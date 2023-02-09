@@ -5444,6 +5444,11 @@ typedef struct _SOPC_FlattenedRanges
     SOPC_FlattenedRange* ranges;
 } SOPC_FlattenedRanges;
 
+static inline uint32_t SOPC_MIN_INDEX(uint32_t left, uint32_t right)
+{
+    return (left > right ? right : left);
+}
+
 // Common treatment for slicing both strings and bytestrings
 static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
                                                  const SOPC_String* src,
@@ -5460,7 +5465,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
         return SOPC_STATUS_OK;
     }
 
-    uint32_t end = (dimension->end >= src_length) ? (src_length - 1) : dimension->end;
+    uint32_t end = SOPC_MIN_INDEX(dimension->end, src_length - 1);
     assert(end >= start);
 
     uint32_t dst_len = end - start + 1;
@@ -5550,7 +5555,7 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
         return SOPC_STATUS_OK;
     }
 
-    uint32_t end = (dim->end >= array_length) ? (array_length - 1) : dim->end;
+    uint32_t end = SOPC_MIN_INDEX(dim->end, array_length - 1);
     assert(end >= start);
 
     uint32_t dst_len = end - start + 1;
@@ -5865,15 +5870,8 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
         }
         SOPC_Dimension* truncatedDim = &truncatedRange.dimensions[i];
         truncatedDim->start = dim->start;
-        if (dim->end >= array_length)
-        {
-            // Truncate range end if end index is not in the source variant matrix
-            truncatedDim->end = array_length - 1;
-        }
-        else
-        {
-            truncatedDim->end = dim->end;
-        }
+        // Truncate range end if origin end index is not in the source variant matrix
+        truncatedDim->end = SOPC_MIN_INDEX(dim->end, array_length - 1);
         uint32_t length_in_dim = truncatedDim->end - truncatedDim->start + 1;
         if (length_in_dim > INT32_MAX)
         {
