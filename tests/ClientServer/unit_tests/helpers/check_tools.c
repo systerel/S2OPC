@@ -4998,10 +4998,6 @@ START_TEST(test_ua_variant_set_range_matrix)
                                            (const char*[]){"one", "two"},
                                            2, // shall have exact second dimension range length
                                            "3:4,1:3", (const char*[]){"this", "is", "a", "lone", "stwoence"}, 5);
-    test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
-                                           (const char*[]){"one", "two"},
-                                           2, // shall have exact second dimension range length
-                                           "3:4,1:3", (const char*[]){"this", "is", "a", "lone", "stwoence"}, 5);
 
     // invalid set range if complete write is not possible
     test_ua_variant_set_range_matrix_helper(
