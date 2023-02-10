@@ -207,7 +207,7 @@
     <xs:sequence>
       <xs:element type="UserPolicyType" name="UserPolicy" maxOccurs="5" minOccurs="0">
         <xs:annotation>
-          <xs:documentation>Available token types are only anonymous and x509 certificate.</xs:documentation>
+          <xs:documentation>Available token types are only anonymous, username and x509 certificate.</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
