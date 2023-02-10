@@ -157,10 +157,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         {
             char* password = NULL;
             size_t lenPassword = 0;
-            bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedKey();
+            bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedClientKey();
             if (clientKeyEncrypted)
             {
-                bool res = SOPC_ClientInternal_GetKeyPassword(&password);
+                bool res = SOPC_ClientInternal_GetClientKeyPassword(&password);
                 if (!res)
                 {
                     Helpers_Log(SOPC_LOG_LEVEL_ERROR,

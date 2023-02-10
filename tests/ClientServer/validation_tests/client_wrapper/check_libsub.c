@@ -317,7 +317,7 @@ START_TEST(test_half_broken_subscriptions)
          .expected_endpoints = NULL}};
 
     ck_assert(SOPC_LibSub_Initialize(&cfg_cli) == SOPC_STATUS_OK);
-    ck_assert(SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv) == SOPC_STATUS_OK);
+    ck_assert(SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv) == SOPC_STATUS_OK);
     for (int i = 0; i < N_CONNECTIONS; ++i)
     {
         ck_assert(SOPC_LibSub_ConfigureConnection(&cfg_con[i], &cfg_ids[i]) == SOPC_STATUS_OK);

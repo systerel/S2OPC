@@ -113,7 +113,7 @@ int main(int argc, char* const argv[])
     };
 
     /* callback to retrieve the client's private key password */
-    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
+    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Example_wrapper_browse: Failed to configure the client key user password callback\n");

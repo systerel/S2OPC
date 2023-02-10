@@ -98,7 +98,7 @@ START_TEST(test_wrapper_reverse_connections)
     }
 
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */

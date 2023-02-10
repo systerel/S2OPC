@@ -162,7 +162,7 @@ static int32_t client_create_configuration(void)
         .reverseConnectionConfigId = 0,
     };
 
-    status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the client key user password callback\n");

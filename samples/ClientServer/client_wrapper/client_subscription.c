@@ -197,7 +197,7 @@ int main(int argc, char* const argv[])
 
     if (cfg_con.security_mode != OpcUa_MessageSecurityMode_None)
     {
-        status = SOPC_HelperConfigClient_SetKeyPasswordCallback(&client_get_private_key_password);
+        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&client_get_private_key_password);
         if (SOPC_STATUS_OK != status)
         {
             Helpers_Log(SOPC_LOG_LEVEL_ERROR,

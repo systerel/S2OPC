@@ -89,7 +89,8 @@ typedef void SOPC_ClientHelper_DisconnectCbk(const uint32_t connectionId);
    Zero-terminated path to the client certificate in the DER format, signed by the root certificate authority
  @var SOPC_ClientHelper_Security::path_key_cli
    Zero-terminated path to the client private key which is paired to the public key signed client certificate,
-   in the DER format
+   in the DER format.
+   Note: if the key is encrypted ::SOPC_HelperConfigClient_SetClientKeyPasswordCallback shall be called.
  @var SOPC_ClientHelper_Security::policyId
    Zero-terminated policy id. To know which policy id to use, please read a
    GetEndpointsResponse or a CreateSessionResponse.
@@ -109,9 +110,11 @@ typedef void SOPC_ClientHelper_DisconnectCbk(const uint32_t connectionId);
  @var SOPC_ClientHelper_Security::password
    Zero-terminated password, ignored when username is NULL. Password is kept in memory for future reconnections.
  @var SOPC_ClientHelper_Security::path_cert_x509_token
-   Zero-terminated path to the x509 certificate, NULL for anonymous access, see policyId
+   Zero-terminated path to the user x509 certificate, NULL for anonymous access, see policyId
  @var SOPC_ClientHelper_Security::path_key_x509_token
-   Zero-terminated path to the x509 private key, NULL for anonymous access, see policyId
+   Zero-terminated path to the user private key, NULL for anonymous access, see policyId.
+   Note: if the key is encrypted ::SOPC_HelperConfigClient_SetClientKeyPasswordCallback shall be called.
+
 */
 typedef struct
 {

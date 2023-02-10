@@ -379,6 +379,7 @@ typedef struct
     SOPC_LibSub_CstString username;
     SOPC_LibSub_CstString password;
     SOPC_LibSub_CstString path_cert_x509_token;
+    bool encrypted_key_x509_token;
     SOPC_LibSub_CstString path_key_x509_token;
     int64_t publish_period_ms;
     uint32_t n_max_keepalive;

@@ -19,34 +19,61 @@
 
 #include "libs2opc_client_config.h"
 #include "libs2opc_client_internal.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 
-SOPC_GetClientKeyPassword_Fct* FctGetClientKeyPassword = NULL;
+static SOPC_GetPassword_Fct* FctGetClientKeyPassword = NULL;
+static SOPC_GetPassword_Fct* FctGetUserKeyPassword = NULL;
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyPasswordCallback(SOPC_GetClientKeyPassword_Fct* getClientKeyPassword)
+static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC_GetPassword_Fct* getClientKeyPassword)
 {
+    SOPC_ASSERT(NULL != destCb);
     if (NULL == getClientKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    FctGetClientKeyPassword = getClientKeyPassword;
+    *destCb = getClientKeyPassword;
     return SOPC_STATUS_OK;
 }
 
-// Get password to decrypt client private key from internal callback
-bool SOPC_ClientInternal_GetKeyPassword(char** outPassword)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
 {
-    if (NULL == FctGetClientKeyPassword)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "The following user callback isn't configured: SOPC_GetClientKeyPassword_Fct");
-        return false;
-    }
-    bool res = FctGetClientKeyPassword(outPassword);
-    return res;
+    return SetPasswordCallback(&FctGetClientKeyPassword, getClientKeyPassword);
 }
 
-bool SOPC_ClientInternal_IsEncryptedKey(void)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
+{
+    return SetPasswordCallback(&FctGetUserKeyPassword, getClientKeyPassword);
+}
+
+static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, const char* cbName, char** outPassword)
+{
+    if (NULL == passwordCb)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
+        return false;
+    }
+    return passwordCb(outPassword);
+}
+
+// Get password to decrypt user private key from internal callback
+bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
+{
+    return SOPC_ClientInternal_GetPassword(FctGetClientKeyPassword, "ClientKeyPasswordCallback", outPassword);
+}
+
+// Get password to decrypt user private key from internal callback
+bool SOPC_ClientInternal_GetUserKeyPassword(char** outPassword)
+{
+    return SOPC_ClientInternal_GetPassword(FctGetUserKeyPassword, "UserKeyPasswordCallback", outPassword);
+}
+
+bool SOPC_ClientInternal_IsEncryptedClientKey(void)
 {
     return NULL != FctGetClientKeyPassword;
+}
+
+bool SOPC_ClientInternal_IsEncryptedUserKey(void)
+{
+    return NULL != FctGetUserKeyPassword;
 }

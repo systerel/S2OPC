@@ -39,13 +39,30 @@
  * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_GetKeyPassword(char** outPassword);
+bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword);
 
 /**
- * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetKeyPasswordCallback (i.e. the
- *        client's key is encrypted).
+ * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetClientKeyPasswordCallback (i.e.
+ * the client's key is encrypted).
  *
  */
-bool SOPC_ClientInternal_IsEncryptedKey(void);
+bool SOPC_ClientInternal_IsEncryptedClientKey(void);
+
+/**
+ * \brief Function to call the callback to retrieve password for decryption of the User private key.
+ *
+ * \param[out] outPassword   the newly allocated password.
+ *
+ * \return                   true in case of success, otherwise false.
+ *
+ */
+bool SOPC_ClientInternal_GetUserKeyPassword(char** outPassword);
+
+/**
+ * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetUserKeyPasswordCallback (i.e.
+ * the user's key is encrypted).
+ *
+ */
+bool SOPC_ClientInternal_IsEncryptedUserKey(void);
 
 #endif /* LIBS2OPC_CLIENT_INTERNAL_H_ */

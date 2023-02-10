@@ -39,6 +39,7 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_user_app_itf.h"
 
+#include "libs2opc_client_internal.h"
 #include "state_machine.h"
 #include "toolkit_helpers.h"
 
@@ -398,10 +399,42 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
             /* Load the x509 private key and not freed it, let the toolkit do it */
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(pSM->szPath_key_x509_token, &pKey);
-                if (SOPC_STATUS_OK != status)
+                char* password = NULL;
+                size_t lenPassword = 0;
+                bool userKeyEncrypted = SOPC_ClientInternal_IsEncryptedUserKey();
+                if (userKeyEncrypted)
                 {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken private key.");
+                    bool res = SOPC_ClientInternal_GetUserKeyPassword(&password);
+                    if (!res)
+                    {
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                    "Failed to retrieve the password of the client's private key from callback.");
+                        status = SOPC_STATUS_NOK;
+                    }
+                }
+
+                if (SOPC_STATUS_OK == status && NULL != password)
+                {
+                    lenPassword = strlen(password);
+                    if (UINT32_MAX < lenPassword)
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                }
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                        pSM->szPath_key_x509_token, &pKey, password, (uint32_t) lenPassword);
+                    if (SOPC_STATUS_OK != status)
+                    {
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken private key.");
+                    }
+                }
+
+                if (NULL != password)
+                {
+                    SOPC_Free(password);
                 }
             }
 
