@@ -26,8 +26,8 @@
 #ifndef LIBS2OPC_CLIENT_CONFIG_H_
 #define LIBS2OPC_CLIENT_CONFIG_H_
 
-#include <stdbool.h>
-#include "sopc_builtintypes.h"
+// #include <stdbool.h>
+// #include "sopc_builtintypes.h"
 
 /**
  * \brief Type of callback to retrieve password for decryption of the client application private key

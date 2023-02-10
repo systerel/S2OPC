@@ -24,6 +24,7 @@ import getpass
 from pys2opc import PyS2OPC_Client
 
 TEST_PASSWORD_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_PRIVATE_KEY"
+TEST_PASSWORD_USER_PRIV_KEY_ENV_NAME = "TEST_PASSWORD_USER_PRIVATE_KEY"
 TEST_PASSWORD_USER_ENV_NAME = "TEST_PASSWORD_USER"
 
 class ReconnectingContext:
@@ -60,6 +61,13 @@ class PyS2OPC_Client_Test():
         return pwd
 
     @staticmethod
+    def get_user_key_password():
+        pwd = os.getenv(TEST_PASSWORD_USER_PRIV_KEY_ENV_NAME)
+        if pwd is None:
+            pwd = getpass.getpass(prompt='User private key password:')
+        return pwd
+
+    @staticmethod
     def get_user_password(username):
         pwd = os.getenv(TEST_PASSWORD_USER_ENV_NAME)
         if pwd is None:
@@ -68,3 +76,4 @@ class PyS2OPC_Client_Test():
 
 # overload the default method to get key password
 PyS2OPC_Client.get_client_key_password = PyS2OPC_Client_Test.get_client_key_password
+PyS2OPC_Client.get_user_key_password = PyS2OPC_Client_Test.get_user_key_password

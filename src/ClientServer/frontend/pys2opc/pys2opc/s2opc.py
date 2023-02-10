@@ -99,6 +99,17 @@ def _callback_get_client_key_password(password):
         return False
     return True
 
+@ffi.def_extern()
+def _callback_get_user_key_password(password):
+    try:
+        pwd = PyS2OPC_Client.get_user_key_password()
+        pwd = pwd.encode() + b'\0' # Add protection to avoid buffer overrun with C code
+        password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
+    except Exception:
+        return False
+    return True
+
+
 class PyS2OPC:
     """
     Python version of the S2OPC + client subscription libraries.
@@ -304,7 +315,10 @@ class PyS2OPC_Client(PyS2OPC):
                                   client_key_encrypted = True,
                                   policy_id = 'anonymous',
                                   username = None,
-                                  password = None):
+                                  password = None,
+                                  path_cert_user = None,
+                                  path_key_user = None,
+                                  user_key_encrypted = True):
         """
         Returns a configuration that can be later used in `PyS2OPC_Client.connect` or `PyS2OPC_Client.get_endpoints`.
 
@@ -328,7 +342,7 @@ class PyS2OPC_Client(PyS2OPC):
                            It must be signed by the certificate authority.
             path_cert_cli: The path to the certificate of the client.
             path_key_cli: The path to the private key of the client certificate.
-            client_key_encrypted: Whether the client private key is encrypted or not. Password is asked interactively.
+            client_key_encrypted: Whether the client private key is encrypted or not. Password is asked interactively if it is encrypted.
             policy_id: To know which policy id to use, When username is NULL, the AnonymousIdentityToken
                        is used and the policy id must correspond to an anonymous UserIdentityPolicy.
                        Otherwise, the UserNameIdentityToken is used and the policy id must correspond to
@@ -337,6 +351,9 @@ class PyS2OPC_Client(PyS2OPC):
                       or not, depending on the user token security policy associated to the policyId
                       or if it is empty depending on the SecureChannel security policy.
             password: The password is ignored when username is NULL.
+            path_cert_user: The path to the certificate of the user X509 token (only if not anonymous or username token used).
+            path_key_user: The path to the private key of the user X509 token.
+            user_key_encrypted: Whether the user private key is encrypted or not. Password is asked interactively if it is encrypted.
         """
         _username = NULL
         if username:
@@ -362,6 +379,8 @@ class PyS2OPC_Client(PyS2OPC):
                                  'policyId': ffi.new('char[]', policy_id.encode()),
                                  'username': _username,
                                  'password': _password,
+                                 'path_cert_x509_token': ffi.new('char[]', path_cert_user.encode()),
+                                 'path_key_x509_token': ffi.new('char[]', path_key_user.encode()),
                                  'publish_period_ms': publish_period,
                                  'n_max_keepalive': n_max_keepalive,
                                  'n_max_lifetime': n_max_lifetime,
@@ -374,6 +393,9 @@ class PyS2OPC_Client(PyS2OPC):
         if client_key_encrypted:
             status = libsub.SOPC_HelperConfigClient_SetClientKeyPasswordCallback(libsub._callback_get_client_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the client private key.'
+        if user_key_encrypted:
+            status = libsub.SOPC_HelperConfigClient_SetUserKeyPasswordCallback(libsub._callback_get_user_key_password)
+            assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the user private key.'
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
 
@@ -463,6 +485,16 @@ class PyS2OPC_Client(PyS2OPC):
         It uses the `PyS2OPC._get_password` which uses get_pass library.
         """
         return PyS2OPC._get_password("Client private key password:")
+
+    @staticmethod
+    def get_user_key_password():
+        """
+        Default method that is called during configuration phase if an encrypted private key is used,
+        it shall return the password to decrypt the user private key.
+        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        """
+        return PyS2OPC._get_password("User private key password:")
+
 
 class PyS2OPC_Server(PyS2OPC):
     """
