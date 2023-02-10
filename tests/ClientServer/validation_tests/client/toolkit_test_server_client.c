@@ -153,7 +153,7 @@ static int32_t client_create_configuration(void)
         .username = NULL,
         .password = NULL,
         .path_cert_x509_token = "./user_public/user_2k_cert.der",
-        .path_key_x509_token = "./user_private/user_2k_key.pem",
+        .path_key_x509_token = "./user_private/encrypted_user_2k_key.pem",
     };
 
     SOPC_ClientHelper_EndpointConnection endpoint = {
@@ -165,7 +165,13 @@ static int32_t client_create_configuration(void)
     status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Client: Failed to configure the client key user password callback\n");
+        printf("<Test_Server_Client: Failed to configure the client key password callback\n");
+    }
+
+    status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("<Test_Server_Client: Failed to configure the user key password callback\n");
     }
 
     /* connect to the endpoint */

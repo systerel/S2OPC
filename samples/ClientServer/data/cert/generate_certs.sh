@@ -103,6 +103,15 @@ openssl req -config $CONF_USR -reqexts user_cert -sha256 -nodes -newkey rsa:4096
 openssl ca -batch -config $CONF_CA_USR -policy signing_policy -extensions user_signing_req -days $DURATION -in user_2k.csr -out user_2k_cert.pem
 openssl ca -batch -config $CONF_CA_USR -policy signing_policy -extensions user_signing_req -days $DURATION -in user_4k.csr -out user_4k_cert.pem
 
+# Generate user encrypted private keys (these commands require the password).
+echo "****** User private keys encryption ******"
+openssl rsa -in user_2k_key.pem -aes-256-cbc -out encrypted_user_2k_key.pem
+openssl rsa -in user_4k_key.pem -aes-256-cbc -out encrypted_user_4k_key.pem
+
+# Remove the unencrypted keys
+rm user*_key.pem
+
+
 # Output application and user certificates in DER format
 for fradix in ca user_ca client_2k_ client_4k_ server_2k_ server_4k_ user_2k_ user_4k_; do
     openssl x509 -in ${fradix}cert.pem -out ${fradix}cert.der -outform der
