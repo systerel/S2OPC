@@ -72,16 +72,20 @@ static SOPC_ClientHelper_EndpointConnection invalid_endpoint = {
     .reverseConnectionConfigId = 0,
 };
 
-static SOPC_ClientHelper_Security valid_security_none = {.security_policy = SOPC_SecurityPolicy_None_URI,
-                                                         .security_mode = OpcUa_MessageSecurityMode_None,
-                                                         .path_cert_auth = "./trusted/cacert.der",
-                                                         .path_crl = "./revoked/cacrl.der",
-                                                         .path_cert_srv = NULL,
-                                                         .path_cert_cli = NULL,
-                                                         .path_key_cli = NULL,
-                                                         .policyId = "anonymous",
-                                                         .username = NULL,
-                                                         .password = NULL};
+static SOPC_ClientHelper_Security valid_security_none = {
+    .security_policy = SOPC_SecurityPolicy_None_URI,
+    .security_mode = OpcUa_MessageSecurityMode_None,
+    .path_cert_auth = "./trusted/cacert.der",
+    .path_crl = "./revoked/cacrl.der",
+    .path_cert_srv = NULL,
+    .path_cert_cli = NULL,
+    .path_key_cli = NULL,
+    .policyId = "anonymous",
+    .username = NULL,
+    .password = NULL,
+    .path_cert_x509_token = NULL,
+    .path_key_x509_token = NULL,
+};
 
 static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
@@ -93,7 +97,10 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
     .policyId = "username",
     .username = "username",
-    .password = "password"};
+    .password = "password",
+    .path_cert_x509_token = NULL,
+    .path_key_x509_token = NULL,
+};
 
 static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {

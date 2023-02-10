@@ -54,7 +54,10 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .path_key_cli = "./client_private/encrypted_client_4k_key.pem",
     .policyId = "anonymous",
     .username = NULL,
-    .password = NULL};
+    .password = NULL,
+    .path_cert_x509_token = NULL,
+    .path_key_x509_token = NULL,
+};
 
 START_TEST(test_wrapper_reverse_connections)
 {

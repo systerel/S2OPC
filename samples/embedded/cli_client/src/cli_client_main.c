@@ -316,6 +316,8 @@ static int cmd_demo_configure(WordList* pList)
         .policyId = "anonymous",
         .username = NULL,
         .password = NULL,
+        .path_cert_x509_token = NULL,
+        .path_key_x509_token = NULL,
     };
 
     if (gConfigurationId > 0)

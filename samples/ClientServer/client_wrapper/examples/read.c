@@ -78,6 +78,8 @@ int main(int argc, char* const argv[])
         .policyId = "anonymous",
         .username = NULL,
         .password = NULL,
+        .path_cert_x509_token = NULL,
+        .path_key_x509_token = NULL,
     };
 
     SOPC_ClientHelper_EndpointConnection endpoint = {
