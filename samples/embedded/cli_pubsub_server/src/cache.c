@@ -131,14 +131,14 @@ bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const 
         variant->Doublev = (double) fValue;
         break;
     case SOPC_String_Id:
-        SOPC_String_InitializeFromCString(&variant->String, value);
+        result = (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(&variant->String, value));
         break;
     case SOPC_DateTime_Id:
         variant->Date = SOPC_Time_GetCurrentTimeUTC();
         break;
     case SOPC_ByteString_Id:
-        SOPC_ByteString_InitializeFixedSize(&variant->Bstring, (uint32_t) strlen(value));
-        SOPC_ByteString_CopyFromBytes(&variant->Bstring, (const SOPC_Byte*) value, (int32_t) strlen(value));
+        result = (SOPC_STATUS_OK ==
+                  SOPC_ByteString_CopyFromBytes(&variant->Bstring, (const SOPC_Byte*) value, (int32_t) strlen(value)));
         break;
     case SOPC_StatusCode_Id:
         variant->Status = (SOPC_StatusCode) iValue;
@@ -457,19 +457,21 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
 
     if (NULL != dv)
     {
+        int result = -1;
         static char status[22];
         if (dv->Status & SOPC_BadStatusMask)
         {
-            sprintf(status, "BAD 0x%08" PRIX32, dv->Status);
+            result = sprintf(status, "BAD 0x%08" PRIX32, dv->Status);
         }
         else if (dv->Status & SOPC_UncertainStatusMask)
         {
-            sprintf(status, "UNCERTAIN 0x%08" PRIX32, dv->Status);
+            result = sprintf(status, "UNCERTAIN 0x%08" PRIX32, dv->Status);
         }
         else
         {
-            sprintf(status, "GOOD");
+            result = sprintf(status, "GOOD");
         }
+        SOPC_ASSERT(result > 0);
 
         char* type = "";
         switch (dv->Value.ArrayType)
@@ -495,7 +497,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
                 "Variant",        "DiagnosticInfo"};
 
             const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
-            if (typeId <= sizeof(typeName) / sizeof(*typeName))
+            if (typeId <= sizeof(typeName) / sizeof(*typeName) - 1)
             {
                 printf(" ; Type=%.12s ; Val = ", typeName[typeId]);
             }

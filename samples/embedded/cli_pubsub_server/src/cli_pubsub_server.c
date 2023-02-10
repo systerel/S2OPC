@@ -908,7 +908,8 @@ static int cmd_demo_write(WordList* pList)
     }
 
     SOPC_NodeId nid;
-    SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_DataValue dv;
     SOPC_DataValue_Initialize(&dv);
 
@@ -917,7 +918,8 @@ static int cmd_demo_write(WordList* pList)
     if (dvC[0] == 's')
     {
         dv.Value.BuiltInTypeId = SOPC_String_Id;
-        SOPC_String_InitializeFromCString(&dv.Value.Value.String, dvC + 1);
+        status = SOPC_String_InitializeFromCString(&dv.Value.Value.String, dvC + 1);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     else if (dvC[0] == 'b')
     {
@@ -967,7 +969,8 @@ static int cmd_demo_read(WordList* pList)
     }
 
     SOPC_NodeId nid;
-    SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_DataValue* dv = Server_LocalReadSingleNode(&nid);
 

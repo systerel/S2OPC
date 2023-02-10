@@ -47,10 +47,10 @@ char* SOPC_Shell_ReadLine(void)
 {
     char* line = NULL;
     size_t len = 0;
-    getline(&line, &len, stdin);
+    ssize_t result = getline(&line, &len, stdin);
 
     // Remove EOL chars
-    while (NULL != line && len > 0 && line[len - 1] < ' ')
+    while (-1 != result && NULL != line && len > 0 && line[len - 1] < ' ')
     {
         len--;
         line[len] = 0;
