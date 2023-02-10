@@ -119,6 +119,7 @@ generation:
     - if: "$NO_GEN == null && \
            $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && \
+           $WITH_COVERITY == null && \
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
            $ALL_TESTS == null && \
