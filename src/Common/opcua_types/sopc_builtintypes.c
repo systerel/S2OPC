@@ -5704,6 +5704,7 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
             }
             else
             {
+                SOPC_Free(numberOfElementsPerDimensionIndex);
                 return SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
