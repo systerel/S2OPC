@@ -60,7 +60,7 @@ int main(int argc, char* argv[])
     struct argparse_option options[] = {OPT_HELP(),       CONN_OPTIONS[0], CONN_OPTIONS[1], CONN_OPTIONS[2],
                                         CONN_OPTIONS[3],  CONN_OPTIONS[4], CONN_OPTIONS[5], CONN_OPTIONS[6],
                                         CONN_OPTIONS[7],  CONN_OPTIONS[8], CONN_OPTIONS[9], CONN_OPTIONS[10],
-                                        CONN_OPTIONS[14], OPT_END()};
+                                        CONN_OPTIONS[16], OPT_END()};
     struct argparse argparse;
 
     argparse_init(&argparse, options, usage, 0);

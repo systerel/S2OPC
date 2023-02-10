@@ -42,6 +42,8 @@ char* PATH_SERVER_PUBL = "./server_public/server_4k_cert.der";
 char* PATH_CACERT_PUBL = "./trusted/cacert.der";
 char* PATH_CACRL = "./revoked/cacrl.der";
 char* PATH_ISSUED = NULL;
+char* PATH_USER_PUBL = NULL; // "./user_public/user_4k_cert.der";
+char* PATH_USER_PRIV = NULL; // "./user_private/encrypted_user_4k_key.pem";
 
 int NO_KEY_ENCRYPTION = false;
 
@@ -50,14 +52,20 @@ static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
     return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
 }
 
-Config_GetClientKeyPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskPass_FromTerminal;
+static bool SOPC_UserPrivateKeyAskPass_FromTerminal(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("User private key password:\n", outPassword);
+}
+
+Config_GetPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskPass_FromTerminal;
+Config_GetPassword_Fct* getUserKeyPassword_Fct = &SOPC_UserPrivateKeyAskPass_FromTerminal;
 
 char* USER_POLICY_ID = "user";
 char* USER_NAME = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
 
-struct argparse_option CONN_OPTIONS[15] = {
+struct argparse_option CONN_OPTIONS[17] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -99,7 +107,8 @@ struct argparse_option CONN_OPTIONS[15] = {
     OPT_STRING(0,
                "client_key",
                &PATH_CLIENT_PRIV,
-               "(default: ./client_private/encrypted_client_4k_key.pem) path to the client private key to use",
+               "(default: ./client_private/encrypted_client_4k_key.pem) path to the client private key to use "
+               "(encrypted by default, see no_key_encryption option)",
                NULL,
                0,
                0),
@@ -147,6 +156,21 @@ struct argparse_option CONN_OPTIONS[15] = {
                0,
                0),
     OPT_STRING(0,
+               "user_cert",
+               &PATH_USER_PUBL,
+               "(if anonymous and username mode are not active) path to the X509 user certificate to use (public key)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
+               "user_key",
+               &PATH_USER_PRIV,
+               "(if anonymous and username mode are not active) path to the client private key to use"
+               "(encrypted by default, see no_key_encryption option)",
+               NULL,
+               0,
+               0),
+    OPT_STRING(0,
                "sessionName",
                &SESSION_NAME,
                "(default: 'S2OPC_client_session') the session name indicated server on session creation",
@@ -156,7 +180,7 @@ struct argparse_option CONN_OPTIONS[15] = {
     OPT_BOOLEAN(0,
                 "no_key_encryption",
                 &NO_KEY_ENCRYPTION,
-                "(default: false) set if the client application private key is not encrypted",
+                "(default: false) set if the client application and user private key are not encrypted",
                 NULL,
                 0,
                 0)};
@@ -316,14 +340,18 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
             if (!NO_KEY_ENCRYPTION)
             {
                 res = getClientKeyPassword_Fct(&password);
-            }
 
-            if (res && !NO_KEY_ENCRYPTION)
-            {
-                lenPassword = strlen(password);
-                if (UINT32_MAX < lenPassword)
+                if (res)
                 {
-                    status = SOPC_STATUS_NOK;
+                    lenPassword = strlen(password);
+                    if (UINT32_MAX < lenPassword)
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                }
+                else
+                {
+                    status = SOPC_STATUS_INVALID_PARAMETERS;
                 }
             }
 
@@ -371,9 +399,14 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
     return status;
 }
 
-void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword)
+void Config_Client_SetClientKeyPassword_Fct(Config_GetPassword_Fct* getClientKeyPassword)
 {
     getClientKeyPassword_Fct = getClientKeyPassword;
+}
+
+void Config_Client_SetUserKeyPassword_Fct(Config_GetPassword_Fct* getUserKeyPassword)
+{
+    getUserKeyPassword_Fct = getUserKeyPassword;
 }
 
 char* Config_Client_GetUserPassword(void)
@@ -388,4 +421,57 @@ char* Config_Client_GetUserPassword(void)
         }
     }
     return password;
+}
+
+bool Config_Client_GetUserCertAndKey(SOPC_SerializedCertificate** userX509cert,
+                                     SOPC_SerializedAsymmetricKey** userX509key)
+{
+    assert(NULL != userX509cert);
+    assert(NULL != userX509key);
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_USER_PUBL, userX509cert);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("# Error: Failed to load user certificate\n");
+        return false;
+    }
+
+    char* password = NULL;
+    size_t lenPassword = 0;
+
+    if (!NO_KEY_ENCRYPTION)
+    {
+        bool res = getUserKeyPassword_Fct(&password);
+
+        if (res)
+        {
+            lenPassword = strlen(password);
+            if (UINT32_MAX < lenPassword)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(PATH_USER_PRIV, userX509key, password,
+                                                                                (uint32_t) lenPassword);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf(
+                "# Error: Failed to load user private key. Please check the password if the key is "
+                "encrypted and check the key format (PEM)\n");
+        }
+    }
+
+    if (NULL != password)
+    {
+        SOPC_Free(password);
+    }
+
+    return (SOPC_STATUS_OK == status);
 }

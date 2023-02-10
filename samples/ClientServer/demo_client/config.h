@@ -34,7 +34,7 @@
 #include "sopc_user_app_itf.h"
 
 /**
- * \brief Type of callback to retrieve password for decryption of the client private key.
+ * \brief Type of callback to retrieve a password.
  *
  * \param[out] outPassword   out parameter, the newly allocated password which shall be a zero-terminated string in case
  *                           of success.
@@ -44,7 +44,7 @@
  * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
  * failure.
  */
-typedef bool Config_GetClientKeyPassword_Fct(char** outPassword);
+typedef bool Config_GetPassword_Fct(char** outPassword);
 
 /* Connection configuration variables with default values */
 
@@ -68,11 +68,13 @@ extern char* PATH_ISSUED;
 
 extern char* USER_POLICY_ID;
 extern char* USER_NAME;
+extern char* PATH_USER_PUBL;
+extern char* PATH_USER_PRIV;
 
 extern char* SESSION_NAME;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[15];
+extern struct argparse_option CONN_OPTIONS[17];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200
@@ -108,13 +110,34 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
 void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig);
 
 /**
+ * \brief Retrieve the serialized version of the user X509 token certificate and key
+ *        for which paths have been provided through command line arguments.
+ * \param[out] userX509cert  A reference to the pointer in which the serialized certificate will be set
+ * \param[out] userX509key   A reference to the pointer in which the serialized key will be set.
+ *                           If the key is expected to be encrypted the password will be asked interactively
+ *                           unless ::Config_Client_SetUserKeyPassword_Fct has been called to do otherwise.
+ *
+ * \return true in case of success and false otherwise
+ */
+bool Config_Client_GetUserCertAndKey(SOPC_SerializedCertificate** userX509cert,
+                                     SOPC_SerializedAsymmetricKey** userX509key);
+
+/**
  * \brief Change the default callback which retrieve password for decryption of the client private key.
  *
  * \param getClientKeyPassword  The callback to retrieve the password
  *
  * \note   This function is useful for validation tests
  */
-void Config_Client_SetKeyPassword_Fct(Config_GetClientKeyPassword_Fct* getClientKeyPassword);
+void Config_Client_SetClientKeyPassword_Fct(Config_GetPassword_Fct* getClientKeyPassword);
+
+/**
+ * \brief Change the default callback which retrieve password for decryption of the user private key.
+ *
+ * \param getUserKeyPassword  The callback to retrieve the password
+ *
+ */
+void Config_Client_SetUserKeyPassword_Fct(Config_GetPassword_Fct* getUserKeyPassword);
 
 /**
  * \brief Function to retrieve the user password when username token type is for establishing connection session.

@@ -139,6 +139,8 @@ typedef struct
     const char* username;
     const uint8_t* password;
     int32_t length;
+    SOPC_SerializedCertificate* userX509;
+    SOPC_SerializedAsymmetricKey* userX509key;
 } activation_type;
 
 static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_type activation_parameters)
@@ -167,11 +169,20 @@ static SOPC_ReturnStatus ActivateSession(StateMachine_Machine* pSM, activation_t
         status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(
             endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId);
     }
-    else
+    else if (NULL != activation_parameters.username)
     {
         status = SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
             endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
             activation_parameters.username, activation_parameters.password, activation_parameters.length);
+    }
+    else
+    {
+        status = SOPC_ToolkitClient_AsyncActivateSession_Certificate(
+            endpointConnectionCfg, SESSION_NAME, (uintptr_t) pSM->pCtxSession, activation_parameters.policyId,
+            activation_parameters.userX509, activation_parameters.userX509key);
+        /* Clear the temporary certificate */
+        SOPC_KeyManager_SerializedCertificate_Delete(activation_parameters.userX509);
+        activation_parameters.userX509 = NULL;
     }
 
     pSM->state = stActivating;
@@ -197,6 +208,21 @@ SOPC_ReturnStatus StateMachine_StartSession_UsernamePassword(StateMachine_Machin
                              .username = username,
                              .password = (const uint8_t*) password,
                              .length = (int32_t) strlen(password)};
+    return ActivateSession(pSM, activ);
+}
+
+SOPC_ReturnStatus StateMachine_StartSession_UserX509(StateMachine_Machine* pSM,
+                                                     const char* policyId,
+                                                     SOPC_SerializedCertificate* userX509cert,
+                                                     SOPC_SerializedAsymmetricKey* userX509key)
+{
+    activation_type activ = {.anonymous = false,
+                             .policyId = policyId,
+                             .username = NULL,
+                             .password = NULL,
+                             .length = 0,
+                             .userX509 = userX509cert,
+                             .userX509key = userX509key};
     return ActivateSession(pSM, activ);
 }
 

@@ -93,6 +93,11 @@ SOPC_ReturnStatus StateMachine_StartSession_UsernamePassword(StateMachine_Machin
                                                              const char* username,
                                                              const char* password);
 
+SOPC_ReturnStatus StateMachine_StartSession_UserX509(StateMachine_Machine* pSM,
+                                                     const char* policyId,
+                                                     SOPC_SerializedCertificate* userX509cert,
+                                                     SOPC_SerializedAsymmetricKey* userX509key);
+
 /**
  * \brief Send a GetEndpointsRequest.
  */

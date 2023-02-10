@@ -79,6 +79,8 @@ int main(int argc, char* argv[])
                                         CONN_OPTIONS[12],
                                         CONN_OPTIONS[13],
                                         CONN_OPTIONS[14],
+                                        CONN_OPTIONS[15],
+                                        CONN_OPTIONS[16],
                                         OPT_END()};
     struct argparse argparse;
 
@@ -139,6 +141,20 @@ int main(int argc, char* argv[])
             {
                 status = StateMachine_StartSession_UsernamePassword(g_pSM, USER_POLICY_ID, USER_NAME, password);
                 SOPC_Free(password);
+            }
+            else
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+        }
+        else if (NULL != PATH_USER_PUBL && NULL != PATH_USER_PRIV)
+        {
+            SOPC_SerializedCertificate* userX509cert = NULL;
+            SOPC_SerializedAsymmetricKey* userX509key = NULL;
+            bool res = Config_Client_GetUserCertAndKey(&userX509cert, &userX509key);
+            if (res)
+            {
+                status = StateMachine_StartSession_UserX509(g_pSM, USER_POLICY_ID, userX509cert, userX509key);
             }
             else
             {

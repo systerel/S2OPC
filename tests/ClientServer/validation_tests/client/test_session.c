@@ -51,7 +51,7 @@ START_TEST(test_username_password)
     ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_QuitAfterConnect) == SOPC_STATUS_OK);
     g_pSM = StateMachine_Create();
     ck_assert(NULL != g_pSM);
-    Config_Client_SetKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
+    Config_Client_SetClientKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert(StateMachine_ConfigureMachine(g_pSM, true, false) == SOPC_STATUS_OK);
 
     ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "username", "user", "password") == SOPC_STATUS_OK);
