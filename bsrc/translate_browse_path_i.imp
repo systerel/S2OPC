@@ -224,8 +224,10 @@ LOCAL_OPERATIONS
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
 
+        d_var_browse_source_it,
         d_var_browse_value_in,
         d_var_browse_result_out:(
+            d_inv_browse_source_it &
             d_inv_browse_value_in &
             d_inv_browse_result_out
         )
@@ -295,8 +297,10 @@ LOCAL_OPERATIONS
             )
         ) ||
 
+        d_var_browse_source_it,
         d_var_browse_value_in,
         d_var_browse_result_out:(
+            d_inv_browse_source_it &
             d_inv_browse_value_in &
             d_inv_browse_result_out
         )
@@ -377,20 +381,23 @@ LOCAL_OPERATIONS
 
     free_BrowsePathResult =
     BEGIN
-        BrowsePathResult := {}
+        BrowsePathResult := {} ||
+        d_var_browse_source_it :(d_inv_browse_source_it)
     END
     ;
 
     free_BrowsePathRemaining =
     BEGIN
         BrowsePathRemainingNodeId := {} ||
-        BrowsePathRemainingIndex  := {}
+        BrowsePathRemainingIndex  := {} ||
+        d_var_browse_source_it :(d_inv_browse_source_it)
     END
     ;
 
     free_BrowsePathSource =
     BEGIN
-        BrowsePathSource := {}
+        BrowsePathSource := {} ||
+        d_var_browse_source_it :(d_inv_browse_source_it)
     END
     ;
 
