@@ -882,7 +882,7 @@ OPERATIONS
             l_size = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
             browsePathSourceIdx_iterated = 1 .. l_index &
             browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
-            l_continue_source = bool(l_index + 1 < l_size)
+            l_continue_source = bool(l_index < l_size)
         VARIANT
             l_size - l_index
         END
