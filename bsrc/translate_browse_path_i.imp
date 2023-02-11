@@ -875,13 +875,11 @@ OPERATIONS
                                                   index, targetName);
             l_translate_statusCode := statusCode_operation
         INVARIANT
-
-            browsePathSourceIdx_to_iterate <: NAT1 &
-            browsePathSourceIdx_iterated   <: NAT1 &
-            browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
-            l_size = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-            browsePathSourceIdx_iterated = 1 .. l_index &
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
             browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
             l_continue_source = bool(l_index < l_size)
         VARIANT
             l_size - l_index
@@ -1023,6 +1021,12 @@ OPERATIONS
                 l_continue := FALSE
             END
         INVARIANT
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
+            l_continue = bool(l_index < l_size)                    &
 
             (l_alloc = FALSE => BrowsePathSource = {})
 
@@ -1047,7 +1051,12 @@ OPERATIONS
             l_expandedNodeId <-- get_BrowsePathResult(l_index);
             free_ExpandedNodeId(l_expandedNodeId)
         INVARIANT
-            TRUE = FALSE
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
+            l_continue = bool(l_index < l_size)
         VARIANT
             0
         END
@@ -1071,7 +1080,12 @@ OPERATIONS
             l_expandedNodeId <-- get_BrowsePathResult(l_index);
             free_ExpandedNodeId(l_expandedNodeId)
         INVARIANT
-            TRUE = FALSE
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
+            l_continue = bool(l_index < l_size)
         VARIANT
             0
         END
@@ -1095,7 +1109,12 @@ OPERATIONS
             l_nodeId <-- get_BrowsePathSource(l_index);
             free_node_id_pointer(l_nodeId)
         INVARIANT
-            TRUE = FALSE
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
+            l_continue = bool(l_index < l_size)
         VARIANT
             0
         END
@@ -1212,14 +1231,12 @@ OPERATIONS
                 l_continue := FALSE
             END
         INVARIANT
-            browsePathSourceIdx_to_iterate <: NAT1 &
-            browsePathSourceIdx_iterated   <: NAT1 &
-            nextBrowsePathSourceIdx : NAT1 &
+            l_index : NAT          &
+            l_index <= size_result &
             browsePathSourceIdx_iterated = 1 .. l_index &
             browsePathSourceIdx_to_iterate = l_index + 1 .. size_result &
-
-            l_continue = bool(statusCode_alloc = e_sc_ok & (l_index < size_result)) &
             nextBrowsePathSourceIdx = l_index + 1 &
+            l_continue = bool(statusCode_alloc = e_sc_ok & (l_index < size_result)) &
 
             statusCode_alloc : t_StatusCode_i &
             statusCode_alloc : t_StatusCode   &
@@ -1273,14 +1290,12 @@ OPERATIONS
             END
         INVARIANT
 
-            browsePathSourceIdx_to_iterate <: NAT1 &
-            browsePathSourceIdx_iterated   <: NAT1 &
-            nextBrowsePathSourceIdx : NAT1 &
+            l_index : NAT         &
+            l_index <= nb_max_ref &
             browsePathSourceIdx_iterated = 1 .. l_index &
             browsePathSourceIdx_to_iterate = l_index + 1 .. nb_max_ref &
-
-            l_continue = bool(l_statusCode_alloc = e_sc_ok & (l_index < nb_max_ref)) &
             nextBrowsePathSourceIdx = l_index + 1 &
+            l_continue = bool(l_statusCode_alloc = e_sc_ok & (l_index < nb_max_ref)) &
 
             out_statusCode_operation : {e_sc_ok,e_sc_uncertain_reference_out_of_server,
                                         e_sc_bad_out_of_memory} &
