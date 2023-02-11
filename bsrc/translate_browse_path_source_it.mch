@@ -38,7 +38,7 @@ DEFINITIONS
     browsePathSourceIdx_iterated   <: NAT1 &
     browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
     nb_browsePathSourceIdx_max_refs = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-    nextBrowsePathSourceIdx : NAT1
+    nextBrowsePathSourceIdx : NATURAL1
     )
 
 ABSTRACT_VARIABLES
@@ -66,12 +66,12 @@ OPERATIONS
 
     p_continue, p_browsePathSourceIdx <-- continue_iter_browsePathSourceIdx =
     PRE
-        nb_browsePathSourceIdx_max_refs > 0 &
         nextBrowsePathSourceIdx <= nb_browsePathSourceIdx_max_refs
     THEN
         browsePathSourceIdx_iterated   := 1 .. nextBrowsePathSourceIdx ||
         browsePathSourceIdx_to_iterate := nextBrowsePathSourceIdx + 1 .. nb_browsePathSourceIdx_max_refs ||
-        p_browsePathSourceIdx          := nextBrowsePathSourceIdx ||
+        p_browsePathSourceIdx          :(  p_browsePathSourceIdx : NAT1 &
+                                           p_browsePathSourceIdx = nextBrowsePathSourceIdx) ||
         nextBrowsePathSourceIdx        := nextBrowsePathSourceIdx + 1 ||
         p_continue                     := bool(nextBrowsePathSourceIdx < nb_browsePathSourceIdx_max_refs)
     END

@@ -141,7 +141,7 @@ DEFINITIONS
         browsePathSourceIdx_iterated   <: NAT1 &
         browsePathSourceIdx_to_iterate /\ browsePathSourceIdx_iterated = {} &
         nb_browsePathSourceIdx_max_refs = card(browsePathSourceIdx_to_iterate \/ browsePathSourceIdx_iterated) &
-        nextBrowsePathSourceIdx : NAT1
+        nextBrowsePathSourceIdx : NATURAL1
     );
 
     d_inv_element_it ==

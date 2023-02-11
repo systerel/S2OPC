@@ -38,7 +38,7 @@ DEFINITIONS
     browseResult_iterated   <: NAT1 &
     browseResult_to_iterate /\ browseResult_iterated = {} &
     nb_browseResult_max_refs = card(browseResult_to_iterate \/ browseResult_iterated) &
-    nextBrowseResult : NAT1
+    nextBrowseResult : NATURAL1
     )
 
 ABSTRACT_VARIABLES
@@ -70,7 +70,8 @@ OPERATIONS
     THEN
         browseResult_iterated   := 1 .. nextBrowseResult ||
         browseResult_to_iterate := nextBrowseResult + 1 .. nb_browseResult_max_refs ||
-        p_browseResultIdx       := nextBrowseResult ||
+        p_browseResultIdx       :(  p_browseResultIdx : NAT1 &
+                                    p_browseResultIdx = nextBrowseResult ) ||
         nextBrowseResult        := nextBrowseResult + 1 ||
         p_continue              := bool(nextBrowseResult < nb_browseResult_max_refs)
     END
