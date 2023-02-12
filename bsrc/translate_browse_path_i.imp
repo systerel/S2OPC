@@ -863,6 +863,7 @@ OPERATIONS
         l_continue_source <-- init_iter_browsePathSourceIdx(l_size);
         l_translate_statusCode := statusCode_operation;
 
+        l_index := 0;
         WHILE l_continue_source = TRUE
         DO
             l_continue_source, l_index <-- continue_iter_browsePathSourceIdx;
