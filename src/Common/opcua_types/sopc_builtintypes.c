@@ -5299,18 +5299,34 @@ void SOPC_Clear_Array(int32_t* noOfElts, void** eltsArray, size_t sizeOfElt, SOP
     }
 }
 
-static inline bool is_array_valid_range(int32_t arrayLength, const SOPC_Dimension* dimension, bool writeRange)
+/**
+ * \brief Check if a range is valid on an array.
+ * \note:
+ * - Arrays always start at index 0
+ * - ::SOPC_Dimension objects are always valid (implying that start &tl;= end is already asserted)
+ *
+ * \param arrayLength The array length
+ * \param dimension   A (non-NULL) dimension. Contains the range to check.
+ * \param fullRange   When true, the function checks that at least one element of the array is valid for \p dimension
+ *                    (typical for a "Read" array check).
+ *                    When  false, the function checks that all elements of the array are valid for \p dimension
+ *                    (typical for a "Write" array check).
+ *
+ * \return true if the range is valid, false otherwise.
+ */
+static inline bool is_array_valid_range(int32_t arrayLength, const SOPC_Dimension* dimension, bool fullRange)
 {
+    SOPC_ASSERT(NULL != dimension);
     if (arrayLength <= 0)
     {
         return false;
     }
     const uint32_t uLen = (uint32_t) arrayLength;
 
-    return dimension->start < uLen && (!writeRange || dimension->end < uLen);
+    return dimension->start < uLen && (!fullRange || dimension->end < uLen);
 }
 
-static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
+static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool fullRange)
 {
     assert(range->n_dimensions == 1);
 
@@ -5319,11 +5335,11 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
         // Dereferencing scalars is allowed for strings and bytestrings
         if (variant->BuiltInTypeId == SOPC_String_Id)
         {
-            return is_array_valid_range(variant->Value.String.Length, &range->dimensions[0], writeRange);
+            return is_array_valid_range(variant->Value.String.Length, &range->dimensions[0], fullRange);
         }
         else if (variant->BuiltInTypeId == SOPC_ByteString_Id)
         {
-            return is_array_valid_range(variant->Value.Bstring.Length, &range->dimensions[0], writeRange);
+            return is_array_valid_range(variant->Value.Bstring.Length, &range->dimensions[0], fullRange);
         }
     }
 
@@ -5340,10 +5356,10 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
      *       if (ArrayDimension[0] != 0 && range->dimensions[0].start >= ArrayDimension[0]) return false
      */
 
-    return is_array_valid_range(variant->Value.Array.Length, &range->dimensions[0], writeRange);
+    return is_array_valid_range(variant->Value.Array.Length, &range->dimensions[0], fullRange);
 }
 
-static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool writeRange)
+static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool fullRange)
 {
     assert(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
@@ -5376,7 +5392,7 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
              i <= range->dimensions[0].end && i < (uint32_t) variant->Value.Array.Length && has_range; i++)
         {
             // Second range dimension limits the part of the string concerned
-            has_range &= is_array_valid_range(strArray[i].Length, &range->dimensions[1], writeRange);
+            has_range &= is_array_valid_range(strArray[i].Length, &range->dimensions[1], fullRange);
         }
     }
     else
@@ -5394,7 +5410,7 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
         for (size_t i = 0; i < range->n_dimensions && has_range; i++)
         {
             has_range &=
-                is_array_valid_range(variant->Value.Matrix.ArrayDimensions[i], &range->dimensions[i], writeRange);
+                is_array_valid_range(variant->Value.Matrix.ArrayDimensions[i], &range->dimensions[i], fullRange);
         }
     }
     /* Note: we might also detect static range invalid cases but we need the ArrayDimension attribute of Variable node.
@@ -5406,18 +5422,22 @@ static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRang
 
 SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
                                         const SOPC_NumericRange* range,
-                                        bool write_range,
+                                        bool fullRange,
                                         bool* hasRange)
 {
+    if (NULL == variant || NULL == range || NULL == hasRange)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     switch (range->n_dimensions)
     {
     case 0:
         return SOPC_STATUS_INVALID_PARAMETERS;
     case 1:
-        *hasRange = has_range_array(variant, range, write_range);
+        *hasRange = has_range_array(variant, range, fullRange);
         return SOPC_STATUS_OK;
     default:
-        *hasRange = has_range_matrix(variant, range, write_range);
+        *hasRange = has_range_matrix(variant, range, fullRange);
         return SOPC_STATUS_OK;
     }
 }

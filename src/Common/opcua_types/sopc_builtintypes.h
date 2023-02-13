@@ -1030,17 +1030,19 @@ SOPC_ReturnStatus SOPC_Variant_CopyAux(void* dest, const void* src);
  *
  * \param      variant     The variant for which the range is checked
  * \param      range       The range to check for given variant
- * \param      writeRange  Flag that shall be true if the verification is done for a write operation, false otherwise.
- *                         In case of write operation the range shall be strictly included
- *                         otherwise only start index shall be included.
+ * \param      fullRange   When true, the function checks that at least one element of the array is valid
+ *                         for \p range (typical for a "Read" array check).
+ *                         When  false, the function checks that all elements of the array are valid
+ *                         for \p range (typical for a "Write" array check).
  * \param[out] hasRange    The result pointer parameter, the result is true if the range is valid for the given variant
  *                         and false otherwise
  *
- * \return                 SOPC_STATUS_INVALID_PARAMETERS if the number of dimensions is 0, SOPC_STATUS_OK otherwise.
+ * \return                 SOPC_STATUS_INVALID_PARAMETERS if a parameter is NULL or the number of dimensions is 0,
+ *                         SOPC_STATUS_OK otherwise.
  */
 SOPC_ReturnStatus SOPC_Variant_HasRange(const SOPC_Variant* variant,
                                         const SOPC_NumericRange* range,
-                                        bool writeRange,
+                                        bool fullRange,
                                         bool* hasRange);
 SOPC_ReturnStatus SOPC_Variant_GetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
 SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range);
