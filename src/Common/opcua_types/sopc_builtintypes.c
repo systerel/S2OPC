@@ -5857,8 +5857,8 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
     {
         const SOPC_Dimension* dim = &range->dimensions[i];
         assert(src->Value.Array.Length >= 0);
-        const uint32_t array_length = (uint32_t) src->Value.Matrix.ArrayDimensions[i];
-        if (array_length <= dim->start)
+        const int32_t array_length = src->Value.Matrix.ArrayDimensions[i];
+        if (!is_array_valid_range(array_length, dim, false))
         {
             /* Start index shall be valid in the source variant matrix */
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -5867,7 +5867,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
         SOPC_Dimension* truncatedDim = &truncatedRange.dimensions[i];
         truncatedDim->start = dim->start;
         // Truncate range end if origin end index is not in the source variant matrix
-        truncatedDim->end = SOPC_MIN_INDEX(dim->end, array_length - 1);
+        truncatedDim->end = SOPC_MIN_INDEX(dim->end, (uint32_t) array_length - 1);
         const uint32_t length_in_dim = truncatedDim->end - truncatedDim->start + 1;
         if (length_in_dim > INT32_MAX)
         {
@@ -5962,7 +5962,7 @@ static SOPC_ReturnStatus set_range_string(SOPC_String* dst, const SOPC_String* s
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (dst->Length <= 0 || ((uint32_t) dst->Length) <= start || ((uint32_t) dst->Length) <= end)
+    if (!is_array_valid_range(dst->Length, dimension, true))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -6006,8 +6006,7 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (dst->Value.Array.Length <= 0 || ((uint32_t) dst->Value.Array.Length) <= start ||
-        ((uint32_t) dst->Value.Array.Length) <= end)
+    if (!is_array_valid_range(dst->Value.Array.Length, &range->dimensions[0], true))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -6067,8 +6066,7 @@ static SOPC_ReturnStatus set_range_matrix_on_string_array(SOPC_Variant* dst,
     assert(dst->ArrayType == SOPC_VariantArrayType_Array);
     assert(2 == range->n_dimensions);
 
-    if (range->dimensions[0].start >= (uint32_t) dst->Value.Array.Length ||
-        range->dimensions[0].end >= (uint32_t) dst->Value.Array.Length)
+    if (!is_array_valid_range(dst->Value.Array.Length, &range->dimensions[0], true))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -6167,9 +6165,7 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
 
-        if (dst->Value.Matrix.ArrayDimensions[i] <= 0 ||
-            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= start_in_dim ||
-            ((uint32_t) dst->Value.Matrix.ArrayDimensions[i]) <= end_in_dim)
+        if (!is_array_valid_range(dst->Value.Matrix.ArrayDimensions[i], dim, true))
         {
             return SOPC_STATUS_INVALID_PARAMETERS;
         }
