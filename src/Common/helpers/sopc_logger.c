@@ -89,7 +89,6 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     }
 
 #else /* SOPC_HAS_FILESYSTEM */
-        /* Status stays OK given that we don't have other alternatives for now */
         fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
         result = SOPC_STATUS_NOT_SUPPORTED;
 #endif
