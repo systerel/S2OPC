@@ -4703,6 +4703,29 @@ START_TEST(test_ua_variant_get_range_matrix)
 
     SOPC_Variant_Clear(&deref);
 
+    /*
+     * Note: next case is considered a as specific matrix case in the specification but it is also actually
+     *       a standard array case for String/ByteString arrays:
+     * "Arrays of ByteString and String values are treated as two dimensional arrays
+     *  where the final index specifies the substring range within the ByteString or String value.
+     *  The entire ByteString or String value is selected if the final index is omitted."
+     */
+
+    SOPC_NumericRange_Delete(matrix_range);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_NumericRange_Parse("1:3", &matrix_range));
+
+    SOPC_Variant_Initialize(&deref);
+    ck_assert_uint_eq(SOPC_STATUS_OK, SOPC_Variant_GetRange(&deref, sourceStringArray, matrix_range));
+    ck_assert_uint_eq(SOPC_VariantArrayType_Array, deref.ArrayType);
+    ck_assert_uint_eq(sourceStringArray->BuiltInTypeId, deref.BuiltInTypeId);
+    ck_assert_uint_eq(false, deref.DoNotClear);
+    ck_assert_int_eq(3, deref.Value.Array.Length);
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[0]), "is");
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[1]), "four");
+    ck_assert_str_eq(SOPC_String_GetRawCString(&deref.Value.Array.Content.StringArr[2]), "long");
+
+    SOPC_Variant_Clear(&deref);
+
     SOPC_Variant_Delete(sourceStringArray);
     SOPC_Variant_Clear(&source);
     SOPC_NumericRange_Delete(matrix_range);
@@ -5008,8 +5031,10 @@ START_TEST(test_ua_variant_set_range_matrix)
         (const char**[]){(const char*[]){"hello"}, (const char*[]){"phone"}}, (size_t[]){2, 1},
         (const char**[]){(const char*[]){"hi", "you"}, (const char*[]){"call", "outer space"}}, (size_t[]){2, 2},
         "0:1,0:1", NULL, NULL);
+    // write strings of 3 characters into strings of less than 3 characters
     test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
                                            (const char*[]){"one", "two"}, 2, "1:2,0:2", NULL, 0);
+    // write strings out of the original array of strings
     test_ua_variant_set_range_array_helper((const char*[]){"this", "is", "a", "long", "sentence"}, 5,
                                            (const char*[]){"one", "two"}, 2, "4:5,0:2", NULL, 0);
 }
