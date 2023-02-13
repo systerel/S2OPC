@@ -557,13 +557,13 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_User
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy;
 
 // UserTokenPolicyId for x509 token type with Basic256Sha256 SecurityPolicy example
-#define SOPC_UserTokenPolicy_X509Basic256Sha256_ID "x509_Basic256Sha256"
+#define SOPC_UserTokenPolicy_X509Basic256Sha256_ID "X509_Basic256Sha256"
 /** Example x509 security policy supported and configured with Basic256Sha256 security policy.
  */
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_Basic256Sha256SecurityPolicy;
 
 // UserTokenPolicyId for x509 token type with default SecurityPolicy example
-#define SOPC_UserTokenPolicy_X509_ID "x509"
+#define SOPC_UserTokenPolicy_X509_ID "X509"
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy;
 
 #endif
