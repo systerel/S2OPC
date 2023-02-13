@@ -63,6 +63,6 @@ emailAddress        = optional
 [ user_signing_req ]
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
-extendedKeyUsage = clientAuth, serverAuth
+keyUsage = nonRepudiation, digitalSignature
+extendedKeyUsage = clientAuth
 

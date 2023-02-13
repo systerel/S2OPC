@@ -16,7 +16,7 @@ localityName        = Aix-en-Provence
 # Extensions for client certificates (`man x509v3_config`).
 basicConstraints = CA:FALSE
 subjectKeyIdentifier = hash
-keyUsage = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
+keyUsage = nonRepudiation, digitalSignature
 extendedKeyUsage = clientAuth
 subjectAltName = @alternate_names
 
