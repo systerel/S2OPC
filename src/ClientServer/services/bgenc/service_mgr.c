@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/01/2023 14:00:56
+ Date                 : 13/02/2023 17:19:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -588,7 +588,13 @@ void service_mgr__treat_discovery_service_req(
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__StatusCode_service) {
    {
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
+      constants__t_ApplicationDescription_i service_mgr__l_app_desc;
+      t_bool service_mgr__l_is_discovery_server;
       
+      service_set_discovery_server__get_ApplicationDescription(service_mgr__endpoint_config_idx,
+         &service_mgr__l_app_desc);
+      service_set_discovery_server__is_ApplicationDescription_DiscoveryServerType(service_mgr__l_app_desc,
+         &service_mgr__l_is_discovery_server);
       switch (service_mgr__req_typ) {
       case constants__e_msg_discovery_get_endpoints_req:
          service_get_endpoints_bs__treat_get_endpoints_request(service_mgr__req_msg,
@@ -602,18 +608,27 @@ void service_mgr__treat_discovery_service_req(
             service_mgr__endpoint_config_idx,
             &service_mgr__l_ret);
          break;
-      case constants__e_msg_discovery_find_servers_on_network_req:
-         service_set_discovery_server__treat_find_servers_on_network_request(service_mgr__req_msg,
-            service_mgr__resp_msg,
-            &service_mgr__l_ret);
-         break;
-      case constants__e_msg_discovery_register_server2_req:
-         service_set_discovery_server__treat_register_server2_request(service_mgr__req_msg,
-            service_mgr__resp_msg,
-            &service_mgr__l_ret);
-         break;
       default:
-         service_mgr__l_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         if (service_mgr__l_is_discovery_server == true) {
+            switch (service_mgr__req_typ) {
+            case constants__e_msg_discovery_find_servers_on_network_req:
+               service_set_discovery_server__treat_find_servers_on_network_request(service_mgr__req_msg,
+                  service_mgr__resp_msg,
+                  &service_mgr__l_ret);
+               break;
+            case constants__e_msg_discovery_register_server2_req:
+               service_set_discovery_server__treat_register_server2_request(service_mgr__req_msg,
+                  service_mgr__resp_msg,
+                  &service_mgr__l_ret);
+               break;
+            default:
+               service_mgr__l_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+               break;
+            }
+         }
+         else {
+            service_mgr__l_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         }
          break;
       }
       *service_mgr__StatusCode_service = service_mgr__l_ret;

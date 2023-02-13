@@ -78,5 +78,25 @@ OPERATIONS
     BEGIN
         skip
     END
+    ;
+
+    p_app_desc <-- get_ApplicationDescription (p_endpoint_config_idx) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
+    THEN
+        p_app_desc
+        :(p_app_desc : t_ApplicationDescription_i &
+          p_app_desc : t_ApplicationDescription)
+    END
+    ;
+
+    p_isDiscoveryServer <-- is_ApplicationDescription_DiscoveryServerType (p_app_desc) =
+    PRE
+        p_app_desc : t_ApplicationDescription_i &
+        p_app_desc : t_ApplicationDescription
+    THEN
+        p_isDiscoveryServer :: BOOL
+    END
 
 END

@@ -716,20 +716,34 @@ OPERATIONS
 
     StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
-        l_ret
+        l_ret,
+        l_app_desc,
+        l_is_discovery_server
     IN
+        l_app_desc <-- get_ApplicationDescription (endpoint_config_idx);
+        l_is_discovery_server <-- is_ApplicationDescription_DiscoveryServerType (l_app_desc);
         CASE req_typ OF
             EITHER e_msg_discovery_get_endpoints_req THEN
                 l_ret <-- treat_get_endpoints_request (req_msg, resp_msg, endpoint_config_idx)
             OR e_msg_discovery_find_servers_req THEN
                 l_ret <-- treat_find_servers_request (req_msg, resp_msg, endpoint_config_idx)
-            OR e_msg_discovery_find_servers_on_network_req THEN
-                l_ret <-- treat_find_servers_on_network_request (req_msg, resp_msg)
-            OR e_msg_discovery_register_server2_req THEN
-                l_ret <-- treat_register_server2_request (req_msg, resp_msg)
             ELSE
+                IF l_is_discovery_server = TRUE
+                THEN
+                    /* Some services are dedicated to Discovery Servers only */
+                    CASE req_typ OF
+                        EITHER e_msg_discovery_find_servers_on_network_req THEN
+                            l_ret <-- treat_find_servers_on_network_request (req_msg, resp_msg)
+                        OR e_msg_discovery_register_server2_req THEN
+                            l_ret <-- treat_register_server2_request (req_msg, resp_msg)
+                        ELSE
+                            l_ret := e_sc_bad_service_unsupported
+                        END
+                    END
+                ELSE
                 /* Cases shall cover all session services req types */
                 l_ret := e_sc_bad_service_unsupported
+                END
             END
         END;
         StatusCode_service := l_ret

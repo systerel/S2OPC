@@ -104,5 +104,14 @@ OPERATIONS
     THEN
         p_ServerUri :: t_ServerUri
     END
+    ;
+
+    p_isDiscoveryServer <-- is_ApplicationDescription_DiscoveryServerType (p_app_desc) =
+    PRE
+        p_app_desc : t_ApplicationDescription_i &
+        p_app_desc : t_ApplicationDescription
+    THEN
+        p_isDiscoveryServer :: BOOL
+    END
 
 END

@@ -32,6 +32,9 @@ SEES
    constants_statuscodes_bs,
    message_in_bs,
    message_out_bs
+PROMOTES
+    get_ApplicationDescription,
+    is_ApplicationDescription_DiscoveryServerType
 
 DEFINITIONS
 

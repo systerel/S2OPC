@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server.h
 
- Date                 : 04/08/2022 14:53:13
+ Date                 : 13/02/2023 17:19:37
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,12 @@
    INITIALISATION Clause
   ------------------------*/
 extern void service_set_discovery_server__INITIALISATION(void);
+
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define service_set_discovery_server__get_ApplicationDescription service_set_discovery_server_data_bs__get_ApplicationDescription
+#define service_set_discovery_server__is_ApplicationDescription_DiscoveryServerType service_set_discovery_server_data_bs__is_ApplicationDescription_DiscoveryServerType
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

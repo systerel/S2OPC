@@ -123,6 +123,14 @@ void service_set_discovery_server_data_bs__has_ServerUri(
     *service_set_discovery_server_data_bs__p_bool = hasServerUri;
 }
 
+void service_set_discovery_server_data_bs__is_ApplicationDescription_DiscoveryServerType(
+    const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,
+    t_bool* const service_set_discovery_server_data_bs__p_isDiscoveryServer)
+{
+    *service_set_discovery_server_data_bs__p_isDiscoveryServer =
+        OpcUa_ApplicationType_DiscoveryServer == service_set_discovery_server_data_bs__p_app_desc->ApplicationType;
+}
+
 void service_set_discovery_server_data_bs__is_empty_ServerUri(
     const constants__t_ServerUri service_set_discovery_server_data_bs__p_server_uri,
     t_bool* const service_set_discovery_server_data_bs__p_bool)

@@ -21,7 +21,7 @@
 
  File Name            : service_set_discovery_server_data_bs.h
 
- Date                 : 04/08/2022 14:53:46
+ Date                 : 13/02/2023 17:20:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -66,6 +66,9 @@ extern void service_set_discovery_server_data_bs__has_ServerUri(
    const t_entier4 service_set_discovery_server_data_bs__p_nbServerUri,
    const constants__t_ServerUris service_set_discovery_server_data_bs__p_ServerUris,
    t_bool * const service_set_discovery_server_data_bs__p_bool);
+extern void service_set_discovery_server_data_bs__is_ApplicationDescription_DiscoveryServerType(
+   const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,
+   t_bool * const service_set_discovery_server_data_bs__p_isDiscoveryServer);
 extern void service_set_discovery_server_data_bs__is_empty_ServerUri(
    const constants__t_ServerUri service_set_discovery_server_data_bs__p_server_uri,
    t_bool * const service_set_discovery_server_data_bs__p_bool);
