@@ -41,6 +41,1195 @@
 // "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
 #include "s2opc_common_export.h"
 
+#ifndef OPCUA_EXCLUDE_KeyValuePair
+/*============================================================================
+ * The KeyValuePair structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_KeyValuePair_EncodeableType;
+
+typedef struct _OpcUa_KeyValuePair
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_QualifiedName Key;
+    SOPC_Variant Value;
+} OpcUa_KeyValuePair;
+
+void OpcUa_KeyValuePair_Initialize(void* pValue);
+
+void OpcUa_KeyValuePair_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_AdditionalParametersType
+/*============================================================================
+ * The AdditionalParametersType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AdditionalParametersType_EncodeableType;
+
+typedef struct _OpcUa_AdditionalParametersType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfParameters;
+    OpcUa_KeyValuePair* Parameters;
+} OpcUa_AdditionalParametersType;
+
+void OpcUa_AdditionalParametersType_Initialize(void* pValue);
+
+void OpcUa_AdditionalParametersType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EphemeralKeyType
+/*============================================================================
+ * The EphemeralKeyType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EphemeralKeyType_EncodeableType;
+
+typedef struct _OpcUa_EphemeralKeyType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_ByteString PublicKey;
+    SOPC_ByteString Signature;
+} OpcUa_EphemeralKeyType;
+
+void OpcUa_EphemeralKeyType_Initialize(void* pValue);
+
+void OpcUa_EphemeralKeyType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EndpointType
+/*============================================================================
+ * The EndpointType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointType_EncodeableType;
+
+typedef struct _OpcUa_EndpointType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String EndpointUrl;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityPolicyUri;
+    SOPC_String TransportProfileUri;
+} OpcUa_EndpointType;
+
+void OpcUa_EndpointType_Initialize(void* pValue);
+
+void OpcUa_EndpointType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_RationalNumber
+/*============================================================================
+ * The RationalNumber structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_RationalNumber_EncodeableType;
+
+typedef struct _OpcUa_RationalNumber
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t Numerator;
+    uint32_t Denominator;
+} OpcUa_RationalNumber;
+
+void OpcUa_RationalNumber_Initialize(void* pValue);
+
+void OpcUa_RationalNumber_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ThreeDVector
+/*============================================================================
+ * The ThreeDVector structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ThreeDVector_EncodeableType;
+
+typedef struct _OpcUa_ThreeDVector
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    double X;
+    double Y;
+    double Z;
+} OpcUa_ThreeDVector;
+
+void OpcUa_ThreeDVector_Initialize(void* pValue);
+
+void OpcUa_ThreeDVector_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ThreeDCartesianCoordinates
+/*============================================================================
+ * The ThreeDCartesianCoordinates structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ThreeDCartesianCoordinates_EncodeableType;
+
+typedef struct _OpcUa_ThreeDCartesianCoordinates
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    double X;
+    double Y;
+    double Z;
+} OpcUa_ThreeDCartesianCoordinates;
+
+void OpcUa_ThreeDCartesianCoordinates_Initialize(void* pValue);
+
+void OpcUa_ThreeDCartesianCoordinates_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ThreeDOrientation
+/*============================================================================
+ * The ThreeDOrientation structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ThreeDOrientation_EncodeableType;
+
+typedef struct _OpcUa_ThreeDOrientation
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    double A;
+    double B;
+    double C;
+} OpcUa_ThreeDOrientation;
+
+void OpcUa_ThreeDOrientation_Initialize(void* pValue);
+
+void OpcUa_ThreeDOrientation_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ThreeDFrame
+/*============================================================================
+ * The ThreeDFrame structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ThreeDFrame_EncodeableType;
+
+typedef struct _OpcUa_ThreeDFrame
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_ThreeDCartesianCoordinates CartesianCoordinates;
+    OpcUa_ThreeDOrientation Orientation;
+} OpcUa_ThreeDFrame;
+
+void OpcUa_ThreeDFrame_Initialize(void* pValue);
+
+void OpcUa_ThreeDFrame_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_IdentityMappingRuleType
+/*============================================================================
+ * The IdentityMappingRuleType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_IdentityMappingRuleType_EncodeableType;
+
+typedef struct _OpcUa_IdentityMappingRuleType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_IdentityCriteriaType CriteriaType;
+    SOPC_String Criteria;
+} OpcUa_IdentityMappingRuleType;
+
+void OpcUa_IdentityMappingRuleType_Initialize(void* pValue);
+
+void OpcUa_IdentityMappingRuleType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_CurrencyUnitType
+/*============================================================================
+ * The CurrencyUnitType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_CurrencyUnitType_EncodeableType;
+
+typedef struct _OpcUa_CurrencyUnitType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int16_t NumericCode;
+    SOPC_SByte Exponent;
+    SOPC_String AlphabeticCode;
+    SOPC_LocalizedText Currency;
+} OpcUa_CurrencyUnitType;
+
+void OpcUa_CurrencyUnitType_Initialize(void* pValue);
+
+void OpcUa_CurrencyUnitType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TrustListDataType
+/*============================================================================
+ * The TrustListDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TrustListDataType_EncodeableType;
+
+typedef struct _OpcUa_TrustListDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t SpecifiedLists;
+    int32_t NoOfTrustedCertificates;
+    SOPC_ByteString* TrustedCertificates;
+    int32_t NoOfTrustedCrls;
+    SOPC_ByteString* TrustedCrls;
+    int32_t NoOfIssuerCertificates;
+    SOPC_ByteString* IssuerCertificates;
+    int32_t NoOfIssuerCrls;
+    SOPC_ByteString* IssuerCrls;
+} OpcUa_TrustListDataType;
+
+void OpcUa_TrustListDataType_Initialize(void* pValue);
+
+void OpcUa_TrustListDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DecimalDataType
+/*============================================================================
+ * The DecimalDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DecimalDataType_EncodeableType;
+
+typedef struct _OpcUa_DecimalDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int16_t Scale;
+    SOPC_ByteString Value;
+} OpcUa_DecimalDataType;
+
+void OpcUa_DecimalDataType_Initialize(void* pValue);
+
+void OpcUa_DecimalDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_StructureField
+/*============================================================================
+ * The StructureField structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_StructureField_EncodeableType;
+
+typedef struct _OpcUa_StructureField
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_LocalizedText Description;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    uint32_t MaxStringLength;
+    SOPC_Boolean IsOptional;
+} OpcUa_StructureField;
+
+void OpcUa_StructureField_Initialize(void* pValue);
+
+void OpcUa_StructureField_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_StructureDefinition
+/*============================================================================
+ * The StructureDefinition structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_StructureDefinition_EncodeableType;
+
+typedef struct _OpcUa_StructureDefinition
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId DefaultEncodingId;
+    SOPC_NodeId BaseDataType;
+    OpcUa_StructureType StructureType;
+    int32_t NoOfFields;
+    OpcUa_StructureField* Fields;
+} OpcUa_StructureDefinition;
+
+void OpcUa_StructureDefinition_Initialize(void* pValue);
+
+void OpcUa_StructureDefinition_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_StructureDescription
+/*============================================================================
+ * The StructureDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_StructureDescription_EncodeableType;
+
+typedef struct _OpcUa_StructureDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId DataTypeId;
+    SOPC_QualifiedName Name;
+    OpcUa_StructureDefinition StructureDefinition;
+} OpcUa_StructureDescription;
+
+void OpcUa_StructureDescription_Initialize(void* pValue);
+
+void OpcUa_StructureDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EnumField
+/*============================================================================
+ * The EnumField structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
+
+typedef struct _OpcUa_EnumField
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int64_t Value;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    SOPC_String Name;
+} OpcUa_EnumField;
+
+void OpcUa_EnumField_Initialize(void* pValue);
+
+void OpcUa_EnumField_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EnumDefinition
+/*============================================================================
+ * The EnumDefinition structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumDefinition_EncodeableType;
+
+typedef struct _OpcUa_EnumDefinition
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfFields;
+    OpcUa_EnumField* Fields;
+} OpcUa_EnumDefinition;
+
+void OpcUa_EnumDefinition_Initialize(void* pValue);
+
+void OpcUa_EnumDefinition_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EnumDescription
+/*============================================================================
+ * The EnumDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumDescription_EncodeableType;
+
+typedef struct _OpcUa_EnumDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId DataTypeId;
+    SOPC_QualifiedName Name;
+    OpcUa_EnumDefinition EnumDefinition;
+    SOPC_Byte BuiltInType;
+} OpcUa_EnumDescription;
+
+void OpcUa_EnumDescription_Initialize(void* pValue);
+
+void OpcUa_EnumDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_SimpleTypeDescription
+/*============================================================================
+ * The SimpleTypeDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SimpleTypeDescription_EncodeableType;
+
+typedef struct _OpcUa_SimpleTypeDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId DataTypeId;
+    SOPC_QualifiedName Name;
+    SOPC_NodeId BaseDataType;
+    SOPC_Byte BuiltInType;
+} OpcUa_SimpleTypeDescription;
+
+void OpcUa_SimpleTypeDescription_Initialize(void* pValue);
+
+void OpcUa_SimpleTypeDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataTypeSchemaHeader
+/*============================================================================
+ * The DataTypeSchemaHeader structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataTypeSchemaHeader_EncodeableType;
+
+typedef struct _OpcUa_DataTypeSchemaHeader
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfNamespaces;
+    SOPC_String* Namespaces;
+    int32_t NoOfStructureDataTypes;
+    OpcUa_StructureDescription* StructureDataTypes;
+    int32_t NoOfEnumDataTypes;
+    OpcUa_EnumDescription* EnumDataTypes;
+    int32_t NoOfSimpleDataTypes;
+    OpcUa_SimpleTypeDescription* SimpleDataTypes;
+} OpcUa_DataTypeSchemaHeader;
+
+void OpcUa_DataTypeSchemaHeader_Initialize(void* pValue);
+
+void OpcUa_DataTypeSchemaHeader_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataTypeDescription
+/*============================================================================
+ * The DataTypeDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataTypeDescription_EncodeableType;
+
+typedef struct _OpcUa_DataTypeDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId DataTypeId;
+    SOPC_QualifiedName Name;
+} OpcUa_DataTypeDescription;
+
+void OpcUa_DataTypeDescription_Initialize(void* pValue);
+
+void OpcUa_DataTypeDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UABinaryFileDataType
+/*============================================================================
+ * The UABinaryFileDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UABinaryFileDataType_EncodeableType;
+
+typedef struct _OpcUa_UABinaryFileDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfNamespaces;
+    SOPC_String* Namespaces;
+    int32_t NoOfStructureDataTypes;
+    OpcUa_StructureDescription* StructureDataTypes;
+    int32_t NoOfEnumDataTypes;
+    OpcUa_EnumDescription* EnumDataTypes;
+    int32_t NoOfSimpleDataTypes;
+    OpcUa_SimpleTypeDescription* SimpleDataTypes;
+    SOPC_String SchemaLocation;
+    int32_t NoOfFileHeader;
+    OpcUa_KeyValuePair* FileHeader;
+    SOPC_Variant Body;
+} OpcUa_UABinaryFileDataType;
+
+void OpcUa_UABinaryFileDataType_Initialize(void* pValue);
+
+void OpcUa_UABinaryFileDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_FieldMetaData
+/*============================================================================
+ * The FieldMetaData structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FieldMetaData_EncodeableType;
+
+typedef struct _OpcUa_FieldMetaData
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_LocalizedText Description;
+    OpcUa_DataSetFieldFlags FieldFlags;
+    SOPC_Byte BuiltInType;
+    SOPC_NodeId DataType;
+    int32_t ValueRank;
+    int32_t NoOfArrayDimensions;
+    uint32_t* ArrayDimensions;
+    uint32_t MaxStringLength;
+    SOPC_Guid DataSetFieldId;
+    int32_t NoOfProperties;
+    OpcUa_KeyValuePair* Properties;
+} OpcUa_FieldMetaData;
+
+void OpcUa_FieldMetaData_Initialize(void* pValue);
+
+void OpcUa_FieldMetaData_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ConfigurationVersionDataType
+/*============================================================================
+ * The ConfigurationVersionDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ConfigurationVersionDataType_EncodeableType;
+
+typedef struct _OpcUa_ConfigurationVersionDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t MajorVersion;
+    uint32_t MinorVersion;
+} OpcUa_ConfigurationVersionDataType;
+
+void OpcUa_ConfigurationVersionDataType_Initialize(void* pValue);
+
+void OpcUa_ConfigurationVersionDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetMetaDataType
+/*============================================================================
+ * The DataSetMetaDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataSetMetaDataType_EncodeableType;
+
+typedef struct _OpcUa_DataSetMetaDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfNamespaces;
+    SOPC_String* Namespaces;
+    int32_t NoOfStructureDataTypes;
+    OpcUa_StructureDescription* StructureDataTypes;
+    int32_t NoOfEnumDataTypes;
+    OpcUa_EnumDescription* EnumDataTypes;
+    int32_t NoOfSimpleDataTypes;
+    OpcUa_SimpleTypeDescription* SimpleDataTypes;
+    SOPC_String Name;
+    SOPC_LocalizedText Description;
+    int32_t NoOfFields;
+    OpcUa_FieldMetaData* Fields;
+    SOPC_Guid DataSetClassId;
+    OpcUa_ConfigurationVersionDataType ConfigurationVersion;
+} OpcUa_DataSetMetaDataType;
+
+void OpcUa_DataSetMetaDataType_Initialize(void* pValue);
+
+void OpcUa_DataSetMetaDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PublishedDataSetDataType
+/*============================================================================
+ * The PublishedDataSetDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishedDataSetDataType_EncodeableType;
+
+typedef struct _OpcUa_PublishedDataSetDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    int32_t NoOfDataSetFolder;
+    SOPC_String* DataSetFolder;
+    OpcUa_DataSetMetaDataType DataSetMetaData;
+    int32_t NoOfExtensionFields;
+    OpcUa_KeyValuePair* ExtensionFields;
+    SOPC_ExtensionObject DataSetSource;
+} OpcUa_PublishedDataSetDataType;
+
+void OpcUa_PublishedDataSetDataType_Initialize(void* pValue);
+
+void OpcUa_PublishedDataSetDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PublishedVariableDataType
+/*============================================================================
+ * The PublishedVariableDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishedVariableDataType_EncodeableType;
+
+typedef struct _OpcUa_PublishedVariableDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId PublishedVariable;
+    uint32_t AttributeId;
+    double SamplingIntervalHint;
+    uint32_t DeadbandType;
+    double DeadbandValue;
+    SOPC_String IndexRange;
+    SOPC_Variant SubstituteValue;
+    int32_t NoOfMetaDataProperties;
+    SOPC_QualifiedName* MetaDataProperties;
+} OpcUa_PublishedVariableDataType;
+
+void OpcUa_PublishedVariableDataType_Initialize(void* pValue);
+
+void OpcUa_PublishedVariableDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PublishedDataItemsDataType
+/*============================================================================
+ * The PublishedDataItemsDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishedDataItemsDataType_EncodeableType;
+
+typedef struct _OpcUa_PublishedDataItemsDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfPublishedData;
+    OpcUa_PublishedVariableDataType* PublishedData;
+} OpcUa_PublishedDataItemsDataType;
+
+void OpcUa_PublishedDataItemsDataType_Initialize(void* pValue);
+
+void OpcUa_PublishedDataItemsDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
+/*============================================================================
+ * The SimpleAttributeOperand structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
+
+typedef struct _OpcUa_SimpleAttributeOperand
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId TypeDefinitionId;
+    int32_t NoOfBrowsePath;
+    SOPC_QualifiedName* BrowsePath;
+    uint32_t AttributeId;
+    SOPC_String IndexRange;
+} OpcUa_SimpleAttributeOperand;
+
+void OpcUa_SimpleAttributeOperand_Initialize(void* pValue);
+
+void OpcUa_SimpleAttributeOperand_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ContentFilterElement
+/*============================================================================
+ * The ContentFilterElement structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
+
+typedef struct _OpcUa_ContentFilterElement
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_FilterOperator FilterOperator;
+    int32_t NoOfFilterOperands;
+    SOPC_ExtensionObject* FilterOperands;
+} OpcUa_ContentFilterElement;
+
+void OpcUa_ContentFilterElement_Initialize(void* pValue);
+
+void OpcUa_ContentFilterElement_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ContentFilter
+/*============================================================================
+ * The ContentFilter structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
+
+typedef struct _OpcUa_ContentFilter
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfElements;
+    OpcUa_ContentFilterElement* Elements;
+} OpcUa_ContentFilter;
+
+void OpcUa_ContentFilter_Initialize(void* pValue);
+
+void OpcUa_ContentFilter_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PublishedEventsDataType
+/*============================================================================
+ * The PublishedEventsDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PublishedEventsDataType_EncodeableType;
+
+typedef struct _OpcUa_PublishedEventsDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId EventNotifier;
+    int32_t NoOfSelectedFields;
+    OpcUa_SimpleAttributeOperand* SelectedFields;
+    OpcUa_ContentFilter Filter;
+} OpcUa_PublishedEventsDataType;
+
+void OpcUa_PublishedEventsDataType_Initialize(void* pValue);
+
+void OpcUa_PublishedEventsDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetWriterDataType
+/*============================================================================
+ * The DataSetWriterDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataSetWriterDataType_EncodeableType;
+
+typedef struct _OpcUa_DataSetWriterDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    uint16_t DataSetWriterId;
+    OpcUa_DataSetFieldContentMask DataSetFieldContentMask;
+    uint32_t KeyFrameCount;
+    SOPC_String DataSetName;
+    int32_t NoOfDataSetWriterProperties;
+    OpcUa_KeyValuePair* DataSetWriterProperties;
+    SOPC_ExtensionObject TransportSettings;
+    SOPC_ExtensionObject MessageSettings;
+} OpcUa_DataSetWriterDataType;
+
+void OpcUa_DataSetWriterDataType_Initialize(void* pValue);
+
+void OpcUa_DataSetWriterDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ApplicationDescription
+/*============================================================================
+ * The ApplicationDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
+
+typedef struct _OpcUa_ApplicationDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String ApplicationUri;
+    SOPC_String ProductUri;
+    SOPC_LocalizedText ApplicationName;
+    OpcUa_ApplicationType ApplicationType;
+    SOPC_String GatewayServerUri;
+    SOPC_String DiscoveryProfileUri;
+    int32_t NoOfDiscoveryUrls;
+    SOPC_String* DiscoveryUrls;
+} OpcUa_ApplicationDescription;
+
+void OpcUa_ApplicationDescription_Initialize(void* pValue);
+
+void OpcUa_ApplicationDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
+/*============================================================================
+ * The UserTokenPolicy structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
+
+typedef struct _OpcUa_UserTokenPolicy
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String PolicyId;
+    OpcUa_UserTokenType TokenType;
+    SOPC_String IssuedTokenType;
+    SOPC_String IssuerEndpointUrl;
+    SOPC_String SecurityPolicyUri;
+} OpcUa_UserTokenPolicy;
+
+void OpcUa_UserTokenPolicy_Initialize(void* pValue);
+
+void OpcUa_UserTokenPolicy_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EndpointDescription
+/*============================================================================
+ * The EndpointDescription structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
+
+typedef struct _OpcUa_EndpointDescription
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String EndpointUrl;
+    OpcUa_ApplicationDescription Server;
+    SOPC_ByteString ServerCertificate;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityPolicyUri;
+    int32_t NoOfUserIdentityTokens;
+    OpcUa_UserTokenPolicy* UserIdentityTokens;
+    SOPC_String TransportProfileUri;
+    SOPC_Byte SecurityLevel;
+} OpcUa_EndpointDescription;
+
+void OpcUa_EndpointDescription_Initialize(void* pValue);
+
+void OpcUa_EndpointDescription_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PubSubGroupDataType
+/*============================================================================
+ * The PubSubGroupDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PubSubGroupDataType_EncodeableType;
+
+typedef struct _OpcUa_PubSubGroupDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityGroupId;
+    int32_t NoOfSecurityKeyServices;
+    OpcUa_EndpointDescription* SecurityKeyServices;
+    uint32_t MaxNetworkMessageSize;
+    int32_t NoOfGroupProperties;
+    OpcUa_KeyValuePair* GroupProperties;
+} OpcUa_PubSubGroupDataType;
+
+void OpcUa_PubSubGroupDataType_Initialize(void* pValue);
+
+void OpcUa_PubSubGroupDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_WriterGroupDataType
+/*============================================================================
+ * The WriterGroupDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_WriterGroupDataType_EncodeableType;
+
+typedef struct _OpcUa_WriterGroupDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityGroupId;
+    int32_t NoOfSecurityKeyServices;
+    OpcUa_EndpointDescription* SecurityKeyServices;
+    uint32_t MaxNetworkMessageSize;
+    int32_t NoOfGroupProperties;
+    OpcUa_KeyValuePair* GroupProperties;
+    uint16_t WriterGroupId;
+    double PublishingInterval;
+    double KeepAliveTime;
+    SOPC_Byte Priority;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    SOPC_String HeaderLayoutUri;
+    SOPC_ExtensionObject TransportSettings;
+    SOPC_ExtensionObject MessageSettings;
+    int32_t NoOfDataSetWriters;
+    OpcUa_DataSetWriterDataType* DataSetWriters;
+} OpcUa_WriterGroupDataType;
+
+void OpcUa_WriterGroupDataType_Initialize(void* pValue);
+
+void OpcUa_WriterGroupDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetReaderDataType
+/*============================================================================
+ * The DataSetReaderDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DataSetReaderDataType_EncodeableType;
+
+typedef struct _OpcUa_DataSetReaderDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    SOPC_Variant PublisherId;
+    uint16_t WriterGroupId;
+    uint16_t DataSetWriterId;
+    OpcUa_DataSetMetaDataType DataSetMetaData;
+    OpcUa_DataSetFieldContentMask DataSetFieldContentMask;
+    double MessageReceiveTimeout;
+    uint32_t KeyFrameCount;
+    SOPC_String HeaderLayoutUri;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityGroupId;
+    int32_t NoOfSecurityKeyServices;
+    OpcUa_EndpointDescription* SecurityKeyServices;
+    int32_t NoOfDataSetReaderProperties;
+    OpcUa_KeyValuePair* DataSetReaderProperties;
+    SOPC_ExtensionObject TransportSettings;
+    SOPC_ExtensionObject MessageSettings;
+    SOPC_ExtensionObject SubscribedDataSet;
+} OpcUa_DataSetReaderDataType;
+
+void OpcUa_DataSetReaderDataType_Initialize(void* pValue);
+
+void OpcUa_DataSetReaderDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ReaderGroupDataType
+/*============================================================================
+ * The ReaderGroupDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReaderGroupDataType_EncodeableType;
+
+typedef struct _OpcUa_ReaderGroupDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    OpcUa_MessageSecurityMode SecurityMode;
+    SOPC_String SecurityGroupId;
+    int32_t NoOfSecurityKeyServices;
+    OpcUa_EndpointDescription* SecurityKeyServices;
+    uint32_t MaxNetworkMessageSize;
+    int32_t NoOfGroupProperties;
+    OpcUa_KeyValuePair* GroupProperties;
+    SOPC_ExtensionObject TransportSettings;
+    SOPC_ExtensionObject MessageSettings;
+    int32_t NoOfDataSetReaders;
+    OpcUa_DataSetReaderDataType* DataSetReaders;
+} OpcUa_ReaderGroupDataType;
+
+void OpcUa_ReaderGroupDataType_Initialize(void* pValue);
+
+void OpcUa_ReaderGroupDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PubSubConnectionDataType
+/*============================================================================
+ * The PubSubConnectionDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PubSubConnectionDataType_EncodeableType;
+
+typedef struct _OpcUa_PubSubConnectionDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String Name;
+    SOPC_Boolean Enabled;
+    SOPC_Variant PublisherId;
+    SOPC_String TransportProfileUri;
+    SOPC_ExtensionObject Address;
+    int32_t NoOfConnectionProperties;
+    OpcUa_KeyValuePair* ConnectionProperties;
+    SOPC_ExtensionObject TransportSettings;
+    int32_t NoOfWriterGroups;
+    OpcUa_WriterGroupDataType* WriterGroups;
+    int32_t NoOfReaderGroups;
+    OpcUa_ReaderGroupDataType* ReaderGroups;
+} OpcUa_PubSubConnectionDataType;
+
+void OpcUa_PubSubConnectionDataType_Initialize(void* pValue);
+
+void OpcUa_PubSubConnectionDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_NetworkAddressDataType
+/*============================================================================
+ * The NetworkAddressDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NetworkAddressDataType_EncodeableType;
+
+typedef struct _OpcUa_NetworkAddressDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String NetworkInterface;
+} OpcUa_NetworkAddressDataType;
+
+void OpcUa_NetworkAddressDataType_Initialize(void* pValue);
+
+void OpcUa_NetworkAddressDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_NetworkAddressUrlDataType
+/*============================================================================
+ * The NetworkAddressUrlDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_NetworkAddressUrlDataType_EncodeableType;
+
+typedef struct _OpcUa_NetworkAddressUrlDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String NetworkInterface;
+    SOPC_String Url;
+} OpcUa_NetworkAddressUrlDataType;
+
+void OpcUa_NetworkAddressUrlDataType_Initialize(void* pValue);
+
+void OpcUa_NetworkAddressUrlDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_FieldTargetDataType
+/*============================================================================
+ * The FieldTargetDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_FieldTargetDataType_EncodeableType;
+
+typedef struct _OpcUa_FieldTargetDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_Guid DataSetFieldId;
+    SOPC_String ReceiverIndexRange;
+    SOPC_NodeId TargetNodeId;
+    uint32_t AttributeId;
+    SOPC_String WriteIndexRange;
+    OpcUa_OverrideValueHandling OverrideValueHandling;
+    SOPC_Variant OverrideValue;
+} OpcUa_FieldTargetDataType;
+
+void OpcUa_FieldTargetDataType_Initialize(void* pValue);
+
+void OpcUa_FieldTargetDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TargetVariablesDataType
+/*============================================================================
+ * The TargetVariablesDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_TargetVariablesDataType_EncodeableType;
+
+typedef struct _OpcUa_TargetVariablesDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfTargetVariables;
+    OpcUa_FieldTargetDataType* TargetVariables;
+} OpcUa_TargetVariablesDataType;
+
+void OpcUa_TargetVariablesDataType_Initialize(void* pValue);
+
+void OpcUa_TargetVariablesDataType_Clear(void* pValue);
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_RolePermissionType
 /*============================================================================
  * The RolePermissionType structure.
@@ -60,6 +1249,382 @@ typedef struct _OpcUa_RolePermissionType
 void OpcUa_RolePermissionType_Initialize(void* pValue);
 
 void OpcUa_RolePermissionType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_SubscribedDataSetMirrorDataType
+/*============================================================================
+ * The SubscribedDataSetMirrorDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SubscribedDataSetMirrorDataType_EncodeableType;
+
+typedef struct _OpcUa_SubscribedDataSetMirrorDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String ParentNodeName;
+    int32_t NoOfRolePermissions;
+    OpcUa_RolePermissionType* RolePermissions;
+} OpcUa_SubscribedDataSetMirrorDataType;
+
+void OpcUa_SubscribedDataSetMirrorDataType_Initialize(void* pValue);
+
+void OpcUa_SubscribedDataSetMirrorDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PubSubConfigurationDataType
+/*============================================================================
+ * The PubSubConfigurationDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_PubSubConfigurationDataType_EncodeableType;
+
+typedef struct _OpcUa_PubSubConfigurationDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfPublishedDataSets;
+    OpcUa_PublishedDataSetDataType* PublishedDataSets;
+    int32_t NoOfConnections;
+    OpcUa_PubSubConnectionDataType* Connections;
+    SOPC_Boolean Enabled;
+} OpcUa_PubSubConfigurationDataType;
+
+void OpcUa_PubSubConfigurationDataType_Initialize(void* pValue);
+
+void OpcUa_PubSubConfigurationDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UadpWriterGroupMessageDataType
+/*============================================================================
+ * The UadpWriterGroupMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UadpWriterGroupMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_UadpWriterGroupMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t GroupVersion;
+    OpcUa_DataSetOrderingType DataSetOrdering;
+    OpcUa_UadpNetworkMessageContentMask NetworkMessageContentMask;
+    double SamplingOffset;
+    int32_t NoOfPublishingOffset;
+    double* PublishingOffset;
+} OpcUa_UadpWriterGroupMessageDataType;
+
+void OpcUa_UadpWriterGroupMessageDataType_Initialize(void* pValue);
+
+void OpcUa_UadpWriterGroupMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UadpDataSetWriterMessageDataType
+/*============================================================================
+ * The UadpDataSetWriterMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UadpDataSetWriterMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_UadpDataSetWriterMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_UadpDataSetMessageContentMask DataSetMessageContentMask;
+    uint16_t ConfiguredSize;
+    uint16_t NetworkMessageNumber;
+    uint16_t DataSetOffset;
+} OpcUa_UadpDataSetWriterMessageDataType;
+
+void OpcUa_UadpDataSetWriterMessageDataType_Initialize(void* pValue);
+
+void OpcUa_UadpDataSetWriterMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UadpDataSetReaderMessageDataType
+/*============================================================================
+ * The UadpDataSetReaderMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UadpDataSetReaderMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_UadpDataSetReaderMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t GroupVersion;
+    uint16_t NetworkMessageNumber;
+    uint16_t DataSetOffset;
+    SOPC_Guid DataSetClassId;
+    OpcUa_UadpNetworkMessageContentMask NetworkMessageContentMask;
+    OpcUa_UadpDataSetMessageContentMask DataSetMessageContentMask;
+    double PublishingInterval;
+    double ReceiveOffset;
+    double ProcessingOffset;
+} OpcUa_UadpDataSetReaderMessageDataType;
+
+void OpcUa_UadpDataSetReaderMessageDataType_Initialize(void* pValue);
+
+void OpcUa_UadpDataSetReaderMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_JsonWriterGroupMessageDataType
+/*============================================================================
+ * The JsonWriterGroupMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_JsonWriterGroupMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_JsonWriterGroupMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_JsonNetworkMessageContentMask NetworkMessageContentMask;
+} OpcUa_JsonWriterGroupMessageDataType;
+
+void OpcUa_JsonWriterGroupMessageDataType_Initialize(void* pValue);
+
+void OpcUa_JsonWriterGroupMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_JsonDataSetWriterMessageDataType
+/*============================================================================
+ * The JsonDataSetWriterMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_JsonDataSetWriterMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_JsonDataSetWriterMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_JsonDataSetMessageContentMask DataSetMessageContentMask;
+} OpcUa_JsonDataSetWriterMessageDataType;
+
+void OpcUa_JsonDataSetWriterMessageDataType_Initialize(void* pValue);
+
+void OpcUa_JsonDataSetWriterMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_JsonDataSetReaderMessageDataType
+/*============================================================================
+ * The JsonDataSetReaderMessageDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_JsonDataSetReaderMessageDataType_EncodeableType;
+
+typedef struct _OpcUa_JsonDataSetReaderMessageDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    OpcUa_JsonNetworkMessageContentMask NetworkMessageContentMask;
+    OpcUa_JsonDataSetMessageContentMask DataSetMessageContentMask;
+} OpcUa_JsonDataSetReaderMessageDataType;
+
+void OpcUa_JsonDataSetReaderMessageDataType_Initialize(void* pValue);
+
+void OpcUa_JsonDataSetReaderMessageDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DatagramConnectionTransportDataType
+/*============================================================================
+ * The DatagramConnectionTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DatagramConnectionTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_DatagramConnectionTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_ExtensionObject DiscoveryAddress;
+} OpcUa_DatagramConnectionTransportDataType;
+
+void OpcUa_DatagramConnectionTransportDataType_Initialize(void* pValue);
+
+void OpcUa_DatagramConnectionTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DatagramWriterGroupTransportDataType
+/*============================================================================
+ * The DatagramWriterGroupTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_DatagramWriterGroupTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_DatagramWriterGroupTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_Byte MessageRepeatCount;
+    double MessageRepeatDelay;
+} OpcUa_DatagramWriterGroupTransportDataType;
+
+void OpcUa_DatagramWriterGroupTransportDataType_Initialize(void* pValue);
+
+void OpcUa_DatagramWriterGroupTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_BrokerConnectionTransportDataType
+/*============================================================================
+ * The BrokerConnectionTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrokerConnectionTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_BrokerConnectionTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String ResourceUri;
+    SOPC_String AuthenticationProfileUri;
+} OpcUa_BrokerConnectionTransportDataType;
+
+void OpcUa_BrokerConnectionTransportDataType_Initialize(void* pValue);
+
+void OpcUa_BrokerConnectionTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_BrokerWriterGroupTransportDataType
+/*============================================================================
+ * The BrokerWriterGroupTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrokerWriterGroupTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_BrokerWriterGroupTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String QueueName;
+    SOPC_String ResourceUri;
+    SOPC_String AuthenticationProfileUri;
+    OpcUa_BrokerTransportQualityOfService RequestedDeliveryGuarantee;
+} OpcUa_BrokerWriterGroupTransportDataType;
+
+void OpcUa_BrokerWriterGroupTransportDataType_Initialize(void* pValue);
+
+void OpcUa_BrokerWriterGroupTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_BrokerDataSetWriterTransportDataType
+/*============================================================================
+ * The BrokerDataSetWriterTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrokerDataSetWriterTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_BrokerDataSetWriterTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String QueueName;
+    SOPC_String ResourceUri;
+    SOPC_String AuthenticationProfileUri;
+    OpcUa_BrokerTransportQualityOfService RequestedDeliveryGuarantee;
+    SOPC_String MetaDataQueueName;
+    double MetaDataUpdateTime;
+} OpcUa_BrokerDataSetWriterTransportDataType;
+
+void OpcUa_BrokerDataSetWriterTransportDataType_Initialize(void* pValue);
+
+void OpcUa_BrokerDataSetWriterTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_BrokerDataSetReaderTransportDataType
+/*============================================================================
+ * The BrokerDataSetReaderTransportDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_BrokerDataSetReaderTransportDataType_EncodeableType;
+
+typedef struct _OpcUa_BrokerDataSetReaderTransportDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_String QueueName;
+    SOPC_String ResourceUri;
+    SOPC_String AuthenticationProfileUri;
+    OpcUa_BrokerTransportQualityOfService RequestedDeliveryGuarantee;
+    SOPC_String MetaDataQueueName;
+} OpcUa_BrokerDataSetReaderTransportDataType;
+
+void OpcUa_BrokerDataSetReaderTransportDataType_Initialize(void* pValue);
+
+void OpcUa_BrokerDataSetReaderTransportDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_AliasNameDataType
+/*============================================================================
+ * The AliasNameDataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_AliasNameDataType_EncodeableType;
+
+typedef struct _OpcUa_AliasNameDataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_QualifiedName AliasName;
+    int32_t NoOfReferencedNodes;
+    SOPC_ExpandedNodeId* ReferencedNodes;
+} OpcUa_AliasNameDataType;
+
+void OpcUa_AliasNameDataType_Initialize(void* pValue);
+
+void OpcUa_AliasNameDataType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UnsignedRationalNumber
+/*============================================================================
+ * The UnsignedRationalNumber structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UnsignedRationalNumber_EncodeableType;
+
+typedef struct _OpcUa_UnsignedRationalNumber
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t Numerator;
+    uint32_t Denominator;
+} OpcUa_UnsignedRationalNumber;
+
+void OpcUa_UnsignedRationalNumber_Initialize(void* pValue);
+
+void OpcUa_UnsignedRationalNumber_Clear(void* pValue);
 
 #endif
 
@@ -536,30 +2101,6 @@ void OpcUa_EnumValueType_Clear(void* pValue);
 
 #endif
 
-#ifndef OPCUA_EXCLUDE_EnumField
-/*============================================================================
- * The EnumField structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EnumField_EncodeableType;
-
-typedef struct _OpcUa_EnumField
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    int64_t Value;
-    SOPC_LocalizedText DisplayName;
-    SOPC_LocalizedText Description;
-    SOPC_String Name;
-} OpcUa_EnumField;
-
-void OpcUa_EnumField_Initialize(void* pValue);
-
-void OpcUa_EnumField_Clear(void* pValue);
-
-#endif
-
 #ifndef OPCUA_EXCLUDE_OptionSet
 /*============================================================================
  * The OptionSet structure.
@@ -601,34 +2142,6 @@ typedef struct _OpcUa_TimeZoneDataType
 void OpcUa_TimeZoneDataType_Initialize(void* pValue);
 
 void OpcUa_TimeZoneDataType_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_ApplicationDescription
-/*============================================================================
- * The ApplicationDescription structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ApplicationDescription_EncodeableType;
-
-typedef struct _OpcUa_ApplicationDescription
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String ApplicationUri;
-    SOPC_String ProductUri;
-    SOPC_LocalizedText ApplicationName;
-    OpcUa_ApplicationType ApplicationType;
-    SOPC_String GatewayServerUri;
-    SOPC_String DiscoveryProfileUri;
-    int32_t NoOfDiscoveryUrls;
-    SOPC_String* DiscoveryUrls;
-} OpcUa_ApplicationDescription;
-
-void OpcUa_ApplicationDescription_Initialize(void* pValue);
-
-void OpcUa_ApplicationDescription_Clear(void* pValue);
 
 #endif
 
@@ -704,6 +2217,59 @@ typedef struct _OpcUa_ServiceFault
 void OpcUa_ServiceFault_Initialize(void* pValue);
 
 void OpcUa_ServiceFault_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_SessionlessInvokeRequestType
+/*============================================================================
+ * The SessionlessInvokeRequestType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SessionlessInvokeRequestType_EncodeableType;
+
+typedef struct _OpcUa_SessionlessInvokeRequestType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t UrisVersion;
+    int32_t NoOfNamespaceUris;
+    SOPC_String* NamespaceUris;
+    int32_t NoOfServerUris;
+    SOPC_String* ServerUris;
+    int32_t NoOfLocaleIds;
+    SOPC_String* LocaleIds;
+    uint32_t ServiceId;
+} OpcUa_SessionlessInvokeRequestType;
+
+void OpcUa_SessionlessInvokeRequestType_Initialize(void* pValue);
+
+void OpcUa_SessionlessInvokeRequestType_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_SessionlessInvokeResponseType
+/*============================================================================
+ * The SessionlessInvokeResponseType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SessionlessInvokeResponseType_EncodeableType;
+
+typedef struct _OpcUa_SessionlessInvokeResponseType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfNamespaceUris;
+    SOPC_String* NamespaceUris;
+    int32_t NoOfServerUris;
+    SOPC_String* ServerUris;
+    uint32_t ServiceId;
+} OpcUa_SessionlessInvokeResponseType;
+
+void OpcUa_SessionlessInvokeResponseType_Initialize(void* pValue);
+
+void OpcUa_SessionlessInvokeResponseType_Clear(void* pValue);
 
 #endif
 
@@ -830,60 +2396,6 @@ void OpcUa_FindServersOnNetworkResponse_Initialize(void* pValue);
 void OpcUa_FindServersOnNetworkResponse_Clear(void* pValue);
 
 #endif
-#endif
-
-#ifndef OPCUA_EXCLUDE_UserTokenPolicy
-/*============================================================================
- * The UserTokenPolicy structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_UserTokenPolicy_EncodeableType;
-
-typedef struct _OpcUa_UserTokenPolicy
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String PolicyId;
-    OpcUa_UserTokenType TokenType;
-    SOPC_String IssuedTokenType;
-    SOPC_String IssuerEndpointUrl;
-    SOPC_String SecurityPolicyUri;
-} OpcUa_UserTokenPolicy;
-
-void OpcUa_UserTokenPolicy_Initialize(void* pValue);
-
-void OpcUa_UserTokenPolicy_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_EndpointDescription
-/*============================================================================
- * The EndpointDescription structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_EndpointDescription_EncodeableType;
-
-typedef struct _OpcUa_EndpointDescription
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_String EndpointUrl;
-    OpcUa_ApplicationDescription Server;
-    SOPC_ByteString ServerCertificate;
-    OpcUa_MessageSecurityMode SecurityMode;
-    SOPC_String SecurityPolicyUri;
-    int32_t NoOfUserIdentityTokens;
-    OpcUa_UserTokenPolicy* UserIdentityTokens;
-    SOPC_String TransportProfileUri;
-    SOPC_Byte SecurityLevel;
-} OpcUa_EndpointDescription;
-
-void OpcUa_EndpointDescription_Initialize(void* pValue);
-
-void OpcUa_EndpointDescription_Clear(void* pValue);
-
 #endif
 
 #ifndef OPCUA_EXCLUDE_GetEndpoints
@@ -1812,6 +3324,55 @@ void OpcUa_ViewAttributes_Clear(void* pValue);
 
 #endif
 
+#ifndef OPCUA_EXCLUDE_GenericAttributeValue
+/*============================================================================
+ * The GenericAttributeValue structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_GenericAttributeValue_EncodeableType;
+
+typedef struct _OpcUa_GenericAttributeValue
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t AttributeId;
+    SOPC_Variant Value;
+} OpcUa_GenericAttributeValue;
+
+void OpcUa_GenericAttributeValue_Initialize(void* pValue);
+
+void OpcUa_GenericAttributeValue_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_GenericAttributes
+/*============================================================================
+ * The GenericAttributes structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_GenericAttributes_EncodeableType;
+
+typedef struct _OpcUa_GenericAttributes
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    uint32_t SpecifiedAttributes;
+    SOPC_LocalizedText DisplayName;
+    SOPC_LocalizedText Description;
+    uint32_t WriteMask;
+    uint32_t UserWriteMask;
+    int32_t NoOfAttributeValues;
+    OpcUa_GenericAttributeValue* AttributeValues;
+} OpcUa_GenericAttributes;
+
+void OpcUa_GenericAttributes_Initialize(void* pValue);
+
+void OpcUa_GenericAttributes_Clear(void* pValue);
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_AddNodesItem
 /*============================================================================
  * The AddNodesItem structure.
@@ -2710,51 +4271,6 @@ void OpcUa_NodeReference_Clear(void* pValue);
 
 #endif
 
-#ifndef OPCUA_EXCLUDE_ContentFilterElement
-/*============================================================================
- * The ContentFilterElement structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilterElement_EncodeableType;
-
-typedef struct _OpcUa_ContentFilterElement
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    OpcUa_FilterOperator FilterOperator;
-    int32_t NoOfFilterOperands;
-    SOPC_ExtensionObject* FilterOperands;
-} OpcUa_ContentFilterElement;
-
-void OpcUa_ContentFilterElement_Initialize(void* pValue);
-
-void OpcUa_ContentFilterElement_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_ContentFilter
-/*============================================================================
- * The ContentFilter structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ContentFilter_EncodeableType;
-
-typedef struct _OpcUa_ContentFilter
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    int32_t NoOfElements;
-    OpcUa_ContentFilterElement* Elements;
-} OpcUa_ContentFilter;
-
-void OpcUa_ContentFilter_Initialize(void* pValue);
-
-void OpcUa_ContentFilter_Clear(void* pValue);
-
-#endif
-
 #ifndef OPCUA_EXCLUDE_ElementOperand
 /*============================================================================
  * The ElementOperand structure.
@@ -2819,31 +4335,6 @@ typedef struct _OpcUa_AttributeOperand
 void OpcUa_AttributeOperand_Initialize(void* pValue);
 
 void OpcUa_AttributeOperand_Clear(void* pValue);
-
-#endif
-
-#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
-/*============================================================================
- * The SimpleAttributeOperand structure.
- *===========================================================================*/
-S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_SimpleAttributeOperand_EncodeableType;
-
-typedef struct _OpcUa_SimpleAttributeOperand
-{
-    SOPC_EncodeableType* encodeableType;
-    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
-     *  for giving a copy of the header to application.
-     */
-    SOPC_NodeId TypeDefinitionId;
-    int32_t NoOfBrowsePath;
-    SOPC_QualifiedName* BrowsePath;
-    uint32_t AttributeId;
-    SOPC_String IndexRange;
-} OpcUa_SimpleAttributeOperand;
-
-void OpcUa_SimpleAttributeOperand_Initialize(void* pValue);
-
-void OpcUa_SimpleAttributeOperand_Clear(void* pValue);
 
 #endif
 
@@ -3291,6 +4782,28 @@ typedef struct _OpcUa_ReadAtTimeDetails
 void OpcUa_ReadAtTimeDetails_Initialize(void* pValue);
 
 void OpcUa_ReadAtTimeDetails_Clear(void* pValue);
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_ReadAnnotationDataDetails
+/*============================================================================
+ * The ReadAnnotationDataDetails structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ReadAnnotationDataDetails_EncodeableType;
+
+typedef struct _OpcUa_ReadAnnotationDataDetails
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    int32_t NoOfReqTimes;
+    SOPC_DateTime* ReqTimes;
+} OpcUa_ReadAnnotationDataDetails;
+
+void OpcUa_ReadAnnotationDataDetails_Initialize(void* pValue);
+
+void OpcUa_ReadAnnotationDataDetails_Clear(void* pValue);
 
 #endif
 
@@ -5460,6 +6973,42 @@ void OpcUa_ProgramDiagnosticDataType_Clear(void* pValue);
 
 #endif
 
+#ifndef OPCUA_EXCLUDE_ProgramDiagnostic2DataType
+/*============================================================================
+ * The ProgramDiagnostic2DataType structure.
+ *===========================================================================*/
+S2OPC_COMMON_EXPORT extern SOPC_EncodeableType OpcUa_ProgramDiagnostic2DataType_EncodeableType;
+
+typedef struct _OpcUa_ProgramDiagnostic2DataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_NodeId CreateSessionId;
+    SOPC_String CreateClientName;
+    SOPC_DateTime InvocationCreationTime;
+    SOPC_DateTime LastTransitionTime;
+    SOPC_String LastMethodCall;
+    SOPC_NodeId LastMethodSessionId;
+    int32_t NoOfLastMethodInputArguments;
+    OpcUa_Argument* LastMethodInputArguments;
+    int32_t NoOfLastMethodOutputArguments;
+    OpcUa_Argument* LastMethodOutputArguments;
+    int32_t NoOfLastMethodInputValues;
+    SOPC_Variant* LastMethodInputValues;
+    int32_t NoOfLastMethodOutputValues;
+    SOPC_Variant* LastMethodOutputValues;
+    SOPC_DateTime LastMethodCallTime;
+    SOPC_StatusCode LastMethodReturnStatus;
+} OpcUa_ProgramDiagnostic2DataType;
+
+void OpcUa_ProgramDiagnostic2DataType_Initialize(void* pValue);
+
+void OpcUa_ProgramDiagnostic2DataType_Clear(void* pValue);
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_Annotation
 /*============================================================================
  * The Annotation structure.
@@ -5500,8 +7049,194 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf,
  *===========================================================================*/
 typedef enum SOPC_TypeInternalIndex
 {
+#ifndef OPCUA_EXCLUDE_KeyValuePair
+    SOPC_TypeInternalIndex_KeyValuePair,
+#endif
+#ifndef OPCUA_EXCLUDE_AdditionalParametersType
+    SOPC_TypeInternalIndex_AdditionalParametersType,
+#endif
+#ifndef OPCUA_EXCLUDE_EphemeralKeyType
+    SOPC_TypeInternalIndex_EphemeralKeyType,
+#endif
+#ifndef OPCUA_EXCLUDE_EndpointType
+    SOPC_TypeInternalIndex_EndpointType,
+#endif
+#ifndef OPCUA_EXCLUDE_RationalNumber
+    SOPC_TypeInternalIndex_RationalNumber,
+#endif
+#ifndef OPCUA_EXCLUDE_ThreeDVector
+    SOPC_TypeInternalIndex_ThreeDVector,
+#endif
+#ifndef OPCUA_EXCLUDE_ThreeDCartesianCoordinates
+    SOPC_TypeInternalIndex_ThreeDCartesianCoordinates,
+#endif
+#ifndef OPCUA_EXCLUDE_ThreeDOrientation
+    SOPC_TypeInternalIndex_ThreeDOrientation,
+#endif
+#ifndef OPCUA_EXCLUDE_ThreeDFrame
+    SOPC_TypeInternalIndex_ThreeDFrame,
+#endif
+#ifndef OPCUA_EXCLUDE_IdentityMappingRuleType
+    SOPC_TypeInternalIndex_IdentityMappingRuleType,
+#endif
+#ifndef OPCUA_EXCLUDE_CurrencyUnitType
+    SOPC_TypeInternalIndex_CurrencyUnitType,
+#endif
+#ifndef OPCUA_EXCLUDE_TrustListDataType
+    SOPC_TypeInternalIndex_TrustListDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DecimalDataType
+    SOPC_TypeInternalIndex_DecimalDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_StructureField
+    SOPC_TypeInternalIndex_StructureField,
+#endif
+#ifndef OPCUA_EXCLUDE_StructureDefinition
+    SOPC_TypeInternalIndex_StructureDefinition,
+#endif
+#ifndef OPCUA_EXCLUDE_StructureDescription
+    SOPC_TypeInternalIndex_StructureDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_EnumField
+    SOPC_TypeInternalIndex_EnumField,
+#endif
+#ifndef OPCUA_EXCLUDE_EnumDefinition
+    SOPC_TypeInternalIndex_EnumDefinition,
+#endif
+#ifndef OPCUA_EXCLUDE_EnumDescription
+    SOPC_TypeInternalIndex_EnumDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_SimpleTypeDescription
+    SOPC_TypeInternalIndex_SimpleTypeDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_DataTypeSchemaHeader
+    SOPC_TypeInternalIndex_DataTypeSchemaHeader,
+#endif
+#ifndef OPCUA_EXCLUDE_DataTypeDescription
+    SOPC_TypeInternalIndex_DataTypeDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_UABinaryFileDataType
+    SOPC_TypeInternalIndex_UABinaryFileDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_FieldMetaData
+    SOPC_TypeInternalIndex_FieldMetaData,
+#endif
+#ifndef OPCUA_EXCLUDE_ConfigurationVersionDataType
+    SOPC_TypeInternalIndex_ConfigurationVersionDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DataSetMetaDataType
+    SOPC_TypeInternalIndex_DataSetMetaDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_PublishedDataSetDataType
+    SOPC_TypeInternalIndex_PublishedDataSetDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_PublishedVariableDataType
+    SOPC_TypeInternalIndex_PublishedVariableDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_PublishedDataItemsDataType
+    SOPC_TypeInternalIndex_PublishedDataItemsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
+    SOPC_TypeInternalIndex_SimpleAttributeOperand,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilterElement
+    SOPC_TypeInternalIndex_ContentFilterElement,
+#endif
+#ifndef OPCUA_EXCLUDE_ContentFilter
+    SOPC_TypeInternalIndex_ContentFilter,
+#endif
+#ifndef OPCUA_EXCLUDE_PublishedEventsDataType
+    SOPC_TypeInternalIndex_PublishedEventsDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DataSetWriterDataType
+    SOPC_TypeInternalIndex_DataSetWriterDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ApplicationDescription
+    SOPC_TypeInternalIndex_ApplicationDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_UserTokenPolicy
+    SOPC_TypeInternalIndex_UserTokenPolicy,
+#endif
+#ifndef OPCUA_EXCLUDE_EndpointDescription
+    SOPC_TypeInternalIndex_EndpointDescription,
+#endif
+#ifndef OPCUA_EXCLUDE_PubSubGroupDataType
+    SOPC_TypeInternalIndex_PubSubGroupDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_WriterGroupDataType
+    SOPC_TypeInternalIndex_WriterGroupDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DataSetReaderDataType
+    SOPC_TypeInternalIndex_DataSetReaderDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ReaderGroupDataType
+    SOPC_TypeInternalIndex_ReaderGroupDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_PubSubConnectionDataType
+    SOPC_TypeInternalIndex_PubSubConnectionDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_NetworkAddressDataType
+    SOPC_TypeInternalIndex_NetworkAddressDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_NetworkAddressUrlDataType
+    SOPC_TypeInternalIndex_NetworkAddressUrlDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_FieldTargetDataType
+    SOPC_TypeInternalIndex_FieldTargetDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_TargetVariablesDataType
+    SOPC_TypeInternalIndex_TargetVariablesDataType,
+#endif
 #ifndef OPCUA_EXCLUDE_RolePermissionType
     SOPC_TypeInternalIndex_RolePermissionType,
+#endif
+#ifndef OPCUA_EXCLUDE_SubscribedDataSetMirrorDataType
+    SOPC_TypeInternalIndex_SubscribedDataSetMirrorDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_PubSubConfigurationDataType
+    SOPC_TypeInternalIndex_PubSubConfigurationDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_UadpWriterGroupMessageDataType
+    SOPC_TypeInternalIndex_UadpWriterGroupMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_UadpDataSetWriterMessageDataType
+    SOPC_TypeInternalIndex_UadpDataSetWriterMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_UadpDataSetReaderMessageDataType
+    SOPC_TypeInternalIndex_UadpDataSetReaderMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_JsonWriterGroupMessageDataType
+    SOPC_TypeInternalIndex_JsonWriterGroupMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_JsonDataSetWriterMessageDataType
+    SOPC_TypeInternalIndex_JsonDataSetWriterMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_JsonDataSetReaderMessageDataType
+    SOPC_TypeInternalIndex_JsonDataSetReaderMessageDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DatagramConnectionTransportDataType
+    SOPC_TypeInternalIndex_DatagramConnectionTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_DatagramWriterGroupTransportDataType
+    SOPC_TypeInternalIndex_DatagramWriterGroupTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_BrokerConnectionTransportDataType
+    SOPC_TypeInternalIndex_BrokerConnectionTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_BrokerWriterGroupTransportDataType
+    SOPC_TypeInternalIndex_BrokerWriterGroupTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_BrokerDataSetWriterTransportDataType
+    SOPC_TypeInternalIndex_BrokerDataSetWriterTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_BrokerDataSetReaderTransportDataType
+    SOPC_TypeInternalIndex_BrokerDataSetReaderTransportDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_AliasNameDataType
+    SOPC_TypeInternalIndex_AliasNameDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_UnsignedRationalNumber
+    SOPC_TypeInternalIndex_UnsignedRationalNumber,
 #endif
 #ifndef OPCUA_EXCLUDE_ReferenceNode
     SOPC_TypeInternalIndex_ReferenceNode,
@@ -5545,17 +7280,11 @@ typedef enum SOPC_TypeInternalIndex
 #ifndef OPCUA_EXCLUDE_EnumValueType
     SOPC_TypeInternalIndex_EnumValueType,
 #endif
-#ifndef OPCUA_EXCLUDE_EnumField
-    SOPC_TypeInternalIndex_EnumField,
-#endif
 #ifndef OPCUA_EXCLUDE_OptionSet
     SOPC_TypeInternalIndex_OptionSet,
 #endif
 #ifndef OPCUA_EXCLUDE_TimeZoneDataType
     SOPC_TypeInternalIndex_TimeZoneDataType,
-#endif
-#ifndef OPCUA_EXCLUDE_ApplicationDescription
-    SOPC_TypeInternalIndex_ApplicationDescription,
 #endif
 #ifndef OPCUA_EXCLUDE_RequestHeader
     SOPC_TypeInternalIndex_RequestHeader,
@@ -5565,6 +7294,12 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_ServiceFault
     SOPC_TypeInternalIndex_ServiceFault,
+#endif
+#ifndef OPCUA_EXCLUDE_SessionlessInvokeRequestType
+    SOPC_TypeInternalIndex_SessionlessInvokeRequestType,
+#endif
+#ifndef OPCUA_EXCLUDE_SessionlessInvokeResponseType
+    SOPC_TypeInternalIndex_SessionlessInvokeResponseType,
 #endif
 #ifndef OPCUA_EXCLUDE_FindServers
 #ifndef OPCUA_EXCLUDE_FindServersRequest
@@ -5584,12 +7319,6 @@ typedef enum SOPC_TypeInternalIndex
 #ifndef OPCUA_EXCLUDE_FindServersOnNetworkResponse
     SOPC_TypeInternalIndex_FindServersOnNetworkResponse,
 #endif
-#endif
-#ifndef OPCUA_EXCLUDE_UserTokenPolicy
-    SOPC_TypeInternalIndex_UserTokenPolicy,
-#endif
-#ifndef OPCUA_EXCLUDE_EndpointDescription
-    SOPC_TypeInternalIndex_EndpointDescription,
 #endif
 #ifndef OPCUA_EXCLUDE_GetEndpoints
 #ifndef OPCUA_EXCLUDE_GetEndpointsRequest
@@ -5720,6 +7449,12 @@ typedef enum SOPC_TypeInternalIndex
 #ifndef OPCUA_EXCLUDE_ViewAttributes
     SOPC_TypeInternalIndex_ViewAttributes,
 #endif
+#ifndef OPCUA_EXCLUDE_GenericAttributeValue
+    SOPC_TypeInternalIndex_GenericAttributeValue,
+#endif
+#ifndef OPCUA_EXCLUDE_GenericAttributes
+    SOPC_TypeInternalIndex_GenericAttributes,
+#endif
 #ifndef OPCUA_EXCLUDE_AddNodesItem
     SOPC_TypeInternalIndex_AddNodesItem,
 #endif
@@ -5849,12 +7584,6 @@ typedef enum SOPC_TypeInternalIndex
 #ifndef OPCUA_EXCLUDE_NodeReference
     SOPC_TypeInternalIndex_NodeReference,
 #endif
-#ifndef OPCUA_EXCLUDE_ContentFilterElement
-    SOPC_TypeInternalIndex_ContentFilterElement,
-#endif
-#ifndef OPCUA_EXCLUDE_ContentFilter
-    SOPC_TypeInternalIndex_ContentFilter,
-#endif
 #ifndef OPCUA_EXCLUDE_ElementOperand
     SOPC_TypeInternalIndex_ElementOperand,
 #endif
@@ -5863,9 +7592,6 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_AttributeOperand
     SOPC_TypeInternalIndex_AttributeOperand,
-#endif
-#ifndef OPCUA_EXCLUDE_SimpleAttributeOperand
-    SOPC_TypeInternalIndex_SimpleAttributeOperand,
 #endif
 #ifndef OPCUA_EXCLUDE_ContentFilterElementResult
     SOPC_TypeInternalIndex_ContentFilterElementResult,
@@ -5926,6 +7652,9 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_ReadAtTimeDetails
     SOPC_TypeInternalIndex_ReadAtTimeDetails,
+#endif
+#ifndef OPCUA_EXCLUDE_ReadAnnotationDataDetails
+    SOPC_TypeInternalIndex_ReadAnnotationDataDetails,
 #endif
 #ifndef OPCUA_EXCLUDE_HistoryData
     SOPC_TypeInternalIndex_HistoryData,
@@ -6216,6 +7945,9 @@ typedef enum SOPC_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_ProgramDiagnosticDataType
     SOPC_TypeInternalIndex_ProgramDiagnosticDataType,
+#endif
+#ifndef OPCUA_EXCLUDE_ProgramDiagnostic2DataType
+    SOPC_TypeInternalIndex_ProgramDiagnostic2DataType,
 #endif
 #ifndef OPCUA_EXCLUDE_Annotation
     SOPC_TypeInternalIndex_Annotation,

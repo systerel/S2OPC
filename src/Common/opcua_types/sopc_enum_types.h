@@ -36,6 +36,411 @@
 
 #include <stdint.h>
 
+#ifndef OPCUA_EXCLUDE_NamingRuleType
+/*============================================================================
+ * The NamingRuleType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_NamingRuleType
+{
+    OpcUa_NamingRuleType_Mandatory = 1,
+    OpcUa_NamingRuleType_Optional = 2,
+    OpcUa_NamingRuleType_Constraint = 3,
+    OpcUa_NamingRuleType_SizeOf = INT32_MAX
+} OpcUa_NamingRuleType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_OpenFileMode
+/*============================================================================
+ * The OpenFileMode enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_OpenFileMode
+{
+    OpcUa_OpenFileMode_Read = 1,
+    OpcUa_OpenFileMode_Write = 2,
+    OpcUa_OpenFileMode_EraseExisting = 4,
+    OpcUa_OpenFileMode_Append = 8,
+    OpcUa_OpenFileMode_SizeOf = INT32_MAX
+} OpcUa_OpenFileMode;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_IdentityCriteriaType
+/*============================================================================
+ * The IdentityCriteriaType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_IdentityCriteriaType
+{
+    OpcUa_IdentityCriteriaType_UserName = 1,
+    OpcUa_IdentityCriteriaType_Thumbprint = 2,
+    OpcUa_IdentityCriteriaType_Role = 3,
+    OpcUa_IdentityCriteriaType_GroupId = 4,
+    OpcUa_IdentityCriteriaType_Anonymous = 5,
+    OpcUa_IdentityCriteriaType_AuthenticatedUser = 6,
+    OpcUa_IdentityCriteriaType_Application = 7,
+    OpcUa_IdentityCriteriaType_SizeOf = INT32_MAX
+} OpcUa_IdentityCriteriaType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TrustListMasks
+/*============================================================================
+ * The TrustListMasks enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_TrustListMasks
+{
+    OpcUa_TrustListMasks_None = 0,
+    OpcUa_TrustListMasks_TrustedCertificates = 1,
+    OpcUa_TrustListMasks_TrustedCrls = 2,
+    OpcUa_TrustListMasks_IssuerCertificates = 4,
+    OpcUa_TrustListMasks_IssuerCrls = 8,
+    OpcUa_TrustListMasks_All = 15,
+    OpcUa_TrustListMasks_SizeOf = INT32_MAX
+} OpcUa_TrustListMasks;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PubSubState
+/*============================================================================
+ * The PubSubState enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_PubSubState
+{
+    OpcUa_PubSubState_Disabled = 0,
+    OpcUa_PubSubState_Paused = 1,
+    OpcUa_PubSubState_Operational = 2,
+    OpcUa_PubSubState_Error = 3,
+    OpcUa_PubSubState_PreOperational = 4,
+    OpcUa_PubSubState_SizeOf = INT32_MAX
+} OpcUa_PubSubState;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetFieldFlags
+/*============================================================================
+ * The DataSetFieldFlags enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_DataSetFieldFlags
+{
+    OpcUa_DataSetFieldFlags_None = 0,
+    OpcUa_DataSetFieldFlags_PromotedField = 1,
+    OpcUa_DataSetFieldFlags_SizeOf = INT32_MAX
+} OpcUa_DataSetFieldFlags;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetFieldContentMask
+/*============================================================================
+ * The DataSetFieldContentMask enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_DataSetFieldContentMask
+{
+    OpcUa_DataSetFieldContentMask_None = 0,
+    OpcUa_DataSetFieldContentMask_StatusCode = 1,
+    OpcUa_DataSetFieldContentMask_SourceTimestamp = 2,
+    OpcUa_DataSetFieldContentMask_ServerTimestamp = 4,
+    OpcUa_DataSetFieldContentMask_SourcePicoSeconds = 8,
+    OpcUa_DataSetFieldContentMask_ServerPicoSeconds = 16,
+    OpcUa_DataSetFieldContentMask_RawData = 32,
+    OpcUa_DataSetFieldContentMask_SizeOf = INT32_MAX
+} OpcUa_DataSetFieldContentMask;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_OverrideValueHandling
+/*============================================================================
+ * The OverrideValueHandling enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_OverrideValueHandling
+{
+    OpcUa_OverrideValueHandling_Disabled = 0,
+    OpcUa_OverrideValueHandling_LastUsableValue = 1,
+    OpcUa_OverrideValueHandling_OverrideValue = 2,
+    OpcUa_OverrideValueHandling_SizeOf = INT32_MAX
+} OpcUa_OverrideValueHandling;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DataSetOrderingType
+/*============================================================================
+ * The DataSetOrderingType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_DataSetOrderingType
+{
+    OpcUa_DataSetOrderingType_Undefined = 0,
+    OpcUa_DataSetOrderingType_AscendingWriterId = 1,
+    OpcUa_DataSetOrderingType_AscendingWriterIdSingle = 2,
+    OpcUa_DataSetOrderingType_SizeOf = INT32_MAX
+} OpcUa_DataSetOrderingType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UadpNetworkMessageContentMask
+/*============================================================================
+ * The UadpNetworkMessageContentMask enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_UadpNetworkMessageContentMask
+{
+    OpcUa_UadpNetworkMessageContentMask_None = 0,
+    OpcUa_UadpNetworkMessageContentMask_PublisherId = 1,
+    OpcUa_UadpNetworkMessageContentMask_GroupHeader = 2,
+    OpcUa_UadpNetworkMessageContentMask_WriterGroupId = 4,
+    OpcUa_UadpNetworkMessageContentMask_GroupVersion = 8,
+    OpcUa_UadpNetworkMessageContentMask_NetworkMessageNumber = 16,
+    OpcUa_UadpNetworkMessageContentMask_SequenceNumber = 32,
+    OpcUa_UadpNetworkMessageContentMask_PayloadHeader = 64,
+    OpcUa_UadpNetworkMessageContentMask_Timestamp = 128,
+    OpcUa_UadpNetworkMessageContentMask_PicoSeconds = 256,
+    OpcUa_UadpNetworkMessageContentMask_DataSetClassId = 512,
+    OpcUa_UadpNetworkMessageContentMask_PromotedFields = 1024,
+    OpcUa_UadpNetworkMessageContentMask_SizeOf = INT32_MAX
+} OpcUa_UadpNetworkMessageContentMask;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_UadpDataSetMessageContentMask
+/*============================================================================
+ * The UadpDataSetMessageContentMask enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_UadpDataSetMessageContentMask
+{
+    OpcUa_UadpDataSetMessageContentMask_None = 0,
+    OpcUa_UadpDataSetMessageContentMask_Timestamp = 1,
+    OpcUa_UadpDataSetMessageContentMask_PicoSeconds = 2,
+    OpcUa_UadpDataSetMessageContentMask_Status = 4,
+    OpcUa_UadpDataSetMessageContentMask_MajorVersion = 8,
+    OpcUa_UadpDataSetMessageContentMask_MinorVersion = 16,
+    OpcUa_UadpDataSetMessageContentMask_SequenceNumber = 32,
+    OpcUa_UadpDataSetMessageContentMask_SizeOf = INT32_MAX
+} OpcUa_UadpDataSetMessageContentMask;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_JsonNetworkMessageContentMask
+/*============================================================================
+ * The JsonNetworkMessageContentMask enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_JsonNetworkMessageContentMask
+{
+    OpcUa_JsonNetworkMessageContentMask_None = 0,
+    OpcUa_JsonNetworkMessageContentMask_NetworkMessageHeader = 1,
+    OpcUa_JsonNetworkMessageContentMask_DataSetMessageHeader = 2,
+    OpcUa_JsonNetworkMessageContentMask_SingleDataSetMessage = 4,
+    OpcUa_JsonNetworkMessageContentMask_PublisherId = 8,
+    OpcUa_JsonNetworkMessageContentMask_DataSetClassId = 16,
+    OpcUa_JsonNetworkMessageContentMask_ReplyTo = 32,
+    OpcUa_JsonNetworkMessageContentMask_SizeOf = INT32_MAX
+} OpcUa_JsonNetworkMessageContentMask;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_JsonDataSetMessageContentMask
+/*============================================================================
+ * The JsonDataSetMessageContentMask enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_JsonDataSetMessageContentMask
+{
+    OpcUa_JsonDataSetMessageContentMask_None = 0,
+    OpcUa_JsonDataSetMessageContentMask_DataSetWriterId = 1,
+    OpcUa_JsonDataSetMessageContentMask_MetaDataVersion = 2,
+    OpcUa_JsonDataSetMessageContentMask_SequenceNumber = 4,
+    OpcUa_JsonDataSetMessageContentMask_Timestamp = 8,
+    OpcUa_JsonDataSetMessageContentMask_Status = 16,
+    OpcUa_JsonDataSetMessageContentMask_MessageType = 32,
+    OpcUa_JsonDataSetMessageContentMask_SizeOf = INT32_MAX
+} OpcUa_JsonDataSetMessageContentMask;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_BrokerTransportQualityOfService
+/*============================================================================
+ * The BrokerTransportQualityOfService enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_BrokerTransportQualityOfService
+{
+    OpcUa_BrokerTransportQualityOfService_NotSpecified = 0,
+    OpcUa_BrokerTransportQualityOfService_BestEffort = 1,
+    OpcUa_BrokerTransportQualityOfService_AtLeastOnce = 2,
+    OpcUa_BrokerTransportQualityOfService_AtMostOnce = 3,
+    OpcUa_BrokerTransportQualityOfService_ExactlyOnce = 4,
+    OpcUa_BrokerTransportQualityOfService_SizeOf = INT32_MAX
+} OpcUa_BrokerTransportQualityOfService;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_DiagnosticsLevel
+/*============================================================================
+ * The DiagnosticsLevel enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_DiagnosticsLevel
+{
+    OpcUa_DiagnosticsLevel_Basic = 0,
+    OpcUa_DiagnosticsLevel_Advanced = 1,
+    OpcUa_DiagnosticsLevel_Info = 2,
+    OpcUa_DiagnosticsLevel_Log = 3,
+    OpcUa_DiagnosticsLevel_Debug = 4,
+    OpcUa_DiagnosticsLevel_SizeOf = INT32_MAX
+} OpcUa_DiagnosticsLevel;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_PubSubDiagnosticsCounterClassification
+/*============================================================================
+ * The PubSubDiagnosticsCounterClassification enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_PubSubDiagnosticsCounterClassification
+{
+    OpcUa_PubSubDiagnosticsCounterClassification_Information = 0,
+    OpcUa_PubSubDiagnosticsCounterClassification_Error = 1,
+    OpcUa_PubSubDiagnosticsCounterClassification_SizeOf = INT32_MAX
+} OpcUa_PubSubDiagnosticsCounterClassification;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_Duplex
+/*============================================================================
+ * The Duplex enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_Duplex
+{
+    OpcUa_Duplex_Full = 0,
+    OpcUa_Duplex_Half = 1,
+    OpcUa_Duplex_Unknown = 2,
+    OpcUa_Duplex_SizeOf = INT32_MAX
+} OpcUa_Duplex;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_InterfaceAdminStatus
+/*============================================================================
+ * The InterfaceAdminStatus enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_InterfaceAdminStatus
+{
+    OpcUa_InterfaceAdminStatus_Up = 0,
+    OpcUa_InterfaceAdminStatus_Down = 1,
+    OpcUa_InterfaceAdminStatus_Testing = 2,
+    OpcUa_InterfaceAdminStatus_SizeOf = INT32_MAX
+} OpcUa_InterfaceAdminStatus;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_InterfaceOperStatus
+/*============================================================================
+ * The InterfaceOperStatus enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_InterfaceOperStatus
+{
+    OpcUa_InterfaceOperStatus_Up = 0,
+    OpcUa_InterfaceOperStatus_Down = 1,
+    OpcUa_InterfaceOperStatus_Testing = 2,
+    OpcUa_InterfaceOperStatus_Unknown = 3,
+    OpcUa_InterfaceOperStatus_Dormant = 4,
+    OpcUa_InterfaceOperStatus_NotPresent = 5,
+    OpcUa_InterfaceOperStatus_LowerLayerDown = 6,
+    OpcUa_InterfaceOperStatus_SizeOf = INT32_MAX
+} OpcUa_InterfaceOperStatus;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_NegotiationStatus
+/*============================================================================
+ * The NegotiationStatus enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_NegotiationStatus
+{
+    OpcUa_NegotiationStatus_InProgress = 0,
+    OpcUa_NegotiationStatus_Complete = 1,
+    OpcUa_NegotiationStatus_Failed = 2,
+    OpcUa_NegotiationStatus_Unknown = 3,
+    OpcUa_NegotiationStatus_NoNegotiation = 4,
+    OpcUa_NegotiationStatus_SizeOf = INT32_MAX
+} OpcUa_NegotiationStatus;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TsnFailureCode
+/*============================================================================
+ * The TsnFailureCode enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_TsnFailureCode
+{
+    OpcUa_TsnFailureCode_NoFailure = 0,
+    OpcUa_TsnFailureCode_InsufficientBandwidth = 1,
+    OpcUa_TsnFailureCode_InsufficientResources = 2,
+    OpcUa_TsnFailureCode_InsufficientTrafficClassBandwidth = 3,
+    OpcUa_TsnFailureCode_StreamIdInUse = 4,
+    OpcUa_TsnFailureCode_StreamDestinationAddressInUse = 5,
+    OpcUa_TsnFailureCode_StreamPreemptedByHigherRank = 6,
+    OpcUa_TsnFailureCode_LatencyHasChanged = 7,
+    OpcUa_TsnFailureCode_EgressPortNotAvbCapable = 8,
+    OpcUa_TsnFailureCode_UseDifferentDestinationAddress = 9,
+    OpcUa_TsnFailureCode_OutOfMsrpResources = 10,
+    OpcUa_TsnFailureCode_OutOfMmrpResources = 11,
+    OpcUa_TsnFailureCode_CannotStoreDestinationAddress = 12,
+    OpcUa_TsnFailureCode_PriorityIsNotAnSrcClass = 13,
+    OpcUa_TsnFailureCode_MaxFrameSizeTooLarge = 14,
+    OpcUa_TsnFailureCode_MaxFanInPortsLimitReached = 15,
+    OpcUa_TsnFailureCode_FirstValueChangedForStreamId = 16,
+    OpcUa_TsnFailureCode_VlanBlockedOnEgress = 17,
+    OpcUa_TsnFailureCode_VlanTaggingDisabledOnEgress = 18,
+    OpcUa_TsnFailureCode_SrClassPriorityMismatch = 19,
+    OpcUa_TsnFailureCode_FeatureNotPropagated = 20,
+    OpcUa_TsnFailureCode_MaxLatencyExceeded = 21,
+    OpcUa_TsnFailureCode_BridgeDoesNotProvideNetworkId = 22,
+    OpcUa_TsnFailureCode_StreamTransformNotSupported = 23,
+    OpcUa_TsnFailureCode_StreamIdTypeNotSupported = 24,
+    OpcUa_TsnFailureCode_FeatureNotSupported = 25,
+    OpcUa_TsnFailureCode_SizeOf = INT32_MAX
+} OpcUa_TsnFailureCode;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TsnStreamState
+/*============================================================================
+ * The TsnStreamState enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_TsnStreamState
+{
+    OpcUa_TsnStreamState_Disabled = 0,
+    OpcUa_TsnStreamState_Configuring = 1,
+    OpcUa_TsnStreamState_Ready = 2,
+    OpcUa_TsnStreamState_Operational = 3,
+    OpcUa_TsnStreamState_Error = 4,
+    OpcUa_TsnStreamState_SizeOf = INT32_MAX
+} OpcUa_TsnStreamState;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TsnTalkerStatus
+/*============================================================================
+ * The TsnTalkerStatus enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_TsnTalkerStatus
+{
+    OpcUa_TsnTalkerStatus_None = 0,
+    OpcUa_TsnTalkerStatus_Ready = 1,
+    OpcUa_TsnTalkerStatus_Failed = 2,
+    OpcUa_TsnTalkerStatus_SizeOf = INT32_MAX
+} OpcUa_TsnTalkerStatus;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_TsnListenerStatus
+/*============================================================================
+ * The TsnListenerStatus enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_TsnListenerStatus
+{
+    OpcUa_TsnListenerStatus_None = 0,
+    OpcUa_TsnListenerStatus_Ready = 1,
+    OpcUa_TsnListenerStatus_PartialFailed = 2,
+    OpcUa_TsnListenerStatus_Failed = 3,
+    OpcUa_TsnListenerStatus_SizeOf = INT32_MAX
+} OpcUa_TsnListenerStatus;
+
+#endif
+
 #ifndef OPCUA_EXCLUDE_IdType
 /*============================================================================
  * The IdType enumeration.
@@ -97,6 +502,95 @@ typedef enum _OpcUa_PermissionType
     OpcUa_PermissionType_AddNode = 65536,
     OpcUa_PermissionType_SizeOf = INT32_MAX
 } OpcUa_PermissionType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_AccessLevelType
+/*============================================================================
+ * The AccessLevelType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_AccessLevelType
+{
+    OpcUa_AccessLevelType_None = 0,
+    OpcUa_AccessLevelType_CurrentRead = 1,
+    OpcUa_AccessLevelType_CurrentWrite = 2,
+    OpcUa_AccessLevelType_HistoryRead = 4,
+    OpcUa_AccessLevelType_HistoryWrite = 8,
+    OpcUa_AccessLevelType_SemanticChange = 16,
+    OpcUa_AccessLevelType_StatusWrite = 32,
+    OpcUa_AccessLevelType_TimestampWrite = 64,
+    OpcUa_AccessLevelType_SizeOf = INT32_MAX
+} OpcUa_AccessLevelType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_AccessLevelExType
+/*============================================================================
+ * The AccessLevelExType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_AccessLevelExType
+{
+    OpcUa_AccessLevelExType_None = 0,
+    OpcUa_AccessLevelExType_CurrentRead = 1,
+    OpcUa_AccessLevelExType_CurrentWrite = 2,
+    OpcUa_AccessLevelExType_HistoryRead = 4,
+    OpcUa_AccessLevelExType_HistoryWrite = 8,
+    OpcUa_AccessLevelExType_SemanticChange = 16,
+    OpcUa_AccessLevelExType_StatusWrite = 32,
+    OpcUa_AccessLevelExType_TimestampWrite = 64,
+    OpcUa_AccessLevelExType_NonatomicRead = 256,
+    OpcUa_AccessLevelExType_NonatomicWrite = 512,
+    OpcUa_AccessLevelExType_WriteFullArrayOnly = 1024,
+    OpcUa_AccessLevelExType_NoSubDataTypes = 2048,
+    OpcUa_AccessLevelExType_SizeOf = INT32_MAX
+} OpcUa_AccessLevelExType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_EventNotifierType
+/*============================================================================
+ * The EventNotifierType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_EventNotifierType
+{
+    OpcUa_EventNotifierType_None = 0,
+    OpcUa_EventNotifierType_SubscribeToEvents = 1,
+    OpcUa_EventNotifierType_HistoryRead = 4,
+    OpcUa_EventNotifierType_HistoryWrite = 8,
+    OpcUa_EventNotifierType_SizeOf = INT32_MAX
+} OpcUa_EventNotifierType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_AccessRestrictionType
+/*============================================================================
+ * The AccessRestrictionType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_AccessRestrictionType
+{
+    OpcUa_AccessRestrictionType_None = 0,
+    OpcUa_AccessRestrictionType_SigningRequired = 1,
+    OpcUa_AccessRestrictionType_EncryptionRequired = 2,
+    OpcUa_AccessRestrictionType_SessionRequired = 4,
+    OpcUa_AccessRestrictionType_ApplyRestrictionsToBrowse = 8,
+    OpcUa_AccessRestrictionType_SizeOf = INT32_MAX
+} OpcUa_AccessRestrictionType;
+
+#endif
+
+#ifndef OPCUA_EXCLUDE_StructureType
+/*============================================================================
+ * The StructureType enumeration.
+ *===========================================================================*/
+typedef enum _OpcUa_StructureType
+{
+    OpcUa_StructureType_Structure = 0,
+    OpcUa_StructureType_StructureWithOptionalFields = 1,
+    OpcUa_StructureType_Union = 2,
+    OpcUa_StructureType_StructureWithSubtypedValues = 3,
+    OpcUa_StructureType_UnionWithSubtypedValues = 4,
+    OpcUa_StructureType_SizeOf = INT32_MAX
+} OpcUa_StructureType;
 
 #endif
 
