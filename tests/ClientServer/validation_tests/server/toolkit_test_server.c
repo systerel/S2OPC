@@ -376,7 +376,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     {
         status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", "en-US",
-                                                                   OpcUa_ApplicationType_Server);
+                                                                   OpcUa_ApplicationType_DiscoveryServer);
     }
     if (SOPC_STATUS_OK == status)
     {

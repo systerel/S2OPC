@@ -234,7 +234,7 @@ int main(int argc, char* argv[])
     {
         status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", NULL,
-                                                                   OpcUa_ApplicationType_Server);
+                                                                   OpcUa_ApplicationType_DiscoveryServer);
 
         if (SOPC_STATUS_OK != status)
         {
