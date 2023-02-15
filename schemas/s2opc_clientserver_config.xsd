@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:element name="S2OPC" type="S2OPCType"/>
+  <xs:simpleType name="ApplicationTypeEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Server"/>
+      <xs:enumeration value="ClientAndServer"/>
+      <xs:enumeration value="DiscoveryServer"/>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:simpleType name="SecurityURI">
     <xs:restriction base="xs:anyURI">
       <xs:enumeration value="http://opcfoundation.org/UA/SecurityPolicy#None"/>
@@ -141,11 +148,19 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="ApplicationTypeType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute type="ApplicationTypeEnum" name="type" default="Server" />
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:complexType name="ApplicationDescriptionType">
     <xs:sequence>
       <xs:element type="ApplicationURIType" name="ApplicationURI" />
       <xs:element type="ProductURIType" name="ProductURI" />
       <xs:element type="ApplicationNameType" name="ApplicationName" maxOccurs="unbounded"/>
+      <xs:element type="ApplicationTypeType" name="ApplicationType" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="SecurityModeType">

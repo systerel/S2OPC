@@ -48,6 +48,7 @@ typedef enum
     PARSE_APPLICATION_URI,     // ......Application URI
     PARSE_PRODUCT_URI,         // ......Product URI
     PARSE_APPLICATION_NAME,    // ......Application Name
+    PARSE_APPLICATION_TYPE,    // ......Application Type
     PARSE_APPLICATION_CERT,    // ....In application certificate
     PARSE_SERVER_CERT,         // ......Server certificate
     PARSE_SERVER_KEY,          // ......Server key
@@ -314,6 +315,12 @@ static bool end_app_desc(struct parse_context_t* ctx)
         return false;
     }
 
+    if (OpcUa_ApplicationType_SizeOf == ctx->appDesc.ApplicationType)
+    {
+        // Set default value "Server"
+        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_Server;
+    }
+
     return true;
 }
 
@@ -369,6 +376,47 @@ static bool start_prod_uri(struct parse_context_t* ctx, const XML_Char** attrs)
     }
 
     ctx->state = PARSE_PRODUCT_URI;
+
+    return true;
+}
+
+static bool parse_app_type_text(struct parse_context_t* ctx, const char* text)
+{
+    if (strcmp(text, "Server") == 0)
+    {
+        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_Server;
+    }
+    else if (strcmp(text, "ClientAndServer") == 0)
+    {
+        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_ClientAndServer;
+    }
+    else if (strcmp(text, "DiscoveryServer") == 0)
+    {
+        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_DiscoveryServer;
+    }
+    else
+    {
+        return false;
+    }
+    return true;
+}
+
+static bool start_app_type(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    if (ctx->appDesc.ApplicationType != OpcUa_ApplicationType_SizeOf)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationType defined several times");
+        return false;
+    }
+
+    const char* attr_val = get_attr(ctx, "type", attrs);
+
+    if (!parse_app_type_text(ctx, attr_val))
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid application type: %s", attr_val);
+        return false;
+    }
+    ctx->state = PARSE_APPLICATION_TYPE;
 
     return true;
 }
@@ -1123,6 +1171,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
                 return;
             }
         }
+        else if (strcmp(name, "ApplicationType") == 0)
+        {
+            if (!start_app_type(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
         else
         {
             LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
@@ -1441,6 +1497,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_APPLICATION_URI:
         ctx->state = PARSE_APPLICATION_DESC;
         break;
+    case PARSE_APPLICATION_TYPE:
+        ctx->state = PARSE_APPLICATION_DESC;
+        break;
     case PARSE_APPLICATION_DESC:
         if (!end_app_desc(ctx))
         {
@@ -1553,6 +1612,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
     OpcUa_ApplicationDescription_Initialize(&ctx.appDesc);
+    ctx.appDesc.ApplicationType = OpcUa_ApplicationType_SizeOf;
 
     XML_SetElementHandler(parser, start_element_handler, end_element_handler);
 
