@@ -68,6 +68,7 @@ PROMOTES
     is_IndexRangeDefined,
 
     treat_write_request,
-    treat_add_nodes_request
+    treat_add_nodes_request,
+    treat_method_call_request
 
 END

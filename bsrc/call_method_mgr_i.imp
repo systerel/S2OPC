@@ -23,7 +23,6 @@ REFINES
     call_method_mgr
 
 SEES
-    address_space_itf,
     constants,
     constants_statuscodes_bs,
     channel_mgr,
@@ -36,12 +35,49 @@ DEFINITIONS
     "definitions.def"
 
 IMPORTS
+    service_write,
+
     call_method_bs,
     call_method_it,
     call_method_result_it,
     msg_call_method_bs,
     argument_pointer_bs
+    
+PROMOTES
+    is_mandatory_attribute,
+    is_AddressSpace_constant,
+    read_Node_Attribute,
+    readall_AddressSpace_Node,
+    get_NodeClass,
+    get_BrowseName,
+    get_DisplayName,
+    is_transitive_subtype,
+    is_valid_ReferenceTypeId,
+    is_NodeId_equal,
+    get_TypeDefinition,
+    get_Reference_ReferenceType,
+    get_Reference_TargetNode,
+    get_Reference_IsForward,
+    get_Node_RefIndexEnd,
+    get_RefIndex_Reference,
+    get_Value_StatusCode,
+    read_AddressSpace_clear_value,
+    read_AddressSpace_free_variant,
+    is_local_service_treatment,
+    set_local_service_treatment,
+    get_user_authorization ,
+    get_Executable,
+    get_InputArguments,
+    get_conv_Variant_ValueRank,
+    get_conv_Variant_Type,
+    read_variable_compat_type,
+    check_object_has_method,
+    check_nodeId_isValid,
+    is_IndexRangeDefined,
 
+    addNode_AddressSpace,
+    treat_write_request
+    
 LOCAL_OPERATIONS
 
     StatusCode <-- treat_one_method_call (p_session, p_req_msg, p_res_msg, p_callMethod, p_endpoint_config_idx) =

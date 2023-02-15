@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 25/08/2022 12:09:49
+ Date                 : 16/02/2023 08:33:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -88,6 +88,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__read_variable_compat_type service_add_nodes_1__read_variable_compat_type
 #define service_add_nodes__readall_AddressSpace_Node service_add_nodes_1__readall_AddressSpace_Node
 #define service_add_nodes__set_local_service_treatment service_add_nodes_1__set_local_service_treatment
+#define service_add_nodes__treat_method_call_request service_add_nodes_1__treat_method_call_request
 #define service_add_nodes__treat_write_request service_add_nodes_1__treat_write_request
 
 /*--------------------------

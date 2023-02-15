@@ -41,8 +41,7 @@ IMPORTS
     subscription_mgr,
     service_set_discovery_server,
     service_register_nodes,
-    service_unregister_nodes,
-    call_method_mgr
+    service_unregister_nodes
 
 PROMOTES
     /* message_in_bs */

@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.c
 
- Date                 : 05/08/2022 09:35:35
+ Date                 : 16/02/2023 08:33:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,7 +54,7 @@ void service_add_nodes_1__check_add_nodes_item_params_parent_nid(
          &service_add_nodes_1__l_local_server_exp_node_id,
          &service_add_nodes_1__l_node_id);
       if (service_add_nodes_1__l_local_server_exp_node_id == true) {
-         service_write__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
+         call_method_mgr__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
             &service_add_nodes_1__l_node_exists,
             &service_add_nodes_1__l_node);
          if (service_add_nodes_1__l_node_exists == true) {
@@ -79,13 +79,13 @@ void service_add_nodes_1__check_add_nodes_item_params_ref_type(
       
       *service_add_nodes_1__sc_operation = service_add_nodes_1__p_sc_operation;
       if (service_add_nodes_1__p_sc_operation == constants_statuscodes_bs__e_sc_ok) {
-         service_write__is_valid_ReferenceTypeId(service_add_nodes_1__p_refTypeId,
+         call_method_mgr__is_valid_ReferenceTypeId(service_add_nodes_1__p_refTypeId,
             &service_add_nodes_1__l_bres);
          if (service_add_nodes_1__l_bres == false) {
             *service_add_nodes_1__sc_operation = constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid;
          }
          else {
-            service_write__is_transitive_subtype(service_add_nodes_1__p_refTypeId,
+            call_method_mgr__is_transitive_subtype(service_add_nodes_1__p_refTypeId,
                constants__c_HierarchicalReferences_Type_NodeId,
                &service_add_nodes_1__l_bres);
             if (service_add_nodes_1__l_bres == false) {
@@ -115,11 +115,11 @@ void service_add_nodes_1__check_add_nodes_item_params_type_def(
             &service_add_nodes_1__l_local_server_exp_node_id,
             &service_add_nodes_1__l_node_id);
          if (service_add_nodes_1__l_local_server_exp_node_id == true) {
-            service_write__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
+            call_method_mgr__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
                &service_add_nodes_1__l_node_exists,
                &service_add_nodes_1__l_node);
             if (service_add_nodes_1__l_node_exists == true) {
-               service_write__get_NodeClass(service_add_nodes_1__l_node,
+               call_method_mgr__get_NodeClass(service_add_nodes_1__l_node,
                   &service_add_nodes_1__l_node_class);
                if ((service_add_nodes_1__l_node_class == constants__e_ncl_VariableType) &&
                   (service_add_nodes_1__p_nodeClass == constants__e_ncl_Variable)) {
@@ -160,7 +160,7 @@ void service_add_nodes_1__check_add_nodes_item_params_req_node_id(
                &service_add_nodes_1__l_local_server_exp_node_id,
                &service_add_nodes_1__l_node_id);
             if (service_add_nodes_1__l_local_server_exp_node_id == true) {
-               service_write__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
+               call_method_mgr__readall_AddressSpace_Node(service_add_nodes_1__l_node_id,
                   &service_add_nodes_1__l_node_exists,
                   &service_add_nodes_1__l_node);
                if (service_add_nodes_1__l_node_exists == false) {
@@ -230,7 +230,7 @@ void service_add_nodes_1__treat_add_nodes_item(
          &service_add_nodes_1__l_sc,
          &service_add_nodes_1__l_new_nid);
       if (service_add_nodes_1__l_sc == constants_statuscodes_bs__e_sc_ok) {
-         service_write__addNode_AddressSpace(service_add_nodes_1__p_parentExpNid,
+         call_method_mgr__addNode_AddressSpace(service_add_nodes_1__p_parentExpNid,
             service_add_nodes_1__p_refTypeId,
             service_add_nodes_1__l_new_nid,
             service_add_nodes_1__p_browseName,

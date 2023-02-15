@@ -44,6 +44,7 @@ OPERATIONS
 
     d_adsp_operations;
     d_adsp_write_operation;
+    d_adsp_call_operation;
 
     sc_operation, new_nodeId
       <-- treat_add_nodes_item (p_parentExpNid, p_refTypeId, p_reqExpNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =

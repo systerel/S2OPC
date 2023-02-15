@@ -31,13 +31,14 @@ SEES
     msg_node_management_add_nodes
 
 IMPORTS
-    service_write
+    call_method_mgr
 
 /* Note: We would like to use EXTENDS instead of IMPORTS + PROMOTES,
    but it would trigger a bug in the project check. */
 
 PROMOTES
     treat_write_request,
+    treat_method_call_request,
 
     is_mandatory_attribute,
     is_AddressSpace_constant,

@@ -45,6 +45,7 @@ OPERATIONS
 
     d_adsp_operations;
     d_adsp_write_operation;
+    d_adsp_call_operation;
 
     StatusCode_service <-- treat_add_nodes_request(p_user, p_req_msg, p_resp_msg) =
     PRE

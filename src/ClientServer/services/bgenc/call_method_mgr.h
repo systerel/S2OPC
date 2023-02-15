@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 04/08/2022 14:53:04
+ Date                 : 16/02/2023 08:33:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,11 +43,11 @@
 #include "call_method_it.h"
 #include "call_method_result_it.h"
 #include "msg_call_method_bs.h"
+#include "service_write.h"
 
 /*--------------
    SEES Clause
   --------------*/
-#include "address_space_itf.h"
 #include "channel_mgr.h"
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
@@ -60,6 +60,42 @@
    INITIALISATION Clause
   ------------------------*/
 extern void call_method_mgr__INITIALISATION(void);
+
+/*-------------------------------
+   PROMOTES and EXTENDS Clauses
+  -------------------------------*/
+#define call_method_mgr__addNode_AddressSpace service_write__addNode_AddressSpace
+#define call_method_mgr__check_nodeId_isValid service_write__check_nodeId_isValid
+#define call_method_mgr__check_object_has_method service_write__check_object_has_method
+#define call_method_mgr__get_BrowseName service_write__get_BrowseName
+#define call_method_mgr__get_DisplayName service_write__get_DisplayName
+#define call_method_mgr__get_Executable service_write__get_Executable
+#define call_method_mgr__get_InputArguments service_write__get_InputArguments
+#define call_method_mgr__get_NodeClass service_write__get_NodeClass
+#define call_method_mgr__get_Node_RefIndexEnd service_write__get_Node_RefIndexEnd
+#define call_method_mgr__get_RefIndex_Reference service_write__get_RefIndex_Reference
+#define call_method_mgr__get_Reference_IsForward service_write__get_Reference_IsForward
+#define call_method_mgr__get_Reference_ReferenceType service_write__get_Reference_ReferenceType
+#define call_method_mgr__get_Reference_TargetNode service_write__get_Reference_TargetNode
+#define call_method_mgr__get_TypeDefinition service_write__get_TypeDefinition
+#define call_method_mgr__get_Value_StatusCode service_write__get_Value_StatusCode
+#define call_method_mgr__get_conv_Variant_Type service_write__get_conv_Variant_Type
+#define call_method_mgr__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
+#define call_method_mgr__get_user_authorization service_write__get_user_authorization
+#define call_method_mgr__is_AddressSpace_constant service_write__is_AddressSpace_constant
+#define call_method_mgr__is_IndexRangeDefined service_write__is_IndexRangeDefined
+#define call_method_mgr__is_NodeId_equal service_write__is_NodeId_equal
+#define call_method_mgr__is_local_service_treatment service_write__is_local_service_treatment
+#define call_method_mgr__is_mandatory_attribute service_write__is_mandatory_attribute
+#define call_method_mgr__is_transitive_subtype service_write__is_transitive_subtype
+#define call_method_mgr__is_valid_ReferenceTypeId service_write__is_valid_ReferenceTypeId
+#define call_method_mgr__read_AddressSpace_clear_value service_write__read_AddressSpace_clear_value
+#define call_method_mgr__read_AddressSpace_free_variant service_write__read_AddressSpace_free_variant
+#define call_method_mgr__read_Node_Attribute service_write__read_Node_Attribute
+#define call_method_mgr__read_variable_compat_type service_write__read_variable_compat_type
+#define call_method_mgr__readall_AddressSpace_Node service_write__readall_AddressSpace_Node
+#define call_method_mgr__set_local_service_treatment service_write__set_local_service_treatment
+#define call_method_mgr__treat_write_request service_write__treat_write_request
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 08/03/2023 15:55:35
+ Date                 : 06/03/2023 16:13:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -395,7 +395,7 @@ void service_mgr__treat_session_nano_extended_service_req(
             service_mgr__StatusCode_service);
          break;
       case constants__e_msg_method_call_req:
-         call_method_mgr__treat_method_call_request(service_mgr__session,
+         address_space_itf__treat_method_call_request(service_mgr__session,
             service_mgr__req_msg,
             service_mgr__resp_msg,
             service_mgr__StatusCode_service);

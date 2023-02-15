@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes_1.h
 
- Date                 : 05/08/2022 09:35:35
+ Date                 : 16/02/2023 08:33:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,7 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "service_write.h"
+#include "call_method_mgr.h"
 
 /*--------------
    SEES Clause
@@ -57,37 +57,38 @@ extern void service_add_nodes_1__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define service_add_nodes_1__check_nodeId_isValid service_write__check_nodeId_isValid
-#define service_add_nodes_1__check_object_has_method service_write__check_object_has_method
-#define service_add_nodes_1__get_BrowseName service_write__get_BrowseName
-#define service_add_nodes_1__get_DisplayName service_write__get_DisplayName
-#define service_add_nodes_1__get_Executable service_write__get_Executable
-#define service_add_nodes_1__get_InputArguments service_write__get_InputArguments
-#define service_add_nodes_1__get_NodeClass service_write__get_NodeClass
-#define service_add_nodes_1__get_Node_RefIndexEnd service_write__get_Node_RefIndexEnd
-#define service_add_nodes_1__get_RefIndex_Reference service_write__get_RefIndex_Reference
-#define service_add_nodes_1__get_Reference_IsForward service_write__get_Reference_IsForward
-#define service_add_nodes_1__get_Reference_ReferenceType service_write__get_Reference_ReferenceType
-#define service_add_nodes_1__get_Reference_TargetNode service_write__get_Reference_TargetNode
-#define service_add_nodes_1__get_TypeDefinition service_write__get_TypeDefinition
-#define service_add_nodes_1__get_Value_StatusCode service_write__get_Value_StatusCode
-#define service_add_nodes_1__get_conv_Variant_Type service_write__get_conv_Variant_Type
-#define service_add_nodes_1__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
-#define service_add_nodes_1__get_user_authorization service_write__get_user_authorization
-#define service_add_nodes_1__is_AddressSpace_constant service_write__is_AddressSpace_constant
-#define service_add_nodes_1__is_IndexRangeDefined service_write__is_IndexRangeDefined
-#define service_add_nodes_1__is_NodeId_equal service_write__is_NodeId_equal
-#define service_add_nodes_1__is_local_service_treatment service_write__is_local_service_treatment
-#define service_add_nodes_1__is_mandatory_attribute service_write__is_mandatory_attribute
-#define service_add_nodes_1__is_transitive_subtype service_write__is_transitive_subtype
-#define service_add_nodes_1__is_valid_ReferenceTypeId service_write__is_valid_ReferenceTypeId
-#define service_add_nodes_1__read_AddressSpace_clear_value service_write__read_AddressSpace_clear_value
-#define service_add_nodes_1__read_AddressSpace_free_variant service_write__read_AddressSpace_free_variant
-#define service_add_nodes_1__read_Node_Attribute service_write__read_Node_Attribute
-#define service_add_nodes_1__read_variable_compat_type service_write__read_variable_compat_type
-#define service_add_nodes_1__readall_AddressSpace_Node service_write__readall_AddressSpace_Node
-#define service_add_nodes_1__set_local_service_treatment service_write__set_local_service_treatment
-#define service_add_nodes_1__treat_write_request service_write__treat_write_request
+#define service_add_nodes_1__check_nodeId_isValid call_method_mgr__check_nodeId_isValid
+#define service_add_nodes_1__check_object_has_method call_method_mgr__check_object_has_method
+#define service_add_nodes_1__get_BrowseName call_method_mgr__get_BrowseName
+#define service_add_nodes_1__get_DisplayName call_method_mgr__get_DisplayName
+#define service_add_nodes_1__get_Executable call_method_mgr__get_Executable
+#define service_add_nodes_1__get_InputArguments call_method_mgr__get_InputArguments
+#define service_add_nodes_1__get_NodeClass call_method_mgr__get_NodeClass
+#define service_add_nodes_1__get_Node_RefIndexEnd call_method_mgr__get_Node_RefIndexEnd
+#define service_add_nodes_1__get_RefIndex_Reference call_method_mgr__get_RefIndex_Reference
+#define service_add_nodes_1__get_Reference_IsForward call_method_mgr__get_Reference_IsForward
+#define service_add_nodes_1__get_Reference_ReferenceType call_method_mgr__get_Reference_ReferenceType
+#define service_add_nodes_1__get_Reference_TargetNode call_method_mgr__get_Reference_TargetNode
+#define service_add_nodes_1__get_TypeDefinition call_method_mgr__get_TypeDefinition
+#define service_add_nodes_1__get_Value_StatusCode call_method_mgr__get_Value_StatusCode
+#define service_add_nodes_1__get_conv_Variant_Type call_method_mgr__get_conv_Variant_Type
+#define service_add_nodes_1__get_conv_Variant_ValueRank call_method_mgr__get_conv_Variant_ValueRank
+#define service_add_nodes_1__get_user_authorization call_method_mgr__get_user_authorization
+#define service_add_nodes_1__is_AddressSpace_constant call_method_mgr__is_AddressSpace_constant
+#define service_add_nodes_1__is_IndexRangeDefined call_method_mgr__is_IndexRangeDefined
+#define service_add_nodes_1__is_NodeId_equal call_method_mgr__is_NodeId_equal
+#define service_add_nodes_1__is_local_service_treatment call_method_mgr__is_local_service_treatment
+#define service_add_nodes_1__is_mandatory_attribute call_method_mgr__is_mandatory_attribute
+#define service_add_nodes_1__is_transitive_subtype call_method_mgr__is_transitive_subtype
+#define service_add_nodes_1__is_valid_ReferenceTypeId call_method_mgr__is_valid_ReferenceTypeId
+#define service_add_nodes_1__read_AddressSpace_clear_value call_method_mgr__read_AddressSpace_clear_value
+#define service_add_nodes_1__read_AddressSpace_free_variant call_method_mgr__read_AddressSpace_free_variant
+#define service_add_nodes_1__read_Node_Attribute call_method_mgr__read_Node_Attribute
+#define service_add_nodes_1__read_variable_compat_type call_method_mgr__read_variable_compat_type
+#define service_add_nodes_1__readall_AddressSpace_Node call_method_mgr__readall_AddressSpace_Node
+#define service_add_nodes_1__set_local_service_treatment call_method_mgr__set_local_service_treatment
+#define service_add_nodes_1__treat_method_call_request call_method_mgr__treat_method_call_request
+#define service_add_nodes_1__treat_write_request call_method_mgr__treat_write_request
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

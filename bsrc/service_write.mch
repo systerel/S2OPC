@@ -47,7 +47,6 @@ OPERATIONS
     d_adsp_operations;
     d_adsp_write_operation;
 
-
 /* Services Node Management */
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE

@@ -27,7 +27,26 @@ SEES
     message_out_bs,
     request_handle_bs
 
+DEFINITIONS
+    "address_space.def"
+
+ABSTRACT_VARIABLES
+    d_adsp_variables
+
+INVARIANT
+    d_adsp_invariant
+
+INITIALISATION
+    d_adsp_variables
+    :(
+        d_adsp_invariant
+    )
+
 OPERATIONS
+    
+    d_adsp_operations;
+    d_adsp_add_node_operation;
+    d_adsp_write_operation;
 
     StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
     PRE

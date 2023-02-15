@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 05/08/2022 09:02:51
+ Date                 : 16/02/2023 08:33:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -87,6 +87,7 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__readall_AddressSpace_Node service_add_nodes__readall_AddressSpace_Node
 #define address_space_itf__set_local_service_treatment service_add_nodes__set_local_service_treatment
 #define address_space_itf__treat_add_nodes_request service_add_nodes__treat_add_nodes_request
+#define address_space_itf__treat_method_call_request service_add_nodes__treat_method_call_request
 #define address_space_itf__treat_write_request service_add_nodes__treat_write_request
 
 #endif

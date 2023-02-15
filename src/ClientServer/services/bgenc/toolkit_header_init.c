@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 26/08/2022 11:46:33
+ Date                 : 16/02/2023 08:34:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -211,6 +211,12 @@ void INITIALISATION(void) {
    response_write_bs__INITIALISATION();
    service_write_1__INITIALISATION();
    service_write__INITIALISATION();
+   call_method_bs__INITIALISATION();
+   msg_call_method_bs__INITIALISATION();
+   call_method_it__INITIALISATION();
+   call_method_result_it__INITIALISATION();
+   argument_pointer_bs__INITIALISATION();
+   call_method_mgr__INITIALISATION();
    service_add_nodes_1__INITIALISATION();
    service_add_nodes__INITIALISATION();
    address_space_itf__INITIALISATION();
@@ -277,12 +283,6 @@ void INITIALISATION(void) {
    msg_unregister_nodes__INITIALISATION();
    unregister_nodes_it__INITIALISATION();
    service_unregister_nodes__INITIALISATION();
-   call_method_bs__INITIALISATION();
-   msg_call_method_bs__INITIALISATION();
-   call_method_it__INITIALISATION();
-   call_method_result_it__INITIALISATION();
-   argument_pointer_bs__INITIALISATION();
-   call_method_mgr__INITIALISATION();
    service_mgr__INITIALISATION();
    io_dispatch_mgr__INITIALISATION();
    toolkit_header__INITIALISATION();
