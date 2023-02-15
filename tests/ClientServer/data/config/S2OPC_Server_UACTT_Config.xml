@@ -58,6 +58,7 @@
       <ProductURI uri="urn:S2OPC:localhost"/>
       <ApplicationName text="S2OPC toolkit server example" locale="en-US"/>
       <ApplicationName text="S2OPC toolkit: exemple de serveur" locale="fr-FR"/>
+      <ApplicationType type="DiscoveryServer"/>
     </ApplicationDescription>
     <Endpoints>
       <Endpoint url="opc.tcp://localhost:4841" enableListening="true">
