@@ -29,16 +29,6 @@
 #include "sopc_user_app_itf.h"
 #include "util_b2c.h"
 
-/*
-  Index in C code equals index from B model minus 1
-*/
-
-static struct call_method_bs__ExecResult
-{
-    int32_t nb;
-    SOPC_Variant* variants;
-} call_method_bs__execResults = {0, NULL};
-
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
@@ -47,35 +37,28 @@ void call_method_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_req_msg,
-                                     const constants__t_CallMethod_i call_method_bs__p_callMethod,
-                                     const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
-                                     constants__t_RawStatusCode* const call_method_bs__rawStatusCode)
+void call_method_bs__exec_callMethod(const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
+                                     const constants__t_CallMethodPointer_i call_method_bs__p_call_method_pointer,
+                                     constants__t_RawStatusCode* const call_method_bs__p_rawStatusCode,
+                                     t_entier4* const call_method_bs__p_nb_out,
+                                     constants__t_ArgumentsPointer_i* const call_method_bs__p_out_arguments)
 {
-    /* Do not call before the memory is freed */
-    assert(0 == call_method_bs__execResults.nb && NULL == call_method_bs__execResults.variants);
-
-    /* Get the Call Method Request from the message */
-    /* Ensured by B model */
-    assert(NULL != call_method_bs__p_req_msg);
-    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) call_method_bs__p_req_msg;
-    assert(encType == &OpcUa_CallRequest_EncodeableType);
-    OpcUa_CallRequest* callRequest = (OpcUa_CallRequest*) call_method_bs__p_req_msg;
-    assert(0 < call_method_bs__p_callMethod && call_method_bs__p_callMethod <= callRequest->NoOfMethodsToCall);
-    OpcUa_CallMethodRequest* methodToCall = &callRequest->MethodsToCall[call_method_bs__p_callMethod - 1];
+    *call_method_bs__p_nb_out = 0;
+    *call_method_bs__p_out_arguments = NULL;
+    OpcUa_CallMethodRequest* methodToCall = call_method_bs__p_call_method_pointer;
     assert(NULL != methodToCall);
 
     /* Get the Method Call Manager from server configuration */
     SOPC_Endpoint_Config* endpoint_config = SOPC_ToolkitServer_GetEndpointConfig(call_method_bs__p_endpoint_config_idx);
     if (NULL == endpoint_config || NULL == endpoint_config->serverConfigPtr)
     {
-        *call_method_bs__rawStatusCode = OpcUa_BadInternalError;
+        *call_method_bs__p_rawStatusCode = OpcUa_BadInternalError;
         return;
     }
     SOPC_MethodCallManager* mcm = endpoint_config->serverConfigPtr->mcm;
     if (NULL == mcm || NULL == mcm->pFnGetMethod)
     {
-        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
+        *call_method_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
         return;
     }
 
@@ -84,7 +67,7 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
     SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
     if (NULL == method_c)
     {
-        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
+        *call_method_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
         return;
     }
 
@@ -93,11 +76,12 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
                                                                   : 0; /* convert to avoid compilator error */
     SOPC_Variant* inputArgs = methodToCall->InputArguments;
     uint32_t noOfOutput = 0;
+    SOPC_Variant* outputArgs = NULL;
     SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
-    *call_method_bs__rawStatusCode = method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput,
-                                                           &call_method_bs__execResults.variants, method_c->pParam);
+    *call_method_bs__p_rawStatusCode =
+        method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
     SOPC_CallContext_Free(cc);
-    if (0 != noOfOutput && NULL == call_method_bs__execResults.variants)
+    if (0 != noOfOutput && NULL == outputArgs)
     {
         char* mNodeId = SOPC_NodeId_ToCString(methodId);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -105,40 +89,23 @@ void call_method_bs__exec_callMethod(const constants__t_msg_i call_method_bs__p_
                                "not expected when noOfOutputs (%" PRIu32 ") > 0",
                                mNodeId, noOfOutput);
         SOPC_Free(mNodeId);
-        *call_method_bs__rawStatusCode = OpcUa_BadNotImplemented;
+        *call_method_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
         return;
     }
-    if (noOfOutput <= INT32_MAX)
+    if (noOfOutput > INT32_MAX)
     {
-        call_method_bs__execResults.nb = (int32_t) noOfOutput;
+        noOfOutput = INT32_MAX;
+        // Note: normally used for input arguments but it is the better match and should not occur
+        *call_method_bs__p_rawStatusCode = OpcUa_BadTooManyArguments;
+    }
+    if (SOPC_IsGoodStatus(*call_method_bs__p_rawStatusCode))
+    {
+        *call_method_bs__p_nb_out = (int32_t) noOfOutput;
+        *call_method_bs__p_out_arguments = outputArgs;
     }
     else
     {
-        call_method_bs__execResults.nb = INT32_MAX;
-        *call_method_bs__rawStatusCode = OpcUa_BadQueryTooComplex;
+        int32_t nbElts = (int32_t) noOfOutput;
+        SOPC_Clear_Array(&nbElts, (void**) &outputArgs, sizeof(SOPC_Variant), SOPC_Variant_ClearAux);
     }
-}
-
-void call_method_bs__free_exec_result(void)
-{
-    if (NULL != call_method_bs__execResults.variants)
-    {
-        SOPC_Free(call_method_bs__execResults.variants);
-        call_method_bs__execResults.variants = NULL;
-    }
-    call_method_bs__execResults.nb = 0;
-}
-
-void call_method_bs__read_exec_result(const t_entier4 call_method_bs__index,
-                                      constants__t_Variant_i* const call_method_bs__value)
-{
-    assert(0 < call_method_bs__index && call_method_bs__index <= call_method_bs__execResults.nb);
-    assert(NULL != call_method_bs__value);
-    assert(NULL != call_method_bs__execResults.variants);
-    *call_method_bs__value = &call_method_bs__execResults.variants[call_method_bs__index - 1];
-}
-
-void call_method_bs__read_nb_exec_result(t_entier4* const call_method_bs__nb)
-{
-    *call_method_bs__nb = call_method_bs__execResults.nb;
 }

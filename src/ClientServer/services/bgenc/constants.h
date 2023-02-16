@@ -45,12 +45,14 @@
   -----------------------------*/
 #define constants__t_ApplicationDescription_i constants_bs__t_ApplicationDescription_i
 #define constants__t_Argument_i constants_bs__t_Argument_i
+#define constants__t_ArgumentsPointer_i constants_bs__t_ArgumentsPointer_i
 #define constants__t_ArrayDimensions_i constants_bs__t_ArrayDimensions_i
 #define constants__t_BrowseNodeClassMask_i constants_bs__t_BrowseNodeClassMask_i
 #define constants__t_BrowsePath_i constants_bs__t_BrowsePath_i
 #define constants__t_BrowseResultMask_i constants_bs__t_BrowseResultMask_i
 #define constants__t_BrowseResultReferences_i constants_bs__t_BrowseResultReferences_i
 #define constants__t_Byte constants_bs__t_Byte
+#define constants__t_CallMethodPointer_i constants_bs__t_CallMethodPointer_i
 #define constants__t_CallMethod_i constants_bs__t_CallMethod_i
 #define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
@@ -327,12 +329,14 @@ typedef enum {
   --------------------------*/
 #define constants__t_ApplicationDescription_i_max constants_bs__t_ApplicationDescription_i_max
 #define constants__t_Argument_i_max constants_bs__t_Argument_i_max
+#define constants__t_ArgumentsPointer_i_max constants_bs__t_ArgumentsPointer_i_max
 #define constants__t_ArrayDimensions_i_max constants_bs__t_ArrayDimensions_i_max
 #define constants__t_BrowseNodeClassMask_i_max constants_bs__t_BrowseNodeClassMask_i_max
 #define constants__t_BrowsePath_i_max constants_bs__t_BrowsePath_i_max
 #define constants__t_BrowseResultMask_i_max constants_bs__t_BrowseResultMask_i_max
 #define constants__t_BrowseResultReferences_i_max constants_bs__t_BrowseResultReferences_i_max
 #define constants__t_Byte_max constants_bs__t_Byte_max
+#define constants__t_CallMethodPointer_i_max constants_bs__t_CallMethodPointer_i_max
 #define constants__t_CallMethod_i_max constants_bs__t_CallMethod_i_max
 #define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
@@ -406,6 +410,7 @@ typedef enum {
   ------------------------------------------------*/
 #define constants__c_ApplicationDescription_indet constants_bs__c_ApplicationDescription_indet
 #define constants__c_Argument_indet constants_bs__c_Argument_indet
+#define constants__c_ArgumentsPointer_indet constants_bs__c_ArgumentsPointer_indet
 #define constants__c_ArrayDimensions_indet constants_bs__c_ArrayDimensions_indet
 #define constants__c_BrowseNodeClassMask_indet constants_bs__c_BrowseNodeClassMask_indet
 #define constants__c_BrowseResultMask_all constants_bs__c_BrowseResultMask_all
@@ -413,6 +418,7 @@ typedef enum {
 #define constants__c_BrowseResultReferences_indet constants_bs__c_BrowseResultReferences_indet
 #define constants__c_ByteString_Type_NodeId constants_bs__c_ByteString_Type_NodeId
 #define constants__c_Byte_Type_NodeId constants_bs__c_Byte_Type_NodeId
+#define constants__c_CallMethodPointer_indet constants_bs__c_CallMethodPointer_indet
 #define constants__c_CallMethod_indet constants_bs__c_CallMethod_indet
 #define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet

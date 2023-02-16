@@ -213,7 +213,7 @@ DEFINITIONS
         /* User authorization */
         s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
     );
-    
+
     d_adsp_add_node_operation ==
     /* Services Node Management */
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =

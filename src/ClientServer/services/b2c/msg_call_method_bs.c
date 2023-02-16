@@ -105,32 +105,6 @@ void msg_call_method_bs__alloc_CallMethod_Res_InputArgumentResult(
     *msg_call_method_bs__statusCode = constants_statuscodes_bs__e_sc_ok;
 }
 
-void msg_call_method_bs__alloc_CallMethod_Res_OutputArgument(
-    const constants__t_msg_i msg_call_method_bs__p_res_msg,
-    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-    const t_entier4 msg_call_method_bs__nb,
-    constants_statuscodes_bs__t_StatusCode_i* const msg_call_method_bs__statusCode)
-{
-    assert(NULL != msg_call_method_bs__statusCode);
-
-    OpcUa_CallMethodResult* result =
-        msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
-
-    /* ensured by B model */
-    assert(msg_call_method_bs__nb > 0);
-
-    result->OutputArguments = SOPC_Calloc((size_t) msg_call_method_bs__nb, sizeof(SOPC_Variant));
-
-    if (NULL == result->OutputArguments)
-    {
-        *msg_call_method_bs__statusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        result->NoOfOutputArguments = 0;
-        return;
-    }
-    result->NoOfOutputArguments = 0; /* number of copied elements */
-    *msg_call_method_bs__statusCode = constants_statuscodes_bs__e_sc_ok;
-}
-
 void msg_call_method_bs__alloc_CallMethod_Result(
     const constants__t_msg_i msg_call_method_bs__p_res_msg,
     const t_entier4 msg_call_method_bs__nb,
@@ -168,21 +142,6 @@ void msg_call_method_bs__free_CallMethod_Res_InputArgument(
     SOPC_Free(result->InputArgumentResults);
     result->InputArgumentResults = NULL;
     result->NoOfInputArgumentResults = 0;
-}
-
-void msg_call_method_bs__free_CallMethod_Res_OutputArgument(
-    const constants__t_msg_i msg_call_method_bs__p_res_msg,
-    const constants__t_CallMethod_i msg_call_method_bs__callMethod)
-{
-    OpcUa_CallMethodResult* result =
-        msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
-    for (int i = 0; i < result->NoOfOutputArguments; i++)
-    {
-        SOPC_Variant_Clear(&result->OutputArguments[i]);
-    }
-    SOPC_Free(result->OutputArguments);
-    result->OutputArguments = NULL;
-    result->NoOfOutputArguments = 0;
 }
 
 void msg_call_method_bs__read_CallMethod_InputArguments(
@@ -232,6 +191,16 @@ void msg_call_method_bs__read_CallMethod_Objectid(const constants__t_msg_i msg_c
     *msg_call_method_bs__p_objectid = &method->ObjectId;
 }
 
+void msg_call_method_bs__read_CallMethod_Pointer(
+    const constants__t_msg_i msg_call_method_bs__p_req_msg,
+    const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
+    constants__t_CallMethodPointer_i* const msg_call_method_bs__p_callMethodPointer)
+{
+    OpcUa_CallMethodRequest* method =
+        msg_call_method_bs__getCallMethod(msg_call_method_bs__p_req_msg, msg_call_method_bs__p_callMethod);
+    *msg_call_method_bs__p_callMethodPointer = method;
+}
+
 void msg_call_method_bs__read_call_method_request(
     const constants__t_msg_i msg_call_method_bs__p_req_msg,
     constants_statuscodes_bs__t_StatusCode_i* const msg_call_method_bs__Status,
@@ -250,6 +219,18 @@ void msg_call_method_bs__read_nb_CallMethods(const constants__t_msg_i msg_call_m
     *msg_call_method_bs__p_nb = request->NoOfMethodsToCall;
 }
 
+void msg_call_method_bs__set_CallMethod_Res_OutputArgument(
+    const constants__t_msg_i msg_call_method_bs__p_res_msg,
+    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
+    const t_entier4 msg_call_method_bs__nb_out_args,
+    const constants__t_ArgumentsPointer_i msg_call_method_bs__out_args)
+{
+    OpcUa_CallMethodResult* result =
+        msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
+    result->NoOfOutputArguments = msg_call_method_bs__nb_out_args;
+    result->OutputArguments = msg_call_method_bs__out_args;
+}
+
 void msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(
     const constants__t_msg_i msg_call_method_bs__p_res_msg,
     const constants__t_CallMethod_i msg_call_method_bs__callMethod,
@@ -262,21 +243,6 @@ void msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(
     assert(0 < msg_call_method_bs__index && msg_call_method_bs__index <= result->NoOfInputArgumentResults);
     util_status_code__B_to_C(msg_call_method_bs__statusCode,
                              &result->InputArgumentResults[msg_call_method_bs__index - 1]);
-}
-
-void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
-    const constants__t_msg_i msg_call_method_bs__p_res_msg,
-    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-    const t_entier4 msg_call_method_bs__index,
-    const constants__t_Variant_i msg_call_method_bs__value)
-{
-    assert(NULL != msg_call_method_bs__value);
-    OpcUa_CallMethodResult* result =
-        msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
-    /* ensured by B model */
-    assert(0 < msg_call_method_bs__index && msg_call_method_bs__index == result->NoOfOutputArguments + 1);
-    SOPC_Variant_Move(&result->OutputArguments[msg_call_method_bs__index - 1], msg_call_method_bs__value);
-    result->NoOfOutputArguments++;
 }
 
 void msg_call_method_bs__write_CallMethod_Res_Status(const constants__t_msg_i msg_call_method_bs__p_res_msg,

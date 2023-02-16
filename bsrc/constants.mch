@@ -111,7 +111,9 @@ SETS
     t_RelativePath_i;
     t_RelativePathElt_i;
     t_CallMethod_i;
+    t_CallMethodPointer_i;
     t_Argument_i;
+    t_ArgumentsPointer_i;
     t_NodeAttributes_i;
     t_session_token_i; /* (SOPC_NodeId*) */
     t_user_i; /* Server-side user */
@@ -375,7 +377,9 @@ CONCRETE_CONSTANTS
     c_RelativePath_indet,
     c_RelativePathElt_indet,
     c_CallMethod_indet,
+    c_CallMethodPointer_indet,
     c_Argument_indet,
+    c_ArgumentsPointer_indet,
     c_NodeAttributes_indet,
     c_session_token_indet,
     c_Nonce_indet,
@@ -486,7 +490,9 @@ ABSTRACT_CONSTANTS
     t_RelativePath,
     t_RelativePathElt,
     t_CallMethod,
+    t_CallMethodPointer,
     t_Argument,
+    t_ArgumentsPointer,
     t_NodeAttributes,
     t_session_token,
     t_user,
@@ -737,9 +743,17 @@ PROPERTIES
     cast_t_CallMethod : NAT +-> t_CallMethod_i &
     cast_t_CallMethod : perm(t_CallMethod) &
 
+    t_CallMethodPointer <: t_CallMethodPointer_i &
+    c_CallMethodPointer_indet : t_CallMethodPointer_i &
+    c_CallMethodPointer_indet /: t_CallMethodPointer &
+
     t_Argument <: t_Argument_i &
     c_Argument_indet : t_Argument_i &
     c_Argument_indet /: t_Argument &
+
+    t_ArgumentsPointer <: t_ArgumentsPointer_i &
+    c_ArgumentsPointer_indet : t_ArgumentsPointer_i &
+    c_ArgumentsPointer_indet /: t_ArgumentsPointer &
 
     t_NodeAttributes <: t_NodeAttributes_i &
     c_NodeAttributes_indet : t_NodeAttributes_i &

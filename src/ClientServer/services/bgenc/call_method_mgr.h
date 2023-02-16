@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 16/02/2023 08:33:28
+ Date                 : 16/02/2023 13:30:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -115,10 +115,6 @@ extern void call_method_mgr__check_method_call_inputs(
 extern void call_method_mgr__check_method_call_one_argument_type(
    const constants__t_Variant_i call_method_mgr__p_value,
    const constants__t_Argument_i call_method_mgr__p_arg,
-   constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
-extern void call_method_mgr__copy_exec_result(
-   const constants__t_msg_i call_method_mgr__p_res_msg,
-   const constants__t_CallMethod_i call_method_mgr__p_callMethod,
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode);
 extern void call_method_mgr__treat_one_method_call(
    const constants__t_session_i call_method_mgr__p_session,

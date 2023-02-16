@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 16/02/2023 08:33:28
+ Date                 : 16/02/2023 13:30:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -105,6 +105,9 @@ void call_method_mgr__treat_one_method_call(
    constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
    {
       constants__t_RawStatusCode call_method_mgr__l_rawStatusCode;
+      constants__t_CallMethodPointer_i call_method_mgr__l_method_call_pointer;
+      t_entier4 call_method_mgr__l_nb_out;
+      constants__t_ArgumentsPointer_i call_method_mgr__l_arguments_out;
       
       call_method_mgr__check_method_call_inputs(call_method_mgr__p_session,
          call_method_mgr__p_req_msg,
@@ -114,18 +117,23 @@ void call_method_mgr__treat_one_method_call(
       constants_statuscodes_bs__getall_conv_StatusCode_To_RawStatusCode(*call_method_mgr__StatusCode,
          &call_method_mgr__l_rawStatusCode);
       if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-         call_method_bs__exec_callMethod(call_method_mgr__p_req_msg,
+         msg_call_method_bs__read_CallMethod_Pointer(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
-            call_method_mgr__p_endpoint_config_idx,
-            &call_method_mgr__l_rawStatusCode);
+            &call_method_mgr__l_method_call_pointer);
+         call_method_bs__exec_callMethod(call_method_mgr__p_endpoint_config_idx,
+            call_method_mgr__l_method_call_pointer,
+            &call_method_mgr__l_rawStatusCode,
+            &call_method_mgr__l_nb_out,
+            &call_method_mgr__l_arguments_out);
          constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(call_method_mgr__l_rawStatusCode,
             call_method_mgr__StatusCode);
-         if (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) {
-            call_method_mgr__copy_exec_result(call_method_mgr__p_res_msg,
+         if ((*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok) &&
+            (call_method_mgr__l_nb_out > 0)) {
+            msg_call_method_bs__set_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
                call_method_mgr__p_callMethod,
-               call_method_mgr__StatusCode);
+               call_method_mgr__l_nb_out,
+               call_method_mgr__l_arguments_out);
          }
-         call_method_bs__free_exec_result();
       }
       msg_call_method_bs__write_CallMethod_Res_Status(call_method_mgr__p_res_msg,
          call_method_mgr__p_callMethod,
@@ -312,43 +320,6 @@ void call_method_mgr__check_method_call_one_argument_type(
       }
       else {
          *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
-      }
-   }
-}
-
-void call_method_mgr__copy_exec_result(
-   const constants__t_msg_i call_method_mgr__p_res_msg,
-   const constants__t_CallMethod_i call_method_mgr__p_callMethod,
-   constants_statuscodes_bs__t_StatusCode_i * const call_method_mgr__StatusCode) {
-   {
-      t_bool call_method_mgr__l_continue;
-      t_entier4 call_method_mgr__l_nb;
-      constants__t_Variant_i call_method_mgr__l_value;
-      t_entier4 call_method_mgr__l_index;
-      
-      call_method_bs__read_nb_exec_result(&call_method_mgr__l_nb);
-      call_method_result_it__init_iter_callMethodResultIdx(call_method_mgr__l_nb,
-         &call_method_mgr__l_continue);
-      if (call_method_mgr__l_continue == false) {
-         *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_ok;
-      }
-      else {
-         msg_call_method_bs__alloc_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
-            call_method_mgr__p_callMethod,
-            call_method_mgr__l_nb,
-            call_method_mgr__StatusCode);
-         call_method_mgr__l_continue = (*call_method_mgr__StatusCode == constants_statuscodes_bs__e_sc_ok);
-         while (call_method_mgr__l_continue == true) {
-            call_method_result_it__continue_iter_callMethodResultIdx(&call_method_mgr__l_continue,
-               &call_method_mgr__l_index);
-            call_method_bs__read_exec_result(call_method_mgr__l_index,
-               &call_method_mgr__l_value);
-            msg_call_method_bs__write_CallMethod_Res_OutputArgument(call_method_mgr__p_res_msg,
-               call_method_mgr__p_callMethod,
-               call_method_mgr__l_index,
-               call_method_mgr__l_value);
-            call_method_mgr__l_continue = (call_method_mgr__l_continue == true);
-         }
       }
    }
 }

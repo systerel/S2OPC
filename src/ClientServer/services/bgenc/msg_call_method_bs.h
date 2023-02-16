@@ -21,7 +21,7 @@
 
  File Name            : msg_call_method_bs.h
 
- Date                 : 04/08/2022 14:53:35
+ Date                 : 16/02/2023 13:30:52
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -57,19 +57,11 @@ extern void msg_call_method_bs__alloc_CallMethod_Res_InputArgumentResult(
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
    const t_entier4 msg_call_method_bs__nb,
    constants_statuscodes_bs__t_StatusCode_i * const msg_call_method_bs__statusCode);
-extern void msg_call_method_bs__alloc_CallMethod_Res_OutputArgument(
-   const constants__t_msg_i msg_call_method_bs__p_res_msg,
-   const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-   const t_entier4 msg_call_method_bs__nb,
-   constants_statuscodes_bs__t_StatusCode_i * const msg_call_method_bs__statusCode);
 extern void msg_call_method_bs__alloc_CallMethod_Result(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const t_entier4 msg_call_method_bs__nb,
    constants_statuscodes_bs__t_StatusCode_i * const msg_call_method_bs__statusCode);
 extern void msg_call_method_bs__free_CallMethod_Res_InputArgument(
-   const constants__t_msg_i msg_call_method_bs__p_res_msg,
-   const constants__t_CallMethod_i msg_call_method_bs__callMethod);
-extern void msg_call_method_bs__free_CallMethod_Res_OutputArgument(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod);
 extern void msg_call_method_bs__read_CallMethod_InputArguments(
@@ -89,6 +81,10 @@ extern void msg_call_method_bs__read_CallMethod_Objectid(
    const constants__t_msg_i msg_call_method_bs__p_req_msg,
    const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
    constants__t_NodeId_i * const msg_call_method_bs__p_objectid);
+extern void msg_call_method_bs__read_CallMethod_Pointer(
+   const constants__t_msg_i msg_call_method_bs__p_req_msg,
+   const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
+   constants__t_CallMethodPointer_i * const msg_call_method_bs__p_callMethodPointer);
 extern void msg_call_method_bs__read_call_method_request(
    const constants__t_msg_i msg_call_method_bs__p_req_msg,
    constants_statuscodes_bs__t_StatusCode_i * const msg_call_method_bs__Status,
@@ -96,16 +92,16 @@ extern void msg_call_method_bs__read_call_method_request(
 extern void msg_call_method_bs__read_nb_CallMethods(
    const constants__t_msg_i msg_call_method_bs__p_req_msg,
    t_entier4 * const msg_call_method_bs__p_nb);
+extern void msg_call_method_bs__set_CallMethod_Res_OutputArgument(
+   const constants__t_msg_i msg_call_method_bs__p_res_msg,
+   const constants__t_CallMethod_i msg_call_method_bs__callMethod,
+   const t_entier4 msg_call_method_bs__nb_out_args,
+   const constants__t_ArgumentsPointer_i msg_call_method_bs__out_args);
 extern void msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,
    const t_entier4 msg_call_method_bs__index,
    const constants_statuscodes_bs__t_StatusCode_i msg_call_method_bs__statusCode);
-extern void msg_call_method_bs__write_CallMethod_Res_OutputArgument(
-   const constants__t_msg_i msg_call_method_bs__p_res_msg,
-   const constants__t_CallMethod_i msg_call_method_bs__callMethod,
-   const t_entier4 msg_call_method_bs__index,
-   const constants__t_Variant_i msg_call_method_bs__value);
 extern void msg_call_method_bs__write_CallMethod_Res_Status(
    const constants__t_msg_i msg_call_method_bs__p_res_msg,
    const constants__t_CallMethod_i msg_call_method_bs__callMethod,

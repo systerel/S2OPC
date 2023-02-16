@@ -22,71 +22,33 @@ MACHINE
 
 SEES
     constants,
-    constants_statuscodes_bs,
-    message_in_bs,
-    message_out_bs,
-    request_handle_bs
-
-ABSTRACT_VARIABLES
-
-    exec_result
-
-INVARIANT
-
-    exec_result : seq(t_Variant_i)
-
-INITIALISATION
-
-    exec_result
-    :(
-        exec_result = {}
-    )
+    constants_statuscodes_bs
 
 OPERATIONS
 
-    rawStatusCode <-- exec_callMethod(p_req_msg, p_callMethod, p_endpoint_config_idx) =
+    p_rawStatusCode, p_nb_out, p_out_arguments <-- exec_callMethod(p_endpoint_config_idx, p_call_method_pointer) =
     PRE
-        p_req_msg : t_msg_i   &
-        p_req_msg = c_msg_out &
-        p_callMethod : t_CallMethod_i &
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
-        exec_result = {} /* Do not call before the memory is freed */
+        p_call_method_pointer : t_CallMethodPointer_i &
+        p_call_method_pointer : t_CallMethodPointer
     THEN
-        rawStatusCode,
-        exec_result
+        p_rawStatusCode,
+        p_nb_out,
+        p_out_arguments
         :(
-            rawStatusCode : t_RawStatusCode &
-            exec_result : seq(t_Variant_i)
+            p_rawStatusCode : t_RawStatusCode &
+            p_nb_out : NAT &
+            p_out_arguments : t_ArgumentsPointer_i &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                p_nb_out = 0 &
+                p_out_arguments = c_ArgumentsPointer_indet
+            ) &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                (p_nb_out > 0 =>
+                 p_out_arguments : t_ArgumentsPointer)
+            )
         )
     END
-    ;
 
-    free_exec_result =
-    BEGIN
-        exec_result :( exec_result = {} )
-    END
-    ;
-
-    nb <-- read_nb_exec_result =
-    BEGIN
-        nb
-        :(
-            nb : NAT &
-            nb = size(exec_result)
-        )
-    END
-    ;
-
-    value <-- read_exec_result(index) =
-    PRE
-        index : NAT1 &
-        index : dom(exec_result)
-    THEN
-        value
-        :(
-            value : t_Variant_i &
-            value = exec_result(index)
-        )
-    END
 END

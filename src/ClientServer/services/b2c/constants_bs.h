@@ -58,12 +58,14 @@
   -----------------------------*/
 typedef OpcUa_ApplicationDescription* constants_bs__t_ApplicationDescription_i;
 typedef OpcUa_Argument* constants_bs__t_Argument_i;
+typedef SOPC_Variant* constants_bs__t_ArgumentsPointer_i;
 typedef void* constants_bs__t_ArrayDimensions_i;
 typedef uint32_t constants_bs__t_BrowseNodeClassMask_i;
 typedef uint32_t constants_bs__t_BrowsePath_i;
 typedef uint32_t constants_bs__t_BrowseResultMask_i;
 typedef OpcUa_ReferenceDescription* constants_bs__t_BrowseResultReferences_i;
 typedef uint8_t constants_bs__t_Byte;
+typedef OpcUa_CallMethodRequest* constants_bs__t_CallMethodPointer_i;
 typedef int32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
@@ -142,6 +144,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
   ------------------------------------------------*/
 #define constants_bs__c_ApplicationDescription_indet NULL
 #define constants_bs__c_Argument_indet NULL
+#define constants_bs__c_ArgumentsPointer_indet NULL
 #define constants_bs__c_ArrayDimensions_indet 0
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
@@ -150,6 +153,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 extern const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId;
 extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_CallMethod_indet 0
+#define constants_bs__c_CallMethodPointer_indet NULL
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
 #define constants_bs__c_DataValue_indet NULL

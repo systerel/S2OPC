@@ -21,7 +21,7 @@
 
  File Name            : call_method_bs.h
 
- Date                 : 04/08/2022 14:53:30
+ Date                 : 16/02/2023 13:30:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,9 +40,6 @@
   --------------*/
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
-#include "message_in_bs.h"
-#include "message_out_bs.h"
-#include "request_handle_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -53,15 +50,10 @@ extern void call_method_bs__INITIALISATION(void);
    OPERATIONS Clause
   --------------------*/
 extern void call_method_bs__exec_callMethod(
-   const constants__t_msg_i call_method_bs__p_req_msg,
-   const constants__t_CallMethod_i call_method_bs__p_callMethod,
    const constants__t_endpoint_config_idx_i call_method_bs__p_endpoint_config_idx,
-   constants__t_RawStatusCode * const call_method_bs__rawStatusCode);
-extern void call_method_bs__free_exec_result(void);
-extern void call_method_bs__read_exec_result(
-   const t_entier4 call_method_bs__index,
-   constants__t_Variant_i * const call_method_bs__value);
-extern void call_method_bs__read_nb_exec_result(
-   t_entier4 * const call_method_bs__nb);
+   const constants__t_CallMethodPointer_i call_method_bs__p_call_method_pointer,
+   constants__t_RawStatusCode * const call_method_bs__p_rawStatusCode,
+   t_entier4 * const call_method_bs__p_nb_out,
+   constants__t_ArgumentsPointer_i * const call_method_bs__p_out_arguments);
 
 #endif

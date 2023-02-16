@@ -31,7 +31,8 @@ SEES
 DEFINITIONS
     d_variables_in ==
     CallMethods,
-    CallMethod_Msg,
+    CallMethods_Msg,
+    CallMethod_Pointer,
     CallMethod_ObjectId,
     CallMethod_MethodId,
     CallMethod_InputArguments
@@ -42,14 +43,15 @@ DEFINITIONS
     CallMethodRes_status,
     CallMethodRes_AllocatedInputArgumentResult,
     CallMethodRes_InputArgumentResult,
-    CallMethodRes_AllocatedOutputArgument,
-    CallMethodRes_OutputArgument
+    CallMethodRes_NbOutputArguments,
+    CallMethodRes_OutputArguments
     ;
 
     d_inv_in ==
-    CallMethod_Msg     : t_msg_i         &
+    CallMethods_Msg     : t_msg_i         &
     CallMethods               <: t_CallMethod   &
     CallMethods               = cast_t_CallMethod[1..card(CallMethods)] &
+    CallMethod_Pointer        : CallMethods --> t_CallMethodPointer &
     CallMethod_ObjectId       : CallMethods --> t_NodeId_i &
     CallMethod_MethodId       : CallMethods --> t_NodeId_i &
     CallMethod_InputArguments : CallMethods --> seq(t_Variant_i)
@@ -57,13 +59,13 @@ DEFINITIONS
 
     d_inv_out ==
     CallMethodRes_Msg                    : t_msg_i &
-    CallMethodRes_status                 : t_CallMethod --> t_RawStatusCode      &
-    CallMethodRes_AllocatedInputArgumentResult : t_CallMethod --> NAT1                & /* Allocated memory */
-    CallMethodRes_InputArgumentResult    : t_CallMethod --> seq(t_StatusCode) & /* Effective data */
-    CallMethodRes_AllocatedOutputArgument      : t_CallMethod --> NAT1                & /* Allocated memory */
-    CallMethodRes_OutputArgument         : t_CallMethod --> seq(t_Variant)    & /* Effective data */
+    CallMethodRes_status                 : CallMethods +-> t_RawStatusCode      &
+    CallMethodRes_AllocatedInputArgumentResult : CallMethods +-> NAT                & /* Allocated memory */
+    CallMethodRes_InputArgumentResult    : CallMethods +-> seq(t_StatusCode) & /* Effective data */
+    CallMethodRes_NbOutputArguments      : CallMethods +-> NAT                & /* Number of arguments */
+    CallMethodRes_OutputArguments        : CallMethods +-> seq(t_Variant)    & /* Output arguments */
     dom(CallMethodRes_status) = dom(CallMethodRes_InputArgumentResult)          &
-    dom(CallMethodRes_status) = dom(CallMethodRes_OutputArgument)
+    dom(CallMethodRes_status) = dom(CallMethodRes_OutputArguments)
 
 ABSTRACT_VARIABLES
     d_variables_in,
@@ -81,7 +83,7 @@ INITIALISATION
     d_variables_out
     :
     (
-        CallMethod_Msg = c_msg_indet &
+        CallMethods_Msg = c_msg_indet &
         CallMethods = {} &
         CallMethod_ObjectId = {} &
         CallMethod_MethodId = {} &
@@ -91,8 +93,8 @@ INITIALISATION
         CallMethodRes_status = {} &
         CallMethodRes_AllocatedInputArgumentResult = {} &
         CallMethodRes_InputArgumentResult = {} &
-        CallMethodRes_AllocatedOutputArgument = {} &
-        CallMethodRes_OutputArgument = {}
+        CallMethodRes_NbOutputArguments = {} &
+        CallMethodRes_OutputArguments = {}
     )
 OPERATIONS
 
@@ -113,11 +115,11 @@ OPERATIONS
             p_nb = card(CallMethods) &
             (Status = e_sc_ok
                 =>
-                CallMethod_Msg = p_req_msg
+                CallMethods_Msg = p_req_msg
             ) &
             (Status /= e_sc_ok
                 =>
-                CallMethod_Msg = c_msg_indet &
+                CallMethods_Msg = c_msg_indet &
                 CallMethods = {}
             )
         )
@@ -128,9 +130,21 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        p_req_msg = CallMethod_Msg
+        p_req_msg = CallMethods_Msg
     THEN
         p_nb :(p_nb : NAT & p_nb = card(CallMethods))
+    END
+    ;
+
+    p_callMethodPointer <-- read_CallMethod_Pointer (p_req_msg, p_callMethod) =
+    PRE
+        p_req_msg : t_msg_i &
+        p_req_msg : t_msg   &
+        p_req_msg = CallMethods_Msg &
+        p_callMethod   : t_CallMethod_i &
+        p_callMethod   : CallMethods
+    THEN
+        p_callMethodPointer :( p_callMethodPointer : t_CallMethodPointer_i & p_callMethodPointer = CallMethod_Pointer(p_callMethod))
     END
     ;
 
@@ -138,7 +152,7 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        p_req_msg = CallMethod_Msg &
+        p_req_msg = CallMethods_Msg &
         p_callMethod   : t_CallMethod_i &
         p_callMethod   : CallMethods
     THEN
@@ -150,7 +164,7 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        p_req_msg = CallMethod_Msg &
+        p_req_msg = CallMethods_Msg &
         p_callMethod   : t_CallMethod_i &
         p_callMethod   : CallMethods
     THEN
@@ -162,7 +176,7 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        p_req_msg = CallMethod_Msg &
+        p_req_msg = CallMethods_Msg &
         p_callMethod   : t_CallMethod_i &
         p_callMethod   : CallMethods
     THEN
@@ -174,7 +188,7 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        p_req_msg = CallMethod_Msg &
+        p_req_msg = CallMethods_Msg &
         p_callMethod : t_CallMethod_i &
         p_callMethod : CallMethods  &
         p_index_arg : NAT1 &
@@ -201,13 +215,17 @@ OPERATIONS
             d_inv_out &
             (statusCode = e_sc_ok =>
                 CallMethodRes_Msg = p_res_msg &
-                dom(CallMethodRes_status) = CallMethods &
+                CallMethodRes_status                 : CallMethods --> t_RawStatusCode   &
+                CallMethodRes_AllocatedInputArgumentResult : CallMethods --> NAT         &
+                CallMethodRes_InputArgumentResult    : CallMethods --> seq(t_StatusCode) &
+                CallMethodRes_NbOutputArguments      : CallMethods --> NAT               &
+                CallMethodRes_OutputArguments        : CallMethods --> seq(t_Variant)    &
                 /* Input argument results are not allocated yet */
                 ran(CallMethodRes_AllocatedInputArgumentResult) = {0} &
                 ran(CallMethodRes_InputArgumentResult) = {} &
                 /* Output results are not allocated yet */
-                ran(CallMethodRes_AllocatedOutputArgument) = {0} &
-                ran(CallMethodRes_OutputArgument) = {}
+                ran(CallMethodRes_NbOutputArguments) = {0} &
+                ran(CallMethodRes_OutputArguments) = {}
             ) &
             (statusCode /= e_sc_ok =>
                 CallMethodRes_Msg = c_msg_indet &
@@ -295,73 +313,27 @@ OPERATIONS
     END
     ;
 
-    /* Allocate nb element in OutputArgument but still no effective variant */
-    statusCode <-- alloc_CallMethod_Res_OutputArgument(p_res_msg, callMethod, nb) =
+    /* Set OutputArguments result */
+    set_CallMethod_Res_OutputArgument(p_res_msg, callMethod, nb_out_args, out_args) =
     PRE
         p_res_msg : t_msg_i   &
         p_res_msg = c_msg_out &
         card(CallMethods) > 0       &
         callMethod : t_CallMethod_i &
         callMethod : CallMethods    &
-        callMethod : dom(CallMethodRes_OutputArgument) &
-        nb         : NAT1
+        callMethod : dom(CallMethodRes_OutputArguments) &
+        nb_out_args : NAT1 &
+        out_args : t_ArgumentsPointer_i &
+        out_args : t_ArgumentsPointer
     THEN
-        CallMethodRes_AllocatedOutputArgument,
-        CallMethodRes_OutputArgument,
-        statusCode
+        CallMethodRes_NbOutputArguments,
+        CallMethodRes_OutputArguments
         :(
-            statusCode : t_StatusCode_i &
-            statusCode : { e_sc_ok, e_sc_bad_out_of_memory } &
-            (statusCode = e_sc_ok =>
-                {callMethod} <<| CallMethodRes_AllocatedOutputArgument = {callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
-                {callMethod} <<| CallMethodRes_OutputArgument = {callMethod} <<| CallMethodRes_OutputArgument$0 &
-                CallMethodRes_AllocatedOutputArgument(callMethod) = nb &
-                CallMethodRes_OutputArgument(callMethod) = {}
-            ) &
-            (statusCode = e_sc_bad_out_of_memory =>
-                {callMethod} <<| CallMethodRes_AllocatedOutputArgument = {callMethod} <<| CallMethodRes_AllocatedOutputArgument$0 &
-                {callMethod} <<| CallMethodRes_OutputArgument = {callMethod} <<| CallMethodRes_OutputArgument$0 &
-                CallMethodRes_AllocatedOutputArgument(callMethod) = 0 &
-                CallMethodRes_OutputArgument(callMethod) = {}
-            )
+            {callMethod} <<| CallMethodRes_NbOutputArguments = {callMethod} <<| CallMethodRes_NbOutputArguments$0 &
+            {callMethod} <<| CallMethodRes_OutputArguments = {callMethod} <<| CallMethodRes_OutputArguments$0 &
+            CallMethodRes_NbOutputArguments(callMethod) = nb_out_args &
+            callMethod : dom(CallMethodRes_OutputArguments) /* => value pointed by out_args */
         )
     END
-    ;
 
-    free_CallMethod_Res_OutputArgument(p_res_msg, callMethod) =
-    PRE
-        p_res_msg : t_msg_i   &
-        p_res_msg = c_msg_out &
-        card(CallMethods) > 0       &
-        callMethod : t_CallMethod_i &
-        callMethod : CallMethods    &
-        callMethod : dom(CallMethodRes_OutputArgument)
-    THEN
-        CallMethodRes_AllocatedOutputArgument(callMethod) := 0 ||
-        CallMethodRes_OutputArgument(callMethod) := {}
-    END
-    ;
-
-    /* Variant are copied in response */
-    write_CallMethod_Res_OutputArgument(p_res_msg, callMethod, index, value) =
-    PRE
-        p_res_msg : t_msg_i &
-        p_res_msg : t_msg   &
-        p_res_msg = CallMethod_Msg &
-        card(CallMethods) > 0       &
-        callMethod : t_CallMethod_i &
-        callMethod : CallMethods    &
-        callMethod : dom(CallMethodRes_OutputArgument) &
-        index      : NAT1           &
-        index      = size(CallMethodRes_OutputArgument(callMethod)) + 1 &
-        index      <= CallMethodRes_AllocatedOutputArgument(callMethod) &
-        value : t_Variant_i &
-        value : t_Variant
-    THEN
-        CallMethodRes_OutputArgument
-        :(
-            {callMethod} <<| CallMethodRes_OutputArgument = {callMethod} <<| CallMethodRes_OutputArgument$0 &
-            CallMethodRes_OutputArgument(callMethod) = CallMethodRes_OutputArgument$0(callMethod) <+ {index |-> value}
-        )
-    END
 END

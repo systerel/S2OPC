@@ -52,7 +52,7 @@ OPERATIONS
     PRE
         p_req_msg : t_msg_i &
         p_req_msg : t_msg   &
-        CallMethod_Msg = p_req_msg
+        CallMethods_Msg = p_req_msg
     THEN
         callMethods_iterated   := {}        ||
         callMethods_to_iterate := CallMethods ||
