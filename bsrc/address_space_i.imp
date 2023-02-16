@@ -64,7 +64,9 @@ PROMOTES
     get_conv_Variant_ValueRank,
     get_conv_Variant_Type,
     check_object_has_method,
-    is_IndexRangeDefined
+    is_IndexRangeDefined,
+
+    exec_callMethod
 
 DEFINITIONS
     "definitions.def";

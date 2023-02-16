@@ -68,7 +68,8 @@ PROMOTES
     check_nodeId_isValid,
     is_IndexRangeDefined,
 
-    addNode_AddressSpace
+    addNode_AddressSpace,
+    exec_callMethod
 
 OPERATIONS
 

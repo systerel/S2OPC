@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 16/02/2023 13:30:19
+ Date                 : 16/02/2023 16:12:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -120,7 +120,7 @@ void call_method_mgr__treat_one_method_call(
          msg_call_method_bs__read_CallMethod_Pointer(call_method_mgr__p_req_msg,
             call_method_mgr__p_callMethod,
             &call_method_mgr__l_method_call_pointer);
-         call_method_bs__exec_callMethod(call_method_mgr__p_endpoint_config_idx,
+         service_write__exec_callMethod(call_method_mgr__p_endpoint_config_idx,
             call_method_mgr__l_method_call_pointer,
             &call_method_mgr__l_rawStatusCode,
             &call_method_mgr__l_nb_out,

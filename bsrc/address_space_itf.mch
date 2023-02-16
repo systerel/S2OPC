@@ -50,27 +50,6 @@ OPERATIONS
     d_adsp_operations;
     d_adsp_write_operation;
     d_adsp_call_operation;
-
-    StatusCode_service <-- treat_add_nodes_request(p_user, p_req_msg, p_resp_msg) =
-    PRE
-        p_user : t_user_i        &
-        p_user : t_user          &
-        p_req_msg : t_msg_i  &
-        p_req_msg = c_msg_in &
-        c_msg_in : t_msg         &
-        a_msg_in_type = e_msg_node_add_nodes_req &
-        p_resp_msg : t_msg_i   &
-        p_resp_msg = c_msg_out &
-        c_msg_out : t_msg &
-        a_msg_out_type = e_msg_node_add_nodes_resp
-    THEN
-        StatusCode_service,
-        d_adsp_nodes_variables
-        :(
-            StatusCode_service       : t_StatusCode_i &
-            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
-            d_adsp_nodes_invariant
-        )
-    END
+    d_adsp_add_operation
 
 END

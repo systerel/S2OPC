@@ -37,7 +37,6 @@ DEFINITIONS
 IMPORTS
     service_write,
 
-    call_method_bs,
     call_method_it,
     call_method_result_it,
     msg_call_method_bs,

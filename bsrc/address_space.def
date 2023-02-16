@@ -214,8 +214,31 @@ DEFINITIONS
         s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
     );
 
-    d_adsp_add_node_operation ==
-    /* Services Node Management */
+    d_adsp_add_operation ==
+    StatusCode_service <-- treat_add_nodes_request(p_user, p_req_msg, p_resp_msg) =
+    PRE
+        p_user : t_user_i        &
+        p_user : t_user          &
+        p_req_msg : t_msg_i  &
+        p_req_msg = c_msg_in &
+        c_msg_in : t_msg         &
+        a_msg_in_type = e_msg_node_add_nodes_req &
+        p_resp_msg : t_msg_i   &
+        p_resp_msg = c_msg_out &
+        c_msg_out : t_msg &
+        a_msg_out_type = e_msg_node_add_nodes_resp
+    THEN
+        StatusCode_service,
+        d_adsp_nodes_variables
+        :(
+            StatusCode_service       : t_StatusCode_i &
+            StatusCode_service       : {e_sc_ok, e_sc_bad_nothing_to_do, e_sc_bad_too_many_ops, e_sc_bad_out_of_memory}  &
+            d_adsp_nodes_invariant
+        )
+    END
+    ;
+
+    d_adsp_add_node_internal_operation ==
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
         p_parentNid : t_ExpandedNodeId_i &
@@ -293,9 +316,40 @@ DEFINITIONS
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_method_call_resp
     THEN
-        StatusCode_service
+        StatusCode_service,
+        d_adsp_variables
         :(  StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
+            StatusCode_service : t_StatusCode &
+            d_adsp_invariant
+        )
+    END
+    ;
+
+    d_adsp_call_method_internal_operation ==
+    p_rawStatusCode, p_nb_out, p_out_arguments <-- exec_callMethod(p_endpoint_config_idx, p_call_method_pointer) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_call_method_pointer : t_CallMethodPointer_i &
+        p_call_method_pointer : t_CallMethodPointer
+    THEN
+        d_adsp_variables, /* Any address space change is possible */
+        p_rawStatusCode,
+        p_nb_out,
+        p_out_arguments
+        :(
+            d_adsp_invariant &
+            p_rawStatusCode : t_RawStatusCode &
+            p_nb_out : NAT &
+            p_out_arguments : t_ArgumentsPointer_i &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                p_nb_out = 0 &
+                p_out_arguments = c_ArgumentsPointer_indet
+            ) &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                (p_nb_out > 0 =>
+                 p_out_arguments : t_ArgumentsPointer)
+            )
         )
     END
     ;

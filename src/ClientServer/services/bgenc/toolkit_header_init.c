@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 16/02/2023 08:34:21
+ Date                 : 16/02/2023 16:13:08
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -53,7 +53,6 @@
 #include "browse_treatment_result_bs.h"
 #include "browse_treatment_result_it.h"
 #include "browse_treatment_target_it.h"
-#include "call_method_bs.h"
 #include "call_method_it.h"
 #include "call_method_mgr.h"
 #include "call_method_result_it.h"
@@ -211,7 +210,6 @@ void INITIALISATION(void) {
    response_write_bs__INITIALISATION();
    service_write_1__INITIALISATION();
    service_write__INITIALISATION();
-   call_method_bs__INITIALISATION();
    msg_call_method_bs__INITIALISATION();
    call_method_it__INITIALISATION();
    call_method_result_it__INITIALISATION();

@@ -45,42 +45,13 @@ INITIALISATION
 OPERATIONS
 
     d_adsp_operations;
+
+    /* write service operation */
     d_adsp_write_operation;
 
-/* Services Node Management */
-    sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
-    PRE
-        p_parentNid : t_ExpandedNodeId_i &
-        p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
-        conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
-        p_refTypeId : t_NodeId_i &
-        p_refTypeId : t_NodeId &
-        p_newNodeId : t_NodeId_i &
-        p_newNodeId : t_NodeId &
-        p_newNodeId /: ran(a_NodeId) &
-        p_browseName : t_QualifiedName_i &
-        p_browseName : t_QualifiedName &
-        p_nodeClass : t_NodeClass_i &
-        p_nodeClass : t_NodeClass &
-        p_nodeAttributes : t_NodeAttributes_i &
-        p_nodeAttributes : t_NodeAttributes &
-        p_typeDefId : t_ExpandedNodeId_i &
-        p_typeDefId : t_ExpandedNodeId &
-        (p_nodeClass : {e_ncl_Object, e_ncl_Variable} =>
-            p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
-            conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)) &
-        (p_nodeClass /: {e_ncl_Object, e_ncl_Variable} =>
-            p_typeDefId = c_ExpandedNodeId_indet)
-    THEN
-        sc_addnode,
-        d_adsp_nodes_variables
-        :(
-            sc_addnode : t_StatusCode_i &
-            sc_addnode : {e_sc_ok, e_sc_bad_browse_name_duplicated, e_sc_bad_reference_not_allowed,
-                          e_sc_bad_type_definition_invalid, e_sc_bad_out_of_memory,
-                          e_sc_bad_node_class_invalid} & // BadNodeClassInvalid used for unsupported NodeClass for now
-            d_adsp_nodes_invariant
-        )
-    END
+    /* operation used by call_method_mgr */
+    d_adsp_call_method_internal_operation;
+    /* operation used by service_add_nodes */
+    d_adsp_add_node_internal_operation
 
 END

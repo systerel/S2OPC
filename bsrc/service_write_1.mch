@@ -61,7 +61,11 @@ INITIALISATION
 OPERATIONS
 
     d_adsp_operations;
-    d_adsp_add_node_operation;
+
+    /* operation used by call_method_mgr */
+    d_adsp_call_method_internal_operation;
+    /* operation used by service_add_nodes */
+    d_adsp_add_node_internal_operation;
 
     StatusCode_service <-- treat_write_request_WriteValues (p_user, p_locales) =
     PRE

@@ -128,6 +128,34 @@ OPERATIONS
     END
     ;
 
+    p_rawStatusCode, p_nb_out, p_out_arguments <-- exec_callMethod(p_endpoint_config_idx, p_call_method_pointer) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_call_method_pointer : t_CallMethodPointer_i &
+        p_call_method_pointer : t_CallMethodPointer
+    THEN
+        d_adsp_variables, /* Any address space change is possible */
+        p_rawStatusCode,
+        p_nb_out,
+        p_out_arguments
+        :(
+            d_adsp_invariant &
+            p_rawStatusCode : t_RawStatusCode &
+            p_nb_out : NAT &
+            p_out_arguments : t_ArgumentsPointer_i &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                p_nb_out = 0 &
+                p_out_arguments = c_ArgumentsPointer_indet
+            ) &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                (p_nb_out > 0 =>
+                 p_out_arguments : t_ArgumentsPointer)
+            )
+        )
+    END
+    ;
+
     /* Node Management operations */
     sc_addnode <-- addNode_AddressSpace(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE

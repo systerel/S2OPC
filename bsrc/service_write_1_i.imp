@@ -72,6 +72,7 @@ PROMOTES
     is_IndexRangeDefined,
 
     addNode_AddressSpace,
+    exec_callMethod,
 
     write_WriteResponse_msg_out
 

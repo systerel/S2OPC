@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "address_space_bs.h"
+#include "app_cb_call_context_internal.h"
 #include "b2c.h"
 #include "util_address_space.h"
 
@@ -39,6 +40,8 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_numeric_range.h"
+#include "sopc_service_call_context.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_user_manager.h"
 #include "util_add_node.h"
 #include "util_b2c.h"
@@ -67,6 +70,80 @@ void address_space_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i address_space_bs__p_endpoint_config_idx,
+                                       const constants__t_CallMethodPointer_i address_space_bs__p_call_method_pointer,
+                                       constants__t_RawStatusCode* const address_space_bs__p_rawStatusCode,
+                                       t_entier4* const address_space_bs__p_nb_out,
+                                       constants__t_ArgumentsPointer_i* const address_space_bs__p_out_arguments)
+{
+    *address_space_bs__p_nb_out = 0;
+    *address_space_bs__p_out_arguments = NULL;
+    OpcUa_CallMethodRequest* methodToCall = address_space_bs__p_call_method_pointer;
+    assert(NULL != methodToCall);
+
+    /* Get the Method Call Manager from server configuration */
+    SOPC_Endpoint_Config* endpoint_config =
+        SOPC_ToolkitServer_GetEndpointConfig(address_space_bs__p_endpoint_config_idx);
+    if (NULL == endpoint_config || NULL == endpoint_config->serverConfigPtr)
+    {
+        *address_space_bs__p_rawStatusCode = OpcUa_BadInternalError;
+        return;
+    }
+    SOPC_MethodCallManager* mcm = endpoint_config->serverConfigPtr->mcm;
+    if (NULL == mcm || NULL == mcm->pFnGetMethod)
+    {
+        *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
+        return;
+    }
+
+    /* Get the C function corresponding to the method */
+    SOPC_NodeId* methodId = &methodToCall->MethodId;
+    SOPC_MethodCallFunc* method_c = mcm->pFnGetMethod(mcm, methodId);
+    if (NULL == method_c)
+    {
+        *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
+        return;
+    }
+
+    SOPC_NodeId* objectId = &methodToCall->ObjectId;
+    uint32_t nbInputArgs = (0 < methodToCall->NoOfInputArguments) ? (uint32_t) methodToCall->NoOfInputArguments
+                                                                  : 0; /* convert to avoid compilator error */
+    SOPC_Variant* inputArgs = methodToCall->InputArguments;
+    uint32_t noOfOutput = 0;
+    SOPC_Variant* outputArgs = NULL;
+    SOPC_CallContext* cc = SOPC_CallContext_Copy(SOPC_CallContext_GetCurrent());
+    *address_space_bs__p_rawStatusCode =
+        method_c->pMethodFunc(cc, objectId, nbInputArgs, inputArgs, &noOfOutput, &outputArgs, method_c->pParam);
+    SOPC_CallContext_Free(cc);
+    if (0 != noOfOutput && NULL == outputArgs)
+    {
+        char* mNodeId = SOPC_NodeId_ToCString(methodId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "MethodCall %s unexpected failure: application variant array result is NULL which is "
+                               "not expected when noOfOutputs (%" PRIu32 ") > 0",
+                               mNodeId, noOfOutput);
+        SOPC_Free(mNodeId);
+        *address_space_bs__p_rawStatusCode = OpcUa_BadNotImplemented;
+        return;
+    }
+    if (noOfOutput > INT32_MAX)
+    {
+        noOfOutput = INT32_MAX;
+        // Note: normally used for input arguments but it is the better match and should not occur
+        *address_space_bs__p_rawStatusCode = OpcUa_BadTooManyArguments;
+    }
+    if (SOPC_IsGoodStatus(*address_space_bs__p_rawStatusCode))
+    {
+        *address_space_bs__p_nb_out = (int32_t) noOfOutput;
+        *address_space_bs__p_out_arguments = outputArgs;
+    }
+    else
+    {
+        int32_t nbElts = (int32_t) noOfOutput;
+        SOPC_Clear_Array(&nbElts, (void**) &outputArgs, sizeof(SOPC_Variant), SOPC_Variant_ClearAux);
+    }
+}
 
 void address_space_bs__addNode_AddressSpace_Variable(
     const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,

@@ -28,8 +28,6 @@ SEES
 
 DEFINITIONS
     d_variables ==
-        ConstantAddressSpace, /* In constant address space only Value attribute might be modified, no node can be added / removed */
-
         s_Node,
 
         a_NodeId,
@@ -79,8 +77,6 @@ DEFINITIONS
 
     d_inv ==
     (
-        ConstantAddressSpace : BOOL &
-
         /* Address Space nodes */
         s_Node <: t_Node &
 
@@ -167,12 +163,15 @@ DEFINITIONS
         d_inv
 
 ABSTRACT_VARIABLES
+    ConstantAddressSpace, /* In constant address space only Value attribute might be modified, no node can be added / removed */
     d_variables
 
 INVARIANT
+    ConstantAddressSpace : BOOL &
     d_inv
 
 INITIALISATION
+    ConstantAddressSpace :: BOOL ||
     /* This is where the Address Space is filled */
     d_variables :( d_init )
 
@@ -896,6 +895,35 @@ OPERATIONS
         p_variant : t_Variant
     THEN
         p_type :: t_NodeId_i
+    END
+    ;
+
+    /* Method Call operation */
+    p_rawStatusCode, p_nb_out, p_out_arguments <-- exec_callMethod(p_endpoint_config_idx, p_call_method_pointer) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_call_method_pointer : t_CallMethodPointer_i &
+        p_call_method_pointer : t_CallMethodPointer
+    THEN
+        d_variables, /* Any address space change is possible */
+        p_rawStatusCode,
+        p_nb_out,
+        p_out_arguments
+        :(
+            d_inv &
+            p_rawStatusCode : t_RawStatusCode &
+            p_nb_out : NAT &
+            p_out_arguments : t_ArgumentsPointer_i &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                p_nb_out = 0 &
+                p_out_arguments = c_ArgumentsPointer_indet
+            ) &
+            (p_rawStatusCode /= c_RawStatusCode_Good =>
+                (p_nb_out > 0 =>
+                 p_out_arguments : t_ArgumentsPointer)
+            )
+        )
     END
     ;
 

@@ -45,26 +45,12 @@ INITIALISATION
 OPERATIONS
 
     d_adsp_operations;
-    d_adsp_add_node_operation;
     d_adsp_write_operation;
 
-    StatusCode_service <-- treat_method_call_request (p_session, p_req_msg, p_resp_msg) =
-    PRE
-        p_session : t_session_i &
-        p_session : t_session &
-        p_req_msg : t_msg_i &
-        p_req_msg : t_msg &
-        p_req_msg = c_msg_in &
-        a_msg_in_type = e_msg_method_call_req &
-        p_resp_msg : t_msg_i &
-        p_resp_msg : t_msg &
-        p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_method_call_resp
-    THEN
-        StatusCode_service
-        :(  StatusCode_service : t_StatusCode_i &
-            StatusCode_service : t_StatusCode
-        )
-    END
+    /* call service operation */
+    d_adsp_call_operation;
+
+    /* operation used by service_add_nodes */
+    d_adsp_add_node_internal_operation
 
 END

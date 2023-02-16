@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 16/02/2023 13:30:19
+ Date                 : 16/02/2023 16:12:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -39,7 +39,6 @@
    IMPORTS Clause
   -----------------*/
 #include "argument_pointer_bs.h"
-#include "call_method_bs.h"
 #include "call_method_it.h"
 #include "call_method_result_it.h"
 #include "msg_call_method_bs.h"
