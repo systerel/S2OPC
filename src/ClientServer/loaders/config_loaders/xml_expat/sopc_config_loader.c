@@ -411,7 +411,12 @@ static bool start_app_type(struct parse_context_t* ctx, const XML_Char** attrs)
 
     const char* attr_val = get_attr(ctx, "type", attrs);
 
-    if (!parse_app_type_text(ctx, attr_val))
+    if (NULL == attr_val)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationType 'type' attribute missing");
+        return false;
+    }
+    else if (!parse_app_type_text(ctx, attr_val))
     {
         LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid application type: %s", attr_val);
         return false;
