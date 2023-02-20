@@ -251,7 +251,6 @@ target_include_directories(test_secure_channels_server PRIVATE "unit_tests/secur
 
 # Tests compilation definition #
 
-
 # Client/Server test
 add_executable(toolkit_test_server_client
   "validation_tests/client/toolkit_test_server_client.c"
@@ -460,6 +459,16 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ctt_ca1TC_ca2I_usrTR.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/issued_usr
   )
 
+# Test discovery server
+
+add_executable(toolkit_test_discovery_server
+  "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_discovery_server.c"
+  ${TEST_SERVER_ADDRESS_SPACE_C})
+add_dependencies(toolkit_test_discovery_server make-server-address-space)
+target_link_libraries(toolkit_test_discovery_server PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_compile_options(toolkit_test_discovery_server PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(toolkit_test_discovery_server PRIVATE ${S2OPC_DEFINITIONS})
+
 # Tests run definition #
 
 #Note: use absolute path for scripts to allow ctest to be run from another another path
@@ -496,16 +505,20 @@ set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT
 
 
 # Function to run a validation of the S2OPC server scenario with given client scenario test
-function(s2opc_server_validation_test name)
+function(s2opc_custom_server_validation_test server_target name)
   get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
   set(test_name "validation::${name}")
   add_test(NAME "${test_name}"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMAND
     "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
-    "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
+    "--server-wd" $<TARGET_FILE_DIR:${server_target}>
+    "--server-cmd" "$<TARGET_FILE:${server_target}> ${no_ext_name}"
     "${PYTHON_EXECUTABLE}" ${CMAKE_CURRENT_SOURCE_DIR}/interop_tools/${name})
+endfunction()
+
+function(s2opc_server_validation_test name)
+  s2opc_custom_server_validation_test(${TOOLKIT_TEST_SERVER} ${name})
 endfunction()
 
 # Function to run a validation of the given S2OPC client scenario with another server
@@ -534,7 +547,7 @@ function(s2opc_client_self_validation_test name)
   set_tests_properties(${test_name} PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=${name}.tap")
 endfunction()
 
-s2opc_server_validation_test("client.py")
+s2opc_custom_server_validation_test("toolkit_test_discovery_server" "client.py")
 s2opc_server_validation_test("client_sc_renew.py")
 s2opc_server_validation_test("client_session_timeout.py")
 s2opc_server_validation_test("client_sc_establish_timeout.py")
