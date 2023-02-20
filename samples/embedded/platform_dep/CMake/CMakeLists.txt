@@ -35,47 +35,42 @@ find_package(PythonInterp 3 REQUIRED)
 #### Samples for S2OPC PubSub library ####
 
 # Options reserved to samples
-option(ENABLE_SAMPLES "Build the S2OPC PubSub library samples" ON)
 option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" ON)
 option(WITH_CONST_ADDSPACE "Generate an address space where non writeable attributes are const" ON)
 
-if(ENABLE_SAMPLES)
+if(UNIX)
+  set(PLATFORM_DIR linux)
+  set(S2OPC_COMPILER_FLAGS ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE -Wno-error=date-time -Wno-date-time)
+elseif(WIN32)
+  set(PLATFORM_DIR windows)
+else()
+  message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
+endif()
 
-  if(UNIX)
-    set(PLATFORM_DIR linux)
-    set(S2OPC_COMPILER_FLAGS ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE -Wno-error=date-time -Wno-date-time)
-  elseif(WIN32)
-    set(PLATFORM_DIR windows)
-  else()
-    message(FATAL_ERROR "Unsupported platform: ${CMAKE_SYSTEM_NAME}")
-  endif()
+FILE(GLOB samples_src
+  ${SAMPLE_SRC_DIR}/src/*.c
+  ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src/*.c
+  )
 
-  FILE(GLOB samples_src
-    ${SAMPLE_SRC_DIR}/src/*.c
-    ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src/*.c
-    )
+add_executable(${SAMPLE_PROJECT_NAME} ${samples_src})
 
-  add_executable(${SAMPLE_PROJECT_NAME} ${samples_src})
+target_compile_options(${SAMPLE_PROJECT_NAME} PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE ${S2OPC_DEFINITIONS})
+target_include_directories(${SAMPLE_PROJECT_NAME} PRIVATE
+      ${SAMPLE_SRC_DIR}/src
+      ${SAMPLE_PTF_DEP}/include
+      ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src
+      )
+if (WITH_STATIC_SECURITY_DATA)
+  target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE "WITH_STATIC_SECURITY_DATA")
+endif()
 
-  target_compile_options(${SAMPLE_PROJECT_NAME} PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE ${S2OPC_DEFINITIONS})
-  target_include_directories(${SAMPLE_PROJECT_NAME} PRIVATE
-        ${SAMPLE_SRC_DIR}/src
-        ${SAMPLE_PTF_DEP}/include
-        ${SAMPLE_PTF_DEP}/${PLATFORM_DIR}/src
-        )
-  if (WITH_STATIC_SECURITY_DATA)
-    target_compile_definitions(${SAMPLE_PROJECT_NAME} PRIVATE "WITH_STATIC_SECURITY_DATA")
-  endif()
-
-  if(NOT S2OPC_CLIENTSERVER_ONLY)
-    target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE s2opc_pubsub)
-  endif()
-  if(NOT S2OPC_PUBSUB_ONLY)
-    target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
-      s2opc_clientwrapper
-      s2opc_serverwrapper
-      s2opc_clientserver-loader-embedded)
-  endif()
-
-endif(ENABLE_SAMPLES)
+if(NOT S2OPC_CLIENTSERVER_ONLY)
+  target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE s2opc_pubsub)
+endif()
+if(NOT S2OPC_PUBSUB_ONLY)
+  target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
+    s2opc_clientwrapper
+    s2opc_serverwrapper
+    s2opc_clientserver-loader-embedded)
+endif()

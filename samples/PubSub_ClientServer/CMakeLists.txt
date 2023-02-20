@@ -21,8 +21,6 @@ find_package(PythonInterp 3 REQUIRED)
 #### Samples for S2OPC PubSub library ####
 
 # Options reserved to samples
-option(ENABLE_SAMPLES "Build the S2OPC PubSub library samples" ON)
-
 option(PUBSUB_STATIC_CONFIG "Load PubSub configuration statically" OFF)
 
 ## Functions used to generate config data for samples ##
@@ -55,51 +53,44 @@ if(PUBSUB_STATIC_CONFIG)
   pubsub_embed_config(${STATIC_PUBSUB_CONFIG_C} "${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml")
 endif()
 
+# Demo PubSub server
+add_executable(pubsub_server "pubsub_server/main.c"
+                             "pubsub_server/server.c"
+                             "pubsub_server/pubsub.c"
+                             "pubsub_server/helpers.c"
+                             "${STATIC_PUBSUB_CONFIG_C}"
+                             "${STATIC_ADDRESS_SPACE_C}"
+                             )
+target_compile_options(pubsub_server PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(pubsub_server PRIVATE ${S2OPC_DEFINITIONS})
+
+if (WITH_STATIC_SECURITY_DATA)
+  target_compile_definitions(pubsub_server PRIVATE "WITH_STATIC_SECURITY_DATA")
+  # Reuse code of demo server
+    set(S2OPC_SERVERTEST_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
+    target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERTEST_INCLUDES})
+endif()
 
 
-if(ENABLE_SAMPLES)
+target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded s2opc_clientserver-xml-loaders-expat)
+target_include_directories(pubsub_server PRIVATE pubsub_server)
 
-
-  # Demo PubSub server
-  add_executable(pubsub_server "pubsub_server/main.c"
-                               "pubsub_server/server.c"
-                               "pubsub_server/pubsub.c"
-                               "pubsub_server/helpers.c"
-                               "${STATIC_PUBSUB_CONFIG_C}"
-                               "${STATIC_ADDRESS_SPACE_C}"
-                               )
-  target_compile_options(pubsub_server PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(pubsub_server PRIVATE ${S2OPC_DEFINITIONS})
-
-  if (WITH_STATIC_SECURITY_DATA)
-    target_compile_definitions(pubsub_server PRIVATE "WITH_STATIC_SECURITY_DATA")
-    # Reuse code of demo server
-      set(S2OPC_SERVERTEST_INCLUDES ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
-      target_include_directories(pubsub_server PRIVATE ${S2OPC_SERVERTEST_INCLUDES})
-  endif()
-
-
-  target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded s2opc_clientserver-xml-loaders-expat)
-  target_include_directories(pubsub_server PRIVATE pubsub_server)
-
-  # Copy data
-  add_custom_command(
-    TARGET pubsub_server POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
-    # Reuse certs of ClientServer samples
-    COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
-    COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
-    COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
-    COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
-    # PubSub samples specific data
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/keyNonce.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-    )
-
-endif(ENABLE_SAMPLES)
+# Copy data
+add_custom_command(
+  TARGET pubsub_server POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
+  # Reuse certs of ClientServer samples
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
+  COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
+  COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_2k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_private/
+  COMMAND ${CMAKE_COMMAND} -E copy  ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/
+  # PubSub samples specific data
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/keyNonce.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  )

@@ -456,7 +456,6 @@ endfunction()
 ## S2OPC fuzzing tests: to be run manually ##
 
 # options with impact on the dependencies
-option(ENABLE_TESTING "Build the S2OPC tests" ON)
 option(ENABLE_FUZZING "Build the S2OPC fuzzers" OFF)
 
 # Enable fuzzing if WITH_OSS_FUZZ is ON

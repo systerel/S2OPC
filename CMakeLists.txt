@@ -30,6 +30,15 @@ endif()
 
 # S2OPC #
 
+# Options
+option(ENABLE_SAMPLES "Build the S2OPC library samples" ON)
+option(ENABLE_TESTING "Build the S2OPC library tests" ON)
+
 add_subdirectory(src)
-add_subdirectory(tests)
-add_subdirectory(samples)
+
+if(ENABLE_TESTING)
+ add_subdirectory(tests)
+endif()
+if(ENABLE_SAMPLES)
+  add_subdirectory(samples)
+endif()
