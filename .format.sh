@@ -24,7 +24,6 @@ SRCS_DIR=./src
 TEST_DIR=./tests
 BSRCS_DIR=./bsrc
 SAMPLE_DIR=./samples
-ZEPHYR_SAMPLES_DIR=./zephyr/samples
 
 find $SRCS_DIR $TEST_DIR -name "*.[hc]" ! -path "./src/ClientServer/services/bgenc/*" -exec clang-format -style=file -i '{}' \;
 find $SAMPLE_DIR -name "*.[hc]" ! -name "test_address_space.c" -exec clang-format -style=file -i '{}' \;
