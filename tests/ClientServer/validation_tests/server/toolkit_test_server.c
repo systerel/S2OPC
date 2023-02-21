@@ -376,7 +376,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     {
         status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", "en-US",
-                                                                   OpcUa_ApplicationType_DiscoveryServer);
+                                                                   OpcUa_ApplicationType_Server);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -527,7 +527,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     }
 
     /*
-     * 3rd Security policy is None with anonymous and username (non encrypted) authentication allowed
+     * 6th Security policy is None with anonymous and username (non encrypted) authentication allowed
      * (for tests only, otherwise users on unsecure channel shall be forbidden
      *  and only discovery endpoint activated on a secured channel configuration)
      */
