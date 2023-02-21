@@ -654,6 +654,9 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
 
     if (SOPC_STATUS_OK != status)
     {
+        // Free the possibly allocated certificate in case of error
+        SOPC_KeyManager_Certificate_Free(*clientSenderCertificate);
+        *clientSenderCertificate = NULL;
         result = false;
     }
 
