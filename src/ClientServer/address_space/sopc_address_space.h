@@ -24,6 +24,16 @@
 
 #include "sopc_types.h"
 
+/**
+ * \brief AddressSpace module provides an abstract representation of the address space.
+ *        This is the representation provided by AddressSpace loaders ::SOPC_Embedded_AddressSpace_Load or
+ *        ::SOPC_UANodeSet_Parse or might be used to build an AddressSpace from scratch.
+ *
+ * \note  Once configured the AddressSpace is managed by services layer
+ *        and shall not be accessed directly. AddressSpaceAccess might be provided for limited scopes
+ *        (e.g. method call implementation).
+ */
+
 #define FOR_EACH_ELEMENT_TYPE(x, extra)                                                                               \
     x(DataType, data_type, extra) x(Method, method, extra) x(Object, object, extra) x(ObjectType, object_type, extra) \
         x(ReferenceType, reference_type, extra) x(Variable, variable, extra) x(VariableType, variable_type, extra)    \

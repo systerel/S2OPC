@@ -22,27 +22,30 @@
  * Utils to add node in address space
  */
 
-#ifndef UTIL_ADD_NODE_H_
-#define UTIL_ADD_NODE_H_
+#ifndef SOPC_NODE_MGT_HELPER_INTERNAL_H_
+#define SOPC_NODE_MGT_HELPER_INTERNAL_H_
 
-#include "constants_statuscodes_bs.h"
+#include "sopc_address_space.h"
+#include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
-void util_add_node__check_constraints_addNode_AddressSpace_Variable(
-    const SOPC_NodeId* parentNid,
-    const SOPC_NodeId* refTypeId,
-    const SOPC_QualifiedName* browseName,
-    const SOPC_NodeId* typeDefId,
-    constants_statuscodes_bs__t_StatusCode_i* sc_addnode);
+SOPC_StatusCode SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(SOPC_AddressSpace* addSpace,
+                                                                        const SOPC_ExpandedNodeId* parentNid,
+                                                                        const SOPC_NodeId* refTypeId,
+                                                                        const SOPC_QualifiedName* browseName,
+                                                                        const SOPC_ExpandedNodeId* typeDefId);
 
-SOPC_ReturnStatus util_add_node__AddVariableNodeAttributes(SOPC_AddressSpace_Node* node,
-                                                           OpcUa_VariableNode* varNode,
-                                                           const SOPC_ExtensionObject* nodeAttributes,
-                                                           constants_statuscodes_bs__t_StatusCode_i* sc_addnode);
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_AddressSpace* addSpace,
+                                                                       SOPC_AddressSpace_Node* node,
+                                                                       OpcUa_VariableNode* varNode,
+                                                                       const OpcUa_VariableAttributes* varAttributes,
+                                                                       SOPC_StatusCode* scAddNode);
 
-SOPC_ReturnStatus util_add_node__AddRefChildToParentNode(const SOPC_NodeId* parentNodeId,
-                                                         const SOPC_NodeId* childNodeId,
-                                                         const SOPC_NodeId* refTypeId);
+SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(SOPC_AddressSpace* addSpace,
+                                                                     const SOPC_NodeId* parentNodeId,
+                                                                     const SOPC_NodeId* childNodeId,
+                                                                     const SOPC_NodeId* refTypeId);
 
-void util_add_node__RemLastRefInParentNode(const SOPC_NodeId* parentNodeId);
+bool SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(SOPC_AddressSpace* addSpace, const SOPC_NodeId* parentNodeId);
 
-#endif /* UTIL_ADD_NODE_H_ */
+#endif /* SOPC_NODE_MGT_HELPER_INTERNAL_H_ */

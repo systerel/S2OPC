@@ -23,6 +23,7 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_types.h"
 
 /**
  * \brief AddressSpace Access module provides controlled access to address space.
@@ -113,19 +114,15 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_Write(SOPC_AddressSpaceAccess* addSpaceA
                                               const uint16_t* optSourcePicoSeconds);
 
 /**
- * \note: Operation of add node includes creation of mutual references with parent / type
+ * \note: Add variable node operation includes creation of mutual references with parent / type
  *        and might include type sub-nodes creation
  */
-/*SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
+SOPC_StatusCode SOPC_AddressSpaceAccess_AddVariableNode(SOPC_AddressSpaceAccess* addSpaceAccess,
                                                         const SOPC_ExpandedNodeId* parentNodeId,
                                                         const SOPC_NodeId* refTypeId,
                                                         const SOPC_NodeId* newNodeId,
                                                         const SOPC_QualifiedName* browseName,
-                                                        OpcUa_VariableAttributes* varAttributes,
-                                                        SOPC_ExpandedNodeId typeDefId);
-*/
-// Operation of delete node includes deletion of mutual references / deletion of subnodes
-// SOPC_StatusCode SOPC_AddressSpaceAccess_DeleteNode(SOPC_AddressSpaceAccess* addSpaceAccess, const SOPC_NodeId*
-// nodeId);
+                                                        const OpcUa_VariableAttributes* varAttributes,
+                                                        const SOPC_ExpandedNodeId* typeDefId);
 
 #endif /* SOPC_ADDRESS_SPACE_ACCESS_H_ */

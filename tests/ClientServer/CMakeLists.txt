@@ -32,7 +32,8 @@ endif()
 ### Tests and validation of S2OPC library ###
 
 # Get S2OPC necessary internal header for unit and validation tests
-set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES
+set(S2OPC_CLIENTSERVER_INTERNAL_INCLUDES 
+  "${S2OPC_ROOT_PATH}/src/ClientServer/address_space" 
   "${S2OPC_ROOT_PATH}/src/ClientServer/api_toolkit"
   "${S2OPC_ROOT_PATH}/src/ClientServer/configuration"
   "${S2OPC_ROOT_PATH}/src/ClientServer/secure_channels"

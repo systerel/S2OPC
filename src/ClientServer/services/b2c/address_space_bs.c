@@ -45,12 +45,12 @@
 #include "sopc_service_call_context.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_user_manager.h"
-#include "util_add_node.h"
 #include "util_b2c.h"
 #include "util_variant.h"
 
 bool sopc_addressSpace_configured = false;
 SOPC_AddressSpace* address_space_bs__nodes = NULL;
+SOPC_AddressSpaceAccess* addSpaceAccess = NULL;
 
 #define InputArguments_BrowseName "InputArguments"
 
@@ -60,7 +60,10 @@ void SOPC_AddressSpace_Check_Configured(void)
 {
     if (sopc_addressSpace_configured)
     {
-        assert(NULL != address_space_bs__nodes);
+        SOPC_ASSERT(NULL != address_space_bs__nodes);
+        // TODO: UNINIT !
+        addSpaceAccess = SOPC_AddressSpaceAccess_Create(address_space_bs__nodes, false);
+        SOPC_ASSERT(NULL != addSpaceAccess);
     }
 }
 
@@ -195,106 +198,17 @@ void address_space_bs__addNode_AddressSpace_Variable(
     const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
 {
-    assert(SOPC_AddressSpace_AreNodesReleasable(address_space_bs__nodes));
-    assert(!SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes));
-
-    assert(constants__e_ncl_Variable == address_space_bs__p_nodeClass);
+    SOPC_UNUSED_ARG(address_space_bs__p_nodeClass); // For B precondition
+    assert(NULL != address_space_bs__p_nodeAttributes);
     assert(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
     assert(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
            &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
-    assert(0 == address_space_bs__p_typeDefId->ServerIndex);
-    *address_space_bs__sc_addnode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-    SOPC_AddressSpace_Node* newNode = SOPC_Calloc(1, sizeof(*newNode));
-    if (NULL == newNode)
-    {
-        return;
-    }
-    SOPC_AddressSpace_Node_Initialize(address_space_bs__nodes, newNode, OpcUa_NodeClass_Variable);
-
-    // Copy the main parameters not included in NodeAttributes structure
-    OpcUa_VariableNode* varNode = &newNode->data.variable;
-    // NodeID
-    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&varNode->NodeId, address_space_bs__p_newNodeId);
-    assert(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-
-    // BrowseName
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_QualifiedName_Copy(&varNode->BrowseName, address_space_bs__p_browseName);
-        assert(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
-    // References from new node (backward to parent and forward to type)
-    if (SOPC_STATUS_OK == status)
-    {
-        varNode->References = SOPC_Calloc(2, sizeof(*varNode->References));
-        if (NULL == varNode->References)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        else
-        {
-            varNode->NoOfReferences = 2;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set HasTypeDefinition
-        OpcUa_ReferenceNode* hasTypeDef = &varNode->References[0];
-        hasTypeDef->IsInverse = false;
-        hasTypeDef->ReferenceTypeId.Namespace = 0;
-        hasTypeDef->ReferenceTypeId.IdentifierType = SOPC_IdentifierType_Numeric;
-        hasTypeDef->ReferenceTypeId.Data.Numeric = OpcUaId_HasTypeDefinition;
-        status = SOPC_ExpandedNodeId_Copy(&hasTypeDef->TargetId, address_space_bs__p_typeDefId);
-        assert(SOPC_STATUS_OK == status || SOPC_STATUS_OUT_OF_MEMORY == status);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Set hierarchical reference to parent
-        OpcUa_ReferenceNode* hierarchicalRef = &varNode->References[1];
-        hierarchicalRef->IsInverse = true;
-        status = SOPC_NodeId_Copy(&hierarchicalRef->ReferenceTypeId, address_space_bs__p_refTypeId);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ExpandedNodeId_Copy(&hierarchicalRef->TargetId, address_space_bs__p_parentNid);
-        }
-        else
-        {
-            assert(SOPC_STATUS_OUT_OF_MEMORY == status);
-        }
-    }
-    // Manage NodeAttributes
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(newNode, varNode, address_space_bs__p_nodeAttributes,
-                                                          address_space_bs__sc_addnode);
-    }
-    // Set reciprocal reference from parent and add node to address space
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(&address_space_bs__p_parentNid->NodeId,
-                                                        address_space_bs__p_newNodeId, address_space_bs__p_refTypeId);
-        // Add node to address space
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_AddressSpace_Append(address_space_bs__nodes, newNode);
-            if (SOPC_STATUS_OK != status)
-            {
-                assert(SOPC_STATUS_OUT_OF_MEMORY == status);
-                // Rollback reference added in parent
-                SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(&address_space_bs__p_parentNid->NodeId);
-            }
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        *address_space_bs__sc_addnode = constants_statuscodes_bs__e_sc_ok;
-    }
-    else
-    {
-        // Clear and dealloc node
-        SOPC_AddressSpace_Node_Clear(address_space_bs__nodes, newNode);
-        SOPC_Free(newNode);
-    }
+    SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddVariableNode(
+        addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
+        address_space_bs__p_browseName,
+        (const OpcUa_VariableAttributes*) address_space_bs__p_nodeAttributes->Body.Object.Value,
+        address_space_bs__p_typeDefId);
+    util_status_code__C_to_B(retCode, address_space_bs__sc_addnode);
 }
 
 void address_space_bs__addNode_check_valid_node_attributes_type(
@@ -360,11 +274,14 @@ void address_space_bs__check_constraints_addNode_AddressSpace_Variable(
     const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
 {
+    // TODO: delete
     SOPC_UNUSED_ARG(address_space_bs__p_newNodeId);
     SOPC_UNUSED_ARG(address_space_bs__p_nodeClass);
-    SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(
-        &address_space_bs__p_parentNid->NodeId, address_space_bs__p_refTypeId, address_space_bs__p_browseName,
-        &address_space_bs__p_typeDefId->NodeId, address_space_bs__sc_addnode);
+    SOPC_UNUSED_ARG(address_space_bs__p_parentNid);
+    SOPC_UNUSED_ARG(address_space_bs__p_refTypeId);
+    SOPC_UNUSED_ARG(address_space_bs__p_browseName);
+    SOPC_UNUSED_ARG(address_space_bs__p_typeDefId);
+    *address_space_bs__sc_addnode = constants_statuscodes_bs__e_sc_ok;
 }
 
 void address_space_bs__gen_addNode_event(const constants__t_NodeId_i address_space_bs__p_newNodeId)
