@@ -866,6 +866,8 @@
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=Objects.15361.TRACKs.BALA_RDLS_026TK.RM.TK</Reference>
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=Objects.15361.TRACKs.BALA_RDLS_OSTK.RM.TK</Reference>
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=Objects.15361.TRACKs.BALA_RDLS_WBK_RDLN_EBK.RM.TK</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=TestObject_HelloNextArg</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=TestObject_Counter</Reference>
     </References>
   </UAVariableType>
   <UAVariableType BrowseName="PropertyType" NodeId="i=68" ValueRank="-2">
@@ -8887,8 +8889,32 @@
     <Description>TestObject</Description>
     <Description Locale="en">TestObject</Description>
     <References>
+      <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
       <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
     </References>
   </UAObject>
+  <UAVariable BrowseName="1:HelloNextArg" DataType="String" NodeId="ns=1;s=TestObject_HelloNextArg">
+    <DisplayName>HelloNextArg</DisplayName>
+    <Description />
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+    <Value>
+      <uax:String>World</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="1:Counter" DataType="UInt32" NodeId="ns=1;s=TestObject_Counter">
+    <DisplayName>Counter</DisplayName>
+    <Description />
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>0</uax:UInt32>
+    </Value>
+  </UAVariable>
   </UANodeSet>

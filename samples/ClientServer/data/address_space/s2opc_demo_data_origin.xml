@@ -1839,10 +1839,32 @@
       <Reference ReferenceType="HasComponent">ns=1;s=MethodIO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodI</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
     </References>
   </UAObject>
+  <UAVariable NodeId="ns=1;s=TestObject_HelloNextArg" BrowseName="1:HelloNextArg" DataType="String">
+    <DisplayName>HelloNextArg</DisplayName>
+    <Description/>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:String>World</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;s=TestObject_Counter" BrowseName="1:Counter" DataType="UInt32">
+    <DisplayName>Counter</DisplayName>
+    <Description/>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:UInt32>0</uax:UInt32>
+    </Value>
+  </UAVariable>
   <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12734">
     <DisplayName>MethodNoArg</DisplayName>
     <Description>MethodNoArg</Description>
@@ -1873,73 +1895,9 @@
           </TypeId>
           <Body>
             <Argument>
-              <Name>CertificateGroupId</Name>
-              <DataType>
-                <Identifier>i=17</Identifier>
-              </DataType>
-              <ValueRank>-1</ValueRank>
-              <ArrayDimensions />
-              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
-            </Argument>
-          </Body>
-        </ExtensionObject>
-        <ExtensionObject>
-          <TypeId>
-            <Identifier>i=297</Identifier>
-          </TypeId>
-          <Body>
-            <Argument>
-              <Name>CertificateTypeId</Name>
-              <DataType>
-                <Identifier>i=17</Identifier>
-              </DataType>
-              <ValueRank>-1</ValueRank>
-              <ArrayDimensions />
-              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
-            </Argument>
-          </Body>
-        </ExtensionObject>
-        <ExtensionObject>
-          <TypeId>
-            <Identifier>i=297</Identifier>
-          </TypeId>
-          <Body>
-            <Argument>
-              <Name>SubjectName</Name>
+              <Name>Next Hello Name</Name>
               <DataType>
                 <Identifier>i=12</Identifier>
-              </DataType>
-              <ValueRank>-1</ValueRank>
-              <ArrayDimensions />
-              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
-            </Argument>
-          </Body>
-        </ExtensionObject>
-        <ExtensionObject>
-          <TypeId>
-            <Identifier>i=297</Identifier>
-          </TypeId>
-          <Body>
-            <Argument>
-              <Name>RegeneratePrivateKey</Name>
-              <DataType>
-                <Identifier>i=1</Identifier>
-              </DataType>
-              <ValueRank>-1</ValueRank>
-              <ArrayDimensions />
-              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
-            </Argument>
-          </Body>
-        </ExtensionObject>
-        <ExtensionObject>
-          <TypeId>
-            <Identifier>i=297</Identifier>
-          </TypeId>
-          <Body>
-            <Argument>
-              <Name>Nonce</Name>
-              <DataType>
-                <Identifier>i=15</Identifier>
               </DataType>
               <ValueRank>-1</ValueRank>
               <ArrayDimensions />
@@ -1964,9 +1922,9 @@
           </TypeId>
           <Body>
             <Argument>
-              <Name>CertificateRequest</Name>
+              <Name>Hello Result</Name>
               <DataType>
-                <Identifier>i=15</Identifier>
+                <Identifier>i=12</Identifier>
               </DataType>
               <ValueRank>-1</ValueRank>
               <ArrayDimensions />
@@ -1999,7 +1957,7 @@
           </TypeId>
           <Body>
             <Argument>
-              <Name>SubscriptionId</Name>
+              <Name>Counter Increment</Name>
               <DataType>
                 <Identifier>i=7</Identifier>
               </DataType>
@@ -2034,9 +1992,9 @@
           </TypeId>
           <Body>
             <Argument>
-              <Name>Certificates</Name>
+              <Name>Counter</Name>
               <DataType>
-                <Identifier>i=15</Identifier>
+                <Identifier>i=7</Identifier>
               </DataType>
               <ValueRank>1</ValueRank>
               <ArrayDimensions />

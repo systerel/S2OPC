@@ -149,7 +149,70 @@ static const bool secuActive = true;
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
 
-static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* callContextPtr,
+static const SOPC_NodeId TestObject = {.IdentifierType = SOPC_IdentifierType_String,
+                                       .Namespace = 1,
+                                       .Data.String = {sizeof("TestObject") - 1, 1, (SOPC_Byte*) "TestObject"}};
+
+static const SOPC_NodeId TestObject_HelloNextArg = {
+    .IdentifierType = SOPC_IdentifierType_String,
+    .Namespace = 1,
+    .Data.String = {sizeof("TestObject_HelloNextArg") - 1, 1, (SOPC_Byte*) "TestObject_HelloNextArg"}};
+
+static const SOPC_NodeId TestObject_Counter = {
+    .IdentifierType = SOPC_IdentifierType_String,
+    .Namespace = 1,
+    .Data.String = {sizeof("TestObject_Counter") - 1, 1, (SOPC_Byte*) "TestObject_Counter"}};
+
+static SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
+                                                   const SOPC_NodeId* objectId,
+                                                   uint32_t nbInputArgs,
+                                                   const SOPC_Variant* inputArgs,
+                                                   uint32_t* nbOutputArgs,
+                                                   SOPC_Variant** outputArgs,
+                                                   void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+
+    if (!SOPC_NodeId_Equal(&TestObject, objectId))
+    {
+        // Unexpected NodeId to apply method
+        return OpcUa_BadNodeIdInvalid;
+    }
+
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
+    if (!SOPC_IsGoodStatus(stCode) || SOPC_UInt32_Id != dv->Value.BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType)
+    {
+        return OpcUa_BadInvalidState;
+    }
+
+    dv->Value.Value.Uint32++;
+
+    stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_Counter, SOPC_AttributeId_Value, NULL, &dv->Value,
+                                           NULL, NULL, NULL);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        return OpcUa_BadInvalidState;
+    }
+
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+    return SOPC_GoodGenericStatus;
+}
+
+static SOPC_StatusCode SOPC_Method_Func_AddToCounter(const SOPC_CallContext* callContextPtr,
                                                      const SOPC_NodeId* objectId,
                                                      uint32_t nbInputArgs,
                                                      const SOPC_Variant* inputArgs,
@@ -157,17 +220,110 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* cal
                                                      SOPC_Variant** outputArgs,
                                                      void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
+    SOPC_UNUSED_ARG(param);
     SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != inputArgs);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+
+    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (!SOPC_NodeId_Equal(&TestObject, objectId))
+    {
+        // Unexpected NodeId to apply method
+        return OpcUa_BadNodeIdInvalid;
+    }
+
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
+    if (!SOPC_IsGoodStatus(stCode) || SOPC_UInt32_Id != dv->Value.BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType)
+    {
+        return OpcUa_BadInvalidState;
+    }
+
+    dv->Value.Value.Uint32 += inputArgs[0].Value.Uint32;
+
+    stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_Counter, SOPC_AttributeId_Value, NULL, &dv->Value,
+                                           NULL, NULL, NULL);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        return OpcUa_BadInvalidState;
+    }
+
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    return SOPC_STATUS_OK;
+    return SOPC_GoodGenericStatus;
 }
 
-static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_CallContext* callContextPtr,
+static SOPC_StatusCode SOPC_Method_Func_GetCounterValue(const SOPC_CallContext* callContextPtr,
+                                                        const SOPC_NodeId* objectId,
+                                                        uint32_t nbInputArgs,
+                                                        const SOPC_Variant* inputArgs,
+                                                        uint32_t* nbOutputArgs,
+                                                        SOPC_Variant** outputArgs,
+                                                        void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+
+    // Allocate output parameters
+    *outputArgs = SOPC_Calloc(1, sizeof(**outputArgs));
+    if (NULL == *outputArgs)
+    {
+        return OpcUa_BadOutOfMemory;
+    }
+    SOPC_Variant_Initialize(*outputArgs);
+    *nbOutputArgs = 1;
+
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_Counter, NULL, &dv);
+    if (SOPC_IsGoodStatus(stCode) && SOPC_UInt32_Id == dv->Value.BuiltInTypeId &&
+        SOPC_VariantArrayType_SingleValue == dv->Value.ArrayType)
+    {
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(*outputArgs, &dv->Value);
+        if (SOPC_STATUS_OK != status)
+        {
+            stCode = OpcUa_BadOutOfMemory;
+        }
+    }
+    else
+    {
+        stCode = OpcUa_BadInvalidState;
+    }
+
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Free(*outputArgs);
+        *outputArgs = NULL;
+        *nbOutputArgs = 0;
+    }
+
+    return stCode;
+}
+
+static SOPC_StatusCode SOPC_Method_Func_UpdateAndGetPreviousHello(const SOPC_CallContext* callContextPtr,
                                                                   const SOPC_NodeId* objectId,
                                                                   uint32_t nbInputArgs,
                                                                   const SOPC_Variant* inputArgs,
@@ -175,18 +331,88 @@ static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_Cal
                                                                   SOPC_Variant** outputArgs,
                                                                   void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
     SOPC_UNUSED_ARG(param);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+
+    if (1 != nbInputArgs || SOPC_String_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || inputArgs[0].Value.String.Length <= 0)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    // Allocate output parameters
+    *outputArgs = SOPC_Calloc(1, sizeof(**outputArgs));
+    if (NULL == *outputArgs)
+    {
+        return OpcUa_BadOutOfMemory;
+    }
+    SOPC_Variant_Initialize(*outputArgs);
     *nbOutputArgs = 1;
-    *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
-    assert(NULL != *outputArgs);
-    SOPC_Variant_Initialize(&((*outputArgs)[0]));
-    (*outputArgs)[0].BuiltInTypeId = SOPC_UInt32_Id;
-    (*outputArgs)[0].Value.Uint32 = 42;
-    return SOPC_STATUS_OK;
+
+    // Retrieve previous hello argument recorded
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    SOPC_DataValue* dv = NULL;
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_ReadValue(addSpAccess, &TestObject_HelloNextArg, NULL, &dv);
+
+    // Compute output parameter
+    if (SOPC_IsGoodStatus(stCode) && SOPC_String_Id == dv->Value.BuiltInTypeId &&
+        SOPC_VariantArrayType_SingleValue == dv->Value.ArrayType)
+    {
+        const char* helloTemplate = "Hello  !";
+        const size_t helloArgLen = (size_t)(dv->Value.Value.String.Length > 0 ? dv->Value.Value.String.Length : 0);
+        size_t helloSize = strlen(helloTemplate) + helloArgLen + 1;
+
+        char* helloSentence = SOPC_Malloc(helloSize * sizeof(char));
+
+        if (NULL != helloSentence &&
+            (int) (helloSize - 1) !=
+                snprintf(helloSentence, helloSize, "Hello %s !", SOPC_String_GetRawCString(&dv->Value.Value.String)))
+        {
+            stCode = OpcUa_BadOutOfMemory;
+        }
+
+        if (SOPC_IsGoodStatus(stCode))
+        {
+            (*outputArgs)[0].BuiltInTypeId = SOPC_String_Id;
+            (*outputArgs)[0].ArrayType = SOPC_VariantArrayType_SingleValue;
+            SOPC_String_Initialize(&(*outputArgs)[0].Value.String);
+            SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&(*outputArgs)[0].Value.String, helloSentence);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                stCode = OpcUa_BadOutOfMemory;
+            }
+            SOPC_Free(helloSentence);
+        }
+    }
+    else
+    {
+        stCode = OpcUa_BadInvalidState;
+    }
+
+    // Write next hello argument
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_HelloNextArg, SOPC_AttributeId_Value, NULL,
+                                               &inputArgs[0], NULL, NULL, NULL);
+    }
+
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Variant_Clear(&(*outputArgs)[0]);
+        SOPC_Free(*outputArgs);
+        *outputArgs = NULL;
+        *nbOutputArgs = 0;
+    }
+
+    return stCode;
 }
 
 /*
@@ -828,7 +1054,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_IncCounter;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
         }
         else
@@ -843,7 +1069,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_AddToCounter;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Only input, no output", NULL);
         }
         else
@@ -859,7 +1085,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_Generic;
+            methodFunc = &SOPC_Method_Func_GetCounterValue;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, only output", NULL);
         }
         else
@@ -875,7 +1101,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
         methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
         if (NULL != methodId)
         {
-            methodFunc = &SOPC_Method_Func_Test_CreateSigningRequest;
+            methodFunc = &SOPC_Method_Func_UpdateAndGetPreviousHello;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Input, output", NULL);
         }
         else
