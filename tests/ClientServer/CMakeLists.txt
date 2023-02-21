@@ -294,7 +294,7 @@ add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.
   "validation_tests/client/testlib_read_response.c"
   ${TEST_LIGHT_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-add_dependencies(toolkit_test_server_local_service make-light-address-space)
+add_dependencies(toolkit_test_client make-light-address-space)
 target_link_libraries(toolkit_test_client PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
@@ -343,7 +343,7 @@ add_executable(${TOOLKIT_TEST_SERVER}
   "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_server.c"
   ${TEST_SERVER_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-add_dependencies(toolkit_test_server_local_service make-server-address-space)
+add_dependencies(${TOOLKIT_TEST_SERVER} make-server-address-space)
 target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
 target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
