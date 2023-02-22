@@ -265,13 +265,13 @@ void address_space_bs__addNode_AddressSpace_Variable(
     // Manage NodeAttributes
     if (SOPC_STATUS_OK == status)
     {
-        status = util_add_node__AddVariableNodeAttributes(newNode, varNode, address_space_bs__p_nodeAttributes,
+        status = SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(newNode, varNode, address_space_bs__p_nodeAttributes,
                                                           address_space_bs__sc_addnode);
     }
     // Set reciprocal reference from parent and add node to address space
     if (SOPC_STATUS_OK == status)
     {
-        status = util_add_node__AddRefChildToParentNode(&address_space_bs__p_parentNid->NodeId,
+        status = SOPC_NodeMgtHelperInternal_AddRefChildToParentNode(&address_space_bs__p_parentNid->NodeId,
                                                         address_space_bs__p_newNodeId, address_space_bs__p_refTypeId);
         // Add node to address space
         if (SOPC_STATUS_OK == status)
@@ -281,7 +281,7 @@ void address_space_bs__addNode_AddressSpace_Variable(
             {
                 assert(SOPC_STATUS_OUT_OF_MEMORY == status);
                 // Rollback reference added in parent
-                util_add_node__RemLastRefInParentNode(&address_space_bs__p_parentNid->NodeId);
+                SOPC_NodeMgtHelperInternal_RemoveLastRefInParentNode(&address_space_bs__p_parentNid->NodeId);
             }
         }
     }
@@ -362,7 +362,7 @@ void address_space_bs__check_constraints_addNode_AddressSpace_Variable(
 {
     SOPC_UNUSED_ARG(address_space_bs__p_newNodeId);
     SOPC_UNUSED_ARG(address_space_bs__p_nodeClass);
-    util_add_node__check_constraints_addNode_AddressSpace_Variable(
+    SOPC_NodeMgtHelperInternal_CheckConstraints_AddVariable(
         &address_space_bs__p_parentNid->NodeId, address_space_bs__p_refTypeId, address_space_bs__p_browseName,
         &address_space_bs__p_typeDefId->NodeId, address_space_bs__sc_addnode);
 }

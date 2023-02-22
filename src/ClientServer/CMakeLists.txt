@@ -27,6 +27,7 @@ s2opc_gen_build_info(${CMAKE_CURRENT_SOURCE_DIR}/configuration/sopc_toolkit_buil
 
 # Define non-platform dependent source files
 file(GLOB_RECURSE S2OPC_CLIENTSERVER_SRCS
+    "address_space/*.c"
     "api_toolkit/*.c"
     "configuration/*.c"
     "sockets/*.c"
@@ -37,6 +38,7 @@ file(GLOB_RECURSE S2OPC_CLIENTSERVER_SRCS
 # Define S2OPC library includes
 
 set(S2OPC_CLIENTSERVER_PUBLIC_INCLUDES
+    "${CMAKE_CURRENT_SOURCE_DIR}/address_space"
     "${CMAKE_CURRENT_SOURCE_DIR}/api_toolkit"
     "${CMAKE_CURRENT_SOURCE_DIR}/configuration"
     "${CMAKE_CURRENT_SOURCE_DIR}/services/b2c"
