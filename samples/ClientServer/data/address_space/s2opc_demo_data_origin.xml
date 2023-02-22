@@ -1866,15 +1866,15 @@
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12734">
-    <DisplayName>MethodNoArg</DisplayName>
-    <Description>MethodNoArg</Description>
+    <DisplayName>IncrementCounter</DisplayName>
+    <Description>IncrementCounter</Description>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
     </References>
   </UAMethod>
   <UAMethod NodeId="ns=1;s=MethodIO" BrowseName="MethodIO" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12731">
-    <DisplayName>MethodIO</DisplayName>
-    <Description>MethodIO</Description>
+    <DisplayName>IncrementalHello</DisplayName>
+    <Description>IncrementalHello</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;s=MethodIO_Input</Reference>
       <Reference ReferenceType="HasProperty">ns=1;s=MethodIO_Output</Reference>
@@ -1936,8 +1936,8 @@
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=MethodI" BrowseName="MethodInput" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12871">
-    <DisplayName>MethodInput</DisplayName>
-    <Description>MethodInput</Description>
+    <DisplayName>AddToCounter</DisplayName>
+    <Description>AddToCounter</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;s=MethodI_Input</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
@@ -1971,8 +1971,8 @@
     </Value>
   </UAVariable>
   <UAMethod NodeId="ns=1;s=MethodO" BrowseName="MethodOutput" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12775">
-    <DisplayName>MethodOutput</DisplayName>
-    <Description>MethodOutput</Description>
+    <DisplayName>GetCounter</DisplayName>
+    <Description>GetCounter</Description>
     <References>
       <Reference ReferenceType="HasProperty">ns=1;s=MethodO_Output</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
