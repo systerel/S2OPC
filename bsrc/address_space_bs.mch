@@ -947,45 +947,6 @@ OPERATIONS
     END
     ;
 
-    sc_addnode <-- check_constraints_addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_typeDefId) =
-    PRE
-        p_parentNid : t_ExpandedNodeId_i &
-        p_parentNid : dom(conv_ExpandedNodeId_NodeId) &
-        conv_ExpandedNodeId_NodeId(p_parentNid) : ran(a_NodeId) &
-        p_refTypeId : t_NodeId_i &
-        p_refTypeId : t_NodeId &
-        p_newNodeId : t_NodeId_i &
-        p_newNodeId : t_NodeId &
-        p_newNodeId /: ran(a_NodeId) &
-        p_browseName : t_QualifiedName_i &
-        p_browseName : t_QualifiedName &
-        p_nodeClass : t_NodeClass_i &
-        p_nodeClass = e_ncl_Variable &
-        p_typeDefId : t_ExpandedNodeId_i &
-        p_typeDefId : t_ExpandedNodeId &
-        p_typeDefId : dom(conv_ExpandedNodeId_NodeId) &
-        conv_ExpandedNodeId_NodeId(p_typeDefId) : ran(a_NodeId)
-    THEN
-        sc_addnode
-        :(sc_addnode : t_StatusCode_i &
-          sc_addnode : {e_sc_ok, e_sc_bad_browse_name_duplicated,
-                        e_sc_bad_reference_not_allowed, e_sc_bad_type_definition_invalid} &
-          (sc_addnode /= e_sc_ok =>
-            /* Guarantee reference type is suitable between parent node and variable node */
-            (IsParentChildRefTypeSuitable(e_ncl_Variable |-> p_refTypeId |-> conv_ExpandedNodeId_NodeId(p_parentNid))
-             = FALSE <=> (sc_addnode = e_sc_bad_reference_not_allowed)) or
-            /* Guarantee type definition is suitable between variable node and type node */
-            (IsTypeDefSuitable(e_ncl_Variable |-> conv_ExpandedNodeId_NodeId(p_typeDefId)) = FALSE
-             <=> (sc_addnode = e_sc_bad_type_definition_invalid)) or
-            /* Guarantee node added cannot have same BrowseName than another parent's child node */
-            (#(l_node).(l_node : s_Node &
-                    ParentNode(l_node) = a_NodeId~(conv_ExpandedNodeId_NodeId(p_parentNid)) &
-                    a_BrowseName(l_node) = p_browseName)
-             <=> (sc_addnode = e_sc_bad_browse_name_duplicated)))
-        )
-    END
-    ;
-
     sc_addnode <-- addNode_AddressSpace_Variable(p_parentNid, p_refTypeId, p_newNodeId, p_browseName, p_nodeClass, p_nodeAttributes, p_typeDefId) =
     PRE
         p_parentNid : t_ExpandedNodeId_i &
@@ -1034,7 +995,8 @@ OPERATIONS
         ParentNode
         :(
             sc_addnode : t_StatusCode_i &
-            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory} &
+            sc_addnode : {e_sc_ok, e_sc_bad_node_attributes_invalid, e_sc_bad_out_of_memory, e_sc_bad_browse_name_duplicated,
+                          e_sc_bad_reference_not_allowed, e_sc_bad_type_definition_invalid} &
             s_Node <: t_Node &
 
             /* Attributes */

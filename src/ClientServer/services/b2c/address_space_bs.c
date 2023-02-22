@@ -273,25 +273,6 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
     }
 }
 
-void address_space_bs__check_constraints_addNode_AddressSpace_Variable(
-    const constants__t_ExpandedNodeId_i address_space_bs__p_parentNid,
-    const constants__t_NodeId_i address_space_bs__p_refTypeId,
-    const constants__t_NodeId_i address_space_bs__p_newNodeId,
-    const constants__t_QualifiedName_i address_space_bs__p_browseName,
-    const constants__t_NodeClass_i address_space_bs__p_nodeClass,
-    const constants__t_ExpandedNodeId_i address_space_bs__p_typeDefId,
-    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
-{
-    // TODO: delete
-    SOPC_UNUSED_ARG(address_space_bs__p_newNodeId);
-    SOPC_UNUSED_ARG(address_space_bs__p_nodeClass);
-    SOPC_UNUSED_ARG(address_space_bs__p_parentNid);
-    SOPC_UNUSED_ARG(address_space_bs__p_refTypeId);
-    SOPC_UNUSED_ARG(address_space_bs__p_browseName);
-    SOPC_UNUSED_ARG(address_space_bs__p_typeDefId);
-    *address_space_bs__sc_addnode = constants_statuscodes_bs__e_sc_ok;
-}
-
 void address_space_bs__gen_addNode_event(const constants__t_NodeId_i address_space_bs__p_newNodeId)
 {
     assert(NULL != address_space_bs__p_newNodeId);
