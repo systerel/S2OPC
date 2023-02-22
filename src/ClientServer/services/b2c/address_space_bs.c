@@ -28,10 +28,10 @@
 #include <string.h>
 
 #include "address_space_bs.h"
+
+#include "../../address_space/sopc_address_space_utils_internal.h"
 #include "app_cb_call_context_internal.h"
 #include "b2c.h"
-#include "util_address_space.h"
-
 #include "address_space_impl.h"
 #include "opcua_identifiers.h"
 #include "sopc_address_space_access_internal.h"

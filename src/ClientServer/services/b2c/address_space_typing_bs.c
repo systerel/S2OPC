@@ -27,9 +27,8 @@
 #include <assert.h>
 #include <inttypes.h>
 
+#include "../../address_space/sopc_address_space_utils_internal.h"
 #include "address_space_impl.h"
-#include "util_address_space.h"
-
 #include "sopc_address_space.h"
 #include "sopc_toolkit_config_constants.h"
 

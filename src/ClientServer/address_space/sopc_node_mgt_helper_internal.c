@@ -29,7 +29,8 @@
 
 #include "address_space_impl.h"
 #include "sopc_node_mgt_helper_internal.h"
-#include "util_address_space.h"
+
+#include "sopc_address_space_utils_internal.h"
 
 static const SOPC_NodeId DataVariable_Type = {SOPC_IdentifierType_Numeric, 0,
                                               .Data.Numeric = OpcUaId_BaseDataVariableType};

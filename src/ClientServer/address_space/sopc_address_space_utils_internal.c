@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include "sopc_address_space_utils_internal.h"
+
 #include <assert.h>
 
 #include "constants.h"
@@ -26,7 +28,6 @@
 #include "sopc_embedded_nodeset2.h"
 #include "sopc_logger.h"
 #include "sopc_types.h"
-#include "util_address_space.h"
 
 void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                        constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
