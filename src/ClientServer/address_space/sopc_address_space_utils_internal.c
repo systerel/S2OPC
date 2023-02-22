@@ -17,40 +17,36 @@
  * under the License.
  */
 
+#include <inttypes.h>
+
 #include "sopc_address_space_utils_internal.h"
 
-#include <assert.h>
-
-#include "constants.h"
-
-#include "address_space_impl.h"
 #include "opcua_identifiers.h"
+#include "sopc_assert.h"
 #include "sopc_embedded_nodeset2.h"
 #include "sopc_logger.h"
+#include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
-void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
-                                       constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
+SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node)
 {
-    assert(NULL != address_space_bs__p_node);
-    SOPC_AddressSpace_Node* node = address_space_bs__p_node;
-    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, node);
-    *address_space_bs__p_type_def = constants__c_ExpandedNodeId_indet;
+    SOPC_ASSERT(NULL != node);
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, node);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, node);
 
     for (int32_t i = 0; i < *n_refs; ++i)
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (util_addspace__is_type_definition(ref))
+        if (SOPC_AddressSpaceUtil_IsTypeDefinition(ref))
         {
-            *address_space_bs__p_type_def = &ref->TargetId;
-            break;
+            return &ref->TargetId;
         }
     }
+    return NULL;
 }
 
-bool util_addspace__is_component(const OpcUa_ReferenceNode* ref)
+bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -61,7 +57,7 @@ bool util_addspace__is_component(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasComponent == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool util_addspace__is_type_definition(const OpcUa_ReferenceNode* ref)
+bool SOPC_AddressSpaceUtil_IsTypeDefinition(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -72,7 +68,7 @@ bool util_addspace__is_type_definition(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasTypeDefinition == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool util_addspace__is_property(const OpcUa_ReferenceNode* ref)
+bool SOPC_AddressSpaceUtil_IsProperty(const OpcUa_ReferenceNode* ref)
 {
     if (ref->IsInverse)
     {
@@ -83,7 +79,7 @@ bool util_addspace__is_property(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasProperty == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool util_addspace__is_reversed_has_child(const OpcUa_ReferenceNode* ref)
+bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref)
 {
     if (false == ref->IsInverse)
     {
@@ -116,16 +112,16 @@ static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* no
     }
 }
 
-static const SOPC_NodeId* get_direct_parent_of_node(const constants_bs__t_Node_i child)
+static const SOPC_NodeId* get_direct_parent_of_node(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* child)
 {
     SOPC_NodeId* directParent = NULL;
-    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, child);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, child);
+    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, child);
+    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, child);
     for (int32_t i = 0; i < *n_refs; ++i)
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (util_addspace__is_reversed_has_child(ref))
+        if (SOPC_AddressSpaceUtil_IsReversedHasChild(ref))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId
@@ -141,7 +137,7 @@ static const SOPC_NodeId* get_direct_parent_of_node(const constants_bs__t_Node_i
     return directParent;
 }
 
-const SOPC_NodeId* util_addspace__get_direct_parent(const SOPC_NodeId* childNodeId)
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParent(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId)
 {
     const SOPC_NodeId* result = NULL;
 
@@ -161,21 +157,22 @@ const SOPC_NodeId* util_addspace__get_direct_parent(const SOPC_NodeId* childNode
         void* node;
         bool node_found = false;
 
-        node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, childNodeId, &node_found);
+        node = SOPC_AddressSpace_Get_Node(addSpace, childNodeId, &node_found);
 
         if (node_found)
         {
             // Starting to check if direct parent is researched parent
-            result = get_direct_parent_of_node(node);
+            result = get_direct_parent_of_node(addSpace, node);
         }
     }
     return result;
 }
 
-bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
-                                                    const SOPC_NodeId* originSubtype,
-                                                    const SOPC_NodeId* currentTypeOrSubtype,
-                                                    const SOPC_NodeId* expectedParentType)
+bool SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(SOPC_AddressSpace* addSpace,
+                                                        int recursionLimit,
+                                                        const SOPC_NodeId* originSubtype,
+                                                        const SOPC_NodeId* currentTypeOrSubtype,
+                                                        const SOPC_NodeId* expectedParentType)
 {
     recursionLimit--;
     if (recursionLimit < 0)
@@ -184,7 +181,7 @@ bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
     }
 
     // Starting to check if direct parent is researched parent
-    const SOPC_NodeId* directParent = util_addspace__get_direct_parent(currentTypeOrSubtype);
+    const SOPC_NodeId* directParent = SOPC_AddressSpaceUtil_GetDirectParent(addSpace, currentTypeOrSubtype);
     if (NULL != directParent)
     {
         if (SOPC_NodeId_Equal(directParent, expectedParentType))
@@ -193,17 +190,16 @@ bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
         }
         else
         {
-            return util_addspace__recursive_is_transitive_subtype(recursionLimit, originSubtype, directParent,
-                                                                  expectedParentType);
+            return SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, recursionLimit, originSubtype,
+                                                                      directParent, expectedParentType);
         }
     } // else: transitive research failed
 
     return false;
 }
 
-bool util_addspace__is_valid_ReferenceTypeId(const SOPC_NodeId* address_space_typing_bs__p_nodeId)
+bool SOPC_AddressSpaceUtil_IsValidReferenceTypeId(SOPC_AddressSpace* addSpace, const SOPC_NodeId* nodeId)
 {
-    const SOPC_NodeId* nodeId = address_space_typing_bs__p_nodeId;
     bool result = false;
     if (SOPC_IdentifierType_Numeric == nodeId->IdentifierType && OPCUA_NAMESPACE_INDEX == nodeId->Namespace &&
         nodeId->Data.Numeric <= SOPC_MAX_TYPE_INFO_NODE_ID)
@@ -216,7 +212,7 @@ bool util_addspace__is_valid_ReferenceTypeId(const SOPC_NodeId* address_space_ty
     {
         // NodeId not in static array of type nodes info, start research in address space
         bool node_found = false;
-        SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, nodeId, &node_found);
+        SOPC_AddressSpace_Node* node = SOPC_AddressSpace_Get_Node(addSpace, nodeId, &node_found);
 
         if (node_found)
         {

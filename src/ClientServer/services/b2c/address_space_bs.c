@@ -29,12 +29,12 @@
 
 #include "address_space_bs.h"
 
-#include "../../address_space/sopc_address_space_utils_internal.h"
+#include "address_space_impl.h"
 #include "app_cb_call_context_internal.h"
 #include "b2c.h"
-#include "address_space_impl.h"
 #include "opcua_identifiers.h"
 #include "sopc_address_space_access_internal.h"
+#include "sopc_address_space_utils_internal.h"
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_dict.h"
@@ -1226,7 +1226,8 @@ static bool is_inputArgument(const OpcUa_VariableNode* node)
 void address_space_bs__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def)
 {
-    util_addspace__get_TypeDefinition(address_space_bs__p_node, address_space_bs__p_type_def);
+    *address_space_bs__p_type_def =
+        SOPC_AddressSpaceUtil_GetTypeDefinition(address_space_bs__nodes, address_space_bs__p_node);
 }
 
 void address_space_bs__get_Reference_ReferenceType(const constants__t_Reference_i address_space_bs__p_ref,
@@ -1288,7 +1289,7 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
     for (int32_t i = 0; i < *n_refs && NULL == result; ++i)
     { /* stop when input argument is found */
         OpcUa_ReferenceNode* ref = &(*refs)[i];
-        if (util_addspace__is_property(ref))
+        if (SOPC_AddressSpaceUtil_IsProperty(ref))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId

@@ -27,9 +27,9 @@
 #include <assert.h>
 #include <inttypes.h>
 
-#include "../../address_space/sopc_address_space_utils_internal.h"
 #include "address_space_impl.h"
 #include "sopc_address_space.h"
+#include "sopc_address_space_utils_internal.h"
 #include "sopc_toolkit_config_constants.h"
 
 /*------------------------
@@ -48,9 +48,9 @@ void address_space_typing_bs__is_transitive_subtype(const constants__t_NodeId_i 
                                                     const constants__t_NodeId_i address_space_typing_bs__p_parent_type,
                                                     t_bool* const address_space_typing_bs__bres)
 {
-    *address_space_typing_bs__bres = util_addspace__recursive_is_transitive_subtype(
-        RECURSION_LIMIT, address_space_typing_bs__p_subtype, address_space_typing_bs__p_subtype,
-        address_space_typing_bs__p_parent_type);
+    *address_space_typing_bs__bres = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
+        address_space_bs__nodes, RECURSION_LIMIT, address_space_typing_bs__p_subtype,
+        address_space_typing_bs__p_subtype, address_space_typing_bs__p_parent_type);
 }
 
 static SOPC_NodeId Enumeration_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29};
@@ -82,7 +82,8 @@ void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
     }
 
     // Case 1 evaluation
-    bool res = util_addspace__recursive_is_transitive_subtype(1, dataType, dataType, valueType);
+    bool res =
+        SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(address_space_bs__nodes, 1, dataType, dataType, valueType);
 
     // Case 2 evaluation
     if (!res && SOPC_Int32_Id == valueType->Data.Numeric)
@@ -105,7 +106,8 @@ void address_space_typing_bs__is_compatible_simple_type_or_enumeration(
 void address_space_typing_bs__is_valid_ReferenceTypeId(const constants__t_NodeId_i address_space_typing_bs__p_nodeId,
                                                        t_bool* const address_space_typing_bs__bres)
 {
-    *address_space_typing_bs__bres = util_addspace__is_valid_ReferenceTypeId(address_space_typing_bs__p_nodeId);
+    *address_space_typing_bs__bres =
+        SOPC_AddressSpaceUtil_IsValidReferenceTypeId(address_space_bs__nodes, address_space_typing_bs__p_nodeId);
 }
 
 static bool recursive_check_object_has_method(int recursionLimit,
@@ -142,7 +144,7 @@ static bool recursive_check_object_has_method(int recursionLimit,
         switch (object->node_class)
         {
         case OpcUa_NodeClass_Object:
-            util_addspace__get_TypeDefinition(object, &type);
+            type = SOPC_AddressSpaceUtil_GetTypeDefinition(address_space_bs__nodes, object);
             if (NULL != type && type->ServerIndex == 0 && type->NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId
                 res = recursive_check_object_has_method(recursionLimit, &type->NodeId, methodId);
@@ -150,8 +152,8 @@ static bool recursive_check_object_has_method(int recursionLimit,
             break;
 
         case OpcUa_NodeClass_ObjectType:
-            res =
-                recursive_check_object_has_method(recursionLimit, util_addspace__get_direct_parent(objectId), methodId);
+            res = recursive_check_object_has_method(
+                recursionLimit, SOPC_AddressSpaceUtil_GetDirectParent(address_space_bs__nodes, objectId), methodId);
             break;
 
         default:
@@ -186,7 +188,7 @@ static bool is_component_of(const SOPC_NodeId* component, const constants_bs__t_
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (util_addspace__is_component(ref))
+        if (SOPC_AddressSpaceUtil_IsComponent(ref))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId

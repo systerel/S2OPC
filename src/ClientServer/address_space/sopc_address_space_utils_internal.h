@@ -17,27 +17,33 @@
  * under the License.
  */
 
-#ifndef UTIL_ADDRESS_SPACE_H_
-#define UTIL_ADDRESS_SPACE_H_
+#ifndef SOPC_ADDRESS_SPACE_UTILS_INTERNAL_H_
+#define SOPC_ADDRESS_SPACE_UTILS_INTERNAL_H_
 
-bool util_addspace__is_type_definition(const OpcUa_ReferenceNode* ref);
-bool util_addspace__is_component(const OpcUa_ReferenceNode* ref);
-bool util_addspace__is_property(const OpcUa_ReferenceNode* ref);
+#include <stdbool.h>
 
-void util_addspace__get_TypeDefinition(const constants__t_Node_i address_space_bs__p_node,
-                                       constants__t_ExpandedNodeId_i* const address_space_bs__p_type_def);
-
-bool util_addspace__is_reversed_has_child(const OpcUa_ReferenceNode* ref);
-
-const SOPC_NodeId* util_addspace__get_direct_parent(const SOPC_NodeId* childNodeId);
+#include "sopc_address_space.h"
+#include "sopc_builtintypes.h"
+#include "sopc_common_constants.h"
+#include "sopc_types.h"
 
 #define RECURSION_LIMIT SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL
 
-bool util_addspace__recursive_is_transitive_subtype(int recursionLimit,
-                                                    const SOPC_NodeId* originSubtype,
-                                                    const SOPC_NodeId* currentTypeOrSubtype,
-                                                    const SOPC_NodeId* expectedParentType);
+bool SOPC_AddressSpaceUtil_IsTypeDefinition(const OpcUa_ReferenceNode* ref);
+bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref);
+bool SOPC_AddressSpaceUtil_IsProperty(const OpcUa_ReferenceNode* ref);
+bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref);
 
-bool util_addspace__is_valid_ReferenceTypeId(const SOPC_NodeId* address_space_typing_bs__p_nodeId);
+SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node);
 
-#endif /* UTIL_ADDRESS_SPACE_H_ */
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParent(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId);
+
+bool SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(SOPC_AddressSpace* addSpace,
+                                                        int recursionLimit,
+                                                        const SOPC_NodeId* originSubtype,
+                                                        const SOPC_NodeId* currentTypeOrSubtype,
+                                                        const SOPC_NodeId* expectedParentType);
+
+bool SOPC_AddressSpaceUtil_IsValidReferenceTypeId(SOPC_AddressSpace* addSpace, const SOPC_NodeId* nodeId);
+
+#endif /* SOPC_ADDRESS_SPACE_UTILS_INTERNAL_H_ */

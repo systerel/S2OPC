@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -27,7 +28,6 @@
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
-#include "address_space_impl.h"
 #include "sopc_node_mgt_helper_internal.h"
 
 #include "sopc_address_space_utils_internal.h"
@@ -44,10 +44,13 @@ static const SOPC_NodeId HasProperty_Type = {SOPC_IdentifierType_Numeric, 0, .Da
 static const SOPC_NodeId HierarchicalReferences_Type_NodeId = {SOPC_IdentifierType_Numeric, 0,
                                                                .Data.Numeric = OpcUaId_HierarchicalReferences};
 
-static bool is_type_or_subtype(const SOPC_NodeId* actualType, const SOPC_NodeId* expectedType)
+static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
+                               const SOPC_NodeId* actualType,
+                               const SOPC_NodeId* expectedType)
 {
     return SOPC_NodeId_Equal(actualType, expectedType) ||
-           util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, actualType, actualType, expectedType);
+           SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(addSpace, RECURSION_LIMIT, actualType, actualType,
+                                                              expectedType);
 }
 
 static bool check_variable_organizes_reference(OpcUa_NodeClass parentNodeClass, SOPC_StatusCode* scAddNode)
@@ -87,7 +90,7 @@ static bool check_variable_has_component_reference(SOPC_AddressSpace* addSpace,
      * as DataVariable.
      */
     // Target Variable is a DataVariable
-    bool isDataVariable = is_type_or_subtype(typeDefId, &DataVariable_Type);
+    bool isDataVariable = is_type_or_subtype(addSpace, typeDefId, &DataVariable_Type);
     if (!isDataVariable)
     {
         parentNodeIdStr = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(addSpace, parentNode));
@@ -110,10 +113,10 @@ static bool check_variable_has_component_reference(SOPC_AddressSpace* addSpace,
         return true;
     case OpcUa_NodeClass_Variable:
         // Source Variable is a DataVariable
-        util_addspace__get_TypeDefinition(parentNode, &parentTypeDef);
+        parentTypeDef = SOPC_AddressSpaceUtil_GetTypeDefinition(addSpace, parentNode);
         if (NULL != parentTypeDef)
         {
-            isParentNodeDataVariable = is_type_or_subtype(&parentTypeDef->NodeId, &DataVariable_Type);
+            isParentNodeDataVariable = is_type_or_subtype(addSpace, &parentTypeDef->NodeId, &DataVariable_Type);
         }
         if (!isParentNodeDataVariable)
         {
@@ -160,11 +163,11 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
     if (OpcUa_NodeClass_Variable == parentNodeClass)
     {
         // Source Variable is not a Property itself
-        util_addspace__get_TypeDefinition(parentNode, &parentTypeDef);
+        parentTypeDef = SOPC_AddressSpaceUtil_GetTypeDefinition(addSpace, parentNode);
         bool isParentNodeProperty = true;
         if (NULL != parentTypeDef)
         {
-            isParentNodeProperty = is_type_or_subtype(&parentTypeDef->NodeId, &Property_Type);
+            isParentNodeProperty = is_type_or_subtype(addSpace, &parentTypeDef->NodeId, &Property_Type);
         }
         if (isParentNodeProperty)
         {
@@ -180,7 +183,7 @@ static bool check_variable_has_property_reference(SOPC_AddressSpace* addSpace,
         }
 
         // Target Variable is a property
-        bool isPropertyVariable = is_type_or_subtype(typeDefId, &Property_Type);
+        bool isPropertyVariable = is_type_or_subtype(addSpace, typeDefId, &Property_Type);
         if (!isPropertyVariable)
         {
             char* typeDefIdStr = SOPC_NodeId_ToCString(typeDefId);
@@ -210,7 +213,7 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
     bool identifiedRefType = false;
 
     // Evaluate Organizes reference type from parent to this variable node
-    bool isOrganizesRef = is_type_or_subtype(referenceTypeId, &Organizes_Type);
+    bool isOrganizesRef = is_type_or_subtype(addSpace, referenceTypeId, &Organizes_Type);
     if (isOrganizesRef)
     {
         identifiedRefType = true;
@@ -220,7 +223,7 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
     if (!identifiedRefType)
     {
         // Evaluate HasComponent reference type from parent to this variable node
-        bool isHasComponentRef = is_type_or_subtype(referenceTypeId, &HasComponent_Type);
+        bool isHasComponentRef = is_type_or_subtype(addSpace, referenceTypeId, &HasComponent_Type);
 
         if (isHasComponentRef)
         {
@@ -232,7 +235,7 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
     if (!identifiedRefType)
     {
         // Evaluate HasProperty reference type from parent to this variable node
-        bool isHasPropertyRef = is_type_or_subtype(referenceTypeId, &HasProperty_Type);
+        bool isHasPropertyRef = is_type_or_subtype(addSpace, referenceTypeId, &HasProperty_Type);
         if (isHasPropertyRef)
         {
             validRef =
@@ -243,8 +246,8 @@ static bool check_variable_reference_type_to_parent(SOPC_AddressSpace* addSpace,
     if (!identifiedRefType)
     {
         // Evaluate (unknown) Aggregates reference type from parent to this variable node
-        bool isAggregatesRef = util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, referenceTypeId,
-                                                                              referenceTypeId, &Aggregates_Type);
+        bool isAggregatesRef = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
+            addSpace, RECURSION_LIMIT, referenceTypeId, referenceTypeId, &Aggregates_Type);
         /* §7.6 Part 3 (1.05): The Aggregates ReferenceType is an abstract ReferenceType; only subtypes of it can be
          * used. It is a subtype of HasChild. [..] There are no constraints defined for this abstract ReferenceType.
          */
@@ -294,9 +297,9 @@ static bool check_browse_name_unique_from_parent(SOPC_AddressSpace* addSpace,
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (!ref->IsInverse &&
-            util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, &ref->ReferenceTypeId,
-                                                           &ref->ReferenceTypeId, &HierarchicalReferences_Type_NodeId))
+        if (!ref->IsInverse && SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(
+                                   addSpace, RECURSION_LIMIT, &ref->ReferenceTypeId, &ref->ReferenceTypeId,
+                                   &HierarchicalReferences_Type_NodeId))
         {
             // Note: NamespaceUri should not be interpreted as external server but is not managed for now
             if (0 == ref->TargetId.ServerIndex && ref->TargetId.NamespaceUri.Length <= 0)
@@ -493,7 +496,7 @@ SOPC_ReturnStatus SOPC_NodeMgtHelperInternal_AddVariableNodeAttributes(SOPC_Addr
         else
         {
             // Allow read access
-            varNode->AccessLevel = SOPC_AccessLevelMask_CurrentRead;
+            varNode->AccessLevel = 1; // bit 0 set
         }
     }
     if (SOPC_STATUS_OK == status)
