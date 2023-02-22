@@ -1588,7 +1588,8 @@ OPERATIONS
         subscription_mgr_UNINITIALISATION;
         service_set_view_UNINITIALISATION;
         service_set_discovery_server_UNINITIALISATION;
-        service_mgr_bs_UNINITIALISATION
+        service_mgr_bs_UNINITIALISATION;
+        address_space_bs_UNINITIALISATION
     END
 
 END

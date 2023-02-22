@@ -60,6 +60,7 @@ INITIALISATION
 
 OPERATIONS
 
+    d_adsp_UNINIT;
     d_adsp_operations;
 
     /* operation used by call_method_mgr */

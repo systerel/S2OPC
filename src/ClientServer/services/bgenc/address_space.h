@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 16/02/2023 16:12:07
+ Date                 : 22/02/2023 16:16:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -62,6 +62,7 @@ extern void address_space__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define address_space__address_space_bs_UNINITIALISATION address_space_bs__address_space_bs_UNINITIALISATION
 #define address_space__check_object_has_method address_space_typing__check_object_has_method
 #define address_space__exec_callMethod address_space_bs__exec_callMethod
 #define address_space__get_BrowseName address_space_bs__get_BrowseName

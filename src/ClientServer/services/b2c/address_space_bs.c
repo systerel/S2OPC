@@ -76,6 +76,14 @@ void address_space_bs__INITIALISATION(void) {}
    OPERATIONS Clause
   --------------------*/
 
+void address_space_bs__address_space_bs_UNINITIALISATION(void)
+{
+    if (NULL != addSpaceAccess)
+    {
+        SOPC_AddressSpaceAccess_Delete(&addSpaceAccess);
+    }
+}
+
 static void generate_changes_notifs_after_method_call(SOPC_SLinkedList* operations)
 {
     SOPC_ASSERT(NULL != operations);

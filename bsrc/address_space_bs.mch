@@ -177,6 +177,14 @@ INITIALISATION
 
 OPERATIONS
 
+    /* Needs UNINIT to deallocate address space access */
+    address_space_bs_UNINITIALISATION =
+    BEGIN
+        ConstantAddressSpace :: BOOL ||
+        d_variables :( d_init )
+    END
+    ;
+
     bres <-- is_AddressSpace_constant =
     BEGIN
         bres := ConstantAddressSpace

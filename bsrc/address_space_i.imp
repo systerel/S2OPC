@@ -39,6 +39,7 @@ IMPORTS
     user_authorization_bs
 
 PROMOTES
+    address_space_bs_UNINITIALISATION,
     is_AddressSpace_constant,
     readall_AddressSpace_Node,
     get_NodeClass,

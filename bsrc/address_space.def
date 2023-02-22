@@ -354,6 +354,13 @@ DEFINITIONS
     END
     ;
 
+    d_adsp_UNINIT ==
+    address_space_bs_UNINITIALISATION =
+    BEGIN
+        d_adsp_variables :( d_adsp_invariant )
+    END
+    ;
+
     d_adsp_operations ==
     bres <-- is_mandatory_attribute(p_ncl, p_aid) =
     PRE

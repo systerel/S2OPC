@@ -44,6 +44,7 @@ INITIALISATION
 
 OPERATIONS
 
+    d_adsp_UNINIT;
     d_adsp_operations;
 
     /* write service operation */

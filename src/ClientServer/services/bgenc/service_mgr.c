@@ -1784,5 +1784,6 @@ void service_mgr__service_mgr_UNINITIALISATION(void) {
    service_set_view__service_set_view_UNINITIALISATION();
    service_set_discovery_server__service_set_discovery_server_UNINITIALISATION();
    service_mgr_bs__service_mgr_bs_UNINITIALISATION();
+   address_space_itf__address_space_bs_UNINITIALISATION();
 }
 

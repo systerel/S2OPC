@@ -43,6 +43,7 @@ INITIALISATION
 
 OPERATIONS
 
+    d_adsp_UNINIT;
     d_adsp_operations;
 
     p_status <-- treat_write_request_WriteValue (p_user, p_locales, p_wvi) =

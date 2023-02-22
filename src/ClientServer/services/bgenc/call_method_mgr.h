@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 16/02/2023 16:12:13
+ Date                 : 22/02/2023 16:16:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -64,6 +64,7 @@ extern void call_method_mgr__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define call_method_mgr__addNode_AddressSpace service_write__addNode_AddressSpace
+#define call_method_mgr__address_space_bs_UNINITIALISATION service_write__address_space_bs_UNINITIALISATION
 #define call_method_mgr__check_nodeId_isValid service_write__check_nodeId_isValid
 #define call_method_mgr__check_object_has_method service_write__check_object_has_method
 #define call_method_mgr__get_BrowseName service_write__get_BrowseName

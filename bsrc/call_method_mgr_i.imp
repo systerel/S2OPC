@@ -43,6 +43,7 @@ IMPORTS
     argument_pointer_bs
 
 PROMOTES
+    address_space_bs_UNINITIALISATION,
     is_mandatory_attribute,
     is_AddressSpace_constant,
     read_Node_Attribute,

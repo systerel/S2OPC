@@ -36,6 +36,7 @@ IMPORTS
    but it would trigger a bug in the project check. */
 
 PROMOTES
+    address_space_bs_UNINITIALISATION,
     is_mandatory_attribute,
     is_AddressSpace_constant,
     read_Node_Attribute,
