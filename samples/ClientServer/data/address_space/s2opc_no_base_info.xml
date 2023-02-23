@@ -30,7 +30,7 @@
  * Modifications: adaptation for S2OPC demo server
 -->
 
-<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" LastModified="2022-03-29T00:00:00Z">
+<UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd" LastModified="2022-03-29T00:00:00Z">
   <Models>
     <Model ModelUri="http://opcfoundation.org/UA/" PublicationDate="2022-03-29T00:00:00Z" Version="1.04.11" XmlSchemaUri="http://opcfoundation.org/UA/2008/02/Types.xsd" />
   </Models>
@@ -1029,6 +1029,11 @@
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=MultiStateDiscreteItemVarEnumStrings</Reference>
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=TwoStateDiscreteItemVarFalseState</Reference>
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=TwoStateDiscreteItemVarTrueState</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=MethodIO_Input</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=MethodIO_Output</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=MethodI_Input</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=MethodO_Output</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">ns=1;s=AddVariableMethod_Input</Reference>
     </References>
   </UAVariableType>
   <UAVariableType BrowseName="DataTypeDescriptionType" DataType="String" NodeId="i=69" ReleaseStatus="Deprecated">
@@ -8889,6 +8894,11 @@
     <Description>TestObject</Description>
     <Description Locale="en">TestObject</Description>
     <References>
+      <Reference ReferenceType="HasComponent">ns=1;s=MethodNoArg</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=MethodIO</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=MethodO</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=MethodI</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=AddVariableMethod</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
@@ -8917,4 +8927,195 @@
       <uax:UInt32>0</uax:UInt32>
     </Value>
   </UAVariable>
-  </UANodeSet>
+  <UAMethod BrowseName="MethodNoArg" NodeId="ns=1;s=MethodNoArg" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>IncrementCounter</DisplayName>
+    <Description>IncrementCounter</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAMethod BrowseName="MethodIO" NodeId="ns=1;s=MethodIO" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>IncrementalHello</DisplayName>
+    <Description>IncrementalHello</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=MethodIO_Input</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;s=MethodIO_Output</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable BrowseName="InputArguments" DataType="i=296" NodeId="ns=1;s=MethodIO_Input" ParentNodeId="ns=1;s=MethodIO" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MethodIO</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Next Hello Name</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable BrowseName="OutputArguments" DataType="i=296" NodeId="ns=1;s=MethodIO_Output" ParentNodeId="ns=1;s=MethodIO" ValueRank="1">
+    <DisplayName>OutputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MethodIO</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Hello Result</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod BrowseName="MethodInput" NodeId="ns=1;s=MethodI" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>AddToCounter</DisplayName>
+    <Description>AddToCounter</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=MethodI_Input</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable BrowseName="InputArguments" DataType="i=296" NodeId="ns=1;s=MethodI_Input" ParentNodeId="ns=1;s=MethodI" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MethodI</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Counter Increment</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=7</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod BrowseName="MethodOutput" NodeId="ns=1;s=MethodO" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>GetCounter</DisplayName>
+    <Description>GetCounter</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=MethodO_Output</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable BrowseName="OutputArguments" DataType="i=296" NodeId="ns=1;s=MethodO_Output" ParentNodeId="ns=1;s=MethodO" ValueRank="1">
+    <DisplayName>OutputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=MethodO</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Counter</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=7</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod BrowseName="AddVariableMethod" NodeId="ns=1;s=AddVariableMethod" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>AddVariable</DisplayName>
+    <Description>AddVariable</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=AddVariableMethod_Input</Reference>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable BrowseName="InputArguments" DataType="i=296" NodeId="ns=1;s=AddVariableMethod_Input" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference IsForward="false" ReferenceType="HasProperty">ns=1;s=AddVariableMethod</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>NodeId</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=17</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>DataType</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=17</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+              <uax:Description p5:nil="true" />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+</UANodeSet>

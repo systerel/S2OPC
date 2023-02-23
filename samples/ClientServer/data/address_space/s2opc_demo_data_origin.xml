@@ -1839,6 +1839,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=MethodIO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodI</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=AddVariableMethod</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
@@ -1865,14 +1866,14 @@
       <uax:UInt32>0</uax:UInt32>
     </Value>
   </UAVariable>
-  <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12734">
+  <UAMethod NodeId="ns=1;s=MethodNoArg" BrowseName="MethodNoArg" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>IncrementCounter</DisplayName>
     <Description>IncrementCounter</Description>
     <References>
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
     </References>
   </UAMethod>
-  <UAMethod NodeId="ns=1;s=MethodIO" BrowseName="MethodIO" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12731">
+  <UAMethod NodeId="ns=1;s=MethodIO" BrowseName="MethodIO" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>IncrementalHello</DisplayName>
     <Description>IncrementalHello</Description>
     <References>
@@ -1935,7 +1936,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAMethod NodeId="ns=1;s=MethodI" BrowseName="MethodInput" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12871">
+  <UAMethod NodeId="ns=1;s=MethodI" BrowseName="MethodInput" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>AddToCounter</DisplayName>
     <Description>AddToCounter</Description>
     <References>
@@ -1970,7 +1971,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
-  <UAMethod NodeId="ns=1;s=MethodO" BrowseName="MethodOutput" ParentNodeId="ns=1;s=TestObject" MethodDeclarationId="i=12775">
+  <UAMethod NodeId="ns=1;s=MethodO" BrowseName="MethodOutput" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>GetCounter</DisplayName>
     <Description>GetCounter</Description>
     <References>
@@ -1997,6 +1998,57 @@
                 <Identifier>i=7</Identifier>
               </DataType>
               <ValueRank>1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="ns=1;s=AddVariableMethod" BrowseName="AddVariableMethod" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>AddVariable</DisplayName>
+    <Description>AddVariable</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=AddVariableMethod_Input</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="ns=1;s=AddVariableMethod_Input" BrowseName="InputArguments" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=AddVariableMethod</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>NodeId</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>DataType</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
               <ArrayDimensions />
               <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
             </Argument>
