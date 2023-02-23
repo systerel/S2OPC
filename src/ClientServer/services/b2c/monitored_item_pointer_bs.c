@@ -111,7 +111,7 @@ void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-#define EURAnge_BrowseName "EURange"
+#define InputArguments_BrowseName "EURange"
 
 static bool is_EURange(const OpcUa_VariableNode* node)
 {
@@ -127,7 +127,7 @@ static bool is_EURange(const OpcUa_VariableNode* node)
     }
 
     /* Browse shall be EURange (and should be in NS=O but we don't check it) */
-    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name), EURAnge_BrowseName) == 0);
+    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name), InputArguments_BrowseName) == 0);
 }
 
 static bool check_percent_deadband_filter_allowed(SOPC_AddressSpace_Node* variableNode, OpcUa_Range** range)
@@ -309,6 +309,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
         monitItem->filterAbsoluteDeadandeContext = monitored_item_pointer_bs__p_filterAbsDeadbandCtx;
+        monitItem->lastCachedValueForFilter = NULL;
         monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
         monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
@@ -499,7 +500,7 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     *monitored_item_pointer_bs__p_clientHandle = monitItem->clientHandle;
 }
 
-// Note: second comparison allows to eliminate the NaN value for FP which shall be considered equals
+// Note: both < and > operators always return False with NaN, testing both allow to consider NaN values equal
 #define COMPARE_DEADBAND_ABSOLUTE_NUMERIC_VALUE(sopcTypeid, ntype, tmpVarType) \
     case sopcTypeid:                                                           \
         left##tmpVarType = *(const ntype*) left;                               \
@@ -532,6 +533,7 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
                                                    const void* right,
                                                    int32_t* compResult)
 {
+    assert(NULL != customContext);
     double deadband = *(const double*) customContext;
     // Checked on filter creation
     assert(!(deadband < 0.0));

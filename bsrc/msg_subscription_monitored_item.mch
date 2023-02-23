@@ -334,7 +334,7 @@ OPERATIONS
            p_sc = e_sc_ok &
            (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter)) & // No filter or filter valid
           (p_bres = FALSE => p_sc /= e_sc_ok) &
-          (p_filter /= c_monitoringFilter_indet & p_filter /: t_monitoringFilter =>
+          (p_filter /= c_monitoringFilter_indet & p_filter /: t_monitoringFilter => // Filter is invalid (unknown) or unsupported (Aggregate / Event)
             p_sc = e_sc_bad_monitored_item_filter_invalid or p_sc = e_sc_bad_monitored_item_filter_unsupported)
        )
     END

@@ -121,24 +121,25 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
         {
             *sc = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
         }
-        else if (SOPC_ExtObjBodyEncoding_Object != filter->Encoding ||
-                 &OpcUa_DataChangeFilter_EncodeableType != filter->Body.Object.ObjType)
+        else if (SOPC_ExtObjBodyEncoding_Object != filter->Encoding)
         {
-            if (SOPC_ExtObjBodyEncoding_Object != filter->Encoding ||
-                (&OpcUa_AggregateFilter_EncodeableType != filter->Body.Object.ObjType &&
-                 &OpcUa_EventFilter_EncodeableType != filter->Body.Object.ObjType))
-            {
-                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
-            }
-            else
-            {
-                // AggregateFilter or EventFilter are not supported
-                // Note: DataChangeFilter does not have result and thus does not provide revised value in response
-                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
-            }
+            // Filter was not decoded as an object => unknown type
+            *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+        }
+        else if (&OpcUa_AggregateFilter_EncodeableType == filter->Body.Object.ObjType &&
+                 &OpcUa_EventFilter_EncodeableType == filter->Body.Object.ObjType)
+        {
+            // AggregateFilter or EventFilter are not supported
+            *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
+        }
+        else if (&OpcUa_DataChangeFilter_EncodeableType != filter->Body.Object.ObjType)
+        {
+            // Filter type is unexpected
+            *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
         }
         else
         {
+            // Note: DataChangeFilter does not have result and thus does not provide revised value in response
             OpcUa_DataChangeFilter* dcf = filter->Body.Object.Value;
             bool validFilter = true;
             bool validPercent = true;
@@ -148,7 +149,7 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             case OpcUa_DataChangeTrigger_Status:
             case OpcUa_DataChangeTrigger_StatusValue:
             case OpcUa_DataChangeTrigger_StatusValueTimestamp:
-                validFilter &= true;
+                validFilter = true;
                 break;
             default:
                 validFilter = false;

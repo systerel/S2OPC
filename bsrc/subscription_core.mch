@@ -940,8 +940,12 @@ OPERATIONS
         a_notification_queue_notifications
         :( p_sc : t_StatusCode_i &
             a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
-            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid &
-                a_notification_queue_notifications = a_notification_queue_notifications$0) &
+            {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications =
+            {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications$0 &
+            (p_sc /= e_sc_ok =>
+                a_notification_queue_notifications = a_notification_queue_notifications$0
+            ) &
+            (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid) &
             (p_mi_id : ran(a_monitoredItemId) &
                 (p_filter : t_monitoringFilter &
                  not (a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) : ran(a_NodeId) &
@@ -949,9 +953,7 @@ OPERATIONS
                      (a_NodeId~(a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id))) |-> p_filter) : a_monitoredItemNodeFilterValid)
                     => p_sc = e_sc_bad_filter_not_allowed) &
                 (not (p_filter : t_monitoringFilter & a_monitoredItemAttributeId(a_monitoredItemId~(p_mi_id)) /= e_aid_Value)
-                    =>  p_sc = e_sc_ok &
-                    {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications =
-                    {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications$0
+                    =>  p_sc = e_sc_ok
                 )
             )
         )

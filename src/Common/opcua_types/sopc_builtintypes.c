@@ -4077,100 +4077,37 @@ static SOPC_ReturnStatus CompareVariantsNonArrayBuiltInType(SOPC_BuiltinId built
         *comparison = 0;
         break;
     case SOPC_Boolean_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Boolean,
-                                 (const void*) &right->Boolean, comparison);
-        break;
     case SOPC_SByte_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Sbyte,
-                                 (const void*) &right->Sbyte, comparison);
-        break;
     case SOPC_Byte_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Byte,
-                                 (const void*) &right->Byte, comparison);
-        break;
     case SOPC_Int16_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Int16,
-                                 (const void*) &right->Int16, comparison);
-        break;
     case SOPC_UInt16_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Uint16,
-                                 (const void*) &right->Uint16, comparison);
-        break;
     case SOPC_Int32_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Int32,
-                                 (const void*) &right->Int32, comparison);
-        break;
     case SOPC_UInt32_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Uint32,
-                                 (const void*) &right->Uint32, comparison);
-        break;
     case SOPC_Int64_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Int64,
-                                 (const void*) &right->Int64, comparison);
-        break;
     case SOPC_UInt64_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Uint64,
-                                 (const void*) &right->Uint64, comparison);
-        break;
     case SOPC_Float_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Floatv,
-                                 (const void*) &right->Floatv, comparison);
-        break;
     case SOPC_Double_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Doublev,
-                                 (const void*) &right->Doublev, comparison);
-        break;
     case SOPC_String_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->String,
-                                 (const void*) &right->String, comparison);
-        break;
     case SOPC_DateTime_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Date,
-                                 (const void*) &right->Date, comparison);
+    case SOPC_ByteString_Id:
+    case SOPC_XmlElement_Id:
+    case SOPC_StatusCode_Id:
+        // Note union fields are aligned: provide pointer to data
+        // (i.e. first first address for those types)
+        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left, (const void*) right, comparison);
         break;
     case SOPC_Guid_Id:
+    case SOPC_NodeId_Id:
+    case SOPC_ExpandedNodeId_Id:
+    case SOPC_QualifiedName_Id:
+    case SOPC_LocalizedText_Id:
+    case SOPC_ExtensionObject_Id:
+    case SOPC_DataValue_Id:
+    case SOPC_DiagnosticInfo_Id:
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
         status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->Guid, (const void*) right->Guid,
                                  comparison);
-        break;
-    case SOPC_ByteString_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Bstring,
-                                 (const void*) &right->Bstring, comparison);
-        break;
-    case SOPC_XmlElement_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->XmlElt,
-                                 (const void*) &right->XmlElt, comparison);
-        break;
-    case SOPC_NodeId_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->NodeId,
-                                 (const void*) right->NodeId, comparison);
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->ExpNodeId,
-                                 (const void*) right->ExpNodeId, comparison);
-        break;
-    case SOPC_StatusCode_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) &left->Status,
-                                 (const void*) &right->Status, comparison);
-        break;
-    case SOPC_QualifiedName_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->Qname,
-                                 (const void*) right->Qname, comparison);
-        break;
-    case SOPC_LocalizedText_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->LocalizedText,
-                                 (const void*) right->LocalizedText, comparison);
-        break;
-    case SOPC_ExtensionObject_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->ExtObject,
-                                 (const void*) right->ExtObject, comparison);
-        break;
-    case SOPC_DataValue_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->DataValue,
-                                 (const void*) right->DataValue, comparison);
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        status = compAuxFunction(customCompContext, builtInTypeId, (const void*) left->DiagInfo,
-                                 (const void*) right->DiagInfo, comparison);
         break;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
@@ -4198,94 +4135,35 @@ static SOPC_ReturnStatus CompareVariantArrayBuiltInType(SOPC_BuiltinId builtInTy
         // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
         break; // SOPC_STATUS_NOK since a NULL must not be an array
     case SOPC_Boolean_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->BooleanArr, (void*) arrayRight->BooleanArr,
-                                     sizeof(SOPC_Boolean), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_SByte_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->SbyteArr, (void*) arrayRight->SbyteArr,
-                                     sizeof(SOPC_SByte), compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Byte_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->ByteArr, (void*) arrayRight->ByteArr, sizeof(SOPC_Byte),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Int16_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Int16Arr, (void*) arrayRight->Int16Arr, sizeof(int16_t),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_UInt16_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Uint16Arr, (void*) arrayRight->Uint16Arr,
-                                     sizeof(uint16_t), compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Int32_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Int32Arr, (void*) arrayRight->Int32Arr, sizeof(int32_t),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_UInt32_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Uint32Arr, (void*) arrayRight->Uint32Arr,
-                                     sizeof(uint32_t), compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Int64_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Int64Arr, (void*) arrayRight->Int64Arr, sizeof(int64_t),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_UInt64_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->Uint64Arr, (void*) arrayRight->Uint64Arr,
-                                     sizeof(uint64_t), compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Float_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->FloatvArr, (void*) arrayRight->FloatvArr, sizeof(float),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_Double_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->DoublevArr, (void*) arrayRight->DoublevArr,
-                                     sizeof(double), compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_String_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->StringArr, (void*) arrayRight->StringArr,
-                                     sizeof(SOPC_String), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_DateTime_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->DateArr, (void*) arrayRight->DateArr,
-                                     sizeof(SOPC_DateTime), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_Guid_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->GuidArr, (void*) arrayRight->GuidArr, sizeof(SOPC_Guid),
-                                     compAuxFunction, customCompContext, builtInTypeId, comparison);
     case SOPC_ByteString_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->BstringArr, (void*) arrayRight->BstringArr,
-                                     sizeof(SOPC_ByteString), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_XmlElement_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->XmlEltArr, (void*) arrayRight->XmlEltArr,
-                                     sizeof(SOPC_XmlElement), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_NodeId_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->NodeIdArr, (void*) arrayRight->NodeIdArr,
-                                     sizeof(SOPC_NodeId), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_ExpandedNodeId_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->ExpNodeIdArr, (void*) arrayRight->ExpNodeIdArr,
-                                     sizeof(SOPC_ExpandedNodeId), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_StatusCode_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->StatusArr, (void*) arrayRight->StatusArr,
-                                     sizeof(SOPC_StatusCode), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_QualifiedName_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->QnameArr, (void*) arrayRight->QnameArr,
-                                     sizeof(SOPC_QualifiedName), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_LocalizedText_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->LocalizedTextArr, (void*) arrayRight->LocalizedTextArr,
-                                     sizeof(SOPC_LocalizedText), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_ExtensionObject_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->ExtObjectArr, (void*) arrayRight->ExtObjectArr,
-                                     sizeof(SOPC_ExtensionObject), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_DataValue_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->DataValueArr, (void*) arrayRight->DataValueArr,
-                                     sizeof(SOPC_DataValue), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_Variant_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->VariantArr, (void*) arrayRight->VariantArr,
-                                     sizeof(SOPC_Variant), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
     case SOPC_DiagnosticInfo_Id:
-        return SOPC_CompCustom_Array(length, (void*) arrayLeft->DiagInfoArr, (void*) arrayRight->DiagInfoArr,
-                                     sizeof(SOPC_DiagnosticInfo), compAuxFunction, customCompContext, builtInTypeId,
-                                     comparison);
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field)
+        return SOPC_CompCustom_Array(length, (const void*) arrayLeft->BooleanArr, (const void*) arrayRight->BooleanArr,
+                                     SOPC_BuiltInType_HandlingTable[builtInTypeId].size, compAuxFunction,
+                                     customCompContext, builtInTypeId, comparison);
     default:
         break;
     }
@@ -5327,7 +5205,13 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
                                   SOPC_EncodeableObject_PfnComp* compFct,
                                   int32_t* comparisonResult)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (0 == sizeOfElt || NULL == compFct || NULL == comparisonResult)
+    {
+        return status;
+    }
+
     size_t idx = 0;
     size_t pos = 0;
     const SOPC_Byte* byteArrayLeft = eltsArrayLeft;
@@ -5335,6 +5219,7 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparisonResult = 0;
+        status = SOPC_STATUS_OK;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparisonResult == 0; idx++)
         {
             pos = idx * sizeOfElt;
@@ -5344,10 +5229,6 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     else if (0 == noOfElts)
     {
         *comparisonResult = 0;
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return status;
 }
@@ -5361,7 +5242,13 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
                                         SOPC_BuiltinId builtInId,
                                         int32_t* comparisonResult)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (0 == sizeOfElt || NULL == compCustomFct || NULL == comparisonResult)
+    {
+        return status;
+    }
+
     size_t idx = 0;
     size_t pos = 0;
     const SOPC_Byte* byteArrayLeft = eltsArrayLeft;
@@ -5369,6 +5256,7 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
     if (noOfElts > 0 && byteArrayLeft != NULL && byteArrayRight != NULL)
     {
         *comparisonResult = 0;
+        status = SOPC_STATUS_OK;
         for (idx = 0; idx < (size_t) noOfElts && SOPC_STATUS_OK == status && *comparisonResult == 0; idx++)
         {
             pos = idx * sizeOfElt;
@@ -5379,10 +5267,6 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
     else if (0 == noOfElts)
     {
         *comparisonResult = 0;
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return status;
 }
