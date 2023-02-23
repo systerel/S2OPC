@@ -65,4 +65,12 @@ SOPC_StatusCode SOPC_Method_Func_UpdateAndGetPreviousHello(const SOPC_CallContex
                                                            SOPC_Variant** outputArgs,
                                                            void* param);
 
+SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContextPtr,
+                                             const SOPC_NodeId* objectId,
+                                             uint32_t nbInputArgs,
+                                             const SOPC_Variant* inputArgs,
+                                             uint32_t* nbOutputArgs,
+                                             SOPC_Variant** outputArgs,
+                                             void* param);
+
 #endif

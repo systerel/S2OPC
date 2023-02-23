@@ -845,6 +845,21 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
             status = SOPC_STATUS_NOK;
         }
     }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "ns=1;s=AddVariableMethod";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_AddVariable;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "AddVariable", NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
     return status;
 }
 

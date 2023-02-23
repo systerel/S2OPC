@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_macros.h"
@@ -44,6 +45,10 @@ static const SOPC_NodeId TestObject_Counter = {
     .IdentifierType = SOPC_IdentifierType_String,
     .Namespace = 1,
     .Data.String = {sizeof("TestObject_Counter") - 1, 1, (SOPC_Byte*) "TestObject_Counter"}};
+
+static const SOPC_NodeId HasComponent_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasComponent};
+static const SOPC_NodeId DataVariable_Type = {SOPC_IdentifierType_Numeric, 0,
+                                              .Data.Numeric = OpcUaId_BaseDataVariableType};
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
@@ -113,7 +118,8 @@ SOPC_StatusCode SOPC_Method_Func_AddToCounter(const SOPC_CallContext* callContex
     SOPC_ASSERT(NULL != nbOutputArgs);
     SOPC_ASSERT(NULL != outputArgs);
 
-    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
+    if (1 != nbInputArgs || SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType)
     {
         return OpcUa_BadInvalidArgument;
     }
@@ -298,4 +304,79 @@ SOPC_StatusCode SOPC_Method_Func_UpdateAndGetPreviousHello(const SOPC_CallContex
     }
 
     return stCode;
+}
+
+SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContextPtr,
+                                             const SOPC_NodeId* objectId,
+                                             uint32_t nbInputArgs,
+                                             const SOPC_Variant* inputArgs,
+                                             uint32_t* nbOutputArgs,
+                                             SOPC_Variant** outputArgs,
+                                             void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(inputArgs);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != inputArgs);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    if (2 != nbInputArgs || SOPC_NodeId_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || SOPC_NodeId_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (0 != inputArgs[1].Value.NodeId->Namespace ||
+        SOPC_IdentifierType_Numeric != inputArgs[1].Value.NodeId->IdentifierType ||
+        SOPC_Null_Id == inputArgs[1].Value.NodeId->Data.Numeric ||
+        SOPC_BUILTINID_MAX < inputArgs[1].Value.NodeId->Data.Numeric)
+    {
+        // Accepts only built in types
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (!SOPC_NodeId_Equal(&TestObject, objectId))
+    {
+        // Unexpected NodeId to apply method
+        return OpcUa_BadNodeIdInvalid;
+    }
+
+    SOPC_AddressSpaceAccess* addSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+
+    SOPC_ExpandedNodeId pNid;
+    SOPC_ExpandedNodeId_Initialize(&pNid);
+    pNid.NodeId = TestObject;
+
+    char* myVarId = SOPC_NodeId_ToCString(inputArgs[0].Value.NodeId);
+    SOPC_QualifiedName browseName;
+    SOPC_QualifiedName_Initialize(&browseName);
+    browseName.NamespaceIndex = 1;
+    SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&browseName.Name, myVarId);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    OpcUa_VariableAttributes attrs;
+    OpcUa_VariableAttributes_Initialize(&attrs);
+    attrs.SpecifiedAttributes =
+        OpcUa_NodeAttributesMask_DataType | OpcUa_NodeAttributesMask_AccessLevel | OpcUa_NodeAttributesMask_Value;
+    attrs.DataType = *inputArgs[1].Value.NodeId;
+    attrs.AccessLevel = 99;
+    SOPC_Variant_Initialize(&attrs.Value);
+    attrs.Value.BuiltInTypeId = inputArgs[1].Value.NodeId->Data.Numeric;
+
+    SOPC_ExpandedNodeId typeDefId;
+    SOPC_ExpandedNodeId_Initialize(&typeDefId);
+    typeDefId.NodeId = DataVariable_Type;
+
+    SOPC_StatusCode sc = SOPC_AddressSpaceAccess_AddVariableNode(
+        addSpAccess, &pNid, &HasComponent_Type, inputArgs[0].Value.NodeId, &browseName, &attrs, &typeDefId);
+
+    SOPC_Free(myVarId);
+    return sc;
 }
