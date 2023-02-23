@@ -3526,76 +3526,36 @@ static void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
     case SOPC_Null_Id:
         break;
     case SOPC_Boolean_Id:
-        clearAuxFunction((void*) &val->Boolean);
-        break;
     case SOPC_SByte_Id:
-        clearAuxFunction((void*) &val->Sbyte);
-        break;
     case SOPC_Byte_Id:
-        clearAuxFunction((void*) &val->Byte);
-        break;
     case SOPC_Int16_Id:
-        clearAuxFunction((void*) &val->Int16);
-        break;
     case SOPC_UInt16_Id:
-        clearAuxFunction((void*) &val->Uint16);
-        break;
     case SOPC_Int32_Id:
-        clearAuxFunction((void*) &val->Int32);
-        break;
     case SOPC_UInt32_Id:
-        clearAuxFunction((void*) &val->Uint32);
-        break;
     case SOPC_Int64_Id:
-        clearAuxFunction((void*) &val->Int64);
-        break;
     case SOPC_UInt64_Id:
-        clearAuxFunction((void*) &val->Uint64);
-        break;
     case SOPC_Float_Id:
-        clearAuxFunction((void*) &val->Floatv);
-        break;
     case SOPC_Double_Id:
-        clearAuxFunction((void*) &val->Doublev);
-        break;
     case SOPC_String_Id:
-        clearAuxFunction((void*) &val->String);
-        break;
     case SOPC_DateTime_Id:
-        clearAuxFunction((void*) &val->Date);
+    case SOPC_ByteString_Id:
+    case SOPC_XmlElement_Id:
+    case SOPC_StatusCode_Id:
+        // Note union fields are aligned: provide pointer to data
+        // (i.e. first first address for those types)
+        clearAuxFunction((void*) val);
         break;
     case SOPC_Guid_Id:
-        clearAuxFunction((void*) val->Guid);
-        break;
-    case SOPC_ByteString_Id:
-        clearAuxFunction((void*) &val->Bstring);
-        break;
-    case SOPC_XmlElement_Id:
-        clearAuxFunction((void*) &val->XmlElt);
-        break;
     case SOPC_NodeId_Id:
-        clearAuxFunction((void*) val->NodeId);
-        break;
     case SOPC_ExpandedNodeId_Id:
-        clearAuxFunction((void*) val->ExpNodeId);
-        break;
-    case SOPC_StatusCode_Id:
-        clearAuxFunction((void*) &val->Status);
-        break;
     case SOPC_QualifiedName_Id:
-        clearAuxFunction((void*) val->Qname);
-        break;
     case SOPC_LocalizedText_Id:
-        clearAuxFunction((void*) val->LocalizedText);
-        break;
     case SOPC_ExtensionObject_Id:
-        clearAuxFunction((void*) val->ExtObject);
-        break;
     case SOPC_DataValue_Id:
-        clearAuxFunction((void*) val->DataValue);
-        break;
     case SOPC_DiagnosticInfo_Id:
-        clearAuxFunction((void*) val->DiagInfo);
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
+        clearAuxFunction((void*) val->Guid);
         break;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
@@ -3626,128 +3586,34 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
             // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
             break; // SOPC_STATUS_NOK since a NULL must not be an array
         case SOPC_Boolean_Id:
-            array->BooleanArr = SOPC_Calloc(size, sizeof(SOPC_Boolean));
-            if (NULL != array->BooleanArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_SByte_Id:
-            array->SbyteArr = SOPC_Calloc(size, sizeof(SOPC_SByte));
-            if (NULL != array->SbyteArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Byte_Id:
-            array->ByteArr = SOPC_Calloc(size, sizeof(SOPC_Byte));
-            if (NULL != array->ByteArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Int16_Id:
-            array->Int16Arr = SOPC_Calloc(size, sizeof(int16_t));
-            if (NULL != array->Int16Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_UInt16_Id:
-            array->Uint16Arr = SOPC_Calloc(size, sizeof(uint16_t));
-            if (NULL != array->Uint16Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Int32_Id:
-            array->Int32Arr = SOPC_Calloc(size, sizeof(int32_t));
-            if (NULL != array->Int32Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_UInt32_Id:
-            array->Uint32Arr = SOPC_Calloc(size, sizeof(uint32_t));
-            if (NULL != array->Uint32Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Int64_Id:
-            array->Int64Arr = SOPC_Calloc(size, sizeof(int64_t));
-            if (NULL != array->Int64Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_UInt64_Id:
-            array->Uint64Arr = SOPC_Calloc(size, sizeof(uint64_t));
-            if (NULL != array->Uint64Arr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Float_Id:
-            array->FloatvArr = SOPC_Calloc(size, sizeof(float));
-            if (NULL != array->FloatvArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Double_Id:
-            array->DoublevArr = SOPC_Calloc(size, sizeof(double));
-            if (NULL != array->DoublevArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_String_Id:
-            array->StringArr = SOPC_Calloc(size, sizeof(SOPC_String));
-            if (NULL != array->StringArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_DateTime_Id:
-            array->DateArr = SOPC_Calloc(size, sizeof(SOPC_DateTime));
-            if (NULL != array->DateArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Guid_Id:
-            array->GuidArr = SOPC_Calloc(size, sizeof(SOPC_Guid));
-            if (NULL != array->GuidArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_ByteString_Id:
-            array->BstringArr = SOPC_Calloc(size, sizeof(SOPC_ByteString));
-            if (NULL != array->BstringArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_XmlElement_Id:
-            array->XmlEltArr = SOPC_Calloc(size, sizeof(SOPC_XmlElement));
-            if (NULL != array->XmlEltArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_NodeId_Id:
-            array->NodeIdArr = SOPC_Calloc(size, sizeof(SOPC_NodeId));
-            if (NULL != array->NodeIdArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_ExpandedNodeId_Id:
-            array->ExpNodeIdArr = SOPC_Calloc(size, sizeof(SOPC_ExpandedNodeId));
-            if (NULL != array->ExpNodeIdArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_StatusCode_Id:
-            array->StatusArr = SOPC_Calloc(size, sizeof(SOPC_StatusCode));
-            if (NULL != array->StatusArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_QualifiedName_Id:
-            array->QnameArr = SOPC_Calloc(size, sizeof(SOPC_QualifiedName));
-            if (NULL != array->QnameArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_LocalizedText_Id:
-            array->LocalizedTextArr = SOPC_Calloc(size, sizeof(SOPC_LocalizedText));
-            if (NULL != array->LocalizedTextArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_ExtensionObject_Id:
-            array->ExtObjectArr = SOPC_Calloc(size, sizeof(SOPC_ExtensionObject));
-            if (NULL != array->ExtObjectArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_DataValue_Id:
-            array->DataValueArr = SOPC_Calloc(size, sizeof(SOPC_DataValue));
-            if (NULL != array->DataValueArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_Variant_Id:
-            array->VariantArr = SOPC_Calloc(size, sizeof(SOPC_Variant));
-            if (NULL != array->VariantArr)
-                return SOPC_STATUS_OK;
-            break;
         case SOPC_DiagnosticInfo_Id:
-            array->DiagInfoArr = SOPC_Calloc(size, sizeof(SOPC_DiagnosticInfo));
-            if (NULL != array->DiagInfoArr)
+            // Note union fields content are aligned: provide pointer to data
+            // (i.e. content of the first field)
+            array->BooleanArr = SOPC_Calloc(size, SOPC_BuiltInType_HandlingTable[builtInTypeId].size);
+            if (NULL != array->BooleanArr)
                 return SOPC_STATUS_OK;
             break;
         default:
@@ -3772,79 +3638,34 @@ static void ClearToVariantArrayBuiltInType(SOPC_BuiltinId builtInTypeId,
         // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
         break;
     case SOPC_Boolean_Id:
-        SOPC_Clear_Array(length, (void**) &array->BooleanArr, sizeof(SOPC_Boolean), clearAuxFunction);
-        break;
     case SOPC_SByte_Id:
-        SOPC_Clear_Array(length, (void**) &array->SbyteArr, sizeof(SOPC_SByte), clearAuxFunction);
-        break;
     case SOPC_Byte_Id:
-        SOPC_Clear_Array(length, (void**) &array->ByteArr, sizeof(SOPC_Byte), clearAuxFunction);
-        break;
     case SOPC_Int16_Id:
-        SOPC_Clear_Array(length, (void**) &array->Int16Arr, sizeof(int16_t), clearAuxFunction);
-        break;
     case SOPC_UInt16_Id:
-        SOPC_Clear_Array(length, (void**) &array->Uint16Arr, sizeof(uint16_t), clearAuxFunction);
-        break;
     case SOPC_Int32_Id:
-        SOPC_Clear_Array(length, (void**) &array->Int32Arr, sizeof(int32_t), clearAuxFunction);
-        break;
     case SOPC_UInt32_Id:
-        SOPC_Clear_Array(length, (void**) &array->Uint32Arr, sizeof(uint32_t), clearAuxFunction);
-        break;
     case SOPC_Int64_Id:
-        SOPC_Clear_Array(length, (void**) &array->Int64Arr, sizeof(int64_t), clearAuxFunction);
-        break;
     case SOPC_UInt64_Id:
-        SOPC_Clear_Array(length, (void**) &array->Uint64Arr, sizeof(uint64_t), clearAuxFunction);
-        break;
     case SOPC_Float_Id:
-        SOPC_Clear_Array(length, (void**) &array->FloatvArr, sizeof(float), clearAuxFunction);
-        break;
     case SOPC_Double_Id:
-        SOPC_Clear_Array(length, (void**) &array->DoublevArr, sizeof(double), clearAuxFunction);
-        break;
     case SOPC_String_Id:
-        SOPC_Clear_Array(length, (void**) &array->StringArr, sizeof(SOPC_String), clearAuxFunction);
-        break;
     case SOPC_DateTime_Id:
-        SOPC_Clear_Array(length, (void**) &array->DateArr, sizeof(SOPC_DateTime), clearAuxFunction);
-        break;
     case SOPC_Guid_Id:
-        SOPC_Clear_Array(length, (void**) &array->GuidArr, sizeof(SOPC_Guid), clearAuxFunction);
-        break;
     case SOPC_ByteString_Id:
-        SOPC_Clear_Array(length, (void**) &array->BstringArr, sizeof(SOPC_ByteString), clearAuxFunction);
-        break;
     case SOPC_XmlElement_Id:
-        SOPC_Clear_Array(length, (void**) &array->XmlEltArr, sizeof(SOPC_XmlElement), clearAuxFunction);
-        break;
     case SOPC_NodeId_Id:
-        SOPC_Clear_Array(length, (void**) &array->NodeIdArr, sizeof(SOPC_NodeId), clearAuxFunction);
-        break;
     case SOPC_ExpandedNodeId_Id:
-        SOPC_Clear_Array(length, (void**) &array->ExpNodeIdArr, sizeof(SOPC_ExpandedNodeId), clearAuxFunction);
-        break;
     case SOPC_StatusCode_Id:
-        SOPC_Clear_Array(length, (void**) &array->StatusArr, sizeof(SOPC_StatusCode), clearAuxFunction);
-        break;
     case SOPC_QualifiedName_Id:
-        SOPC_Clear_Array(length, (void**) &array->QnameArr, sizeof(SOPC_QualifiedName), clearAuxFunction);
-        break;
     case SOPC_LocalizedText_Id:
-        SOPC_Clear_Array(length, (void**) &array->LocalizedTextArr, sizeof(SOPC_LocalizedText), clearAuxFunction);
-        break;
     case SOPC_ExtensionObject_Id:
-        SOPC_Clear_Array(length, (void**) &array->ExtObjectArr, sizeof(SOPC_ExtensionObject), clearAuxFunction);
-        break;
     case SOPC_DataValue_Id:
-        SOPC_Clear_Array(length, (void**) &array->DataValueArr, sizeof(SOPC_DataValue), clearAuxFunction);
-        break;
     case SOPC_Variant_Id:
-        SOPC_Clear_Array(length, (void**) &array->VariantArr, sizeof(SOPC_Variant), clearAuxFunction);
-        break;
     case SOPC_DiagnosticInfo_Id:
-        SOPC_Clear_Array(length, (void**) &array->DiagInfoArr, sizeof(SOPC_DiagnosticInfo), clearAuxFunction);
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field)
+        SOPC_Clear_Array(length, (void**) &array->BooleanArr, SOPC_BuiltInType_HandlingTable[builtInTypeId].size,
+                         clearAuxFunction);
         break;
     default:
         break;
@@ -3862,76 +3683,36 @@ static SOPC_ReturnStatus ApplyOpToVariantNonArrayBuiltInType(SOPC_BuiltinId buil
     case SOPC_Null_Id:
         break; // SOPC_STATUS_NOK since no operation could be applied to a NULL variant
     case SOPC_Boolean_Id:
-        status = opAuxFunction((void*) &left->Boolean, (const void*) &right->Boolean);
-        break;
     case SOPC_SByte_Id:
-        status = opAuxFunction((void*) &left->Sbyte, (const void*) &right->Sbyte);
-        break;
     case SOPC_Byte_Id:
-        status = opAuxFunction((void*) &left->Byte, (const void*) &right->Byte);
-        break;
     case SOPC_Int16_Id:
-        status = opAuxFunction((void*) &left->Int16, (const void*) &right->Int16);
-        break;
     case SOPC_UInt16_Id:
-        status = opAuxFunction((void*) &left->Uint16, (const void*) &right->Uint16);
-        break;
     case SOPC_Int32_Id:
-        status = opAuxFunction((void*) &left->Int32, (const void*) &right->Int32);
-        break;
     case SOPC_UInt32_Id:
-        status = opAuxFunction((void*) &left->Uint32, (const void*) &right->Uint32);
-        break;
     case SOPC_Int64_Id:
-        status = opAuxFunction((void*) &left->Int64, (const void*) &right->Int64);
-        break;
     case SOPC_UInt64_Id:
-        status = opAuxFunction((void*) &left->Uint64, (const void*) &right->Uint64);
-        break;
     case SOPC_Float_Id:
-        status = opAuxFunction((void*) &left->Floatv, (const void*) &right->Floatv);
-        break;
     case SOPC_Double_Id:
-        status = opAuxFunction((void*) &left->Doublev, (const void*) &right->Doublev);
-        break;
     case SOPC_String_Id:
-        status = opAuxFunction((void*) &left->String, (const void*) &right->String);
-        break;
     case SOPC_DateTime_Id:
-        status = opAuxFunction((void*) &left->Date, (const void*) &right->Date);
+    case SOPC_ByteString_Id:
+    case SOPC_XmlElement_Id:
+    case SOPC_StatusCode_Id:
+        // Note union fields are aligned: provide pointer to data
+        // (i.e. first first address for those types)
+        status = opAuxFunction((void*) left, (const void*) right);
         break;
     case SOPC_Guid_Id:
-        status = opAuxFunction((void*) left->Guid, (void*) right->Guid);
-        break;
-    case SOPC_ByteString_Id:
-        status = opAuxFunction((void*) &left->Bstring, (const void*) &right->Bstring);
-        break;
-    case SOPC_XmlElement_Id:
-        status = opAuxFunction((void*) &left->XmlElt, (const void*) &right->XmlElt);
-        break;
     case SOPC_NodeId_Id:
-        status = opAuxFunction((void*) left->NodeId, (void*) right->NodeId);
-        break;
     case SOPC_ExpandedNodeId_Id:
-        status = opAuxFunction((void*) left->ExpNodeId, (void*) right->ExpNodeId);
-        break;
-    case SOPC_StatusCode_Id:
-        status = opAuxFunction((void*) &left->Status, (const void*) &right->Status);
-        break;
     case SOPC_QualifiedName_Id:
-        status = opAuxFunction((void*) left->Qname, (void*) right->Qname);
-        break;
     case SOPC_LocalizedText_Id:
-        status = opAuxFunction((void*) left->LocalizedText, (void*) right->LocalizedText);
-        break;
     case SOPC_ExtensionObject_Id:
-        status = opAuxFunction((void*) left->ExtObject, (void*) right->ExtObject);
-        break;
     case SOPC_DataValue_Id:
-        status = opAuxFunction((void*) left->DataValue, (void*) right->DataValue);
-        break;
     case SOPC_DiagnosticInfo_Id:
-        status = opAuxFunction((void*) left->DiagInfo, (void*) right->DiagInfo);
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
+        status = opAuxFunction((void*) left->Guid, (const void*) right->Guid);
         break;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
@@ -3957,80 +3738,34 @@ static SOPC_ReturnStatus ApplyOpToVariantArrayBuiltInType(SOPC_BuiltinId builtIn
         // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
         break; // SOPC_STATUS_NOK since a NULL must not be an array
     case SOPC_Boolean_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->BooleanArr, (void*) arrayRight->BooleanArr,
-                             sizeof(SOPC_Boolean), opAuxFunction);
     case SOPC_SByte_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->SbyteArr, (void*) arrayRight->SbyteArr, sizeof(SOPC_SByte),
-                             opAuxFunction);
     case SOPC_Byte_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->ByteArr, (void*) arrayRight->ByteArr, sizeof(SOPC_Byte),
-                             opAuxFunction);
     case SOPC_Int16_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Int16Arr, (void*) arrayRight->Int16Arr, sizeof(int16_t),
-                             opAuxFunction);
     case SOPC_UInt16_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Uint16Arr, (void*) arrayRight->Uint16Arr, sizeof(uint16_t),
-                             opAuxFunction);
     case SOPC_Int32_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Int32Arr, (void*) arrayRight->Int32Arr, sizeof(int32_t),
-                             opAuxFunction);
     case SOPC_UInt32_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Uint32Arr, (void*) arrayRight->Uint32Arr, sizeof(uint32_t),
-                             opAuxFunction);
     case SOPC_Int64_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Int64Arr, (void*) arrayRight->Int64Arr, sizeof(int64_t),
-                             opAuxFunction);
     case SOPC_UInt64_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->Uint64Arr, (void*) arrayRight->Uint64Arr, sizeof(uint64_t),
-                             opAuxFunction);
     case SOPC_Float_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->FloatvArr, (void*) arrayRight->FloatvArr, sizeof(float),
-                             opAuxFunction);
     case SOPC_Double_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->DoublevArr, (void*) arrayRight->DoublevArr, sizeof(double),
-                             opAuxFunction);
     case SOPC_String_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->StringArr, (void*) arrayRight->StringArr, sizeof(SOPC_String),
-                             opAuxFunction);
     case SOPC_DateTime_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->DateArr, (void*) arrayRight->DateArr, sizeof(SOPC_DateTime),
-                             opAuxFunction);
     case SOPC_Guid_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->GuidArr, (void*) arrayRight->GuidArr, sizeof(SOPC_Guid),
-                             opAuxFunction);
     case SOPC_ByteString_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->BstringArr, (void*) arrayRight->BstringArr,
-                             sizeof(SOPC_ByteString), opAuxFunction);
     case SOPC_XmlElement_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->XmlEltArr, (void*) arrayRight->XmlEltArr,
-                             sizeof(SOPC_XmlElement), opAuxFunction);
     case SOPC_NodeId_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->NodeIdArr, (void*) arrayRight->NodeIdArr, sizeof(SOPC_NodeId),
-                             opAuxFunction);
     case SOPC_ExpandedNodeId_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->ExpNodeIdArr, (void*) arrayRight->ExpNodeIdArr,
-                             sizeof(SOPC_ExpandedNodeId), opAuxFunction);
     case SOPC_StatusCode_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->StatusArr, (void*) arrayRight->StatusArr,
-                             sizeof(SOPC_StatusCode), opAuxFunction);
     case SOPC_QualifiedName_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->QnameArr, (void*) arrayRight->QnameArr,
-                             sizeof(SOPC_QualifiedName), opAuxFunction);
     case SOPC_LocalizedText_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->LocalizedTextArr, (void*) arrayRight->LocalizedTextArr,
-                             sizeof(SOPC_LocalizedText), opAuxFunction);
     case SOPC_ExtensionObject_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->ExtObjectArr, (void*) arrayRight->ExtObjectArr,
-                             sizeof(SOPC_ExtensionObject), opAuxFunction);
     case SOPC_DataValue_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->DataValueArr, (void*) arrayRight->DataValueArr,
-                             sizeof(SOPC_DataValue), opAuxFunction);
     case SOPC_Variant_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->VariantArr, (void*) arrayRight->VariantArr,
-                             sizeof(SOPC_Variant), opAuxFunction);
     case SOPC_DiagnosticInfo_Id:
-        return SOPC_Op_Array(length, (void*) arrayLeft->DiagInfoArr, (void*) arrayRight->DiagInfoArr,
-                             sizeof(SOPC_DiagnosticInfo), opAuxFunction);
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field)
+        return SOPC_Op_Array(length, (void*) arrayLeft->BooleanArr, (void*) arrayRight->BooleanArr,
+                             SOPC_BuiltInType_HandlingTable[builtInTypeId].size, opAuxFunction);
     default:
         break;
     }
@@ -4276,89 +4011,17 @@ static SOPC_ReturnStatus AllocVariantNonArrayBuiltInType(SOPC_BuiltinId builtInT
     case SOPC_StatusCode_Id:
         break;
     case SOPC_Guid_Id:
-        val->Guid = SOPC_Malloc(sizeof(SOPC_Guid));
-        if (NULL != val->Guid)
-        {
-            memset(val->Guid, 0, sizeof(SOPC_Guid));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_NodeId_Id:
-        val->NodeId = SOPC_Malloc(sizeof(SOPC_NodeId));
-        if (NULL != val->NodeId)
-        {
-            memset(val->NodeId, 0, sizeof(SOPC_NodeId));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_ExpandedNodeId_Id:
-        val->ExpNodeId = SOPC_Malloc(sizeof(SOPC_ExpandedNodeId));
-        if (NULL != val->ExpNodeId)
-        {
-            memset(val->ExpNodeId, 0, sizeof(SOPC_ExpandedNodeId));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_QualifiedName_Id:
-        val->Qname = SOPC_Malloc(sizeof(SOPC_QualifiedName));
-        if (NULL != val->Qname)
-        {
-            memset(val->Qname, 0, sizeof(SOPC_QualifiedName));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_LocalizedText_Id:
-        val->LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
-        if (NULL != val->LocalizedText)
-        {
-            memset(val->LocalizedText, 0, sizeof(SOPC_LocalizedText));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_ExtensionObject_Id:
-        val->ExtObject = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
-        if (NULL != val->ExtObject)
-        {
-            memset(val->ExtObject, 0, sizeof(SOPC_ExtensionObject));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_DataValue_Id:
-        val->DataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
-        if (NULL != val->DataValue)
-        {
-            memset(val->DataValue, 0, sizeof(SOPC_DataValue));
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        break;
     case SOPC_DiagnosticInfo_Id:
-        val->DiagInfo = SOPC_Malloc(sizeof(SOPC_DiagnosticInfo));
-        if (NULL != val->DiagInfo)
-        {
-            memset(val->DiagInfo, 0, sizeof(SOPC_DiagnosticInfo));
-        }
-        else
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
+        val->Guid = SOPC_Calloc(1, SOPC_BuiltInType_HandlingTable[builtInTypeId].size);
+        if (NULL == val->Guid)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -4398,60 +4061,20 @@ static void FreeVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId, SOPC_Va
     case SOPC_StatusCode_Id:
         break;
     case SOPC_Guid_Id:
+    case SOPC_NodeId_Id:
+    case SOPC_ExpandedNodeId_Id:
+    case SOPC_QualifiedName_Id:
+    case SOPC_LocalizedText_Id:
+    case SOPC_ExtensionObject_Id:
+    case SOPC_DataValue_Id:
+    case SOPC_DiagnosticInfo_Id:
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
         if (NULL != val->Guid)
         {
-            SOPC_Free(val->Guid);
+            SOPC_Free((void*) val->Guid);
         }
         val->Guid = NULL;
-        break;
-    case SOPC_NodeId_Id:
-        if (NULL != val->NodeId)
-        {
-            SOPC_Free(val->NodeId);
-        }
-        val->NodeId = NULL;
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        if (NULL != val->ExpNodeId)
-        {
-            SOPC_Free(val->ExpNodeId);
-        }
-        val->ExpNodeId = NULL;
-        break;
-    case SOPC_QualifiedName_Id:
-        if (NULL != val->Qname)
-        {
-            SOPC_Free(val->Qname);
-        }
-        val->Qname = NULL;
-        break;
-    case SOPC_LocalizedText_Id:
-        if (NULL != val->LocalizedText)
-        {
-            SOPC_Free(val->LocalizedText);
-        }
-        val->LocalizedText = NULL;
-        break;
-    case SOPC_ExtensionObject_Id:
-        if (NULL != val->ExtObject)
-        {
-            SOPC_Free(val->ExtObject);
-        }
-        val->ExtObject = NULL;
-        break;
-    case SOPC_DataValue_Id:
-        if (NULL != val->DataValue)
-        {
-            SOPC_Free(val->DataValue);
-        }
-        val->DataValue = NULL;
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        if (NULL != val->DiagInfo)
-        {
-            SOPC_Free(val->DiagInfo);
-        }
-        val->DiagInfo = NULL;
         break;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
@@ -6246,53 +5869,35 @@ const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId
     case SOPC_Null_Id:
         return NULL;
     case SOPC_Boolean_Id:
-        return &var->Value.Boolean;
     case SOPC_SByte_Id:
-        return &var->Value.Sbyte;
     case SOPC_Byte_Id:
-        return &var->Value.Byte;
     case SOPC_Int16_Id:
-        return &var->Value.Int16;
     case SOPC_UInt16_Id:
-        return &var->Value.Uint16;
     case SOPC_Int32_Id:
-        return &var->Value.Int32;
     case SOPC_UInt32_Id:
-        return &var->Value.Uint32;
     case SOPC_Int64_Id:
-        return &var->Value.Int64;
     case SOPC_UInt64_Id:
-        return &var->Value.Uint64;
     case SOPC_Float_Id:
-        return &var->Value.Floatv;
     case SOPC_Double_Id:
-        return &var->Value.Doublev;
     case SOPC_String_Id:
-        return &var->Value.String;
     case SOPC_DateTime_Id:
-        return &var->Value.Date;
-    case SOPC_Guid_Id:
-        return var->Value.Guid;
     case SOPC_ByteString_Id:
-        return &var->Value.Bstring;
     case SOPC_XmlElement_Id:
-        return &var->Value.XmlElt;
-    case SOPC_NodeId_Id:
-        return var->Value.NodeId;
-    case SOPC_ExpandedNodeId_Id:
-        return var->Value.ExpNodeId;
     case SOPC_StatusCode_Id:
-        return &var->Value.Status;
+        // Note union fields are aligned: provide pointer to data
+        // (i.e. first first address for those types)
+        return (const void*) &var->Value.Boolean;
+    case SOPC_Guid_Id:
+    case SOPC_NodeId_Id:
+    case SOPC_ExpandedNodeId_Id:
     case SOPC_QualifiedName_Id:
-        return var->Value.Qname;
     case SOPC_LocalizedText_Id:
-        return var->Value.LocalizedText;
     case SOPC_ExtensionObject_Id:
-        return var->Value.ExtObject;
     case SOPC_DataValue_Id:
-        return var->Value.DataValue;
     case SOPC_DiagnosticInfo_Id:
-        return var->Value.DiagInfo;
+        // Note union fields content are aligned: provide pointer to data
+        // (i.e. content of the first field for those types)
+        return (const void*) var->Value.Guid;
     case SOPC_Variant_Id:
         // Part 6 Table 14 (v1.03): "The value shall not be a Variant
         //                           but it could be an array of Variants."
@@ -6310,61 +5915,43 @@ const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId 
     assert(builtInTypeId == var->BuiltInTypeId);
     assert(var->Value.Array.Length > index);
 
+    if (index < 0 || (uint64_t) index > (uint64_t) SIZE_MAX)
+    {
+        return NULL;
+    }
+
     switch (builtInTypeId)
     {
     case SOPC_Null_Id:
         // mantis #0003682: errata for 1.03 but not confirmed NULL array forbidden
         return NULL;
     case SOPC_Boolean_Id:
-        return (void*) &var->Value.Array.Content.BooleanArr[index];
     case SOPC_SByte_Id:
-        return (void*) &var->Value.Array.Content.SbyteArr[index];
     case SOPC_Byte_Id:
-        return (void*) &var->Value.Array.Content.ByteArr[index];
     case SOPC_Int16_Id:
-        return (void*) &var->Value.Array.Content.Int16Arr[index];
     case SOPC_UInt16_Id:
-        return (void*) &var->Value.Array.Content.Uint16Arr[index];
     case SOPC_Int32_Id:
-        return (void*) &var->Value.Array.Content.Int32Arr[index];
     case SOPC_UInt32_Id:
-        return (void*) &var->Value.Array.Content.Uint32Arr[index];
     case SOPC_Int64_Id:
-        return (void*) &var->Value.Array.Content.Int64Arr[index];
     case SOPC_UInt64_Id:
-        return (void*) &var->Value.Array.Content.Uint64Arr[index];
     case SOPC_Float_Id:
-        return (void*) &var->Value.Array.Content.FloatvArr[index];
     case SOPC_Double_Id:
-        return (void*) &var->Value.Array.Content.DoublevArr[index];
     case SOPC_String_Id:
-        return (void*) &var->Value.Array.Content.StringArr[index];
     case SOPC_DateTime_Id:
-        return (void*) &var->Value.Array.Content.DateArr[index];
     case SOPC_Guid_Id:
-        return (void*) &var->Value.Array.Content.GuidArr[index];
     case SOPC_ByteString_Id:
-        return (void*) &var->Value.Array.Content.BstringArr[index];
     case SOPC_XmlElement_Id:
-        return (void*) &var->Value.Array.Content.XmlEltArr[index];
     case SOPC_NodeId_Id:
-        return (void*) &var->Value.Array.Content.NodeIdArr[index];
     case SOPC_ExpandedNodeId_Id:
-        return (void*) &var->Value.Array.Content.ExpNodeIdArr[index];
     case SOPC_StatusCode_Id:
-        return (void*) &var->Value.Array.Content.StatusArr[index];
     case SOPC_QualifiedName_Id:
-        return (void*) &var->Value.Array.Content.QnameArr[index];
     case SOPC_LocalizedText_Id:
-        return (void*) &var->Value.Array.Content.LocalizedTextArr[index];
     case SOPC_ExtensionObject_Id:
-        return (void*) &var->Value.Array.Content.ExtObjectArr[index];
     case SOPC_DataValue_Id:
-        return (void*) &var->Value.Array.Content.DataValueArr[index];
     case SOPC_Variant_Id:
-        return (void*) &var->Value.Array.Content.VariantArr[index];
     case SOPC_DiagnosticInfo_Id:
-        return (void*) &var->Value.Array.Content.DiagInfoArr[index];
+        return (char*) var->Value.Array.Content.BooleanArr +
+               SOPC_BuiltInType_HandlingTable[builtInTypeId].size * (size_t) index;
     default:
         return NULL;
     }
@@ -6379,84 +5966,42 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
     assert(builtInTypeId == var->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
     assert(var->Value.Array.Length > index);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    if (index < 0 || (uint64_t) index > (uint64_t) SIZE_MAX)
+    {
+        return false;
+    }
 
     SOPC_EncodeableObject_PfnCopy* copyFct = SOPC_BuiltInType_HandlingTable[builtInTypeId].copy;
     switch (builtInTypeId)
     {
     case SOPC_Boolean_Id:
-        status = copyFct(&var->Value.Array.Content.BooleanArr[index], value);
-        break;
     case SOPC_SByte_Id:
-        status = copyFct(&var->Value.Array.Content.SbyteArr[index], value);
-        break;
     case SOPC_Byte_Id:
-        status = copyFct(&var->Value.Array.Content.ByteArr[index], value);
-        break;
     case SOPC_Int16_Id:
-        status = copyFct(&var->Value.Array.Content.Int16Arr[index], value);
-        break;
     case SOPC_UInt16_Id:
-        status = copyFct(&var->Value.Array.Content.Uint16Arr[index], value);
-        break;
     case SOPC_Int32_Id:
-        status = copyFct(&var->Value.Array.Content.Int32Arr[index], value);
-        break;
     case SOPC_UInt32_Id:
-        status = copyFct(&var->Value.Array.Content.Uint32Arr[index], value);
-        break;
     case SOPC_Int64_Id:
-        status = copyFct(&var->Value.Array.Content.Int64Arr[index], value);
-        break;
     case SOPC_UInt64_Id:
-        status = copyFct(&var->Value.Array.Content.Uint64Arr[index], value);
-        break;
     case SOPC_Float_Id:
-        status = copyFct(&var->Value.Array.Content.FloatvArr[index], value);
-        break;
     case SOPC_Double_Id:
-        status = copyFct(&var->Value.Array.Content.DoublevArr[index], value);
-        break;
     case SOPC_String_Id:
-        status = copyFct(&var->Value.Array.Content.StringArr[index], value);
-        break;
     case SOPC_DateTime_Id:
-        status = copyFct(&var->Value.Array.Content.DateArr[index], value);
-        break;
     case SOPC_Guid_Id:
-        status = copyFct(&var->Value.Array.Content.GuidArr[index], value);
-        break;
     case SOPC_ByteString_Id:
-        status = copyFct(&var->Value.Array.Content.BstringArr[index], value);
-        break;
     case SOPC_XmlElement_Id:
-        status = copyFct(&var->Value.Array.Content.XmlEltArr[index], value);
-        break;
     case SOPC_NodeId_Id:
-        status = copyFct(&var->Value.Array.Content.NodeIdArr[index], value);
-        break;
     case SOPC_ExpandedNodeId_Id:
-        status = copyFct(&var->Value.Array.Content.ExpNodeIdArr[index], value);
-        break;
     case SOPC_StatusCode_Id:
-        status = copyFct(&var->Value.Array.Content.StatusArr[index], value);
-        break;
     case SOPC_QualifiedName_Id:
-        status = copyFct(&var->Value.Array.Content.QnameArr[index], value);
-        break;
     case SOPC_LocalizedText_Id:
-        status = copyFct(&var->Value.Array.Content.LocalizedTextArr[index], value);
-        break;
     case SOPC_ExtensionObject_Id:
-        status = copyFct(&var->Value.Array.Content.ExtObjectArr[index], value);
-        break;
     case SOPC_DataValue_Id:
-        status = copyFct(&var->Value.Array.Content.DataValueArr[index], value);
-        break;
     case SOPC_Variant_Id:
-        status = copyFct(&var->Value.Array.Content.VariantArr[index], value);
-        break;
     case SOPC_DiagnosticInfo_Id:
-        status = copyFct(&var->Value.Array.Content.DiagInfoArr[index], value);
+        status = copyFct((char*) var->Value.Array.Content.BooleanArr +
+                             SOPC_BuiltInType_HandlingTable[builtInTypeId].size * (size_t) index,
+                         value);
         break;
     default:
         assert(false);
