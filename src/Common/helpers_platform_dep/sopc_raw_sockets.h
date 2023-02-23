@@ -57,7 +57,9 @@ bool SOPC_Socket_Network_Clear(void);
  *  \param port        The port number on which to connect or to listen to (optional for listening if hostname set)
  *  \param addrs       The addressing information to establish or listen a TCP connection over IPV4 and IPV6
  *
- *  \return            GOOD if operation succeeded, BAD otherwise.
+ *  \return            SOPC_STATUS_OK if operation succeeded,
+ *                     SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                     SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs);
 
@@ -105,7 +107,9 @@ void SOPC_Socket_Clear(Socket* sock);
  *  \param setNonBlocking    If value is not false (0) the socket is configured to be non blocking
  *  \param[out] sock         Value pointed is set with the newly created socket
  *
- *  \return                  GOOD if operation succeeded, BAD otherwise.
+ *  \return                  SOPC_STATUS_OK if operation succeeded,
+ *                           SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                           SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
@@ -118,7 +122,9 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
  *  \param sock    The socket used for binding and listening
  *  \param addr    The addressing information used to bind the socket for listening (IP and port)
  *
- *  \return        GOOD if operation succeeded, BAD otherwise.
+ *  \return        SOPC_STATUS_OK if operation succeeded,
+ *                 SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                 SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr);
 
@@ -130,7 +136,9 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
  *  \param setNonBlocking     If value is not false (0) the connection socket is configured to be non blocking
  *  \param[out] acceptedSock  Value pointed is set with the newly created socket for accepted connection
  *
- *  \return        GOOD if operation succeeded, BAD otherwise.
+ *  \return        SOPC_STATUS_OK if operation succeeded,
+ *                 SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                 SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, Socket* acceptedSock);
 
@@ -142,7 +150,9 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
  *  \param addr    The addressing information used to establish connection (IP and port)
  *  \param sock    The socket used for establishing the connection
  *
- *  \return        GOOD if operation succeeded, BAD otherwise.
+ *  \return        SOPC_STATUS_OK if operation succeeded,
+ *                 SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                 SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr);
 
@@ -154,7 +164,9 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
  *  \param from    The socket used for establishing the connection
  *  \param to      The socket to connect to
  *
- *  \return        GOOD if operation succeeded, BAD otherwise.
+ *  \return        SOPC_STATUS_OK if operation succeeded,
+ *                 SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                 SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to);
 
@@ -166,7 +178,9 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to);
  *  \param sock    The socket on which the first read event has been received after calling SOPC_Socket_Connect
  * operation.
  *
- *  \return        GOOD if connection succeeded, BAD otherwise.
+ *  \return        SOPC_STATUS_OK if operation succeeded,
+ *                 SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                 SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock);
 
@@ -222,8 +236,9 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
  *                   (only significant when SOPC_STATUS_OK returned)
  *
  *  \return          SOPC_STATUS_OK if bytes were written,
+ *                   SOPC_STATUS_INVALID_PARAMETERS if parameters are not valid,
  *                   SOPC_STATUS_WOULD_BLOCK if socket write operation would block,
- *                   SOPC_STATUS_NOK if it failed and
+ *                   SOPC_STATUS_NOK if it failed
  */
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes);
 
@@ -236,8 +251,10 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
  *  \param readCount    Pointer to the number of bytes actually written on the socket
  *                      (only significant when SOPC_STATUS_OK returned)
  *
- *  \return         SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_CLOSED in case of disconnection and
- * SOPC_STATUS_NOK otherwise.
+ *  \return         SOPC_STATUS_OK if operation succeeded,
+ *                  SOPC_STATUS_WOULD_BLOCK if socket read operation would block,
+ *                  SOPC_STATUS_CLOSED in case of disconnection and
+ *                  SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount);
 
