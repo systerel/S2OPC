@@ -102,6 +102,123 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
     }
 }
 
+typedef enum
+{
+    SOPC_InternalNodeClass_Unspecified = 0,
+    SOPC_InternalNodeClass_Object = 1,
+    SOPC_InternalNodeClass_Variable = 3,
+    SOPC_InternalNodeClass_Method = 4,
+    SOPC_InternalNodeClass_ObjectType = 5,
+    SOPC_InternalNodeClass_VariableType = 6,
+    SOPC_InternalNodeClass_ReferenceType = 7,
+    SOPC_InternalNodeClass_DataType = 8,
+    SOPC_InternalNodeClass_View = 9,
+} SOPC_InternalNodeClass;
+
+static const bool NODE_CLASS_TO_ATTRIBS[SOPC_InternalNodeClass_View + 1]
+                                       [SOPC_AttributeId_UserExecutable - SOPC_AttributeId_IsAbstract + 1] = {
+                                           {//  8     9     10     11     12     13     14
+                                            // 15    16     17     18     19     20     21     22
+                                            // Unspecified class
+                                            false, false, false, false, false, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+                                           {// ObjectNode
+                                            false, false, false, false, true, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+                                           {// VariableNode
+                                            false, false, false, false, false, true, true,
+
+                                            true, true, true, /**/ true, true, true, false, false},
+                                           {// MethodNode
+                                            false, false, false, false, false, false, false,
+
+                                            false, false, false, false, false, false, true, true},
+
+                                           {// ObjectTypeNode
+                                            true, false, false, false, false, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+
+                                           {// VariableTypeNode
+                                            true, false, false, false, false, true, /**/ true,
+
+                                            true, true, false, false, /**/ false, false, true, true},
+
+                                           {// ReferenceTypeNode
+                                            true, true, true, /**/ false, false, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+
+                                           {// DataTypeNode
+                                            true, false, false, false, false, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+
+                                           {// ViewNode
+                                            false, false, false, true, true, false, false,
+
+                                            false, false, false, false, false, false, false, false},
+};
+
+bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_AttributeId attribute)
+{
+    assert(space != NULL);
+    assert(node != NULL);
+
+    if ((int64_t) attribute <= (int64_t) SOPC_AttributeId_Invalid)
+    {
+        // Invalid attribute
+        return false;
+    }
+    else if (attribute < SOPC_AttributeId_IsAbstract)
+    {
+        // Common attributes present in all OpcUa_*Node types
+        return true;
+    }
+    else if (attribute > SOPC_AttributeId_UserExecutable)
+    {
+        // Unexpected attributes
+        return false;
+    }
+
+    SOPC_InternalNodeClass inc = SOPC_InternalNodeClass_Unspecified;
+    switch (node->node_class)
+    {
+    case OpcUa_NodeClass_Unspecified:
+        inc = SOPC_InternalNodeClass_Unspecified;
+        break;
+    case OpcUa_NodeClass_Object:
+        inc = SOPC_InternalNodeClass_Object;
+        break;
+    case OpcUa_NodeClass_Variable:
+        inc = SOPC_InternalNodeClass_Variable;
+        break;
+    case OpcUa_NodeClass_Method:
+        inc = SOPC_InternalNodeClass_Method;
+        break;
+    case OpcUa_NodeClass_ObjectType:
+        inc = SOPC_InternalNodeClass_ObjectType;
+        break;
+    case OpcUa_NodeClass_VariableType:
+        inc = SOPC_InternalNodeClass_VariableType;
+        break;
+    case OpcUa_NodeClass_ReferenceType:
+        inc = SOPC_InternalNodeClass_ReferenceType;
+        break;
+    case OpcUa_NodeClass_DataType:
+        inc = SOPC_InternalNodeClass_DataType;
+        break;
+    case OpcUa_NodeClass_View:
+        inc = SOPC_InternalNodeClass_View;
+        break;
+    default:
+        return false;
+    }
+    return NODE_CLASS_TO_ATTRIBS[inc][attribute - SOPC_AttributeId_IsAbstract];
+}
+
 #define ELEMENT_ATTRIBUTE_GETTER_CASE(val, field, extra) \
     case OpcUa_NodeClass_##val:                          \
         return &node->data.field.extra;

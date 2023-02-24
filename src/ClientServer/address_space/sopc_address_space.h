@@ -158,6 +158,9 @@ typedef void SOPC_AddressSpace_ForEach_Fct(const void* key, const void* value, v
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data);
 
 /* Common attributes */
+bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space,
+                                     SOPC_AddressSpace_Node* node,
+                                     SOPC_AttributeId attribute);
 OpcUa_NodeClass* SOPC_AddressSpace_Get_NodeClass(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_NodeId* SOPC_AddressSpace_Get_NodeId(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 SOPC_QualifiedName* SOPC_AddressSpace_Get_BrowseName(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);

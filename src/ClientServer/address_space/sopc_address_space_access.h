@@ -64,10 +64,6 @@ typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
  *          - UserAccessLevel
  *          - UserExecutable
  *          User related attributes will never be provided since behavior is dynamic.
- *
- * \warning For supported attributes, accessing an invalid attribute for the class of the corresponding node
- *          will lead to raise an assertion.
- *          TODO: returns OpcUa_BadInvalidAttributeId !!!
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_NodeId* nodeId,

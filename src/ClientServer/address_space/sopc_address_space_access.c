@@ -139,6 +139,11 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
     {
         return OpcUa_BadNodeIdUnknown;
     }
+    if (!SOPC_AddressSpace_Has_Attribute(addSpaceAccess->addSpaceRef, node, attribId))
+    {
+        return OpcUa_BadAttributeIdInvalid;
+    }
+
     SOPC_Variant* val = NULL;
     switch (attribId)
     {
