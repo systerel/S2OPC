@@ -79,16 +79,20 @@ SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextP
     if (!SOPC_IsGoodStatus(stCode) || SOPC_UInt32_Id != dv->Value.BuiltInTypeId ||
         SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType)
     {
-        return OpcUa_BadInvalidState;
+        stCode = OpcUa_BadInvalidState;
     }
 
-    dv->Value.Value.Uint32++;
-
-    SOPC_DateTime ts = 0; // will set current time as source TS
-    stCode = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
-    if (!SOPC_IsGoodStatus(stCode))
+    if (SOPC_IsGoodStatus(stCode))
     {
-        return OpcUa_BadInvalidState;
+        dv->Value.Value.Uint32++;
+
+        SOPC_DateTime ts = 0; // will set current time as source TS
+        stCode =
+            SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
+        if (!SOPC_IsGoodStatus(stCode))
+        {
+            stCode = OpcUa_BadInvalidState;
+        }
     }
 
     SOPC_DataValue_Clear(dv);
@@ -135,16 +139,20 @@ SOPC_StatusCode SOPC_Method_Func_AddToCounter(const SOPC_CallContext* callContex
     if (!SOPC_IsGoodStatus(stCode) || SOPC_UInt32_Id != dv->Value.BuiltInTypeId ||
         SOPC_VariantArrayType_SingleValue != dv->Value.ArrayType)
     {
-        return OpcUa_BadInvalidState;
+        stCode = OpcUa_BadInvalidState;
     }
 
-    dv->Value.Value.Uint32 += inputArgs[0].Value.Uint32;
-
-    SOPC_DateTime ts = 0; // will set current time as source TS
-    stCode = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
-    if (!SOPC_IsGoodStatus(stCode))
+    if (SOPC_IsGoodStatus(stCode))
     {
-        return OpcUa_BadInvalidState;
+        dv->Value.Value.Uint32 += inputArgs[0].Value.Uint32;
+
+        SOPC_DateTime ts = 0; // will set current time as source TS
+        stCode =
+            SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
+        if (!SOPC_IsGoodStatus(stCode))
+        {
+            stCode = OpcUa_BadInvalidState;
+        }
     }
 
     SOPC_DataValue_Clear(dv);
@@ -152,7 +160,7 @@ SOPC_StatusCode SOPC_Method_Func_AddToCounter(const SOPC_CallContext* callContex
 
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    return SOPC_GoodGenericStatus;
+    return stCode;
 }
 
 SOPC_StatusCode SOPC_Method_Func_GetCounterValue(const SOPC_CallContext* callContextPtr,
@@ -274,8 +282,8 @@ SOPC_StatusCode SOPC_Method_Func_UpdateAndGetPreviousHello(const SOPC_CallContex
             {
                 stCode = OpcUa_BadOutOfMemory;
             }
-            SOPC_Free(helloSentence);
         }
+        SOPC_Free(helloSentence);
     }
     else
     {
