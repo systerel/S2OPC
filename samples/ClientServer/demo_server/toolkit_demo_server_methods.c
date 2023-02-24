@@ -85,8 +85,7 @@ SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextP
     dv->Value.Value.Uint32++;
 
     SOPC_DateTime ts = 0; // will set current time as source TS
-    stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_Counter, SOPC_AttributeId_Value, NULL, &dv->Value,
-                                           NULL, &ts, NULL);
+    stCode = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
     if (!SOPC_IsGoodStatus(stCode))
     {
         return OpcUa_BadInvalidState;
@@ -142,8 +141,7 @@ SOPC_StatusCode SOPC_Method_Func_AddToCounter(const SOPC_CallContext* callContex
     dv->Value.Value.Uint32 += inputArgs[0].Value.Uint32;
 
     SOPC_DateTime ts = 0; // will set current time as source TS
-    stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_Counter, SOPC_AttributeId_Value, NULL, &dv->Value,
-                                           NULL, &ts, NULL);
+    stCode = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_Counter, NULL, &dv->Value, NULL, &ts, NULL);
     if (!SOPC_IsGoodStatus(stCode))
     {
         return OpcUa_BadInvalidState;
@@ -288,8 +286,8 @@ SOPC_StatusCode SOPC_Method_Func_UpdateAndGetPreviousHello(const SOPC_CallContex
     if (SOPC_IsGoodStatus(stCode))
     {
         SOPC_DateTime ts = 0; // will set current time as source TS
-        stCode = SOPC_AddressSpaceAccess_Write(addSpAccess, &TestObject_HelloNextArg, SOPC_AttributeId_Value, NULL,
-                                               &inputArgs[0], NULL, &ts, NULL);
+        stCode = SOPC_AddressSpaceAccess_WriteValue(addSpAccess, &TestObject_HelloNextArg, NULL, &inputArgs[0], NULL,
+                                                    &ts, NULL);
     }
 
     SOPC_DataValue_Clear(dv);

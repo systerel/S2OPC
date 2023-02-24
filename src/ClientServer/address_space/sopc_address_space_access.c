@@ -353,17 +353,16 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     return status;
 }
 
-SOPC_StatusCode SOPC_AddressSpaceAccess_Write(SOPC_AddressSpaceAccess* addSpaceAccess,
-                                              const SOPC_NodeId* nodeId,
-                                              SOPC_AttributeId attribId,
-                                              const SOPC_NumericRange* optNumRange,
-                                              const SOPC_Variant* value,
-                                              const SOPC_StatusCode* optStatus,
-                                              const SOPC_DateTime* optSourceTimestamp,
-                                              const uint16_t* optSourcePicoSeconds)
+SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeId,
+                                                   const SOPC_NumericRange* optNumRange,
+                                                   const SOPC_Variant* value,
+                                                   const SOPC_StatusCode* optStatus,
+                                                   const SOPC_DateTime* optSourceTimestamp,
+                                                   const uint16_t* optSourcePicoSeconds)
 {
-    if (NULL == addSpaceAccess || NULL == nodeId || (optNumRange != NULL && SOPC_AttributeId_Value != attribId) ||
-        NULL == value || (NULL != optSourcePicoSeconds && NULL == optSourceTimestamp))
+    if (NULL == addSpaceAccess || NULL == nodeId || NULL == value ||
+        (NULL != optSourcePicoSeconds && NULL == optSourceTimestamp))
     {
         return OpcUa_BadInvalidArgument;
     }
@@ -449,8 +448,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_Write(SOPC_AddressSpaceAccess* addSpaceA
 
     if (SOPC_STATUS_OK == status && addSpaceAccess->recordOperations)
     {
-        status = SOPC_InternalRecordOperation_Write(addSpaceAccess, node, nodeId, attribId, &previousValue,
-                                                    prevStatusCode, prevSourceTs);
+        status = SOPC_InternalRecordOperation_Write(addSpaceAccess, node, nodeId, SOPC_AttributeId_Value,
+                                                    &previousValue, prevStatusCode, prevSourceTs);
         returnCode = (SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadOutOfMemory);
     }
 

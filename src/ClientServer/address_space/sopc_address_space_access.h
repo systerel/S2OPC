@@ -102,9 +102,22 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess*
 /**
  * \brief Write Value attribute content with Status and Source Timestamp metadata.
  *
- * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
- *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL, numeric range on non-Value attribute,
- * incoherent)
+ * \param addSpaceAccess       The AddressSpace Access used for write operation
+ * \param nodeId               The NodeId of a Variable/VariableType node in the AddressSpace
+ * \param optNumRange          (Optional) The numeric range to write in the targeted node with the given value,
+ *                                        it shall be NULL if no range requested (complete write of target value).
+ * \param value                The value to write into the Variable/VariableType node.
+ * \param optStatus            (Optional) The status code to associate with the value written,
+ *                                        NULL if previous value shall be kept.
+ * \param optSourceTimestamp   (Optional) The source timestamp as OPC UA DateTime to associate with the value written,
+ *                                        NULL if previous source timestamp shall be kept,
+ *                                        0 if the current time shall be set.
+ * \param optSourcePicoSeconds (Optional) The source timestamp picoseconds part to associate with the value written,
+ *                                        it shall be NULL if \p optSourceTimestamp is NULL,
+ *                                        it might be NULL or set to 0 if the current time shall be set.
+ *
+ * \return SOPC_GoodGenericStatus in case of success, otherwise:
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL, incoherent parameters)
  *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
  *         - OpcUa_BadWriteNotSupported: if status code and/or timestamp provided but are read-only in AddressSpace
  *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
@@ -114,17 +127,16 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess*
  *         - OpcUa_BadIndexRangeNoData: if there is no data for the numeric range provided
  *
  *
- * \note if \p optSourcePicoSeconds != NULL => \p optSourceTimestamp != NULL
- *       if *optSourcePicoSeconds == 0 &&  *optSourceTimestamp == 0 => source == current time
+ * \warning No typechecking is implemented in this operation for now (value write will succeed),
+ *          it is responsibility of caller to check the Value complies with the Variable DataType.
  */
-SOPC_StatusCode SOPC_AddressSpaceAccess_Write(SOPC_AddressSpaceAccess* addSpaceAccess,
-                                              const SOPC_NodeId* nodeId,
-                                              SOPC_AttributeId attribId,
-                                              const SOPC_NumericRange* optNumRange,
-                                              const SOPC_Variant* value,
-                                              const SOPC_StatusCode* optStatus,
-                                              const SOPC_DateTime* optSourceTimestamp,
-                                              const uint16_t* optSourcePicoSeconds);
+SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addSpaceAccess,
+                                                   const SOPC_NodeId* nodeId,
+                                                   const SOPC_NumericRange* optNumRange,
+                                                   const SOPC_Variant* value,
+                                                   const SOPC_StatusCode* optStatus,
+                                                   const SOPC_DateTime* optSourceTimestamp,
+                                                   const uint16_t* optSourcePicoSeconds);
 
 /**
  * \note: Add variable node operation includes creation of mutual references with parent / type
