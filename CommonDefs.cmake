@@ -187,6 +187,7 @@ option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 # S2OPC client/server library scope option
 option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
 option(SOPC_HAS_NODE_MANAGEMENT_SERVICES "Make NodeManagement service set available to clients" OFF)
+option(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION "Make NodeManagement service set available to clients" OFF)
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
@@ -276,6 +277,7 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 # print options with no incompatibility
 print_if_activated("WITH_NANO_EXTENDED")
 print_if_activated("SOPC_HAS_NODE_MANAGEMENT_SERVICES")
+print_if_activated("SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 print_if_activated("SECURITY_HARDENING")
@@ -369,8 +371,10 @@ endif()
 
 # Add WITH_NANO_EXTENDED to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
-# Add WITH_NANO_EXTENDED to compilation definition if option activated
+# Add SOPC_HAS_NODE_MANAGEMENT_SERVICES to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${SOPC_HAS_NODE_MANAGEMENT_SERVICES}>:SOPC_HAS_NODE_MANAGEMENT_SERVICES>)
+# Add SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION}>:SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION>)
 
 ### Define common functions ###
 
