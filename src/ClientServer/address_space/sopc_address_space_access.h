@@ -42,6 +42,18 @@ typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
 /**
  * \brief Read an attribute and retrieve its value as a Variant.
  *
+ * \param addSpaceAccess  The AddressSpace Access used for read operation
+ * \param nodeId          The NodeId of a node in the AddressSpace
+ * \param attribId        The AttributeId to read in the node
+ * \param[out] outValue   The pointer in which the Variant containing the read result will be returned
+ *
+ * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
+ *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
+ *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
+ *                                    (it might also be invalid for concerned node in this case)
+ *         - OpcUa_BadOutOfMemory: if Variant allocation failed
+ *
  * \warning The following attributes are not supported and will lead to return an OpcUa_BadNotImplemented status:
  *          - ContainsNoLoops
  *          - InverseName
@@ -54,13 +66,8 @@ typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
  *          User related attributes will never be provided since behavior is dynamic.
  *
  * \warning For supported attributes, accessing an invalid attribute for the class of the corresponding node
- *          will lead to raise an assertion. TODO: returns OpcUa_BadInvalidAttributeId !!!
- * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
- *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
- *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
- *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
- *                                    (it might also be invalid for concerned node in this case)
- *         - OpcUa_BadOutOfMemory: if Variant allocation failed
+ *          will lead to raise an assertion.
+ *          TODO: returns OpcUa_BadInvalidAttributeId !!!
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAccess* addSpaceAccess,
                                                       const SOPC_NodeId* nodeId,
@@ -70,16 +77,22 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_ReadAttribute(const SOPC_AddressSpaceAcc
 /**
  * \brief Read Value attribute content with Status and Source Timestamp metadata.
  *
- * \note Server Timestamp is never set in returned value since current date on read is used for OPC UA service.
+ * \param addSpaceAccess     The AddressSpace Access used for read operation
+ * \param nodeId             The NodeId of a Variable/VariableType node in the AddressSpace
+ * \param optNumRange        (Optional) The numeric range to use to read value, it shall be NULL if no range requested.
+ * \param[out] outDataValue  The pointer in which the DataValue containing the read Value result will be returned.
+ *                           It contains the Value as a Variant and the associated StatusCode and Source Timestamp.
  *
  * \return SOPC_GoodGenericStatus in case of success with an allocated \p outValue, otherwise:
- *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL)
+ *         - OpcUa_BadInvalidArgument: if provided parameters are invalid (NULL except if optional)
  *         - OpcUa_BadNodeIdUnknown: if provided \p nodeId is not present in AddressSpace
  *         - OpcUa_BadNotImplemented: if the requested attribute is not implemented
  *                                    (it might also be invalid for concerned node in this case)
  *         - OpcUa_BadOutOfMemory: if DataValue/Variant allocation failed
  *         - OpcUa_BadIndexRangeInvalid: if numeric range provided is invalid
  *         - OpcUa_BadIndexRangeNoData: if there is no data for the numeric range provided
+ *
+ * \note Server Timestamp is never set in returned value since current date on read is used for OPC UA service.
  */
 SOPC_StatusCode SOPC_AddressSpaceAccess_ReadValue(const SOPC_AddressSpaceAccess* addSpaceAccess,
                                                   const SOPC_NodeId* nodeId,
