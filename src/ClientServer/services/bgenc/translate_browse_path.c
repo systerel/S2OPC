@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 13/02/2023 00:56:45
+ Date                 : 03/03/2023 14:14:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -596,14 +596,13 @@ void translate_browse_path__compute_browse_result_from_source(
    }
 }
 
-void translate_browse_path__treat_browse_result_one_source(
+void translate_browse_path__treat_browse_result_one_source_1(
    const t_entier4 translate_browse_path__index,
    const constants__t_QualifiedName_i translate_browse_path__targetName,
-   const t_entier4 translate_browse_path__nbReferences,
+   const t_entier4 translate_browse_path__browseResult_index,
+   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
    {
-      t_bool translate_browse_path__l_continue;
-      t_entier4 translate_browse_path__l_browseResult_index;
       constants__t_NodeId_i translate_browse_path__l_res_refTypeId;
       t_bool translate_browse_path__l_res_isForward;
       constants__t_ExpandedNodeId_i translate_browse_path__l_res_ExpandedNodeId;
@@ -616,44 +615,64 @@ void translate_browse_path__treat_browse_result_one_source(
       t_bool translate_browse_path__l_local_server;
       constants__t_NodeId_i translate_browse_path__l_source_tmp;
       
+      *translate_browse_path__statusCode_operation = translate_browse_path__in_statusCode;
+      browse_treatment__getall_browse_result_reference_at(translate_browse_path__browseResult_index,
+         &translate_browse_path__l_res_refTypeId,
+         &translate_browse_path__l_res_isForward,
+         &translate_browse_path__l_res_ExpandedNodeId,
+         &translate_browse_path__l_res_BrowseName,
+         &translate_browse_path__l_res_DisplayName,
+         &translate_browse_path__l_res_NodeClass,
+         &translate_browse_path__l_res_TypeDefinition);
+      constants__is_QualifiedNames_Equal(translate_browse_path__targetName,
+         translate_browse_path__l_res_BrowseName,
+         &translate_browse_path__l_found);
+      if (translate_browse_path__l_found == true) {
+         translate_browse_path__checkAndAdd_BrowsePathResult(translate_browse_path__l_res_ExpandedNodeId,
+            &translate_browse_path__l_translate_statusCode);
+         if ((translate_browse_path__l_translate_statusCode == constants_statuscodes_bs__e_sc_ok) &&
+            (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
+            ;
+         }
+         else {
+            *translate_browse_path__statusCode_operation = translate_browse_path__l_translate_statusCode;
+         }
+      }
+      else if (translate_browse_path__l_res_ExpandedNodeId != constants__c_ExpandedNodeId_indet) {
+         constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path__l_res_ExpandedNodeId,
+            &translate_browse_path__l_local_server,
+            &translate_browse_path__l_source_tmp);
+         if (translate_browse_path__l_local_server == false) {
+            translate_browse_path__checkAndAdd_BrowsePathRemaining(translate_browse_path__l_res_ExpandedNodeId,
+               translate_browse_path__index,
+               translate_browse_path__statusCode_operation);
+         }
+      }
+   }
+}
+
+void translate_browse_path__treat_browse_result_one_source(
+   const t_entier4 translate_browse_path__index,
+   const constants__t_QualifiedName_i translate_browse_path__targetName,
+   const t_entier4 translate_browse_path__nbReferences,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
+   {
+      t_bool translate_browse_path__l_continue;
+      t_entier4 translate_browse_path__l_browseResult_index;
+      constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_translate_statusCode;
+      
       *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_no_match;
       translate_browse_path_result_it__init_iter_translate_browseResult(translate_browse_path__nbReferences,
          &translate_browse_path__l_continue);
       while (translate_browse_path__l_continue == true) {
          translate_browse_path_result_it__continue_iter_translate_browseResult(&translate_browse_path__l_continue,
             &translate_browse_path__l_browseResult_index);
-         browse_treatment__getall_browse_result_reference_at(translate_browse_path__l_browseResult_index,
-            &translate_browse_path__l_res_refTypeId,
-            &translate_browse_path__l_res_isForward,
-            &translate_browse_path__l_res_ExpandedNodeId,
-            &translate_browse_path__l_res_BrowseName,
-            &translate_browse_path__l_res_DisplayName,
-            &translate_browse_path__l_res_NodeClass,
-            &translate_browse_path__l_res_TypeDefinition);
-         constants__is_QualifiedNames_Equal(translate_browse_path__targetName,
-            translate_browse_path__l_res_BrowseName,
-            &translate_browse_path__l_found);
-         if (translate_browse_path__l_found == true) {
-            translate_browse_path__checkAndAdd_BrowsePathResult(translate_browse_path__l_res_ExpandedNodeId,
-               &translate_browse_path__l_translate_statusCode);
-            if ((translate_browse_path__l_translate_statusCode == constants_statuscodes_bs__e_sc_ok) &&
-               (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
-               ;
-            }
-            else {
-               *translate_browse_path__statusCode_operation = translate_browse_path__l_translate_statusCode;
-            }
-         }
-         else if (translate_browse_path__l_res_ExpandedNodeId != constants__c_ExpandedNodeId_indet) {
-            constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path__l_res_ExpandedNodeId,
-               &translate_browse_path__l_local_server,
-               &translate_browse_path__l_source_tmp);
-            if (translate_browse_path__l_local_server == false) {
-               translate_browse_path__checkAndAdd_BrowsePathRemaining(translate_browse_path__l_res_ExpandedNodeId,
-                  translate_browse_path__index,
-                  translate_browse_path__statusCode_operation);
-            }
-         }
+         translate_browse_path__treat_browse_result_one_source_1(translate_browse_path__index,
+            translate_browse_path__targetName,
+            translate_browse_path__l_browseResult_index,
+            *translate_browse_path__statusCode_operation,
+            &translate_browse_path__l_translate_statusCode);
+         *translate_browse_path__statusCode_operation = translate_browse_path__l_translate_statusCode;
          translate_browse_path__l_continue = ((translate_browse_path__l_continue == true) &&
             (((*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
             (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) ||
