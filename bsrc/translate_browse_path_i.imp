@@ -1489,12 +1489,16 @@ statusCode_operation <-- treat_browse_result_one_source_1(index, targetName, bro
                     statusCode_operation =  e_sc_bad_no_match))
 
         INVARIANT
-            l_continue = bool(translate_browseResult_to_iterate = {}) &
             nb_translate_browseResult_max_refs : NAT &
             translate_browseResult_to_iterate <: NAT &
             translate_browseResult_iterated   <: NAT &
             translate_browseResult_to_iterate /\ translate_browseResult_iterated = {} &
-            nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated)
+            nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated) &
+
+            l_continue = bool((translate_browseResult_to_iterate /= {}) &
+                              (statusCode_operation : {e_sc_ok,
+                                  e_sc_uncertain_reference_out_of_server,
+                                  e_sc_bad_no_match}))
         VARIANT
             card(translate_browseResult_to_iterate)
         END
