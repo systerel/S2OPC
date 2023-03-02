@@ -47,6 +47,7 @@ DEFINITIONS
     d_variables_out ==
         out_BrowseResult_BrowseStatus,
         out_BrowseResult_ContinuationPointId,
+        out_BrowseResultReferences,
         out_BrowseResult_nb_References,
         out_BrowseResult_ReferenceTypeId,
         out_BrowseResult_isForward,
@@ -55,7 +56,6 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        out_BrowseResultReferences,
         isBrowseResultComputed,
         isBrowseResultAllocated
     ;
@@ -79,18 +79,28 @@ DEFINITIONS
         session_ContinuationPoint : s_ContinuationPoints >-> t_session // a continuation point is associated to a session (=> 1 CP / session)
     ;
     d_inv_out ==
-        out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
-        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
-        out_BrowseResult_nb_References     : NAT                        &
-        out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
-        out_BrowseResult_isForward         : NAT +-> BOOL               &
-        out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
-        out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
-        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  & /* Spec (v1.04) part 4 table 167 indicates it as mandatory (should be t_LocalizedText)
-                                                                             but if node is not present we do not have it*/
-        out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
-        out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
-        out_BrowseResultReferences         : t_BrowseResultReferences_i &
+        out_BrowseResult_BrowseStatus        : t_StatusCode_i             &
+        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i    &
+        out_BrowseResultReferences           : t_BrowseResultReferences_i &
+        out_BrowseResult_nb_References       : NAT                        &
+        out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
+        out_BrowseResult_isForward       : seq(BOOL)               &
+        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId_i) &
+        out_BrowseResult_BrowseName      : seq(t_QualifiedName_i)  &
+        out_BrowseResult_DisplayName     : seq(t_LocalizedText_i)  & /* Spec (v1.04) part 4 table 167 indicates it as mandatory
+                                                                        (should be t_LocalizedText),
+                                                                        but if node is not present we do not have it*/
+        out_BrowseResult_NodeClass       : seq(t_NodeClass_i)      &
+        out_BrowseResult_TypeDefinition  : seq(t_ExpandedNodeId_i) &
+
+        size(out_BrowseResult_ReferenceTypeId) = out_BrowseResult_nb_References &
+        size(out_BrowseResult_isForward)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeId)          = out_BrowseResult_nb_References &
+        size(out_BrowseResult_BrowseName)      = out_BrowseResult_nb_References &
+        size(out_BrowseResult_DisplayName)     = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References &
+
         isBrowseResultComputed             : BOOL                       &
         isBrowseResultAllocated            : BOOL
     ;
@@ -120,8 +130,9 @@ DEFINITIONS
     d_init_out ==
         d_variables_out
         :(
-            out_BrowseResult_BrowseStatus      = c_StatusCode_indet         &
-            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet &
+            out_BrowseResult_BrowseStatus        = c_StatusCode_indet             &
+            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet    &
+            out_BrowseResultReferences           = c_BrowseResultReferences_indet &
             out_BrowseResult_nb_References     = 0                          &
             out_BrowseResult_ReferenceTypeId   = {}                         &
             out_BrowseResult_isForward         = {}                         &
@@ -130,7 +141,6 @@ DEFINITIONS
             out_BrowseResult_DisplayName       = {}                         &
             out_BrowseResult_NodeClass         = {}                         &
             out_BrowseResult_TypeDefinition    = {}                         &
-            out_BrowseResultReferences         = c_BrowseResultReferences_indet &
             isBrowseResultComputed             = FALSE                      &
             isBrowseResultAllocated            = FALSE
         )
@@ -311,14 +321,7 @@ OPERATIONS
     PRE
         isBrowseResultComputed = TRUE &
         p_refIndex : NAT &
-        p_refIndex : 1..out_BrowseResult_nb_References &
-        p_refIndex : dom(out_BrowseResult_ReferenceTypeId) &
-        p_refIndex : dom(out_BrowseResult_isForward) &
-        p_refIndex : dom(out_BrowseResult_NodeId) &
-        p_refIndex : dom(out_BrowseResult_BrowseName) &
-        p_refIndex : dom(out_BrowseResult_DisplayName) &
-        p_refIndex : dom(out_BrowseResult_NodeClass) &
-        p_refIndex : dom(out_BrowseResult_TypeDefinition)
+        p_refIndex : 1..out_BrowseResult_nb_References
     THEN
         p_refTypeId :(p_refTypeId : t_NodeId_i & p_refTypeId = out_BrowseResult_ReferenceTypeId(p_refIndex)) ||
         p_isForward := out_BrowseResult_isForward(p_refIndex) ||

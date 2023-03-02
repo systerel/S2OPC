@@ -59,6 +59,17 @@ DEFINITIONS
         next_reference_index
     ;
 
+    d_var_out_BrowseResult ==
+        out_BrowseResult_nb_References,
+        out_BrowseResult_ReferenceTypeId,
+        out_BrowseResult_isForward,
+        out_BrowseResult_NodeId,
+        out_BrowseResult_BrowseName,
+        out_BrowseResult_DisplayName,
+        out_BrowseResult_NodeClass,
+        out_BrowseResult_TypeDefinition
+    ;
+
     d_inv_result_it ==
     (   nb_browseResult_max_refs : NAT &
         browseResult_to_iterate <: NAT1 &
@@ -74,6 +85,24 @@ DEFINITIONS
         references_iterated   <: NAT &
         references_to_iterate /\ references_iterated = {} &
         next_reference_index : NAT
+    );
+
+    d_inv_out_BrowseResult ==
+    (   out_BrowseResult_nb_References   : NAT                     &
+        out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
+        out_BrowseResult_isForward       : seq(BOOL)               &
+        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId_i) &
+        out_BrowseResult_BrowseName      : seq(t_QualifiedName_i)  &
+        out_BrowseResult_DisplayName     : seq(t_LocalizedText_i)  &
+        out_BrowseResult_NodeClass       : seq(t_NodeClass_i)      &
+        out_BrowseResult_TypeDefinition  : seq(t_ExpandedNodeId_i) &
+        size(out_BrowseResult_ReferenceTypeId) = out_BrowseResult_nb_References &
+        size(out_BrowseResult_isForward)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeId)          = out_BrowseResult_nb_References &
+        size(out_BrowseResult_BrowseName)      = out_BrowseResult_nb_References &
+        size(out_BrowseResult_DisplayName)     = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References
     )
 
 
@@ -207,27 +236,11 @@ LOCAL_OPERATIONS
         ) ||
         /* Use of BrowseResult iterator */
         d_var_result_it,
-
         /* out BrowseResult */
-        out_BrowseResult_NodeId,
-        out_BrowseResult_ReferenceTypeId,
-        out_BrowseResult_isForward,
-        out_BrowseResult_nb_References,
-        out_BrowseResult_BrowseName,
-        out_BrowseResult_DisplayName,
-        out_BrowseResult_NodeClass,
-        out_BrowseResult_TypeDefinition
+        d_var_out_BrowseResult
         :(
             d_inv_result_it &
-
-            out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
-            out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
-            out_BrowseResult_isForward         : NAT +-> BOOL               &
-            out_BrowseResult_nb_References     : NAT                        &
-            out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
-            out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  &
-            out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
-            out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i
+            d_inv_out_BrowseResult
         ) ||
         /* Use of reference targets iterator */
         d_var_reference_it :(d_inv_reference_it)
@@ -258,27 +271,12 @@ LOCAL_OPERATIONS
     THEN
         p_continue, p_alloc_failed,
         browseResult_iterated, browseResult_to_iterate, nextBrowseResult,
-        out_BrowseResult_NodeId,
-        out_BrowseResult_nb_References,
-        out_BrowseResult_BrowseName,
-        out_BrowseResult_DisplayName,
-        out_BrowseResult_NodeClass,
-        out_BrowseResult_TypeDefinition,
-        out_BrowseResult_ReferenceTypeId,
-        out_BrowseResult_isForward:(
-            p_continue : BOOL &
+        d_var_out_BrowseResult
+        :(  p_continue : BOOL &
             p_alloc_failed : BOOL &
 
             d_inv_result_it &
-
-            out_BrowseResult_nb_References   : NAT                        &
-            out_BrowseResult_NodeId          : NAT +-> t_ExpandedNodeId_i &
-            out_BrowseResult_BrowseName      : NAT +-> t_QualifiedName_i  &
-            out_BrowseResult_DisplayName     : NAT +-> t_LocalizedText_i  &
-            out_BrowseResult_NodeClass       : NAT +-> t_NodeClass_i      &
-            out_BrowseResult_TypeDefinition  : NAT +-> t_ExpandedNodeId_i &
-            out_BrowseResult_ReferenceTypeId : NAT +-> t_NodeId_i         &
-            out_BrowseResult_isForward       : NAT +-> BOOL               &
+            d_inv_out_BrowseResult &
 
             (p_alloc_failed = TRUE => p_continue = FALSE) &
             (p_alloc_failed = FALSE =>

@@ -119,17 +119,24 @@ DEFINITIONS
     );
 
     d_inv_browse_result_out ==
-    (   out_BrowseResult_BrowseStatus      : t_StatusCode_i             &
-        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i  &
-        out_BrowseResult_nb_References     : NAT                        &
-        out_BrowseResult_ReferenceTypeId   : NAT +-> t_NodeId_i         &
-        out_BrowseResult_isForward         : NAT +-> BOOL               &
-        out_BrowseResult_NodeId            : NAT +-> t_ExpandedNodeId   &
-        out_BrowseResult_BrowseName        : NAT +-> t_QualifiedName_i  &
-        out_BrowseResult_DisplayName       : NAT +-> t_LocalizedText_i  &
-        out_BrowseResult_NodeClass         : NAT +-> t_NodeClass_i      &
-        out_BrowseResult_TypeDefinition    : NAT +-> t_ExpandedNodeId_i &
-        out_BrowseResultReferences         : t_BrowseResultReferences_i &
+    (   out_BrowseResult_BrowseStatus        : t_StatusCode_i             &
+        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i    &
+        out_BrowseResultReferences           : t_BrowseResultReferences_i &
+        out_BrowseResult_nb_References   : NAT                     &
+        out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
+        out_BrowseResult_isForward       : seq(BOOL)               &
+        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId_i) &
+        out_BrowseResult_BrowseName      : seq(t_QualifiedName_i)  &
+        out_BrowseResult_DisplayName     : seq(t_LocalizedText_i)  &
+        out_BrowseResult_NodeClass       : seq(t_NodeClass_i)      &
+        out_BrowseResult_TypeDefinition  : seq(t_ExpandedNodeId_i) &
+        size(out_BrowseResult_ReferenceTypeId) = out_BrowseResult_nb_References &
+        size(out_BrowseResult_isForward)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeId)          = out_BrowseResult_nb_References &
+        size(out_BrowseResult_BrowseName)      = out_BrowseResult_nb_References &
+        size(out_BrowseResult_DisplayName)     = out_BrowseResult_nb_References &
+        size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
+        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References &
 
         isBrowseResultComputed             : BOOL                       &
         isBrowseResultAllocated            : BOOL
@@ -622,7 +629,7 @@ LOCAL_OPERATIONS
     PRE
         index : NAT1 &
         nbReferences : NAT &
-        nbReferences : dom(out_BrowseResult_NodeId) &
+        nbReferences : 1..out_BrowseResult_nb_References &
         targetName : t_QualifiedName_i &
         targetName : t_QualifiedName
     THEN
