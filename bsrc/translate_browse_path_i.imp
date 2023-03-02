@@ -736,30 +736,13 @@ LOCAL_OPERATIONS
             dom(BrowsePathRemainingNodeId$0) <| BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
             dom(BrowsePathRemainingIndex$0) <| BrowsePathRemainingIndex = BrowsePathRemainingIndex$0 &
 
-            ( statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
-                =>
-
-                /* all target in BrowsePathResult has browse name equal to TargetName and
-                is equal to a browse result */
-                !(bpri).( bpri : size(BrowsePathResult$0)+1 .. size(BrowsePathResult) =>
-                    #(bri).(bri : 1..nbReferences &
-                        out_BrowseResult_NodeId(bri) = BrowsePathResult(bpri) &
-                        out_BrowseResult_BrowseName(bri) = targetName))
-            ) &
-            ( statusCode_operation = e_sc_uncertain_reference_out_of_server
-                =>
-               BrowsePathRemainingNodeId /= BrowsePathRemainingNodeId$0 &
-               !(bpri).( bpri : size(BrowsePathRemainingNodeId$0)+1 .. size(BrowsePathRemainingNodeId) =>
-                   index = BrowsePathRemainingIndex(bpri) &
-                    #(bri).(bri : 1..nbReferences &
-                        out_BrowseResult_NodeId(bri) = BrowsePathRemainingNodeId(bpri) &
-                        out_BrowseResult_BrowseName(bri) = targetName))
-            ) &
-            ( statusCode_operation = e_sc_ok
-                =>
-                BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
-                BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
-            )
+            BrowsePathResult[size(BrowsePathResult$0)+1 .. size(BrowsePathResult)] <:
+                out_BrowseResult_NodeId[1..nbReferences] &
+            BrowsePathRemainingNodeId[size(BrowsePathRemainingNodeId$0)+1 ..
+                                      size(BrowsePathRemainingNodeId)] <:
+                out_BrowseResult_NodeId[1..nbReferences] &
+            BrowsePathRemainingIndex[size(BrowsePathRemainingNodeId$0)+1 ..
+                                     size(BrowsePathRemainingNodeId)] <: {index}
         )
     END
     ;
