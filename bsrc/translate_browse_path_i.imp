@@ -614,7 +614,9 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex} &
 
             nbReferences : NAT &
-            nbReferences <= k_n_BrowseTarget_max
+            nbReferences <= k_n_BrowseTarget_max &
+
+            (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE)
         ) ||
 
         d_var_browse_value_in,
@@ -636,7 +638,8 @@ LOCAL_OPERATIONS
         in_statusCode : {e_sc_ok, e_sc_bad_no_match,
             e_sc_uncertain_reference_out_of_server} &
         size(BrowsePathResult) < k_n_BrowsePathResPerElt_max &
-        size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max
+        size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max &
+        isBrowseResultComputed = TRUE
     THEN
         statusCode_operation,
         BrowsePathResult,
@@ -708,7 +711,8 @@ LOCAL_OPERATIONS
         nbReferences : NAT &
         nbReferences : 1..out_BrowseResult_nb_References &
         targetName : t_QualifiedName_i &
-        targetName : t_QualifiedName
+        targetName : t_QualifiedName &
+        isBrowseResultComputed = TRUE
     THEN
         statusCode_operation,
         BrowsePathResult,
