@@ -731,7 +731,6 @@ LOCAL_OPERATIONS
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : {e_sc_ok,
                 e_sc_bad_no_match,
-                e_sc_bad_node_id_unknown,
                 e_sc_bad_out_of_memory,
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server} &
