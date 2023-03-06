@@ -70,7 +70,7 @@ set(TEST_USERS_XML               "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_
 set(TEST_SERVER_UACTT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Server_UACTT_Config.xml")
 set(TEST_USERS_UACTT_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_UACTT_Users.xml")
 
-set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/tests/ClientServer/data/address_space/s2opc_no_base_info.xml")
+set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_no_base_info.xml")
 
 if (WITH_NANO_EXTENDED)
   set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
