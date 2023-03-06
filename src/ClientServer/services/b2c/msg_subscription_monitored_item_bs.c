@@ -126,7 +126,7 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             // Filter was not decoded as an object => unknown type
             *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
         }
-        else if (&OpcUa_AggregateFilter_EncodeableType == filter->Body.Object.ObjType &&
+        else if (&OpcUa_AggregateFilter_EncodeableType == filter->Body.Object.ObjType ||
                  &OpcUa_EventFilter_EncodeableType == filter->Body.Object.ObjType)
         {
             // AggregateFilter or EventFilter are not supported
