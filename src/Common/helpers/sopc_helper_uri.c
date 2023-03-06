@@ -20,7 +20,6 @@
 #include <assert.h>
 #include <stddef.h>
 #include <string.h>
-#include <sys/types.h>
 
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"

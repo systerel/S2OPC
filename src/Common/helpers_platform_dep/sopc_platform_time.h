@@ -26,6 +26,13 @@
 #ifndef SOPC_PLATFORM_TIME_H_
 #define SOPC_PLATFORM_TIME_H_
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "p_time.h"
+#include "sopc_builtintypes.h"
+#include "sopc_enums.h"
+
 /**
  * \brief the toolkit provide and use monotonic clock for time references (used for timers)
  * Note: it is possible to set the clock as non monotonic defining variable on configuration. Otherwise default value is

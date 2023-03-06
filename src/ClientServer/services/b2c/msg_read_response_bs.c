@@ -23,7 +23,6 @@
  */
 
 #include <string.h>
-#include <time.h>
 
 #include "msg_read_response_bs.h"
 #include "sopc_mem_alloc.h"

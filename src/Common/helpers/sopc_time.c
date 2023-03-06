@@ -24,7 +24,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <time.h>
 
 #include "sopc_assert.h"
 #include "sopc_helper_string.h"
