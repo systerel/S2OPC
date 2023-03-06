@@ -21,17 +21,18 @@
 
 #include "address_space_impl.h"
 #include "monitored_item_pointer_impl.h"
-#include "util_address_space.h"
 
 #include <assert.h>
 #include <inttypes.h>
 #include <math.h>
 #include <string.h>
 
+#include "sopc_address_space_utils_internal.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+
 #include "util_b2c.h"
 
 static const SOPC_NodeId Number_DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Number};
@@ -141,7 +142,7 @@ static bool check_percent_deadband_filter_allowed(SOPC_AddressSpace_Node* variab
     for (int32_t i = 0; i < *n_refs && NULL == euRangeVariant; ++i)
     { /* stop when input argument is found */
         OpcUa_ReferenceNode* ref = &(*refs)[i];
-        if (util_addspace__is_property(ref))
+        if (SOPC_AddressSpaceUtil_IsProperty(ref))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId
@@ -197,8 +198,8 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         if (OpcUa_NodeClass_Variable == *ncl)
         {
             dataTypeId = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-            result = util_addspace__recursive_is_transitive_subtype(RECURSION_LIMIT, dataTypeId, dataTypeId,
-                                                                    &Number_DataType);
+            result = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(address_space_bs__nodes, RECURSION_LIMIT,
+                                                                        dataTypeId, dataTypeId, &Number_DataType);
             /* Keep the absolute deadband value as context */
             *monitored_item_pointer_bs__filterAbsDeadbandCtx = monitored_item_pointer_bs__p_filter->DeadbandValue;
             if (result)
