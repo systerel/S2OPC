@@ -419,14 +419,7 @@ void msg_session_bs__write_activate_msg_user_token_signature(
     OpcUa_ActivateSessionRequest* pReq = (OpcUa_ActivateSessionRequest*) msg_session_bs__msg;
     OpcUa_SignatureData* pSig = msg_session_bs__p_user_token_signature;
 
-    /* Copy Signature, which is not a built-in, so copy its fields */
-    /* TODO: should borrow a reference instead of copy */
-    status = SOPC_String_Copy(&pReq->UserTokenSignature.Algorithm, &pSig->Algorithm);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ByteString_Copy(&pReq->UserTokenSignature.Signature, &pSig->Signature);
-    }
+    status = SOPC_EncodeableObject_Copy(&OpcUa_SignatureData_EncodeableType, &pReq->UserTokenSignature, pSig);
 
     if (SOPC_STATUS_OK == status)
     {
