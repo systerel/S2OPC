@@ -248,7 +248,7 @@ To build S2OPC libraries and tests with default configuration on current stable 
 - Visual Studio version to use and type of build (Release, Debug, etc.). Set the VS_VERSION and CONFIG variables.
 
 By setting environment variables WITH_NANO_EXTENDED, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
-- WITH_NANO_EXTENDED (OFF by default): if set to ON, it includes extend features out of the server nano scope, it includes simplified subscription (no filter, no deletion, etc.) and method calls services (no address space access, etc.)
+- WITH_NANO_EXTENDED (OFF by default): if set to ON, it includes extended features out of the server nano scope, it includes subscription, monitored items and method calls services (no address space access, etc.)
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
 - ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools, etc.)
