@@ -404,6 +404,7 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
@@ -447,6 +448,7 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
@@ -504,6 +506,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
@@ -570,6 +573,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
@@ -599,12 +603,12 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
 
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
     if (NULL == type || NULL == destValue || NULL == srcValue || *((SOPC_EncodeableType* const*) srcValue) != type ||
         *((SOPC_EncodeableType* const*) destValue) != type)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
     status = SOPC_STATUS_OK;
@@ -617,8 +621,8 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
 
         if (desc->isArrayLength)
         {
-            const int32_t* pSrcLength = NULL;
-            int32_t* pDestLength = NULL;
+            const int32_t* pSrcLength = pSrcField;
+            int32_t* pDestLength = pDestField;
 
             const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
             void** pArrayDest = NULL;
@@ -628,9 +632,8 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
 
             assert(desc->isBuiltIn);
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pSrcLength = pSrcField;
-            pDestLength = pDestField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             if (*pSrcLength > 0)
@@ -699,8 +702,8 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
 
         if (desc->isArrayLength)
         {
-            const int32_t* pLeftLength = NULL;
-            const int32_t* pRightLength = NULL;
+            const int32_t* pLeftLength = pLeftField;
+            const int32_t* pRightLength = pRightField;
 
             const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
             const void* const* pArrayLeft = NULL;
@@ -710,9 +713,8 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
 
             assert(desc->isBuiltIn);
             assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
-            pLeftLength = pLeftField;
-            pRightLength = pRightField;
 
+            // Increment to obtain the array content field
             ++i;
             assert(i < type->NoOfFields);
             if (pLeftLength < pRightLength)

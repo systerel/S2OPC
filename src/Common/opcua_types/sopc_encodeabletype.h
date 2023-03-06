@@ -106,10 +106,10 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void*
 /**
  *  \brief Compare function generic signature for an encodeable object
  *
- *  \param left      The encodeable object instance in which copy will be done
+ *  \param left      The left operand encodeable object instance to be compared.
  *                   It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
  *                   or a built-in type object.
- *  \param right     The encodeable object instance copied into \p dest.
+ *  \param right     The right operand encodeable object instance to be compared.
  *                   It shall be either an encodeable type object with ::SOPC_EncodeableType* as first field
  *                   or a built-in type object.
  * \param[out] comp  Pointer to an integer that will store the comparison result when returned status is
