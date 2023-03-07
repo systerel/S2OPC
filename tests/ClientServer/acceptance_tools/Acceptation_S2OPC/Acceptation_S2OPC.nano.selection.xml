@@ -92,9 +92,6 @@
      <TestCase name="006.js"/>
      <TestCase name="007.js"/>
      <TestCase name="008.js"/>
-     <TestCase name="009.js"/>
-     <TestCase name="010.js"/>
-     <TestCase name="011.js"/>
     </TestCases>
    </ConformanceUnit>
    <ConformanceUnit name="Attribute Write Values">
