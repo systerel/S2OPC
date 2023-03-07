@@ -5,3 +5,6 @@ s2opc.xml: merge OPCUA base nodeset and demo application nodeset and generate re
 
 `s2opc_nano.xml`: merge OPCUA base nodeset and demo application nodeset, generate reciprocal references and remove nodes that shall not be present for Nano profile
 `<S2OPC_root>/scripts/nodeset-address-space-utils.py --output s2opc_nano.xml --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml  s2opc_demo_data_perfs.xml`
+
+`s2opc_no_base_info.xml`: merge OPCUA base nodeset and demo application nodeset, generate reciprocal references and remove nodes for an address space with limited NS0 base info data:
+`<S2OPC_root>/scripts/nodeset-address-space-utils.py --output s2opc_no_base_info.xml --remove-node-ids-greater-than 3000 --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml`

@@ -26,9 +26,16 @@ sed '1d' s2opc.xml.tmp >> s2opc.xml
 echo '' >> s2opc.xml
 rm s2opc.xml.tmp
 
-# Generate demo NodeSet for Nano extended profile
+# Generate demo NodeSet for Nano profile
 ../../../../scripts/nodeset-address-space-utils.py --output s2opc_nano.xml.tmp --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 cat licence.xml > s2opc_nano.xml
 sed '1d' s2opc_nano.xml.tmp >> s2opc_nano.xml
 echo '' >> s2opc_nano.xml
 rm s2opc_nano.xml.tmp
+
+# Generate demo NodeSet with limited base info data
+../../../../scripts/nodeset-address-space-utils.py --output s2opc_no_base_info.xml.tmp --remove-node-ids-greater-than 3000 --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
+cat licence.xml > s2opc_no_base_info.xml
+sed '1d' s2opc_no_base_info.xml.tmp >> s2opc_no_base_info.xml
+echo '' >> s2opc_no_base_info.xml
+rm s2opc_no_base_info.xml.tmp
