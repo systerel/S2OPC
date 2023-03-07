@@ -55,6 +55,7 @@ zephyr_include_directories(
     ${S2OPC_SRC}/Common/helpers
     ${S2OPC_SRC}/Common/helpers_platform_dep
     ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr
+    ${S2OPC_SRC}/ClientServer/address_space
     ${S2OPC_SRC}/ClientServer/configuration
     ${S2OPC_SRC}/Common/configuration
     ${S2OPC_SRC}/Common/opcua_types
