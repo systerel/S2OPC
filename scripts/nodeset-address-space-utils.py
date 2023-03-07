@@ -28,6 +28,8 @@
 import argparse
 import sys
 import xml.etree.ElementTree as ET
+import re
+
 
 INDENT_SPACES = '  '
 
@@ -198,6 +200,22 @@ def remove_methods(tree, namespaces):
     _remove_nids(tree, methods+methods_properties+['i=11709'])
     _remove_refs_to_nids(tree, methods+methods_properties+['i=11709'], namespaces)
 
+def remove_node_ids_greater_than(tree, namespaces, intMaxId):
+    ns0nidPattern = re.compile('i=([0-9]+)')
+    # Find Node Ids greater than intMaxId in NS 0
+    root = tree.getroot()
+    nodes = root.findall('*[@NodeId]')
+    nodes_to_remove = []
+    for node in nodes:
+        nid = node.get('NodeId')
+        match = ns0nidPattern.match(nid)
+        if match:
+            if int(match.group(1)) > intMaxId:
+                nodes_to_remove.append(nid)
+    # Delete the concerned nodes and references associated
+    _remove_nids(tree, nodes_to_remove)
+    _remove_refs_to_nids(tree, nodes_to_remove, namespaces)
+
 def sanitize(tree, namespaces):
     """
     Returns True if the sanitation is a success.
@@ -339,6 +357,8 @@ if __name__ == '__main__':
                         help='Remove nodes and references that enable the use of methods')
     parser.add_argument('--remove-max-node-management', action='store_true', dest='remove_max_node_mgt',
                         help='Remove the MaxNodesPerNodeManagement node and references to it')
+    parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
+                        help='Remove the nodes of NS 0 with a NodeId greater than the given value')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''
             Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
@@ -382,6 +402,9 @@ if __name__ == '__main__':
 
     if args.remove_max_node_mgt:
         remove_max_node_mgt(tree, namespaces)
+
+    if args.remove_node_ids_gt > 0:
+        remove_node_ids_greater_than(tree, namespaces, args.remove_node_ids_gt)
 
     if args.sanitize:
         res = sanitize(tree, namespaces)
