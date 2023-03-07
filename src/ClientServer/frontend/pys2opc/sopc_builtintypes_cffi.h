@@ -23,6 +23,9 @@
  * See s2opc_headers.h
  */
 
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnCopy)(void* dest, const void* src);
+typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const void* right, int32_t* comp);
+
 typedef enum SOPC_BuiltinId
 {
     SOPC_Null_Id = 0,
