@@ -4802,6 +4802,7 @@ SOPC_ReturnStatus SOPC_Comp_Array(int32_t noOfElts,
     else if (0 == noOfElts)
     {
         *comparisonResult = 0;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
@@ -4840,6 +4841,7 @@ SOPC_ReturnStatus SOPC_CompCustom_Array(int32_t noOfElts,
     else if (0 == noOfElts)
     {
         *comparisonResult = 0;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
