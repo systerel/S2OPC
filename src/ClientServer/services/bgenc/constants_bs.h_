@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 25/01/2023 14:36:54
+ Date                 : 08/03/2023 14:50:09
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -267,6 +267,7 @@
 #define constants_bs__k_n_BrowseResponse_max 0
 #define constants_bs__k_n_BrowseTarget_max 0
 #define constants_bs__k_n_IndexRange_max 0
+#define constants_bs__k_n_UserAuthAttempts_max 0
 #define constants_bs__k_n_WriteResponse_max 0
 #define constants_bs__k_n_genericOperationPerReq_max 0
 #define constants_bs__k_n_monitoredItemNotif_max 0

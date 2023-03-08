@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 20/01/2023 11:38:23
+ Date                 : 08/03/2023 14:49:57
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -520,6 +520,7 @@ void session_core__allocate_authenticated_user(
    const constants__t_user_token_i session_core__p_user_token,
    const constants__t_SignatureData_i session_core__p_user_token_signature,
    constants_statuscodes_bs__t_StatusCode_i * const session_core__p_sc_valid_user,
+   t_bool * const session_core__p_max_attempts,
    constants__t_user_i * const session_core__p_user) {
    {
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
@@ -540,6 +541,9 @@ void session_core__allocate_authenticated_user(
          session_core__p_user_token_signature,
          session_core__p_sc_valid_user,
          session_core__p_user);
+      session_core_1__check_server_session_user_auth_attempts(session_core__p_session,
+         (*session_core__p_sc_valid_user == constants_statuscodes_bs__e_sc_ok),
+         session_core__p_max_attempts);
    }
 }
 
@@ -566,7 +570,7 @@ void session_core__server_activate_session_req_and_resp_sm(
          if (session_core__l_channel == session_core__channel) {
             session_core__server_internal_activate_req_and_resp(session_core__channel,
                session_core__session,
-               constants__e_session_creating,
+               constants__e_session_userActivating,
                session_core__user,
                session_core__activate_req_msg,
                session_core__activate_resp_msg,

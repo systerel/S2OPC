@@ -363,9 +363,11 @@ OPERATIONS
         l_endpoint_config_idx,
         l_has_user_token_policy_available,
         l_timer_creation_ok,
+        l_max_user_auth_attempts,
         l_user,
         l_user_token_signature
     IN
+        l_max_user_auth_attempts := FALSE;
         session := c_session_indet;
         service_ret := c_StatusCode_indet;
         CASE req_typ OF
@@ -405,7 +407,7 @@ OPERATIONS
                     THEN
                         l_is_valid_user_token, l_user_token, l_user_token_signature <-- read_activate_req_msg_identity_token (req_msg);
                         IF l_is_valid_user_token = TRUE THEN
-                            service_ret, l_user <-- allocate_authenticated_user (channel, session, l_user_token, l_user_token_signature);
+                            service_ret, l_max_user_auth_attempts, l_user <-- allocate_authenticated_user (channel, session, l_user_token, l_user_token_signature);
                             IF service_ret = e_sc_ok
                             THEN
                                 // TODO: differentiate sc_activate from user_activate directly here

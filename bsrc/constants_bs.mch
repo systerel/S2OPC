@@ -115,6 +115,7 @@ CONCRETE_CONSTANTS
     k_n_registerNodes_max,
     k_n_unregisterNodes_max,
     k_n_nodesToAdd_max,
+    k_n_UserAuthAttempts_max,
 
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
@@ -279,6 +280,7 @@ PROPERTIES
     k_n_registerNodes_max : NAT &
     k_n_unregisterNodes_max : NAT &
     k_n_nodesToAdd_max : NAT &
+    k_n_UserAuthAttempts_max : NAT &
 
     t_Variant <: t_Variant_i &
     c_Variant_indet : t_Variant_i &

@@ -340,6 +340,8 @@ CONCRETE_CONSTANTS
 
     k_n_nodesToAdd_max,
 
+    k_n_UserAuthAttempts_max,
+
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
@@ -629,6 +631,8 @@ PROPERTIES
     k_n_noRemainingPathIndex > k_n_genericOperationPerReq_max &
 
     k_n_nodesToAdd_max : NAT &
+
+    k_n_UserAuthAttempts_max : NAT &
 
     t_Node <: t_Node_i &
     c_Node_indet : t_Node_i &

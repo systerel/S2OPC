@@ -37,6 +37,7 @@ CONCRETE_VARIABLES
     a_reverse_channel_i,
     a_client_to_create_i,
     a_client_orphaned_i,
+    a_server_user_auth_attempts_i,
     a_server_client_locales_i
 
 INVARIANT
@@ -46,6 +47,7 @@ INVARIANT
     a_reverse_channel_i  : t_channel_i --> t_session_i                               &
     a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
+    a_server_user_auth_attempts_i : t_session_i --> NAT                              &
     a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
     s_session            = s_session_i~[{TRUE}]                                      &
     dom(a_state)         = s_session                                                 &
@@ -54,6 +56,7 @@ INVARIANT
     a_channel~           = t_channel <| a_reverse_channel_i |> t_session             &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
+    a_server_user_auth_attempts = t_session <| a_server_user_auth_attempts_i &
     a_server_client_locales = t_session <| a_server_client_locales_i
 
 INITIALISATION
@@ -63,6 +66,7 @@ INITIALISATION
     a_reverse_channel_i := t_channel_i * {c_session_indet};
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
     a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
+    a_server_user_auth_attempts_i := t_session_i * {0};
     a_server_client_locales_i := t_session_i * {c_LocaleIds_empty}
 
 OPERATIONS
@@ -194,6 +198,18 @@ OPERATIONS
         END
         ;
         a_server_client_locales_i(p_session) := c_LocaleIds_empty
+    END
+    ;
+
+    set_server_session_user_auth_attempts(p_session, p_attempts) =
+    BEGIN
+        a_server_user_auth_attempts_i(p_session) := p_attempts
+    END
+    ;
+
+    p_attempts <-- get_server_session_user_auth_attempts(p_session) =
+    BEGIN
+        p_attempts := a_server_user_auth_attempts_i(p_session)
     END
 
 END

@@ -311,7 +311,7 @@ OPERATIONS
     END
     ;
 
-    p_sc_valid_user, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token, p_user_token_signature) =
+    p_sc_valid_user, p_max_attempts, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token, p_user_token_signature) =
     PRE
         p_channel : t_channel_i &
         p_channel : s_channel_connected &
@@ -324,11 +324,13 @@ OPERATIONS
         p_user_token_signature : t_SignatureData_i
     THEN
         p_sc_valid_user,
+        p_max_attempts,
         p_user
         :(p_sc_valid_user : t_StatusCode_i &
           p_sc_valid_user : t_StatusCode &
+          p_max_attempts : BOOL &
           p_user : t_user_i &
-          (p_sc_valid_user = e_sc_ok => p_user : t_user) &
+          (p_sc_valid_user = e_sc_ok => p_user : t_user & p_max_attempts = FALSE) &
           (p_sc_valid_user /= e_sc_ok =>
               p_user = c_user_indet))
     END

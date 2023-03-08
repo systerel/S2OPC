@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 04/08/2022 14:53:18
+ Date                 : 08/03/2023 14:49:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -40,6 +40,7 @@ constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants_
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
 constants__t_session_i session_core_2__a_reverse_channel_i[constants__t_channel_i_max+1];
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
+t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
 t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
@@ -81,6 +82,12 @@ void session_core_2__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
          session_core_2__a_client_orphaned_i[i] = constants__c_channel_config_idx_indet;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_server_user_auth_attempts_i[i] = 0;
       }
    }
    {
@@ -226,5 +233,17 @@ void session_core_2__reset_server_session_preferred_locales(
       }
       session_core_2__a_server_client_locales_i[session_core_2__p_session] = constants__c_LocaleIds_empty;
    }
+}
+
+void session_core_2__set_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_2__p_session,
+   const t_entier4 session_core_2__p_attempts) {
+   session_core_2__a_server_user_auth_attempts_i[session_core_2__p_session] = session_core_2__p_attempts;
+}
+
+void session_core_2__get_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_2__p_session,
+   t_entier4 * const session_core_2__p_attempts) {
+   *session_core_2__p_attempts = session_core_2__a_server_user_auth_attempts_i[session_core_2__p_session];
 }
 

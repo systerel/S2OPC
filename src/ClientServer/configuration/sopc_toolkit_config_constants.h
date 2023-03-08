@@ -145,6 +145,13 @@
 #define SOPC_MAX_SESSION_TIMEOUT 600000 // 10 minutes
 #endif
 
+/** @brief Maximum number of contiguous session user authentication failure attempts
+ *         before the session and the associated secure channel are closed.
+ */
+#ifndef SOPC_MAX_SESSION_AUTH_ATTEMPTS
+#define SOPC_MAX_SESSION_AUTH_ATTEMPTS 3
+#endif
+
 /* SUBSCRIPTION CONFIGURATION */
 
 /** @brief Maximum publish requests stored by server for a subscription */
