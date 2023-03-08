@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 04/08/2022 14:53:17
+ Date                 : 08/03/2023 17:48:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -117,6 +117,10 @@ void session_core_1__create_session(
    session_core_1__l_set_session_state(session_core_1__session,
       session_core_1__state,
       session_core_1__is_client);
+   if (session_core_1__is_client == false) {
+      session_core_2__set_server_session_user_auth_attempts(session_core_1__session,
+         0);
+   }
 }
 
 void session_core_1__set_session_state(
@@ -192,6 +196,28 @@ void session_core_1__set_server_session_preferred_locales_or_indet(
          }
          session_core_2__set_server_session_preferred_locales(session_core_1__p_session,
             session_core_1__p_localesIds);
+      }
+   }
+}
+
+void session_core_1__check_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_1__p_session,
+   const t_bool session_core_1__p_success,
+   t_bool * const session_core_1__p_max_reached) {
+   {
+      t_entier4 session_core_1__l_attempts;
+      
+      if (session_core_1__p_success == true) {
+         *session_core_1__p_max_reached = false;
+      }
+      else {
+         session_core_2__get_server_session_user_auth_attempts(session_core_1__p_session,
+            &session_core_1__l_attempts);
+         session_core_1__l_attempts = session_core_1__l_attempts +
+            1;
+         session_core_2__set_server_session_user_auth_attempts(session_core_1__p_session,
+            session_core_1__l_attempts);
+         *session_core_1__p_max_reached = (session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max);
       }
    }
 }

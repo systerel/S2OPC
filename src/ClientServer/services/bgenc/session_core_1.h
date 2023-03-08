@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 04/08/2022 14:53:17
+ Date                 : 15/03/2023 15:47:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -125,6 +125,10 @@ extern void session_core_1__l_set_session_state(
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+extern void session_core_1__check_server_session_user_auth_attempts(
+   const constants__t_session_i session_core_1__p_session,
+   const t_bool session_core_1__p_success,
+   t_bool * const session_core_1__p_max_reached);
 extern void session_core_1__create_session(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_i session_core_1__channel,

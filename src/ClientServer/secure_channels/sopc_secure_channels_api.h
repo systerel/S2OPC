@@ -54,7 +54,7 @@ typedef enum
                           auxParam = (uint32_t) request Id context if response (server) / request Handle context if
                           request (client) */
     SC_SERVICE_SND_ERR, /* id = secure channel connection index,
-                           params = (SOPC_StatusCode) encoding failure status code
+                           params = (SOPC_StatusCode) encoding failure status code or security check failed (user auth)
                            auxParam = (uint32_t) request Id context of response (Debug info only)
                          */
 } SOPC_SecureChannels_InputEvent;

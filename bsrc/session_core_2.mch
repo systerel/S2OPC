@@ -33,6 +33,7 @@ ABSTRACT_VARIABLES
     a_channel,
     a_client_to_create,
     a_client_orphaned,
+    a_server_user_auth_attempts,
     a_server_client_locales
 
 INVARIANT
@@ -41,6 +42,7 @@ INVARIANT
     a_channel          : t_session >+> t_channel              &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i &
+    a_server_user_auth_attempts : t_session --> NAT &
     a_server_client_locales : t_session --> t_LocaleIds
 
 INITIALISATION
@@ -49,6 +51,7 @@ INITIALISATION
     a_channel          := {} ||
     a_client_to_create := {} ||
     a_client_orphaned  := {} ||
+    a_server_user_auth_attempts := t_session * {0} ||
     a_server_client_locales := t_session * {c_LocaleIds_empty}
 
 OPERATIONS
@@ -270,6 +273,25 @@ OPERATIONS
           (a_server_client_locales$0(p_session) /= c_LocaleIds_empty => p_localeIds = a_server_client_locales$0(p_session)) &
           {p_session} <<| a_server_client_locales = {p_session} <<| a_server_client_locales$0 &
           {p_session} <| a_server_client_locales = {p_session |-> c_LocaleIds_empty})
+    END
+    ;
+
+    set_server_session_user_auth_attempts(p_session, p_attempts) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session &
+        p_attempts : NAT
+    THEN
+        a_server_user_auth_attempts(p_session) := p_attempts
+    END
+    ;
+
+    p_attempts <-- get_server_session_user_auth_attempts(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : dom(a_server_user_auth_attempts)
+    THEN
+        p_attempts := a_server_user_auth_attempts(p_session)
     END
 
 END

@@ -570,7 +570,7 @@ static void SC_CloseSecureConnection(
                         scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
                 }
 
-                // Immediatly close the connection if failed
+                // Immediately close the connection if failed
                 if (SC_CloseConnection(scConnectionIdx, socketFailure))
                 {
                     scConnection = NULL; // Closed connection
@@ -3545,9 +3545,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     const char* eventString = NULL;
     switch (event)
     {
-    /* Sockets events: */
-    /* Sockets manager -> SC connection state manager */
-
     /* Services events: */
     /* Services manager -> SC connection state manager */
     case SC_CONNECT:

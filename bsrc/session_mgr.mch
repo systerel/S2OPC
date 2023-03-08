@@ -64,7 +64,7 @@ OPERATIONS
     END
     ;
 
-    session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret, security_failed <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -85,8 +85,13 @@ OPERATIONS
             e_msg_session_activate_resp,
             e_msg_session_close_resp}
     THEN
-        service_ret :( service_ret : t_StatusCode_i & service_ret : t_StatusCode ) ||
-        session :: t_session_i
+        session,
+        service_ret,
+        security_failed
+        :(session : t_session_i &
+          service_ret : t_StatusCode_i & service_ret : t_StatusCode &
+          security_failed : BOOL &
+          (service_ret = e_sc_ok => security_failed = TRUE))
     END
     ;
 

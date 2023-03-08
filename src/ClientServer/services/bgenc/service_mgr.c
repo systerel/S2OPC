@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 05/01/2023 14:00:56
+ Date                 : 15/03/2023 15:47:04
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -731,6 +731,7 @@ void service_mgr__server_receive_session_treatment_req(
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       constants__t_session_i service_mgr__l_session;
       constants_statuscodes_bs__t_StatusCode_i service_mgr__l_ret;
+      t_bool service_mgr__l_secu_failed;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       constants__t_channel_config_idx_i service_mgr__l_channel_cfg;
       
@@ -763,7 +764,8 @@ void service_mgr__server_receive_session_treatment_req(
                   service_mgr__req_typ,
                   service_mgr__l_resp_msg,
                   &service_mgr__l_session,
-                  &service_mgr__l_ret);
+                  &service_mgr__l_ret,
+                  &service_mgr__l_secu_failed);
                if (service_mgr__l_ret != constants_statuscodes_bs__e_sc_ok) {
                   service_mgr__l_resp_msg_typ = constants__e_msg_service_fault_resp;
                }
@@ -783,6 +785,9 @@ void service_mgr__server_receive_session_treatment_req(
                if (*service_mgr__sc != constants_statuscodes_bs__e_sc_ok) {
                   session_mgr__server_close_session(service_mgr__l_session,
                      constants_statuscodes_bs__e_sc_bad_encoding_error);
+               }
+               if (service_mgr__l_secu_failed == true) {
+                  *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_security_checks_failed;
                }
                message_out_bs__dealloc_msg_header_out(service_mgr__l_resp_msg_header);
                message_out_bs__dealloc_msg_out(service_mgr__l_resp_msg);

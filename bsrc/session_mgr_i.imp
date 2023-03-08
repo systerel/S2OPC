@@ -352,7 +352,7 @@ OPERATIONS
     END
     ;
 
-    session, service_ret <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
+    session, service_ret, security_failed <-- server_receive_session_req (channel, session_token, req_msg, req_typ, resp_msg) =
     VAR
         l_valid_session,
         l_session_state,
@@ -365,6 +365,7 @@ OPERATIONS
         l_timer_creation_ok,
         l_user
     IN
+        security_failed := FALSE; /* Only evaluated in case of user authentication attempt */
         session := c_session_indet;
         service_ret := c_StatusCode_indet;
         CASE req_typ OF
@@ -404,7 +405,7 @@ OPERATIONS
                     THEN
                         l_is_valid_user_token, l_user_token <-- read_activate_req_msg_identity_token (req_msg);
                         IF l_is_valid_user_token = TRUE THEN
-                            service_ret, l_user <-- allocate_authenticated_user (channel, session, l_user_token);
+                            service_ret, security_failed, l_user <-- allocate_authenticated_user (channel, session, l_user_token);
                             IF service_ret = e_sc_ok
                             THEN
                                 // TODO: differentiate sc_activate from user_activate directly here
@@ -414,6 +415,10 @@ OPERATIONS
                                 THEN
                                     deallocate_user (l_user)
                                 END
+                            ELSIF security_failed = TRUE
+                            THEN
+                                /* Close session as counter measure for repeated user authentication failures */
+                                server_close_session_sm (session, service_ret)
                             END
                         ELSE
                             // invalid user token type

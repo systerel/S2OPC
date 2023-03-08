@@ -601,7 +601,7 @@ OPERATIONS
     END
     ;
 
-    p_sc_valid_user, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token) =
+    p_sc_valid_user, p_max_attempts, p_user <-- allocate_authenticated_user (p_channel, p_session, p_user_token) =
     VAR
         l_channel_config_idx,
         l_endpoint_config_idx,
@@ -610,7 +610,8 @@ OPERATIONS
         l_channel_config_idx <-- get_channel_info (p_channel);
         l_endpoint_config_idx <-- server_get_endpoint_config (p_channel);
         l_server_nonce <-- get_NonceServer(p_session, FALSE);
-        p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, l_server_nonce, l_channel_config_idx, l_endpoint_config_idx)
+        p_sc_valid_user, p_user <-- allocate_valid_and_authenticated_user (p_user_token, l_server_nonce, l_channel_config_idx, l_endpoint_config_idx);
+        p_max_attempts <-- check_server_session_user_auth_attempts(p_session, bool(p_sc_valid_user = e_sc_ok))
     END
     ;
 
@@ -632,7 +633,7 @@ OPERATIONS
             THEN
                 l_valid <-- server_internal_activate_req_and_resp (channel,
                                                                    session,
-                                                                   e_session_creating,
+                                                                   e_session_userActivating,
                                                                    user,
                                                                    activate_req_msg,
                                                                    activate_resp_msg);

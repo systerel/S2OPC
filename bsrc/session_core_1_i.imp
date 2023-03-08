@@ -183,7 +183,11 @@ OPERATIONS
     create_session (session, channel, state, is_client) =
     BEGIN
         set_session_channel(session, channel);
-        l_set_session_state(session, state, is_client)
+        l_set_session_state(session, state, is_client);
+        IF is_client = FALSE
+        THEN
+            set_server_session_user_auth_attempts(session, 0)
+        END
     END
     ;
 
@@ -261,6 +265,23 @@ OPERATIONS
             ;
             set_server_session_preferred_locales(p_session, p_localesIds)
         END
+    END
+    ;
+
+    p_max_reached <-- check_server_session_user_auth_attempts(p_session, p_success) =
+    VAR
+        l_attempts
+    IN
+        IF p_success = TRUE
+        THEN
+            p_max_reached := FALSE
+        ELSE
+            l_attempts <-- get_server_session_user_auth_attempts(p_session);
+            l_attempts := l_attempts + 1;
+            set_server_session_user_auth_attempts(p_session, l_attempts);
+            p_max_reached := bool(l_attempts >= k_n_UserAuthAttempts_max)
+        END
+
     END
 
 END

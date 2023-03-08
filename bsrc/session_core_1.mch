@@ -39,6 +39,7 @@ DEFINITIONS
     a_client_token,
     a_server_token,
     a_user_server,
+    a_server_user_auth_attempts, /* Number of contiguous failed attempts */
     a_user_client,
     a_user_secu_client,
     a_user_server_cert,
@@ -56,9 +57,10 @@ DEFINITIONS
     a_client_token               : t_session +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session         &
     a_user_server                : t_session +-> t_user                  &
+    a_server_user_auth_attempts  : t_session --> NAT                     &
     a_user_client                : t_session +-> t_user_token            &
     a_user_secu_client           : t_session +-> t_SecurityPolicy        &
-    a_user_server_cert           : t_session       +-> t_byte_buffer     &
+    a_user_server_cert           : t_session +-> t_byte_buffer           &
     a_NonceServer                : t_session +-> t_Nonce                 &
     a_NonceClient                : t_session +-> t_Nonce                 &
     a_server_client_locales      : t_session --> t_LocaleIds
@@ -79,6 +81,7 @@ INITIALISATION
     a_client_token               := {} ||
     a_server_token               := {} ||
     a_user_server                := {} ||
+    a_server_user_auth_attempts  := {} ||
     a_user_client                := {} ||
     a_user_secu_client           := {} ||
     a_user_server_cert           := {} ||
@@ -186,7 +189,14 @@ OPERATIONS
         is_client : BOOL
     THEN
         a_channel (session) := channel ||
-        a_state   (session) := state
+        a_state   (session) := state   ||
+        a_server_user_auth_attempts :(
+            a_server_user_auth_attempts : t_session +-> NAT &
+            (is_client = FALSE =>
+                {session} <<| a_server_user_auth_attempts = {session} <<| a_server_user_auth_attempts$0 &
+                a_server_user_auth_attempts(session) = 0) &
+            (is_client = TRUE =>
+                a_server_user_auth_attempts = a_server_user_auth_attempts$0))
     END
     ;
 
@@ -244,6 +254,7 @@ OPERATIONS
         a_client_app_context         := {session} <<| a_client_app_context         ||
         a_client_orphaned            := {session} <<| a_client_orphaned            || /* If session was orphaned, remove this relation */
         a_user_server                := {session} <<| a_user_server                || /* If session had a user, remove this relation */
+        a_server_user_auth_attempts  := {session} <<| a_server_user_auth_attempts  || /* If session was on server side, remove this relation */
         a_user_client                := {session} <<| a_user_client                ||
         a_server_token               := a_server_token |>> {session}               || /* If session had token, remove this relation */
         a_client_token               := {session} <<| a_client_token               ||
@@ -906,6 +917,24 @@ OPERATIONS
         p_session    : t_session
     THEN
         p_localeIds :(p_localeIds : t_LocaleIds_i & p_localeIds = a_server_client_locales(p_session))
+    END
+    ;
+
+    p_max_reached <-- check_server_session_user_auth_attempts(p_session, p_success) =
+    PRE
+        p_session    : t_session_i &
+        p_session    : dom(a_server_user_auth_attempts) &
+        p_success    : BOOL
+    THEN
+        p_max_reached, a_server_user_auth_attempts :(
+            p_max_reached : BOOL &
+            a_server_user_auth_attempts  : t_session --> NAT &
+            {p_session} <<| a_server_user_auth_attempts = {p_session} <<| a_server_user_auth_attempts$0 &
+            (p_success = TRUE => p_max_reached = FALSE) &
+            (p_success = FALSE =>
+                a_server_user_auth_attempts(p_session) = a_server_user_auth_attempts$0(p_session) + 1 &
+                p_max_reached = bool(a_server_user_auth_attempts(p_session) >= k_n_UserAuthAttempts_max))
+        )
     END
 
 END
