@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 08/03/2023 14:49:55
+ Date                 : 08/03/2023 17:48:14
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -208,8 +208,6 @@ void session_core_1__check_server_session_user_auth_attempts(
       t_entier4 session_core_1__l_attempts;
       
       if (session_core_1__p_success == true) {
-         session_core_2__set_server_session_user_auth_attempts(session_core_1__p_session,
-            0);
          *session_core_1__p_max_reached = false;
       }
       else {

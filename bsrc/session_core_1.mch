@@ -938,9 +938,7 @@ OPERATIONS
             p_max_reached : BOOL &
             a_server_user_auth_attempts  : t_session --> NAT &
             {p_session} <<| a_server_user_auth_attempts = {p_session} <<| a_server_user_auth_attempts$0 &
-            (p_success = TRUE =>
-                p_max_reached = FALSE &
-                a_server_user_auth_attempts(p_session) = 0) &
+            (p_success = TRUE => p_max_reached = FALSE) &
             (p_success = FALSE =>
                 a_server_user_auth_attempts(p_session) = a_server_user_auth_attempts$0(p_session) + 1 &
                 p_max_reached = bool(a_server_user_auth_attempts(p_session) >= k_n_UserAuthAttempts_max))

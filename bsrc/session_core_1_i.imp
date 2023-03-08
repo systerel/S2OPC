@@ -275,7 +275,6 @@ OPERATIONS
     IN
         IF p_success = TRUE
         THEN
-            set_server_session_user_auth_attempts(p_session, 0);
             p_max_reached := FALSE
         ELSE
             l_attempts <-- get_server_session_user_auth_attempts(p_session);
