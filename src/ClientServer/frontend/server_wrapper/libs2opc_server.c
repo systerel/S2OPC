@@ -42,7 +42,7 @@
 #define UPDATE_TIMEOUT_MS 500
 
 // Flag used on sig stop
-volatile sig_atomic_t stopServer = 0;
+static int32_t stopServer = 0;
 
 /*
  * Management of Ctrl-C to stop the server (callback on stop signal)
@@ -582,7 +582,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
     {
         // If we catch sig stop we have to check if the signal occurred regularly or if server is requested to stop
         // Note: we avoid recurrent use of mutex by accessing serverRequestedToStop in an atomic way
-        while (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop) && !stopServer)
+        while (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop) &&
+               !SOPC_Atomic_Int_Get(&stopServer))
         {
             SOPC_Sleep(UPDATE_TIMEOUT_MS);
         }
