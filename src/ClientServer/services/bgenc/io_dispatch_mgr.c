@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 04/11/2022 14:14:30
+ Date                 : 08/03/2023 15:55:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -341,6 +341,11 @@ void io_dispatch_mgr__receive_msg_buffer(
                   service_mgr__send_channel_msg_buffer(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_buffer_out,
                      io_dispatch_mgr__request_context);
+                  if (io_dispatch_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_security_checks_failed) {
+                     service_mgr__send_channel_error_msg(io_dispatch_mgr__channel,
+                        io_dispatch_mgr__l_sc,
+                        io_dispatch_mgr__request_context);
+                  }
                }
                else if ((io_dispatch_mgr__l_valid_req == true) &&
                   (io_dispatch_mgr__l_async_resp == false)) {

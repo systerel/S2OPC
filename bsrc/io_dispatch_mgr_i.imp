@@ -384,7 +384,13 @@ OPERATIONS
                         /* Send the response message on secure channel if available */
                         IF l_valid_req = TRUE & l_buffer_out /= c_byte_buffer_indet
                         THEN
-                            send_channel_msg_buffer (channel, l_buffer_out, request_context)
+                            send_channel_msg_buffer (channel, l_buffer_out, request_context);
+                            IF l_sc = e_sc_bad_security_checks_failed
+                            THEN
+                                /* A security check failed occurred (user auth repeated failures),
+                                the Secure Channel will be closed as countermeasure. */
+                                send_channel_error_msg(channel, l_sc, request_context)
+                            END
                         ELSIF l_valid_req = TRUE & l_async_resp = FALSE
                         THEN
                             /* Unexpected invalid buffer, it should lead to an Abort chunk */

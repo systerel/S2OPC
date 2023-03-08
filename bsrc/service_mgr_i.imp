@@ -831,6 +831,7 @@ OPERATIONS
         l_resp_msg_header,
         l_session,
         l_ret,
+        l_secu_failed,
         l_buffer_out,
         l_channel_cfg
     IN
@@ -850,7 +851,7 @@ OPERATIONS
                 l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
                 IF l_resp_msg /= c_msg_indet
                 THEN
-                    l_session, l_ret <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
+                    l_session, l_ret, l_secu_failed <-- server_receive_session_req (channel, l_session_token, l_req_msg, req_typ, l_resp_msg);
                     IF l_ret /= e_sc_ok
                     THEN
                         /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
@@ -865,7 +866,11 @@ OPERATIONS
                         /* invalid encoding => close session */
                         server_close_session (l_session, e_sc_bad_encoding_error)
                     END;
-
+                    IF l_secu_failed = TRUE THEN
+                        /* Counter measure in case of repeated user authentication failures */
+                        sc := e_sc_bad_security_checks_failed
+                    END
+                    ;
                     /* response message structures not necessary anymore */
                     dealloc_msg_header_out (l_resp_msg_header);
                     dealloc_msg_out (l_resp_msg)
