@@ -132,6 +132,10 @@ bool SOPC_PubSubConnection_Set_Name(SOPC_PubSubConnection* connection, const cha
 bool SOPC_PubSubConnection_Is_Enabled(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_Enabled(SOPC_PubSubConnection* connection, bool enabled);
 
+/* Publisher only */
+void SOPC_PubSubConnection_Set_AcyclicPublisher(SOPC_PubSubConnection* connection, bool acyclicPublisher);
+bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* connection);
+
 const SOPC_Conf_PublisherId* SOPC_PubSubConnection_Get_PublisherId(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_PublisherId_UInteger(SOPC_PubSubConnection* connection, uint64_t id);
 // make a copy of id

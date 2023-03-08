@@ -30,6 +30,7 @@ ATTRIBUTE_CONNECTION_MODE = "mode"
 ATTRIBUTE_CONNECTION_MQTT_TOPIC = "mqttTopic"
 ATTRIBUTE_CONNECTION_MQTT_USERNAME = "mqttUsername"
 ATTRIBUTE_CONNECTION_MQTT_PASSWORD = "mqttPassword"
+ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER = "acyclicPublisher"
 VALUE_CONNECTION_MODE_PUBLISHER = "publisher"
 VALUE_CONNECTION_MODE_SUBSCRIBER = "subscriber"
 
@@ -99,7 +100,7 @@ class ResultFile:
 # A global context
 class GContext:
     pubDataSetIndex = 0
-    
+
 class CnxContext:
     def __init__(self, connection):
         self.publisherId = None
@@ -107,6 +108,7 @@ class CnxContext:
         self.mqttTopic = connection.get(ATTRIBUTE_CONNECTION_MQTT_TOPIC)
         self.mqttUsername = connection.get(ATTRIBUTE_CONNECTION_MQTT_USERNAME)
         self.mqttPassword = connection.get(ATTRIBUTE_CONNECTION_MQTT_PASSWORD)
+        self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER,False))
         self.messages = connection.findall("./%s" % TAG_MESSAGE)
 
 
@@ -137,15 +139,15 @@ def getCSecurityMode(mode):
 def getOptionalAttribute(node, attrName : str, defValue):
     try:return node.get(attrName, defValue)
     except:return defValue
-    
-    
+
+
 
 def handleDoc(tree, result):
     pubSub = tree.getroot()
     handlePubSub(pubSub, result)
 
 def handlePubSub(pubSub, result):
-    
+
     pubConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_PUBLISHER))
     subConnections = pubSub.findall("./%s[@%s='%s']" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_SUBSCRIBER))
     pubDataSets = pubSub.findall("./%s[@%s='%s']/%s/%s" % (TAG_CONNECTION, ATTRIBUTE_CONNECTION_MODE, VALUE_CONNECTION_MODE_PUBLISHER,
@@ -175,7 +177,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     /* %d publisher connection */
     alloc = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, %d);
     """ % (len(pubConnections), len(pubConnections)))
-        
+
         result.add("""
     /* %d Published Datasets */
     alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, %d);
@@ -186,7 +188,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         for connection in pubConnections:
             pubid = int(getOptionalAttribute(connection, ATTRIBUTE_MESSAGE_PUBLISHERID, -1))
             assert pubid > 0
-                
+
             handlePubConnection(pubid, connection, cnxIndex, result)
             cnxIndex += 1
 
@@ -227,7 +229,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
 def handlePubConnection(publisherId, connection, index, result):
     cnxContext = CnxContext(connection)
-    
+
     result.add("""
     /** Publisher connection %d **/
     """ % index)
@@ -243,7 +245,12 @@ def handlePubConnection(publisherId, connection, index, result):
         alloc = SOPC_PubSubConnection_Set_Address(connection, "%s");
     }
     """ % (index, publisherId, cnxContext.address))
-    
+
+        result.add("""
+    // Set acyclic publisher mode
+    SOPC_PubSubConnection_Set_AcyclicPublisher(connection, %d);
+    """ % (cnxContext.acyclicPublisher))
+
         result.add("""
     if (alloc)
     {
@@ -279,17 +286,17 @@ def handlePubConnection(publisherId, connection, index, result):
 
 def handlePubMessage(cnxContext, message, msgIndex, result):
     global IS_DEFINED_C_GROUP
-    
+
     msgContext = MessageContext(cnxContext, message)
- 
+
     datasets = message.findall(TAG_DATASET)
-     
+
     if not IS_DEFINED_C_GROUP:
         result.add("""
     SOPC_WriterGroup* writerGroup = NULL;""")
 
     IS_DEFINED_C_GROUP = True
-    
+
     result.add("""
     /*** Pub Message %d ***/
     """ % msgContext.id)
@@ -312,7 +319,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     #result.add("""
     #    int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
     #""")
-     
+
     result.add("""
     if (alloc)
     {
@@ -326,14 +333,14 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     for dataset in datasets:
         handleDataset(PUB_MODE, msgContext, dataset, dsIndex, result)
         dsIndex += 1
-    
+
 def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     global IS_DEFINED_C_WRITER
     global IS_DEFINED_C_DATASET
     global DEFINE_C_SETSUBNBVARIABLES
-    
+
     writerId = int(getOptionalAttribute(dataset, ATTRIBUTE_DATASET_WRITERID, 0))
-    
+
     result.add("""
     /*** DataSetMessage No %d of message %d ***/
     """ % (dsIndex+1, msgContext.id))
@@ -342,18 +349,18 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
 
     if len(variables) > 0:
         if mode == PUB_MODE:
-    
+
             if not IS_DEFINED_C_WRITER:
                 result.add("""
     SOPC_DataSetWriter* writer = NULL;""")
-         
+
                 IS_DEFINED_C_WRITER = True
-        
+
             if not IS_DEFINED_C_DATASET:
                 result.add("""
     SOPC_PublishedDataSet* dataset = NULL;""")
             IS_DEFINED_C_DATASET = True
-    
+
             result.add("""
     if (alloc)
     {
@@ -369,9 +376,9 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
             GContext.pubDataSetIndex, writerId, len(variables)))
             GContext.pubDataSetIndex += 1
         elif mode == SUB_MODE:
-            
+
             DEFINE_C_SETSUBNBVARIABLES = True;
-            
+
             assert(None != msgContext.cnxContext.publisherId)
             result.add("""
     if (alloc)
@@ -383,19 +390,19 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     """ % (msgContext.interval,
            dsIndex,
            writerId, msgContext.interval))
-            
-            
+
+
             result.add("""
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, %d);
-    
+
     }
-    
+
     if (alloc)
     {
     """ % len(variables))
-        
+
         varIndex = 0
         for variable in variables:
             handleVariable(mode, variable, varIndex, result)
@@ -427,9 +434,9 @@ def handleVariable(mode, variable, index, result):
 
 def handleSubConnection(connection, index, result):
     cnxContext = CnxContext(connection)
-    
+
     nbMsg = len(cnxContext.messages)
-    
+
     result.add("""
     /** Subscriber connection %d **/
     """ % index)
@@ -474,7 +481,7 @@ def handleSubConnection(connection, index, result):
 
         msgIndex = 0
         for message in cnxContext.messages:
-            
+
             cnxContext.publisherId = getOptionalAttribute(message, ATTRIBUTE_MESSAGE_PUBLISHERID, 0)
             handleSubMessage(cnxContext, message, msgIndex, result)
             msgIndex += 1
@@ -483,17 +490,17 @@ def handleSubConnection(connection, index, result):
 def handleSubMessage(cnxContext : CnxContext, message, index, result):
     global IS_DEFINED_C_READER
     global DEFINE_C_SETSUBNBVARIABLES
-    
+
     msgContext = MessageContext(cnxContext, message)
- 
+
     datasets = message.findall(TAG_DATASET)
-    
+
     for attr in [ATTRIBUTE_MESSAGE_ID,
                  ATTRIBUTE_MESSAGE_VERSION,
                  ATTRIBUTE_MESSAGE_INTERVAL,
                  ATTRIBUTE_MESSAGE_PUBLISHERID]:
         assert attr in message.keys()
-    
+
     if not IS_DEFINED_C_READER:
         result.add("""
     SOPC_DataSetReader* dsReader = NULL;
@@ -519,7 +526,7 @@ def handleSubMessage(cnxContext : CnxContext, message, index, result):
            index, getCSecurityMode(msgContext.securityMode),
            msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, len(datasets)))
 
-    
+
     dsIndex = 0
     for dataset in datasets:
         handleDataset(SUB_MODE, msgContext, dataset, dsIndex, result)
@@ -569,7 +576,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
     }
-    
+
     return group;
 }
 
@@ -634,7 +641,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     assert(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     assert(allocSuccess);
-    
+
     return readerGroup;
 }
 
@@ -642,7 +649,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
         cFile.add("""
 static SOPC_DataSetReader* SOPC_PubSubConfig_SetReaderAt(SOPC_ReaderGroup* readerGroup,
                                                          uint16_t index,
-                                                         uint16_t writerId,   
+                                                         uint16_t writerId,
                                                          double interval)
 {
     assert(index < 0x100);

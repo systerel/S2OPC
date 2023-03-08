@@ -84,6 +84,9 @@ struct SOPC_PubScheduler_TransportCtx
     // specific to SOPC_PubSubProtocol_MQTT
     MqttContextClient* mqttClient;
     const char* mqttTopic;
+
+    /* Is publisher in acyclic mode. If yes message will not be considered when looking for most expire one */
+    bool isAcyclic;
 };
 
 typedef struct MessageCtx
@@ -121,7 +124,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
                                        SOPC_WriterGroup* group);
 
-/* Finds the message with the smallest next_timeout */
+/* Finds the message with the smallest next_timeout
+   return NULL if every publisher is acyclic */
 static MessageCtx* MessageCtxArray_FindMostExpired(void);
 
 static void SOPC_PubScheduler_Context_Clear(void);
@@ -291,14 +295,12 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     {
         context->mqttTopic = NULL;
     }
+
     context->group = group;
-    context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
-    context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
-
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
-    context->next_timeout = SOPC_RealTime_Create(NULL);
+
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
@@ -306,33 +308,42 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         result = (NULL != context->security);
     }
 
-    if (NULL == context->message || NULL == context->next_timeout || !result)
+    /* If publisher is acyclic we don't need to compute publishing interval */
+    if (!ctx->isAcyclic)
+    {
+        context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
+        context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
+        context->next_timeout = SOPC_RealTime_Create(NULL);
+
+        /* Compute next timeout.  */
+        if (context->publishingOffsetUs >= 0)
+        {
+            // If publishing offset is not zero, then the publishing period shall be a divisor of 1s (Otherwise,
+            // there will be no way to find a common reference)
+            SOPC_ASSERT(context->publishingIntervalUs > 0);
+
+            if (((1000 * 1000) % context->publishingIntervalUs) != 0)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                       "Publisher: When using PublishingOffset, interval must be a divider of 1000");
+                return false;
+            }
+            else if ((uint32_t) context->publishingOffsetUs >= context->publishingIntervalUs)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                       "Publisher: PublishingOffset cannot be greater than PublishingInterval");
+                return false;
+            }
+        }
+        SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
+                                         context->publishingOffsetUs);
+    }
+
+    if (NULL == context->message || (NULL == context->next_timeout && !ctx->isAcyclic) || !result)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot allocate message context");
         return false;
     }
-
-    /* Compute next timeout.  */
-    if (context->publishingOffsetUs >= 0)
-    {
-        // If publishing offset is not zero, then the publishing period shall be a divisor of 1s (Otherwise,
-        // there will be no way to find a common reference)
-        SOPC_ASSERT(context->publishingIntervalUs > 0);
-
-        if (((1000 * 1000) % context->publishingIntervalUs) != 0)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Publisher: When using PublishingOffset, interval must be a divider of 1000");
-            return false;
-        }
-        else if ((uint32_t) context->publishingOffsetUs >= context->publishingIntervalUs)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Publisher: PublishingOffset cannot be greater than PublishingInterval");
-            return false;
-        }
-    }
-    SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs, context->publishingOffsetUs);
 
     /* Fill in security context */
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
@@ -375,9 +386,12 @@ static MessageCtx* MessageCtxArray_FindMostExpired(void)
     for (size_t i = 0; i < messages->length; ++i)
     {
         MessageCtx* cursor = &messages->array[i];
-        if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
+        if (!cursor->transport->isAcyclic)
         {
-            worse = cursor;
+            if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
+            {
+                worse = cursor;
+            }
         }
     }
 
@@ -533,6 +547,13 @@ static void* thread_start_publish(void* arg)
 
         /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
+        /* There is no cyclic Publisher exit the thread */
+        if (NULL == context)
+        {
+            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
+                                  "There is no cyclic publisher, Time-Sensitive publisher thread not needed");
+            break;
+        }
         if (SOPC_RealTime_IsExpired(context->next_timeout, now))
         {
             MessageCtx_send_publish_message(context);
@@ -728,6 +749,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].sock = outSock;
         pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxUdp_Clear;
         pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxUdp_Send;
+        pubSchedulerCtx.transport[index].isAcyclic = SOPC_PubSubConnection_Get_AcyclicPublisher(connection);
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }
@@ -761,6 +783,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].pFctSend = SOPC_PubScheduler_CtxMqtt_Send;
         pubSchedulerCtx.transport[index].udpAddr = NULL;
         pubSchedulerCtx.transport[index].sock = -1;
+        pubSchedulerCtx.transport[index].isAcyclic = SOPC_PubSubConnection_Get_AcyclicPublisher(connection);
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }
@@ -789,6 +812,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].sock = outSock;
         pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxEth_Clear;
         pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxEth_Send;
+        pubSchedulerCtx.transport[index].isAcyclic = SOPC_PubSubConnection_Get_AcyclicPublisher(connection);
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
     }
@@ -850,4 +874,43 @@ static void SOPC_PubScheduler_CtxEth_Send(SOPC_PubScheduler_TransportCtx* ctx, S
         // TODO: Some verifications should maybe added...
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_ETH_Socket_SendTo error %s ...", strerror(errno));
     }
+}
+
+static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
+{
+    MessageCtx_Array* messages = &pubSchedulerCtx.messages;
+    MessageCtx* found = NULL;
+
+    SOPC_ASSERT(messages->length > 0 && messages->current == messages->length);
+    for (size_t i = 0; i < messages->length; ++i)
+    {
+        MessageCtx* cursor = &messages->array[i];
+        if (cursor->transport->isAcyclic)
+        {
+            if (wgId == SOPC_WriterGroup_Get_Id(cursor->group))
+            {
+                if (NULL == found)
+                {
+                    found = cursor;
+                }
+                else
+                {
+                    SOPC_ASSERT(false && "WriterGroupId shall be unique in configuration");
+                }
+            }
+        }
+    }
+
+    return found;
+}
+
+bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
+{
+    MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
+    if (NULL == ctx)
+    {
+        return false;
+    }
+    MessageCtx_send_publish_message(ctx);
+    return true;
 }

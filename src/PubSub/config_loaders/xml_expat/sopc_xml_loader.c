@@ -82,6 +82,7 @@
 #define ATTR_CONNECTION_IFNAME "interfaceName"
 #define ATTR_CONNECTION_MQTTUSERNAME "mqttUsername"
 #define ATTR_CONNECTION_MQTTPASSWORD "mqttPassword"
+#define ATTR_CONNECTION_ACYCLIC_PUBLISHER "acyclicPublisher"
 
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
@@ -156,7 +157,7 @@ struct sopc_xml_pubsub_connection_t
     char* mqttUsername;
     char* mqttPassword;
     char* mqttTopic;
-
+    bool is_acyclic;
     struct sopc_xml_pubsub_message_t* messageArr;
 };
 
@@ -400,6 +401,33 @@ static bool parse_connection_attributes(const char* attr_name,
     else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTPASSWORD, attr_name))
     {
         result = copy_any_string_attribute_value(&connection->mqttPassword, attr_val);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_ACYCLIC_PUBLISHER, attr_name))
+    {
+        int res = SOPC_strncmp_ignore_case(attr_val, "true", strlen("true"));
+        if (-1000 == res)
+        {
+            result = false;
+        }
+        else if (!res)
+        {
+            result = true;
+            connection->is_acyclic = true;
+        }
+        else
+        {
+            res = SOPC_strncmp_ignore_case(attr_val, "false", strlen("false"));
+            if (!res)
+            {
+                result = true;
+                connection->is_acyclic = false;
+            }
+            else
+            {
+                result = false;
+                LOG_XML_ERRORF("Attribute <%s> only accept value true or false", attr_name);
+            }
+        }
     }
     else
     {
@@ -994,6 +1022,11 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             // Publisher connection
             SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id);
             allocSuccess = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
+
+            if (allocSuccess)
+            {
+                SOPC_PubSubConnection_Set_AcyclicPublisher(connection, p_connection->is_acyclic);
+            }
 
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
             {

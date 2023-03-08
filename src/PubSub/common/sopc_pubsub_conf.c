@@ -82,6 +82,8 @@ struct SOPC_PubSubConnection
     // Password for MQTT protocol
     char* mqttPassword;
 
+    bool acyclicPublisher;
+
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
     // KeyValuePair *connectionProperties: not used;
@@ -367,6 +369,16 @@ SOPC_PublishedDataSet* SOPC_PubSubConfiguration_Get_PublishedDataSet_At(const SO
 {
     assert(NULL != configuration && index < configuration->publishedDataSet_length);
     return &(configuration->publishedDataSet[index]);
+}
+
+void SOPC_PubSubConnection_Set_AcyclicPublisher(SOPC_PubSubConnection* connection, bool acyclicPublisher)
+{
+    connection->acyclicPublisher = acyclicPublisher;
+}
+
+bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* connection)
+{
+    return connection->acyclicPublisher;
 }
 
 static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
