@@ -824,6 +824,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
         /* Skip certificates that are not authorities */
         if (!crt->ca_istrue)
         {
+            /* Iterate */
+            prev = crt;
+            crt = crt->next;
             continue;
         }
 
