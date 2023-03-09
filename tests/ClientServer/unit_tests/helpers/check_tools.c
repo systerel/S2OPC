@@ -1337,7 +1337,7 @@ START_TEST(test_helper_uri)
     ck_assert(SOPC_STATUS_OK ==
               SOPC_Helper_URI_SplitUri("opc.tcp://[fe80::250:b6ff:fe17:9f3a]:99999/test", &type, &hostname, &port));
     ck_assert(SOPC_URI_TCPUA == type);
-    ck_assert(strncmp(hostname, "[fe80::250:b6ff:fe17:9f3a]", strlen("[fe80::250:b6ff:fe17:9f3a]") + 1) == 0);
+    ck_assert(strncmp(hostname, "fe80::250:b6ff:fe17:9f3a", strlen("fe80::250:b6ff:fe17:9f3a") + 1) == 0);
     ck_assert(strncmp(port, "99999", strlen("99999") + 1) == 0);
     uri_free(&type, &hostname, &port);
 }

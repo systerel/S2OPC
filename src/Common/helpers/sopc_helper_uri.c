@@ -88,13 +88,18 @@ static SOPC_ReturnStatus getUriHostname(const char** ppCursor, char** ppHostname
         {
             if (*pCursor == URI_OPEN_BRACKET)
             {
+                ++start;
                 ++NbBracketOpen;
             }
             if (NbBracketOpen > 0 && URI_CLOSE_BRACKET == *pCursor)
             {
+                --len;
                 --NbBracketOpen;
             }
-            ++len;
+            else
+            {
+                ++len;
+            }
             ++pCursor;
         }
         if ('\0' == *pCursor)
