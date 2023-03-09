@@ -40,13 +40,14 @@ class PubSubState(Enum):
 class PubSubServer:
     """Wraps a client that connects to the sample pubsub_server"""
 
-    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status):
+    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_acyclicSend):
         self.uri = uri
         self.client = Client(self.uri)
         self.client.application_uri = "urn:S2OPC:localhost"
         self.nid_configuration = nid_configuration
         self.nid_start_stop = nid_start_stop
         self.nid_status = nid_status
+        self.nid_acyclicSend = nid_acyclicSend
 
     # Connect to the Pub/Sub server. Shall be called before other methods
     def connect(self):
@@ -55,6 +56,7 @@ class PubSubServer:
         self.nodeConfiguration = self.client.get_node(self.nid_configuration)
         self.nodeStartStop = self.client.get_node(self.nid_start_stop)
         self.nodeStatus = self.client.get_node(self.nid_status)
+        self.nodeAcyclicSend = self.client.get_node(self.nid_acyclicSend)
 
     # Is connected to Pub/Sub server
     def isConnected(self):
@@ -121,6 +123,22 @@ class PubSubServer:
         try:
             return self.nodeConfiguration.get_value()
         except:  # TODO: exception too broad
+            print('Client probably not connected to PubSubServer')
+            return None
+
+    # Set Writer group Id on node Acyclic send
+    # If writer group Id match with one writer group id of acyclic publisher configuration if will send all datasets
+    def setAcyclicSend(self,value):
+        try:
+            self.nodeAcyclicSend.set_value(ua.Variant(value,ua.VariantType.UInt16))
+        except: #TODO exception too broad
+            print('Client porbably not connected to PubSubServer')
+
+    # Get Writer group Id on acyclic publisher send command
+    def getAcyclicSend(self):
+        try:
+            return self.nodeAcyclicSend.get_value()
+        except: #TODO exception too broad
             print('Client probably not connected to PubSubServer')
             return None
 

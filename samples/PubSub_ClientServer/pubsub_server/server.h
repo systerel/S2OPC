@@ -43,11 +43,14 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void);
 /** Calls Toolkit_Configured(), starts the server */
 SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig);
 bool Server_IsRunning(void);
+
 SOPC_ReturnStatus Server_WritePubSubNodes(void);
+bool Server_Trigger_Publisher(uint16_t writerGroupId);
 void Server_StopAndClear(SOPC_S2OPC_Config* pConfig);
 
 bool Server_PubSubStop_Requested(void);
 bool Server_PubSubStart_Requested(void);
+int32_t Server_PubAcyclicSend_Requested(void);
 
 /* Interacting with the Sub module */
 

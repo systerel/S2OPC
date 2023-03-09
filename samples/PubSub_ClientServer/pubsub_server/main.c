@@ -152,6 +152,21 @@ int main(int argc, char* const argv[])
             printf("# Warning: waiting for a new configure + start command !\n");
             status = SOPC_STATUS_OK;
         }
+        /* Writer Group Id cannot be equal to 0 if Acyclic publisher have been triggered to send something writer group
+         * Id should be different than 0 */
+        uint16_t writerGroupId = (uint16_t) Server_PubAcyclicSend_Requested();
+        if (writerGroupId)
+        {
+            status = Server_Trigger_Publisher(writerGroupId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_NOK == status)
+            {
+                printf(
+                    "# Warning: Acyclic send request failed with writer group id %d \n check that publisher is set has "
+                    "acyclic publisher and writer group id correspond to configuration. \n",
+                    writerGroupId);
+            }
+            status = SOPC_STATUS_OK;
+        }
     }
 
     /* Clean and quit */

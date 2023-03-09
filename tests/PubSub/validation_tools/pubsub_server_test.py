@@ -31,6 +31,7 @@ DEFAULT_URI = 'opc.tcp://localhost:4841'
 NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
+NID_ACYCLIC_SEND = u"ns=1;s=AcyclicPubSend"
 
 NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_BOOL = u"ns=1;s=SubBool"
@@ -562,6 +563,28 @@ XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_LOOP_ACYCLIC = """<PubSub >
+    <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" mode="publisher" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Null" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Null" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
 # TODO: group these helpers in an helper class that wraps both the client to the pubsub_server and the logger instances
 # Test connection and status depending of pStart command
 def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
@@ -625,6 +648,17 @@ def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
     expected = pPubsubserver.getValue(nodeId)
     pLogger.add_test('write in %s succeeded' % nodeId , expected == value)
 
+def helpTestSetSendValue(pPubsubServer,value,pLogger):
+    pPubsubServer.setAcyclicSend(value)
+    expected = pPubsubServer.getAcyclicSend()
+    pLogger.add_test('write in %s succedded' % NID_ACYCLIC_SEND, expected == value)
+    nbPollingAcyclicSendNode = 10
+    for i in range(nbPollingAcyclicSendNode):
+        sleep(DYN_CONF_PUB_INTERVAL_200)
+        if(0 == pPubsubServer.getAcyclicSend()):
+            break
+    pLogger.add_test('publisher send message with writer group id %i' %value, i < nbPollingAcyclicSendNode - 1)
+
 def helpAssertState(psserver, expected, pLogger):
     state = psserver.getPubSubState()
     pLogger.add_test(f'PubSub Module state is {state}, should be {expected}', state == expected)
@@ -675,8 +709,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 def testPubSubDynamicConf():
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS)
-
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND)
     defaultXml2Restore = False
 
     try:
@@ -1018,6 +1051,30 @@ def testPubSubDynamicConf():
         logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
         sleep(DYN_CONF_PUB_INTERVAL_1000)
 
+        # TC 24 : Test acyclic publisher send
+        logger.begin_section("TC 24 : Test with acyclic Publisher and Subscriber")
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_ACYCLIC, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+
+        # Send the message
+        writerGroupId = 1
+        helpTestSetSendValue(pubsubserver,writerGroupId,logger)
+
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)
 
@@ -1141,7 +1198,6 @@ if __name__=='__main__':
     argparser.add_argument('--static', action='store_true', default=False,
                            help='Flag to indicates that Pub-Sub configuration is static. Default is false')
     args = argparser.parse_args()
-
     if args.static:
         testPubSubStaticConf()
     else:

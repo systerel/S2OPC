@@ -57,6 +57,7 @@ static uint32_t epConfigIdx = 0;
 static int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
+static int32_t pubAcyclicSendRequest = 0;
 
 static SOPC_AddressSpace* address_space = NULL;
 static uint8_t lastPubSubCommand = 0;
@@ -73,7 +74,6 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_StatusCode opStatus);
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
-
 SOPC_ReturnStatus Server_Initialize(void)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
@@ -476,6 +476,18 @@ bool Server_PubSubStart_Requested(void)
     return requested;
 }
 
+int32_t Server_PubAcyclicSend_Requested(void)
+{
+    /* Writer group id cannot be equal to 0 */
+    int32_t writerGroupId = SOPC_Atomic_Int_Get(&pubAcyclicSendRequest);
+    if (writerGroupId)
+    {
+        /* Reset since request is transmitted on return */
+        SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, 0);
+    }
+    return writerGroupId;
+}
+
 SOPC_ReturnStatus Server_WritePubSubNodes(void)
 {
     SOPC_NodeId* nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
@@ -599,6 +611,66 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     return status;
 }
 
+bool Server_Trigger_Publisher(uint16_t writerGroupId)
+{
+    if (!Server_IsRunning())
+    {
+        return false;
+    }
+
+    bool res = SOPC_PubScheduler_AcyclicSend(writerGroupId);
+
+    /* Create a WriteRequest with a single WriteValue */
+    OpcUa_WriteRequest* request = NULL;
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    assert(SOPC_STATUS_OK == status);
+    OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
+
+    /* Avoid the creation of the NodeId each call of the function */
+    static SOPC_NodeId* nidSend = NULL;
+    if (NULL == nidSend)
+    {
+        nidSend = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND, strlen(NODEID_ACYCLICPUB_SEND));
+    }
+
+    if (NULL == request || NULL == wv || NULL == nidSend)
+    {
+        SOPC_Free(wv);
+        SOPC_Free(nidSend);
+        return false;
+    }
+
+    SOPC_DataValue* dv = &wv->Value;
+    SOPC_Variant* val = &dv->Value;
+
+    request->NoOfNodesToWrite = 1;
+    request->NodesToWrite = wv;
+
+    wv->AttributeId = 13;
+    dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+    val->BuiltInTypeId = SOPC_UInt16_Id;
+    val->ArrayType = SOPC_VariantArrayType_SingleValue;
+    val->Value.Uint16 = 0;
+
+    status = SOPC_NodeId_Copy(&wv->NodeId, nidSend);
+    SOPC_NodeId_Clear(nidSend);
+    SOPC_Free(nidSend);
+    nidSend = NULL;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+    }
+    else
+    {
+        SOPC_Free(wv);
+        wv = NULL;
+        SOPC_Free(request);
+        request = NULL;
+    }
+    return res;
+}
+
 void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
 {
     /* SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx); */
@@ -623,7 +695,6 @@ void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
         lastPubSubConfigPath = NULL;
     }
 }
-
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_App_AddSpace_Event event,
                                       void* opParam,
@@ -746,12 +817,14 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     /* It's easier to create the NodeIds once and for all than converting the event's NodeId to a string each time */
     static SOPC_NodeId* nidConfig = NULL;
     static SOPC_NodeId* nidCommand = NULL;
-    if (NULL == nidConfig || NULL == nidCommand)
+    static SOPC_NodeId* nidSend = NULL;
+    if (NULL == nidConfig || NULL == nidCommand || NULL == nidSend)
     {
         nidConfig = SOPC_NodeId_FromCString(NODEID_PUBSUB_CONFIG, strlen(NODEID_PUBSUB_CONFIG));
         nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
+        nidSend = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND, strlen(NODEID_ACYCLICPUB_SEND));
     }
-    assert(NULL != nidConfig && NULL != nidCommand);
+    assert(NULL != nidConfig && NULL != nidCommand && NULL != nidSend);
 
     /* If config changes, store the new configuration path in global cache */
     int32_t cmpConfig = -1;
@@ -768,6 +841,14 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     SOPC_NodeId_Clear(nidCommand);
     SOPC_Free(nidCommand);
     nidCommand = NULL;
+
+    /* If send changes, Send every writer group with new values stored in address space */
+    int32_t cmpSend = -1;
+    status = SOPC_NodeId_Compare(nidSend, &pwv->NodeId, &cmpSend);
+    assert(SOPC_STATUS_OK == status);
+    SOPC_NodeId_Clear(nidSend);
+    SOPC_Free(nidSend);
+    nidSend = NULL;
 
     if (0 == cmpConfig)
     {
@@ -837,6 +918,37 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
             SOPC_Atomic_Int_Set(&pubSubStartRequested, true);
         }
         lastPubSubCommand = command;
+    }
+
+    if (0 == cmpSend)
+    {
+        /* Its status code must be good, its type uint16, and be a single value */
+        SOPC_DataValue* dv = &pwv->Value;
+        if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
+        {
+            printf("# Warning: Status Code not Good, ignoring Start/Stop Command.\n");
+            return;
+        }
+
+        SOPC_Variant* variant = &dv->Value;
+        if (variant->BuiltInTypeId != SOPC_UInt16_Id)
+        {
+            printf("# Warning: Start/Stop Command value is of invalid type. Expected Byte, actual type id is %d.\n",
+                   variant->BuiltInTypeId);
+            return;
+        }
+        if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
+        {
+            printf("# Warning: Start/Stop Command must be a single value, not an array nor a matrix.\n");
+            return;
+        }
+
+        /* Command processing */
+        uint16_t command = variant->Value.Uint16;
+        if (command)
+        {
+            SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) command);
+        }
     }
 }
 
