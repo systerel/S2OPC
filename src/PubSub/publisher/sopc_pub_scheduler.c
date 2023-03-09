@@ -117,7 +117,9 @@ static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config);
 static void MessageCtx_Array_Clear(void);
 
 // Traverse allocated message array to initialize transport context associated to message. Increment "current" field.
-static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group);
+static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
+                                       SOPC_Conf_PublisherId pubId,
+                                       SOPC_WriterGroup* group);
 
 /* Finds the message with the smallest next_timeout */
 static MessageCtx* MessageCtxArray_FindMostExpired(void);
@@ -253,7 +255,9 @@ static void MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.length = 0;
 }
 
-static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC_WriterGroup* group)
+static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
+                                       SOPC_Conf_PublisherId pubId,
+                                       SOPC_WriterGroup* group)
 {
     assert(ctx != NULL);
     assert(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
@@ -263,7 +267,25 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx, SOPC
     context->transport = ctx;
     if (NULL != ctx->mqttClient)
     {
-        context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+        /* If no topic has been set by user a default one is used */
+        const char* topic = SOPC_WriterGroup_Get_MqttTopic(group);
+        if (NULL == topic)
+        {
+            SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
+            if (SOPC_WriterGroup_Set_Default_MqttTopic(group, pubId.data.uint, SOPC_WriterGroup_Get_Id(group)))
+            {
+                context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
+                return false;
+            }
+        }
+        else
+        {
+            context->mqttTopic = topic;
+        }
     }
     else
     {
@@ -606,7 +628,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     for (uint32_t i = 0; SOPC_STATUS_OK == resultSOPC && i < nbConnection; i++)
     {
         SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, i);
-
+        const SOPC_Conf_PublisherId* pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
         const uint16_t nbWriterGroup = SOPC_PubSubConnection_Nb_WriterGroup(connection);
         if (!SOPC_PubScheduler_Connection_Get_Transport(i, connection, &transportCtx))
         {
@@ -616,7 +638,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
 
-            if (!MessageCtx_Array_Init_Next(transportCtx, group))
+            if (!MessageCtx_Array_Init_Next(transportCtx, *pubId, group))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }

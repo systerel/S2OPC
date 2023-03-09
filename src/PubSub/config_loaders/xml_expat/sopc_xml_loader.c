@@ -1017,11 +1017,6 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 {
                     allocSuccess = SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttPublisherTopic);
                 }
-                if (NULL == msg->mqttPublisherTopic && allocSuccess)
-                {
-                    allocSuccess =
-                        SOPC_WriterGroup_Set_Default_MqttTopic(writerGroup, p_connection->publisher_id, msg->groupId);
-                }
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
