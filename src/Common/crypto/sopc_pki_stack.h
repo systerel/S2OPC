@@ -162,4 +162,154 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                                                         char** lPathCRL,
                                                         SOPC_PKIProvider** ppPKI);
 
+/* ****************************************************************** */
+/* ************************* NEW API ******************************** */
+
+/*
+ The directory store shall be form as following:
+  .
+  |
+  ---- Directory_store_name
+       |
+       ---- default
+       |    |
+       |    ---- trusted
+       |    |    |
+       |    |    ---- certs (individual certificates with .DER format)
+       |    |    ---- crls  (individual CRLs with .DER format)
+       |    ---- issuers
+       |         |
+       |         ---- certs (individual certificates with .DER format)
+       |         ---- crls  (individual CRLs with .DER format)
+       |
+       ---- trustList (Optional)
+       |    |
+       |    ---- trusted
+       |    |    |
+       |    |    ---- certs (individual certificates with .DER format)
+       |    |    ---- crls  (individual CRLs with .DER format)
+       |    ---- issuers
+       |         |
+       |         ---- certs (individual certificates with .DER format)
+       |         ---- crls  (individual CRLs with .DER format)
+*/
+
+/**
+ * \brief The PKIProvider object for the Public Key Infrastructure.
+ */
+typedef struct SOPC_PKIProviderNew SOPC_PKIProviderNew;
+
+SOPC_ReturnStatus SOPC_PKIProvider_CreateFromBuffer(SOPC_CertificateList* pTrustedCerts,
+                                                    SOPC_CRLList* pTrustedCrl,
+                                                    SOPC_CertificateList* pIssuerCerts,
+                                                    SOPC_CRLList* pIssuerCrl,
+                                                    bool bBackwardInteroperability,
+                                                    SOPC_PKIProviderNew** ppPKI);
+
+/**
+ * \brief Create the PKIProvider from a directory where certificates are store.
+ *
+ * The directory store shall be form as following:
+ *
+ * - Directory_store_name/default/trusted/certs (individual cert with .DER format)
+ * - Directory_store_name/default/trusted/crls (individual cert with .DER format)
+ * - Directory_store_name/default/issuers/certs (individual cert with .DER format)
+ * - Directory_store_name/default/issuers/crls (individual cert with .DER format)
+ *
+ * - Directory_store_name/trustList/trusted/certs (individual cert with .DER format)
+ * - Directory_store_name/trustList/trusted/crls (individual cert with .DER format)
+ * - Directory_store_name/trustList/issuers/certs (individual cert with .DER format)
+ * - Directory_store_name/trustList/issuers/crls (individual cert with .DER format)
+ *
+ * The trustList could be empty but not the default fodler.
+ * Default folder is use when \p bDefaultBuild is set to True.
+ * If \p bDefaultBuild is set to False, the function attempts to build the PKI from the trustList folder
+ * and in case of error, it switches from the default folder.
+ *
+ * Notions :
+ * - CA is a root CA if it is self-signed.
+ * - trusted/certs = trusted root CA + trusted link CA + trusted cert.
+ * - trusted/crls = CRLs of the trusted root CA + trusted link CA.
+ * - issuer/certs = untrusted root CA + untrusted link CA.
+ * - issuer/crls = CRLs of the untrusted root CA + untrusted link CA.
+ * - CAs from trusted/certs and issuers/certs allow to verify the signing chain of a cert which is included into
+ *   trusted/certs.
+ * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
+ *
+ * This function check :
+ * - That the certificate store is not empty.
+ * - That at least one cert from trusted/certs is provided.
+ * - That each certificate from issuer/certs are CA.
+ * - That each CA has exactly one Certificate Revocation List (CRL).
+ * - todo: That each CA keyUsage is filed with keyCertSign and keyCrlSign.
+ * - todo: That the chain of signatures is rigth for each certificate.
+ *
+ * \note Content of the pki is NULL when return value is not SOPC_STATUS_OK.
+ *
+ * \param directoryStorePath The directory path where certificates are store.
+ * \param bDefaultBuild Defined if the PKI is build from <directoryStorePath>/default forlder.
+ * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to True
+ *                                 will be marked as root CA and as trusted certificates.
+ * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *              SOPC_PKIProviderNew_Free().
+ *
+ * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *          and SOPC_STATUS_NOK when there was an error.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
+                                                      bool bDefaultBuild,
+                                                      bool bBackwardInteroperability,
+                                                      SOPC_PKIProviderNew** ppPKI);
+
+/**
+ * \brief Create the PKIProvider from list representation.
+ *
+ * Notions :
+ * - CA is a root CA if it is self-signed.
+ * - \p pTrustedCerts = trusted root CA + trusted link CA + trusted cert.
+ * - \p pTrustedCrl = CRLs of the trusted root CA + trusted link CA.
+ * - \p pIssuerCerts = untrusted root CA + untrusted link CA.
+ * - \p pIssuerCrl = CRLs of the untrusted root CA + untrusted link CA.
+ * - CAs from trusted/certs and issuers/certs allow to verify the signing chain of a cert which is included into
+ *   trusted/certs.
+ * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
+ *
+ * This function check :
+ * - That at least one cert from \p pTrustedCerts is provided.
+ * - That each certificate from \p pIssuerCerts are CA.
+ * - That each CA has exactly one Certificate Revocation List (CRL).
+ * - todo: That each CA keyUsage is filed with keyCertSign and keyCrlSign.
+ * - todo: That the chain of signatures is rigth for each certificate.
+ *
+ * \param pTrustedCerts A valid pointer to the trusted certificate list. This object is borrowed and is freed by
+ *                      SOPC_PKIProvider_Free.
+ * \param pTrustedCrl A valid pointer to the trusted CRL list. This object is borrowed and is
+ *                     freed by SOPC_PKIProvider_Free.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list. This object is
+ *                      borrowed and is freed by SOPC_PKIProvider_Free.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list. This object is borrowed and is freed
+ *                   by SOPC_PKIProvider_Free.
+ * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to
+ *                                  True will be marked as root CA and as trusted certificates.
+ * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *              SOPC_PKIProviderNew_Free().
+ *
+ * \note In case of error, all arguments are freed by the fonction.
+ *          Content of the pki is NULL when return value is not SOPC_STATUS_OK.
+ *
+ * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
+ *          and SOPC_STATUS_NOK when there was an error. In case of error, all arguments are freed.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrustedCerts,
+                                                     SOPC_CRLList* pTrustedCrl,
+                                                     SOPC_CertificateList* pIssuerCerts,
+                                                     SOPC_CRLList* pIssuerCrl,
+                                                     bool bBackwardInteroperability,
+                                                     SOPC_PKIProviderNew** ppPKI);
+
+/**
+ * \brief   Free a PKI provider.
+ */
+void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI);
+
 #endif /* SOPC_PKI_STACK_H_ */
