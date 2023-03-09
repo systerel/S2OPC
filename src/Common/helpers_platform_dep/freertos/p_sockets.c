@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_macros.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 
@@ -78,6 +79,43 @@ void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
         freeaddrinfo(*addrs);
         *addrs = NULL;
     }
+}
+
+void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
+{
+    if (NULL == addr)
+    {
+        return;
+    }
+    if (NULL != *addr)
+    {
+        SOPC_Free((*addr)->ai_addr);
+    }
+    SOPC_Free(*addr);
+    *addr = NULL;
+}
+
+SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
+{
+    /* TODO: to be implemented and tested */
+    SOPC_UNUSED_ARG(addr);
+    return NULL;
+}
+
+SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
+{
+    /* TODO: to be implemented and tested */
+    SOPC_UNUSED_ARG(sock);
+    return NULL;
+}
+
+SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* addr, char** host, char** service)
+{
+    /* TODO: to be implemented and tested */
+    SOPC_UNUSED_ARG(addr);
+    SOPC_UNUSED_ARG(host);
+    SOPC_UNUSED_ARG(service);
+    return SOPC_STATUS_NOT_SUPPORTED;
 }
 
 void SOPC_Socket_Clear(Socket* sock)

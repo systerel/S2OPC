@@ -78,6 +78,7 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
         while (!result && nextAddr != NULL)
         {
             result = SOPC_SocketsEventMgr_ConnectClient(connectSocket, nextAddr);
+            connectSocket->curConnectAttemptAddr = nextAddr;
             nextAddr = SOPC_Socket_AddrInfo_IterNext(nextAddr);
             connectSocket->nextConnectAttemptAddr = nextAddr;
         }
@@ -126,6 +127,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
             for (p = res; p != NULL && !connectResult; p = SOPC_Socket_AddrInfo_IterNext(p))
             {
                 connectResult = SOPC_SocketsEventMgr_ConnectClient(freeSocket, p);
+                freeSocket->curConnectAttemptAddr = p;
             }
             if (!connectResult)
             {
@@ -140,6 +142,11 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
                 // Next attempts addresses for connections remaining: store to use in case of async. connection failure
                 freeSocket->nextConnectAttemptAddr = p;
                 freeSocket->connectAddrs = res;
+            }
+            else
+            {
+                // Keep unique address reference
+                freeSocket->addr = SOPC_Socket_CopyAddress(res);
             }
 
             resultSocket = freeSocket;
@@ -242,6 +249,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
 
                         if (SOPC_STATUS_OK == status)
                         {
+                            freeSocket->addr = SOPC_Socket_CopyAddress(p);
                             freeSocket->state = SOCKET_STATE_LISTENING;
                             listenResult = true;
                         }
@@ -603,6 +611,44 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
     }
 }
 
+static void SOPC_SocketsInternalEventMgr_LogAcceptedConnection(SOPC_Socket* listener, SOPC_Socket* connection)
+{
+    char* peerHost = NULL;
+    char* peerService = NULL;
+    char* selfHost = NULL;
+    char* selfService = NULL;
+    SOPC_ReturnStatus status = SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SocketAddress_GetNameInfo(listener->addr, &selfHost, &selfService);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "Connection accepted on [%s]:%s from [%s]:%s with socket socketIdx=%" PRIu32, selfHost,
+                              selfService, peerHost, peerService, connection->socketIdx);
+    }
+    SOPC_Free(peerHost);
+    SOPC_Free(peerService);
+    SOPC_Free(selfHost);
+    SOPC_Free(selfService);
+}
+
+static void SOPC_SocketsInternalEventMgr_LogConnection(SOPC_Socket* connection)
+{
+    char* peerHost = NULL;
+    char* peerService = NULL;
+    SOPC_ReturnStatus status = SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                              "Connection established to [%s]:%s with socket socketIdx=%" PRIu32, peerHost, peerService,
+                              connection->socketIdx);
+    }
+    SOPC_Free(peerHost);
+    SOPC_Free(peerService);
+}
+
 void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_Socket* socketElt)
 {
     bool result = false;
@@ -637,6 +683,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                                         &acceptSock->sock);
             if (SOPC_STATUS_OK == status)
             {
+                acceptSock->addr = SOPC_Socket_GetPeerAddress(acceptSock->sock);
+                SOPC_SocketsInternalEventMgr_LogAcceptedConnection(socketElt, acceptSock);
                 acceptSock->isServerConnection = true;
                 acceptSock->listenerSocketIdx = socketElt->socketIdx;
                 // Set initial state of new socket
@@ -688,9 +736,12 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         // No more attempts expected: free the attempts addresses
         if (socketElt->connectAddrs != NULL)
         {
+            socketElt->addr = SOPC_Socket_CopyAddress(socketElt->curConnectAttemptAddr);
             SOPC_Socket_AddrInfoDelete((SOPC_Socket_AddressInfo**) &socketElt->connectAddrs);
+            socketElt->curConnectAttemptAddr = NULL;
             socketElt->nextConnectAttemptAddr = NULL;
         }
+        SOPC_SocketsInternalEventMgr_LogConnection(socketElt);
 
         // Notify connection
         SOPC_Sockets_Emit(SOCKET_CONNECTION,

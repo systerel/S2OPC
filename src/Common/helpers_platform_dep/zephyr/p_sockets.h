@@ -41,6 +41,11 @@ typedef int Socket;
 
 typedef struct zsock_addrinfo SOPC_Socket_AddressInfo;
 
+/**
+ *  \brief Socket address information on a connected socket
+ */
+typedef struct zsock_addrinfo SOPC_Socket_Address;
+
 /* Socket set definition*/
 
 typedef struct

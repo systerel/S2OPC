@@ -35,6 +35,7 @@
  * The platform-specific implementation of "p_sockets.h" shall provide the actual definition of:
  * - \ref Socket type (e.g. int for LINUX)
  * - \ref SOPC_Socket_AddressInfo for Network Address definition structure (e.g. struct addrinfo for LINUX)
+ * - \ref SOPC_Socket_Address for Socket Address definition structure (e.g. struct addrinfo for LINUX)
  * - \ref SOPC_SocketSet type for socket sets (e.g. fd_set for LINUX)
  */
 #include "p_sockets.h"
@@ -69,7 +70,7 @@ SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Sock
  *
  *  \param addr    A socket addressing information element
  *
- *  \return        Next socket adressing information element or NULL if no more are present.
+ *  \return        Next socket addressing information element or NULL if no more are present.
  */
 SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* addr);
 
@@ -91,6 +92,46 @@ uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr);
  *
  */
 void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs);
+
+/**
+ *  \brief Given a socket get the address information associated to the peer connected to the socket
+ *
+ *  \param sock    The socket connected to a peer
+ *
+ *  \return        Address information element or NULL in case of error.
+ */
+SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(Socket sock);
+
+/**
+ * \brief Copy the socket address from a socket address information
+ *
+ * \param addr  The socket address information to copy into socket address structure
+ *
+ * \return      The socket address created from the \p addr or NULL in case of failures
+ */
+SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr);
+
+/**
+ * \brief Get address information as C strings from the given socket address
+ *
+ * \param      addr    The socket address to use to get information as C string
+ * \param[out] host    (optional) The host information of the address as C string (i.e. IP)
+ * \param[out] service (optional) The service information of the address as C string (i.e. port)
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS if parameters are invalid (NULL for addr or both NULL for outputs)
+ *         or SOPC_STATUS_NOK if it failed.
+ */
+SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_Address* addr, char** host, char** service);
+
+/**
+ *  \brief Deallocate a socket address obtained with ::SOPC_Socket_GetPeerAddress or ::SOPC_Socket_CopyAddress
+ *
+ *  \param addr (In/Out) An address information to deallocate.
+ *                       Pointer set to NULL after operation.
+ *
+ */
+void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr);
 
 /**
  *  \brief Clear socket state to an invalid socket

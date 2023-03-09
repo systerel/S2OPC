@@ -143,6 +143,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
             }
         }
 
+        SOPC_SocketAddress_Delete(&sock->addr);
         /* Equivalent to
          * sock->isUsed = false;
          * sock->state = SOCKET_STATE_CLOSED;

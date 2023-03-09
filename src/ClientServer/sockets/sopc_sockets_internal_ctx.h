@@ -55,11 +55,14 @@ typedef struct SOPC_Socket
     SOPC_Socket_State state;
     // addresses for connection
     void* connectAddrs;           // Possible connection addresses (to free on connection)
+    void* curConnectAttemptAddr;  // Current connection attempt address
     void* nextConnectAttemptAddr; // Next connection attempt address
     // number of connection for a listener (state = LISTENING)
     uint32_t listenerConnections;
     // define if isServerConnection != false
     uint32_t listenerSocketIdx;
+    // socket address
+    SOPC_Socket_Address* addr;
 } SOPC_Socket;
 
 /** @brief Array containing all sockets that can be used */

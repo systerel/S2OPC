@@ -31,6 +31,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
 bool SOPC_Socket_Network_Initialize(void)
@@ -88,6 +89,122 @@ void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs)
         freeaddrinfo(*addrs);
         *addrs = NULL;
     }
+}
+
+void SOPC_SocketAddress_Delete(SOPC_Socket_Address** addr)
+{
+    if (NULL == addr)
+    {
+        return;
+    }
+    if (NULL != *addr)
+    {
+        SOPC_Free((*addr)->ai_addr);
+    }
+    SOPC_Free(*addr);
+    *addr = NULL;
+}
+
+SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr)
+{
+    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    if (NULL != result)
+    {
+        result->ai_addr = SOPC_Calloc(1, addr->ai_addrlen);
+        result->ai_addrlen = addr->ai_addrlen;
+        if (NULL != result->ai_addr)
+        {
+            result->ai_addr = memcpy(result->ai_addr, addr->ai_addr, addr->ai_addrlen);
+        }
+        else
+        {
+            SOPC_Free(result);
+            result = NULL;
+        }
+    }
+    return result;
+}
+
+SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
+{
+    if (sock == SOPC_INVALID_SOCKET)
+    {
+        return NULL;
+    }
+    SOPC_Socket_AddressInfo* result = SOPC_Calloc(1, sizeof(*result));
+    struct sockaddr_storage* sockAddrStorage = SOPC_Calloc(1, sizeof(*sockAddrStorage));
+    socklen_t sockAddrStorageLen = sizeof(*sockAddrStorage);
+    int res = -1;
+    if (NULL != result && NULL != sockAddrStorage)
+    {
+        res = getpeername(sock, (struct sockaddr*) sockAddrStorage, &sockAddrStorageLen);
+        if (0 == res)
+        {
+            result->ai_family = sockAddrStorage->ss_family;
+            result->ai_addrlen = sockAddrStorageLen;
+            result->ai_addr = (struct sockaddr*) sockAddrStorage;
+        }
+    }
+    if (res != 0)
+    {
+        SOPC_Free(sockAddrStorage);
+        result = NULL;
+    }
+    return result;
+}
+
+SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* addr, char** host, char** service)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL == addr || (NULL == host && NULL == service))
+    {
+        return status;
+    }
+    int flags = 0;
+    status = SOPC_STATUS_OK;
+    char* hostRes = NULL;
+    char* serviceRes = NULL;
+    if (NULL != host)
+    {
+        flags |= NI_NUMERICHOST;
+
+        hostRes = SOPC_Calloc(NI_MAXHOST, sizeof(*hostRes));
+        if (hostRes == NULL)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != service)
+    {
+        flags |= NI_NUMERICSERV;
+        serviceRes = SOPC_Calloc(NI_MAXSERV, sizeof(*serviceRes));
+        if (serviceRes == NULL)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
+    if (0 != res)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(hostRes);
+        SOPC_Free(serviceRes);
+    }
+    else
+    {
+        if (NULL != host)
+        {
+            *host = hostRes;
+        }
+        if (NULL != service)
+        {
+            *service = serviceRes;
+        }
+    }
+    return status;
 }
 
 void SOPC_Socket_Clear(Socket* sock)
