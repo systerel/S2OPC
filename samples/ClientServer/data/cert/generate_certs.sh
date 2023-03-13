@@ -88,7 +88,7 @@ echo
 
 # CA generation for users X509IdentityToken: generate key, generate self signed certificate
 # /!\ only for test as no pass phrase is embedeed
-openssl genrsa -out $CA_KEY_USR 4096
+openssl genrsa -out $CA_KEY_USR -aes-256-cbc 4096
 openssl req -config $CONF_CA_USR -new -x509 -key $CA_KEY_USR -out $CA_CERT_USR -days $DURATION
 
 # Generate an empty Certificate Revocation List, convert it to DER format
