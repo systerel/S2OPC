@@ -1604,8 +1604,9 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         }
         else
         {
+            /* Set PKI for users */
+            SOPC_PKIProviderStack_SetUserCert(pX509_UserIdentity_PKI, true);
             config->pX509_UserIdentity_PKI = pX509_UserIdentity_PKI;
-            ;
             config->users = users;
             config->rejectedUser = rejectedUser;
             config->certificates = certificates;

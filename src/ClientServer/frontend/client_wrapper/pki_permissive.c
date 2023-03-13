@@ -64,7 +64,7 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     pki->pIssuedCertsList = NULL;
     pki->pUntrustedIssuerRootsList = NULL;
     pki->pCertRevocList = NULL; // Can be NULL
-    pki->pUserData = NULL;
+    pki->pUserData = (uintptr_t) false;
     *ppPKI = pki;
 
     return SOPC_STATUS_OK;

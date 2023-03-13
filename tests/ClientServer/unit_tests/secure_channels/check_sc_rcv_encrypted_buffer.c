@@ -211,7 +211,7 @@ static void establishSC(void)
         pki.pIssuedCertsList = NULL;
         pki.pUntrustedIssuerRootsList = NULL;
         pki.pCertRevocList = NULL;
-        pki.pUserData = NULL;
+        pki.pUserData = (uintptr_t) NULL;
     }
 
     if (SOPC_STATUS_OK == status)

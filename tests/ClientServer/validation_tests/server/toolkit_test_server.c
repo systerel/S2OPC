@@ -750,6 +750,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        /* Set PKI for user */
+        SOPC_PKIProviderStack_SetUserCert(pX509_UserIdentity_PKI, true);
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
         authenticationManager->pData = pX509_UserIdentity_PKI;

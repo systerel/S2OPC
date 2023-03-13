@@ -62,6 +62,27 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
                                                SOPC_PKIProvider** ppPKI);
 
 /**
+ * \brief   Define whether the PKI is used for user or application certificates,
+ *          The extensions verification for users:
+ *              - The keyUsage is expected to be filled with digitalSignature.
+ *              - The extendedkeyUsage is not checked.
+ *              - The CA flag is expected to be FALSE
+ *          The extensions verification for applications:
+ *              - The keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *                and dataEncipherment.
+ *              - The extendedkeyUsage is filled with serverAuth and/or clientAuth.
+ *
+ * \note By default, the PKI is used for application instance certificates.
+ *
+ * \param pPKI   A valid pointer to the SOPC_PKIProvider.
+ * \param bIsUserPki Define whether the PKI is used for user or application certificates.
+ *
+ * \return  SOPC_STATUS_OK when successful or SOPC_STATUS_INVALID_PARAMETERS when \p pPKI is NULL.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProviderStack_SetUserCert(SOPC_PKIProvider* pPKI, bool bIsUserPki);
+
+/**
  * \brief           Creates a SOPC_PKIProviderStack using lists of paths.
  *
  *   This verifies the certificate in the safest manner (whole certificate chain, with date validation,

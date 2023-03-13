@@ -101,7 +101,7 @@ struct SOPC_PKIProvider
     /** \brief PKI implementations can use this placeholder to store handles to certificate revocation list(s). */
     void* pCertRevocList;
     /** \brief PKI implementations can use this placeholder to store more specific data. */
-    void* pUserData;
+    uintptr_t pUserData;
 };
 
 /**

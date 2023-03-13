@@ -210,14 +210,16 @@ static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_d
 }
 
 /* Returns 0 if all key usages and extended key usages are ok */
-static SOPC_ReturnStatus check_key_usages(const mbedtls_x509_crt* crt)
+static SOPC_ReturnStatus check_key_usages(const mbedtls_x509_crt* crt, bool isUserPki)
 {
-    unsigned int usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE | MBEDTLS_X509_KU_NON_REPUDIATION |
-                          MBEDTLS_X509_KU_KEY_ENCIPHERMENT | MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
-    int err = mbedtls_x509_crt_check_key_usage(crt, usages);
-
-    if (0 == err)
+    int err = 0;
+    unsigned int usages = 0;
+    if (!isUserPki)
     {
+        usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE | MBEDTLS_X509_KU_NON_REPUDIATION |
+                 MBEDTLS_X509_KU_KEY_ENCIPHERMENT | MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
+        err = mbedtls_x509_crt_check_key_usage(crt, usages);
+
         /* If the ext usage is neither server auth nor client auth, it shall be rejected */
         /* TODO: check whether the crt is for a server or a client, and only check the corresponding ext usage */
         bool missSer = mbedtls_x509_crt_check_extended_key_usage(crt, MBEDTLS_OID_SERVER_AUTH,
@@ -227,6 +229,17 @@ static SOPC_ReturnStatus check_key_usages(const mbedtls_x509_crt* crt)
         if (missSer && missCli)
         {
             err = 1;
+        }
+    }
+    else
+    {
+        /* Check the key usages for user certificate (it is not part of the OPC UA but it makes sense to keep it). */
+        usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE;
+        err = mbedtls_x509_crt_check_key_usage(crt, usages);
+        if (0 == err)
+        {
+            /* The CA flag shall be FALSE for user certificate */
+            err = crt->ca_istrue;
         }
     }
 
@@ -279,7 +292,8 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Check certificate usages */
-    status = check_key_usages(mbed_chall);
+    bool isUserPki = (bool) pPKI->pUserData;
+    status = check_key_usages(mbed_chall, isUserPki);
     if (SOPC_STATUS_OK != status)
     {
         *error = SOPC_CertificateValidationError_UseNotAllowed;
@@ -354,7 +368,7 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* lRootsTrusted,
                                          SOPC_CertificateList* lLinksUntrusted,
                                          SOPC_CertificateList* lIssued,
                                          SOPC_CRLList* lCrl,
-                                         void* pUserData)
+                                         bool isUserPki)
 {
     SOPC_PKIProvider* pki = SOPC_Malloc(sizeof(SOPC_PKIProvider));
 
@@ -372,10 +386,21 @@ static SOPC_PKIProvider* create_pkistack(SOPC_CertificateList* lRootsTrusted,
         pki->pUntrustedIssuerLinksList = lLinksUntrusted;
         pki->pIssuedCertsList = lIssued;
         pki->pCertRevocList = lCrl;
-        pki->pUserData = pUserData;
+        pki->pUserData = (uintptr_t) isUserPki;
     }
 
     return pki;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderStack_SetUserCert(SOPC_PKIProvider* pPKI, bool bIsUserPki)
+{
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    pPKI->pUserData = (uintptr_t) bIsUserPki;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
@@ -408,7 +433,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(caCert, NULL, NULL, NULL, NULL, pRevocationList, NULL);
+        pki = create_pkistack(caCert, NULL, NULL, NULL, NULL, pRevocationList, false);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -647,7 +672,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
     SOPC_PKIProvider* pki = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        pki = create_pkistack(lRootsTrusted, lLinksTrusted, lRootsUntrusted, lLinksUntrusted, lIssued, lCrls, NULL);
+        pki = create_pkistack(lRootsTrusted, lLinksTrusted, lRootsUntrusted, lLinksUntrusted, lIssued, lCrls, false);
         if (NULL == pki)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
