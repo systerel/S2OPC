@@ -142,7 +142,7 @@ then
 else
     # Run linux UACTT
     echo "Launching Acceptance Test Tool: uacompliancetest -s $CONFIGURATION --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE"
-    /opt/opcfoundation/uactt_1.03/bin/uacompliancetest -s $CONFIGURATION --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
+    /opt/opcfoundation/uactt/bin/uacompliancetest -s $CONFIGURATION --selection $SELECTION -h -c -r ./$LOG_FILE 2>$UACTT_ERROR_FILE
 fi
 
 echo "Closing Acceptance Test Tool"
