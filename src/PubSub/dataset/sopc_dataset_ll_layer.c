@@ -17,9 +17,9 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_conf.h"
 
@@ -34,6 +34,8 @@ typedef struct SOPC_Dataset_LL_DataSetField SOPC_Dataset_LL_DataSetField;
 
 struct SOPC_Dataset_LL_DataSetMessage
 {
+    SOPC_UadpDataSetMessageContentMask conf;
+
     SOPC_Dataset_LL_DataSetField* dataset_fields;
     uint16_t dataset_fields_length;
     uint16_t dataset_writer_id;
@@ -102,12 +104,16 @@ SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t ds
         return NULL;
     }
     result->msgHeader.UADP_version = uadp_version;
-    bool status = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(result, dsm_nb);
-    if (!status)
+    if (0 != dsm_nb)
     {
-        SOPC_Free(result);
-        return NULL;
+        bool status = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(result, dsm_nb);
+        if (!status)
+        {
+            SOPC_Free(result);
+            return NULL;
+        }
     }
+
     return result;
 }
 
@@ -151,7 +157,7 @@ uint8_t SOPC_Dataset_LL_NetworkMessage_GetVersion(const SOPC_Dataset_LL_NetworkM
 
 void SOPC_Dataset_LL_NetworkMessage_SetVersion(SOPC_Dataset_LL_NetworkMessage_Header* nmh, uint8_t version)
 {
-    assert(version <= 15); // Encoded on 4 bits
+    SOPC_ASSERT(version <= 15); // Encoded on 4 bits
     if (NULL != nmh)
     {
         nmh->UADP_version = version;
@@ -241,7 +247,7 @@ SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdTy
  */
 bool SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t dsf_nb)
 {
-    assert(NULL != dsm);
+    SOPC_ASSERT(NULL != dsm);
     if (dsf_nb > 0)
     {
         dsm->dataset_fields = SOPC_Calloc(dsf_nb, sizeof(SOPC_Dataset_LL_DataSetField));
@@ -289,6 +295,45 @@ uint16_t SOPC_Dataset_LL_DataSetMsg_Get_WriterId(const SOPC_Dataset_LL_DataSetMe
         return 0;
     }
     return dsm->dataset_writer_id;
+}
+
+void SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                SOPC_UadpDataSetMessageContentMask conf)
+{
+    dsm->conf = conf;
+}
+
+SOPC_UadpDataSetMessageContentMask* SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    return &dsm->conf;
+}
+
+// dataset message type (default is Key Frame without flags 2 otherwise)
+SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(const SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    if (!dsm->conf.DataSetFlags2)
+    {
+        return DataSet_LL_MessageType_KeyFrame;
+    }
+    else
+    {
+        switch (dsm->conf.DataSetMessageType)
+        {
+        case DataSet_LL_MessageType_KeyFrame:
+            return DataSet_LL_MessageType_KeyFrame;
+        case DataSet_LL_MessageType_DeltaFrame:
+            return DataSet_LL_MessageType_DeltaFrame;
+        case DataSet_LL_MessageType_Event:
+            return DataSet_LL_MessageType_Event;
+            break;
+        case DataSet_LL_MessageType_KeepAlive:
+            return DataSet_LL_MessageType_KeepAlive;
+            break;
+        default:
+            SOPC_ASSERT(false && "Unexpected data set message type");
+            return dsm->conf.FieldEncoding;
+        }
+    }
 }
 
 /**
@@ -445,7 +490,7 @@ SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader(
 
 bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t dsm_nb)
 {
-    assert(NULL != nm);
+    SOPC_ASSERT(NULL != nm);
     nm->dataset_messages = SOPC_Calloc(dsm_nb, sizeof(SOPC_Dataset_LL_DataSetMessage));
     if (NULL == nm->dataset_messages)
     {

@@ -565,7 +565,7 @@ XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
 
 XML_PUBSUB_LOOP_ACYCLIC = """<PubSub >
     <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" mode="publisher" publisherId="1">
-        <message groupId="1" publishingInterval="200" groupVersion="1">
+        <message groupId="1" publishingInterval="200" keepAliveTime="200." groupVersion="1">
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />

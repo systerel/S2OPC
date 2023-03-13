@@ -165,7 +165,7 @@ int main(void)
     {
         return -2;
     }
-    SOPC_Dataset_NetworkMessage* nm = SOPC_Create_NetworkMessage_From_WriterGroup(conf_group);
+    SOPC_Dataset_NetworkMessage* nm = SOPC_Create_NetworkMessage_From_WriterGroup(conf_group, false);
     if (NULL == nm)
     {
         return -3;

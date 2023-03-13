@@ -17,17 +17,31 @@
  * under the License.
  */
 
-#include <assert.h>
+#include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_dataset_layer.h"
 #include "sopc_dataset_ll_layer.h"
 
+// TODO: Most of those flags should be configurable in the future (once encoder supports all cases)
+const uint8_t DATASET_DSM_ENCODING_TYPE = 0;          // Only 0 supported
+const bool DATASET_DSM_IS_VALID = true;               // Only true supported
+const bool DATASET_DSM_SEQ_NUMBER_ENABLED = false;    // Only False supported
+const bool DATASET_DSM_STATUS_ENABLED = false;        //  Only false supported
+const bool DATASET_DSM_MAJOR_VERSION_ENABLED = false; // Only false supported
+const bool DATASET_DSM_MINOR_VERSION_ENABLED = false; // Only false supported
+const bool DATASET_DSM_CLASSID_ENABLED = false;       // Only false supported
+
+const bool DATASET_DSM_TIMESTAMP_ENABLED = false;    // Only false supported
+const bool DATASET_DSM_PICOSECONDS_INCLUDED = false; // Only false supported
+
 static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_WriterGroup* group);
 
-SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_WriterGroup* group)
+SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_WriterGroup* group, bool isKeepAlive)
 {
-    assert(NULL != group);
+    SOPC_ASSERT(NULL != group);
     uint8_t nb_dataSetWriter = SOPC_WriterGroup_Nb_DataSetWriter(group);
+
     // TODO :replace by a configurable value through writer group
     SOPC_Dataset_LL_NetworkMessage* msg_nm =
         SOPC_Dataset_LL_NetworkMessage_Create(nb_dataSetWriter, UADP_DEFAULT_VERSION);
@@ -41,6 +55,8 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
         return NULL;
     }
 
+    // Define DataSetMessage flags 1 & 2 values
+
     // UADP version is already set to default one
 
     SOPC_NetworkMessage_Set_PublisherId(header, group);
@@ -53,14 +69,59 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
         SOPC_DataSetWriter* conf_dsw = SOPC_WriterGroup_Get_DataSetWriter_At(group, iDataSet);
         SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(msg_nm, iDataSet);
         SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, SOPC_DataSetWriter_Get_Id(conf_dsw));
-
-        const uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
-
-        const bool status = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nbFields);
-        if (!status)
+        SOPC_UadpDataSetMessageContentMask conf;
+        memset(&conf, 0, sizeof(conf));
+        conf.NotValidFlag = !DATASET_DSM_IS_VALID;
+        conf.FieldEncoding = DATASET_DSM_ENCODING_TYPE;
+        conf.DataSetMessageSequenceNumberFlag = DATASET_DSM_SEQ_NUMBER_ENABLED;
+        conf.StatusFlag = DATASET_DSM_STATUS_ENABLED;
+        conf.ConfigurationVersionMajorVersionFlag = DATASET_DSM_MAJOR_VERSION_ENABLED;
+        conf.ConfigurationVersionMinorFlag = DATASET_DSM_MINOR_VERSION_ENABLED;
+        conf.DataSetFlags2 = false;                                // by default depends on source type
+        conf.DataSetMessageType = DataSet_LL_MessageType_KeyFrame; // by default depends on source type
+        conf.TimestampFlag = DATASET_DSM_TIMESTAMP_ENABLED;
+        conf.PicoSecondsFlag = DATASET_DSM_PICOSECONDS_INCLUDED;
+        switch (SOPC_PublishedDataSet_Get_DataSet_SourceType(SOPC_DataSetWriter_Get_DataSet(conf_dsw)))
         {
-            SOPC_Dataset_LL_NetworkMessage_Delete(msg_nm);
-            return NULL;
+        case SOPC_PublishedDataItemsDataType:
+            SOPC_ASSERT(!isKeepAlive);
+            break;
+        case SOPC_PublishedEventsDataType:
+            conf.DataSetFlags2 = true;
+            if (isKeepAlive)
+            {
+                conf.DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
+            }
+            else
+            {
+                conf.DataSetMessageType = DataSet_LL_MessageType_Event;
+            }
+            break;
+        case SOPC_PublishedDataSetCustomSourceDataType:
+            conf.DataSetFlags2 = true;
+            if (isKeepAlive)
+            {
+                conf.DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
+            }
+            else
+            {
+                conf.DataSetMessageType = DataSet_LL_MessageType_Event;
+            }
+            break;
+        default:
+            SOPC_ASSERT(false);
+        }
+        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, conf);
+        if (!isKeepAlive)
+        {
+            const uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
+
+            const bool status = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nbFields);
+            if (!status)
+            {
+                SOPC_Dataset_LL_NetworkMessage_Delete(msg_nm);
+                return NULL;
+            }
         }
     }
     return msg_nm;
@@ -77,13 +138,13 @@ void SOPC_NetworkMessage_Set_Variant_At(SOPC_Dataset_NetworkMessage* nm,
                                         SOPC_Variant* variant,
                                         SOPC_FieldMetaData* metadata)
 {
-    assert(NULL != nm && NULL != variant && NULL != metadata);
+    SOPC_ASSERT(NULL != nm && NULL != variant && NULL != metadata);
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dsm_index);
     // checks bad index
-    assert(NULL != dsm);
+    SOPC_ASSERT(NULL != dsm);
 
     bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, dsf_index);
-    assert(res); // valid index
+    SOPC_ASSERT(res); // valid index
 }
 
 // private
@@ -93,7 +154,7 @@ static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_H
     const SOPC_Conf_PublisherId* conf_pubid = SOPC_PubSubConnection_Get_PublisherId(conf_connection);
     // String not managed
     uint64_t conf_id = conf_pubid->data.uint;
-    assert(SOPC_UInteger_PublisherId == conf_pubid->type);
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == conf_pubid->type);
     if (UINT32_MAX < conf_id)
     {
         SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nmh, conf_id);

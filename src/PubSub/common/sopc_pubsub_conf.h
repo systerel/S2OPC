@@ -65,7 +65,8 @@ typedef enum
 typedef enum
 {
     SOPC_PublishedDataItemsDataType = 0,
-    SOPC_PublishedEventsDataType = 1
+    SOPC_PublishedEventsDataType = 1,
+    SOPC_PublishedDataSetCustomSourceDataType = 2
 } SOPC_PublishedDataSetSourceType;
 
 typedef enum
@@ -250,11 +251,17 @@ void SOPC_WriterGroup_Set_Id(SOPC_WriterGroup* group, uint16_t id);
 uint32_t SOPC_WriterGroup_Get_Version(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version);
 
+/* Expected to be -1 for acyclic Publisher */
 double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms);
 
+/* Expected to be -1 for acyclic Publisher */
 int32_t SOPC_WriterGroup_Get_PublishingOffset(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offset_ms);
+
+/* Expected only for acyclic publisher */
+double SOPC_WriterGroup_Get_KeepAlive(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms);
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,

@@ -44,6 +44,7 @@ VALUE_MESSAGE_SECURITY_MODE_NONE = "none"
 VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
 VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
+ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -120,6 +121,7 @@ class MessageContext:
         self.interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
         self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,-1))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
+        self.keepAliveTime = float(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL,-1.))
 
 
 def getCSecurityMode(mode):
@@ -315,6 +317,13 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
  """ % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
         msgContext.offset, getCSecurityMode(msgContext.securityMode)))
 
+    if(msgContext.keepAliveTime > 0.):
+        result.add("""
+        if(alloc)
+        {
+            SOPC_WriterGroup_Set_KeepAlive(writerGroup, %f);
+        }
+        """ %(msgContext.keepAliveTime))
     #Get Publishing Offset:
     #result.add("""
     #    int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
@@ -367,13 +376,13 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, %d);
         assert(NULL != writer);
         // WriterId = %d
-        dataset = SOPC_PubSubConfig_InitDataSet(config, %d, writer, %d, %d);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, %d, writer, %d, %d, %d);
         alloc = NULL != dataset;
     }
     if (alloc)
     {""" % (dsIndex,
             writerId,
-            GContext.pubDataSetIndex, writerId, len(variables)))
+            GContext.pubDataSetIndex, msgContext.cnxContext.acyclicPublisher, writerId, len(variables)))
             GContext.pubDataSetIndex += 1
         elif mode == SUB_MODE:
 
@@ -588,11 +597,19 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
 static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfiguration* config,
                                                             uint16_t dataSetIndex,
                                                             SOPC_DataSetWriter* writer,
+                                                            bool isAcyclic,
                                                             uint16_t dataSetId,
                                                             uint16_t nbVar)
 {
     SOPC_PublishedDataSet* dataset = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, dataSetIndex);
-    SOPC_PublishedDataSet_Init(dataset, SOPC_PublishedDataItemsDataType, nbVar);
+    if(isAcyclic)
+    {
+        SOPC_PublishedDataSet_Init(dataset, SOPC_PublishedDataSetCustomSourceDataType, nbVar);
+    }
+    else
+    {
+        SOPC_PublishedDataSet_Init(dataset, SOPC_PublishedDataItemsDataType, nbVar);
+    }
     SOPC_DataSetWriter_Set_DataSet(writer, dataset);
     SOPC_DataSetWriter_Set_Id(writer, dataSetId);
 

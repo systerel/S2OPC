@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <inttypes.h>
 
@@ -35,6 +34,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_missing_c99.h"
 #include "sopc_mqtt_transport_layer.h"
+#include "sopc_mutexes.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_pubsub_helpers.h"
@@ -93,6 +93,7 @@ typedef struct MessageCtx
 {
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
     SOPC_Dataset_NetworkMessage* message;
+    SOPC_Dataset_NetworkMessage* messageKeepAlive;
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
@@ -100,14 +101,16 @@ typedef struct MessageCtx
     int32_t publishingOffsetUs; /**< Negative = not used */
     const char* mqttTopic;
     bool warned; /**< Have we warned about expired messages yet? */
+    uint64_t keepAliveTimeUs;
 } MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
 typedef struct MessageCtx_Array
 {
-    uint64_t length;   // Size of this array is SOPC_PubScheduler_Nb_Message
-    uint64_t current;  // Nb of messages already initialized. Monotonic.
-    MessageCtx* array; // MessageCtx: array of context for each message
+    uint64_t length;    // Size of this array is SOPC_PubScheduler_Nb_Message
+    uint64_t current;   // Nb of messages already initialized. Monotonic.
+    MessageCtx* array;  // MessageCtx: array of context for each message
+    Mutex acyclicMutex; // Mutex used for acyclic send
 } MessageCtx_Array;
 
 // Total of message
@@ -184,6 +187,12 @@ static void* thread_start_publish(void* arg);
  */
 static void MessageCtx_send_publish_message(MessageCtx* context);
 
+/**
+ * @brief Send keep alive message for acyclic publisher
+ *
+ */
+static void send_keepAlive_message(MessageCtx* context);
+
 // Clear pub scheduler context
 static void SOPC_PubScheduler_Context_Clear(void)
 {
@@ -223,15 +232,20 @@ static void SOPC_PubScheduler_Context_Clear(void)
 
 static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
 {
+    bool result = true;
     const uint64_t length = SOPC_PubScheduler_Nb_Message(config);
     pubSchedulerCtx.messages.current = 0;
     pubSchedulerCtx.messages.array = SOPC_Calloc((size_t) length, sizeof(MessageCtx));
     if (NULL == pubSchedulerCtx.messages.array)
     {
-        return false;
+        result = false;
     }
-    pubSchedulerCtx.messages.length = length;
-    return true;
+    if (result)
+    {
+        pubSchedulerCtx.messages.length = length;
+        result = SOPC_STATUS_OK == Mutex_Initialization(&pubSchedulerCtx.messages.acyclicMutex);
+    }
+    return result;
 }
 
 static void MessageCtx_Array_Clear(void)
@@ -245,6 +259,8 @@ static void MessageCtx_Array_Clear(void)
             SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Network message #%" PRIu32 " freed", i);
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].message);
             arr[i].message = NULL;
+            SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].messageKeepAlive);
+            arr[i].messageKeepAlive = NULL;
             SOPC_PubSub_Security_Clear(arr[i].security);
             SOPC_Free(arr[i].security);
             arr[i].security = NULL;
@@ -257,14 +273,15 @@ static void MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.array = NULL;
     pubSchedulerCtx.messages.current = 0;
     pubSchedulerCtx.messages.length = 0;
+    Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
 }
 
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
                                        SOPC_WriterGroup* group)
 {
-    assert(ctx != NULL);
-    assert(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
+    SOPC_ASSERT(ctx != NULL);
+    SOPC_ASSERT(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
 
     MessageCtx* context = &(pubSchedulerCtx.messages.array[pubSchedulerCtx.messages.current]);
 
@@ -299,7 +316,9 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->group = group;
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
-    context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group);
+    context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
+    context->messageKeepAlive = NULL; // by default NULL and set only if publsiher is acyclic
+    context->next_timeout = SOPC_RealTime_Create(NULL);
 
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
@@ -313,8 +332,6 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     {
         context->publishingIntervalUs = (uint64_t)(SOPC_WriterGroup_Get_PublishingInterval(group) * 1000);
         context->publishingOffsetUs = (int32_t)(SOPC_WriterGroup_Get_PublishingOffset(group) * 1000);
-        context->next_timeout = SOPC_RealTime_Create(NULL);
-
         /* Compute next timeout.  */
         if (context->publishingOffsetUs >= 0)
         {
@@ -338,8 +355,15 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
                                          context->publishingOffsetUs);
     }
-
-    if (NULL == context->message || (NULL == context->next_timeout && !ctx->isAcyclic) || !result)
+    /* We only use keep alive for acyclic publisher*/
+    else
+    {
+        context->keepAliveTimeUs = (uint64_t)(SOPC_WriterGroup_Get_KeepAlive(group) * 1000);
+        SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
+        context->messageKeepAlive = SOPC_Create_NetworkMessage_From_WriterGroup(group, true);
+    }
+    if (NULL == context->message || ((NULL == context->next_timeout || context->messageKeepAlive) && !ctx->isAcyclic) ||
+        !result)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot allocate message context");
         return false;
@@ -382,16 +406,13 @@ static MessageCtx* MessageCtxArray_FindMostExpired(void)
     MessageCtx_Array* messages = &pubSchedulerCtx.messages;
     MessageCtx* worse = NULL;
 
-    assert(messages->length > 0 && messages->current == messages->length);
+    SOPC_ASSERT(messages->length > 0 && messages->current == messages->length);
     for (size_t i = 0; i < messages->length; ++i)
     {
         MessageCtx* cursor = &messages->array[i];
-        if (!cursor->transport->isAcyclic)
+        if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
         {
-            if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
-            {
-                worse = cursor;
-            }
+            worse = cursor;
         }
     }
 
@@ -423,13 +444,13 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
      *  but we use this info for all the DSMs... -> TODO investigate
      */
 
-    assert(NULL != context);
+    SOPC_ASSERT(NULL != context);
     SOPC_Dataset_NetworkMessage* message = context->message;
     SOPC_WriterGroup* group = context->group;
-    assert(NULL != message && NULL != group);
+    SOPC_ASSERT(NULL != message && NULL != group);
 
     size_t nDsm = (size_t) SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
-    assert((size_t) SOPC_WriterGroup_Nb_DataSetWriter(group) == nDsm);
+    SOPC_ASSERT((size_t) SOPC_WriterGroup_Nb_DataSetWriter(group) == nDsm);
 
     bool typeCheckingSuccess = true;
 
@@ -441,10 +462,10 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
         uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
-        assert(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
+        SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
         SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dataset);
-        assert(NULL != values);
+        SOPC_ASSERT(NULL != values);
 
         /* Check value-type compatibility and encode */
         /* TODO: simplify and externalize the type check */
@@ -452,7 +473,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         {
             /* TODO: this function should take a size_t */
             SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, (uint16_t) iField);
-            assert(NULL != fieldData);
+            SOPC_ASSERT(NULL != fieldData);
             SOPC_DataValue* dv = &values[iField];
 
             bool isBad = false;
@@ -489,7 +510,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             /* TODO: avoid the creation of a Variant to delete it immediately,
              *  or change the behavior of Set_Variant_At because it is its sole use */
             SOPC_Variant* variant = SOPC_Variant_Create();
-            assert(NULL != variant);
+            SOPC_ASSERT(NULL != variant);
             SOPC_Variant_Move(variant, &dv->Value);
             /* TODO: this function should take a size_t */
             SOPC_NetworkMessage_Set_Variant_At(message, (uint8_t) iDsm, (uint16_t) iField, variant, fieldData);
@@ -510,7 +531,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (NULL != security)
         {
             security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
-            assert(NULL != security->msgNonceRandom); /* TODO: Fail sooner, don't call GetVariables */
+            SOPC_ASSERT(NULL != security->msgNonceRandom); /* TODO: Fail sooner, don't call GetVariables */
             security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
             pubSchedulerCtx.sequenceNumber++;
         }
@@ -529,6 +550,31 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     }
 }
 
+static void send_keepAlive_message(MessageCtx* context)
+{
+    SOPC_PubSub_SecurityType* security = context->security;
+    SOPC_Dataset_LL_NetworkMessage* message = context->messageKeepAlive;
+    if (NULL != security)
+    {
+        security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
+        SOPC_ASSERT(NULL != security->msgNonceRandom);
+        security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
+        pubSchedulerCtx.sequenceNumber++;
+    }
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+    if (NULL != security)
+    {
+        SOPC_Free(security->msgNonceRandom);
+        security->msgNonceRandom = NULL;
+    }
+
+    context->transport->mqttTopic = context->mqttTopic;
+
+    context->transport->pFctSend(context->transport, buffer);
+    SOPC_Buffer_Delete(buffer);
+    buffer = NULL;
+}
+
 static void* thread_start_publish(void* arg)
 {
     SOPC_UNUSED_ARG(arg);
@@ -536,31 +582,35 @@ static void* thread_start_publish(void* arg)
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
 
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
-    assert(NULL != now);
+    SOPC_RealTime* nextTimeout = SOPC_RealTime_Create(NULL);
+    SOPC_ASSERT(NULL != now);
     bool ok = true;
 
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
     {
         /* Wake-up: find which message(s) needs to be sent */
         ok = SOPC_RealTime_GetTime(now);
-        assert(ok && "Failed GetTime");
+        SOPC_ASSERT(ok && "Failed GetTime");
 
+        Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
         /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
-        /* There is no cyclic Publisher exit the thread */
-        if (NULL == context)
-        {
-            SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB,
-                                  "There is no cyclic publisher, Time-Sensitive publisher thread not needed");
-            break;
-        }
         if (SOPC_RealTime_IsExpired(context->next_timeout, now))
         {
-            MessageCtx_send_publish_message(context);
+            if (context->transport->isAcyclic)
+            {
+                send_keepAlive_message(context);
+                /* Re-schedule keep alive message */
+                SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
+            }
+            else
+            {
+                MessageCtx_send_publish_message(context);
+                /* Re-schedule this message */
+                SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
+                                                 context->publishingOffsetUs);
+            }
 
-            /* Re-schedule this message */
-            SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
-                                             context->publishingOffsetUs);
             if (SOPC_RealTime_IsExpired(context->next_timeout, now) && !context->warned)
             {
                 /* This message next publish cycle was already expired before we encoded the previous one */
@@ -571,18 +621,22 @@ static void* thread_start_publish(void* arg)
                                          SOPC_WriterGroup_Get_Id(context->group));
                 context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
             }
+            Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
         }
 
         /* Otherwise sleep until there is a message to send */
         else
         {
-            ok = SOPC_RealTime_SleepUntil(context->next_timeout);
-            assert(ok && "Failed NanoSleep");
+            SOPC_RealTime_Copy(context->next_timeout, nextTimeout);
+            Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+            ok = SOPC_RealTime_SleepUntil(nextTimeout);
+            SOPC_ASSERT(ok && "Failed NanoSleep");
         }
     }
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
     SOPC_RealTime_Delete(&now);
+    SOPC_RealTime_Delete(&nextTimeout);
 
     return NULL;
 }
@@ -906,11 +960,25 @@ static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
 
 bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
 {
+    bool result = true;
     MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
     if (NULL == ctx)
     {
-        return false;
+        result = false;
     }
-    MessageCtx_send_publish_message(ctx);
-    return true;
+    if (result)
+    {
+        result = SOPC_STATUS_OK == Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+        if (result)
+        {
+            result = SOPC_RealTime_GetTime(ctx->next_timeout);
+            if (result)
+            {
+                SOPC_RealTime_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
+                MessageCtx_send_publish_message(ctx);
+            }
+            result = SOPC_STATUS_OK == Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+        }
+    }
+    return result;
 }

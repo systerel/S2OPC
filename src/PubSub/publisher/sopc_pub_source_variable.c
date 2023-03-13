@@ -17,9 +17,9 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_source_variable.h"
 #include "sopc_pubsub_helpers.h"
@@ -56,7 +56,6 @@ SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariable
         return NULL;
     }
 
-    assert(SOPC_PublishedDataItemsDataType == SOPC_PublishedDataSet_Get_DataSet_SourceType(pubDataset));
     uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataset);
 
     OpcUa_ReadValueId* readValues = SOPC_Calloc(nbFieldsMetadata, sizeof(*readValues));
@@ -74,10 +73,10 @@ SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariable
         OpcUa_ReadValueId_Initialize(readValue);
 
         SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataset, i);
-        assert(NULL != fieldData);
+        SOPC_ASSERT(NULL != fieldData);
 
         SOPC_PublishedVariable* sourceData = SOPC_FieldMetaData_Get_PublishedVariable(fieldData);
-        assert(NULL != sourceData);
+        SOPC_ASSERT(NULL != sourceData);
 
         readValue->AttributeId = SOPC_PublishedVariable_Get_AttributeId(sourceData);
 

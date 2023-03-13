@@ -94,6 +94,7 @@
 #define ATTR_MESSAGE_GROUP_ID "groupId"
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
 #define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
+#define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
 #define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
@@ -144,6 +145,7 @@ struct sopc_xml_pubsub_message_t
     uint32_t groupVersion;
     char* mqttPublisherTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
+    double keepAliveTime;
 };
 
 struct sopc_xml_pubsub_connection_t
@@ -531,6 +533,10 @@ static bool parse_message_attributes(const char* attr_name,
     {
         result = copy_any_string_attribute_value(&msg->mqttPublisherTopic, attr_val);
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_KEEP_ALIVE, attr_name))
+    {
+        result = SOPC_strtodouble(attr_val, strlen(attr_val), sizeof(double) * 8, &msg->keepAliveTime);
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'message' attribute <%s>", attr_name);
@@ -545,7 +551,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     msg->security_mode = SOPC_SecurityMode_None;
     msg->publishing_interval = 0.0;
     msg->publishing_offset = -1;
-
+    msg->keepAliveTime = 0.0;
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
 
     if (result)
@@ -576,6 +582,11 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
             // A publisher connection shall NOT provide a message publisherId source (itself here)
             LOG_XML_ERROR("Message publisherId shall not be provided in a connection in publisher mode");
             result = false;
+        }
+        else if (msg->keepAliveTime <= 0.0 && ctx->connectionArr[ctx->nb_connections - 1].is_acyclic)
+        {
+            // An acyclic publisher shall provide a keep alive timer for all messages
+            LOG_XML_ERROR("Message keepAliveTime is missing");
         }
         else
         {
@@ -1022,10 +1033,14 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             // Publisher connection
             SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id);
             allocSuccess = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
-
+            SOPC_PublishedDataSetSourceType type = SOPC_PublishedDataItemsDataType;
             if (allocSuccess)
             {
                 SOPC_PubSubConnection_Set_AcyclicPublisher(connection, p_connection->is_acyclic);
+                if (p_connection->is_acyclic)
+                {
+                    type = SOPC_PublishedDataSetCustomSourceDataType;
+                }
             }
 
             for (uint16_t imsg = 0; imsg < p_connection->nb_messages && allocSuccess; imsg++)
@@ -1040,6 +1055,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_PublishingOffset(writerGroup, msg->publishing_offset);
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->groupVersion);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
+                SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
 
                 // Associate dataSet with writer
                 assert(msg->nb_datasets < 0x100);
@@ -1057,7 +1073,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_PublishedDataSet* pubDataSet =
                         SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, pubDataSetIndex);
                     pubDataSetIndex++;
-                    SOPC_PublishedDataSet_Init(pubDataSet, SOPC_PublishedDataItemsDataType, ds->nb_variables);
+                    SOPC_PublishedDataSet_Init(pubDataSet, type, ds->nb_variables);
 
                     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
                     assert(dataSetWriter != NULL);

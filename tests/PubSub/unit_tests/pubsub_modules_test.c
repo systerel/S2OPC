@@ -1202,7 +1202,7 @@ START_TEST(test_dataset_layer)
     ck_assert_ptr_nonnull(config);
     ck_assert_ptr_nonnull(group);
 
-    SOPC_Dataset_NetworkMessage* nm = SOPC_Create_NetworkMessage_From_WriterGroup(group);
+    SOPC_Dataset_NetworkMessage* nm = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
     ck_assert_ptr_nonnull(nm);
 
     SOPC_PublishedDataSet* pubDataSet = SOPC_PubSubConfiguration_Get_PublishedDataSet_At(config, 0);

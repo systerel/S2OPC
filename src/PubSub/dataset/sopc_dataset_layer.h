@@ -26,7 +26,7 @@
 typedef SOPC_Dataset_LL_NetworkMessage SOPC_Dataset_NetworkMessage;
 
 /* Create a NetworkMessage from a given configuration */
-SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_WriterGroup* group);
+SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_WriterGroup* group, bool isKeepAlive);
 
 void SOPC_Delete_NetworkMessage(SOPC_Dataset_NetworkMessage* nm);
 

@@ -54,6 +54,28 @@ typedef struct SOPC_Dataset_LL_PublisherId
     } data;
 } SOPC_Dataset_LL_PublisherId;
 
+typedef enum SOPC_DataSet_LL_DataSetMessageType
+{
+    DataSet_LL_MessageType_KeyFrame = 0x00,
+    DataSet_LL_MessageType_DeltaFrame = 0x01,
+    DataSet_LL_MessageType_Event = 0x02,
+    DataSet_LL_MessageType_KeepAlive = 0x03
+} SOPC_DataSet_LL_DataSetMessageType;
+
+typedef struct SOPC_UadpDataSetMessageContentMask
+{
+    bool NotValidFlag; // Inversed logic to allow default nominal behavior without init
+    uint8_t FieldEncoding;
+    bool DataSetMessageSequenceNumberFlag;
+    bool StatusFlag;
+    bool ConfigurationVersionMajorVersionFlag;
+    bool ConfigurationVersionMinorFlag;
+    bool DataSetFlags2;
+    SOPC_DataSet_LL_DataSetMessageType DataSetMessageType;
+    bool TimestampFlag;
+    bool PicoSecondsFlag;
+} SOPC_UadpDataSetMessageContentMask;
+
 /**
  * Header NetworkMessage
  */
@@ -141,6 +163,17 @@ void SOPC_Dataset_LL_DataSetMsg_Set_WriterId(SOPC_Dataset_LL_DataSetMessage* dsm
 
 // dataset writer id
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_WriterId(const SOPC_Dataset_LL_DataSetMessage* dsm);
+
+// Set UADP conf associated to the DSM
+void SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                SOPC_UadpDataSetMessageContentMask conf);
+
+// Get UADP conf associated to the DSM
+SOPC_UadpDataSetMessageContentMask* SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm);
+
+// dataset message type (default is Key Frame without DataSetFlags2 content mask)
+SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(
+    const SOPC_Dataset_LL_DataSetMessage* dsm);
 
 /**
  * Header DataSetField
