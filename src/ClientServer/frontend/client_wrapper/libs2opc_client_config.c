@@ -25,14 +25,14 @@
 static SOPC_GetPassword_Fct* FctGetClientKeyPassword = NULL;
 static SOPC_GetPassword_Fct* FctGetUserKeyPassword = NULL;
 
-static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC_GetPassword_Fct* getClientKeyPassword)
+static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC_GetPassword_Fct* getKeyPassword)
 {
     SOPC_ASSERT(NULL != destCb);
-    if (NULL == getClientKeyPassword)
+    if (NULL == getKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    *destCb = getClientKeyPassword;
+    *destCb = getKeyPassword;
     return SOPC_STATUS_OK;
 }
 
@@ -41,9 +41,9 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetP
     return SetPasswordCallback(&FctGetClientKeyPassword, getClientKeyPassword);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getUserKeyPassword)
 {
-    return SetPasswordCallback(&FctGetUserKeyPassword, getClientKeyPassword);
+    return SetPasswordCallback(&FctGetUserKeyPassword, getUserKeyPassword);
 }
 
 static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, const char* cbName, char** outPassword)

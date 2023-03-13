@@ -408,7 +408,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
                     if (!res)
                     {
                         Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                                    "Failed to retrieve the password of the client's private key from callback.");
+                                    "Failed to retrieve the password of the user private key from callback.");
                         status = SOPC_STATUS_NOK;
                     }
                 }
