@@ -284,7 +284,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
             }
             else
             {
-                printf("%s", SOPC_String_GetRawCString(&pPol->SecurityPolicyUri));
+                printf("%s\n", SOPC_String_GetRawCString(&pPol->SecurityPolicyUri));
                 if (strncmp(SOPC_String_GetRawCString(&pPol->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
                             strlen(SOPC_SecurityPolicy_None_URI)) == 0)
                 {
