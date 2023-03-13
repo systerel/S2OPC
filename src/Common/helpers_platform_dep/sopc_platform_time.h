@@ -176,6 +176,15 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date);
 SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy);
 
 /**
+ * @brief A copy of a non-NULL SOPC_RealTime structure
+ *
+ * @param from Pointer to the source
+ * @param to Pointer to the destination
+ * @return true succeed to copy contain
+ * @return false if \a from or \a to is NULL
+ */
+bool SOPC_RealTime_Copy(const SOPC_RealTime* from, SOPC_RealTime* to);
+/**
  * \brief Deletes a time reference.
  * \param t A reference returned by \a SOPC_RealTime_Create
  */

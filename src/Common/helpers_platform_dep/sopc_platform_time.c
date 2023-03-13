@@ -46,6 +46,17 @@ SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
     return ret;
 }
 
+/**********************************************************/
+bool SOPC_RealTime_Copy(const SOPC_RealTime* from, SOPC_RealTime* to)
+{
+    if (NULL == from || NULL == to)
+    {
+        return false;
+    }
+    *to = *from;
+    return true;
+}
+
 /***************************************************/
 void SOPC_RealTime_Delete(SOPC_RealTime** t)
 {
