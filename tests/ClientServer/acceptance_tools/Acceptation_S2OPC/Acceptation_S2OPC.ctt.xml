@@ -21807,7 +21807,7 @@
        <ItemData role="0" rolename="DisplayRole">
         <Value typename="QString" type="10" data="Test Tool"/>
        </ItemData>
-       <ChildRows size="6">
+       <ChildRows size="7">
         <Row row="0">
          <Column column="0">
           <ItemData role="0" rolename="DisplayRole">
@@ -22224,6 +22224,44 @@
          <Column column="5">
           <ItemData role="0" rolename="DisplayRole">
            <Value typename="int" type="2" data="0"/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+        </Row>
+        <Row row="6">
+         <Column column="0">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="QString" type="10" data="MaxNodeValidationsPerTestscript"/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+         <Column column="1">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="QString" type="10" data="100000"/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+         <Column column="2">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="QString" type="10" data="The maximum number of nodes that should be validated per test script. The setting is used e.g. in the Conformance Unit 'Base Info Type System'."/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+         <Column column="3">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="int" type="2" data="1"/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+         <Column column="4">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="int" type="2" data="0"/>
+          </ItemData>
+          <ChildRows size="0"/>
+         </Column>
+         <Column column="5">
+          <ItemData role="0" rolename="DisplayRole">
+           <Value typename="int" type="2" data="2"/>
           </ItemData>
           <ChildRows size="0"/>
          </Column>
