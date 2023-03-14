@@ -152,6 +152,7 @@ SOPC_Socket_AddressInfo* SOPC_Socket_GetPeerAddress(Socket sock)
     if (res != 0)
     {
         SOPC_Free(sockAddrStorage);
+        SOPC_Free(result);
         result = NULL;
     }
     return result;
@@ -187,10 +188,13 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
-    int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
-    if (0 != res)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_NOK;
+        int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
+        if (0 != res)
+        {
+            status = SOPC_STATUS_NOK;
+        }
     }
     if (SOPC_STATUS_OK != status)
     {
