@@ -56,7 +56,6 @@
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
   TEST_PASSWORD_PRIVATE_KEY : password
   TEST_PASSWORD_USER : password
-  LINUX_UACTT: 1
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
@@ -414,7 +413,7 @@ test-unit:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-linux@sha256:c876e9998e15e7b2af08a32dbc3e85b6e0304f6f3dd3f8632e00b9271d405e07 # digest of uactt-linux:1.3
+  image: com.systerel.fr:5000/c838/uactt-win@sha256:a663d6c02b303573cafbea3c4a5eb9fb23c861f3b7e75e2320221d59da391846 # digest of uactt-win:2.2
   script:
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:
