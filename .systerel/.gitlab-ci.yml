@@ -366,7 +366,7 @@ test-unit:
 
 .test-uactt: &test_uactt
   <<: *test_linux
-  image: com.systerel.fr:5000/c838/uactt-win@sha256:a663d6c02b303573cafbea3c4a5eb9fb23c861f3b7e75e2320221d59da391846 # digest of uactt-win:2.2
+  image: com.systerel.fr:5000/c838/uactt-linux@sha256:c876e9998e15e7b2af08a32dbc3e85b6e0304f6f3dd3f8632e00b9271d405e07 # digest of uactt-linux:1.3
   script:
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:
@@ -384,6 +384,7 @@ test-unit:
 test-uactt-all-tests:
   <<: *test_uactt
   variables:
+    LINUX_UACTT: 1
     TEST_PASSWORD_PRIVATE_KEY : password
   rules:
     - if: "$ALL_TESTS != null && \
@@ -395,6 +396,7 @@ test-uactt:
   <<: *test_uactt
   variables:
     <<: *nominal_test_variables
+    LINUX_UACTT: 1
   rules: # repeat .test-uactt variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
