@@ -98,7 +98,8 @@ void SOPC_Socket_AddrInfoDelete(SOPC_Socket_AddressInfo** addrs);
  *
  *  \param sock    The socket connected to a peer
  *
- *  \return        Address information element or NULL in case of error.
+ *  \return        The newly allocated peer socket address or NULL in case of error.
+ *                 Caller is responsible to free the result using ::SOPC_SocketAddress_Delete.
  */
 SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(Socket sock);
 
@@ -107,7 +108,8 @@ SOPC_Socket_Address* SOPC_Socket_GetPeerAddress(Socket sock);
  *
  * \param addr  The socket address information to copy into socket address structure
  *
- * \return      The socket address created from the \p addr or NULL in case of failures
+ * \return      The newly allocated socket address created from the \p addr or NULL in case of failures.
+ *              Caller is responsible to free the result using ::SOPC_SocketAddress_Delete.
  */
 SOPC_Socket_Address* SOPC_Socket_CopyAddress(SOPC_Socket_AddressInfo* addr);
 
