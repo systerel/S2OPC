@@ -408,6 +408,26 @@ LOCAL_OPERATIONS
     END
     ;
 
+    statusCode_operation <-- update_one_browse_path_source(source) =
+    PRE
+        source : t_NodeId_i &
+        source : t_NodeId
+    THEN
+        statusCode_operation,
+        BrowsePathSource
+        :(  statusCode_operation : t_StatusCode_i &
+            statusCode_operation : t_StatusCode   &
+            statusCode_operation : {e_sc_ok, e_sc_bad_out_of_memory} &
+
+            BrowsePathSource : seq(t_NodeId_i) &
+            (statusCode_operation = e_sc_ok =>
+                BrowsePathSource = BrowsePathSource$0 <- source) &
+            (statusCode_operation /= e_sc_ok =>
+                BrowsePathSource = BrowsePathSource$0)
+        )
+    END
+    ;
+
     statusCode_operation <-- checkAndAdd_BrowsePathResult(expandedNodeId) =
     PRE
         expandedNodeId : t_ExpandedNodeId_i &
@@ -750,13 +770,14 @@ LOCAL_OPERATIONS
     END
     ;
 
-    statusCode_operation <-- treat_one_translate_browse_path_1(statusCode_init, source) =
+    statusCode_operation <-- treat_one_translate_browse_path_1(source, rel_path) =
     PRE
         IsDecoded = TRUE &
-        statusCode_init : t_StatusCode_i &
-        statusCode_init : t_StatusCode   &
         source : t_NodeId_i &
-        source : t_NodeId
+        source : t_NodeId   &
+        rel_path : t_RelativePath_i &
+        rel_path : t_RelativePath   &
+        rel_path : dom(RelativePath_RelativePathElt)
     THEN
         statusCode_operation,
         BrowsePathSource,
@@ -851,16 +872,15 @@ OPERATIONS
     VAR
         l_statusCode_operation,
         l_statusCode_operation_2,
-        l_continue,
+        l_size_rel_path,
         l_relativePath,
-        l_source,
-        l_statusCode_init
+        l_source
     IN
         l_relativePath <-- read_BrowsePath_RelativePath(browsePath);
         l_source <-- read_BrowsePath_StartingNode(browsePath);
-        l_continue <-- init_iter_relativePath(l_relativePath);
+        l_size_rel_path <-- read_RelativePath_Nb_RelativePathElt(l_relativePath);
         l_statusCode_operation <-- check_startingNode(l_source);
-        IF l_continue = FALSE
+        IF (l_size_rel_path = 0)
         THEN
             // There is no element in the path
             write_BrowsePath_Res_StatusCode(browsePath, e_sc_bad_nothing_to_do)
@@ -868,9 +888,8 @@ OPERATIONS
         THEN
             write_BrowsePath_Res_StatusCode(browsePath, l_statusCode_operation)
         ELSE
-            l_statusCode_init := l_statusCode_operation;
             l_statusCode_operation <--
-                treat_one_translate_browse_path_1(l_statusCode_init, l_source);
+                treat_one_translate_browse_path_1(l_source, l_relativePath);
 
             IF l_statusCode_operation = e_sc_ok or
                 l_statusCode_operation = e_sc_uncertain_reference_out_of_server
@@ -1062,13 +1081,11 @@ OPERATIONS
         l_expandedNodeId,
         l_local_server,
         l_nodeId,
-        l_alloc,
         l_source_copy
     IN
         statusCode_operation := e_sc_ok;
         l_size <-- get_BrowsePathResultSize;
         l_continue <-- init_iter_browsePathSourceIdx(l_size);
-        l_alloc := FALSE;
         WHILE l_continue = TRUE
         DO
             l_continue, l_index <-- continue_iter_browsePathSourceIdx;
@@ -1077,12 +1094,10 @@ OPERATIONS
             THEN
                 l_local_server, l_nodeId <-- getall_conv_ExpandedNodeId_NodeId(l_expandedNodeId);
                 ASSERT l_local_server = TRUE THEN
-                    l_alloc, l_source_copy <-- copy_node_id_pointer_content (l_nodeId);
-                    IF l_alloc = TRUE THEN
-                        add_BrowsePathSource(l_source_copy)
-                    ELSE
+                    statusCode_operation <-- update_one_browse_path_source(l_nodeId);
+                    IF (statusCode_operation /= e_sc_ok)
+                    THEN
                         free_BrowsePathSource;
-                        statusCode_operation := e_sc_bad_out_of_memory;
                         l_continue := FALSE
                     END
                 END
@@ -1097,9 +1112,7 @@ OPERATIONS
             browsePathSourceIdx_iterated = 1 .. l_index            &
             browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
             nextBrowsePathSourceIdx = l_index + 1                  &
-            l_continue = bool(l_index < l_size)                    &
-
-            (l_alloc = FALSE => BrowsePathSource = {})
+            l_continue = bool(l_index < l_size)
 
         VARIANT
             0
@@ -1191,6 +1204,22 @@ OPERATIONS
         END
         ;
         init_BrowsePathSource
+    END
+    ;
+
+    statusCode_operation <-- update_one_browse_path_source(source) =
+    VAR
+        l_alloc,
+        l_source_copy
+    IN
+        statusCode_operation := c_StatusCode_indet;
+        l_alloc, l_source_copy <-- copy_node_id_pointer_content (source);
+        IF l_alloc = TRUE THEN
+            add_BrowsePathSource(l_source_copy);
+            statusCode_operation := e_sc_ok
+        ELSE
+            statusCode_operation := e_sc_bad_out_of_memory
+        END
     END
     ;
 
@@ -1508,52 +1537,50 @@ statusCode_operation <-- treat_browse_result_one_source_1(index, targetName, bro
     END
     ;
 
-    statusCode_operation <-- treat_one_translate_browse_path_1(statusCode_init, source) =
+    statusCode_operation <-- treat_one_translate_browse_path_1(source, rel_path) =
     VAR
         l_continue,
         l_continue_1,
         l_source_copy,
         l_index,
-        l_relativePathElt
+        l_relativePathElt,
+        l_statusCode
     IN
-        statusCode_operation := statusCode_init;
+        statusCode_operation <-- update_one_browse_path_source(source);
 
-        l_continue, l_source_copy <-- copy_node_id_pointer_content (source);
-        l_index := 0;
-        IF l_continue = TRUE THEN
-            add_BrowsePathSource(l_source_copy) /* copy the source in source sequence */
-        ELSE
-            statusCode_operation := e_sc_bad_out_of_memory
-        END
-        ;
+        IF (statusCode_operation = e_sc_ok)
+        THEN
+            l_continue <-- init_iter_relativePath(rel_path);
 
-        /* Iterate on element list of the path
-           - BrowsePathResult is reset at each step to keep only intermediate target
-           - BrowsePathRemainingNodeId/Index are cumulative
-           - Final target are last step BrowsePathResult + BrowsePathRemainingNodeId
-        */
-        WHILE l_continue = TRUE
-        DO
-            free_BrowsePathResult;
-            l_continue, l_relativePathElt, l_index <-- continue_iter_relativePath;
+            l_index := 0;
+            /* Iterate on element list of the path
+               - BrowsePathResult is reset at each step to keep only intermediate target
+               - BrowsePathRemainingNodeId/Index are cumulative
+               - Final target are last step BrowsePathResult + BrowsePathRemainingNodeId
+            */
+            WHILE l_continue = TRUE
+            DO
+                free_BrowsePathResult;
+                l_continue, l_relativePathElt, l_index <-- continue_iter_relativePath;
 
-            l_continue_1 := l_continue;
-            statusCode_operation, l_continue <--
-                treat_one_translate_browse_path_1_1(l_relativePathElt,
-                                                    l_index, l_continue_1)
-        INVARIANT
-            elements_to_iterate : seq(t_RelativePathElt)  &
-            elements_iterated   : seq(t_RelativePathElt)  &
-            elements_iterated ^ elements_to_iterate = relativePathEls &
+                l_continue_1 := l_continue;
+                statusCode_operation, l_continue <--
+                    treat_one_translate_browse_path_1_1(l_relativePathElt,
+                                                        l_index, l_continue_1)
+            INVARIANT
+                elements_to_iterate : seq(t_RelativePathElt)  &
+                elements_iterated   : seq(t_RelativePathElt)  &
+                elements_iterated ^ elements_to_iterate = relativePathEls &
 
-            l_continue = bool(size(elements_to_iterate) > 0 &
-                              (size(elements_iterated) = 0 or
-                               statusCode_operation = e_sc_ok ))     &
+                l_continue = bool(size(elements_to_iterate) > 0 &
+                                  (size(elements_iterated) = 0 or
+                                   statusCode_operation = e_sc_ok ))     &
 
-            d_inv_browse_result_out
+                d_inv_browse_result_out
 
-        VARIANT
-            card(elements_to_iterate)
+            VARIANT
+                card(elements_to_iterate)
+            END
         END
     END
     ;

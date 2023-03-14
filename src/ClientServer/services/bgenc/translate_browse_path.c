@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.c
 
- Date                 : 03/03/2023 14:14:03
+ Date                 : 23/07/2023 15:41:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,20 +69,19 @@ void translate_browse_path__treat_one_translate_browse_path(
    {
       constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_operation;
       constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_operation_2;
-      t_bool translate_browse_path__l_continue;
+      t_entier4 translate_browse_path__l_size_rel_path;
       constants__t_RelativePath_i translate_browse_path__l_relativePath;
       constants__t_NodeId_i translate_browse_path__l_source;
-      constants_statuscodes_bs__t_StatusCode_i translate_browse_path__l_statusCode_init;
       
       msg_translate_browse_path_bs__read_BrowsePath_RelativePath(translate_browse_path__browsePath,
          &translate_browse_path__l_relativePath);
       msg_translate_browse_path_bs__read_BrowsePath_StartingNode(translate_browse_path__browsePath,
          &translate_browse_path__l_source);
-      translate_browse_path_element_it__init_iter_relativePath(translate_browse_path__l_relativePath,
-         &translate_browse_path__l_continue);
+      msg_translate_browse_path_bs__read_RelativePath_Nb_RelativePathElt(translate_browse_path__l_relativePath,
+         &translate_browse_path__l_size_rel_path);
       translate_browse_path__check_startingNode(translate_browse_path__l_source,
          &translate_browse_path__l_statusCode_operation);
-      if (translate_browse_path__l_continue == false) {
+      if (translate_browse_path__l_size_rel_path == 0) {
          msg_translate_browse_path_bs__write_BrowsePath_Res_StatusCode(translate_browse_path__browsePath,
             constants_statuscodes_bs__e_sc_bad_nothing_to_do);
       }
@@ -91,9 +90,8 @@ void translate_browse_path__treat_one_translate_browse_path(
             translate_browse_path__l_statusCode_operation);
       }
       else {
-         translate_browse_path__l_statusCode_init = translate_browse_path__l_statusCode_operation;
-         translate_browse_path__treat_one_translate_browse_path_1(translate_browse_path__l_statusCode_init,
-            translate_browse_path__l_source,
+         translate_browse_path__treat_one_translate_browse_path_1(translate_browse_path__l_source,
+            translate_browse_path__l_relativePath,
             &translate_browse_path__l_statusCode_operation);
          if ((translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||
             (translate_browse_path__l_statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
@@ -293,14 +291,11 @@ void translate_browse_path__copy_browsePathResult_to_source(
       constants__t_ExpandedNodeId_i translate_browse_path__l_expandedNodeId;
       t_bool translate_browse_path__l_local_server;
       constants__t_NodeId_i translate_browse_path__l_nodeId;
-      t_bool translate_browse_path__l_alloc;
-      constants__t_NodeId_i translate_browse_path__l_source_copy;
       
       *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_ok;
       translate_browse_path_1__get_BrowsePathResultSize(&translate_browse_path__l_size);
       translate_browse_path_source_it__init_iter_browsePathSourceIdx(translate_browse_path__l_size,
          &translate_browse_path__l_continue);
-      translate_browse_path__l_alloc = false;
       while (translate_browse_path__l_continue == true) {
          translate_browse_path_source_it__continue_iter_browsePathSourceIdx(&translate_browse_path__l_continue,
             &translate_browse_path__l_index);
@@ -310,15 +305,10 @@ void translate_browse_path__copy_browsePathResult_to_source(
             constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path__l_expandedNodeId,
                &translate_browse_path__l_local_server,
                &translate_browse_path__l_nodeId);
-            node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__l_nodeId,
-               &translate_browse_path__l_alloc,
-               &translate_browse_path__l_source_copy);
-            if (translate_browse_path__l_alloc == true) {
-               translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
-            }
-            else {
+            translate_browse_path__update_one_browse_path_source(translate_browse_path__l_nodeId,
+               translate_browse_path__statusCode_operation);
+            if (*translate_browse_path__statusCode_operation != constants_statuscodes_bs__e_sc_ok) {
                translate_browse_path__free_BrowsePathSource();
-               *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
                translate_browse_path__l_continue = false;
             }
          }
@@ -391,6 +381,27 @@ void translate_browse_path__free_BrowsePathSource(void) {
          node_id_pointer_bs__free_node_id_pointer(translate_browse_path__l_nodeId);
       }
       translate_browse_path_1__init_BrowsePathSource();
+   }
+}
+
+void translate_browse_path__update_one_browse_path_source(
+   const constants__t_NodeId_i translate_browse_path__source,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
+   {
+      t_bool translate_browse_path__l_alloc;
+      constants__t_NodeId_i translate_browse_path__l_source_copy;
+      
+      *translate_browse_path__statusCode_operation = constants_statuscodes_bs__c_StatusCode_indet;
+      node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__source,
+         &translate_browse_path__l_alloc,
+         &translate_browse_path__l_source_copy);
+      if (translate_browse_path__l_alloc == true) {
+         translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
+         *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_ok;
+      }
+      else {
+         *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+      }
    }
 }
 
@@ -682,38 +693,33 @@ void translate_browse_path__treat_browse_result_one_source(
 }
 
 void translate_browse_path__treat_one_translate_browse_path_1(
-   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_init,
    const constants__t_NodeId_i translate_browse_path__source,
+   const constants__t_RelativePath_i translate_browse_path__rel_path,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation) {
    {
       t_bool translate_browse_path__l_continue;
       t_bool translate_browse_path__l_continue_1;
-      constants__t_NodeId_i translate_browse_path__l_source_copy;
       t_entier4 translate_browse_path__l_index;
       constants__t_RelativePathElt_i translate_browse_path__l_relativePathElt;
       
-      *translate_browse_path__statusCode_operation = translate_browse_path__statusCode_init;
-      node_id_pointer_bs__copy_node_id_pointer_content(translate_browse_path__source,
-         &translate_browse_path__l_continue,
-         &translate_browse_path__l_source_copy);
-      translate_browse_path__l_index = 0;
-      if (translate_browse_path__l_continue == true) {
-         translate_browse_path_1__add_BrowsePathSource(translate_browse_path__l_source_copy);
-      }
-      else {
-         *translate_browse_path__statusCode_operation = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-      }
-      while (translate_browse_path__l_continue == true) {
-         translate_browse_path__free_BrowsePathResult();
-         translate_browse_path_element_it__continue_iter_relativePath(&translate_browse_path__l_continue,
-            &translate_browse_path__l_relativePathElt,
-            &translate_browse_path__l_index);
-         translate_browse_path__l_continue_1 = translate_browse_path__l_continue;
-         translate_browse_path__treat_one_translate_browse_path_1_1(translate_browse_path__l_relativePathElt,
-            translate_browse_path__l_index,
-            translate_browse_path__l_continue_1,
-            translate_browse_path__statusCode_operation,
+      translate_browse_path__update_one_browse_path_source(translate_browse_path__source,
+         translate_browse_path__statusCode_operation);
+      if (*translate_browse_path__statusCode_operation == constants_statuscodes_bs__e_sc_ok) {
+         translate_browse_path_element_it__init_iter_relativePath(translate_browse_path__rel_path,
             &translate_browse_path__l_continue);
+         translate_browse_path__l_index = 0;
+         while (translate_browse_path__l_continue == true) {
+            translate_browse_path__free_BrowsePathResult();
+            translate_browse_path_element_it__continue_iter_relativePath(&translate_browse_path__l_continue,
+               &translate_browse_path__l_relativePathElt,
+               &translate_browse_path__l_index);
+            translate_browse_path__l_continue_1 = translate_browse_path__l_continue;
+            translate_browse_path__treat_one_translate_browse_path_1_1(translate_browse_path__l_relativePathElt,
+               translate_browse_path__l_index,
+               translate_browse_path__l_continue_1,
+               translate_browse_path__statusCode_operation,
+               &translate_browse_path__l_continue);
+         }
       }
    }
 }

@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 03/03/2023 14:14:03
+ Date                 : 23/07/2023 15:41:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -154,8 +154,8 @@ extern void translate_browse_path__treat_one_relative_path_element_2(
    const constants__t_QualifiedName_i translate_browse_path__targetName,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_translate_browse_path_1(
-   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__statusCode_init,
    const constants__t_NodeId_i translate_browse_path__source,
+   const constants__t_RelativePath_i translate_browse_path__rel_path,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_translate_browse_path_1_1(
    const constants__t_RelativePathElt_i translate_browse_path__rel_path_elt,
@@ -163,6 +163,9 @@ extern void translate_browse_path__treat_one_translate_browse_path_1_1(
    const t_bool translate_browse_path__continue,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation,
    t_bool * const translate_browse_path__p_continue);
+extern void translate_browse_path__update_one_browse_path_source(
+   const constants__t_NodeId_i translate_browse_path__source,
+   constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 
 /*--------------------
    OPERATIONS Clause
