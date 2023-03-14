@@ -53,7 +53,7 @@ version="2.0">
 </xsl:text></xsl:when>
 <xsl:when test="starts-with($testresult, '5')">Ok|<xsl:value-of select="regex-group(1)" />|<xsl:value-of select="$description"/><xsl:text>
 </xsl:text></xsl:when>
-<xsl:when test="starts-with($testresult, '6')"><xsl:message>Unsupported testresult code <xsl:value-of select="regex-group(1)"/> for test <xsl:value-of select="$testname"/> </xsl:message></xsl:when>
+<xsl:when test="starts-with($testresult, '6')"><xsl:message>Unsupported testresult code <xsl:value-of select="regex-group(1)"/> for test <xsl:value-of select="$testname"/>: <xsl:value-of select="$description"/> </xsl:message></xsl:when>
         </xsl:choose>
         </xsl:matching-substring>
     </xsl:analyze-string><xsl:text/>
