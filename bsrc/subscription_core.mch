@@ -452,12 +452,12 @@ OPERATIONS
         p_subscription : s_subscription &
         p_pubEnabled : BOOL
     THEN
-        IF p_pubEnabled = TRUE
-        THEN
-            a_PublishingEnabled := a_PublishingEnabled \/ {p_subscription}
-        ELSE
-            a_PublishingEnabled := a_PublishingEnabled - {p_subscription}
-        END
+        /* Transition #19 */
+        a_PublishingEnabled,
+        a_MoreNotifications
+        :((p_pubEnabled = TRUE => a_PublishingEnabled = a_PublishingEnabled \/ {p_subscription}) &
+          (p_pubEnabled = FALSE => a_PublishingEnabled = a_PublishingEnabled - {p_subscription}) &
+           a_MoreNotifications = a_MoreNotifications$0 - {p_subscription})
     END
     ;
 
