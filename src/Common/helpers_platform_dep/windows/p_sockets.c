@@ -190,7 +190,8 @@ SOPC_ReturnStatus SOPC_SocketAddress_GetNameInfo(const SOPC_Socket_AddressInfo* 
     }
     if (SOPC_STATUS_OK == status)
     {
-        int res = getnameinfo(addr->ai_addr, addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV, flags);
+        int res = getnameinfo(addr->ai_addr, (socklen_t) addr->ai_addrlen, hostRes, NI_MAXHOST, serviceRes, NI_MAXSERV,
+                              flags);
         if (0 != res)
         {
             status = SOPC_STATUS_NOK;
