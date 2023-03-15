@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 07/11/2022 10:15:37
+ Date                 : 15/03/2023 14:35:32
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -553,6 +553,7 @@ void subscription_core__modify_subscription(
       subscription_core_1__set_subscription_MaxLifetimeAndKeepAliveCount(subscription_core__p_subscription,
          subscription_core__p_revLifetimeCount,
          subscription_core__p_revMaxKeepAlive);
+      subscription_core_1__reset_subscription_LifetimeCounter(subscription_core__p_subscription);
       subscription_core_1__set_subscription_MaxNotifsPerPublish(subscription_core__p_subscription,
          subscription_core__p_revMaxNotifPerPublish);
       subscription_core_1__get_subscription_timer_id(subscription_core__p_subscription,

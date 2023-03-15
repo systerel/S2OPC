@@ -432,6 +432,15 @@ OPERATIONS
     END
     ;
 
+    reset_subscription_LifetimeCounter (p_subscription) =
+    PRE
+        p_subscription : t_subscription_i &
+        p_subscription : dom(a_LifetimeCounter)
+    THEN
+        a_LifetimeCounter(p_subscription) := a_lifetimeExpCount(p_subscription)
+    END
+    ;
+
     /* To be used if is_session_still_activated (p_subscription) == FALSE
        since requests will not be valid anymore on another SC */
     empty_session_publish_requests (p_subscription) =
@@ -454,10 +463,14 @@ OPERATIONS
     THEN
         /* Transition #19 */
         a_PublishingEnabled,
-        a_MoreNotifications
+        a_MoreNotifications,
+        a_LifetimeCounter
         :((p_pubEnabled = TRUE => a_PublishingEnabled = a_PublishingEnabled \/ {p_subscription}) &
           (p_pubEnabled = FALSE => a_PublishingEnabled = a_PublishingEnabled - {p_subscription}) &
-           a_MoreNotifications = a_MoreNotifications$0 - {p_subscription})
+          a_MoreNotifications = a_MoreNotifications$0 - {p_subscription} &
+          {p_subscription} <<| a_LifetimeCounter = {p_subscription} <<| a_LifetimeCounter$0 &
+          a_LifetimeCounter (p_subscription) = a_lifetimeExpCount(p_subscription)
+        )
     END
     ;
 
@@ -591,7 +604,8 @@ OPERATIONS
         a_publishInterval (p_subscription) := p_revPublishInterval ||
         a_lifetimeExpCount (p_subscription) := p_revLifetimeCount  ||
         a_keepAliveExpCount (p_subscription) := p_revMaxKeepAlive  ||
-        a_maxNotifsPerPublish (p_subscription) := p_revMaxNotifPerPublish
+        a_maxNotifsPerPublish (p_subscription) := p_revMaxNotifPerPublish ||
+        a_LifetimeCounter (p_subscription) := p_revLifetimeCount
     END
     ;
 

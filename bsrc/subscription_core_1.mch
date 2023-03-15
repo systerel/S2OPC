@@ -433,10 +433,14 @@ OPERATIONS
     THEN
         /* Transition #19 */
         a_PublishingEnabled,
-        a_MoreNotifications
+        a_MoreNotifications,
+        a_LifetimeCounter
         :((p_pubEnabled = TRUE => a_PublishingEnabled = a_PublishingEnabled \/ {p_subscription}) &
           (p_pubEnabled = FALSE => a_PublishingEnabled = a_PublishingEnabled - {p_subscription}) &
-           a_MoreNotifications = a_MoreNotifications$0 - {p_subscription})
+          a_MoreNotifications = a_MoreNotifications$0 - {p_subscription} &
+          {p_subscription} <<| a_LifetimeCounter = {p_subscription} <<| a_LifetimeCounter$0 &
+          a_LifetimeCounter (p_subscription) = a_lifetimeExpCount(p_subscription)
+        )
     END
     ;
 

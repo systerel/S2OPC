@@ -1522,6 +1522,7 @@ OPERATIONS
         THEN
             l_republishQueue <-- get_subscription_notifRepublishQueue (l_session_sub);
             l_bres, l_notifMsg <-- get_republish_notif_from_queue (l_republishQueue, l_seq_num);
+            reset_subscription_LifetimeCounter (l_session_sub);
             IF l_bres = TRUE
             THEN
                 StatusCode_service <-- setall_msg_republish_response (p_resp_msg, l_notifMsg)
@@ -1551,6 +1552,7 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
+                reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_create_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
@@ -1585,6 +1587,7 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
+                reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_modify_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
@@ -1616,6 +1619,7 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
+                reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_delete_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
@@ -1648,6 +1652,7 @@ OPERATIONS
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
             IF l_valid_subscription = TRUE
             THEN
+                reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_set_monit_mode_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN

@@ -50,6 +50,7 @@ PROMOTES
     is_valid_subscription,
     getall_subscription,
     getall_session,
+    reset_subscription_LifetimeCounter,
     set_subscription_PublishingEnabled,
     get_subscription_notifRepublishQueue,
     /* subscription_core_bs */
@@ -847,6 +848,7 @@ OPERATIONS
     IN
         set_subscription_publishInterval (p_subscription, p_revPublishInterval);
         set_subscription_MaxLifetimeAndKeepAliveCount (p_subscription, p_revLifetimeCount, p_revMaxKeepAlive);
+        reset_subscription_LifetimeCounter (p_subscription);
         set_subscription_MaxNotifsPerPublish (p_subscription, p_revMaxNotifPerPublish);
         l_timerId <-- get_subscription_timer_id (p_subscription);
         modify_publish_timer_period (l_timerId, p_revPublishInterval)

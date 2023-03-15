@@ -335,7 +335,8 @@ OPERATIONS
     set_subscription_PublishingEnabled (p_subscription, p_pubEnabled) =
     BEGIN
         a_PublishingEnabled_i(p_subscription) := p_pubEnabled;
-        a_MoreNotifications_i(p_subscription) := FALSE
+        a_MoreNotifications_i(p_subscription) := FALSE;
+        a_LifetimeCounter_i(p_subscription) := a_lifetimeExpCount_i(p_subscription)
     END
     ;
 

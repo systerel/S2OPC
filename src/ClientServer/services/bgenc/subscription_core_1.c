@@ -21,7 +21,7 @@
 
  File Name            : subscription_core_1.c
 
- Date                 : 15/03/2023 11:01:29
+ Date                 : 15/03/2023 14:35:31
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -363,6 +363,7 @@ void subscription_core_1__set_subscription_PublishingEnabled(
    const t_bool subscription_core_1__p_pubEnabled) {
    subscription_core_1__a_PublishingEnabled_i[subscription_core_1__p_subscription] = subscription_core_1__p_pubEnabled;
    subscription_core_1__a_MoreNotifications_i[subscription_core_1__p_subscription] = false;
+   subscription_core_1__a_LifetimeCounter_i[subscription_core_1__p_subscription] = subscription_core_1__a_lifetimeExpCount_i[subscription_core_1__p_subscription];
 }
 
 void subscription_core_1__get_subscription_PublishingEnabled(

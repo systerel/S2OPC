@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 14/02/2023 10:44:16
+ Date                 : 15/03/2023 14:35:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1056,6 +1056,7 @@ void subscription_mgr__treat_subscription_republish_request(
             subscription_mgr__l_seq_num,
             &subscription_mgr__l_bres,
             &subscription_mgr__l_notifMsg);
+         subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_session_sub);
          if (subscription_mgr__l_bres == true) {
             msg_subscription_publish_ack_bs__setall_msg_republish_response(subscription_mgr__p_resp_msg,
                subscription_mgr__l_notifMsg,
@@ -1096,6 +1097,7 @@ void subscription_mgr__treat_subscription_create_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
+            subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_create_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
@@ -1149,6 +1151,7 @@ void subscription_mgr__treat_subscription_modify_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
+            subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_modify_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
@@ -1194,6 +1197,7 @@ void subscription_mgr__treat_subscription_delete_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
+            subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_delete_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
@@ -1241,6 +1245,7 @@ void subscription_mgr__treat_subscription_set_monit_mode_monitored_items_req(
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
          if (subscription_mgr__l_valid_subscription == true) {
+            subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_set_monit_mode_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
