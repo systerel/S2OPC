@@ -19,9 +19,18 @@
 
 #include "sopc_filesystem.h"
 
+#include <dirent.h>
 #include <errno.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include "sopc_assert.h"
+#include "sopc_enums.h"
+#include "sopc_helper_string.h"
+#include "sopc_mem_alloc.h"
+
+#define STR_MARGIN_SIZE 4
 
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 {
@@ -78,6 +87,159 @@ SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
     {
         return SOPC_FileSystem_Remove_Error_UnknownIssue;
     }
+}
+
+static SOPC_ReturnStatus get_file_path(const char* pDirectoryPath, const char* pFileName, char** ppFilePath)
+{
+    SOPC_ASSERT(NULL != pDirectoryPath && NULL != pFileName && NULL != ppFilePath);
+
+    /* Retrieve the file path */
+    size_t sizeFilePath = strlen(pDirectoryPath) + strlen(pFileName) + STR_MARGIN_SIZE;
+    char* pFilePath = SOPC_Calloc(sizeFilePath, sizeof(char));
+    SOPC_ReturnStatus status = NULL != pFilePath ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    if (SOPC_STATUS_OK == status)
+    {
+        int res = snprintf(pFilePath, sizeFilePath, "%s/%s", pDirectoryPath, pFileName);
+        status = 0 <= res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    /* clear if error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pFilePath);
+        pFileName = NULL;
+    }
+    /* set result */
+    *ppFilePath = pFilePath;
+    return status;
+}
+
+static SOPC_ReturnStatus is_regular_file(const char* pFilePath, bool* result)
+{
+    *result = true;
+    /* Get informations about the current file */
+    struct stat info = {0};
+    int res = stat(pFilePath, &info);
+    SOPC_ReturnStatus status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    /* Only keep rugular file => avoid dir, fifo, link ...*/
+    if (SOPC_STATUS_OK == status)
+    {
+        if (!S_ISREG(info.st_mode))
+        {
+            *result = false;
+        }
+    }
+    return status;
+}
+
+static void SOPC_Free_CstringFromPtr(void* data)
+{
+    if (NULL != data)
+    {
+        SOPC_Free(*(char**) data);
+    }
+}
+
+/* if isName is set to True then ppFileInfos is an array of names else of paths. */
+static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPath,
+                                                        SOPC_Array** ppFileInfos,
+                                                        const bool bIsName)
+{
+    SOPC_Array* pFileInfos = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    DIR* d = NULL;
+    struct dirent* dir = {0};
+    char* pFilePath = NULL;
+    char* pFileName = NULL;
+    bool bIsRegular = false;
+    bool bResAppend = false;
+
+    d = opendir(directoryPath);
+    if (NULL == d)
+    {
+        return SOPC_FileSystem_GetDir_Error_PathInvalid;
+    }
+    /* Read before while */
+    dir = readdir(d);
+    /* Create the array to store the informations */
+    pFileInfos = SOPC_Array_Create(sizeof(char*), 0, SOPC_Free_CstringFromPtr);
+    if (NULL == pFileInfos)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    while (NULL != dir && SOPC_STATUS_OK == status)
+    {
+        /* Retrieve the file path */
+        status = get_file_path(directoryPath, dir->d_name, &pFilePath);
+        if (SOPC_STATUS_OK == status)
+        {
+            /* We don't want sub folders! Is it a regular file? */
+            status = is_regular_file(pFilePath, &bIsRegular);
+        }
+        /* Only keep rugular file */
+        if (!bIsRegular && SOPC_STATUS_OK == status)
+        {
+            /* Next iteration */
+            SOPC_Free(pFilePath);
+            dir = readdir(d);
+            continue;
+        }
+        /* Append the fileName or the filePath to the array */
+        if (SOPC_STATUS_OK == status)
+        {
+            if (bIsName)
+            {
+                pFileName = SOPC_strdup(dir->d_name);
+                bResAppend = SOPC_Array_Append(pFileInfos, pFileName);
+                SOPC_Free(pFilePath); // We do not need filePath anymore and have to freed it.
+            }
+            else
+            {
+                bResAppend = SOPC_Array_Append(pFileInfos, pFilePath);
+            }
+            status = bResAppend ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
+        /* Next iteration */
+        dir = readdir(d);
+    }
+    /* Clore after while */
+    closedir(d);
+    /* Clear */
+    if (SOPC_STATUS_OK != status)
+    {
+        /* Clear */
+        SOPC_Free(pFilePath); // in case of append error
+        SOPC_Free(pFileName); // in case of append error
+        SOPC_Array_Delete(pFileInfos);
+        *ppFileInfos = NULL;
+        return SOPC_FileSystem_GetDir_Error_UnknownIssue;
+    }
+
+    *ppFileInfos = pFileInfos;
+    return SOPC_FileSystem_GetDir_OK;
+}
+
+SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFileNames(const char* directoryPath, SOPC_Array** ppFileNames)
+{
+    if (NULL == directoryPath || NULL == ppFileNames)
+    {
+        return SOPC_FileSystem_GetDir_Error_InvalidParameters;
+    }
+
+    SOPC_FileSystem_GetDirResult res = get_dir_files_infos(directoryPath, ppFileNames, true);
+
+    return res;
+}
+
+SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directoryPath, SOPC_Array** ppFilePaths)
+{
+    if (NULL == directoryPath || NULL == ppFilePaths)
+    {
+        return SOPC_FileSystem_GetDir_Error_InvalidParameters;
+    }
+
+    SOPC_FileSystem_GetDirResult res = get_dir_files_infos(directoryPath, ppFilePaths, false);
+
+    return res;
 }
 
 FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype)

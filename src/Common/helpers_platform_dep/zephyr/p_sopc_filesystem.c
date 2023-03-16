@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include "sopc_assert.h"
 #include "sopc_filesystem.h"
 
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
@@ -27,4 +28,19 @@ SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
 {
     return SOPC_FileSystem_Creation_Error_UnknownIssue;
+}
+
+SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFileNames(const char* directoryPath, SOPC_Array** ppFileNames)
+{
+    (void) directoryPath;
+    (void) ppFileNames;
+    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+    return SOPC_FileSystem_Creation_OK;
+}
+SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directoryPath, SOPC_Array** ppFilePaths)
+{
+    (void) directoryPath;
+    (void) ppFilePaths;
+    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+    return SOPC_FileSystem_Creation_OK;
 }
