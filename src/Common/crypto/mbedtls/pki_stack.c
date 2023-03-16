@@ -751,10 +751,10 @@ static SOPC_ReturnStatus get_path(const char* pBasePath, const char* pSubPath, c
 static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
                                                       SOPC_CertificateList** ppCerts,
                                                       SOPC_CRLList** ppCrl,
-                                                      bool is_crl)
+                                                      bool bIscrl)
 {
     SOPC_ASSERT(NULL != basePath);
-    if (is_crl)
+    if (bIscrl)
     {
         SOPC_ASSERT(NULL != ppCrl && NULL == ppCerts);
     }
@@ -762,70 +762,51 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
     {
         SOPC_ASSERT(NULL == ppCrl && NULL != ppCerts);
     }
-
-    DIR* d = NULL;
-    struct dirent* dir = {0};
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_CertificateList* certs = NULL;
-    SOPC_CRLList* crl = NULL;
-
-    d = opendir(basePath);
-    if (NULL == d)
+    SOPC_Array* pFilePaths = NULL;
+    SOPC_CertificateList* pCerts = NULL;
+    SOPC_CRLList* pCrl = NULL;
+    char* pFilePath = NULL;
+    /* Get the array of path from basePath */
+    SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(basePath, &pFilePaths);
+    if (SOPC_FileSystem_GetDir_OK != dirRes)
     {
         fprintf(stderr, "> PKI creation error: failed to open directory <%s>.\n", basePath);
-        status = SOPC_STATUS_NOK;
+        return SOPC_STATUS_NOK;
     }
-
-    if (SOPC_STATUS_OK == status)
+    /* Get the size and iterate for each item */
+    size_t nbFiles = SOPC_Array_Size(pFilePaths);
+    for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
-        char* file_path = NULL;
-        int res = 0;
-        while (NULL != (dir = readdir(d)) && SOPC_STATUS_OK == status)
+        pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
+        fprintf(stderr, "> PKI loading file <%s>\n", pFilePath);
+        if (bIscrl)
         {
-            res = strcmp(dir->d_name, ".");
-            if (0 == res)
-            {
-                continue;
-            }
-
-            res = strcmp(dir->d_name, "..");
-            if (0 == res)
-            {
-                continue;
-            }
-            status = get_path(basePath, dir->d_name, &file_path);
-            if (SOPC_STATUS_OK == status)
-            {
-                fprintf(stderr, "> PKI loading file <%s>\n", file_path);
-                if (is_crl)
-                {
-                    status = SOPC_KeyManager_CRL_CreateOrAddFromFile(file_path, &crl);
-                }
-                else
-                {
-                    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(file_path, &certs);
-                }
-            }
-            else
-            {
-                SOPC_KeyManager_Certificate_Free(certs);
-                SOPC_KeyManager_CRL_Free(crl);
-            }
-            SOPC_Free(file_path);
-            file_path = NULL;
+            /* Load CRL */
+            status = SOPC_KeyManager_CRL_CreateOrAddFromFile(pFilePath, &pCrl);
         }
-        closedir(d);
+        else
+        {
+            /* Load CERT */
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(pFilePath, &pCerts);
+        }
     }
-
-    if (is_crl)
+    /* Clear in case of error */
+    if (SOPC_STATUS_OK != status)
     {
-        *ppCrl = crl;
+        SOPC_KeyManager_Certificate_Free(pCerts);
+        SOPC_KeyManager_CRL_Free(pCrl);
+    }
+    if (bIscrl)
+    {
+        *ppCrl = pCrl;
     }
     else
     {
-        *ppCerts = certs;
+        *ppCerts = pCerts;
     }
-
+    /* Always clear */
+    SOPC_Array_Delete(pFilePaths);
     return status;
 }
 
