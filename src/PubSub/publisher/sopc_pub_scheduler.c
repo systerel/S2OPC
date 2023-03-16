@@ -21,6 +21,7 @@
 #include <inttypes.h>
 
 #include "p_time.h"
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
@@ -94,6 +95,7 @@ typedef struct MessageCtx
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
     SOPC_Dataset_NetworkMessage* message;
     SOPC_Dataset_NetworkMessage* messageKeepAlive;
+    uint16_t writerMessageSequence; /* TODO add a context by dataSetWriter in writer group when several possible */
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
@@ -262,6 +264,7 @@ static void MessageCtx_Array_Clear(void)
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].messageKeepAlive);
             arr[i].messageKeepAlive = NULL;
             SOPC_PubSub_Security_Clear(arr[i].security);
+            arr[i].writerMessageSequence = 0;
             SOPC_Free(arr[i].security);
             arr[i].security = NULL;
             SOPC_RealTime_Delete(&arr[i].next_timeout);
@@ -318,6 +321,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->warned = false;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
     context->messageKeepAlive = NULL; // by default NULL and set only if publsiher is acyclic
+    context->writerMessageSequence = 1;
     context->next_timeout = SOPC_RealTime_Create(NULL);
 
     bool result = true;
@@ -460,6 +464,10 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
         const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, (uint8_t) iDsm);
 
+        // TODO: manage several writers SNs (only 1 writer by group for now)
+        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, context->writerMessageSequence);
+        context->writerMessageSequence++;
+
         uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
         SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
@@ -554,6 +562,18 @@ static void send_keepAlive_message(MessageCtx* context)
 {
     SOPC_PubSub_SecurityType* security = context->security;
     SOPC_Dataset_LL_NetworkMessage* message = context->messageKeepAlive;
+    SOPC_WriterGroup* group = context->group;
+
+    size_t nDsm = (size_t) SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
+    SOPC_ASSERT((size_t) SOPC_WriterGroup_Nb_DataSetWriter(group) == nDsm);
+
+    for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
+    {
+        SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
+        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, context->writerMessageSequence);
+        context->writerMessageSequence++;
+    }
+
     if (NULL != security)
     {
         security->msgNonceRandom = SOPC_PubSub_Security_Random(security->provider);
@@ -561,6 +581,7 @@ static void send_keepAlive_message(MessageCtx* context)
         security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
         pubSchedulerCtx.sequenceNumber++;
     }
+
     SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
     if (NULL != security)
     {

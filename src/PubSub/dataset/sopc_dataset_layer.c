@@ -26,7 +26,7 @@
 // TODO: Most of those flags should be configurable in the future (once encoder supports all cases)
 const uint8_t DATASET_DSM_ENCODING_TYPE = 0;          // Only 0 supported
 const bool DATASET_DSM_IS_VALID = true;               // Only true supported
-const bool DATASET_DSM_SEQ_NUMBER_ENABLED = false;    // Only False supported
+const bool DATASET_DSM_SEQ_NUMBER_ENABLED = true;    // True or False supported
 const bool DATASET_DSM_STATUS_ENABLED = false;        //  Only false supported
 const bool DATASET_DSM_MAJOR_VERSION_ENABLED = false; // Only false supported
 const bool DATASET_DSM_MINOR_VERSION_ENABLED = false; // Only false supported

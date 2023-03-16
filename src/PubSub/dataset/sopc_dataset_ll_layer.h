@@ -175,6 +175,10 @@ SOPC_UadpDataSetMessageContentMask* SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(S
 SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(
     const SOPC_Dataset_LL_DataSetMessage* dsm);
 
+// dataset message sequence number
+void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn);
+uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm);
+
 /**
  * Header DataSetField
  */

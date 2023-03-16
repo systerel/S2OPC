@@ -925,7 +925,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
     setTargetVariablesCb_ReaderTest_nbVal = 0;
-    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL);
+    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -943,7 +943,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // Change PUBLISHER ID and check that message has not been fully parsed.
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, NETWORK_MSG_PUBLISHER_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
@@ -959,7 +959,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // WRONG DATA SET WRITER ID on second DSM
     SOPC_DataSetReader_Set_DataSetWriterId(dsr[1], DATASET_MSG_WRITER_ID_BASE - 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
@@ -975,7 +975,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // WRONG DATA SET WRITER ID on first DSM
     SOPC_DataSetReader_Set_DataSetWriterId(dsr[0], DATASET_MSG_WRITER_ID_BASE - 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1010,7 +1010,7 @@ START_TEST(test_subscriber_reader_layer)
 
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
-    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1023,7 +1023,7 @@ START_TEST(test_subscriber_reader_layer)
     // Change PUBLISHER ID and check that message has not been fully parsed.
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, NETWORK_MSG_PUBLISHER_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
@@ -1037,7 +1037,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP ID
     SOPC_ReaderGroup_Set_GroupId(readerGroup, NETWORK_MSG_GROUP_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
@@ -1051,7 +1051,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP VERSION
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, NETWORK_MSG_GROUP_VERSION + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
@@ -1065,7 +1065,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG DATA SET WRITER ID
     SOPC_DataSetReader_Set_DataSetWriterId(*dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingReader, code);
@@ -1081,7 +1081,7 @@ START_TEST(test_subscriber_reader_layer)
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, NETWORK_MSG_GROUP_VERSION + 1);
     SOPC_DataSetReader_Set_DataSetWriterId(*dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL);
+    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     code = SOPC_UADP_NetworkMessage_Get_Last_Error();
     ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);

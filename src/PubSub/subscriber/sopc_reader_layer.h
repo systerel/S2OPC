@@ -32,11 +32,13 @@
  * \param buffer : data to decode
  * \param config : configuration to provide to the target module which consumes the decoded data
  * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
+ * \param snCBck : function to check if sequence number receive is newer or not
  */
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
                                         SOPC_SubTargetVariableConfig* config,
-                                        SOPC_UADP_GetSecurity_Func securityCBck);
+                                        SOPC_UADP_GetSecurity_Func securityCBck,
+                                        SOPC_UADP_Is_Writer_SN_Newer_Func snCBck);
 
 /**
  * Return default reception filtering functions.

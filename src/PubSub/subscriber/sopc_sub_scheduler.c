@@ -17,11 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
+
 #include <inttypes.h>
 #include <stdbool.h>
 
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_eth_sockets.h"
@@ -143,6 +144,32 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 
 // END SUBSCRIBER SECURITY CONTEXT
 
+/**
+ * Initialize data related to a DataSetWriter (relative to a publisher).
+ * If already initialize, ignore the initialization.
+ */
+static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId);
+
+// DataSetWriter context
+typedef struct SOPC_SubScheduler_Writer_Ctx
+{
+    SOPC_Conf_PublisherId pubId;
+    uint16_t writerId;
+    bool dataSetMessageSequenceNumberSet;
+    uint16_t dataSetMessageSequenceNumber;
+} SOPC_SubScheduler_Writer_Ctx;
+
+/*
+ * Returns true if the sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and received sequence
+ * number. False otherwise, in this case either the sequence number is older, invalid or the tuple (PublisherId,
+ * DataSetWriterId) unknown.
+ */
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pubId,
+                                                 const uint16_t writerId,
+                                                 const uint16_t receivedSN);
+// End of data set writer context
+
+
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
 
 /* Transport context. One per connection */
@@ -206,6 +233,10 @@ static struct
     // One element by publisher id : actually same key and same group for all module
     // TODO future version, it should contain one element per (publisherid, tokenid)
     SOPC_Array* securityCtx;
+
+    /* DataSetWriters context (current sequence number).
+     * DataSetWriter is uniquely identified by PublisherId + DataSetWriterId (see §6.2.4.1)*/
+    SOPC_Array* writerCtx;
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
 
@@ -225,7 +256,8 @@ static struct
                   .nbMqttTransportContext = 0,
                   .sockArray = NULL,
 
-                  .securityCtx = NULL};
+                  .securityCtx = NULL,
+                  .writerCtx = NULL};
 
 static void set_new_state(SOPC_PubSubState new)
 {
@@ -277,7 +309,7 @@ static void on_socket_message_received(void* pInputIdentifier, Socket sock);
  */
 static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
-    assert(NULL != pInputIdentifier);
+    SOPC_ASSERT(NULL != pInputIdentifier);
 
     if (schedulerCtx.receptionBufferMQTT != NULL && size < SOPC_PUBSUB_BUFFER_SIZE)
     {
@@ -298,7 +330,7 @@ static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputI
 
 static void on_socket_message_received(void* pInputIdentifier, Socket sock)
 {
-    assert(NULL != pInputIdentifier);
+    SOPC_ASSERT(NULL != pInputIdentifier);
     SOPC_SubScheduler_TransportCtx* transportCtx = pInputIdentifier;
     SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(schedulerCtx.receptionBufferSockets, 0);
     if (SOPC_STATUS_OK != status)
@@ -321,7 +353,7 @@ static void on_socket_message_received(void* pInputIdentifier, Socket sock)
         }
         break;
     default:
-        assert(false && "Unexpected protocol for reception on socket");
+        SOPC_ASSERT(false && "Unexpected protocol for reception on socket");
         break;
     }
 
@@ -349,7 +381,7 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
     {
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
          *  random bytes found on the network */
-        result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos);
+        result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos, SOPC_SubScheduler_Is_Writer_SN_Newer);
 
         if (SOPC_STATUS_ENCODING_ERROR == result)
         {
@@ -410,6 +442,8 @@ static void uninit_sub_scheduler_ctx(void)
     SOPC_Array_Delete(schedulerCtx.securityCtx);
 
     schedulerCtx.securityCtx = NULL;
+    SOPC_Array_Delete(schedulerCtx.writerCtx);
+    schedulerCtx.writerCtx = NULL;
 }
 
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
@@ -417,7 +451,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                                 SOPC_SubscriberStateChanged_Func* pStateChangedCb)
 {
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
-    assert(nb_connections > 0);
+    SOPC_ASSERT(nb_connections > 0);
 
     bool result = true;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -458,6 +492,18 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
         }
     }
 
+    if (result)
+    {
+        schedulerCtx.writerCtx =
+            SOPC_Array_Create(sizeof(SOPC_SubScheduler_Writer_Ctx), SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER, NULL);
+
+        result = (NULL != schedulerCtx.writerCtx);
+        if (!result)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
     for (uint32_t iIter = 0; iIter < nb_connections && result; iIter++)
     {
@@ -466,7 +512,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
         if (SOPC_Null_PublisherId == pubId->type)
         {
-            assert(SOPC_PubSubConnection_Nb_WriterGroup(connection) == 0);
+            SOPC_ASSERT(SOPC_PubSubConnection_Nb_WriterGroup(connection) == 0);
             // SOPC_Null_PublisherId pubId => Subscriber connection case
 
             uint16_t nbReaderGroups = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
@@ -621,6 +667,13 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                 {
                     SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
                     SOPC_SubScheduler_Add_Security_Ctx(group);
+                    uint8_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
+                    const SOPC_Conf_PublisherId* dsmPubId = SOPC_ReaderGroup_Get_PublisherId(group);
+                    for(uint8_t r_i = 0; r_i < nbReaders; r_i++)
+                    {
+                        SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group,r_i);
+                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId,SOPC_DataSetReader_Get_DataSetWriterId(reader));
+                    }
                 }
             }
         }
@@ -629,7 +682,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     if (false == result)
     {
         uninit_sub_scheduler_ctx();
-        assert(SOPC_STATUS_OK != status);
+        SOPC_ASSERT(SOPC_STATUS_OK != status);
     }
 
     return status;
@@ -667,7 +720,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
         SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb);
         if (SOPC_STATUS_OK == status)
         {
-            assert(schedulerCtx.nbConnections <= UINT16_MAX);
+            SOPC_ASSERT(schedulerCtx.nbConnections <= UINT16_MAX);
             // Run the socket manager with the context
             if (0 < schedulerCtx.nbSockets)
             {
@@ -700,7 +753,7 @@ void SOPC_SubScheduler_Stop(void)
     }
 
     // true because isStarted is false
-    assert(schedulerCtx.nbConnections > 0);
+    SOPC_ASSERT(schedulerCtx.nbConnections > 0);
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, true);
     SOPC_Sub_SocketsMgr_Clear();
     set_new_state(SOPC_PubSubState_Disabled);
@@ -718,8 +771,8 @@ void SOPC_SubScheduler_Stop(void)
 */
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
 {
-    assert(0 < schedulerCtx.nbSockets);
-    assert(NULL == schedulerCtx.sockArray);
+    SOPC_ASSERT(0 < schedulerCtx.nbSockets);
+    SOPC_ASSERT(NULL == schedulerCtx.sockArray);
 
     uint16_t nb_socket = schedulerCtx.nbSockets;
     schedulerCtx.sockArray = SOPC_Calloc(nb_socket, sizeof(*schedulerCtx.sockArray));
@@ -745,7 +798,7 @@ static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
         }
     }
 
-    assert(nb_socket == sockIdx);
+    SOPC_ASSERT(nb_socket == sockIdx);
     SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
                                    schedulerCtx.sockArray, nb_socket, on_socket_message_received, NULL, NULL,
                                    threadPriority);
@@ -784,7 +837,7 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ct
         return NULL;
     }
     // only Integer publisher id is managed
-    assert(SOPC_UInteger_PublisherId == pubId.type);
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
     // get keys
     size_t size = SOPC_Array_Size(schedulerCtx.securityCtx);
     for (size_t i = 0; i < size; i++)
@@ -822,7 +875,7 @@ static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t t
 
 static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
 {
-    assert(NULL != group);
+    SOPC_ASSERT(NULL != group);
     if (SOPC_SecurityMode_Invalid == SOPC_ReaderGroup_Get_SecurityMode(group) ||
         SOPC_SecurityMode_None == SOPC_ReaderGroup_Get_SecurityMode(group))
     {
@@ -830,11 +883,11 @@ static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group)
         return;
     }
 
-    assert(NULL != schedulerCtx.securityCtx);
+    SOPC_ASSERT(NULL != schedulerCtx.securityCtx);
 
     // Create a new sub security context for each publisher id managed by this reader group
     const SOPC_Conf_PublisherId* pubId = SOPC_ReaderGroup_Get_PublisherId(group);
-    assert(NULL != pubId); // Reader without publisher id are not managed
+    SOPC_ASSERT(NULL != pubId); // Reader without publisher id are not managed
 
     // check the publisher id is already registered.
     SOPC_SubScheduler_Security_Pub_Ctx* pubCtx =
@@ -894,11 +947,11 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Creat
         return NULL;
     }
     // Init Key
-    assert(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
+    SOPC_ASSERT(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
     ctx->writerGroupId = writerGroupId;
 
     // Init Security Infos
-    assert(SOPC_SecurityMode_Invalid != mode && SOPC_SecurityMode_None != mode);
+    SOPC_ASSERT(SOPC_SecurityMode_Invalid != mode && SOPC_SecurityMode_None != mode);
     ctx->security.mode = mode;
     ctx->security.sequenceNumber = 0;
     ctx->security.groupKeys = SOPC_LocalSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, 0);
@@ -916,13 +969,13 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
     SOPC_SubScheduler_Security_Pub_Ctx* pubCtx,
     uint16_t writerGroupId)
 {
-    assert(NULL != pubCtx);
+    SOPC_ASSERT(NULL != pubCtx);
     size_t size = SOPC_Array_Size(pubCtx->readers);
     for (size_t i = 0; i < size; i++)
     {
         SOPC_SubScheduler_Security_Reader_Ctx* readerCtx =
             SOPC_Array_Get(pubCtx->readers, SOPC_SubScheduler_Security_Reader_Ctx*, i);
-        assert(NULL != readerCtx);
+        SOPC_ASSERT(NULL != readerCtx);
         if (readerCtx->writerGroupId == writerGroupId)
         {
             return readerCtx;
@@ -933,7 +986,7 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 
 static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(const SOPC_Conf_PublisherId* pubId)
 {
-    assert(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
+    SOPC_ASSERT(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
 
     SOPC_SubScheduler_Security_Pub_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_SubScheduler_Security_Pub_Ctx));
     if (NULL == ctx)
@@ -950,4 +1003,92 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
         ctx = NULL;
     }
     return ctx;
+}
+
+static bool Is_UInt32_Sequence_Number_Newer(uint32_t received, uint32_t processed)
+{
+    // See Spec OPC UA Part 14 - Table 133
+    // NetworkMessages the following formula shall be used:
+    // (4294967295 + received sequence number – last processed sequence number) modulo 4294967296.
+    // Results below 1073741824 indicate that the received NetworkMessages is newer than
+    // the last processed NetworkMessages...
+    // Results above 3221225472 indicate that the received message is older (or same) than
+    // the last processed NetworkMessages...
+    // Other results are invalid...
+    uint64_t max_uint32 = UINT32_MAX;
+    uint64_t diff = max_uint32 + received - processed;
+    uint64_t res = diff % (max_uint32 + 1);
+    if (1073741824 > res)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId)
+{
+    // only Integer publisher id is managed
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId->type);
+
+    bool found = false;
+    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
+    for (size_t i = 0; i < size && !found; i++)
+    {
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        if (ctx->pubId.type == pubId->type && ctx->pubId.data.uint == pubId->data.uint && ctx->writerId == writerId)
+        {
+            found = true;
+        }
+    }
+    if (!found)
+    {
+        SOPC_SubScheduler_Writer_Ctx ctx;
+        ctx.pubId = *pubId;
+        ctx.writerId = writerId;
+        ctx.dataSetMessageSequenceNumberSet = false;
+        ctx.dataSetMessageSequenceNumber = 0;
+        bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
+        SOPC_ASSERT(res);
+    }
+}
+
+// Returns true if the sequence number is newer
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pubId,
+                                                 const uint16_t writerId,
+                                                 const uint16_t receivedSN)
+{
+    // only Integer publisher id is managed
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
+
+    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
+    for (size_t i = 0; i < size; i++)
+    {
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        if (ctx->pubId.type == pubId.type && ctx->pubId.data.uint == pubId.data.uint && ctx->writerId == writerId)
+        {
+            if (ctx->dataSetMessageSequenceNumberSet)
+            {
+                if (Is_UInt32_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+                {
+                    ctx->dataSetMessageSequenceNumber = receivedSN;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                ctx->dataSetMessageSequenceNumber = receivedSN;
+                ctx->dataSetMessageSequenceNumberSet = true;
+                return true;
+            }
+        }
+    }
+    // (PubId, WriterId) tuple not configured as expected in Subscriber
+    return false;
 }

@@ -39,6 +39,7 @@ struct SOPC_Dataset_LL_DataSetMessage
     SOPC_Dataset_LL_DataSetField* dataset_fields;
     uint16_t dataset_fields_length;
     uint16_t dataset_writer_id;
+    uint16_t dataset_message_sequence_number;
 };
 
 typedef struct Dataset_LL_Group
@@ -334,6 +335,16 @@ SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(co
             return dsm->conf.FieldEncoding;
         }
     }
+}
+
+void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn)
+{
+    dsm->dataset_message_sequence_number = sn;
+}
+
+uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    return dsm->dataset_message_sequence_number;
 }
 
 /**

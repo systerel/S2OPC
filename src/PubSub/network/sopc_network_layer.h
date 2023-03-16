@@ -24,6 +24,7 @@
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
+#include "sopc_pubsub_conf.h"
 
 // TODO: use security mode instead of security enabled
 // TODO: remove SOPC_UADP_NetworkMessage_Get_Last_Error and provide a call-specific return value
@@ -32,6 +33,19 @@ typedef struct SOPC_UADP_Network_Message
 {
     SOPC_Dataset_LL_NetworkMessage* nm;
 } SOPC_UADP_NetworkMessage;
+
+/**
+ * \brief Function used to check if a DataSetMessage sequence number is newer for the identified DataSetWriter.
+ *
+ * \param pubId       the publisher id associated to the DataSetWriter
+ * \param writerId    the DataSetWriter id
+ * \param receivedSN  the dataset message sequence number
+ *
+ */
+typedef bool (*SOPC_UADP_Is_Writer_SN_Newer_Func)(const SOPC_Conf_PublisherId pubId,
+                                                  const uint16_t writerId,
+                                                  const uint16_t receivedSN);
+
 
 /**
  * \brief Encode a NetworkMessage with UADP Mapping
@@ -111,6 +125,7 @@ typedef struct
 {
     SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
     SOPC_UADP_GetSecurity_Func* pGetSecurity_Func;
+    SOPC_UADP_Is_Writer_SN_Newer_Func checkDataSetMessageSN_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 
@@ -121,6 +136,7 @@ typedef struct
 
  * \param reader_config The configuration for message parsing/filtering
  * \param connection The related connection
+ *
  *
  * \return a pointer to a new network message (must be freed by caller) if decoding succeeded and led
  *          to at least 1 variable update.
@@ -153,6 +169,7 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed,
     SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed,
     SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed,
     SOPC_UADP_NetworkMessage_Error_Write_EncryptPaylod_Failed,
     SOPC_UADP_NetworkMessage_Error_Write_PayloadFlush_Failed,
     SOPC_UADP_NetworkMessage_Error_Write_Sign_Failed,
@@ -170,6 +187,8 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSkip_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNumCheck_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_InvalidBit,
     SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed,
     SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed,

@@ -103,7 +103,7 @@ const bool DATASET_LL_SEQUENCE_NUMBER_ENABLED = false;
 
 const uint8_t DATASET_LL_DSM_ENCODING_TYPE = 0; // Must include 1 shift bit.
 const bool DATASET_LL_DSM_IS_VALID = true;
-const bool DATASET_LL_DSM_SEQ_NUMBER_ENABLED = false;
+const bool DATASET_LL_DSM_SEQ_NUMBER_ENABLED = true;
 const bool DATASET_LL_DSM_STATUS_ENABLED = false;
 const bool DATASET_LL_DSM_MAJOR_VERSION_ENABLED = false;
 const bool DATASET_LL_DSM_MINOR_VERSION_ENABLED = false;
@@ -649,7 +649,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
         //   - sequence number is enabled
         Network_Message_Set_Bool_Bit(&byte, 3, conf->DataSetMessageSequenceNumberFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_SEQ_NUMBER_ENABLED == conf->DataSetMessageSequenceNumberFlag && "No DSM SN allowed");
+        SOPC_ASSERT(DATASET_LL_DSM_SEQ_NUMBER_ENABLED == conf->DataSetMessageSequenceNumberFlag && "DSM SN allowed");
 
         //   - status
         Network_Message_Set_Bool_Bit(&byte, 4, conf->StatusFlag);
@@ -689,6 +689,14 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
             status = SOPC_Buffer_Write(buffer_payload, (uint8_t*) &byte, 1);
             check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
+        }
+
+        // DataSetMessage Sequence Number
+        if (conf->DataSetMessageSequenceNumberFlag)
+        {
+            uint16_t dsmSN = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm);
+            status = SOPC_UInt16_Write(&dsmSN, buffer_payload, 0);
+            check_status_and_set_default(status,SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed);
         }
 
         // If message is not a keep alive type, encode data fields
@@ -792,7 +800,9 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
  */
 static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* dsm,
                                                SOPC_Buffer* buffer_payload,
-                                               uint16_t dsmSize)
+                                               uint16_t dsmSize,
+                                               SOPC_Conf_PublisherId pubId,
+                                               const SOPC_UADP_NetworkMessage_Reader_Configuration* readerConf)
 {
     SOPC_ASSERT(NULL != buffer_payload);
     SOPC_ASSERT(NULL != dsm);
@@ -863,14 +873,33 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
             }
         }
     }
-
     /** DataSetMessage SequenceNumber **/
     if (dsm_conf->DataSetMessageSequenceNumberFlag && SOPC_STATUS_OK == status)
     {
-        // not managed yet
-        uint16_t notUsed;
-        status = SOPC_UInt16_Read(&notUsed, buffer_payload, 0);
-        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum);
+        uint16_t dsmSN = 0;
+        status = SOPC_UInt16_Read(&dsmSN, buffer_payload, 0);
+        check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed);
+        if(SOPC_STATUS_OK == status)
+        {
+            if(NULL != readerConf->checkDataSetMessageSN_Func && readerConf->checkDataSetMessageSN_Func(pubId,SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm),dsmSN)) // UNFINISHED COME BACK
+            {
+                SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm,dsmSN);
+            }
+            else
+            {
+                /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
+                 */
+                uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+                if (writerId)
+                {
+                    /* If subscriber don't meet configuration or is not newer still decode dataSetMessage */
+                    if (readerConf->checkDataSetMessageSN_Func(pubId, writerId, dsmSN))
+                    {
+                        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmSN);
+                    }
+                }
+            }
+        }
     }
 
     /** Timestamp **/
@@ -1437,7 +1466,10 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
         const SOPC_DataSetReader* reader = dsmReaders[i];
         if (NULL != reader)
         {
-            status = decode_dataSetMessage(dsm, buffer_payload, size);
+            status = decode_dataSetMessage(
+                dsm, buffer_payload, size,
+                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), readerConf);
+
             if (SOPC_STATUS_OK == status)
             {
                 status = readerConf->callbacks.pSetDsm_Func(dsm, readerConf->targetConfig, reader);

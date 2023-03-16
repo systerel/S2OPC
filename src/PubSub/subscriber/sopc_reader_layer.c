@@ -85,11 +85,13 @@ const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Defau
 SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
                                         SOPC_SubTargetVariableConfig* config,
-                                        SOPC_UADP_GetSecurity_Func securityCBck)
+                                        SOPC_UADP_GetSecurity_Func securityCBck,
+                                        SOPC_UADP_Is_Writer_SN_Newer_Func snCBck)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = securityCBck,
+        .checkDataSetMessageSN_Func = snCBck,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .targetConfig = config};
     SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
