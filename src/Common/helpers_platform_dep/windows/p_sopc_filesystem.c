@@ -85,23 +85,13 @@ static SOPC_ReturnStatus get_file_path(const char* pDirectoryPath, const char* p
 {
     SOPC_ASSERT(NULL != pDirectoryPath && NULL != pFileName && NULL != ppFilePath);
 
-    /* Retrieve the file path */
-    size_t sizeFilePath = strlen(pDirectoryPath) + strlen(pFileName) + STR_MARGIN_SIZE;
-    char* pFilePath = SOPC_Calloc(sizeFilePath, sizeof(char));
-    SOPC_ReturnStatus status = NULL != pFilePath ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    char* tmp = NULL;
+    SOPC_ReturnStatus status = SOPC_StrConcat(pDirectoryPath, "/", &tmp);
     if (SOPC_STATUS_OK == status)
     {
-        int res = snprintf(pFilePath, sizeFilePath, "%s/%s", pDirectoryPath, pFileName);
-        status = 0 <= res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        status = SOPC_StrConcat(tmp, pFileName, ppFilePath);
     }
-    /* clear if error */
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Free(pFilePath);
-        pFileName = NULL;
-    }
-    /* set result */
-    *ppFilePath = pFilePath;
+    SOPC_Free(tmp);
     return status;
 }
 
@@ -139,7 +129,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
     bool bResAppend = false;
 
     char* winPath = NULL;
-    status = get_file_path(directoryPath, "\\*", &winPath);
+    status = SOPC_StrConcat(directoryPath, "\\*", &winPath);
     if (SOPC_STATUS_OK != status)
     {
         return SOPC_FileSystem_GetDir_Error_UnknownIssue;

@@ -30,8 +30,6 @@
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
-#define STR_MARGIN_SIZE 4
-
 SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath)
 {
     int res = mkdir(directoryPath, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -93,23 +91,13 @@ static SOPC_ReturnStatus get_file_path(const char* pDirectoryPath, const char* p
 {
     SOPC_ASSERT(NULL != pDirectoryPath && NULL != pFileName && NULL != ppFilePath);
 
-    /* Retrieve the file path */
-    size_t sizeFilePath = strlen(pDirectoryPath) + strlen(pFileName) + STR_MARGIN_SIZE;
-    char* pFilePath = SOPC_Calloc(sizeFilePath, sizeof(char));
-    SOPC_ReturnStatus status = NULL != pFilePath ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    char* tmp = NULL;
+    SOPC_ReturnStatus status = SOPC_StrConcat(pDirectoryPath, "/", &tmp);
     if (SOPC_STATUS_OK == status)
     {
-        int res = snprintf(pFilePath, sizeFilePath, "%s/%s", pDirectoryPath, pFileName);
-        status = 0 <= res ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        status = SOPC_StrConcat(tmp, pFileName, ppFilePath);
     }
-    /* clear if error */
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Free(pFilePath);
-        pFileName = NULL;
-    }
-    /* set result */
-    *ppFilePath = pFilePath;
+    SOPC_Free(tmp);
     return status;
 }
 

@@ -701,12 +701,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
 /* ****************************************************************** */
 /* ************************* NEW API ******************************** */
-
-#include "dirent.h"
 #include "sopc_assert.h"
 #include "sopc_filesystem.h"
-
-#define STR_MARGIN_SIZE 5
+#include "sopc_helper_string.h"
 
 /**
  * \brief The PKIProvider object for the Public Key Infrastructure.
@@ -722,31 +719,6 @@ struct SOPC_PKIProviderNew
     SOPC_CertificateList* pIssuerRoots;
     SOPC_CRLList* pIssuerCrl;
 };
-
-static SOPC_ReturnStatus get_path(const char* pBasePath, const char* pSubPath, char** ppOutPath)
-{
-    SOPC_ASSERT(NULL != pBasePath && NULL != pSubPath);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    size_t size_path = strlen(pBasePath) + strlen(pSubPath) + STR_MARGIN_SIZE;
-    char* pOutPath = SOPC_Calloc(size_path, sizeof(char));
-    if (NULL == pOutPath)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    int res = snprintf(pOutPath, size_path, "%s/%s", pBasePath, pSubPath);
-    if (0 > res)
-    {
-        SOPC_Free(pOutPath);
-        pOutPath = NULL;
-        status = SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    *ppOutPath = pOutPath;
-
-    return status;
-}
 
 static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
                                                       SOPC_CertificateList** ppCerts,
@@ -820,7 +792,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
                 NULL != ppIssuerCrl);
     /* Trusted Certs */
     char* trustedCertsPath = NULL;
-    SOPC_ReturnStatus status = get_path(basePath, "trusted/certs", &trustedCertsPath);
+    SOPC_ReturnStatus status = SOPC_StrConcat(basePath, "/trusted/certs", &trustedCertsPath);
     if (SOPC_STATUS_OK == status)
     {
         status = load_certificate_or_crl_list(trustedCertsPath, ppTrustedCerts, NULL, false);
@@ -830,7 +802,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     if (SOPC_STATUS_OK == status)
     {
         char* trustedCrlPath = NULL;
-        status = get_path(basePath, "trusted/crl", &trustedCrlPath);
+        status = SOPC_StrConcat(basePath, "/trusted/crl", &trustedCrlPath);
         if (SOPC_STATUS_OK == status)
         {
             status = load_certificate_or_crl_list(trustedCrlPath, NULL, ppTrustedCrl, true);
@@ -841,7 +813,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     if (SOPC_STATUS_OK == status)
     {
         char* issuerCertsPath = NULL;
-        status = get_path(basePath, "issuers/certs", &issuerCertsPath);
+        status = SOPC_StrConcat(basePath, "/issuers/certs", &issuerCertsPath);
         if (SOPC_STATUS_OK == status)
         {
             status = load_certificate_or_crl_list(issuerCertsPath, ppIssuerCerts, NULL, false);
@@ -852,7 +824,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     if (SOPC_STATUS_OK == status)
     {
         char* issuerCrlPath = NULL;
-        status = get_path(basePath, "issuers/crl", &issuerCrlPath);
+        status = SOPC_StrConcat(basePath, "/issuers/crl", &issuerCrlPath);
         if (SOPC_STATUS_OK == status)
         {
             status = load_certificate_or_crl_list(issuerCrlPath, NULL, ppIssuerCrl, true);
@@ -1270,7 +1242,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
     /* Select the rigth folder*/
     if (bDefaultBuild)
     {
-        status = get_path(directoryStorePath, "default", &path);
+        status = SOPC_StrConcat(directoryStorePath, "/default", &path);
         if (SOPC_STATUS_OK != status)
         {
             return status;
@@ -1279,7 +1251,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
     }
     else
     {
-        status = get_path(directoryStorePath, "trustList", &path);
+        status = SOPC_StrConcat(directoryStorePath, "/trustList", &path);
         if (SOPC_STATUS_OK != status)
         {
             return status;

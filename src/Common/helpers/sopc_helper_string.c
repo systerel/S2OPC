@@ -23,11 +23,14 @@
 #include <errno.h>
 #include <float.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h> /* strtoul */
 #include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
+
+#define STR_MARGIN_SIZE 5
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 {
@@ -402,4 +405,31 @@ char* SOPC_strdup(const char* s)
 
     memcpy(res, s, len * sizeof(char));
     return res;
+}
+
+SOPC_ReturnStatus SOPC_StrConcat(const char* left, const char* right, char** str)
+{
+    if (NULL == left || NULL == right || NULL == str)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    size_t size_path = strlen(left) + strlen(right) + STR_MARGIN_SIZE;
+    char* pOut = SOPC_Calloc(size_path, sizeof(char));
+    if (NULL == pOut)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    int res = snprintf(pOut, size_path, "%s%s", left, right);
+    if (0 > res)
+    {
+        SOPC_Free(pOut);
+        pOut = NULL;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    *str = pOut;
+    return status;
 }
