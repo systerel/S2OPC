@@ -696,7 +696,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         {
             uint16_t dsmSN = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm);
             status = SOPC_UInt16_Write(&dsmSN, buffer_payload, 0);
-            check_status_and_set_default(status,SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed);
+            check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed);
         }
 
         // If message is not a keep alive type, encode data fields
@@ -879,11 +879,11 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
         uint16_t dsmSN = 0;
         status = SOPC_UInt16_Read(&dsmSN, buffer_payload, 0);
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed);
-        if(SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status)
         {
-            if(NULL != readerConf->checkDataSetMessageSN_Func && readerConf->checkDataSetMessageSN_Func(pubId,SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm),dsmSN)) // UNFINISHED COME BACK
+            if (NULL == readerConf->checkDataSetMessageSN_Func)
             {
-                SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm,dsmSN);
+                /* Reader don't check SequenceNumber */
             }
             else
             {

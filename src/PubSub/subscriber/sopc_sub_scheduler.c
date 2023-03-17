@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 #include <inttypes.h>
 #include <stdbool.h>
 
@@ -169,7 +168,6 @@ static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pub
                                                  const uint16_t receivedSN);
 // End of data set writer context
 
-
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
 
 /* Transport context. One per connection */
@@ -237,6 +235,11 @@ static struct
     /* DataSetWriters context (current sequence number).
      * DataSetWriter is uniquely identified by PublisherId + DataSetWriterId (see §6.2.4.1)*/
     SOPC_Array* writerCtx;
+
+    /* Callback to notify gaps in received DataSetMessage sequence number
+     * (only when received is newer regarding part 14 definition)*/
+    SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCallback;
+
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
 
@@ -257,7 +260,8 @@ static struct
                   .sockArray = NULL,
 
                   .securityCtx = NULL,
-                  .writerCtx = NULL};
+                  .writerCtx = NULL,
+                  .dsmSnGapCallback = NULL};
 
 static void set_new_state(SOPC_PubSubState new)
 {
@@ -381,7 +385,8 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
     {
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
          *  random bytes found on the network */
-        result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos, SOPC_SubScheduler_Is_Writer_SN_Newer);
+        result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos,
+                                       SOPC_SubScheduler_Is_Writer_SN_Newer);
 
         if (SOPC_STATUS_ENCODING_ERROR == result)
         {
@@ -444,11 +449,13 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.securityCtx = NULL;
     SOPC_Array_Delete(schedulerCtx.writerCtx);
     schedulerCtx.writerCtx = NULL;
+    schedulerCtx.dsmSnGapCallback = NULL;
 }
 
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
                                                 SOPC_SubTargetVariableConfig* targetConfig,
-                                                SOPC_SubscriberStateChanged_Func* pStateChangedCb)
+                                                SOPC_SubscriberStateChanged_Func* pStateChangedCb,
+                                                SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb)
 {
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
     SOPC_ASSERT(nb_connections > 0);
@@ -459,6 +466,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     schedulerCtx.config = config;
     schedulerCtx.targetConfig = targetConfig;
     schedulerCtx.pStateCallback = pStateChangedCb;
+    schedulerCtx.dsmSnGapCallback = dsmSnGapCb;
 
     schedulerCtx.receptionBufferSockets = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
     result = (NULL != schedulerCtx.receptionBufferSockets);
@@ -669,10 +677,10 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     SOPC_SubScheduler_Add_Security_Ctx(group);
                     uint8_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
                     const SOPC_Conf_PublisherId* dsmPubId = SOPC_ReaderGroup_Get_PublisherId(group);
-                    for(uint8_t r_i = 0; r_i < nbReaders; r_i++)
+                    for (uint8_t r_i = 0; r_i < nbReaders; r_i++)
                     {
-                        SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group,r_i);
-                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId,SOPC_DataSetReader_Get_DataSetWriterId(reader));
+                        SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, r_i);
+                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, SOPC_DataSetReader_Get_DataSetWriterId(reader));
                     }
                 }
             }
@@ -691,6 +699,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
+                             SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb,
                              int threadPriority)
 {
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
@@ -717,7 +726,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
     if (result)
     {
         // Prepare connections context: socket creation & connection config context
-        SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb);
+        SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb, dsmSnGapCb);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_ASSERT(schedulerCtx.nbConnections <= UINT16_MAX);
@@ -1078,6 +1087,10 @@ static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pub
                 }
                 else
                 {
+                    if (NULL != schedulerCtx.dsmSnGapCallback)
+                    {
+                        schedulerCtx.dsmSnGapCallback(pubId, writerId, ctx->dataSetMessageSequenceNumber, receivedSN);
+                    }
                     return false;
                 }
             }

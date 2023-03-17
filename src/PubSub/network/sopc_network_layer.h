@@ -22,9 +22,9 @@
 
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
-#include "sopc_pubsub_conf.h"
 
 // TODO: use security mode instead of security enabled
 // TODO: remove SOPC_UADP_NetworkMessage_Get_Last_Error and provide a call-specific return value
@@ -45,7 +45,6 @@ typedef struct SOPC_UADP_Network_Message
 typedef bool (*SOPC_UADP_Is_Writer_SN_Newer_Func)(const SOPC_Conf_PublisherId pubId,
                                                   const uint16_t writerId,
                                                   const uint16_t receivedSN);
-
 
 /**
  * \brief Encode a NetworkMessage with UADP Mapping

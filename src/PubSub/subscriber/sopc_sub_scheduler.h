@@ -35,10 +35,15 @@ typedef enum SOPC_PubSubState
 /* \param state   the new subscriber state */
 typedef void SOPC_SubscriberStateChanged_Func(SOPC_PubSubState state);
 
+typedef void (*SOPC_SubscriberDataSetMessageSequenceNumberGap_Func)(SOPC_Conf_PublisherId pubId,
+                                                                    uint16_t writerId,
+                                                                    uint16_t prevSN,
+                                                                    uint16_t receivedSN);
 /* Only state changed callback can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
+                             SOPC_SubscriberDataSetMessageSequenceNumberGap_Func sdmSnGapCb,
                              int threadPriority);
 
 void SOPC_SubScheduler_Stop(void);

@@ -866,6 +866,19 @@ static void cb_SetSubStatus(SOPC_PubSubState state)
 }
 
 /***************************************************/
+static void cb_ReceiveGapDsmSequenceNumber(SOPC_Conf_PublisherId pubId,
+                                           uint16_t writerId,
+                                           uint16_t prevSN,
+                                           uint16_t receivedSN)
+{
+    /* Only UInterger publisher Id support*/
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
+    PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu8
+          ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+          pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+}
+
+/***************************************************/
 static int cmd_demo_sub(WordList* pList)
 {
     const char* word = CLI_GetNextWord(pList);
@@ -874,8 +887,8 @@ static int cmd_demo_sub(WordList* pList)
     {
         // start subscriber (will fail if already started)
         bool bResult;
-        bResult =
-            SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
+        bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, cb_ReceiveGapDsmSequenceNumber,
+                                          CONFIG_SOPC_SUBSCRIBER_PRIORITY);
         if (!bResult)
         {
             PRINT("\r\nFailed to start Subscriber!\r\n");

@@ -153,7 +153,7 @@ int main(int argc, char** argv)
 
     SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&SOPC_SetTargetVariables_Test);
 
-    bool started = SOPC_SubScheduler_Start(config, targetConfig, stateChangedCb, 0);
+    bool started = SOPC_SubScheduler_Start(config, targetConfig, stateChangedCb, NULL, 0);
 
     while (true == started && false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
     {
