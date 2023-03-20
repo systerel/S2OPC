@@ -218,7 +218,7 @@ START_TEST(test_sub_xml_parsing)
     uint16_t writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(0, writerId); // same as writeGroupId
+    ck_assert_uint_eq(0, writerId);
 
     double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval
@@ -253,7 +253,7 @@ START_TEST(test_sub_xml_parsing)
     writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(0, writerId); // same as writeGroupId (default value)
+    ck_assert_uint_eq(0, writerId);
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval

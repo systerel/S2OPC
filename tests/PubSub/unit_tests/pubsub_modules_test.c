@@ -52,12 +52,12 @@ SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_Sin
 
 /* Test network message layer */
 
-#define ENCODED_DATA_SIZE 35
+#define ENCODED_DATA_SIZE 37
 uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
                                                        // Payload header/Message Count & DSM WriterIds
                                                        0x01, 0xFF, 0x00,
                                                        // DSM1 (Flags, nbFields)
-                                                       0x01, 0x05, 0x00,
+                                                       0x09, 0x00, 0x00, 0x05, 0x00,
                                                        // DSM1 = vars 1..5
                                                        0x07, 0x2E, 0x34, 0xB8, 0x00, 0x03, 0xEF, 0x05, 0x54, 0xFD, 0x0A,
                                                        0x8F, 0xC2, 0xF5, 0x3D, 0x07, 0xBC, 0xA4, 0x05, 0x00};
@@ -65,35 +65,37 @@ uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0
 SOPC_Buffer encoded_network_msg = {ENCODED_DATA_SIZE, ENCODED_DATA_SIZE,       ENCODED_DATA_SIZE, 0,
                                    ENCODED_DATA_SIZE, encoded_network_msg_data};
 
-#define ENCODED_KEEP_ALIVE_DATA 14
+#define ENCODED_KEEP_ALIVE_DATA 16
 uint8_t encoded_network_msg_keep_alive[ENCODED_KEEP_ALIVE_DATA] = {
-    0x71,                                                       // Flags + Version (NETWORK_MSG_VERSION)
-    0x2E,                                                       // PublisherId (NETWORK_MSG_PUBLISHER_ID)
-    0x03,                                                       // GroupFlags
-    0x2A, 0x00,                                                 // WriterGroupId (NETWORK_MSG_GROUP_ID)
-    0xE8, 0x03, 0x00, 0x00,                                     // GroupVersion (NETWORK_MSG_GROUP_VERSION)
-    0x01,                                                       // Payload header/Message Count
-    0xFF, 0x00,                                                 // Payload header/ DSM WriterIds
-    0x81,                                                       // DSM Header/ dataSet Flags1
-    0x03                                                        // DSM Header/ dataSet Flags2
+    0x71,                   // Flags + Version (NETWORK_MSG_VERSION)
+    0x2E,                   // PublisherId (NETWORK_MSG_PUBLISHER_ID)
+    0x03,                   // GroupFlags
+    0x2A, 0x00,             // WriterGroupId (NETWORK_MSG_GROUP_ID)
+    0xE8, 0x03, 0x00, 0x00, // GroupVersion (NETWORK_MSG_GROUP_VERSION)
+    0x01,                   // Payload header/Message Count
+    0xFF, 0x00,             // Payload header/ DSM WriterIds
+    0x89,                   // DSM Header/ dataSet Flags1 plus
+    0x03,                   // DSM Header/ dataSet Flags2
+    0x00, 0x00              // DSM Sequence number
 };
 
-SOPC_Buffer encoded_network_keep_alive_msg = {ENCODED_KEEP_ALIVE_DATA, ENCODED_KEEP_ALIVE_DATA, ENCODED_KEEP_ALIVE_DATA, 0,
-                                            ENCODED_KEEP_ALIVE_DATA, encoded_network_msg_keep_alive};
+SOPC_Buffer encoded_network_keep_alive_msg = {ENCODED_KEEP_ALIVE_DATA, ENCODED_KEEP_ALIVE_DATA,
+                                              ENCODED_KEEP_ALIVE_DATA, 0,
+                                              ENCODED_KEEP_ALIVE_DATA, encoded_network_msg_keep_alive};
 
-#define ENCODED_DATA_SIZE2 59
+#define ENCODED_DATA_SIZE2 63
 uint8_t encoded_network_msg_data2[ENCODED_DATA_SIZE2] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
                                                          // DSM Count & DSM WriterIds
                                                          0x02, 0xFF, 0x00, 0x00, 0x01,
                                                          // DSM1 & 2 size
-                                                         0x17, 0x00, 0x12, 0x00,
+                                                         0x19, 0x00, 0x14, 0x00,
                                                          // DSM1 (Flags, nbFields)
-                                                         0x01, 0x05, 0x00,
+                                                         0x09, 0x00, 0x00, 0x05, 0x00,
                                                          // DSM1 = vars 1..5
                                                          0x07, 0x2E, 0x34, 0xB8, 0x00, 0x03, 0xEF, 0x05, 0x54, 0xFD,
                                                          0x0A, 0x8F, 0xC2, 0xF5, 0x3D, 0x07, 0xBC, 0xA4, 0x05, 0x00,
                                                          // DSM2 (Flags, nbFields)
-                                                         0x01, 0x04, 0x00,
+                                                         0x09, 0x00, 0x00, 0x04, 0x00,
                                                          // DSM2 = vars 1..4
                                                          0x07, 0x2E, 0x34, 0xB8, 0x00, 0x03, 0xEF, 0x05, 0x54, 0xFD,
                                                          0x0A, 0x8F, 0xC2, 0xF5, 0x3D};
@@ -101,7 +103,7 @@ uint8_t encoded_network_msg_data2[ENCODED_DATA_SIZE2] = {0x71, 0x2E, 0x03, 0x2A,
 SOPC_Buffer encoded_network_msg2 = {ENCODED_DATA_SIZE2, ENCODED_DATA_SIZE2,       ENCODED_DATA_SIZE2, 0,
                                     ENCODED_DATA_SIZE2, encoded_network_msg_data2};
 
-#define ENCODED_DSM_PRE_FIELD_SIZE 3u // DataSet Flags1 + number of fields
+#define ENCODED_DSM_PRE_FIELD_SIZE 5u // DataSet Flags1 + number of fields + Sequence Number
 
 // Content of encoded variables (see "varArr") for Multi-DataSetMessage
 #define ENCODED_VAR0_SIZE 5u
@@ -178,7 +180,7 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffe
 
 static void check_network_msg_content_uni_keep_alive_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
 {
-    ck_assert_uint_eq(1,SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm));
+    ck_assert_uint_eq(1, SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm));
     const SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(nm);
     ck_assert_ptr_nonnull(header);
 
@@ -316,6 +318,20 @@ START_TEST(test_hl_network_msg_encode)
     res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, NB_VARS);
     ck_assert_int_eq(true, res);
 
+    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
+    conf->NotValidFlag = false;
+    conf->FieldEncoding = 0;
+    conf->DataSetMessageSequenceNumberFlag = true;
+    conf->StatusFlag = false;
+    conf->ConfigurationVersionMajorVersionFlag = false;
+    conf->ConfigurationVersionMinorFlag = false;
+    conf->DataSetFlags2 = false;
+    conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
+    conf->TimestampFlag = false;
+    conf->PicoSecondsFlag = false;
+
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
+
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
         SOPC_Variant* var = SOPC_Variant_Create();
@@ -392,7 +408,7 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
 
     conf->NotValidFlag = false;
     conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = false;
+    conf->DataSetMessageSequenceNumberFlag = true;
     conf->StatusFlag = false;
     conf->ConfigurationVersionMajorVersionFlag = false;
     conf->ConfigurationVersionMinorFlag = false;
@@ -402,7 +418,7 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
     conf->PicoSecondsFlag = false;
 
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE));
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm,*conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
 
     // Check network message content
     check_network_msg_content_uni_keep_alive_dsm(nm);
@@ -476,6 +492,19 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
 
         uint16_t nb_vars = (uint16_t)(NB_VARS - imsg);
 
+        SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
+        conf->NotValidFlag = false;
+        conf->FieldEncoding = 0;
+        conf->DataSetMessageSequenceNumberFlag = true;
+        conf->StatusFlag = false;
+        conf->ConfigurationVersionMajorVersionFlag = false;
+        conf->ConfigurationVersionMinorFlag = false;
+        conf->DataSetFlags2 = false;
+        conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
+        conf->TimestampFlag = false;
+        conf->PicoSecondsFlag = false;
+
+        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
         SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + imsg));
         bool res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nb_vars);
         ck_assert_int_eq(true, res);
@@ -554,52 +583,67 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     ck_assert_uint_eq(data[27], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VARS0_1_SIZE));
     ck_assert_uint_eq(data[28], BYTE1(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VAR0_SIZE));
     ck_assert_uint_eq(data[29], BYTE2(ENCODED_DSM_PRE_FIELD_SIZE + ENCODED_VAR0_SIZE));
-    static const uint8_t DS_Flags1 = 1;
+    static const uint8_t DS_Flags1 = 9;
     // Note: each DSM starts with DataSetFlags set to 1 "Valid / DataValue=Variant"
     // and is followed by 2 bytes giving the number of fields (different for each DSM)
 
     // Check DSM[0] containing var[0..4]
     unsigned int dsm_idx = 30;
     ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1));
+    // DSM[0]/ Sequence Number equal to 0
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(0));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(0));
     // DSM[0]/nb DataSet (5 fields)
-    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(5));
-    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(5));
+    ck_assert_uint_eq(data[dsm_idx + 3], BYTE1(5));
+    ck_assert_uint_eq(data[dsm_idx + 4], BYTE2(5));
     dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
     ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_4_SIZE);
 
     // Check DSM[1] containing var[0..3]
     dsm_idx = dsm_idx + ENCODED_VARS0_4_SIZE;
     ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1));
+    // DSM[1]/ Sequence Number equal to 0
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(0));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(0));
     // DSM[1]/nb DataSet (4 fields)
-    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(4));
-    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(4));
+    ck_assert_uint_eq(data[dsm_idx + 3], BYTE1(4));
+    ck_assert_uint_eq(data[dsm_idx + 4], BYTE2(4));
     dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
     ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_3_SIZE);
 
     // Check DSM[2] containing var[0..2]
     dsm_idx = dsm_idx + ENCODED_VARS0_3_SIZE;
-    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version
+    // DSM[2]/ Sequence Number equal to 0
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(0));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(0));
     // DSM[2]/nb DataSet (3 fields)
-    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(3));
-    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(3));
+    ck_assert_uint_eq(data[dsm_idx + 3], BYTE1(3));
+    ck_assert_uint_eq(data[dsm_idx + 4], BYTE2(3));
     dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
     ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_2_SIZE);
 
     // Check DSM[3] containing var[0..1]
     dsm_idx = dsm_idx + ENCODED_VARS0_2_SIZE;
-    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version
+    // DSM[3]/ Sequence Number equal to 0
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(0));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(0));
     // DSM[3]/nb DataSet (2 fields)
-    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(2));
-    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(2));
+    ck_assert_uint_eq(data[dsm_idx + 3], BYTE1(2));
+    ck_assert_uint_eq(data[dsm_idx + 4], BYTE2(2));
     dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
     ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VARS0_1_SIZE);
 
     // Check DSM[4] containing var[0..0]
     dsm_idx = dsm_idx + ENCODED_VARS0_1_SIZE;
-    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version or seqNum
+    ck_assert_uint_eq(data[dsm_idx], BYTE1(DS_Flags1)); // Valid / DataValue, no status or config version
+    // DSM[4]/ Sequence Number equal to 0
+    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(0));
+    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(0));
     // DSM[4]/nb DataSet (1 field)
-    ck_assert_uint_eq(data[dsm_idx + 1], BYTE1(1));
-    ck_assert_uint_eq(data[dsm_idx + 2], BYTE2(1));
+    ck_assert_uint_eq(data[dsm_idx + 3], BYTE1(1));
+    ck_assert_uint_eq(data[dsm_idx + 4], BYTE2(1));
     dsm_idx = dsm_idx + ENCODED_DSM_PRE_FIELD_SIZE;
     ck_assert_mem_eq(encoded_vars_dsm, &data[dsm_idx], ENCODED_VAR0_SIZE);
 
