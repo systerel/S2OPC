@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 08/03/2023 14:49:57
+ Date                 : 20/03/2023 15:38:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -906,7 +906,7 @@ void session_core__find_channel_to_close(
       t_bool session_core__l_continue;
       constants__t_channel_i session_core__l_channel;
       t_bool session_core__l_connected;
-      constants__t_session_i session_core__l_session;
+      t_entier4 session_core__l_nb_sessions;
       constants__t_timeref_i session_core__l_timeref;
       t_bool session_core__l_is_older_than;
       constants__t_channel_i session_core__l_oldest_channel;
@@ -920,10 +920,10 @@ void session_core__find_channel_to_close(
             &session_core__l_channel);
          channel_mgr__is_connected_channel(session_core__l_channel,
             &session_core__l_connected);
-         session_core_1__get_channel_session(session_core__l_channel,
-            &session_core__l_session);
+         session_core_1__get_channel_nb_sessions(session_core__l_channel,
+            &session_core__l_nb_sessions);
          if ((session_core__l_connected == true) &&
-            (session_core__l_session == constants__c_session_indet)) {
+            (session_core__l_nb_sessions == 0)) {
             channel_mgr__get_connection_time(session_core__l_channel,
                &session_core__l_timeref);
             if (session_core__l_oldest_channel_timeref == constants__c_timeref_indet) {

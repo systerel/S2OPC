@@ -31,6 +31,7 @@ ABSTRACT_VARIABLES
     s_session,
     a_state,
     a_channel,
+    a_channel_nb_sessions,
     a_client_to_create,
     a_client_orphaned,
     a_server_user_auth_attempts,
@@ -39,7 +40,8 @@ ABSTRACT_VARIABLES
 INVARIANT
     s_session         <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
-    a_channel          : t_session >+> t_channel              &
+    a_channel          : t_session +-> t_channel              &
+    a_channel_nb_sessions : t_channel --> NAT                 &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
     a_client_orphaned  : t_session +-> t_channel_config_idx_i &
     a_server_user_auth_attempts : t_session --> NAT &
@@ -49,6 +51,7 @@ INITIALISATION
     s_session          := {} ||
     a_state            := {} ||
     a_channel          := {} ||
+    a_channel_nb_sessions := t_channel * {0} ||
     a_client_to_create := {} ||
     a_client_orphaned  := {} ||
     a_server_user_auth_attempts := t_session * {0} ||
@@ -82,7 +85,18 @@ OPERATIONS
         p_session : t_session_i &
         p_session : t_session
     THEN
-        a_channel := {p_session} <<| a_channel
+        a_channel,
+        a_channel_nb_sessions
+        :(a_channel = {p_session} <<| a_channel$0 &
+          a_channel_nb_sessions : t_channel --> NAT &
+            /* No channel was associated: no change */
+            (a_channel$0 (p_session) = c_channel_indet =>
+                a_channel_nb_sessions = a_channel_nb_sessions$0) &
+            /* Channel was associated: decrement channel sessions counter */
+            (a_channel$0 (p_session) /= c_channel_indet =>
+                {a_channel$0 (p_session)} <<| a_channel_nb_sessions = {a_channel$0 (p_session)} <<| a_channel_nb_sessions$0 &
+                a_channel_nb_sessions (a_channel$0 (p_session)) = a_channel_nb_sessions (a_channel$0 (p_session)) - 1)
+        )
     END
     ;
 
@@ -138,7 +152,28 @@ OPERATIONS
         channel : t_channel_i &
         channel : t_channel
     THEN
-        a_channel (session) := channel
+        a_channel,
+        a_channel_nb_sessions
+        :(a_channel : t_session +-> t_channel &
+          {session} <<| a_channel = {session} <<| a_channel$0 &
+          a_channel (session) = channel &
+          a_channel_nb_sessions : t_channel --> NAT &
+           /* Same channel as previous associated to session: do not change channel sessions counter */
+          (a_channel$0 (session) = channel => a_channel_nb_sessions = a_channel_nb_sessions$0) &
+          (a_channel$0 (session) /= channel =>
+                /* No previous channel associated to session: only increment the channel sessions counter */
+                (a_channel$0 (session) = c_channel_indet =>
+                    a_channel_nb_sessions (channel) = a_channel_nb_sessions (channel) + 1 &
+                    {channel} <<| a_channel_nb_sessions = {channel} <<| a_channel_nb_sessions$0)
+                ) &
+                /* Previous channel associated to session: decrement previous channel and increment new channel sessions counters */
+                (a_channel$0 (session) /= c_channel_indet =>
+                    a_channel_nb_sessions (a_channel$0 (session)) = a_channel_nb_sessions (a_channel$0 (session)) - 1 &
+                    a_channel_nb_sessions (channel) = a_channel_nb_sessions (channel) + 1 &
+                    /* No change for other channels */
+                    {channel, a_channel$0 (session)} <<| a_channel_nb_sessions = {channel, a_channel$0 (session)} <<| a_channel_nb_sessions$0
+                )
+          )
     END
     ;
 
@@ -170,15 +205,14 @@ OPERATIONS
     END
     ;
 
-    p_session <-- get_channel_session (p_channel) =
+    p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
     PRE
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        p_session
-        :(p_session : t_session_i &
-            (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
-            (p_channel /: dom(a_channel~) => p_session = c_session_indet)
+        p_nb_sessions
+        :(p_nb_sessions : NAT &
+          p_nb_sessions = a_channel_nb_sessions (p_channel)
         )
     END
     ;

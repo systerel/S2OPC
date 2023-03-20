@@ -302,15 +302,15 @@ OPERATIONS
     END
     ;
 
-    p_session <-- get_channel_session (p_channel) =
+    p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
     PRE
         p_channel : t_channel_i &
         p_channel : t_channel
     THEN
-        p_session
-        :(p_session : t_session_i &
-            (p_channel : dom(a_channel~) => p_session = a_channel~(p_channel)) &
-            (p_channel /: dom(a_channel~) => p_session = c_session_indet)
+        p_nb_sessions
+        :(p_nb_sessions : NAT &
+            (p_channel : dom(a_channel~) => p_nb_sessions = card(a_channel~[{p_channel}])) &
+            (p_channel /: dom(a_channel~) => p_nb_sessions = 0)
         )
     END
     ;

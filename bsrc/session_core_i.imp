@@ -968,7 +968,7 @@ OPERATIONS
         l_continue,
         l_channel,
         l_connected,
-        l_session,
+        l_nb_sessions,
         l_timeref,
         l_is_older_than,
         l_oldest_channel,
@@ -982,8 +982,8 @@ OPERATIONS
         DO
             l_continue, l_channel <-- continue_iter_channel;
             l_connected <-- is_connected_channel(l_channel);
-            l_session <-- get_channel_session(l_channel);
-            IF l_connected = TRUE & l_session = c_session_indet
+            l_nb_sessions <-- get_channel_nb_sessions(l_channel);
+            IF l_connected = TRUE & l_nb_sessions = 0
             THEN
                 l_timeref <-- get_connection_time(l_channel);
                 IF l_oldest_channel_timeref = c_timeref_indet

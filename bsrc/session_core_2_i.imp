@@ -34,7 +34,7 @@ CONCRETE_VARIABLES
     s_session_i,
     a_state_i,
     a_channel_i,
-    a_reverse_channel_i,
+    a_channel_nb_sessions_i,
     a_client_to_create_i,
     a_client_orphaned_i,
     a_server_user_auth_attempts_i,
@@ -44,7 +44,7 @@ INVARIANT
     s_session_i          : t_session_i --> BOOL                                      &
     a_state_i            : t_session_i --> t_sessionState                            &
     a_channel_i          : t_session_i --> t_channel_i                               &
-    a_reverse_channel_i  : t_channel_i --> t_session_i                               &
+    a_channel_nb_sessions_i : t_channel_i --> NAT                                    &
     a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
     a_server_user_auth_attempts_i : t_session_i --> NAT                              &
@@ -53,7 +53,6 @@ INVARIANT
     dom(a_state)         = s_session                                                 &
     a_state             <: a_state_i                                                 &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
-    a_channel~           = t_channel <| a_reverse_channel_i |> t_session             &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
     a_server_user_auth_attempts = t_session <| a_server_user_auth_attempts_i &
@@ -63,7 +62,7 @@ INITIALISATION
     s_session_i  := t_session_i * {FALSE};
     a_state_i    := t_session_i * {e_session_closed};
     a_channel_i  := t_session_i * {c_channel_indet};
-    a_reverse_channel_i := t_channel_i * {c_session_indet};
+    a_channel_nb_sessions_i := t_channel_i * {0};
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
     a_client_orphaned_i := t_session_i * {c_channel_config_idx_indet};
     a_server_user_auth_attempts_i := t_session_i * {0};
@@ -85,8 +84,15 @@ OPERATIONS
     ;
 
     reset_session_channel(p_session) =
-    BEGIN
-        a_reverse_channel_i(a_channel_i(p_session)) := c_session_indet;
+    VAR
+        l_channel
+    IN
+        l_channel := a_channel_i(p_session);
+        IF l_channel /= c_channel_indet
+        THEN
+            a_channel_nb_sessions_i(l_channel) := a_channel_nb_sessions_i(l_channel) - 1
+        END
+        ;
         a_channel_i(p_session) := c_channel_indet
     END
     ;
@@ -122,10 +128,20 @@ OPERATIONS
     ;
 
     set_session_channel (session, channel) =
-    BEGIN
-        a_reverse_channel_i(a_channel_i(session)) := c_session_indet;
-        a_channel_i(session) := channel;
-        a_reverse_channel_i(channel) := session
+    VAR
+        l_prev_channel
+    IN
+        l_prev_channel := a_channel_i(session);
+        IF l_prev_channel /= channel
+        THEN
+            a_channel_nb_sessions_i(channel) := a_channel_nb_sessions_i(channel) + 1;
+            IF l_prev_channel /= c_channel_indet
+            THEN
+                a_channel_nb_sessions_i(l_prev_channel) := a_channel_nb_sessions_i(l_prev_channel) - 1
+            END
+        END
+        ;
+        a_channel_i(session) := channel
     END
     ;
 
@@ -142,9 +158,9 @@ OPERATIONS
     END
     ;
 
-    p_session <-- get_channel_session (p_channel) =
+    p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
     BEGIN
-        p_session := a_reverse_channel_i(p_channel)
+        p_nb_sessions := a_channel_nb_sessions_i(p_channel)
     END
     ;
 

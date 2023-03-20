@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 08/03/2023 14:49:56
+ Date                 : 21/03/2023 16:09:35
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -36,9 +36,9 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 constants__t_channel_i session_core_2__a_channel_i[constants__t_session_i_max+1];
+t_entier4 session_core_2__a_channel_nb_sessions_i[constants__t_channel_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
-constants__t_session_i session_core_2__a_reverse_channel_i[constants__t_channel_i_max+1];
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
@@ -69,7 +69,7 @@ void session_core_2__INITIALISATION(void) {
    {
       t_entier4 i;
       for (i = constants__t_channel_i_max; 0 <= i; i = i - 1) {
-         session_core_2__a_reverse_channel_i[i] = constants__c_session_indet;
+         session_core_2__a_channel_nb_sessions_i[i] = 0;
       }
    }
    {
@@ -115,8 +115,16 @@ void session_core_2__remove_session(
 
 void session_core_2__reset_session_channel(
    const constants__t_session_i session_core_2__p_session) {
-   session_core_2__a_reverse_channel_i[session_core_2__a_channel_i[session_core_2__p_session]] = constants__c_session_indet;
-   session_core_2__a_channel_i[session_core_2__p_session] = constants__c_channel_indet;
+   {
+      constants__t_channel_i session_core_2__l_channel;
+      
+      session_core_2__l_channel = session_core_2__a_channel_i[session_core_2__p_session];
+      if (session_core_2__l_channel != constants__c_channel_indet) {
+         session_core_2__a_channel_nb_sessions_i[session_core_2__l_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__l_channel] -
+            1;
+      }
+      session_core_2__a_channel_i[session_core_2__p_session] = constants__c_channel_indet;
+   }
 }
 
 void session_core_2__reset_session_to_create(
@@ -150,9 +158,20 @@ void session_core_2__set_session_state_1(
 void session_core_2__set_session_channel(
    const constants__t_session_i session_core_2__session,
    const constants__t_channel_i session_core_2__channel) {
-   session_core_2__a_reverse_channel_i[session_core_2__a_channel_i[session_core_2__session]] = constants__c_session_indet;
-   session_core_2__a_channel_i[session_core_2__session] = session_core_2__channel;
-   session_core_2__a_reverse_channel_i[session_core_2__channel] = session_core_2__session;
+   {
+      constants__t_channel_i session_core_2__l_prev_channel;
+      
+      session_core_2__l_prev_channel = session_core_2__a_channel_i[session_core_2__session];
+      if (session_core_2__l_prev_channel != session_core_2__channel) {
+         session_core_2__a_channel_nb_sessions_i[session_core_2__channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__channel] +
+            1;
+         if (session_core_2__l_prev_channel != constants__c_channel_indet) {
+            session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] = session_core_2__a_channel_nb_sessions_i[session_core_2__l_prev_channel] -
+               1;
+         }
+      }
+      session_core_2__a_channel_i[session_core_2__session] = session_core_2__channel;
+   }
 }
 
 void session_core_2__getall_session_channel(
@@ -170,10 +189,10 @@ void session_core_2__get_session_channel(
    *session_core_2__channel = session_core_2__a_channel_i[session_core_2__session];
 }
 
-void session_core_2__get_channel_session(
+void session_core_2__get_channel_nb_sessions(
    const constants__t_channel_i session_core_2__p_channel,
-   constants__t_session_i * const session_core_2__p_session) {
-   *session_core_2__p_session = session_core_2__a_reverse_channel_i[session_core_2__p_channel];
+   t_entier4 * const session_core_2__p_nb_sessions) {
+   *session_core_2__p_nb_sessions = session_core_2__a_channel_nb_sessions_i[session_core_2__p_channel];
 }
 
 void session_core_2__getall_to_create(
