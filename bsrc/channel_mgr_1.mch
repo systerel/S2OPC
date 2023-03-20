@@ -198,8 +198,6 @@ OPERATIONS
     PRE
         p_channel : t_channel_i &
         p_channel : t_channel   &
-        p_channel : s_channel_connected &
-
         p_timeref : t_timeref_i &
         p_timeref : t_timeref
     THEN

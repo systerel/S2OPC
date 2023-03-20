@@ -39,7 +39,7 @@ DEFINITIONS
     s_cli_channel_connecting <: t_channel_config_idx &
     s_cli_channel_disconnecting <: t_channel_config_idx &
     s_channel_connected <: t_channel &
-    a_channel_connected_time : t_channel +-> t_timeref &
+    a_channel_connected_time : s_channel_connected --> t_timeref &
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &

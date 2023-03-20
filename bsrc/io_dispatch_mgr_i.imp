@@ -358,7 +358,6 @@ OPERATIONS
             l_msg_header_type <-- get_msg_header_type (l_msg_type);
             l_msg_service_class <-- get_msg_service_class (l_msg_type);
             l_set_app_call_context_channel_config (channel);
-            /* TODO: check that channel is secured if service class /= discovery class */
             CASE l_msg_header_type OF
                 EITHER e_msg_request_type THEN
                     l_valid_req := FALSE;
