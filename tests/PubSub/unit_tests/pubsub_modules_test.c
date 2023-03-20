@@ -17,6 +17,15 @@
  * under the License.
  */
 
+/** \file
+ *
+ * \brief Entry point for tests. Tests use libcheck.
+ * https://libcheck.github.io/check/doc/check_html/check_3.html
+ *
+ * If you want to debug the exe, you should define env var CK_FORK=no
+ * http://check.sourceforge.net/doc/check_html/check_4.html#No-Fork-Mode
+ */
+
 #include <check.h>
 #include <stdlib.h>
 
@@ -55,6 +64,22 @@ uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0
 
 SOPC_Buffer encoded_network_msg = {ENCODED_DATA_SIZE, ENCODED_DATA_SIZE,       ENCODED_DATA_SIZE, 0,
                                    ENCODED_DATA_SIZE, encoded_network_msg_data};
+
+#define ENCODED_KEEP_ALIVE_DATA 14
+uint8_t encoded_network_msg_keep_alive[ENCODED_KEEP_ALIVE_DATA] = {
+    0x71,                                                       // Flags + Version (NETWORK_MSG_VERSION)
+    0x2E,                                                       // PublisherId (NETWORK_MSG_PUBLISHER_ID)
+    0x03,                                                       // GroupFlags
+    0x2A, 0x00,                                                 // WriterGroupId (NETWORK_MSG_GROUP_ID)
+    0xE8, 0x03, 0x00, 0x00,                                     // GroupVersion (NETWORK_MSG_GROUP_VERSION)
+    0x01,                                                       // Payload header/Message Count
+    0xFF, 0x00,                                                 // Payload header/ DSM WriterIds
+    0x81,                                                       // DSM Header/ dataSet Flags1
+    0x03                                                        // DSM Header/ dataSet Flags2
+};
+
+SOPC_Buffer encoded_network_keep_alive_msg = {ENCODED_KEEP_ALIVE_DATA, ENCODED_KEEP_ALIVE_DATA, ENCODED_KEEP_ALIVE_DATA, 0,
+                                            ENCODED_KEEP_ALIVE_DATA, encoded_network_msg_keep_alive};
 
 #define ENCODED_DATA_SIZE2 59
 uint8_t encoded_network_msg_data2[ENCODED_DATA_SIZE2] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
@@ -149,6 +174,32 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffe
         .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
 
     return SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
+}
+
+static void check_network_msg_content_uni_keep_alive_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    ck_assert_uint_eq(1,SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm));
+    const SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(nm);
+    ck_assert_ptr_nonnull(header);
+
+    ck_assert_uint_eq(DataSet_LL_PubId_Byte_Id, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->type);
+    ck_assert_uint_eq(NETWORK_MSG_PUBLISHER_ID, SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)->data.byte);
+
+    ck_assert_uint_eq(NETWORK_MSG_VERSION, SOPC_Dataset_LL_NetworkMessage_GetVersion(header));
+
+    ck_assert_uint_eq(NETWORK_MSG_GROUP_ID, SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
+    ck_assert_uint_eq(NETWORK_MSG_GROUP_VERSION, SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
+
+    SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
+
+    ck_assert_uint_eq((uint16_t)(DATASET_MSG_WRITER_ID_BASE), SOPC_Dataset_LL_DataSetMsg_Get_WriterId(msg_dsm));
+    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
+    ck_assert_ptr_nonnull(conf);
+
+    ck_assert_uint_eq(1, conf->DataSetFlags2);
+    ck_assert_uint_eq(DataSet_LL_MessageType_KeepAlive, conf->DataSetMessageType);
+
+    ck_assert_uint_eq(0, SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(msg_dsm));
 }
 
 static void check_network_msg_content_uni_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
@@ -312,6 +363,81 @@ START_TEST(test_hl_network_msg_decode)
     check_network_msg_content_uni_dsm(uadp_nm->nm);
 
     SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_UADP_NetworkMessage_Delete(uadp_nm);
+    SOPC_PubSubConfiguration_Delete(config);
+}
+END_TEST
+
+START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
+{
+    // Initialize endianess for encoders
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+
+    bool res = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, 1);
+    ck_assert_int_eq(true, res);
+
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, NETWORK_MSG_PUBLISHER_ID);
+
+    SOPC_Dataset_LL_NetworkMessage_SetVersion(header, NETWORK_MSG_VERSION);
+
+    SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, NETWORK_MSG_GROUP_ID);
+    SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
+
+    SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
+    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
+
+    conf->NotValidFlag = false;
+    conf->FieldEncoding = 0;
+    conf->DataSetMessageSequenceNumberFlag = false;
+    conf->StatusFlag = false;
+    conf->ConfigurationVersionMajorVersionFlag = false;
+    conf->ConfigurationVersionMinorFlag = false;
+    conf->DataSetFlags2 = true;
+    conf->DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
+    conf->TimestampFlag = false;
+    conf->PicoSecondsFlag = false;
+
+    SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE));
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm,*conf);
+
+    // Check network message content
+    check_network_msg_content_uni_keep_alive_dsm(nm);
+
+    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+
+    ck_assert_uint_eq(ENCODED_KEEP_ALIVE_DATA, buffer->length);
+
+    for (uint32_t i = 0; i < buffer->length; i++)
+    {
+        ck_assert_uint_eq(encoded_network_msg_keep_alive[i], buffer->data[i]);
+    }
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Dataset_LL_NetworkMessage_Delete(nm);
+}
+END_TEST
+
+START_TEST(test_hl_network_msg_decode_uni_keep_alive_dsm)
+{
+    // Initialize endianess for encoders
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    SOPC_DataSetReader* dsr[1];
+    SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 1);
+    ck_assert_ptr_nonnull(config);
+    SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
+    ck_assert_ptr_nonnull(connection);
+
+    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(&encoded_network_keep_alive_msg, connection);
+    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
+    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
+    ck_assert_ptr_null(uadp_nm);
+
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_keep_alive_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
     SOPC_PubSubConfiguration_Delete(config);
@@ -1244,6 +1370,8 @@ int main(void)
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_multi_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm_nok);
+    tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_uni_keep_alive_dsm);
+    tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_uni_keep_alive_dsm);
 
     TCase* tc_sub_target_variable_layer = tcase_create("Subscriber target variable layer");
     suite_add_tcase(suite, tc_sub_target_variable_layer);
