@@ -718,6 +718,10 @@ struct SOPC_PKIProviderNew
     SOPC_CertificateList* pIssuerCerts;
     SOPC_CertificateList* pIssuerRoots;
     SOPC_CRLList* pIssuerCrl;
+
+    SOPC_CertificateList* pAllCerts;
+    SOPC_CertificateList* pAllRoots;
+    SOPC_CRLList* pAllCrl;
 };
 
 static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
@@ -960,6 +964,74 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
     return status;
 }
 
+static SOPC_ReturnStatus merge_certficates(SOPC_CertificateList* pLeft,
+                                           SOPC_CertificateList* pRight,
+                                           SOPC_CertificateList** ppRes)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pLeft && NULL == pRight)
+    {
+        /* Nothing to merge */
+        return status;
+    }
+    SOPC_CertificateList* pRes = NULL;
+    mbedtls_x509_crt* crt = NULL;
+    if (NULL != pLeft)
+    {
+        crt = &pLeft->crt;
+    }
+    do
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pRes);
+        crt = crt->next;
+        if (NULL == crt && NULL != pRight)
+        {
+            crt = &pRight->crt;
+        }
+    } while (NULL != crt && SOPC_STATUS_OK != status);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pRes);
+        pRes = NULL;
+    }
+    *ppRes = pRes;
+    return status;
+}
+
+static SOPC_ReturnStatus merge_crls(SOPC_CRLList* pLeft, SOPC_CRLList* pRight, SOPC_CRLList** ppRes)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pLeft && NULL == pRight)
+    {
+        /* Nothing to merge */
+        return status;
+    }
+    SOPC_CRLList* pRes = NULL;
+    mbedtls_x509_crl* crl = NULL;
+    if (NULL != pLeft)
+    {
+        crl = &pLeft->crl;
+    }
+    do
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(crl->raw.p, (uint32_t) crl->raw.len, &pRes);
+        crl = crl->next;
+        if (NULL == crl && NULL != pRight)
+        {
+            crl = &pRight->crl;
+        }
+    } while (NULL != crl && SOPC_STATUS_OK != status);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pRes);
+        pRes = NULL;
+    }
+    *ppRes = pRes;
+    return status;
+}
+
 static void get_list_stats(SOPC_CertificateList* pCert, uint32_t* caCount, uint32_t* listLength, uint32_t* rootCount)
 {
     if (NULL == pCert)
@@ -1064,6 +1136,7 @@ RBA TODO:
     - Add a configuration to raise a warning or to return an error if the chain of signatures is not rigth for each
 certificate.
         --> The objectif is to fail during the PKI update (certificate manager) but not during a "nominal" operation.
+    - Maybe use a copy of arguments instead of borrowing them.
 */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
@@ -1076,6 +1149,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     SOPC_PKIProviderNew* pPKI = NULL;
     SOPC_CertificateList* pTrustedRoots = NULL; /* trusted root CA */
     SOPC_CertificateList* pIssuerRoots = NULL;  /* issuer root CA */
+    SOPC_CertificateList* pAllRoots = NULL;     /* issuer + trusted roots */
+    SOPC_CertificateList* pAllCerts = NULL;     /* issuer + trusted certs */
+    SOPC_CRLList* pAllCrl = NULL;               /* */
 
     if (NULL == ppPKI)
     {
@@ -1158,28 +1234,17 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         }
     }
 
-    /* Clear and return if error occurred before the links */
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_Certificate_Free(pIssuerCerts);
-        SOPC_KeyManager_Certificate_Free(pTrustedCerts);
-        SOPC_KeyManager_Certificate_Free(pTrustedRoots);
-        SOPC_KeyManager_Certificate_Free(pIssuerRoots);
-        SOPC_KeyManager_CRL_Free(pTrustedCrl);
-        SOPC_KeyManager_CRL_Free(pIssuerCrl);
-        *ppPKI = NULL;
-        return status;
-    }
-
-    /* Link the issuer lists with the trusted lists
-     * (issuer roots -> trusted roots, issuer certs -> trusted certs) */
     if (SOPC_STATUS_OK == status)
     {
-        status = link_certificates(&pIssuerRoots, &pTrustedRoots);
+        status = merge_certficates(pIssuerCerts, pTrustedCerts, &pAllCerts);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = link_certificates(&pIssuerCerts, &pTrustedCerts);
+        status = merge_certficates(pIssuerRoots, pTrustedRoots, &pAllRoots);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = merge_crls(pIssuerCrl, pTrustedCrl, &pAllCrl);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -1191,28 +1256,22 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         pPKI->pIssuerCerts = pIssuerCerts;
         pPKI->pIssuerCrl = pIssuerCrl;
         pPKI->bBackwardInteroperability = bBackwardInteroperability;
+        pPKI->pAllCerts = pAllCerts;
+        pPKI->pAllRoots = pAllRoots;
+        pPKI->pAllCrl = pAllCrl;
     }
     else
     {
-        /* Deleting the issuer list will also clear the trusted list, as they are linked. */
-        if (NULL != pIssuerRoots)
-        {
-            SOPC_KeyManager_Certificate_Free(pIssuerRoots);
-        }
-        else
-        {
-            SOPC_KeyManager_Certificate_Free(pTrustedRoots);
-        }
-        if (NULL != pIssuerCerts)
-        {
-            SOPC_KeyManager_Certificate_Free(pIssuerCerts);
-        }
-        else
-        {
-            SOPC_KeyManager_Certificate_Free(pTrustedCerts);
-        }
+        SOPC_KeyManager_Certificate_Free(pTrustedRoots);
+        SOPC_KeyManager_Certificate_Free(pIssuerRoots);
+        SOPC_KeyManager_Certificate_Free(pAllRoots);
+        SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(pIssuerCerts);
+        SOPC_KeyManager_Certificate_Free(pAllCerts);
         SOPC_KeyManager_CRL_Free(pTrustedCrl);
         SOPC_KeyManager_CRL_Free(pIssuerCrl);
+        SOPC_KeyManager_CRL_Free(pAllCrl);
+
         SOPC_Free(pPKI);
         pPKI = NULL;
     }
@@ -1292,25 +1351,14 @@ void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
     {
         return;
     }
-
-    /* Deleting the issuer list will also clear the trusted list, as they are linked. */
-    if (NULL != pPKI->pIssuerRoots)
-    {
-        SOPC_KeyManager_Certificate_Free(pPKI->pIssuerRoots);
-    }
-    else
-    {
-        SOPC_KeyManager_Certificate_Free(pPKI->pTrustedRoots);
-    }
-    if (NULL != pPKI->pIssuerCerts)
-    {
-        SOPC_KeyManager_Certificate_Free(pPKI->pIssuerCerts);
-    }
-    else
-    {
-        SOPC_KeyManager_Certificate_Free(pPKI->pTrustedCerts);
-    }
+    SOPC_KeyManager_Certificate_Free(pPKI->pTrustedRoots);
+    SOPC_KeyManager_Certificate_Free(pPKI->pIssuerRoots);
+    SOPC_KeyManager_Certificate_Free(pPKI->pAllRoots);
+    SOPC_KeyManager_Certificate_Free(pPKI->pTrustedCerts);
+    SOPC_KeyManager_Certificate_Free(pPKI->pIssuerCerts);
+    SOPC_KeyManager_Certificate_Free(pPKI->pAllCerts);
     SOPC_KeyManager_CRL_Free(pPKI->pTrustedCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
+    SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
     SOPC_Free(pPKI);
 }

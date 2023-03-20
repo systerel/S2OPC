@@ -247,7 +247,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromBuffer(SOPC_CertificateList* pTrust
  * \note Content of the pki is NULL when return value is not SOPC_STATUS_OK.
  *
  * \param directoryStorePath The directory path where certificates are store.
- * \param bDefaultBuild Defined if the PKI is build from <directoryStorePath>/default forlder.
+ * \param bDefaultBuild Defined if the PKI is build from directory_store_name/default forlder.
  * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to True
  *                                 will be marked as root CA and as trusted certificates.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
@@ -283,12 +283,10 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  *
  * \param pTrustedCerts A valid pointer to the trusted certificate list. This object is borrowed and is freed by
  *                      SOPC_PKIProvider_Free.
- * \param pTrustedCrl A valid pointer to the trusted CRL list. This object is borrowed and is
- *                     freed by SOPC_PKIProvider_Free.
+ * \param pTrustedCrl A valid pointer to the trusted CRL list.
  * \param pIssuerCerts A valid pointer to the issuer certificate list. This object is
  *                      borrowed and is freed by SOPC_PKIProvider_Free.
- * \param pIssuerCrl A valid pointer to the issuer CRL list. This object is borrowed and is freed
- *                   by SOPC_PKIProvider_Free.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list.
  * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to
  *                                  True will be marked as root CA and as trusted certificates.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
