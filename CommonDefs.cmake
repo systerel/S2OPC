@@ -122,6 +122,7 @@ if (SECURITY_HARDENING)
   # Force symbol stripping (only available for GNU compatible compilers)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-s>)
   list(APPEND S2OPC_LINKER_FLAGS $<${IS_GNU}:-s>)
+  set(CMAKE_SKIP_RPATH TRUE)
 endif()
 # Set GNU linker flags
 list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wl,-z,relro,-z,now>)
