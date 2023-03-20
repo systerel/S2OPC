@@ -146,10 +146,17 @@
 #endif
 
 /** @brief Maximum number of session user authentication failure attempts
- *         before the session and the associated secure channel are closed.
+ *         before the session is closed.
  */
 #ifndef SOPC_MAX_SESSION_AUTH_ATTEMPTS
 #define SOPC_MAX_SESSION_AUTH_ATTEMPTS 3
+#endif
+
+/** @brief Delay in seconds for which the secure channel of a session that reached ::SOPC_MAX_SESSION_AUTH_ATTEMPTS
+ *         user authentication failure attempts will block new sessions creation.
+ */
+#ifndef SOPC_CREATE_SESSION_LOCK_DELAY_SECS
+#define SOPC_CREATE_SESSION_LOCK_DELAY_SECS 60
 #endif
 
 /* SUBSCRIPTION CONFIGURATION */

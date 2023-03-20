@@ -132,6 +132,7 @@ CONCRETE_CONSTANTS
 
     c_channel_indet,
     c_max_channels_connected,
+    c_channel_lock_create_session_delay,
     c_user_indet,
     c_user_token_indet,
     c_session_indet,
@@ -326,6 +327,7 @@ PROPERTIES
     cast_t_channel : perm(t_channel) &
 
     c_max_channels_connected : NAT &
+    c_channel_lock_create_session_delay : NAT &
 
     t_session <: t_session_i &
     c_session_indet : t_session_i &

@@ -21,7 +21,7 @@
 
  File Name            : time_reference_bs.h
 
- Date                 : 04/08/2022 14:53:48
+ Date                 : 21/03/2023 09:18:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -48,7 +48,10 @@ extern void time_reference_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void time_reference_bs__get_current_TimerReference(
+extern void time_reference_bs__get_current_TimeReference(
+   constants__t_timeref_i * const time_reference_bs__p_timeref);
+extern void time_reference_bs__get_target_TimeReference(
+   const t_entier4 time_reference_bs__p_delaySeconds,
    constants__t_timeref_i * const time_reference_bs__p_timeref);
 extern void time_reference_bs__is_less_than_TimeReference(
    const constants__t_timeref_i time_reference_bs__p_left,

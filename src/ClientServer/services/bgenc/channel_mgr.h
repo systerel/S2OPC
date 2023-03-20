@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 04/11/2022 14:14:30
+ Date                 : 21/03/2023 09:49:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -111,11 +111,18 @@ extern void channel_mgr__close_secure_channel(
    const constants__t_channel_i channel_mgr__channel);
 extern void channel_mgr__is_auto_close_channel_active(
    t_bool * const channel_mgr__p_auto_closed_active);
+extern void channel_mgr__is_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel,
+   t_bool * const channel_mgr__p_session_locked);
+extern void channel_mgr__set_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel);
 extern void channel_mgr__srv_new_secure_channel(
    const constants__t_endpoint_config_idx_i channel_mgr__endpoint_config_idx,
    const constants__t_channel_config_idx_i channel_mgr__channel_config_idx,
    const constants__t_channel_i channel_mgr__channel,
    const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__bres);
+extern void channel_mgr__update_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel);
 
 #endif

@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_1.c
 
- Date                 : 24/08/2022 07:50:30
+ Date                 : 21/03/2023 09:17:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -36,6 +36,7 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 constants__t_timeref_i channel_mgr_1__a_channel_connected_time_i[constants__t_channel_i_max+1];
+constants__t_timeref_i channel_mgr_1__a_channel_create_session_locked_i[constants__t_channel_i_max+1];
 constants__t_channel_config_idx_i channel_mgr_1__a_config_i[constants__t_channel_i_max+1];
 constants__t_channel_i channel_mgr_1__a_config_inv_i[constants__t_channel_config_idx_i_max+1];
 constants__t_endpoint_config_idx_i channel_mgr_1__a_endpoint_i[constants__t_channel_i_max+1];
@@ -74,6 +75,12 @@ void channel_mgr_1__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_channel_i_max; 0 <= i; i = i - 1) {
          channel_mgr_1__a_channel_connected_time_i[i] = constants__c_timeref_indet;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_channel_i_max; 0 <= i; i = i - 1) {
+         channel_mgr_1__a_channel_create_session_locked_i[i] = constants__c_timeref_indet;
       }
    }
    {
@@ -349,5 +356,17 @@ void channel_mgr_1__get_connection_time(
    const constants__t_channel_i channel_mgr_1__p_channel,
    constants__t_timeref_i * const channel_mgr_1__p_timeref) {
    *channel_mgr_1__p_timeref = channel_mgr_1__a_channel_connected_time_i[channel_mgr_1__p_channel];
+}
+
+void channel_mgr_1__set_create_session_locked_1(
+   const constants__t_channel_i channel_mgr_1__p_channel,
+   const constants__t_timeref_i channel_mgr_1__p_timeref) {
+   channel_mgr_1__a_channel_create_session_locked_i[channel_mgr_1__p_channel] = channel_mgr_1__p_timeref;
+}
+
+void channel_mgr_1__get_create_session_locked_1(
+   const constants__t_channel_i channel_mgr_1__p_channel,
+   constants__t_timeref_i * const channel_mgr_1__p_timeref) {
+   *channel_mgr_1__p_timeref = channel_mgr_1__a_channel_create_session_locked_i[channel_mgr_1__p_channel];
 }
 

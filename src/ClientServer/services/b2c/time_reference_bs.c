@@ -23,6 +23,7 @@
 
 #include "time_reference_bs.h"
 
+#include "sopc_assert.h"
 #include "sopc_time.h"
 
 /*------------------------
@@ -33,10 +34,20 @@ void time_reference_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void time_reference_bs__get_current_TimerReference(constants__t_timeref_i* const time_reference_bs__p_timeref)
+void time_reference_bs__get_current_TimeReference(constants__t_timeref_i* const time_reference_bs__p_timeref)
 {
     *time_reference_bs__p_timeref = SOPC_TimeReference_GetCurrent();
 }
+
+void time_reference_bs__get_target_TimeReference(const t_entier4 time_reference_bs__p_delaySeconds,
+                                                 constants__t_timeref_i* const time_reference_bs__p_timeref)
+{
+    SOPC_ASSERT(time_reference_bs__p_delaySeconds > 0);
+    SOPC_TimeReference current = SOPC_TimeReference_GetCurrent();
+    *time_reference_bs__p_timeref =
+        SOPC_TimeReference_AddMilliseconds(current, (uint64_t) time_reference_bs__p_delaySeconds * 1000);
+}
+
 void time_reference_bs__is_less_than_TimeReference(const constants__t_timeref_i time_reference_bs__p_left,
                                                    const constants__t_timeref_i time_reference_bs__p_right,
                                                    t_bool* const time_reference_bs__p_is_oldest)

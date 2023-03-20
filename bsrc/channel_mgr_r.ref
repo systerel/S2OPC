@@ -34,6 +34,7 @@ DEFINITIONS
     s_cli_channel_disconnecting,
     s_channel_connected,
     a_channel_connected_time,
+    a_channel_create_session_locked,
     a_config,
     a_reverse_endpoint_config,
     a_endpoint,
@@ -47,6 +48,7 @@ INITIALISATION
     s_cli_channel_disconnecting := {} ||
     s_channel_connected         := {} ||
     a_channel_connected_time    := {} ||
+    a_channel_create_session_locked := {} ||
     a_config                    := {} ||
     a_reverse_endpoint_config   := {} ||
     a_endpoint                  := {} ||
@@ -153,5 +155,35 @@ OPERATIONS
             bres := FALSE
         END
     END
+    ;
 
+    set_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        a_channel_create_session_locked
+        :(a_channel_create_session_locked : s_channel_connected --> t_timeref_i &
+            {p_channel} <<| a_channel_create_session_locked = {p_channel} <<| a_channel_create_session_locked$0 &
+            a_channel_create_session_locked(p_channel) : t_timeref
+        )
+    END
+    ;
+
+    update_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        a_channel_create_session_locked : (a_channel_create_session_locked : s_channel_connected --> t_timeref_i)
+    END
+    ;
+
+    p_session_locked <-- is_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        p_session_locked := bool(a_channel_create_session_locked (p_channel) /= c_timeref_indet)
+    END
 END

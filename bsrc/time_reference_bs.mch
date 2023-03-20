@@ -31,8 +31,16 @@ INITIALISATION
     TimeReference_IsLessThan :(TimeReference_IsLessThan : t_timeref <-> t_timeref)
 OPERATIONS
 
-    p_timeref <-- get_current_TimerReference =
+    p_timeref <-- get_current_TimeReference =
     BEGIN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref : t_timeref)
+    END
+    ;
+
+    p_timeref <-- get_target_TimeReference (p_delaySeconds) =
+    PRE
+        p_delaySeconds : NAT
+    THEN
         p_timeref :(p_timeref : t_timeref_i & p_timeref : t_timeref)
     END
     ;

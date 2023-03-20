@@ -407,6 +407,7 @@ CONCRETE_CONSTANTS
     c_channel_config_idx_indet,
     c_channel_indet,
     c_max_channels_connected,
+    c_channel_lock_create_session_delay,
     c_client_request_handle_indet,
     c_server_request_handle_any,
     c_no_application_context,
@@ -706,6 +707,7 @@ PROPERTIES
     cast_t_channel : perm(t_channel) &
 
     c_max_channels_connected : NAT &
+    c_channel_lock_create_session_delay : NAT &
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &

@@ -191,6 +191,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_byte_buffer_indet 0
 #define constants_bs__c_channel_config_idx_indet 0
 #define constants_bs__c_channel_indet 0
+#define constants_bs__c_channel_lock_create_session_delay SOPC_CREATE_SESSION_LOCK_DELAY_SECS
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
 #define constants_bs__c_max_channels_connected SOPC_MAX_SECURE_CONNECTIONS

@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 09/03/2023 18:09:24
+ Date                 : 21/03/2023 09:17:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -451,6 +451,7 @@ typedef enum {
 #define constants__c_byte_buffer_indet constants_bs__c_byte_buffer_indet
 #define constants__c_channel_config_idx_indet constants_bs__c_channel_config_idx_indet
 #define constants__c_channel_indet constants_bs__c_channel_indet
+#define constants__c_channel_lock_create_session_delay constants_bs__c_channel_lock_create_session_delay
 #define constants__c_client_request_handle_indet constants_bs__c_client_request_handle_indet
 #define constants__c_endpoint_config_idx_indet constants_bs__c_endpoint_config_idx_indet
 #define constants__c_max_channels_connected constants_bs__c_max_channels_connected

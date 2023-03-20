@@ -30,6 +30,7 @@ DEFINITIONS
     s_cli_channel_disconnecting,
     s_channel_connected,
     a_channel_connected_time,
+    a_channel_create_session_locked,
     a_config,
     a_reverse_endpoint_config,
     a_endpoint,
@@ -40,6 +41,8 @@ DEFINITIONS
     s_cli_channel_disconnecting <: t_channel_config_idx &
     s_channel_connected <: t_channel &
     a_channel_connected_time : s_channel_connected --> t_timeref &
+    /* session treatments (create / activate) are locked on a secure channel when a_channel_sessions_locked(p_channel) /= c_timeref_indet */
+    a_channel_create_session_locked : s_channel_connected --> t_timeref_i &
     /* each created channel has a configuration
        and there is at most 1 channel per configuration */
     a_config : s_channel_connected >-> t_channel_config_idx &
@@ -311,4 +314,32 @@ OPERATIONS
     BEGIN
         p_auto_closed_active := bool(card(s_cli_channel_connecting) + card(s_channel_connected) >= c_max_channels_connected)
     END
+    ;
+
+    set_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        a_channel_create_session_locked : (a_channel_create_session_locked : s_channel_connected --> t_timeref_i)
+    END
+    ;
+
+    update_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        a_channel_create_session_locked : (a_channel_create_session_locked : s_channel_connected --> t_timeref_i)
+    END
+    ;
+
+    p_session_locked <-- is_create_session_locked (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        p_session_locked :: BOOL
+    END
+
 END

@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 24/08/2022 07:50:31
+ Date                 : 21/03/2023 09:49:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -185,7 +185,7 @@ void channel_mgr__srv_new_secure_channel(
       if (((channel_mgr__l_con == false) &&
          (channel_mgr__l_dom == false)) &&
          (channel_mgr__l_allowed_new_sc == true)) {
-         time_reference_bs__get_current_TimerReference(&channel_mgr__l_current_time);
+         time_reference_bs__get_current_TimeReference(&channel_mgr__l_current_time);
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
             channel_mgr__l_current_time);
          channel_mgr_1__set_config(channel_mgr__channel,
@@ -278,7 +278,7 @@ void channel_mgr__cli_set_connected_channel(
       if ((channel_mgr__l_is_channel_connecting == true) &&
          (channel_mgr__l_is_channel_connected == false)) {
          channel_mgr_1__remove_cli_channel_connecting(channel_mgr__config_idx);
-         time_reference_bs__get_current_TimerReference(&channel_mgr__l_current_time);
+         time_reference_bs__get_current_TimeReference(&channel_mgr__l_current_time);
          channel_mgr_1__add_channel_connected(channel_mgr__channel,
             channel_mgr__l_current_time);
          channel_mgr_1__set_config(channel_mgr__channel,
@@ -320,6 +320,52 @@ void channel_mgr__is_auto_close_channel_active(
       channel_mgr_1__get_card_channel_used(&channel_mgr__l_card_used);
       constants__get_card_t_channel(&channel_mgr__l_card_channel);
       *channel_mgr__p_auto_closed_active = (channel_mgr__l_card_used >= constants__c_max_channels_connected);
+   }
+}
+
+void channel_mgr__set_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel) {
+   {
+      constants__t_timeref_i channel_mgr__l_end_lock_target_timeref;
+      
+      time_reference_bs__get_target_TimeReference(constants__c_channel_lock_create_session_delay,
+         &channel_mgr__l_end_lock_target_timeref);
+      channel_mgr_1__set_create_session_locked_1(channel_mgr__p_channel,
+         channel_mgr__l_end_lock_target_timeref);
+   }
+}
+
+void channel_mgr__update_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel) {
+   {
+      constants__t_timeref_i channel_mgr__l_current_timeref;
+      constants__t_timeref_i channel_mgr__l_target_timeref;
+      t_bool channel_mgr__l_target_not_reached;
+      
+      channel_mgr_1__get_create_session_locked_1(channel_mgr__p_channel,
+         &channel_mgr__l_target_timeref);
+      if (channel_mgr__l_target_timeref != constants__c_timeref_indet) {
+         time_reference_bs__get_current_TimeReference(&channel_mgr__l_current_timeref);
+         time_reference_bs__is_less_than_TimeReference(channel_mgr__l_current_timeref,
+            channel_mgr__l_target_timeref,
+            &channel_mgr__l_target_not_reached);
+         if (channel_mgr__l_target_not_reached == false) {
+            channel_mgr_1__set_create_session_locked_1(channel_mgr__p_channel,
+               constants__c_timeref_indet);
+         }
+      }
+   }
+}
+
+void channel_mgr__is_create_session_locked(
+   const constants__t_channel_i channel_mgr__p_channel,
+   t_bool * const channel_mgr__p_session_locked) {
+   {
+      constants__t_timeref_i channel_mgr__l_target_timeref;
+      
+      channel_mgr_1__get_create_session_locked_1(channel_mgr__p_channel,
+         &channel_mgr__l_target_timeref);
+      *channel_mgr__p_session_locked = (channel_mgr__l_target_timeref != constants__c_timeref_indet);
    }
 }
 

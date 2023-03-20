@@ -29,6 +29,7 @@ DEFINITIONS
     s_cli_channel_disconnecting,
     s_channel_connected,
     a_channel_connected_time,
+    a_channel_create_session_locked,
     a_config,
     a_reverse_endpoint_config,
     a_endpoint
@@ -40,6 +41,8 @@ DEFINITIONS
     s_channel_connected         <: t_channel                           &
     a_channel_connected_time     : t_channel +-> t_timeref             &
     dom(a_channel_connected_time) = s_channel_connected                &
+    a_channel_create_session_locked : t_channel +-> t_timeref          &
+    dom(a_channel_create_session_locked) = s_channel_connected         &
     a_config                     : t_channel +-> t_channel_config_idx  &
     a_reverse_endpoint_config    : t_channel +-> t_reverse_endpoint_config_idx_i &
     a_endpoint                   : t_channel +-> t_endpoint_config_idx
@@ -55,6 +58,7 @@ INITIALISATION
     s_cli_channel_disconnecting := {} ||
     s_channel_connected         := {} ||
     a_channel_connected_time    := {} ||
+    a_channel_create_session_locked := {} ||
     a_config                    := {} ||
     a_reverse_endpoint_config   := {} ||
     a_endpoint                  := {}
@@ -316,6 +320,25 @@ OPERATIONS
         p_channel : s_channel_connected
     THEN
         p_timeref :(p_timeref : t_timeref_i & p_timeref = a_channel_connected_time(p_channel))
+    END
+    ;
+
+    set_create_session_locked_1 (p_channel, p_timeref) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected &
+        p_timeref : t_timeref_i
+    THEN
+        a_channel_create_session_locked (p_channel) := p_timeref
+    END
+    ;
+
+    p_timeref <-- get_create_session_locked_1 (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : s_channel_connected
+    THEN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref = a_channel_create_session_locked (p_channel))
     END
 
 END

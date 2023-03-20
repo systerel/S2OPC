@@ -227,7 +227,7 @@ OPERATIONS
             l_dom = FALSE &
             l_allowed_new_sc = TRUE
         THEN
-            l_current_time <-- get_current_TimerReference;
+            l_current_time <-- get_current_TimeReference;
             add_channel_connected(channel, l_current_time);
             set_config(channel, channel_config_idx, c_reverse_endpoint_config_idx_indet);
             set_endpoint(channel, endpoint_config_idx);
@@ -308,7 +308,7 @@ OPERATIONS
             l_is_channel_connected = FALSE
         THEN
             remove_cli_channel_connecting(config_idx);
-            l_current_time <-- get_current_TimerReference;
+            l_current_time <-- get_current_TimeReference;
             add_channel_connected(channel, l_current_time);
             set_config(channel, config_idx, reverse_endpoint_config_idx);
             define_SecurityPolicy(channel);
@@ -341,6 +341,43 @@ OPERATIONS
         l_card_used <-- get_card_channel_used;
         l_card_channel <-- get_card_t_channel;
         p_auto_closed_active := bool(l_card_used >= c_max_channels_connected)
+    END
+    ;
+
+    set_create_session_locked (p_channel) =
+    VAR
+        l_end_lock_target_timeref
+    IN
+        l_end_lock_target_timeref <-- get_target_TimeReference (c_channel_lock_create_session_delay);
+        set_create_session_locked_1 (p_channel, l_end_lock_target_timeref)
+    END
+    ;
+
+    update_create_session_locked (p_channel) =
+    VAR
+        l_current_timeref,
+        l_target_timeref,
+        l_target_not_reached
+    IN
+        l_target_timeref <-- get_create_session_locked_1 (p_channel);
+        IF l_target_timeref /= c_timeref_indet
+        THEN
+            l_current_timeref <-- get_current_TimeReference;
+            l_target_not_reached <-- is_less_than_TimeReference(l_current_timeref, l_target_timeref);
+            IF l_target_not_reached = FALSE
+            THEN
+                set_create_session_locked_1 (p_channel, c_timeref_indet)
+            END
+        END
+    END
+    ;
+
+    p_session_locked <-- is_create_session_locked (p_channel) =
+    VAR
+        l_target_timeref
+    IN
+        l_target_timeref <-- get_create_session_locked_1 (p_channel);
+        p_session_locked := bool(l_target_timeref /= c_timeref_indet)
     END
 
 END
