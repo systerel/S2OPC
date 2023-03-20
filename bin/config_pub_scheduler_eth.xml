@@ -1,0 +1,24 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.eth://01-00-00-01-04-00" mode="publisher" interfaceName="lo" publisherId="123">
+        <message publishingInterval="50." groupId="14" groupVersion="1">
+            <!-- one to many -->
+            <dataset writerId="50">
+                <!-- one to many -->
+                <variable nodeId="ns=1;i=5" displayName="Toto" dataType="Boolean"/>
+            </dataset>
+            <dataset writerId="51">
+                <!-- one to many -->
+                <variable nodeId="ns=2;i=6" displayName="Titi" dataType="UInt32"/>
+                <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
+            </dataset>
+        </message>
+        <message publishingInterval="30." groupId="15">
+            <!-- one to many -->
+            <dataset writerId="52">
+                <!-- one to many -->
+                <variable nodeId="ns=1;i=2" displayName="Tata" dataType="Int16"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>

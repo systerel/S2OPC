@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <Anonymous>
+    <UserAuthorization/>
+  </Anonymous>
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
+    <!-- user="noaccess" pwd="secret" -->
+    <UserPassword user="noaccess" hash="19d8fd2b171d36c5149d6a48e530861e2c9e47f37f1e76e6ed870f1ece05ad6a" salt="135a2fa157056a355a33aa7f1934c3e7">
+      <UserAuthorization/>
+    </UserPassword>
+    <!-- user="user1" pwd="12345" -->
+    <UserPassword user="user1" hash="79a98299904928eb48145f5f0b1b4488f69f15e654c9593b82830ec56e05fa35" salt="ee506a036b8a8dbbb34b9a1695f0eecb">
+      <UserAuthorization write="true" read="false" execute="true" />
+    </UserPassword>
+    <!-- user="user2" pwd="password2" -->
+    <UserPassword user="user2" hash="65087a3ccd7bc2ff96ea881e9517b1843da7f7352666085db483c0f25f9034c8" salt="74785320953e51f12ecff4027233a694">
+      <UserAuthorization write="false" read="true" execute="true" />
+    </UserPassword>
+    <!-- user="user3" pwd="42" -->
+    <UserPassword user="user3" hash="24b30f26f6ea3206ddc4bb945f560f0fcd0242e63a265bcff7805d812840cb23" salt="988ec81df723d4e94be791dec58b321d">
+      <UserAuthorization  write="true" read="true" execute="false" />
+    </UserPassword>
+  </UserPasswordConfiguration>
+
+</S2OPC_Users>

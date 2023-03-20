@@ -1,0 +1,16 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="42">
+        <!-- one to many -->
+        <message groupId="14" publishingInterval="30." groupVersion="1" >
+            <dataset writerId="50">
+                <!-- one to many -->
+                <variable nodeId="ns=1;i=1" displayName="myByte" dataType="Byte"/>
+                <variable nodeId="ns=1;i=0" displayName="myUInt32" dataType="UInt32"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+
+
+
