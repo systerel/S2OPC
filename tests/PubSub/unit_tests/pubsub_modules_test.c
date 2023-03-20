@@ -434,8 +434,10 @@ START_TEST(test_hl_network_msg_decode_uni_keep_alive_dsm)
 
     SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(&encoded_network_keep_alive_msg, connection);
     const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
-    ck_assert_ptr_null(uadp_nm);
+    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
+    ck_assert_ptr_nonnull(uadp_nm);
+
+    check_network_msg_content_uni_keep_alive_dsm(uadp_nm->nm);
 
     SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_keep_alive_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

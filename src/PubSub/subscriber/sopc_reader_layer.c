@@ -21,6 +21,7 @@
 
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_network_layer.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_reader_layer.h"
@@ -200,13 +201,23 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
 {
     assert(NULL != dsm && NULL != reader);
     SOPC_ReturnStatus result = SOPC_STATUS_ENCODING_ERROR;
-
-    if (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm))
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    if (DataSet_LL_MessageType_KeepAlive == conf->DataSetMessageType)
     {
-        bool write_succes = (targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm));
-        if (write_succes)
+        result = SOPC_STATUS_OK;
+    }
+    else
+    {
+        if (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm))
         {
-            result = SOPC_STATUS_OK;
+            bool write_succes =
+                (targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm));
+            if (write_succes)
+            {
+                result = SOPC_STATUS_OK;
+            }
         }
     }
     return result;
