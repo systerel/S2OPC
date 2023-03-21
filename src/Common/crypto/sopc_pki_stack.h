@@ -199,12 +199,81 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
  */
 typedef struct SOPC_PKIProviderNew SOPC_PKIProviderNew;
 
-SOPC_ReturnStatus SOPC_PKIProvider_CreateFromBuffer(SOPC_CertificateList* pTrustedCerts,
-                                                    SOPC_CRLList* pTrustedCrl,
-                                                    SOPC_CertificateList* pIssuerCerts,
-                                                    SOPC_CRLList* pIssuerCrl,
-                                                    bool bBackwardInteroperability,
-                                                    SOPC_PKIProviderNew** ppPKI);
+/* Message digests for signatures */
+typedef enum
+{
+    SOPC_PKI_MD_SHA1,
+    SOPC_PKI_MD_SHA256,
+    SOPC_PKI_MD_SHA1_OR_ABOVE,
+    SOPC_PKI_MD_SHA256_OR_ABOVE,
+} SOPC_PKI_MdSign;
+
+/* Public key algorithms */
+typedef enum
+{
+    SOPC_PKI_PK_ANY,
+    SOPC_PKI_PK_RSA
+} SOPC_PKI_PkAlgo;
+
+/* Elliptic curves for ECDSA */
+typedef enum
+{
+    SOPC_PKI_CURVES_ANY,
+} SOPC_PKI_EllipticCurves;
+
+/* Key usage */
+typedef enum
+{
+    SOPC_PKI_KU_DISABLE_CHECK = 0x0000,
+    SOPC_PKI_KU_NON_REPUDIATION = 0x0001,
+    SOPC_PKI_KU_DIGITAL_SIGNATURE = 0x0002,
+    SOPC_PKI_KU_KEY_ENCIPHERMENT = 0x0004,
+    SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT = 0x0008,
+    SOPC_PKI_KU_KEY_CERT_SIGN = 0x0010,
+    SOPC_PKI_KU_KEY_CRL_SIGN = 0x00100
+} SOPC_PKI_KeyUsage_Mask;
+
+/**
+ * \brief Validation configuration for the leaf certificate.
+ */
+typedef struct SOPC_PKI_leafPropertiesConfig
+{
+    SOPC_PKI_MdSign mdSign;
+    SOPC_PKI_PkAlgo pkAlgo;
+    SOPC_PKI_KeyUsage_Mask keyUsage;
+    uint32_t RSAMinimumKeySize;
+    uint32_t RSAMaximumKeySize;
+} SOPC_PKI_leafPropertiesConfig;
+
+/**
+ * \brief Validation configuration for the chain.
+ */
+typedef struct SOPC_PKI_chainPropertiesConfig
+{
+    SOPC_PKI_MdSign mdSign;
+    SOPC_PKI_PkAlgo pkAlgo;
+    SOPC_PKI_EllipticCurves curves;
+    uint32_t RSAMinimumKeySize;
+} SOPC_PKI_chainPropertiesConfig;
+
+/**
+ * \brief Validation configuration
+ */
+typedef struct SOPC_PKIProvider_ValidConfig
+{
+    SOPC_PKI_leafPropertiesConfig leafProperties;   /**< Validation configuration for the leaf certificate. */
+    SOPC_PKI_chainPropertiesConfig chainProperties; /**< Validation configuration for the chain. */
+    bool bApplyleafProperties;                      /**< Apply the verification on leaf certificate */
+    bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
+                                         set to True will be marked as root CA and as trusted certificates.*/
+} SOPC_PKIProvider_ValidConfig;
+
+/* TODO RBA: Add uri and hostName */
+typedef struct SOPC_PKIProvider_ValidArg
+{
+    bool bIsAppServerCert; /**< server side */
+    bool bIsAppClientCert; /**< client side */
+} SOPC_PKIProvider_ValidArg;
 
 /**
  * \brief Create the PKIProvider from a directory where certificates are store.
@@ -248,8 +317,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromBuffer(SOPC_CertificateList* pTrust
  *
  * \param directoryStorePath The directory path where certificates are store.
  * \param bDefaultBuild Defined if the PKI is build from directory_store_name/default forlder.
- * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to True
- *                                 will be marked as root CA and as trusted certificates.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
  *
@@ -258,7 +325,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromBuffer(SOPC_CertificateList* pTrust
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
                                                       bool bDefaultBuild,
-                                                      bool bBackwardInteroperability,
                                                       SOPC_PKIProviderNew** ppPKI);
 
 /**
@@ -287,8 +353,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  * \param pIssuerCerts A valid pointer to the issuer certificate list. This object is
  *                      borrowed and is freed by SOPC_PKIProvider_Free.
  * \param pIssuerCrl A valid pointer to the issuer CRL list.
- * \param bBackwardInteroperability Defined if self-signed certificates whose basicConstraints CA flag set to
- *                                  True will be marked as root CA and as trusted certificates.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
  *
@@ -302,9 +366,28 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
                                                      SOPC_CRLList* pIssuerCrl,
-                                                     bool bBackwardInteroperability,
                                                      SOPC_PKIProviderNew** ppPKI);
 
+/** \brief Validation function for a certificate with the PKI chain
+ *
+ *   It implements the validation with the certificate chain of the PKI.
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ * \param pConfig A valid pointer to the configuration.
+ * \param pArgs A valid pointer to additional arguments. (Set to NULL if not used)
+ * \param error The OpcUa error code for certificate validation.
+ *
+ * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
+ *
+ * \return SOPC_STATUS_OK when the certificate is successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
+                                                                    SOPC_CertificateList* pToValidate,
+                                                                    SOPC_PKIProvider_ValidConfig* pConfig,
+                                                                    SOPC_PKIProvider_ValidArg* pArgs,
+                                                                    uint32_t* error);
 /**
  * \brief   Free a PKI provider.
  */
