@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 08/03/2023 15:55:44
+ Date                 : 21/03/2023 10:00:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -274,6 +274,7 @@ void session_mgr__server_receive_session_req(
       constants__t_channel_config_idx_i session_mgr__l_channel_config_idx;
       constants__t_endpoint_config_idx_i session_mgr__l_endpoint_config_idx;
       t_bool session_mgr__l_has_user_token_policy_available;
+      t_bool session_mgr__l_session_creation_locked;
       t_bool session_mgr__l_timer_creation_ok;
       constants__t_user_i session_mgr__l_user;
       constants__t_SignatureData_i session_mgr__l_user_token_signature;
@@ -290,7 +291,10 @@ void session_mgr__server_receive_session_req(
          session_core__has_user_token_policy_available(session_mgr__l_channel_config_idx,
             session_mgr__l_endpoint_config_idx,
             &session_mgr__l_has_user_token_policy_available);
-         if (session_mgr__l_has_user_token_policy_available == true) {
+         channel_mgr__is_create_session_locked(session_mgr__channel,
+            &session_mgr__l_session_creation_locked);
+         if ((session_mgr__l_has_user_token_policy_available == true) &&
+            (session_mgr__l_session_creation_locked == false)) {
             session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
                session_mgr__req_msg,
                session_mgr__resp_msg,
@@ -307,8 +311,11 @@ void session_mgr__server_receive_session_req(
                }
             }
          }
-         else {
+         else if (session_mgr__l_has_user_token_policy_available == false) {
             *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_service_unsupported;
+         }
+         else {
+            *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_too_many_sessions;
          }
          break;
       case constants__e_msg_session_activate_req:

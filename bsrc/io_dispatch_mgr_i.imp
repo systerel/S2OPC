@@ -368,6 +368,7 @@ OPERATIONS
                         /* Server receiving a request: OK */
                         CASE l_msg_service_class OF
                             EITHER e_msg_session_treatment_class THEN
+                                update_create_session_locked(channel);
                                 l_valid_req, l_sc, l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
                                 l_valid_req, l_async_resp, l_sc, l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
@@ -387,8 +388,8 @@ OPERATIONS
                             IF l_sc = e_sc_bad_security_checks_failed
                             THEN
                                 /* A security check failed occurred (user auth repeated failures),
-                                the Secure Channel will be closed as countermeasure. */
-                                send_channel_error_msg(channel, l_sc, request_context)
+                                the Secure Channel will lock sessions creation for a period of time as countermeasure. */
+                                set_create_session_locked (channel)
                             END
                         ELSIF l_valid_req = TRUE & l_async_resp = FALSE
                         THEN

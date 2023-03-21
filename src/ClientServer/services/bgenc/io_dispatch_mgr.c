@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 08/03/2023 15:55:30
+ Date                 : 21/03/2023 10:00:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -305,6 +305,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                (io_dispatch_mgr__l_valid_req_context == true)) {
                switch (io_dispatch_mgr__l_msg_service_class) {
                case constants__e_msg_session_treatment_class:
+                  channel_mgr__update_create_session_locked(io_dispatch_mgr__channel);
                   service_mgr__server_receive_session_treatment_req(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer,
@@ -342,9 +343,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                      io_dispatch_mgr__l_buffer_out,
                      io_dispatch_mgr__request_context);
                   if (io_dispatch_mgr__l_sc == constants_statuscodes_bs__e_sc_bad_security_checks_failed) {
-                     service_mgr__send_channel_error_msg(io_dispatch_mgr__channel,
-                        io_dispatch_mgr__l_sc,
-                        io_dispatch_mgr__request_context);
+                     channel_mgr__set_create_session_locked(io_dispatch_mgr__channel);
                   }
                }
                else if ((io_dispatch_mgr__l_valid_req == true) &&

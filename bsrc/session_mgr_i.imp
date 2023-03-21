@@ -362,6 +362,7 @@ OPERATIONS
         l_channel_config_idx,
         l_endpoint_config_idx,
         l_has_user_token_policy_available,
+        l_session_creation_locked,
         l_timer_creation_ok,
         l_user,
         l_user_token_signature
@@ -377,7 +378,8 @@ OPERATIONS
                 l_channel_config_idx <-- get_channel_info (channel);
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
                 l_has_user_token_policy_available <-- has_user_token_policy_available (l_channel_config_idx, l_endpoint_config_idx);
-                IF l_has_user_token_policy_available = TRUE
+                l_session_creation_locked <-- is_create_session_locked (channel);
+                IF l_has_user_token_policy_available = TRUE & l_session_creation_locked = FALSE
                 THEN
                     session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg);
                     IF service_ret = e_sc_ok
@@ -389,8 +391,12 @@ OPERATIONS
                             server_close_session_sm (session, e_sc_bad_resource_unavailable)
                         END
                     END
-                ELSE
+                ELSIF l_has_user_token_policy_available = FALSE
+                THEN
                     service_ret := e_sc_bad_service_unsupported
+                ELSE
+                    /* session creation is locked for this secure channel for now */
+                    service_ret := e_sc_bad_too_many_sessions
                 END
             OR e_msg_session_activate_req THEN
                 // SESSION ACTIVATION REQUEST
