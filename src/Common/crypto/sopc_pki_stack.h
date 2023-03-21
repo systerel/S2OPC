@@ -266,14 +266,14 @@ typedef struct SOPC_PKIProvider_ValidConfig
     bool bApplyleafProperties;                      /**< Apply the verification on leaf certificate */
     bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
                                          set to True will be marked as root CA and as trusted certificates.*/
-} SOPC_PKIProvider_ValidConfig;
+} SOPC_PKI_ValidConfig;
 
 /* TODO RBA: Add uri and hostName */
 typedef struct SOPC_PKIProvider_ValidArg
 {
     bool bIsAppServerCert; /**< server side */
     bool bIsAppClientCert; /**< client side */
-} SOPC_PKIProvider_ValidArg;
+} SOPC_PKI_ValidArg;
 
 /**
  * \brief Create the PKIProvider from a directory where certificates are store.
@@ -385,9 +385,28 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
                                                                     SOPC_CertificateList* pToValidate,
-                                                                    SOPC_PKIProvider_ValidConfig* pConfig,
-                                                                    SOPC_PKIProvider_ValidArg* pArgs,
+                                                                    SOPC_PKI_ValidConfig* pConfig,
+                                                                    SOPC_PKI_ValidArg* pArgs,
                                                                     uint32_t* error);
+
+/** \brief Validation function for a leaf certificate
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ * \param pConfig A valid pointer to the configuration.
+ * \param pArgs A valid pointer to additional arguments. (Set to NULL if not used)
+ * \param error The OpcUa error code for certificate validation.
+ *
+ * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
+ *
+ * \return SOPC_STATUS_OK when the certificate is successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
+                                                          SOPC_CertificateList* pToValidate,
+                                                          SOPC_PKI_leafPropertiesConfig* pConfig,
+                                                          SOPC_PKI_ValidArg* pArgs,
+                                                          uint32_t* error);
 /**
  * \brief   Free a PKI provider.
  */

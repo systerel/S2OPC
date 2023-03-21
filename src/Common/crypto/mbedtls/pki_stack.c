@@ -847,7 +847,7 @@ static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pk
 
 static SOPC_ReturnStatus check_certificate_usage(SOPC_CertificateList* pToValidate,
                                                  SOPC_PKI_leafPropertiesConfig* pConfig,
-                                                 SOPC_PKIProvider_ValidArg* pArgs)
+                                                 SOPC_PKI_ValidArg* pArgs)
 {
     unsigned int usages = 0;
     int err = 0;
@@ -944,8 +944,8 @@ static SOPC_ReturnStatus set_profile_from_configuration(SOPC_PKI_chainProperties
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
                                                                     SOPC_CertificateList* pToValidate,
-                                                                    SOPC_PKIProvider_ValidConfig* pConfig,
-                                                                    SOPC_PKIProvider_ValidArg* pArgs,
+                                                                    SOPC_PKI_ValidConfig* pConfig,
+                                                                    SOPC_PKI_ValidArg* pArgs,
                                                                     uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pConfig || NULL == error)
@@ -970,7 +970,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
         status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidate, &bIsTrusted);
         if (SOPC_STATUS_OK != status)
         {
-            return SOPC_STATUS_INVALID_PARAMETERS;
+            return SOPC_STATUS_NOK;
         }
     }
     else
@@ -979,31 +979,16 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
         status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidate, &bIsTrusted);
         if (SOPC_STATUS_OK != status)
         {
-            return SOPC_STATUS_INVALID_PARAMETERS;
+            return SOPC_STATUS_NOK;
         }
     }
     /* Apply verification on the certificate */
     if (pConfig->bApplyleafProperties)
     {
-        /*
-        TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
-            1. check_security_policy(pToValidate, pConfig->leafProperties)
-            2. check_host_name(pToValidate, pArgs->hostName)
-            3. check_uri(pToValidate, pArgs->uri)
-            4. check_certificate_usage(pToValidate, pConfig->leafProperties, leafProperties->bIsServer)
-        */
-        status = check_security_policy(pToValidate, &pConfig->leafProperties);
+        status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pToValidate, &pConfig->leafProperties, pArgs, error);
         if (SOPC_STATUS_OK != status)
         {
-            *error = SOPC_CertificateValidationError_Invalid; // TODO RBA: replace by Bad_CertificatePolicyCheckFailed?
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = check_certificate_usage(pToValidate, &pConfig->leafProperties, pArgs);
-            if (SOPC_STATUS_OK != status)
-            {
-                *error = SOPC_CertificateValidationError_UseNotAllowed;
-            }
+            return SOPC_STATUS_NOK;
         }
     }
     /* Set the profile from configuration */
@@ -1044,6 +1029,42 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
 
     /* Unlink end_of_chall, otherwise destroying the pToValidate will also destroy trusted or untrusted links */
     end_of_chall->next = NULL;
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
+                                                          SOPC_CertificateList* pToValidate,
+                                                          SOPC_PKI_leafPropertiesConfig* pConfig,
+                                                          SOPC_PKI_ValidArg* pArgs,
+                                                          uint32_t* error)
+{
+    if (NULL == pPKI || NULL == pToValidate || NULL == pConfig || NULL == error)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *error = SOPC_CertificateValidationError_Unkown;
+    /*
+    TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
+        1. check_security_policy(pToValidate, pConfig)
+        2. check_host_name(pToValidate, pArgs)
+        3. check_uri(pToValidate, pArgs)
+        4. check_certificate_usage(pToValidate, pConfig, pArgs)
+    */
+    SOPC_ReturnStatus status = check_security_policy(pToValidate, pConfig);
+    if (SOPC_STATUS_OK != status)
+    {
+        *error = SOPC_CertificateValidationError_Invalid; // TODO RBA: replace by Bad_CertificatePolicyCheckFailed?
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = check_certificate_usage(pToValidate, pConfig, pArgs);
+        if (SOPC_STATUS_OK != status)
+        {
+            *error = SOPC_CertificateValidationError_UseNotAllowed;
+        }
+    }
 
     return status;
 }
