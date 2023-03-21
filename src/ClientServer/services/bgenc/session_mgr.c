@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 21/03/2023 10:00:49
+ Date                 : 21/03/2023 17:41:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -275,6 +275,7 @@ void session_mgr__server_receive_session_req(
       constants__t_endpoint_config_idx_i session_mgr__l_endpoint_config_idx;
       t_bool session_mgr__l_has_user_token_policy_available;
       t_bool session_mgr__l_session_creation_locked;
+      t_entier4 session_mgr__l_nb_sessions_on_SC;
       t_bool session_mgr__l_timer_creation_ok;
       constants__t_user_i session_mgr__l_user;
       constants__t_SignatureData_i session_mgr__l_user_token_signature;
@@ -293,8 +294,11 @@ void session_mgr__server_receive_session_req(
             &session_mgr__l_has_user_token_policy_available);
          channel_mgr__is_create_session_locked(session_mgr__channel,
             &session_mgr__l_session_creation_locked);
-         if ((session_mgr__l_has_user_token_policy_available == true) &&
-            (session_mgr__l_session_creation_locked == false)) {
+         session_core__get_channel_nb_sessions(session_mgr__channel,
+            &session_mgr__l_nb_sessions_on_SC);
+         if (((session_mgr__l_has_user_token_policy_available == true) &&
+            (session_mgr__l_session_creation_locked == false)) &&
+            (session_mgr__l_nb_sessions_on_SC < constants__c_max_sessions_per_channel)) {
             session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
                session_mgr__req_msg,
                session_mgr__resp_msg,

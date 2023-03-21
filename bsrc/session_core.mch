@@ -650,6 +650,19 @@ OPERATIONS
     END
     ;
 
+    p_nb_sessions <-- get_channel_nb_sessions (p_channel) =
+    PRE
+        p_channel : t_channel_i &
+        p_channel : t_channel
+    THEN
+        p_nb_sessions
+        :(p_nb_sessions : NAT &
+            (p_channel : dom(a_channel~) => p_nb_sessions = card(a_channel~[{p_channel}])) &
+            (p_channel /: dom(a_channel~) => p_nb_sessions = 0)
+        )
+    END
+    ;
+
     reset_session_to_create(p_session) =
     PRE
         p_session : t_session_i &

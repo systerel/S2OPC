@@ -130,6 +130,11 @@
 #define SOPC_MAX_SESSIONS 20
 #endif /* SOPC_MAX_SESSIONS */
 
+/** @brief Maximum number of sessions per secure channel connection */
+#ifndef SOPC_MAX_SESSIONS_PER_SECURE_CONNECTION
+#define SOPC_MAX_SESSIONS_PER_SECURE_CONNECTION 5
+#endif
+
 /** @brief Client requested timeout for which a session shall remain open without activity */
 #ifndef SOPC_REQUESTED_SESSION_TIMEOUT
 #define SOPC_REQUESTED_SESSION_TIMEOUT 60000 // 60 seconds

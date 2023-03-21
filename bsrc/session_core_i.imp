@@ -47,6 +47,7 @@ PROMOTES
     client_get_token_from_session,
     getall_session_channel,
     get_session_channel,
+    get_channel_nb_sessions,
     set_session_to_create,
     set_session_app_context,
     getall_to_create,

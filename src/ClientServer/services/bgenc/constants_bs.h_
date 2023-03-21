@@ -21,7 +21,7 @@
 
  File Name            : constants_bs.h
 
- Date                 : 21/03/2023 09:18:06
+ Date                 : 21/03/2023 17:41:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -241,6 +241,7 @@
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
 #define constants_bs__c_max_channels_connected 0
+#define constants_bs__c_max_sessions_per_channel 0
 #define constants_bs__c_monitoredItemId_indet 0
 #define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0

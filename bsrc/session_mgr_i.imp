@@ -363,6 +363,7 @@ OPERATIONS
         l_endpoint_config_idx,
         l_has_user_token_policy_available,
         l_session_creation_locked,
+        l_nb_sessions_on_SC,
         l_timer_creation_ok,
         l_user,
         l_user_token_signature
@@ -377,9 +378,13 @@ OPERATIONS
                 // This status code is reported in all error cases
                 l_channel_config_idx <-- get_channel_info (channel);
                 l_endpoint_config_idx <-- server_get_endpoint_config (channel);
+                /* Check at least 1 user policy available for using a session */
                 l_has_user_token_policy_available <-- has_user_token_policy_available (l_channel_config_idx, l_endpoint_config_idx);
+                /* Check session creation is not locked for this SC */
                 l_session_creation_locked <-- is_create_session_locked (channel);
-                IF l_has_user_token_policy_available = TRUE & l_session_creation_locked = FALSE
+                /* Check the maximum number of sessions on the SC is not reached */
+                l_nb_sessions_on_SC <-- get_channel_nb_sessions (channel);
+                IF l_has_user_token_policy_available = TRUE & l_session_creation_locked = FALSE & l_nb_sessions_on_SC < c_max_sessions_per_channel
                 THEN
                     session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg);
                     IF service_ret = e_sc_ok
@@ -395,7 +400,7 @@ OPERATIONS
                 THEN
                     service_ret := e_sc_bad_service_unsupported
                 ELSE
-                    /* session creation is locked for this secure channel for now */
+                    /* session creation is locked for this secure channel for now or max number of sessions for this SC is reached */
                     service_ret := e_sc_bad_too_many_sessions
                 END
             OR e_msg_session_activate_req THEN

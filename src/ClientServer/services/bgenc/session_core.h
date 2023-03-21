@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 08/03/2023 14:49:57
+ Date                 : 21/03/2023 17:41:43
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -69,6 +69,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
 #define session_core__deallocate_user user_authentication__deallocate_user
 #define session_core__drop_user_server session_core_1__drop_user_server
+#define session_core__get_channel_nb_sessions session_core_1__get_channel_nb_sessions
 #define session_core__get_local_user user_authentication__get_local_user
 #define session_core__get_server_session_preferred_locales session_core_1__get_server_session_preferred_locales
 #define session_core__get_session_channel session_core_1__get_session_channel
