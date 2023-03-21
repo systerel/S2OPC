@@ -236,7 +236,7 @@ typedef enum
 /**
  * \brief Validation configuration for the leaf certificate.
  */
-typedef struct SOPC_PKI_leafPropertiesConfig
+typedef struct SOPC_PKI_LeafPropertiesConfig
 {
     SOPC_PKI_MdSign mdSign;
     SOPC_PKI_PkAlgo pkAlgo;
@@ -280,27 +280,29 @@ typedef struct SOPC_PKIProvider_ValidArg
  *
  * The directory store shall be form as following:
  *
- * - Directory_store_name/default/trusted/certs (individual cert with .DER format)
- * - Directory_store_name/default/trusted/crls (individual cert with .DER format)
- * - Directory_store_name/default/issuers/certs (individual cert with .DER format)
- * - Directory_store_name/default/issuers/crls (individual cert with .DER format)
+ * - Directory_store_name/default/trusted/certs (.DER files)
+ * - Directory_store_name/default/trusted/crl (.DER files)
+ * - Directory_store_name/default/issuers/certs (.DER files)
+ * - Directory_store_name/default/issuers/crl (.DER files)
  *
- * - Directory_store_name/trustList/trusted/certs (individual cert with .DER format)
- * - Directory_store_name/trustList/trusted/crls (individual cert with .DER format)
- * - Directory_store_name/trustList/issuers/certs (individual cert with .DER format)
- * - Directory_store_name/trustList/issuers/crls (individual cert with .DER format)
+ * - Directory_store_name/trustList/trusted/certs (.DER files)
+ * - Directory_store_name/trustList/trusted/crl (.DER files)
+ * - Directory_store_name/trustList/issuers/certs (.DER files)
+ * - Directory_store_name/trustList/issuers/crl (.DER files)
  *
  * The trustList could be empty but not the default fodler.
  * Default folder is use when \p bDefaultBuild is set to True.
  * If \p bDefaultBuild is set to False, the function attempts to build the PKI from the trustList folder
  * and in case of error, it switches from the default folder.
+ * For both folders, default and trustList, each subfolder certs and crl is mandatory.
+ *
  *
  * Notions :
  * - CA is a root CA if it is self-signed.
  * - trusted/certs = trusted root CA + trusted link CA + trusted cert.
- * - trusted/crls = CRLs of the trusted root CA + trusted link CA.
+ * - trusted/crl = CRLs of the trusted root CA + trusted link CA.
  * - issuer/certs = untrusted root CA + untrusted link CA.
- * - issuer/crls = CRLs of the untrusted root CA + untrusted link CA.
+ * - issuer/crl = CRLs of the untrusted root CA + untrusted link CA.
  * - CAs from trusted/certs and issuers/certs allow to verify the signing chain of a cert which is included into
  *   trusted/certs.
  * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
@@ -347,11 +349,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  * - todo: That each CA keyUsage is filed with keyCertSign and keyCrlSign.
  * - todo: That the chain of signatures is rigth for each certificate.
  *
- * \param pTrustedCerts A valid pointer to the trusted certificate list. This object is borrowed and is freed by
- *                      SOPC_PKIProvider_Free.
+ * \param pTrustedCerts A valid pointer to the trusted certificate list.
  * \param pTrustedCrl A valid pointer to the trusted CRL list.
- * \param pIssuerCerts A valid pointer to the issuer certificate list. This object is
- *                      borrowed and is freed by SOPC_PKIProvider_Free.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list.
  * \param pIssuerCrl A valid pointer to the issuer CRL list.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
