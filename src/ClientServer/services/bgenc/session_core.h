@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 21/03/2023 17:41:43
+ Date                 : 22/03/2023 10:04:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -183,6 +183,7 @@ extern void session_core__is_session_valid_for_service(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
    t_bool * const session_core__ret);
+extern void session_core__may_close_unactivated_session(void);
 extern void session_core__server_activate_session_req_and_resp_sm(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,

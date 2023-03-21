@@ -872,11 +872,6 @@ OPERATIONS
     END
     ;
 
-    service_mgr_UNINITIALISATION =
-    BEGIN
-        skip
-    END
-    ;
 
     p_has_channel_to_close, p_channel_to_close <-- find_channel_to_close =
     BEGIN
@@ -887,6 +882,12 @@ OPERATIONS
             (p_has_channel_to_close = TRUE => p_channel_to_close : s_channel_connected) &
             (p_has_channel_to_close = FALSE => p_channel_to_close = c_channel_indet)
         )
+    END
+    ;
+
+    service_mgr_UNINITIALISATION =
+    BEGIN
+        skip
     END
 
 END

@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 20/03/2023 15:38:46
+ Date                 : 22/03/2023 10:04:21
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -51,6 +51,7 @@
 #include "message_in_bs.h"
 #include "message_out_bs.h"
 #include "request_handle_bs.h"
+#include "time_reference_bs.h"
 
 /*------------------------
    INITIALISATION Clause
@@ -135,9 +136,14 @@ extern void session_core_1__create_session(
    const constants__t_channel_i session_core_1__channel,
    const constants__t_sessionState session_core_1__state,
    const t_bool session_core_1__is_client);
+extern void session_core_1__find_session_to_close(
+   t_bool * const session_core_1__p_has_session_to_close,
+   constants__t_session_i * const session_core_1__p_session_to_close);
 extern void session_core_1__init_new_session(
    const t_bool session_core_1__is_client,
    constants__t_session_i * const session_core_1__p_session);
+extern void session_core_1__is_auto_close_session_active(
+   t_bool * const session_core_1__p_auto_closed_active);
 extern void session_core_1__set_server_session_preferred_locales_or_indet(
    const constants__t_session_i session_core_1__p_session,
    const constants__t_LocaleIds_i session_core_1__p_localesIds);

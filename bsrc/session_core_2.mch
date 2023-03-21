@@ -30,6 +30,7 @@ SEES
 ABSTRACT_VARIABLES
     s_session,
     a_state,
+    a_session_init_time,
     a_channel,
     a_channel_nb_sessions,
     a_client_to_create,
@@ -40,6 +41,7 @@ ABSTRACT_VARIABLES
 INVARIANT
     s_session         <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
+    a_session_init_time : t_session +-> t_timeref             &
     a_channel          : t_session +-> t_channel              &
     a_channel_nb_sessions : t_channel --> NAT                 &
     a_client_to_create : t_session +-> t_channel_config_idx_i &
@@ -50,6 +52,7 @@ INVARIANT
 INITIALISATION
     s_session          := {} ||
     a_state            := {} ||
+    a_session_init_time := {} ||
     a_channel          := {} ||
     a_channel_nb_sessions := t_channel * {0} ||
     a_client_to_create := {} ||
@@ -59,14 +62,16 @@ INITIALISATION
 
 OPERATIONS
 
-    add_session(p_session, p_state) =
+    add_session(p_session, p_timeref) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
-        p_state   : t_sessionState
+        p_timeref : t_timeref_i &
+        p_timeref : t_timeref
     THEN
         s_session := s_session \/ {p_session} ||
-        a_state(p_session) := p_state
+        a_state(p_session) := e_session_init ||
+        a_session_init_time(p_session) := p_timeref
     END
     ;
 
@@ -76,7 +81,8 @@ OPERATIONS
         p_session : t_session
     THEN
         s_session := s_session - {p_session} ||
-        a_state   := {p_session} <<| a_state
+        a_state   := {p_session} <<| a_state ||
+        a_session_init_time := {p_session} <<| a_session_init_time
     END
     ;
 
@@ -326,6 +332,21 @@ OPERATIONS
         p_session : dom(a_server_user_auth_attempts)
     THEN
         p_attempts := a_server_user_auth_attempts(p_session)
+    END
+    ;
+
+    p_timeref <-- get_init_time(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : dom(a_session_init_time)
+    THEN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref = a_session_init_time(p_session))
+    END
+    ;
+
+    p_nb_sessions <-- get_card_s_session =
+    BEGIN
+        p_nb_sessions := card(s_session)
     END
 
 END

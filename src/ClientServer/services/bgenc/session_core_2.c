@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 21/03/2023 16:09:35
+ Date                 : 22/03/2023 10:04:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -41,7 +41,9 @@ constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants_
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
+constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
 constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
+t_entier4 session_core_2__card_s_session_i;
 t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
 /*------------------------
@@ -54,10 +56,17 @@ void session_core_2__INITIALISATION(void) {
          session_core_2__s_session_i[i] = false;
       }
    }
+   session_core_2__card_s_session_i = 0;
    {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
          session_core_2__a_state_i[i] = constants__e_session_closed;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_session_init_time_i[i] = constants__c_timeref_indet;
       }
    }
    {
@@ -103,14 +112,20 @@ void session_core_2__INITIALISATION(void) {
   --------------------*/
 void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionState session_core_2__p_state) {
+   const constants__t_timeref_i session_core_2__p_timeref) {
    session_core_2__s_session_i[session_core_2__p_session] = true;
-   session_core_2__a_state_i[session_core_2__p_session] = session_core_2__p_state;
+   session_core_2__card_s_session_i = session_core_2__card_s_session_i +
+      1;
+   session_core_2__a_state_i[session_core_2__p_session] = constants__e_session_init;
+   session_core_2__a_session_init_time_i[session_core_2__p_session] = session_core_2__p_timeref;
 }
 
 void session_core_2__remove_session(
    const constants__t_session_i session_core_2__p_session) {
    session_core_2__s_session_i[session_core_2__p_session] = false;
+   session_core_2__card_s_session_i = session_core_2__card_s_session_i -
+      1;
+   session_core_2__a_session_init_time_i[session_core_2__p_session] = constants__c_timeref_indet;
 }
 
 void session_core_2__reset_session_channel(
@@ -264,5 +279,16 @@ void session_core_2__get_server_session_user_auth_attempts(
    const constants__t_session_i session_core_2__p_session,
    t_entier4 * const session_core_2__p_attempts) {
    *session_core_2__p_attempts = session_core_2__a_server_user_auth_attempts_i[session_core_2__p_session];
+}
+
+void session_core_2__get_init_time(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_timeref_i * const session_core_2__p_timeref) {
+   *session_core_2__p_timeref = session_core_2__a_session_init_time_i[session_core_2__p_session];
+}
+
+void session_core_2__get_card_s_session(
+   t_entier4 * const session_core_2__p_nb_sessions) {
+   *session_core_2__p_nb_sessions = session_core_2__card_s_session_i;
 }
 

@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 20/03/2023 15:38:47
+ Date                 : 22/03/2023 10:04:22
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -53,7 +53,9 @@ extern constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[con
 extern constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
 extern constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 extern t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
+extern constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
 extern constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
+extern t_entier4 session_core_2__card_s_session_i;
 extern t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
 /*------------------------
@@ -66,10 +68,15 @@ extern void session_core_2__INITIALISATION(void);
   --------------------*/
 extern void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionState session_core_2__p_state);
+   const constants__t_timeref_i session_core_2__p_timeref);
+extern void session_core_2__get_card_s_session(
+   t_entier4 * const session_core_2__p_nb_sessions);
 extern void session_core_2__get_channel_nb_sessions(
    const constants__t_channel_i session_core_2__p_channel,
    t_entier4 * const session_core_2__p_nb_sessions);
+extern void session_core_2__get_init_time(
+   const constants__t_session_i session_core_2__p_session,
+   constants__t_timeref_i * const session_core_2__p_timeref);
 extern void session_core_2__get_server_session_preferred_locales(
    const constants__t_session_i session_core_2__p_session,
    constants__t_LocaleIds_i * const session_core_2__p_localeIds);

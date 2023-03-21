@@ -409,6 +409,7 @@ CONCRETE_CONSTANTS
     c_max_channels_connected,
     c_max_sessions_per_channel,
     c_channel_lock_create_session_delay,
+    c_session_activation_min_delay,
     c_client_request_handle_indet,
     c_server_request_handle_any,
     c_no_application_context,
@@ -710,6 +711,7 @@ PROPERTIES
     c_max_channels_connected : NAT &
     c_max_sessions_per_channel : NAT &
     c_channel_lock_create_session_delay : NAT &
+    c_session_activation_min_delay : NAT &
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
@@ -720,6 +722,7 @@ PROPERTIES
     c_reverse_endpoint_config_idx_indet /: t_reverse_endpoint_config_idx &
 
     t_session <: t_session_i &
+    t_session /= {} &
     c_session_indet : t_session_i &
     c_session_indet /: t_session &
     cast_t_session : NAT +-> t_session_i &

@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 08/03/2023 17:48:14
+ Date                 : 22/03/2023 12:05:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -79,6 +79,7 @@ void session_core_1__init_new_session(
    {
       t_bool session_core_1__l_is_session;
       t_bool session_core_1__l_continue;
+      constants__t_timeref_i session_core_1__l_current_time;
       
       *session_core_1__p_session = constants__c_session_indet;
       session_core_1__l_is_session = true;
@@ -96,8 +97,9 @@ void session_core_1__init_new_session(
          *session_core_1__p_session = constants__c_session_indet;
       }
       else {
+         time_reference_bs__get_current_TimeReference(&session_core_1__l_current_time);
          session_core_2__add_session(*session_core_1__p_session,
-            constants__e_session_init);
+            session_core_1__l_current_time);
          session_core_bs__notify_set_session_state(*session_core_1__p_session,
             constants__e_session_closed,
             constants__e_session_init,
@@ -219,6 +221,86 @@ void session_core_1__check_server_session_user_auth_attempts(
             session_core_1__l_attempts);
          *session_core_1__p_max_reached = (session_core_1__l_attempts >= constants__k_n_UserAuthAttempts_max);
       }
+   }
+}
+
+void session_core_1__find_session_to_close(
+   t_bool * const session_core_1__p_has_session_to_close,
+   constants__t_session_i * const session_core_1__p_session_to_close) {
+   {
+      t_bool session_core_1__l_continue;
+      constants__t_session_i session_core_1__l_session;
+      t_bool session_core_1__l_valid_session;
+      constants__t_sessionState session_core_1__l_state;
+      constants__t_timeref_i session_core_1__l_timeref;
+      t_bool session_core_1__l_is_older_than;
+      constants__t_session_i session_core_1__l_oldest_session;
+      constants__t_timeref_i session_core_1__l_oldest_session_timeref;
+      constants__t_timeref_i session_core_1__l_min_timeref_req;
+      constants__t_timeref_i session_core_1__l_current_timeref;
+      
+      session_core_1__l_oldest_session = constants__c_session_indet;
+      session_core_1__l_oldest_session_timeref = constants__c_timeref_indet;
+      session_core_1_it__init_iter_session(&session_core_1__l_continue);
+      while (session_core_1__l_continue == true) {
+         session_core_1_it__continue_iter_session(&session_core_1__l_continue,
+            &session_core_1__l_session);
+         session_core_2__is_valid_session(session_core_1__l_session,
+            &session_core_1__l_valid_session);
+         if (session_core_1__l_valid_session == true) {
+            session_core_2__get_session_state(session_core_1__l_session,
+               &session_core_1__l_state);
+            if (session_core_1__l_state == constants__e_session_created) {
+               session_core_2__get_init_time(session_core_1__l_session,
+                  &session_core_1__l_timeref);
+               if (session_core_1__l_oldest_session_timeref == constants__c_timeref_indet) {
+                  time_reference_bs__add_delay_TimeReference(session_core_1__l_timeref,
+                     constants__c_session_activation_min_delay,
+                     &session_core_1__l_min_timeref_req);
+                  time_reference_bs__get_current_TimeReference(&session_core_1__l_current_timeref);
+                  time_reference_bs__is_less_than_TimeReference(session_core_1__l_min_timeref_req,
+                     session_core_1__l_current_timeref,
+                     &session_core_1__l_is_older_than);
+                  if (session_core_1__l_is_older_than == true) {
+                     session_core_1__l_oldest_session_timeref = session_core_1__l_timeref;
+                     session_core_1__l_oldest_session = session_core_1__l_session;
+                  }
+               }
+               else {
+                  time_reference_bs__is_less_than_TimeReference(session_core_1__l_timeref,
+                     session_core_1__l_oldest_session_timeref,
+                     &session_core_1__l_is_older_than);
+                  if (session_core_1__l_is_older_than == true) {
+                     session_core_1__l_oldest_session_timeref = session_core_1__l_timeref;
+                     session_core_1__l_oldest_session = session_core_1__l_session;
+                  }
+               }
+            }
+         }
+      }
+      if (session_core_1__l_oldest_session_timeref == constants__c_timeref_indet) {
+         *session_core_1__p_has_session_to_close = false;
+         *session_core_1__p_session_to_close = constants__c_session_indet;
+      }
+      else {
+         *session_core_1__p_has_session_to_close = true;
+         *session_core_1__p_session_to_close = session_core_1__l_oldest_session;
+      }
+   }
+}
+
+void session_core_1__is_auto_close_session_active(
+   t_bool * const session_core_1__p_auto_closed_active) {
+   {
+      t_entier4 session_core_1__l_t_session_card;
+      t_entier4 session_core_1__l_s_session_card;
+      t_entier4 session_core_1__l_avail_session_card;
+      
+      constants__get_card_t_session(&session_core_1__l_t_session_card);
+      session_core_2__get_card_s_session(&session_core_1__l_s_session_card);
+      session_core_1__l_avail_session_card = session_core_1__l_t_session_card -
+         session_core_1__l_s_session_card;
+      *session_core_1__p_auto_closed_active = (session_core_1__l_avail_session_card <= 1);
    }
 }
 

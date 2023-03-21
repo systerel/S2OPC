@@ -215,6 +215,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_request_context_indet 0
 #define constants_bs__c_reverse_endpoint_config_idx_indet 0
 #define constants_bs__c_server_request_handle_any 0
+#define constants_bs__c_session_activation_min_delay SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS
 #define constants_bs__c_session_indet 0
 #define constants_bs__c_session_token_indet 0
 #define constants_bs__c_sub_seq_num_indet 0

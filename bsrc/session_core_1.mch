@@ -944,5 +944,25 @@ OPERATIONS
                 p_max_reached = bool(a_server_user_auth_attempts(p_session) >= k_n_UserAuthAttempts_max))
         )
     END
+    ;
+
+    p_has_session_to_close, p_session_to_close <-- find_session_to_close =
+    BEGIN
+        p_has_session_to_close,
+        p_session_to_close
+        :(p_has_session_to_close : BOOL &
+          p_session_to_close : t_session_i &
+          (p_has_session_to_close = FALSE => p_session_to_close = c_session_indet) &
+          /* Returns the oldest session that is not yet activated */
+          (p_has_session_to_close = TRUE => a_state(p_session_to_close) = e_session_created)
+         )
+    END
+    ;
+
+    p_auto_closed_active <-- is_auto_close_session_active =
+    BEGIN
+        /* Autoclose is active when next session will be the last session available */
+        p_auto_closed_active := bool(card(t_session - s_session) <= 1)
+    END
 
 END

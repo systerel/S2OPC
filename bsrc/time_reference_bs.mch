@@ -45,6 +45,16 @@ OPERATIONS
     END
     ;
 
+    p_timeref <-- add_delay_TimeReference (p_init_timeref, p_delaySeconds) =
+    PRE
+        p_init_timeref : t_timeref_i &
+        p_init_timeref : t_timeref &
+        p_delaySeconds : NAT
+    THEN
+        p_timeref :(p_timeref : t_timeref_i & p_timeref : t_timeref)
+    END
+    ;
+
     p_is_oldest <-- is_less_than_TimeReference (p_left, p_right) =
     PRE
         p_left : t_timeref_i &

@@ -29,7 +29,8 @@ SEES
     request_handle_bs,
     message_out_bs,
     message_in_bs,
-    channel_mgr
+    channel_mgr,
+    time_reference_bs
 
 IMPORTS
     session_core_1_it,
@@ -144,7 +145,8 @@ OPERATIONS
     p_session <-- init_new_session (is_client) =
     VAR
         l_is_session,
-        l_continue
+        l_continue,
+        l_current_time
     IN
         p_session := c_session_indet;
         l_is_session := TRUE;
@@ -175,7 +177,8 @@ OPERATIONS
         IF  l_is_session = TRUE THEN
             p_session := c_session_indet
         ELSE
-            add_session(p_session, e_session_init);
+            l_current_time <-- get_current_TimeReference;
+            add_session(p_session, l_current_time);
             notify_set_session_state(p_session, e_session_closed, e_session_init, c_StatusCode_indet, is_client)
         END
     END
@@ -283,6 +286,100 @@ OPERATIONS
             p_max_reached := bool(l_attempts >= k_n_UserAuthAttempts_max)
         END
 
+    END
+    ;
+
+    p_has_session_to_close, p_session_to_close <-- find_session_to_close =
+    VAR
+        l_continue,
+        l_session,
+        l_valid_session,
+        l_state,
+        l_timeref,
+        l_is_older_than,
+        l_oldest_session,
+        l_oldest_session_timeref,
+        l_min_timeref_req,
+        l_current_timeref
+    IN
+        l_oldest_session := c_session_indet;
+        l_oldest_session_timeref := c_timeref_indet;
+        l_continue <-- init_iter_session;
+        WHILE
+            l_continue = TRUE
+        DO
+            l_continue, l_session <-- continue_iter_session;
+            l_valid_session <-- is_valid_session (l_session);
+            IF l_valid_session = TRUE
+            THEN
+                l_state <-- get_session_state (l_session);
+                /* We can close only created session that is not yet activated */
+                IF l_state = e_session_created
+                THEN
+                    l_timeref <-- get_init_time(l_session);
+                    IF l_oldest_session_timeref = c_timeref_indet
+                    THEN
+                        /* Ensure we waited the minimum delay to allow session activation */
+                        l_min_timeref_req <-- add_delay_TimeReference (l_timeref, c_session_activation_min_delay);
+                        l_current_timeref <-- get_current_TimeReference;
+                        l_is_older_than <-- is_less_than_TimeReference(l_min_timeref_req, l_current_timeref);
+                        IF l_is_older_than = TRUE
+                        THEN
+                            /* first secure channel we are allowed to close found */
+                            l_oldest_session_timeref := l_timeref;
+                            l_oldest_session := l_session
+                        END
+                    ELSE
+                        l_is_older_than <-- is_less_than_TimeReference(l_timeref, l_oldest_session_timeref);
+                        IF l_is_older_than = TRUE
+                        THEN
+                            /* older secure channel to close found */
+                            l_oldest_session_timeref := l_timeref;
+                            l_oldest_session := l_session
+                        END
+                    END
+                END
+            END
+        INVARIANT
+            l_continue = bool(sessions_to_iterate /= {}) &
+            sessions_to_iterate /\ sessions_iterated = {} &
+            sessions_to_iterate \/ sessions_iterated = t_session &
+
+            !(p_session).(p_session : dom(sessions_iterated <| a_state |> {e_session_created}) =>
+                /* Oldest timeref is less than any other timeref */
+                (l_oldest_session_timeref /= a_session_init_time(p_session) =>
+                    l_oldest_session_timeref |-> a_session_init_time(p_session) : TimeReference_IsLessThan) &
+                    l_oldest_session : a_session_init_time~[{l_oldest_session_timeref}]
+            )
+            &
+            (sessions_iterated <| a_state |> {e_session_created} = {} =>
+                l_oldest_session_timeref = c_timeref_indet &
+                l_oldest_session = c_session_indet
+            )
+        VARIANT
+            card(sessions_to_iterate)
+        END;
+        IF l_oldest_session_timeref = c_timeref_indet
+        THEN
+            p_has_session_to_close := FALSE;
+            p_session_to_close := c_session_indet
+        ELSE
+            p_has_session_to_close := TRUE;
+            p_session_to_close := l_oldest_session
+        END
+    END
+    ;
+
+    p_auto_closed_active <-- is_auto_close_session_active =
+    VAR
+        l_t_session_card,
+        l_s_session_card,
+        l_avail_session_card
+    IN
+        l_t_session_card <-- get_card_t_session;
+        l_s_session_card <-- get_card_s_session;
+        l_avail_session_card := l_t_session_card - l_s_session_card;
+        p_auto_closed_active := bool(l_avail_session_card <= 1)
     END
 
 END

@@ -164,6 +164,14 @@
 #define SOPC_CREATE_SESSION_LOCK_DELAY_SECS 60
 #endif
 
+/** @brief Minimum delay in seconds to activate a created session.
+ *         After this delay the session might be closed by server
+ *         if maximum number of session used is almost reached.
+ */
+#ifndef SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS
+#define SOPC_SESSION_ACTIVATION_MIN_DELAY_SECS 10
+#endif
+
 /* SUBSCRIPTION CONFIGURATION */
 
 /** @brief Maximum publish requests stored by server for a subscription */

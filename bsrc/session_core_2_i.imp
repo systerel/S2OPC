@@ -32,9 +32,11 @@ SEES
 
 CONCRETE_VARIABLES
     s_session_i,
+    card_s_session_i,
     a_state_i,
     a_channel_i,
     a_channel_nb_sessions_i,
+    a_session_init_time_i,
     a_client_to_create_i,
     a_client_orphaned_i,
     a_server_user_auth_attempts_i,
@@ -42,7 +44,9 @@ CONCRETE_VARIABLES
 
 INVARIANT
     s_session_i          : t_session_i --> BOOL                                      &
+    card_s_session_i     : NAT                                                       &
     a_state_i            : t_session_i --> t_sessionState                            &
+    a_session_init_time_i : t_session_i --> t_timeref_i                              &
     a_channel_i          : t_session_i --> t_channel_i                               &
     a_channel_nb_sessions_i : t_channel_i --> NAT                                    &
     a_client_to_create_i : t_session_i --> t_channel_config_idx_i                    &
@@ -52,6 +56,7 @@ INVARIANT
     s_session            = s_session_i~[{TRUE}]                                      &
     dom(a_state)         = s_session                                                 &
     a_state             <: a_state_i                                                 &
+    a_session_init_time  = t_session <| a_session_init_time_i |> t_timeref           &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
     a_client_orphaned    = t_session <| a_client_orphaned_i |> t_channel_config_idx  &
@@ -60,7 +65,9 @@ INVARIANT
 
 INITIALISATION
     s_session_i  := t_session_i * {FALSE};
+    card_s_session_i := 0;
     a_state_i    := t_session_i * {e_session_closed};
+    a_session_init_time_i := t_session_i * {c_timeref_indet};
     a_channel_i  := t_session_i * {c_channel_indet};
     a_channel_nb_sessions_i := t_channel_i * {0};
     a_client_to_create_i := t_session_i * {c_channel_config_idx_indet};
@@ -70,16 +77,20 @@ INITIALISATION
 
 OPERATIONS
 
-    add_session(p_session, p_state) =
+    add_session(p_session, p_timeref) =
     BEGIN
         s_session_i(p_session) := TRUE;
-        a_state_i  (p_session) := p_state
+        card_s_session_i := card_s_session_i + 1;
+        a_state_i  (p_session) := e_session_init;
+        a_session_init_time_i (p_session) := p_timeref
     END
     ;
 
     remove_session(p_session) =
     BEGIN
-        s_session_i(p_session) := FALSE
+        s_session_i(p_session) := FALSE;
+        card_s_session_i := card_s_session_i - 1;
+        a_session_init_time_i (p_session) := c_timeref_indet
     END
     ;
 
@@ -226,6 +237,18 @@ OPERATIONS
     p_attempts <-- get_server_session_user_auth_attempts(p_session) =
     BEGIN
         p_attempts := a_server_user_auth_attempts_i(p_session)
+    END
+    ;
+
+    p_timeref <-- get_init_time(p_session) =
+    BEGIN
+        p_timeref := a_session_init_time_i(p_session)
+    END
+    ;
+
+    p_nb_sessions <-- get_card_s_session =
+    BEGIN
+        p_nb_sessions := card_s_session_i
     END
 
 END

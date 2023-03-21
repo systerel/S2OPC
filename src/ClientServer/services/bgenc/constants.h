@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 21/03/2023 17:41:24
+ Date                 : 22/03/2023 11:17:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -475,6 +475,7 @@ typedef enum {
 #define constants__c_request_context_indet constants_bs__c_request_context_indet
 #define constants__c_reverse_endpoint_config_idx_indet constants_bs__c_reverse_endpoint_config_idx_indet
 #define constants__c_server_request_handle_any constants_bs__c_server_request_handle_any
+#define constants__c_session_activation_min_delay constants_bs__c_session_activation_min_delay
 #define constants__c_session_indet constants_bs__c_session_indet
 #define constants__c_session_token_indet constants_bs__c_session_token_indet
 #define constants__c_sub_seq_num_indet constants_bs__c_sub_seq_num_indet

@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 21/03/2023 17:41:44
+ Date                 : 22/03/2023 13:49:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -299,6 +299,7 @@ void session_mgr__server_receive_session_req(
          if (((session_mgr__l_has_user_token_policy_available == true) &&
             (session_mgr__l_session_creation_locked == false)) &&
             (session_mgr__l_nb_sessions_on_SC < constants__c_max_sessions_per_channel)) {
+            session_core__may_close_unactivated_session();
             session_core__server_create_session_req_and_resp_sm(session_mgr__channel,
                session_mgr__req_msg,
                session_mgr__resp_msg,
@@ -312,6 +313,9 @@ void session_mgr__server_receive_session_req(
                   *session_mgr__service_ret = constants_statuscodes_bs__e_sc_bad_resource_unavailable;
                   session_core__server_close_session_sm(*session_mgr__session,
                      constants_statuscodes_bs__e_sc_bad_resource_unavailable);
+               }
+               else {
+                  session_core__may_close_unactivated_session();
                }
             }
          }

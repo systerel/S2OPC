@@ -34,6 +34,15 @@ void time_reference_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
+
+void time_reference_bs__add_delay_TimeReference(const constants__t_timeref_i time_reference_bs__p_init_timeref,
+                                                const t_entier4 time_reference_bs__p_delaySeconds,
+                                                constants__t_timeref_i* const time_reference_bs__p_timeref)
+{
+    *time_reference_bs__p_timeref = SOPC_TimeReference_AddMilliseconds(
+        time_reference_bs__p_init_timeref, (uint64_t) time_reference_bs__p_delaySeconds * 1000);
+}
+
 void time_reference_bs__get_current_TimeReference(constants__t_timeref_i* const time_reference_bs__p_timeref)
 {
     *time_reference_bs__p_timeref = SOPC_TimeReference_GetCurrent();

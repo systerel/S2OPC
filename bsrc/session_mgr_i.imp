@@ -386,6 +386,8 @@ OPERATIONS
                 l_nb_sessions_on_SC <-- get_channel_nb_sessions (channel);
                 IF l_has_user_token_policy_available = TRUE & l_session_creation_locked = FALSE & l_nb_sessions_on_SC < c_max_sessions_per_channel
                 THEN
+                    /* Activate auto-close mechanism in case maximum number of sessions was reached */
+                    may_close_unactivated_session;
                     session, service_ret <-- server_create_session_req_and_resp_sm (channel, req_msg, resp_msg);
                     IF service_ret = e_sc_ok
                     THEN
@@ -394,6 +396,9 @@ OPERATIONS
                         THEN
                             service_ret := e_sc_bad_resource_unavailable;
                             server_close_session_sm (session, e_sc_bad_resource_unavailable)
+                        ELSE
+                            /* Activate auto-close mechanism in case maximum number of sessions will be reached on next creation */
+                            may_close_unactivated_session
                         END
                     END
                 ELSIF l_has_user_token_policy_available = FALSE

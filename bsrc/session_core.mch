@@ -905,5 +905,21 @@ OPERATIONS
     THEN
         p_user_token_policy_available :: BOOL
     END
+    ;
+
+    may_close_unactivated_session =
+    BEGIN
+        CHOICE
+            ANY l_session WHERE
+                l_session : t_session_i &
+                l_session : s_session &
+                a_state(l_session) = e_session_created
+            THEN
+                d_close_session(l_session)
+            END
+        OR
+            skip
+        END
+    END
 
 END
