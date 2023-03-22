@@ -57,7 +57,7 @@ DEFINITIONS
     a_client_token               : t_session +-> t_session_token         &
     a_server_token               : t_session_token +-> t_session         &
     a_user_server                : t_session +-> t_user                  &
-    a_server_user_auth_attempts  : t_session --> NAT                     &
+    a_server_user_auth_attempts  : t_session +-> NAT                     &
     a_user_client                : t_session +-> t_user_token            &
     a_user_secu_client           : t_session +-> t_SecurityPolicy        &
     a_user_server_cert           : t_session +-> t_byte_buffer           &
@@ -81,7 +81,7 @@ INITIALISATION
     a_client_token               := {} ||
     a_server_token               := {} ||
     a_user_server                := {} ||
-    a_server_user_auth_attempts  := {} ||
+    a_server_user_auth_attempts  := t_session * {0} ||
     a_user_client                := {} ||
     a_user_secu_client           := {} ||
     a_user_server_cert           := {} ||
