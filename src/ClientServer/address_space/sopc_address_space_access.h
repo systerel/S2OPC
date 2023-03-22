@@ -34,7 +34,7 @@
  *        an AddressSpaceAccess instance is provided by the S2OPC API.
  *
  * \warning AddressSpaceAccess operations are not thread-safe,
- *          concurrent access shall be managed by caller if caller want to do some.
+ *          concurrent access shall be managed by caller if caller wants to do some.
  */
 
 typedef struct _SOPC_AddressSpaceAccess SOPC_AddressSpaceAccess;
@@ -139,7 +139,8 @@ SOPC_StatusCode SOPC_AddressSpaceAccess_WriteValue(SOPC_AddressSpaceAccess* addS
  *
  * \param addSpaceAccess  The AddressSpace Access used for write operation
  * \param parentNodeId    The ExpandedNodeId of the parent node in AddressSpace for the variable to add.
- *                        Only "local" NodeId are supported for now (ServerIndex shall be 0 and NamespaceUri ignored).
+ *                        Only "local" NodeId are supported for now
+ *                        (ServerIndex shall be 0 and NamespaceUri is ignored).
  *                        Parent node characteristics shall be compliant to add the new Variable node as a child.
  *                        See OPC UA specifications part 3 for constraints and returned error code for details.
  * \param refTypeId       The NodeId of the reference type used for reference between parent node and new variable node.

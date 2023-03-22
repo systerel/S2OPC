@@ -106,13 +106,13 @@ typedef enum
 {
     SOPC_InternalNodeClass_Unspecified = 0,
     SOPC_InternalNodeClass_Object = 1,
-    SOPC_InternalNodeClass_Variable = 3,
-    SOPC_InternalNodeClass_Method = 4,
-    SOPC_InternalNodeClass_ObjectType = 5,
-    SOPC_InternalNodeClass_VariableType = 6,
-    SOPC_InternalNodeClass_ReferenceType = 7,
-    SOPC_InternalNodeClass_DataType = 8,
-    SOPC_InternalNodeClass_View = 9,
+    SOPC_InternalNodeClass_Variable = 2,
+    SOPC_InternalNodeClass_Method = 3,
+    SOPC_InternalNodeClass_ObjectType = 4,
+    SOPC_InternalNodeClass_VariableType = 5,
+    SOPC_InternalNodeClass_ReferenceType = 6,
+    SOPC_InternalNodeClass_DataType = 7,
+    SOPC_InternalNodeClass_View = 8,
 } SOPC_InternalNodeClass;
 
 static const bool NODE_CLASS_TO_ATTRIBS[SOPC_InternalNodeClass_View + 1]
@@ -164,8 +164,8 @@ static const bool NODE_CLASS_TO_ATTRIBS[SOPC_InternalNodeClass_View + 1]
 
 bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_AttributeId attribute)
 {
-    assert(space != NULL);
-    assert(node != NULL);
+    assert(NULL != space);
+    assert(NULL != node);
 
     if ((int64_t) attribute <= (int64_t) SOPC_AttributeId_Invalid)
     {

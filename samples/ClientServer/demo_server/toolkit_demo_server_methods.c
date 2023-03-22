@@ -321,8 +321,6 @@ SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContext
                                              void* param)
 {
     SOPC_UNUSED_ARG(param);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
 
     SOPC_ASSERT(NULL != callContextPtr);
     SOPC_ASSERT(NULL != objectId);

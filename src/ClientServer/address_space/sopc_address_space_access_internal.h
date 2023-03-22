@@ -31,6 +31,15 @@
  *
  */
 
+/**
+ * \brief Create an AddressSpaceAccess from the given AddressSpace with a flag indicating
+ *        if the (write) operations should be recorded.
+ * \param addSpaceRef       The AddressSpace for which an AddressSpaceAccess will be created
+ * \param recordOperations  Flag indicating if the (write) operations on address space should be recorded.
+ *                          The recorded operations can be used to create Data/Node changes
+ *                          necessary for subscription notifications.
+ * \return the AddressSpaceAccess created
+ */
 SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSpaceRef, bool recordOperations);
 
 /* \brief Get the operations that occurred during AddressSpaceAccess lifetime if recordOperations was set.
@@ -43,6 +52,12 @@ SOPC_AddressSpaceAccess* SOPC_AddressSpaceAccess_Create(SOPC_AddressSpace* addSp
  */
 SOPC_SLinkedList* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess* addSpaceAccess);
 
+/**
+ * \brief Delete an AddressSpaceAccess previously created with ::SOPC_AddressSpaceAccess_Create
+ * \param addSpaceAccess    Pointer to the allocated AddressSpaceAccess to delete.
+ *                          The remaining recorded operations are deleted.
+ *                          Content will be set to NULL after call.
+ */
 void SOPC_AddressSpaceAccess_Delete(SOPC_AddressSpaceAccess** addSpaceAccess);
 
 typedef enum
