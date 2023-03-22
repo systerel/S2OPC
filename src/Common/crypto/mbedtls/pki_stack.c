@@ -738,7 +738,7 @@ struct SOPC_PKIProviderNew
 static bool cert_is_self_sign(mbedtls_x509_crt* crt);
 
 static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToValidate,
-                                               const SOPC_PKI_leafPropertiesConfig* pConfig)
+                                               const SOPC_PKI_LeafProfile* pConfig)
 {
     SOPC_AsymmetricKey pub_key;
     size_t keyLenBits = 0;
@@ -844,9 +844,9 @@ static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pk
     return usages;
 }
 
-static SOPC_ReturnStatus check_certificate_usage(SOPC_CertificateList* pToValidate,
-                                                 SOPC_PKI_leafPropertiesConfig* pConfig,
-                                                 SOPC_PKI_ValidArg* pArgs)
+static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pToValidate,
+                                                 const SOPC_PKI_LeafProfile* pConfig,
+                                                 const SOPC_PKI_ValidationArgs* pArgs)
 {
     unsigned int usages = 0;
     int err = 0;
@@ -886,7 +886,7 @@ static SOPC_ReturnStatus check_certificate_usage(SOPC_CertificateList* pToValida
     }
 }
 
-static SOPC_ReturnStatus set_profile_from_configuration(SOPC_PKI_chainPropertiesConfig* pConfig,
+static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProfile* pConfig,
                                                         mbedtls_x509_crt_profile* pProfile)
 {
     /* Set hashes allowed */
@@ -942,9 +942,9 @@ static SOPC_ReturnStatus set_profile_from_configuration(SOPC_PKI_chainProperties
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
-                                                                    SOPC_CertificateList* pToValidate,
-                                                                    SOPC_PKI_ValidConfig* pConfig,
-                                                                    SOPC_PKI_ValidArg* pArgs,
+                                                                    const SOPC_CertificateList* pToValidate,
+                                                                    const SOPC_PKI_Profile* pConfig,
+                                                                    const SOPC_PKI_ValidationArgs* pArgs,
                                                                     uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pConfig || NULL == error)
@@ -955,7 +955,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
     *error = SOPC_CertificateValidationError_Unkown;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bIsTrusted = false;
-    bool bIsSelfSign = cert_is_self_sign(&pToValidate->crt);
+    mbedtls_x509_crt crt = pToValidate->crt;
+    bool bIsSelfSign = cert_is_self_sign(&crt);
     /* CA certificates that are not roots are always rejected */
     if (pToValidate->crt.ca_istrue && !bIsSelfSign)
     {
@@ -982,9 +983,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
         }
     }
     /* Apply verification on the certificate */
-    if (pConfig->bApplyleafProperties)
+    if (pConfig->bApplyLeafProfile)
     {
-        status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pToValidate, &pConfig->leafProperties, pArgs, error);
+        status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pToValidate, &pConfig->leafProfile, pArgs, error);
         if (SOPC_STATUS_OK != status)
         {
             return SOPC_STATUS_NOK;
@@ -992,7 +993,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
     }
     /* Set the profile from configuration */
     mbedtls_x509_crt_profile crt_profile = {0};
-    set_profile_from_configuration(&pConfig->chainProperties, &crt_profile);
+    set_profile_from_configuration(&pConfig->chainProfile, &crt_profile);
 
     SOPC_CertificateList* trust_list = bIsTrusted ? pPKI->pAllRoots : pPKI->pTrustedRoots;
     SOPC_CRLList* cert_crl = pPKI->pAllCrl;
@@ -1033,9 +1034,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
-                                                          SOPC_CertificateList* pToValidate,
-                                                          SOPC_PKI_leafPropertiesConfig* pConfig,
-                                                          SOPC_PKI_ValidArg* pArgs,
+                                                          const SOPC_CertificateList* pToValidate,
+                                                          const SOPC_PKI_LeafProfile* pConfig,
+                                                          const SOPC_PKI_ValidationArgs* pArgs,
                                                           uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pConfig || NULL == error)

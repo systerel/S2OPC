@@ -234,46 +234,46 @@ typedef enum
 } SOPC_PKI_KeyUsage_Mask;
 
 /**
- * \brief Validation configuration for the leaf certificate.
+ * \brief Leaf certificate profile for validation
  */
-typedef struct SOPC_PKI_LeafPropertiesConfig
+typedef struct SOPC_PKI_LeafProfile
 {
     SOPC_PKI_MdSign mdSign;
     SOPC_PKI_PkAlgo pkAlgo;
     SOPC_PKI_KeyUsage_Mask keyUsage;
     uint32_t RSAMinimumKeySize;
     uint32_t RSAMaximumKeySize;
-} SOPC_PKI_leafPropertiesConfig;
+} SOPC_PKI_LeafProfile;
 
 /**
- * \brief Validation configuration for the chain.
+ * \brief Certificate chain profile for validation
  */
-typedef struct SOPC_PKI_chainPropertiesConfig
+typedef struct SOPC_PKI_ChainProfile
 {
     SOPC_PKI_MdSign mdSign;
     SOPC_PKI_PkAlgo pkAlgo;
     SOPC_PKI_EllipticCurves curves;
     uint32_t RSAMinimumKeySize;
-} SOPC_PKI_chainPropertiesConfig;
+} SOPC_PKI_ChainProfile;
 
 /**
  * \brief Validation configuration
  */
-typedef struct SOPC_PKIProvider_ValidConfig
+typedef struct SOPC_PKI_Profile
 {
-    SOPC_PKI_leafPropertiesConfig leafProperties;   /**< Validation configuration for the leaf certificate. */
-    SOPC_PKI_chainPropertiesConfig chainProperties; /**< Validation configuration for the chain. */
-    bool bApplyleafProperties;                      /**< Apply the verification on leaf certificate */
-    bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
-                                         set to True will be marked as root CA and as trusted certificates.*/
-} SOPC_PKI_ValidConfig;
+    SOPC_PKI_LeafProfile leafProfile;   /**< Validation configuration for the leaf certificate. */
+    SOPC_PKI_ChainProfile chainProfile; /**< Validation configuration for the chain. */
+    bool bApplyLeafProfile;             /**< Apply the verification on leaf certificate */
+    bool bBackwardInteroperability;     /**< Defined if self-signed certificates whose basicConstraints CA flag
+                                             set to True will be marked as root CA and as trusted certificates.*/
+} SOPC_PKI_Profile;
 
 /* TODO RBA: Add uri and hostName */
-typedef struct SOPC_PKIProvider_ValidArg
+typedef struct SOPC_PKI_ValidationArgs
 {
     bool bIsAppServerCert; /**< server side */
     bool bIsAppClientCert; /**< client side */
-} SOPC_PKI_ValidArg;
+} SOPC_PKI_ValidationArgs;
 
 /**
  * \brief Create the PKIProvider from a directory where certificates are store.
@@ -384,9 +384,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
  *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
-                                                                    SOPC_CertificateList* pToValidate,
-                                                                    SOPC_PKI_ValidConfig* pConfig,
-                                                                    SOPC_PKI_ValidArg* pArgs,
+                                                                    const SOPC_CertificateList* pToValidate,
+                                                                    const SOPC_PKI_Profile* pConfig,
+                                                                    const SOPC_PKI_ValidationArgs* pArgs,
                                                                     uint32_t* error);
 
 /** \brief Validation function for a leaf certificate
@@ -403,9 +403,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
  *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
-                                                          SOPC_CertificateList* pToValidate,
-                                                          SOPC_PKI_leafPropertiesConfig* pConfig,
-                                                          SOPC_PKI_ValidArg* pArgs,
+                                                          const SOPC_CertificateList* pToValidate,
+                                                          const SOPC_PKI_LeafProfile* pConfig,
+                                                          const SOPC_PKI_ValidationArgs* pArgs,
                                                           uint32_t* error);
 /**
  * \brief   Free a PKI provider.
