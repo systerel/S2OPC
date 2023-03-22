@@ -492,6 +492,7 @@ OPERATIONS
         :(
             p_bres : BOOL &
             p_nonce : t_Nonce_i &
+            a_NonceServer : s_session +-> t_Nonce &
             (p_bres = TRUE
              =>
              a_NonceServer(p_session) : t_Nonce &
