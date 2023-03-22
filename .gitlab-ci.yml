@@ -518,7 +518,7 @@ check_doc:
   script:
     - cd $BUILD_DIR
     - cmake --build . --target doc &> doc.log
-    - test $(grep -c warning doc.log) -eq 0
+    - test $(grep -c 'warning:' doc.log) -eq 0
   variables:
     <<: *build_linux_variables
   artifacts:
@@ -527,5 +527,5 @@ check_doc:
     expire_in: '1 month'
     when: on_failure
   rules:
-   - if: "$ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-     when: always # run even if previous job in pipeline failed
+   - if: "$ALL_BUILDS != null || $ALL_TESTS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+     when: on_success
