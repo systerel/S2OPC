@@ -107,8 +107,8 @@
 #endif
 
 /** Check Node management services activation for clients is set only in case of nano extended services */
-#if SOPC_HAS_NODE_MANAGEMENT_SERVICES && !WITH_NANO_EXTENDED
-#error "Node management services cannot be activated for clients without WITH_NANO_EXTENDED variable set"
+#if S2OPC_NODE_MANAGEMENT && S2OPC_NANO_PROFILE != false
+#error "Node management services cannot be activated for clients with S2OPC_NANO_PROFILE variable set"
 #endif
 
 #endif

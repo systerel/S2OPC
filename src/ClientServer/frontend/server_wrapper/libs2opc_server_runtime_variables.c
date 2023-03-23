@@ -525,7 +525,8 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
                                                                SOPC_Server_RuntimeVariables* vars)
 {
     size_t nbNodesToSet = 5;
-#if 0 != WITH_NANO_EXTENDED
+#if S2OPC_NANO_PROFILE
+#else
     nbNodesToSet += 3; // Subscription, MethodCall and AddNodes operations
 #endif
     OpcUa_WriteValue* values = append_write_values(write_values, nbNodesToSet);
@@ -545,16 +546,14 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
     set_write_value_uint32(&values[4],
                            OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerTranslateBrowsePathsToNodeIds,
                            vars->maximum_operations_per_request);
-#if 0 != WITH_NANO_EXTENDED
-    set_write_value_uint32(
-        &values[5], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxMonitoredItemsPerCall,
-        vars->maximum_operations_per_request);
-    set_write_value_uint32(
-        &values[6], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall,
-        vars->maximum_operations_per_request);
-    set_write_value_uint32(
-        &values[7], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerNodeManagement,
-        vars->maximum_heavy_operations_per_request);
+#if S2OPC_NANO_PROFILE
+#else
+    set_write_value_uint32(&values[5], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxMonitoredItemsPerCall,
+                           vars->maximum_operations_per_request);
+    set_write_value_uint32(&values[6], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall,
+                           vars->maximum_operations_per_request);
+    set_write_value_uint32(&values[7], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerNodeManagement,
+                           vars->maximum_heavy_operations_per_request);
 #endif
     return true;
 }

@@ -137,7 +137,8 @@ static const SOPC_NodeId* get_direct_parent_of_node(SOPC_AddressSpace* addSpace,
     return directParent;
 }
 
-const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId)
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* addSpace,
+                                                             const SOPC_NodeId* childNodeId)
 {
     const SOPC_NodeId* result = NULL;
 
@@ -150,7 +151,7 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* 
             result = &typeInfo->subtypeNodeId;
         }
     }
-    else if (SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
+    else if (S2OPC_DYNAMIC_TYPE_RESOLUTION)
     {
         // Parent not found in static array of extracted HasSubtype references, start research in address space
 

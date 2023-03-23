@@ -4,7 +4,7 @@
 
 #########################################################
 # Default CI pipeline configuration:
-# - preset variables: 'WITH_NANO_EXTENDED = 1' and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
+# - preset variables: 'S2OPC_NODE_MANAGEMENT = 1' set in gitlab project
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: build-linux64-ASan
@@ -14,7 +14,6 @@
 #     - test-uactt
 #
 # CI pipeline manual run with 'ALL_TESTS = 1':
-# - preset variables: 'WITH_NANO_EXTENDED = 1' and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - build: build-linux64-pys2opc # 'WITH_ASAN = 0' and 'WITH_PYS2OPC = 1'
 #   - tests: # TEST_SERVER_XML_ADDRESS_SPACE, TEST_SERVER_XML_CONFIG and TEST_USERS_XML_CONFIG are NOT set to use static config
@@ -22,7 +21,6 @@
 #     - test-uactt-all-tests
 #
 # CI pipeline manual run with 'ALL_BUILDS = 1':
-# - preset variables: 'WITH_NANO_EXTENDED = 1'  and 'SOPC_HAS_NODE_MANAGEMENT_SERVICES = 1' set in gitlab project
 # - jobs run in stages:
 #   - gen: generation job
 #   - build: # 'WITH_STATIC_SECURITY_DATA: 1', 'WITH_CONST_ADDSPACE: 1' and 'PUBSUB_STATIC_CONFIG: 1'
@@ -47,10 +45,10 @@
 #########################################################
 
 .variables: &nominal_build_variables
-  SOPC_HAS_NODE_MANAGEMENT_SERVICES: 1
+  S2OPC_NODE_MANAGEMENT: 1
 
 .variables: &nominal_test_variables
-  SOPC_HAS_NODE_MANAGEMENT_SERVICES: 1
+  S2OPC_NODE_MANAGEMENT: 1
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
@@ -183,7 +181,7 @@ build-linux64-pys2opc:
     <<: *build_linux_variables
     <<: *all-tests_build_variables # add pys2opc
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
-    - if: "$ALL_TESTS != null || $NO_ASAN != null && $WITH_NANO_EXTENDED == '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
+    - if: "$ALL_TESTS != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE != '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
       when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
@@ -201,7 +199,7 @@ build-linux64-NoASan-NoPyS2OPC:
   variables:
     <<: *build_linux_variables
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
-    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $WITH_NANO_EXTENDED != '1'"
+    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE == '1'"
       when: on_success
 
 build-win64: &build_win64
@@ -275,7 +273,7 @@ build-linux64-coverity:
   script: |-
     mkdir build
     cd build
-    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_NANO_EXTENDED=1 -DSOPC_HAS_NODE_MANAGEMENT_SERVICES=1 ..
+    cmake -DWITH_COVERITY=1 -DCMAKE_BUILD_TYPE=Debug -S2OPC_NODE_MANAGEMENT=1 ..
     /opt/cov-analysis-linux64-2022.6.0/bin/cov-build --dir cov-int make
     tar czf cov-int.tar.gz cov-int
     curl -k --form token=${COVERITY_TOKEN} --form email=${COVERITY_EMAIL} --form version=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form description=${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA} --form file=@cov-int.tar.gz https://scan.coverity.com/builds?project=S2OPC
@@ -506,7 +504,7 @@ pages:
     - mkdir $BUILD_DIR
     - cd $BUILD_DIR
     # PyS2OPC relies on subscriptions
-    - cmake -DWITH_NANO_EXTENDED=yes -DSOPC_HAS_NODE_MANAGEMENT_SERVICES=yes -DWITH_PYS2OPC=yes ..
+    - cmake -DS2OPC_NODE_MANAGEMENT=yes -DWITH_PYS2OPC=yes ..
     - cmake --build . --target doc
     - mv apidoc/html ../public/
   artifacts:

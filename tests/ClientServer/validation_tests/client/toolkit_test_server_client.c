@@ -275,7 +275,7 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
 }
 
 #ifdef WITH_EXPAT
-#if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES
+#if 0 != S2OPC_NODE_MANAGEMENT
 static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
 {
     // Note: address space need to be defined dynamically using
@@ -654,7 +654,7 @@ START_TEST(test_server_client)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
 #ifdef WITH_EXPAT
-#if 0 != SOPC_HAS_NODE_MANAGEMENT_SERVICES
+#if 0 != S2OPC_NODE_MANAGEMENT
     /* Run an add nodes service test */
     if (SOPC_STATUS_OK == status)
     {

@@ -73,10 +73,10 @@ set(TEST_USERS_UACTT_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_
 
 set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_no_base_info.xml")
 
-if (WITH_NANO_EXTENDED)
-  set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
-else()
+if (S2OPC_NANO_PROFILE)
   set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
+else()
+  set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
 endif()
 set(TEST_ADDRESS_SPACE_XML_FILE "S2OPC_Test_NodeSet.xml")
 
@@ -334,10 +334,10 @@ target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS
 # Server scenario (configured for UACTT)
 
 # Manage the Nano profiles extended mode
-if (WITH_NANO_EXTENDED)
-  set(TOOLKIT_TEST_SERVER "toolkit_test_server")
-else()
+if (S2OPC_NANO_PROFILE)
   set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
+else()
+  set(TOOLKIT_TEST_SERVER "toolkit_test_server")
 endif()
 
 add_executable(${TOOLKIT_TEST_SERVER}

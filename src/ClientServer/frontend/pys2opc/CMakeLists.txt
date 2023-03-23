@@ -35,8 +35,8 @@ if(WITH_PYS2OPC)
 
   # Check requirements
   # No ASan and other were already checked in CommonDefs
-  if(NOT WITH_NANO_EXTENDED)
-    message(SEND_ERROR "-- PyS2OPC requires WITH_NANO_EXTENDED")
+  if(S2OPC_NANO_PROFILE)
+    message(SEND_ERROR "-- PyS2OPC requires S2OPC_NANO_PROFILE=0")
   endif()
   if(NOT TARGET s2opc_clientwrapper OR NOT TARGET s2opc_clientserver-xml-loaders-expat)
     message(SEND_ERROR "-- PyS2OPC requires the S2OPC client wrapper and S2OPC xml loaders with Expat")

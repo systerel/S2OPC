@@ -27,7 +27,7 @@ set(SERVER_CSPN_ST_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Se
 set(USERS_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Users_Demo_Config.xml")
 
 # Define a demo XML address space configuration
-if (WITH_NANO_EXTENDED)
+if (NOT S2OPC_NANO_PROFILE)
   set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
   set(DEMO_ADDRESS_SPACE_XML_FILE "S2OPC_Demo_NodeSet.xml")
 else()
@@ -36,7 +36,7 @@ else()
 endif()
 
 # Manage the Nano profiles extended mode
-if (WITH_NANO_EXTENDED)
+if (NOT S2OPC_NANO_PROFILE)
   set(TOOLKIT_DEMO_SERVER "toolkit_demo_server")
 else()
   set(TOOLKIT_DEMO_SERVER "toolkit_demo_nano_server")

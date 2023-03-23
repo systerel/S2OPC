@@ -176,7 +176,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_RelativePathElt_indet 0
 #define constants_bs__c_RelativePath_indet 0
 
-#if 0 == WITH_NANO_EXTENDED
+#if S2OPC_NANO_PROFILE
 #define constants_bs__c_Server_Nano_Extended false
 #else
 #define constants_bs__c_Server_Nano_Extended true

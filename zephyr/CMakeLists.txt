@@ -4,7 +4,6 @@ zephyr_interface_library_named(S2OPC)
 
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1)
 add_definitions (-DPUBSUB_STATIC_CONFIG=1)
-add_definitions (-DWITH_NANO_EXTENDED=1)
 add_definitions (-DWITH_CONST_ADDSPACE=1)
 add_definitions (-DSOPC_TIMER_RESOLUTION_MS=50)
 add_definitions (-DSOPC_SC_CONNECTION_TIMEOUT_MS=60000)

@@ -72,7 +72,7 @@ for c in $DISABLED_CHECKERS; do SCAN_BUILD="${SCAN_BUILD} -disable-checker $c"; 
 
 mkdir build-analyzer
 cd build-analyzer
-$SCAN_BUILD cmake -DWITH_NANO_EXTENDED=1 -DCMAKE_BUILD_TYPE=RelWithDebInfo $SRC_DIR
+$SCAN_BUILD cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo $SRC_DIR
 $SCAN_BUILD make -j$(nproc)
 
 # Report folders have names of the form 2018-07-...

@@ -71,7 +71,7 @@ static int32_t getEndpointsReceived = 0;
 
 static uint32_t cptReadResps = 0;
 
-#if 0 == WITH_NANO_EXTENDED
+#if S2OPC_NANO_PROFILE
 #define TEST_SUB_SERVICE_UNSUPPORTED true
 #else
 #define TEST_SUB_SERVICE_UNSUPPORTED false

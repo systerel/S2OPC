@@ -186,9 +186,25 @@ option(WITH_CLANG_SOURCE_COVERAGE "build with Clang source coverage" OFF)
 option(WITH_OSS_FUZZ "Add the fuzzers target when building for OSS-Fuzz" OFF)
 option(WITH_PYS2OPC "Also builds PyS2OPC" OFF)
 # S2OPC client/server library scope option
-option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
-option(SOPC_HAS_NODE_MANAGEMENT_SERVICES "Make NodeManagement service set available to clients" OFF)
-option(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION "Make NodeManagement service set available to clients" OFF)
+
+option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA services)" OFF)
+option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
+option(S2OPC_DYNAMIC_TYPE_RESOLUTION "Activate type resolution using content of address space in addition to static types data" OFF)
+
+if(DEFINED WITH_NANO_EXTENDED)
+  if(NOT WITH_NANO_EXTENDED)
+    set(S2OPC_NANO_PROFILE ON)
+  endif()
+endif()
+
+if(SOPC_HAS_NODE_MANAGEMENT_SERVICES)
+  set(S2OPC_NODE_MANAGEMENT ON)
+endif()
+
+if(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
+  set(S2OPC_DYNAMIC_TYPE_RESOLUTION ON)
+endif()
+
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
@@ -276,9 +292,9 @@ check_debug_build_type("WITH_ASAN" "to set compilation flag '-fno-omit-frame-poi
 check_debug_build_type("WITH_TSAN" "to set compilation flag '-fno-omit-frame-pointer'")
 check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-pointer'")
 # print options with no incompatibility
-print_if_activated("WITH_NANO_EXTENDED")
-print_if_activated("SOPC_HAS_NODE_MANAGEMENT_SERVICES")
-print_if_activated("SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION")
+print_if_activated("S2OPC_NANO_PROFILE")
+print_if_activated("S2OPC_NODE_MANAGEMENT")
+print_if_activated("S2OPC_DYNAMIC_TYPE_RESOLUTION")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 print_if_activated("SECURITY_HARDENING")
@@ -370,12 +386,13 @@ if(WITH_GCC_STATIC_ANALYSIS)
   list(APPEND S2OPC_COMPILER_FLAGS -fanalyzer -fanalyzer-verbosity=${WITH_GCC_STATIC_ANALYSIS})
 endif()
 
-# Add WITH_NANO_EXTENDED to compilation definition if option activated
-list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${WITH_NANO_EXTENDED}>:WITH_NANO_EXTENDED>)
-# Add SOPC_HAS_NODE_MANAGEMENT_SERVICES to compilation definition if option activated
-list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${SOPC_HAS_NODE_MANAGEMENT_SERVICES}>:SOPC_HAS_NODE_MANAGEMENT_SERVICES>)
-# Add SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION to compilation definition if option activated
-list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION}>:SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION>)
+# Add S2OPC_NANO_PROFILE to compilation definition if option activated
+# Note: definition is necessary to build PyS2OPC
+list(APPEND S2OPC_DEFINITIONS S2OPC_NANO_PROFILE=${S2OPC_NANO_PROFILE})
+# Add S2OPC_NODE_MANAGEMENT to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_MANAGEMENT}>:S2OPC_NODE_MANAGEMENT>)
+# Add S2OPC_DYNAMIC_TYPE_RESOLUTION to compilation definition if option activated
+list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_DYNAMIC_TYPE_RESOLUTION}>:S2OPC_DYNAMIC_TYPE_RESOLUTION>)
 
 ### Define common functions ###
 

@@ -59,7 +59,7 @@ The main configuration functions are defined by libs2opc_server_config.h:
 - ::SOPC_HelperConfigServer_Initialize shall be called before any other function of the server wrapper module (and after ::SOPC_CommonHelper_Initialize).
 - ::SOPC_HelperConfigServer_Clear shall be called when server wrapper module is not used anymore.
 - ::SOPC_HelperConfigServer_ConfigureFromXML loads configuration from XML configuration files (server endpoints and security, address space, users). See \ref xml_config "XML file examples".
-- ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is compiled with WITH_NANO_EXTENDED=1).
+- ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is NOT compiled with S2OPC_NANO_PROFILE=1).
 - ::SOPC_HelperConfigServer_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients.
 - ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse sets a callback to use local services on server in an asynchronous way (see ::SOPC_ServerHelper_LocalServiceAsync).
 

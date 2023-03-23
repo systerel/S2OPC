@@ -232,16 +232,40 @@
  *         If variable is set to true the references are also searched into instantiated address space
  *         when not available in static extraction content, the search is recursive but
  *         it still limited by SOPC_DEFAULT_MAX_STRUCT_NESTED_LEVEL levels of recursion.*/
+#ifndef S2OPC_DYNAMIC_TYPE_RESOLUTION
 #ifndef SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
-#define SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION false
+#define S2OPC_DYNAMIC_TYPE_RESOLUTION false
+#else
+/* Retro-compatibility for deprecated name */
+#define S2OPC_DYNAMIC_TYPE_RESOLUTION SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
+#endif
 #endif
 
 /** @brief Node management services activation for clients (AddNodes only for now)
- * Note: the services are accessible as server local service if address space is not constant nor statically defined.
+ * Note: the services are always accessible as server local service if address space is not constant nor statically
+ * defined.
  * */
+#ifndef S2OPC_NODE_MANAGEMENT
 #ifndef SOPC_HAS_NODE_MANAGEMENT_SERVICES
-#define SOPC_HAS_NODE_MANAGEMENT_SERVICES false
+#define S2OPC_NODE_MANAGEMENT false
+#else
+/* Retro-compatibility for deprecated name */
+#define S2OPC_NODE_MANAGEMENT SOPC_HAS_NODE_MANAGEMENT_SERVICES
 #endif
+#endif
+
+/* PROFILE MANAGEMENT */
+
+#ifndef S2OPC_NANO_PROFILE
+#ifndef WITH_NANO_EXTENDED
+#define S2OPC_NANO_PROFILE false
+/* Retro-compatibility for deprecated name */
+#elif WITH_NANO_EXTENDED
+#define S2OPC_NANO_PROFILE false
+#else
+#define S2OPC_NANO_PROFILE true
+#endif /* WITH_NANO_EXTENDED */
+#endif /* S2OPC_NANO_PROFILE */
 
 #include "sopc_config_constants_check.h"
 

@@ -29,7 +29,7 @@ INGOPCS initial consortium:
 
 ## Certification
 
-The sample server application (toolkit_test_nano_server) created using S2OPC toolkit has been certified by OPC Foundation independent test lab according to the following OPC UA profiles:
+The sample nano server application (toolkit_test_nano_server) created using S2OPC toolkit has been certified by OPC Foundation independent test lab according to the following OPC UA profiles:
 - Nano Embedded Device Server
 - SecurityPolicy - Basic256
 - SecurityPolicy - Basic256Sha256
@@ -81,9 +81,9 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - FindServersOnNetwork service
   - RegisterServer2 service
   - RegisterNodes service
-  - Only if compiled with WITH_NANO_EXTENDED set to 1:
+  - Only if NOT compiled with S2OPC_NANO_PROFILE set to 1:
     - Subscription and MonitoredItem services (except TransferSubscriptions and SetTriggering)
-  - Only if compiled with WITH_NANO_EXTENDED and SOPC_HAS_NODE_MANAGEMENT_SERVICES set to 1:
+  - Only if compiled with S2OPC_NODE_MANAGEMENT set to 1:
     - AddNodes service (simplified: variable node only, no NodeId generation, simplified checks on ReferenceType/Type definition,
                                     single node added only without automated generation based on type)
 
@@ -94,10 +94,10 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
 - Server instantiation: several endpoint descriptions, 1 address space, multiple secure channel instances and session instances
 - Server discovery services: getEndpoints, findServers
 - Server Nano profile services: read, write, browse, browseNext (1 continuation point per session), translateBrowsePath, registerNodes
-- Server extended services (only if compiled with WITH_NANO_EXTENDED set to 1):
+- Server Micro profile and additional services (only if not compiled with S2OPC_NANO_PROFILE set to 1):
   - subscription (no subscription transfer),
-  - method call (no access to node object nor address space during call, any other event blocked during function execution)
-  - add nodes (only if compiled with SOPC_HAS_NODE_MANAGEMENT_SERVICES set to 1)
+  - method call
+  - add nodes (variable node only) if library compiled with S2OPC_NODE_MANAGEMENT set to 1
 - Server local services: read, write, browse and discovery services
 - Server address space modification:
   - mechanisms implemented for remote modification: variables modification with typechecking (data type and value rank), access level and user access level control
@@ -247,12 +247,18 @@ To build S2OPC libraries and tests with default configuration on current stable 
 - Paths to external libraries source directory: MbedTLS, Expat (optional: needed for XML parsing features only), Check (optional: needed for S2OPC unit tests). Set the  MBEDTLS_DIR, EXPAT_DIR and CHECK_DIR variables.
 - Visual Studio version to use and type of build (Release, Debug, etc.). Set the VS_VERSION and CONFIG variables.
 
-By setting environment variables WITH_NANO_EXTENDED, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
-- WITH_NANO_EXTENDED (OFF by default): if set to ON, it includes extended features out of the server nano scope, it includes subscription, monitored items and method calls services (no address space access, etc.)
+By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUILD_SHARED_LIBS, ENABLE_TESTING, ENABLE_SAMPLES and WITH_PYS2OPC it is possible to customize S2OPC build.
+- S2OPC_NANO_PROFILE (OFF by default): if set to ON, it excludes the features out of the OPC UA server nano scope (excluded services: subscription, monitored items and method calls services)
+- S2OPC_NODE_MANAGEMENT (OFF by default): if set to ON, activates a simplified AddNodes service (variable node only without child nodes generation, no NodeId generation, simplified checks on types)
+- S2OPC_DYNAMIC_TYPE_RESOLUTION (OFF by default): if set to ON, type resolution uses the HasSubType references of address space if the already static extracted types of NS0 are not sufficient.
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
-- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools, etc.)
+- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,8ful$
+etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
+- (deprecated) WITH_NANO_EXTENDED: equivalent to S2OPC_NANO_PROFILE set to OFF (default)
+- (deprecated) SOPC_HAS_NODE_MANAGEMENT_SERVICES: equivalent to S2OPC_NODE_MANAGEMENT
+- (deprecated) SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION: equivalent to S2OPC_DYNAMIC_TYPE_RESOLUTION
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 

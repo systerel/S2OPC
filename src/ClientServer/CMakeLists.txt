@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(S2OPC_ClientServer LANGUAGES C)
 
-option(WITH_NANO_EXTENDED "Use Nano profile with additional services out of Nano scope" OFF)
-
 ##                                    ##
 # S2OPC client/server toolkit library  #
 ##                                    ##
