@@ -36,7 +36,8 @@ bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref);
 
 SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node);
 
-const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParent(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId);
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* addSpace,
+                                                             const SOPC_NodeId* childNodeId);
 
 bool SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(SOPC_AddressSpace* addSpace,
                                                         int recursionLimit,

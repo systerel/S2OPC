@@ -137,7 +137,7 @@ static const SOPC_NodeId* get_direct_parent_of_node(SOPC_AddressSpace* addSpace,
     return directParent;
 }
 
-const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParent(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId)
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* addSpace, const SOPC_NodeId* childNodeId)
 {
     const SOPC_NodeId* result = NULL;
 
@@ -181,7 +181,7 @@ bool SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(SOPC_AddressSpace* addSp
     }
 
     // Starting to check if direct parent is researched parent
-    const SOPC_NodeId* directParent = SOPC_AddressSpaceUtil_GetDirectParent(addSpace, currentTypeOrSubtype);
+    const SOPC_NodeId* directParent = SOPC_AddressSpaceUtil_GetDirectParentType(addSpace, currentTypeOrSubtype);
     if (NULL != directParent)
     {
         if (SOPC_NodeId_Equal(directParent, expectedParentType))

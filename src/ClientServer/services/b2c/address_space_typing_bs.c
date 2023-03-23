@@ -153,7 +153,7 @@ static bool recursive_check_object_has_method(int recursionLimit,
 
         case OpcUa_NodeClass_ObjectType:
             res = recursive_check_object_has_method(
-                recursionLimit, SOPC_AddressSpaceUtil_GetDirectParent(address_space_bs__nodes, objectId), methodId);
+                recursionLimit, SOPC_AddressSpaceUtil_GetDirectParentType(address_space_bs__nodes, objectId), methodId);
             break;
 
         default:
