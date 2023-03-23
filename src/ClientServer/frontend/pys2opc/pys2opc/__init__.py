@@ -109,7 +109,7 @@ It can be changed later, and will be checked only when encoding the value.
 DataValue is another OPC UA concept that encapsulates `Variant` to add timestamps and a quality (see `pys2opc.types.DataValue`).
 It is DataValues that are used to store values (when reading or writing values).
 There are helpers to convert Python values to OPC UA values (`pys2opc.types.DataValue.from_python`).
-The other way around is simpler (just use the `pys2opc.types.DataValue.variant` as if it was a Python value).
+The other way around is simpler (just use the `pys2opc.types.DataValue` variant field as if it was a Python value).
 
 When writing nodes to a server, PyS2OPC is able to compute the type of a Variant by making a read beforehand
 (see `pys2opc.connection.BaseClientConnectionHandler.write_nodes`) and deducing the right types.

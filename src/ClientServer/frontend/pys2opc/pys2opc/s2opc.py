@@ -482,7 +482,7 @@ class PyS2OPC_Client(PyS2OPC):
         """
         Default method that is called during configuration phase if an encrypted private key is used, 
         it shall return the password to decrypt the client private key.
-        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        It uses `_get_password` which uses get_pass library.
         """
         return PyS2OPC._get_password("Client private key password:")
 
@@ -491,7 +491,7 @@ class PyS2OPC_Client(PyS2OPC):
         """
         Default method that is called during configuration phase if an encrypted private key is used,
         it shall return the password to decrypt the user private key.
-        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        It uses the `_get_password` which uses get_pass library.
         """
         return PyS2OPC._get_password("User private key password:")
 
@@ -892,7 +892,7 @@ class PyS2OPC_Server(PyS2OPC):
         """
         Default method that is called during configuration phase if an encrypted private key is used, 
         it shall return the password to decrypt the server private key.
-        It uses the `PyS2OPC._get_password` which uses get_pass library.
+        It uses `_get_password` which uses get_pass library.
         """
         return PyS2OPC._get_password("Server private key password:")
             
@@ -914,7 +914,7 @@ class PyS2OPC_Server(PyS2OPC):
         `epIdx` is the local endpoint index to send this request to.
         If `None`, this function chooses an endpoint.
 
-        See `pys2opc.connection.BaseConnectionHandler.read_nodes` for more details.
+        See `pys2opc.connection.BaseClientConnectionHandler.read_nodes` for more details.
         """
         request = Request.new_read_request(nodeIds, attributes=attributes)
         return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)
@@ -926,7 +926,7 @@ class PyS2OPC_Server(PyS2OPC):
         `epIdx` is the local endpoint index to send this request to.
         If `None`, this function chooses an endpoint.
 
-        See `pys2opc.connection.BaseConnectionHandler.write_nodes` for more details.
+        See `pys2opc.connection.BaseClientConnectionHandler.write_nodes` for more details.
         """
         # Where there are unknown types, makes a read request first
         if bAutoTypeWithRead:
@@ -943,7 +943,7 @@ class PyS2OPC_Server(PyS2OPC):
         `epIdx` is the local endpoint index to send this request to.
         If `None`, this function chooses an endpoint.
 
-        See `pys2opc.connection.BaseConnectionHandler.browse_nodes` for more details.
+        See `pys2opc.connection.BaseClientConnectionHandler.browse_nodes` for more details.
         """
         request = Request.new_browse_request(nodeIds, maxReferencesPerNode=maxReferencesPerNode)
         return PyS2OPC_Server._send_request(request, bWaitResponse, epIdx)

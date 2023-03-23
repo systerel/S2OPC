@@ -142,7 +142,7 @@ class BaseClientConnectionHandler(LibSubAsyncRequestHandler):
         which has accessors to check whether the writes were successful or not.
         Otherwise, returns the `pys2opc.request.Request`.
 
-        When `bAutoTypeWithRead`, this method tries to determine missing `datavalues` types (see `pys2opc.types.DataValues`).
+        When `bAutoTypeWithRead`, this method tries to determine missing `datavalues` types (see `pys2opc.types.DataValue`).
         It sends a blocking `ReadRequest` first on the `nodeIds` and `attributes`, and deduce the types from the response.
         The request is only sent when at least one datavalue lacks type in both `datavalue.variantType` and `types`.
         The type deduction may fail if the node does not exist or if the value is a `null`.

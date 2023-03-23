@@ -69,7 +69,7 @@ class BaseAddressSpaceHandler:
 class BaseUserHandler:
     """
     Base class for the authentications and authorizations of users.
-    You should derive this class and re-implement its `BaseUserHandler.on_user_authentication` and `BaseUserHandler.on_user_authorization`.
+    You should derive this class and re-implement the functions.
     """
     pass
     #def _on_user_authentication(self, authenticationManager, pUser, pUserAuthenticated):
