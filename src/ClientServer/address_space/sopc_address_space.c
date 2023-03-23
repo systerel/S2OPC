@@ -116,50 +116,72 @@ typedef enum
 } SOPC_InternalNodeClass;
 
 static const bool NODE_CLASS_TO_ATTRIBS[SOPC_InternalNodeClass_View + 1]
-                                       [SOPC_AttributeId_UserExecutable - SOPC_AttributeId_IsAbstract + 1] = {
+                                       [SOPC_AttributeId_AccessLevelEx - SOPC_AttributeId_IsAbstract + 1] = {
                                            {//  8     9     10     11     12     13     14
                                             // 15    16     17     18     19     20     21     22
+                                            // 23    24     25     26     27
                                             // Unspecified class
                                             false, false, false, false, false, false, false,
 
-                                            false, false, false, false, false, false, false, false},
-                                           {// ObjectNode
-                                            false, false, false, false, true, false, false,
+                                            false, false, false, false, false, false, false, false,
 
-                                            false, false, false, false, false, false, false, false},
+                                            false, false, false, false, false},
+
+                                           {// ObjectNode
+                                            false, false, false, false, true,  false, false,
+
+                                            false, false, false, false, false, false, false, false,
+
+                                            false, true,  true,  true,  false},
+
                                            {// VariableNode
                                             false, false, false, false, false, true, true,
 
-                                            true, true, true, /**/ true, true, true, false, false},
+                                            true,  true,  true,  true,  true,  true, false, false,
+
+                                            false, true,  true,  true,  true},
+
                                            {// MethodNode
                                             false, false, false, false, false, false, false,
 
-                                            false, false, false, false, false, false, true, true},
+                                            false, false, false, false, false, false, true,  true,
+
+                                            false, true,  true,  true,  false},
 
                                            {// ObjectTypeNode
-                                            true, false, false, false, false, false, false,
+                                            true,  false, false, false, false, false, false,
 
-                                            false, false, false, false, false, false, false, false},
+                                            false, false, false, false, false, false, false, false,
+
+                                            false, true,  true,  true,  false},
 
                                            {// VariableTypeNode
-                                            true, false, false, false, false, true, /**/ true,
+                                            true,  false, false, false, false, true,  true,
 
-                                            true, true, false, false, /**/ false, false, true, true},
+                                            true,  true,  false, false, false, false, true, true,
+
+                                            false, true,  true,  true,  false},
 
                                            {// ReferenceTypeNode
-                                            true, true, true, /**/ false, false, false, false,
+                                            true,  true,  true,  false, false, false, false,
 
-                                            false, false, false, false, false, false, false, false},
+                                            false, false, false, false, false, false, false, false,
+
+                                            false, true,  true,  true,  false},
 
                                            {// DataTypeNode
-                                            true, false, false, false, false, false, false,
+                                            true,  false, false, false, false, false, false,
 
-                                            false, false, false, false, false, false, false, false},
+                                            false, false, false, false, false, false, false, false,
+
+                                            true,  true,  true,  true,  false},
 
                                            {// ViewNode
-                                            false, false, false, true, true, false, false,
+                                            false, false, false, true,  true,  false, false,
 
-                                            false, false, false, false, false, false, false, false},
+                                            false, false, false, false, false, false, false, false,
+
+                                            false, true,  true,  true,  false},
 };
 
 bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_AttributeId attribute)
