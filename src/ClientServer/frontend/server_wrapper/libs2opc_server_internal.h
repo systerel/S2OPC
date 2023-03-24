@@ -45,8 +45,12 @@
 #define SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS 5000
 #endif
 
-#ifndef DEFAULT_SHUTDOWN_PHASE_IN_SECONDS
-#define DEFAULT_SHUTDOWN_PHASE_IN_SECONDS 5
+#ifndef SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS
+#define SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS 5
+#endif
+
+#ifndef SOPC_DEFAULT_CURRENT_TIME_REFERSH_FREQ_MS
+#define SOPC_DEFAULT_CURRENT_TIME_REFERSH_FREQ_MS 1000
 #endif
 
 typedef enum
@@ -111,6 +115,9 @@ typedef struct SOPC_ServerHelper_Config
 
     // Server shutdown phase duration configuration
     uint16_t configuredSecondsTillShutdown;
+    // Server status current time refresh interval
+    uint16_t configuredCurrentTimeRefreshIntervalMs;
+    uint32_t currentTimeRefreshTimerId;
 
     // User authentication and authorization managers
     // Note: temporarily duplicated with SOPC_S2OPC_Config endpoints

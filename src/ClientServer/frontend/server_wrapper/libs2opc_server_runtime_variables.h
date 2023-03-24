@@ -37,6 +37,7 @@ typedef struct SOPC_Server_RuntimeVariables
     uint32_t secondsTillShutdown;
     SOPC_LocalizedText shutdownReason;
     OpcUa_ServerState server_state;
+    SOPC_DateTime startTime;
     OpcUa_BuildInfo build_info;
     SOPC_Byte service_level;
     bool auditing;
@@ -99,5 +100,17 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeV
  * to update the runtime variables of the server.
  */
 OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SOPC_Server_RuntimeVariables* vars);
+
+/**
+ * \brief Build a write request to update the server status current time variables value in the address space.
+ *
+ * \param var Values of the runtime variables.
+ * \return the WriteRequest to use with local services in case of success, NULL in case of failure.
+ *
+ * This function gathers the 2 variables nodes containing the server status current time (ServerStatus and CurrentTime)
+ * into a single write request that should be used with ::SOPC_ToolkitServer_AsyncLocalServiceRequest
+ * to update the runtime variables of the server.
+ */
+OpcUa_WriteRequest* SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(SOPC_Server_RuntimeVariables* vars);
 
 #endif

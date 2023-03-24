@@ -26,8 +26,11 @@
 #include "libs2opc_server.h"
 #include "libs2opc_server_internal.h"
 
+#include "opcua_identifiers.h"
+
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
+#include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -281,6 +284,34 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa
     return status;
 }
 
+static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* handler,
+                                                         int32_t event,
+                                                         uint32_t eltId,
+                                                         uintptr_t params,
+                                                         uintptr_t auxParam)
+{
+    assert(OpcUaId_Server_ServerStatus_CurrentTime == event);
+    assert(OpcUaId_Server_ServerStatus_CurrentTime == eltId);
+    SOPC_UNUSED_ARG(handler);
+    SOPC_UNUSED_ARG(params);
+    SOPC_UNUSED_ARG(auxParam);
+    SOPC_HelperConfigInternal_Ctx* ctx = SOPC_HelperConfigInternalCtx_Create(0, SE_LOCAL_SERVICE_RESPONSE);
+    if (NULL != ctx)
+    {
+        ctx->eventCtx.localService.isHelperInternal = true;
+        ctx->eventCtx.localService.internalErrorMsg =
+            "Updating server status current time runtime variables of server information nodes failed."
+            " Please check address space content includes necessary base information nodes.";
+        OpcUa_WriteRequest* writeRequest =
+            SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(&sopc_server_helper_config.runtimeVariables);
+        if (NULL != writeRequest)
+        {
+            SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], writeRequest,
+                                                        (uintptr_t) ctx);
+        }
+    }
+}
+
 // Build and update server runtime variables (Server node info) and request to open all endpoints of the server
 static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 {
@@ -312,6 +343,22 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             SOPC_RuntimeVariables_BuildWriteRequest(&sopc_server_helper_config.runtimeVariables);
 
         status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(writeRequest, ctx);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EventHandler* currentTimeHandler =
+                SOPC_EventHandler_Create(sopc_appLooper, SOPC_UpdateCurrentTime_EventHandler_Callback);
+            SOPC_Event currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
+                                           OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
+            uint32_t currentTimeTimerId = SOPC_EventTimer_CreatePeriodic(
+                currentTimeHandler, currentTimeEvent, sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs);
+            if (0 == currentTimeTimerId)
+            {
+                SOPC_Logger_TraceWarning(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Timer creation to update server status current time failed, it will not be updated.");
+            }
+        }
     }
     else
     {
@@ -334,6 +381,9 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 // Returns when shutdown countdown is terminated
 static void SOPC_HelperInternal_ShutdownPhaseServer(void)
 {
+    // Stop the current time update timer
+    SOPC_EventTimer_Cancel(sopc_server_helper_config.currentTimeRefreshTimerId);
+
     // The OPC UA server indicates it will shutdown during a few seconds and then actually stop
 
     SOPC_Server_RuntimeVariables* runtime_vars = &sopc_server_helper_config.runtimeVariables;

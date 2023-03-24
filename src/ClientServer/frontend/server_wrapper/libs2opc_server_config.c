@@ -52,7 +52,9 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
         },
     .serverStoppedStatus = SOPC_STATUS_OK,
     .stoppedCb = NULL,
-    .configuredSecondsTillShutdown = DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
+    .configuredSecondsTillShutdown = SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
+    .configuredCurrentTimeRefreshIntervalMs = 1000,
+    .currentTimeRefreshTimerId = 0,
     .authenticationManager = NULL,
     .authorizationManager = NULL,
     .buildInfo = NULL,
@@ -596,6 +598,23 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
         return SOPC_STATUS_INVALID_STATE;
     }
     sopc_server_helper_config.configuredSecondsTillShutdown = secondsTillShutdown;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetCurrentTimeRefreshInterval(uint16_t intervalMs)
+{
+    if (!SOPC_ServerInternal_IsConfiguring())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (intervalMs >= 2 * SOPC_TIMER_RESOLUTION_MS)
+    {
+        sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs = intervalMs;
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     return SOPC_STATUS_OK;
 }
 

@@ -85,6 +85,7 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
 
     runtimeVariables.secondsTillShutdown = 0;
     runtimeVariables.server_state = OpcUa_ServerState_Running;
+    runtimeVariables.startTime = SOPC_Time_GetCurrentTimeUTC();
     SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
 
     OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
@@ -222,6 +223,7 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
     set_write_value_id(wv, id);
     set_variant_scalar(&wv->Value.Value, SOPC_DateTime_Id);
     wv->Value.Value.Value.Date = value;
+    wv->Value.SourceTimestamp = value; /* Make source timestamp the same than time value */
     return true;
 }
 
@@ -314,7 +316,9 @@ static bool set_server_server_status_state_value(OpcUa_WriteValue* wv, OpcUa_Ser
     return true;
 }
 
-static bool set_write_value_server_status(OpcUa_WriteValue* wv, SOPC_Server_RuntimeVariables* vars)
+static bool set_write_value_server_status(OpcUa_WriteValue* wv,
+                                          SOPC_Server_RuntimeVariables* vars,
+                                          SOPC_DateTime currentTime)
 {
     const OpcUa_BuildInfo* build_info = &vars->build_info;
     /* create extension object */
@@ -331,15 +335,16 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, SOPC_Server_Runt
         SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, &server_status_in_extObject->BuildInfo, build_info);
     assert(SOPC_STATUS_OK == status);
 
-    server_status_in_extObject->CurrentTime = SOPC_Time_GetCurrentTimeUTC();
+    server_status_in_extObject->CurrentTime = currentTime;
     server_status_in_extObject->SecondsTillShutdown = vars->secondsTillShutdown;
     status = SOPC_LocalizedText_Copy(&server_status_in_extObject->ShutdownReason, &vars->shutdownReason);
     assert(SOPC_STATUS_OK == status);
     server_status_in_extObject->State = vars->server_state;
-    server_status_in_extObject->StartTime = SOPC_Time_GetCurrentTimeUTC();
+    server_status_in_extObject->StartTime = vars->startTime;
 
     /* Prepare write of this extension object */
     set_write_value_id(wv, OpcUaId_Server_ServerStatus);
+    wv->Value.SourceTimestamp = currentTime; /* Make source timestamp the same than current time value */
     wv->Value.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
     wv->Value.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
     wv->Value.Value.Value.ExtObject = extObject;
@@ -350,16 +355,16 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv, SOPC_Server_Runt
 static bool set_server_server_status_variables(SOPC_Array* write_values, SOPC_Server_RuntimeVariables* vars)
 {
     OpcUa_WriteValue* values = append_write_values(write_values, 6);
+    SOPC_DateTime currentTime = SOPC_Time_GetCurrentTimeUTC();
     return values != NULL &&
-           set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_StartTime, SOPC_Time_GetCurrentTimeUTC()) &&
-           set_write_value_datetime(&values[1], OpcUaId_Server_ServerStatus_CurrentTime,
-                                    SOPC_Time_GetCurrentTimeUTC()) &&
+           set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_StartTime, vars->startTime) &&
+           set_write_value_datetime(&values[1], OpcUaId_Server_ServerStatus_CurrentTime, currentTime) &&
            set_server_server_status_state_value(&values[2], vars->server_state) &&
            set_write_value_uint32(&values[3], OpcUaId_Server_ServerStatus_SecondsTillShutdown,
                                   vars->secondsTillShutdown) &&
            set_write_value_localized_text(&values[4], OpcUaId_Server_ServerStatus_ShutdownReason,
                                           vars->shutdownReason) &&
-           set_write_value_server_status(&values[5], vars) &&
+           set_write_value_server_status(&values[5], vars, currentTime) &&
            set_server_server_status_build_info_variables(write_values, &vars->build_info);
 }
 
@@ -648,5 +653,37 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SO
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
     request->NoOfNodesToWrite = (int32_t) n_values;
 
+    return request;
+}
+
+OpcUa_WriteRequest* SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(SOPC_Server_RuntimeVariables* vars)
+{
+    OpcUa_WriteRequest* request = SOPC_Calloc(1, sizeof(*request));
+    SOPC_Array* write_values = SOPC_Array_Create(sizeof(OpcUa_WriteValue), 2, OpcUa_WriteValue_Clear);
+
+    bool ok = (NULL != write_values && NULL != request);
+    SOPC_DateTime currentTime = SOPC_Time_GetCurrentTimeUTC();
+
+    OpcUa_WriteValue* values = NULL;
+    if (ok)
+    {
+        values = append_write_values(write_values, 2);
+        ok = (NULL != values);
+    }
+
+    ok = (ok && set_write_value_datetime(&values[0], OpcUaId_Server_ServerStatus_CurrentTime, currentTime) &&
+          set_write_value_server_status(&values[1], vars, currentTime));
+
+    if (ok)
+    {
+        OpcUa_WriteRequest_Initialize(request);
+        request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
+        request->NoOfNodesToWrite = 2;
+    }
+    else
+    {
+        SOPC_Array_Delete(write_values);
+        SOPC_Free(request);
+    }
     return request;
 }
