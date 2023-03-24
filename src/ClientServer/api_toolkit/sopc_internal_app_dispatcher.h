@@ -23,8 +23,9 @@
 #include "sopc_event_handler.h"
 #include "sopc_user_app_itf.h"
 
-extern SOPC_ComEvent_Fct* appEventCallback;
-extern SOPC_AddressSpaceNotif_Fct* appAddressSpaceNotificationCallback;
+extern SOPC_ComEvent_Fct* sopc_appEventCallback;
+extern SOPC_AddressSpaceNotif_Fct* sopc_appAddressSpaceNotificationCallback;
+extern SOPC_Looper* sopc_appLooper;
 
 void SOPC_App_Initialize(void);
 void SOPC_App_Clear(void);

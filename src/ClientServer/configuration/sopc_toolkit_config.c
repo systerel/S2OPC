@@ -101,7 +101,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             Mutex_Lock(&tConfig.mut);
             tConfig.initDone = true;
 
-            appEventCallback = pAppFct;
+            sopc_appEventCallback = pAppFct;
 
             // Ensure constants cannot be modified later
             SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
@@ -302,8 +302,8 @@ void SOPC_Toolkit_Clear(void)
         Mutex_Lock(&tConfig.mut);
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
-        appEventCallback = NULL;
-        appAddressSpaceNotificationCallback = NULL;
+        sopc_appEventCallback = NULL;
+        sopc_appAddressSpaceNotificationCallback = NULL;
         address_space_bs__nodes = NULL;
         sopc_addressSpace_configured = false;
         // Reset values to init value
@@ -662,10 +662,10 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
         if (tConfig.initDone)
         {
             Mutex_Lock(&tConfig.mut);
-            if (!tConfig.serverConfigLocked && appAddressSpaceNotificationCallback == NULL)
+            if (!tConfig.serverConfigLocked && sopc_appAddressSpaceNotificationCallback == NULL)
             {
                 status = SOPC_STATUS_OK;
-                appAddressSpaceNotificationCallback = pAddSpaceNotifFct;
+                sopc_appAddressSpaceNotificationCallback = pAddSpaceNotifFct;
             }
             Mutex_Unlock(&tConfig.mut);
         }

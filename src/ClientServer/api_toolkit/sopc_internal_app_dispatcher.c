@@ -28,10 +28,10 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-SOPC_ComEvent_Fct* appEventCallback = NULL;
-SOPC_AddressSpaceNotif_Fct* appAddressSpaceNotificationCallback = NULL;
+SOPC_ComEvent_Fct* sopc_appEventCallback = NULL;
+SOPC_AddressSpaceNotif_Fct* sopc_appAddressSpaceNotificationCallback = NULL;
 
-SOPC_Looper* appLooper = NULL;
+SOPC_Looper* sopc_appLooper = NULL;
 SOPC_EventHandler* appComEventHandler = NULL;
 SOPC_EventHandler* appAddressSpaceNotificationHandler = NULL;
 
@@ -107,20 +107,20 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
         break;
     }
 
-    if (NULL != appEventCallback)
+    if (NULL != sopc_appEventCallback)
     {
         if (comEvent == SE_ACTIVATED_SESSION)
         {
-            appEventCallback(comEvent,
-                             id, // session id
-                             NULL,
-                             auxParam); // session context
+            sopc_appEventCallback(comEvent,
+                                  id, // session id
+                                  NULL,
+                                  auxParam); // session context
         }
         else
         {
-            appEventCallback(comEvent, id,
-                             params,    // see event definition of params
-                             auxParam); // application context
+            sopc_appEventCallback(comEvent, id,
+                                  params,    // see event definition of params
+                                  auxParam); // application context
         }
     }
 
@@ -175,9 +175,9 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
             }
         }
 
-        if (NULL != appAddressSpaceNotificationCallback)
+        if (NULL != sopc_appAddressSpaceNotificationCallback)
         {
-            appAddressSpaceNotificationCallback(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
+            sopc_appAddressSpaceNotificationCallback(cc, asEvent, params, (SOPC_StatusCode) initialAuxParam);
         }
 
         if (NULL != params)
@@ -197,20 +197,20 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 
 void SOPC_App_Initialize(void)
 {
-    appLooper = SOPC_Looper_Create("Application");
-    assert(appLooper != NULL);
+    sopc_appLooper = SOPC_Looper_Create("Application");
+    assert(sopc_appLooper != NULL);
 
-    appComEventHandler = SOPC_EventHandler_Create(appLooper, onComEvent);
+    appComEventHandler = SOPC_EventHandler_Create(sopc_appLooper, onComEvent);
     assert(appComEventHandler != NULL);
 
-    appAddressSpaceNotificationHandler = SOPC_EventHandler_Create(appLooper, onAddressSpaceNotification);
+    appAddressSpaceNotificationHandler = SOPC_EventHandler_Create(sopc_appLooper, onAddressSpaceNotification);
     assert(appAddressSpaceNotificationHandler != NULL);
 }
 
 void SOPC_App_Clear(void)
 {
-    SOPC_Looper_Delete(appLooper);
-    appLooper = NULL;
+    SOPC_Looper_Delete(sopc_appLooper);
+    sopc_appLooper = NULL;
     appComEventHandler = NULL;
     appAddressSpaceNotificationHandler = NULL;
 }
