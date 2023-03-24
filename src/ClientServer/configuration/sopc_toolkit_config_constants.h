@@ -152,8 +152,8 @@
 #define SOPC_MAX_SESSION_AUTH_ATTEMPTS 3
 #endif
 
-/** @brief Delay in seconds for which the secure channel of a session that reached ::SOPC_MAX_SESSION_AUTH_ATTEMPTS
- *         user authentication failure attempts will block new sessions creation.
+/** @brief Period of time in seconds during which new sessions creation will be blocked on the secure channel
+ *         when ::SOPC_MAX_SESSION_AUTH_ATTEMPTS user authentication failure attempts occurred.
  */
 #ifndef SOPC_CREATE_SESSION_LOCK_DELAY_SECS
 #define SOPC_CREATE_SESSION_LOCK_DELAY_SECS 60
