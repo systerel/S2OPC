@@ -236,7 +236,7 @@
 #ifndef SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
 #define S2OPC_DYNAMIC_TYPE_RESOLUTION false
 #else
-/* Retro-compatibility for deprecated name */
+/* backward compatibility for deprecated name */
 #define S2OPC_DYNAMIC_TYPE_RESOLUTION SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
 #endif
 #endif
@@ -249,7 +249,7 @@
 #ifndef SOPC_HAS_NODE_MANAGEMENT_SERVICES
 #define S2OPC_NODE_MANAGEMENT false
 #else
-/* Retro-compatibility for deprecated name */
+/* backward compatibility for deprecated name */
 #define S2OPC_NODE_MANAGEMENT SOPC_HAS_NODE_MANAGEMENT_SERVICES
 #endif
 #endif
@@ -259,7 +259,7 @@
 #ifndef S2OPC_NANO_PROFILE
 #ifndef WITH_NANO_EXTENDED
 #define S2OPC_NANO_PROFILE false
-/* Retro-compatibility for deprecated name */
+/* backward compatibility for deprecated name */
 #elif WITH_NANO_EXTENDED
 #define S2OPC_NANO_PROFILE false
 #else

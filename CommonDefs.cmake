@@ -191,6 +191,8 @@ option(S2OPC_NANO_PROFILE "Use Nano profile only (limited scope of OPC UA servic
 option(S2OPC_NODE_MANAGEMENT "Make NodeManagement service set available to clients" OFF)
 option(S2OPC_DYNAMIC_TYPE_RESOLUTION "Activate type resolution using content of address space in addition to static types data" OFF)
 
+# Manage backward compatibilty for previous option names
+
 if(DEFINED WITH_NANO_EXTENDED)
   if(NOT WITH_NANO_EXTENDED)
     set(S2OPC_NANO_PROFILE ON)
@@ -388,7 +390,7 @@ endif()
 
 # Add S2OPC_NANO_PROFILE to compilation definition if option activated
 # Note: definition is necessary to build PyS2OPC
-list(APPEND S2OPC_DEFINITIONS S2OPC_NANO_PROFILE=${S2OPC_NANO_PROFILE})
+list(APPEND S2OPC_DEFINITIONS  $<$<BOOL:${S2OPC_NANO_PROFILE}>:S2OPC_NANO_PROFILE>)
 # Add S2OPC_NODE_MANAGEMENT to compilation definition if option activated
 list(APPEND S2OPC_DEFINITIONS $<$<BOOL:${S2OPC_NODE_MANAGEMENT}>:S2OPC_NODE_MANAGEMENT>)
 # Add S2OPC_DYNAMIC_TYPE_RESOLUTION to compilation definition if option activated
@@ -456,9 +458,14 @@ function(s2opc_expand_header h_input context_targets h_expanded)
     # Same for defines
     set(_expand_eval_defines "$<TARGET_PROPERTY:${_context_target},COMPILE_DEFINITIONS>")
     list(APPEND _expand_defines "$<$<BOOL:${_expand_eval_defines}>:-D$<JOIN:${_expand_eval_defines},\;-D>>")
+    list(APPEND _expand_defines_flags "${_expand_eval_defines}")
   endforeach(_context_target)
+  # Note: the $<BOOL> evaluation never returns FALSE when variable is empty which lead to empty flag issue (-D ).
+  #       Add an additional definition to avoid this possible case.
+  list(APPEND _expand_defines_flags "S2OPC_NON_EMPTY_DEF")
+  set(_expand_defines_flags "$<$<BOOL:${_expand_defines_flags}>:-D$<JOIN:${_expand_defines_flags}, -D>>")
 
-  # Of course, M$ deprecated '-o', so we have to handle this manually... But at least there exists equivalents.
+  # On Windows '-o' is deprecated, use equivalent option.
   if(WIN32 AND NOT MINGW)
     set(_output_switches /P /Fi${h_expanded})
   else()
@@ -466,7 +473,8 @@ function(s2opc_expand_header h_input context_targets h_expanded)
   endif()
   add_custom_command(DEPENDS ${h_input}
                      OUTPUT ${h_expanded}
-                     COMMAND ${CMAKE_C_COMPILER} ${_expand_includes} ${_expand_defines}
+                     COMMAND ${CMAKE_C_COMPILER} ${_expand_includes}
+                             "${_expand_defines_flags}"
                              -DS2OPC_PYEXPANSION
                              -E ${h_input} ${_output_switches}
                      COMMENT "Expending header file to ${h_expanded}"
