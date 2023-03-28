@@ -32,3 +32,4 @@ the legal rights to contribute.
 * Robin Barrucand <robin.barrucand@systerel.fr>
 * Henri de Pesquidoux <henri.de.pesquidoux-stg@systerel.fr>
 * tajan <sebastien.tajan-stg@systerel.fr>
+* Nathan Lebeau <nathan.lebeau-stg@systerel.fr>
