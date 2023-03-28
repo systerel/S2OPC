@@ -766,16 +766,16 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     }
 
     /* Poor-man's SHA-1 format */
-    char* ret = SOPC_Calloc(61, sizeof(char));
+    char* ret = SOPC_Calloc(42, sizeof(char));
     if (NULL == ret)
     {
         return NULL;
     }
     for (size_t i = 0; i < 20; ++i)
     {
-        snprintf(ret + 3 * i, 4, "%02X:", pDest[i]);
+        snprintf(ret + 2 * i, 3, "%02X", pDest[i]);
     }
-    ret[59] = '\0';
+    ret[40] = '\0';
 
     return ret;
 }
