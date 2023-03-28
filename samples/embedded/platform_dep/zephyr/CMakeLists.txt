@@ -31,6 +31,16 @@ add_definitions (-UNDEBUG)
 add_definitions (-Werror)
 
 # =====================
+# S2OPC BUILD VARIABLES
+# =====================
+execute_process(COMMAND git rev-parse HEAD OUTPUT_VARIABLE BUILD_SRC_COMMIT)
+string(REGEX REPLACE "\n$" "" BUILD_SRC_COMMIT "${BUILD_SRC_COMMIT}")
+
+add_definitions (-DBUILD_SRC_COMMIT="${BUILD_SRC_COMMIT}")
+add_definitions (-DBUILD_DOCKER_ID="N.A.")
+add_definitions (-DBUILD_BUILD_DATE=__DATE__\"\ \"__TIME__)
+
+# =====================
 # MBEDTLS SPECIFIC DEFS
 # =====================
 # MBEDTLS requires an applicative-defined configuration

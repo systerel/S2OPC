@@ -294,9 +294,14 @@ static int cmd_demo_info(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
+    const SOPC_Build_Info buildInfo = SOPC_CommonHelper_GetBuildInfo().commonBuildInfo;
+
     PRINT("\nEmbedded S2OPC client demo status\n");
     PRINT("Server endpoint       : %s\n", epURL);
     PRINT("Client toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+    PRINT("Server src commit     : %s\n", buildInfo.buildSrcCommit);
+    PRINT("Server docker Id      : %s\n", buildInfo.buildDockerId);
+    PRINT("Server build date     : %s\n", buildInfo.buildBuildDate);
     PRINT("Client configured     : %s\n", YES_NO(gConfigurationId > 0));
 
     return 0;

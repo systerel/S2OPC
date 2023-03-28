@@ -48,6 +48,7 @@
 #include "samples_platform_dep.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_common_build_info.h"
 #include "sopc_encodeable.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -764,11 +765,16 @@ static int cmd_demo_info(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
+    const SOPC_Build_Info buildInfo = SOPC_CommonHelper_GetBuildInfo().commonBuildInfo;
+
     PRINT("S2OPC PubSub+Server demo status\n");
     PRINT("Server endpoint       : %s\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
     PRINT("Server running        : %s\n", YES_NO(gStopped == 0));
     PRINT("Server const@space    : %s\n", YES_NO(sopc_embedded_is_const_addspace));
     PRINT("Server toolkit version: %s\n", SOPC_TOOLKIT_VERSION);
+    PRINT("Server src commit     : %s\n", buildInfo.buildSrcCommit);
+    PRINT("Server docker Id      : %s\n", buildInfo.buildDockerId);
+    PRINT("Server build date     : %s\n", buildInfo.buildBuildDate);
     PRINT("Publisher address     : %s\n", CONFIG_SOPC_PUBLISHER_ADDRESS);
     PRINT("Publisher running     : %s\n", YES_NO(gPubStarted));
     PRINT("Publisher period      : %d ms\n", CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000);
