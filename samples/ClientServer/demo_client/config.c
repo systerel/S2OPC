@@ -165,8 +165,8 @@ struct argparse_option CONN_OPTIONS[17] = {
     OPT_STRING(0,
                "user_key",
                &PATH_USER_PRIV,
-               "(if anonymous and username mode are not active) path to the client private key to use"
-               "(encrypted by default, see no_key_encryption option)",
+               "(if anonymous and username mode are not active) path to the X509 user private key to use (encrypted by "
+               "default, see no_key_encryption option)",
                NULL,
                0,
                0),
