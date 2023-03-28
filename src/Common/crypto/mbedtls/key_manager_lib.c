@@ -23,6 +23,7 @@
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_helper_string.h"
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -929,6 +930,80 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
     return status;
 }
 
+static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* directoryPath)
+{
+    SOPC_ASSERT(NULL != buf && NULL != directoryPath);
+
+    char* basePath = NULL;
+    char* filePath = NULL;
+    char* fileName = NULL;
+    FILE* fp = NULL;
+    /* Compute the file name (SHA1) */
+    char* thumbprint = get_raw_sha1(buf);
+    SOPC_ReturnStatus status = NULL == thumbprint ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StrConcat(thumbprint, ".der", &fileName);
+    }
+    /* Compute the file path */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StrConcat(directoryPath, "/", &basePath);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StrConcat(basePath, fileName, &filePath);
+    }
+    /* MODE = write in binary format and erase if existing */
+    if (SOPC_STATUS_OK == status)
+    {
+        fp = fopen(filePath, "wb+");
+        if (NULL == fp)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t nb_written = fwrite(buf->p, 1, buf->len, fp);
+        if (buf->len != nb_written)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    /* Close and clear */
+    if (NULL != fp)
+    {
+        fclose(fp);
+    }
+    SOPC_Free(basePath);
+    SOPC_Free(filePath);
+    SOPC_Free(fileName);
+    SOPC_Free(thumbprint);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* pCerts, const char* directoryPath)
+{
+    if (NULL == pCerts)
+    {
+        return SOPC_STATUS_OK; // The list could be empty
+    }
+    if (NULL == directoryPath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    mbedtls_x509_crt* crt = &pCerts->crt;
+    while (crt != NULL && SOPC_STATUS_OK == status)
+    {
+        status = raw_buf_to_der_file(&crt->raw, directoryPath);
+        crt = crt->next;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,
                                                                  const SOPC_CertificateList* pCert,
                                                                  bool* pbMatch)
@@ -1059,6 +1134,26 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 #else
     return SOPC_STATUS_NOK;
 #endif
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath)
+{
+    if (NULL == pCrls)
+    {
+        return SOPC_STATUS_OK; // The list could be empty
+    }
+    if (NULL == directoryPath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    mbedtls_x509_crl* crl = &pCrls->crl;
+    while (crl != NULL && SOPC_STATUS_OK == status)
+    {
+        status = raw_buf_to_der_file(&crl->raw, directoryPath);
+        crl = crl->next;
+    }
+    return status;
 }
 
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)

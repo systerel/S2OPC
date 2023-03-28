@@ -323,6 +323,17 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
                                                     uint32_t* pLenAllocated);
 
 /**
+ * \brief           Write all the certificates of \p pCerts in DER files
+ *                  at destination \p directoryPath . File names are defined using the SHA1 of the certificates.
+ *
+ * \param pCerts         A valid pointer to the certificate list.
+ * \param directoryPath  The directory path to write the DER files.
+ *
+ * \return          SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* pCerts, const char* directoryPath);
+
+/**
  * \brief           Computes and writes the thumbprint of \p pCert to \p pDest.
  *
  *   The computation of the thumbprint and its size depends on the current security policy.
@@ -558,6 +569,17 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL);
+
+/**
+ * \brief           Write all the CRL ( \p pCrls ) in DER files.
+ *                  at destination \p directoryPath . File names are defined using the SHA1 of the crls.
+ *
+ * \param pCrls          A valid pointer to the CRL list.
+ * \param directoryPath  The directory path to write the DER files.
+ *
+ * \return          SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath);
 
 /**
  * \brief           Frees a Certificate created with SOPC_KeyManager_CRL_CreateOrAddFromFile() or
