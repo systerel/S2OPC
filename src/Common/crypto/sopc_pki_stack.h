@@ -407,6 +407,24 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
                                                           const SOPC_PKI_LeafProfile* pConfig,
                                                           const SOPC_PKI_ValidationArgs* pArgs,
                                                           uint32_t* error);
+
+/** \brief Write the certificate DER files in the trustList folder of the PKI storage.
+ *         The trustList folder is created if it is missing.
+ *         The trustList folder has the same tree structure as the default folder:
+ *
+ *         - trustList/trusted/certs (.DER files)
+ *         - trustList/trusted/crl (.DER files)
+ *         - trustList/issuers/certs (.DER files)
+ *         - trustList/issuers/crl (.DER files)
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param bEraseExistingFiles whether the existing files of the the trustList folder should be deleted.
+ *
+ * \return SOPC_STATUS_OK when the certificate is successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles);
+
 /**
  * \brief   Free a PKI provider.
  */

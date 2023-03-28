@@ -1645,6 +1645,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         pPKI->pAllCerts = _pAllCerts;
         pPKI->pAllRoots = _pAllRoots;
         pPKI->pAllCrl = _pAllCrl;
+        pPKI->directoryStorePath = NULL;
     }
     else
     {
@@ -1721,6 +1722,11 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
         status = SOPC_PKIProviderNew_CreateFromStore(directoryStorePath, true, ppPKI);
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        (*ppPKI)->directoryStorePath = directoryStorePath;
+    }
+
     /* Clear */
     SOPC_Free(path);
 
@@ -1748,4 +1754,161 @@ void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
     SOPC_Free(pPKI);
+}
+
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
+{
+    SOPC_ASSERT(NULL != directoryPath);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Array* pFilePaths = NULL;
+    char* pFilePath = NULL;
+    int res = -1;
+    /* Get the array of file paths from the given directory */
+    SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(directoryPath, &pFilePaths);
+    if (SOPC_FileSystem_GetDir_OK != dirRes)
+    {
+        fprintf(stderr, "> PKI write to store: failed to open directory <%s>.\n", directoryPath);
+        return SOPC_STATUS_NOK;
+    }
+    size_t nbFiles = SOPC_Array_Size(pFilePaths);
+    for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
+    {
+        pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
+        res = remove(pFilePath);
+        if (0 != res)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    SOPC_Array_Delete(pFilePaths);
+    return status;
+}
+
+static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
+                                                 SOPC_CertificateList* pCerts,
+                                                 const char* directoryPath,
+                                                 const bool bEraseExistingFiles)
+{
+    SOPC_ASSERT(NULL != directoryPath);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (bEraseExistingFiles)
+    {
+        status = remove_files(directoryPath);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_ToDER_Files(pRoots, directoryPath);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_ToDER_Files(pCerts, directoryPath);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
+                                                const char* directoryPath,
+                                                const bool bEraseExistingFiles)
+{
+    SOPC_ASSERT(NULL != directoryPath);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (bEraseExistingFiles)
+    {
+        status = remove_files(directoryPath);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_ToDER_Files(pCrl, directoryPath);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus may_create_pki_folder(const char* pBasePath, const char* pSubPath, char** ppPath)
+{
+    SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_Creation_Error_UnknownIssue;
+    char* pPath = NULL;
+    SOPC_ReturnStatus status = SOPC_StrConcat(pBasePath, pSubPath, &pPath);
+    if (SOPC_STATUS_OK == status)
+    {
+        mkdir_res = SOPC_FileSystem_mkdir(pPath);
+        if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdir_res && SOPC_FileSystem_Creation_OK != mkdir_res)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pPath);
+        pPath = NULL;
+    }
+    *ppPath = pPath;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
+{
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* The case of the PKI is build from buffer (there is no store) */
+    if (NULL == pPKI->directoryStorePath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    char* basePath = NULL;
+    char* path = NULL;
+    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, "/trustList", &basePath);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    status = may_create_pki_folder(basePath, "/trusted", &path);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Free(path);
+        status = may_create_pki_folder(basePath, "/trusted/certs", &path);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = write_cert_to_der_files(pPKI->pTrustedRoots, pPKI->pTrustedCerts, path, bEraseExistingFiles);
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Free(path);
+        status = may_create_pki_folder(basePath, "/trusted/crl", &path);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = write_crl_to_der_files(pPKI->pTrustedCrl, path, bEraseExistingFiles);
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Free(path);
+        status = may_create_pki_folder(basePath, "/issuers", &path);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Free(path);
+        status = may_create_pki_folder(basePath, "/issuers/certs", &path);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = write_cert_to_der_files(pPKI->pIssuerRoots, pPKI->pIssuerCerts, path, bEraseExistingFiles);
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Free(path);
+        status = may_create_pki_folder(basePath, "/issuers/crl", &path);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = write_crl_to_der_files(pPKI->pIssuerCrl, path, bEraseExistingFiles);
+        }
+    }
+
+    SOPC_Free(basePath);
+    SOPC_Free(path);
+
+    return status;
 }
