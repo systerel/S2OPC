@@ -215,7 +215,7 @@ git add .gitlab-ci.yml
 git rm -rf .systerel/ .gitignore &> /dev/null || exit 1
 git commit -S -m "Keep CI artifacts, remove internal CI files and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
-git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz $DELIVERY_NAME || exit 1
+git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz "${DELIVERY_NAME}_branch" || exit 1
 
 if [ $? -eq 0 ]; then
     echo "=============================================================="
