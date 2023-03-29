@@ -246,14 +246,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
     if (connectStatus < 0)
     {
-        int optErr = 0;
-        socklen_t optErrSize = sizeof(optErr);
-        int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-        if (ret < 0)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        if (EINPROGRESS == optErr)
+        if (EINPROGRESS == errno)
         {
             // Non blocking connection started
             connectStatus = 0;
@@ -392,10 +385,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     }
 
     *sentBytes = 0;
-    int optErr = 0;
-    socklen_t optErrSize = sizeof(optErr);
-    res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
+    if (EAGAIN == errno || EWOULDBLOCK == errno)
     {
         return SOPC_STATUS_WOULD_BLOCK;
     }
@@ -426,11 +416,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     }
 
     *readCount = 0;
-    int optErr = 0;
-    socklen_t optErrSize = sizeof(optErr);
-
-    int res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
+    if (EAGAIN == errno || EWOULDBLOCK == errno)
     {
         return SOPC_STATUS_WOULD_BLOCK;
     }
