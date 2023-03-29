@@ -207,6 +207,11 @@ void SOPC_App_Initialize(void)
     assert(appAddressSpaceNotificationHandler != NULL);
 }
 
+SOPC_Looper* SOPC_App_GetLooper(void)
+{
+    return sopc_appLooper;
+}
+
 void SOPC_App_Clear(void)
 {
     SOPC_Looper_Delete(sopc_appLooper);

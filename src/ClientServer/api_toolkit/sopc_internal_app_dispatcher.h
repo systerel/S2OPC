@@ -25,9 +25,9 @@
 
 extern SOPC_ComEvent_Fct* sopc_appEventCallback;
 extern SOPC_AddressSpaceNotif_Fct* sopc_appAddressSpaceNotificationCallback;
-extern SOPC_Looper* sopc_appLooper;
 
 void SOPC_App_Initialize(void);
+SOPC_Looper* SOPC_App_GetLooper(void);
 void SOPC_App_Clear(void);
 
 SOPC_ReturnStatus SOPC_App_EnqueueComEvent(SOPC_App_Com_Event event, uint32_t id, uintptr_t params, uintptr_t auxParam);
