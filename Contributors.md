@@ -31,3 +31,4 @@ the legal rights to contribute.
 * Shahbaaz Ramjane <shahbaaz.ramjane@systerel.fr>
 * Robin Barrucand <robin.barrucand@systerel.fr>
 * Henri de Pesquidoux <henri.de.pesquidoux-stg@systerel.fr>
+* tajan <sebastien.tajan-stg@systerel.fr>
