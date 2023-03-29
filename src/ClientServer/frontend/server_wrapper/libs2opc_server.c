@@ -309,6 +309,10 @@ static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* hand
             SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], writeRequest,
                                                         (uintptr_t) ctx);
         }
+        else
+        {
+            SOPC_Free(ctx);
+        }
     }
 }
 

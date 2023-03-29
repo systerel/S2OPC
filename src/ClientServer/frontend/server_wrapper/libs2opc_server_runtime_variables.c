@@ -137,6 +137,7 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_
 
     runtimeVariables.secondsTillShutdown = 0;
     runtimeVariables.server_state = OpcUa_ServerState_Running;
+    runtimeVariables.startTime = SOPC_Time_GetCurrentTimeUTC();
     SOPC_LocalizedText_Initialize(&runtimeVariables.shutdownReason);
 
     OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
@@ -684,6 +685,7 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_UpdateCurrentTimeWriteRequest(SOPC_Ser
     {
         SOPC_Array_Delete(write_values);
         SOPC_Free(request);
+        request = NULL;
     }
     return request;
 }
