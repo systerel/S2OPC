@@ -363,6 +363,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
                     SOPC_LOG_MODULE_CLIENTSERVER,
                     "Timer creation to update server status current time failed, it will not be updated.");
             }
+            sopc_server_helper_config.currentTimeRefreshTimerId = currentTimeTimerId;
         }
     }
     else
