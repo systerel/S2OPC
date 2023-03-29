@@ -160,10 +160,10 @@ int main(int argc, char* const argv[])
             status = Server_Trigger_Publisher(writerGroupId) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
             if (SOPC_STATUS_NOK == status)
             {
-                printf(
-                    "# Warning: Acyclic send request failed with writer group id %d \n check that publisher is set has "
-                    "acyclic publisher and writer group id correspond to configuration. \n",
-                    writerGroupId);
+                printf("# Warning: Acyclic send request failed with writer group id %" PRIu16
+                       ". \n Check that publisher is set "
+                       "as acyclic publisher and writer group id correspond to configuration. \n",
+                       writerGroupId);
             }
             status = SOPC_STATUS_OK;
         }

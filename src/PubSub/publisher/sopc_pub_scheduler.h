@@ -40,8 +40,8 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 
 /**
  * @brief Launch sending process in acyclic mode. Content of the message can be modified in callback \p
- * SOPC_GetSourceVariables_Func set in function ::SOPC_PubSourceVariableConfig_Create. To select the content to be send
- * \p writerGroupId should match the WriterGroup Id of dataset set in configuration
+ * SOPC_GetSourceVariables_Func set in function ::SOPC_PubSourceVariableConfig_Create. To select the content to be sent
+ * \p writerGroupId shall match the WriterGroup Id of dataset set in configuration
  *
  * @param writerGroupId Id of the writer group to send
  * @return true if succeed to match a writer group to send and send it

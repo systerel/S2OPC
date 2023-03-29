@@ -180,7 +180,7 @@ SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy);
  *
  * @param from Pointer to the source
  * @param to Pointer to the destination
- * @return true succeed to copy contain
+ * @return true in case of success
  * @return false if \a from or \a to is NULL
  */
 bool SOPC_RealTime_Copy(const SOPC_RealTime* from, SOPC_RealTime* to);

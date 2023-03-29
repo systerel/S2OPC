@@ -52,25 +52,25 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(1, 1);
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
     SOPC_Dataset_LL_NetworkMessage_SetVersion(header, 1);
     SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(dsm, 5);
     SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(header, 15300);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, 1245);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, 963852);
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, 123);
-    conf->NotValidFlag = false;
-    conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = true;
-    conf->StatusFlag = false;
-    conf->ConfigurationVersionMajorVersionFlag = false;
-    conf->ConfigurationVersionMinorFlag = false;
-    conf->DataSetFlags2 = false;
-    conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
-    conf->TimestampFlag = false;
-    conf->PicoSecondsFlag = false;
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = {
+        .validFlag = true,
+        .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+        .dataSetMessageSequenceNumberFlag = true,
+        .statusFlag = false,
+        .configurationVersionMajorVersionFlag = false,
+        .configurationVersionMinorFlag = false,
+        .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+        .timestampFlag = false,
+        .picoSecondsFlag = false,
+    };
 
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, *conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
     SOPC_Variant* variant;
     // variant 1
     variant = SOPC_Variant_Create();

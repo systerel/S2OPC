@@ -132,7 +132,7 @@ class PubSubServer:
         try:
             self.nodeAcyclicSend.set_value(ua.Variant(value,ua.VariantType.UInt16))
         except: #TODO exception too broad
-            print('Client porbably not connected to PubSubServer')
+            print('Client probably not connected to PubSubServer')
 
     # Get Writer group Id on acyclic publisher send command
     def getAcyclicSend(self):

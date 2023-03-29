@@ -35,10 +35,20 @@ typedef enum SOPC_PubSubState
 /* \param state   the new subscriber state */
 typedef void SOPC_SubscriberStateChanged_Func(SOPC_PubSubState state);
 
-typedef void (*SOPC_SubscriberDataSetMessageSequenceNumberGap_Func)(SOPC_Conf_PublisherId pubId,
-                                                                    uint16_t writerId,
-                                                                    uint16_t prevSN,
-                                                                    uint16_t receivedSN);
+/**
+ * @brief Callback to notify gaps in received DataSetMessage sequence number.
+ * DataSetMessage is identified by tuple [pubId,writerId] describe below.
+ *
+ * @param pubId Publisher Id of the networkMessage
+ * @param writerId dataSetWriterId to filter dataSetMessage
+ * @param prevSN previous DataSetMessage sequence number received
+ * @param receivedSN current DataSetMessage sequence number received
+ */
+typedef void SOPC_SubscriberDataSetMessageSequenceNumberGap_Func(SOPC_Conf_PublisherId pubId,
+                                                                 uint16_t writerId,
+                                                                 uint16_t prevSN,
+                                                                 uint16_t receivedSN);
+
 /* Only state changed callback can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,

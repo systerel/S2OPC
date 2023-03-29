@@ -101,13 +101,11 @@ const bool DATASET_LL_WRITER_GROUP_VERSION_ENABLED = true;
 const bool DATASET_LL_NETWORK_MESSAGE_NUMBER_ENABLED = false;
 const bool DATASET_LL_SEQUENCE_NUMBER_ENABLED = false;
 
-const uint8_t DATASET_LL_DSM_ENCODING_TYPE = 0; // Must include 1 shift bit.
 const bool DATASET_LL_DSM_IS_VALID = true;
 const bool DATASET_LL_DSM_SEQ_NUMBER_ENABLED = true;
 const bool DATASET_LL_DSM_STATUS_ENABLED = false;
 const bool DATASET_LL_DSM_MAJOR_VERSION_ENABLED = false;
 const bool DATASET_LL_DSM_MINOR_VERSION_ENABLED = false;
-const SOPC_DataSet_LL_DataSetMessageType DATASET_LL_DSM_MESSAGE_TYPE_UNSUPPORTED = DataSet_LL_MessageType_DeltaFrame;
 const bool DATASET_LL_DSM_TIMESTAMP_ENABLED = false;
 const bool DATASET_LL_DSM_PICOSECONDS_ENABLED = false;
 
@@ -395,6 +393,11 @@ static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Heade
            security || DATASET_LL_TIMESTAMP_ENABLED || DATASET_LL_PICOSECONDS_ENABLED;
 }
 
+static bool Network_Layer_DataSetMessage_Is_Flags2_Enabled(SOPC_DataSet_LL_UadpDataSetMessageContentMask conf)
+{
+    return (DataSet_LL_MessageType_KeyFrame != conf.dataSetMessageType || conf.timestampFlag || conf.picoSecondsFlag);
+}
+
 static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t processed)
 {
     // See Spec OPC UA Part 14 - Table 75
@@ -628,63 +631,66 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
     {
         // dsmStartBufferPos is set with buffer position before DSM content
         uint32_t dsmStartBufferPos;
+        bool dsmFlags2Enable = false;
         status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
 
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
         SOPC_ASSERT(NULL != dsm);
-        SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+        const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+        SOPC_ASSERT(NULL != conf);
+
+        dsmFlags2Enable = Network_Layer_DataSetMessage_Is_Flags2_Enabled(*conf);
 
         // DataSetMessage (1 byte)
 
         // - DataSet Flags 1
-        //   - FieldEncoding is variant
-        SOPC_ASSERT(DATASET_LL_DSM_ENCODING_TYPE == conf->FieldEncoding && "Only variant encoding supported");
-        SOPC_ASSERT(conf->FieldEncoding <= 2);
-        byte = (uint8_t)(conf->FieldEncoding << 1); // field encoding starts at bit 1
+        //   - fieldEncoding is variant
+        SOPC_ASSERT(DataSet_LL_FieldEncoding_Variant == conf->fieldEncoding && "Only variant encoding supported");
+        SOPC_ASSERT(conf->fieldEncoding <= 2);
+        byte = (uint8_t)(conf->fieldEncoding << 1); // field encoding starts at bit 1
 
         //   - DataSetMessage isValid
-        Network_Message_Set_Bool_Bit(&byte, 0, !conf->NotValidFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_IS_VALID == !conf->NotValidFlag && "Only valid DSM allowed");
+        Network_Message_Set_Bool_Bit(&byte, 0, conf->validFlag);
+        SOPC_ASSERT(DATASET_LL_DSM_IS_VALID == conf->validFlag && "Only valid DSM allowed");
 
         //   - sequence number is enabled
-        Network_Message_Set_Bool_Bit(&byte, 3, conf->DataSetMessageSequenceNumberFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_SEQ_NUMBER_ENABLED == conf->DataSetMessageSequenceNumberFlag && "DSM SN allowed");
+        Network_Message_Set_Bool_Bit(&byte, 3, conf->dataSetMessageSequenceNumberFlag);
+        SOPC_ASSERT(DATASET_LL_DSM_SEQ_NUMBER_ENABLED == conf->dataSetMessageSequenceNumberFlag && "DSM SN allowed");
 
         //   - status
-        Network_Message_Set_Bool_Bit(&byte, 4, conf->StatusFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_STATUS_ENABLED == conf->StatusFlag && "Status not supported");
+        Network_Message_Set_Bool_Bit(&byte, 4, conf->statusFlag);
+        SOPC_ASSERT(DATASET_LL_DSM_STATUS_ENABLED == conf->statusFlag && "Status not supported");
 
         //   - major version
-        Network_Message_Set_Bool_Bit(&byte, 5, conf->ConfigurationVersionMajorVersionFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_MAJOR_VERSION_ENABLED == conf->ConfigurationVersionMajorVersionFlag &&
+        Network_Message_Set_Bool_Bit(&byte, 5, conf->configurationVersionMajorVersionFlag);
+        SOPC_ASSERT(DATASET_LL_DSM_MAJOR_VERSION_ENABLED == conf->configurationVersionMajorVersionFlag &&
                     "Major version not supported");
 
         //   - minor version
-        Network_Message_Set_Bool_Bit(&byte, 6, conf->ConfigurationVersionMinorFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_MINOR_VERSION_ENABLED == conf->ConfigurationVersionMajorVersionFlag &&
+        Network_Message_Set_Bool_Bit(&byte, 6, conf->configurationVersionMinorFlag);
+        SOPC_ASSERT(DATASET_LL_DSM_MINOR_VERSION_ENABLED == conf->configurationVersionMinorFlag &&
                     "Minor version not supported");
 
         //   - DataSet Flags 2
-        Network_Message_Set_Bool_Bit(&byte, 7, conf->DataSetFlags2);
+        Network_Message_Set_Bool_Bit(&byte, 7, dsmFlags2Enable);
 
         status = SOPC_Buffer_Write(buffer_payload, (uint8_t*) &byte, 1);
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed);
 
         // - DataSet Flags 2 (1 byte)
-        if (conf->DataSetFlags2 && SOPC_STATUS_OK == status)
+        if (dsmFlags2Enable && SOPC_STATUS_OK == status)
         {
-            //   - DataSetMessageType (bits 0-3)
-            byte = (uint8_t) conf->DataSetMessageType;
-            SOPC_ASSERT(DATASET_LL_DSM_MESSAGE_TYPE_UNSUPPORTED != conf->DataSetMessageType &&
-                        "Unsupported message type");
-            SOPC_ASSERT(conf->DataSetMessageType <= DataSet_LL_MessageType_KeepAlive && "Unsupported Message type");
+            //   - dataSetMessageType (bits 0-3)
+            byte = (uint8_t) conf->dataSetMessageType;
+            SOPC_ASSERT(DataSet_LL_MessageType_DeltaFrame != conf->dataSetMessageType && "Unsupported message type");
+            SOPC_ASSERT(conf->dataSetMessageType <= DataSet_LL_MessageType_KeepAlive && "Unsupported Message type");
             // - Timestamp enabled
-            Network_Message_Set_Bool_Bit(&byte, 4, conf->TimestampFlag);
-            SOPC_ASSERT(DATASET_LL_DSM_TIMESTAMP_ENABLED == conf->TimestampFlag && "Timestamp not supported");
+            Network_Message_Set_Bool_Bit(&byte, 4, conf->timestampFlag);
+            SOPC_ASSERT(DATASET_LL_DSM_TIMESTAMP_ENABLED == conf->timestampFlag && "Timestamp not supported");
 
-            Network_Message_Set_Bool_Bit(&byte, 5, conf->PicoSecondsFlag);
-            SOPC_ASSERT(DATASET_LL_DSM_PICOSECONDS_ENABLED == conf->PicoSecondsFlag && "Picoseconds not supported");
+            Network_Message_Set_Bool_Bit(&byte, 5, conf->picoSecondsFlag);
+            SOPC_ASSERT(DATASET_LL_DSM_PICOSECONDS_ENABLED == conf->picoSecondsFlag && "Picoseconds not supported");
             //   - status is disabled
 
             status = SOPC_Buffer_Write(buffer_payload, (uint8_t*) &byte, 1);
@@ -692,7 +698,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         }
 
         // DataSetMessage Sequence Number
-        if (conf->DataSetMessageSequenceNumberFlag)
+        if (SOPC_STATUS_OK == status && conf->dataSetMessageSequenceNumberFlag)
         {
             uint16_t dsmSN = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm);
             status = SOPC_UInt16_Write(&dsmSN, buffer_payload, 0);
@@ -700,7 +706,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
         }
 
         // If message is not a keep alive type, encode data fields
-        if (SOPC_STATUS_OK == status && DataSet_LL_MessageType_KeepAlive != conf->DataSetMessageType)
+        if (SOPC_STATUS_OK == status && DataSet_LL_MessageType_KeepAlive != conf->dataSetMessageType)
         {
             status = Network_DataSetFields_To_UADP(buffer_payload, dsm);
             check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed);
@@ -806,16 +812,20 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
 {
     SOPC_ASSERT(NULL != buffer_payload);
     SOPC_ASSERT(NULL != dsm);
+    SOPC_ASSERT(NULL != readerConf);
     // Note :  dsmSizes may be NULL
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Byte data;
 
-    SOPC_UadpDataSetMessageContentMask* dsm_conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+    const SOPC_DataSet_LL_UadpDataSetMessageContentMask* contentMask = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask dsm_conf = *contentMask;
 
     uint32_t dsmStartBufferPos;
     status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    bool dsmFlags2Enable = false;
     /* DataSetMessages Header */
 
     /** DataSetFlags1 **/
@@ -832,25 +842,25 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
 
         if (SOPC_STATUS_OK == status)
         {
-            dsm_conf->FieldEncoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
-            if (DATASET_LL_DSM_ENCODING_TYPE != dsm_conf->FieldEncoding)
+            dsm_conf.fieldEncoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
+            if (DataSet_LL_FieldEncoding_Variant != dsm_conf.fieldEncoding)
             {
                 // not managed yet
                 set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType);
             }
             else
             {
-                dsm_conf->DataSetMessageSequenceNumberFlag = Network_Message_Get_Bool_Bit(data, 3);
-                dsm_conf->StatusFlag = Network_Message_Get_Bool_Bit(data, 4);
-                dsm_conf->ConfigurationVersionMajorVersionFlag = Network_Message_Get_Bool_Bit(data, 5);
-                dsm_conf->ConfigurationVersionMinorFlag = Network_Message_Get_Bool_Bit(data, 6);
-                dsm_conf->DataSetFlags2 = Network_Message_Get_Bool_Bit(data, 7);
+                dsm_conf.dataSetMessageSequenceNumberFlag = Network_Message_Get_Bool_Bit(data, 3);
+                dsm_conf.statusFlag = Network_Message_Get_Bool_Bit(data, 4);
+                dsm_conf.configurationVersionMajorVersionFlag = Network_Message_Get_Bool_Bit(data, 5);
+                dsm_conf.configurationVersionMinorFlag = Network_Message_Get_Bool_Bit(data, 6);
+                dsmFlags2Enable = Network_Message_Get_Bool_Bit(data, 7);
             }
         }
     }
 
-    /** DataSetFlags2 **/
-    if (dsm_conf->DataSetFlags2 && SOPC_STATUS_OK == status)
+    /** dataSetFlags2 **/
+    if (dsmFlags2Enable && SOPC_STATUS_OK == status)
     {
         // Bit range 0-3: UADP DataSetMessage type
         // Bit 4: Timestamp enabled
@@ -860,21 +870,21 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
 
         if (SOPC_STATUS_OK == status)
         {
-            dsm_conf->DataSetMessageType = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
-            if (DataSet_LL_MessageType_DeltaFrame == dsm_conf->DataSetMessageType)
+            dsm_conf.dataSetMessageType = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_4 - 1);
+            if (DataSet_LL_MessageType_DeltaFrame == dsm_conf.dataSetMessageType)
             {
                 // Not managed yet
                 set_status_default(&status, SOPC_UADP_NetworkMessage_Error_Unsupported_DsmType);
             }
             else
             {
-                dsm_conf->TimestampFlag = Network_Message_Get_Bool_Bit(data, 4);
-                dsm_conf->PicoSecondsFlag = Network_Message_Get_Bool_Bit(data, 5);
+                dsm_conf.timestampFlag = Network_Message_Get_Bool_Bit(data, 4);
+                dsm_conf.picoSecondsFlag = Network_Message_Get_Bool_Bit(data, 5);
             }
         }
     }
     /** DataSetMessage SequenceNumber **/
-    if (dsm_conf->DataSetMessageSequenceNumberFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.dataSetMessageSequenceNumberFlag && SOPC_STATUS_OK == status)
     {
         uint16_t dsmSN = 0;
         status = SOPC_UInt16_Read(&dsmSN, buffer_payload, 0);
@@ -889,11 +899,11 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
             {
                 /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
                  */
-                uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
-                if (writerId)
+                const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+                if (0 != writerId)
                 {
                     /* If subscriber don't meet configuration or is not newer still decode dataSetMessage */
-                    if (readerConf->checkDataSetMessageSN_Func(pubId, writerId, dsmSN))
+                    if (readerConf->checkDataSetMessageSN_Func(&pubId, writerId, dsmSN))
                     {
                         SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmSN);
                     }
@@ -903,7 +913,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     }
 
     /** Timestamp **/
-    if (dsm_conf->TimestampFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.timestampFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
         uint64_t timestamp;
@@ -912,7 +922,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     }
 
     /** PicoSeconds **/
-    if (dsm_conf->PicoSecondsFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.picoSecondsFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
         uint16_t notUsed;
@@ -921,7 +931,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     }
 
     /** Status **/
-    if (dsm_conf->StatusFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.statusFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
         uint16_t notUsed;
@@ -930,7 +940,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     }
 
     /** ConfigurationVersion MajorVersion **/
-    if (dsm_conf->ConfigurationVersionMajorVersionFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.configurationVersionMajorVersionFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
         uint32_t not_used;
@@ -939,7 +949,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     }
 
     /** ConfigurationVersion MinorVersion **/
-    if (dsm_conf->ConfigurationVersionMinorFlag && SOPC_STATUS_OK == status)
+    if (dsm_conf.configurationVersionMinorFlag && SOPC_STATUS_OK == status)
     {
         // not managed yet
         uint32_t not_used;
@@ -950,10 +960,10 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     /** Set content mask to associated Dsm */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, *dsm_conf);
+        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &dsm_conf);
     }
 
-    if (SOPC_STATUS_OK == status && DataSet_LL_MessageType_KeepAlive != dsm_conf->DataSetMessageType)
+    if (SOPC_STATUS_OK == status && DataSet_LL_MessageType_KeepAlive != dsm_conf.dataSetMessageType)
     {
         /* Data Key Frame DataSetMessage Data */
         status = UADP_To_DataSetFields(buffer_payload, dsm);
@@ -1458,7 +1468,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
     // Bit 4: Status enabled
     // Bit 5: ConfigurationVersionMajorVersion enabled
     // Bit 6: ConfigurationVersionMinorVersion enable
-    // Bit 7: DataSetFlags2 enabled
+    // Bit 7: dataSetFlags2 enabled
     for (int i = 0; i < msg_count && SOPC_STATUS_OK == status; i++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);

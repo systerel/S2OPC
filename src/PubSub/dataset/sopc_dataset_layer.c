@@ -23,17 +23,16 @@
 #include "sopc_dataset_layer.h"
 #include "sopc_dataset_ll_layer.h"
 
-// TODO: Most of those flags should be configurable in the future (once encoder supports all cases)
-const uint8_t DATASET_DSM_ENCODING_TYPE = 0;          // Only 0 supported
-const bool DATASET_DSM_IS_VALID = true;               // Only true supported
-const bool DATASET_DSM_SEQ_NUMBER_ENABLED = true;     // Only true supported
-const bool DATASET_DSM_STATUS_ENABLED = false;        // Only false supported
-const bool DATASET_DSM_MAJOR_VERSION_ENABLED = false; // Only false supported
-const bool DATASET_DSM_MINOR_VERSION_ENABLED = false; // Only false supported
-const bool DATASET_DSM_CLASSID_ENABLED = false;       // Only false supported
-
-const bool DATASET_DSM_TIMESTAMP_ENABLED = false;    // Only false supported
-const bool DATASET_DSM_PICOSECONDS_INCLUDED = false; // Only false supported
+static const SOPC_DataSet_LL_UadpDataSetMessageContentMask default_Uapd_DSM_Mask = {
+    .validFlag = true,
+    .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+    .dataSetMessageSequenceNumberFlag = true,
+    .statusFlag = false,
+    .configurationVersionMajorVersionFlag = false,
+    .configurationVersionMinorFlag = false,
+    .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+    .timestampFlag = false,
+    .picoSecondsFlag = false};
 
 static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_WriterGroup* group);
 
@@ -69,49 +68,27 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
         SOPC_DataSetWriter* conf_dsw = SOPC_WriterGroup_Get_DataSetWriter_At(group, iDataSet);
         SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(msg_nm, iDataSet);
         SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, SOPC_DataSetWriter_Get_Id(conf_dsw));
-        SOPC_UadpDataSetMessageContentMask conf;
-        memset(&conf, 0, sizeof(conf));
-        conf.NotValidFlag = !DATASET_DSM_IS_VALID;
-        conf.FieldEncoding = DATASET_DSM_ENCODING_TYPE;
-        conf.DataSetMessageSequenceNumberFlag = DATASET_DSM_SEQ_NUMBER_ENABLED;
-        conf.StatusFlag = DATASET_DSM_STATUS_ENABLED;
-        conf.ConfigurationVersionMajorVersionFlag = DATASET_DSM_MAJOR_VERSION_ENABLED;
-        conf.ConfigurationVersionMinorFlag = DATASET_DSM_MINOR_VERSION_ENABLED;
-        conf.DataSetFlags2 = false;                                // by default depends on source type
-        conf.DataSetMessageType = DataSet_LL_MessageType_KeyFrame; // by default depends on source type
-        conf.TimestampFlag = DATASET_DSM_TIMESTAMP_ENABLED;
-        conf.PicoSecondsFlag = DATASET_DSM_PICOSECONDS_INCLUDED;
-        switch (SOPC_PublishedDataSet_Get_DataSet_SourceType(SOPC_DataSetWriter_Get_DataSet(conf_dsw)))
+        SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = default_Uapd_DSM_Mask;
+
+        SOPC_PublishedDataSetSourceType sourceType =
+            SOPC_PublishedDataSet_Get_DataSet_SourceType(SOPC_DataSetWriter_Get_DataSet(conf_dsw));
+        if (SOPC_PublishedDataItemsDataType == sourceType)
         {
-        case SOPC_PublishedDataItemsDataType:
             SOPC_ASSERT(!isKeepAlive);
-            break;
-        case SOPC_PublishedEventsDataType:
-            conf.DataSetFlags2 = true;
-            if (isKeepAlive)
-            {
-                conf.DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
-            }
-            else
-            {
-                conf.DataSetMessageType = DataSet_LL_MessageType_Event;
-            }
-            break;
-        case SOPC_PublishedDataSetCustomSourceDataType:
-            conf.DataSetFlags2 = true;
-            if (isKeepAlive)
-            {
-                conf.DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
-            }
-            else
-            {
-                conf.DataSetMessageType = DataSet_LL_MessageType_Event;
-            }
-            break;
-        default:
-            SOPC_ASSERT(false);
         }
-        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, conf);
+        else
+        {
+            if (isKeepAlive)
+            {
+                conf.dataSetMessageType = DataSet_LL_MessageType_KeepAlive;
+            }
+            else
+            {
+                conf.dataSetMessageType = DataSet_LL_MessageType_Event;
+            }
+        }
+
+        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
         if (!isKeepAlive)
         {
             const uint16_t nbFields = SOPC_PublishedDataSet_Nb_FieldMetaData(SOPC_DataSetWriter_Get_DataSet(conf_dsw));

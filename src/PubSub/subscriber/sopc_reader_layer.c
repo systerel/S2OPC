@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
                                         SOPC_SubTargetVariableConfig* config,
                                         SOPC_UADP_GetSecurity_Func securityCBck,
-                                        SOPC_UADP_Is_Writer_SN_Newer_Func snCBck)
+                                        SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
@@ -203,11 +203,11 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
 {
     assert(NULL != dsm && NULL != reader);
     SOPC_ReturnStatus result = SOPC_STATUS_ENCODING_ERROR;
-    SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    if (DataSet_LL_MessageType_KeepAlive == conf->DataSetMessageType)
+    const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+    if (DataSet_LL_MessageType_KeepAlive == conf->dataSetMessageType)
     {
+        // In case of keep alive message, dataSetMessage is sent without payload so possibly-remaining payload won't be
+        // parsed
         result = SOPC_STATUS_OK;
     }
     else

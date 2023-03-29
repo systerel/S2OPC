@@ -173,7 +173,10 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, 
 static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffer, SOPC_PubSubConnection* connection)
 {
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .pGetSecurity_Func = NULL, .callbacks = SOPC_Reader_NetworkMessage_Default_Readers, .targetConfig = NULL};
+        .pGetSecurity_Func = NULL,
+        .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
+        .checkDataSetMessageSN_Func = NULL,
+        .targetConfig = NULL};
 
     return SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
 }
@@ -195,11 +198,10 @@ static void check_network_msg_content_uni_keep_alive_dsm(SOPC_Dataset_LL_Network
     SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
 
     ck_assert_uint_eq((uint16_t)(DATASET_MSG_WRITER_ID_BASE), SOPC_Dataset_LL_DataSetMsg_Get_WriterId(msg_dsm));
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
+    const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
     ck_assert_ptr_nonnull(conf);
 
-    ck_assert_uint_eq(1, conf->DataSetFlags2);
-    ck_assert_uint_eq(DataSet_LL_MessageType_KeepAlive, conf->DataSetMessageType);
+    ck_assert_uint_eq(DataSet_LL_MessageType_KeepAlive, conf->dataSetMessageType);
 
     ck_assert_uint_eq(0, SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(msg_dsm));
 }
@@ -318,19 +320,19 @@ START_TEST(test_hl_network_msg_encode)
     res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, NB_VARS);
     ck_assert_int_eq(true, res);
 
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
-    conf->NotValidFlag = false;
-    conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = true;
-    conf->StatusFlag = false;
-    conf->ConfigurationVersionMajorVersionFlag = false;
-    conf->ConfigurationVersionMinorFlag = false;
-    conf->DataSetFlags2 = false;
-    conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
-    conf->TimestampFlag = false;
-    conf->PicoSecondsFlag = false;
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = {
+        .validFlag = true,
+        .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+        .dataSetMessageSequenceNumberFlag = true,
+        .statusFlag = false,
+        .configurationVersionMajorVersionFlag = false,
+        .configurationVersionMinorFlag = false,
+        .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+        .timestampFlag = false,
+        .picoSecondsFlag = false,
+    };
 
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
 
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
@@ -404,21 +406,20 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
 
     SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
-
-    conf->NotValidFlag = false;
-    conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = true;
-    conf->StatusFlag = false;
-    conf->ConfigurationVersionMajorVersionFlag = false;
-    conf->ConfigurationVersionMinorFlag = false;
-    conf->DataSetFlags2 = true;
-    conf->DataSetMessageType = DataSet_LL_MessageType_KeepAlive;
-    conf->TimestampFlag = false;
-    conf->PicoSecondsFlag = false;
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = {
+        .validFlag = true,
+        .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+        .dataSetMessageSequenceNumberFlag = true,
+        .statusFlag = false,
+        .configurationVersionMajorVersionFlag = false,
+        .configurationVersionMinorFlag = false,
+        .dataSetMessageType = DataSet_LL_MessageType_KeepAlive,
+        .timestampFlag = false,
+        .picoSecondsFlag = false,
+    };
 
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE));
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
 
     // Check network message content
     check_network_msg_content_uni_keep_alive_dsm(nm);
@@ -492,19 +493,19 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
 
         uint16_t nb_vars = (uint16_t)(NB_VARS - imsg);
 
-        SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(msg_dsm);
-        conf->NotValidFlag = false;
-        conf->FieldEncoding = 0;
-        conf->DataSetMessageSequenceNumberFlag = true;
-        conf->StatusFlag = false;
-        conf->ConfigurationVersionMajorVersionFlag = false;
-        conf->ConfigurationVersionMinorFlag = false;
-        conf->DataSetFlags2 = false;
-        conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
-        conf->TimestampFlag = false;
-        conf->PicoSecondsFlag = false;
+        SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = {
+            .validFlag = true,
+            .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+            .dataSetMessageSequenceNumberFlag = true,
+            .statusFlag = false,
+            .configurationVersionMajorVersionFlag = false,
+            .configurationVersionMinorFlag = false,
+            .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+            .timestampFlag = false,
+            .picoSecondsFlag = false,
+        };
 
-        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, *conf);
+        SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
         SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + imsg));
         bool res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm, nb_vars);
         ck_assert_int_eq(true, res);

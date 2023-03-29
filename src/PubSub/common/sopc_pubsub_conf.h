@@ -62,6 +62,8 @@ typedef enum
     SOPC_PubSubConnection_Sub = 1
 } SOPC_PubSubConnection_Type;
 
+/* There is no functional difference between SOPC_PublishedEventsDataType and SOPC_PublishedDataSetCustomSourceDataType
+ * by now.*/
 typedef enum
 {
     SOPC_PublishedDataItemsDataType = 0,
@@ -251,11 +253,11 @@ void SOPC_WriterGroup_Set_Id(SOPC_WriterGroup* group, uint16_t id);
 uint32_t SOPC_WriterGroup_Get_Version(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_Version(SOPC_WriterGroup* group, uint32_t version);
 
-/* Expected to be -1 for acyclic Publisher */
+/* Expected to be negative for acyclic Publisher */
 double SOPC_WriterGroup_Get_PublishingInterval(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_PublishingInterval(SOPC_WriterGroup* group, double interval_ms);
 
-/* Expected to be -1 for acyclic Publisher */
+/* Expected to be negative for acyclic Publisher */
 int32_t SOPC_WriterGroup_Get_PublishingOffset(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offset_ms);
 

@@ -1066,9 +1066,16 @@ def testPubSubDynamicConf():
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
+        # Wait some long time and check nothing happen
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
+
         # Send the message
         writerGroupId = 1
         helpTestSetSendValue(pubsubserver,writerGroupId,logger)
+        sleep(DYN_CONF_PUB_INTERVAL_200)
 
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))

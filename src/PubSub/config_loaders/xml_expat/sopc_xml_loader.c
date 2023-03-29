@@ -292,6 +292,27 @@ static bool parse_unsigned_value(const char* data, size_t len, uint8_t width, vo
     }
 }
 
+static bool parse_boolean(const char* data, size_t len, bool* dest)
+{
+    bool result = false;
+    int res = SOPC_strncmp_ignore_case(data, "true", len);
+    if (0 == res)
+    {
+        *dest = true;
+        result = true;
+    }
+    else
+    {
+        res = SOPC_strncmp_ignore_case(data, "false", len);
+        if (0 == res)
+        {
+            *dest = false;
+            result = true;
+        }
+    }
+    return result;
+}
+
 static bool copy_any_string_attribute_value(char** to, const char* from)
 {
     assert(to != NULL);
@@ -406,30 +427,7 @@ static bool parse_connection_attributes(const char* attr_name,
     }
     else if (TEXT_EQUALS(ATTR_CONNECTION_ACYCLIC_PUBLISHER, attr_name))
     {
-        int res = SOPC_strncmp_ignore_case(attr_val, "true", strlen("true"));
-        if (-1000 == res)
-        {
-            result = false;
-        }
-        else if (!res)
-        {
-            result = true;
-            connection->is_acyclic = true;
-        }
-        else
-        {
-            res = SOPC_strncmp_ignore_case(attr_val, "false", strlen("false"));
-            if (!res)
-            {
-                result = true;
-                connection->is_acyclic = false;
-            }
-            else
-            {
-                result = false;
-                LOG_XML_ERRORF("Attribute <%s> only accept value true or false", attr_name);
-            }
-        }
+        result = parse_boolean(attr_val, strlen(attr_val), &connection->is_acyclic);
     }
     else
     {
@@ -551,7 +549,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     msg->security_mode = SOPC_SecurityMode_None;
     msg->publishing_interval = 0.0;
     msg->publishing_offset = -1;
-    msg->keepAliveTime = 0.0;
+    msg->keepAliveTime = -1.0;
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
 
     if (result)

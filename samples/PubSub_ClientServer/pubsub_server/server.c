@@ -926,20 +926,20 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         SOPC_DataValue* dv = &pwv->Value;
         if ((dv->Status & SOPC_GoodStatusOppositeMask) != 0)
         {
-            printf("# Warning: Status Code not Good, ignoring Start/Stop Command.\n");
+            printf("# Warning: Status Code not Good, ignoring Send command.\n");
             return;
         }
 
         SOPC_Variant* variant = &dv->Value;
         if (variant->BuiltInTypeId != SOPC_UInt16_Id)
         {
-            printf("# Warning: Start/Stop Command value is of invalid type. Expected Byte, actual type id is %d.\n",
+            printf("# Warning: Send Command value is of invalid type. Expected UInt16 type, actual type id is %d.\n",
                    variant->BuiltInTypeId);
             return;
         }
         if (variant->ArrayType != SOPC_VariantArrayType_SingleValue)
         {
-            printf("# Warning: Start/Stop Command must be a single value, not an array nor a matrix.\n");
+            printf("# Warning: Send Command must be a single value, not an array nor a matrix.\n");
             return;
         }
 

@@ -41,10 +41,11 @@ typedef struct SOPC_UADP_Network_Message
  * \param writerId    the DataSetWriter id
  * \param receivedSN  the dataset message sequence number
  *
+ * \return True if \a receivedSn is newer (valid) for this dataSetWriter. False otherwise
  */
-typedef bool (*SOPC_UADP_Is_Writer_SN_Newer_Func)(const SOPC_Conf_PublisherId pubId,
-                                                  const uint16_t writerId,
-                                                  const uint16_t receivedSN);
+typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_PublisherId* pubId,
+                                                        const uint16_t writerId,
+                                                        const uint16_t receivedSN);
 
 /**
  * \brief Encode a NetworkMessage with UADP Mapping
@@ -124,7 +125,7 @@ typedef struct
 {
     SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
     SOPC_UADP_GetSecurity_Func* pGetSecurity_Func;
-    SOPC_UADP_Is_Writer_SN_Newer_Func checkDataSetMessageSN_Func;
+    SOPC_UADP_IsWriterSequenceNumberNewer_Func* checkDataSetMessageSN_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 

@@ -264,7 +264,6 @@ static void MessageCtx_Array_Clear(void)
             SOPC_Dataset_LL_NetworkMessage_Delete(arr[i].messageKeepAlive);
             arr[i].messageKeepAlive = NULL;
             SOPC_PubSub_Security_Clear(arr[i].security);
-            arr[i].writerMessageSequence = 0;
             SOPC_Free(arr[i].security);
             arr[i].security = NULL;
             SOPC_RealTime_Delete(&arr[i].next_timeout);
@@ -320,7 +319,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
-    context->messageKeepAlive = NULL; // by default NULL and set only if publsiher is acyclic
+    context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
+    context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
     context->writerMessageSequence = 1;
     context->next_timeout = SOPC_RealTime_Create(NULL);
 
@@ -366,8 +366,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
         context->messageKeepAlive = SOPC_Create_NetworkMessage_From_WriterGroup(group, true);
     }
-    if (NULL == context->message || ((NULL == context->next_timeout || context->messageKeepAlive) && !ctx->isAcyclic) ||
-        !result)
+    if (NULL == context->message || NULL == context->next_timeout ||
+        (NULL != context->messageKeepAlive && !ctx->isAcyclic) || (NULL == context && ctx->isAcyclic) || !result)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot allocate message context");
         return false;
@@ -601,11 +601,14 @@ static void* thread_start_publish(void* arg)
     SOPC_UNUSED_ARG(arg);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
-
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
     SOPC_RealTime* nextTimeout = SOPC_RealTime_Create(NULL);
     SOPC_ASSERT(NULL != now);
     bool ok = true;
+
+    status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
     {
@@ -613,7 +616,6 @@ static void* thread_start_publish(void* arg)
         ok = SOPC_RealTime_GetTime(now);
         SOPC_ASSERT(ok && "Failed GetTime");
 
-        Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
         /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
         if (SOPC_RealTime_IsExpired(context->next_timeout, now))
@@ -642,18 +644,22 @@ static void* thread_start_publish(void* arg)
                                          SOPC_WriterGroup_Get_Id(context->group));
                 context->warned = true; /* Avoid being spammed @ 10kHz and being even slower because of this */
             }
-            Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
         }
 
         /* Otherwise sleep until there is a message to send */
         else
         {
             SOPC_RealTime_Copy(context->next_timeout, nextTimeout);
-            Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+            status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             ok = SOPC_RealTime_SleepUntil(nextTimeout);
             SOPC_ASSERT(ok && "Failed NanoSleep");
+            status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
     }
+    status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
     SOPC_RealTime_Delete(&now);
@@ -982,24 +988,19 @@ static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
 bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
 {
     bool result = true;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
     if (NULL == ctx)
     {
-        result = false;
+        return false;
     }
-    if (result)
-    {
-        result = SOPC_STATUS_OK == Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
-        if (result)
-        {
-            result = SOPC_RealTime_GetTime(ctx->next_timeout);
-            if (result)
-            {
-                SOPC_RealTime_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
-                MessageCtx_send_publish_message(ctx);
-            }
-            result = SOPC_STATUS_OK == Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
-        }
-    }
+    status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    result = SOPC_RealTime_GetTime(ctx->next_timeout);
+    SOPC_ASSERT(result);
+    SOPC_RealTime_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
+    MessageCtx_send_publish_message(ctx);
+    status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     return result;
 }

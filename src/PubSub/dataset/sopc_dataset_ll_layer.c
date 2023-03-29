@@ -34,7 +34,7 @@ typedef struct SOPC_Dataset_LL_DataSetField SOPC_Dataset_LL_DataSetField;
 
 struct SOPC_Dataset_LL_DataSetMessage
 {
-    SOPC_UadpDataSetMessageContentMask conf;
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask conf;
 
     SOPC_Dataset_LL_DataSetField* dataset_fields;
     uint16_t dataset_fields_length;
@@ -105,16 +105,12 @@ SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t ds
         return NULL;
     }
     result->msgHeader.UADP_version = uadp_version;
-    if (0 != dsm_nb)
+    bool status = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(result, dsm_nb);
+    if (!status)
     {
-        bool status = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(result, dsm_nb);
-        if (!status)
-        {
-            SOPC_Free(result);
-            return NULL;
-        }
+        SOPC_Free(result);
+        return NULL;
     }
-
     return result;
 }
 
@@ -299,42 +295,25 @@ uint16_t SOPC_Dataset_LL_DataSetMsg_Get_WriterId(const SOPC_Dataset_LL_DataSetMe
 }
 
 void SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm,
-                                                SOPC_UadpDataSetMessageContentMask conf)
+                                                const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf)
 {
-    dsm->conf = conf;
+    SOPC_ASSERT(NULL != dsm);
+    SOPC_ASSERT(NULL != conf);
+    dsm->conf = *conf;
 }
 
-SOPC_UadpDataSetMessageContentMask* SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(SOPC_Dataset_LL_DataSetMessage* dsm)
+const SOPC_DataSet_LL_UadpDataSetMessageContentMask* SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(
+    const SOPC_Dataset_LL_DataSetMessage* dsm)
 {
+    SOPC_ASSERT(NULL != dsm);
     return &dsm->conf;
 }
 
 // dataset message type (default is Key Frame without flags 2 otherwise)
 SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(const SOPC_Dataset_LL_DataSetMessage* dsm)
 {
-    if (!dsm->conf.DataSetFlags2)
-    {
-        return DataSet_LL_MessageType_KeyFrame;
-    }
-    else
-    {
-        switch (dsm->conf.DataSetMessageType)
-        {
-        case DataSet_LL_MessageType_KeyFrame:
-            return DataSet_LL_MessageType_KeyFrame;
-        case DataSet_LL_MessageType_DeltaFrame:
-            return DataSet_LL_MessageType_DeltaFrame;
-        case DataSet_LL_MessageType_Event:
-            return DataSet_LL_MessageType_Event;
-            break;
-        case DataSet_LL_MessageType_KeepAlive:
-            return DataSet_LL_MessageType_KeepAlive;
-            break;
-        default:
-            SOPC_ASSERT(false && "Unexpected data set message type");
-            return dsm->conf.FieldEncoding;
-        }
-    }
+    SOPC_ASSERT(NULL != dsm);
+    return dsm->conf.dataSetMessageType;
 }
 
 void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn)
@@ -502,10 +481,17 @@ SOPC_Dataset_LL_NetworkMessage_Header* SOPC_Dataset_LL_NetworkMessage_GetHeader(
 bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_NetworkMessage* nm, uint8_t dsm_nb)
 {
     SOPC_ASSERT(NULL != nm);
-    nm->dataset_messages = SOPC_Calloc(dsm_nb, sizeof(SOPC_Dataset_LL_DataSetMessage));
-    if (NULL == nm->dataset_messages)
+    if (0 == dsm_nb)
     {
-        return false;
+        nm->dataset_messages = NULL;
+    }
+    else
+    {
+        nm->dataset_messages = SOPC_Calloc(dsm_nb, sizeof(SOPC_Dataset_LL_DataSetMessage));
+        if (NULL == nm->dataset_messages)
+        {
+            return false;
+        }
     }
     nm->dataset_messages_length = dsm_nb;
     return true;

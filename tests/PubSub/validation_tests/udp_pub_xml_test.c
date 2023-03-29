@@ -105,18 +105,18 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
 
     // Set payload header flags
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dswIdx);
-    SOPC_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
-    conf->NotValidFlag = false;
-    conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = true;
-    conf->StatusFlag = false;
-    conf->ConfigurationVersionMajorVersionFlag = false;
-    conf->ConfigurationVersionMinorFlag = false;
-    conf->DataSetFlags2 = false;
-    conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
-    conf->TimestampFlag = false;
-    conf->PicoSecondsFlag = false;
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, *conf);
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask conf = {
+        .validFlag = true,
+        .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+        .dataSetMessageSequenceNumberFlag = true,
+        .statusFlag = false,
+        .configurationVersionMajorVersionFlag = false,
+        .configurationVersionMinorFlag = false,
+        .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+        .timestampFlag = false,
+        .picoSecondsFlag = false,
+    };
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
 
     // variant 1
     variant = SOPC_Variant_Create();
@@ -136,18 +136,7 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
 
     // Set payload header flags
     dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dswIdx);
-    conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
-    conf->NotValidFlag = false;
-    conf->FieldEncoding = 0;
-    conf->DataSetMessageSequenceNumberFlag = true;
-    conf->StatusFlag = false;
-    conf->ConfigurationVersionMajorVersionFlag = false;
-    conf->ConfigurationVersionMinorFlag = false;
-    conf->DataSetFlags2 = false;
-    conf->DataSetMessageType = DataSet_LL_MessageType_KeyFrame;
-    conf->TimestampFlag = false;
-    conf->PicoSecondsFlag = false;
-    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, *conf);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
 
     variant = SOPC_Variant_Create();
     variant->BuiltInTypeId = SOPC_UInt32_Id;

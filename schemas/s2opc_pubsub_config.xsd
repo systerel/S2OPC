@@ -56,7 +56,7 @@
     <xs:attribute name="mqttUsername" type="xs:string" use="optional"/> <!-- mqttUsername and mqttPassword must be either none or both set -->
     <xs:attribute name="mqttPassword" type="xs:string" use="optional"/>
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
-    <xs:attribute name="acyclicPublisher" type="xs:string" use="optional"/> <!-- true to enable acyclic publisher -->
+    <xs:attribute name="acyclicPublisher" type="xs:boolean" use="optional"/> <!-- true to enable acyclic publisher. Default is false -->
   </xs:complexType>
   <xs:complexType name="message">
     <xs:sequence>

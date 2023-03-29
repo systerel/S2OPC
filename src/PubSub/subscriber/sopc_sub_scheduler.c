@@ -144,12 +144,14 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 // END SUBSCRIBER SECURITY CONTEXT
 
 /**
- * Initialize data related to a DataSetWriter (relative to a publisher).
- * If already initialize, ignore the initialization.
+ * @brief Initialize data related to a DataSetWriter (relative to a publisher).
+ * If already initialized, ignore the initialization.
+ *
+ * @param pubId PublisherId attach to a networkMessage
+ * @param writerId DataSetWriterId attach to a dataSetMessage
  */
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId);
 
-// DataSetWriter context
 typedef struct SOPC_SubScheduler_Writer_Ctx
 {
     SOPC_Conf_PublisherId pubId;
@@ -158,12 +160,17 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     uint16_t dataSetMessageSequenceNumber;
 } SOPC_SubScheduler_Writer_Ctx;
 
-/*
- * Returns true if the sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and received sequence
- * number. False otherwise, in this case either the sequence number is older, invalid or the tuple (PublisherId,
- * DataSetWriterId) unknown.
+/**
+ * @brief Check if sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and
+ * received sequence number.
+ *
+ * @param pubId PublisherId attach to a networkMessage
+ * @param writerId DataSetW attach to a dataSetMessage
+ * @param receivedSN received sequence number
+ * @return true if sequence number received is newer and valid
+ * @return false if sequence number received is older or invalid
  */
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pubId,
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
                                                  const uint16_t writerId,
                                                  const uint16_t receivedSN);
 // End of data set writer context
@@ -233,12 +240,13 @@ static struct
     SOPC_Array* securityCtx;
 
     /* DataSetWriters context (current sequence number).
-     * DataSetWriter is uniquely identified by PublisherId + DataSetWriterId (see §6.2.4.1)*/
+     * DataSetWriter is uniquely identified by PublisherId + DataSetWriterId (see §6.2.4.1)
+     * It is an array of SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER element of type SOPC_SubScheduler_Writer_Ctx */
     SOPC_Array* writerCtx;
 
     /* Callback to notify gaps in received DataSetMessage sequence number
      * (only when received is newer regarding part 14 definition)*/
-    SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCallback;
+    SOPC_SubscriberDataSetMessageSequenceNumberGap_Func* dsmSnGapCallback;
 
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
@@ -1014,31 +1022,26 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
     return ctx;
 }
 
-static bool Is_UInt32_Sequence_Number_Newer(uint32_t received, uint32_t processed)
+static bool Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processed)
 {
-    // See Spec OPC UA Part 14 - Table 133
+    // See Spec OPC UA Part 14 - Table 133 - rev 1.05
     // NetworkMessages the following formula shall be used:
-    // (4294967295 + received sequence number – last processed sequence number) modulo 4294967296.
-    // Results below 1073741824 indicate that the received NetworkMessages is newer than
+    // (received sequence number - 1 - last processed sequence number) modulo 65536.
+    // Results below 16384 indicate that the received NetworkMessages is newer than
     // the last processed NetworkMessages...
-    // Results above 3221225472 indicate that the received message is older (or same) than
+    // Results above 49152 indicate that the received message is older (or same) than
     // the last processed NetworkMessages...
     // Other results are invalid...
-    uint64_t max_uint32 = UINT32_MAX;
-    uint64_t diff = max_uint32 + received - processed;
-    uint64_t res = diff % (max_uint32 + 1);
-    if (1073741824 > res)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    const uint16_t diff = (uint16_t)(received - 1 - processed);
+
+    /* We actually don't make difference between results above upper bound and between lower and upper bound
+     * because we don't handle reordering message */
+    return diff < 16384;
 }
 
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId)
 {
+    SOPC_ASSERT(NULL != pubId);
     // only Integer publisher id is managed
     SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId->type);
 
@@ -1046,7 +1049,7 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < size && !found; i++)
     {
-        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         if (ctx->pubId.type == pubId->type && ctx->pubId.data.uint == pubId->data.uint && ctx->writerId == writerId)
         {
             found = true;
@@ -1065,22 +1068,23 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
 }
 
 // Returns true if the sequence number is newer
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pubId,
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
                                                  const uint16_t writerId,
                                                  const uint16_t receivedSN)
 {
+    SOPC_ASSERT(NULL != pubId);
     // only Integer publisher id is managed
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
+    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId->type);
 
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < size; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        if (ctx->pubId.type == pubId.type && ctx->pubId.data.uint == pubId.data.uint && ctx->writerId == writerId)
+        if (ctx->pubId.type == pubId->type && ctx->pubId.data.uint == pubId->data.uint && ctx->writerId == writerId)
         {
             if (ctx->dataSetMessageSequenceNumberSet)
             {
-                if (Is_UInt32_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+                if (Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
                 {
                     ctx->dataSetMessageSequenceNumber = receivedSN;
                     return true;
@@ -1089,7 +1093,7 @@ static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId pub
                 {
                     if (NULL != schedulerCtx.dsmSnGapCallback)
                     {
-                        schedulerCtx.dsmSnGapCallback(pubId, writerId, ctx->dataSetMessageSequenceNumber, receivedSN);
+                        schedulerCtx.dsmSnGapCallback(*pubId, writerId, ctx->dataSetMessageSequenceNumber, receivedSN);
                     }
                     return false;
                 }

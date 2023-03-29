@@ -317,7 +317,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
  """ % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
         msgContext.offset, getCSecurityMode(msgContext.securityMode)))
 
-    if(msgContext.keepAliveTime > 0.):
+    if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
         if(alloc)
         {

@@ -38,7 +38,7 @@ SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                         SOPC_Buffer* buffer,
                                         SOPC_SubTargetVariableConfig* config,
                                         SOPC_UADP_GetSecurity_Func securityCBck,
-                                        SOPC_UADP_Is_Writer_SN_Newer_Func snCBck);
+                                        SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck);
 
 /**
  * Return default reception filtering functions.
