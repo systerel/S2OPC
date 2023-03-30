@@ -144,7 +144,7 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
             {
                 char* nodeIdStr = SOPC_NodeId_ToCString(&writeReqCtx->NodesToWrite[i].NodeId);
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                         "- Writing runtime variable %s failed with status 0x%X", nodeIdStr,
+                                         "- Writing runtime variable %s failed with status 0x%" PRIX32, nodeIdStr,
                                          writeResp->Results[i]);
                 SOPC_Free(nodeIdStr);
             }

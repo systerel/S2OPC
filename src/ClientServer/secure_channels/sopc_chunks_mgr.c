@@ -241,10 +241,10 @@ static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chun
         }
         else if (chunkCtx->currentMsgSize > chunkCtx->currentChunkInputBuffer->maximum_size)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "ChunksMgr: decoding TCP UA header: message size=%u indicated greater than receiveBufferSize=%u",
-                chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer->maximum_size);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ChunksMgr: decoding TCP UA header: message size=%" PRIu32
+                                   " indicated greater than receiveBufferSize=%" PRIu32,
+                                   chunkCtx->currentMsgSize, chunkCtx->currentChunkInputBuffer->maximum_size);
             *errorStatus = OpcUa_BadTcpMessageTooLarge;
             result = false;
         }
@@ -412,7 +412,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr (asym cert): sender certificate decoding error (epCfgIdx=%" PRIu32
-                                   " scCfgIdx=%" PRIu32 "): status=%" PRIX32,
+                                   " scCfgIdx=%" PRIu32 "): status=%d",
                                    epConfigIdx, scConfigIdx, status);
         }
     }
@@ -474,7 +474,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
                         "ChunksMgr (asym cert): sender certificate validation failed (epCfgIdx=%" PRIu32
-                        " scCfgIdx=%" PRIu32 ") with error: %X",
+                        " scCfgIdx=%" PRIu32 ") with error: %" PRIX32 "",
                         epConfigIdx, scConfigIdx, *errorStatus);
 
                     // TODO:  keep reason in some cases ?
@@ -4389,7 +4389,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                          "ScChunksMgr: encoded an abort chunk for: scIdx=%" PRIu32
-                                         " reqId/Handle=%" PRIu32 " sc=%X reason='%s'",
+                                         " reqId/Handle=%" PRIu32 " sc=%" PRIX32 " reason='%s'",
                                          scConnectionIdx, requestIdOrHandle,
                                          SOPC_StatusCode_ToTcpErrorCode(*errorStatus), errorReason);
                 result = SC_Chunks_TreatSendBufferMSGCLO(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,

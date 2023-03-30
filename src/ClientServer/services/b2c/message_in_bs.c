@@ -137,7 +137,7 @@ void message_in_bs__decode_msg_header(const t_bool message_in_bs__is_request,
         if (SOPC_STATUS_OK == status)
         {
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Services: decoded input message header statusCode= '%X'",
+                                   "Services: decoded input message header statusCode= '%" PRIX32 "'",
                                    ((OpcUa_ResponseHeader*) header)->ServiceResult);
         }
     }

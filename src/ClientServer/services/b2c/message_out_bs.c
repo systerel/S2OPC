@@ -283,7 +283,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
         if (message_out_bs__msg_type == constants__e_msg_service_fault_resp)
         {
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Services: encoded output message type = '%s' with statusCode= '%X'",
+                                   "Services: encoded output message type = '%s' with statusCode= '%" PRIX32 "'",
                                    SOPC_EncodeableType_GetName(encType),
                                    ((OpcUa_ResponseHeader*) message_out_bs__msg_header)->ServiceResult);
         }

@@ -3712,8 +3712,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         break;
     case SC_SERVICE_SND_ERR:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ScStateMgr: SC_SERVICE_SND_ERR scIdx=%" PRIu32 " sc=%X reqId/Handle=%" PRIuPTR, eltId,
-                               (SOPC_StatusCode) params, auxParam);
+                               "ScStateMgr: SC_SERVICE_SND_ERR scIdx=%" PRIu32 " sc=%" PRIX32 " reqId/Handle=%" PRIuPTR,
+                               eltId, (SOPC_StatusCode) params, auxParam);
 
         /* id = secure channel connection index,
            params = (SOPC_StatusCode) encoding failure status code (response too large, etc)

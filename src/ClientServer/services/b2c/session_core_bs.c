@@ -281,7 +281,7 @@ void session_core_bs__notify_set_session_state(
             SOPC_StatusCode scReason;
             util_status_code__B_to_C(session_core_bs__sc_reason, &scReason);
             SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                                  "Services: session=%" PRIu32 " closed with bad status code '%X'",
+                                  "Services: session=%" PRIu32 " closed with bad status code '%" PRIX32 "'",
                                   session_core_bs__session, scReason);
         }
     }
