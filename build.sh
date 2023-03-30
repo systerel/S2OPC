@@ -95,6 +95,7 @@ else
     append_cmake_option WITH_NANO_EXTENDED
     append_cmake_option SOPC_HAS_NODE_MANAGEMENT_SERVICES
     append_cmake_option SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION
+    append_cmake_option WITH_CYCLONE_CRYPTO
     echo "cmake $CMAKE_OPTIONS .." >> $CURDIR/build.log
     cmake $CMAKE_OPTIONS .. >> $CURDIR/build.log
     cd - > /dev/null || exit 1

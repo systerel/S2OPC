@@ -207,6 +207,8 @@ if(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
   set(S2OPC_DYNAMIC_TYPE_RESOLUTION ON)
 endif()
 
+# S2OPC swap mbedtls library to cyclone_crypto
+option(WITH_CYCLONE_CRYPTO "Use cyclone_crypto library" OFF)
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
@@ -297,6 +299,7 @@ check_debug_build_type("WITH_UBSAN" "to set compilation flag '-fno-omit-frame-po
 print_if_activated("S2OPC_NANO_PROFILE")
 print_if_activated("S2OPC_NODE_MANAGEMENT")
 print_if_activated("S2OPC_DYNAMIC_TYPE_RESOLUTION")
+print_if_activated("WITH_CYCLONE_CRYPTO")
 print_if_activated("WITH_CONST_ADDSPACE")
 print_if_activated("WITH_STATIC_SECURITY_DATA")
 print_if_activated("SECURITY_HARDENING")
