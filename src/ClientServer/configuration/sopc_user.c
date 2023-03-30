@@ -17,12 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
-
+#include "sopc_user.h"
+#include "sopc_assert.h"
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_user.h"
 
 typedef enum
 {
@@ -126,32 +125,32 @@ SOPC_User* SOPC_User_CreateCertificate(SOPC_ByteString* certificateData)
 
 const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user)
 {
-    assert(SOPC_User_IsUsername(user));
+    SOPC_ASSERT(SOPC_User_IsUsername(user));
     return &user->data.username;
 }
 
 bool SOPC_User_IsUsername(const SOPC_User* user)
 {
-    assert(NULL != user);
+    SOPC_ASSERT(NULL != user);
     return USER_USERNAME == user->type;
 }
 
 const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user)
 {
-    assert(SOPC_User_IsCertificate(user));
+    SOPC_ASSERT(SOPC_User_IsCertificate(user));
     return &user->data.certificate_thumbprint;
 }
 
 bool SOPC_User_IsCertificate(const SOPC_User* user)
 {
-    assert(NULL != user);
+    SOPC_ASSERT(NULL != user);
     return USER_CERTIFICATE == user->type;
 }
 
 bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
 {
-    assert(NULL != left);
-    assert(NULL != right);
+    SOPC_ASSERT(NULL != left);
+    SOPC_ASSERT(NULL != right);
 
     if (left->type == right->type)
     {
@@ -165,7 +164,7 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
         case USER_CERTIFICATE:
             return SOPC_String_Equal(&left->data.certificate_thumbprint, &right->data.certificate_thumbprint);
         default:
-            assert(false && "Unknown Type");
+            SOPC_ASSERT(false && "Unknown Type");
             break;
         }
     }
@@ -184,7 +183,7 @@ void SOPC_User_Free(SOPC_User** ppUser)
     {
         SOPC_Boolean is_username = SOPC_User_IsUsername(user);
         SOPC_Boolean is_certificate = SOPC_User_IsCertificate(user);
-        assert(is_username || is_certificate);
+        SOPC_ASSERT(is_username || is_certificate);
         if (is_username)
         {
             SOPC_String_Clear(&user->data.username);
@@ -267,7 +266,7 @@ const char* SOPC_User_ToCString(const SOPC_User* user)
     case USER_CERTIFICATE:
         return SOPC_String_GetRawCString(SOPC_User_GetCertificate_Thumbprint(user));
     default:
-        assert(false && "Unknown user type");
+        SOPC_ASSERT(false && "Unknown user type");
     }
 
     return NULL;

@@ -25,9 +25,9 @@
  *              nor sanitize their arguments.
  */
 
-#include <assert.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_macros.h"
@@ -1055,10 +1055,10 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
 
         /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (Little-endian), 4 for block counter
          * (Big-endian) */
-        assert(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
-                      SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
-                      4 /* BlockCounter length */) &&
-               "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
+        SOPC_ASSERT(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
+                           SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
+                           4 /* BlockCounter length */) &&
+                    "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
 
         uint8_t counter[16] = {0};
         uint8_t* p = counter;
@@ -1077,7 +1077,7 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
         p[3] = 0x01;
 
         p += 4;
-        assert(p - counter == 16 && "Invalid pointer arithmetics");
+        SOPC_ASSERT(p - counter == 16 && "Invalid pointer arithmetics");
 
         size_t nc_off = 0; /* Offset in the current stream block. Unused, as there is only one stream per message */
         uint8_t stream_block[16] = {0}; /* Stream block to resume operation. Unused, same as nc_off */

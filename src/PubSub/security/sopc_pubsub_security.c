@@ -18,7 +18,7 @@
  */
 
 #include "sopc_pubsub_security.h"
-#include <assert.h>
+#include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_mem_alloc.h"
@@ -58,7 +58,7 @@ SOPC_Buffer* SOPC_PubSub_Security_Encrypt(const SOPC_PubSub_SecurityType* securi
         return NULL;
     }
     // Check with length in UADP  (OPC UA Spec Part 14)
-    assert(SOPC_PUBSUB_SECURITY_RANDOM_LENGTH == lengthMessageRandom);
+    SOPC_ASSERT(SOPC_PUBSUB_SECURITY_RANDOM_LENGTH == lengthMessageRandom);
     status = SOPC_CryptoProvider_PubSubCrypt(security->provider, payload->data, payload->length,
                                              security->groupKeys->encryptKey, security->groupKeys->keyNonce,
                                              security->msgNonceRandom, lengthMessageRandom, security->sequenceNumber,

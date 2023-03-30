@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> /* getenv, exit */
 #include <string.h>
@@ -61,7 +60,7 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     encConf.receive_max_nb_chunks = 12;
     encConf.send_max_nb_chunks = 12;
     bool res = SOPC_Common_SetEncodingConstants(encConf);
-    assert(res);
+    SOPC_ASSERT(res);
 
     // Get default log config and set the custom path
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();

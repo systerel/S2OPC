@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -232,10 +232,10 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
             clientAppCfg->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
             status = SOPC_String_AttachFromCstring(&clientAppCfg->clientDescription.ApplicationName.defaultText,
                                                    APPLICATION_NAME);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             // Note: client ApplicationURI is extracted from certificate if it is used and will replace APPLICATION_URI
             status = SOPC_String_AttachFromCstring(&clientAppCfg->clientDescription.ApplicationUri, APPLICATION_URI);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             pscConfig->clientConfigPtr = clientAppCfg;
             pscConfig->url = ENDPOINT_URL;
             pscConfig->crt_cli = NULL;
@@ -426,8 +426,8 @@ char* Config_Client_GetUserPassword(void)
 bool Config_Client_GetUserCertAndKey(SOPC_SerializedCertificate** userX509cert,
                                      SOPC_SerializedAsymmetricKey** userX509key)
 {
-    assert(NULL != userX509cert);
-    assert(NULL != userX509key);
+    SOPC_ASSERT(NULL != userX509cert);
+    SOPC_ASSERT(NULL != userX509key);
     SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_USER_PUBL, userX509cert);
     if (SOPC_STATUS_OK != status)
     {

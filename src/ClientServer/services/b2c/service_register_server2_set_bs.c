@@ -18,9 +18,9 @@
  */
 
 #include "service_register_server2_set_bs.h"
-#include <assert.h>
 
 #include "service_discovery_servers_internal.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
@@ -35,7 +35,7 @@ static SOPC_Value_Timestamp resetTime = {0, 0};
 void service_register_server2_set_bs__INITIALISATION(void)
 {
     registeredServer2List = SOPC_SLinkedList_Create(0);
-    assert(NULL != registeredServer2List);
+    SOPC_ASSERT(NULL != registeredServer2List);
     registeredServer2ListIt = NULL;
     resetTime.timestamp = SOPC_Time_GetCurrentTimeUTC();
 }
@@ -49,7 +49,7 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
     const t_entier4 service_register_server2_set_bs__p_recordId,
     t_bool* const service_register_server2_set_bs__alloc_success)
 {
-    assert(service_register_server2_set_bs__p_recordId >= 0);
+    SOPC_ASSERT(service_register_server2_set_bs__p_recordId >= 0);
     *service_register_server2_set_bs__alloc_success = false;
     SOPC_RegisterServer2Record_Internal* newRecord = SOPC_Calloc(1, sizeof(*newRecord));
     if (NULL == newRecord)
@@ -86,7 +86,7 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
 
             void* removed = SOPC_SLinkedList_RemoveFromId(registeredServer2List,
                                                           (uint32_t) service_register_server2_set_bs__p_recordId);
-            assert(added == removed);
+            SOPC_ASSERT(added == removed);
             SOPC_Free(newRecord);
         }
     }
@@ -119,7 +119,7 @@ void service_register_server2_set_bs__continue_iter_registered_server2_set(
     t_bool* const service_register_server2_set_bs__continue,
     constants__t_RegisteredServer2Info_i* const service_register_server2_set_bs__p_registeredServerInfo)
 {
-    assert(NULL != registeredServer2ListIt);
+    SOPC_ASSERT(NULL != registeredServer2ListIt);
     *service_register_server2_set_bs__p_registeredServerInfo = SOPC_SLinkedList_Next(&registeredServer2ListIt);
     *service_register_server2_set_bs__continue = SOPC_SLinkedList_HasNext(&registeredServer2ListIt);
 }
@@ -163,7 +163,7 @@ static void freeRecord(uint32_t id, void* val)
 void service_register_server2_set_bs__remove_from_registered_server2_set(
     const t_entier4 service_register_server2_set_bs__p_recordId)
 {
-    assert(service_register_server2_set_bs__p_recordId >= 0);
+    SOPC_ASSERT(service_register_server2_set_bs__p_recordId >= 0);
     SOPC_RegisterServer2Record_Internal* record =
         SOPC_SLinkedList_RemoveFromId(registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId);
     freeRecord(0, (void*) record);

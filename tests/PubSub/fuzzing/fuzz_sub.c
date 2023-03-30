@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_network_layer.h"
 #include "sopc_reader_layer.h"
@@ -42,7 +42,7 @@ static void setupConnection(void)
     SOPC_ReaderGroup* subReader = NULL;
     SOPC_DataSetReader* dsReader = NULL;
     configuration = SOPC_PubSubConfiguration_Create();
-    assert(NULL != configuration);
+    SOPC_ASSERT(NULL != configuration);
     // "udp_pub_test"
     SOPC_PubSubConfiguration_Allocate_SubConnection_Array(configuration, 1);
     subConnection = SOPC_PubSubConfiguration_Get_SubConnection_At(configuration, 0);
@@ -62,27 +62,27 @@ static void setupConnection(void)
     SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 5);
     // Var 1
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Byte_Id);
     // Var 3
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
     // Var 4
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
     // Var 5
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 4);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
 
@@ -101,22 +101,22 @@ static void setupConnection(void)
     SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 4);
     // Var 1
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
     // Var 3
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
     // Var 4
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
 }
@@ -128,7 +128,7 @@ int LLVMFuzzerInitialize(int* argc, char*** argv)
     setupConnection();
     SOPC_Helper_EndiannessCfg_Initialize();
     sopc_buffer = SOPC_Buffer_CreateResizable(BUFFER_INITIAL_LEN, BUFFER_MAX_LEN);
-    assert(sopc_buffer != NULL);
+    SOPC_ASSERT(sopc_buffer != NULL);
 
     return 0;
 }
@@ -148,11 +148,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
 
     SOPC_Buffer_SetPosition(sopc_buffer, 0);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(sopc_buffer, buf, (uint32_t) len);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     sopc_buffer->length = sopc_buffer->position;
     SOPC_Buffer_SetPosition(sopc_buffer, 0);
 
-    assert(NULL != subConnection);
+    SOPC_ASSERT(NULL != subConnection);
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,

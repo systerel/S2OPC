@@ -58,7 +58,6 @@
  *   the saved CSV will be named $CSV_PREFIX-YYYYMMDD-HHMMSS.csv according to the current date.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <signal.h>
@@ -68,6 +67,7 @@
 #include <time.h>   /* Timestamped csv */
 
 #include "p_time.h" /* SOPC_RealTime API, for now linux only */
+#include "sopc_assert.h"
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
 #include "sopc_helper_string.h"
@@ -333,10 +333,10 @@ static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int3
         {
             /* Get the value and modify it in place */
             SOPC_DataValue* dv_counter = Cache_Get(&nid_counter);
-            assert(NULL != dv_counter);
+            SOPC_ASSERT(NULL != dv_counter);
             SOPC_Variant* var = &dv_counter->Value;
-            assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-            assert(SOPC_UInt32_Id == var->BuiltInTypeId);
+            SOPC_ASSERT(SOPC_VariantArrayType_SingleValue == var->ArrayType);
+            SOPC_ASSERT(SOPC_UInt32_Id == var->BuiltInTypeId);
             ++var->Value.Uint32;
 
             /* Record the current time */

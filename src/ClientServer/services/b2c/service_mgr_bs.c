@@ -20,7 +20,6 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
@@ -30,6 +29,7 @@
 #include "service_mgr_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_assert.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -135,12 +135,12 @@ void service_mgr_bs__client_channel_connected_event_discovery(
                         }
                         else
                         {
-                            assert(NULL != elt->msgToSend);
+                            SOPC_ASSERT(NULL != elt->msgToSend);
                             SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) elt->msgToSend;
                             SOPC_ReturnStatus status =
                                 SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, SOPC_STATUS_OUT_OF_MEMORY,
                                                          (uintptr_t) encType, elt->msgAppContext);
-                            assert(SOPC_STATUS_OK == status);
+                            SOPC_ASSERT(SOPC_STATUS_OK == status);
 
                             SOPC_Logger_TraceWarning(
                                 SOPC_LOG_MODULE_CLIENTSERVER,

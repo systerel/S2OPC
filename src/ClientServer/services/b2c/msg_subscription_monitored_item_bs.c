@@ -112,8 +112,8 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
                                                          SOPC_AttributeId attributeId,
                                                          constants_statuscodes_bs__t_StatusCode_i* sc)
 {
-    assert(NULL != filter);
-    assert(NULL != sc);
+    SOPC_ASSERT(NULL != filter);
+    SOPC_ASSERT(NULL != sc);
 
     if (filter->Length > 0)
     {
@@ -459,7 +459,7 @@ void msg_subscription_monitored_item_bs__alloc_msg_delete_monitored_items_resp_r
     const t_entier4 msg_subscription_monitored_item_bs__p_nb_results,
     t_bool* const msg_subscription_monitored_item_bs__bres)
 {
-    assert(msg_subscription_monitored_item_bs__p_nb_results > 0);
+    SOPC_ASSERT(msg_subscription_monitored_item_bs__p_nb_results > 0);
     *msg_subscription_monitored_item_bs__bres = false;
     OpcUa_DeleteMonitoredItemsResponse* deleteResp =
         (OpcUa_DeleteMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
@@ -524,7 +524,7 @@ void msg_subscription_monitored_item_bs__alloc_msg_set_monit_mode_monitored_item
     const t_entier4 msg_subscription_monitored_item_bs__p_nb_results,
     t_bool* const msg_subscription_monitored_item_bs__bres)
 {
-    assert(msg_subscription_monitored_item_bs__p_nb_results > 0);
+    SOPC_ASSERT(msg_subscription_monitored_item_bs__p_nb_results > 0);
     *msg_subscription_monitored_item_bs__bres = false;
     OpcUa_SetMonitoringModeResponse* setMonitModeResp =
         (OpcUa_SetMonitoringModeResponse*) msg_subscription_monitored_item_bs__p_resp_msg;

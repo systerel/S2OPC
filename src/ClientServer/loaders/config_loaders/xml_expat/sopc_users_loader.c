@@ -19,7 +19,6 @@
 
 #include "sopc_users_loader.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -959,7 +958,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_USERAUTHORIZATION:
         break;
     default:
-        assert(false && "Unknown state.");
+        SOPC_ASSERT(false && "Unknown state.");
         break;
     }
 }
@@ -1051,10 +1050,10 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_S2OPC_USERS:
         break;
     case PARSE_START:
-        assert(false && "Got end_element callback when in PARSE_START state.");
+        SOPC_ASSERT(false && "Got end_element callback when in PARSE_START state.");
         break;
     default:
-        assert(false && "Unknown state.");
+        SOPC_ASSERT(false && "Unknown state.");
         break;
     }
 }
@@ -1494,8 +1493,8 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
                             SOPC_UserAuthorization_Manager** authorization)
 {
-    assert(NULL != authentication);
-    assert(NULL != authorization);
+    SOPC_ASSERT(NULL != authentication);
+    SOPC_ASSERT(NULL != authorization);
 
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
     SOPC_ReturnStatus pki_status = SOPC_STATUS_OK;

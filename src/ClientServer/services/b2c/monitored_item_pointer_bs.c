@@ -22,12 +22,12 @@
 #include "address_space_impl.h"
 #include "monitored_item_pointer_impl.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <math.h>
 #include <string.h>
 
 #include "sopc_address_space_utils_internal.h"
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -87,9 +87,9 @@ void monitored_item_pointer_bs__INITIALISATION(void)
     monitoredItemIdDict = SOPC_Dict_Create(constants_bs__c_monitoredItemId_indet, SOPC_InternalMonitoredItemId_Hash,
                                            SOPC_InternalMonitoredItemId_Equal, SOPC_InternalMonitoredItemId_Free,
                                            SOPC_InternalMonitoredItem_Free);
-    assert(monitoredItemIdDict != NULL);
+    SOPC_ASSERT(monitoredItemIdDict != NULL);
     monitoredItemIdFreed = SOPC_SLinkedList_Create(0);
-    assert(monitoredItemIdFreed != NULL);
+    SOPC_ASSERT(monitoredItemIdFreed != NULL);
 }
 
 void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
@@ -182,7 +182,7 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
 {
     *monitored_item_pointer_bs__filterAbsDeadbandCtx = constants_bs__c_monitoringFilterCtx_indet;
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
-    assert(NULL != monitored_item_pointer_bs__p_filter);
+    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_filter);
     OpcUa_NodeClass* ncl = NULL;
     SOPC_NodeId* dataTypeId = NULL;
     bool result = false;
@@ -194,7 +194,7 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         break;
     case OpcUa_DeadbandType_Absolute:
         ncl = SOPC_AddressSpace_Get_NodeClass(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-        assert(NULL != ncl);
+        SOPC_ASSERT(NULL != ncl);
         if (OpcUa_NodeClass_Variable == *ncl)
         {
             dataTypeId = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
@@ -210,7 +210,7 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         break;
     case OpcUa_DeadbandType_Percent:
         ncl = SOPC_AddressSpace_Get_NodeClass(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-        assert(NULL != ncl);
+        SOPC_ASSERT(NULL != ncl);
         if (OpcUa_NodeClass_Variable == *ncl)
         {
             result = check_percent_deadband_filter_allowed(monitored_item_pointer_bs__p_node, &euRange);
@@ -225,7 +225,7 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         break;
     default:
         // Already checked when retrieved in message
-        assert(false && "invalid deadband type");
+        SOPC_ASSERT(false && "invalid deadband type");
     }
 }
 
@@ -488,7 +488,7 @@ void monitored_item_pointer_bs__getall_monitoredItemPointer(
     constants__t_monitoringMode_i* const monitored_item_pointer_bs__p_monitoringMode,
     constants__t_client_handle_i* const monitored_item_pointer_bs__p_clientHandle)
 {
-    assert(NULL != monitored_item_pointer_bs__p_monitoredItemPointer); // Guaranteed by B model
+    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_monitoredItemPointer); // Guaranteed by B model
     SOPC_InternalMontitoredItem* monitItem =
         (SOPC_InternalMontitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
     *monitored_item_pointer_bs__p_monitoredItemId = monitItem->monitoredItemId;
@@ -534,10 +534,10 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
                                                    const void* right,
                                                    int32_t* compResult)
 {
-    assert(NULL != customContext);
+    SOPC_ASSERT(NULL != customContext);
     double deadband = *(const double*) customContext;
     // Checked on filter creation
-    assert(!(deadband < 0.0));
+    SOPC_ASSERT(!(deadband < 0.0));
     int32_t compareValue = 0;
     uint64_t leftuint64_t = 0;
     uint64_t rightuint64_t = 0;
@@ -586,7 +586,7 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
         switch (filter->DeadbandType)
         {
         case OpcUa_DeadbandType_None:
-            assert(false && "already evaluated case");
+            SOPC_ASSERT(false && "already evaluated case");
             break;
         case OpcUa_DeadbandType_Absolute:
             /* Variable DataType already verified to have (sub)type Number.
@@ -603,7 +603,7 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
             break;
         default:
             // Already checked when retrieved in message
-            assert(false && "invalid deadband type");
+            SOPC_ASSERT(false && "invalid deadband type");
         }
     }
     else

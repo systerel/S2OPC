@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sub_scheduler.h"
@@ -36,7 +36,7 @@ static int callIndex = 0;
 
 static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
-    assert(NULL != nodesToWrite);
+    SOPC_ASSERT(NULL != nodesToWrite);
 
     if (!SOPC_Atomic_Int_Get(&stop))
     {
@@ -44,7 +44,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
         if (callIndex == 1)
         {
             // Only one value in first DSM
-            assert(1 == nbValues);
+            SOPC_ASSERT(1 == nbValues);
 
             SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_Boolean_Id != variant->BuiltInTypeId)
@@ -63,7 +63,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
         else if (callIndex == 2)
         {
             // Two variables in second DSM
-            assert(2 == nbValues);
+            SOPC_ASSERT(2 == nbValues);
 
             SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_UInt32_Id != variant->BuiltInTypeId)
@@ -145,11 +145,11 @@ int main(int argc, char** argv)
     }
 
     FILE* fd = fopen(filename, "r");
-    assert(NULL != fd);
+    SOPC_ASSERT(NULL != fd);
 
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);
     int closed = fclose(fd);
-    assert(0 == closed);
+    SOPC_ASSERT(0 == closed);
 
     SOPC_SubTargetVariableConfig* targetConfig = SOPC_SubTargetVariableConfig_Create(&SOPC_SetTargetVariables_Test);
 

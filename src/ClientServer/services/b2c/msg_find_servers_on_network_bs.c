@@ -19,8 +19,7 @@
 
 #include "msg_find_servers_on_network_bs.h"
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
@@ -38,7 +37,7 @@ void msg_find_servers_on_network_bs__alloc_find_servers_on_network_servers(
     t_bool* const msg_find_servers_on_network_bs__p_allocSuccess)
 {
     *msg_find_servers_on_network_bs__p_allocSuccess = false;
-    assert(msg_find_servers_on_network_bs__p_nb_servers > 0);
+    SOPC_ASSERT(msg_find_servers_on_network_bs__p_nb_servers > 0);
     OpcUa_FindServersOnNetworkResponse* resp = msg_find_servers_on_network_bs__p_resp;
     resp->Servers = SOPC_Malloc(sizeof(*resp->Servers) * (size_t) msg_find_servers_on_network_bs__p_nb_servers);
     if (NULL != resp->Servers)
@@ -97,10 +96,10 @@ void msg_find_servers_on_network_bs__set_find_servers_on_network_server(
     const constants__t_MdnsDiscoveryConfig_i msg_find_servers_on_network_bs__p_mdns_config)
 {
     OpcUa_FindServersOnNetworkResponse* resp = msg_find_servers_on_network_bs__p_resp;
-    assert(msg_find_servers_on_network_bs__p_srv_index < resp->NoOfServers); // Guaranteed by B model
-    assert(msg_find_servers_on_network_bs__p_recordId >= 0);                 // Guaranteed by B model
-    assert(msg_find_servers_on_network_bs__p_registered_server->NoOfDiscoveryUrls >
-           0); // Guaranteed by construction in B model
+    SOPC_ASSERT(msg_find_servers_on_network_bs__p_srv_index < resp->NoOfServers); // Guaranteed by B model
+    SOPC_ASSERT(msg_find_servers_on_network_bs__p_recordId >= 0);                 // Guaranteed by B model
+    SOPC_ASSERT(msg_find_servers_on_network_bs__p_registered_server->NoOfDiscoveryUrls >
+                0); // Guaranteed by construction in B model
     OpcUa_ServerOnNetwork* server = &resp->Servers[msg_find_servers_on_network_bs__p_srv_index];
     server->RecordId = (uint32_t) msg_find_servers_on_network_bs__p_recordId;
     SOPC_ReturnStatus status =

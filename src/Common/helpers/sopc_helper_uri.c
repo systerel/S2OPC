@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 #include <sys/types.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
@@ -162,7 +162,7 @@ static SOPC_ReturnStatus getUriPrefixOrPort(const char** ppCursor,
     }
     else
     {
-        assert(false && "Unknown uriSwitch");
+        SOPC_ASSERT(false && "Unknown uriSwitch");
     }
 
     if (SOPC_STATUS_OK == res)

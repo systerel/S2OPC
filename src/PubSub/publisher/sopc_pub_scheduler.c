@@ -606,6 +606,8 @@ static void* thread_start_publish(void* arg)
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
     SOPC_RealTime* nextTimeout = SOPC_RealTime_Create(NULL);
     SOPC_ASSERT(NULL != now);
+    SOPC_ASSERT(NULL != nextTimeout);
+
     bool ok = true;
 
     status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
@@ -650,7 +652,8 @@ static void* thread_start_publish(void* arg)
         /* Otherwise sleep until there is a message to send */
         else
         {
-            SOPC_RealTime_Copy(nextTimeout, context->next_timeout);
+            ok = SOPC_RealTime_Copy(nextTimeout, context->next_timeout);
+            SOPC_ASSERT(ok && "Failed Copy");
             status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
             ok = SOPC_RealTime_SleepUntil(nextTimeout);

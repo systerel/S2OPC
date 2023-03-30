@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
@@ -78,35 +78,35 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Uint32 = 12071982;
     bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 0);
-    assert(res);
+    SOPC_ASSERT(res);
     // variant 2
     variant = SOPC_Variant_Create();
     variant->BuiltInTypeId = SOPC_Byte_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Byte = 239;
     res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 1);
-    assert(res);
+    SOPC_ASSERT(res);
     // variant 3
     variant = SOPC_Variant_Create();
     variant->BuiltInTypeId = SOPC_UInt16_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Uint16 = 64852;
     res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 2);
-    assert(res);
+    SOPC_ASSERT(res);
     // variant 4
     variant = SOPC_Variant_Create();
     variant->BuiltInTypeId = SOPC_DateTime_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Date = SOPC_Time_GetCurrentTimeUTC();
     res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 3);
-    assert(res);
+    SOPC_ASSERT(res);
     // variant 5
     variant = SOPC_Variant_Create();
     variant->BuiltInTypeId = SOPC_UInt32_Id;
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     variant->Value.Uint32 = 369852;
     res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 4);
-    assert(res);
+    SOPC_ASSERT(res);
 
     return nm;
 }
@@ -135,7 +135,7 @@ int main(void)
         while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
         {
             status = SOPC_UDP_Socket_SendTo(sock, multicastAddr, buffer);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             SOPC_Sleep(100);
         }
     }

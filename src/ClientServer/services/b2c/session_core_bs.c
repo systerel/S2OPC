@@ -20,7 +20,6 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -104,7 +103,7 @@ void session_core_bs__INITIALISATION(void)
                sizeof(clientSessionData->user_client_server_certificate));
     }
 
-    assert(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
+    SOPC_ASSERT(SOPC_MAX_SESSIONS + 1 <= SIZE_MAX / sizeof(constants__t_user_i));
     memset(session_client_app_context, (int) 0,
            sizeof(constants__t_session_application_context_i) * (SOPC_MAX_SESSIONS + 1));
     memset(session_expiration_timer, (int) 0, sizeof(uint32_t) * (SOPC_MAX_SESSIONS + 1));
@@ -123,7 +122,7 @@ void session_core_bs__may_validate_server_certificate(
     const constants__t_SecurityPolicy session_core_bs__p_user_secu_policy,
     t_bool* const session_core_bs__valid_cert)
 {
-    assert(constants__e_secpol_None != session_core_bs__p_user_secu_policy);
+    SOPC_ASSERT(constants__e_secpol_None != session_core_bs__p_user_secu_policy);
 
     *session_core_bs__valid_cert = false;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
@@ -368,7 +367,7 @@ void session_core_bs__server_is_valid_session_token(const constants__t_session_t
 void session_core_bs__client_set_NonceServer(const constants__t_session_i session_core_bs__p_session,
                                              const constants__t_msg_i session_core_bs__p_resp_msg)
 {
-    assert(constants__c_session_indet != session_core_bs__p_session);
+    SOPC_ASSERT(constants__c_session_indet != session_core_bs__p_session);
 
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__p_resp_msg;
     // Shallow copy of server nonce
@@ -400,7 +399,7 @@ void session_core_bs__client_set_session_token(const constants__t_session_i sess
 void session_core_bs__delete_session_token(const constants__t_session_i session_core_bs__p_session,
                                            const t_bool session_core_bs__p_is_client)
 {
-    assert(constants__c_session_indet != session_core_bs__p_session);
+    SOPC_ASSERT(constants__c_session_indet != session_core_bs__p_session);
     if (session_core_bs__p_is_client)
     {
         ClientSessionData* sData = &clientSessionDataArray[session_core_bs__p_session];
@@ -631,7 +630,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            assert(pECfg->serverConfigPtr->serverKey != NULL);
+            SOPC_ASSERT(pECfg->serverConfigPtr->serverKey != NULL);
             status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pECfg->serverConfigPtr->serverKey, false,
                                                                          &privateKey);
         }
@@ -647,7 +646,7 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            assert(sigLength <= INT32_MAX);
+            SOPC_ASSERT(sigLength <= INT32_MAX);
             pSign->Signature.Length = (int32_t) sigLength;
             if (pSign->Signature.Length > 0 && (uint64_t) pSign->Signature.Length * sizeof(SOPC_Byte) <= SIZE_MAX)
             {
@@ -1459,7 +1458,7 @@ void session_core_bs__get_session_app_context(
     const constants__t_session_i session_core_bs__p_session,
     constants__t_session_application_context_i* const session_core_bs__p_app_context)
 {
-    assert(constants__c_session_indet != session_core_bs__p_session);
+    SOPC_ASSERT(constants__c_session_indet != session_core_bs__p_session);
     *session_core_bs__p_app_context = session_client_app_context[session_core_bs__p_session];
 }
 
@@ -1617,7 +1616,7 @@ void session_core_bs__server_set_fresh_nonce(
     *session_core_bs__p_bres = false;
     *session_core_bs__p_nonce = constants__c_Nonce_indet;
 
-    assert(constants__c_session_indet != session_core_bs__p_session);
+    SOPC_ASSERT(constants__c_session_indet != session_core_bs__p_session);
 
     pSession = &serverSessionDataArray[session_core_bs__p_session];
 
@@ -1658,10 +1657,10 @@ void session_core_bs__server_may_need_user_token_encryption(
 
     /* Retrieve the secure channel configuration and available user token policies for the security policy and mode */
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
-    assert(NULL != scConfig);
+    SOPC_ASSERT(NULL != scConfig);
 
     bool foundUserSecuPolicyWithEncryption = false;
 

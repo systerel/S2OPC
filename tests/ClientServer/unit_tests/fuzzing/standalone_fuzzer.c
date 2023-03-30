@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
 extern int LLVMFuzzerTestOneInput(const unsigned char* data, size_t size);

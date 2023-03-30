@@ -20,12 +20,12 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 
 #include "sopc_secure_channels_api.h"
 
+#include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_macros.h"
 #include "sopc_types.h"
@@ -62,7 +62,7 @@ void channel_mgr_bs__is_valid_channel_config_idx(const constants__t_channel_conf
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (NULL == res)
@@ -86,7 +86,7 @@ void channel_mgr_bs__is_valid_endpoint_config_idx(const constants__t_endpoint_co
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (NULL == res)
@@ -156,7 +156,7 @@ void channel_mgr_bs__get_SecurityPolicy(const constants__t_channel_i channel_mgr
     {
         pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(scConfigIdx);
     }
-    assert(pSCCfg != NULL);
+    SOPC_ASSERT(pSCCfg != NULL);
 
     // Note: this conditional branch is only needed for mingw compiler that did not take assert into account
     if (pSCCfg != NULL)

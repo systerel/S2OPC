@@ -27,13 +27,13 @@
  *
  */
 
-#include <assert.h>
 #include <stdio.h>
 
 #include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 
 static void disconnect_callback(const uint32_t c_id)
@@ -134,7 +134,7 @@ int main(int argc, char* const argv[])
         writeValue.indexRange = NULL;
         writeValue.value = malloc(sizeof(SOPC_DataValue));
 
-        assert(writeValue.value != NULL);
+        SOPC_ASSERT(writeValue.value != NULL);
         SOPC_DataValue_Initialize(writeValue.value);
 
         writeValue.value->Value.DoNotClear = false;

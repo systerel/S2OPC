@@ -19,12 +19,12 @@
 
 #include "libs2opc_server_runtime_variables.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
@@ -92,29 +92,29 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
 
     status =
         SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &server_config->serverDescription.ProductUri);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.ManufacturerName, "Systerel");
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName,
                                     &server_config->serverDescription.ApplicationName.defaultText);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildVersion);
-    assert(0 == cmp_res);
+    SOPC_ASSERT(0 == cmp_res);
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion,
                                            (char*) build_info.clientServerBuildInfo.buildVersion);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber,
                                            (char*) build_info.clientServerBuildInfo.buildSrcCommit);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     time_t buildDateAsTimet = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);
     SOPC_DateTime buildDate;
     status = SOPC_Time_FromTimeT(buildDateAsTimet, &buildDate);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     runtimeVariables.build_info.BuildDate = buildDate;
 
@@ -143,19 +143,19 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_Build(OpcUa_BuildInfo* build_
     OpcUa_BuildInfo_Initialize(&runtimeVariables.build_info);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductUri, &build_info->ProductUri);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ManufacturerName, &build_info->ManufacturerName);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.ProductName, &build_info->ProductName);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.SoftwareVersion, &build_info->SoftwareVersion);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFrom(&runtimeVariables.build_info.BuildNumber, &build_info->BuildNumber);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     runtimeVariables.build_info.BuildDate = build_info->BuildDate;
 
@@ -257,10 +257,10 @@ static bool set_write_value_localized_text(OpcUa_WriteValue* wv, uint32_t id, SO
     set_write_value_id(wv, id);
     set_variant_scalar(&wv->Value.Value, SOPC_LocalizedText_Id);
     wv->Value.Value.Value.LocalizedText = SOPC_Malloc(sizeof(SOPC_LocalizedText));
-    assert(NULL != wv->Value.Value.Value.LocalizedText);
+    SOPC_ASSERT(NULL != wv->Value.Value.Value.LocalizedText);
     SOPC_LocalizedText_Initialize(wv->Value.Value.Value.LocalizedText);
     SOPC_ReturnStatus status = SOPC_LocalizedText_Copy(wv->Value.Value.Value.LocalizedText, &value);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return true;
 }
@@ -275,10 +275,10 @@ static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildIn
     SOPC_ExtensionObject_Initialize(extObject);
     status =
         SOPC_Encodeable_CreateExtension(extObject, &OpcUa_BuildInfo_EncodeableType, (void**) &build_info_in_extObject);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, build_info_in_extObject, build_info);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     /* Prepare write of this extension object */
     set_write_value_id(wv, OpcUaId_Server_ServerStatus_BuildInfo);
@@ -330,16 +330,16 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv,
     SOPC_ExtensionObject_Initialize(extObject);
     status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_ServerStatusDataType_EncodeableType,
                                              (void**) &server_status_in_extObject);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status =
         SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, &server_status_in_extObject->BuildInfo, build_info);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     server_status_in_extObject->CurrentTime = currentTime;
     server_status_in_extObject->SecondsTillShutdown = vars->secondsTillShutdown;
     status = SOPC_LocalizedText_Copy(&server_status_in_extObject->ShutdownReason, &vars->shutdownReason);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     server_status_in_extObject->State = vars->server_state;
     server_status_in_extObject->StartTime = vars->startTime;
 
@@ -413,7 +413,7 @@ static bool set_server_namespace_array_value(OpcUa_WriteValue* wv, char** app_na
         }
     }
 
-    assert(n_app_namespace_uris <= INT32_MAX);
+    SOPC_ASSERT(n_app_namespace_uris <= INT32_MAX);
 
     SOPC_String* uris = SOPC_Calloc(n_app_namespace_uris, sizeof(SOPC_String));
 
@@ -464,7 +464,7 @@ static bool set_server_capabilities_locale_ids_array_value(OpcUa_WriteValue* wv,
         }
     }
 
-    assert(n_locale_ids <= INT32_MAX);
+    SOPC_ASSERT(n_locale_ids <= INT32_MAX);
 
     SOPC_String* localeIds = NULL;
 
@@ -624,7 +624,7 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildWriteRequest(SOPC_Server_RuntimeV
     }
 
     size_t n_values = SOPC_Array_Size(write_values);
-    assert(n_values <= INT32_MAX);
+    SOPC_ASSERT(n_values <= INT32_MAX);
 
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);
@@ -648,7 +648,7 @@ OpcUa_WriteRequest* SOPC_RuntimeVariables_BuildUpdateServerStatusWriteRequest(SO
     }
 
     size_t n_values = SOPC_Array_Size(write_values);
-    assert(n_values <= INT32_MAX);
+    SOPC_ASSERT(n_values <= INT32_MAX);
 
     OpcUa_WriteRequest_Initialize(request);
     request->NodesToWrite = SOPC_Array_Into_Raw(write_values);

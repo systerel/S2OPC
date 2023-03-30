@@ -19,8 +19,7 @@
 
 #include "monitored_item_queue_it_bs.h"
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 

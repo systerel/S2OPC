@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 
 #include "app_cb_call_context_internal.h"
+#include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
@@ -198,13 +198,13 @@ static void onAddressSpaceNotification(SOPC_EventHandler* handler,
 void SOPC_App_Initialize(void)
 {
     sopc_appLooper = SOPC_Looper_Create("Application");
-    assert(sopc_appLooper != NULL);
+    SOPC_ASSERT(sopc_appLooper != NULL);
 
     appComEventHandler = SOPC_EventHandler_Create(sopc_appLooper, onComEvent);
-    assert(appComEventHandler != NULL);
+    SOPC_ASSERT(appComEventHandler != NULL);
 
     appAddressSpaceNotificationHandler = SOPC_EventHandler_Create(sopc_appLooper, onAddressSpaceNotification);
-    assert(appAddressSpaceNotificationHandler != NULL);
+    SOPC_ASSERT(appAddressSpaceNotificationHandler != NULL);
 }
 
 SOPC_Looper* SOPC_App_GetLooper(void)

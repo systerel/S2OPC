@@ -54,14 +54,14 @@ static SOPC_VariantValue* argument_pointer_bs__check_and_get_variant_value(
 void argument_pointer_bs__read_argument_type(const constants__t_Argument_i argument_pointer_bs__p_arg,
                                              constants__t_NodeId_i* const argument_pointer_bs__p_type)
 {
-    assert(NULL != argument_pointer_bs__p_type);
+    SOPC_ASSERT(NULL != argument_pointer_bs__p_type);
     *argument_pointer_bs__p_type = &argument_pointer_bs__p_arg->DataType;
 }
 
 void argument_pointer_bs__read_argument_valueRank(const constants__t_Argument_i argument_pointer_bs__p_arg,
                                                   t_entier4* const argument_pointer_bs__p_vr)
 {
-    assert(NULL != argument_pointer_bs__p_vr);
+    SOPC_ASSERT(NULL != argument_pointer_bs__p_vr);
     *argument_pointer_bs__p_vr = argument_pointer_bs__p_arg->ValueRank;
 }
 
@@ -69,21 +69,21 @@ void argument_pointer_bs__read_variant_argument(const constants__t_Variant_i arg
                                                 const t_entier4 argument_pointer_bs__p_index,
                                                 constants__t_Argument_i* const argument_pointer_bs__p_arg)
 {
-    assert(NULL != argument_pointer_bs__p_arg);
+    SOPC_ASSERT(NULL != argument_pointer_bs__p_arg);
 
     SOPC_VariantValue* value = argument_pointer_bs__check_and_get_variant_value(argument_pointer_bs__p_variant);
-    assert(NULL != value);
+    SOPC_ASSERT(NULL != value);
     if (NULL != value)
     {
         int32_t length = value->Array.Length;
-        assert(0 < argument_pointer_bs__p_index && argument_pointer_bs__p_index <= length);
+        SOPC_ASSERT(0 < argument_pointer_bs__p_index && argument_pointer_bs__p_index <= length);
         SOPC_ExtensionObject* extObjectArr = &value->Array.Content.ExtObjectArr[argument_pointer_bs__p_index - 1];
 
-        assert(SOPC_ExtObjBodyEncoding_Object == extObjectArr->Encoding);            // .. encoded in object ..
-        assert(&OpcUa_Argument_EncodeableType == extObjectArr->Body.Object.ObjType); // .. of type argument.
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == extObjectArr->Encoding);            // .. encoded in object ..
+        SOPC_ASSERT(&OpcUa_Argument_EncodeableType == extObjectArr->Body.Object.ObjType); // .. of type argument.
         *argument_pointer_bs__p_arg = (OpcUa_Argument*) extObjectArr->Body.Object.Value;
-        assert(NULL != *argument_pointer_bs__p_arg);
-        assert(&OpcUa_Argument_EncodeableType == (*argument_pointer_bs__p_arg)->encodeableType);
+        SOPC_ASSERT(NULL != *argument_pointer_bs__p_arg);
+        SOPC_ASSERT(&OpcUa_Argument_EncodeableType == (*argument_pointer_bs__p_arg)->encodeableType);
     }
 }
 
@@ -92,7 +92,7 @@ void argument_pointer_bs__read_variant_nb_argument(const constants__t_Variant_i 
                                                    t_entier4* const argument_pointer_bs__p_nb,
                                                    t_bool* const argument_pointer_bs__p_bres)
 {
-    assert(NULL != argument_pointer_bs__p_nb);
+    SOPC_ASSERT(NULL != argument_pointer_bs__p_nb);
 
     if (NULL == argument_pointer_bs__p_variant)
     {

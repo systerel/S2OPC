@@ -18,12 +18,13 @@
  */
 
 #include "sopc_array.h"
-#include "sopc_mem_alloc.h"
 
-#include <assert.h>
 #include <stdint.h>
 #include <stdlib.h> /* qsort */
 #include <string.h>
+
+#include "sopc_assert.h"
+#include "sopc_mem_alloc.h"
 
 #define ARRAY_ELT(a, idx) ((void*) (a->data + idx * a->element_size))
 
@@ -38,7 +39,7 @@ struct _SOPC_Array
 
 static bool array_grow(SOPC_Array* a, size_t min_size)
 {
-    assert(a != NULL);
+    SOPC_ASSERT(a != NULL);
 
     if (a->cap >= min_size)
     {
@@ -88,7 +89,7 @@ SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC
 
 SOPC_Array* SOPC_Array_Copy(const SOPC_Array* array)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
 
     SOPC_Array* copy = SOPC_Array_Create(array->element_size, array->sz, array->free_func);
 
@@ -128,7 +129,7 @@ void SOPC_Array_Delete(SOPC_Array* array)
 
 bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elements)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
 
     if (n_elements == 0)
     {
@@ -156,27 +157,27 @@ bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elem
 
 void* SOPC_Array_Get_Ptr(const SOPC_Array* array, size_t index)
 {
-    assert(array != NULL);
-    assert(index < array->sz);
+    SOPC_ASSERT(array != NULL);
+    SOPC_ASSERT(index < array->sz);
 
     return ARRAY_ELT(array, index);
 }
 
 size_t SOPC_Array_Size(const SOPC_Array* array)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
     return array->sz;
 }
 
 void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func* compare_func)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
     qsort(array->data, array->sz, array->element_size, compare_func);
 }
 
 void* SOPC_Array_Into_Raw(SOPC_Array* array)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
 
     void* data = array->data;
 
@@ -192,12 +193,12 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array)
 
 SOPC_Array_Free_Func* SOPC_Array_Get_Free_Func(SOPC_Array* array)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
     return array->free_func;
 }
 
 void SOPC_Array_Set_Free_Func(SOPC_Array* array, SOPC_Array_Free_Func* func)
 {
-    assert(array != NULL);
+    SOPC_ASSERT(array != NULL);
     array->free_func = func;
 }

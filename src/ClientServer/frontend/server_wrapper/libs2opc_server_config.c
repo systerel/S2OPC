@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 
 #include "libs2opc_common_config.h"
@@ -25,6 +24,7 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -115,7 +115,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     bool hasUserName = false;
     bool hasSecurity = false;
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
         SOPC_Endpoint_Config* ep = sopc_server_helper_config.endpoints[i];
@@ -181,7 +181,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
         // Create empty locale array
         pConfig->serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
-        assert(NULL != pConfig->serverConfig.localeIds);
+        SOPC_ASSERT(NULL != pConfig->serverConfig.localeIds);
         pConfig->serverConfig.localeIds[0] = NULL;
     }
 
@@ -234,7 +234,7 @@ static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No locales defined for the server.");
         // Create empty locale array
         pConfig->serverConfig.localeIds = SOPC_Calloc(1, sizeof(char*));
-        assert(NULL != pConfig->serverConfig.localeIds);
+        SOPC_ASSERT(NULL != pConfig->serverConfig.localeIds);
         pConfig->serverConfig.localeIds[0] = NULL;
     }
 
@@ -396,7 +396,7 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
         break;
     case SE_LOCAL_SERVICE_RESPONSE:
         ctx = (SOPC_HelperConfigInternal_Ctx*) helperContext;
-        assert(event == ctx->event);
+        SOPC_ASSERT(event == ctx->event);
         if (ctx->eventCtx.localService.isSyncCall)
         {
             SOPC_ServerInternal_SyncLocalServiceCb(*(SOPC_EncodeableType**) param, param, ctx);
@@ -408,7 +408,7 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
         SOPC_Free(ctx);
         break;
     default:
-        assert(false && "Unexpected events");
+        SOPC_ASSERT(false && "Unexpected events");
     }
 }
 
@@ -440,7 +440,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
     }
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     sopc_server_helper_config = sopc_server_helper_config_default;
 
     // We only do copies in helper config
@@ -542,7 +542,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     pConfig->serverConfig.mcm = mcm;
     return SOPC_STATUS_OK;
 }
@@ -572,7 +572,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_Cre
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     pConfig->serverConfig.nodeAvailFunc = nodeAvailCb;
     return SOPC_STATUS_OK;
 }

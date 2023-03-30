@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -56,9 +56,9 @@ static void init_mcast_addrs(void)
     for (int i = 0; i < NB_ADDRS; i++)
     {
         int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03d", i + 100);
-        assert(sizeof(MCAST_ADDR) - 1 == res);
+        SOPC_ASSERT(sizeof(MCAST_ADDR) - 1 == res);
         addressArr[i] = SOPC_UDP_SocketAddress_Create(false, addr, MCAST_PORT);
-        assert(NULL != addressArr[i]);
+        SOPC_ASSERT(NULL != addressArr[i]);
     }
     SOPC_Free(addr);
 }

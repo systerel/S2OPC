@@ -19,7 +19,6 @@
 
 #include "sopc_secure_listener_state_mgr.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -81,7 +80,7 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
                                                         uint32_t endpointConfigIdx,
                                                         bool socketFailure)
 {
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
     SOPC_SecureListener* scListener = NULL;
     bool result = false;
     uint32_t idx = 0;
@@ -174,7 +173,7 @@ static SOPC_SecureListener* SOPC_SecureListenerStateMgr_GetListener(uint32_t end
 
 static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scListener, uint32_t newConnectionIndex)
 {
-    assert(scListener != NULL);
+    SOPC_ASSERT(scListener != NULL);
     uint32_t idx = (scListener->lastConnectionIdxArrayIdx + 1) % SOPC_MAX_SOCKETS_CONNECTIONS;
     uint32_t lastIdx = 0;
     bool result = false;
@@ -200,7 +199,7 @@ static bool SOPC_SecureListenerStateMgr_AddConnection(SOPC_SecureListener* scLis
 
 static void SOPC_SecureListenerStateMgr_RemoveConnection(SOPC_SecureListener* scListener, uint32_t connectionIndex)
 {
-    assert(scListener != NULL);
+    SOPC_ASSERT(scListener != NULL);
     uint32_t idx = 0;
     bool result = false;
     do
@@ -255,9 +254,9 @@ static bool SOPC_SecureListenerStateMgr_GetFirstConnectionCompatible(SOPC_Secure
                                                                      const char* serverURI, // if serverURL is not NULL
                                                                      uint32_t* outScIdx)
 {
-    assert(NULL != scListener);
-    assert(NULL != outScIdx);
-    assert(scListener->reverseEnpoint);
+    SOPC_ASSERT(NULL != scListener);
+    SOPC_ASSERT(NULL != outScIdx);
+    SOPC_ASSERT(scListener->reverseEnpoint);
     bool resultFound = false;
     uint32_t scIdx = 0;
     for (unsigned int idx = 0; !resultFound && idx < SOPC_MAX_SOCKETS_CONNECTIONS; idx++)
@@ -281,10 +280,10 @@ static void SOPC_SecureListenerStateMgr_SwitchWaitingConnectionWithToken(uint32_
 {
     SOPC_SecureConnection* waitingSc = SC_GetConnection(waitingScIndex);
     SOPC_SecureConnection* tokenSc = SC_GetConnection(tokenScIndex);
-    assert(waitingSc != NULL);
-    assert(SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == waitingSc->state);
-    assert(tokenSc != NULL);
-    assert(SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == tokenSc->state);
+    SOPC_ASSERT(waitingSc != NULL);
+    SOPC_ASSERT(SECURE_CONNECTION_STATE_TCP_REVERSE_INIT == waitingSc->state);
+    SOPC_ASSERT(tokenSc != NULL);
+    SOPC_ASSERT(SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == tokenSc->state);
     uint32_t tokenSocketIdx = tokenSc->socketIndex;
     SOPC_SecureConnection bufferSc = *waitingSc;
     *waitingSc = *tokenSc;
@@ -298,9 +297,9 @@ static SOPC_ReturnStatus SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(
                                                                                 uint32_t connectionIdx,
                                                                                 uint32_t timeoutMs)
 {
-    assert(NULL != timerId);
-    assert(connectionIdx > 0);
-    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
+    SOPC_ASSERT(NULL != timerId);
+    SOPC_ASSERT(connectionIdx > 0);
+    SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
@@ -345,7 +344,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
     {
         /* id = endpoint description configuration index,
            auxParam = (uint32_t) secure channel connection index */
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
@@ -441,7 +440,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         break;
     case INT_EP_SC_DISCONNECTED:
     {
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: INT_EP_SC_DISCONNECTED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
@@ -461,7 +460,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
     {
         /* id = reverse endpoint configuration index,
            auxParam = (uint32_t) secure channel connection index */
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: INT_REVERSE_EP_REQ_CONNECTION reverseEpCfgIdx=%" PRIu32
                                " scIdx=%" PRIuPTR,
@@ -494,7 +493,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
     }
     default:
         // Already filtered by secure channels API module
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -517,7 +516,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     {
         /* id = endpoint description config index,
            auxParam = socket index */
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: SOCKET_LISTENER_OPENED epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
@@ -540,7 +539,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     {
         /* id = endpoint description config index,
            auxParam = new connection socket index */
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: SOCKET_LISTENER_CONNECTION epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
@@ -571,7 +570,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                 if (result)
                 {
                     sc = SC_GetConnection(newScIdx);
-                    assert(NULL != sc);
+                    SOPC_ASSERT(NULL != sc);
                     sc->isReverseConnection = true;
                     sc->clientReverseEpConfigIdx = eltId;
                     sc->socketIndex = (uint32_t) auxParam;
@@ -589,7 +588,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
                     {
                         // No more connections slot to add to listener for now
                         result = SC_CloseConnection(newScIdx, false); // clears SC and closes socket
-                        assert(result);
+                        SOPC_ASSERT(result);
                     }
                     else
                     {
@@ -639,7 +638,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         break;
     }
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -681,8 +680,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
             }
             else
             {
-                assert(epConfig->nbClientsToConnect > 0 &&
-                       "Endpoint cannot be configured to not listen without reverse connection");
+                SOPC_ASSERT(epConfig->nbClientsToConnect > 0 &&
+                            "Endpoint cannot be configured to not listen without reverse connection");
                 // Define a listener
                 result = SOPC_SecureListenerStateMgr_NoListener(eltId);
             }
@@ -768,7 +767,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         break;
     default:
         // Already filtered by secure channels API module
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -789,13 +788,13 @@ void SOPC_SecureListenerStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent eve
         if (NULL != sc && SECURE_CONNECTION_STATE_TCP_REVERSE_TOKEN == sc->state)
         {
             scListener = SOPC_SecureListenerStateMgr_GetListener(sc->clientReverseEpConfigIdx);
-            assert(NULL != scListener);
+            SOPC_ASSERT(NULL != scListener);
             SOPC_SecureListenerStateMgr_RemoveConnection(scListener, eltId);
             result = SC_CloseConnection(eltId, false); // clears SC and closes the socket
             SOPC_ASSERT(result);
         }
         break;
     default:
-        assert(false && "Unknown SOPC_SecureChannels_TimerEvent for secure listener state manager");
+        SOPC_ASSERT(false && "Unknown SOPC_SecureChannels_TimerEvent for secure listener state manager");
     }
 }

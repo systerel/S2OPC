@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_sockets_api.h"
@@ -45,21 +45,21 @@ void SOPC_SecureChannelsInternalContext_Initialize(SOPC_SetListenerFunc* setSock
     lastSecureConnectionArrayIdx = 0;
 
     secureChannelsLooper = SOPC_Looper_Create("Secure_Channels");
-    assert(secureChannelsLooper != NULL);
+    SOPC_ASSERT(secureChannelsLooper != NULL);
 
     secureChannelsInputEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInputEvent);
-    assert(secureChannelsInputEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsInputEventHandler != NULL);
 
     secureChannelsInternalEventHandler =
         SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnInternalEvent);
-    assert(secureChannelsInternalEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsInternalEventHandler != NULL);
 
     secureChannelsSocketsEventHandler =
         SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnSocketsEvent);
-    assert(secureChannelsSocketsEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsSocketsEventHandler != NULL);
 
     secureChannelsTimerEventHandler = SOPC_EventHandler_Create(secureChannelsLooper, SOPC_SecureChannels_OnTimerEvent);
-    assert(secureChannelsTimerEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsTimerEventHandler != NULL);
 
     setSocketsListener(secureChannelsSocketsEventHandler);
 }
@@ -91,7 +91,7 @@ const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn)
 
 uint32_t SOPC_ScInternalContext_GetNbIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
-    assert(NULL != chunkCtx);
+    SOPC_ASSERT(NULL != chunkCtx);
     if (NULL == chunkCtx->intermediateChunksInputBuffers)
     {
         return 0;
@@ -106,7 +106,7 @@ bool SOPC_ScInternalContext_AddIntermediateInputChunk(SOPC_SecureConnection_TcpP
                                                       SOPC_SecureConnection_ChunkMgrCtx* chunkCtx,
                                                       SOPC_Buffer* intermediateChunk)
 {
-    assert(NULL != chunkCtx);
+    SOPC_ASSERT(NULL != chunkCtx);
     if (NULL == chunkCtx->intermediateChunksInputBuffers)
     {
         chunkCtx->intermediateChunksInputBuffers = SOPC_SLinkedList_Create(tcpProperties->receiveMaxChunkCount);
@@ -131,7 +131,7 @@ static void SOPC_ScInternalContext_DeleteIntermediateInputBuffer(uint32_t id, vo
 
 void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
-    assert(NULL != chunkCtx);
+    SOPC_ASSERT(NULL != chunkCtx);
     if (NULL != chunkCtx->intermediateChunksInputBuffers)
     {
         SOPC_SLinkedList_Apply(chunkCtx->intermediateChunksInputBuffers,
@@ -144,7 +144,7 @@ void SOPC_ScInternalContext_ClearIntermediateInputChunks(SOPC_SecureConnection_C
 /** @brief Clear the current chunk context but not the intermediate chunks context */
 void SOPC_ScInternalContext_ClearCurrentInputChunkContext(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
-    assert(NULL != chunkCtx);
+    SOPC_ASSERT(NULL != chunkCtx);
     SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
     chunkCtx->currentChunkInputBuffer = NULL;
     chunkCtx->currentMsgSize = 0;
@@ -155,7 +155,7 @@ void SOPC_ScInternalContext_ClearCurrentInputChunkContext(SOPC_SecureConnection_
 /** @brief Clear the current chunk and intermediate chunks context */
 void SOPC_ScInternalContext_ClearInputChunksContext(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
-    assert(NULL != chunkCtx);
+    SOPC_ASSERT(NULL != chunkCtx);
     SOPC_ScInternalContext_ClearIntermediateInputChunks(chunkCtx);
     SOPC_ScInternalContext_ClearCurrentInputChunkContext(chunkCtx);
     // Delete complete message context:

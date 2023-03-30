@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,6 +31,7 @@
 /* S2OPC includes */
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -123,7 +123,7 @@ static SOPC_StatusCode SOPC_Method_Func_Test_CreateSigningRequest(const SOPC_Cal
     SOPC_UNUSED_ARG(param);
     *nbOutputArgs = 1;
     *outputArgs = SOPC_Calloc(1, sizeof(SOPC_Variant));
-    assert(NULL != *outputArgs);
+    SOPC_ASSERT(NULL != *outputArgs);
     SOPC_Variant_Initialize(&((*outputArgs)[0]));
     (*outputArgs)[0].BuiltInTypeId = SOPC_UInt32_Id;
     (*outputArgs)[0].Value.Uint32 = 42;
@@ -568,10 +568,10 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 {
     SOPC_UNUSED_ARG(authn);
 
-    assert(NULL != token && NULL != authenticated);
+    SOPC_ASSERT(NULL != token && NULL != authenticated);
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
-    assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;

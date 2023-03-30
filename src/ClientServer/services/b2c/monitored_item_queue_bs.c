@@ -19,7 +19,7 @@
 
 #include "monitored_item_queue_bs.h"
 
-#include <assert.h>
+#include "sopc_assert.h"
 
 /*--------------
    SEES Clause

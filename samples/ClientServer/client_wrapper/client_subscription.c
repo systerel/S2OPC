@@ -23,7 +23,6 @@
  *
  */
 
-#include <assert.h>
 #include <getopt.h>
 #include <inttypes.h>
 #include <stdbool.h>
@@ -34,6 +33,7 @@
 
 #include "libs2opc_client_config.h"
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_user_app_itf.h"
@@ -245,13 +245,13 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         SOPC_LibSub_AttributeId* lAttrIds = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_AttributeId));
-        assert(NULL != lAttrIds);
+        SOPC_ASSERT(NULL != lAttrIds);
         for (int i = 0; i < options.node_ids_size; ++i)
         {
             lAttrIds[i] = SOPC_LibSub_AttributeId_Value;
         }
         SOPC_LibSub_DataId* lDataId = calloc((size_t)(options.node_ids_size), sizeof(SOPC_LibSub_DataId));
-        assert(NULL != lDataId);
+        SOPC_ASSERT(NULL != lDataId);
         status = SOPC_LibSub_AddToSubscription(con_id, (const char* const*) options.node_ids, lAttrIds,
                                                options.node_ids_size, lDataId);
         if (SOPC_STATUS_OK != status)
@@ -349,7 +349,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     case val:                                        \
         free(o->field);                              \
         o->field = calloc(strlen(optarg) + 1, 1);    \
-        assert(NULL != o->field);                    \
+        SOPC_ASSERT(NULL != o->field);               \
         strcpy(o->field, optarg);                    \
         break;
 
@@ -406,13 +406,13 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     if (NULL == o->endpoint_url)
     {
         o->endpoint_url = malloc(strlen(DEFAULT_ENDPOINT_URL) + 1);
-        assert(NULL != o->endpoint_url);
+        SOPC_ASSERT(NULL != o->endpoint_url);
         strcpy(o->endpoint_url, DEFAULT_ENDPOINT_URL);
     }
     if (NULL == o->policyId)
     {
         o->policyId = malloc(strlen(POLICY_ID) + 1);
-        assert(NULL != o->policyId);
+        SOPC_ASSERT(NULL != o->policyId);
         strcpy(o->policyId, POLICY_ID);
     }
     CONVERT_STR_OPT(publish_period, int64_t, PUBLISH_PERIOD_MS)
@@ -437,7 +437,7 @@ static bool parse_options(cmd_line_options_t* o, int argc, char* const* argv)
     for (int i = 0; i < o->node_ids_size; ++i)
     {
         o->node_ids[i] = malloc(strlen(argv[optind + i]) + 1);
-        assert(NULL != o->node_ids[i]);
+        SOPC_ASSERT(NULL != o->node_ids[i]);
         strcpy(o->node_ids[i], argv[optind + i]);
     }
 

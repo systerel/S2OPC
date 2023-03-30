@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_crypto_provider.h"
@@ -227,7 +227,7 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                             for (k = 0; k < lenThmb; ++k)
                             {
                                 nbCharThmb = printf("%02" SCNx8, pThmb[k]);
-                                assert(2 == nbCharThmb);
+                                SOPC_ASSERT(2 == nbCharThmb);
 
                                 if (k < lenThmb - 1)
                                 {

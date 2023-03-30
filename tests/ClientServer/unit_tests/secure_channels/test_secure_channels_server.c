@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -27,6 +26,7 @@
 #include "event_recorder.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_async_queue.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
@@ -245,10 +245,10 @@ int main(int argc, char* argv[])
 
         epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(&epConfig);
 
-        assert(epConfigIdx != 0);
+        SOPC_ASSERT(epConfigIdx != 0);
 
         status = SOPC_ToolkitServer_Configured();
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         SOPC_SecureChannels_EnqueueEvent(EP_OPEN, epConfigIdx, (uintptr_t) NULL, 0);
 
@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
             {
                 SOPC_EncodeableType* encType = NULL;
                 status = SOPC_MsgBodyType_Read((SOPC_Buffer*) serviceEvent->params, &encType);
-                assert(status == SOPC_STATUS_OK);
+                SOPC_ASSERT(status == SOPC_STATUS_OK);
                 SOPC_Buffer_Delete((SOPC_Buffer*) serviceEvent->params);
                 serviceEvent->params = (uintptr_t) NULL;
                 if (encType == &OpcUa_GetEndpointsRequest_EncodeableType)
@@ -303,15 +303,15 @@ int main(int argc, char* argv[])
                     OpcUa_ResponseHeader_Initialize(&rHeader);
 
                     SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH);
-                    assert(NULL != buffer);
+                    SOPC_ASSERT(NULL != buffer);
                     status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                     status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                     status =
                         SOPC_EncodeMsg_Type_Header_Body(buffer, &OpcUa_ServiceFault_EncodeableType,
                                                         &OpcUa_ResponseHeader_EncodeableType, (void*) &rHeader, NULL);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
                     SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (uintptr_t) buffer,
                                                      serviceEvent->auxParam); // request context

@@ -18,7 +18,6 @@
  */
 
 #include <arpa/inet.h>
-#include <assert.h>
 #include <errno.h>
 #include <ifaddrs.h>
 #include <inttypes.h>
@@ -35,6 +34,7 @@
 #include <sys/socket.h>
 
 #include "p_udp_sockets_custom.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 
 #ifndef SO_EE_ORIGIN_TXTIME
@@ -157,7 +157,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
     sockIpAddr.sin_family = AF_INET;
     sockIpAddr.sin_addr = mcastAddr;
     long int port = strtol(service, NULL, 10);
-    assert(port <= UINT16_MAX);
+    SOPC_ASSERT(port <= UINT16_MAX);
     sockIpAddr.sin_port = htons((uint16_t) port);
 
     // Describes the buffer information to be sent

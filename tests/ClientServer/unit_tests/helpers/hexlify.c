@@ -17,11 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "sopc_assert.h"
 
 #include "hexlify.h"
 
@@ -29,7 +30,7 @@
 // Returns n the number of translated chars (< 0 for errors)
 int hexlify(const unsigned char* src, char* dst, size_t n)
 {
-    assert(n <= INT32_MAX);
+    SOPC_ASSERT(n <= INT32_MAX);
     size_t i;
     char buffer[3];
     int res = 0;
@@ -40,7 +41,7 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
     for (i = 0; i < n; ++i)
     {
         res = sprintf(buffer, "%02" SCNx8, src[i]); // sprintf copies the last \0 too
-        assert(2 == res);
+        SOPC_ASSERT(2 == res);
         memcpy(dst + 2 * i, buffer, 2);
     }
 
@@ -51,7 +52,7 @@ int hexlify(const unsigned char* src, char* dst, size_t n)
 // Returns n the number of translated couples (< 0 for errors)
 int unhexlify(const char* src, unsigned char* dst, size_t n)
 {
-    assert(n <= INT32_MAX);
+    SOPC_ASSERT(n <= INT32_MAX);
     static unsigned int buf;
     size_t i;
 

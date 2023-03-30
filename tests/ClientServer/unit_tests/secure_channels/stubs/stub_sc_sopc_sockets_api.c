@@ -19,12 +19,12 @@
 
 #include "stub_sc_sopc_sockets_api.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "event_helpers.h"
 #include "hexlify.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -35,7 +35,7 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uin
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Event* scParams = SOPC_Calloc(1, sizeof(SOPC_Event));
-    assert(scParams != NULL && socketsInputEvents != NULL);
+    SOPC_ASSERT(scParams != NULL && socketsInputEvents != NULL);
     scParams->event = (int32_t) scEvent;
     scParams->eltId = id;
     scParams->params = params;
@@ -45,13 +45,13 @@ void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uin
 
     // avoid unused parameter compiler warning: status is not used if asserts are not compiled in
     SOPC_UNUSED_ARG(status);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Sockets_Initialize(void)
 {
     SOPC_ReturnStatus status = SOPC_AsyncQueue_Init(&socketsInputEvents, "StubsSC_SocketsEventQueue");
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 }
 
 void SOPC_Sockets_Clear(void)
@@ -91,7 +91,7 @@ SOPC_ReturnStatus check_expected_message_helper(const char* hexExpMsg,
 
     if (ignoreBytes != false)
     {
-        assert((uint32_t)(start + length) <= buffer->length);
+        SOPC_ASSERT((uint32_t)(start + length) <= buffer->length);
         // Set bytes to 0
         memset(buffer->data + start, 0, (size_t) length);
     }
@@ -150,7 +150,7 @@ SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
 
 SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
 {
-    assert(strlen(hexInputMsg) <= UINT32_MAX);
+    SOPC_ASSERT(strlen(hexInputMsg) <= UINT32_MAX);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) strlen(hexInputMsg) / 2);

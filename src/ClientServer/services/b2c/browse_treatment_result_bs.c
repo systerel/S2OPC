@@ -17,9 +17,8 @@
  * under the License.
  */
 
-#include <assert.h>
-
 #include "browse_treatment_result_bs.h"
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
@@ -50,7 +49,7 @@ void browse_treatment_result_bs__alloc_browse_result(const t_entier4 browse_trea
 
     if (browse_treatment_result_bs__p_maxResultRefs > 0)
     {
-        assert((uint64_t) browse_treatment_result_bs__p_maxResultRefs <= SIZE_MAX);
+        SOPC_ASSERT((uint64_t) browse_treatment_result_bs__p_maxResultRefs <= SIZE_MAX);
         references = SOPC_Calloc((size_t) browse_treatment_result_bs__p_maxResultRefs, sizeof(*references));
         if (NULL != references)
         {
@@ -109,8 +108,8 @@ void browse_treatment_result_bs__getall_browse_result_reference_at(
     constants__t_ExpandedNodeId_i* const browse_treatment_result_bs__p_TypeDefinition)
 {
     // Note browse_treatment_result_bs__p_refIndex : 1..nbMaxReferences to be translated in C array idx by adding (-1)
-    assert(browse_treatment_result_bs__p_refIndex > 0);
-    assert(browse_treatment_result_bs__p_refIndex <= nbReferences);
+    SOPC_ASSERT(browse_treatment_result_bs__p_refIndex > 0);
+    SOPC_ASSERT(browse_treatment_result_bs__p_refIndex <= nbReferences);
     OpcUa_ReferenceDescription* refDesc = &references[browse_treatment_result_bs__p_refIndex - 1];
 
     // Mandatory ReferenceTypeId
@@ -142,7 +141,7 @@ void browse_treatment_result_bs__getall_browse_result_reference_at(
     if (OpcUa_NodeClass_Unspecified != refDesc->NodeClass)
     {
         bool res = util_NodeClass__C_to_B(refDesc->NodeClass, browse_treatment_result_bs__p_NodeClass);
-        assert(res);
+        SOPC_ASSERT(res);
     }
     // Optional TypeDefinition
     if (0 == refDesc->TypeDefinition.NamespaceUri.Length && 0 == refDesc->TypeDefinition.ServerIndex &&
@@ -209,14 +208,14 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
     const constants__t_ExpandedNodeId_i browse_treatment_result_bs__p_TypeDefinition,
     t_bool* const browse_treatment_result_bs__p_alloc_failed)
 {
-    assert(NULL != references);
+    SOPC_ASSERT(NULL != references);
     /* Notes:
      * - browse_treatment_result_bs__p_refIndex : 1..nbMaxReferences to be translated in C array idx by adding (-1)
      * - index are set by the B model in the increasing order from 1 to <N>
      */
-    assert(browse_treatment_result_bs__p_refIndex > 0);
-    assert(browse_treatment_result_bs__p_refIndex - 1 == nbReferences);
-    assert(browse_treatment_result_bs__p_refIndex <= nbMaxReferences);
+    SOPC_ASSERT(browse_treatment_result_bs__p_refIndex > 0);
+    SOPC_ASSERT(browse_treatment_result_bs__p_refIndex - 1 == nbReferences);
+    SOPC_ASSERT(browse_treatment_result_bs__p_refIndex <= nbMaxReferences);
     OpcUa_ReferenceDescription* refDesc = &references[browse_treatment_result_bs__p_refIndex - 1];
     OpcUa_ReferenceDescription_Initialize(refDesc);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -232,7 +231,7 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
         // IsForward: mandatory (except if filtered by ResultMask => false value in this case)
         refDesc->IsForward = browse_treatment_result_bs__p_isForward;
         // TargetNodeId: cannot be indet (ensured by following assertion)
-        assert(constants_bs__c_ExpandedNodeId_indet != browse_treatment_result_bs__p_NodeId);
+        SOPC_ASSERT(constants_bs__c_ExpandedNodeId_indet != browse_treatment_result_bs__p_NodeId);
         status = SOPC_ExpandedNodeId_Copy(&refDesc->NodeId, browse_treatment_result_bs__p_NodeId);
     }
 
@@ -250,7 +249,7 @@ void browse_treatment_result_bs__setall_browse_result_reference_at(
     if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_NodeClass != constants__c_NodeClass_indet)
     {
         bool res = util_NodeClass__B_to_C(browse_treatment_result_bs__p_NodeClass, &refDesc->NodeClass);
-        assert(res);
+        SOPC_ASSERT(res);
     }
     // Optional TypeDefinition
     if (SOPC_STATUS_OK == status && browse_treatment_result_bs__p_TypeDefinition != constants__c_ExpandedNodeId_indet)

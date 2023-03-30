@@ -20,7 +20,6 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
@@ -30,6 +29,7 @@
 #include "message_out_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_assert.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -173,7 +173,7 @@ void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i mess
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
@@ -220,7 +220,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (NULL == chConfig)
@@ -267,7 +267,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -324,7 +324,7 @@ static void internal__message_out_bs__encode_msg(const constants__t_channel_conf
                 }
                 break;
             default:
-                assert(false);
+                SOPC_ASSERT(false);
             }
             break;
         // TODO: add a SOPC_STATUS_ENCODING_LIMIT for errors due to limits
@@ -403,7 +403,7 @@ void message_out_bs__server_write_msg_out_header_req_handle(
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -422,7 +422,7 @@ void message_out_bs__write_msg_out_header_session_token(
 
     SOPC_ReturnStatus status =
         SOPC_NodeId_Copy(&((OpcUa_RequestHeader*) message_out_bs__msg_header)->AuthenticationToken, authToken);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void message_out_bs__write_msg_resp_header_service_status(

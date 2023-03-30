@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <fcntl.h>
 #include <stdbool.h>
 #include <stdlib.h>

@@ -17,8 +17,7 @@
  * under the License.
  */
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -55,14 +54,14 @@ static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
     }
     else
     {
-        assert(false && "Cannot create variables with dimensions > 2");
+        SOPC_ASSERT(false && "Cannot create variables with dimensions > 2");
     }
     return result;
 }
 
 static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* variant)
 {
-    assert(NULL != variant);
+    SOPC_ASSERT(NULL != variant);
     switch (type)
     {
     case SOPC_Null_Id:
@@ -123,7 +122,7 @@ static void initializeSingleValue(SOPC_BuiltinId type, SOPC_VariantValue* varian
     case SOPC_DiagnosticInfo_Id:
     case SOPC_Variant_Id:
     default:
-        assert(false && "Cannot create default empty value for complex types");
+        SOPC_ASSERT(false && "Cannot create default empty value for complex types");
         break;
     }
 }
@@ -157,12 +156,12 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArra
     case SOPC_VariantArrayType_Matrix:
         var->Value.Matrix.Dimensions = 2;
         var->Value.Matrix.ArrayDimensions = SOPC_Calloc(2, sizeof(uint32_t));
-        assert(var->Value.Matrix.ArrayDimensions != NULL);
+        SOPC_ASSERT(var->Value.Matrix.ArrayDimensions != NULL);
         var->Value.Matrix.ArrayDimensions[0] = 0;
         var->Value.Matrix.ArrayDimensions[1] = 0;
         break;
     default:
-        assert(false && "Cannot create default empty value for Matrixes with Dimensions > 2");
+        SOPC_ASSERT(false && "Cannot create default empty value for Matrixes with Dimensions > 2");
         break;
     }
 
@@ -321,8 +320,8 @@ bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv)
 /* nodesToRead shall be freed by the callee, and returned DataValues will be freed by the caller */
 SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
 {
-    assert(NULL != nodesToRead && nbValues > 0);
-    assert(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
+    SOPC_ASSERT(NULL != nodesToRead && nbValues > 0);
+    SOPC_ASSERT(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
 
     SOPC_DataValue* dvs = SOPC_Calloc((size_t) nbValues, sizeof(SOPC_DataValue));
     if (NULL == dvs)
@@ -338,9 +337,9 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
         SOPC_DataValue* dv = &dvs[i];
 
         /* IndexRange and DataEncoding are not supported in this cache and should be empty */
-        assert(rv->IndexRange.Length <= 0 && "IndexRange not supported");
-        assert(rv->DataEncoding.NamespaceIndex == 0 && rv->DataEncoding.Name.Length <= 0 &&
-               "DataEncoding not supported");
+        SOPC_ASSERT(rv->IndexRange.Length <= 0 && "IndexRange not supported");
+        SOPC_ASSERT(rv->DataEncoding.NamespaceIndex == 0 && rv->DataEncoding.Name.Length <= 0 &&
+                    "DataEncoding not supported");
 
         /* As ownership is given to the caller, we have to copy all values */
         const SOPC_DataValue* src = SOPC_Dict_Get(g_cache, &rv->NodeId, NULL);
@@ -368,8 +367,8 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
 /* nodesToWrite shall be freed by the callee */
 bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 {
-    assert(NULL != nodesToWrite && nbValues > 0);
-    assert(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
+    SOPC_ASSERT(NULL != nodesToWrite && nbValues > 0);
+    SOPC_ASSERT(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
 
     bool ok = true;
     Cache_Lock();
@@ -381,7 +380,7 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
         SOPC_DataValue* dv = &wv->Value;
 
         /* IndexRange is not supported in this cache and should be empty */
-        assert(wv->IndexRange.Length <= 0 && "IndexRange not supported");
+        SOPC_ASSERT(wv->IndexRange.Length <= 0 && "IndexRange not supported");
 
         /* Divert the NodeId and the DataValue (avoid a complete copy) from the OpcUa_WriteValue and give them to our
          * dict */
@@ -415,13 +414,13 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 void Cache_Lock(void)
 {
     SOPC_ReturnStatus status = Mutex_Lock(&g_lock);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void Cache_Unlock(void)
 {
     SOPC_ReturnStatus status = Mutex_Unlock(&g_lock);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void Cache_Clear(void)

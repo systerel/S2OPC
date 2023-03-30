@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
@@ -40,7 +40,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     }
 
     char* buf_copy = SOPC_Calloc(1 + len, sizeof(char));
-    assert(buf_copy != NULL);
+    SOPC_ASSERT(buf_copy != NULL);
 
     memcpy(buf_copy, buf, len);
 

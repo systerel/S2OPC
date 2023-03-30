@@ -18,9 +18,9 @@
  */
 
 #include "sopc_dict.h"
-#include "sopc_mem_alloc.h"
 
-#include <assert.h>
+#include "sopc_assert.h"
+#include "sopc_mem_alloc.h"
 
 #define HASH_I(hash, i) (hash + (i / 2) + (i * i / 2))
 
@@ -109,14 +109,14 @@ static bool insert_item(SOPC_Dict* d, uint64_t hash, void* key, void* value, boo
         }
     }
 
-    assert(false && "Cannot find a free bucket?!");
+    SOPC_ASSERT(false && "Cannot find a free bucket?!");
     return false;
 }
 
 static bool dict_resize(SOPC_Dict* d, size_t size)
 {
     size_t sizemask = size - 1;
-    assert((size & sizemask) == 0); // Ensure we have a power of two
+    SOPC_ASSERT((size & sizemask) == 0); // Ensure we have a power of two
 
     SOPC_DictBucket* buckets = SOPC_Calloc(size, sizeof(SOPC_DictBucket));
 
@@ -242,7 +242,7 @@ void SOPC_Dict_Delete(SOPC_Dict* d)
 // The computed value is such that dictionary occupation stays under 50%.
 static size_t minimum_dict_size(size_t start_size, size_t n_items)
 {
-    assert((start_size & (start_size - 1)) == 0);
+    SOPC_ASSERT((start_size & (start_size - 1)) == 0);
 
     size_t size = start_size;
 
@@ -256,15 +256,15 @@ static size_t minimum_dict_size(size_t start_size, size_t n_items)
 
 bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     return dict_resize(d, minimum_dict_size(d->size, n_items));
 }
 
 void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key)
 {
-    assert(d != NULL);
-    assert(d->empty_key != tombstone_key);
-    assert(d->n_busy == 0);
+    SOPC_ASSERT(d != NULL);
+    SOPC_ASSERT(d->empty_key != tombstone_key);
+    SOPC_ASSERT(d->n_busy == 0);
     d->tombstone_key = tombstone_key;
 }
 
@@ -292,7 +292,7 @@ static bool maybe_resize(SOPC_Dict* d, uint8_t delta)
 
 bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     if (key == d->empty_key || key == d->tombstone_key)
     {
         return false;
@@ -345,7 +345,7 @@ static SOPC_DictBucket* get_internal(const SOPC_Dict* d, const void* key)
 
 void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     SOPC_DictBucket* bucket = get_internal(d, key);
 
     if (found != NULL)
@@ -358,7 +358,7 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found)
 
 void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     SOPC_DictBucket* bucket = get_internal(d, key);
 
     if (found != NULL)
@@ -371,10 +371,10 @@ void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found)
 
 void SOPC_Dict_Remove(SOPC_Dict* d, const void* key)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
 
     // Check that a tombstone key has been defined
-    assert(d->empty_key != d->tombstone_key);
+    SOPC_ASSERT(d->empty_key != d->tombstone_key);
 
     SOPC_DictBucket* bucket = get_internal(d, key);
 
@@ -395,25 +395,25 @@ void SOPC_Dict_Remove(SOPC_Dict* d, const void* key)
 
 SOPC_Dict_Free_Fct* SOPC_Dict_GetKeyFreeFunc(const SOPC_Dict* d)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     return d->key_free;
 }
 
 void SOPC_Dict_SetKeyFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     d->key_free = func;
 }
 
 SOPC_Dict_Free_Fct* SOPC_Dict_GetValueFreeFunc(const SOPC_Dict* d)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     return d->value_free;
 }
 
 void SOPC_Dict_SetValueFreeFunc(SOPC_Dict* d, SOPC_Dict_Free_Fct* func)
 {
-    assert(d != NULL);
+    SOPC_ASSERT(d != NULL);
     d->value_free = func;
 }
 
@@ -429,7 +429,7 @@ size_t SOPC_Dict_Capacity(const SOPC_Dict* d)
 
 void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, void* user_data)
 {
-    assert(NULL != func && NULL != d);
+    SOPC_ASSERT(NULL != func && NULL != d);
 
     for (size_t i = 0; i < d->size; ++i)
     {

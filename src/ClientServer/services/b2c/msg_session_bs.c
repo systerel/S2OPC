@@ -20,13 +20,13 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <inttypes.h>
 #include <math.h>
 #include <string.h>
 
 #include "msg_session_bs.h"
 
+#include "sopc_assert.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -58,7 +58,7 @@ void msg_session_bs__write_activate_msg_user(const constants__t_msg_i msg_sessio
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "msg_session_bs__write_activate_msg_user: userToken copy failed");
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -73,7 +73,7 @@ void msg_session_bs__write_create_session_req_msg_endpointUrl(
     {
         status = SOPC_String_CopyFromCString(&createSessionReq->EndpointUrl, chConfig->url);
     }
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void msg_session_bs__write_create_session_req_msg_serverUri(
@@ -85,7 +85,7 @@ void msg_session_bs__write_create_session_req_msg_serverUri(
     if (NULL != chConfig && NULL != chConfig->serverUri)
     {
         SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&createSessionReq->ServerUri, chConfig->serverUri);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }
 
@@ -102,7 +102,7 @@ void msg_session_bs__write_create_session_req_msg_sessionName(
 
     SOPC_ReturnStatus status =
         SOPC_String_AttachFromCstring(&createSessionReq->SessionName, sessionAppCtx->sessionName);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void msg_session_bs__write_create_session_req_msg_sessionTimeout(
@@ -142,7 +142,7 @@ void msg_session_bs__write_create_session_req_msg_crypto(
     /* Write the Certificate */
     SOPC_ByteString_Clear(&pReq->ClientCertificate);
 
-    assert(pSerialCertCli->length <= INT32_MAX);
+    SOPC_ASSERT(pSerialCertCli->length <= INT32_MAX);
     status =
         SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pSerialCertCli->data, (int32_t) pSerialCertCli->length);
     if (SOPC_STATUS_OK != status)
@@ -207,7 +207,7 @@ void msg_session_bs__write_create_session_msg_session_token(
     SOPC_ReturnStatus status;
     const SOPC_NodeId* nodeId = msg_session_bs__session_token;
     status = SOPC_NodeId_Copy(&createSessionResp->AuthenticationToken, nodeId);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     createSessionResp->SessionId.IdentifierType = SOPC_IdentifierType_Numeric;
     createSessionResp->SessionId.Data.Numeric = msg_session_bs__session;
     createSessionResp->SessionId.Data.Numeric += 100000;
@@ -278,7 +278,7 @@ void msg_session_bs__write_create_session_resp_cert(
     if (result)
     {
         SOPC_ByteString_Clear(&pResp->ServerCertificate);
-        assert(pCrtSrv->length <= INT32_MAX);
+        SOPC_ASSERT(pCrtSrv->length <= INT32_MAX);
         status = SOPC_ByteString_CopyFromBytes(&pResp->ServerCertificate, pCrtSrv->data, (int32_t) pCrtSrv->length);
         result = SOPC_STATUS_OK == status;
     }

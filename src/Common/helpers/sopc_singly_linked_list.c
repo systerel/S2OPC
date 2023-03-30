@@ -19,11 +19,11 @@
 
 #include "sopc_singly_linked_list.h"
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -59,8 +59,8 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax)
 
 void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
 {
-    assert(list != NULL);
-    assert(value != NULL);
+    SOPC_ASSERT(list != NULL);
+    SOPC_ASSERT(value != NULL);
 
     SOPC_SLinkedList_Elt* elt = NULL;
     void* result = NULL;
@@ -132,8 +132,8 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
                                     void* value,
                                     int8_t (*pCompFn)(void* left, void* right))
 {
-    assert(list != NULL);
-    assert(value != NULL);
+    SOPC_ASSERT(list != NULL);
+    SOPC_ASSERT(value != NULL);
 
     SOPC_SLinkedList_Elt* newElt = NULL;
     SOPC_SLinkedList_Elt* elt = NULL;
@@ -160,8 +160,8 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
 
     if (list->first == NULL)
     {
-        assert(list->last == NULL);
-        assert(list->length == 0);
+        SOPC_ASSERT(list->last == NULL);
+        SOPC_ASSERT(list->length == 0);
         list->first = newElt;
         list->last = newElt;
         list->length = list->length + 1;
@@ -205,7 +205,7 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
             else
             {
                 // Insert as last element
-                assert(list->last == elt);
+                SOPC_ASSERT(list->last == elt);
                 list->length = list->length + 1;
                 elt->next = newElt;
                 list->last = newElt;
@@ -218,7 +218,7 @@ void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
 
 void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
 
     void* result = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
@@ -250,16 +250,16 @@ static bool SOPC_InternalSLinkedList_IsEqualToEltToRemove(SOPC_SLinkedList_Elt* 
 
 static bool SOPC_InternalSLinkedList_IsEltIdEqualToEltToRemove(SOPC_SLinkedList_Elt* left, SOPC_SLinkedList_Elt* right)
 {
-    assert(left != NULL);
-    assert(right != NULL);
+    SOPC_ASSERT(left != NULL);
+    SOPC_ASSERT(right != NULL);
     return left->id == right->id;
 }
 
 static bool SOPC_InternalSLinkedList_IsEltValueEqualToEltToRemove(SOPC_SLinkedList_Elt* left,
                                                                   SOPC_SLinkedList_Elt* right)
 {
-    assert(left != NULL);
-    assert(right != NULL);
+    SOPC_ASSERT(left != NULL);
+    SOPC_ASSERT(right != NULL);
     return left->value == right->value;
 }
 
@@ -268,9 +268,9 @@ static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
                                             bool (*isElementFct)(SOPC_SLinkedList_Elt* left,
                                                                  SOPC_SLinkedList_Elt* right))
 {
-    assert(list != NULL);
-    assert(eltToRemove != NULL);
-    assert(isElementFct != NULL);
+    SOPC_ASSERT(list != NULL);
+    SOPC_ASSERT(eltToRemove != NULL);
+    SOPC_ASSERT(isElementFct != NULL);
 
     SOPC_SLinkedList_Elt* elt = NULL;
     SOPC_SLinkedList_Elt* nextElt = NULL;
@@ -320,7 +320,7 @@ static void* SOPC_SLinkedList_RemoveFromElt(SOPC_SLinkedList* list,
 
 void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
     if (list->last == NULL)
     {
         return NULL;
@@ -330,7 +330,7 @@ void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list)
 
 void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
     if (list->first == NULL)
     {
         return NULL;
@@ -340,7 +340,7 @@ void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list)
 
 void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
     if (list->last == NULL)
     {
         return NULL;
@@ -350,7 +350,7 @@ void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list)
 
 static SOPC_SLinkedList_Elt* SOPC_SLinkedList_InternalFind(SOPC_SLinkedList* list, uint32_t id)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
 
     SOPC_SLinkedList_Elt* elt = list->first;
 
@@ -375,8 +375,8 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id)
 
 void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val))
 {
-    assert(list != NULL);
-    assert(pFn != NULL);
+    SOPC_ASSERT(list != NULL);
+    SOPC_ASSERT(pFn != NULL);
 
     SOPC_SLinkedList_Elt* elt = NULL;
 
@@ -391,7 +391,7 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
 // Returns null => Not found, otherwise => elt pointer
 void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
 
     SOPC_SLinkedList_Elt eltToRemove = {id, NULL, NULL};
 
@@ -400,7 +400,7 @@ void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id)
 
 void* SOPC_SLinkedList_RemoveFromValuePtr(SOPC_SLinkedList* list, void* value)
 {
-    assert(list != NULL);
+    SOPC_ASSERT(list != NULL);
 
     SOPC_SLinkedList_Elt eltToRemove = {0, value, NULL};
 
@@ -443,13 +443,13 @@ void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val)
 
 SOPC_SLinkedListIterator SOPC_SLinkedList_GetIterator(SOPC_SLinkedList* list)
 {
-    assert(NULL != list);
+    SOPC_ASSERT(NULL != list);
     return list->first;
 }
 
 void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
 {
-    assert(it != NULL);
+    SOPC_ASSERT(it != NULL);
     SOPC_SLinkedList_Elt* elt = NULL;
     void* value = NULL;
     if (*it != NULL)
@@ -467,7 +467,7 @@ void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId)
 
 bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it)
 {
-    assert(it != NULL);
+    SOPC_ASSERT(it != NULL);
     SOPC_SLinkedList_Elt* elt = NULL;
     bool result = false;
     if (*it != NULL)
@@ -485,19 +485,19 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it)
 
 uint32_t SOPC_SLinkedList_GetLength(SOPC_SLinkedList* list)
 {
-    assert(NULL != list);
+    SOPC_ASSERT(NULL != list);
     return list->length;
 }
 
 uint32_t SOPC_SLinkedList_GetCapacity(SOPC_SLinkedList* list)
 {
-    assert(NULL != list);
+    SOPC_ASSERT(NULL != list);
     return list->maxLength;
 }
 
 bool SOPC_SLinkedList_SetCapacity(SOPC_SLinkedList* list, size_t sizeMax)
 {
-    assert(NULL != list);
+    SOPC_ASSERT(NULL != list);
     if (sizeMax > 0 && list->length > sizeMax)
     {
         return false;

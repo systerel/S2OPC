@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -281,7 +280,7 @@ static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
     {
         result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock);
     }
-    assert(SOPC_Atomic_Int_Get(&receptionThread.stopFlag) != 0);
+    SOPC_ASSERT(SOPC_Atomic_Int_Get(&receptionThread.stopFlag) != 0);
     return NULL;
 }
 
@@ -329,7 +328,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     SOPC_Socket_Close(&receptionThread.sigClientSock);
 
     status = SOPC_Thread_Join(receptionThread.thread);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     /* Close all sockets created to interrupt select */
     SOPC_Socket_Close(&receptionThread.sigServerConnectionSock);

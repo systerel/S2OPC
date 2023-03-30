@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -27,6 +26,8 @@
 #include <inttypes.h>
 
 #include <zephyr/kernel.h>
+
+#include "sopc_assert.h"
 
 #if CONFIG_NET_GPTP
 #include <zephyr/net/gptp.h>
@@ -116,7 +117,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
  * SOPC_TimeReference-related features are not resynchronized and remain on internal MONOTONIC clock.
  */
 
-#define GPTP_ASSERT(x) SOPC_ASSERT(x)
+#define GPTP_SOPC_ASSERT(x) SOPC_ASSERT(x)
 #define GPTP_CORRECT(x) ((x) *gLocalClockCorrFactor)
 #define CLOCK_CORRECTION_RANGE 0.1
 
@@ -146,7 +147,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
 static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
 
 #else // CONFIG_NET_GPTP
-#define GPTP_ASSERT(x)
+#define GPTP_SOPC_ASSERT(x)
 #define GPTP_CORRECT(x) (x)
 // No time correction if PTP is not available
 #define P_TIME_TimeReference_GetCorrected100ns P_TIME_TimeReference_GetInternal100ns
@@ -223,7 +224,7 @@ static uint64_t P_TIME_GetBuildDateTime(void)
     }
     else
     {
-        assert(false); /* Could not parse compilation date */
+        SOPC_ASSERT(false); /* Could not parse compilation date */
     }
 
     buildDate.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
@@ -405,7 +406,7 @@ void SOPC_Sleep(unsigned int milliseconds)
 {
     if (milliseconds > 0)
     {
-        GPTP_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
+        GPTP_SOPC_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
         k_sleep(K_MSEC(GPTP_CORRECT(milliseconds)));
     }
     else
@@ -418,7 +419,7 @@ void SOPC_Sleep(unsigned int milliseconds)
 /***************************************************/
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
 
     *t = P_TIME_TimeReference_GetInternal100ns();
     return true;
@@ -429,7 +430,7 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
 {
     SOPC_ASSERT(NULL != t);
     uint32_t increment_us = duration_us;
-    GPTP_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
+    GPTP_SOPC_ASSERT(fabs(1.0 - gLocalClockCorrFactor) <= CLOCK_CORRECTION_RANGE);
 
     if (offset_us >= 0)
     {
@@ -495,7 +496,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 /***************************************************/
 int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 {
-    assert(NULL != tRef);
+    SOPC_ASSERT(NULL != tRef);
     SOPC_RealTime t1;
 
     if (NULL == t)
@@ -513,7 +514,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 /***************************************************/
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
-    assert(NULL != date);
+    SOPC_ASSERT(NULL != date);
 
     SOPC_RealTime now = P_TIME_TimeReference_GetInternal100ns();
 

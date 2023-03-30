@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_uri.h"
 #include "sopc_macros.h"
 #include "sopc_pubsub_helpers.h"
@@ -55,7 +55,7 @@ int main(int argc, char* const argv[])
     /* Parse command line arguments ? */
     if (argc > 1)
     {
-        assert(argc == 2);
+        SOPC_ASSERT(argc == 2);
         size_t tmp, tmp2, tmp3;
         bool res = SOPC_Helper_URI_ParseUri_WithPrefix("opc.tcp://", argv[1], &tmp, &tmp2, &tmp3);
         if (!res)

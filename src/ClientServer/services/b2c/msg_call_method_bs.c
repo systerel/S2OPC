@@ -17,9 +17,8 @@
  * under the License.
  */
 
-#include <assert.h>
-
 #include "msg_call_method_bs.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
@@ -38,9 +37,9 @@ void msg_call_method_bs__INITIALISATION(void) {}
 
 static OpcUa_CallResponse* msg_call_method_bs__getCallResponse(const constants__t_msg_i msg_call_method_bs__p_res_msg)
 {
-    assert(NULL != msg_call_method_bs__p_res_msg);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_res_msg);
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg_call_method_bs__p_res_msg;
-    assert(encType == &OpcUa_CallResponse_EncodeableType);
+    SOPC_ASSERT(encType == &OpcUa_CallResponse_EncodeableType);
     return (OpcUa_CallResponse*) msg_call_method_bs__p_res_msg;
 }
 
@@ -50,18 +49,18 @@ static OpcUa_CallMethodResult* msg_call_method_bs__getCallResult(
 {
     OpcUa_CallResponse* response = msg_call_method_bs__getCallResponse(msg_call_method_bs__p_res_msg);
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= response->NoOfResults);
+    SOPC_ASSERT(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= response->NoOfResults);
 
     OpcUa_CallMethodResult* result = &response->Results[msg_call_method_bs__callMethod - 1];
-    assert(NULL != result);
+    SOPC_ASSERT(NULL != result);
     return result;
 }
 
 static OpcUa_CallRequest* msg_call_method_bs__getCallRequest(const constants__t_msg_i msg_call_method_bs__p_req_msg)
 {
-    assert(NULL != msg_call_method_bs__p_req_msg);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_req_msg);
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg_call_method_bs__p_req_msg;
-    assert(encType == &OpcUa_CallRequest_EncodeableType);
+    SOPC_ASSERT(encType == &OpcUa_CallRequest_EncodeableType);
     return (OpcUa_CallRequest*) msg_call_method_bs__p_req_msg;
 }
 
@@ -72,10 +71,10 @@ static OpcUa_CallMethodRequest* msg_call_method_bs__getCallMethod(
     OpcUa_CallRequest* request = msg_call_method_bs__getCallRequest(msg_call_method_bs__p_req_msg);
 
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= request->NoOfMethodsToCall);
+    SOPC_ASSERT(0 < msg_call_method_bs__callMethod && msg_call_method_bs__callMethod <= request->NoOfMethodsToCall);
 
     OpcUa_CallMethodRequest* method = &request->MethodsToCall[msg_call_method_bs__callMethod - 1];
-    assert(NULL != method);
+    SOPC_ASSERT(NULL != method);
     return method;
 }
 
@@ -85,13 +84,13 @@ void msg_call_method_bs__alloc_CallMethod_Res_InputArgumentResult(
     const t_entier4 msg_call_method_bs__nb,
     constants_statuscodes_bs__t_StatusCode_i* const msg_call_method_bs__statusCode)
 {
-    assert(NULL != msg_call_method_bs__statusCode);
+    SOPC_ASSERT(NULL != msg_call_method_bs__statusCode);
 
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
 
     /* ensured by B model */
-    assert(msg_call_method_bs__nb > 0);
+    SOPC_ASSERT(msg_call_method_bs__nb > 0);
 
     result->InputArgumentResults = SOPC_Calloc((size_t) msg_call_method_bs__nb, sizeof(SOPC_StatusCode));
 
@@ -110,8 +109,8 @@ void msg_call_method_bs__alloc_CallMethod_Result(
     const t_entier4 msg_call_method_bs__nb,
     constants_statuscodes_bs__t_StatusCode_i* const msg_call_method_bs__statusCode)
 {
-    assert(NULL != msg_call_method_bs__statusCode);
-    assert(msg_call_method_bs__nb > 0);
+    SOPC_ASSERT(NULL != msg_call_method_bs__statusCode);
+    SOPC_ASSERT(msg_call_method_bs__nb > 0);
 
     OpcUa_CallResponse* response = msg_call_method_bs__getCallResponse(msg_call_method_bs__p_res_msg);
 
@@ -150,12 +149,12 @@ void msg_call_method_bs__read_CallMethod_InputArguments(
     const t_entier4 msg_call_method_bs__p_index_arg,
     constants__t_Variant_i* const msg_call_method_bs__p_arg)
 {
-    assert(NULL != msg_call_method_bs__p_arg);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_arg);
 
     OpcUa_CallMethodRequest* method =
         msg_call_method_bs__getCallMethod(msg_call_method_bs__p_req_msg, msg_call_method_bs__p_callMethod);
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__p_index_arg && msg_call_method_bs__p_index_arg <= method->NoOfInputArguments);
+    SOPC_ASSERT(0 < msg_call_method_bs__p_index_arg && msg_call_method_bs__p_index_arg <= method->NoOfInputArguments);
 
     *msg_call_method_bs__p_arg = &method->InputArguments[msg_call_method_bs__p_index_arg - 1];
 }
@@ -164,7 +163,7 @@ void msg_call_method_bs__read_CallMethod_MethodId(const constants__t_msg_i msg_c
                                                   const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
                                                   constants__t_NodeId_i* const msg_call_method_bs__p_methodid)
 {
-    assert(NULL != msg_call_method_bs__p_methodid);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_methodid);
     OpcUa_CallMethodRequest* method =
         msg_call_method_bs__getCallMethod(msg_call_method_bs__p_req_msg, msg_call_method_bs__p_callMethod);
     *msg_call_method_bs__p_methodid = &method->MethodId;
@@ -175,7 +174,7 @@ void msg_call_method_bs__read_CallMethod_Nb_InputArguments(
     const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
     t_entier4* const msg_call_method_bs__p_nb)
 {
-    assert(NULL != msg_call_method_bs__p_nb);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_nb);
 
     OpcUa_CallMethodRequest* method =
         msg_call_method_bs__getCallMethod(msg_call_method_bs__p_req_msg, msg_call_method_bs__p_callMethod);
@@ -185,7 +184,7 @@ void msg_call_method_bs__read_CallMethod_Objectid(const constants__t_msg_i msg_c
                                                   const constants__t_CallMethod_i msg_call_method_bs__p_callMethod,
                                                   constants__t_NodeId_i* const msg_call_method_bs__p_objectid)
 {
-    assert(NULL != msg_call_method_bs__p_objectid);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_objectid);
     OpcUa_CallMethodRequest* method =
         msg_call_method_bs__getCallMethod(msg_call_method_bs__p_req_msg, msg_call_method_bs__p_callMethod);
     *msg_call_method_bs__p_objectid = &method->ObjectId;
@@ -213,8 +212,8 @@ void msg_call_method_bs__read_call_method_request(
 void msg_call_method_bs__read_nb_CallMethods(const constants__t_msg_i msg_call_method_bs__p_req_msg,
                                              t_entier4* const msg_call_method_bs__p_nb)
 {
-    assert(NULL != msg_call_method_bs__p_req_msg);
-    assert(NULL != msg_call_method_bs__p_nb);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_req_msg);
+    SOPC_ASSERT(NULL != msg_call_method_bs__p_nb);
     OpcUa_CallRequest* request = msg_call_method_bs__getCallRequest(msg_call_method_bs__p_req_msg);
     *msg_call_method_bs__p_nb = request->NoOfMethodsToCall;
 }
@@ -240,7 +239,7 @@ void msg_call_method_bs__write_CallMethod_Res_InputArgumentResult(
     OpcUa_CallMethodResult* result =
         msg_call_method_bs__getCallResult(msg_call_method_bs__p_res_msg, msg_call_method_bs__callMethod);
     /* ensured by B model */
-    assert(0 < msg_call_method_bs__index && msg_call_method_bs__index <= result->NoOfInputArgumentResults);
+    SOPC_ASSERT(0 < msg_call_method_bs__index && msg_call_method_bs__index <= result->NoOfInputArgumentResults);
     util_status_code__B_to_C(msg_call_method_bs__statusCode,
                              &result->InputArgumentResults[msg_call_method_bs__index - 1]);
 }

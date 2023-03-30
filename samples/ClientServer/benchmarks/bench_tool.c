@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <float.h>
 #include <inttypes.h>
@@ -27,16 +26,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <sopc_askpass.h>
-#include <sopc_common.h>
-#include <sopc_crypto_profiles.h>
-#include <sopc_mem_alloc.h>
-#include <sopc_mutexes.h>
-#include <sopc_pki_stack.h>
-#include <sopc_time.h>
-#include <sopc_toolkit_async_api.h>
-#include <sopc_toolkit_config.h>
-#include <sopc_user_app_itf.h>
+#include "sopc_askpass.h"
+#include "sopc_assert.h"
+#include "sopc_common.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
+#include "sopc_pki_stack.h"
+#include "sopc_time.h"
+#include "sopc_toolkit_async_api.h"
+#include "sopc_toolkit_config.h"
+#include "sopc_user_app_itf.h"
 
 static const char* DEFAULT_SERVER_URL = "opc.tcp://localhost:4841";
 
@@ -88,18 +88,18 @@ struct app_ctx_t
 static void make_nodeid(char* buf, size_t len, size_t idx)
 {
     int n = snprintf(buf, len, "ns=1;s=Objects.%" PRIu64, (uint64_t) idx);
-    assert(n > 0 && (((size_t) n) < (len - 1)));
+    SOPC_ASSERT(n > 0 && (((size_t) n) < (len - 1)));
 }
 
 static void* bench_read_requests(size_t request_size, size_t bench_offset, size_t addspace_size)
 {
-    assert(request_size <= INT32_MAX);
+    SOPC_ASSERT(request_size <= INT32_MAX);
 
     OpcUa_ReadRequest* req = SOPC_Calloc(1, sizeof(OpcUa_ReadRequest));
-    assert(req != NULL);
+    SOPC_ASSERT(req != NULL);
 
     OpcUa_ReadValueId* req_contents = SOPC_Calloc(request_size, sizeof(OpcUa_ReadValueId));
-    assert(req_contents != NULL);
+    SOPC_ASSERT(req_contents != NULL);
 
     OpcUa_ReadRequest_Initialize(req);
 
@@ -117,10 +117,10 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
         r->AttributeId = 1; // NodeId
         make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
         SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
-        assert(id != NULL);
+        SOPC_ASSERT(id != NULL);
 
         SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
         SOPC_Free(id);
@@ -131,13 +131,13 @@ static void* bench_read_requests(size_t request_size, size_t bench_offset, size_
 
 static void* bench_write_requests(size_t request_size, size_t bench_offset, size_t addspace_size)
 {
-    assert(request_size <= INT32_MAX);
+    SOPC_ASSERT(request_size <= INT32_MAX);
 
     OpcUa_WriteRequest* req = SOPC_Calloc(1, sizeof(OpcUa_WriteRequest));
-    assert(req != NULL);
+    SOPC_ASSERT(req != NULL);
 
     OpcUa_WriteValue* req_contents = SOPC_Calloc(request_size, sizeof(OpcUa_WriteValue));
-    assert(req_contents != NULL);
+    SOPC_ASSERT(req_contents != NULL);
 
     OpcUa_WriteRequest_Initialize(req);
 
@@ -153,10 +153,10 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
 
         make_nodeid(buf, sizeof(buf) / sizeof(char), (i + bench_offset) % addspace_size);
         SOPC_NodeId* id = SOPC_NodeId_FromCString(buf, (int32_t) strlen(buf));
-        assert(id != NULL);
+        SOPC_ASSERT(id != NULL);
 
         SOPC_ReturnStatus status = SOPC_NodeId_Copy(&r->NodeId, id);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
 
         SOPC_NodeId_Clear(id);
         SOPC_Free(id);
@@ -173,7 +173,7 @@ static void* bench_write_requests(size_t request_size, size_t bench_offset, size
 static void bench_cycle_start(struct app_ctx_t* ctx)
 {
     void* req = ctx->bench_func(ctx->request_size, ctx->address_space_offset, ctx->address_space_size);
-    assert(req != NULL);
+    SOPC_ASSERT(req != NULL);
 
     ctx->address_space_offset = (ctx->address_space_offset + ctx->request_size) % ctx->address_space_size;
     ctx->cycle_start_ts = SOPC_Time_GetCurrentTimeUTC();
@@ -192,13 +192,13 @@ static double mean(uint64_t* data, uint64_t n)
 
     for (uint64_t i = 0; i < n; ++i)
     {
-        assert(data[i] <= DBL_MAX);
+        SOPC_ASSERT(data[i] <= DBL_MAX);
         double x = acc + ((double) data[i]);
-        assert(x >= acc); // In case we overflow
+        SOPC_ASSERT(x >= acc); // In case we overflow
         acc = x;
     }
 
-    assert(n <= DBL_MAX);
+    SOPC_ASSERT(n <= DBL_MAX);
     acc /= ((double) n);
 
     return acc;
@@ -215,14 +215,14 @@ static double stddev(uint64_t* data, uint64_t n, double mean)
 
     for (uint64_t i = 0; i < n; ++i)
     {
-        assert(data[i] <= DBL_MAX);
+        SOPC_ASSERT(data[i] <= DBL_MAX);
         double d = (double) data[i];
         double x = var + (d - mean) * (d - mean);
-        assert(x >= var);
+        SOPC_ASSERT(x >= var);
         var = x;
     }
 
-    assert((n - 1) <= DBL_MAX);
+    SOPC_ASSERT((n - 1) <= DBL_MAX);
     var /= ((double) (n - 1));
 
     return sqrt(var);
@@ -246,7 +246,7 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
     }
 
     SOPC_DateTime now = SOPC_Time_GetCurrentTimeUTC();
-    assert(now >= ctx->cycle_start_ts);
+    SOPC_ASSERT(now >= ctx->cycle_start_ts);
 
     // OPC UA DateTime is 100 nanoseconds
     ctx->measurements[ctx->n_measurements] = 100 * ((uint64_t)(now - ctx->cycle_start_ts));
@@ -257,7 +257,7 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
     double sd = stddev(ctx->measurements, ctx->n_measurements, m);
 
     // Standard error of the mean
-    assert(ctx->n_measurements <= DBL_MAX);
+    SOPC_ASSERT(ctx->n_measurements <= DBL_MAX);
     double sem = sd / sqrt((double) ctx->n_measurements);
 
     double critical_value;
@@ -332,7 +332,7 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
         }
         else
         {
-            assert(ctx->status != BENCH_RUNNING);
+            SOPC_ASSERT(ctx->status != BENCH_RUNNING);
             shutdown = true;
         }
 
@@ -358,9 +358,9 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
 
     if (shutdown)
     {
-        assert(ctx->status != BENCH_RUNNING);
+        SOPC_ASSERT(ctx->status != BENCH_RUNNING);
         status = Condition_SignalAll(&ctx->run_cond);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }
 
@@ -616,11 +616,11 @@ int main(int argc, char** argv)
     memset(&ctx, 0, sizeof(struct app_ctx_t));
 
     SOPC_ReturnStatus mutStatus = Mutex_Initialization(&ctx.run_mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     mutStatus = Mutex_Lock(&ctx.run_mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     mutStatus = Condition_Init(&ctx.run_cond);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     ctx.address_space_size = (size_t) as_size;
     ctx.request_size = (size_t) request_size;
@@ -632,10 +632,10 @@ int main(int argc, char** argv)
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./bench_tool_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_Toolkit_Initialize(event_handler);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     SOPC_SecureChannel_Config scConfig;
     memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
@@ -673,14 +673,14 @@ int main(int argc, char** argv)
     }
 
     uint32_t configIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-    assert(configIdx != 0);
+    SOPC_ASSERT(configIdx != 0);
 
     printf("Connecting to the server...\n");
     SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
     SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) &ctx, "anonymous");
 
     mutStatus = Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_Toolkit_Clear();
     SOPC_PKIProvider_Free(&pki);

@@ -19,9 +19,10 @@
 
 #include "pubsub_config_static.h"
 
-#include <assert.h>
 #include <stdbool.h>
 #include <string.h>
+
+#include "sopc_assert.h"
 
 #include "samples_platform_dep.h"
 #include "test_config.h"
@@ -89,9 +90,9 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
     SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
-    assert(NULL != publishedVar);
+    SOPC_ASSERT(NULL != publishedVar);
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId, (int32_t) strlen(strNodeId));
-    assert(NULL != nodeId);
+    SOPC_ASSERT(NULL != nodeId);
     SOPC_PublishedVariable_Set_NodeId(publishedVar, nodeId);
     SOPC_PublishedVariable_Set_AttributeId(publishedVar,
                                            13); // Value => AttributeId=13
@@ -106,7 +107,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
                                                              SOPC_SecurityMode_Type securityMode)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
-    assert(readerGroup != NULL);
+    SOPC_ASSERT(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, version);
     // SOPC_ReaderGroup_Set_GroupId(readerGroup, groupId); // No group defined in this demo
@@ -115,7 +116,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     if (allocSuccess)
     {
         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, 0);
-        assert(reader != NULL);
+        SOPC_ASSERT(reader != NULL);
         SOPC_DataSetReader_Set_DataSetWriterId(reader, messageId);
         SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2.0 * (double) interval);
         return reader;
@@ -134,7 +135,7 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
                                                SOPC_BuiltinId builtinType)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_DataSetReader_Get_FieldMetaData_At(reader, index);
-    assert(fieldmetadata != NULL);
+    SOPC_ASSERT(fieldmetadata != NULL);
 
     /* fieldmetadata: type the field */
     SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
@@ -142,7 +143,7 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
 
     /* FieldTarget: link to the source/target data */
     SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldmetadata);
-    assert(fieldTarget != NULL);
+    SOPC_ASSERT(fieldTarget != NULL);
     SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(strNodeId, (int32_t) strlen(strNodeId));
     SOPC_FieldTarget_Set_NodeId(fieldTarget, nodeId);
     SOPC_FieldTarget_Set_AttributeId(fieldTarget, 13); // Value => AttributeId=13

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <math.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
@@ -32,7 +32,7 @@
 void SOPC_EncodeDecode_Int16(int16_t* intv)
 {
     uint16_t* twoBytes = (uint16_t*) intv;
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *twoBytes = SWAP_2_BYTES(*twoBytes);
@@ -41,7 +41,7 @@ void SOPC_EncodeDecode_Int16(int16_t* intv)
 
 void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 {
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_2_BYTES(*uintv);
@@ -50,7 +50,7 @@ void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
 
 void SOPC_EncodeDecode_Int32(int32_t* intv)
 {
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) intv;
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
@@ -60,7 +60,7 @@ void SOPC_EncodeDecode_Int32(int32_t* intv)
 
 void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 {
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_4_BYTES(*uintv);
@@ -69,7 +69,7 @@ void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
 
 void SOPC_EncodeDecode_Int64(int64_t* intv)
 {
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) intv;
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
@@ -79,7 +79,7 @@ void SOPC_EncodeDecode_Int64(int64_t* intv)
 
 void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 {
-    assert(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
     if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
     {
         *uintv = SWAP_8_BYTES(*uintv);
@@ -88,7 +88,7 @@ void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
 
 void SOPC_EncodeDecode_Float(float* floatv)
 {
-    assert(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
     uint32_t* fourBytes = (uint32_t*) floatv;
 
     switch (SOPC_Helper_Endianness_GetFloat())
@@ -105,7 +105,7 @@ void SOPC_EncodeDecode_Float(float* floatv)
 
 void SOPC_EncodeDecode_Double(double* doublev)
 {
-    assert(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
+    SOPC_ASSERT(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
     uint64_t* eightBytes = (uint64_t*) doublev;
 
     switch (SOPC_Helper_Endianness_GetFloat())
@@ -1213,7 +1213,7 @@ static SOPC_ReturnStatus Internal_NodeId_Write(SOPC_Buffer* buf,
                                                const SOPC_NodeId* nodeId,
                                                uint32_t nestedStructLevel)
 {
-    assert(NULL != nodeId);
+    SOPC_ASSERT(NULL != nodeId);
     SOPC_NodeId_DataEncoding encodingType = 0x0F & encodingByte; // Eliminate flags
 
     SOPC_Byte byte = 0;
@@ -1228,15 +1228,15 @@ static SOPC_ReturnStatus Internal_NodeId_Write(SOPC_Buffer* buf,
             status = SOPC_STATUS_INVALID_PARAMETERS;
             break;
         case SOPC_NodeIdEncoding_TwoBytes:
-            assert(OPCUA_NAMESPACE_INDEX == nodeId->Namespace);
-            assert(nodeId->Data.Numeric <= UINT8_MAX);
+            SOPC_ASSERT(OPCUA_NAMESPACE_INDEX == nodeId->Namespace);
+            SOPC_ASSERT(nodeId->Data.Numeric <= UINT8_MAX);
             byte = (SOPC_Byte) nodeId->Data.Numeric;
 
             status = SOPC_Byte_Write(&byte, buf, nestedStructLevel);
             break;
         case SOPC_NodeIdEncoding_FourBytes:
-            assert(nodeId->Namespace <= UINT8_MAX);
-            assert(nodeId->Data.Numeric <= UINT16_MAX);
+            SOPC_ASSERT(nodeId->Namespace <= UINT8_MAX);
+            SOPC_ASSERT(nodeId->Data.Numeric <= UINT16_MAX);
             twoBytes = (uint16_t) nodeId->Data.Numeric;
             byte = (SOPC_Byte) nodeId->Namespace;
 
@@ -1307,7 +1307,7 @@ static SOPC_ReturnStatus Internal_NodeId_Read(SOPC_Buffer* buf,
                                               SOPC_Byte* encodingByte,
                                               uint32_t nestedStructLevel)
 {
-    assert(NULL != nodeId);
+    SOPC_ASSERT(NULL != nodeId);
     SOPC_NodeId_DataEncoding encodingType = 0x0F;
 
     SOPC_Byte byte = 0;
@@ -1524,7 +1524,7 @@ SOPC_ReturnStatus SOPC_StatusCode_Read(SOPC_StatusCode* status, SOPC_Buffer* buf
 
 static SOPC_Byte GetDiagInfoEncodingByte(const SOPC_DiagnosticInfo* diagInfo)
 {
-    assert(NULL != diagInfo);
+    SOPC_ASSERT(NULL != diagInfo);
     SOPC_Byte encodingByte = 0x00;
     if (diagInfo->SymbolicId > -1)
     {
@@ -1786,7 +1786,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_Read(SOPC_QualifiedName* qname, SOPC_Buffer
 
 static SOPC_Byte GetLocalizedTextEncodingByte(const SOPC_LocalizedText* ltext)
 {
-    assert(NULL != ltext);
+    SOPC_ASSERT(NULL != ltext);
     SOPC_Byte encodingByte = 0;
     if (ltext->defaultLocale.Length > 0)
     {
@@ -2201,7 +2201,7 @@ static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
 
 static SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant)
 {
-    assert(NULL != variant);
+    SOPC_ASSERT(NULL != variant);
     SOPC_Byte encodingByte = (SOPC_Byte) variant->BuiltInTypeId;
     if (variant->ArrayType == SOPC_VariantArrayType_Matrix)
     {
@@ -3114,7 +3114,7 @@ SOPC_ReturnStatus SOPC_Variant_Read(SOPC_Variant* variant, SOPC_Buffer* buf, uin
 
 static SOPC_Byte GetDataValueEncodingMask(const SOPC_DataValue* dataValue)
 {
-    assert(NULL != dataValue);
+    SOPC_ASSERT(NULL != dataValue);
     SOPC_Byte mask = 0;
     if (dataValue->Value.BuiltInTypeId != SOPC_Null_Id && dataValue->Value.BuiltInTypeId <= SOPC_BUILTINID_MAX)
     {

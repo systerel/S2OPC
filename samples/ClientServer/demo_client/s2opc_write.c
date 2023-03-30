@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
 #include "sopc_helper_uri.h"
@@ -324,7 +324,7 @@ static bool ParseValue(const char* val)
         }
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     g_dv.SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();

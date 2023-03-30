@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
 #include "libs2opc_common_config.h"
@@ -25,6 +24,7 @@
 #include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_internal.h"
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
@@ -35,7 +35,7 @@
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.namespaces)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -58,7 +58,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, con
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.localeIds)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -132,7 +132,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
                                                                     OpcUa_ApplicationType applicationType)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || pConfig->serverConfig.serverDescription.ApplicationUri.Length > 0 ||
         pConfig->serverConfig.serverDescription.ProductUri.Length > 0 ||
         pConfig->serverConfig.serverDescription.ApplicationName.defaultText.Length > 0)
@@ -175,7 +175,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
     }
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
 
     return SOPC_Internal_AddApplicationNameLocale(&pConfig->serverConfig.serverDescription,
                                                   pConfig->serverConfig.localeIds, additionalAppName,
@@ -185,7 +185,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.pki)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -203,7 +203,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
                                                                  bool encrypted)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
         NULL != pConfig->serverConfig.serverKey)
     {
@@ -279,7 +279,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
                                                                   const unsigned char* serverPrivateKey)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
         NULL != pConfig->serverConfig.serverKey)
     {
@@ -357,7 +357,7 @@ SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bo
     }
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
 
     newEp->hasDiscoveryEndpoint = hasDiscovery;
     newEp->serverConfigPtr = &pConfig->serverConfig;
@@ -397,7 +397,7 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
         return NULL;
     }
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&sp->securityPolicy, sUri);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     destEndpoint->nbSecuConfigs++;
     return sp;
 }

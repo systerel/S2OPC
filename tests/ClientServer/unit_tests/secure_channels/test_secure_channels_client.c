@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -25,6 +24,7 @@
 
 #include "event_helpers.h"
 #include "event_recorder.h"
+#include "sopc_assert.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
         scConfig.url = sEndpointUrl;
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-        assert(scConfigIdx != 0);
+        SOPC_ASSERT(scConfigIdx != 0);
 
         SOPC_SecureChannels_EnqueueEvent(SC_CONNECT, scConfigIdx, (uintptr_t) NULL, 0);
         printf(">>Stub_Client: Establishing connection to server...\n");
@@ -353,15 +353,15 @@ int main(int argc, char* argv[])
         cRequest.ProfileUris = NULL;
 
         SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_DEFAULT_RECEIVE_MAX_MESSAGE_LENGTH);
-        assert(NULL != buffer);
+        SOPC_ASSERT(NULL != buffer);
         status = SOPC_Buffer_SetDataLength(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         status = SOPC_Buffer_SetPosition(buffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         status =
             SOPC_EncodeMsg_Type_Header_Body(buffer, &OpcUa_GetEndpointsRequest_EncodeableType,
                                             &OpcUa_RequestHeader_EncodeableType, (void*) &rHeader, (void*) &cRequest);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
 
         SOPC_SecureChannels_EnqueueEvent(SC_SERVICE_SND_MSG, scConnectionId, (uintptr_t) buffer, 0);
 

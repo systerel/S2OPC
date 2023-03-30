@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sub_sockets_mgr.h"
@@ -46,19 +46,19 @@ static void init_mcast_addrs(void)
 {
     printf("config:");
     SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
-    assert(localAddr != NULL);
+    SOPC_ASSERT(localAddr != NULL);
     char* addr = SOPC_Calloc(1, sizeof(MCAST_ADDR));
     for (uint16_t i = 0; i < NB_ADDRS; i++)
     {
         printf("%" PRIx16 "\n", i);
         int res = snprintf(addr, sizeof(MCAST_ADDR), "232.1.2.%03" PRIu16, i + 100);
-        assert(sizeof(MCAST_ADDR) - 1 == res);
+        SOPC_ASSERT(sizeof(MCAST_ADDR) - 1 == res);
         addressArr[i] = SOPC_UDP_SocketAddress_Create(false, addr, MCAST_PORT);
-        assert(NULL != addressArr[i]);
+        SOPC_ASSERT(NULL != addressArr[i]);
         SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addressArr[i], NULL, true, true, &socketArr[i]);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         status = SOPC_UDP_Socket_AddMembership(socketArr[i], NULL, addressArr[i], localAddr);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         sockIdxArr[i] = i;
     }
     SOPC_Free(addr);
@@ -101,7 +101,7 @@ static void readyToReceive(void* sockContext, Socket sock)
     }
     else if (SOPC_STATUS_OK == status && buffer->length == 1)
     {
-        assert(buffer->data[0] == 0);
+        SOPC_ASSERT(buffer->data[0] == 0);
         printf("Received 'empty' data, used to check that subscriber is running !\n");
     }
     else

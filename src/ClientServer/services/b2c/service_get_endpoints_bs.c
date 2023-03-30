@@ -26,9 +26,9 @@
 #include "b2c.h"
 #include "util_discovery_services.h"
 
+#include "sopc_assert.h"
 #include "sopc_types.h"
 
-#include <assert.h>
 #include <stdbool.h>
 
 /*------------------------

@@ -20,7 +20,6 @@
 #ifndef UTIL_B2C_H_
 #define UTIL_B2C_H_
 
-#include <assert.h>
 #include <stdbool.h>
 
 #include "b2c.h"
@@ -29,6 +28,7 @@
 
 #include "address_space_impl.h"
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_types.h"
 #include "sopc_user_manager.h"

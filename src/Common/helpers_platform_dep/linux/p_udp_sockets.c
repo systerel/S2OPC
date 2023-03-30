@@ -17,12 +17,13 @@
  * under the License.
  */
 
-#include "sopc_common_constants.h"
-#include "sopc_macros.h"
 #include "sopc_udp_sockets.h"
 
+#include "sopc_assert.h"
+#include "sopc_common_constants.h"
+#include "sopc_macros.h"
+
 #include <arpa/inet.h>
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
@@ -104,11 +105,11 @@ static struct ip_mreqn SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo*
                                                   const SOPC_Socket_AddressInfo* localAddr,
                                                   unsigned int if_index)
 {
-    assert(multiCastAddr != NULL);
+    SOPC_ASSERT(multiCastAddr != NULL);
     struct ip_mreqn membership;
 
     membership.imr_multiaddr.s_addr = ((struct sockaddr_in*) get_ai_addr(multiCastAddr))->sin_addr.s_addr;
-    assert(if_index > 0);
+    SOPC_ASSERT(if_index > 0);
     membership.imr_ifindex = (int) if_index;
     if (NULL == localAddr)
     {
@@ -126,8 +127,8 @@ static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInf
                                                     unsigned int if_index)
 {
     SOPC_UNUSED_ARG(localAddr);
-    assert(if_index > 0);
-    assert(multiCastAddr != NULL);
+    SOPC_ASSERT(if_index > 0);
+    SOPC_ASSERT(multiCastAddr != NULL);
     struct ipv6_mreq membership;
 
     membership.ipv6mr_multiaddr = ((struct sockaddr_in6*) get_ai_addr(multiCastAddr))->sin6_addr;
@@ -156,7 +157,7 @@ static bool setMembershipOption(Socket sock,
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
     return (0 == setOptStatus);
 }

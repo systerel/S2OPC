@@ -20,9 +20,9 @@
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
 
-#include <assert.h>
 #include <stdbool.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_chunks_mgr.h"
 #include "sopc_macros.h"
@@ -85,7 +85,7 @@ void SOPC_SecureChannels_OnInternalEvent(SOPC_EventHandler* handler,
         SOPC_ChunksMgr_Dispatcher(internalEvent, eltId, params, auxParam);
         break;
     default:
-        assert(false && "Unknown internal event.");
+        SOPC_ASSERT(false && "Unknown internal event.");
         break;
     }
 }
@@ -118,7 +118,7 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
         SOPC_ChunksMgr_OnSocketEvent(sockEvent, eltId, params, auxParam);
         break;
     default:
-        assert(false && "Unknown socket event.");
+        SOPC_ASSERT(false && "Unknown socket event.");
     }
 }
 
@@ -145,7 +145,7 @@ void SOPC_SecureChannels_OnTimerEvent(SOPC_EventHandler* handler,
         SOPC_SecureListenerStateMgr_OnTimerEvent(timerEvent, id, params, auxParam);
         break;
     default:
-        assert(false && "Unknown timer event.");
+        SOPC_ASSERT(false && "Unknown timer event.");
     }
 }
 
@@ -179,7 +179,7 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
     default:
-        assert(false && "Unknown input event.");
+        SOPC_ASSERT(false && "Unknown input event.");
     }
 }
 
@@ -188,7 +188,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
                                                    uintptr_t params,
                                                    uintptr_t auxParam)
 {
-    assert(secureChannelsInputEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsInputEventHandler != NULL);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     switch (scEvent)
@@ -206,7 +206,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
         status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:
-        assert(false && "Unknown event.");
+        SOPC_ASSERT(false && "Unknown event.");
     }
     return status;
 }
@@ -216,7 +216,7 @@ void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent 
                                               uintptr_t params,
                                               uintptr_t auxParam)
 {
-    assert(secureChannelsInternalEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsInternalEventHandler != NULL);
     SOPC_EventHandler_Post(secureChannelsInternalEventHandler, (int32_t) event, id, params, auxParam);
 }
 
@@ -225,7 +225,7 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_Internal
                                                     uintptr_t params,
                                                     uintptr_t auxParam)
 {
-    assert(secureChannelsInternalEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsInternalEventHandler != NULL);
     SOPC_EventHandler_PostAsNext(secureChannelsInternalEventHandler, (int32_t) event, id, params, auxParam);
 }
 

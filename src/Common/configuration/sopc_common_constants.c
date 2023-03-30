@@ -19,14 +19,13 @@
 
 #include "sopc_common_constants.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
-
-#include <assert.h>
 
 bool SOPC_Internal_Common_Constants_RuntimeCheck(void)
 {
     bool res = (sizeof(uintptr_t) == sizeof(void*));
-    assert(res && "uintptr_t has not same size as void* which is expected for other language bindings");
+    SOPC_ASSERT(res && "uintptr_t has not same size as void* which is expected for other language bindings");
     return res;
 }
 
@@ -86,12 +85,12 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config)
         // Enforce definition of max message size
         if (0 == config.send_max_msg_size)
         {
-            assert(0 != config.send_max_nb_chunks);
+            SOPC_ASSERT(0 != config.send_max_nb_chunks);
             config.send_max_msg_size = config.send_max_nb_chunks * config.buffer_size;
         }
         if (0 == config.receive_max_msg_size)
         {
-            assert(0 != config.receive_max_msg_size);
+            SOPC_ASSERT(0 != config.receive_max_msg_size);
             config.receive_max_msg_size = config.receive_max_nb_chunks * config.buffer_size;
         }
 

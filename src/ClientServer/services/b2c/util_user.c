@@ -29,7 +29,7 @@
 constants__t_user_token_type_i util_get_user_token_type_from_token(
     const constants__t_user_token_i user_authentication_bs__p_user_token)
 {
-    assert(NULL != user_authentication_bs__p_user_token);
+    SOPC_ASSERT(NULL != user_authentication_bs__p_user_token);
     SOPC_EncodeableType* tokenType = user_authentication_bs__p_user_token->Body.Object.ObjType;
     if (&OpcUa_AnonymousIdentityToken_EncodeableType == tokenType)
     {
@@ -70,7 +70,7 @@ static bool checkEncryptionAlgorithm(constants__t_SecurityPolicy secpol, SOPC_St
         return 0 == strcmp("http://opcfoundation.org/UA/security/rsa-oaep-sha2-256",
                            SOPC_String_GetRawCString(encryptionAlgo));
     default:
-        assert(false && "Invalid security policy");
+        SOPC_ASSERT(false && "Invalid security policy");
         return false;
     }
 }
@@ -91,7 +91,7 @@ const char* util_getEncryptionAlgorithm(constants__t_SecurityPolicy secpol)
     case constants__e_secpol_Aes256Sha256RsaPss:
         return "http://opcfoundation.org/UA/security/rsa-oaep-sha2-256";
     default:
-        assert(false && "Invalid security policy");
+        SOPC_ASSERT(false && "Invalid security policy");
         return NULL;
     }
 }
@@ -104,7 +104,7 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
                                              constants__t_SecurityPolicy* secpol)
 {
     SOPC_String* tokenPolicyId = NULL;
-    assert(secpol != NULL);
+    SOPC_ASSERT(secpol != NULL);
     SOPC_String* encryptionAlgo = NULL;
     bool bres = false;
 
@@ -147,7 +147,7 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
         {
             return false;
         }
-        assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->PolicyId;
         // Check Encryption Algo / Security policy
         encryptionAlgo = &((OpcUa_UserNameIdentityToken*) user_token->Body.Object.Value)->EncryptionAlgorithm;
@@ -165,7 +165,7 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
         {
             return false;
         }
-        assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_X509IdentityToken*) user_token->Body.Object.Value)->PolicyId;
         break;
     case OpcUa_UserTokenType_IssuedToken:
@@ -173,7 +173,7 @@ bool util_check_user_token_policy_compliance(const SOPC_SecureChannel_Config* sc
         {
             return false;
         }
-        assert(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == user_token->Encoding);
         tokenPolicyId = &((OpcUa_IssuedIdentityToken*) user_token->Body.Object.Value)->PolicyId;
         // Check Encryption Algo / Security policy
         encryptionAlgo = &((OpcUa_IssuedIdentityToken*) user_token->Body.Object.Value)->EncryptionAlgorithm;

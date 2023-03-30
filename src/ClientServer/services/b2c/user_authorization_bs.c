@@ -17,12 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
-
-#include "constants_bs.h"
 #include "user_authorization_bs.h"
+#include "constants_bs.h"
 #include "util_b2c.h"
 
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_user_manager.h"

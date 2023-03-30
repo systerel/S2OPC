@@ -19,15 +19,14 @@
 
 #include "continuation_point_impl.h"
 
-#include <assert.h>
-
 #include <sopc_buffer.h>
 #include <sopc_encoder.h>
+#include "sopc_assert.h"
 
 SOPC_ReturnStatus SOPC_ContinuationPointId_Encode(uint64_t continuationPointId, SOPC_ByteString* bs)
 {
     SOPC_Buffer tmpBuf;
-    assert(bs != NULL);
+    SOPC_ASSERT(bs != NULL);
     SOPC_ReturnStatus status = SOPC_ByteString_InitializeFixedSize(bs, sizeof(continuationPointId));
     if (SOPC_STATUS_OK == status)
     {
@@ -53,7 +52,7 @@ SOPC_ReturnStatus SOPC_ContinuationPointId_Encode(uint64_t continuationPointId, 
 SOPC_ReturnStatus SOPC_ContinuationPointId_Decode(const SOPC_ByteString* bs, uint64_t* continuationPointId)
 {
     SOPC_Buffer tmpBuf;
-    assert(bs != NULL);
+    SOPC_ASSERT(bs != NULL);
     if (bs->Length != sizeof(*continuationPointId))
     {
         return SOPC_STATUS_NOK;

@@ -19,7 +19,6 @@
 
 #include "freertos/p_time.h"
 
-#include <assert.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,7 +113,7 @@ void P_TIME_SetInitialDateToBuildTime(void)
     }
     else
     {
-        assert(false); /* Could not parse compilation date */
+        SOPC_ASSERT(false); /* Could not parse compilation date */
     }
 
     today.tm_year = atoi(ptrYear) - 1900; /* C99 specifies that tm_year begins in 1900 */
@@ -239,7 +238,7 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
     t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
     return true;
 }
@@ -288,7 +287,7 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
-    assert(NULL != date);
+    SOPC_ASSERT(NULL != date);
     SOPC_RealTime now;
 
     now.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
@@ -320,5 +319,5 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
  *                  .tm_sec = 42,
  *                  .tm_isdst = 0};
  * time_t nsec = mktime(&tmc);
- * assert(1560268242 == nsec);
+ * SOPC_ASSERT(1560268242 == nsec);
  */

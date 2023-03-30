@@ -19,7 +19,6 @@
 
 #include "sopc_config_loader.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +28,7 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
@@ -1546,10 +1546,10 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_S2OPC:
         break;
     case PARSE_START:
-        assert(false && "Got end_element callback when in PARSE_START state.");
+        SOPC_ASSERT(false && "Got end_element callback when in PARSE_START state.");
         break;
     default:
-        assert(false && "Unknown state.");
+        SOPC_ASSERT(false && "Unknown state.");
         break;
     }
 }
@@ -1564,7 +1564,7 @@ static void SOPC_Free_CstringFromPtr(void* data)
 
 bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
 {
-    assert(NULL != config);
+    SOPC_ASSERT(NULL != config);
     SOPC_S2OPC_Config_Initialize(config);
     config->serverConfig.freeCstringsFlag = true; // C strings are allocated during parsing or NULL if undefined
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
@@ -1638,7 +1638,7 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
     {
         config->serverConfig.endpoints = SOPC_Array_Into_Raw(ctx.endpoints);
         ctx.endpoints = NULL;
-        assert(NULL != config->serverConfig.endpoints);
+        SOPC_ASSERT(NULL != config->serverConfig.endpoints);
         config->serverConfig.nbEndpoints = (uint8_t) nbEndpoints;
         config->serverConfig.serverCertPath = ctx.serverCertificate;
         config->serverConfig.serverKeyPath = ctx.serverKey;

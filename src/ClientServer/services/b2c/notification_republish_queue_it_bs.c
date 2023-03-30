@@ -18,10 +18,10 @@
  */
 
 #include "notification_republish_queue_it_bs.h"
+
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-
-#include <assert.h>
 
 /*------------------------
    INITIALISATION Clause
@@ -49,7 +49,7 @@ void notification_republish_queue_it_bs__continue_iter_notif_republish(
 
     void* notifMsg = SOPC_SLinkedList_NextWithId(notification_republish_queue_it_bs__p_iterator,
                                                  notification_republish_queue_it_bs__seq_num);
-    assert(notifMsg != NULL);
+    SOPC_ASSERT(notifMsg != NULL);
     *notification_republish_queue_it_bs__continue =
         SOPC_SLinkedList_HasNext(notification_republish_queue_it_bs__p_iterator);
 }

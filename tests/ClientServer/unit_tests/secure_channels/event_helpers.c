@@ -19,10 +19,10 @@
 
 #include "event_helpers.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_time.h"
 
 // Sleep timeout in milliseconds
@@ -32,7 +32,7 @@ static const uint32_t loopTimeout = 2000;
 
 void WaitEvent(SOPC_AsyncQueue* queue, void** event)
 {
-    assert(queue != NULL);
+    SOPC_ASSERT(queue != NULL);
 
     for (uint32_t loopCount = 0; loopCount * sleepTimeout <= loopTimeout; ++loopCount)
     {
@@ -48,11 +48,11 @@ void WaitEvent(SOPC_AsyncQueue* queue, void** event)
         }
         else
         {
-            assert(false && "Error while waiting for event");
+            SOPC_ASSERT(false && "Error while waiting for event");
         }
     }
 
-    assert(false && "Timeout while waiting for socket event");
+    SOPC_ASSERT(false && "Timeout while waiting for socket event");
 }
 
 bool CheckEvent(const char* event_type,

@@ -20,7 +20,6 @@
 /*------------------------
    Exported Declarations
   ------------------------*/
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -31,6 +30,7 @@
 #include "constants_bs.h"
 
 #include "opcua_identifiers.h"
+#include "sopc_assert.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -78,7 +78,7 @@ void message_in_bs__dealloc_msg_in_header(const constants__t_msg_header_i messag
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
@@ -168,7 +168,7 @@ void message_in_bs__decode_service_fault_msg_req_handle(
         message_in_bs__dealloc_msg_in_header(message_in_bs__msg_header);
         // Restore initial position
         SOPC_ReturnStatus retStatus = SOPC_Buffer_SetPosition(message_in_bs__msg_buffer, positionBackup);
-        assert(SOPC_STATUS_OK == retStatus);
+        SOPC_ASSERT(SOPC_STATUS_OK == retStatus);
     }
 }
 
@@ -320,7 +320,7 @@ void message_in_bs__server_read_msg_header_req_handle(const constants__t_msg_hea
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 

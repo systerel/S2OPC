@@ -17,9 +17,8 @@
  * under the License.
  */
 
-#include <assert.h>
-
 #include "msg_translate_browse_path_bs.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
@@ -53,9 +52,9 @@ void msg_translate_browse_path_bs__decode_translate_browse_paths_request(
     const constants__t_msg_i msg_translate_browse_path_bs__req_msg,
     constants_statuscodes_bs__t_StatusCode_i* const msg_translate_browse_path_bs__StatusCode_service)
 {
-    assert(NULL != msg_translate_browse_path_bs__StatusCode_service);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__StatusCode_service);
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg_translate_browse_path_bs__req_msg;
-    assert(encType == &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType);
+    SOPC_ASSERT(encType == &OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType);
     browsePaths_request = (OpcUa_TranslateBrowsePathsToNodeIdsRequest*) msg_translate_browse_path_bs__req_msg;
 
     *msg_translate_browse_path_bs__StatusCode_service = constants_statuscodes_bs__e_sc_ok;
@@ -72,7 +71,7 @@ void msg_translate_browse_path_bs__decode_translate_browse_paths_request(
 /* output p_nb_BrowsePaths is uinnt32_t */
 void msg_translate_browse_path_bs__read_nb_BrowsePaths(t_entier4* const msg_translate_browse_path_bs__p_nb_BrowsePaths)
 {
-    assert(NULL != browsePaths_request);
+    SOPC_ASSERT(NULL != browsePaths_request);
     *msg_translate_browse_path_bs__p_nb_BrowsePaths = browsePaths_nbBrowsePaths;
 }
 
@@ -84,9 +83,9 @@ uint32_t msg_translate_browse_path_bs__get_BrowsePathIndex(
     const constants__t_BrowsePath_i msg_translate_browse_path_bs__browsePath,
     int32_t indexMax)
 {
-    assert(0 < msg_translate_browse_path_bs__browsePath);
+    SOPC_ASSERT(0 < msg_translate_browse_path_bs__browsePath);
     uint32_t browsePath_index = msg_translate_browse_path_bs__browsePath - 1;
-    assert(browsePath_index < (uint32_t) indexMax);
+    SOPC_ASSERT(browsePath_index < (uint32_t) indexMax);
     return browsePath_index;
 }
 
@@ -95,7 +94,7 @@ void msg_translate_browse_path_bs__read_BrowsePath_StartingNode(
     const constants__t_BrowsePath_i msg_translate_browse_path_bs__browsePath,
     constants__t_NodeId_i* const msg_translate_browse_path_bs__nodeId)
 {
-    assert(NULL != browsePaths_request);
+    SOPC_ASSERT(NULL != browsePaths_request);
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_nbBrowsePaths);
     *msg_translate_browse_path_bs__nodeId = &(browsePaths_request->BrowsePaths[browsePath_index].StartingNode);
@@ -109,7 +108,7 @@ void msg_translate_browse_path_bs__read_BrowsePath_RelativePath(
     const constants__t_BrowsePath_i msg_translate_browse_path_bs__browsePath,
     constants__t_RelativePath_i* const msg_translate_browse_path_bs__relativePath)
 {
-    assert(NULL != browsePaths_request);
+    SOPC_ASSERT(NULL != browsePaths_request);
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_nbBrowsePaths);
     *msg_translate_browse_path_bs__relativePath =
@@ -120,7 +119,7 @@ void msg_translate_browse_path_bs__read_RelativePath_Nb_RelativePathElt(
     const constants__t_RelativePath_i msg_translate_browse_path_bs__relativePath,
     t_entier4* const msg_translate_browse_path_bs__nb_relativePathElt)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePath);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePath);
     *msg_translate_browse_path_bs__nb_relativePathElt = msg_translate_browse_path_bs__relativePath->NoOfElements;
 }
 
@@ -129,10 +128,10 @@ void msg_translate_browse_path_bs__read_RelativePath_RelativePathElt(
     const t_entier4 msg_translate_browse_path_bs__index,
     constants__t_RelativePathElt_i* const msg_translate_browse_path_bs__relativePathElt)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePath);
-    assert(NULL != msg_translate_browse_path_bs__relativePathElt);
-    assert(0 < msg_translate_browse_path_bs__index);
-    assert(msg_translate_browse_path_bs__index <= msg_translate_browse_path_bs__relativePath->NoOfElements);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePath);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePathElt);
+    SOPC_ASSERT(0 < msg_translate_browse_path_bs__index);
+    SOPC_ASSERT(msg_translate_browse_path_bs__index <= msg_translate_browse_path_bs__relativePath->NoOfElements);
     const int32_t index = msg_translate_browse_path_bs__index - 1;
     *msg_translate_browse_path_bs__relativePathElt = &(msg_translate_browse_path_bs__relativePath->Elements[index]);
 }
@@ -141,8 +140,8 @@ void msg_translate_browse_path_bs__read_RelativePathElt_IncludedSubtypes(
     const constants__t_RelativePathElt_i msg_translate_browse_path_bs__relativePathElt,
     t_bool* const msg_translate_browse_path_bs__includedSubtypes)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePathElt);
-    assert(NULL != msg_translate_browse_path_bs__includedSubtypes);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePathElt);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__includedSubtypes);
     if (msg_translate_browse_path_bs__relativePathElt->IncludeSubtypes)
     {
         *msg_translate_browse_path_bs__includedSubtypes = true;
@@ -157,8 +156,8 @@ void msg_translate_browse_path_bs__read_RelativePathElt_IsInverse(
     const constants__t_RelativePathElt_i msg_translate_browse_path_bs__relativePathElt,
     t_bool* const msg_translate_browse_path_bs__isInverse)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePathElt);
-    assert(NULL != msg_translate_browse_path_bs__isInverse);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePathElt);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__isInverse);
     if (msg_translate_browse_path_bs__relativePathElt->IsInverse)
     {
         *msg_translate_browse_path_bs__isInverse = true;
@@ -173,8 +172,8 @@ void msg_translate_browse_path_bs__read_RelativePathElt_ReferenceTypeId(
     const constants__t_RelativePathElt_i msg_translate_browse_path_bs__relativePathElt,
     constants__t_NodeId_i* const msg_translate_browse_path_bs__referenceTypeId)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePathElt);
-    assert(NULL != msg_translate_browse_path_bs__referenceTypeId);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePathElt);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__referenceTypeId);
     *msg_translate_browse_path_bs__referenceTypeId = &(msg_translate_browse_path_bs__relativePathElt->ReferenceTypeId);
     if (SOPC_NodeId_IsNull(*msg_translate_browse_path_bs__referenceTypeId))
     {
@@ -186,15 +185,15 @@ void msg_translate_browse_path_bs__read_RelativePathElt_TargetName(
     const constants__t_RelativePathElt_i msg_translate_browse_path_bs__relativePathElt,
     constants__t_QualifiedName_i* const msg_translate_browse_path_bs__targetName)
 {
-    assert(NULL != msg_translate_browse_path_bs__relativePathElt);
-    assert(NULL != msg_translate_browse_path_bs__targetName);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__relativePathElt);
+    SOPC_ASSERT(NULL != msg_translate_browse_path_bs__targetName);
     *msg_translate_browse_path_bs__targetName = &(msg_translate_browse_path_bs__relativePathElt->TargetName);
 }
 
 void msg_translate_browse_path_bs__alloc_browse_path_result(
     constants_statuscodes_bs__t_StatusCode_i* const msg_translate_browse_path_bs__statusCode)
 {
-    assert(browsePaths_nbBrowsePaths > 0);
+    SOPC_ASSERT(browsePaths_nbBrowsePaths > 0);
     browsePaths_results.Results = SOPC_Calloc((size_t) browsePaths_nbBrowsePaths, sizeof(OpcUa_BrowsePathResult));
     if (NULL == browsePaths_results.Results)
     {
@@ -215,7 +214,7 @@ void msg_translate_browse_path_bs__write_BrowsePath_Res_StatusCode(
     const constants__t_BrowsePath_i msg_translate_browse_path_bs__browsePath,
     const constants_statuscodes_bs__t_StatusCode_i msg_translate_browse_path_bs__statusCode)
 {
-    assert(NULL != browsePaths_results.Results);
+    SOPC_ASSERT(NULL != browsePaths_results.Results);
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_results.NoOfResults);
 
@@ -228,8 +227,8 @@ void msg_translate_browse_path_bs__alloc_BrowsePath_Res_Target(
     const t_entier4 msg_translate_browse_path_bs__nbTargetMax,
     constants_statuscodes_bs__t_StatusCode_i* const msg_translate_browse_path_bs__statusCode)
 {
-    assert(NULL != browsePaths_results.Results);
-    assert(msg_translate_browse_path_bs__nbTargetMax > 0);
+    SOPC_ASSERT(NULL != browsePaths_results.Results);
+    SOPC_ASSERT(msg_translate_browse_path_bs__nbTargetMax > 0);
     size_t allocSize = (size_t) msg_translate_browse_path_bs__nbTargetMax;
     uint32_t browsePath_index = msg_translate_browse_path_bs__get_BrowsePathIndex(
         msg_translate_browse_path_bs__browsePath, browsePaths_results.NoOfResults);
@@ -263,7 +262,7 @@ void msg_translate_browse_path_bs__add_BrowsePath_Res_Target_withRemainingPath(
     const t_entier4 msg_translate_browse_path_bs__remainingIndex,
     constants_statuscodes_bs__t_StatusCode_i* const msg_translate_browse_path_bs__statusCode)
 {
-    assert(0 <= msg_translate_browse_path_bs__remainingIndex);
+    SOPC_ASSERT(0 <= msg_translate_browse_path_bs__remainingIndex);
     msg_translate_browse_path_bs__add_BrowsePath_Res_Target_Common(
         msg_translate_browse_path_bs__browsePath, msg_translate_browse_path_bs__node,
         (uint32_t) msg_translate_browse_path_bs__remainingIndex, msg_translate_browse_path_bs__statusCode);
@@ -276,15 +275,15 @@ void msg_translate_browse_path_bs__add_BrowsePath_Res_Target_Common(
     const uint32_t remainingIndex,
     constants_statuscodes_bs__t_StatusCode_i* const statusCode)
 {
-    assert(NULL != browsePaths_results.Results);
-    assert(NULL != statusCode);
-    assert(NULL != node);
+    SOPC_ASSERT(NULL != browsePaths_results.Results);
+    SOPC_ASSERT(NULL != statusCode);
+    SOPC_ASSERT(NULL != node);
 
     uint32_t browsePath_index =
         msg_translate_browse_path_bs__get_BrowsePathIndex(browsePath, browsePaths_results.NoOfResults);
     OpcUa_BrowsePathResult* result = &browsePaths_results.Results[browsePath_index];
 
-    assert(NULL != result->Targets);
+    SOPC_ASSERT(NULL != result->Targets);
     *statusCode = constants_statuscodes_bs__e_sc_ok;
 
     /* Initialize and set. result->NoOfTargets is the current element */
@@ -309,7 +308,7 @@ void msg_translate_browse_path_bs__write_translate_browse_paths_response(
 {
     /* Check and get type of message */
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg_translate_browse_path_bs__p_msg_out;
-    assert(encType == &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType);
+    SOPC_ASSERT(encType == &OpcUa_TranslateBrowsePathsToNodeIdsResponse_EncodeableType);
     OpcUa_TranslateBrowsePathsToNodeIdsResponse* browsePaths_response =
         (OpcUa_TranslateBrowsePathsToNodeIdsResponse*) msg_translate_browse_path_bs__p_msg_out;
 

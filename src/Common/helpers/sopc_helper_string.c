@@ -19,7 +19,6 @@
 
 #include "sopc_helper_string.h"
 
-#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
@@ -27,6 +26,7 @@
 #include <stdlib.h> /* strtoul */
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)

@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
@@ -291,9 +291,9 @@ static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
                                                               uint32_t count,
                                                               uint32_t* finalSentBytes)
 {
-    assert(sock != NULL);
-    assert(data != NULL);
-    assert(finalSentBytes != NULL);
+    SOPC_ASSERT(sock != NULL);
+    SOPC_ASSERT(data != NULL);
+    SOPC_ASSERT(finalSentBytes != NULL);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t sentBytes = 0;
     uint32_t totalSentBytes = 0;
@@ -387,7 +387,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
         buffer->position = buffer->position + sentBytes;
         // Re-enqueue in LIFO mode to be the next buffer to treat
         status = SOPC_AsyncQueue_BlockingEnqueueFirstOut(sock->writeQueue, buffer);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     return writeQueueResult;
@@ -445,7 +445,7 @@ static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
     }
 
     status = SOPC_Buffer_SetDataLength(buffer, readBytes);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     SOPC_Sockets_Emit(SOCKET_RCV_BYTES, socket->connectionId, (uintptr_t) buffer, socket_id);
 
@@ -491,8 +491,8 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
         /* id = socket index,
          * auxParam = secure channel connection index associated to accepted connection */
-        assert(auxParam <= UINT32_MAX);
-        assert(eltId < SOPC_MAX_SOCKETS);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(eltId < SOPC_MAX_SOCKETS);
 
         socketElt = &socketsArray[eltId];
         if (socketElt->state == SOCKET_STATE_ACCEPTED)
@@ -523,7 +523,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         break;
     case SOCKET_CLOSE:
-        assert(eltId < SOPC_MAX_SOCKETS);
+        SOPC_ASSERT(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "SocketEvent: SOCKET_CLOSE socketIdx=%" PRIu32 " connectionIdx=%" PRIuPTR, eltId,
                                auxParam);
@@ -544,7 +544,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         break;
     case SOCKET_CLOSE_LISTENER:
-        assert(eltId < SOPC_MAX_SOCKETS);
+        SOPC_ASSERT(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "SocketEvent: SOCKET_CLOSE_LISTENER socketIdx=%" PRIu32 " endpointIdx=%" PRIuPTR, eltId,
                                auxParam);
@@ -564,7 +564,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         break;
     case SOCKET_WRITE:
-        assert(eltId < SOPC_MAX_SOCKETS);
+        SOPC_ASSERT(eltId < SOPC_MAX_SOCKETS);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "SocketEvent: SOCKET_WRITE socketIdx=%" PRIu32, eltId);
         /*
         id = socket index,
@@ -580,10 +580,10 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
             // Prepare buffer to be written (position set to 0 since it has been written precedently)
             status = SOPC_Buffer_SetPosition(buffer, 0);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             // Enqueue message buffer to send
             status = SOPC_AsyncQueue_BlockingEnqueue(socketElt->writeQueue, buffer);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             result = true;
             if (!socketElt->isNotWritable)
             {
@@ -607,7 +607,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
 
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -663,7 +663,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                                "SocketEvent: INT_SOCKET_LISTENER_CONNECTION_ATTEMPT socketIdx=%" PRIu32, socketIdx);
 
         // State was set to accepted by network event manager
-        assert(socketElt->state == SOCKET_STATE_LISTENING);
+        SOPC_ASSERT(socketElt->state == SOCKET_STATE_LISTENING);
 
         if (socketElt->listenerConnections < SOPC_MAX_SOCKETS_CONNECTIONS)
         {
@@ -711,7 +711,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                                "SocketEvent: INT_SOCKET_CONNECTION_ATTEMPT_FAILED socketIdx=%" PRIu32, socketIdx);
 
         // State is connecting
-        assert(socketElt->state == SOCKET_STATE_CONNECTING);
+        SOPC_ASSERT(socketElt->state == SOCKET_STATE_CONNECTING);
 
         // Will do a new attempt with next possible address if possible
         result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
@@ -731,7 +731,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                                socketIdx);
 
         // State was set to connected by network manager
-        assert(socketElt->state == SOCKET_STATE_CONNECTING);
+        SOPC_ASSERT(socketElt->state == SOCKET_STATE_CONNECTING);
 
         // No more attempts expected: free the attempts addresses
         if (socketElt->connectAddrs != NULL)
@@ -802,6 +802,6 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
 
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }

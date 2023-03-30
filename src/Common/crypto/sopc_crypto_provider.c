@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
 #include "sopc_crypto_provider.h"
@@ -99,7 +98,7 @@ void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider)
 
 const SOPC_CryptoProfile* SOPC_CryptoProvider_GetProfileServices(const SOPC_CryptoProvider* pProvider)
 {
-    assert(NULL != pProvider);
+    SOPC_ASSERT(NULL != pProvider);
     if (NULL != pProvider->pProfilePubSub)
     {
         return NULL;
@@ -109,7 +108,7 @@ const SOPC_CryptoProfile* SOPC_CryptoProvider_GetProfileServices(const SOPC_Cryp
 
 const SOPC_CryptoProfile_PubSub* SOPC_CryptoProvider_GetProfilePubSub(const SOPC_CryptoProvider* pProvider)
 {
-    assert(NULL != pProvider);
+    SOPC_ASSERT(NULL != pProvider);
     if (NULL != pProvider->pProfile)
     {
         return NULL;
@@ -1490,7 +1489,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
                                                         uint32_t lenOutput,
                                                         const char** errorReason)
 {
-    assert(NULL != errorReason);
+    SOPC_ASSERT(NULL != errorReason);
     *errorReason = "";
 
     uint32_t lenOutCalc = 0;
@@ -1588,7 +1587,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
                                                         uint32_t* pLenWritten,
                                                         const char** errorReason)
 {
-    assert(NULL != errorReason);
+    SOPC_ASSERT(NULL != errorReason);
     *errorReason = "";
 
     uint32_t lenOutCalc = 0;
@@ -1692,7 +1691,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
                                                      uint32_t lenSignature,
                                                      const char** errorReason)
 {
-    assert(NULL != errorReason);
+    SOPC_ASSERT(NULL != errorReason);
     *errorReason = "";
 
     uint32_t lenSigCalc = 0, lenKey = 0;
@@ -1786,7 +1785,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
                                                        uint32_t lenSignature,
                                                        const char** errorReason)
 {
-    assert(NULL != errorReason);
+    SOPC_ASSERT(NULL != errorReason);
     *errorReason = "";
 
     uint32_t lenSigCalc = 0, lenKey = 0;
@@ -1881,7 +1880,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error)
 {
-    assert(NULL != error);
+    SOPC_ASSERT(NULL != error);
 
     // TODO: where is the key key_pub <-> key_priv association checked?
     if (NULL == pProvider || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)

@@ -17,11 +17,12 @@
  * under the License.
  */
 
+#include "sopc_assert.h"
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_logger.h"
 #include "sopc_time.h"

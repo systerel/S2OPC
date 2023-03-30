@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 
 #include "sopc_assert.h"
@@ -30,11 +29,11 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
                                                               const SOPC_ExtensionObject* pUser,
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated)
 {
-    assert(NULL != authenticationManager);
-    assert(NULL != pUser);
-    assert(NULL != pUserAuthenticated);
-    assert(NULL != authenticationManager->pFunctions);
-    assert(NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
+    SOPC_ASSERT(NULL != authenticationManager);
+    SOPC_ASSERT(NULL != pUser);
+    SOPC_ASSERT(NULL != pUserAuthenticated);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions->pFuncValidateUserIdentity);
 
     /* UACTT tests expect that a UserName identity token with empty username is invalid. */
     if (&OpcUa_UserNameIdentityToken_EncodeableType == pUser->Body.Object.ObjType)
@@ -57,15 +56,15 @@ SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuth
                                                                uint32_t attributeId,
                                                                bool* pbOperationAuthorized)
 {
-    assert(NULL != userWithAuthorization);
-    assert(NULL != nodeId);
-    assert(NULL != pbOperationAuthorized);
+    SOPC_ASSERT(NULL != userWithAuthorization);
+    SOPC_ASSERT(NULL != nodeId);
+    SOPC_ASSERT(NULL != pbOperationAuthorized);
     SOPC_User* user = userWithAuthorization->user;
     SOPC_UserAuthorization_Manager* authorizationManager = userWithAuthorization->authorizationManager;
-    assert(NULL != user);
-    assert(NULL != authorizationManager);
-    assert(NULL != authorizationManager->pFunctions);
-    assert(NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
+    SOPC_ASSERT(NULL != user);
+    SOPC_ASSERT(NULL != authorizationManager);
+    SOPC_ASSERT(NULL != authorizationManager->pFunctions);
+    SOPC_ASSERT(NULL != authorizationManager->pFunctions->pFuncAuthorizeOperation);
 
     return (authorizationManager->pFunctions->pFuncAuthorizeOperation)(authorizationManager, operationType, nodeId,
                                                                        attributeId, user, pbOperationAuthorized);
@@ -79,8 +78,8 @@ void SOPC_UserAuthentication_FreeManager(SOPC_UserAuthentication_Manager** ppAut
     }
 
     SOPC_UserAuthentication_Manager* authenticationManager = *ppAuthenticationManager;
-    assert(NULL != authenticationManager->pFunctions);
-    assert(NULL != authenticationManager->pFunctions->pFuncFree);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions);
+    SOPC_ASSERT(NULL != authenticationManager->pFunctions->pFuncFree);
     authenticationManager->pFunctions->pFuncFree(authenticationManager);
     *ppAuthenticationManager = NULL;
 }
@@ -93,8 +92,8 @@ void SOPC_UserAuthorization_FreeManager(SOPC_UserAuthorization_Manager** ppAutho
     }
 
     SOPC_UserAuthorization_Manager* authorizationManager = *ppAuthorizationManager;
-    assert(NULL != authorizationManager->pFunctions);
-    assert(NULL != authorizationManager->pFunctions->pFuncFree);
+    SOPC_ASSERT(NULL != authorizationManager->pFunctions);
+    SOPC_ASSERT(NULL != authorizationManager->pFunctions->pFuncFree);
     authorizationManager->pFunctions->pFuncFree(authorizationManager);
     *ppAuthorizationManager = NULL;
 }
@@ -106,7 +105,7 @@ static SOPC_ReturnStatus AuthenticateAllowAll(SOPC_UserAuthentication_Manager* a
 {
     SOPC_UNUSED_ARG(authenticationManager);
     SOPC_UNUSED_ARG(pUserIdentity);
-    assert(NULL != pUserAuthenticated);
+    SOPC_ASSERT(NULL != pUserAuthenticated);
 
     *pUserAuthenticated = SOPC_USER_AUTHENTICATION_OK;
     return SOPC_STATUS_OK;
@@ -125,7 +124,7 @@ static SOPC_ReturnStatus AuthorizeAllowAll(SOPC_UserAuthorization_Manager* autho
     SOPC_UNUSED_ARG(nodeId);
     SOPC_UNUSED_ARG(attributeId);
     SOPC_UNUSED_ARG(pUser);
-    assert(NULL != pbOperationAuthorized);
+    SOPC_ASSERT(NULL != pbOperationAuthorized);
 
     *pbOperationAuthorized = true;
     return SOPC_STATUS_OK;
@@ -169,11 +168,11 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateFromIdentityToken(
     const SOPC_ExtensionObject* pUserIdentity,
     SOPC_UserAuthorization_Manager* authorizationManager)
 {
-    assert(NULL != pUserIdentity);
-    assert(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
-    assert(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
-           &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
-           &OpcUa_X509IdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
+    SOPC_ASSERT(NULL != pUserIdentity);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pUserIdentity->Encoding);
+    SOPC_ASSERT(&OpcUa_AnonymousIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
+                &OpcUa_UserNameIdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType ||
+                &OpcUa_X509IdentityToken_EncodeableType == pUserIdentity->Body.Object.ObjType);
 
     SOPC_UserWithAuthorization* userauthz = SOPC_Calloc(1, sizeof(SOPC_UserWithAuthorization));
     if (NULL == userauthz)
@@ -232,13 +231,13 @@ SOPC_UserWithAuthorization* SOPC_UserWithAuthorization_CreateLocal(SOPC_UserAuth
 
 SOPC_UserAuthorization_Manager* SOPC_UserWithAuthorization_GetManager(SOPC_UserWithAuthorization* userWithAuthorization)
 {
-    assert(NULL != userWithAuthorization);
+    SOPC_ASSERT(NULL != userWithAuthorization);
     return userWithAuthorization->authorizationManager;
 }
 
 const SOPC_User* SOPC_UserWithAuthorization_GetUser(SOPC_UserWithAuthorization* userWithAuthorization)
 {
-    assert(NULL != userWithAuthorization);
+    SOPC_ASSERT(NULL != userWithAuthorization);
     return userWithAuthorization->user;
 }
 

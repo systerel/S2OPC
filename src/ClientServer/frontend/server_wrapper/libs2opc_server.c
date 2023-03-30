@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdlib.h>
 
@@ -28,6 +27,7 @@
 
 #include "opcua_identifiers.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
 #include "sopc_internal_app_dispatcher.h"
@@ -85,7 +85,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
 {
     struct LocalServiceCtx* ls = &(helperCtx->eventCtx.localService);
     // Helper internal call to internal services are always using asynchronous way
-    assert(!ls->isHelperInternal);
+    SOPC_ASSERT(!ls->isHelperInternal);
     Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
     // Chech synchronous response id is the one expected
     if (ls->syncId != sopc_server_helper_config.syncLocalServiceId)
@@ -123,7 +123,7 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
 {
     SOPC_HelperConfigInternal_Ctx* helperCtx = (SOPC_HelperConfigInternal_Ctx*) context;
 
-    assert(&OpcUa_WriteResponse_EncodeableType == encType);
+    SOPC_ASSERT(&OpcUa_WriteResponse_EncodeableType == encType);
     OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
     OpcUa_WriteRequest* writeReqCtx = (OpcUa_WriteRequest*) helperCtx->userContext;
     bool ok = (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult));
@@ -290,8 +290,8 @@ static void SOPC_UpdateCurrentTime_EventHandler_Callback(SOPC_EventHandler* hand
                                                          uintptr_t params,
                                                          uintptr_t auxParam)
 {
-    assert(OpcUaId_Server_ServerStatus_CurrentTime == event);
-    assert(OpcUaId_Server_ServerStatus_CurrentTime == eltId);
+    SOPC_ASSERT(OpcUaId_Server_ServerStatus_CurrentTime == event);
+    SOPC_ASSERT(OpcUaId_Server_ServerStatus_CurrentTime == eltId);
     SOPC_UNUSED_ARG(handler);
     SOPC_UNUSED_ARG(params);
     SOPC_UNUSED_ARG(auxParam);
@@ -515,7 +515,7 @@ static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClos
 {
     // use condition variable and let ::SOPC_ServerHelper_Serve manage shutdown
     SOPC_ReturnStatus status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (allEndpointsAlreadyClosed)
     {
         // Case in which server is stopping because all endpoints were closed before server requested to stop
@@ -523,9 +523,9 @@ static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClos
     }
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop, true);
     status = Condition_SignalAll(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 // server stopped callback used by ::SOPC_ServerHelper_Serve
@@ -655,7 +655,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
-    assert(NULL == sopc_server_helper_config.syncResp);
+    SOPC_ASSERT(NULL == sopc_server_helper_config.syncResp);
     // Set helper local service context
     ctx->eventCtx.localService.isSyncCall = true;
     ctx->eventCtx.localService.syncId = sopc_server_helper_config.syncLocalServiceId;
@@ -672,7 +672,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     if (SOPC_STATUS_OK == status)
     {
-        assert(NULL != sopc_server_helper_config.syncResp);
+        SOPC_ASSERT(NULL != sopc_server_helper_config.syncResp);
         // Set response output
         *response = sopc_server_helper_config.syncResp;
     }

@@ -17,9 +17,8 @@
  * under the License.
  */
 
-#include <assert.h>
-
 #include "msg_subscription_publish_ack_bs.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"

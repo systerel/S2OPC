@@ -32,11 +32,11 @@
  *    - Field 4 with value True and type Boolean
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -68,7 +68,7 @@ static void setupConnection(void)
     SOPC_ReaderGroup* subReader = NULL;
     SOPC_DataSetReader* dsReader = NULL;
     configuration = SOPC_PubSubConfiguration_Create();
-    assert(NULL != configuration);
+    SOPC_ASSERT(NULL != configuration);
 
     // Matching "config_pub_interop.xml"
     SOPC_PubSubConfiguration_Allocate_SubConnection_Array(configuration, 1);
@@ -89,22 +89,22 @@ static void setupConnection(void)
     SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 4);
     // Var 1
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Int16_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
-    assert(NULL != meta);
+    SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Boolean_Id);
 }
@@ -146,7 +146,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     const SOPC_UADP_Configuration* config = SOPC_Dataset_LL_NetworkMessage_GetHeaderConfig(header);
-    assert(NULL != config);
+    SOPC_ASSERT(NULL != config);
 
     if (1 != SOPC_Dataset_LL_NetworkMessage_GetVersion(header))
     {
@@ -270,7 +270,7 @@ static void readyToReceive(void* sockContext, Socket sock)
     }
     else if (SOPC_STATUS_OK == status && buffer->length == 1)
     {
-        assert(buffer->data[0] == 0);
+        SOPC_ASSERT(buffer->data[0] == 0);
         printf("Received 'empty' data, used to check that subscriber is running !\n");
     }
     else
@@ -282,7 +282,7 @@ static void readyToReceive(void* sockContext, Socket sock)
 
 static void tick(void* tickCtx)
 {
-    assert(CTX_VALUE == (uintptr_t) tickCtx);
+    SOPC_ASSERT(CTX_VALUE == (uintptr_t) tickCtx);
     // printf("tick !\n");
 }
 

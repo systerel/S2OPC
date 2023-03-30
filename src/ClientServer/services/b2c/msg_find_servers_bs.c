@@ -19,8 +19,7 @@
 
 #include "msg_find_servers_bs.h"
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -39,7 +38,7 @@ void msg_find_servers_bs__alloc_find_servers(const constants__t_msg_i msg_find_s
                                              t_bool* const msg_find_servers_bs__p_allocSuccess)
 {
     *msg_find_servers_bs__p_allocSuccess = false;
-    assert(msg_find_servers_bs__p_nb_servers > 0);
+    SOPC_ASSERT(msg_find_servers_bs__p_nb_servers > 0);
     OpcUa_FindServersResponse* resp = msg_find_servers_bs__p_resp;
     resp->Servers = SOPC_Malloc(sizeof(*resp->Servers) * (size_t) msg_find_servers_bs__p_nb_servers);
     if (NULL != resp->Servers)
@@ -62,7 +61,7 @@ void msg_find_servers_bs__get_find_servers_req_params(const constants__t_msg_i m
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     *msg_find_servers_bs__p_LocaleIds = SOPC_String_GetCStringArray(req->NoOfLocaleIds, req->LocaleIds);
     SOPC_GCC_DIAGNOSTIC_RESTORE
-    assert(NULL != *msg_find_servers_bs__p_LocaleIds); // TODO: change LocaleIds format or return alloc boolean
+    SOPC_ASSERT(NULL != *msg_find_servers_bs__p_LocaleIds); // TODO: change LocaleIds format or return alloc boolean
     *msg_find_servers_bs__p_nbServerUri = req->NoOfServerUris;
     *msg_find_servers_bs__p_ServerUris = req->ServerUris;
 }
@@ -137,7 +136,7 @@ void msg_find_servers_bs__set_find_servers_server(
 {
     *msg_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     OpcUa_FindServersResponse* resp = msg_find_servers_bs__p_resp;
-    assert(resp->NoOfServers > msg_find_servers_bs__p_srv_index);
+    SOPC_ASSERT(resp->NoOfServers > msg_find_servers_bs__p_srv_index);
     bool success = registerServerToApplicationDescription(msg_find_servers_bs__p_registered_server,
                                                           msg_find_servers_bs__p_localeIds,
                                                           &resp->Servers[msg_find_servers_bs__p_srv_index]);
@@ -162,9 +161,9 @@ static bool has_none_security_mode(SOPC_Endpoint_Config* epConfig)
 static bool util_ApplicationDescription_addImplicitDiscoveryEndpoint(OpcUa_ApplicationDescription* dst,
                                                                      SOPC_Endpoint_Config* endpoint_config)
 {
-    assert(NULL != dst);
-    assert(NULL != endpoint_config);
-    assert(dst->NoOfDiscoveryUrls <= 0);
+    SOPC_ASSERT(NULL != dst);
+    SOPC_ASSERT(NULL != endpoint_config);
+    SOPC_ASSERT(dst->NoOfDiscoveryUrls <= 0);
 
     /* If no discovery URL already defined for the current endpoint, try to find one.
      * It has one, if either the current endpoint has an implicit discovery endpoint
@@ -207,7 +206,7 @@ void msg_find_servers_bs__set_find_servers_server_ApplicationDescription(
 {
     *msg_find_servers_bs__ret = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     OpcUa_FindServersResponse* resp = msg_find_servers_bs__p_resp;
-    assert(resp->NoOfServers > msg_find_servers_bs__p_srv_index);
+    SOPC_ASSERT(resp->NoOfServers > msg_find_servers_bs__p_srv_index);
     const OpcUa_ApplicationDescription* src = msg_find_servers_bs__p_app_desc;
     OpcUa_ApplicationDescription* dest = &resp->Servers[msg_find_servers_bs__p_srv_index];
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST

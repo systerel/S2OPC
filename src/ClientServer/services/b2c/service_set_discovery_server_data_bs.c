@@ -19,11 +19,10 @@
 
 #include "service_set_discovery_server_data_bs.h"
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
-
-#include <assert.h>
 
 /*------------------------
    INITIALISATION Clause
@@ -62,7 +61,7 @@ void service_set_discovery_server_data_bs__get_ApplicationDescription_ServerUri(
     const constants__t_ApplicationDescription_i service_set_discovery_server_data_bs__p_app_desc,
     constants__t_ServerUri* const service_set_discovery_server_data_bs__p_ServerUri)
 {
-    assert(NULL != service_set_discovery_server_data_bs__p_app_desc);
+    SOPC_ASSERT(NULL != service_set_discovery_server_data_bs__p_app_desc);
     *service_set_discovery_server_data_bs__p_ServerUri =
         &service_set_discovery_server_data_bs__p_app_desc->ApplicationUri;
 }
@@ -97,7 +96,7 @@ void service_set_discovery_server_data_bs__has_ServerCapabilities(
         for (int32_t j = 0; !capabilityAvailable && j < mdnsConfig->NoOfServerCapabilities; j++)
         {
             status = SOPC_String_Compare(reqCapability, &mdnsConfig->ServerCapabilities[j], true, &comparison);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             capabilityAvailable = (0 == comparison);
         }
         allCapabilitiesFound &= capabilityAvailable;
@@ -111,8 +110,8 @@ void service_set_discovery_server_data_bs__has_ServerUri(
     const constants__t_ServerUris service_set_discovery_server_data_bs__p_ServerUris,
     t_bool* const service_set_discovery_server_data_bs__p_bool)
 {
-    assert(service_set_discovery_server_data_bs__p_nbServerUri > 0);
-    assert(service_set_discovery_server_data_bs__p_ServerUris != NULL);
+    SOPC_ASSERT(service_set_discovery_server_data_bs__p_nbServerUri > 0);
+    SOPC_ASSERT(service_set_discovery_server_data_bs__p_ServerUris != NULL);
     bool hasServerUri = false;
     for (int32_t i = 0; !hasServerUri && i < service_set_discovery_server_data_bs__p_nbServerUri; i++)
     {

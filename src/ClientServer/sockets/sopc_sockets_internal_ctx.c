@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -93,7 +92,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
     if (NULL != result && !isListener)
     {
         status = SOPC_AsyncQueue_Init(&result->writeQueue, "Socket write msgs");
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     return result;
 }
@@ -132,7 +131,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
         {
             if (sock->isServerConnection)
             {
-                assert(sock->listenerSocketIdx < SOPC_MAX_SOCKETS);
+                SOPC_ASSERT(sock->listenerSocketIdx < SOPC_MAX_SOCKETS);
 
                 // Management of number of connection on a listener
                 if (socketsArray[sock->listenerSocketIdx].state == SOCKET_STATE_LISTENING &&
@@ -157,7 +156,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
 
 void SOPC_Sockets_Emit(SOPC_Sockets_OutputEvent event, uint32_t eltId, uintptr_t params, uintptr_t auxParam)
 {
-    assert(socketsEventHandler != NULL);
+    SOPC_ASSERT(socketsEventHandler != NULL);
     SOPC_ReturnStatus status = SOPC_EventHandler_Post(socketsEventHandler, (int32_t) event, eltId, params, auxParam);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 }

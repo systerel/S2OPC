@@ -1356,7 +1356,7 @@ const char* util_channel__SecurityPolicy_B_to_C(constants__t_SecurityPolicy secp
     case constants__e_secpol_Aes256Sha256RsaPss:
         return SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI;
     default:
-        assert(false && "Invalid security policy");
+        SOPC_ASSERT(false && "Invalid security policy");
         return NULL;
     }
 }
@@ -1387,8 +1387,8 @@ OpcUa_BrowseDirection util_BrowseDirection__B_to_C(constants__t_BrowseDirection_
     case constants__e_bd_both:
         return OpcUa_BrowseDirection_Both;
     default:
-        assert(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Forward);
-        assert(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Inverse);
+        SOPC_ASSERT(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Forward);
+        SOPC_ASSERT(OpcUa_BrowseDirection_Both + 1 != OpcUa_BrowseDirection_Inverse);
         return OpcUa_BrowseDirection_Both + 1;
     }
 }
@@ -1564,7 +1564,7 @@ constants__t_AttributeId_i util_AttributeId__C_to_B(uint32_t caid)
 
 void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_UserAuthorization_OperationType* pcoptype)
 {
-    assert(NULL != pcoptype);
+    SOPC_ASSERT(NULL != pcoptype);
 
     switch (boptype)
     {
@@ -1581,7 +1581,7 @@ void util_operation_type__B_to_C(constants__t_operation_type_i boptype, SOPC_Use
         *pcoptype = SOPC_USER_AUTHORIZATION_OPERATION_ADDNODE;
         break;
     default:
-        assert(false); /* Unexpected operation type */
+        SOPC_ASSERT(false); /* Unexpected operation type */
     }
 }
 
@@ -1589,9 +1589,9 @@ constants_statuscodes_bs__t_StatusCode_i util_read_value_indexed_helper(SOPC_Var
                                                                         const SOPC_Variant* src,
                                                                         const SOPC_NumericRange* range)
 {
-    assert(NULL != dst);
-    assert(NULL != src);
-    assert(NULL != range);
+    SOPC_ASSERT(NULL != dst);
+    SOPC_ASSERT(NULL != src);
+    SOPC_ASSERT(NULL != range);
     bool has_range = false;
     SOPC_ReturnStatus status = SOPC_Variant_HasRange(src, range, false, &has_range);
 

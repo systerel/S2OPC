@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -66,7 +66,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         {
             status = SOPC_EncodeableObject_Encode(type, pValue, result_buffer, 0);
             /* we should succeed in encoding what we just decoded */
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             /* we cannot verify that buffer == result_buffer since some things might vary
              * such as string length for empty string etc. */
 
@@ -85,7 +85,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_EncodeableObject_Decode(type, pValue2, result_buffer, 0);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
                     /* encode again */
                     SOPC_Buffer* result_buffer2 = SOPC_Buffer_CreateResizable((uint32_t) len - 1, (uint32_t)(2 * len));
@@ -97,11 +97,11 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
                     {
                         status = SOPC_EncodeableObject_Encode(type, pValue2, result_buffer2, 0);
                         /* we should succeed in encoding what we just decoded */
-                        assert(SOPC_STATUS_OK == status);
+                        SOPC_ASSERT(SOPC_STATUS_OK == status);
                         /* compare result_buffer2 with result buffer */
                         /* we should have the same buffers */
-                        assert(result_buffer2->length == result_buffer->length);
-                        assert(0 == memcmp(result_buffer2->data, result_buffer->data, result_buffer2->length));
+                        SOPC_ASSERT(result_buffer2->length == result_buffer->length);
+                        SOPC_ASSERT(0 == memcmp(result_buffer2->data, result_buffer->data, result_buffer2->length));
                     }
 
                     SOPC_Buffer_Delete(result_buffer2);

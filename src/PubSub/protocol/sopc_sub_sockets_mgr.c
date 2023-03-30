@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 
 #include "sopc_assert.h"
@@ -77,7 +76,7 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 
         if (nbReady < 0)
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
         else if (nbReady == 0)
         {
@@ -194,8 +193,8 @@ void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     void* tickCbCtx,
                                     int threadPriority)
 {
-    assert(NULL != socketArray);
-    assert(NULL != pCallback);
+    SOPC_ASSERT(NULL != socketArray);
+    SOPC_ASSERT(NULL != pCallback);
     bool result = SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, sizeOfSockContextElt, socketArray, nbSockets,
                                                       pCallback, pTickCb, tickCbCtx, threadPriority);
     SOPC_ASSERT(result);

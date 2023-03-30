@@ -19,7 +19,6 @@
 
 #include "sopc_uanodeset_loader.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -155,7 +154,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
 static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    assert(ctx->current_alias_alias == NULL);
+    SOPC_ASSERT(ctx->current_alias_alias == NULL);
 
     for (size_t i = 0; attrs[i]; i++)
     {
@@ -282,7 +281,7 @@ static parse_complex_value_tag_t complex_value_ext_obj_range_tags[] = {
  */
 static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_complex_value_tag_array_t* body_tags)
 {
-    assert(NULL != body_tags);
+    SOPC_ASSERT(NULL != body_tags);
     const void* encType = NULL;
 
     switch (nid_in_NS0)
@@ -398,7 +397,7 @@ static const char* tag_from_element_id(const uint32_t id)
 
 static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const XML_Char** attrs)
 {
-    assert(ctx->node.node_class == 0);
+    SOPC_ASSERT(ctx->node.node_class == 0);
 
     SOPC_AddressSpace_Node_Initialize(ctx->space, &ctx->node, element_type);
     // Note: value_status default value set on NodeId parsing
@@ -533,7 +532,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         }
         else if (strcmp("AccessLevel", attr) == 0)
         {
-            assert(OpcUa_NodeClass_Variable == element_type);
+            SOPC_ASSERT(OpcUa_NodeClass_Variable == element_type);
             if (OpcUa_NodeClass_Variable != element_type)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser,
@@ -552,7 +551,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         }
         else if (strcmp("Executable", attr) == 0)
         {
-            assert(OpcUa_NodeClass_Method == element_type);
+            SOPC_ASSERT(OpcUa_NodeClass_Method == element_type);
             if (OpcUa_NodeClass_Method != element_type)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser,
@@ -636,7 +635,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 
     // Should not fail since we reserved space for one element above
     bool append = SOPC_Array_Append(ctx->references, ref);
-    assert(append);
+    SOPC_ASSERT(append);
 
     ctx->state = PARSE_NODE_REFERENCE;
 
@@ -645,8 +644,8 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
 
 static bool start_node_value_array(struct parse_context_t* ctx)
 {
-    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
-    assert(ctx->list_nodes == NULL);
+    SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
+    SOPC_ASSERT(ctx->list_nodes == NULL);
 
     ctx->list_nodes = SOPC_Array_Create(sizeof(SOPC_Variant), 0, (SOPC_Array_Free_Func*) SOPC_Variant_ClearAux);
 
@@ -738,8 +737,8 @@ static bool complex_value_tag_from_tag_name_no_namespace(const char* tag_name,
                                                          parse_complex_value_tag_array_t inCurrentCtx,
                                                          parse_complex_value_tag_t** outTagCtx)
 {
-    assert(NULL != inCurrentCtx);
-    assert(NULL != outTagCtx);
+    SOPC_ASSERT(NULL != inCurrentCtx);
+    SOPC_ASSERT(NULL != outTagCtx);
 
     *outTagCtx = NULL;
     int index = 0;
@@ -856,7 +855,7 @@ static bool start_in_extension_object(struct parse_context_t* ctx, parse_complex
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (!ok)
@@ -879,7 +878,7 @@ static bool start_in_extension_object(struct parse_context_t* ctx, parse_complex
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
         ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
         ctx->state = PARSE_NODE_VALUE;
@@ -990,7 +989,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         break;
     case PARSE_NODE_VALUE:
     {
-        assert(current_element_has_value(ctx));
+        SOPC_ASSERT(current_element_has_value(ctx));
 
         if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
@@ -999,7 +998,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
 
-        assert(ctx->current_value_type == SOPC_Null_Id);
+        SOPC_ASSERT(ctx->current_value_type == SOPC_Null_Id);
 
         ctx->current_value_type = type_id;
         ctx->current_array_type = array_type;
@@ -1038,8 +1037,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         return;
     case PARSE_NODE_VALUE_ARRAY:
     {
-        assert(current_element_has_value(ctx));
-        assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+        SOPC_ASSERT(current_element_has_value(ctx));
+        SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
 
         if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
         {
@@ -1076,9 +1075,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_NODE_VALUE_SCALAR_COMPLEX:
-        assert(current_element_has_value(ctx));
-        assert(NULL != ctx->complex_value_ctx.tags);
-        assert(NULL != ctx->complex_value_ctx.end_element_restore_context);
+        SOPC_ASSERT(current_element_has_value(ctx));
+        SOPC_ASSERT(NULL != ctx->complex_value_ctx.tags);
+        SOPC_ASSERT(NULL != ctx->complex_value_ctx.end_element_restore_context);
 
         if (!complex_value_tag_from_tag(name, ctx->complex_value_ctx.tags, &currentTagCtx))
         {
@@ -1144,7 +1143,7 @@ static bool finalize_alias(struct parse_context_t* ctx)
 static bool finalize_reference(struct parse_context_t* ctx)
 {
     size_t n_refs = SOPC_Array_Size(ctx->references);
-    assert(n_refs > 0);
+    SOPC_ASSERT(n_refs > 0);
 
     OpcUa_ReferenceNode* ref = SOPC_Array_Get_Ptr(ctx->references, n_refs - 1);
     const char* text = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
@@ -1174,7 +1173,7 @@ static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context
     case PARSE_NODE_DESCRIPTION:
         return SOPC_AddressSpace_Get_Description(ctx->space, &ctx->node);
     default:
-        assert(false && "Unexpected state");
+        SOPC_ASSERT(false && "Unexpected state");
     }
     return NULL;
 }
@@ -1196,7 +1195,7 @@ static uint8_t type_width(SOPC_BuiltinId ty)
     case SOPC_UInt64_Id:
         return 64;
     default:
-        assert(false && "Non numeric type");
+        SOPC_ASSERT(false && "Non numeric type");
     }
     return 0;
 }
@@ -1267,11 +1266,11 @@ static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str
 
 static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_complex_value_tag_array_t tagsContext)
 {
-    assert(plt != NULL);
+    SOPC_ASSERT(plt != NULL);
 
     parse_complex_value_tag_t* currentTagCtx = NULL;
     bool locale_ok = complex_value_tag_from_tag_name_no_namespace("Locale", tagsContext, &currentTagCtx);
-    assert(locale_ok);
+    SOPC_ASSERT(locale_ok);
 
     const char* locale = currentTagCtx->single_value;
     if (!currentTagCtx->set)
@@ -1281,7 +1280,7 @@ static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_com
     }
 
     bool text_ok = complex_value_tag_from_tag_name_no_namespace("Text", tagsContext, &currentTagCtx);
-    assert(text_ok);
+    SOPC_ASSERT(text_ok);
 
     const char* text = currentTagCtx->single_value;
     if (!currentTagCtx->set)
@@ -1323,11 +1322,11 @@ static bool set_variant_value_localized_text(SOPC_LocalizedText** plt, parse_com
 
 static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_tag_array_t tagsContext)
 {
-    assert(NULL != nodeId);
+    SOPC_ASSERT(NULL != nodeId);
 
     parse_complex_value_tag_t* currentTagCtx = NULL;
     bool id_tag_ok = complex_value_tag_from_tag_name_no_namespace("Identifier", tagsContext, &currentTagCtx);
-    assert(id_tag_ok);
+    SOPC_ASSERT(id_tag_ok);
 
     const char* id = currentTagCtx->single_value;
     if (!currentTagCtx->set)
@@ -1337,7 +1336,7 @@ static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_t
     }
 
     size_t len = strlen(id);
-    assert(len <= INT32_MAX);
+    SOPC_ASSERT(len <= INT32_MAX);
 
     *nodeId = SOPC_NodeId_FromCString(id, (int32_t) len);
 
@@ -1352,11 +1351,11 @@ static bool set_variant_value_nodeid(SOPC_NodeId** nodeId, parse_complex_value_t
 
 static bool set_variant_value_guid(SOPC_Guid** guid, parse_complex_value_tag_array_t tagsContext)
 {
-    assert(NULL != guid);
+    SOPC_ASSERT(NULL != guid);
 
     parse_complex_value_tag_t* currentTagCtx = NULL;
     bool id_tag_ok = complex_value_tag_from_tag_name_no_namespace("String", tagsContext, &currentTagCtx);
-    assert(id_tag_ok);
+    SOPC_ASSERT(id_tag_ok);
 
     const char* stringGuid = currentTagCtx->single_value;
     if (!currentTagCtx->set)
@@ -1366,7 +1365,7 @@ static bool set_variant_value_guid(SOPC_Guid** guid, parse_complex_value_tag_arr
     }
 
     size_t len = strlen(stringGuid);
-    assert(len <= INT32_MAX);
+    SOPC_ASSERT(len <= INT32_MAX);
 
     *guid = SOPC_Malloc(sizeof(SOPC_Guid));
     if (NULL == *guid)
@@ -1393,36 +1392,36 @@ static bool set_variant_value_extobj_argument(OpcUa_Argument* argument,
     parse_complex_value_tag_t* argumentTagCtx = NULL;
     bool argument_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("Argument", bodyChildsTagContext, &argumentTagCtx);
-    assert(argument_tag_ok);
+    SOPC_ASSERT(argument_tag_ok);
 
     parse_complex_value_tag_t* nameTagCtx = NULL;
     bool name_tag_ok = complex_value_tag_from_tag_name_no_namespace("Name", argumentTagCtx->childs, &nameTagCtx);
-    assert(name_tag_ok);
+    SOPC_ASSERT(name_tag_ok);
 
     parse_complex_value_tag_t* dataTypeTagCtx = NULL;
     bool dataType_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("DataType", argumentTagCtx->childs, &dataTypeTagCtx);
-    assert(dataType_tag_ok);
+    SOPC_ASSERT(dataType_tag_ok);
 
     parse_complex_value_tag_t* valueRankTagCtx = NULL;
     bool valueRank_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("ValueRank", argumentTagCtx->childs, &valueRankTagCtx);
-    assert(valueRank_tag_ok);
+    SOPC_ASSERT(valueRank_tag_ok);
 
     parse_complex_value_tag_t* arrayDimensionsTagCtx = NULL;
     bool arrayDimensions_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("ArrayDimensions", argumentTagCtx->childs, &arrayDimensionsTagCtx);
-    assert(arrayDimensions_tag_ok);
+    SOPC_ASSERT(arrayDimensions_tag_ok);
 
     parse_complex_value_tag_t* arrayDimUInt32TagCtx = NULL;
     bool arrayDimUInt32_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("UInt32", arrayDimensionsTagCtx->childs, &arrayDimUInt32TagCtx);
-    assert(arrayDimUInt32_tag_ok);
+    SOPC_ASSERT(arrayDimUInt32_tag_ok);
 
     parse_complex_value_tag_t* descriptionTagCtx = NULL;
     bool description_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("Description", argumentTagCtx->childs, &descriptionTagCtx);
-    assert(description_tag_ok);
+    SOPC_ASSERT(description_tag_ok);
 
     // Note: "tagCtx->set" is only set when the context contains a parsed string (not set in complex type parent tag)
 
@@ -1518,22 +1517,22 @@ static bool set_variant_value_extobj_enum_value_type(OpcUa_EnumValueType* enumVa
     parse_complex_value_tag_t* enumValueTypeTagCtx = NULL;
     bool enumValueType_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("EnumValueType", bodyChildsTagContext, &enumValueTypeTagCtx);
-    assert(enumValueType_tag_ok);
+    SOPC_ASSERT(enumValueType_tag_ok);
 
     parse_complex_value_tag_t* valueTagCtx = NULL;
     bool value_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("Value", enumValueTypeTagCtx->childs, &valueTagCtx);
-    assert(value_tag_ok);
+    SOPC_ASSERT(value_tag_ok);
 
     parse_complex_value_tag_t* displayNameTagCtx = NULL;
     bool displayName_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("DisplayName", enumValueTypeTagCtx->childs, &displayNameTagCtx);
-    assert(displayName_tag_ok);
+    SOPC_ASSERT(displayName_tag_ok);
 
     parse_complex_value_tag_t* descriptionTagCtx = NULL;
     bool description_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("Description", enumValueTypeTagCtx->childs, &descriptionTagCtx);
-    assert(description_tag_ok);
+    SOPC_ASSERT(description_tag_ok);
 
     if (valueTagCtx->set)
     {
@@ -1581,27 +1580,27 @@ static bool set_variant_value_extobj_eu_information(OpcUa_EUInformation* euInfor
     parse_complex_value_tag_t* euInformationTagCtx = NULL;
     bool euInformation_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("EUInformation", bodyChildsTagContext, &euInformationTagCtx);
-    assert(euInformation_tag_ok);
+    SOPC_ASSERT(euInformation_tag_ok);
 
     parse_complex_value_tag_t* nsUriTagCtx = NULL;
     bool nsUri_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("NamespaceUri", euInformationTagCtx->childs, &nsUriTagCtx);
-    assert(nsUri_tag_ok);
+    SOPC_ASSERT(nsUri_tag_ok);
 
     parse_complex_value_tag_t* unitIdTagCtx = NULL;
     bool unitId_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("UnitId", euInformationTagCtx->childs, &unitIdTagCtx);
-    assert(unitId_tag_ok);
+    SOPC_ASSERT(unitId_tag_ok);
 
     parse_complex_value_tag_t* displayNameTagCtx = NULL;
     bool displayName_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("DisplayName", euInformationTagCtx->childs, &displayNameTagCtx);
-    assert(displayName_tag_ok);
+    SOPC_ASSERT(displayName_tag_ok);
 
     parse_complex_value_tag_t* descriptionTagCtx = NULL;
     bool description_tag_ok =
         complex_value_tag_from_tag_name_no_namespace("Description", euInformationTagCtx->childs, &descriptionTagCtx);
-    assert(description_tag_ok);
+    SOPC_ASSERT(description_tag_ok);
 
     if (nsUriTagCtx->set)
     {
@@ -1657,15 +1656,15 @@ static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_val
 
     parse_complex_value_tag_t* rangeTagCtx = NULL;
     bool range_tag_ok = complex_value_tag_from_tag_name_no_namespace("Range", bodyChildsTagContext, &rangeTagCtx);
-    assert(range_tag_ok);
+    SOPC_ASSERT(range_tag_ok);
 
     parse_complex_value_tag_t* lowTagCtx = NULL;
     bool low_tag_ok = complex_value_tag_from_tag_name_no_namespace("Low", rangeTagCtx->childs, &lowTagCtx);
-    assert(low_tag_ok);
+    SOPC_ASSERT(low_tag_ok);
 
     parse_complex_value_tag_t* highTagCtx = NULL;
     bool high_tag_ok = complex_value_tag_from_tag_name_no_namespace("High", rangeTagCtx->childs, &highTagCtx);
-    assert(high_tag_ok);
+    SOPC_ASSERT(high_tag_ok);
 
     if (lowTagCtx->set)
     {
@@ -1688,26 +1687,26 @@ static bool set_variant_value_extobj_range(OpcUa_Range* range, parse_complex_val
 static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
                                               parse_complex_value_tag_array_t tagsContext)
 {
-    assert(NULL != extObj);
+    SOPC_ASSERT(NULL != extObj);
 
     parse_complex_value_tag_t* typeIdTagCtx = NULL;
     bool typeid_tag_ok = complex_value_tag_from_tag_name_no_namespace("TypeId", tagsContext, &typeIdTagCtx);
-    assert(typeid_tag_ok);
+    SOPC_ASSERT(typeid_tag_ok);
     if (!typeIdTagCtx->set)
     {
         return false;
     }
-    assert(NULL != typeIdTagCtx->user_data);
+    SOPC_ASSERT(NULL != typeIdTagCtx->user_data);
     SOPC_EncodeableType* encType = typeIdTagCtx->user_data;
 
     parse_complex_value_tag_t* bodyTagCtx = NULL;
     bool body_tag_ok = complex_value_tag_from_tag_name_no_namespace("Body", tagsContext, &bodyTagCtx);
-    assert(body_tag_ok);
+    SOPC_ASSERT(body_tag_ok);
     if (!bodyTagCtx->set)
     {
         return false;
     }
-    assert(NULL != bodyTagCtx->childs);
+    SOPC_ASSERT(NULL != bodyTagCtx->childs);
 
     SOPC_ExtensionObject* newExtObj = SOPC_Malloc(sizeof(SOPC_ExtensionObject));
     if (NULL == newExtObj)
@@ -1744,7 +1743,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
         result = set_variant_value_extobj_range((OpcUa_Range*) object, bodyTagCtx->childs);
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (!result)
@@ -1761,19 +1760,19 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
 
 static bool set_variant_value_qualified_name(SOPC_QualifiedName** pqname, parse_complex_value_tag_array_t tagsContext)
 {
-    assert(NULL != pqname);
+    SOPC_ASSERT(NULL != pqname);
     parse_complex_value_tag_t* currentTagCtx = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     bool ns_index_ok = complex_value_tag_from_tag_name_no_namespace("NamespaceIndex", tagsContext, &currentTagCtx);
-    assert(ns_index_ok && "QualifiedName without namespace index.");
+    SOPC_ASSERT(ns_index_ok && "QualifiedName without namespace index.");
 
     uint16_t namespaceindex = 0;
     status = SOPC_strtouint16_t(currentTagCtx->single_value, &namespaceindex, 10, '\0');
-    assert(SOPC_STATUS_OK == status && "Unable to convert QualifiedName index to uint16.");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "Unable to convert QualifiedName index to uint16.");
 
     bool name_ok = complex_value_tag_from_tag_name_no_namespace("Name", tagsContext, &currentTagCtx);
-    assert(name_ok && "QualifiedName without name.");
+    SOPC_ASSERT(name_ok && "QualifiedName without name.");
 
     const char* name = currentTagCtx->single_value;
     if (!currentTagCtx->set)
@@ -1884,7 +1883,7 @@ static bool set_variant_value_complex(SOPC_Variant* var,
     case SOPC_String_Id:
     case SOPC_ByteString_Id:
     case SOPC_XmlElement_Id: // TODO: not a simple type but not a complex one neither
-        assert(false && "Unexpected simple type");
+        SOPC_ASSERT(false && "Unexpected simple type");
         break;
     case SOPC_QualifiedName_Id:
         ok = set_variant_value_qualified_name(&var->Value.Qname, tagsContext);
@@ -1902,7 +1901,7 @@ static bool set_variant_value_complex(SOPC_Variant* var,
         ok = set_variant_value_extensionobject(&var->Value.ExtObject, tagsContext);
         break;
     default:
-        assert(false && "Cannot parse current value type.");
+        SOPC_ASSERT(false && "Cannot parse current value type.");
     }
 
     if (ok)
@@ -1915,7 +1914,7 @@ static bool set_variant_value_complex(SOPC_Variant* var,
 
 static bool set_element_value_scalar(struct parse_context_t* ctx)
 {
-    assert(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
+    SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_SingleValue);
 
     SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
     bool ok = false;
@@ -1939,7 +1938,7 @@ static bool set_element_value_scalar(struct parse_context_t* ctx)
 
 static bool append_element_value(struct parse_context_t* ctx)
 {
-    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+    SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
 
     SOPC_Variant* var = SOPC_Variant_Create();
 
@@ -1984,9 +1983,9 @@ static bool SOPC_Variant_MoveExtensionObjectInto_ArrayValueAt(const SOPC_Variant
                                                               int32_t index,
                                                               SOPC_ExtensionObject* extObj)
 {
-    assert(SOPC_VariantArrayType_Array == var->ArrayType);
-    assert(SOPC_ExtensionObject_Id == var->BuiltInTypeId);
-    assert(var->Value.Array.Length > index);
+    SOPC_ASSERT(SOPC_VariantArrayType_Array == var->ArrayType);
+    SOPC_ASSERT(SOPC_ExtensionObject_Id == var->BuiltInTypeId);
+    SOPC_ASSERT(var->Value.Array.Length > index);
 
     return SOPC_STATUS_OK == SOPC_ExtensionObject_Move(&var->Value.Array.Content.ExtObjectArr[index], extObj);
 }
@@ -1995,7 +1994,7 @@ static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_B
 {
     size_t length = SOPC_Array_Size(var_arr);
 
-    assert(length <= INT32_MAX);
+    SOPC_ASSERT(length <= INT32_MAX);
     bool res = SOPC_Variant_Initialize_Array(var, builtInId, (int32_t) length);
 
     if (!res)
@@ -2007,7 +2006,7 @@ static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_B
     for (size_t i = 0; i < length && res; i++)
     {
         SOPC_Variant* lvar = SOPC_Array_Get_Ptr(var_arr, i);
-        assert(builtInId == lvar->BuiltInTypeId);
+        SOPC_ASSERT(builtInId == lvar->BuiltInTypeId);
         const void* value = SOPC_Variant_Get_SingleValue(lvar, builtInId);
         if (SOPC_ExtensionObject_Id != builtInId)
         {
@@ -2031,8 +2030,8 @@ static bool SOPC_Array_Of_Variant_Into_Variant_Array(SOPC_Array* var_arr, SOPC_B
 
 static bool set_element_value_array(struct parse_context_t* ctx)
 {
-    assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
-    assert(ctx->list_nodes != NULL);
+    SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
+    SOPC_ASSERT(ctx->list_nodes != NULL);
 
     SOPC_Variant* var = SOPC_AddressSpace_Get_Value(ctx->space, &ctx->node);
 
@@ -2050,7 +2049,7 @@ static bool finalize_node(struct parse_context_t* ctx)
     if (ctx->references != NULL)
     {
         size_t n_references = SOPC_Array_Size(ctx->references);
-        assert(n_references <= INT32_MAX);
+        SOPC_ASSERT(n_references <= INT32_MAX);
 
         *SOPC_AddressSpace_Get_NoOfReferences(ctx->space, &ctx->node) = (int32_t) n_references;
         *SOPC_AddressSpace_Get_References(ctx->space, &ctx->node) = SOPC_Array_Into_Raw(ctx->references);
@@ -2103,7 +2102,7 @@ static void end_of_single_value_parsing(struct parse_context_t* ctx)
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -2120,7 +2119,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
         parse_complex_value_tag_t* identifierTagCtx = NULL;
         bool id_tag_ok =
             complex_value_tag_from_tag_name_no_namespace("Identifier", currentTagCtx->childs, &identifierTagCtx);
-        assert(id_tag_ok);
+        SOPC_ASSERT(id_tag_ok);
 
         SOPC_NodeId* nodeId =
             SOPC_NodeId_FromCString(identifierTagCtx->single_value, (int32_t) strlen(identifierTagCtx->single_value));
@@ -2132,7 +2131,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
             parse_complex_value_tag_t* bodyTagCtx = NULL;
             bool body_tag_ok =
                 complex_value_tag_from_tag_name_no_namespace("Body", ctx->complex_value_ctx.tags, &bodyTagCtx);
-            assert(body_tag_ok);
+            SOPC_ASSERT(body_tag_ok);
             // Fill the Body tag children context and retrieve encodeableType
             const void* encType = ext_obj_body_from_its_type_id(nodeId->Data.Numeric, &bodyTagCtx->childs);
             if (NULL != encType)
@@ -2152,7 +2151,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
     }
     else // end of Body shall not trigger this function (is_extension_object set to false on Body start)
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (!ok)
@@ -2175,7 +2174,7 @@ static bool end_in_extension_object(struct parse_context_t* ctx, parse_complex_v
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
         ctx->current_array_type = SOPC_VariantArrayType_SingleValue;
         ctx->state = PARSE_NODE_VALUE;
@@ -2251,22 +2250,22 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_NODE;
         break;
     case PARSE_NODE_VALUE_SCALAR:
-        assert(ctx->current_value_type != SOPC_Null_Id);
+        SOPC_ASSERT(ctx->current_value_type != SOPC_Null_Id);
 
         end_of_single_value_parsing(ctx);
 
         break;
     case PARSE_NODE_VALUE_SCALAR_COMPLEX:
-        assert(current_element_has_value(ctx));
-        assert(NULL != ctx->complex_value_ctx.end_element_restore_context);
+        SOPC_ASSERT(current_element_has_value(ctx));
+        SOPC_ASSERT(NULL != ctx->complex_value_ctx.end_element_restore_context);
         // Restore context of current tag
         ctx->complex_value_ctx.tags = SOPC_SLinkedList_PopHead(ctx->complex_value_ctx.end_element_restore_context);
-        assert(NULL != ctx->complex_value_ctx.tags);
+        SOPC_ASSERT(NULL != ctx->complex_value_ctx.tags);
 
         // Check if it is the complex value closing node
         if (0 == SOPC_SLinkedList_GetLength(ctx->complex_value_ctx.end_element_restore_context))
         {
-            assert(strncmp(name, ctx->complex_value_ctx.value_tag, strlen(name)) == 0);
+            SOPC_ASSERT(strncmp(name, ctx->complex_value_ctx.value_tag, strlen(name)) == 0);
 
             end_of_single_value_parsing(ctx);
             clear_complex_value_context(&ctx->complex_value_ctx);
@@ -2324,7 +2323,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         break;
     case PARSE_NODE_VALUE_ARRAY:
-        assert(ctx->current_array_type == SOPC_VariantArrayType_Array);
+        SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
 
         if (!set_element_value_array(ctx))
         {
@@ -2365,16 +2364,16 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODESET:
         break;
     case PARSE_START:
-        assert(false && "Got end_element callback when in PARSE_START state.");
+        SOPC_ASSERT(false && "Got end_element callback when in PARSE_START state.");
         break;
     default:
-        assert(false && "Unknown state.");
+        SOPC_ASSERT(false && "Unknown state.");
     }
 }
 
 static void char_data_handler(void* user_data, const XML_Char* s, int len)
 {
-    assert(len >= 0);
+    SOPC_ASSERT(len >= 0);
 
     struct parse_context_t* ctx = user_data;
 

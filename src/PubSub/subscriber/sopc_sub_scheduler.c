@@ -20,6 +20,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#include "sopc_sub_scheduler.h"
+
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -36,7 +38,6 @@
 #include "sopc_pubsub_helpers.h"
 #include "sopc_pubsub_protocol.h"
 #include "sopc_reader_layer.h"
-#include "sopc_sub_scheduler.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"

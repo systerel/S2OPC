@@ -19,8 +19,6 @@
 
 #include "sopc_sockets_api.h"
 
-#include <assert.h>
-
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_raw_sockets.h"

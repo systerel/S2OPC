@@ -23,7 +23,6 @@
  *
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
@@ -327,14 +326,14 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
     {
         SOPC_StaMac_Machine* pSM = *ppSM;
         SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_SLinkedList_Apply(pSM->pListReqCtx, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Delete(pSM->pListReqCtx);
         pSM->pListReqCtx = NULL;
         SOPC_SLinkedList_Delete(pSM->pListMonIt);
         pSM->pListMonIt = NULL;
         status = Mutex_Unlock(&pSM->mutex);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         Mutex_Clear(&pSM->mutex);
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_Free((void*) pSM->szPolicyId);
@@ -362,7 +361,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (pSM->state != stInit)
     {
@@ -468,7 +467,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
     }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -476,7 +475,7 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
 SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
 {
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (!SOPC_StaMac_IsConnected(pSM))
@@ -493,7 +492,7 @@ SOPC_ReturnStatus SOPC_StaMac_StopSession(SOPC_StaMac_Machine* pSM)
     }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -512,7 +511,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    assert(SOPC_REQUEST_SCOPE_STATE_MACHINE == requestScope || SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
+    SOPC_ASSERT(SOPC_REQUEST_SCOPE_STATE_MACHINE == requestScope || SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
 
     pReqCtx = SOPC_Malloc(sizeof(SOPC_StaMac_ReqCtx));
     if (NULL == pReqCtx)
@@ -521,7 +520,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Adds it to the list of yet-to-be-answered requests */
     pReqCtx->appCtx = appCtx;
@@ -547,7 +546,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -666,7 +665,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (stActivated != pSM->state)
     {
@@ -737,7 +736,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     lpNid = NULL;
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -750,10 +749,10 @@ bool SOPC_StaMac_IsConnectable(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     bool return_code = (stInit == pSM->state);
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
 }
@@ -766,7 +765,7 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     bool bConnected = false;
     switch (pSM->state)
@@ -783,7 +782,7 @@ bool SOPC_StaMac_IsConnected(SOPC_StaMac_Machine* pSM)
     }
 
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return bConnected;
 }
@@ -796,10 +795,10 @@ bool SOPC_StaMac_IsError(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     bool return_code = (stError == pSM->state);
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
 }
@@ -812,10 +811,10 @@ void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     pSM->state = stError;
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
@@ -826,10 +825,10 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     bool return_code = (0 != pSM->iSubscriptionID);
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
 }
@@ -842,7 +841,7 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitored
     }
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     bool bHasMonIt = false;
     SOPC_SLinkedListIterator pIter = NULL;
     pIter = SOPC_SLinkedList_GetIterator(pSM->pListMonIt);
@@ -856,26 +855,26 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitored
     }
 
     status = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return bHasMonIt;
 }
 
 int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM)
 {
-    assert(NULL != pSM);
+    SOPC_ASSERT(NULL != pSM);
     return pSM->iTimeoutMs;
 }
 
 uintptr_t SOPC_StaMac_GetUserContext(SOPC_StaMac_Machine* pSM)
 {
-    assert(NULL != pSM);
+    SOPC_ASSERT(NULL != pSM);
     return pSM->userContext;
 }
 
 void SOPC_StaMac_SetUserContext(SOPC_StaMac_Machine* pSM, uintptr_t userContext)
 {
-    assert(NULL != pSM);
+    SOPC_ASSERT(NULL != pSM);
     pSM->userContext = userContext;
 }
 
@@ -1052,7 +1051,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     SOPC_StaMac_RequestScope requestScope = SOPC_REQUEST_SCOPE_STATE_MACHINE;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, event, arg, pParam, toolkitCtx);
 
     if (bProcess)
@@ -1202,7 +1201,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         /* Forward the event to the generic event callback if it is not an error */
         else
         {
-            assert(SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
+            SOPC_ASSERT(SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
             if (SE_SND_REQUEST_FAILED == event)
             {
                 pSM->state = stClosing;
@@ -1226,7 +1225,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return bProcess;
 }
@@ -1374,7 +1373,7 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     /* Take note to acknowledge later. There is no ack with KeepAlive. */
     /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
      * it would be more appropriate to have a list of SeqNumbsToAck... */
-    assert(!pSM->bAckSubscr);
+    SOPC_ASSERT(!pSM->bAckSubscr);
     if (0 < pPubResp->NoOfAvailableSequenceNumbers)
     {
         pSM->bAckSubscr = true;
@@ -1393,11 +1392,11 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     /* Traverse the notifications and calls the callback */
     pNotifMsg = &pPubResp->NotificationMessage;
     /* For now, only handles at most a NotificationData */
-    assert(1 >= pNotifMsg->NoOfNotificationData);
+    SOPC_ASSERT(1 >= pNotifMsg->NoOfNotificationData);
     if (0 < pNotifMsg->NoOfNotificationData)
     {
-        assert(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
-        assert(&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[0].Body.Object.ObjType);
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
+        SOPC_ASSERT(&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[0].Body.Object.ObjType);
         pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
         for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
         {
@@ -1437,7 +1436,7 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
     SOPC_UNUSED_ARG(appCtx);
     /* TODO: verify revised values?? */
 
-    assert(0 == pSM->iSubscriptionID);
+    SOPC_ASSERT(0 == pSM->iSubscriptionID);
     pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription created.");
     pSM->state = stActivated;
@@ -1451,7 +1450,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
 
-    assert(pSM->iSubscriptionID != 0);
+    SOPC_ASSERT(pSM->iSubscriptionID != 0);
     if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
     {
         /* we should have deleted only one subscription */
@@ -1489,7 +1488,7 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
     /* There should be only one result element */
     pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
     SOPC_CreateMonitoredItem_Ctx* MIappCtx = (SOPC_CreateMonitoredItem_Ctx*) appCtx;
-    assert(NULL != pMonItResp);
+    SOPC_ASSERT(NULL != pMonItResp);
 
     for (i = 0; i < pMonItResp->NoOfResults; ++i)
     {
@@ -1629,7 +1628,7 @@ static void StaMac_ProcessEvent_stError(SOPC_StaMac_Machine* pSM,
  */
 static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_State oldState)
 {
-    assert(NULL != pSM);
+    SOPC_ASSERT(NULL != pSM);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     void* pRequest = NULL;

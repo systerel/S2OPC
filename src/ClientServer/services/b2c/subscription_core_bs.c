@@ -25,11 +25,11 @@
   --------------*/
 #include "constants.h"
 
-#include <assert.h>
 #include <math.h>
 
 #include "address_space_impl.h"
 #include "inttypes.h"
+#include "sopc_assert.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_services_api_internal.h"
@@ -49,10 +49,10 @@ static void free_monitored_item_queue(void* data)
   ------------------------*/
 void subscription_core_bs__INITIALISATION(void)
 {
-    assert(nodeIdToMonitoredItemQueue == NULL);
+    SOPC_ASSERT(nodeIdToMonitoredItemQueue == NULL);
 
     nodeIdToMonitoredItemQueue = SOPC_NodeId_Dict_Create(true, free_monitored_item_queue);
-    assert(nodeIdToMonitoredItemQueue != NULL);
+    SOPC_ASSERT(nodeIdToMonitoredItemQueue != NULL);
 }
 
 void subscription_core_bs__subscription_core_bs_UNINITIALISATION(void)

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_buffer.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
@@ -201,7 +201,7 @@ SOPC_ReturnStatus SOPC_Buffer_SetDataLength(SOPC_Buffer* buffer, uint32_t length
  */
 static bool SOPC_Buffer_CheckSizeAndResize(SOPC_Buffer* buffer, uint32_t totalNbBytes, bool exactResize)
 {
-    assert(buffer != NULL);
+    SOPC_ASSERT(buffer != NULL);
     if (totalNbBytes <= buffer->current_size)
     {
         // Enough bytes available in current buffer allocated bytes
@@ -314,7 +314,7 @@ SOPC_ReturnStatus SOPC_Buffer_CopyWithLength(SOPC_Buffer* dest, SOPC_Buffer* src
     if (dest != NULL && src != NULL && dest->data != NULL && src->data != NULL && src->length >= limitedLength &&
         src->position <= limitedLength)
     {
-        assert(src->position <= src->length);
+        SOPC_ASSERT(src->position <= src->length);
 
         if (SOPC_Buffer_CheckSizeAndResize(dest, limitedLength, true))
         {
@@ -351,7 +351,7 @@ SOPC_ReturnStatus SOPC_Buffer_Copy(SOPC_Buffer* dest, SOPC_Buffer* src)
 
 uint32_t SOPC_Buffer_Remaining(SOPC_Buffer* buffer)
 {
-    assert(buffer != NULL);
+    SOPC_ASSERT(buffer != NULL);
     return buffer->length - buffer->position;
 }
 

@@ -22,10 +22,9 @@
  * Implements the base machine for the constants
  */
 
-#include <assert.h>
-
-#include "b2c.h"
 #include "constants_bs.h"
+#include "b2c.h"
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -220,7 +219,7 @@ void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i co
 
 void constants_bs__free_LocaleIds(const constants_bs__t_LocaleIds_i constants_bs__p_in)
 {
-    assert(constants_bs__c_LocaleIds_indet != constants_bs__p_in);
+    SOPC_ASSERT(constants_bs__c_LocaleIds_indet != constants_bs__p_in);
     uint32_t idx = 0;
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     char* cstring = constants_bs__p_in[idx];

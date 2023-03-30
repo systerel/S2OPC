@@ -19,7 +19,6 @@
 
 #include "sopc_xml_loader.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <float.h>
 #include <stdbool.h>
@@ -29,6 +28,7 @@
 
 #include "expat.h"
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
@@ -315,7 +315,7 @@ static bool parse_boolean(const char* data, size_t len, bool* dest)
 
 static bool copy_any_string_attribute_value(char** to, const char* from)
 {
-    assert(to != NULL);
+    SOPC_ASSERT(to != NULL);
     bool result = false;
     *to = SOPC_Malloc(strlen(from) + 1);
     if (NULL == *to)
@@ -356,7 +356,7 @@ static bool parse_attributes(const XML_Char** attrs,
                              void* user_param)
 {
     bool result = true;
-    assert(NULL != callback && NULL != attrs);
+    SOPC_ASSERT(NULL != callback && NULL != attrs);
     for (size_t i = 0; attrs[i] && result; ++i)
     {
         // Current attribute name
@@ -385,7 +385,7 @@ static bool parse_connection_attributes(const char* attr_name,
                                         void* user_param)
 {
     bool result = false;
-    assert(NULL != user_param);
+    SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_connection_t* connection = (struct sopc_xml_pubsub_connection_t*) user_param;
 
     if (TEXT_EQUALS(ATTR_CONNECTION_ADDR, attr_name))
@@ -480,7 +480,7 @@ static bool parse_message_attributes(const char* attr_name,
 {
     (void) ctx;
     bool result = false;
-    assert(NULL != user_param);
+    SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_message_t* msg = (struct sopc_xml_pubsub_message_t*) user_param;
 
     if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHING_ITV, attr_name))
@@ -601,7 +601,7 @@ static bool parse_dataset_attributes(const char* attr_name,
 {
     (void) ctx;
     bool result = false;
-    assert(NULL != user_param);
+    SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_dataset_t* ds = (struct sopc_xml_pubsub_dataset_t*) user_param;
     ds->writer_id = 0;
 
@@ -625,7 +625,7 @@ static bool parse_dataset_attributes(const char* attr_name,
 static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_dataset_t* ds, const XML_Char** attrs)
 {
     memset(ds, 0, sizeof *ds);
-    assert(NULL != ctx->currentMessage);
+    SOPC_ASSERT(NULL != ctx->currentMessage);
     ds->writer_id = 0;
 
     bool result = parse_attributes(attrs, parse_dataset_attributes, ctx, (void*) ds);
@@ -666,12 +666,12 @@ static bool parse_variable_attributes(const char* attr_name,
 {
     (void) ctx;
     bool result = false;
-    assert(NULL != user_param);
+    SOPC_ASSERT(NULL != user_param);
     struct sopc_xml_pubsub_variable_t* var = (struct sopc_xml_pubsub_variable_t*) user_param;
 
     if (TEXT_EQUALS(ATTR_VARIABLE_NODE_ID, attr_name))
     {
-        assert(strlen(attr_val) <= INT32_MAX);
+        SOPC_ASSERT(strlen(attr_val) <= INT32_MAX);
         var->nodeId = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
         result = (NULL != var->nodeId);
     }
@@ -778,19 +778,19 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         if (NULL == ctx->connectionArr)
         {
-            assert(ctx->nb_connections == 0);
+            SOPC_ASSERT(ctx->nb_connections == 0);
             ctx->connectionArr = SOPC_Malloc(sizeof *ctx->connectionArr);
             ctx->nb_connections = 1;
-            assert(NULL != ctx->connectionArr);
+            SOPC_ASSERT(NULL != ctx->connectionArr);
         }
         else
         {
-            assert(ctx->nb_connections > 0);
+            SOPC_ASSERT(ctx->nb_connections > 0);
             ctx->nb_connections++;
             ctx->connectionArr =
                 SOPC_Realloc(ctx->connectionArr, (size_t)(ctx->nb_connections - 1) * sizeof *ctx->connectionArr,
                              ctx->nb_connections * sizeof *ctx->connectionArr);
-            assert(NULL != ctx->connectionArr);
+            SOPC_ASSERT(NULL != ctx->connectionArr);
         }
         if (!start_connection(ctx, attrs))
         {
@@ -808,19 +808,19 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
         if (NULL == connection->messageArr)
         {
-            assert(connection->nb_messages == 0);
+            SOPC_ASSERT(connection->nb_messages == 0);
             connection->messageArr = SOPC_Malloc(sizeof *connection->messageArr);
             connection->nb_messages = 1;
-            assert(NULL != connection->messageArr);
+            SOPC_ASSERT(NULL != connection->messageArr);
         }
         else
         {
-            assert(connection->nb_messages > 0);
+            SOPC_ASSERT(connection->nb_messages > 0);
             connection->nb_messages++;
             connection->messageArr = SOPC_Realloc(
                 connection->messageArr, (size_t)(connection->nb_messages - 1) * sizeof *connection->messageArr,
                 connection->nb_messages * sizeof *connection->messageArr);
-            assert(NULL != connection->messageArr);
+            SOPC_ASSERT(NULL != connection->messageArr);
         }
         if (!start_message(ctx, &connection->messageArr[connection->nb_messages - 1], attrs))
         {
@@ -836,23 +836,23 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        assert(NULL != connection);
+        SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
         ctx->currentMessage = msg;
         if (NULL == msg->datasetArr)
         {
-            assert(msg->nb_datasets == 0);
+            SOPC_ASSERT(msg->nb_datasets == 0);
             msg->datasetArr = SOPC_Malloc(sizeof *msg->datasetArr);
             msg->nb_datasets = 1;
-            assert(NULL != msg->datasetArr);
+            SOPC_ASSERT(NULL != msg->datasetArr);
         }
         else
         {
-            assert(msg->nb_datasets > 0);
+            SOPC_ASSERT(msg->nb_datasets > 0);
             msg->nb_datasets++;
             msg->datasetArr = SOPC_Realloc(msg->datasetArr, (size_t)(msg->nb_datasets - 1) * sizeof *msg->datasetArr,
                                            msg->nb_datasets * sizeof *msg->datasetArr);
-            assert(NULL != msg->datasetArr);
+            SOPC_ASSERT(NULL != msg->datasetArr);
         }
         if (!start_dataset(ctx, &msg->datasetArr[msg->nb_datasets - 1], attrs))
         {
@@ -868,24 +868,24 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             return;
         }
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        assert(NULL != connection);
+        SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
-        assert(NULL != msg);
+        SOPC_ASSERT(NULL != msg);
         ds = &msg->datasetArr[msg->nb_datasets - 1];
         if (NULL == ds->variableArr)
         {
-            assert(ds->nb_variables == 0);
+            SOPC_ASSERT(ds->nb_variables == 0);
             ds->variableArr = SOPC_Malloc(sizeof *ds->variableArr);
             ds->nb_variables = 1;
-            assert(NULL != ds->variableArr);
+            SOPC_ASSERT(NULL != ds->variableArr);
         }
         else
         {
-            assert(ds->nb_variables > 0);
+            SOPC_ASSERT(ds->nb_variables > 0);
             ds->nb_variables++;
             ds->variableArr = SOPC_Realloc(ds->variableArr, (size_t)(ds->nb_variables - 1) * sizeof *ds->variableArr,
                                            ds->nb_variables * sizeof *ds->variableArr);
-            assert(NULL != ds->variableArr);
+            SOPC_ASSERT(NULL != ds->variableArr);
         }
         if (!start_variable(ctx, &ds->variableArr[ds->nb_variables - 1], attrs))
         {
@@ -911,7 +911,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_CONNECTION:
         ctx->state = PARSE_PUBSUB;
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        assert(NULL != connection);
+        SOPC_ASSERT(NULL != connection);
         if ((NULL == connection->mqttPassword) != (NULL == connection->mqttUsername))
         {
             LOG("mqttPassword and mqttUsername must be set together.");
@@ -922,9 +922,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_MESSAGE:
         // It must be ensured that all dataset have consistent writerId (all 0 or all non-0)
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        assert(NULL != connection);
+        SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
-        assert(NULL != msg);
+        SOPC_ASSERT(NULL != msg);
         if (msg->nb_datasets == 0)
         {
             LOG("Message requires at least one DataSet.");
@@ -958,10 +958,10 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_DATASET:
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
-        assert(NULL != connection);
+        SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
-        assert(NULL != msg);
-        assert(msg->nb_datasets > 0);
+        SOPC_ASSERT(NULL != msg);
+        SOPC_ASSERT(msg->nb_datasets > 0);
         // Check that there is no duplicate of writerid for the same Group
         for (int jDs = 0; jDs < msg->nb_datasets - 1; ++jDs)
         {
@@ -983,11 +983,11 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         break;
     case PARSE_START:
         LOG_XML_ERROR("Got end_element callback when in PARSE_START state.");
-        assert(false);
+        SOPC_ASSERT(false);
         break;
     default:
         LOG_XML_ERROR("Unknown state.");
-        assert(false);
+        SOPC_ASSERT(false);
         break;
     }
 }
@@ -1007,7 +1007,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             SOPC_PubSubConfiguration_Allocate_SubConnection_Array(config, ctx->nb_connections - ctx->nb_pubconnections);
     }
 
-    assert(ctx->nb_messages <= UINT16_MAX);
+    SOPC_ASSERT(ctx->nb_messages <= UINT16_MAX);
 
     if (ctx->has_publisher && allocSuccess)
     {
@@ -1022,10 +1022,10 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
         if (p_connection->is_publisher)
         {
-            assert(ctx->has_publisher); // Checked on parsing
+            SOPC_ASSERT(ctx->has_publisher); // Checked on parsing
 
             connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, pubicon);
-            assert(NULL != connection);
+            SOPC_ASSERT(NULL != connection);
             pubicon++;
 
             // Publisher connection
@@ -1056,7 +1056,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
 
                 // Associate dataSet with writer
-                assert(msg->nb_datasets < 0x100);
+                SOPC_ASSERT(msg->nb_datasets < 0x100);
                 allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
@@ -1074,7 +1074,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_PublishedDataSet_Init(pubDataSet, type, ds->nb_variables);
 
                     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
-                    assert(dataSetWriter != NULL);
+                    SOPC_ASSERT(dataSetWriter != NULL);
                     SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id);
 
                     SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
@@ -1085,12 +1085,12 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
                         SOPC_FieldMetaData* fieldMetaData =
                             SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, ivar);
-                        assert(fieldMetaData != NULL);
+                        SOPC_ASSERT(fieldMetaData != NULL);
                         SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
 
                         SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
-                        assert(publishedVar != NULL);
+                        SOPC_ASSERT(publishedVar != NULL);
                         SOPC_PublishedVariable_Set_NodeId(publishedVar, var->nodeId);
                         var->nodeId = NULL; // Transfer ownership to publishedVariable
 
@@ -1104,7 +1104,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
         {
             // Subscriber connection
             connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, subicon);
-            assert(NULL != connection);
+            SOPC_ASSERT(NULL != connection);
             subicon++;
 
             allocSuccess = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, p_connection->nb_messages);
@@ -1113,14 +1113,14 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 struct sopc_xml_pubsub_message_t* msg = &p_connection->messageArr[imsg];
                 // Create reader group
                 SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, imsg);
-                assert(readerGroup != NULL);
+                SOPC_ASSERT(readerGroup != NULL);
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
                 SOPC_ReaderGroup_Set_GroupVersion(readerGroup, msg->groupVersion);
                 SOPC_ReaderGroup_Set_GroupId(readerGroup, msg->groupId);
 
                 SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id);
 
-                assert(msg->nb_datasets < 0x100);
+                SOPC_ASSERT(msg->nb_datasets < 0x100);
                 allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
 
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
@@ -1128,7 +1128,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
 
                     SOPC_DataSetReader* dataSetReader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, ids);
-                    assert(dataSetReader != NULL);
+                    SOPC_ASSERT(dataSetReader != NULL);
                     SOPC_DataSetReader_Set_DataSetWriterId(dataSetReader, ds->writer_id);
                     SOPC_DataSetReader_Set_ReceiveTimeout(dataSetReader, 2 * msg->publishing_interval);
 
@@ -1146,7 +1146,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                         SOPC_FieldMetaData* fieldMetaData =
                             SOPC_DataSetReader_Get_FieldMetaData_At(dataSetReader, ivar);
-                        assert(fieldMetaData != NULL);
+                        SOPC_ASSERT(fieldMetaData != NULL);
 
                         /* FieldMetaData: type the field */
                         SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
@@ -1154,7 +1154,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                         /* FieldTarget: link to the source/target data */
                         SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
-                        assert(fieldTarget != NULL);
+                        SOPC_ASSERT(fieldTarget != NULL);
                         SOPC_FieldTarget_Set_NodeId(fieldTarget, var->nodeId);
                         var->nodeId = NULL; // Transfer ownership to fieldTarget
                         // SOPC_FieldTarget_Set_SourceIndexes() => no indexRange

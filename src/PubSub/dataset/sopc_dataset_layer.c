@@ -19,8 +19,9 @@
 
 #include <string.h>
 
-#include "sopc_assert.h"
 #include "sopc_dataset_layer.h"
+
+#include "sopc_assert.h"
 #include "sopc_dataset_ll_layer.h"
 
 static const SOPC_DataSet_LL_UadpDataSetMessageContentMask default_Uapd_DSM_Mask = {

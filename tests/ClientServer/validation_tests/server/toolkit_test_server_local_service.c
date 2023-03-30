@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
@@ -68,7 +68,7 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
         OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) response;
         cptReadResps++;
         // Check context value is same as those provided with request
-        assert(cptReadResps == appContext);
+        SOPC_ASSERT(cptReadResps == appContext);
         if (cptReadResps <= 1)
         {
             test_results_set_service_result(
@@ -83,7 +83,7 @@ static void SOPC_LocalServiceAsyncRespCallback(SOPC_EncodeableType* encType, voi
     else if (encType == &OpcUa_WriteResponse_EncodeableType)
     {
         // Check context value is same as one provided with request
-        assert(1 == appContext);
+        SOPC_ASSERT(1 == appContext);
         printf("<Test_Server_Local_Service: received local service  WriteResponse \n");
         OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) response;
         test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));

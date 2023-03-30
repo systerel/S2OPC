@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -61,13 +61,13 @@ void SOPC_AddressSpace_Node_Initialize(SOPC_AddressSpace* space,
                                        SOPC_AddressSpace_Node* node,
                                        OpcUa_NodeClass node_class)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node_class)
     {
         FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_INITIALIZE_CASE, NULL)
     default:
-        assert(false && "Unknown element type");
+        SOPC_ASSERT(false && "Unknown element type");
     }
 
     node->node_class = node_class;
@@ -186,8 +186,8 @@ static const bool NODE_CLASS_TO_ATTRIBS[SOPC_InternalNodeClass_View + 1]
 
 bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_AttributeId attribute)
 {
-    assert(NULL != space);
-    assert(NULL != node);
+    SOPC_ASSERT(NULL != space);
+    SOPC_ASSERT(NULL != node);
 
     if ((int64_t) attribute <= (int64_t) SOPC_AttributeId_Invalid)
     {
@@ -248,13 +248,13 @@ bool SOPC_AddressSpace_Has_Attribute(SOPC_AddressSpace* space, SOPC_AddressSpace
 #define ELEMENT_ATTRIBUTE_GETTER(ret_type, name)                                                   \
     ret_type* SOPC_AddressSpace_Get_##name(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node) \
     {                                                                                              \
-        assert(space != NULL);                                                                     \
-        assert(node->node_class > 0);                                                              \
+        SOPC_ASSERT(space != NULL);                                                                \
+        SOPC_ASSERT(node->node_class > 0);                                                         \
         switch (node->node_class)                                                                  \
         {                                                                                          \
             FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_GETTER_CASE, name)                             \
         default:                                                                                   \
-            assert(false && "Unknown element type");                                               \
+            SOPC_ASSERT(false && "Unknown element type");                                          \
             return NULL;                                                                           \
         }                                                                                          \
     }
@@ -279,14 +279,14 @@ static SOPC_Variant* SOPC_AddressSpace_Node_Get_Value(SOPC_AddressSpace_Node* no
     case OpcUa_NodeClass_VariableType:
         return &node->data.variable_type.Value;
     default:
-        assert(false && "Current element has no value.");
+        SOPC_ASSERT(false && "Current element has no value.");
         return NULL;
     }
 }
 
 SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -296,8 +296,8 @@ SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_Address
             /* When the address space is constant, the only variable part is the variant array space->variables defined
              * outside of the node. In this case the node variable variant content data.variable.Value.Value shall be
              * the index in this array and therefore shall be a single value UInt32 */
-            assert(SOPC_VariantArrayType_SingleValue == node->data.variable.Value.ArrayType);
-            assert(SOPC_UInt32_Id == node->data.variable.Value.BuiltInTypeId);
+            SOPC_ASSERT(SOPC_VariantArrayType_SingleValue == node->data.variable.Value.ArrayType);
+            SOPC_ASSERT(SOPC_UInt32_Id == node->data.variable.Value.BuiltInTypeId);
             return &space->variables[node->data.variable.Value.Value.Uint32];
         }
         else
@@ -307,14 +307,14 @@ SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_Address
     case OpcUa_NodeClass_VariableType:
         return &node->data.variable_type.Value;
     default:
-        assert(false && "Current element has no value.");
+        SOPC_ASSERT(false && "Current element has no value.");
         return NULL;
     }
 }
 
 SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -323,14 +323,14 @@ SOPC_NodeId* SOPC_AddressSpace_Get_DataType(SOPC_AddressSpace* space, SOPC_Addre
     case OpcUa_NodeClass_VariableType:
         return &node->data.variable_type.DataType;
     default:
-        assert(false && "Current element has no data type.");
+        SOPC_ASSERT(false && "Current element has no data type.");
         return NULL;
     }
 }
 
 int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -339,14 +339,14 @@ int32_t* SOPC_AddressSpace_Get_ValueRank(SOPC_AddressSpace* space, SOPC_AddressS
     case OpcUa_NodeClass_VariableType:
         return &node->data.variable_type.ValueRank;
     default:
-        assert(false && "Current element has no value rank.");
+        SOPC_ASSERT(false && "Current element has no value rank.");
         return NULL;
     }
 }
 
 int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -355,14 +355,14 @@ int32_t SOPC_AddressSpace_Get_NoOfArrayDimensions(SOPC_AddressSpace* space, SOPC
     case OpcUa_NodeClass_VariableType:
         return node->data.variable_type.NoOfArrayDimensions;
     default:
-        assert(false && "Current element has no NoOfDimensions.");
+        SOPC_ASSERT(false && "Current element has no NoOfDimensions.");
         return -1;
     }
 }
 
 uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -371,42 +371,42 @@ uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_A
     case OpcUa_NodeClass_VariableType:
         return node->data.variable_type.ArrayDimensions;
     default:
-        assert(false && "Current element has no ArrayDimensions.");
+        SOPC_ASSERT(false && "Current element has no ArrayDimensions.");
         return NULL;
     }
 }
 
 SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
     case OpcUa_NodeClass_Variable:
         return node->data.variable.AccessLevel;
     default:
-        assert(false && "Current element has no access level.");
+        SOPC_ASSERT(false && "Current element has no access level.");
         return 0;
     }
 }
 
 SOPC_Boolean SOPC_AddressSpace_Get_Executable(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
     case OpcUa_NodeClass_Method:
         return node->data.method.Executable;
     default:
-        assert(false && "Current element has no Executable attribute.");
+        SOPC_ASSERT(false && "Current element has no Executable attribute.");
         return false;
     }
 }
 
 SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     switch (node->node_class)
     {
@@ -419,14 +419,14 @@ SOPC_Boolean* SOPC_AddressSpace_Get_IsAbstract(SOPC_AddressSpace* space, SOPC_Ad
     case OpcUa_NodeClass_DataType:
         return &node->data.data_type.IsAbstract;
     default:
-        assert(false && "Current element has no IsAbstract attribute.");
+        SOPC_ASSERT(false && "Current element has no IsAbstract attribute.");
         return NULL;
     }
 }
 
 SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (!space->readOnlyNodes)
     {
@@ -440,7 +440,7 @@ SOPC_StatusCode SOPC_AddressSpace_Get_StatusCode(SOPC_AddressSpace* space, SOPC_
 
 bool SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_StatusCode status)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (!space->readOnlyNodes)
     {
@@ -452,7 +452,7 @@ bool SOPC_AddressSpace_Set_StatusCode(SOPC_AddressSpace* space, SOPC_AddressSpac
 
 SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (!space->readOnlyNodes)
     {
@@ -467,7 +467,7 @@ SOPC_Value_Timestamp SOPC_AddressSpace_Get_SourceTs(SOPC_AddressSpace* space, SO
 
 bool SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node, SOPC_Value_Timestamp ts)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (!space->readOnlyNodes)
     {
@@ -479,20 +479,20 @@ bool SOPC_AddressSpace_Set_SourceTs(SOPC_AddressSpace* space, SOPC_AddressSpace_
 
 static void SOPC_AddressSpace_Node_Clear_Local(SOPC_AddressSpace_Node* node)
 {
-    assert(NULL != node);
-    assert(node->node_class > 0);
+    SOPC_ASSERT(NULL != node);
+    SOPC_ASSERT(node->node_class > 0);
 
     switch (node->node_class)
     {
         FOR_EACH_ELEMENT_TYPE(ELEMENT_ATTRIBUTE_CLEAR_CASE, NULL)
     default:
-        assert(false && "Unknown element type");
+        SOPC_ASSERT(false && "Unknown element type");
     }
 }
 
 void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     SOPC_AddressSpace_Node_Clear_Local(node);
 }
@@ -535,7 +535,7 @@ SOPC_AddressSpace* SOPC_AddressSpace_Create(bool free_nodes)
 
 bool SOPC_AddressSpace_AreNodesReleasable(const SOPC_AddressSpace* space)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     return space->free_nodes;
 }
@@ -563,14 +563,14 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
 
 bool SOPC_AddressSpace_AreReadOnlyNodes(const SOPC_AddressSpace* space)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     return space->readOnlyNodes;
 }
 
 SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (space->readOnlyNodes)
     {
@@ -615,7 +615,7 @@ void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
 
 SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, const SOPC_NodeId* key, bool* found)
 {
-    assert(space != NULL);
+    SOPC_ASSERT(space != NULL);
 
     if (!space->readOnlyNodes)
     {
@@ -654,13 +654,13 @@ typedef struct
 static void addressSpace_ForEach_Convert(const void* key, void* value, void* user_data)
 {
     AddressSpace_Dict_Context* context = (AddressSpace_Dict_Context*) user_data;
-    assert(NULL != user_data && NULL != context->pFunc);
+    SOPC_ASSERT(NULL != user_data && NULL != context->pFunc);
     context->pFunc(key, value, context->user_data);
 }
 
 void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data)
 {
-    assert(NULL != space && NULL != pFunc);
+    SOPC_ASSERT(NULL != space && NULL != pFunc);
 
     if (!space->readOnlyNodes)
     {

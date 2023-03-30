@@ -133,7 +133,7 @@ void browse_treatment_continuation_points_bs__get_continuation_point_id(
     const constants__t_ContinuationPoint_i browse_treatment_continuation_points_bs__p_continuationPoint,
     constants__t_ContinuationPointId_i* const browse_treatment_continuation_points_bs__p_continuationPointId)
 {
-    assert(browse_treatment_continuation_points_bs__p_continuationPoint.continuationPointId != 0);
+    SOPC_ASSERT(browse_treatment_continuation_points_bs__p_continuationPoint.continuationPointId != 0);
     *browse_treatment_continuation_points_bs__p_continuationPointId =
         browse_treatment_continuation_points_bs__p_continuationPoint.continuationPointId;
 }
@@ -151,7 +151,7 @@ void browse_treatment_continuation_points_bs__getall_continuation_point_bs(
     constants__t_BrowseResultMask_i* const browse_treatment_continuation_points_bs__p_resultMask)
 {
     SOPC_ContinuationPointData data = browse_treatment_continuation_points_bs__p_ContinuationPoint;
-    assert(data.continuationPointId != 0);
+    SOPC_ASSERT(data.continuationPointId != 0);
     *browse_treatment_continuation_points_bs__p_nextIndex = data.nextRefIndexOnNode;
     *browse_treatment_continuation_points_bs__p_maxTargetRef = data.maxTargetReferencesToReturn;
     *browse_treatment_continuation_points_bs__p_browseView = data.browseView;

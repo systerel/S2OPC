@@ -26,6 +26,7 @@
 #include <time.h>
 
 #include "msg_read_response_bs.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
@@ -79,7 +80,7 @@ void msg_read_response_bs__set_read_response(const constants__t_msg_i msg_read_r
     OpcUa_ReadResponse* resp = (OpcUa_ReadResponse*) msg_read_response_bs__p_resp_msg;
     SOPC_DataValue* pDataValue = NULL;
 
-    assert(msg_read_response_bs__p_rvi > 0);
+    SOPC_ASSERT(msg_read_response_bs__p_rvi > 0);
 
     /* rvi is castable, it's one of its properties, but it starts at 1 */
     pDataValue = &resp->Results[msg_read_response_bs__p_rvi - 1];

@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <error.h>
 #include <math.h>
 #include <string.h>
 
 #include "linux/p_time.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
@@ -98,11 +98,11 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
          * In this latter case the real time is used which is not monotonic
          * and there is no guarantee on elapsed duration computation.
          * */
-        assert(false == SOPC_MONOTONIC_CLOCK);
+        SOPC_ASSERT(false == SOPC_MONOTONIC_CLOCK);
         gettimeResult = clock_gettime(CLOCK_REALTIME, &currentTime);
     }
     // At least realtime clock shall always be available
-    assert(0 == gettimeResult);
+    SOPC_ASSERT(0 == gettimeResult);
 
     if (currentTime.tv_sec > 0 && UINT64_MAX / 1000 > (uint64_t) currentTime.tv_sec)
     {
@@ -139,7 +139,7 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
 
     int res = clock_gettime(CLOCK_MONOTONIC, t);
     if (-1 == res)
@@ -154,7 +154,7 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 
 static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
 
     /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
     t->tv_sec += (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS);
@@ -178,7 +178,7 @@ static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
 /***************************************************/
 void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
     uint64_t increment_us = duration_us;
 
     if (offset_us >= 0)
@@ -195,7 +195,7 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
          *       - actual wait times are provided by monotonic realtime clock
          */
 
-        assert(duration_us > 0);
+        SOPC_ASSERT(duration_us > 0);
         // Current remainder of clock within window given by duration_us
         uint64_t currentRem_us = (uint64_t)(SOPC_Time_GetCurrentTimeUTC() / 10);
         currentRem_us %= duration_us;
@@ -243,7 +243,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
     if (NULL == t)
     {
         const bool ok = SOPC_RealTime_GetTime(&t1);
-        assert(ok);
+        SOPC_ASSERT(ok);
     }
     else
     {
@@ -257,7 +257,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
-    assert(NULL != date);
+    SOPC_ASSERT(NULL != date);
     static bool warned = false;
     const int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
 

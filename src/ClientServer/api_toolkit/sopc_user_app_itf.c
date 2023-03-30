@@ -19,10 +19,10 @@
 
 #include "sopc_user_app_itf.h"
 
-#include <assert.h>
 #include <string.h>
 
 #include "app_cb_call_context_internal.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki.h"
 
@@ -74,7 +74,7 @@ void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config)
 
 void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
 {
-    assert(NULL != config);
+    SOPC_ASSERT(NULL != config);
     if (config->freeCstringsFlag)
     {
         for (int i = 0; NULL != config->namespaces && NULL != config->namespaces[i]; i++)
@@ -152,7 +152,7 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
 
 void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
 {
-    assert(NULL != config);
+    SOPC_ASSERT(NULL != config);
     OpcUa_ApplicationDescription_Clear(&config->clientDescription);
     if (config->freeCstringsFlag)
     {

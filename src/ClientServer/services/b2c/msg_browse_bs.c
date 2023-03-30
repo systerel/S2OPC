@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stddef.h>
 
 #include "msg_browse_bs.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
 
@@ -38,8 +38,8 @@ void msg_browse_bs__alloc_browse_response(const constants__t_msg_i msg_browse_bs
 {
     *msg_browse_bs__p_isallocated = false;
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
-    assert((uint64_t) msg_browse_bs__p_nb_bvi < SIZE_MAX);
-    assert(msg_browse_bs__p_nb_bvi > 0);
+    SOPC_ASSERT((uint64_t) msg_browse_bs__p_nb_bvi < SIZE_MAX);
+    SOPC_ASSERT(msg_browse_bs__p_nb_bvi > 0);
     resp->Results = SOPC_Malloc(sizeof(*resp->Results) * (size_t) msg_browse_bs__p_nb_bvi);
     if (NULL != resp->Results)
     {
@@ -89,8 +89,8 @@ void msg_browse_bs__getall_BrowseValue(const constants__t_msg_i msg_browse_bs__p
 {
     OpcUa_BrowseRequest* req = msg_browse_bs__p_req_msg;
     // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
-    assert(msg_browse_bs__p_bvi > 0);
-    assert(msg_browse_bs__p_bvi <= req->NoOfNodesToBrowse);
+    SOPC_ASSERT(msg_browse_bs__p_bvi > 0);
+    SOPC_ASSERT(msg_browse_bs__p_bvi <= req->NoOfNodesToBrowse);
     OpcUa_BrowseDescription* bdesc = &req->NodesToBrowse[msg_browse_bs__p_bvi - 1];
     util_NodeId_borrowReference_or_indet__C_to_B(msg_browse_bs__p_NodeId, &bdesc->NodeId);
     *msg_browse_bs__p_dir = util_BrowseDirection__C_to_B(bdesc->BrowseDirection);
@@ -108,8 +108,8 @@ void msg_browse_bs__set_ResponseBrowse_BrowseResult(
 {
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
     // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
-    assert(msg_browse_bs__p_bvi > 0);
-    assert(msg_browse_bs__p_bvi <= resp->NoOfResults);
+    SOPC_ASSERT(msg_browse_bs__p_bvi > 0);
+    SOPC_ASSERT(msg_browse_bs__p_bvi <= resp->NoOfResults);
     OpcUa_BrowseResult* res = &resp->Results[msg_browse_bs__p_bvi - 1];
     res->NoOfReferences = msg_browse_bs__p_nb_targets;
     res->References = msg_browse_bs__p_browseResultReferences;
@@ -121,8 +121,8 @@ void msg_browse_bs__set_ResponseBrowse_BrowseStatus(const constants__t_msg_i msg
 {
     OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
     // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
-    assert(msg_browse_bs__p_bvi > 0);
-    assert(msg_browse_bs__p_bvi <= resp->NoOfResults);
+    SOPC_ASSERT(msg_browse_bs__p_bvi > 0);
+    SOPC_ASSERT(msg_browse_bs__p_bvi <= resp->NoOfResults);
     OpcUa_BrowseResult* res = &resp->Results[msg_browse_bs__p_bvi - 1];
     util_status_code__B_to_C(msg_browse_bs__p_sc, &res->StatusCode);
 }
@@ -136,11 +136,11 @@ void msg_browse_bs__set_ResponseBrowse_ContinuationPoint(
     {
         OpcUa_BrowseResponse* resp = msg_browse_bs__p_resp_msg;
         // Note: msg_browse_bs__p_bvi : 1..N to be translated into C array index by adding (-1)
-        assert(msg_browse_bs__p_bvi > 0);
-        assert(msg_browse_bs__p_bvi <= resp->NoOfResults);
+        SOPC_ASSERT(msg_browse_bs__p_bvi > 0);
+        SOPC_ASSERT(msg_browse_bs__p_bvi <= resp->NoOfResults);
         OpcUa_BrowseResult* res = &resp->Results[msg_browse_bs__p_bvi - 1];
         SOPC_ReturnStatus status =
             SOPC_ContinuationPointId_Encode(msg_browse_bs__p_continuationPointId, &res->ContinuationPoint);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }

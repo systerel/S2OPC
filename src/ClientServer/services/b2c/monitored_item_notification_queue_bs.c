@@ -17,8 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
-
 #include "monitored_item_notification_queue_bs.h"
 
 /*--------------
@@ -27,6 +25,7 @@
 #include "constants.h"
 
 #include "monitored_item_pointer_impl.h"
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -53,7 +52,7 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    assert(monitoredItemPointer->queueSize > 0);
+    SOPC_ASSERT(monitoredItemPointer->queueSize > 0);
     monitoredItemPointer->notifQueue = SOPC_SLinkedList_Create((size_t) monitoredItemPointer->queueSize);
     if (NULL == monitoredItemPointer->notifQueue)
     {
@@ -81,7 +80,7 @@ void monitored_item_notification_queue_bs__clear_monitored_item_notification_que
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    assert(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
+    SOPC_ASSERT(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
     SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
     SOPC_SLinkedList_Clear(monitoredItemPointer->notifQueue);
 }
@@ -92,7 +91,7 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    assert(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
+    SOPC_ASSERT(monitoredItemPointer->notifQueue == monitored_item_notification_queue_bs__p_queue);
     SOPC_SLinkedList_Apply(monitoredItemPointer->notifQueue, SOPC_InternalNotificationQueueElement_Free);
     SOPC_SLinkedList_Delete(monitoredItemPointer->notifQueue);
     monitoredItemPointer->notifQueue = NULL;
@@ -100,8 +99,8 @@ void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_n
 
 static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bool discardOldest)
 {
-    assert(NULL != notifQueue);
-    assert(SOPC_SLinkedList_GetLength(notifQueue) > 0);
+    SOPC_ASSERT(NULL != notifQueue);
+    SOPC_ASSERT(SOPC_SLinkedList_GetLength(notifQueue) > 0);
     SOPC_InternalNotificationElement* discardedNotifElt = NULL;
     if (discardOldest)
     {
@@ -111,7 +110,7 @@ static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bo
     {
         discardedNotifElt = SOPC_SLinkedList_PopLast(notifQueue);
     }
-    assert(NULL != discardedNotifElt);
+    SOPC_ASSERT(NULL != discardedNotifElt);
     OpcUa_WriteValue_Clear(discardedNotifElt->value);
     SOPC_Free(discardedNotifElt->value);
     SOPC_Free(discardedNotifElt);
@@ -131,7 +130,7 @@ static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_SLinkedList* notifQueue
     { // New last notification DataValue status code should have bit set
         notifElt = SOPC_SLinkedList_GetLast(notifQueue);
     }
-    assert(NULL != notifElt);
+    SOPC_ASSERT(NULL != notifElt);
 
     /* The next notification of the one discarded should have overflow bit set */
     notifElt->value->Value.Status |= SOPC_DataValueOverflowStatusMask;
@@ -147,7 +146,7 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
     const SOPC_NodeId* monitored_item_notification_queue_bs__p_nid,
     const uint32_t attributeId)
 {
-    assert(notifElt != NULL);
+    SOPC_ASSERT(notifElt != NULL);
     SOPC_InternalNotificationElement* checkAdded = NULL;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
 
@@ -279,8 +278,8 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
     const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
     t_bool* const monitored_item_notification_queue_bs__bres)
 {
-    assert(monitored_item_notification_queue_bs__p_queue ==
-           ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
+    SOPC_ASSERT(monitored_item_notification_queue_bs__p_queue ==
+                ((SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
     *monitored_item_notification_queue_bs__bres = false;
 
     SOPC_ReturnStatus retStatus = SOPC_STATUS_OUT_OF_MEMORY;
@@ -381,7 +380,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
     SOPC_InternalNotificationElement* notifElt =
         SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
 
-    assert(notifElt != NULL);
+    SOPC_ASSERT(notifElt != NULL);
 
     *monitored_item_notification_queue_bs__p_writeValuePointer = notifElt->value;
     SOPC_Free(notifElt);
@@ -399,9 +398,9 @@ void monitored_item_notification_queue_bs__get_length_monitored_item_notificatio
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
     t_entier4* const monitored_item_notification_queue_bs__p_nb_available_notifs)
 {
-    assert(NULL != monitored_item_notification_queue_bs__p_mi_notif_queue);
+    SOPC_ASSERT(NULL != monitored_item_notification_queue_bs__p_mi_notif_queue);
     uint32_t length = SOPC_SLinkedList_GetLength(monitored_item_notification_queue_bs__p_mi_notif_queue);
-    assert(length <= INT32_MAX); // Guaranteed by add functions
+    SOPC_ASSERT(length <= INT32_MAX); // Guaranteed by add functions
     *monitored_item_notification_queue_bs__p_nb_available_notifs = (int32_t) length;
 }
 
@@ -440,7 +439,7 @@ void monitored_item_notification_queue_bs__resize_monitored_item_notification_qu
 {
     SOPC_InternalMontitoredItem* monitoredItemPointer =
         (SOPC_InternalMontitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem;
-    assert(monitoredItemPointer->queueSize >= 0);
+    SOPC_ASSERT(monitoredItemPointer->queueSize >= 0);
     SOPC_SLinkedList* notifQueue = monitoredItemPointer->notifQueue;
 
     /* Discard notifications if more available than new capacity */
@@ -458,5 +457,5 @@ void monitored_item_notification_queue_bs__resize_monitored_item_notification_qu
 
     /* Change notification queue capacity */
     bool capacitySet = SOPC_SLinkedList_SetCapacity(notifQueue, (size_t) monitoredItemPointer->queueSize);
-    assert(capacitySet);
+    SOPC_ASSERT(capacitySet);
 }

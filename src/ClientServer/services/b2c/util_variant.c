@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "util_variant.h"
 
@@ -93,11 +93,11 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
 SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
                                                                                   char** preferredLocales)
 {
-    assert(NULL != v);
+    SOPC_ASSERT(NULL != v);
     SOPC_Variant* value = *v;
 
-    assert(SOPC_LocalizedText_Id == value->BuiltInTypeId);
-    assert(value->DoNotClear); // it was a shallow copy
+    SOPC_ASSERT(SOPC_LocalizedText_Id == value->BuiltInTypeId);
+    SOPC_ASSERT(value->DoNotClear); // it was a shallow copy
 
     SOPC_Variant* result = NULL;
 
@@ -171,7 +171,7 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
     return result;
 }

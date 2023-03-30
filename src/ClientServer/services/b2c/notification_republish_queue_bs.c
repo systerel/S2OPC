@@ -19,8 +19,7 @@
 
 #include "notification_republish_queue_bs.h"
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -36,8 +35,8 @@ void notification_republish_queue_bs__INITIALISATION(void) {}
 
 static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcUa_NotificationMessage* src)
 {
-    assert(dst != NULL && src != NULL);
-    assert(src->NoOfNotificationData == 1); // Restricted support for now
+    SOPC_ASSERT(dst != NULL && src != NULL);
+    SOPC_ASSERT(src->NoOfNotificationData == 1); // Restricted support for now
 
     SOPC_ExtensionObject* notification_data = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
 
@@ -70,7 +69,7 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
     const constants__t_notif_msg_i notification_republish_queue_bs__p_notif_msg,
     t_bool* const notification_republish_queue_bs__bres)
 {
-    assert(notification_republish_queue_bs__p_notif_msg->NoOfNotificationData == 1);
+    SOPC_ASSERT(notification_republish_queue_bs__p_notif_msg->NoOfNotificationData == 1);
     *notification_republish_queue_bs__bres = false;
     OpcUa_NotificationMessage* notifMsgCpy = SOPC_Malloc(sizeof(OpcUa_NotificationMessage));
     if (notifMsgCpy == NULL || !notification_message_copy(notifMsgCpy, notification_republish_queue_bs__p_notif_msg))
@@ -131,7 +130,7 @@ void notification_republish_queue_bs__discard_oldest_republish_notif(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue)
 {
     void* removed = SOPC_SLinkedList_PopLast(notification_republish_queue_bs__p_queue);
-    assert(NULL != removed); // Guarantee in precondition of B model
+    SOPC_ASSERT(NULL != removed); // Guarantee in precondition of B model
     SOPC_InternalDeallocNotifMsg(0, removed);
 }
 

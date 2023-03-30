@@ -25,10 +25,10 @@
  * The stack provides only a minimal, always safe validating PKI.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
@@ -301,7 +301,7 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
 
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
     mbedtls_x509_crt* end_of_chall = mbed_chall;
-    assert(NULL != end_of_chall);
+    SOPC_ASSERT(NULL != end_of_chall);
     while (NULL != end_of_chall->next)
     {
         end_of_chall = end_of_chall->next;
@@ -456,7 +456,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
 
 static SOPC_CertificateList* load_certificate_list(char** paths, SOPC_ReturnStatus* status)
 {
-    assert(NULL != paths && NULL != status);
+    SOPC_ASSERT(NULL != paths && NULL != status);
 
     SOPC_CertificateList* certs = NULL;
     char* cur = *paths;
@@ -473,7 +473,7 @@ static SOPC_CertificateList* load_certificate_list(char** paths, SOPC_ReturnStat
 /** \brief Create the prev list if required */
 static SOPC_ReturnStatus link_certificates(SOPC_CertificateList** ppPrev, SOPC_CertificateList** ppNext)
 {
-    assert(NULL != ppPrev && NULL != ppNext);
+    SOPC_ASSERT(NULL != ppPrev && NULL != ppNext);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_CertificateList* prev = *ppPrev;
@@ -483,7 +483,7 @@ static SOPC_ReturnStatus link_certificates(SOPC_CertificateList** ppPrev, SOPC_C
     {
         mbedtls_x509_crt* crt = &prev->crt;
         /* crt should not be NULL, as either untrusted is NULL or at least one cert was created */
-        assert(NULL != crt);
+        SOPC_ASSERT(NULL != crt);
         while (NULL != crt->next)
         {
             crt = crt->next;

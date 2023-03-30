@@ -19,9 +19,9 @@
 
 #include "sopc_pubsub_helpers.h"
 
-#include <assert.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
@@ -31,8 +31,8 @@ static bool SOPC_Internal_PubSubHelpers_ParseAddressUDP(const char* address,
                                                         SOPC_Socket_AddressInfo** multicastAddr,
                                                         char** port)
 {
-    assert(NULL != port);
-    assert(NULL != multicastAddr);
+    SOPC_ASSERT(NULL != port);
+    SOPC_ASSERT(NULL != multicastAddr);
 
     size_t hostLen, portIdx, portLen;
     bool result = SOPC_Helper_URI_ParseUri_WithPrefix(UADP_PREFIX, address, &hostLen, &portIdx, &portLen);
@@ -74,7 +74,7 @@ bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(const char* address,
                                                             SOPC_Socket_AddressInfo** multicastAddr,
                                                             SOPC_Socket_AddressInfo** localAddr)
 {
-    assert(NULL != localAddr);
+    SOPC_ASSERT(NULL != localAddr);
 
     char* port = NULL;
     bool result = SOPC_Internal_PubSubHelpers_ParseAddressUDP(address, multicastAddr, &port);
@@ -221,8 +221,8 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
                                             const SOPC_Variant* variant,
                                             bool* out_isBad)
 {
-    assert(NULL != fieldMetaData);
-    assert(NULL != variant);
+    SOPC_ASSERT(NULL != fieldMetaData);
+    SOPC_ASSERT(NULL != variant);
     if (NULL != out_isBad)
     {
         *out_isBad = false;

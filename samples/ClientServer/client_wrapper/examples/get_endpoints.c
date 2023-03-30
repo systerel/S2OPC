@@ -27,7 +27,6 @@
  *
  */
 
-#include <assert.h>
 #include <stdio.h>
 
 #include "libs2opc_client_cmds.h"

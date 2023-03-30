@@ -23,7 +23,6 @@
  *
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <string.h>
@@ -108,7 +107,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Initialize(const SOPC_LibSub_StaticCfg* pCfg
     SOPC_ReturnStatus status = Mutex_Initialization(&mutex);
 
     SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != appConfig);
+    SOPC_ASSERT(NULL != appConfig);
     appConfig->clientConfig.freeCstringsFlag = true;
 
     if (SOPC_STATUS_OK == status)
@@ -171,7 +170,7 @@ void SOPC_ClientCommon_Clear(void)
     SOPC_CommonHelper_SetClientComEvent(NULL);
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
     // Close all reverse endpoints and free URLs
@@ -237,14 +236,14 @@ void SOPC_ClientCommon_Clear(void)
     pArrScConfig = NULL;
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     Mutex_Clear(&mutex);
 }
 
 uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
 {
     SOPC_S2OPC_Config* appConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != appConfig);
+    SOPC_ASSERT(NULL != appConfig);
     // Configure the reverse endpoint
     SOPC_ReverseEndpointConfigIdx reverseEpIdx = 0;
     if (nbReverseEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
@@ -297,7 +296,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Create the new configuration */
     if (SOPC_STATUS_OK == status)
@@ -532,7 +531,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -551,7 +550,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (UINT32_MAX == nCreatedClient)
     {
@@ -615,14 +614,14 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
              * connection operation succeeded and then connection immediately fails before Connect function returns.
              */
             mutStatus = Mutex_Unlock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
             ++count;
 
             /* Lock again to ensure no state change in state machine during next evaluations */
             mutStatus = Mutex_Lock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
         if (SOPC_StaMac_IsError(pSM))
         {
@@ -649,7 +648,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -671,7 +670,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Finds the state machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
@@ -709,12 +708,12 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
         {
             /* Release the lock so that the event handler can work properly while waiting */
             mutStatus = Mutex_Unlock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
             mutStatus = Mutex_Lock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -732,7 +731,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     SOPC_Free(appCtx);
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -749,7 +748,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine on which the request will be sent */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
@@ -773,7 +772,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -886,7 +885,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the state machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
@@ -915,24 +914,24 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
         {
             /* Release the lock so that the event handler can work properly while waiting */
             mutStatus = Mutex_Unlock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
             SOPC_Sleep(10);
 
             mutStatus = Mutex_Lock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             count += 1;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         SOPC_StaMac_Machine* removedSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_RemoveFromId(pListClient, cliId);
-        assert(pSM == removedSM);
+        SOPC_ASSERT(pSM == removedSM);
         SOPC_StaMac_Delete(&pSM);
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -949,7 +948,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
@@ -979,11 +978,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             mutStatus = Mutex_Unlock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
             mutStatus = Mutex_Lock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -1000,7 +999,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -1016,7 +1015,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine */
     pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
@@ -1048,11 +1047,11 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             mutStatus = Mutex_Unlock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
             mutStatus = Mutex_Lock(&mutex);
-            assert(SOPC_STATUS_OK == mutStatus);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
         /* When the request timeoutHint is lower than pCfg->timeout_ms, the machine will go in error,
@@ -1069,7 +1068,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
 
@@ -1134,7 +1133,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     }
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* check for event type */
     if (LibCommon_IsDiscoveryEvent(event, appContext))
@@ -1167,7 +1166,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
                 /* No more than one machine shall process the event */
                 if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
                 {
-                    assert(!bProcessed);
+                    SOPC_ASSERT(!bProcessed);
                     bProcessed = true;
                     /* Post process the event for callbacks. */
                     if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
@@ -1210,13 +1209,13 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
     }
 
     mutStatus = Mutex_Unlock(&mutex);
-    assert(SOPC_STATUS_OK == mutStatus);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 }
 
 SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_Atomic_Int_Get(&libInitialized) || NULL != pConfig->clientConfig.clientLocaleIds)
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -1226,7 +1225,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_SetLocaleIds(size_t nbLocales, const char** 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     pConfig->clientConfig.clientLocaleIds = SOPC_CommonHelper_Copy_Char_Array(nbLocales, localeIds);
-    assert(pConfig->clientConfig.freeCstringsFlag);
+    SOPC_ASSERT(pConfig->clientConfig.freeCstringsFlag);
 
     if (NULL == pConfig->clientConfig.clientLocaleIds)
     {
@@ -1243,7 +1242,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_SetApplicationDescription(const char* applic
                                                               OpcUa_ApplicationType applicationType)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     if (!SOPC_Atomic_Int_Get(&libInitialized) || pConfig->clientConfig.clientDescription.ApplicationUri.Length > 0 ||
         pConfig->clientConfig.clientDescription.ProductUri.Length > 0 ||
         pConfig->clientConfig.clientDescription.ApplicationName.defaultText.Length > 0)

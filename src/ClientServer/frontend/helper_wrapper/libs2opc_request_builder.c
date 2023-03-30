@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_request_builder.h"
 
+#include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_mem_alloc.h"
 
@@ -773,7 +773,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequ
 OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfiguration(void)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    assert(NULL != pConfig);
+    SOPC_ASSERT(NULL != pConfig);
     OpcUa_ApplicationDescription* srcDesc = &pConfig->serverConfig.serverDescription;
     OpcUa_MdnsDiscoveryConfiguration* mdnsObj = NULL;
     OpcUa_RegisterServer2Request* request = SOPC_Calloc(1, sizeof(OpcUa_RegisterServer2Request));

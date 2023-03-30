@@ -812,7 +812,6 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
 {
     SOPC_ASSERT(NULL != buffer_payload);
     SOPC_ASSERT(NULL != dsm);
-    SOPC_ASSERT(NULL != readerConf);
     // Note :  dsmSizes may be NULL
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;

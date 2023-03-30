@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_enums.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
@@ -64,7 +64,7 @@ SOPC_EventHandler* SOPC_Services_GetEventHandler(void)
 static void SOPC_Internal_AllClientSecureChannelsDisconnected(bool clientOnly)
 {
     Mutex_Lock(&closeAllConnectionsSync.mutex);
-    assert(closeAllConnectionsSync.clientOnlyFlag == clientOnly);
+    SOPC_ASSERT(closeAllConnectionsSync.clientOnlyFlag == clientOnly);
     if (closeAllConnectionsSync.requestedFlag)
     {
         closeAllConnectionsSync.allDisconnectedFlag = true;
@@ -96,10 +96,10 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // id ==  endpoint configuration index
         // params = channel configuration index
         // auxParam == connection Id
-        assert(id <= INT32_MAX);
+        SOPC_ASSERT(id <= INT32_MAX);
         channel_config_idx = (uint32_t) params;
-        assert(channel_config_idx <= constants__t_channel_config_idx_i_max);
-        assert(auxParam <= constants__t_channel_i_max);
+        SOPC_ASSERT(channel_config_idx <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT(auxParam <= constants__t_channel_i_max);
 
         io_dispatch_mgr__server_channel_connected_event(id, channel_config_idx, (uint32_t) auxParam, &bres);
         if (bres == false)
@@ -121,7 +121,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // auxParam == status
         // => B model entry point to add
         status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, auxParam);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
         break;
     case EP_REVERSE_CLOSED:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -130,7 +130,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         //  id = reverse endpoint config index,
         // auxParams = SOPC_ReturnStatus
         status = SOPC_App_EnqueueComEvent(SE_REVERSE_ENDPOINT_CLOSED, id, (uintptr_t) NULL, auxParam);
-        assert(status == SOPC_STATUS_OK);
+        SOPC_ASSERT(status == SOPC_STATUS_OK);
         break;
     case SC_CONNECTED:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -138,8 +138,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // id == connection Id
         // auxParam == secure channel configuration index
         // => B model entry point to add
-        assert(id <= constants__t_channel_i_max);
-        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT(id <= constants__t_channel_i_max);
+        SOPC_ASSERT(auxParam <= constants__t_channel_config_idx_i_max);
         io_dispatch_mgr__client_channel_connected_event((uint32_t) auxParam,
                                                         constants__c_reverse_endpoint_config_idx_indet, id);
         break;
@@ -150,8 +150,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // params = (uint32_t) secure channel configuration index,
         // auxParams = (uint32) reverse endpoint configuration index
         // => B model entry point to add
-        assert(id <= constants__t_channel_i_max);
-        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT(id <= constants__t_channel_i_max);
+        SOPC_ASSERT(auxParam <= constants__t_channel_config_idx_i_max);
         io_dispatch_mgr__client_channel_connected_event((uint32_t) params, (uint32_t) auxParam, id);
         break;
     case SC_CONNECTION_TIMEOUT:
@@ -160,7 +160,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 
         // id == secure channel configuration index
         // => B model entry point to add
-        assert(id <= constants_bs__t_channel_config_idx_i_max);
+        SOPC_ASSERT(id <= constants_bs__t_channel_config_idx_i_max);
         io_dispatch_mgr__client_secure_channel_timeout(id);
         break;
     case SC_DISCONNECTED:
@@ -178,7 +178,7 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         // id ==  connection Id
         // params = message content (byte buffer)
         // auxParam == requestId (server) / 0 (client)
-        assert(NULL != (void*) params);
+        SOPC_ASSERT(NULL != (void*) params);
         io_dispatch_mgr__receive_msg_buffer(id, (constants__t_byte_buffer_i) params,
                                             (constants__t_request_context_i) auxParam, &bres);
         if (!bres)
@@ -206,12 +206,12 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
 
         /* id = secure channel connection index,
            auxParam = request handle */
-        assert(id <= constants__t_channel_i_max);
-        assert(auxParam <= SOPC_MAX_PENDING_REQUESTS);
+        SOPC_ASSERT(id <= constants__t_channel_i_max);
+        SOPC_ASSERT(auxParam <= SOPC_MAX_PENDING_REQUESTS);
         io_dispatch_mgr__client_request_timeout(id, (uint32_t) auxParam);
         break;
     default:
-        assert(false && "Unknown event");
+        SOPC_ASSERT(false && "Unknown event");
     }
 }
 
@@ -252,14 +252,14 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: SE_TO_SE_ACTIVATE_ORPHANED_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR,
                                id, auxParam);
 
-        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT(auxParam <= constants__t_channel_config_idx_i_max);
         io_dispatch_mgr__internal_client_activate_orphaned_session(id, (constants__t_channel_config_idx_i) auxParam);
         break;
     case SE_TO_SE_CREATE_SESSION:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_CREATE_SESSION session=%" PRIu32 " scCfgIdx=%" PRIuPTR, id,
                                auxParam);
-        assert(auxParam <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT(auxParam <= constants__t_channel_config_idx_i_max);
         io_dispatch_mgr__internal_client_create_session((constants__t_session_i) id,
                                                         (constants__t_channel_config_idx_i) auxParam);
         break;
@@ -287,12 +287,12 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: SE_TO_SE_SERVER_DATA_CHANGED session=%" PRIu32, id);
 
-        assert((void*) params != NULL);
+        SOPC_ASSERT((void*) params != NULL);
 
         old_value = (void*) params;
         new_value = (void*) auxParam;
-        assert(old_value != NULL);
-        assert(new_value != NULL);
+        SOPC_ASSERT(old_value != NULL);
+        SOPC_ASSERT(new_value != NULL);
 
         /* Note: write values deallocation managed by B model */
         io_dispatch_mgr__internal_server_data_changed(old_value, new_value, &bres);
@@ -309,7 +309,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
            params = (bool) true if node added, false if node deleted
            auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
          */
-        assert(NULL != (void*) auxParam);
+        SOPC_ASSERT(NULL != (void*) auxParam);
         nodeId = (SOPC_NodeId*) auxParam;
         nodeIdStr = SOPC_NodeId_ToCString(nodeId);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -350,7 +350,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO session=%" PRIu32, id);
 
         msg_data = (void*) params;
-        assert(msg_data != NULL);
+        SOPC_ASSERT(msg_data != NULL);
 
         io_dispatch_mgr__internal_server_send_publish_response_prio_event(
             (constants__t_session_i) id, msg_data->requestHandle, msg_data->requestId, msg_data->msgToSend,
@@ -393,14 +393,14 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         if (NULL == epConfig)
         {
             status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, SOPC_STATUS_INVALID_PARAMETERS);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         else
         {
             status = SOPC_SecureChannels_EnqueueEvent(EP_OPEN,
                                                       id, // Server endpoint config idx
                                                       (uintptr_t) NULL, 0);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         break;
     case APP_TO_SE_CLOSE_ENDPOINT:
@@ -413,12 +413,12 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         if (NULL == epConfig)
         {
             status = SOPC_App_EnqueueComEvent(SE_CLOSED_ENDPOINT, id, (uintptr_t) NULL, SOPC_STATUS_INVALID_PARAMETERS);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         else
         {
             status = SOPC_SecureChannels_EnqueueEvent(EP_CLOSE, id, (uintptr_t) NULL, 0);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         break;
 
@@ -435,7 +435,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         // id =  endpoint configuration index
         // params = local service request
         // auxParam = user application session context
-        assert(id <= INT32_MAX);
+        SOPC_ASSERT(id <= INT32_MAX);
 
         io_dispatch_mgr__server_treat_local_service_request(id, (constants__t_msg_i) params, auxParam, &sCode);
         if (constants_statuscodes_bs__e_sc_ok != sCode)
@@ -451,7 +451,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                 msg = NULL;
             }
             status = SOPC_App_EnqueueComEvent(SE_LOCAL_SERVICE_RESPONSE, id, (uintptr_t) msg, auxParam);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "ServicesMgr: APP_TO_SE_LOCAL_SERVICE_REQUEST failed epCfgIdx=%" PRIu32
                                      " msgType=%s ctx=%" PRIuPTR,
@@ -464,11 +464,11 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: APP_TO_SE_OPEN_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
         reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
-        assert(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
+        SOPC_ASSERT(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
         status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_OPEN,
                                                   id, // Reverse endpoint config idx
                                                   (uintptr_t) NULL, 0);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         break;
     case APP_TO_SE_CLOSE_REVERSE_ENDPOINT:
         /* id = reverse endpoint description config index */
@@ -476,16 +476,16 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                "ServicesMgr: APP_TO_SE_CLOSE_REVERSE_ENDPOINT reverseEpCfgIdx=%" PRIu32, id);
         // Check config index is valid
         reverseEndpointURL = SOPC_ToolkitClient_GetReverseEndpointURL(id);
-        assert(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
+        SOPC_ASSERT(NULL != reverseEndpointURL && "Invalid reverse endpoint configuration index provided");
         status = SOPC_SecureChannels_EnqueueEvent(REVERSE_EP_CLOSE, id, (uintptr_t) NULL, 0);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         break;
     case APP_TO_SE_ACTIVATE_SESSION:
         // id = secure channel config index,
         // params = reverse endpoint connection index or 0 if not a reverse connection
         // auxParam = (SOPC_Internal_SessionAppContext*)
-        assert(id <= constants__t_channel_config_idx_i_max);
-        assert((void*) auxParam != NULL);
+        SOPC_ASSERT(id <= constants__t_channel_config_idx_i_max);
+        SOPC_ASSERT((void*) auxParam != NULL);
         sessionContext = (SOPC_Internal_SessionAppContext*) auxParam;
         userToken = sessionContext->userToken;
         sessionContext->userToken = NULL; // Provided as separated parameter
@@ -524,14 +524,14 @@ static void onServiceEvent(SOPC_EventHandler* handler,
 
         // id == session id
         // params = request
-        assert(id <= constants__t_session_i_max);
+        SOPC_ASSERT(id <= constants__t_session_i_max);
 
         io_dispatch_mgr__client_send_service_request(id, (constants__t_msg_i) params, auxParam, &sCode);
         if (sCode != constants_statuscodes_bs__e_sc_ok)
         {
             status = SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode),
                                               (uintptr_t) encType, auxParam);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
 
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "ServicesMgr: APP_TO_SE_SEND_SESSION_REQUEST failed session=%" PRIu32
@@ -544,7 +544,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                id);
 
         // id == session id
-        assert(id <= constants__t_session_i_max);
+        SOPC_ASSERT(id <= constants__t_session_i_max);
 
         io_dispatch_mgr__client_send_close_session_request(id, &sCode);
         if (sCode != constants_statuscodes_bs__e_sc_ok)
@@ -557,8 +557,8 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         // id = secure channel config index,
         // params = reverse endpoint connection index or 0 if not a reverse connection
         // auxParam = (SOPC_Internal_DiscoveryContext*)
-        assert(id <= constants_bs__t_channel_config_idx_i_max);
-        assert((void*) auxParam != NULL);
+        SOPC_ASSERT(id <= constants_bs__t_channel_config_idx_i_max);
+        SOPC_ASSERT((void*) auxParam != NULL);
 
         discoveryContext = (SOPC_Internal_DiscoveryContext*) auxParam;
 
@@ -578,7 +578,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         {
             status = SOPC_App_EnqueueComEvent(SE_SND_REQUEST_FAILED, util_status_code__B_to_return_status_C(sCode),
                                               (uintptr_t) encType, discoveryContext->discoveryAppContext);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
 
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "ServicesMgr: APP_TO_SE_SEND_DISCOVERY_REQUEST failed scCfgIdx=%" PRIu32
@@ -599,13 +599,13 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
-    assert(servicesEventHandler != NULL);
+    SOPC_ASSERT(servicesEventHandler != NULL);
     SOPC_EventHandler_Post(servicesEventHandler, (int32_t) seEvent, id, params, auxParam);
 }
 
@@ -614,20 +614,20 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     servicesLooper = SOPC_Looper_Create("Services");
-    assert(servicesLooper != NULL);
+    SOPC_ASSERT(servicesLooper != NULL);
 
     servicesEventHandler = SOPC_EventHandler_Create(servicesLooper, onServiceEvent);
-    assert(servicesEventHandler != NULL);
+    SOPC_ASSERT(servicesEventHandler != NULL);
 
     secureChannelsEventHandler = SOPC_EventHandler_Create(servicesLooper, onSecureChannelEvent);
-    assert(secureChannelsEventHandler != NULL);
+    SOPC_ASSERT(secureChannelsEventHandler != NULL);
 
     // Init async close management flag
     status = Mutex_Initialization(&closeAllConnectionsSync.mutex);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     status = Condition_Init(&closeAllConnectionsSync.cond);
-    assert(status == SOPC_STATUS_OK);
+    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     setSecureChannelsListener(secureChannelsEventHandler);
 

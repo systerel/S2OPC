@@ -19,8 +19,7 @@
 
 #include "event_recorder.h"
 
-#include <assert.h>
-
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_mem_alloc.h"
 
@@ -51,11 +50,11 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, uin
 {
     bool found;
     SOPC_AsyncQueue* queue = SOPC_Dict_Get(queues, handler, &found);
-    assert(found);
+    SOPC_ASSERT(found);
     SOPC_ReturnStatus status;
 
     SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
-    assert(ev != NULL);
+    SOPC_ASSERT(ev != NULL);
 
     ev->event = event;
     ev->eltId = id;
@@ -63,7 +62,7 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, uin
     ev->auxParam = auxParam;
 
     status = SOPC_AsyncQueue_BlockingEnqueue(queue, ev);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 static void queue_free(SOPC_AsyncQueue* queue)

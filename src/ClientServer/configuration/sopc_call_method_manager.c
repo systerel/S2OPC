@@ -18,7 +18,7 @@
  */
 
 #include "sopc_call_method_manager.h"
-#include <assert.h>
+#include "sopc_assert.h"
 #include "sopc_dict.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -59,7 +59,7 @@ static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* m
         return NULL;
     }
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
-    assert(NULL != dict);
+    SOPC_ASSERT(NULL != dict);
     SOPC_MethodCallFunc* methodFunc = (SOPC_MethodCallFunc*) SOPC_Dict_Get(dict, methodId, NULL);
     return methodFunc;
 }
@@ -116,7 +116,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
-    assert(NULL != dict);
+    SOPC_ASSERT(NULL != dict);
 
     SOPC_MethodCallFunc* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallFunc));
     if (NULL == wrapper)

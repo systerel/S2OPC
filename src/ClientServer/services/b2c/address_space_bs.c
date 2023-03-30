@@ -22,7 +22,6 @@
  * Implements the structures behind the address space.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -122,7 +121,7 @@ void address_space_bs__exec_callMethod(const constants__t_endpoint_config_idx_i 
     *address_space_bs__p_nb_out = 0;
     *address_space_bs__p_out_arguments = NULL;
     OpcUa_CallMethodRequest* methodToCall = address_space_bs__p_call_method_pointer;
-    assert(NULL != methodToCall);
+    SOPC_ASSERT(NULL != methodToCall);
 
     /* Get the Method Call Manager from server configuration */
     SOPC_Endpoint_Config* endpoint_config =
@@ -207,10 +206,10 @@ void address_space_bs__addNode_AddressSpace_Variable(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc_addnode)
 {
     SOPC_UNUSED_ARG(address_space_bs__p_nodeClass); // For B precondition
-    assert(NULL != address_space_bs__p_nodeAttributes);
-    assert(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
-    assert(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
-           &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
+    SOPC_ASSERT(NULL != address_space_bs__p_nodeAttributes);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
+    SOPC_ASSERT(&OpcUa_NodeAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType ||
+                &OpcUa_VariableAttributes_EncodeableType == address_space_bs__p_nodeAttributes->Body.Object.ObjType);
     SOPC_StatusCode retCode = SOPC_AddressSpaceAccess_AddVariableNode(
         addSpaceAccess, address_space_bs__p_parentNid, address_space_bs__p_refTypeId, address_space_bs__p_newNodeId,
         address_space_bs__p_browseName,
@@ -225,7 +224,7 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
     t_bool* const address_space_bs__bres)
 {
     // Check NodeAttributes is well decoded as an OPC UA object: verified in msg_node_management_add_nodes_bs
-    assert(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == address_space_bs__p_nodeAttributes->Encoding);
 
     // Check NodeAttributes type depending on NodeClass
     SOPC_EncodeableType* expectedNodeAttrsType = NULL;
@@ -256,9 +255,9 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
         expectedNodeAttrsType = &OpcUa_ViewAttributes_EncodeableType;
         break;
     default:
-        assert(false &&
-               "NodeClass must have been already checked by "
-               "msg_node_management_add_nodes_bs__getall_add_node_item_req_params");
+        SOPC_ASSERT(false &&
+                    "NodeClass must have been already checked by "
+                    "msg_node_management_add_nodes_bs__getall_add_node_item_req_params");
     }
 
     SOPC_EncodeableType* actualNodeAttrsType = address_space_bs__p_nodeAttributes->Body.Object.ObjType;
@@ -275,7 +274,7 @@ void address_space_bs__addNode_check_valid_node_attributes_type(
 
 void address_space_bs__gen_addNode_event(const constants__t_NodeId_i address_space_bs__p_newNodeId)
 {
-    assert(NULL != address_space_bs__p_newNodeId);
+    SOPC_ASSERT(NULL != address_space_bs__p_newNodeId);
     SOPC_NodeId* nodeIdCopy = SOPC_Calloc(1, sizeof(*nodeIdCopy));
     if (NULL != nodeIdCopy)
     {
@@ -329,7 +328,7 @@ void address_space_bs__read_AddressSpace_AccessLevelEx_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
 
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns 0 since we always support atomic read/write operations + write with index range
@@ -345,7 +344,7 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
     SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
     // Note: keep only supported access level flags
     accessLevel = (accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite |
@@ -363,8 +362,8 @@ void address_space_bs__read_AddressSpace_ArrayDimensions_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     int32_t* valueRank = SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, address_space_bs__p_node);
     SOPC_Variant* variant = SOPC_Variant_Create();
@@ -415,7 +414,7 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_View);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_View);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns false since we do not check this property
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
@@ -430,8 +429,8 @@ void address_space_bs__read_AddressSpace_DataType_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_NodeId(
         SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, address_space_bs__p_node));
@@ -466,8 +465,8 @@ void address_space_bs__read_AddressSpace_EventNotifier_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_View ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_Object);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_View ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_Object);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns 0 since we do not implement events
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(0);
@@ -482,7 +481,7 @@ void address_space_bs__read_AddressSpace_Executable_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
     bool executable;
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     address_space_bs__get_Executable(address_space_bs__p_node, &executable);
@@ -498,7 +497,7 @@ void address_space_bs__read_AddressSpace_Historizing_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     // Note: always returns false since we do not implement historization
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(false);
@@ -513,10 +512,10 @@ void address_space_bs__read_AddressSpace_IsAbstract_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_ObjectType ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_ObjectType ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(
         SOPC_AddressSpace_Get_IsAbstract(address_space_bs__nodes, address_space_bs__p_node));
@@ -556,7 +555,7 @@ void address_space_bs__read_AddressSpace_Symmetric_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_ReferenceType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant =
         util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.reference_type.Symmetric);
@@ -573,7 +572,7 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
     /* UserAccess Level can be only more restrictive than access level  */
     SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
     SOPC_Byte userAccessLevel = 0;
@@ -604,7 +603,7 @@ void address_space_bs__read_AddressSpace_UserExecutable_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Method);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     /* UserExecutable Level can be only more restrictive than executable attribute */
     *address_space_bs__variant = util_variant__new_Variant_from_Bool(address_space_bs__p_node->data.method.Executable &&
@@ -620,8 +619,8 @@ void address_space_bs__read_AddressSpace_ValueRank_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     *address_space_bs__variant = util_variant__new_Variant_from_int32(
         *SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, address_space_bs__p_node));
@@ -640,8 +639,8 @@ void address_space_bs__read_AddressSpace_Value_value(
     constants__t_RawStatusCode* const address_space_bs__val_sc,
     constants__t_Timestamp* const address_space_bs__val_ts_src)
 {
-    assert(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
-           address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
     *address_space_bs__val_sc = OpcUa_BadInvalidState;
     *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
 
@@ -713,9 +712,9 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
                                                const SOPC_Variant* new_value,
                                                SOPC_Variant* previous_value)
 {
-    assert(SOPC_LocalizedText_Id == new_value->BuiltInTypeId);
-    assert(SOPC_LocalizedText_Id == node_value->BuiltInTypeId);
-    assert(node_value->ArrayType == new_value->ArrayType);
+    SOPC_ASSERT(SOPC_LocalizedText_Id == new_value->BuiltInTypeId);
+    SOPC_ASSERT(SOPC_LocalizedText_Id == node_value->BuiltInTypeId);
+    SOPC_ASSERT(node_value->ArrayType == new_value->ArrayType);
     previous_value->ArrayType = node_value->ArrayType;
     previous_value->BuiltInTypeId = node_value->BuiltInTypeId;
     /* Important note: we shall use Move because the initial variant value might be part of initial address space
@@ -746,7 +745,7 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     }
     else if (SOPC_VariantArrayType_Array == node_value->ArrayType)
     {
-        assert(node_value->Value.Array.Length == new_value->Value.Array.Length);
+        SOPC_ASSERT(node_value->Value.Array.Length == new_value->Value.Array.Length);
         for (int32_t i = 0; SOPC_STATUS_OK == status && i < new_value->Value.Array.Length; i++)
         {
             status = SOPC_LocalizedText_AddOrSetLocale(&node_value->Value.Array.Content.LocalizedTextArr[i],
@@ -756,11 +755,11 @@ static SOPC_ReturnStatus modify_localized_text(char** supportedLocales,
     }
     else if (SOPC_VariantArrayType_Matrix == node_value->ArrayType)
     {
-        assert(node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions);
+        SOPC_ASSERT(node_value->Value.Matrix.Dimensions == new_value->Value.Matrix.Dimensions);
         int32_t matrixLength = 1;
         for (int32_t i = 0; i < new_value->Value.Matrix.Dimensions; i++)
         {
-            assert(node_value->Value.Matrix.ArrayDimensions[i] == new_value->Value.Matrix.ArrayDimensions[i]);
+            SOPC_ASSERT(node_value->Value.Matrix.ArrayDimensions[i] == new_value->Value.Matrix.ArrayDimensions[i]);
             matrixLength *= node_value->Value.Matrix.ArrayDimensions[i];
         }
         for (int32_t i = 0; SOPC_STATUS_OK == status && i < matrixLength; i++)
@@ -956,7 +955,7 @@ static SOPC_Variant* convertVariantType_ByteArrayByteString(SOPC_Variant* toConv
     else
     {
         // It shall be a Byte[] or a ByteString
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     return result;
@@ -1033,7 +1032,7 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     SOPC_UNUSED_ARG(
         address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
-    assert(node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Variable);
     bool result = true;
     if (address_space_bs__p_ts.timestamp == 0 && address_space_bs__p_ts.picoSeconds == 0)
     {
@@ -1072,7 +1071,7 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     SOPC_UNUSED_ARG(
         address_space_bs__p_user); /* Keep for B precondition: user is already authorized for this operation */
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
-    assert(node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Variable);
     bool result = SOPC_AddressSpace_Set_StatusCode(address_space_bs__nodes, node, address_space_bs__p_sc);
 
     if (!result)
@@ -1169,7 +1168,7 @@ void address_space_bs__get_Executable(const constants__t_Node_i address_space_bs
 void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs__p_node,
                                      constants__t_NodeClass_i* const address_space_bs__p_node_class)
 {
-    assert(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
 
     bool res = util_NodeClass__C_to_B(node->node_class, address_space_bs__p_node_class);
@@ -1182,7 +1181,7 @@ void address_space_bs__get_NodeClass(const constants__t_Node_i address_space_bs_
 void address_space_bs__get_DataType(const constants__t_Node_i address_space_bs__p_node,
                                     constants__t_NodeId_i* const address_space_bs__p_data_type)
 {
-    assert(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     *address_space_bs__p_data_type = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, node);
 }
@@ -1190,7 +1189,7 @@ void address_space_bs__get_DataType(const constants__t_Node_i address_space_bs__
 void address_space_bs__get_ValueRank(const constants__t_Node_i address_space_bs__p_node,
                                      t_entier4* const address_space_bs__p_value_rank)
 {
-    assert(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     *address_space_bs__p_value_rank = *SOPC_AddressSpace_Get_ValueRank(address_space_bs__nodes, node);
 }
@@ -1243,7 +1242,7 @@ void address_space_bs__get_Reference_IsForward(const constants__t_Reference_i ad
 void address_space_bs__get_Node_RefIndexEnd(const constants__t_Node_i address_space_bs__p_node,
                                             t_entier4* const address_space_bs__p_ref_index)
 {
-    assert(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
     *address_space_bs__p_ref_index = *n_refs;
@@ -1253,12 +1252,12 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
                                               const t_entier4 address_space_bs__p_ref_index,
                                               constants__t_Reference_i* const address_space_bs__p_ref)
 {
-    assert(NULL != address_space_bs__p_node);
-    assert(address_space_bs__p_ref_index > 0);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(address_space_bs__p_ref_index > 0);
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, node);
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
-    assert(address_space_bs__p_ref_index <= *n_refs);
+    SOPC_ASSERT(address_space_bs__p_ref_index <= *n_refs);
 
     *address_space_bs__p_ref = &(*refs)[address_space_bs__p_ref_index - 1];
 }
@@ -1266,8 +1265,8 @@ void address_space_bs__get_RefIndex_Reference(const constants__t_Node_i address_
 void address_space_bs__get_InputArguments(const constants__t_Node_i address_space_bs__p_node,
                                           constants__t_Variant_i* const address_space_bs__p_input_arg)
 {
-    assert(NULL != address_space_bs__p_node);
-    assert(NULL != address_space_bs__p_input_arg);
+    SOPC_ASSERT(NULL != address_space_bs__p_node);
+    SOPC_ASSERT(NULL != address_space_bs__p_input_arg);
 
     constants__t_Variant_i result = NULL;
     bool found;
@@ -1299,8 +1298,8 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
 void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i address_space_bs__p_variant,
                                              constants__t_NodeId_i* const address_space_bs__p_type)
 {
-    assert(NULL != address_space_bs__p_variant);
-    assert(NULL != address_space_bs__p_type);
+    SOPC_ASSERT(NULL != address_space_bs__p_variant);
+    SOPC_ASSERT(NULL != address_space_bs__p_type);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     *address_space_bs__p_type = (SOPC_NodeId*) SOPC_Variant_Get_DataType(address_space_bs__p_variant);
     SOPC_GCC_DIAGNOSTIC_RESTORE
@@ -1309,7 +1308,7 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
 void address_space_bs__get_conv_Variant_ValueRank(const constants__t_Variant_i address_space_bs__p_variant,
                                                   t_entier4* const address_space_bs__p_valueRank)
 {
-    assert(NULL != address_space_bs__p_variant);
-    assert(NULL != address_space_bs__p_valueRank);
+    SOPC_ASSERT(NULL != address_space_bs__p_variant);
+    SOPC_ASSERT(NULL != address_space_bs__p_valueRank);
     *address_space_bs__p_valueRank = SOPC_Variant_Get_ValueRank(address_space_bs__p_variant);
 }

@@ -18,9 +18,8 @@
  */
 
 #include "msg_register_nodes_bs.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
-
-#include <assert.h>
 
 void msg_register_nodes_bs__INITIALISATION(void) {}
 
@@ -29,7 +28,7 @@ void msg_register_nodes_bs__alloc_msg_register_nodes_resp_results(
     const t_entier4 msg_register_nodes_bs__p_nb_results,
     t_bool* const msg_register_nodes_bs__bres)
 {
-    assert(msg_register_nodes_bs__p_nb_results > 0);
+    SOPC_ASSERT(msg_register_nodes_bs__p_nb_results > 0);
 
     OpcUa_RegisterNodesResponse* response = msg_register_nodes_bs__p_resp_msg;
     response->RegisteredNodeIds = SOPC_Calloc((size_t) msg_register_nodes_bs__p_nb_results, sizeof(SOPC_NodeId));
@@ -65,7 +64,7 @@ void msg_register_nodes_bs__get_msg_register_nodes_req_node_id(
     constants__t_NodeId_i* const msg_register_nodes_bs__p_node_id)
 {
     OpcUa_RegisterNodesRequest* request = msg_register_nodes_bs__p_req_msg;
-    assert(msg_register_nodes_bs__p_index > 0 && msg_register_nodes_bs__p_index <= request->NoOfNodesToRegister);
+    SOPC_ASSERT(msg_register_nodes_bs__p_index > 0 && msg_register_nodes_bs__p_index <= request->NoOfNodesToRegister);
     *msg_register_nodes_bs__p_node_id = &request->NodesToRegister[msg_register_nodes_bs__p_index - 1];
 }
 
@@ -76,7 +75,8 @@ void msg_register_nodes_bs__setall_msg_register_nodes_resp_node_id(
     t_bool* const msg_register_nodes_bs__bres)
 {
     OpcUa_RegisterNodesResponse* response = msg_register_nodes_bs__p_resp_msg;
-    assert(msg_register_nodes_bs__p_index > 0 && msg_register_nodes_bs__p_index <= response->NoOfRegisteredNodeIds);
+    SOPC_ASSERT(msg_register_nodes_bs__p_index > 0 &&
+                msg_register_nodes_bs__p_index <= response->NoOfRegisteredNodeIds);
 
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&response->RegisteredNodeIds[msg_register_nodes_bs__p_index - 1],
                                                 msg_register_nodes_bs__p_node_id);

@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h> /* getenv, exit */
 #include <string.h>
@@ -212,7 +211,7 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     encConf.receive_max_nb_chunks = 12;
     encConf.send_max_nb_chunks = 12;
     bool res = SOPC_Common_SetEncodingConstants(encConf);
-    assert(res);
+    SOPC_ASSERT(res);
 
     // Get default log config and set the custom path
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
@@ -561,10 +560,10 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    assert(NULL != token && NULL != authenticated);
+    SOPC_ASSERT(NULL != token && NULL != authenticated);
 
     *authenticated = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
-    assert(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == token->Encoding);
     if (&OpcUa_UserNameIdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
@@ -884,7 +883,7 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
     if (found)
     {
         SOPC_Variant* boolMatrixVar = SOPC_AddressSpace_Get_Value(addSpace, boolMatrix);
-        assert(NULL != boolMatrixVar);
+        SOPC_ASSERT(NULL != boolMatrixVar);
         SOPC_Variant_Clear(boolMatrixVar);
         boolMatrixVar->BuiltInTypeId = SOPC_Boolean_Id;
         boolMatrixVar->ArrayType = SOPC_VariantArrayType_Matrix;
@@ -927,7 +926,7 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
     if (found)
     {
         SOPC_Variant* byteMatrixVar = SOPC_AddressSpace_Get_Value(addSpace, byteMatrix);
-        assert(NULL != byteMatrixVar);
+        SOPC_ASSERT(NULL != byteMatrixVar);
         SOPC_Variant_Clear(byteMatrixVar);
         byteMatrixVar->BuiltInTypeId = SOPC_Byte_Id;
         byteMatrixVar->ArrayType = SOPC_VariantArrayType_Matrix;

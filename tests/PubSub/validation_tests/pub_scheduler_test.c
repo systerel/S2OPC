@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_dataset_layer.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -70,10 +70,10 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
 SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
 
 {
-    assert(nbValues <= NB_VARS);
-    assert(0 < nbValues);
+    SOPC_ASSERT(nbValues <= NB_VARS);
+    SOPC_ASSERT(0 < nbValues);
     SOPC_DataValue* dataValues = SOPC_Calloc((size_t) nbValues, sizeof(*dataValues));
-    assert(NULL != dataValues);
+    SOPC_ASSERT(NULL != dataValues);
 
     for (int32_t i = 0; i < nbValues; i++)
     {
@@ -84,11 +84,11 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
         OpcUa_ReadValueId* readValue = &nodesToRead[i];
 
         uint32_t index = readValue->NodeId.Data.Numeric;
-        assert(13 == readValue->AttributeId); // Value => AttributeId=13
-        assert(SOPC_IdentifierType_Numeric == readValue->NodeId.IdentifierType);
-        assert(1 + (index / 6) == readValue->NodeId.Namespace);
+        SOPC_ASSERT(13 == readValue->AttributeId); // Value => AttributeId=13
+        SOPC_ASSERT(SOPC_IdentifierType_Numeric == readValue->NodeId.IdentifierType);
+        SOPC_ASSERT(1 + (index / 6) == readValue->NodeId.Namespace);
         // index node id
-        assert(NB_VARS > index);
+        SOPC_ASSERT(NB_VARS > index);
         dataValue->Value.ArrayType = varArr[index].ArrayType;
         dataValue->Value.BuiltInTypeId = varArr[index].BuiltInTypeId;
         dataValue->Value.Value = varArr[index].Value;
@@ -131,15 +131,15 @@ int main(int argc, char** argv)
 
     // Get XML configuration
     FILE* fd = fopen(filename, "r");
-    assert(NULL != fd);
+    SOPC_ASSERT(NULL != fd);
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);
     int closed = fclose(fd);
-    assert(0 == closed);
-    assert(NULL != config);
+    SOPC_ASSERT(0 == closed);
+    SOPC_ASSERT(NULL != config);
 
     // Get Source Configuration
     SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(&SOPC_GetSourceVariables_TestFunc);
-    assert(NULL != sourceConfig);
+    SOPC_ASSERT(NULL != sourceConfig);
 
     // Start without priority, as this test is not time-sensitive
     bool bres = SOPC_PubScheduler_Start(config, sourceConfig, 0);

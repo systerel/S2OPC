@@ -17,14 +17,14 @@
  * under the License.
  */
 
-#include <assert.h>
+#include "sopc_reader_layer.h"
 
+#include "sopc_assert.h"
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_network_layer.h"
 #include "sopc_pubsub_helpers.h"
-#include "sopc_reader_layer.h"
 
 /**
  * Filter at NetworkMessage Level
@@ -112,7 +112,7 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
                                                        const uint32_t groupVersion,
                                                        const uint32_t groupId)
 {
-    assert(NULL != connection && uadp_conf != NULL);
+    SOPC_ASSERT(NULL != connection && uadp_conf != NULL);
     // Find a matching ReaderGroup in connection
     const uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
 
@@ -122,7 +122,7 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
     {
         bool match = true;
         SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, i);
-        assert(NULL != readerGroup);
+        SOPC_ASSERT(NULL != readerGroup);
 
         if (uadp_conf->GroupVersionFlag)
         {
@@ -159,7 +159,7 @@ static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* grou
                                                     const uint16_t writerId,
                                                     const uint8_t dataSetIndex)
 {
-    assert(NULL != group && uadp_conf != NULL);
+    SOPC_ASSERT(NULL != group && uadp_conf != NULL);
     // Find a matching reader in group
     const SOPC_DataSetReader* result = NULL;
     const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
@@ -201,7 +201,7 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
                                              SOPC_SubTargetVariableConfig* targetConfig,
                                              const SOPC_DataSetReader* reader)
 {
-    assert(NULL != dsm && NULL != reader);
+    SOPC_ASSERT(NULL != dsm && NULL != reader);
     SOPC_ReturnStatus result = SOPC_STATUS_ENCODING_ERROR;
     const SOPC_DataSet_LL_UadpDataSetMessageContentMask* conf = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
     if (DataSet_LL_MessageType_KeepAlive == conf->dataSetMessageType)
@@ -228,13 +228,13 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
 static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf_pubid,
                                                const SOPC_Dataset_LL_PublisherId* nm_pubid)
 {
-    assert(NULL != conf_pubid && NULL != nm_pubid);
+    SOPC_ASSERT(NULL != conf_pubid && NULL != nm_pubid);
 
     switch (conf_pubid->type)
     {
     case SOPC_String_PublisherId:
         // Not managed
-        assert(DataSet_LL_PubId_String_Id != nm_pubid->type);
+        SOPC_ASSERT(DataSet_LL_PubId_String_Id != nm_pubid->type);
         return false;
     case SOPC_UInteger_PublisherId:
     {

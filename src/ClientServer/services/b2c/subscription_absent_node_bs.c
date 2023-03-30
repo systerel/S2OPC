@@ -42,7 +42,7 @@ void subscription_absent_node_bs__absent_Node_is_known(
     *subscription_absent_node_bs__valueSc = constants_statuscodes_bs__e_sc_ok;
     SOPC_Endpoint_Config* endpointConfig =
         SOPC_ToolkitServer_GetEndpointConfig(subscription_absent_node_bs__p_endpoint_config_idx);
-    assert(NULL != endpointConfig && NULL != endpointConfig->serverConfigPtr);
+    SOPC_ASSERT(NULL != endpointConfig && NULL != endpointConfig->serverConfigPtr);
     SOPC_Server_Config* serverConfig = endpointConfig->serverConfigPtr;
     if (NULL != serverConfig->nodeAvailFunc)
     {

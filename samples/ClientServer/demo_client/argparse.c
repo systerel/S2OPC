@@ -28,13 +28,13 @@
  *
  */
 #include "argparse.h"
-#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_macros.h"
 
 #define OPT_UNSET 1
@@ -163,7 +163,7 @@ static int argparse_getvalue(struct argparse* self, const struct argparse_option
             argparse_error(self, opt, "expects a numerical value", flags);
         break;
     default:
-        assert(0);
+        SOPC_ASSERT(0);
     }
 
 skipped:
@@ -303,7 +303,7 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
             case -2:
                 goto unknown;
             default:
-                assert(false);
+                SOPC_ASSERT(false);
                 break;
             }
             while (self->optvalue)
@@ -317,7 +317,7 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
                 case -2:
                     goto unknown;
                 default:
-                    assert(false);
+                    SOPC_ASSERT(false);
                     break;
                 }
             }
@@ -340,7 +340,7 @@ int argparse_parse(struct argparse* self, int argc, char** argv)
         case -2:
             goto unknown;
         default:
-            assert(false);
+            SOPC_ASSERT(false);
             break;
         }
         continue;

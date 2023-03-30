@@ -17,13 +17,13 @@
  * under the License.
  */
 
-#include <assert.h>
+#include "sopc_event_timer_manager.h"
+
 #include <inttypes.h>
 #include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -148,7 +148,7 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
     if (usedTimerIds[timer->id])
     {
         result = SOPC_SLinkedList_RemoveFromId(timers, timer->id);
-        assert(result == timer);
+        SOPC_ASSERT(result == timer);
 
         // Set timer
         result = SOPC_SLinkedList_SortedInsert(timers, timer->id, timer, SOPC_Internal_SLinkedList_EventTimerCompare);
@@ -217,7 +217,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
         if (timer->isPeriodicTimer)
         {
             // Set next target time reference
-            assert(timer->periodMs > 0 && "A periodic timer cannot have a period of 0 ms");
+            SOPC_ASSERT(timer->periodMs > 0 && "A periodic timer cannot have a period of 0 ms");
             timer->endTime = SOPC_TimeReference_AddMilliseconds(timer->endTime, timer->periodMs);
             compareResult = SOPC_TimeReference_Compare(currentTimeRef, timer->endTime);
 
@@ -318,7 +318,7 @@ void SOPC_EventTimer_Initialize(void)
 
     if (SOPC_Thread_Create(&cyclicEvalThread, SOPC_Internal_ThreadLoop, NULL, "Timers") != SOPC_STATUS_OK)
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 

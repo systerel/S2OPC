@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
@@ -525,7 +525,7 @@ SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList
 
 static size_t ptr_offset(const void* p, const void* start)
 {
-    assert(p >= start);
+    SOPC_ASSERT(p >= start);
     return (size_t)(((const uint8_t*) p) - ((const uint8_t*) start));
 }
 
@@ -544,7 +544,7 @@ static void* mem_search(const void* mem, size_t mem_len, const void* needle, siz
     }
 
     size_t offset = ptr_offset(start, mem);
-    assert(offset < mem_len);
+    SOPC_ASSERT(offset < mem_len);
 
     if (mem_len - offset < needle_len)
     {
@@ -658,8 +658,8 @@ static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_Certifica
 
 bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList* pCert, const char* application_uri)
 {
-    assert(pCert != NULL);
-    assert(application_uri != NULL);
+    SOPC_ASSERT(pCert != NULL);
+    SOPC_ASSERT(application_uri != NULL);
     SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     uint8_t str_len = 0;
@@ -689,8 +689,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
                                                                      char** ppApplicationUri,
                                                                      size_t* pStringLength)
 {
-    assert(NULL != pCert);
-    assert(NULL != ppApplicationUri);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != ppApplicationUri);
     SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     uint8_t str_len = 0;
@@ -751,7 +751,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
 /* Creates a new string: free the result */
 static char* get_raw_sha1(const mbedtls_x509_buf* raw)
 {
-    assert(NULL != raw);
+    SOPC_ASSERT(NULL != raw);
 
     /* Make SHA-1 thumbprint */
     const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);

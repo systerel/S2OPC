@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_dataset_layer.h"
@@ -55,14 +55,14 @@ static void Test_StopSignal(int sig)
 
 static void printNmDebug(SOPC_Dataset_LL_NetworkMessage* nm)
 {
-    assert(NULL != nm);
+    SOPC_ASSERT(NULL != nm);
 #if DEBUG_ME
     SOPC_CONSOLE_PRINTF("Content of Network message:\n");
     SOPC_CONSOLE_PRINTF("Msg Version : %u\n", (unsigned) SOPC_Dataset_LL_NetworkMessage_Get_Version(nm));
     SOPC_CONSOLE_PRINTF("Msg GroupId : %u\n", (unsigned) SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm));
     SOPC_CONSOLE_PRINTF("Msg GroupVersion : %u\n", (unsigned) SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm));
     SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(nm);
-    assert(pubId);
+    SOPC_ASSERT(pubId);
     SOPC_CONSOLE_PRINTF("Publisher Id Type : %u\n", (unsigned) SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdType(nm));
     SOPC_CONSOLE_PRINTF("Publisher Id : %u\n", (unsigned) pubId->data.byte);
     const uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
@@ -70,7 +70,7 @@ static void printNmDebug(SOPC_Dataset_LL_NetworkMessage* nm)
     {
         SOPC_CONSOLE_PRINTF("- DSM #%u/%u\n", (unsigned) iDsm, (unsigned) nbDsm);
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, iDsm);
-        assert(dsm);
+        SOPC_ASSERT(dsm);
         SOPC_CONSOLE_PRINTF("  - Writer ID = %u\n", (unsigned) SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm));
         const uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         for (uint16_t iFields = 0; iFields < nbFields; iFields++)
@@ -168,12 +168,12 @@ int main(void)
 
     status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
     FILE* fd = fopen("./config_pub.xml", "r");
-    assert(NULL != fd);
+    SOPC_ASSERT(NULL != fd);
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfig_ParseXML(fd);
 
     int closed = fclose(fd);
-    assert(0 == closed);
-    assert(NULL != config);
+    SOPC_ASSERT(0 == closed);
+    SOPC_ASSERT(NULL != config);
 
     SOPC_PubSubConnection* conf_connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
     if (NULL == conf_connection)
@@ -208,7 +208,7 @@ int main(void)
         while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
         {
             status = SOPC_UDP_Socket_SendTo(sock, multicastAddr, buffer);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             SOPC_Sleep(100);
         }
     }

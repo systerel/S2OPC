@@ -22,7 +22,6 @@
 
 #include "p_sockets.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <ifaddrs.h>
@@ -37,6 +36,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
@@ -69,7 +69,7 @@ static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(Socket sock,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    assert(multicastAddrInfo->recvMulticast);
+    SOPC_ASSERT(multicastAddrInfo->recvMulticast);
 
     struct packet_mreq mreq;
     memset(&mreq, 0, sizeof(mreq));
@@ -163,7 +163,7 @@ static SOPC_ReturnStatus SOPC_ETH_Socket_AddMemberships(Socket sock,
 
 static bool set_mac_addr_from_string(unsigned char* addr, const char* MACaddress)
 {
-    assert(NULL != addr);
+    SOPC_ASSERT(NULL != addr);
     if (strlen(MACaddress) != 17)
     {
         return false;
@@ -185,7 +185,7 @@ static bool set_mac_addr_from_string(unsigned char* addr, const char* MACaddress
 
 static bool set_itfindex_from_string(struct sockaddr_ll* addr, const char* interfaceName)
 {
-    assert(NULL != addr);
+    SOPC_ASSERT(NULL != addr);
     int tmpSock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (tmpSock == SOPC_INVALID_SOCKET)
     {
@@ -209,7 +209,7 @@ static bool set_itfindex_from_string(struct sockaddr_ll* addr, const char* inter
 
 static bool set_mac_addr_from_interface(struct ifreq* ifreq, const char* interfaceName)
 {
-    assert(NULL != ifreq);
+    SOPC_ASSERT(NULL != ifreq);
     int tmpSock = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (tmpSock == SOPC_INVALID_SOCKET)
     {

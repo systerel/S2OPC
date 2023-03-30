@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <string.h>
 
 #include "sopc_toolkit_async_api.h"
 
+#include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
@@ -50,9 +50,9 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
 
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
-    assert(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
-    assert(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
-           "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
+    SOPC_ASSERT(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
+    SOPC_ASSERT(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+                "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
     return (SOPC_EndpointConnectionCfg){.reverseEndpointConfigIdx = 0,
                                         .secureChannelConfigIdx = secureChannelConfigIdx};
 }
@@ -61,14 +61,14 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
     SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx,
     SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
-    assert(0 != reverseEndpointConfigIdx && "Invalid reverse endpoint index 0");
-    assert(reverseEndpointConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
-           "Invalid reverse endpoint index <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
-    assert(reverseEndpointConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
-           "Invalid reverse endpoint index > 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
-    assert(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
-    assert(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
-           "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
+    SOPC_ASSERT(0 != reverseEndpointConfigIdx && "Invalid reverse endpoint index 0");
+    SOPC_ASSERT(reverseEndpointConfigIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+                "Invalid reverse endpoint index <= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
+    SOPC_ASSERT(reverseEndpointConfigIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+                "Invalid reverse endpoint index > 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS");
+    SOPC_ASSERT(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
+    SOPC_ASSERT(secureChannelConfigIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED &&
+                "Invalid secure connection configuration index > SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED");
     return (SOPC_EndpointConnectionCfg){.reverseEndpointConfigIdx = reverseEndpointConfigIdx,
                                         .secureChannelConfigIdx = secureChannelConfigIdx};
 }

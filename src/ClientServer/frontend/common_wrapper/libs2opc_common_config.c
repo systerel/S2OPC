@@ -19,10 +19,10 @@
 
 #include "libs2opc_common_config.h"
 
-#include <assert.h>
 #include <stdio.h>
 
 #include "libs2opc_common_internal.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -110,7 +110,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         }
         break;
     default:
-        assert(false && "Unexpected event");
+        SOPC_ASSERT(false && "Unexpected event");
     }
     Mutex_Unlock(&sopc_helper_config.callbacksMutex);
 }

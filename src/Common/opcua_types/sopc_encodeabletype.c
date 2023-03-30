@@ -19,9 +19,9 @@
 
 #include "sopc_encodeabletype.h"
 
-#include <assert.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_common_constants.h"
 #include "sopc_encoder.h"
@@ -181,9 +181,9 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
         if (found && userCoder != NULL)
         {
             pValue = (SOPC_EncodeableType_UserTypeValue*) userCoder;
-            assert(pValue != NULL);
+            SOPC_ASSERT(pValue != NULL);
             result = pValue->encoder;
-            assert(result != NULL);
+            SOPC_ASSERT(result != NULL);
         }
     }
     return result;
@@ -239,8 +239,8 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
 static SOPC_EncodeableType* getKnownEncodeableType(const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     const uint32_t typeIndex = desc->typeIndex;
-    assert(typeIndex < SOPC_TypeInternalIndex_SIZE &&
-           "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
+    SOPC_ASSERT(typeIndex < SOPC_TypeInternalIndex_SIZE &&
+                "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
     return SOPC_KnownEncodeableTypes[typeIndex];
 }
 
@@ -382,8 +382,8 @@ static const void* const* retrieveConstArrayAddressPtr(const void* pValue,
 
 void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
 {
-    assert(type != NULL);
-    assert(pValue != NULL);
+    SOPC_ASSERT(type != NULL);
+    SOPC_ASSERT(pValue != NULL);
 
     // The first field of all non-builtin OPC UA type instances is its encodeable type
     *((SOPC_EncodeableType**) pValue) = type;
@@ -400,13 +400,13 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             const SOPC_EncodeableType_FieldDescriptor* arrayDesc = NULL;
             void** pArray = NULL;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             initFunction = getPfnInitialize(arrayDesc);
@@ -425,7 +425,7 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
 
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
 {
-    assert(type != NULL);
+    SOPC_ASSERT(type != NULL);
     if (NULL == pValue)
     {
         return;
@@ -444,13 +444,13 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
             void** pArray = NULL;
             size_t size = 0;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
@@ -502,13 +502,13 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
             size_t size = 0;
             SOPC_EncodeableObject_PfnEncode* encodeFunction = NULL;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
@@ -569,13 +569,13 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
             SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
             SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
             pLength = pField;
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
             size = getAllocationSize(arrayDesc);
@@ -630,12 +630,12 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
             size_t size = 0;
             SOPC_EncodeableObject_PfnCopy* copyFunction = NULL;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             if (*pSrcLength > 0)
             {
                 arrayDesc = &type->Fields[i];
@@ -711,12 +711,12 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
             size_t size = 0;
             SOPC_EncodeableObject_PfnComp* compFunction = NULL;
 
-            assert(desc->isBuiltIn);
-            assert(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
+            SOPC_ASSERT(desc->isBuiltIn);
+            SOPC_ASSERT(desc->typeIndex == (uint32_t) SOPC_Int32_Id);
 
             // Increment to obtain the array content field
             ++i;
-            assert(i < type->NoOfFields);
+            SOPC_ASSERT(i < type->NoOfFields);
             if (pLeftLength < pRightLength)
             {
                 resultComp = -1;

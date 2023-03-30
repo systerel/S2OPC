@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -570,7 +569,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
     if (NULL != fd)
     {
         int closed = fclose(fd);
-        assert(closed == 0);
+        SOPC_ASSERT(closed == 0);
     }
 #else
     /* configuration is static. No value for the XML file */
@@ -779,11 +778,11 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
         {
             writeResponse = param;
             // Service should have succeeded
-            assert(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
+            SOPC_ASSERT(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
         return;
     default:
@@ -824,12 +823,12 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
         nidCommand = SOPC_NodeId_FromCString(NODEID_PUBSUB_COMMAND, strlen(NODEID_PUBSUB_COMMAND));
         nidSend = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND, strlen(NODEID_ACYCLICPUB_SEND));
     }
-    assert(NULL != nidConfig && NULL != nidCommand && NULL != nidSend);
+    SOPC_ASSERT(NULL != nidConfig && NULL != nidCommand && NULL != nidSend);
 
     /* If config changes, store the new configuration path in global cache */
     int32_t cmpConfig = -1;
     SOPC_ReturnStatus status = SOPC_NodeId_Compare(nidConfig, &pwv->NodeId, &cmpConfig);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_NodeId_Clear(nidConfig);
     SOPC_Free(nidConfig);
     nidConfig = NULL;
@@ -837,7 +836,7 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
     /* If command changes, start, stop, or restart the PubSub module */
     int32_t cmpCommand = -1;
     status = SOPC_NodeId_Compare(nidCommand, &pwv->NodeId, &cmpCommand);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_NodeId_Clear(nidCommand);
     SOPC_Free(nidCommand);
     nidCommand = NULL;
@@ -981,7 +980,7 @@ void Server_SetSubStatus(SOPC_PubSubState state)
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;
     SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
 
     /* Avoid the creation of the NodeId each call of the function */

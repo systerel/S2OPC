@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_sub_target_variable.h"
@@ -86,11 +86,11 @@ bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetCon
         if (SOPC_STATUS_OK == status)
         {
             variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
-            assert(NULL != variant);
+            SOPC_ASSERT(NULL != variant);
             fieldMetaData = SOPC_DataSetReader_Get_FieldMetaData_At(reader, i);
-            assert(NULL != fieldMetaData);
+            SOPC_ASSERT(NULL != fieldMetaData);
             targetData = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
-            assert(NULL != targetData);
+            SOPC_ASSERT(NULL != targetData);
 
             // Fill write value:
             // NodeId
@@ -103,8 +103,8 @@ bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetCon
             value->AttributeId = SOPC_FieldTarget_Get_AttributeId(targetData);
 
             // source and target indexes:
-            assert(NULL ==
-                   SOPC_FieldTarget_Get_SourceIndexRange(targetData)); // We do not manage index range on received data
+            SOPC_ASSERT(NULL == SOPC_FieldTarget_Get_SourceIndexRange(
+                                    targetData)); // We do not manage index range on received data
 
             const char* targetIndexRange = SOPC_FieldTarget_Get_TargetIndexRange(targetData);
             if (NULL != targetIndexRange)

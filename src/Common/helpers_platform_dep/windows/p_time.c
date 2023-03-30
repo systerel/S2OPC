@@ -81,14 +81,14 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 /***************************************************/
 bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
     return false; // not implemented in Windows
 }
 
 /***************************************************/
 int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 {
-    assert(NULL != tRef);
+    SOPC_ASSERT(NULL != tRef);
     SOPC_UNUSED_ARG(t);
     return 0; // not implemented in Windows
 }
@@ -96,7 +96,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 /***************************************************/
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 {
-    assert(NULL != t);
+    SOPC_ASSERT(NULL != t);
     SOPC_UNUSED_ARG(now);
     return false; // not implemented in Windows
 }

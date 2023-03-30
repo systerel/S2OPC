@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_assert.h"
 #include "sopc_helper_expat.h"
 #include "sopc_mem_alloc.h"
 
@@ -95,8 +95,8 @@ const char* SOPC_HelperExpat_CharDataStripped(SOPC_HelperExpatCtx* ctx)
 
 void SOPC_HelperExpat_PushSkipTag(SOPC_HelperExpatCtx* ctx, const char* name)
 {
-    assert(0 == ctx->skip_tag[0]);
-    assert(strlen(name) < SKIP_TAG_LEN);
+    SOPC_ASSERT(0 == ctx->skip_tag[0]);
+    SOPC_ASSERT(strlen(name) < SKIP_TAG_LEN);
     strncpy(ctx->skip_tag, name, SKIP_TAG_LEN - 1);
 }
 

@@ -21,7 +21,6 @@
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdint.h>
@@ -1189,11 +1188,11 @@ const char* SOPC_String_GetRawCString(const SOPC_String* string)
         if (CHAR_BIT == 8)
         {
             cString = (char*) string->Data;
-            assert(string->Data[string->Length] == '\0');
+            SOPC_ASSERT(string->Data[string->Length] == '\0');
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
     }
     return cString;
@@ -1214,7 +1213,7 @@ SOPC_ReturnStatus SOPC_String_Compare(const SOPC_String* left,
     }
     else if (left->Length == right->Length)
     {
-        assert(CHAR_BIT == 8);
+        SOPC_ASSERT(CHAR_BIT == 8);
         if (false == ignoreCase)
         {
             *comparison = strcmp((char*) left->Data, (char*) right->Data);
@@ -1744,7 +1743,7 @@ SOPC_ReturnStatus SOPC_NodeId_Compare(const SOPC_NodeId* left, const SOPC_NodeId
                 else
                 {
                     // Already verified in precedent conditions
-                    assert(false);
+                    SOPC_ASSERT(false);
                 }
             }
             else if (left->IdentifierType < right->IdentifierType)
@@ -1819,7 +1818,7 @@ void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
 {
     uint64_t h;
 
-    assert(nodeId != NULL);
+    SOPC_ASSERT(nodeId != NULL);
 
     h = SOPC_DJBHash((const uint8_t*) &nodeId->IdentifierType, sizeof(SOPC_IdentifierType));
     h = SOPC_DJBHash_Step(h, (const uint8_t*) &nodeId->Namespace, sizeof(uint16_t));
@@ -1843,7 +1842,7 @@ void SOPC_NodeId_Hash(const SOPC_NodeId* nodeId, uint64_t* hash)
         }
         break;
     default:
-        assert(false && "Unknown IdentifierType");
+        SOPC_ASSERT(false && "Unknown IdentifierType");
     }
 
     *hash = h;
@@ -1918,7 +1917,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                 case SOPC_IdentifierType_Numeric:
                     // with <id> = 10 digits max: "i=<id>\0"
                     res = sprintf(&result[res], "i=%" PRIu32, nodeId->Data.Numeric);
-                    assert(res > 0);
+                    SOPC_ASSERT(res > 0);
                     break;
                 case SOPC_IdentifierType_String:
                     // "s=<string>\0"
@@ -1930,7 +1929,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     {
                         res = sprintf(&result[res], "s=");
                     }
-                    assert(res > 0);
+                    SOPC_ASSERT(res > 0);
                     break;
                 case SOPC_IdentifierType_Guid:
                     // ex: "g=09087e75-8e5e-499b-954f-f2a9603db28a\0"
@@ -1941,7 +1940,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     else
                     {
                         res = sprintf(&result[res], "g=");
-                        assert(res > 0);
+                        SOPC_ASSERT(res > 0);
                     }
                     break;
                 case SOPC_IdentifierType_ByteString:
@@ -1954,7 +1953,7 @@ char* SOPC_NodeId_ToCString(const SOPC_NodeId* nodeId)
                     else
                     {
                         res = sprintf(&result[res], "b=");
-                        assert(res > 0);
+                        SOPC_ASSERT(res > 0);
                     }
                     break;
                 default:
@@ -2617,7 +2616,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_Copy_Internal(int recursionLimit,
             while (SOPC_SLinkedList_HasNext(&it) && SOPC_STATUS_OK == status)
             {
                 SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
-                assert(NULL != lt);
+                SOPC_ASSERT(NULL != lt);
                 SOPC_LocalizedText* newLt = SOPC_Malloc(sizeof(*newLt));
                 SOPC_LocalizedText_Initialize(newLt);
                 status = SOPC_LocalizedText_Copy_Internal(recursionLimit, newLt, lt);
@@ -2682,8 +2681,8 @@ static SOPC_ReturnStatus SOPC_LocalizedText_Compare_Internal(int recursionLimit,
                     {
                         SOPC_LocalizedText* ltLeft = SOPC_SLinkedList_Next(&itLeft);
                         SOPC_LocalizedText* ltRight = SOPC_SLinkedList_Next(&itRight);
-                        assert(NULL != ltLeft);
-                        assert(NULL != ltRight);
+                        SOPC_ASSERT(NULL != ltLeft);
+                        SOPC_ASSERT(NULL != ltRight);
                         status = SOPC_LocalizedText_Compare_Internal(recursionLimit, ltLeft, ltRight, comparison);
                     }
                 }
@@ -2875,9 +2874,9 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
 static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported(SOPC_LocalizedText* destSetOfLt,
                                                                                  const SOPC_LocalizedText* src)
 {
-    assert(NULL != destSetOfLt);
-    assert(NULL != src);
-    assert(src->defaultText.Length > 0);
+    SOPC_ASSERT(NULL != destSetOfLt);
+    SOPC_ASSERT(NULL != src);
+    SOPC_ASSERT(src->defaultText.Length > 0);
     // Set a new localized text we know to be supported locale
 
     // Compare the default locale to the one to add/set
@@ -2960,12 +2959,12 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
 static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSupported(SOPC_LocalizedText* destSetOfLt,
                                                                                     const SOPC_LocalizedText* src)
 {
-    assert(NULL != destSetOfLt);
-    assert(NULL != src);
+    SOPC_ASSERT(NULL != destSetOfLt);
+    SOPC_ASSERT(NULL != src);
     // Removing a localized text is only triggered when set with LT containing empty text for the given locale
-    assert(src->defaultText.Length <= 0);
+    SOPC_ASSERT(src->defaultText.Length <= 0);
     // If locale also empty all localized texts content is cleared at once and this function is not called
-    assert(src->defaultLocale.Length > 0);
+    SOPC_ASSERT(src->defaultLocale.Length > 0);
 
     // Remove a localized text if existing for supported locale
 
@@ -2988,7 +2987,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSuppor
         {
             // Replace default by first available in list
             SOPC_LocalizedText* lt = SOPC_SLinkedList_PopHead(destSetOfLt->localizedTextList);
-            assert(NULL != lt);
+            SOPC_ASSERT(NULL != lt);
             status = SOPC_String_Copy(&destSetOfLt->defaultLocale, &lt->defaultLocale);
             if (SOPC_STATUS_OK == status)
             {
@@ -3161,7 +3160,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
                 while (!localeMatch && SOPC_SLinkedList_HasNext(&it))
                 {
                     const SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
-                    assert(NULL != lt);
+                    SOPC_ASSERT(NULL != lt);
                     res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
                                                             cmpWithCountryRegion);
                     localeMatch = (0 == res);
@@ -3223,7 +3222,7 @@ SOPC_ReturnStatus SOPC_LocalizedTextArray_GetPreferredLocale(SOPC_LocalizedText*
             for (int32_t i = 0; !localeMatch && i < nbLocalizedText; i++)
             {
                 const SOPC_LocalizedText* lt = &srcArray[i];
-                assert(NULL != lt);
+                SOPC_ASSERT(NULL != lt);
                 int res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
                                                             cmpWithCountryRegion);
                 localeMatch = (0 == res);
@@ -3308,7 +3307,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
         }
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -3351,7 +3350,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_Ext
         dest->Body.Object = src->Body.Object;
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
     SOPC_ExtensionObject_Initialize(src);
 
@@ -3418,7 +3417,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Compare(const SOPC_ExtensionObject* left,
                 }
                 break;
             default:
-                assert(false);
+                SOPC_ASSERT(false);
             }
         }
     }
@@ -3461,7 +3460,7 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             }
             break;
         default:
-            assert(false);
+            SOPC_ASSERT(false);
         }
         extObj->Length = -1;
     }
@@ -4177,8 +4176,8 @@ SOPC_ReturnStatus SOPC_Variant_ShallowCopy(SOPC_Variant* dest, const SOPC_Varian
 
 void SOPC_Variant_Move(SOPC_Variant* dst, SOPC_Variant* src)
 {
-    assert(src != NULL);
-    assert(dst != NULL);
+    SOPC_ASSERT(src != NULL);
+    SOPC_ASSERT(dst != NULL);
 
     *dst = *src;
     src->DoNotClear = true;
@@ -4730,7 +4729,7 @@ void SOPC_Initialize_Array(int32_t noOfElts,
                            size_t sizeOfElt,
                            SOPC_EncodeableObject_PfnInitialize* initFct)
 {
-    assert(NULL != eltsArray);
+    SOPC_ASSERT(NULL != eltsArray);
     size_t pos = 0;
     SOPC_Byte* byteArray = eltsArray;
 
@@ -4898,7 +4897,7 @@ static inline bool is_array_valid_range(int32_t arrayLength, const SOPC_Dimensio
 
 static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool fullRange)
 {
-    assert(range->n_dimensions == 1);
+    SOPC_ASSERT(range->n_dimensions == 1);
 
     if (variant->ArrayType == SOPC_VariantArrayType_SingleValue)
     {
@@ -4931,7 +4930,7 @@ static bool has_range_array(const SOPC_Variant* variant, const SOPC_NumericRange
 
 static bool has_range_matrix(const SOPC_Variant* variant, const SOPC_NumericRange* range, bool fullRange)
 {
-    assert(range->n_dimensions > 1);
+    SOPC_ASSERT(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
     {
         return false;
@@ -5041,7 +5040,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
                                                  const SOPC_String* src,
                                                  const SOPC_Dimension* dimension)
 {
-    assert(src->Length >= 0);
+    SOPC_ASSERT(src->Length >= 0);
     SOPC_String_Initialize(dst);
 
     const uint32_t src_length = (uint32_t) src->Length;
@@ -5055,7 +5054,7 @@ static SOPC_ReturnStatus get_range_string_helper(SOPC_String* dst,
     }
 
     const uint32_t end = SOPC_MIN_INDEX(dimension->end, src_length - 1);
-    assert(end >= start);
+    SOPC_ASSERT(end >= start);
 
     const uint32_t dst_len = end - start + 1;
 
@@ -5099,13 +5098,13 @@ static size_t size_of_builtin_type(SOPC_BuiltinId builtInTypeId)
         return SOPC_BuiltInType_HandlingTable[builtInTypeId].size;
     }
 
-    assert(false);
+    SOPC_ASSERT(false);
     return 0;
 }
 
 static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
-    assert(range->n_dimensions == 1);
+    SOPC_ASSERT(range->n_dimensions == 1);
 
     if (src->ArrayType == SOPC_VariantArrayType_SingleValue)
     {
@@ -5126,7 +5125,7 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
     }
 
     const SOPC_Dimension* dim = &range->dimensions[0];
-    assert(src->Value.Array.Length >= 0);
+    SOPC_ASSERT(src->Value.Array.Length >= 0);
     const uint32_t start = dim->start;
     const uint32_t array_length = (uint32_t) src->Value.Array.Length;
 
@@ -5141,7 +5140,7 @@ static SOPC_ReturnStatus get_range_array(SOPC_Variant* dst, const SOPC_Variant* 
     }
 
     const uint32_t end = SOPC_MIN_INDEX(dim->end, array_length - 1);
-    assert(end >= start);
+    SOPC_ASSERT(end >= start);
 
     const uint32_t dst_len = end - start + 1;
 
@@ -5194,8 +5193,8 @@ static SOPC_ReturnStatus get_range_matrix_on_string_array(SOPC_Variant* dst,
                                                           const SOPC_Variant* src,
                                                           const SOPC_NumericRange* range)
 {
-    assert(src->ArrayType == SOPC_VariantArrayType_Array);
-    assert(2 == range->n_dimensions);
+    SOPC_ASSERT(src->ArrayType == SOPC_VariantArrayType_Array);
+    SOPC_ASSERT(2 == range->n_dimensions);
 
     if (range->dimensions[0].start >= (uint32_t) src->Value.Array.Length)
     {
@@ -5250,9 +5249,9 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
                                                        const SOPC_NumericRange* numRanges,
                                                        SOPC_FlattenedRanges* flatRanges)
 {
-    assert(SOPC_VariantArrayType_Matrix == variant->ArrayType);
-    assert(variant->Value.Matrix.Dimensions > 0);
-    assert(numRanges->n_dimensions == (size_t) variant->Value.Matrix.Dimensions);
+    SOPC_ASSERT(SOPC_VariantArrayType_Matrix == variant->ArrayType);
+    SOPC_ASSERT(variant->Value.Matrix.Dimensions > 0);
+    SOPC_ASSERT(numRanges->n_dimensions == (size_t) variant->Value.Matrix.Dimensions);
 
     // Number of ranges to set on the flattened representation
     size_t n_ranges = 1;
@@ -5269,7 +5268,7 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
         const SOPC_Dimension* dim = &numRanges->dimensions[i];
         const uint32_t start_in_dim = dim->start;
         const uint32_t end_in_dim = dim->end;
-        assert(end_in_dim >= start_in_dim);
+        SOPC_ASSERT(end_in_dim >= start_in_dim);
         const uint32_t elts_in_range = end_in_dim - start_in_dim + 1;
 
         /* Note: multi-dimensional arrays are encoded as a one-dimensional array,
@@ -5283,7 +5282,7 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
         // numberOfElementsPerDimensionIndex(dim_<n-1>) = Length of dim_<n> * numberOfElementsPerDimensionIndex(dim_<n>)
         if ((size_t) i < numRanges->n_dimensions - 1)
         {
-            assert(variant->Value.Matrix.ArrayDimensions[i] > 0);
+            SOPC_ASSERT(variant->Value.Matrix.ArrayDimensions[i] > 0);
             numberOfElementsPerDimensionIndex[i] =
                 numberOfElementsPerDimensionIndex[i + 1] * (uint32_t) variant->Value.Matrix.ArrayDimensions[i + 1];
 
@@ -5354,7 +5353,7 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
                     next_i++;
                 }
             }
-            assert(next_i == next_number_of_flat_indexes);
+            SOPC_ASSERT(next_i == next_number_of_flat_indexes);
         }
 
         // Exchange previous with next flattened indexes for next iteration
@@ -5366,7 +5365,7 @@ static SOPC_ReturnStatus flatten_matrix_numeric_ranges(const SOPC_Variant* varia
     // Last dimension treatment
     {
         // Last dimension range will remain a range because flattened indexes remain consecutive (n_range *= 1)
-        assert(previous_number_of_flat_indexes == result_flat_index_ranges.n_ranges);
+        SOPC_ASSERT(previous_number_of_flat_indexes == result_flat_index_ranges.n_ranges);
 
         // Keep last dimension ranges and compute final flattened ranges
         const SOPC_Dimension* dim = &numRanges->dimensions[numRanges->n_dimensions - 1];
@@ -5400,7 +5399,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
      * Source matrix: data source for the specified ranges to read, dimensions lengths might differ from ranges
      * lengths
      */
-    assert(range->n_dimensions > 1);
+    SOPC_ASSERT(range->n_dimensions > 1);
     if (range->n_dimensions > INT32_MAX)
     {
         return false;
@@ -5446,7 +5445,7 @@ static SOPC_ReturnStatus get_range_matrix(SOPC_Variant* dst, const SOPC_Variant*
     for (size_t i = 0; i < range->n_dimensions && SOPC_STATUS_OK == status; i++)
     {
         const SOPC_Dimension* dim = &range->dimensions[i];
-        assert(src->Value.Array.Length >= 0);
+        SOPC_ASSERT(src->Value.Array.Length >= 0);
         const int32_t array_length = src->Value.Matrix.ArrayDimensions[i];
         if (!is_array_valid_range(array_length, dim, false))
         {
@@ -5545,7 +5544,7 @@ static SOPC_ReturnStatus set_range_string(SOPC_String* dst, const SOPC_String* s
 {
     const uint32_t start = dimension->start;
     const uint32_t end = dimension->end;
-    assert(end >= start);
+    SOPC_ASSERT(end >= start);
 
     if (((uint32_t) src->Length) != (end - start + 1))
     {
@@ -5565,8 +5564,8 @@ static SOPC_ReturnStatus set_range_string(SOPC_String* dst, const SOPC_String* s
 
 static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* src, const SOPC_NumericRange* range)
 {
-    assert(dst->BuiltInTypeId == src->BuiltInTypeId);
-    assert(range->n_dimensions == 1);
+    SOPC_ASSERT(dst->BuiltInTypeId == src->BuiltInTypeId);
+    SOPC_ASSERT(range->n_dimensions == 1);
 
     if (src->ArrayType == SOPC_VariantArrayType_SingleValue)
     {
@@ -5589,7 +5588,7 @@ static SOPC_ReturnStatus set_range_array(SOPC_Variant* dst, const SOPC_Variant* 
 
     const uint32_t start = range->dimensions[0].start;
     const uint32_t end = range->dimensions[0].end;
-    assert(end >= start);
+    SOPC_ASSERT(end >= start);
 
     if (((uint32_t) src->Value.Array.Length) != (end - start + 1))
     {
@@ -5653,8 +5652,8 @@ static SOPC_ReturnStatus set_range_matrix_on_string_array(SOPC_Variant* dst,
                                                           const SOPC_Variant* src,
                                                           const SOPC_NumericRange* range)
 {
-    assert(dst->ArrayType == SOPC_VariantArrayType_Array);
-    assert(2 == range->n_dimensions);
+    SOPC_ASSERT(dst->ArrayType == SOPC_VariantArrayType_Array);
+    SOPC_ASSERT(2 == range->n_dimensions);
 
     if (!is_array_valid_range(dst->Value.Array.Length, &range->dimensions[0], true))
     {
@@ -5697,8 +5696,8 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
      * Source matrix: data source for the specified ranges to write, dimensions lengths shall match ranges lengths
      */
 
-    assert(dst->BuiltInTypeId == src->BuiltInTypeId);
-    assert(numRanges->n_dimensions > 1);
+    SOPC_ASSERT(dst->BuiltInTypeId == src->BuiltInTypeId);
+    SOPC_ASSERT(numRanges->n_dimensions > 1);
     if (numRanges->n_dimensions > INT32_MAX)
     {
         return false;
@@ -5747,7 +5746,7 @@ static SOPC_ReturnStatus set_range_matrix(SOPC_Variant* dst,
         const SOPC_Dimension* dim = &numRanges->dimensions[i];
         const uint32_t start_in_dim = dim->start;
         const uint32_t end_in_dim = dim->end;
-        assert(end_in_dim >= start_in_dim);
+        SOPC_ASSERT(end_in_dim >= start_in_dim);
 
         /* Source array dimension shall match the range length (values to write in dimension) */
         if (((uint32_t) src->Value.Matrix.ArrayDimensions[i]) != (end_in_dim - start_in_dim + 1))
@@ -5813,8 +5812,8 @@ SOPC_ReturnStatus SOPC_Variant_SetRange(SOPC_Variant* dst, const SOPC_Variant* s
 
 const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId)
 {
-    assert(SOPC_VariantArrayType_SingleValue == var->ArrayType);
-    assert(builtInTypeId == var->BuiltInTypeId);
+    SOPC_ASSERT(SOPC_VariantArrayType_SingleValue == var->ArrayType);
+    SOPC_ASSERT(builtInTypeId == var->BuiltInTypeId);
 
     switch (builtInTypeId)
     {
@@ -5856,16 +5855,16 @@ const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId
         // Note: Variant is not encoded in S2OPC stack for this case
         return NULL;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
         return NULL;
     }
 }
 
 const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index)
 {
-    assert(SOPC_VariantArrayType_Array == var->ArrayType);
-    assert(builtInTypeId == var->BuiltInTypeId);
-    assert(var->Value.Array.Length > index);
+    SOPC_ASSERT(SOPC_VariantArrayType_Array == var->ArrayType);
+    SOPC_ASSERT(builtInTypeId == var->BuiltInTypeId);
+    SOPC_ASSERT(var->Value.Array.Length > index);
 
     if (index < 0 || (uint64_t) index > (uint64_t) SIZE_MAX)
     {
@@ -5914,9 +5913,9 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
                                         int32_t index,
                                         const void* value)
 {
-    assert(SOPC_VariantArrayType_Array == var->ArrayType);
-    assert(builtInTypeId == var->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
-    assert(var->Value.Array.Length > index);
+    SOPC_ASSERT(SOPC_VariantArrayType_Array == var->ArrayType);
+    SOPC_ASSERT(builtInTypeId == var->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
+    SOPC_ASSERT(var->Value.Array.Length > index);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (index < 0 || (uint64_t) index > (uint64_t) SIZE_MAX)
     {
@@ -5956,7 +5955,7 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
                          value);
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
         break;
     }
 
@@ -6023,7 +6022,7 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
             return &SOPC_Structure_Type;
         }
     default:
-        assert(false); // Invalid type
+        SOPC_ASSERT(false); // Invalid type
         return &SOPC_Null_Type;
     }
 }
@@ -6039,7 +6038,7 @@ int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var)
     case SOPC_VariantArrayType_Matrix:
         return var->Value.Matrix.Dimensions;
     default:
-        assert(false); // Invalid value
+        SOPC_ASSERT(false); // Invalid value
         return -3;
     }
 }
@@ -6230,8 +6229,8 @@ const SOPC_BuiltInType_Handling SOPC_BuiltInType_HandlingTable[SOPC_BUILTINID_MA
 
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank)
 {
-    assert(dest_ValueRank > -4);
-    assert(src_valueRank > -4);
+    SOPC_ASSERT(dest_ValueRank > -4);
+    SOPC_ASSERT(src_valueRank > -4);
     if (dest_ValueRank == src_valueRank)
     {
         // Covers compatible abstract value rank (but src always concrete when computed from variant value)

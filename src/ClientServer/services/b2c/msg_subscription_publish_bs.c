@@ -181,7 +181,7 @@ void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
     const constants__t_WriteValuePointer_i msg_subscription_publish_bs__p_wv_pointer)
 {
     SOPC_UNUSED_ARG(msg_subscription_publish_bs__p_monitored_item_id);
-    assert(SOPC_ExtObjBodyEncoding_Object == msg_subscription_publish_bs__p_notifMsg->NotificationData->Encoding);
+    SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == msg_subscription_publish_bs__p_notifMsg->NotificationData->Encoding);
     OpcUa_DataChangeNotification* dataChangeNotif =
         (OpcUa_DataChangeNotification*) msg_subscription_publish_bs__p_notifMsg->NotificationData->Body.Object.Value;
     dataChangeNotif->MonitoredItems[msg_subscription_publish_bs__p_index - 1].ClientHandle =

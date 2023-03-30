@@ -17,10 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdint.h>
 
 #include "sopc_helper_endianness_cfg.h"
+
+#include "sopc_assert.h"
 
 static SOPC_Endianness endianness_integer = SOPC_Endianness_Undefined;
 static SOPC_Endianness endianness_float = SOPC_Endianness_Undefined;

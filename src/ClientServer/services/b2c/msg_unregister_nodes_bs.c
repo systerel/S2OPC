@@ -19,7 +19,7 @@
 
 #include "msg_unregister_nodes_bs.h"
 
-#include <assert.h>
+#include "sopc_assert.h"
 
 void msg_unregister_nodes_bs__INITIALISATION(void) {}
 
@@ -37,6 +37,7 @@ void msg_unregister_nodes_bs__get_msg_unregister_nodes_req_node_id(
     constants__t_NodeId_i* const msg_unregister_nodes_bs__p_node_id)
 {
     OpcUa_UnregisterNodesRequest* request = msg_unregister_nodes_bs__p_req_msg;
-    assert(msg_unregister_nodes_bs__p_index > 0 && msg_unregister_nodes_bs__p_index <= request->NoOfNodesToUnregister);
+    SOPC_ASSERT(msg_unregister_nodes_bs__p_index > 0 &&
+                msg_unregister_nodes_bs__p_index <= request->NoOfNodesToUnregister);
     *msg_unregister_nodes_bs__p_node_id = &request->NodesToUnregister[msg_unregister_nodes_bs__p_index - 1];
 }

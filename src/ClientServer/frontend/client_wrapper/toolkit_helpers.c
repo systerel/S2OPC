@@ -23,11 +23,11 @@
  *
  */
 
-#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "libs2opc_client_internal.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
@@ -666,7 +666,7 @@ SOPC_ReturnStatus Helpers_NewValueFromDataValue(SOPC_DataValue* pVal, SOPC_LibSu
 SOPC_LibSub_Timestamp Helpers_OPCTimeToNTP(SOPC_DateTime ts)
 {
     /* We are not before 1601 */
-    assert(0 <= ts);
+    SOPC_ASSERT(0 <= ts);
     /* So we can use unsigned arithmetics, and get rid of warnings. */
     uint64_t uts = (uint64_t) ts;
 
@@ -723,7 +723,7 @@ void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstS
         SOPC_CONSOLE_PRINTF("Debug");
         break;
     default:
-        assert(false && "Unkown log level.");
+        SOPC_ASSERT(false && "Unkown log level.");
         break;
     }
     SOPC_CONSOLE_PRINTF(": %s\n", text);

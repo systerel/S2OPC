@@ -22,11 +22,12 @@
   ------------------------*/
 #include "session_request_handle_bs.h"
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "sopc_assert.h"
 
 /* Note: due to request handle generation on client side, request handle is unique regardless the session */
 /* Same size of array than request handles array */
@@ -52,8 +53,8 @@ void session_request_handle_bs__client_add_session_request_handle(
     const constants__t_session_i session_request_handle_bs__session,
     const constants__t_client_request_handle_i session_request_handle_bs__req_handle)
 {
-    assert(session_request_handle_bs__session != constants__c_session_indet);
-    assert(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
+    SOPC_ASSERT(session_request_handle_bs__session != constants__c_session_indet);
+    SOPC_ASSERT(session_request_handle_bs__req_handle != constants__c_client_request_handle_indet);
     // Request handle freshness is guaranteed by request_handle_bs,
     // in degraded cases an old session number could be overwritten here
     client_requests[session_request_handle_bs__req_handle] = session_request_handle_bs__session;
@@ -74,7 +75,7 @@ void session_request_handle_bs__client_get_session_and_remove_request_handle(
             *session_request_handle_bs__session = client_requests[session_request_handle_bs__req_handle];
             client_requests[session_request_handle_bs__req_handle] = constants__c_session_indet;
 
-            assert(session_pending_requests_nb[*session_request_handle_bs__session] > 0);
+            SOPC_ASSERT(session_pending_requests_nb[*session_request_handle_bs__session] > 0);
             session_pending_requests_nb[*session_request_handle_bs__session]--;
         }
     }
@@ -83,7 +84,7 @@ void session_request_handle_bs__client_get_session_and_remove_request_handle(
 void session_request_handle_bs__client_remove_all_request_handles(
     const constants__t_session_i session_request_handle_bs__session)
 {
-    assert(session_request_handle_bs__session != constants__c_session_indet);
+    SOPC_ASSERT(session_request_handle_bs__session != constants__c_session_indet);
     for (uint32_t idx = 1;
          idx <= SOPC_MAX_PENDING_REQUESTS && session_pending_requests_nb[session_request_handle_bs__session] > 0; idx++)
     {

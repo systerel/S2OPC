@@ -24,12 +24,12 @@
 
 #include "address_space_typing_bs.h"
 
-#include <assert.h>
 #include <inttypes.h>
 
 #include "address_space_impl.h"
 #include "sopc_address_space.h"
 #include "sopc_address_space_utils_internal.h"
+#include "sopc_assert.h"
 #include "sopc_toolkit_config_constants.h"
 
 /*------------------------
@@ -167,8 +167,8 @@ void address_space_typing_bs__check_object_has_method(const constants__t_NodeId_
                                                       const constants__t_NodeId_i address_space_typing_bs__p_method,
                                                       t_bool* const address_space_typing_bs__p_bool)
 {
-    assert(NULL != address_space_typing_bs__p_object);
-    assert(NULL != address_space_typing_bs__p_method);
+    SOPC_ASSERT(NULL != address_space_typing_bs__p_object);
+    SOPC_ASSERT(NULL != address_space_typing_bs__p_method);
     const SOPC_NodeId* object = address_space_typing_bs__p_object;
     const SOPC_NodeId* method = address_space_typing_bs__p_method;
 
@@ -177,8 +177,8 @@ void address_space_typing_bs__check_object_has_method(const constants__t_NodeId_
 
 static bool is_component_of(const SOPC_NodeId* component, const constants_bs__t_Node_i node)
 {
-    assert(NULL != node);
-    assert(NULL != component);
+    SOPC_ASSERT(NULL != node);
+    SOPC_ASSERT(NULL != component);
 
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, node);
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, node);

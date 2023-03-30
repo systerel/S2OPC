@@ -20,7 +20,6 @@
 #include "sopc_chunks_mgr.h"
 #include "sopc_chunks_mgr_internal.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,6 +28,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_crypto_provider.h"
 
+#include "sopc_assert.h"
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
@@ -131,14 +131,14 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
 
 static bool SC_Chunks_DecodeTcpMsgHeader(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx, SOPC_StatusCode* errorStatus)
 {
-    assert(chunkCtx != NULL);
-    assert(chunkCtx->currentChunkInputBuffer != NULL);
-    assert(chunkCtx->currentChunkInputBuffer->length - chunkCtx->currentChunkInputBuffer->position >=
-           SOPC_TCP_UA_HEADER_LENGTH);
-    assert(chunkCtx->currentMsgType == SOPC_MSG_TYPE_INVALID);
-    assert(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_INVALID);
-    assert(chunkCtx->currentMsgSize == 0);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(chunkCtx != NULL);
+    SOPC_ASSERT(chunkCtx->currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(chunkCtx->currentChunkInputBuffer->length - chunkCtx->currentChunkInputBuffer->position >=
+                SOPC_TCP_UA_HEADER_LENGTH);
+    SOPC_ASSERT(chunkCtx->currentMsgType == SOPC_MSG_TYPE_INVALID);
+    SOPC_ASSERT(chunkCtx->currentMsgIsFinal == SOPC_MSG_ISFINAL_INVALID);
+    SOPC_ASSERT(chunkCtx->currentMsgSize == 0);
+    SOPC_ASSERT(errorStatus != NULL);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     bool result = false;
@@ -287,14 +287,14 @@ static SOPC_SecureChannels_InternalEvent SC_Chunks_MsgTypeToRcvEvent(SOPC_Msg_Ty
         }
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
         return INT_SC_RCV_ERR;
     }
 }
 
 static bool SC_Chunks_IsMsgEncrypted(OpcUa_MessageSecurityMode securityMode, bool isOPN)
 {
-    assert(securityMode != OpcUa_MessageSecurityMode_Invalid);
+    SOPC_ASSERT(securityMode != OpcUa_MessageSecurityMode_Invalid);
     bool toEncrypt = true;
     // Determine if the message must be encrypted
     if (securityMode == OpcUa_MessageSecurityMode_None || (securityMode == OpcUa_MessageSecurityMode_Sign && !isOPN))
@@ -324,13 +324,13 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                                                             bool* receiverCertificatePresence,
                                                             SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->cryptoProvider != NULL);
-    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
-    assert(senderCertificatePresence != NULL);
-    assert(receiverCertificatePresence != NULL);
-    assert(clientSenderCertificate != NULL);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->cryptoProvider != NULL);
+    SOPC_ASSERT(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(senderCertificatePresence != NULL);
+    SOPC_ASSERT(receiverCertificatePresence != NULL);
+    SOPC_ASSERT(clientSenderCertificate != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
 
     bool result = true;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -356,7 +356,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     if (!scConnection->isServerConnection)
     {
         // CLIENT side: config is mandatory and security mode to be enforced
-        assert(scConfig != NULL);
+        SOPC_ASSERT(scConfig != NULL);
         runningAppCert = scConnection->clientCertificate;
         pkiProvider = scConfig->pki;
         enforceSecuMode = true;
@@ -376,7 +376,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     else
     {
         // SERVER side: client config could be defined or not (new secure channel opening)
-        assert(epConfig != NULL);
+        SOPC_ASSERT(epConfig != NULL);
         runningAppCert = scConnection->serverCertificate;
         pkiProvider = epConfig->serverConfigPtr->pki;
         if (scConfig != NULL)
@@ -667,8 +667,8 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
                                                     bool* isSecurityActive,
                                                     SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -781,7 +781,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         }
         else
         {
-            assert(scConnection->isServerConnection);
+            SOPC_ASSERT(scConnection->isServerConnection);
             // SERVER side (shall comply with one or several server security configuration)
             compareRes = -1;
             for (idx = 0; idx < serverConfig->nbSecuConfigs; idx++)
@@ -960,8 +960,8 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
                                                    bool* isPrevCryptoData,
                                                    SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     uint32_t tokenId = 0;
@@ -1084,7 +1084,7 @@ static bool SC_Chunks_CheckSeqNumReceived(SOPC_SecureConnection* scConnection,
                                           uint32_t seqNumber,
                                           SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     bool result = true;
 
     if (!isOPN)
@@ -1121,8 +1121,8 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
                                             bool isOPN,
                                             SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
@@ -1153,10 +1153,10 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
     bool* messageTimeoutExpired,
     SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
-    assert(requestIdOrHandle != NULL);
-    assert(messageTimeoutExpired != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->chunksCtx.currentChunkInputBuffer != NULL);
+    SOPC_ASSERT(requestIdOrHandle != NULL);
+    SOPC_ASSERT(messageTimeoutExpired != NULL);
 
     bool result = true;
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
@@ -1248,8 +1248,8 @@ static bool SC_Chunks_GetSecurityKeySets(SOPC_SecureConnection* scConnection,
                                          SOPC_SC_SecurityKeySet** senderKeySet,
                                          SOPC_SC_SecurityKeySet** receiverKeySet)
 {
-    assert(NULL != senderKeySet);
-    assert(NULL != receiverKeySet);
+    SOPC_ASSERT(NULL != senderKeySet);
+    SOPC_ASSERT(NULL != receiverKeySet);
 
     if (isPrevCryptoData)
     {
@@ -1279,9 +1279,9 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                                  bool isPrevCryptoData,
                                  const char** errorReason)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* encryptedBuffer = scConnection->chunksCtx.currentChunkInputBuffer;
-    assert(encryptedBuffer != NULL);
+    SOPC_ASSERT(encryptedBuffer != NULL);
     // Current position is SN position
     uint32_t sequenceNumberPosition = encryptedBuffer->position;
 
@@ -1331,10 +1331,10 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                     // Set position to sequence header
                     status = SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                 }
                 else
                 {
@@ -1393,10 +1393,10 @@ static bool SC_Chunks_DecryptMsg(SOPC_SecureConnection* scConnection,
                 if (SOPC_STATUS_OK == status)
                 {
                     status = SOPC_Buffer_SetDataLength(plainBuffer, sequenceNumberPosition + decryptedTextLength);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                     // Set position to sequence header
                     status = SOPC_Buffer_SetPosition(plainBuffer, sequenceNumberPosition);
-                    assert(SOPC_STATUS_OK == status);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                 }
                 else
                 {
@@ -1433,9 +1433,9 @@ static bool SC_Chunks_VerifyMsgSignature(SOPC_SecureConnection* scConnection,
                                          uint32_t* sigPosition,
                                          const char** errorReason)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* buffer = scConnection->chunksCtx.currentChunkInputBuffer;
-    assert(buffer != NULL);
+    SOPC_ASSERT(buffer != NULL);
 
     bool result = false;
 
@@ -1554,7 +1554,7 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
 {
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
-    assert(SOPC_MSG_TYPE_SC_MSG == chunkCtx->currentMsgType);
+    SOPC_ASSERT(SOPC_MSG_TYPE_SC_MSG == chunkCtx->currentMsgType);
 
     bool checkBodyMessageSize = false;
     bool addIntermediateChunk = false;
@@ -1577,7 +1577,7 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
         mergeFinalChunk = true; // Abort is a final chunk but intermediate chunks shall be cleared before merge !
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     uint32_t totalSize = 0;
@@ -1630,7 +1630,7 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
         {
             // Merge several unencrypted chunks into one buffer containing complete message.
 
-            assert(totalSize > 0); // Ensure size was computed
+            SOPC_ASSERT(totalSize > 0); // Ensure size was computed
             uint32_t remaining = 0;
             bool result = false;
             mergedBuffer = SOPC_Buffer_Create(totalSize);
@@ -1644,15 +1644,15 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
             while (NULL != bufferToMerge)
             {
                 result = fill_buffer(mergedBuffer, bufferToMerge, totalSize, &remaining);
-                assert(result);
-                assert(0 == SOPC_Buffer_Remaining(bufferToMerge));
+                SOPC_ASSERT(result);
+                SOPC_ASSERT(0 == SOPC_Buffer_Remaining(bufferToMerge));
                 SOPC_Buffer_Delete(bufferToMerge);
                 bufferToMerge = SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
             }
             result = fill_buffer(mergedBuffer, chunkCtx->currentChunkInputBuffer, totalSize, &remaining);
-            assert(result);
-            assert(0 == remaining);
-            assert(0 == SOPC_Buffer_Remaining(chunkCtx->currentChunkInputBuffer));
+            SOPC_ASSERT(result);
+            SOPC_ASSERT(0 == remaining);
+            SOPC_ASSERT(0 == SOPC_Buffer_Remaining(chunkCtx->currentChunkInputBuffer));
             SOPC_Buffer_Delete(chunkCtx->currentChunkInputBuffer);
             chunkCtx->currentChunkInputBuffer = NULL;
         }
@@ -1668,7 +1668,7 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
         chunkCtx->currentMessageInputBuffer = mergedBuffer;
     }
 
-    assert(NULL == chunkCtx->currentChunkInputBuffer);
+    SOPC_ASSERT(NULL == chunkCtx->currentChunkInputBuffer);
     return true;
 }
 
@@ -1677,8 +1677,8 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
                                bool* ignoreExpiredMessage,
                                SOPC_StatusCode* errorStatus)
 {
-    assert(requestIdOrHandle != NULL);
-    assert(ignoreExpiredMessage != NULL);
+    SOPC_ASSERT(requestIdOrHandle != NULL);
+    SOPC_ASSERT(ignoreExpiredMessage != NULL);
     *ignoreExpiredMessage = false; // default value
 
     bool result = true;
@@ -1809,7 +1809,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         sequenceHeader = true;
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (result && hasSecureChannelId)
@@ -1991,7 +1991,7 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
             // Set signature bytes as unreadable in the buffer (signature uses last bytes)
             SOPC_ReturnStatus status =
                 SOPC_Buffer_SetDataLength(scConnection->chunksCtx.currentChunkInputBuffer, signaturePosition);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         else
         {
@@ -2068,9 +2068,9 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
                                     SOPC_Buffer* receivedBuffer,
                                     SOPC_StatusCode* error)
 {
-    assert(ctx != NULL);
-    assert(receivedBuffer != NULL);
-    assert(error != NULL);
+    SOPC_ASSERT(ctx != NULL);
+    SOPC_ASSERT(receivedBuffer != NULL);
+    SOPC_ASSERT(error != NULL);
 
     uint32_t remaining = 0;
     *error = SOPC_GoodGenericStatus;
@@ -2091,9 +2091,9 @@ bool SC_Chunks_DecodeReceivedBuffer(SOPC_SecureConnection_ChunkMgrCtx* ctx,
     }
 
     // Payload decoding
-    assert(ctx->currentMsgSize > 0); // message size was decoded
-    assert(ctx->currentMsgType != SOPC_MSG_TYPE_INVALID);
-    assert(ctx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
+    SOPC_ASSERT(ctx->currentMsgSize > 0); // message size was decoded
+    SOPC_ASSERT(ctx->currentMsgType != SOPC_MSG_TYPE_INVALID);
+    SOPC_ASSERT(ctx->currentMsgIsFinal != SOPC_MSG_ISFINAL_INVALID);
 
     if (!fill_buffer(ctx->currentChunkInputBuffer, receivedBuffer, ctx->currentMsgSize - SOPC_TCP_UA_HEADER_LENGTH,
                      &remaining))
@@ -2132,9 +2132,9 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           SOPC_Buffer* receivedBuffer)
 {
     bool result = true;
-    assert(scConnection != NULL);
-    assert(receivedBuffer != NULL);
-    assert(receivedBuffer->position == 0);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(receivedBuffer != NULL);
+    SOPC_ASSERT(receivedBuffer->position == 0);
 
     SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     uint32_t requestIdOrHandle = 0;
@@ -2184,7 +2184,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             SC_Chunks_TreatTcpPayload(scConnection, &requestIdOrHandle, &ignoreExpiredMessage, &errorStatus))
         {
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer
-            assert(NULL == chunkCtx->currentChunkInputBuffer);
+            SOPC_ASSERT(NULL == chunkCtx->currentChunkInputBuffer);
             if (NULL != chunkCtx->currentMessageInputBuffer)
             {
                 if (!ignoreExpiredMessage)
@@ -2253,8 +2253,8 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
                                          SOPC_Buffer* buffer,
                                          SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(buffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(buffer != NULL);
     bool result = false;
     const uint8_t* msgTypeBytes = NULL;
     uint32_t messageSize = 0; // Could be temporary depending on message type / secu parameters
@@ -2291,7 +2291,7 @@ static bool SC_Chunks_EncodeTcpMsgHeader(uint32_t scConnectionIdx,
         result = true;
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (result)
@@ -2349,12 +2349,12 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
                                                int32_t* senderCertificateSize,
                                                SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->cryptoProvider != NULL);
-    assert(scConfig != NULL);
-    assert(scConfig->reqSecuPolicyUri != NULL);
-    assert(buffer != NULL);
-    assert(senderCertificateSize != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->cryptoProvider != NULL);
+    SOPC_ASSERT(scConfig != NULL);
+    SOPC_ASSERT(scConfig->reqSecuPolicyUri != NULL);
+    SOPC_ASSERT(buffer != NULL);
+    SOPC_ASSERT(senderCertificateSize != NULL);
     bool result = true;
     bool toEncrypt = true;
     bool toSign = true;
@@ -2519,7 +2519,7 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
         else
         {
             // Certificate shall be defined in configuration if necessary (configuration constraint)
-            assert(false);
+            SOPC_ASSERT(false);
         }
     }
 
@@ -2588,7 +2588,7 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
 
     // Ensure cipher block size is greater or equal to plain block size:
     //  otherwise the plain size could be greater than the  buffer size regarding computation
-    assert(cipherBlockSize >= plainBlockSize);
+    SOPC_ASSERT(cipherBlockSize >= plainBlockSize);
 
     /*
      * Use formulae of spec 1.03.6 errata (see mantis ticket #2897):
@@ -2600,8 +2600,8 @@ static uint32_t SC_Chunks_ComputeMaxBodySize(uint32_t nonEncryptedHeadersSize,
              SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH - signatureSize - paddingSizeFields;
 
     // Maximum body size (+headers+signature+padding size fields) cannot be greater than maximum buffer size
-    assert(chunkSize >= (nonEncryptedHeadersSize + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH + result + signatureSize +
-                         paddingSizeFields));
+    SOPC_ASSERT(chunkSize >= (nonEncryptedHeadersSize + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH + result +
+                              signatureSize + paddingSizeFields));
 
     return result;
 }
@@ -2615,13 +2615,13 @@ static bool SC_Chunks_GetSendingCryptoSizes(SOPC_SecureConnection* scConnection,
                                             uint32_t* cipherTextBlockSize,
                                             uint32_t* plainTextBlockSize)
 {
-    assert(scConnection != NULL);
-    assert(scConfig != NULL);
-    assert(toEncrypt != NULL);
-    assert(toSign != NULL);
-    assert(signatureSize != NULL);
-    assert(cipherTextBlockSize != NULL);
-    assert(plainTextBlockSize != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConfig != NULL);
+    SOPC_ASSERT(toEncrypt != NULL);
+    SOPC_ASSERT(toSign != NULL);
+    SOPC_ASSERT(signatureSize != NULL);
+    SOPC_ASSERT(cipherTextBlockSize != NULL);
+    SOPC_ASSERT(plainTextBlockSize != NULL);
     bool result = true;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -2738,8 +2738,8 @@ static uint32_t SC_Chunks_GetSendingMaxBodySize(SOPC_SecureConnection* scConnect
                                                 bool isSymmetric,
                                                 bool* hasExtraPaddingSize)
 {
-    assert(scConnection != NULL);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConfig != NULL);
     uint32_t maxBodySize = 0;
     bool result = true;
 
@@ -2804,12 +2804,12 @@ static bool SOPC_Chunks_EncodePadding(uint32_t scConnectionIdx,
                                       bool* hasExtraPadding,
                                       SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConfig != NULL);
-    assert(buffer != NULL);
-    assert(signatureSize != NULL);
-    assert(realPaddingLength != NULL);
-    assert(hasExtraPadding != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConfig != NULL);
+    SOPC_ASSERT(buffer != NULL);
+    SOPC_ASSERT(signatureSize != NULL);
+    SOPC_ASSERT(realPaddingLength != NULL);
+    SOPC_ASSERT(hasExtraPadding != NULL);
 
     bool result = true;
 
@@ -3009,9 +3009,9 @@ static bool SC_Chunks_GetEncryptedDataLength(SOPC_SecureConnection* scConnection
                                              bool isSymmetricAlgo,
                                              uint32_t* cipherDataLength)
 {
-    assert(scConnection != NULL);
-    assert(scConfig != NULL);
-    assert(cipherDataLength != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConfig != NULL);
+    SOPC_ASSERT(cipherDataLength != NULL);
     bool result = true;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -3176,10 +3176,10 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
                                  SOPC_Buffer* encryptedBuffer,
                                  SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(nonEncryptedBuffer != NULL);
-    assert(encryptedBuffer != NULL);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(nonEncryptedBuffer != NULL);
+    SOPC_ASSERT(encryptedBuffer != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
     bool result = false;
 
     const char* errorReason = "";
@@ -3198,15 +3198,15 @@ static bool SC_Chunks_EncryptMsg(SOPC_SecureConnection* scConnection,
         {
             // Client side
             scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-            assert(scConfig != NULL);
+            SOPC_ASSERT(scConfig != NULL);
             otherAppCertificate = scConnection->serverCertificate;
         }
         else
         {
             // Server side
             scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-            assert(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager (no
-                                      // sending in wrong state)
+            SOPC_ASSERT(scConfig != NULL); // Even on server side it is guaranteed by secure connection state manager
+                                           // (no sending in wrong state)
             otherAppCertificate = scConnection->clientCertificate;
         }
 
@@ -3347,18 +3347,18 @@ static bool SC_Chunks_TreatSendBufferTCPonly(uint32_t scConnectionIdx,
                                              SOPC_Buffer** outputBuffer,
                                              SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(inputBuffer != NULL);
-    assert(outputBuffer != NULL);
-    assert(errorStatus != NULL);
-    assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType || SOPC_MSG_TYPE_ERR == sendMsgType ||
-           SOPC_MSG_TYPE_RHE == sendMsgType);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(inputBuffer != NULL);
+    SOPC_ASSERT(outputBuffer != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
+    SOPC_ASSERT(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
+                SOPC_MSG_TYPE_ERR == sendMsgType || SOPC_MSG_TYPE_RHE == sendMsgType);
     *outputBuffer = NULL;
 
     // Set the position at the beginning of the buffer
     // (to be read or to encode header for which space was left)
     SOPC_StatusCode status = SOPC_Buffer_SetPosition(inputBuffer, 0);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
     bool result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType, SOPC_UA_FINAL_CHUNK,
@@ -3591,7 +3591,7 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
     case SOPC_MSG_TYPE_ERR:
     case SOPC_MSG_TYPE_INVALID:
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 
     if (!result)
@@ -3610,10 +3610,10 @@ static bool SC_Chunks_TreatSendBufferOPN(
     SOPC_Buffer** outputBuffer,
     SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(inputBuffer != NULL);
-    assert(outputBuffer != NULL);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(inputBuffer != NULL);
+    SOPC_ASSERT(outputBuffer != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
     SOPC_SecureChannel_Config* scConfig = NULL;
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -3633,14 +3633,14 @@ static bool SC_Chunks_TreatSendBufferOPN(
     // Note: when sending a secure conversation message, the secure connection configuration shall be
     // defined
     scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection);
-    assert(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
+    SOPC_ASSERT(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
 
     bool toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, true);
     bool toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
 
     // In specific case of OPN the input buffer contains only message body
     // (without bytes reserved for headers since it is not static size)
-    assert(scConnection->tcpMsgProperties.sendBufferSize > 0);
+    SOPC_ASSERT(scConnection->tcpMsgProperties.sendBufferSize > 0);
     nonEncryptedBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
@@ -3705,7 +3705,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
     // RESERVE BYTES FOR SEQUENCE HEADER
     if (result)
     {
-        assert(nonEncryptedBuffer->length < nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
+        SOPC_ASSERT(nonEncryptedBuffer->length < nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
         status = SOPC_Buffer_SetDataLength(nonEncryptedBuffer,
                                            nonEncryptedBuffer->position + SOPC_UA_SECURE_MESSAGE_SEQUENCE_LENGTH);
         if (SOPC_STATUS_OK == status)
@@ -3753,7 +3753,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
     {
         // Set position to message size field
         status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_MESSAGE_SIZE_POSITION);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     if (result)
@@ -3780,7 +3780,7 @@ static bool SC_Chunks_TreatSendBufferOPN(
     {
         // Set the buffer at the end for next write
         status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, nonEncryptedBuffer->length);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     /* SIGN MESSAGE */
@@ -3838,11 +3838,11 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     SOPC_Buffer** outputBuffer,
     SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(inputChunkBuffer != NULL);
-    assert(*inputChunkBuffer != NULL);
-    assert(outputBuffer != NULL);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(inputChunkBuffer != NULL);
+    SOPC_ASSERT(*inputChunkBuffer != NULL);
+    SOPC_ASSERT(outputBuffer != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
     SOPC_Buffer* nonEncryptedBuffer = *inputChunkBuffer;
     SOPC_SecureChannel_Config* scConfig = NULL;
     bool result = false;
@@ -3862,7 +3862,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     // Note: when sending a secure conversation message, the secure connection configuration shall be
     // defined
     scConfig = SOPC_Toolkit_GetSecureChannelConfig(scConnection);
-    assert(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
+    SOPC_ASSERT(scConfig != NULL); // Even on server side guaranteed by the secure connection state manager
 
     bool toEncrypt = SC_Chunks_IsMsgEncrypted(scConfig->msgSecurityMode, false);
     bool toSign = SC_Chunks_IsMsgSigned(scConfig->msgSecurityMode);
@@ -3870,7 +3870,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     // Set the position at the beginning of the buffer (to be read or to encode header for which space was
     // left)
     status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, 0);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     /* ENCODE OPC UA TCP HEADER PHASE */
     result = SC_Chunks_EncodeTcpMsgHeader(scConnectionIdx, scConnection, sendMsgType, isFinalChar, nonEncryptedBuffer,
@@ -3886,7 +3886,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     if (result)
     {
         /* CHECK MAX BODY SIZE */
-        assert(scConnection->symmSecuMaxBodySize != 0);
+        SOPC_ASSERT(scConnection->symmSecuMaxBodySize != 0);
         // Note: buffer already contains the message body (buffer length == end of body)
         bodySize = nonEncryptedBuffer->length - SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH;
         if (bodySize > scConnection->symmSecuMaxBodySize)
@@ -3910,8 +3910,8 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
         {
             // Server side only (SC renew): new token is not active yet, use the precedent token
             // Note: no timeout on precedent token validity implemented, but it is checked on each client request
-            assert(scConnection->precedentSecurityToken.tokenId != 0);
-            assert(scConnection->precedentSecurityToken.secureChannelId != 0);
+            SOPC_ASSERT(scConnection->precedentSecurityToken.tokenId != 0);
+            SOPC_ASSERT(scConnection->precedentSecurityToken.secureChannelId != 0);
             tokenId = scConnection->precedentSecurityToken.tokenId;
             isPrevCryptoData = true;
         }
@@ -3954,7 +3954,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     {
         // Set position to message size field
         status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, SOPC_UA_HEADER_MESSAGE_SIZE_POSITION);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     if (result)
@@ -3984,7 +3984,7 @@ static bool SC_Chunks_TreatSendBufferMSGCLO(
     {
         // Set the buffer at the end for next write
         status = SOPC_Buffer_SetPosition(nonEncryptedBuffer, nonEncryptedBuffer->length);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     if (result && toSign)
@@ -4075,7 +4075,7 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
         SC_Chunks_TreatReceivedBuffer(scConnection, eltId, buffer);
         break;
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -4100,9 +4100,9 @@ static bool SC_Chunks_ComputeNbChunksToSend(SOPC_SecureConnection* scConnection,
                                             uint32_t* nbChunks,
                                             SOPC_StatusCode* errorStatus)
 {
-    assert(NULL != nbChunks);
-    assert(NULL != errorStatus);
-    assert(SOPC_MSG_TYPE_SC_MSG == msgType || SOPC_MSG_TYPE_SC_CLO == msgType);
+    SOPC_ASSERT(NULL != nbChunks);
+    SOPC_ASSERT(NULL != errorStatus);
+    SOPC_ASSERT(SOPC_MSG_TYPE_SC_MSG == msgType || SOPC_MSG_TYPE_SC_CLO == msgType);
 
     bool result = false;
     SOPC_SecureConnection_TcpProperties* tcpProperties = &scConnection->tcpMsgProperties;
@@ -4157,7 +4157,8 @@ static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
     }
     else
     {
-        assert(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + nextChunkBodySize <= (*nextChunkBuffer)->maximum_size);
+        SOPC_ASSERT(SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH + nextChunkBodySize <=
+                    (*nextChunkBuffer)->maximum_size);
         SOPC_Buffer_Reset(*nextChunkBuffer);
     }
     bool result = *nextChunkBuffer != NULL;
@@ -4166,21 +4167,21 @@ static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
         // Set buffer position and length after the message headers to only manage message body part
         SOPC_ReturnStatus status =
             SOPC_Buffer_SetDataLength(*nextChunkBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         status = SOPC_Buffer_SetPosition(*nextChunkBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
 
         // Copy message body bytes to be sent in the next chunk
         uint32_t remaining = 0;
         result = fill_buffer(*nextChunkBuffer, msgBuffer, nextChunkBodySize, &remaining);
-        assert(result);
-        assert(0 == remaining);
+        SOPC_ASSERT(result);
+        SOPC_ASSERT(0 == remaining);
 
         if (result)
         {
             // Restore position prior to message headers to be encoded first
             status = SOPC_Buffer_SetPosition(*nextChunkBuffer, 0);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
         else
         {
@@ -4260,18 +4261,18 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     SOPC_Buffer* inputChunkBuffer = NULL;
     SOPC_Buffer* outputChunkBuffer = NULL;
 
-    assert(NULL != failedWithAbortMessage);
+    SOPC_ASSERT(NULL != failedWithAbortMessage);
 
     // Set the position at the beginning of the message buffer where starts message headers
     // (corresponding empty bytes were left for headers)
     SOPC_StatusCode status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     if (isTcpUaOnly)
     {
         // HEL / ACK / ERR / RHE case
-        assert(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
-               SOPC_MSG_TYPE_ERR == sendMsgType || SOPC_MSG_TYPE_RHE == sendMsgType);
+        SOPC_ASSERT(SOPC_MSG_TYPE_HEL == sendMsgType || SOPC_MSG_TYPE_ACK == sendMsgType ||
+                    SOPC_MSG_TYPE_ERR == sendMsgType || SOPC_MSG_TYPE_RHE == sendMsgType);
         result = SC_Chunks_TreatSendBufferTCPonly(scConnectionIdx, scConnection, sendMsgType, inputMsgBuffer,
                                                   &outputChunkBuffer, errorStatus);
 
@@ -4284,7 +4285,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     else if (isOPN)
     {
         // OPN case (asymmetric case)
-        assert(SOPC_MSG_TYPE_SC_OPN == sendMsgType);
+        SOPC_ASSERT(SOPC_MSG_TYPE_SC_OPN == sendMsgType);
         result = SC_Chunks_TreatSendBufferOPN(scConnectionIdx, scConnection, requestIdOrHandle, sendMsgType,
                                               inputMsgBuffer, &outputChunkBuffer, errorStatus);
 
@@ -4296,7 +4297,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
     }
     else
     {
-        assert(SOPC_MSG_TYPE_SC_MSG == sendMsgType || SOPC_MSG_TYPE_SC_CLO == sendMsgType);
+        SOPC_ASSERT(SOPC_MSG_TYPE_SC_MSG == sendMsgType || SOPC_MSG_TYPE_SC_CLO == sendMsgType);
         // MSG (/CLO) case (symmetric case)
 
         char* errorReason = NULL;
@@ -4317,27 +4318,27 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
         // Move forward to message body only in order to compute the number of chunks only based on body size
         status = SOPC_Buffer_SetPosition(inputMsgBuffer, SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
-        assert(SOPC_STATUS_OK == status);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
 
         result = SC_Chunks_ComputeNbChunksToSend(scConnection, sendMsgType, SOPC_Buffer_Remaining(inputMsgBuffer),
                                                  &nb_chunks, errorStatus);
 
         if (result)
         {
-            assert(nb_chunks > 0);
+            SOPC_ASSERT(nb_chunks > 0);
             if (nb_chunks == 1)
             {
                 // We use the buffer directly, restore position prior to message headers and use it directly as
                 // final chunk
                 status = SOPC_Buffer_SetPosition(inputMsgBuffer, 0);
-                assert(SOPC_STATUS_OK == status);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
                 inputChunkBuffer = inputMsgBuffer;
                 // Deallocation of input buffer transfered to chunks buffer
                 inputMsgBuffer = NULL;
             }
             else
             {
-                assert(!isOPN);
+                SOPC_ASSERT(!isOPN);
                 result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
                                                          &errorReason);
             }
@@ -4368,7 +4369,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
 
             if (result && nb_chunks_sent < nb_chunks)
             {
-                assert(outputChunkBuffer != inputMsgBuffer); // otherwise only one chunk to send
+                SOPC_ASSERT(outputChunkBuffer != inputMsgBuffer); // otherwise only one chunk to send
                 result = SC_Chunks_NextOutputChunkBuffer(scConnection, inputMsgBuffer, &inputChunkBuffer, errorStatus,
                                                          &errorReason);
             }
@@ -4496,7 +4497,7 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             break;
         default:
             // Already filtered by secure channels API module
-            assert(false);
+            SOPC_ASSERT(false);
         }
 
         if (NULL == buffer || auxParam > UINT32_MAX)

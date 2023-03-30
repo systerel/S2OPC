@@ -17,12 +17,12 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
+#include "sopc_assert.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -91,7 +91,7 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 
 SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 {
-    assert(NULL != mut);
+    SOPC_ASSERT(NULL != mut);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     pthread_mutexattr_t attr;
@@ -208,7 +208,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
         absoluteTimeout.tv_sec = absoluteTimeout.tv_sec + (time_t)(milliSecs / 1000);
         uint64_t nanoseconds = (milliSecs % 1000) * SOPC_MILLISECOND_TO_NANOSECONDS;
 
-        assert(absoluteTimeout.tv_nsec < SOPC_SECOND_TO_NANOSECONDS);
+        SOPC_ASSERT(absoluteTimeout.tv_nsec < SOPC_SECOND_TO_NANOSECONDS);
         if (SOPC_SECOND_TO_NANOSECONDS - (uint64_t) absoluteTimeout.tv_nsec < nanoseconds)
         {
             // Additional second

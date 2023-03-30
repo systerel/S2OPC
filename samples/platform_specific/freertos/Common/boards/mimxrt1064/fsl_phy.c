@@ -251,7 +251,7 @@ status_t PHY_EnableLoopback(ENET_Type* base, uint32_t phyAddr, phy_loop_t mode, 
 
 status_t PHY_GetLinkStatus(ENET_Type* base, uint32_t phyAddr, bool* status)
 {
-    assert(status);
+    SOPC_ASSERT(status);
 
     status_t result = kStatus_Success;
     uint32_t data;

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <signal.h>
 #include <stdlib.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_dataset_layer.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -55,13 +55,13 @@ static SOPC_PubSubConfiguration* UDP_Pub_Test_Get_Conf(void)
     SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);
     SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
     bool alloc = SOPC_PubSubConnection_Set_Name(connection, "Kimi no na wa");
-    assert(alloc);
+    SOPC_ASSERT(alloc);
     SOPC_PubSubConnection_Set_Enabled(connection, true);
     SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 14562);
     alloc = SOPC_PubSubConnection_Set_TransportProfileUri(connection, "udp:uadp");
-    assert(alloc);
+    SOPC_ASSERT(alloc);
     alloc = SOPC_PubSubConnection_Set_Address(connection, MCAST_ADDR);
-    assert(alloc);
+    SOPC_ASSERT(alloc);
 
     SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, 1);
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, 0);
@@ -163,7 +163,7 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     variant->ArrayType = SOPC_VariantArrayType_SingleValue;
     SOPC_String_Initialize(&(variant->Value.String));
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&(variant->Value.String), "Ma chaine de caractère");
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 3);
     SOPC_NetworkMessage_Set_Variant_At(nm, 0, 3, variant, metadata);
 }
@@ -205,7 +205,7 @@ int main(void)
         while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
         {
             status = SOPC_UDP_Socket_SendTo(sock, multicastAddr, buffer);
-            assert(SOPC_STATUS_OK == status);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
             SOPC_Sleep(100);
         }
     }

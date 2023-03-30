@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <winerror.h>
 
+#include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
@@ -147,10 +147,10 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
 
 static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
 {
-    assert(args != NULL);
+    SOPC_ASSERT(args != NULL);
     Thread* thread = (Thread*) args;
     void* returnValue = thread->startFct(thread->args);
-    assert(NULL == returnValue);
+    SOPC_ASSERT(NULL == returnValue);
     return 0;
 }
 
@@ -186,7 +186,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
         /* API is available starting from Windows 10 */
         /* We need to check if the API is available at execution time */
         HMODULE kernel32 = LoadLibraryW(L"kernel32");
-        assert(kernel32 != NULL);
+        SOPC_ASSERT(kernel32 != NULL);
         pSetThreadDescription funcAddress = (pSetThreadDescription) GetProcAddress(kernel32, "SetThreadDescription");
 
         if (NULL != funcAddress)

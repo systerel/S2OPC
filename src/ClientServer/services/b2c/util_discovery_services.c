@@ -17,11 +17,11 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "constants.h"
+#include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -61,11 +61,11 @@ static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, 
         return;
     }
 
-    assert(sopcEndpointConfig->serverConfigPtr->serverCertificate->length <= INT32_MAX);
+    SOPC_ASSERT(sopcEndpointConfig->serverConfigPtr->serverCertificate->length <= INT32_MAX);
     status = SOPC_ByteString_CopyFromBytes(serverCert, sopcEndpointConfig->serverConfigPtr->serverCertificate->data,
                                            (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length);
-    assert(SOPC_STATUS_OK == status);
-    assert(tmpLength <= INT32_MAX);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(tmpLength <= INT32_MAX);
     serverCert->Length = (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length;
 }
 
@@ -75,7 +75,7 @@ static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpo
 {
     int32_t idx = 0;
     OpcUa_ApplicationDescription* desc = &sopcEndpointConfig->serverConfigPtr->serverDescription;
-    assert(desc->ApplicationType != OpcUa_ApplicationType_Client);
+    SOPC_ASSERT(desc->ApplicationType != OpcUa_ApplicationType_Client);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 

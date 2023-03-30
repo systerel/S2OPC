@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <string.h>
 
@@ -59,7 +58,7 @@ void user_authentication_bs__allocate_authenticated_user(
 {
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
 
     SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
 
@@ -90,10 +89,10 @@ static bool SOPC_UserTokenPolicyEval_Internal(
 
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
-    assert(NULL != scConfig);
+    SOPC_ASSERT(NULL != scConfig);
 
     constants__t_SecurityPolicy userSecurityPolicy = constants__e_secpol_B256S256;
 
@@ -553,8 +552,8 @@ void user_authentication_bs__shallow_copy_user_token(
 
 static bool internal_user_name_token_copy(OpcUa_UserNameIdentityToken* source, SOPC_ExtensionObject** dest)
 {
-    assert(NULL != source);
-    assert(NULL != dest);
+    SOPC_ASSERT(NULL != source);
+    SOPC_ASSERT(NULL != dest);
     SOPC_ExtensionObject* user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
     OpcUa_UserNameIdentityToken* token = NULL;
 
@@ -595,7 +594,7 @@ static SOPC_ReturnStatus internal_decrypt_user_password(const OpcUa_UserNameIden
                                                         const SOPC_SerializedAsymmetricKey* serverKey,
                                                         SOPC_Buffer** decryptedBuffer)
 {
-    assert(NULL != decryptedBuffer);
+    SOPC_ASSERT(NULL != decryptedBuffer);
     SOPC_AsymmetricKey* key = NULL;
     uint32_t decryptedLength = 0;
     SOPC_Buffer* buffer = NULL;
@@ -652,9 +651,9 @@ static SOPC_ReturnStatus internal_compare_user_decrypted_password_nonce(const SO
                                                                         SOPC_Buffer* decryptedBuffer,
                                                                         uint32_t* passwordLength)
 {
-    assert(NULL != serverNonce);
-    assert(NULL != decryptedBuffer);
-    assert(NULL != passwordLength);
+    SOPC_ASSERT(NULL != serverNonce);
+    SOPC_ASSERT(NULL != decryptedBuffer);
+    SOPC_ASSERT(NULL != passwordLength);
 
     uint32_t lenNonce = 0;
     uint32_t totalLength = 0;
@@ -776,8 +775,8 @@ void user_authentication_bs__decrypt_user_token(
     t_bool* const user_authentication_bs__p_sc_valid_user_token,
     constants__t_user_token_i* const user_authentication_bs__p_user_token_may_decrypted)
 {
-    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
-           "Only encrypted username identity token supported");
+    SOPC_ASSERT(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
+                "Only encrypted username identity token supported");
     *user_authentication_bs__p_user_token_may_decrypted = NULL;
     *user_authentication_bs__p_sc_valid_user_token = false;
 
@@ -804,7 +803,7 @@ void user_authentication_bs__decrypt_user_token(
     }
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
 
     cp = SOPC_CryptoProvider_Create(util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy));
     if (NULL == cp)
@@ -841,10 +840,10 @@ void user_authentication_bs__encrypt_user_token(
     t_bool* const user_authentication_bs__p_valid,
     constants__t_user_token_i* const user_authentication_bs__p_user_token_encrypted)
 {
-    assert(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
-           "Only encryption of username identity token supported");
-    assert(NULL != user_authentication_bs__p_server_cert);
-    assert(constants__c_user_token_indet != user_authentication_bs__p_user_token);
+    SOPC_ASSERT(constants__e_userTokenType_userName == user_authentication_bs__p_token_type &&
+                "Only encryption of username identity token supported");
+    SOPC_ASSERT(NULL != user_authentication_bs__p_server_cert);
+    SOPC_ASSERT(constants__c_user_token_indet != user_authentication_bs__p_user_token);
     *user_authentication_bs__p_user_token_encrypted = NULL;
     *user_authentication_bs__p_valid = false;
 
@@ -852,7 +851,7 @@ void user_authentication_bs__encrypt_user_token(
 
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitClient_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
-    assert(NULL != scConfig);
+    SOPC_ASSERT(NULL != scConfig);
 
     OpcUa_UserNameIdentityToken* userToken = user_authentication_bs__p_user_token->Body.Object.Value;
 
@@ -1052,7 +1051,7 @@ void user_authentication_bs__get_local_user(
     constants__t_user_i* const session_core_bs__p_user)
 {
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    assert(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig);
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     user_local.user = (SOPC_User*) SOPC_User_GetLocal();

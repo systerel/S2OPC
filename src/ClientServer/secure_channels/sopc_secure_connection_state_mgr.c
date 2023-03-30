@@ -21,15 +21,15 @@
 #include "sopc_secure_connection_state_mgr_internal.h"
 #include "sopc_secure_listener_state_mgr.h"
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "opcua_statuscodes.h"
-#include "sopc_crypto_provider.h"
 
+#include "sopc_assert.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"
@@ -139,7 +139,7 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
             SOPC_ScInternalContext_ClearInputChunksContext(&scConnection->chunksCtx);
 
             // Clear TCP sequence properties
-            assert(scConnection->tcpSeqProperties.sentRequestIds != NULL);
+            SOPC_ASSERT(scConnection->tcpSeqProperties.sentRequestIds != NULL);
 
             SOPC_SLinkedList_Apply(scConnection->tcpSeqProperties.sentRequestIds, SC_Client_ClearPendingRequest);
             SOPC_SLinkedList_Delete(scConnection->tcpSeqProperties.sentRequestIds);
@@ -228,9 +228,9 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
 
 static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uint32_t connectionIdx)
 {
-    assert(NULL != timerId);
-    assert(connectionIdx > 0);
-    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
+    SOPC_ASSERT(NULL != timerId);
+    SOPC_ASSERT(connectionIdx > 0);
+    SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
@@ -255,9 +255,9 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
 
 static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t endpointConfigIdx, uint16_t reverseConnIdx)
 {
-    assert(NULL != timerId);
-    assert(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx)); // Server EP (classic)
-    assert(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+    SOPC_ASSERT(NULL != timerId);
+    SOPC_ASSERT(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx)); // Server EP (classic)
+    SOPC_ASSERT(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
     SOPC_Event event;
     event.eltId = endpointConfigIdx;
     event.event = TIMER_SC_SERVER_REVERSE_CONN_RETRY;
@@ -278,9 +278,9 @@ static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t end
 
 static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_t connectionIdx, uint32_t timeoutMs)
 {
-    assert(NULL != timerId);
-    assert(connectionIdx > 0);
-    assert(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
+    SOPC_ASSERT(NULL != timerId);
+    SOPC_ASSERT(connectionIdx > 0);
+    SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
     SOPC_Event event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
@@ -307,9 +307,9 @@ static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBu
                                                               SOPC_StatusCode* errorStatus,
                                                               char** errorReason)
 {
-    assert(errorReason != NULL);
-    assert(errBuffer != NULL);
-    assert(errorStatus != NULL);
+    SOPC_ASSERT(errorReason != NULL);
+    SOPC_ASSERT(errBuffer != NULL);
+    SOPC_ASSERT(errorStatus != NULL);
     char* result = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_String reason;
@@ -405,7 +405,7 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
                                                             SOPC_StatusCode errorStatus,
                                                             char* reason)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -487,8 +487,8 @@ static void SC_CloseSecureConnection(
     SOPC_StatusCode errorStatus,
     char* reason)
 {
-    assert((socketFailure && immediateClose) || !socketFailure); // socketFailure == true => immediateClose == true
-    assert(scConnection != NULL);
+    SOPC_ASSERT((socketFailure && immediateClose) || !socketFailure); // socketFailure == true => immediateClose == true
+    SOPC_ASSERT(scConnection != NULL);
     uint32_t serverEndpointConfigIdx = 0;
     uint32_t scConfigIdx = scConnection->secureChannelConfigIdx;
     const bool isScConnected = (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
@@ -561,7 +561,7 @@ static void SC_CloseSecureConnection(
                 if (scConnection->isReverseConnection && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
                     scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
                 {
-                    assert(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+                    SOPC_ASSERT(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
                     SOPC_SecureListener* scListener = &secureListenersArray[serverEndpointConfigIdx];
 
                     // Configure a timer for next reverse connection attempt to client
@@ -591,7 +591,7 @@ static void SC_CloseSecureConnection(
 
 static bool SC_ReadAndCheckOpcUaMessageType(SOPC_EncodeableType* msgType, SOPC_Buffer* msgBuffer)
 {
-    assert(msgBuffer != NULL);
+    SOPC_ASSERT(msgBuffer != NULL);
     SOPC_EncodeableType* msgEncType = NULL;
     SOPC_ReturnStatus status = SOPC_MsgBodyType_Read(msgBuffer, &msgEncType);
     return (status == SOPC_STATUS_OK) && (msgEncType == msgType);
@@ -605,11 +605,11 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
                                       SOPC_SC_SecurityKeySets* keySets,
                                       SOPC_StatusCode* errorStatus)
 {
-    assert(cryptoProvider != NULL);
-    assert(clientNonce != NULL);
-    assert(serverNonce != NULL);
-    assert(keySets != NULL);
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(cryptoProvider != NULL);
+    SOPC_ASSERT(clientNonce != NULL);
+    SOPC_ASSERT(serverNonce != NULL);
+    SOPC_ASSERT(keySets != NULL);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -716,13 +716,13 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                                                         uint32_t scConnectionIdx,
                                                         uint32_t socketIdx)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
 
     // Create OPC UA TCP Hello message
     // Max size of buffer is message minimum size + URL bytes length
@@ -792,10 +792,10 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
 
 static void SC_ClientTransition_Connected_To_Disconnected(SOPC_SecureConnection* scConnection, uint32_t scConnectionIdx)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
 
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
-           scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
+                scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
 
     SC_Client_SendCloseSecureChannelRequestAndClose(scConnection, scConnectionIdx, OpcUa_BadSecureChannelClosed,
                                                     "Secure channel requested to be closed by client");
@@ -805,9 +805,9 @@ static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rh
                                                                  char** serverURI,
                                                                  char** serverURL)
 {
-    assert(rheMsgBuffer != NULL);
-    assert(serverURI != NULL);
-    assert(serverURL != NULL);
+    SOPC_ASSERT(rheMsgBuffer != NULL);
+    SOPC_ASSERT(serverURI != NULL);
+    SOPC_ASSERT(serverURL != NULL);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -846,14 +846,14 @@ static bool SC_ClientPrepareTransition_TcpReverseInit_To_TcpInit(SOPC_Buffer* rh
 
 static bool SC_ClientTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* scConnection, SOPC_Buffer* ackMsgBuffer)
 {
-    assert(scConnection != NULL);
-    assert(ackMsgBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(ackMsgBuffer != NULL);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint32_t tempValue = 0;
 
-    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE);
-    assert(!scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE);
+    SOPC_ASSERT(!scConnection->isServerConnection);
 
     result = true;
 
@@ -983,14 +983,14 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
     const uint8_t* bytes = NULL;
 
     config = SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(config != NULL);
+    SOPC_ASSERT(config != NULL);
 
     result = true;
 
     // Create crypto provider if necessary
     if (!isRenewal)
     {
-        assert(NULL == scConnection->cryptoProvider);
+        SOPC_ASSERT(NULL == scConnection->cryptoProvider);
         scConnection->cryptoProvider = SOPC_CryptoProvider_Create(config->reqSecuPolicyUri);
         if (NULL == scConnection->cryptoProvider)
         {
@@ -1097,8 +1097,8 @@ static bool SC_ClientTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 {
     bool result = false;
 
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
     result = SC_ClientTransitionHelper_SendOPN(scConnection, scConnectionIdx, false);
 
     if (result)
@@ -1114,8 +1114,8 @@ static bool SC_ClientTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
 {
     bool result = false;
 
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED);
     result = SC_ClientTransitionHelper_SendOPN(scConnection, scConnectionIdx, true);
 
     if (result)
@@ -1133,7 +1133,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
                                                  bool isOPNrenew,
                                                  SOPC_StatusCode* errorStatus)
 {
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -1146,7 +1146,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
     status = SOPC_DecodeMsg_HeaderOrBody(opnRespBuffer, &OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
     if (SOPC_STATUS_OK == status)
     {
-        assert(respHeader != NULL);
+        SOPC_ASSERT(respHeader != NULL);
         result = true;
     }
     else
@@ -1221,7 +1221,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
     if (result)
     {
         // Retrieve the server nonce and generate key sets if applicable
-        assert(opnResp != NULL);
+        SOPC_ASSERT(opnResp != NULL);
 
         if (OpcUa_MessageSecurityMode_None == scConfig->msgSecurityMode)
         {
@@ -1234,7 +1234,7 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
         }
         else
         {
-            assert(scConnection->clientNonce != NULL);
+            SOPC_ASSERT(scConnection->clientNonce != NULL);
 
             if (opnResp->ServerNonce.Length <= 0)
             {
@@ -1309,13 +1309,13 @@ static bool SC_ClientTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                             SOPC_Buffer* opnRespBuffer,
                                                             SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
-    assert(!scConnection->isServerConnection);
-    assert(opnRespBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
+    SOPC_ASSERT(!scConnection->isServerConnection);
+    SOPC_ASSERT(opnRespBuffer != NULL);
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConfig != NULL);
     bool result = false;
 
     result = SC_ClientTransitionHelper_ReceiveOPN(scConnection, scConfig, scConnectionIdx, opnRespBuffer, false,
@@ -1336,13 +1336,13 @@ static bool SC_ClientTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                                                                 SOPC_Buffer* opnRespBuffer,
                                                                 SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
-    assert(!scConnection->isServerConnection);
-    assert(opnRespBuffer != NULL);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+    SOPC_ASSERT(!scConnection->isServerConnection);
+    SOPC_ASSERT(opnRespBuffer != NULL);
     SOPC_SecureChannel_Config* scConfig =
         SOPC_ToolkitClient_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConfig != NULL);
     bool result = false;
 
     result =
@@ -1361,8 +1361,8 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
                                                         SOPC_StatusCode* errorStatus)
 {
     // Note: errorStatus must be an error allowed in OPC UA TCP error message (part 6 Table 38)
-    assert(scConnection != NULL);
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1373,10 +1373,10 @@ static bool SC_ServerTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     SOPC_String_Initialize(&url);
     uint32_t tempValue = 0;
 
-    assert(scConnection != NULL);
-    assert(helloMsgBuffer != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
-    assert(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(helloMsgBuffer != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_TCP_INIT);
+    SOPC_ASSERT(scConnection->isServerConnection);
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
     result = true;
@@ -1564,11 +1564,11 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    assert(scConnection != NULL);
-    assert(helloMsgBuffer != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE);
-    assert(scConnection->isServerConnection);
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(helloMsgBuffer != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_TCP_NEGOTIATE);
+    SOPC_ASSERT(scConnection->isServerConnection);
+    SOPC_ASSERT(NULL != errorStatus);
 
     // Write the Acknowledge message content
 
@@ -1658,14 +1658,14 @@ static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection*
                                                           uint32_t scConnectionIdx,
                                                           uint32_t socketIdx)
 {
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer = NULL;
     SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
-    assert(NULL != epConfig);
-    assert(NULL != epConfig->serverConfigPtr);
+    SOPC_ASSERT(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    assert(scConnection->state == SECURE_CONNECTION_STATE_TCP_REVERSE_INIT);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_TCP_REVERSE_INIT);
     SOPC_String urlOrURI;
     SOPC_String_Initialize(&urlOrURI);
     int32_t serverUriLen = epConfig->serverConfigPtr->serverDescription.ApplicationUri.Length;
@@ -1741,14 +1741,14 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 {
     // Important note: errorStatus shall be one of the errors that can be sent with a OPC UA TCP error message (part4
     // Table 38)
-    assert(scConnection != NULL);
-    assert(opnReqMsgBuffer != NULL);
-    assert(requestHandle != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
-    assert(scConnection->isServerConnection);
-    assert(scConnection->serverAsymmSecuInfo.securityPolicyUri != NULL); // set by chunks manager
-    assert(scConnection->serverAsymmSecuInfo.validSecurityModes != 0);   // set by chunks manager
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(opnReqMsgBuffer != NULL);
+    SOPC_ASSERT(requestHandle != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_INIT);
+    SOPC_ASSERT(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection->serverAsymmSecuInfo.securityPolicyUri != NULL); // set by chunks manager
+    SOPC_ASSERT(scConnection->serverAsymmSecuInfo.validSecurityModes != 0);   // set by chunks manager
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     bool validSecurityRequested = false;
@@ -1758,12 +1758,12 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(scConnection->serverEndpointConfigIdx);
-    assert(epConfig != NULL);
+    SOPC_ASSERT(epConfig != NULL);
 
     status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
     if (SOPC_STATUS_OK == status)
     {
-        assert(reqHeader != NULL);
+        SOPC_ASSERT(reqHeader != NULL);
         result = true;
     }
 
@@ -1785,7 +1785,7 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
     if (result)
 
     {
-        assert(opnReq != NULL);
+        SOPC_ASSERT(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1876,8 +1876,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             }
             else
             {
-                assert(opnReq->SecurityMode == OpcUa_MessageSecurityMode_Sign ||
-                       opnReq->SecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
+                SOPC_ASSERT(opnReq->SecurityMode == OpcUa_MessageSecurityMode_Sign ||
+                            opnReq->SecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if (opnReq->ClientNonce.Length > 0)
                 {
                     scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(
@@ -1961,9 +1961,9 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
                                                            uint32_t* secureChannelId,
                                                            uint32_t* tokenId)
 {
-    assert(scConnection->isServerConnection);
-    assert(secureChannelId != NULL);
-    assert(tokenId != NULL);
+    SOPC_ASSERT(scConnection->isServerConnection);
+    SOPC_ASSERT(secureChannelId != NULL);
+    SOPC_ASSERT(tokenId != NULL);
 
     bool result = false;
     SOPC_SecureListener* scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
@@ -2046,7 +2046,7 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
 // TODO: to be used for renew
 static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnection)
 {
-    assert(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection->isServerConnection);
 
     uint32_t resultTokenId = 0;
     SOPC_SecureListener* scListener = &secureListenersArray[scConnection->serverEndpointConfigIdx];
@@ -2102,11 +2102,11 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
                                                             uint32_t requestHandle,
                                                             SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
-    assert(scConnection->isServerConnection);
-    assert(scConnection->cryptoProvider != NULL);
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTING);
+    SOPC_ASSERT(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection->cryptoProvider != NULL);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -2119,7 +2119,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     const uint8_t* bytes = NULL;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConfig != NULL);
 
     // Write the OPN response message
     opnRespBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
@@ -2155,7 +2155,7 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
         SOPC_SecretBuffer* serverNonce = NULL;
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
         {
-            assert(scConnection->clientNonce != NULL);
+            SOPC_ASSERT(scConnection->clientNonce != NULL);
 
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider, &serverNonce);
 
@@ -2260,14 +2260,14 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
 {
     // Important note: errorStatus shall be one of the errors that can be sent with a OPC UA TCP error message (part4
     // Table 38)
-    assert(scConnection != NULL);
-    assert(opnReqMsgBuffer != NULL);
-    assert(requestHandle != NULL);
-    assert(requestedLifetime != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED);
-    assert(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(opnReqMsgBuffer != NULL);
+    SOPC_ASSERT(requestHandle != NULL);
+    SOPC_ASSERT(requestedLifetime != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED);
+    SOPC_ASSERT(scConnection->isServerConnection);
     // Note: Chunks manager shall have checked it is the same secu policy and mode
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_SecureChannel_Config* scConfig = NULL;
@@ -2276,12 +2276,12 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConfig != NULL);
 
     status = SOPC_DecodeMsg_HeaderOrBody(opnReqMsgBuffer, &OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
     if (SOPC_STATUS_OK == status)
     {
-        assert(reqHeader != NULL);
+        SOPC_ASSERT(reqHeader != NULL);
         result = true;
     }
 
@@ -2302,7 +2302,7 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
     }
     if (result)
     {
-        assert(opnReq != NULL);
+        SOPC_ASSERT(opnReq != NULL);
         if (scConnection->tcpMsgProperties.protocolVersion != opnReq->ClientProtocolVersion)
         {
             // Different protocol version provided on RENEW
@@ -2353,8 +2353,8 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
             }
             else
             {
-                assert(scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_Sign ||
-                       scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
+                SOPC_ASSERT(scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_Sign ||
+                            scConfig->msgSecurityMode == OpcUa_MessageSecurityMode_SignAndEncrypt);
                 if (opnReq->ClientNonce.Length > 0)
                 {
                     scConnection->clientNonce = SOPC_SecretBuffer_NewFromExposedBuffer(
@@ -2393,10 +2393,10 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
                                                                 uint32_t requestedLifetime,
                                                                 SOPC_StatusCode* errorStatus)
 {
-    assert(scConnection != NULL);
-    assert(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
-    assert(scConnection->isServerConnection);
-    assert(NULL != errorStatus);
+    SOPC_ASSERT(scConnection != NULL);
+    SOPC_ASSERT(scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW);
+    SOPC_ASSERT(scConnection->isServerConnection);
+    SOPC_ASSERT(NULL != errorStatus);
 
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -2414,7 +2414,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
     memset(&newSecuToken, 0, sizeof(SOPC_SecureConnection_SecurityToken));
 
     scConfig = SOPC_ToolkitServer_GetSecureChannelConfig(scConnection->secureChannelConfigIdx);
-    assert(scConfig != NULL);
+    SOPC_ASSERT(scConfig != NULL);
 
     // Write the OPN request message
     opnRespBuffer = SOPC_Buffer_Create(scConnection->tcpMsgProperties.sendBufferSize);
@@ -2448,7 +2448,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         if (scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
         {
             SOPC_SecretBuffer* serverNonce = NULL;
-            assert(scConnection->clientNonce != NULL);
+            SOPC_ASSERT(scConnection->clientNonce != NULL);
 
             status = SOPC_CryptoProvider_GenerateSecureChannelNonce(scConnection->cryptoProvider, &serverNonce);
             result = SOPC_STATUS_OK == status;
@@ -2549,14 +2549,14 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     if (sc->isServerConnection)
     {
         SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(sc->serverEndpointConfigIdx);
-        assert(epConfig != NULL);
+        SOPC_ASSERT(epConfig != NULL);
         serialized_private_key = epConfig->serverConfigPtr->serverKey;
         cert_data = epConfig->serverConfigPtr->serverCertificate;
     }
     else
     {
         SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
-        assert(scConfig != NULL);
+        SOPC_ASSERT(scConfig != NULL);
         serialized_private_key = scConfig->key_priv_cli;
         cert_data = scConfig->crt_cli;
         peer_cert_data = scConfig->crt_srv;
@@ -2607,7 +2607,7 @@ static bool initServerSC(uint32_t socketIndex,
     }
 
     SOPC_SecureConnection* scConnection = SC_GetConnection(*connIdx);
-    assert(scConnection != NULL);
+    SOPC_ASSERT(scConnection != NULL);
 
     // record if the connection is in reverse mode and index
     scConnection->isReverseConnection = reverseConn;
@@ -2637,7 +2637,7 @@ static bool initServerSC(uint32_t socketIndex,
 
 static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx, SOPC_Buffer* msg)
 {
-    assert(!scConnection->isServerConnection);
+    SOPC_ASSERT(!scConnection->isServerConnection);
 
     // CLIENT SIDE: OPN response for new SC or for renew
     // SC (symmetric keys)
@@ -2712,12 +2712,12 @@ static void onClientSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         return;
     }
 
-    assert(false);
+    SOPC_ASSERT(false);
 }
 
 static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx, SOPC_Buffer* msg, uint32_t requestId)
 {
-    assert(scConnection->isServerConnection);
+    SOPC_ASSERT(scConnection->isServerConnection);
 
     // SERVER SIDE: OPN request for new SC or for renew SC (symmetric keys)
     // Check the OPC UA msg is an OPN req
@@ -2804,7 +2804,7 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         return;
     }
 
-    assert(false);
+    SOPC_ASSERT(false);
 }
 
 void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEvent event,
@@ -2831,7 +2831,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         /* id = endpoint description configuration index,
            auxParam = socket index */
 
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScStateMgr: INT_EP_SC_CREATE epCfgIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId,
                                auxParam);
@@ -2861,7 +2861,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         /* id = endpoint description configuration index,
            auxParam = client to connect configuration index in endpoint config */
 
-        assert(auxParam <= UINT8_MAX);
+        SOPC_ASSERT(auxParam <= UINT8_MAX);
         SOPC_Logger_TraceDebug(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "ScStateMgr: INT_EP_SC_REVERSE_CONNECT epCfgIdx=%" PRIu32 " clientToConnectIdx=%" PRIuPTR, eltId, auxParam);
@@ -2876,7 +2876,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             if (result)
             {
                 scConnection = SC_GetConnection(connectionIdx);
-                assert(NULL != scConnection);
+                SOPC_ASSERT(NULL != scConnection);
                 // Change initial state for a reverse init
                 scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
                 // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
@@ -3030,7 +3030,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         if (scConnection->isServerConnection)
         {
-            assert(auxParam <= UINT32_MAX);
+            SOPC_ASSERT(auxParam <= UINT32_MAX);
             onServerSideOpen(scConnection, eltId, buffer, (uint32_t) auxParam);
         }
         else
@@ -3102,7 +3102,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
                 scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
             {
-                assert((void*) params != NULL);
+                SOPC_ASSERT((void*) params != NULL);
                 // Do not delete buffer since it is provided to services:
                 if (!scConnection->isServerConnection)
                 {
@@ -3149,7 +3149,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         if (SOPC_STATUS_OK == status)
         {
-            assert(errorReason != NULL);
+            SOPC_ASSERT(errorReason != NULL);
 
             // Part 6 (1.03) §6.7.3: "The receiver shall ignore the Message but shall not close the SecureChannel"
             if (scConnection->isServerConnection)
@@ -3256,7 +3256,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         if (SOPC_STATUS_OK == status)
         {
-            assert(errorReason != NULL);
+            SOPC_ASSERT(errorReason != NULL);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ScStateMgr: ERR message received with status=%" PRIX32
                                    " and reason=%s (scIdx=%" PRIu32 ")",
@@ -3318,7 +3318,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
         break;
     }
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -3340,7 +3340,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         scConnection = SC_GetConnection(eltId);
 
@@ -3393,7 +3393,7 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         break;
 
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -3445,8 +3445,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
                                " reverseConnIdx=%" PRIuPTR,
                                eltId, params);
 
-        assert(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(eltId)); // Server EP (classic)
-        assert(params < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
+        SOPC_ASSERT(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(eltId)); // Server EP (classic)
+        SOPC_ASSERT(params < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
 
         // Reset connection retry timer id
         secureListenersArray[eltId].reverseConnRetryTimerIds[params] = 0;
@@ -3480,7 +3480,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     }
     case TIMER_SC_REQUEST_TIMEOUT:
     {
-        assert(auxParam <= UINT32_MAX);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScStateMgr: TIMER_SC_REQUEST_TIMEOUT scIdx=%" PRIu32 " reqId=%" PRIuPTR
@@ -3525,7 +3525,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         break;
     }
     default:
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -3582,7 +3582,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                        scCfgIdx, idx);
 
                 scConnection = SC_GetConnection(idx);
-                assert(scConnection != NULL);
+                SOPC_ASSERT(scConnection != NULL);
                 // record the secure channel connection configuration
                 scConnection->secureChannelConfigIdx = scCfgIdx;
 
@@ -3728,6 +3728,6 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         break;
     default:
         // Already filtered by secure channels API module
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
