@@ -1,0 +1,24 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.eth://01-00-00-01-04-00" mode="subscriber">
+        <!-- one to many -->
+        <message groupId="14" groupVersion="1" publishingInterval="50." publisherId="123" >
+          <dataset writerId="50">
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
+                <!-- the nodeId is used to retrieve the variable in the adresse space -->
+          </dataset>
+            <dataset writerId="51">
+                <!-- one to many -->
+                <variable nodeId="ns=2;i=6" displayName="Titi" dataType="UInt32"/>
+                <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
+            </dataset>
+        </message>
+        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="456" securityMode="sign">
+          <dataset>
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
