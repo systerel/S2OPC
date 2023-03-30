@@ -17,10 +17,10 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_logger.h"
@@ -73,7 +73,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     {
         if (0 == SOPC_Atomic_Int_Get(&reverseEpClosedRequested))
         {
-            assert(false && "Unexpected reverse endpoint closure");
+            SOPC_ASSERT(false && "Unexpected reverse endpoint closure");
         }
         else
         {
@@ -82,7 +82,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -249,10 +249,10 @@ int main(void)
     clientAppConfig->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationUri, CLIENT_APPLICATION_URI);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationName.defaultText,
                                            APPLICATION_NAME);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     clientAppConfig->clientLocaleIds = preferred_locale_ids;
     scConfig.clientConfigPtr = clientAppConfig;
 

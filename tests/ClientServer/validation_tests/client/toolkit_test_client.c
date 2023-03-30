@@ -17,24 +17,23 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "sopc_crypto_profiles.h"
-#include "sopc_pki_stack.h"
-
 #include "test_results.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -94,7 +93,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
                 OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
                 cptReadResps++;
                 // Check context value is same as those provided with request
-                assert(cptReadResps == appContext);
+                SOPC_ASSERT(cptReadResps == appContext);
                 if (cptReadResps <= 1)
                 {
                     test_results_set_service_result(
@@ -110,7 +109,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
             else if (encType == &OpcUa_WriteResponse_EncodeableType)
             {
                 // Check context value is same as one provided with request
-                assert(1 == appContext);
+                SOPC_ASSERT(1 == appContext);
                 printf(">>Test_Client_Toolkit: received WriteResponse \n");
                 OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
                 test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
@@ -130,7 +129,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
         if (NULL != param)
         {
             // Check context value is same as one provided with request
-            assert(1 == appContext);
+            SOPC_ASSERT(1 == appContext);
 
             SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
             if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
@@ -177,7 +176,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
         }
         else
         {
-            assert(false);
+            SOPC_ASSERT(false);
         }
 
         uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
@@ -191,7 +190,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
         else
         {
             // Invalid context
-            assert(false);
+            SOPC_ASSERT(false);
         }
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
@@ -202,7 +201,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
             // Context valid but not yet associated to a session Id (never activated before failure)
             // OR context is the one associated to the session Id (activated once before failure)
             uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
-            assert(session_idx == 0 || session_idx == idOrStatus);
+            SOPC_ASSERT(session_idx == 0 || session_idx == idOrStatus);
             int32_t n_sessions_activated = 0;
             n_sessions_activated = SOPC_Atomic_Int_Get(&sessionsActivated);
             if (n_sessions_activated > 0)
@@ -214,7 +213,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
         else
         {
             // Invalid context
-            assert(false);
+            SOPC_ASSERT(false);
         }
         SOPC_Atomic_Int_Add(&sessionsClosed, 1);
     }
@@ -226,7 +225,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     {
         if (0 == SOPC_Atomic_Int_Get(&reverseEpClosedRequested))
         {
-            assert(false && "Unexpected reverse endpoint closure");
+            SOPC_ASSERT(false && "Unexpected reverse endpoint closure");
         }
         else
         {
@@ -235,7 +234,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 
@@ -323,10 +322,10 @@ int main(void)
     clientAppConfig->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationUri, APPLICATION_URI);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationName.defaultText,
                                            APPLICATION_NAME);
-    assert(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     clientAppConfig->clientLocaleIds = preferred_locale_ids;
     scConfig.clientConfigPtr = clientAppConfig;
 
@@ -736,7 +735,7 @@ int main(void)
                 OpcUa_CreateSubscriptionRequest* createSubReq = NULL;
                 status =
                     SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &createSubReq);
-                assert(SOPC_STATUS_OK == status);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
 
                 createSubReq->MaxNotificationsPerPublish = 0;
                 createSubReq->Priority = 0;

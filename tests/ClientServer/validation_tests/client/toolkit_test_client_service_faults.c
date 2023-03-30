@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -29,6 +28,7 @@
 #include "test_results.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_encodeable.h"
@@ -56,7 +56,7 @@ int32_t testStatus = 0;
 
 static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
 {
-    assert(appContext == 1); // Shall always 1 in this test
+    SOPC_ASSERT(appContext == 1); // Shall always 1 in this test
     if (event == SE_RCV_SESSION_RESPONSE)
     {
         printf(">>Test_Client_Toolkit: SE_RCV_SESSION_RESPONSE verification of service fault\n");
@@ -115,7 +115,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     }
     else if (event == SE_ACTIVATED_SESSION)
     {
-        assert(idOrStatus <= INT32_MAX);
+        SOPC_ASSERT(idOrStatus <= INT32_MAX);
         SOPC_Atomic_Int_Set(&sessionActivated, (int32_t) idOrStatus);
     }
     else if (event == SE_SESSION_ACTIVATION_FAILURE)
@@ -165,7 +165,7 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
     }
     else
     {
-        assert(false);
+        SOPC_ASSERT(false);
     }
 }
 

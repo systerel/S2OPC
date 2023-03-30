@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <assert.h>
 #include <check.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +30,7 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
 #include "sopc_encodeable.h"
@@ -341,7 +341,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
 
     if (SOPC_STATUS_OK == status)
     {
-        assert(NULL != addNodesResp);
+        SOPC_ASSERT(NULL != addNodesResp);
         if (!SOPC_IsGoodStatus(addNodesResp->ResponseHeader.ServiceResult) || addNodesResp->NoOfResults != 1 || addNodesResp->Results[0].StatusCode ||
             !SOPC_NodeId_Equal(&reqNodeId.NodeId, &addNodesResp->Results[0].AddedNodeId))
         {
@@ -349,12 +349,12 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
         }
 
         SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
-        assert(SOPC_STATUS_OK == delStatus);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
     else
     {
         SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
-        assert(SOPC_STATUS_OK == delStatus);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
 
     return status;
