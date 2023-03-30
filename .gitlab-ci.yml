@@ -126,7 +126,7 @@ generation:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:49c739e69ea8d0beeb0f108a9c3069b9fec0a18220a4563a15e6e9abc27ec900 # digest of build:1.34
+  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7f6f47f597d9b76fa21fc1f8fbf292abb411b9dd0bab503e41ee988e853fa3ff # digest of build_cyclone:1.1
   script:
     - ./.check_signed_commit.sh
   rules:
@@ -140,12 +140,12 @@ check_commit_signature:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:49c739e69ea8d0beeb0f108a9c3069b9fec0a18220a4563a15e6e9abc27ec900 # digest of build:1.34
+  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7f6f47f597d9b76fa21fc1f8fbf292abb411b9dd0bab503e41ee988e853fa3ff # digest of build_cyclone:1.1
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:12e94f0631ca8a3c9121d142a467351a89d120eaf6d1819e728a9d41d06e218b'
+    DOCKER_IMAGE: 'sha256:40cd080b81dbfff47a595342c982153192c353964e0e3f708c41540085167f8d'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -269,7 +269,7 @@ build-rpi:
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_IMAGE: 'sha256:464cfa4e22af6d1933a17b14db182632dfd28febc3495adbd286aa1e5d8265e4'
+    DOCKER_IMAGE: 'sha256:8ec55cda0f0a951cffee641f7507cea0a4ed27373d9c0f30827cf7fe24aa468b'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
   artifacts:
@@ -360,7 +360,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:96d88c653da1256530126d7f268e9eb6701fed8fb1d3773e0e095e4f070fbae6 # digest of check:1.16
+  image: registry.gitlab.com/systerel/s2opc/check_cyclone@sha256:e2ca3efbf6f040b8431116f7359b29b33183aa9533dbd55b71b78ec6c37defb2 # digest of check_cycone:1.1
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -374,7 +374,7 @@ test-check:
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
     - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
-      DOCKER_IMAGE: 'sha256:55f5a3f10a3e6dd4b1c2d076df98c818eaeb749d623ef57208f6293061a7b8a4'
+      DOCKER_IMAGE: 'sha256:f4cbb1c28938954cd56be8731088bcdf1ed41987ccfca6cf45002ed897e4014d'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
