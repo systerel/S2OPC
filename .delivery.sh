@@ -113,12 +113,12 @@ git checkout -b "${DELIVERY_NAME}_branch" &> /dev/null || exit 1
 echo "Update to $1 version in $VERSION_HEADER in $DELIVERY_NAME"
 sed -i 's/ "\*"//' $VERSION_HEADER || exit 1
 
-git commit $VERSION_HEADER -S -m "Update tagged $1 S2OPC version" &> /dev/null || exit 1
+git commit $VERSION_HEADER -S -m "Ticket #$2: Update tagged $1 S2OPC version" &> /dev/null || exit 1
 
 echo "Generate and commit version file 'VERSION' with '$1' content"
 echo "$1" > VERSION
 git add VERSION &> /dev/null || exit 1
-git commit -S -m "Add VERSION file" &> /dev/null || exit 1
+git commit -S -m "Ticket #$2: Add VERSION file" &> /dev/null || exit 1
 
 echo "Generate C source files"
 ./clean.sh all || exit 1
@@ -130,7 +130,7 @@ echo "Check generated C source files were up to date"
 echo "Re-Generate C source files and commit them with current date"
 # regenerate C source files to be sure we keep current date in source files
 ./.pre-build-in-docker.sh ./pre-build.sh || exit 1
-git commit src/ClientServer/services/bgenc -m "Add generated source files with up to date generation timestamp"
+git commit src/ClientServer/services/bgenc -m "Ticket #$2: Add generated source files with up to date generation timestamp"
 
 echo "Check code with clang tools"
 ./.check-in-docker.sh ./.check-code.sh
@@ -184,7 +184,7 @@ cd ..
 echo "Add Toolkit binaries"
 git add -f bin bin_windows &>/dev/null || exit 1
 git add -f install_linux install_windows &>/dev/null || exit 1
-git commit -S -m "Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
+git commit -S -m "Ticket #$2: Add toolkit binaries for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate test script"
 mkdir -p bin/tests/ClientServer bin/samples/ClientServer bin/tests/PubSub
@@ -197,7 +197,7 @@ sed -i 's,build/bin,bin,g' bin/tests/ClientServer/CTestTestfile.cmake bin/sample
 sed -i 's,/usr/local/bin/python3,python3,g' bin/tests/ClientServer/CTestTestfile.cmake bin/samples/ClientServer/CTestTestfile.cmake bin/tests/PubSub/CTestTestfile.cmake
 
 git add -f bin/tests/ClientServer/CTestTestfile.cmake bin/samples/ClientServer/CTestTestfile.cmake bin/tests/PubSub/CTestTestfile.cmake &>/dev/null || exit 1
-git commit -S -m "Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
+git commit -S -m "Ticket #$2: Add CTest test file for version $DELIVERY_NAME" &> /dev/null || exit 1
 
 echo "Generate documentation with doxygen"
 doxygen doxygen/s2opc-toolkit.doxyfile &> /dev/null
@@ -208,12 +208,12 @@ fi
 
 echo "Add documentation in delivery branch"
 git add -f apidoc &> /dev/null || exit 1
-git commit -S -m "Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
+git commit -S -m "Ticket #$2: Add doxygen documentation for version $DELIVERY_NAME" &> /dev/null || exit 1
 echo "Keep CI artifacts, remove internal CI files, .gitignore file and commit"
 sed -i 's/expire_in:.*$/expire_in: never/g' .gitlab-ci.yml
 git add .gitlab-ci.yml
 git rm -rf .systerel/ .gitignore &> /dev/null || exit 1
-git commit -S -m "Keep CI artifacts, remove internal CI files and .gitignore file" &> /dev/null || exit 1
+git commit -S -m "Ticket #$2: Keep CI artifacts, remove internal CI files and .gitignore file" &> /dev/null || exit 1
 echo "Generation of archive of version $DELIVERY_NAME"
 git archive --prefix=S2OPC-$DELIVERY_NAME/ -o $DELIVERY_NAME.tar.gz "${DELIVERY_NAME}_branch" || exit 1
 
