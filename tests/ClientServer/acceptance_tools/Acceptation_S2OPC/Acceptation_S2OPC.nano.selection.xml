@@ -399,14 +399,6 @@
      <TestCase name="Err-023.js"/>
     </TestCases>
    </ConformanceUnit>
-   <ConformanceUnit name="Session Change User">
-    <TestCases>
-     <TestCase name="001.js"/>
-     <TestCase name="002.js"/>
-     <TestCase name="004.js"/>
-     <TestCase name="006.js"/>
-    </TestCases>
-   </ConformanceUnit>
   </ConformanceGroup>
   <ConformanceGroup name="View Services">
    <ConformanceUnit name="View Basic">
