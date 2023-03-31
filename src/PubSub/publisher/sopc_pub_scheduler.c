@@ -367,7 +367,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->messageKeepAlive = SOPC_Create_NetworkMessage_From_WriterGroup(group, true);
     }
     if (NULL == context->message || NULL == context->next_timeout ||
-        (NULL != context->messageKeepAlive && !ctx->isAcyclic) || (NULL == context && ctx->isAcyclic) || !result)
+        (NULL != context->messageKeepAlive && !ctx->isAcyclic) ||
+        (NULL == context->messageKeepAlive && ctx->isAcyclic) || !result)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Publisher: cannot allocate message context");
         return false;
