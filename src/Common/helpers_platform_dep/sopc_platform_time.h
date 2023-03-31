@@ -178,12 +178,12 @@ SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy);
 /**
  * @brief A copy of a non-NULL SOPC_RealTime structure
  *
- * @param from Pointer to the source
  * @param to Pointer to the destination
+ * @param from Pointer to the source
  * @return true in case of success
  * @return false if \a from or \a to is NULL
  */
-bool SOPC_RealTime_Copy(const SOPC_RealTime* from, SOPC_RealTime* to);
+bool SOPC_RealTime_Copy(SOPC_RealTime* to, const SOPC_RealTime* from);
 /**
  * \brief Deletes a time reference.
  * \param t A reference returned by \a SOPC_RealTime_Create

@@ -47,7 +47,7 @@ SOPC_RealTime* SOPC_RealTime_Create(const SOPC_RealTime* copy)
 }
 
 /**********************************************************/
-bool SOPC_RealTime_Copy(const SOPC_RealTime* from, SOPC_RealTime* to)
+bool SOPC_RealTime_Copy(SOPC_RealTime* to, const SOPC_RealTime* from)
 {
     if (NULL == from || NULL == to)
     {
