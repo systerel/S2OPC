@@ -349,7 +349,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
 
         status = SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(writeRequest, ctx);
 
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && 0 != sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs)
         {
             SOPC_Looper* appLooper = SOPC_App_GetLooper();
             SOPC_EventHandler* currentTimeHandler =

@@ -607,7 +607,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetCurrentTimeRefreshInterval(uint16_t
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (intervalMs >= 2 * SOPC_TIMER_RESOLUTION_MS)
+    if (0 == intervalMs || intervalMs >= 2 * SOPC_TIMER_RESOLUTION_MS)
     {
         sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs = intervalMs;
     }

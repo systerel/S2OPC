@@ -272,7 +272,8 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
 /**
  * \brief Define interval in milliseconds used to refresh the server status current time information.
  *
- * \param intervalMs  The frequency used to refresh the server status current time information
+ * \param intervalMs  The frequency used to refresh the server status current time information.
+ *                    It might be set to 0 to deactivate the CurrentTime value update.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_INVALID_PARAMETER in case the value is
  *         less than minimum interval defined by 2 times ::SOPC_TIMER_RESOLUTION_MS.
