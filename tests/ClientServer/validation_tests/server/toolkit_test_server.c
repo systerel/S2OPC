@@ -606,8 +606,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         SOPC_CertificateList* pUserCert = NULL;
         SOPC_StatusCode errorStatus;
 
-        /* TODO RBA: Move profiles into sopc_crypto_profiles_lib.c and add an accessor in cryptoProvider from security
-         * policy ? */
+        /* TODO RBA: Move profiles in the PKI API with an accesor from the security policy.*/
         const SOPC_PKI_Profile rsa_sha256_2048_4096 = {
             .leafProfile = {.keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
                                         SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION,
@@ -620,7 +619,9 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
                              .pkAlgo = SOPC_PKI_PK_ANY,
                              .RSAMinimumKeySize = 2048},
             .bBackwardInteroperability = false,
-            .bApplyLeafProfile = false}; /* TODO RBA: Add in b2c SOPC_PKIProviderNew_ValidateCertificate */
+            .bApplyLeafProfile =
+                false}; /* TODO RBA: Add SOPC_PKIProviderNew_ValidateCertificate in
+                           user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
 
         const SOPC_PKI_ValidationArgs args = {.bIsAppServerCert = false, .bIsAppClientCert = false};
 

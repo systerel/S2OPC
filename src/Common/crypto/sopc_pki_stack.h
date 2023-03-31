@@ -356,11 +356,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
  *
- * \note In case of error, all arguments are freed by the fonction.
- *          Content of the pki is NULL when return value is not SOPC_STATUS_OK.
- *
  * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
- *          and SOPC_STATUS_NOK when there was an error. In case of error, all arguments are freed.
+ *          and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
@@ -420,11 +417,28 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the the trustList folder should be deleted.
  *
- * \return SOPC_STATUS_OK when the certificate is successfully validated, and
- *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles);
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles);
 
+/** \brief Update the PKI with new lists of certificates an CRL.
+ *
+ * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part should not updated.
+ * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part should not updated.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part should not updated.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if this part should not updated.
+ * \param bIncludeExistingList whether the update should includes the existing certificates of \p ppPKI plus
+ *                             \p pTrustedCerts \p pTrustedCrl \p pIssuerCerts \p pIssuerCrl .
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI,
+                                                     SOPC_CertificateList* pTrustedCerts,
+                                                     SOPC_CRLList* pTrustedCrl,
+                                                     SOPC_CertificateList* pIssuerCerts,
+                                                     SOPC_CRLList* pIssuerCrl,
+                                                     const bool bIncludeExistingList);
 /**
  * \brief   Free a PKI provider.
  */

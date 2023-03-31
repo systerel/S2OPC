@@ -709,12 +709,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 TODO RBA:
 
     - Maybe create a new interface sopc_certificates.h or move some functions into sopc_key_mannager.h
-    - Add static config structure for validation in crypto provider API (get config from security policy)
-    - Make a test with sopc_toolkit_test_server with the PKI for user x509.
+    - Add static config structure for validation in crypto provider API or in PKI API with an accesor from the security
+policy.
     - Replace fprintf by log
-    - Add a validation function for leaf certificates.
-    - Add write function (buffer and fileSystem).
-    - Add update function with mutex.
+    - Add mutex
 */
 
 /**
@@ -722,7 +720,7 @@ TODO RBA:
  */
 struct SOPC_PKIProviderNew
 {
-    const char* directoryStorePath;
+    char* directoryStorePath;
     SOPC_CertificateList* pTrustedCerts;
     SOPC_CertificateList* pTrustedRoots;
     SOPC_CRLList* pTrustedCrl;
@@ -1033,6 +1031,13 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
     return status;
 }
 
+/*
+    TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
+        1. check_security_policy(pToValidate, pConfig)
+        2. check_host_name(pToValidate, pArgs)
+        3. check_uri(pToValidate, pArgs)
+        4. check_certificate_usage(pToValidate, pConfig, pArgs)
+*/
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
                                                           const SOPC_CertificateList* pToValidate,
                                                           const SOPC_PKI_LeafProfile* pConfig,
@@ -1045,13 +1050,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     }
 
     *error = SOPC_CertificateValidationError_Unkown;
-    /*
-    TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
-        1. check_security_policy(pToValidate, pConfig)
-        2. check_host_name(pToValidate, pArgs)
-        3. check_uri(pToValidate, pArgs)
-        4. check_certificate_usage(pToValidate, pConfig, pArgs)
-    */
+
     SOPC_ReturnStatus status = check_security_policy(pToValidate, pConfig);
     if (SOPC_STATUS_OK != status)
     {
@@ -1495,12 +1494,13 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
 /*
 RBA TODO:
     - Check that each CA keyUsage is filed with keyCertSign and keyCrlSign.
+    - Add the chain of signatures verification.
     - Add a configuration to raise a warning or to return an error if the chain of signatures is not rigth for each.
 certificate.
         --> The objectif is to fail during the PKI update (certificate manager part 12) but not during a "nominal"
 operation.
-    - Maybe all the list check can be done during the validation and return Bad_CertificateChainIncomplete
-      (but it is in conflict with the PKI update)
+    - Maybe all the list check (check_lists() function) can be done during the validation and return
+Bad_CertificateChainIncomplete (but it is in conflict with the PKI update)
 */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
@@ -1721,10 +1721,19 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
         fprintf(stderr, "> PKI creation warning: trustList missing or bad build switch to default store.\n");
         status = SOPC_PKIProviderNew_CreateFromStore(directoryStorePath, true, ppPKI);
     }
-
+    /* Copy the directoryStorePath */
     if (SOPC_STATUS_OK == status)
     {
-        (*ppPKI)->directoryStorePath = directoryStorePath;
+        /* Copy only if not done during the recursive call. */
+        if (NULL == (*ppPKI)->directoryStorePath)
+        {
+            (*ppPKI)->directoryStorePath = SOPC_strdup(directoryStorePath);
+            if (NULL == (*ppPKI)->directoryStorePath)
+            {
+                SOPC_PKIProviderNew_Free(*ppPKI);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
     }
 
     /* Clear */
@@ -1738,7 +1747,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
     return status;
 }
 
-void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
+static void sopc_pki_clear(SOPC_PKIProviderNew* pPKI)
 {
     if (NULL == pPKI)
     {
@@ -1753,7 +1762,18 @@ void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
     SOPC_KeyManager_CRL_Free(pPKI->pTrustedCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
+    SOPC_Free(pPKI->directoryStorePath);
+}
+
+void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
+{
+    if (NULL == pPKI)
+    {
+        return;
+    }
+    sopc_pki_clear(pPKI);
     SOPC_Free(pPKI);
+    pPKI = NULL;
 }
 
 static SOPC_ReturnStatus remove_files(const char* directoryPath)
@@ -1846,7 +1866,7 @@ static SOPC_ReturnStatus may_create_pki_folder(const char* pBasePath, const char
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
 {
     if (NULL == pPKI)
     {
@@ -1909,6 +1929,106 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(SOPC_PKIProviderNew* pPKI, co
 
     SOPC_Free(basePath);
     SOPC_Free(path);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI,
+                                                     SOPC_CertificateList* pTrustedCerts,
+                                                     SOPC_CRLList* pTrustedCrl,
+                                                     SOPC_CertificateList* pIssuerCerts,
+                                                     SOPC_CRLList* pIssuerCrl,
+                                                     const bool bIncludeExistingList)
+{
+    SOPC_PKIProviderNew* pPKI = *ppPKI;
+    /* Check parameters */
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_PKIProviderNew* pTmpPKI = NULL;
+    SOPC_CertificateList* _pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
+    SOPC_CertificateList* _pTrustedCertsTmp = NULL;
+    SOPC_CRLList* _pTrustedCrl = NULL;          /* CRLs of trusted intermediate CA and trusted root CA */
+    SOPC_CertificateList* _pIssuerCerts = NULL; /* issuer intermediate CA + iussuer root CA */
+    SOPC_CertificateList* _pIssuerCertsTmp = NULL;
+    SOPC_CRLList* _pIssuerCrl = NULL; /* CRLs of issuer intermediate CA and issuer root CA */
+
+    /* Includes the existing TrustList plus any updates */
+    if (bIncludeExistingList)
+    {
+        /* _pTrustedCerts = _pTrustedCerts + pPKI->pTrustedCerts + pPKI->pTrustedRoot */
+        status = merge_certficates(pPKI->pTrustedCerts, pTrustedCerts, &_pTrustedCertsTmp);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = merge_certficates(pPKI->pTrustedRoots, _pTrustedCertsTmp, &_pTrustedCerts);
+        }
+        /* _pTrustedCrl = _pTrustedCrl + pPKI->pTrustedCrl */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = merge_crls(pPKI->pTrustedCrl, pTrustedCrl, &_pTrustedCrl);
+        }
+        /* _pIssuerCerts = _pIssuerCerts + pPKI->pIssuerCerts + pPKI->pIssuerRoot */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = merge_certficates(pPKI->pIssuerCerts, pIssuerCerts, &_pIssuerCertsTmp);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = merge_certficates(pPKI->pIssuerRoots, _pIssuerCertsTmp, &_pIssuerCerts);
+        }
+        /* _pIssuerCrl = _pIssuerCrl + pPKI->pIssuerCrl */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = merge_crls(pPKI->pIssuerCrl, pIssuerCrl, &_pIssuerCrl);
+        }
+        /* Create a new tmp PKI */
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_PKIProviderNew_CreateFromList(_pTrustedCerts, _pTrustedCrl, _pIssuerCerts, _pIssuerCrl, &pTmpPKI);
+        }
+    }
+    else
+    {
+        /* Create a new tmp PKI */
+        status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &pTmpPKI);
+    }
+    /* Copy the  directory store path before exchange the data */
+    if (SOPC_STATUS_OK == status)
+    {
+        pTmpPKI->directoryStorePath = SOPC_strdup(pPKI->directoryStorePath);
+        if (NULL == pTmpPKI->directoryStorePath)
+        {
+            SOPC_PKIProviderNew_Free(pTmpPKI);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    /* Exchange the internal data */
+    if (SOPC_STATUS_OK == status)
+    {
+        sopc_pki_clear(pPKI);
+        pPKI->pTrustedRoots = pTmpPKI->pTrustedRoots;
+        pPKI->pTrustedCerts = pTmpPKI->pTrustedCerts;
+        pPKI->pTrustedCrl = pTmpPKI->pTrustedCrl;
+        pPKI->pIssuerRoots = pTmpPKI->pIssuerRoots;
+        pPKI->pIssuerCerts = pTmpPKI->pIssuerCerts;
+        pPKI->pIssuerCrl = pTmpPKI->pIssuerCrl;
+        pPKI->pAllCerts = pTmpPKI->pAllCerts;
+        pPKI->pAllRoots = pTmpPKI->pAllRoots;
+        pPKI->pAllCrl = pTmpPKI->pAllCrl;
+        pPKI->directoryStorePath = pTmpPKI->directoryStorePath;
+        SOPC_Free(pTmpPKI);
+    }
+
+    SOPC_KeyManager_Certificate_Free(_pTrustedCerts);
+    SOPC_KeyManager_Certificate_Free(_pTrustedCertsTmp);
+    SOPC_KeyManager_Certificate_Free(_pIssuerCerts);
+    SOPC_KeyManager_Certificate_Free(_pIssuerCertsTmp);
+    SOPC_KeyManager_CRL_Free(_pTrustedCrl);
+    SOPC_KeyManager_CRL_Free(_pIssuerCrl);
 
     return status;
 }
