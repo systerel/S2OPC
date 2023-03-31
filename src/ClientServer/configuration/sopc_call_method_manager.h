@@ -21,6 +21,8 @@
  *
  * \brief Contains the types to be used by the method call manager to configure the Call service
  *
+ * \warning Methods call are blocking for server services treatment,
+ *          methods implementation should be lightweight functions (see Part 3 §4.7).
  */
 
 #ifndef SOPC_CALL_METHOD_MANAGER_H_
@@ -35,9 +37,15 @@ typedef struct SOPC_MethodCallFunc SOPC_MethodCallFunc;
 /**
  * \brief  Type of the function to call associated to a method
  *
- * Method call service verifies the input arguments before calling a SOPC_MethodCallFunc_Ptr function.
+ * \warning The method callback call is blocking for server services treatment
+ *          and thus local services cannot be called synchronously.
+ *          Method should be lightweight functions (see Part 3 §4.7)
+ *          and only operations provided by \p callContextPtr
+ *          shall be used to interact with server address space.
  *
- * Note: a ByteString could be provided instead of an expected array of Byte and conversely (See Spec 1.03 part 4 -
+ * \note Method call service verifies the input arguments before calling a SOPC_MethodCallFunc_Ptr function.
+ *
+ * \note a ByteString could be provided instead of an expected array of Byte and conversely (See Spec 1.03 part 4 -
  * table 66)
  *
  * \param callContextPtr  context provided by server on connection/session associated to method call
