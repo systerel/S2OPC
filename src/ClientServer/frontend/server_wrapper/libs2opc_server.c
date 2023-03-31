@@ -133,11 +133,12 @@ static void SOPC_HelperInternal_RuntimeVariableSetResponseCb(SOPC_EncodeableType
         ok &= SOPC_IsGoodStatus(writeResp->Results[i]);
     }
 
-    if (!ok)
+    if (!ok && NULL != writeReqCtx)
     {
+        // Only display warning if we have context information to display node
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Error while updating address space: %s",
                                  helperCtx->eventCtx.localService.internalErrorMsg);
-        for (int32_t i = 0; NULL != writeReqCtx && i < writeResp->NoOfResults && i < writeReqCtx->NoOfNodesToWrite; ++i)
+        for (int32_t i = 0; i < writeResp->NoOfResults && i < writeReqCtx->NoOfNodesToWrite; ++i)
         {
             if (!SOPC_IsGoodStatus(writeResp->Results[i]))
             {
