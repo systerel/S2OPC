@@ -63,10 +63,20 @@ set_source_files_properties(${PLATFORM_SRCS} PROPERTIES COMPILE_DEFINITIONS "SOP
 ## C99 compliant source code ##
 
 # Define non-platform dependent source files
+file(GLOB S2OPC_COMMON_CRYPTO_INTERFACE_SOURCES
+    "crypto/*.c")
+
+if(NOT WITH_CYCLONE_CRYPTO)
+  file(GLOB S2OPC_COMMON_CRYPTO_SRCS
+      "crypto/mbedtls/*.c")
+else()
+  file(GLOB S2OPC_COMMON_CRYPTO_SRCS
+      "crypto/cyclone_crypto/*.c")
+endif()
+
 file(GLOB_RECURSE S2OPC_COMMON_SRCS
     "configuration/*.c"
     "helpers/*.c"
-    "crypto/*.c"
     "opcua_types/*.c"
 )
 
@@ -87,7 +97,7 @@ set(S2OPC_COMMON_PRIVATE_INCLUDES
 
 ### Configure S2OPC library and its properties ###
 
-add_library(s2opc_common ${PLATFORM_SRCS} ${S2OPC_COMMON_SRCS} ${S2OPC_COMMON_BUILD_INFO_C})
+add_library(s2opc_common ${PLATFORM_SRCS} ${S2OPC_COMMON_SRCS} ${S2OPC_COMMON_CRYPTO_INTERFACE_SOURCES} ${S2OPC_COMMON_CRYPTO_SRCS} ${S2OPC_COMMON_BUILD_INFO_C})
 include(GenerateExportHeader)
 generate_export_header(s2opc_common)
 target_compile_options(s2opc_common PRIVATE ${S2OPC_COMPILER_FLAGS})

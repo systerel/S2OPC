@@ -128,6 +128,7 @@ generation:
   variables: &build_linux_variables
     DOCKER_IMAGE: 'sha256:40cd080b81dbfff47a595342c982153192c353964e0e3f708c41540085167f8d'
     BUILD_DIR: build
+    WITH_CYCLONE_CRYPTO: 1
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
