@@ -24,6 +24,8 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 # See scan-build --help for a list of all checkers
 # This list was originally built for Clang 6.0.0
 
+# Remove alpha.core.CallAndMessageUnInitRefArg because bug 
+# TODO: find a solution to replace this checker 
 EXTRA_CHECKERS="
 alpha.core.BoolAssignment
 alpha.core.CastSize
