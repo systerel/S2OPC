@@ -38613,6 +38613,8 @@
     </References>
     <InverseName>HasAlias</InverseName>
   </UAReferenceType>
+  <!-- Optional nodes : not supported -->
+  <!--
   <UAObject NodeId="i=23470" BrowseName="Aliases">
     <DisplayName>Aliases</DisplayName>
     <References>
@@ -38868,6 +38870,7 @@
       </ListOfExtensionObject>
     </Value>
   </UAVariable>
+  -->
   <UAVariableType NodeId="i=19077" BrowseName="MultiStateDictionaryEntryDiscreteBaseType" DataType="Number" ValueRank="-2">
     <DisplayName>MultiStateDictionaryEntryDiscreteBaseType</DisplayName>
     <References>
