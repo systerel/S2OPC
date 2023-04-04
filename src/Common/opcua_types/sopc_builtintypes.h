@@ -22,7 +22,6 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 
 #include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
