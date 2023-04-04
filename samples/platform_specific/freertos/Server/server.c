@@ -21,12 +21,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* MIMXRT1064 includes */
-#include "fsl_debug_console.h"
-
 /* FreeRTOS include */
 #include "FreeRTOS.h"
 #include "task.h" // Used for disable task entering in user assert
+#include "sys_evt.h" // Used to signal when MxNet has finished configuring Network interface
 
 /* S2OPC includes */
 #include "opcua_identifiers.h"
@@ -47,7 +45,11 @@
 
 #include "static_security_data.h"
 
-#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#include "logging.h"
+
+//#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.67:4841" //Home
+#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.168:4841" //Office
+//#define DEFAULT_ENDPOINT_URL "opc.tcp://10.42.0.230:4841" //Local
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI_2 "urn:S2OPC:localhost_2"
@@ -56,7 +58,7 @@
 static const char* default_app_namespace_uris[] = {DEFAULT_PRODUCT_URI, DEFAULT_PRODUCT_URI_2};
 static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
-static const bool secuActive = true;
+static const bool secuActive = true;//true
 
 /*---------------------------------------------------------------------------
  *                          Log Callback definition
@@ -67,7 +69,7 @@ static void log_UserCallback(const char* context, const char* text)
     SOPC_UNUSED_ARG(context);
     if (NULL != text)
     {
-        PRINTF("%s\r\n", text);
+        LogInfo("%s\r\n", text);
     }
 }
 
@@ -77,8 +79,8 @@ static void log_UserCallback(const char* context, const char* text)
 
 static void assert_userCallback(const char* context)
 {
-    PRINTF("ASSERT FAILED : <%p>\r\n", (void*) context);
-    PRINTF("Context: <%s>", context);
+    LogInfo("ASSERT FAILED : <%p>\r\n", (void*) context);
+    LogInfo("Context: <%s>", context);
     taskDISABLE_INTERRUPTS();
     for (;;)
         ;
@@ -102,7 +104,7 @@ static SOPC_StatusCode SOPC_Method_Func_Test_Generic(const SOPC_CallContext* cal
     SOPC_UNUSED_ARG(param);
     *nbOutputArgs = 0;
     *outputArgs = NULL;
-    PRINTF("[INFO] SOPC_Method_Func_Test_Generic: Number of input argument %" PRIu32
+    LogInfo("[INFO] SOPC_Method_Func_Test_Generic: Number of input argument %" PRIu32
            " number of output argument %" PRIu32 "\r\n",
            nbInputArgs, *nbOutputArgs);
     return SOPC_STATUS_OK;
@@ -196,11 +198,11 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
+            LogInfo("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
         }
         else
         {
-            printf("<Test_Server_Toolkit: Certificates and key loaded\n");
+            LogInfo("<Test_Server_Toolkit: Certificates and key loaded\n");
         }
     }
 
@@ -217,7 +219,7 @@ static SOPC_ReturnStatus Server_Initialize(void)
     SOPC_Assert_Set_UserCallback(&assert_userCallback);
 
     // Initialize toolkit and configure logs
-    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_WARNING,
+    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
                                                .logSystem = SOPC_LOG_SYSTEM_USER,
                                                .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
@@ -229,11 +231,11 @@ static SOPC_ReturnStatus Server_Initialize(void)
     }
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Toolkit: Failed initializing\n");
+        LogInfo("<Test_Server_Toolkit: Failed initializing\n");
     }
     else
     {
-        printf("<Test_Server_Toolkit: initialized\n");
+        LogInfo("<Test_Server_Toolkit: initialized\n");
     }
     return status;
 }
@@ -495,7 +497,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
             {
                 status = SOPC_SecurityConfig_AddUserTokenPolicy(
                     sp,
-                    &SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy); /* Necessary for UACTT tests only */
+                    &SOPC_UserTokenPolicy_UserName_Basic256Sha256SecurityPolicy); /* Necessary for UACTT tests only */ //BBB
             }
         }
     }
@@ -540,11 +542,11 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Toolkit: Failed to configure the @ space\n");
+        LogInfo("<Test_Server_Toolkit: Failed to configure the @ space\n");
     }
     else
     {
-        printf("<Test_Server_Toolkit: @ space configured\n");
+        LogInfo("<Test_Server_Toolkit: @ space configured\n");
     }
 
     return status;
@@ -622,7 +624,7 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         SOPC_UserAuthorization_FreeManager(&authorizationManager);
         SOPC_UserAuthentication_FreeManager(&authenticationManager);
         status = SOPC_STATUS_OUT_OF_MEMORY;
-        printf("<Test_Server_Toolkit: Failed to create the user manager\n");
+        LogInfo("<Test_Server_Toolkit: Failed to create the user manager\n");
     }
 
     if (SOPC_STATUS_OK == status)
@@ -667,12 +669,19 @@ void cbToolkit_test_server(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    /* Block until the network interface is connected */
+    ( void ) xEventGroupWaitBits( xSystemEvents,
+                                  EVT_MASK_NET_CONNECTED,
+                                  0x00,
+                                  pdTRUE,
+                                  portMAX_DELAY );
+
     /* Get the toolkit build information and print it */
     SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
-    printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+    LogInfo("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
            build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
-    printf("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+    LogInfo("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
            build_info.clientServerBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildSrcCommit,
            build_info.clientServerBuildInfo.buildDockerId, build_info.clientServerBuildInfo.buildBuildDate);
 
@@ -702,23 +711,23 @@ void cbToolkit_test_server(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        printf("<Demo_Server: Server started\n");
+        LogInfo("<Demo_Server: Server started\n");
 
         /* Run the server until error  or stop server signal detected (Ctrl-C) */
         status = SOPC_ServerHelper_Serve(true);
 
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Test_Server_Toolkit: Failed to run the server or end to serve with error = '%d'\n", status);
+            LogInfo("<Test_Server_Toolkit: Failed to run the server or end to serve with error = '%d'\n", status);
         }
         else
         {
-            printf("<Test_Server_Toolkit: Server ended to serve successfully\n");
+            LogInfo("<Test_Server_Toolkit: Server ended to serve successfully\n");
         }
     }
     else
     {
-        printf("<Test_Server_Toolkit: Error during configuration phase, see logs for details.\n");
+        LogInfo("<Test_Server_Toolkit: Error during configuration phase, see logs for details.\n");
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
@@ -727,6 +736,6 @@ void cbToolkit_test_server(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Test_Server_Toolkit: Terminating with error status, see logs for details.\n");
+        LogInfo("<Test_Server_Toolkit: Terminating with error status, see logs for details.\n");
     }
 }

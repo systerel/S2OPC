@@ -152,6 +152,16 @@ static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
     return status;
 }
 
+
+#ifndef IPPROTO_IPV6
+#define IPPROTO_IPV6 41
+#endif
+
+#ifndef IPV6_V6ONLY
+#define IPV6_V6ONLY 27
+#endif
+
+
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
                                         bool setNonBlocking,
@@ -246,18 +256,11 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
     if (connectStatus < 0)
     {
-        int optErr = 0;
-        socklen_t optErrSize = sizeof(optErr);
-        int ret = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-        if (ret < 0)
-        {
-            return SOPC_STATUS_NOK;
-        }
-        if (EINPROGRESS == optErr)
-        {
-            // Non blocking connection started
-            connectStatus = 0;
-        }
+    	if (EINPROGRESS == errno)
+    	{
+    		// Non blocking connection started
+    		connectStatus = 0;
+    	}
     }
     if (connectStatus == 0)
     {
@@ -392,10 +395,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     }
 
     *sentBytes = 0;
-    int optErr = 0;
-    socklen_t optErrSize = sizeof(optErr);
-    res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
+    if (errno == EAGAIN || errno == EWOULDBLOCK)
     {
         return SOPC_STATUS_WOULD_BLOCK;
     }
@@ -426,11 +426,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     }
 
     *readCount = 0;
-    int optErr = 0;
-    socklen_t optErrSize = sizeof(optErr);
-
-    int res = getsockopt(sock, SOL_SOCKET, SO_ERROR, &optErr, &optErrSize);
-    if (res >= 0 && (EAGAIN == optErr || EWOULDBLOCK == optErr))
+    if (errno == EAGAIN || errno == EWOULDBLOCK)
     {
         return SOPC_STATUS_WOULD_BLOCK;
     }

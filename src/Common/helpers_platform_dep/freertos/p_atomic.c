@@ -19,6 +19,8 @@
 
 #include "sopc_atomic.h"
 
+//#define SOPC_PTR_SIZE 4 //
+
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
 #if !defined(__clang__) && (__GNUC__ > 4)
@@ -67,7 +69,7 @@ void* SOPC_Atomic_Ptr_Get(void** atomic)
 #endif // !defined(clang)
 }
 
-void SOPC_Atomic_Ptr_Set(void** atomic, void* val)
+void SOPC_Atomic_Ptr_Set(void** atomic, void* val) // Il ne fait rien
 {
 #if !defined(__clang__) && (__GNUC__ > 4)
 

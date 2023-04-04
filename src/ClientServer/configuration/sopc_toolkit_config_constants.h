@@ -105,7 +105,7 @@
  * (elapsed time between socket connection and OPN response message)
  * */
 #ifndef SOPC_SC_CONNECTION_TIMEOUT_MS
-#define SOPC_SC_CONNECTION_TIMEOUT_MS 10000
+#define SOPC_SC_CONNECTION_TIMEOUT_MS 30000 //10000 (10sec)
 #endif
 
 /** @brief Maximum number of configured reverse connection from a server endpoint to clients */

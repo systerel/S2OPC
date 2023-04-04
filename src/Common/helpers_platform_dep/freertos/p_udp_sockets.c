@@ -29,7 +29,7 @@
 #include "lwip/timeouts.h"
 #include "netif/etharp.h"
 
-#include "ethernetif.h"
+//#include "ethernetif.h" // problème -> utilisation de wifi
 
 #include "lwip/init.h"
 #include "lwip/netif.h"

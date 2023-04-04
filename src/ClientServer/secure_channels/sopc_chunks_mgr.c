@@ -663,7 +663,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     return result;
 }
 
-static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scConnection,
+static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scConnection, //BOOOOM
                                                     bool* isSecurityActive,
                                                     SOPC_StatusCode* errorStatus)
 {
@@ -832,7 +832,7 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
 
     if (result)
     {
-        result = SC_Chunks_DecodeAsymSecurityHeader_Certificates(scConnection, serverConfig, clientConfig,
+        result = SC_Chunks_DecodeAsymSecurityHeader_Certificates(scConnection, serverConfig, clientConfig, //BOOOOOM
                                                                  &senderCertifPresence, &clientCertificate,
                                                                  &receiverCertifThumbprintPresence, errorStatus);
 
@@ -1672,7 +1672,7 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
     return true;
 }
 
-bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
+bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,  //BOOOOM
                                uint32_t* requestIdOrHandle,
                                bool* ignoreExpiredMessage,
                                SOPC_StatusCode* errorStatus)
@@ -2180,7 +2180,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             scConnection->secureChannelConfigIdx);
 
         // Decode OPC UA Secure Conversation MessageChunk specific headers if necessary (not HEL/ACK/ERR)
-        if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) &&
+        if (SC_Chunks_CheckMultiChunkContext(chunkCtx, &scConnection->tcpMsgProperties, &errorStatus) && //BOOM
             SC_Chunks_TreatTcpPayload(scConnection, &requestIdOrHandle, &ignoreExpiredMessage, &errorStatus))
         {
             // Current chunk shall have been moved into intermediate chunk buffers or into complete message buffer

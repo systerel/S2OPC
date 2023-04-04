@@ -24,6 +24,7 @@
 /* FreeRTOS include */
 #include "FreeRTOS.h"
 #include "task.h" // Used for disable task entering in user assert
+#include "sys_evt.h" // Used to signal when MxNet has finished configuring Network interface
 
 /* S2OPC includes */
 #include "libs2opc_client_cmds.h"
@@ -37,10 +38,13 @@
 #include "sopc_udp_sockets.h"
 
 /* MIMXRT1064 includes */
-#include "fsl_debug_console.h"
-#include "p_ethernet_if.h"
+//#include "fsl_debug_console.h"
+//#include "p_ethernet_if.h"
 
-#define ENDPOINT_URL "opc.tcp://192.168.5.22:4841"
+#include "logging.h"
+
+#define ENDPOINT_URL "opc.tcp://192.168.1.108:4841"
+//#define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define SERVER_URI "urn:S2OPC:localhost"
 
 static void cbDisconnect(const uint32_t connectionId);
@@ -65,14 +69,15 @@ static void log_UserCallback(const char* context, const char* text)
     SOPC_UNUSED_ARG(context);
     if (NULL != text)
     {
-        PRINTF("%s\r\n", text);
+    	//LogDebug("log_UserCallback function");
+        LogInfo("%s\r\n", text);
     }
 }
 
 static void assert_userCallback(const char* context)
 {
-    PRINTF("ASSERT FAILED : <%p>\r\n", (void*) context);
-    PRINTF("Context: <%s>", context);
+    LogInfo("ASSERT FAILED : <%p>\r\n", (void*) context);
+    LogInfo("Context: <%s>", context);
     taskDISABLE_INTERRUPTS();
     for (;;)
         ;
@@ -83,12 +88,21 @@ void cbToolkit_test_client(void)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t configurationId = 0;
     int32_t connectionId = 0;
-    eEthernetIfResult ethResult = ETHERNET_IF_RESULT_OK;
+    //eEthernetIfResult ethResult = ETHERNET_IF_RESULT_OK;
     SOPC_ClientHelper_BrowseResult* browseResult = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_BrowseResult));
     uint32_t timeoutIf = UINT32_MAX;
 
+    /* Block until the network interface is connected */
+    ( void ) xEventGroupWaitBits( xSystemEvents,
+                                  EVT_MASK_NET_CONNECTED,
+                                  0x00,
+                                  pdTRUE,
+                                  portMAX_DELAY );
+
     // Initialize Client Toolkit
     status = clientInitialize();
+
+    LogDebug("client init"); //n'y arrive pas encore 14/03 -> Check
 
     if (SOPC_STATUS_OK == status)
     {
@@ -101,10 +115,10 @@ void cbToolkit_test_client(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        ethResult = P_ETHERNET_IF_IsReady(timeoutIf);
-        if (ETHERNET_IF_RESULT_OK == ethResult)
+        //ethResult = P_ETHERNET_IF_IsReady(timeoutIf);
+        if (1)//ETHERNET_IF_RESULT_OK == ethResult)
         {
-            connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+            connectionId = SOPC_ClientHelper_CreateConnection(configurationId); //ICI
             if (connectionId <= 0)
             {
                 status = SOPC_STATUS_NOK;
@@ -114,6 +128,7 @@ void cbToolkit_test_client(void)
         {
             status = SOPC_STATUS_NOK;
         }
+
     }
 
     if (SOPC_STATUS_OK == status)
@@ -121,7 +136,7 @@ void cbToolkit_test_client(void)
         status = clientBrowse(connectionId, NULL, browseResult);
         if (SOPC_STATUS_OK != status)
         {
-            PRINTF("Failed to Browse specified node\r\n");
+            LogInfo("Failed to Browse specified node\r\n");
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -129,7 +144,7 @@ void cbToolkit_test_client(void)
         status = clientRead(connectionId);
         if (SOPC_STATUS_OK != status)
         {
-            PRINTF("Failed to read specified node \n\r");
+            LogInfo("Failed to read specified node \n\r");
         }
     }
 
@@ -160,7 +175,7 @@ SOPC_ReturnStatus clientInitialize(void)
     SOPC_Assert_Set_UserCallback(&assert_userCallback);
 
     // Initialize toolkit and configure logs
-    SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_WARNING,
+    SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_INFO,   //change loglevel
                                         .logSystem = SOPC_LOG_SYSTEM_USER,
                                         .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
 
@@ -187,17 +202,24 @@ int32_t clientConfigure(void)
         .reverseConnectionConfigId = 0,
     };
     SOPC_ClientHelper_Security security = {
-        .path_cert_auth = NULL,
-        .path_cert_cli = NULL,
-        .path_cert_srv = NULL,
-        .path_crl = NULL,
-        .path_key_cli = NULL,
+		.path_cert_auth = NULL,
+		.path_cert_cli = NULL,
+		.path_cert_srv = NULL,
+		.path_crl = NULL,
+		.path_key_cli = NULL,
         .policyId = "anonymous",
         .security_mode = OpcUa_MessageSecurityMode_None,
         .security_policy = SOPC_SecurityPolicy_None_URI,
-        .username = NULL,
-        .password = NULL,
+        .username = NULL,//"user1",//NULL
+        .password = NULL,//"password",//NULL
     };
+    //        .path_cert_auth = "./Certs/trusted/cacert.der",
+    //        .path_cert_cli = "./Certs/client_public/client_4k_cert.der",
+    //        .path_cert_srv = "./Certs/server_public/server_4k_cert.der",
+    //        .path_crl = "./Certs/revoked/cacrl.der",
+    //        .path_key_cli = "./Certs/client_private/encrypted_client_4k_key.pem",
+    //        .security_mode = OpcUa_MessageSecurityMode_Sign,
+    //        .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
 
     // Configure client
     configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
@@ -226,9 +248,9 @@ SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_Cl
         for (int32_t i = 0; i < browseResult->nbOfReferences; i++)
         {
             const SOPC_ClientHelper_BrowseResultReference* ref = &browseResult->references[i];
-            PRINTF("Item #%i \r\n", i);
-            PRINTF("- nodeId: %s\r\n", ref->nodeId);
-            PRINTF("- displayName: %s\r\n", ref->displayName);
+            LogInfo("Item #%i \r\n", i);
+            LogInfo("- nodeId: %s\r\n", ref->nodeId);
+            LogInfo("- displayName: %s\r\n", ref->displayName);
 
             SOPC_Free(ref->nodeId);
             SOPC_Free(ref->displayName);
@@ -276,6 +298,8 @@ SOPC_ReturnStatus clientWrite(int32_t connectionId)
     {
         status = SOPC_STATUS_NOK;
     }
+
+    LogDebug("Write done");
     // Clear
     SOPC_Free(dv);
     SOPC_Free(writeValue);
@@ -295,8 +319,8 @@ SOPC_ReturnStatus clientRead(int32_t connectionId)
 
     status = SOPC_ClientHelper_Read(connectionId, readValue, 1, dv);
 
-    PRINTF("Read node %s \r\n", readValue->nodeId);
-    PRINTF("- Value %u \r\n", dv->Value.Value.Uint32);
+    LogInfo("Read node %s \r\n", readValue->nodeId);
+    LogInfo("- Value %u \r\n", dv->Value.Value.Uint32);
 
     SOPC_Free(dv);
     SOPC_Free(readValue);

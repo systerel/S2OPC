@@ -110,7 +110,7 @@ static bool SOPC_Internal_InitSocketsToInterruptSelect(void)
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true, &receptionThread.sigServerConnectionSock);
+            SOPC_Socket_Accept(receptionThread.sigServerListeningSock, true, &receptionThread.sigServerConnectionSock); // ça pète
     }
 
     SOPC_Socket_AddrInfoDelete(&addrs);
@@ -176,7 +176,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
     }
 
     // Returns number of ready descriptor or -1 in case of error
-    nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 0);
+    nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, 0); // lui retroune -1 mais il passe une fois quand même
 
     if (nbReady < 0)
     {
@@ -205,7 +205,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
                 {
                     /* Socket is currently in connecting attempt: check WRITE events */
 
-                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false)
+                    if (SOPC_SocketSet_IsPresent(uaSock->sock, &writeSet) != false) //BOOM!!! passe au 2eme coup
                     {
                         // Check connection errors: mandatory when non blocking connection
                         status = SOPC_Socket_CheckAckConnect(uaSock->sock);
@@ -278,7 +278,7 @@ static void* SOPC_SocketsNetworkEventMgr_ThreadLoop(void* nullData)
     bool result = true;
     while (result)
     {
-        result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock);
+        result = SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(receptionThread.sigServerConnectionSock); // Ici que ça passe pas !!
     }
     SOPC_ASSERT(SOPC_Atomic_Int_Get(&receptionThread.stopFlag) != 0);
     return NULL;
@@ -292,7 +292,7 @@ static bool SOPC_SocketsNetworkEventMgr_LoopThreadStart(void)
     }
 
     /* Initialize the sockets used to interrupt "select" blocking call */
-    bool result = SOPC_Internal_InitSocketsToInterruptSelect();
+    bool result = SOPC_Internal_InitSocketsToInterruptSelect(); // Ici que ça passe pas !! -> done
 
     if (!result)
     {

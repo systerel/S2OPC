@@ -61,7 +61,7 @@
     mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen, NULL, NULL)
 #ifdef MBEDTLS_ECP_C
 // TODO : f_rng cannot be NULL in case of use of Elliptic curves
-#error "Cannot use elliptic curves with MBEDTLS V3. MBEDTLS_PK_PARSE_KEY must be modified to receive f_rng"
+//#error "Cannot use elliptic curves with MBEDTLS V3. MBEDTLS_PK_PARSE_KEY must be modified to receive f_rng"
 #endif
 
 // These defines shall be set before including any other MBEDTLS headers

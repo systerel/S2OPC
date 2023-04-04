@@ -22,8 +22,8 @@
 
 #define IP_ADDRESS_0 192
 #define IP_ADDRESS_1 168
-#define IP_ADDRESS_2 5
-#define IP_ADDRESS_3 102
+#define IP_ADDRESS_2 1
+#define IP_ADDRESS_3 108
 
 #define IP_MASK_0 255
 #define IP_MASK_1 255

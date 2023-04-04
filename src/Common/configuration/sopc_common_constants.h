@@ -70,14 +70,14 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 
 /** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE
-#define SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX
+#define SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE 16384//UINT16_MAX
 #endif /* SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE */
 
 /** @brief Maximum number of chunks received accepted for 1 message, 0 means no limit.
  *  Note: if 0 is chosen SOPC_RECEIVE_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS
-#define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 5
+#define SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS 2
 #endif /* SOPC_DEFAULT_RECEIVE_MAX_NB_CHUNKS */
 
 /** @brief Maximum message length accepted in reception (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.
@@ -91,7 +91,7 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
  *  Note: if 0 is chosen SOPC_SEND_MAX_MESSAGE_LENGTH definition shall be changed not to use it and shall not be 0.
  */
 #ifndef SOPC_DEFAULT_SEND_MAX_NB_CHUNKS
-#define SOPC_DEFAULT_SEND_MAX_NB_CHUNKS 12
+#define SOPC_DEFAULT_SEND_MAX_NB_CHUNKS 2
 #endif /* SOPC_DEFAULT_SEND_MAX_NB_CHUNKS */
 
 /** @brief Maximum message length sent (must be >= SOPC_TCP_UA_MAX_BUFFER_SIZE), 0 means no limit.

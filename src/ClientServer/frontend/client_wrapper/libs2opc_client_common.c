@@ -601,7 +601,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     }
 
     /* Wait for the connection to be created */
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status) //BOOM
     {
         int count = 0;
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_IsConnected(pSM) &&

@@ -605,7 +605,7 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 // Create and initialize a thread
 SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
 {
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, 0, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, 40, taskName, NULL, NULL);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,

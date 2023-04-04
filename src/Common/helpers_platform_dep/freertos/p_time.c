@@ -264,7 +264,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
         t1 = *t;
     }
 
-    return (((int64_t) t1.ticksMs) - ((int64_t) tRef.ticksMs)) * MS_TO_US;
+    return (((int64_t) t1.ticksMs) - ((int64_t) tRef->ticksMs)) * MS_TO_US;
 }
 
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)

@@ -762,7 +762,7 @@ int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id)
         return -1;
     }
 
-    status = SOPC_ClientCommon_Connect((SOPC_LibSub_ConfigurationId) cfg_id, &con_id);
+    status = SOPC_ClientCommon_Connect((SOPC_LibSub_ConfigurationId) cfg_id, &con_id); //BOOM
     if (SOPC_STATUS_OK == status)
     {
         Helpers_Log(SOPC_LOG_LEVEL_INFO, "Connected.");

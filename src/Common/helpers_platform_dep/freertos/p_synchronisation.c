@@ -73,7 +73,7 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pConditionVariable
                                        wClearSignal,                  //
                                        &wCurrentSlotId);              //
 
-                xTaskGenericNotify(handle, wClearSignal, eSetBits, NULL);
+                xTaskGenericNotify(handle, NULL, wClearSignal, eSetBits, NULL);
             }
         } while (UINT16_MAX != wCurrentSlotId);
 
@@ -210,7 +210,7 @@ SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariabl
                                        clearsignal,                   //
                                        &wCurrentSlotId);              //
 
-                configASSERT(pdPASS == xTaskGenericNotify(handle, signal, eSetBits, NULL));
+                configASSERT(pdPASS == xTaskGenericNotify(handle, NULL, signal, eSetBits, NULL));
                 result = SOPC_STATUS_OK;
             }
         } while (UINT16_MAX != wCurrentSlotId && bSignalAll);
@@ -286,6 +286,7 @@ static inline SOPC_ReturnStatus P_SYNCHRO_WaitSignal(uint32_t* pNotificationValu
         if (0 != (notificationValue & (~(uwSignal | uwClearSignal))))
         {
             xTaskGenericNotify(xTaskGetCurrentTaskHandle(),                       //
+            				   NULL,
                                notificationValue & (~(uwSignal | uwClearSignal)), //
                                eSetBits,                                          //
                                NULL);                                             //
@@ -355,6 +356,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
         if (0 != (notificationValue & (~(uwSignal | uwClearSignal))))
         {
             xTaskGenericNotify(xTaskGetCurrentTaskHandle(),                       //
+            				   NULL,
                                notificationValue & (~(uwSignal | uwClearSignal)), //
                                eSetBits,                                          //
                                NULL);                                             //
