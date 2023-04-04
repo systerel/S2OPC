@@ -12,6 +12,7 @@ tradc/
 depand/
 deleted/
 __pycache__/
+.pytest_cache/
 genc/
 *.log
 build_zephyr/
