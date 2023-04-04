@@ -56,23 +56,21 @@ def _remove_nids(tree, nids):
     for nid in nids:
         node = root.find('*[@NodeId="{}"]'.format(nid))
         if node is not None:
-            if args.verbose:
-                print('RemoveNode: {}'.format(nid), file=sys.stderr)
+            # if args.verbose:
+            #     print('RemoveNode: {}'.format(nid), file=sys.stderr)
             root.remove(node)
 
 def _remove_refs_to_nids(tree, nids, namespaces):
     # Remove Reference elements from all nodes that go to the NodeIds in nids
-    root = tree.getroot()
     for node in tree.iterfind('./*[uanodeset:References]', namespaces):
-        nida = node.get('NodeId')  # The starting node of the references below
         refs, = node.iterfind('uanodeset:References', namespaces)
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             if ref.text.strip() in nids:  # The destination node of this reference
-                if args.verbose:
-                    print('RemoveRef: {} -> {}'.format(nida, ref.text.strip()), file=sys.stderr)
+                # if args.verbose:
+                #     print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
                 refs.remove(ref)
 
-def _add_ref(node, ref_type, tgt, is_forward=True):
+def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
     # Add a reference from a node to the other NodeId nid in the given direction
     refs_nodes = node.findall('uanodeset:References', namespaces)
     if len(refs_nodes) < 1:
@@ -104,7 +102,7 @@ def merge(tree, new, namespaces):
     tree_aliases = tree.find('uanodeset:Aliases', namespaces)
     if tree_aliases is None:
         print('Merge: Aliases expected to be present in first address space')
-        return false
+        return False
     tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}  # Assumes that the model does not have the same alias defined multiple times
     new_aliases = new.find('uanodeset:Aliases', namespaces)
     new_alias_dict = {}
@@ -150,8 +148,8 @@ def merge(tree, new, namespaces):
     for node in new.iterfind('*[@NodeId]'):
         nid = node.get('NodeId')
         if nid in new_nids:
-            if args.verbose:
-                print('Merge: add node {}'.format(nid), file=sys.stderr)
+            # if args.verbose:
+            #     print('Merge: add node {}'.format(nid), file=sys.stderr)
             tree_root.append(new_nodes[nid])
     # References of common nodes are merged
     for nid in set(tree_nodes)&set(new_nodes):
@@ -161,7 +159,7 @@ def merge(tree, new, namespaces):
             continue
         nodea = tree_nodes[nid]
         for ref in refsb:
-            _add_ref(nodea, ref.get('ReferenceType'), ref.text, is_forward=(ref.get('IsForward') != 'false'))
+            _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=(ref.get('IsForward') != 'false'))
 
     return True
 
@@ -290,10 +288,10 @@ def sanitize(tree, namespaces):
         if a not in nodes:
             print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
-            if args.verbose:
-                print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
+            # if args.verbose:
+            #     print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
             node = nodes[a]
-            _add_ref(node, t, b, is_forward=True)
+            _add_ref(node, t, b, namespaces, is_forward=True)
 
     # Now add inverse refs b <- a for which a -> b exists
     for a, t, b in refs_fwd_list:
@@ -303,10 +301,10 @@ def sanitize(tree, namespaces):
         if b not in nodes:
             print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
         else:
-            if args.verbose:
-                print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
+            # if args.verbose:
+            #     print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
             node = nodes[b]
-            _add_ref(node, t, a, is_forward=False)
+            _add_ref(node, t, a, namespaces, is_forward=False)
 
     # Note: ParentNodeId is an optional attribute. It refers to the parent node.
     #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
