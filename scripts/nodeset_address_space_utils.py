@@ -336,40 +336,7 @@ def sanitize(tree, namespaces):
     return True
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='A tool to merge (and more) XMLs of OPC UA Address Spaces.')
-    parser.add_argument('fns_adds', nargs='+', metavar='XML',
-                        help='''
-            Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
-            the element from the first address space in the argument order is kept.
-            The models must be for the same OPC UA version (e.g. 1.03).
-                             ''')
-    parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
-                        help='Path to the output file')# (default to stdout)')
-    # TODO: if this feature is needed...
-    #parser.add_argument('--no-gen-reciprocal', action='store_false', dest='reciprocal',
-    #                    help='Suppress the normal behavior which is to generate reciprocal references between nodes that only have one to the other.')
-    parser.add_argument('--remove-max-monitored-items', action='store_true', dest='remove_max_monit',
-                        help='Remove the MaxMonitoredItems node and references to it')
-    parser.add_argument('--remove-methods', action='store_true', dest='remove_methods',
-                        help='Remove nodes and references that enable the use of methods')
-    parser.add_argument('--remove-max-node-management', action='store_true', dest='remove_max_node_mgt',
-                        help='Remove the MaxNodesPerNodeManagement node and references to it')
-    parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
-                        help='Remove the nodes of NS 0 with a NodeId greater than the given value')
-    parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
-                        help='''
-            Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
-            The normal behavior is to check for duplicate nodes,
-            generate reciprocal references between nodes when there is a reference in only one direction,
-            and remove attribute ParentNodeId when erroneous.
-                             ''')
-    parser.add_argument('--verbose', '-v', action='store_true',
-                        help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
-    args = parser.parse_args()
-    # Check that '-' is provided only once in input address spaces
-    assert args.fns_adds.count('-') < 2, 'You can only take a single XML from the standard input'
-
+def run_merge(args):
     # Load and merge all address spaces
     tree = None
     namespaces = {}
@@ -415,3 +382,47 @@ if __name__ == '__main__':
         print('There was some unrecoverable error{}'
               .format(', did not save to {}'.format(args.fn_out) if args.fn_out else ''),
               file=sys.stderr)
+
+
+def make_argparser():
+    parser = argparse.ArgumentParser(description='A tool to merge (and more) XMLs of OPC UA Address Spaces.')
+    parser.add_argument('fns_adds', nargs='+', metavar='XML',
+                        help='''
+            Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
+            the element from the first address space in the argument order is kept.
+            The models must be for the same OPC UA version (e.g. 1.03).
+                             ''')
+    parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
+                        help='Path to the output file')# (default to stdout)')
+    # TODO: if this feature is needed...
+    #parser.add_argument('--no-gen-reciprocal', action='store_false', dest='reciprocal',
+    #                    help='Suppress the normal behavior which is to generate reciprocal references between nodes that only have one to the other.')
+    parser.add_argument('--remove-max-monitored-items', action='store_true', dest='remove_max_monit',
+                        help='Remove the MaxMonitoredItems node and references to it')
+    parser.add_argument('--remove-methods', action='store_true', dest='remove_methods',
+                        help='Remove nodes and references that enable the use of methods')
+    parser.add_argument('--remove-max-node-management', action='store_true', dest='remove_max_node_mgt',
+                        help='Remove the MaxNodesPerNodeManagement node and references to it')
+    parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
+                        help='Remove the nodes of NS 0 with a NodeId greater than the given value')
+    parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
+                        help='''
+            Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
+            The normal behavior is to check for duplicate nodes,
+            generate reciprocal references between nodes when there is a reference in only one direction,
+            and remove attribute ParentNodeId when erroneous.
+                             ''')
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
+
+    return parser
+
+
+if __name__ == '__main__':
+    parser = make_argparser()
+    args = parser.parse_args()
+    # Check that '-' is provided only once in input address spaces
+    assert args.fns_adds.count('-') < 2, 'You can only take a single XML from the standard input'
+
+    run_merge(args)
+
