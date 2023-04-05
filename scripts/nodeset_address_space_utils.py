@@ -32,6 +32,11 @@ import re
 
 
 INDENT_SPACES = '  '
+NS_IDX_MATCHER = re.compile(r'ns=(\d+);(.+)')
+NS_IDX_FORMATTER = 'ns={};{}'
+PREFIX_IDX_MATCHER = re.compile(r'(\d+):(.+)')
+PREFIX_IDX_FORMATTER = '{}:{}'
+
 
 def indent(level):
     return '\n' + INDENT_SPACES*level
@@ -93,10 +98,106 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
     elem.tail = indent(2)
     refs.append(elem)
 
+
+def get_ns0_version(tree_models):
+    for model in tree_models:
+        if model.get('ModelUri') == "http://opcfoundation.org/UA/":
+            return model.get('Version')
+    return None
+
+
+def __get_reassigned_expr(expr: str, ns_idx_reassign: dict, matcher, formatter):
+    m = matcher.match(expr)
+    if m is not None:
+        expr_idx = int(m.group(1))
+        new_idx = ns_idx_reassign.get(expr_idx)
+        if new_idx is not None:
+            return formatter.format(new_idx, m.group(2))
+    return expr
+
+
+def reassigned_ns_index(expr: str, ns_idx_reassign: dict):
+    return __get_reassigned_expr(expr, ns_idx_reassign, NS_IDX_MATCHER, NS_IDX_FORMATTER)
+
+
+def reassigned_prefix_index(expr: str, ns_idx_reassign: dict):
+    return __get_reassigned_expr(expr, ns_idx_reassign, PREFIX_IDX_MATCHER, PREFIX_IDX_FORMATTER)
+
+
+def reassign_elem_attr(elem: ET.Element, attr: str, ns_idx_reassign: dict, fun_reassigned):
+    val = elem.get(attr)
+    if val is not None:
+        r_val = fun_reassigned(val, ns_idx_reassign)
+        elem.set(attr, r_val)
+
+
+def reassign_node_ns_index(node: ET.Element, ns_idx_reassign: dict, namespaces):
+    # Reassign namespace index for:
+    #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
+    #   References/Reference/@ReferenceType and References/Reference/text
+    for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+        reassign_elem_attr(node, attr, ns_idx_reassign, reassigned_ns_index)
+    reassign_elem_attr(node, 'BrowseName', ns_idx_reassign, reassigned_prefix_index)
+    
+    for ref in node.iterfind('uanodeset:References/uanodeset:Reference', namespaces):
+        reassign_elem_attr(ref, 'ReferenceType', ns_idx_reassign, reassigned_ns_index)
+        ref.text = reassigned_ns_index(ref.text, ns_idx_reassign)
+
+
 def merge(tree, new, namespaces):
     # Merge new tree into tree
     # The merge is restricted to tags for which we know the semantics
     # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
+
+    tree_root = tree.getroot()
+
+    # Merge NamespaceURIs
+    new_ns_uris = new.find('uanodeset:NamespaceUris', namespaces)
+    if new_ns_uris is None:
+        print("NamespaceUris is missing in a non-NS0 address space")
+        return False
+
+    tree_ns_uris = tree.find('uanodeset:NamespaceUris', namespaces)
+    if tree_ns_uris is None:
+        tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
+        tree_root.insert(0, new_ns_uris)
+    else:
+        tree_ns_uris[-1].tail = indent(2)
+    # the new namespace URIs from the new address space need to be translated
+    # but some of the namespace might already be in use
+    ns_uris = dict()
+    for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', namespaces)):
+        ns_uris[ns.text] = idx + 1
+
+    ns_idx_reassign = dict()
+    for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', namespaces)):
+        if ns.text in ns_uris:
+            tree_idx = ns_uris[ns.text]
+            if tree_idx != idx + 1:
+                ns_idx_reassign[idx + 1] = tree_idx
+        else:
+            new_idx = len(ns_uris) + 1
+            ns_uris[ns.text] = new_idx
+            if new_idx != idx + 1:
+                ns_idx_reassign[idx + 1] = new_idx
+            tree_ns_uris.append(ns)
+    # print("Namespace URI reassignments:", ns_idx_reassign)
+
+    # Merge Models
+    tree_models = tree.find('uanodeset:Models', namespaces)
+    ns0_version = get_ns0_version(tree_models)
+    if ns0_version is None:
+        print("Missing a NS0 model")
+        return False
+    new_models = new.find('uanodeset:Models', namespaces)
+    tree_models[-1].tail = indent(2)
+    for model in new_models:
+        req_ns0 = model.find('uanodeset:RequiredModel[@ModelUri="http://opcfoundation.org/UA/"]', namespaces)
+        if req_ns0 is not None:
+            req_ns0_version = req_ns0.get('Version')
+            if req_ns0_version != ns0_version:
+                raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
+        tree_models.append(model)
 
     # Merge Aliases
     tree_aliases = tree.find('uanodeset:Aliases', namespaces)
@@ -107,7 +208,7 @@ def merge(tree, new, namespaces):
     new_aliases = new.find('uanodeset:Aliases', namespaces)
     new_alias_dict = {}
     if new_aliases is not None:
-        new_alias_dict = {alias.get('Alias'):alias.text for alias in new_aliases}
+        new_alias_dict = {alias.get('Alias'):reassigned_ns_index(alias.text, ns_idx_reassign) for alias in new_aliases}
     # Assert existing aliases are the same
     res = True
     for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
@@ -135,24 +236,27 @@ def merge(tree, new, namespaces):
 
     # Merge Nodes
     tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
-    new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
+    new_nodes = dict()
+    for node in new.iterfind('*[@NodeId]'):
+        # Reassign namespace index for node attributes and subelements
+        reassign_node_ns_index(node, ns_idx_reassign, namespaces)
+        new_nodes[node.get('NodeId')] = node
+
     # New nodes are copied
-    tree_root = tree.getroot()
-    for nid in sorted(set(new_nodes) & set(tree_nodes)):
+    common_nids = set(new_nodes) & set(tree_nodes)
+    for nid in sorted(common_nids):
         print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
     # New unique nids
-    new_nids = set(new_nodes)-set(tree_nodes)
+    new_nids = set(new_nodes) - set(tree_nodes)
     if len(new_nids) > 0 and len(tree_root) > 0:
         # indent for first node added
         tree_root[-1].tail = indent(1)
-    for node in new.iterfind('*[@NodeId]'):
-        nid = node.get('NodeId')
-        if nid in new_nids:
-            # if args.verbose:
-            #     print('Merge: add node {}'.format(nid), file=sys.stderr)
-            tree_root.append(new_nodes[nid])
+    for nid in sorted(new_nids):
+        # if args.verbose:
+        #     print('Merge: add node {}'.format(nid), file=sys.stderr)
+        tree_root.append(new_nodes[nid])
     # References of common nodes are merged
-    for nid in set(tree_nodes)&set(new_nodes):
+    for nid in sorted(common_nids):
         nodeb = new_nodes[nid]
         refsb = nodeb.find('./uanodeset:References', namespaces)
         if refsb is None:
@@ -391,6 +495,8 @@ def make_argparser():
             Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
             the element from the first address space in the argument order is kept.
             The models must be for the same OPC UA version (e.g. 1.03).
+            The first address space shall be the namespace NS0.
+            The following address spaces, if any, will be the namespaces 1 to N.
                              ''')
     parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
                         help='Path to the output file')# (default to stdout)')
