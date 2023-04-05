@@ -203,4 +203,6 @@ fi
 
 ${MY_DIR}/tests/scripts/check-tap.py ${TAP_DIR}/*.tap && echo "All TAP files are well formed and free of failed tests" || exit 1
 
+PYTHONPATH=${MY_DIR}/scripts ${MY_DIR}/tests/scripts/test_nodeset_utils.py && echo "All Nodeset tests passed" || exit 1
+
 exit $CTEST_RET

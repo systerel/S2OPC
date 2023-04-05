@@ -51,6 +51,6 @@ install(FILES
   ${S2OPC_ROOT_PATH}/scripts/generate-s2opc-address-space.py
   ${S2OPC_ROOT_PATH}/scripts/generate-s2opc_pubsub-static-config.py
   ${S2OPC_ROOT_PATH}/scripts/gen-reciprocal-refs-address-space.xslt
-  ${S2OPC_ROOT_PATH}/scripts/nodeset-address-space-utils.py
+  ${S2OPC_ROOT_PATH}/scripts/nodeset_address_space_utils.py
   DESTINATION bin
   )

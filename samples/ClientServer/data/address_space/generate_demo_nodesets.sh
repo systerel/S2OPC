@@ -19,37 +19,27 @@
 
 set -euox pipefail
 
+function gen_nodeset() {
+	OUTPUT="$1"
+	shift
+	../../../../scripts/nodeset_address_space_utils.py --output "$OUTPUT".tmp $@
+	cat licence.xml > "$OUTPUT"
+	sed '1d' "$OUTPUT".tmp >> "$OUTPUT"
+	echo '' >> "$OUTPUT"
+	rm "$OUTPUT".tmp
+}
+
 # Generate demo NodeSet for Micro profile + node management
-../../../../scripts/nodeset-address-space-utils.py --output s2opc_node_mgt.xml.tmp s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
-cat licence.xml > s2opc_node_mgt.xml
-sed '1d' s2opc_node_mgt.xml.tmp >> s2opc_node_mgt.xml
-echo '' >> s2opc_node_mgt.xml
-rm s2opc_node_mgt.xml.tmp
+gen_nodeset s2opc_node_mgt.xml s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Micro profile
-../../../../scripts/nodeset-address-space-utils.py --output s2opc.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
-cat licence.xml > s2opc.xml
-sed '1d' s2opc.xml.tmp >> s2opc.xml
-echo '' >> s2opc.xml
-rm s2opc.xml.tmp
+gen_nodeset s2opc.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Micro profile + SKS
-../../../../scripts/nodeset-address-space-utils.py --output s2opc_sks.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
-cat licence.xml > s2opc_sks.xml
-sed '1d' s2opc_sks.xml.tmp >> s2opc_sks.xml
-echo '' >> s2opc_sks.xml
-rm s2opc_sks.xml.tmp
+gen_nodeset s2opc_sks.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Nano profile
-../../../../scripts/nodeset-address-space-utils.py --output s2opc_nano.xml.tmp --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
-cat licence.xml > s2opc_nano.xml
-sed '1d' s2opc_nano.xml.tmp >> s2opc_nano.xml
-echo '' >> s2opc_nano.xml
-rm s2opc_nano.xml.tmp
+gen_nodeset s2opc_nano.xml --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet with limited base info data
-../../../../scripts/nodeset-address-space-utils.py --output s2opc_no_base_info.xml.tmp --remove-node-ids-greater-than 3000 --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
-cat licence.xml > s2opc_no_base_info.xml
-sed '1d' s2opc_no_base_info.xml.tmp >> s2opc_no_base_info.xml
-echo '' >> s2opc_no_base_info.xml
-rm s2opc_no_base_info.xml.tmp
+gen_nodeset s2opc_no_base_info.xml --remove-subtree "i=92" "i=93" --remove-unused --remove-backward-refs --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
