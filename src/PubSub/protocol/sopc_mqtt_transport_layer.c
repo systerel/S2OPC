@@ -304,4 +304,11 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
 {
     SOPC_UNUSED_ARG(contextClient);
 }
+
+bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
+{
+    SOPC_UNUSED_ARG(contextClient);
+    return false;
+}
+
 #endif
