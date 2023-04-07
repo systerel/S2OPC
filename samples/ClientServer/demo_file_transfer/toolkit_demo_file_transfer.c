@@ -44,6 +44,13 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
+// Server endpoints and PKI configuration
+#define XML_SERVER_CFG_PATH "./S2OPC_Server_Demo_Config.xml"
+// Server address space configuration
+#define XML_ADDRESS_SPACE_PATH "./ft_data/address_space.xml"
+// User credentials and authorizations
+#define XML_USERS_CFG_PATH "./S2OPC_Users_Demo_Config.xml"
+
 static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
 static void set_file_closing_status(SOPC_Boolean res);
@@ -93,15 +100,16 @@ static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
-    // Server endpoints and PKI configuration
-    const char* xml_server_cfg_path = "./S2OPC_Server_Demo_Config.xml";
-    // Server address space configuration
-    const char* xml_address_space_path = "./ft_data/address_space.xml";
-    // User credentials and authorizations
-    const char* xml_users_cfg_path = "./S2OPC_Users_Demo_Config.xml";
-
-    return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
-                                                    NULL);
+    SOPC_ReturnStatus status =
+        SOPC_HelperConfigServer_ConfigureFromXML(XML_SERVER_CFG_PATH, XML_ADDRESS_SPACE_PATH, XML_USERS_CFG_PATH, NULL);
+    if (SOPC_STATUS_OK != status)
+    {
+        printf("******* Failed to load configuration from paths:\n");
+        printf("******* \t--> need file (relative path where the server is running):\t%s\n", XML_USERS_CFG_PATH);
+        printf("******* \t--> need file (relative path where the server is running):\t%s\n", XML_SERVER_CFG_PATH);
+        printf("******* \t--> need file (relative path where the server is running):\t%s\n", XML_ADDRESS_SPACE_PATH);
+    }
+    return status;
 }
 
 static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callContextPtr,
@@ -284,18 +292,6 @@ int main(int argc, char* argv[])
     {
         /* status = Server_LoadServerConfigurationFromFiles(); */
         status = Server_LoadServerConfigurationFromPaths();
-        if (SOPC_STATUS_OK != status)
-        {
-            printf("******* Failed to load configuration from paths:\n");
-            printf(
-                "******* \t--> need file (relative path where the server is "
-                "running):\t./S2OPC_Users_Demo_Config.xml\n");
-            printf(
-                "******* \t--> need file (relative path where the server is "
-                "running):\t./S2OPC_Server_Demo_Config.xml\n");
-            printf(
-                "******* \t--> need file (relative path where the server is running):\t./ft_data/address_space.xml\n");
-        }
     }
 
     if (SOPC_STATUS_OK == status)

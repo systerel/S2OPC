@@ -45,6 +45,7 @@ check_wrapper.tap
 client_RHE_faults_test.tap
 client_server_test.tap
 client_service_faults_test.tap
+check_file_transfer.tap
 sc_establish_timeout.tap
 sc_renew.tap
 secure_channel_level_None.tap
@@ -57,7 +58,6 @@ secure_channel_level_Sign_B256_2048bit.tap
 session_timeout.tap
 toolkit_test_server_client.tap
 toolkit_test_server_local_service.tap
-toolkit_test_file_transfer.tap
 toolkit_test_suite_client.tap
 validation.tap
 s2opc_write.tap

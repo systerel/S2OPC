@@ -853,6 +853,75 @@ static SOPC_StatusCode FileTransfer_Method_Write(const SOPC_CallContext* callCon
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer:Method_Write: error while writing tmp file");
     }
 
+    bool found = false;
+    SOPC_StatusCode result_code_service = result_code;
+    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    if ((false == found) && (0 == (result_code_service & SOPC_GoodStatusOppositeMask)))
+    {
+        char* C_objectId = SOPC_NodeId_ToCString(objectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Write: unable to retrieve FileType in the API from nodeId %s",
+                               C_objectId);
+        SOPC_Free(C_objectId);
+        result_code_service = OpcUa_BadUnexpectedError;
+    }
+
+    long int cur_pos = -1;
+    long int end_pos = -1;
+    int res = -1;
+
+    /* Calculate the size */
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
+        cur_pos = ftell(file->fp);
+        if (-1L == cur_pos)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Write: the ftell function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
+        res = fseek(file->fp, 0, SEEK_END);
+        if (0 != res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Write: the fseek function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
+        end_pos = ftell(file->fp);
+        if (-1L == end_pos)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Write: the ftell function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
+        res = fseek(file->fp, cur_pos, SEEK_SET);
+        if (0 != res)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Write: the fseek function has failed");
+            result_code_service = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (0 == (result_code_service & SOPC_GoodStatusOppositeMask))
+    {
+        file->size_in_byte = (uint64_t) end_pos;
+        result_code_service = local_write_size(file);
+        if (0 != (result_code_service & SOPC_GoodStatusOppositeMask))
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "FileTransfer:Method_Write: unable to make a local write request for Size variable");
+        }
+    }
+
     return result_code;
 }
 

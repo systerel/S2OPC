@@ -317,6 +317,17 @@ target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_F
 target_compile_definitions(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(toolkit_test_client_rhe_faults PRIVATE s2opc_clientserver)
 
+# Client scenario with file transfer
+if (NOT WIN32 AND expat_FOUND)
+  add_executable(check_file_transfer "validation_tests/client/file_transfer/check_file_transfer.c"
+                                                  "validation_tests/client/file_transfer/check_file_transfer_method.c")
+  target_include_directories(check_file_transfer PRIVATE "validation_tests/client/file_transfer")
+  add_dependencies(check_file_transfer toolkit_test_server_file_transfer)
+  target_link_libraries(check_file_transfer PRIVATE s2opc_clientwrapper Check::check)
+  target_compile_options(check_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
+  target_compile_definitions(check_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
+endif()
+
 # Client services scenarii
 
 # Reuse code of demo client
@@ -335,6 +346,20 @@ target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_CLIENTDEMO_
 target_compile_options(toolkit_test_suite_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS})
 
+# Server scenario for file transfer
+if (NOT WIN32 AND expat_FOUND)
+  add_executable(toolkit_test_server_file_transfer "validation_tests/server/toolkit_test_server_file_transfer.c"
+                                                    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
+  target_include_directories(toolkit_test_server_file_transfer PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer")
+  target_link_libraries(toolkit_test_server_file_transfer PRIVATE s2opc_serverwrapper s2opc_clientserver-xml-loaders-expat)
+  target_compile_options(toolkit_test_server_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno and mkstemp functions.
+  target_compile_definitions(toolkit_test_server_file_transfer PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")
+  add_custom_command(
+        TARGET toolkit_test_server_file_transfer POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/ft_data/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/
+  )
+  endif()
+
 # Server scenario (configured for UACTT)
 
 # Manage the Nano profiles extended mode
@@ -342,33 +367,6 @@ if (S2OPC_NANO_PROFILE)
   set(TOOLKIT_TEST_SERVER "toolkit_test_nano_server")
 else()
   set(TOOLKIT_TEST_SERVER "toolkit_test_server")
-endif()
-
-if(expat_FOUND AND NOT WIN32)
-  set(TOOLKIT_TEST_FILE_TRANSFER "toolkit_test_file_transfer")
-endif()
-
-if (expat_FOUND)
-  # file_transfer only support by linux system
-  if(NOT WIN32)
-    add_executable(${TOOLKIT_TEST_FILE_TRANSFER}  "validation_tests/client/test_file_transfer.c"
-                                                  "validation_tests/client/test_file_transfer_method.c"
-                                                  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
-    target_include_directories(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer"
-                                                                      ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
-    target_link_libraries(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE s2opc_serverwrapper s2opc_clientwrapper Check::check s2opc_clientserver-xml-loaders-expat)
-    # file_transfer API needs GNU_SOURCE (fileno and mkstemp functions)
-    target_compile_options(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE)
-    target_compile_definitions(${TOOLKIT_TEST_FILE_TRANSFER} PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")
-    add_custom_command(
-      TARGET ${TOOLKIT_TEST_FILE_TRANSFER} POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data
-      COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/ft_data/* ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/ft_data/
-    )
-    s2opc_unit_test(${TOOLKIT_TEST_FILE_TRANSFER})
-  endif()
-else()
-  message(WARNING "test file transfer ${TOOLKIT_TEST_FILE_TRANSFER} executable will not be compiled since Expat library not available.")
 endif()
 
 add_executable(${TOOLKIT_TEST_SERVER}
@@ -538,6 +536,16 @@ add_test(NAME "validation::client_RHE_faults_test"
   $<TARGET_FILE:toolkit_test_client_rhe_faults>)
 set_tests_properties("validation::client_RHE_faults_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_RHE_faults_test.tap")
 
+if (NOT WIN32 AND expat_FOUND)
+  add_test(NAME "validation::check_file_transfer"
+          WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+          COMMAND
+          "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+          "--server-wd" $<TARGET_FILE_DIR:toolkit_test_server_file_transfer>
+          "--server-cmd" $<TARGET_FILE:toolkit_test_server_file_transfer>
+          "./check_file_transfer")
+  set_tests_properties("validation::check_file_transfer" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=check_file_transfer.tap")
+endif()
 
 # Function to run a validation of the S2OPC server scenario with given client scenario test
 function(s2opc_custom_server_validation_test server_target name)
