@@ -21,7 +21,8 @@
  *
  * \brief High level interface to build OPC UA request and access OPC UA response
  *
- * \note All parameters provided to request builders are copied and might be deallocated after builder call.
+ * \note All parameters provided to request builders are copied and might be deallocated after builder call
+ *       (unless specified otherwise).
  *
  * \note Allocated requests will be deallocated by the library after service call.
  *       Once a service called (e.g. ::SOPC_ServerHelper_LocalServiceSync),
@@ -29,13 +30,13 @@
  *
  */
 
-#ifndef SOPC_TYPE_HELPER_H_
-#define SOPC_TYPE_HELPER_H_
+#ifndef LIBS2OPC_REQUEST_BUILDER_H_
+#define LIBS2OPC_REQUEST_BUILDER_H_
 
 #include "sopc_types.h"
 
 /**
- * \brief Create a read request
+ * \brief Creates a read request
  *
  * \param nbReadValues  Number of items (node, attribute, index range) to read with this read request.
  *                      \p nbReadValue <= INT32_MAX. ::SOPC_ReadRequest_SetReadValueFromStrings
@@ -61,7 +62,7 @@ OpcUa_ReadRequest* SOPC_ReadRequest_Create(size_t nbReadValues, OpcUa_Timestamps
 SOPC_ReturnStatus SOPC_ReadRequest_SetMaxAge(OpcUa_ReadRequest* readRequest, double maxAge);
 
 /**
- * \brief Set the value to read at given index in read request  (using C strings for node id and index range)
+ * \brief Sets the value to read at given index in read request  (using C strings for node id and index range)
  *
  * \param readRequest  The read request to configure
  *
@@ -94,7 +95,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueFromStrings(OpcUa_ReadRequest* re
                                                            const char* indexRange);
 
 /**
- * \brief Set the value to read at given index in read request
+ * \brief Sets the value to read at given index in read request
  *
  * \param readRequest  The read request to configure
  *
@@ -124,7 +125,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValue(OpcUa_ReadRequest* readRequest,
                                                 const SOPC_String* indexRange);
 
 /**
- * \brief Set the data encoding of the value to read.
+ * \brief Sets the data encoding of the value to read.
  *
  * \param readRequest   The read request to configure
  * \param index         Index of the read value to configure in the read request.
@@ -136,7 +137,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* r
                                                             const SOPC_QualifiedName* dataEncoding);
 
 /**
- * \brief Create a write request
+ * \brief Creates a write request
  *
  * \param nbWriteValues  Number of items (node, attribute, index range) to write with this write request.
  *                       \p nbWriteValue <= INT32_MAX. ::SOPC_WriteRequest_SetWriteValueFromStrings
@@ -148,7 +149,7 @@ SOPC_ReturnStatus SOPC_ReadRequest_SetReadValueDataEncoding(OpcUa_ReadRequest* r
 OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues);
 
 /**
- * \brief Set the value to write at given index in write request (using C strings for node id and index range)
+ * \brief Sets the value to write at given index in write request (using C strings for node id and index range)
  *
  * \param writeRequest  The write request to configure
  *
@@ -190,7 +191,7 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValueFromStrings(OpcUa_WriteRequest*
                                                              const SOPC_DataValue* value);
 
 /**
- * \brief Set the value to write at given index in write request
+ * \brief Sets the value to write at given index in write request
  *
  * \param writeRequest  The write request to configure
  *
@@ -261,7 +262,7 @@ typedef enum
 } SOPC_BrowseRequest_ResultMask;
 
 /**
- * \brief Create a browse request
+ * \brief Creates a browse request
  *
  * \param nbNodesToBrowse       Number of nodes to browse with this browse request.
  *                              \p nbNodesToBrowse <= INT32_MAX. ::SOPC_BrowseRequest_SetBrowseDescriptionFromStrings
@@ -269,7 +270,7 @@ typedef enum
  *                              index. Otherwise empty browse description is sent for the index not configured.
  *
  * \param maxReferencesPerNode  Indicates the maximum number of references to return for each starting node
- *                              specified in the request.
+ *                              specified in the request (0 means no limitation).
  *
  * \param optView               (Optional) Description of the View to browse. If no view used, it should be NULL.
  *
@@ -280,7 +281,7 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
                                                const OpcUa_ViewDescription* optView);
 
 /**
- * \brief Set the node to browse at given index in browse request (using C strings for node id and reference type id)
+ * \brief Sets the node to browse at given index in browse request (using C strings for node id and reference type id)
  *
  * \param browseRequest  The browse request to configure
  *
@@ -329,7 +330,7 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
                                                                      SOPC_BrowseRequest_ResultMask resultMask);
 
 /**
- * \brief Set the node to browse at given index in browse request
+ * \brief Sets the node to browse at given index in browse request
  *
  * \param browseRequest  The browse request to configure
  *
@@ -372,7 +373,7 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
                                                           SOPC_BrowseRequest_ResultMask resultMask);
 
 /**
- * \brief Create a browse next request
+ * \brief Creates a browse next request
  *
  *   BrowseNext are used to continue a Browse that had too much browse results (more than \p maxReferencesPerNode).
  *   The continuation points are found in the browse response.
@@ -407,7 +408,7 @@ OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationP
 OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Create(size_t nbTranslateBrowsePaths);
 
 /**
- * \brief Set the browse path to translate at given index in translate browse paths request
+ * \brief Sets the browse path to translate at given index in translate browse paths request
  *        (using C strings for node id)
  *
  * \param tbpRequest       The translate browse paths request to configure
@@ -440,7 +441,7 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPathFromString(
     OpcUa_RelativePathElement* pathElements);
 
 /**
- * \brief Set the browse path to translate at given index in translate browse paths request
+ * \brief Sets the browse path to translate at given index in translate browse paths request
  *
  * \param tbpRequest       The translate browse paths request to configure
  *
@@ -467,7 +468,7 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
                                                           OpcUa_RelativePathElement* pathElements);
 
 /**
- * \brief Create an array of relative path element to be used in translate browse path.
+ * \brief Creates an array of relative path element to be used in translate browse path.
  *
  * \param nbPathElements   Number of relative path elements in the array
  *                                 \p nbPathElements <= INT32_MAX.
@@ -481,7 +482,7 @@ SOPC_ReturnStatus SOPC_TranslateBrowsePathRequest_SetPath(OpcUa_TranslateBrowseP
 OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElements);
 
 /**
- * \brief Set the path element at given index in relative path element array
+ * \brief Sets the path element at given index in relative path element array
  *
  * \param pathElementsArray  The array of path elements to initialize
  *
@@ -513,7 +514,7 @@ SOPC_ReturnStatus SOPC_RelativePathElements_SetPathElement(OpcUa_RelativePathEle
                                                            const char* targetName);
 
 /**
- * \brief Set the continuation point to browse at given index in browse next request
+ * \brief Sets the continuation point to browse at given index in browse next request
  *
  * \param browseNextRequest  The browse next request to configure
  *
@@ -531,7 +532,7 @@ SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRe
                                                               const SOPC_ByteString* continuationPoint);
 
 /**
- * \brief Create a GetEndpoint request for the given endpoint URL
+ * \brief Creates a GetEndpoint request for the given endpoint URL
  *
  * \param endpointURL  The endpoint URL as C string: "opc.tcp://<hostname>:<port>[/<name>]"
  *
@@ -541,7 +542,7 @@ SOPC_ReturnStatus SOPC_BrowseNextRequest_SetContinuationPoint(OpcUa_BrowseNextRe
 OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointURL);
 
 /**
- * \brief Request preferred locales for the endpoints to be returned by the get endpoints service (Optional)
+ * \brief Requests preferred locales for the endpoints to be returned by the get endpoints service (Optional)
  *        Preferred locale order is the order of \p localesIds array
  *
  * \param getEndpointsReq  The get endpoints request to configure
@@ -558,7 +559,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpoint
                                                                char** localeIds);
 
 /**
- * \brief Request profile URIs for the endpoints to be returned by the get endpoints service (Optional)
+ * \brief Requests profile URIs for the endpoints to be returned by the get endpoints service (Optional)
  *        Endpoints of all transport profile types available are returned
  *        if ::SOPC_GetEndpointsRequest_SetProfileURIs unused.
  *
@@ -581,7 +582,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequ
                                                           char** profileURIs);
 
 /**
- * \brief Create a complete RegisterServer2 request from the current server configuration.
+ * \brief Creates a complete RegisterServer2 request from the current server configuration.
  *        It shall be used to register the current server for FindServer and FindServerOnNetwork services.
  *
  * \return allocated register server 2 request in case of success, NULL in case of failure
@@ -590,7 +591,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequ
 OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfiguration(void);
 
 /**
- * \brief Create an add nodes request
+ * \brief Creates an add nodes request
  *
  * \param nbAddNodes  Number of nodes to add with this request.
  *                      \p nbAddNodes <= INT32_MAX.
@@ -602,7 +603,7 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
 OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes);
 
 /**
- * \brief Set the attributes values requested for the Variable node to add.
+ * \brief Sets the attributes values requested for the Variable node to add.
  *        Optional parameters are prefixed by "opt" and shall be NULL if not defined.
  *        If optional parameters are not defined the server will choose values for this attributes.
  *
@@ -658,4 +659,248 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
                                                             const double* optMinimumSamplingInterval,
                                                             SOPC_Boolean* optHistorizing);
 
-#endif /* SOPC_TYPE_HELPER_H_ */
+/**
+ * \brief Creates an CreateMonitoredItems request
+ *
+ * \param subscriptionId        The identifier of the subscription for which monitored items will be created
+ *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ * \param nbMonitoredItems      Number of MonitoredItem to create with the request.
+ *                              \p nbMonitoredItems <= INT32_MAX.
+ *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
+ *                              for each monitored item index.
+ * \param ts                    Set the timestamps (source, server) to be returned for any monitored item.
+ *
+ * \return allocated CreateMonitoredItems request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           OpcUa_TimestampsToReturn ts);
+
+/**
+ * \brief Sets the monitored item identification parameters.
+ *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams
+ *        for the same index to configure monitoring parameters.
+ *
+ * \param createMIrequest  The create monitored item request to configure
+ *
+ * \param index         Index of the create monitored item to configure in the request.
+ *                      \p index < number of monitored items configured in ::SOPC_CreateMonitoredItemsRequest_Create
+ *
+ * \param nodeId       The id of the node to monitor.
+ *                     \p nodeId shall not be NULL
+ *
+ * \param attribute    The attribute to write in the node.
+ *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
+ *
+ *
+ * \param indexRange   The index range used to identify a single element of an array,
+ *                     or a single range of indexes for arrays.
+ *                     If not used for the monitored item it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or attribute.
+ */
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    const SOPC_NodeId* nodeId,
+    SOPC_AttributeId attribute,
+    const SOPC_String* indexRange);
+
+/**
+ * \brief Sets the monitored item identification parameters using C string parameters.
+ *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams
+ *        for the same index to configure monitoring parameters.
+ *
+ * \param createMIrequest  The create monitored item request to configure
+ *
+ * \param index         Index of the create monitored item to configure in the request.
+ *                      \p index < number of monitored items configured in ::SOPC_CreateMonitoredItemsRequest_Create
+ *
+ * \param nodeId       The id of the node to monitor as a C string, e.g. 'ns=1;s=MyNode'.
+ *                     \p nodeId shall not be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                     OPC UA specification</a>.
+ *
+ * \param attribute    The attribute to write in the node.
+ *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
+ *
+ * \param indexRange   The index range used to identify a single element of an array,
+ *                     or a single range of indexes for arrays.
+ *                     If not used for the monitored item requested it should be NULL.
+ *                     Format is described in
+ *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                     OPC UA specification</a>.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or attribute.
+ */
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    const char* nodeId,
+    SOPC_AttributeId attribute,
+    const char* indexRange);
+
+/**
+ * \brief Creates and allocates a DataChangeFilter filter parameter to be provided to
+ *        ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams.
+ *        See part 4 §7.17.2 for detailed DataChangeFilter documentation.
+ *
+ * \param trigger         The condition on which a data change notification is triggered:
+ *                        Status, Status & Value or Status, Value and Timestamp.
+ * \param deadbandType    The deadband type Absolute, Percent or None if no deadband shall be used.
+ * \param deadbandValue  The deadband value to apply on Value change and for the deadband type (Absolute, Percent)
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ */
+SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigger trigger,
+                                                          OpcUa_DeadbandType deadbandType,
+                                                          double deadbandValue);
+
+/**
+ * \brief Sets the monitored item monitoring parameters.
+ *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId
+ *        for the same index to configure monitored item identification.
+ *        See part 4 §7.16 for detailed MonitoringParameters documentation.
+ *
+ * \param createMIrequest  The create monitored item request to configure
+ *
+ * \param index            Index of the create monitored item to configure in the request.
+ *                         \p index < number of monitored items configured in ::SOPC_CreateMonitoredItemsRequest_Create
+ *
+ * \param monitoringMode   The monitoring mode to use: disabled, sampling, reporting (default mode to be used)
+ *
+ * \param clientHandle     Client-supplied id of the MonitoredItem, it will be provided in Notifications of the
+ *                         ::OpcUa_PublishResponse messages received.
+ * \param samplingInterval The interval defines the sampling interval for the monitored item.
+ *                         The value 0 indicates that the Server should use the fastest practical rate
+ *                         or is based on an exception-based model.
+ *                         The value -1 indicates that the default sampling interval defined by the publishing
+ *                         interval of the subscription is requested.
+ * \param filter           (optional) A filter used by the Server to determine if the MonitoredItem should generate a
+ *                         notification.
+ *                         ::SOPC_MonitoredItem_DataChangeFilter should be used to create a DataChangeFilter.
+ *                         If not used, this parameter is null. If not null the filter memory is managed by the
+ *                         function after call.
+ * \param queueSize        The requested size of the monitored item queue.
+ * \param discardOldest    If set to true the oldest notification is discarded when the queue is full,
+ *                         otherwise the last notification is discarded when the queue is full.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ *
+ * \note  Only exception-based model (see \p samplingInterval) and DataChangeFilter filter are supported by s2opc server
+ */
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    OpcUa_MonitoringMode monitoringMode,
+    uint32_t clientHandle,
+    double samplingInterval,
+    SOPC_ExtensionObject* filter,
+    uint32_t queueSize,
+    SOPC_Boolean discardOldest);
+
+/**
+ * \brief Creates an ModifyMonitoredItems request
+ *
+ * \param subscriptionId        The identifier of the subscription for which monitored items will be created
+ *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ * \param nbMonitoredItems      Number of MonitoredItem to modify with the request.
+ *                              \p nbMonitoredItems <= INT32_MAX.
+ *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
+ *                              for each monitored item index.
+ * \param ts                    Set the timestamps (source, server) to be returned for any monitored item.
+ *
+ * \return allocated ModifyMonitoredItems request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           OpcUa_TimestampsToReturn ts);
+
+/**
+ * \brief Sets the monitored item monitoring parameters to modify.
+ *        See part 4 §7.16 for detailed MonitoringParameters documentation.
+ *
+ * \param modifyMIrequest  The modify monitored item request to configure
+ * \param index            Index of the create monitored item to configure in the request.
+ *                         \p index < number of monitored items configured in ::SOPC_ModifyMonitoredItemsRequest_Create
+ * \param monitoredItemId  The monitored item identifier returned in the ::OpcUa_CreateMonitoredItemResponse.
+ * \param clientHandle     Client-supplied id of the MonitoredItem, it will be provided in Notifications of the
+ *                         ::OpcUa_PublishResponse messages received.
+ * \param samplingInterval The interval defines the sampling interval for the monitored item.
+ *                         The value 0 indicates that the Server should use the fastest practical rate
+ *                         or is based on an exception-based model.
+ *                         The value -1 indicates that the default sampling interval defined by the publishing
+ *                         interval of the subscription is requested.
+ * \param filter           (optional) A filter used by the Server to determine if the MonitoredItem should generate a
+ *                         notification.
+ *                         ::SOPC_MonitoredItem_DataChangeFilter should be used to create a DataChangeFilter.
+ *                         If not used, this parameter is null. If not null the filter memory is managed by the
+ *                         function after call.
+ * \param queueSize        The requested size of the monitored item queue.
+ * \param discardOldest    If set to true the oldest notification is discarded when the queue is full,
+ *                         otherwise the last notification is discarded when the queue is full.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ *
+ * \note  Only exception-based model (see \p samplingInterval) and DataChangeFilter filter are supported by s2opc server
+ */
+SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
+    OpcUa_ModifyMonitoredItemsRequest* modifyMIrequest,
+    size_t index,
+    uint32_t monitoredItemId,
+    uint32_t clientHandle,
+    double samplingInterval,
+    SOPC_ExtensionObject* filter,
+    uint32_t queueSize,
+    SOPC_Boolean discardOldest);
+
+/**
+ * \brief Creates an DeleteMonitoredItems request
+ *
+ * \param subscriptionId        The identifier of the subscription for which monitored items will be deleted
+ *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ * \param nbMonitoredItems      Number of MonitoredItem to delete with the request.
+ *                              \p nbMonitoredItems <= INT32_MAX.
+ *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
+ *                              for each monitored item index.
+ * \param optMonitoredItemIds   (optional) Pointer to the array of monitored item ids to delete.
+ *                              If it is NULL, the id of each monitored item shall be provided using
+ *                              ::SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId.
+ *
+ * \return allocated DeleteMonitoredItems request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_DeleteMonitoredItemsRequest* SOPC_DeleteMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           const uint32_t** optMonitoredItemIds);
+
+/**
+ * \brief Sets the monitored item identifier to delete.
+ *
+ * \param deleteMIrequest  The delete monitored item request to configure
+ * \param index            Index of the create monitored item to configure in the request.
+ *                         \p index < number of monitored items configured in ::SOPC_DeleteMonitoredItemsRequest_Create
+ * \param monitoredItemId  The MonitoredItem id to delete
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
+ */
+SOPC_ReturnStatus SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
+    OpcUa_DeleteMonitoredItemsRequest* deleteMIrequest,
+    size_t index,
+    uint32_t monitoredItemId);
+
+#endif /* LIBS2OPC_REQUEST_BUILDER_H_ */
