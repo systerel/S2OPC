@@ -1037,4 +1037,31 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
     return status;
 }
 
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           OpcUa_TimestampsToReturn ts)
+{
+    OpcUa_CreateMonitoredItemsRequest* req = NULL;
+    if (nbMonitoredItems > INT32_MAX || 0 == subscriptionId)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->SubscriptionId = subscriptionId;
+    req->ItemsToCreate = SOPC_Calloc(nbMonitoredItems, sizeof(*req->ItemsToCreate));
+    req->TimestampsToReturn = ts;
+    if (NULL != req->ItemsToCreate)
+    {
+        req->NoOfItemsToCreate = (int32_t) nbMonitoredItems;
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+}
+
 #undef CHECK_ELEMENT_EXISTS
