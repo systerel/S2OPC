@@ -30,6 +30,10 @@ IS_INTERACTIVE=false
 source .docker-images.sh
 rm -rf build_zephyr/* 2>/dev/null
 mkdir -p build_zephyr
+chmod a+rw build_zephyr
+chmod a+rw samples/embedded/cli_client/
+chmod a+rw samples/embedded/cli_pubsub_server/
+
 # chmod a+rw samples/embedded
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
