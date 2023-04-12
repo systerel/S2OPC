@@ -996,7 +996,7 @@ SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src)
+SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, const char* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     size_t stringLength = 0;
@@ -1008,7 +1008,9 @@ SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src)
         {
             status = SOPC_STATUS_OK;
             dest->Length = (int32_t) stringLength;
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
             dest->Data = (uint8_t*) src;
+            SOPC_GCC_DIAGNOSTIC_RESTORE
             dest->DoNotClear = 1; // dest->characters will not be freed on clear
         }
     }

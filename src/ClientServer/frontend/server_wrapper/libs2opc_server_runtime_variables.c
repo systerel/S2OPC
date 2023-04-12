@@ -104,11 +104,11 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
     int cmp_res = strcmp(build_info.commonBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildVersion);
     SOPC_ASSERT(0 == cmp_res);
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.SoftwareVersion,
-                                           (char*) build_info.clientServerBuildInfo.buildVersion);
+                                           build_info.clientServerBuildInfo.buildVersion);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_String_AttachFromCstring(&runtimeVariables.build_info.BuildNumber,
-                                           (char*) build_info.clientServerBuildInfo.buildSrcCommit);
+                                           build_info.clientServerBuildInfo.buildSrcCommit);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     time_t buildDateAsTimet = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);

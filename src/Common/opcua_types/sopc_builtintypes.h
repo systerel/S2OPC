@@ -703,7 +703,7 @@ SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src);
  * \param src  The C-String data that will be copied to the destination SOPC_String object
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  */
-SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, char* src);
+SOPC_ReturnStatus SOPC_String_AttachFromCstring(SOPC_String* dest, const char* src);
 
 /**
  * \note Since an allocation is used, the user must freed the \a dest pointer after using it.
