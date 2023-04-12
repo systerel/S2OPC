@@ -68,13 +68,13 @@ build_app() {
   echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 }
 
-# Build PUBSUB+SERVER demo on stm32h735g_disco
+# Build CLIENT demo on stm32h735g_disco
 build_app stm32h735g_disco cli_client || exit 10
 
 # Build PUBSUB+SERVER demo on mimxrt1064_evk
 build_app mimxrt1064_evk cli_pubsub_server || exit 11
 
-# Build CLIENT demo on native_posix_64
+# Build PUBSUB+SERVER demo on native_posix_64
 build_app native_posix_64 cli_pubsub_server || exit 12
 
 ls -l ${OUTDIR}/
