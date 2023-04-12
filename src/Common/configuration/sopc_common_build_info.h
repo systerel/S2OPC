@@ -24,10 +24,10 @@
 /* Toolkit build information */
 typedef struct
 {
-    char* buildVersion;
-    char* buildSrcCommit;
-    char* buildDockerId;
-    char* buildBuildDate;
+    const char* buildVersion;
+    const char* buildSrcCommit;
+    const char* buildDockerId;
+    const char* buildBuildDate;
 } SOPC_Build_Info;
 
 SOPC_Build_Info SOPC_Common_GetBuildInfo(void);
