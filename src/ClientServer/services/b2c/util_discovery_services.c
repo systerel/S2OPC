@@ -29,6 +29,7 @@
 #include "sopc_toolkit_config_internal.h"
 #include "util_discovery_services.h"
 
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 const SOPC_String tcpUaTransportProfileURI = {
     .Length = 65,
     .DoNotClear = true,
@@ -50,6 +51,7 @@ const OpcUa_UserTokenPolicy userNameUserTokenPolicy = {
     .IssuerEndpointUrl = {0, true, NULL},
     .SecurityPolicyUri = {0, true, NULL},
 };
+SOPC_GCC_DIAGNOSTIC_RESTORE
 
 static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, SOPC_ByteString* serverCert)
 {
