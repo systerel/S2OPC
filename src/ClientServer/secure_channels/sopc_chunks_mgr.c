@@ -4143,7 +4143,7 @@ static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
                                             SOPC_Buffer* msgBuffer,
                                             SOPC_Buffer** nextChunkBuffer,
                                             SOPC_StatusCode* errorStatus,
-                                            char** errorReason)
+                                            const char** errorReason)
 {
     // Note: msgBuffer position is set to first byte of body to be sent
     uint32_t remainingBytes = SOPC_Buffer_Remaining(msgBuffer);
@@ -4197,7 +4197,7 @@ static bool SC_Chunks_NextOutputChunkBuffer(SOPC_SecureConnection* scConnection,
     return result;
 }
 
-static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCode errorStatus, char* reason)
+static bool SC_Chunks_EncodeAbortMsg(SOPC_Buffer* inputMsgBuffer, SOPC_StatusCode errorStatus, const char* reason)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_String tempString;
@@ -4300,7 +4300,7 @@ static bool SC_Chunks_TreatSendMessageBuffer(
         SOPC_ASSERT(SOPC_MSG_TYPE_SC_MSG == sendMsgType || SOPC_MSG_TYPE_SC_CLO == sendMsgType);
         // MSG (/CLO) case (symmetric case)
 
-        char* errorReason = NULL;
+        const char* errorReason = NULL;
 
         /* Part 6 (1.03): §6.7.3 MessageChunks and error handling:
          * If an error occurs creating a MessageChunk then the sender shall [...]

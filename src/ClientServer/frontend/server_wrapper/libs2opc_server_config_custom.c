@@ -376,7 +376,7 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
         return NULL;
     }
     SOPC_SecurityConfig* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
-    char* sUri = NULL;
+    const char* sUri = NULL;
     switch (uri)
     {
     case SOPC_SecurityPolicy_None:
