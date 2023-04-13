@@ -30,11 +30,11 @@ IS_INTERACTIVE=false
 source .docker-images.sh
 rm -rf build_zephyr/* 2>/dev/null
 mkdir -p build_zephyr
+# local user is different from docker container user
+# therefore, access rights issues can occur.
 chmod a+rw build_zephyr
 chmod a+rw samples/embedded/cli_client/
 chmod a+rw samples/embedded/cli_pubsub_server/
-
-# chmod a+rw samples/embedded
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 $IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_IMAGE}" && \
