@@ -19,6 +19,7 @@
 
 #if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_config_loader.h"
+#include "sopc_config_loader_internal.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -220,514 +221,6 @@ static bool start_namespace(struct parse_context_t* ctx, const XML_Char** attrs)
         return false;
     }
 
-    ctx->state = PARSE_NAMESPACE;
-
-    return true;
-}
-
-static bool end_locales(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->localeIds))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no locales defined for the server");
-        return false;
-    }
-    if (!SOPC_Array_Append_Values(ctx->localeIds, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->localeIds = SOPC_Array_Into_Raw(ctx->localeIds);
-    if (NULL == ctx->serverConfigPtr->localeIds)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->localeIds = NULL;
-    return true;
-}
-
-static bool start_locale(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "id", attrs);
-
-    char* id = SOPC_strdup(attr_val);
-
-    if (id == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    if (!SOPC_Array_Append(ctx->localeIds, id))
-    {
-        SOPC_Free(id);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->state = PARSE_LOCALE;
-
-    return true;
-}
-
-static bool end_app_desc(struct parse_context_t* ctx)
-{
-    if (ctx->appDesc.ApplicationUri.Length <= 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationUri not defined");
-        return false;
-    }
-
-    if (ctx->appDesc.ProductUri.Length <= 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ProductUri not defined");
-        return false;
-    }
-
-    if (ctx->appDesc.ApplicationName.defaultText.Length <= 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationName not defined");
-        return false;
-    }
-
-    if (OpcUa_ApplicationType_SizeOf == ctx->appDesc.ApplicationType)
-    {
-        // Set default value "Server"
-        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_Server;
-    }
-
-    return true;
-}
-
-static bool start_app_uri(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    if (ctx->appDesc.ApplicationUri.Length > 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationUri defined several times");
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
-
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationUri, attr_val);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    else if (ctx->appDesc.ApplicationUri.Length <= 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationUri uri");
-        return false;
-    }
-
-    ctx->state = PARSE_APPLICATION_URI;
-
-    return true;
-}
-
-static bool start_prod_uri(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    if (ctx->appDesc.ProductUri.Length > 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ProductUri defined several times");
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
-
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ProductUri, attr_val);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    else if (ctx->appDesc.ProductUri.Length <= 0)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ProductUri uri");
-        return false;
-    }
-
-    ctx->state = PARSE_PRODUCT_URI;
-
-    return true;
-}
-
-static bool parse_app_type_text(struct parse_context_t* ctx, const char* text)
-{
-    if (strcmp(text, "Server") == 0)
-    {
-        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_Server;
-    }
-    else if (strcmp(text, "ClientAndServer") == 0)
-    {
-        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_ClientAndServer;
-    }
-    else if (strcmp(text, "DiscoveryServer") == 0)
-    {
-        ctx->appDesc.ApplicationType = OpcUa_ApplicationType_DiscoveryServer;
-    }
-    else
-    {
-        return false;
-    }
-    return true;
-}
-
-static bool start_app_type(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    if (ctx->appDesc.ApplicationType != OpcUa_ApplicationType_SizeOf)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationType defined several times");
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "type", attrs);
-
-    if (NULL == attr_val)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ApplicationType 'type' attribute missing");
-        return false;
-    }
-    else if (!parse_app_type_text(ctx, attr_val))
-    {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid application type: %s", attr_val);
-        return false;
-    }
-    ctx->state = PARSE_APPLICATION_TYPE;
-
-    return true;
-}
-
-static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_text = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "text", attrs);
-    const char* attr_locale = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "locale", attrs);
-
-    if (NULL == attr_text || '\0' == attr_text[0])
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "Empty ApplicationName text");
-        return false;
-    }
-
-    if (NULL == attr_locale)
-    {
-        attr_locale = "";
-    }
-
-    SOPC_LocalizedText tmp;
-    SOPC_LocalizedText_Initialize(&tmp);
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&tmp.defaultLocale, attr_locale);
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    status = SOPC_String_CopyFromCString(&tmp.defaultText, attr_text);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        // Additional definitions
-        status =
-            SOPC_LocalizedText_AddOrSetLocale(&ctx->appDesc.ApplicationName, ctx->serverConfigPtr->localeIds, &tmp);
-
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_LocalizedText_Clear(&tmp);
-            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Application name provided for an unsupported locale %s",
-                           attr_locale);
-            return false;
-        }
-    }
-    SOPC_LocalizedText_Clear(&tmp);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->state = PARSE_APPLICATION_NAME;
-
-    return true;
-}
-
-static bool start_server_cert(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    if (ctx->serverCertificate != NULL)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ServerCertificate defined several times");
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
-
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->serverCertificate = path;
-
-    ctx->state = PARSE_SERVER_CERT;
-
-    return true;
-}
-
-static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    if (ctx->serverKey != NULL)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "ServerKey defined several times");
-        return false;
-    }
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
-
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->serverKey = path;
-
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "encrypted", attrs);
-    ctx->serverKeyEncrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
-
-    ctx->state = PARSE_SERVER_KEY;
-
-    return true;
-}
-
-static bool end_trusted_issuers(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->trustedRootIssuers))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no trusted root CA defined");
-        return false;
-    }
-    ctx->trustedIssuersSet = true;
-
-    return true;
-}
-
-static bool start_issuer(struct parse_context_t* ctx,
-                         const XML_Char** attrs,
-                         SOPC_Array* rootIssuers,
-                         SOPC_Array* IntermediateIssuers)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "root", attrs);
-
-    if (attr_val == NULL)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "root attribute missing in Issuer definition");
-        return false;
-    }
-
-    bool isRoot = (strcmp(attr_val, "true") == 0);
-
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "cert_path", attrs);
-
-    char* pathCA = SOPC_strdup(attr_val);
-
-    if (pathCA == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    SOPC_Array* issuers = isRoot ? rootIssuers : IntermediateIssuers;
-
-    if (!SOPC_Array_Append(issuers, pathCA))
-    {
-        SOPC_Free(pathCA);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "revocation_list_path", attrs);
-
-    char* pathCRL = SOPC_strdup(attr_val);
-
-    if (pathCRL == NULL)
-    {
-        LOGF("Warning: CRL missing for the root certificate '%s'", pathCA);
-    }
-    else if (!SOPC_Array_Append(ctx->crlCertificates, pathCRL))
-    {
-        SOPC_Free(pathCRL);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    return true;
-}
-
-static bool start_trusted_issuer(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    bool result = start_issuer(ctx, attrs, ctx->trustedRootIssuers, ctx->trustedIntermediateIssuers);
-
-    ctx->state = PARSE_TRUSTED_ISSUER;
-
-    return result;
-}
-
-static bool end_issued_certs(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->issuedCertificates))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no issued certificates defined");
-        return false;
-    }
-
-    ctx->issuedCertificatesSet = true;
-
-    return true;
-}
-
-static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
-
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    if (!SOPC_Array_Append(ctx->issuedCertificates, path))
-    {
-        SOPC_Free(path);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    ctx->state = PARSE_ISSUED_CERT;
-
-    return true;
-}
-
-static bool end_untrusted_issuers(struct parse_context_t* ctx)
-{
-    if (0 == SOPC_Array_Size(ctx->untrustedRootIssuers) && 0 == SOPC_Array_Size(ctx->untrustedIntermediateIssuers))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no untrusted CA defined");
-        return false;
-    }
-
-    ctx->untrustedIssuersSet = true;
-
-    return true;
-}
-
-static bool start_untrusted_issuer(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    bool result = start_issuer(ctx, attrs, ctx->untrustedRootIssuers, ctx->untrustedIntermediateIssuers);
-
-    ctx->state = PARSE_UNTRUSTED_ISSUER;
-
-    return result;
-}
-
-static bool end_application_certificates(struct parse_context_t* ctx)
-{
-    if (!SOPC_Array_Append_Values(ctx->trustedRootIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->trustedRootIssuersList = SOPC_Array_Into_Raw(ctx->trustedRootIssuers);
-    if (NULL == ctx->serverConfigPtr->trustedRootIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->trustedRootIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(ctx->trustedIntermediateIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->trustedIntermediateIssuersList = SOPC_Array_Into_Raw(ctx->trustedIntermediateIssuers);
-    if (NULL == ctx->serverConfigPtr->trustedIntermediateIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->trustedIntermediateIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(ctx->issuedCertificates, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->issuedCertificatesList = SOPC_Array_Into_Raw(ctx->issuedCertificates);
-    if (NULL == ctx->serverConfigPtr->issuedCertificatesList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->issuedCertificates = NULL;
-
-    if (!SOPC_Array_Append_Values(ctx->untrustedRootIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->untrustedRootIssuersList = SOPC_Array_Into_Raw(ctx->untrustedRootIssuers);
-    if (NULL == ctx->serverConfigPtr->untrustedRootIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->untrustedRootIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(ctx->untrustedIntermediateIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->untrustedIntermediateIssuersList = SOPC_Array_Into_Raw(ctx->untrustedIntermediateIssuers);
-    if (NULL == ctx->serverConfigPtr->untrustedIntermediateIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->untrustedIntermediateIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(ctx->crlCertificates, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->serverConfigPtr->certificateRevocationPathList = SOPC_Array_Into_Raw(ctx->crlCertificates);
-    if (NULL == ctx->serverConfigPtr->certificateRevocationPathList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    ctx->crlCertificates = NULL;
-
-    if (!ctx->issuedCertificatesSet && !ctx->trustedIssuersSet)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser,
-                      "If application certificates section is defined, at least one issued certificate or trusted CA "
-                      "should be define.");
-        return false;
-    }
-
     return true;
 }
 
@@ -795,8 +288,6 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
     ctx->currentEpConfig = SOPC_Array_Get_Ptr(ctx->endpoints, SOPC_Array_Size(ctx->endpoints) - 1);
     ctx->currentEpConfig->serverConfigPtr = ctx->serverConfigPtr;
 
-    ctx->state = PARSE_ENDPOINT;
-
     return true;
 }
 
@@ -857,8 +348,6 @@ static bool start_reverse_connection(struct parse_context_t* ctx, const XML_Char
     epConfig->clientsToConnect[epConfig->nbClientsToConnect].clientEndpointURL = clientUrl;
     epConfig->nbClientsToConnect++;
 
-    ctx->state = PARSE_REVERSE_CONNECTION;
-
     return true;
 }
 
@@ -888,8 +377,6 @@ static bool start_policy(struct parse_context_t* ctx, const XML_Char** attrs)
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
-
-    ctx->state = PARSE_SECURITY_POLICY;
 
     return true;
 }
@@ -940,8 +427,6 @@ static bool start_mode(struct parse_context_t* ctx, const XML_Char** attrs)
         LOG_XML_ERRORF(ctx->helper_ctx.parser, "invalid mode attribute value %s", attr_val);
         return false;
     }
-
-    ctx->state = PARSE_SECURITY_MODE;
 
     return true;
 }
@@ -1021,8 +506,6 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
             return false;
         }
     }
-
-    ctx->state = PARSE_USER_POLICY;
 
     return true;
 }
@@ -1111,11 +594,13 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_NAMESPACE;
         break;
     case PARSE_LOCALES:
         if (strcmp(name, "Locale") == 0)
         {
-            if (!start_locale(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_locale(&ctx->helper_ctx, ctx->localeIds, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -1127,39 +612,50 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_LOCALE;
         break;
     case PARSE_APPLICATION_DESC:
         if (strcmp(name, "ApplicationURI") == 0)
         {
-            if (!start_app_uri(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_app_uri(true, &ctx->helper_ctx, &ctx->appDesc, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_APPLICATION_URI;
         }
         else if (strcmp(name, "ProductURI") == 0)
         {
-            if (!start_prod_uri(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_prod_uri(&ctx->helper_ctx, &ctx->appDesc, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_PRODUCT_URI;
         }
         else if (strcmp(name, "ApplicationName") == 0)
         {
-            if (!start_app_name(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_app_name(true, &ctx->helper_ctx, &ctx->appDesc,
+                                                          ctx->serverConfigPtr->localeIds, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_APPLICATION_NAME;
         }
         else if (strcmp(name, "ApplicationType") == 0)
         {
-            if (!start_app_type(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_app_type(true, &ctx->helper_ctx, &ctx->appDesc, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_APPLICATION_TYPE;
         }
         else
         {
@@ -1171,19 +667,23 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_APPLICATION_CERT:
         if (strcmp(name, "ServerCertificate") == 0)
         {
-            if (!start_server_cert(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_cert(true, &ctx->helper_ctx, &ctx->serverCertificate, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_SERVER_CERT;
         }
         else if (strcmp(name, "ServerKey") == 0)
         {
-            if (!start_server_key(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_key(true, &ctx->helper_ctx, &ctx->serverKey, &ctx->serverKeyEncrypted,
+                                                     attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+            ctx->state = PARSE_SERVER_KEY;
         }
         else if (strcmp(name, "TrustedIssuers") == 0 && !ctx->trustedIssuersSet)
         {
@@ -1207,11 +707,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_TRUSTED_ISSUERS:
         if (strcmp(name, "TrustedIssuer") == 0)
         {
-            if (!start_trusted_issuer(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->trustedRootIssuers,
+                                                        ctx->trustedIntermediateIssuers, ctx->crlCertificates, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
+
+            ctx->state = PARSE_TRUSTED_ISSUER;
         }
         else
         {
@@ -1223,7 +726,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_ISSUED_CERTS:
         if (strcmp(name, "IssuedCertificate") == 0)
         {
-            if (!start_issued_cert(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_issued_cert(&ctx->helper_ctx, ctx->issuedCertificates, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -1235,11 +738,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_ISSUED_CERT;
         break;
     case PARSE_UNTRUSTED_ISSUERS:
         if (strcmp(name, "UntrustedIssuer") == 0)
         {
-            if (!start_untrusted_issuer(ctx, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
+                                                        ctx->untrustedIntermediateIssuers, ctx->crlCertificates, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -1251,6 +757,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_UNTRUSTED_ISSUER;
         break;
     case PARSE_ENDPOINTS:
         if (strcmp(name, "Endpoint") == 0)
@@ -1267,6 +775,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_ENDPOINT;
         break;
     case PARSE_ENDPOINT:
         if (strcmp(name, "SecurityPolicies") == 0)
@@ -1299,6 +809,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_REVERSE_CONNECTION;
         break;
     case PARSE_SECURITY_POLICIES:
         if (strcmp(name, "SecurityPolicy") == 0)
@@ -1315,6 +827,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+        ctx->state = PARSE_SECURITY_POLICY;
         break;
     case PARSE_SECURITY_POLICY:
         if (strcmp(name, "SecurityModes") == 0)
@@ -1347,6 +860,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_SECURITY_MODE;
         break;
     case PARSE_USER_POLICIES:
         if (strcmp(name, "UserPolicy") == 0)
@@ -1363,6 +878,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
+
+        ctx->state = PARSE_USER_POLICY;
         break;
     default:
         return;
@@ -1427,33 +944,37 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_TRUSTED_ISSUERS;
         break;
     case PARSE_TRUSTED_ISSUERS:
-        if (!end_trusted_issuers(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_trusted_issuers(true, &ctx->helper_ctx, ctx->trustedRootIssuers))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
+        ctx->trustedIssuersSet = true;
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_ISSUED_CERT:
         ctx->state = PARSE_ISSUED_CERTS;
         break;
     case PARSE_ISSUED_CERTS:
-        if (!end_issued_certs(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_issued_certs(true, &ctx->helper_ctx, ctx->issuedCertificates))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
+        ctx->issuedCertificatesSet = true;
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_UNTRUSTED_ISSUER:
         ctx->state = PARSE_UNTRUSTED_ISSUERS;
         break;
     case PARSE_UNTRUSTED_ISSUERS:
-        if (!end_untrusted_issuers(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_untrusted_issuers(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
+                                                             ctx->untrustedIntermediateIssuers))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
+        ctx->untrustedIssuersSet = true;
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_SERVER_KEY:
@@ -1463,7 +984,14 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_APPLICATION_CERT:
-        if (!end_application_certificates(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_application_certificates(
+                true, &ctx->helper_ctx, &ctx->trustedRootIssuers, &ctx->serverConfigPtr->trustedRootIssuersList,
+                &ctx->trustedIntermediateIssuers, &ctx->serverConfigPtr->trustedIntermediateIssuersList,
+                &ctx->issuedCertificates, &ctx->serverConfigPtr->issuedCertificatesList, &ctx->untrustedRootIssuers,
+                &ctx->serverConfigPtr->untrustedRootIssuersList, &ctx->untrustedIntermediateIssuers,
+                &ctx->serverConfigPtr->untrustedIntermediateIssuersList, &ctx->crlCertificates,
+                &ctx->serverConfigPtr->certificateRevocationPathList, ctx->issuedCertificatesSet,
+                ctx->trustedIssuersSet))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
@@ -1483,7 +1011,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_APPLICATION_DESC;
         break;
     case PARSE_APPLICATION_DESC:
-        if (!end_app_desc(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_app_desc(true, &ctx->helper_ctx, &ctx->appDesc))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
@@ -1505,11 +1033,13 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_LOCALES;
         break;
     case PARSE_LOCALES:
-        if (!end_locales(ctx))
+        if (!SOPC_ConfigLoaderInternal_end_locales(true, &ctx->helper_ctx, ctx->localeIds,
+                                                   &ctx->serverConfigPtr->localeIds))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
         }
+        ctx->localeIds = NULL;
         ctx->state = PARSE_SRVCONFIG;
         break;
     case PARSE_SRVCONFIG:
