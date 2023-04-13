@@ -478,19 +478,19 @@ static void setupServer(void)
     SOPC_PKIProvider* pkiProvider = NULL;
     status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_SetKeyCertPairFromBytes() failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetKeyCertPairFromBytes() failed");
 
     status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_KeyManager_SerializedCertificate_CreateFromDER() failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_SerializedCertificate_CreateFromDER() failed");
     status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_KeyManager_CRL_CreateOrAddFromDER() failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_CRL_CreateOrAddFromDER() failed");
 
     status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_PKIProviderStack_Create() failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_PKIProviderStack_Create() failed");
     SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 
     status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_SetPKIprovider failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetPKIprovider failed");
 
     log_UserCallback(NULL, "Test_Server_Client: Certificates and key loaded");
 
@@ -506,7 +506,7 @@ static void setupServer(void)
     LOG_INFO("# Address space loaded\n");
 
     status = SOPC_HelperConfigServer_SetAddressSpace(addSpace);
-    SOPC_ASSERT(NULL != addSpace && "SOPC_HelperConfigServer_SetAddressSpace failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetAddressSpace failed");
 
     SOPC_UserAuthorization_Manager* authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
     SOPC_ASSERT(NULL != authorizationManager && "Failed to allocate SOPC_UserAuthentication_Manager");
@@ -528,12 +528,12 @@ static void setupServer(void)
     SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
 
     status = SOPC_HelperConfigServer_SetWriteNotifCallback(&serverWriteEvent);
-    SOPC_ASSERT(NULL != authenticationManager && "SOPC_HelperConfigServer_SetWriteNotifCallback failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetWriteNotifCallback failed");
 
     //////////////////////////////////
     // Set the asynchronous event callback
     status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(localServiceAsyncRespCallback);
-    SOPC_ASSERT(NULL != authenticationManager && "SOPC_HelperConfigServer_SetLocalServiceAsyncResponse failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetLocalServiceAsyncResponse failed");
 
     SOPC_HelperConfigServer_SetShutdownCountdown(1);
 }
@@ -696,7 +696,7 @@ void SOPC_Platform_Main(void)
     logConfig.logLevel = SOPC_LOG_LEVEL_WARNING;
     logConfig.logSysConfig.userSystemLogConfig.doLog = &log_UserCallback;
     status = SOPC_CommonHelper_Initialize(&logConfig);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_CommonHelper_Initialize failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_CommonHelper_Initialize failed");
 
     gLastReceptionDateMs = SOPC_RealTime_Create(NULL);
 
@@ -707,7 +707,7 @@ void SOPC_Platform_Main(void)
     // Start the server
     SOPC_Atomic_Int_Set(&gStopped, 0);
     status = SOPC_ServerHelper_StartServer(&serverStopped_cb);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerHelper_StartServer failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerHelper_StartServer failed");
 
     // Check for server status after some time. (Start is asynchronous)
     SOPC_Sleep(100);
@@ -718,7 +718,7 @@ void SOPC_Platform_Main(void)
 
     /* Create thread for Command Line Input management*/
     status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_Thread_Create failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_Thread_Create failed");
 
     // Wait for termination
     while (SOPC_Atomic_Int_Get(&gStopped) == 0)
