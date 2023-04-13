@@ -110,7 +110,7 @@ def merge(tree, new, namespaces):
         new_alias_dict = {alias.get('Alias'):alias.text for alias in new_aliases}
     # Assert existing aliases are the same
     res = True
-    for alias in set(tree_alias_dict)&set(new_alias_dict):
+    for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
         if tree_alias_dict[alias] != new_alias_dict[alias]:
             print('Merge: Alias used for different NodeId ({} is {} or {})'
                   .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
@@ -119,7 +119,7 @@ def merge(tree, new, namespaces):
         return res
 
     # Add new aliases
-    for alias in set(new_alias_dict)-set(tree_alias_dict):
+    for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
         elem = ET.Element('Alias', {'Alias': alias})
         elem.text = new_alias_dict[alias]
         # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
@@ -138,7 +138,7 @@ def merge(tree, new, namespaces):
     new_nodes = {node.get('NodeId'):node for node in new.iterfind('*[@NodeId]')}
     # New nodes are copied
     tree_root = tree.getroot()
-    for nid in set(new_nodes)&set(tree_nodes):
+    for nid in sorted(set(new_nodes) & set(tree_nodes)):
         print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
     # New unique nids
     new_nids = set(new_nodes)-set(tree_nodes)
