@@ -93,7 +93,7 @@ bool SOPC_Socket_Network_Clear(void);
  *                     SOPC_INVALID_PARAMETERS if parameters are not valid
  *                     SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs);
+SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname, const char* port, SOPC_Socket_AddressInfo** addrs);
 
 /**
  *  \brief Given a socket addressing information element of a linked list,
