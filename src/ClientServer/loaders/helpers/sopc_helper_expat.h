@@ -91,5 +91,11 @@ bool SOPC_HelperExpat_IsSkipTagActive(SOPC_HelperExpatCtx* ctx);
  */
 bool SOPC_HelperExpat_PopSkipTag(SOPC_HelperExpatCtx* ctx, const char* name);
 
-#endif
+/*
+ * \brief Retrieve the attribute name in the given attribute list
+ */
+const char* SOPC_HelperExpat_GetAttr(SOPC_HelperExpatCtx* ctx, const char* attrName, const XML_Char** attrs);
+
+#endif /* SOPC_WITH_EXPAT */
+
 #endif /* SOPC_HELPER_EXPAT_H_ */

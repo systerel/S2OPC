@@ -150,31 +150,6 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     return SOPC_STATUS_OK;
 }
 
-static const char* get_attr(struct parse_context_t* ctx, const char* attr_name, const XML_Char** attrs)
-{
-    for (size_t i = 0; attrs[i]; ++i)
-    {
-        const char* attr = attrs[i];
-
-        if (strcmp(attr_name, attr) == 0)
-        {
-            const char* attr_val = attrs[++i];
-
-            if (attr_val == NULL)
-            {
-                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Missing value for %s attribute", attr_name);
-                return NULL;
-            }
-            return attr_val;
-        }
-        else
-        {
-            ++i; // Skip value of unknown attribute
-        }
-    }
-    return NULL;
-}
-
 static bool end_server_config(struct parse_context_t* ctx)
 {
     if (!ctx->namespacesSet)
@@ -228,7 +203,7 @@ static bool end_namespaces(struct parse_context_t* ctx)
 
 static bool start_namespace(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "uri", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
 
     char* uri = SOPC_strdup(attr_val);
 
@@ -274,7 +249,7 @@ static bool end_locales(struct parse_context_t* ctx)
 
 static bool start_locale(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "id", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "id", attrs);
 
     char* id = SOPC_strdup(attr_val);
 
@@ -333,7 +308,7 @@ static bool start_app_uri(struct parse_context_t* ctx, const XML_Char** attrs)
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "uri", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
 
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ApplicationUri, attr_val);
 
@@ -361,7 +336,7 @@ static bool start_prod_uri(struct parse_context_t* ctx, const XML_Char** attrs)
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "uri", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
 
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ctx->appDesc.ProductUri, attr_val);
 
@@ -410,7 +385,7 @@ static bool start_app_type(struct parse_context_t* ctx, const XML_Char** attrs)
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "type", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "type", attrs);
 
     if (NULL == attr_val)
     {
@@ -429,8 +404,8 @@ static bool start_app_type(struct parse_context_t* ctx, const XML_Char** attrs)
 
 static bool start_app_name(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_text = get_attr(ctx, "text", attrs);
-    const char* attr_locale = get_attr(ctx, "locale", attrs);
+    const char* attr_text = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "text", attrs);
+    const char* attr_locale = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "locale", attrs);
 
     if (NULL == attr_text || '\0' == attr_text[0])
     {
@@ -488,7 +463,7 @@ static bool start_server_cert(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "path", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
 
     char* path = SOPC_strdup(attr_val);
 
@@ -513,7 +488,7 @@ static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "path", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
 
     char* path = SOPC_strdup(attr_val);
 
@@ -525,7 +500,7 @@ static bool start_server_key(struct parse_context_t* ctx, const XML_Char** attrs
 
     ctx->serverKey = path;
 
-    attr_val = get_attr(ctx, "encrypted", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "encrypted", attrs);
     ctx->serverKeyEncrypted = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     ctx->state = PARSE_SERVER_KEY;
@@ -550,7 +525,7 @@ static bool start_issuer(struct parse_context_t* ctx,
                          SOPC_Array* rootIssuers,
                          SOPC_Array* IntermediateIssuers)
 {
-    const char* attr_val = get_attr(ctx, "root", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "root", attrs);
 
     if (attr_val == NULL)
     {
@@ -560,7 +535,7 @@ static bool start_issuer(struct parse_context_t* ctx,
 
     bool isRoot = (strcmp(attr_val, "true") == 0);
 
-    attr_val = get_attr(ctx, "cert_path", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "cert_path", attrs);
 
     char* pathCA = SOPC_strdup(attr_val);
 
@@ -579,7 +554,7 @@ static bool start_issuer(struct parse_context_t* ctx,
         return false;
     }
 
-    attr_val = get_attr(ctx, "revocation_list_path", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "revocation_list_path", attrs);
 
     char* pathCRL = SOPC_strdup(attr_val);
 
@@ -621,7 +596,7 @@ static bool end_issued_certs(struct parse_context_t* ctx)
 
 static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "path", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
 
     char* path = SOPC_strdup(attr_val);
 
@@ -769,7 +744,7 @@ static bool end_endpoints(struct parse_context_t* ctx)
 
 static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "url", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "url", attrs);
 
     if (attr_val == NULL)
     {
@@ -791,7 +766,7 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
     epConfig.endpointURL = url;
 
     // Manage the hasDiscoveryEndpoint flag
-    attr_val = get_attr(ctx, "hasDiscoveryEndpoint", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "hasDiscoveryEndpoint", attrs);
 
     if (attr_val == NULL)
     {
@@ -804,7 +779,7 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
 
     // Manage the enableListening flag
     bool enableListening = true; // default value
-    attr_val = get_attr(ctx, "enableListening", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "enableListening", attrs);
     if (attr_val != NULL)
     {
         enableListening = (strcmp(attr_val, "true") == 0);
@@ -847,7 +822,7 @@ static bool start_reverse_connection(struct parse_context_t* ctx, const XML_Char
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "clientUrl", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "clientUrl", attrs);
 
     if (attr_val == NULL)
     {
@@ -863,7 +838,7 @@ static bool start_reverse_connection(struct parse_context_t* ctx, const XML_Char
         return false;
     }
 
-    attr_val = get_attr(ctx, "clientAppUri", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "clientAppUri", attrs);
 
     char* clientAppURI = NULL;
     if (attr_val != NULL)
@@ -897,7 +872,7 @@ static bool start_policy(struct parse_context_t* ctx, const XML_Char** attrs)
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "uri", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "uri", attrs);
 
     if (attr_val == NULL)
     {
@@ -938,7 +913,7 @@ static bool end_policy(struct parse_context_t* ctx)
 
 static bool start_mode(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "mode", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "mode", attrs);
 
     if (attr_val == NULL)
     {
@@ -982,7 +957,7 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    const char* attr_val = get_attr(ctx, "policyId", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "policyId", attrs);
 
     if (attr_val == NULL)
     {
@@ -1001,7 +976,7 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    attr_val = get_attr(ctx, "tokenType", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "tokenType", attrs);
 
     if (attr_val == NULL)
     {
@@ -1030,7 +1005,7 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
     if (OpcUa_UserTokenType_UserName == userPolicy->TokenType ||
         OpcUa_UserTokenType_Certificate == userPolicy->TokenType)
     {
-        attr_val = get_attr(ctx, "securityUri", attrs);
+        attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "securityUri", attrs);
 
         if (attr_val == NULL)
         {
