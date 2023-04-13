@@ -187,31 +187,6 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     return SOPC_STATUS_OK;
 }
 
-static const char* get_attr(struct parse_context_t* ctx, const char* attr_name, const XML_Char** attrs)
-{
-    for (size_t i = 0; attrs[i]; ++i)
-    {
-        const char* attr = attrs[i];
-
-        if (0 == strcmp(attr_name, attr))
-        {
-            const char* attr_val = attrs[++i];
-
-            if (NULL == attr_val)
-            {
-                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Missing value for %s attribute", attr_name);
-                return NULL;
-            }
-            return attr_val;
-        }
-        else
-        {
-            ++i; // Skip value of unknown attribute
-        }
-    }
-    return NULL;
-}
-
 static bool end_anonymous(struct parse_context_t* ctx)
 {
     ctx->currentAnonymous = false;
@@ -328,7 +303,7 @@ static bool get_decode_buffer(const char* buffer,
 
 static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
 {
-    const char* attr_val = get_attr(ctx, "hash", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "hash", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no password defined");
@@ -343,7 +318,7 @@ static bool get_hash(struct parse_context_t* ctx, const XML_Char** attrs, bool b
 
 static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool base64)
 {
-    const char* attr_val = get_attr(ctx, "salt", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "salt", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no salt defined");
@@ -358,7 +333,7 @@ static bool get_salt(struct parse_context_t* ctx, const XML_Char** attrs, bool b
 
 static bool start_user_password_configuration(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "hash_iteration_count", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "hash_iteration_count", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no iteration count defined");
@@ -378,7 +353,7 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    attr_val = get_attr(ctx, "hash_length", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "hash_length", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no hash length defined");
@@ -392,7 +367,7 @@ static bool start_user_password_configuration(struct parse_context_t* ctx, const
         return false;
     }
 
-    attr_val = get_attr(ctx, "salt_length", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "salt_length", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no salt length defined");
@@ -422,7 +397,7 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
     SOPC_ByteString_Initialize(&ctx->currentUserPassword->hash);
     SOPC_ByteString_Initialize(&ctx->currentUserPassword->salt);
 
-    const char* attr_val = get_attr(ctx, "user", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "user", attrs);
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no username defined");
@@ -441,7 +416,7 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
         return false;
     }
 
-    attr_val = get_attr(ctx, "base64", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "base64", attrs);
     bool base64 = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     bool res = get_hash(ctx, attrs, base64);
@@ -454,16 +429,16 @@ static bool start_userpassword(struct parse_context_t* ctx, const XML_Char** att
 
 static bool start_authorization(struct parse_context_t* ctx, const XML_Char** attrs, user_rights* rights)
 {
-    const char* attr_val = get_attr(ctx, "read", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "read", attrs);
     rights->read = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
-    attr_val = get_attr(ctx, "write", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "write", attrs);
     rights->write = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
-    attr_val = get_attr(ctx, "execute", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "execute", attrs);
     rights->exec = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
-    attr_val = get_attr(ctx, "addnode", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "addnode", attrs);
     rights->addnode = attr_val != NULL && 0 == strcmp(attr_val, "true");
 
     return true;
@@ -474,7 +449,7 @@ static bool start_issuer(struct parse_context_t* ctx,
                          SOPC_Array* rootIssuers,
                          SOPC_Array* IntermediateIssuers)
 {
-    const char* attr_val = get_attr(ctx, "root", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "root", attrs);
 
     if (attr_val == NULL)
     {
@@ -484,7 +459,7 @@ static bool start_issuer(struct parse_context_t* ctx,
 
     bool isRoot = (strcmp(attr_val, "true") == 0);
 
-    attr_val = get_attr(ctx, "cert_path", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "cert_path", attrs);
 
     char* pathCA = SOPC_strdup(attr_val);
 
@@ -511,7 +486,7 @@ static bool start_issuer(struct parse_context_t* ctx,
         return false;
     }
 
-    attr_val = get_attr(ctx, "revocation_list_path", attrs);
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "revocation_list_path", attrs);
 
     char* pathCRL = SOPC_strdup(attr_val);
 
@@ -621,7 +596,7 @@ static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char**
 
 static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attrs)
 {
-    const char* attr_val = get_attr(ctx, "path", attrs);
+    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
 
     char* path = SOPC_strdup(attr_val);
 

@@ -114,3 +114,28 @@ bool SOPC_HelperExpat_PopSkipTag(SOPC_HelperExpatCtx* ctx, const char* name)
     }
     return false;
 }
+
+const char* SOPC_HelperExpat_GetAttr(SOPC_HelperExpatCtx* ctx, const char* attrName, const XML_Char** attrs)
+{
+    for (size_t i = 0; attrs[i]; ++i)
+    {
+        const char* attr = attrs[i];
+
+        if (strcmp(attrName, attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (attr_val == NULL)
+            {
+                LOG_XML_ERRORF(ctx->parser, "Missing value for %s attribute", attrName);
+                return NULL;
+            }
+            return attr_val;
+        }
+        else
+        {
+            ++i; // Skip value of unknown attribute
+        }
+    }
+    return NULL;
+}
