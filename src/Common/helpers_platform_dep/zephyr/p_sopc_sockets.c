@@ -97,8 +97,8 @@ bool SOPC_Socket_Network_Clear()
 }
 
 // Create socket address information object. Shall be destroy after used.
-SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname,                  // Hostname or address
-                                           char* port,                      // Port
+SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname,            // Hostname or address
+                                           const char* port,                // Port
                                            SOPC_Socket_AddressInfo** addrs) // Socket address info object
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
