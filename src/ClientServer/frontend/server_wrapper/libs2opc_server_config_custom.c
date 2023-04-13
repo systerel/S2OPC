@@ -29,6 +29,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
 
@@ -396,7 +397,9 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
     default:
         return NULL;
     }
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&sp->securityPolicy, sUri);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     destEndpoint->nbSecuConfigs++;
     return sp;
