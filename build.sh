@@ -69,6 +69,7 @@ else
     append_cmake_option CMAKE_INSTALL_PREFIX
     append_cmake_option WITH_ASAN
     append_cmake_option WITH_UBSAN
+    append_cmake_option WITH_TSAN
     append_cmake_option WITH_COVERAGE
     append_cmake_option WITH_COVERITY
     append_cmake_option WITH_PYS2OPC
