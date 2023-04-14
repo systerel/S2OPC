@@ -119,4 +119,57 @@
       </Endpoint>
     </Endpoints>
   </ServerConfiguration>
+  <ClientConfiguration>
+    <PreferredLocales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </PreferredLocales>
+    <ApplicationCertificates>
+      <ClientCertificate path="/mypath/mycert.der"/>
+      <ClientKey path="/mypath/mykey.pem" encrypted="true"/>
+      <TrustedIssuers>
+        <TrustedIssuer root="true" cert_path="/mypath/cacert.der" revocation_list_path="/mypath/cacrl.der"/>
+        <TrustedIssuer root="true" cert_path="/mypath/othercacert.der" revocation_list_path="/mypath/othercacrl.der"/>
+        <TrustedIssuer root="false" cert_path="/mypath/intermediate_cacert.der" revocation_list_path="/mypath/intermediate_cacrl.der"/>
+      </TrustedIssuers>
+      <IssuedCertificates>
+        <IssuedCertificate path="/mypath/self_signed.der"/>
+        <IssuedCertificate path="/mypath/signed_by_not_trusted_ca.der"/>
+      </IssuedCertificates>
+      <UntrustedIssuers>
+        <UntrustedIssuer root="true" cert_path="/mypath/not_trusted_ca.der" revocation_list_path="/mypath/not_trusted_revoked.crl"/>
+        <UntrustedIssuer root="false" cert_path="/mypath/not_trusted_intermediate_ca.der" revocation_list_path="/mypath/not_trusted_intermediate_revoked.crl"/>
+      </UntrustedIssuers>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:MY_CLIENT_HOST:app"/>
+      <ProductURI uri="urn:S2OPC:MY_CLIENT_HOST:prod"/>
+      <ApplicationName text="S2OPC toolkit client example" locale="en-US"/>
+      <ApplicationType type="ClientAndServer"/>
+    </ApplicationDescription>
+    <Connections>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4840" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="FirstConnection">
+        <ServerCertificate path=""/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+        <SecurityMode mode="None"/>
+        <UserPolicy policyId="anon" tokenType="anonymous"/>
+      </Connection>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" serverURI="urn:S2OPC:MY_SERVER_HOST:app" reqLifetimeMs="7200000">
+        <ServerCertificate path="server_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+        <UserPolicy policyId="user" tokenType="username">
+          <UserName name="user1"/>
+        </UserPolicy>
+      </Connection>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="ThirdConnection">
+        <ServerCertificate path="server_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="Sign"/>
+        <UserPolicy policyId="x509" tokenType="certificate">
+          <UserX509 cert_path="user_cert.der" key_path="user_key.pem" encrypted="true"/>
+        </UserPolicy>
+      </Connection>
+    </Connections>
+  </ClientConfiguration>
 </S2OPC>

@@ -295,7 +295,9 @@ START_TEST(test_same_address_space_results)
 END_TEST
 
 const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_SERVER_HOST:2", NULL};
-const char* expectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
+const char* serverExpectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
+const char* clientExpectedLocales[3] = {"en-US", "fr-FR", NULL};
+
 const char* expectedTrustedRootIssuers[3] = {"/mypath/cacert.der", "/mypath/othercacert.der", NULL};
 const char* expectedTrustedIntermediateIssuers[2] = {"/mypath/intermediate_cacert.der", NULL};
 
@@ -311,7 +313,7 @@ const char* expectedIssuersCRLs[6] = {"/mypath/cacrl.der",
 
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
-static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
+static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
 {
     SOPC_Server_Config* sConfig = &s2opcConfig->serverConfig;
     /* Check namespaces */
@@ -326,14 +328,14 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
 
     /* Check locales */
     int localeCounter = 0;
-    while (sConfig->localeIds[localeCounter] != NULL && expectedLocales[localeCounter] != NULL)
+    while (sConfig->localeIds[localeCounter] != NULL && serverExpectedLocales[localeCounter] != NULL)
     {
-        int cmp_res = strcmp(sConfig->localeIds[localeCounter], expectedLocales[localeCounter]);
+        int cmp_res = strcmp(sConfig->localeIds[localeCounter], serverExpectedLocales[localeCounter]);
         ck_assert_int_eq(0, cmp_res);
         localeCounter++;
     }
     ck_assert_ptr_null(sConfig->localeIds[localeCounter]);
-    ck_assert_ptr_null(expectedLocales[localeCounter]);
+    ck_assert_ptr_null(serverExpectedLocales[localeCounter]);
 
     /* Check application certificates */
     ck_assert_int_eq(0, strcmp("/mypath/mycert.der", sConfig->serverCertPath));
@@ -451,6 +453,8 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
         }
     }
     ck_assert_int_eq(3, localeCounter);
+
+    ck_assert_int_eq(OpcUa_ApplicationType_Server, sConfig->serverDescription.ApplicationType);
 
     /* Check endpoints */
     ck_assert_uint_eq(2, sConfig->nbEndpoints);
@@ -640,9 +644,207 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
                       SOPC_String_GetRawCString(&userPolicy->SecurityPolicyUri));
     ck_assert_int_eq(0, strEqual);
 }
+
+static void check_parsed_s2opc_client_config(SOPC_S2OPC_Config* s2opcConfig)
+{
+    SOPC_Client_Config* cConfig = &s2opcConfig->clientConfig;
+    int localeCounter = 0;
+    while (cConfig->clientLocaleIds[localeCounter] != NULL && clientExpectedLocales[localeCounter] != NULL)
+    {
+        int cmp_res = strcmp(cConfig->clientLocaleIds[localeCounter], clientExpectedLocales[localeCounter]);
+        ck_assert_int_eq(0, cmp_res);
+        localeCounter++;
+    }
+    ck_assert_ptr_null(cConfig->clientLocaleIds[localeCounter]);
+    ck_assert_ptr_null(clientExpectedLocales[localeCounter]);
+
+    /* Check application certificates */
+    ck_assert_int_eq(true, cConfig->isConfigFromPathsNeeded);
+    ck_assert_int_eq(0, strcmp("/mypath/mycert.der", cConfig->configFromPaths->clientCertPath));
+    ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", cConfig->configFromPaths->clientKeyPath));
+    /* Check whether the server's key private is encryted or not. */
+    ck_assert_int_eq(true, cConfig->configFromPaths->clientKeyEncrypted);
+
+    /* Check trusted CAs */
+    int caCounter = 0;
+    // Root CA
+    for (caCounter = 0;
+         cConfig->configFromPaths->trustedRootIssuersList[caCounter] != NULL && expectedTrustedRootIssuers[caCounter];
+         caCounter++)
+    {
+        int cmp_res =
+            strcmp(cConfig->configFromPaths->trustedRootIssuersList[caCounter], expectedTrustedRootIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->trustedRootIssuersList[caCounter]);
+    ck_assert_ptr_null(expectedTrustedRootIssuers[caCounter]);
+    // Intermediate CA:
+    for (caCounter = 0; cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter] != NULL &&
+                        expectedTrustedIntermediateIssuers[caCounter];
+         caCounter++)
+    {
+        int cmp_res = strcmp(cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter],
+                             expectedTrustedIntermediateIssuers[caCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter]);
+    ck_assert_ptr_null(expectedTrustedIntermediateIssuers[caCounter]);
+
+    /* Check trusted issued certificates */
+    int issuedCounter = 0;
+    for (issuedCounter = 0;
+         cConfig->configFromPaths->issuedCertificatesList[issuedCounter] != NULL && expectedIssuedCerts[issuedCounter];
+         issuedCounter++)
+    {
+        int cmp_res =
+            strcmp(cConfig->configFromPaths->issuedCertificatesList[issuedCounter], expectedIssuedCerts[issuedCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->issuedCertificatesList[issuedCounter]);
+    ck_assert_ptr_null(expectedIssuedCerts[issuedCounter]);
+
+    /* Check untrusted CAs (used to check issued certificate trust chain) */
+    int untrustedCAcounter = 0;
+    // Root CA:
+    for (untrustedCAcounter = 0; cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
+                                 expectedUntrustedRootIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter],
+                             expectedUntrustedRootIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(expectedUntrustedRootIssuers[untrustedCAcounter]);
+    // Intermediate CA:
+    for (untrustedCAcounter = 0;
+         cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
+         expectedUntrustedIntermediateIssuers[untrustedCAcounter];
+         untrustedCAcounter++)
+    {
+        int cmp_res = strcmp(cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter],
+                             expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter]);
+    ck_assert_ptr_null(expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
+
+    /* Check CRLs */
+    int crlCounter = 0;
+    for (crlCounter = 0;
+         cConfig->configFromPaths->certificateRevocationPathList[crlCounter] != NULL && expectedIssuersCRLs[crlCounter];
+         crlCounter++)
+    {
+        int cmp_res = strcmp(cConfig->configFromPaths->certificateRevocationPathList[crlCounter],
+                             expectedIssuersCRLs[crlCounter]);
+        ck_assert_int_eq(0, cmp_res);
+    }
+    ck_assert_ptr_null(cConfig->configFromPaths->certificateRevocationPathList[crlCounter]);
+    ck_assert_ptr_null(expectedIssuersCRLs[crlCounter]);
+
+    /* Check application description */
+    int res =
+        strcmp("urn:S2OPC:MY_CLIENT_HOST:app", SOPC_String_GetRawCString(&cConfig->clientDescription.ApplicationUri));
+    ck_assert_int_eq(0, res);
+    res = strcmp("urn:S2OPC:MY_CLIENT_HOST:prod", SOPC_String_GetRawCString(&cConfig->clientDescription.ProductUri));
+    ck_assert_int_eq(0, res);
+    /* Application names */
+    // default name
+    res = strcmp("S2OPC toolkit client example",
+                 SOPC_String_GetRawCString(&cConfig->clientDescription.ApplicationName.defaultText));
+    ck_assert_int_eq(0, res);
+    res = strcmp("en-US", SOPC_String_GetRawCString(&cConfig->clientDescription.ApplicationName.defaultLocale));
+    ck_assert_int_eq(0, res);
+
+    ck_assert_int_eq(OpcUa_ApplicationType_ClientAndServer, cConfig->clientDescription.ApplicationType);
+
+    /* Check connections */
+    ck_assert_uint_eq(3, cConfig->nbSecureConnections);
+
+    /* 1st connection */
+    SOPC_SecureConnection_Config* secConnConfig = cConfig->secureConnections[0];
+    ck_assert_int_eq(0, secConnConfig->secureConnectionIdx);
+    ck_assert_int_eq(0, strcmp("FirstConnection", secConnConfig->userDefinedId));
+    ck_assert_int_eq(true, secConnConfig->scConfig.isClientSc);
+    ck_assert_ptr_eq(secConnConfig->scConfig.clientConfigPtr, cConfig);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4840", secConnConfig->scConfig.url));
+    ck_assert_ptr_null(secConnConfig->scConfig.serverUri);
+    ck_assert_uint_eq(3600000, secConnConfig->scConfig.requestedLifetime);
+    ck_assert_ptr_nonnull(secConnConfig->reverseURL);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_CLIENT_HOST:4844", secConnConfig->reverseURL));
+
+    ck_assert_ptr_null(secConnConfig->serverCertPath);
+    ck_assert_int_eq(OpcUa_MessageSecurityMode_None, secConnConfig->scConfig.msgSecurityMode);
+    ck_assert_int_eq(
+        0, strcmp("http://opcfoundation.org/UA/SecurityPolicy#None", secConnConfig->scConfig.reqSecuPolicyUri));
+    ck_assert_int_eq(OpcUa_UserTokenType_Anonymous, secConnConfig->sessionConfig.userTokenType);
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userPolicyId);
+    ck_assert_int_eq(0, strcmp("anon", secConnConfig->sessionConfig.userPolicyId));
+
+    /* 2nd connection */
+    secConnConfig = cConfig->secureConnections[1];
+    ck_assert_int_eq(1, secConnConfig->secureConnectionIdx);
+    ck_assert_ptr_null(secConnConfig->userDefinedId);
+    ck_assert_int_eq(true, secConnConfig->scConfig.isClientSc);
+    ck_assert_ptr_eq(secConnConfig->scConfig.clientConfigPtr, cConfig);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME", secConnConfig->scConfig.url));
+    ck_assert_ptr_nonnull(secConnConfig->scConfig.serverUri);
+    ck_assert_int_eq(0, strcmp("urn:S2OPC:MY_SERVER_HOST:app", secConnConfig->scConfig.serverUri));
+    ck_assert_uint_eq(7200000, secConnConfig->scConfig.requestedLifetime);
+    ck_assert_ptr_null(secConnConfig->reverseURL);
+
+    ck_assert_ptr_nonnull(secConnConfig->serverCertPath);
+    ck_assert_int_eq(0, strcmp("server_cert.der", secConnConfig->serverCertPath));
+
+    ck_assert_int_eq(OpcUa_MessageSecurityMode_SignAndEncrypt, secConnConfig->scConfig.msgSecurityMode);
+    ck_assert_int_eq(0, strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256",
+                               secConnConfig->scConfig.reqSecuPolicyUri));
+    ck_assert_int_eq(OpcUa_UserTokenType_UserName, secConnConfig->sessionConfig.userTokenType);
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userPolicyId);
+    ck_assert_int_eq(0, strcmp("user", secConnConfig->sessionConfig.userPolicyId));
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userToken.userName.userName);
+    ck_assert_int_eq(0, strcmp("user1", secConnConfig->sessionConfig.userToken.userName.userName));
+    ck_assert_ptr_null(secConnConfig->sessionConfig.userToken.userName.userPwd);
+
+    /* 3rd connection */
+    secConnConfig = cConfig->secureConnections[2];
+    ck_assert_int_eq(2, secConnConfig->secureConnectionIdx);
+    ck_assert_int_eq(0, strcmp("ThirdConnection", secConnConfig->userDefinedId));
+    ck_assert_int_eq(true, secConnConfig->scConfig.isClientSc);
+    ck_assert_ptr_eq(secConnConfig->scConfig.clientConfigPtr, cConfig);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME", secConnConfig->scConfig.url));
+    ck_assert_ptr_null(secConnConfig->scConfig.serverUri);
+    ck_assert_uint_eq(3600000, secConnConfig->scConfig.requestedLifetime);
+    ck_assert_ptr_nonnull(secConnConfig->reverseURL);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_CLIENT_HOST:4844", secConnConfig->reverseURL));
+
+    ck_assert_ptr_nonnull(secConnConfig->serverCertPath);
+    ck_assert_int_eq(0, strcmp("server_cert.der", secConnConfig->serverCertPath));
+
+    ck_assert_int_eq(OpcUa_MessageSecurityMode_Sign, secConnConfig->scConfig.msgSecurityMode);
+    ck_assert_int_eq(0, strcmp("http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256",
+                               secConnConfig->scConfig.reqSecuPolicyUri));
+    ck_assert_int_eq(OpcUa_UserTokenType_Certificate, secConnConfig->sessionConfig.userTokenType);
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userPolicyId);
+    ck_assert_int_eq(0, strcmp("x509", secConnConfig->sessionConfig.userPolicyId));
+    ck_assert_int_eq(true, secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded);
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userToken.userX509.configFromPaths);
+
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath);
+    ck_assert_int_eq(
+        0, strcmp("user_cert.der", secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath));
+    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath);
+    ck_assert_int_eq(
+        0, strcmp("user_key.pem", secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath));
+    ck_assert_int_eq(true, secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted);
+
+    /* global reverse endpoints for all connections */
+    ck_assert_uint_eq(1, cConfig->nbReverseEndpointURLs);
+    ck_assert_int_eq(0, strcmp("opc.tcp://MY_CLIENT_HOST:4844", cConfig->reverseEndpointURLs[0]));
+}
 #endif
 
-START_TEST(test_XML_server_configuration)
+START_TEST(test_XML_config_configuration)
 {
 // Without EXPAT test cannot be done
 #ifdef WITH_EXPAT
@@ -657,7 +859,8 @@ START_TEST(test_XML_server_configuration)
     fclose(fd);
     ck_assert(result);
 
-    check_parsed_s2opc_config(&s2opcConfig);
+    check_parsed_s2opc_server_config(&s2opcConfig);
+    check_parsed_s2opc_client_config(&s2opcConfig);
 
     SOPC_S2OPC_Config_Clear(&s2opcConfig);
 #else
@@ -1126,7 +1329,7 @@ Suite* tests_make_suite_XML_parsers(void)
     tcase_set_timeout(tc_XML_parsers, 10);
     tcase_add_checked_fixture(tc_XML_parsers, setup, NULL);
     tcase_add_test(tc_XML_parsers, test_same_address_space_results);
-    tcase_add_test(tc_XML_parsers, test_XML_server_configuration);
+    tcase_add_test(tc_XML_parsers, test_XML_config_configuration);
     tcase_add_test(tc_XML_parsers, test_XML_users_configuration);
     suite_add_tcase(s, tc_XML_parsers);
 
