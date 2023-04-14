@@ -61,6 +61,7 @@ typedef struct SOPC_SecureChannel_Config
                                 This value might be specified for reverse connection in order to be verified
                                 on ReverseHello reception. */
     const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
+    /* TODO: move crt_cli / key_priv_cli / pki into client config ? */
     const SOPC_SerializedCertificate* crt_cli;
     const SOPC_SerializedAsymmetricKey* key_priv_cli;
     const SOPC_SerializedCertificate* crt_srv;
@@ -81,6 +82,15 @@ typedef struct SOPC_SecureChannel_Config
 
 #ifndef SOPC_MAX_SECU_POLICIES_CFG
 #define SOPC_MAX_SECU_POLICIES_CFG 5 /* Maximum number of security policies in a configuration array */
+#endif
+
+/* Maximum number of client secure connections */
+#ifndef SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG
+#define SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG SOPC_MAX_SECURE_CONNECTIONS
+#else
+#if SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG > UINT16_MAX
+#error "Maximum number of secure connections configuration cannot be > UINT16_MAX"
+#endif
 #endif
 
 /**
@@ -152,6 +162,95 @@ typedef struct SOPC_Endpoint_Config
                                                                      to clients */
 } SOPC_Endpoint_Config;
 
+typedef struct SOPC_Session_UserX509_ConfigFromPaths
+{
+    char* userCertPath; /**< Temporary path to the user certificate (certX509 shall be instantiated by applicative code)
+                         */
+    char* userKeyPath;  /**< Temporary path to the user key (keyX509 shall be instantiated by applicative code) */
+    bool userKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
+} SOPC_Session_UserX509_ConfigFromPaths;
+
+typedef struct SOPC_Session_UserX509
+{
+    SOPC_SerializedCertificate* certX509;
+    SOPC_SerializedAsymmetricKey* keyX509;
+
+    bool isConfigFromPathNeeded; /**< True if the following field shall be treated to configure the X509 user for
+                                    session */
+    SOPC_Session_UserX509_ConfigFromPaths* configFromPaths; /**< The paths configuration to use for user certificate and
+                                   key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                                   (used to configure certX509 and keyX509) */
+} SOPC_Session_UserX509;
+
+typedef struct SOPC_Session_UserName
+{
+    char* userName;
+    char* userPwd;
+} SOPC_Session_UserName;
+
+typedef struct SOPC_Session_Config
+{
+    const char* userPolicyId;
+    OpcUa_UserTokenType userTokenType;
+    union {
+        SOPC_Session_UserName userName;
+        SOPC_Session_UserX509 userX509;
+    } userToken;
+
+} SOPC_Session_Config;
+
+/**
+ * \brief Structure representing a secure connection configuration (secure channel + session) which allow to establish a
+ * connection to a server
+ */
+typedef struct SOPC_SecureConnection_Config
+{
+    const char* userDefinedId; // Optional user defined id
+
+    SOPC_SecureChannel_Config scConfig;
+    const char* reverseURL;
+
+    bool isServerCertFromPathNeeded; /**< True if the following field shall be treated to configure the client */
+    char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
+                               (scConfig.crt_srv shall be instantiated by applicative code) */
+
+    SOPC_Session_Config sessionConfig;
+
+    uint16_t secureConnectionIdx; /**< Index into ::SOPC_Client_Config secureConnections array */
+    bool finalized; /** < Set when the configuration of the secure connection is frozen and configuration from paths
+                          has been done. */
+} SOPC_SecureConnection_Config;
+
+typedef struct SOPC_Client_ConfigFromPaths
+{
+    char* clientCertPath;    /**< Temporary path to the client certificate (crt_cli shall be instantiated by
+                                applicative code) */
+    char* clientKeyPath;     /**< Temporary path to the client key (key_priv_cli shall be instantiated by applicative
+                                code) */
+    bool clientKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
+    char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
+                                  validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                  provider shall be instantiated using it by applicative code) */
+    char** trustedIntermediateIssuersList; /**< A pointer to an array of paths to each trusted intermediate CA issuer to
+                                  use in the validation chain. The array must contain a NULL pointer to indicate its
+                                  end. (PKI provider shall be instantiated using it by applicative code) */
+    char** issuedCertificatesList;         /**< A pointer to an array of paths to each issued certificate to use in the
+                                              validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                              provider shall be instantiated using it by applicative code) */
+    char** untrustedRootIssuersList; /**< A pointer to an array of paths to each untrusted root CA issuer to use in the
+                                        validation chain. Each issued certificate must have its signing certificate
+                                        chain in the untrusted issuers list. (PKI provider shall be instantiated using
+                                        it by applicative code) */
+    char** untrustedIntermediateIssuersList; /**< A pointer to an array of paths to each untrusted intermediate CA
+                                                issuer to use in the validation chain.   Each issued certificate must
+                                                have its signing certificate chain in the untrusted issuers list. (PKI
+                                                provider shall be instantiated using it by applicative code) */
+    char** certificateRevocationPathList;    /**<  A pointer to an array of paths to each certificate revocation list to
+                                                use.    Each CA of the trusted issuers list and the untrusted issuers list
+                                                must have a    CRL in the list. (PKI provider shall be instantiated using
+                                                it    by applicative code)*/
+} SOPC_Client_ConfigFromPaths;
+
 /**
  * \brief OPC UA client configuration structure
  */
@@ -170,6 +269,21 @@ struct SOPC_Client_Config
                                  It might be NULL if there are no preferred locale ids.
                                  The array of locale ids indicates priority order for localized strings.
                                  The first LocaleId in the array has the highest priority. */
+
+    bool isConfigFromPathsNeeded; /**< True if the following field shall be treated to configure the client */
+    SOPC_Client_ConfigFromPaths*
+        configFromPaths; /**< The paths configuration to use for PKI and client certificate and
+                            key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                            (used to configure SecureChannel_Config pki , crt_cli and key_priv_cli fields) */
+
+    uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
+    SOPC_SecureConnection_Config*
+        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.
+                                                                           Certificate/Key might be set from paths
+                                                                           PKI might be set from paths */
+    uint16_t nbReverseEndpointURLs;
+    char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
+                                                                             per secure connection config. */
 };
 
 /**
@@ -221,6 +335,7 @@ struct SOPC_Server_Config
                              applicative code) */
     char* serverKeyPath;  /**< Temporary path to the server key (serverCertificate shall be instantiated by applicative
                              code) */
+    bool serverKeyEncrypted;       /**< Boolean to indicate if the private key is encrypted */
     char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
                                   validation chain. The array must contain a NULL pointer to indicate its end. (PKI
                                   provider shall be instantiated using it by applicative code) */
@@ -248,7 +363,6 @@ struct SOPC_Server_Config
     /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
     SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
-    bool serverKeyEncrypted;                       /**< Boolean to indicate if the private key is encrypted */
     SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
                               or ::SOPC_PKIProviderStack_Create. */
     SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
