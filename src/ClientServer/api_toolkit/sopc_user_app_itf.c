@@ -23,6 +23,7 @@
 
 #include "app_cb_call_context_internal.h"
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki.h"
 
@@ -150,6 +151,31 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     memset(config, 0, sizeof(*config));
 }
 
+static void SOPC_SecureChannelConfig_Clear(SOPC_SecureChannel_Config* scConfig)
+{
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    OpcUa_GetEndpointsResponse_Clear((void*) scConfig->expectedEndpoints);
+    SOPC_Free((void*) scConfig->expectedEndpoints);
+    scConfig->expectedEndpoints = NULL;
+    SOPC_Free((void*) scConfig->serverUri);
+    scConfig->serverUri = NULL;
+    SOPC_Free((void*) scConfig->url);
+    SOPC_Free((void*) scConfig->reqSecuPolicyUri);
+    scConfig->reqSecuPolicyUri = NULL;
+    scConfig->url = NULL;
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_cli);
+    scConfig->crt_cli = NULL;
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfig->key_priv_cli);
+    scConfig->key_priv_cli = NULL;
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_srv);
+    scConfig->crt_srv = NULL;
+    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&scConfig->pki));
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    scConfig->clientConfigPtr = NULL;
+
+    return;
+}
+
 void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
 {
     SOPC_ASSERT(NULL != config);
@@ -161,6 +187,105 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
             SOPC_Free(config->clientLocaleIds[i]);
         }
         SOPC_Free(config->clientLocaleIds);
+
+        if (config->freeCstringsFlag && config->isConfigFromPathsNeeded && NULL != config->configFromPaths)
+        {
+            SOPC_Client_ConfigFromPaths* pathsConfig = config->configFromPaths;
+
+            SOPC_Free(pathsConfig->clientCertPath);
+            SOPC_Free(pathsConfig->clientKeyPath);
+
+            for (int i = 0;
+                 NULL != pathsConfig->trustedRootIssuersList && NULL != pathsConfig->trustedRootIssuersList[i]; i++)
+            {
+                SOPC_Free(pathsConfig->trustedRootIssuersList[i]);
+            }
+            SOPC_Free(pathsConfig->trustedRootIssuersList);
+
+            for (int i = 0; NULL != pathsConfig->trustedIntermediateIssuersList &&
+                            NULL != pathsConfig->trustedIntermediateIssuersList[i];
+                 i++)
+            {
+                SOPC_Free(pathsConfig->trustedIntermediateIssuersList[i]);
+            }
+            SOPC_Free(pathsConfig->trustedIntermediateIssuersList);
+
+            for (int i = 0;
+                 NULL != pathsConfig->issuedCertificatesList && NULL != pathsConfig->issuedCertificatesList[i]; i++)
+            {
+                SOPC_Free(pathsConfig->issuedCertificatesList[i]);
+            }
+            SOPC_Free(pathsConfig->issuedCertificatesList);
+
+            for (int i = 0;
+                 NULL != pathsConfig->untrustedRootIssuersList && NULL != pathsConfig->untrustedRootIssuersList[i]; i++)
+            {
+                SOPC_Free(pathsConfig->untrustedRootIssuersList[i]);
+            }
+            SOPC_Free(pathsConfig->untrustedRootIssuersList);
+
+            for (int i = 0; NULL != pathsConfig->untrustedIntermediateIssuersList &&
+                            NULL != pathsConfig->untrustedIntermediateIssuersList[i];
+                 i++)
+            {
+                SOPC_Free(pathsConfig->untrustedIntermediateIssuersList[i]);
+            }
+            SOPC_Free(pathsConfig->untrustedIntermediateIssuersList);
+
+            for (int i = 0; NULL != pathsConfig->certificateRevocationPathList &&
+                            NULL != pathsConfig->certificateRevocationPathList[i];
+                 i++)
+            {
+                SOPC_Free(pathsConfig->certificateRevocationPathList[i]);
+            }
+            SOPC_Free(pathsConfig->certificateRevocationPathList);
+
+            SOPC_Free(config->configFromPaths);
+            config->configFromPaths = NULL;
+        }
+    }
+
+    for (uint16_t i = 0; i < config->nbSecureConnections; i++)
+    {
+        SOPC_SecureConnection_Config* secConnConfig = config->secureConnections[i];
+
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        SOPC_Free((void*) secConnConfig->userDefinedId);
+        SOPC_Free((void*) secConnConfig->reverseURL);
+        SOPC_Free((void*) secConnConfig->sessionConfig.userPolicyId);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        SOPC_SecureChannelConfig_Clear(&secConnConfig->scConfig);
+        SOPC_Free(secConnConfig->serverCertPath);
+        if (config->freeCstringsFlag && OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType)
+        {
+            SOPC_Free(secConnConfig->sessionConfig.userToken.userName.userName);
+            SOPC_Free(secConnConfig->sessionConfig.userToken.userName.userPwd);
+        }
+        else if (OpcUa_UserTokenType_Certificate == secConnConfig->sessionConfig.userTokenType)
+        {
+            if (secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded &&
+                NULL != secConnConfig->sessionConfig.userToken.userX509.configFromPaths)
+            {
+                if (config->freeCstringsFlag)
+                {
+                    SOPC_Free(secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath);
+                    SOPC_Free(secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath);
+                }
+                SOPC_Free(secConnConfig->sessionConfig.userToken.userX509.configFromPaths);
+                secConnConfig->sessionConfig.userToken.userX509.configFromPaths = NULL;
+            }
+
+            SOPC_KeyManager_SerializedCertificate_Delete(secConnConfig->sessionConfig.userToken.userX509.certX509);
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(secConnConfig->sessionConfig.userToken.userX509.keyX509);
+        }
+
+        SOPC_Free(secConnConfig);
+        config->secureConnections[i] = NULL;
+    }
+    for (uint16_t i = 0; i < config->nbReverseEndpointURLs; i++)
+    {
+        SOPC_Free(config->reverseEndpointURLs[i]);
+        config->reverseEndpointURLs[i] = NULL;
     }
     memset(config, 0, sizeof(*config));
 }
