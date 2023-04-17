@@ -31,13 +31,15 @@
 #include "address_space_impl.h"
 #include "sopc_assert.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_types.h"
 
 #define DEFAULT_BINARY "Default Binary"
 #define DEFAULT_XML "Default XML"
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 static const SOPC_String SOPC_DEFAULT_BINARY = {sizeof(DEFAULT_BINARY) - 1, true, (SOPC_Byte*) DEFAULT_BINARY};
 static const SOPC_String SOPC_DEFAULT_XML = {sizeof(DEFAULT_XML) - 1, true, (SOPC_Byte*) DEFAULT_XML};
-
+SOPC_GCC_DIAGNOSTIC_RESTORE
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
