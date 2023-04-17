@@ -3535,7 +3535,7 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                               uintptr_t auxParam)
 {
     bool result = false;
-    char* errorMsg = "";
+    const char* errorMsg = "";
     uint32_t idx = 0;
     uint32_t scCfgIdx = 0;
     SOPC_SecureChannel_Config* scConfig = NULL;
