@@ -342,7 +342,7 @@ static SOPC_ReturnStatus SC_ClientTransition_ReceivedErrorMsg(SOPC_Buffer* errBu
     return status;
 }
 
-static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, char* reason)
+static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_StatusCode errorStatus, const char* reason)
 {
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -403,7 +403,7 @@ static bool SC_Server_SendErrorMsgAndClose(uint32_t scConnectionIdx, SOPC_Status
 static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnection* scConnection,
                                                             uint32_t scConnectionIdx,
                                                             SOPC_StatusCode errorStatus,
-                                                            char* reason)
+                                                            const char* reason)
 {
     SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
@@ -485,7 +485,7 @@ static void SC_CloseSecureConnection(
     bool immediateClose, /* Flag to indicate if we immediately close the socket connection or gently (error message)*/
     bool socketFailure,  /* Flag indicating if the socket connection is already closed */
     SOPC_StatusCode errorStatus,
-    char* reason)
+    const char* reason)
 {
     SOPC_ASSERT((socketFailure && immediateClose) || !socketFailure); // socketFailure == true => immediateClose == true
     SOPC_ASSERT(scConnection != NULL);
