@@ -107,17 +107,17 @@ static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
 
 static int32_t client_create_configuration(void)
 {
-    int32_t res = SOPC_ClientHelper_Initialize(disconnect_callback);
+    int32_t res = SOPC_ClientCmd_Initialize(disconnect_callback);
     if (res < 0)
     {
         return res;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelper_SetLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
+    SOPC_ReturnStatus status = SOPC_ClientCmd_SetLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+        status = SOPC_ClientCmd_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                              DEFAULT_APPLICATION_NAME, "fr-FR",
                                                              OpcUa_ApplicationType_Client);
     }
@@ -141,7 +141,7 @@ static int32_t client_create_configuration(void)
         return -100;
     }
 
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
         .path_cert_auth = "./trusted/cacert.der",
@@ -156,7 +156,7 @@ static int32_t client_create_configuration(void)
         .path_key_x509_token = "./user_private/encrypted_user_2k_key.pem",
     };
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = DEFAULT_ENDPOINT_URL,
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
@@ -175,7 +175,7 @@ static int32_t client_create_configuration(void)
     }
 
     /* connect to the endpoint */
-    return SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, expectedEndpoints);
+    return SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, expectedEndpoints);
 }
 
 /*---------------------------------------------------------------------------
@@ -186,7 +186,7 @@ static SOPC_ReturnStatus client_send_write_test(int32_t connectionId)
 {
     /* create the write request */
 
-    SOPC_ClientHelper_WriteValue writeValue;
+    SOPC_ClientCmd_WriteValue writeValue;
     writeValue.nodeId = node_id_str;
 
     writeValue.indexRange = NULL;
@@ -203,7 +203,7 @@ static SOPC_ReturnStatus client_send_write_test(int32_t connectionId)
     writeValue.value->Value.Value.Uint64 = write_value;
 
     SOPC_StatusCode writeResult;
-    int32_t writeRes = SOPC_ClientHelper_Write(connectionId, &writeValue, 1, &writeResult);
+    int32_t writeRes = SOPC_ClientCmd_Write(connectionId, &writeValue, 1, &writeResult);
 
     SOPC_ReturnStatus status = 0 == writeRes ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
@@ -221,7 +221,7 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SOPC_ClientHelper_ReadValue* readValues = SOPC_Calloc(NB_READ_VALUES, sizeof(*readValues));
+    SOPC_ClientCmd_ReadValue* readValues = SOPC_Calloc(NB_READ_VALUES, sizeof(*readValues));
     SOPC_DataValue* resultValues = SOPC_Calloc(NB_READ_VALUES, sizeof(*resultValues));
 
     if (NULL != readValues && NULL != resultValues)
@@ -236,7 +236,7 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
     for (size_t i = 0; SOPC_STATUS_OK == status && i < NB_READ_VALUES; i++)
     {
         SOPC_DataValue_Initialize(&resultValues[i]);
-        SOPC_ClientHelper_ReadValue* readValue = &readValues[i];
+        SOPC_ClientCmd_ReadValue* readValue = &readValues[i];
         readValue->attributeId = 13;
         readValue->nodeId = node_id_str;
         readValue->indexRange = NULL;
@@ -245,7 +245,7 @@ static SOPC_ReturnStatus client_send_read_req_test(int32_t connectionId)
     /* Send the request and retrieve result */
     if (SOPC_STATUS_OK == status)
     {
-        int32_t result = SOPC_ClientHelper_Read(connectionId, readValues, NB_READ_VALUES, resultValues);
+        int32_t result = SOPC_ClientCmd_Read(connectionId, readValues, NB_READ_VALUES, resultValues);
         status = 0 == result ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     }
 
@@ -336,7 +336,7 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(int32_t connectionId)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelper_GenericService(connectionId, (void*) addNodesReq, (void**) &addNodesResp);
+        status = SOPC_ClientCmd_GenericService(connectionId, (void*) addNodesReq, (void**) &addNodesResp);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -614,7 +614,7 @@ START_TEST(test_server_client)
     int32_t connectionId = 0;
     if (SOPC_STATUS_OK == status)
     {
-        connectionId = SOPC_ClientHelper_CreateConnection(clientCfgId);
+        connectionId = SOPC_ClientCmd_CreateConnection(clientCfgId);
 
         if (connectionId <= 0)
         {
@@ -675,7 +675,7 @@ START_TEST(test_server_client)
     /* client request to close the connection */
     if (SOPC_STATUS_OK == status)
     {
-        int32_t disconnectResult = SOPC_ClientHelper_Disconnect(connectionId);
+        int32_t disconnectResult = SOPC_ClientCmd_Disconnect(connectionId);
         if (0 == disconnectResult && SOPC_Atomic_Int_Get(&connectionClosed) != 0)
         {
             status = SOPC_STATUS_OK;
@@ -688,7 +688,7 @@ START_TEST(test_server_client)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Clear client wrapper layer*/
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
 
     /* Asynchronous request to close the endpoint */
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();

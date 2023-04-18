@@ -139,7 +139,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
  *    The operation status.
  */
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                       SOPC_ClientHelper_DataChangeCbk cbkWrapper);
+                                                       SOPC_ClientCmd_DataChangeCbk cbkWrapper);
 /**
  * @brief
  *    deletes a subscription
@@ -222,7 +222,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
  * @return
  *    the operation status
  */
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientHelper_EndpointConnection* connection,
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCmd_EndpointConnection* connection,
                                                                  uintptr_t requestContext);
 
 /**

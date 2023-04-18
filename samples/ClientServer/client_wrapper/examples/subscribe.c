@@ -89,14 +89,14 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
+        int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
         if (init < 0)
         {
             res = -1;
         }
     }
 
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_Sign,
         .path_cert_auth = "./trusted/cacert.der",
@@ -111,7 +111,7 @@ int main(int argc, char* const argv[])
         .path_key_x509_token = NULL,
     };
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
@@ -131,7 +131,7 @@ int main(int argc, char* const argv[])
     int32_t configurationId = 0;
     if (0 == res)
     {
-        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
         if (configurationId <= 0)
         {
             res = -1;
@@ -141,7 +141,7 @@ int main(int argc, char* const argv[])
     int32_t connectionId = 0;
     if (0 == res)
     {
-        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
 
         if (connectionId <= 0)
         {
@@ -152,13 +152,13 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        res = SOPC_ClientHelper_CreateSubscription(connectionId, datachange_callback);
+        res = SOPC_ClientCmd_CreateSubscription(connectionId, datachange_callback);
     }
 
     if (0 == res)
     {
         SOPC_StatusCode result = SOPC_UncertainStatusMask;
-        res = SOPC_ClientHelper_AddMonitoredItems(connectionId, &node_id, 1, &result);
+        res = SOPC_ClientCmd_AddMonitoredItems(connectionId, &node_id, 1, &result);
         if (res > 0)
         {
             printf("Error in add operation for the monitored item: 0x%08" PRIX32 "\n", result);
@@ -168,17 +168,17 @@ int main(int argc, char* const argv[])
     if (res == 0)
     {
         SOPC_Sleep(30);
-        SOPC_ClientHelper_Unsubscribe(connectionId);
+        SOPC_ClientCmd_Unsubscribe(connectionId);
     }
 
     if (connectionId > 0)
     {
-        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
         res = res != 0 ? res : discoRes;
     }
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_CommonHelper_Clear();
 
     return res;

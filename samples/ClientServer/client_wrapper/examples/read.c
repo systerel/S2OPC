@@ -60,13 +60,13 @@ int main(int argc, char* const argv[])
     {
         res = -1;
     }
-    int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
+    int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
     if (init < 0)
     {
         res = -1;
     }
 
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,
         .security_mode = OpcUa_MessageSecurityMode_None,
         .path_cert_auth = "./trusted/cacert.der",
@@ -81,7 +81,7 @@ int main(int argc, char* const argv[])
         .path_key_x509_token = NULL,
     };
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
@@ -101,7 +101,7 @@ int main(int argc, char* const argv[])
     int32_t configurationId = 0;
     if (0 == res)
     {
-        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
         if (configurationId <= 0)
         {
             res = -1;
@@ -111,7 +111,7 @@ int main(int argc, char* const argv[])
     int32_t connectionId = 0;
     if (0 == res)
     {
-        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
 
         if (connectionId <= 0)
         {
@@ -122,7 +122,7 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        SOPC_ClientHelper_ReadValue readValue;
+        SOPC_ClientCmd_ReadValue readValue;
 
         /* initalize read value structure */
         readValue.nodeId = node_id;
@@ -132,7 +132,7 @@ int main(int argc, char* const argv[])
         SOPC_DataValue readDataValue;
 
         /* read the node id value */
-        res = SOPC_ClientHelper_Read(connectionId, &readValue, 1, &readDataValue);
+        res = SOPC_ClientCmd_Read(connectionId, &readValue, 1, &readDataValue);
 
         if (0 == res)
         {
@@ -144,12 +144,12 @@ int main(int argc, char* const argv[])
 
     if (connectionId > 0)
     {
-        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
         res = res != 0 ? res : discoRes;
     }
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_CommonHelper_Clear();
 
     return res;

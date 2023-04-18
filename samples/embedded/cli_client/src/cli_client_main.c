@@ -157,8 +157,8 @@ static void client_tester(int connectionId)
     int res;
     PRINT("Browse Root.Objects\n");
 
-    SOPC_ClientHelper_BrowseRequest browseRequest;
-    SOPC_ClientHelper_BrowseResult browseResult;
+    SOPC_ClientCmd_BrowseRequest browseRequest;
+    SOPC_ClientCmd_BrowseResult browseResult;
 
     browseRequest.nodeId = root_node_id;                     // Root/Objects/
     browseRequest.direction = OpcUa_BrowseDirection_Forward; // forward
@@ -166,14 +166,14 @@ static void client_tester(int connectionId)
     browseRequest.includeSubtypes = true;
 
     /* Browse specified node */
-    res = SOPC_ClientHelper_Browse(connectionId, &browseRequest, 1, &browseResult);
+    res = SOPC_ClientCmd_Browse(connectionId, &browseRequest, 1, &browseResult);
 
     if (0 == res)
     {
         PRINT("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
         for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
         {
-            const SOPC_ClientHelper_BrowseResultReference* ref = &browseResult.references[i];
+            const SOPC_ClientCmd_BrowseResultReference* ref = &browseResult.references[i];
             PRINT("Item #%d\n", i);
             PRINT("- nodeId: %s\n", ref->nodeId);
             PRINT("- displayName: %s\n", ref->displayName);
@@ -254,7 +254,7 @@ void SOPC_Platform_Main(void)
     PRINT("Embedded S2OPC client demo\n");
 
     /* Initialize the toolkit */
-    SOPC_ClientHelper_Initialize(disconnect_callback);
+    SOPC_ClientCmd_Initialize(disconnect_callback);
 
     while (stopSignal == 0)
     {
@@ -264,7 +264,7 @@ void SOPC_Platform_Main(void)
     PRINT("==========\r\n");
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_Free(epURL);
 
     LOG_INFO("# Info: Client demo stopped.\n");
@@ -310,7 +310,7 @@ static int cmd_demo_info(WordList* pList)
 /***************************************************/
 static int cmd_demo_configure(WordList* pList)
 {
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .security_policy = SOPC_SecurityPolicy_None_URI,
         .security_mode = OpcUa_MessageSecurityMode_None,
         .path_cert_auth = NULL,
@@ -344,14 +344,14 @@ static int cmd_demo_configure(WordList* pList)
     }
     SOPC_ASSERT(epURL != NULL);
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = epURL,
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
     };
 
     /* connect to the endpoint */
-    gConfigurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+    gConfigurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
     if (gConfigurationId <= 0)
     {
         PRINT("\nSOPC_ClientHelper_CreateConfiguration failed with code %d\r\n", gConfigurationId);
@@ -368,7 +368,7 @@ static int cmd_demo_connect(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
-    int32_t connectionId = SOPC_ClientHelper_CreateConnection(gConfigurationId);
+    int32_t connectionId = SOPC_ClientCmd_CreateConnection(gConfigurationId);
 
     if (connectionId <= 0)
     {
@@ -377,7 +377,7 @@ static int cmd_demo_connect(WordList* pList)
     else
     {
         client_tester(connectionId);
-        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
         if (discoRes != 0)
         {
             PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", discoRes);
