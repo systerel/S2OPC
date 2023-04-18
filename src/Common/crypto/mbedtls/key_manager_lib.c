@@ -766,7 +766,7 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     }
 
     /* Poor-man's SHA-1 format */
-    char* ret = SOPC_Calloc(42, sizeof(char));
+    char* ret = SOPC_Calloc(41, sizeof(char));
     if (NULL == ret)
     {
         return NULL;
@@ -786,7 +786,7 @@ static char* get_crt_sha1(const mbedtls_x509_crt* crt)
     return get_raw_sha1(&crt->raw);
 }
 
-char* SOPC_KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert)
+char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pCert)
 {
     char* sha_1_cert = NULL;
 
@@ -801,7 +801,7 @@ char* SOPC_KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert)
         return sha_1_cert;
     }
 
-    mbedtls_x509_crt* crt = &pCert->crt;
+    const mbedtls_x509_crt* crt = &pCert->crt;
     sha_1_cert = get_crt_sha1(crt);
     return sha_1_cert;
 }
@@ -968,6 +968,7 @@ static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* 
         size_t nb_written = fwrite(buf->p, 1, buf->len, fp);
         if (buf->len != nb_written)
         {
+            remove(filePath);
             status = SOPC_STATUS_NOK;
         }
     }
@@ -988,7 +989,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
 {
     if (NULL == pCerts)
     {
-        return SOPC_STATUS_OK; // The list could be empty
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (NULL == directoryPath)
     {
@@ -1140,7 +1141,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
 {
     if (NULL == pCrls)
     {
-        return SOPC_STATUS_OK; // The list could be empty
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (NULL == directoryPath)
     {

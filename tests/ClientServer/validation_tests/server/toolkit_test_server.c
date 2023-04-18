@@ -617,21 +617,17 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
             .chainProfile = {.curves = SOPC_PKI_CURVES_ANY,
                              .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
                              .pkAlgo = SOPC_PKI_PK_ANY,
-                             .RSAMinimumKeySize = 2048},
-            .bBackwardInteroperability = false,
-            .bApplyLeafProfile =
-                false}; /* TODO RBA: Add SOPC_PKIProviderNew_ValidateCertificate in
-                           user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
-
-        const SOPC_PKI_ValidationArgs args = {.bIsAppServerCert = false, .bIsAppClientCert = false};
+                             .RSAMinimumKeySize = 2048}};
+        /* TODO RBA: Add SOPC_PKIProviderNew_ValidateCertificate in
+                     user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
 
         status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
 
         if (SOPC_STATUS_OK == status)
         {
             // Verify certificate through PKIProvider callback
-            status = SOPC_PKIProviderNew_ValidateCertificate_WithChain(pkiProvider, pUserCert, &rsa_sha256_2048_4096,
-                                                                       &args, &errorStatus);
+            status =
+                SOPC_PKIProviderNew_ValidateCertificate(pkiProvider, pUserCert, &rsa_sha256_2048_4096, &errorStatus);
             // status = pkiProvider->pFnValidateCertificate(pkiProvider, pUserCert, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
@@ -702,6 +698,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
+    SOPC_PKI_Config pki_config = {.type = SOPC_PKI_TYPE_USER, .bBackwardInteroperability = false};
+
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_CertificateList* userCAcert = NULL;
     SOPC_CRLList* userCAcrl = NULL;
@@ -716,12 +714,13 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, &pX509_UserIdentity_PKI);
+        status =
+            SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, &pki_config, &pX509_UserIdentity_PKI);
     }
     SOPC_KeyManager_Certificate_Free(userCAcert);
     SOPC_KeyManager_CRL_Free(userCAcrl);
 #else
-    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", true, &pX509_UserIdentity_PKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", &pki_config, &pX509_UserIdentity_PKI);
     // status = SOPC_PKIProviderStack_CreateFromPaths(
     //     x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
     //     x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers,

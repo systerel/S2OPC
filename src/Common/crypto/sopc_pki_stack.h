@@ -175,23 +175,23 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
        |    |
        |    ---- trusted
        |    |    |
-       |    |    ---- certs (individual certificates with .DER format)
-       |    |    ---- crls  (individual CRLs with .DER format)
+       |    |    ---- certs
+       |    |    ---- crl
        |    ---- issuers
        |         |
-       |         ---- certs (individual certificates with .DER format)
-       |         ---- crls  (individual CRLs with .DER format)
+       |         ---- certs
+       |         ---- crl
        |
-       ---- trustList (Optional)
+       ---- trustList
        |    |
        |    ---- trusted
        |    |    |
-       |    |    ---- certs (individual certificates with .DER format)
-       |    |    ---- crls  (individual CRLs with .DER format)
+       |    |    ---- certs
+       |    |    ---- crl
        |    ---- issuers
        |         |
-       |         ---- certs (individual certificates with .DER format)
-       |         ---- crls  (individual CRLs with .DER format)
+       |         ---- certs
+       |         ---- crl
 */
 
 /**
@@ -233,6 +233,15 @@ typedef enum
     SOPC_PKI_KU_KEY_CRL_SIGN = 0x00100
 } SOPC_PKI_KeyUsage_Mask;
 
+/* Type of PKI */
+typedef enum
+{
+    SOPC_PKI_TYPE_CLIENT_APP,
+    SOPC_PKI_TYPE_SERVER_APP,
+    SOPC_PKI_TYPE_CLIENT_SERVER_APP,
+    SOPC_PKI_TYPE_USER
+} SOPC_PKI_Type;
+
 /**
  * \brief Leaf certificate profile for validation
  */
@@ -263,36 +272,33 @@ typedef struct SOPC_PKI_Profile
 {
     SOPC_PKI_LeafProfile leafProfile;   /**< Validation configuration for the leaf certificate. */
     SOPC_PKI_ChainProfile chainProfile; /**< Validation configuration for the chain. */
-    bool bApplyLeafProfile;             /**< Apply the verification on leaf certificate */
-    bool bBackwardInteroperability;     /**< Defined if self-signed certificates whose basicConstraints CA flag
-                                             set to True will be marked as root CA and as trusted certificates.*/
 } SOPC_PKI_Profile;
 
 /* TODO RBA: Add uri and hostName */
-typedef struct SOPC_PKI_ValidationArgs
+typedef struct SOPC_PKI_Config
 {
-    bool bIsAppServerCert; /**< server side */
-    bool bIsAppClientCert; /**< client side */
-} SOPC_PKI_ValidationArgs;
+    SOPC_PKI_Type type;             /* user, app client, app server, app client server */
+    bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
+                                         set to True will be marked as root CA and as trusted certificates.*/
+} SOPC_PKI_Config;
 
 /**
  * \brief Create the PKIProvider from a directory where certificates are store.
  *
  * The directory store shall be form as following:
  *
- * - Directory_store_name/default/trusted/certs (.DER files)
- * - Directory_store_name/default/trusted/crl (.DER files)
- * - Directory_store_name/default/issuers/certs (.DER files)
- * - Directory_store_name/default/issuers/crl (.DER files)
+ * - Directory_store_name/default/trusted/certs (.DER or .PEM files)
+ * - Directory_store_name/default/trusted/crl (.DER or .PEM files)
+ * - Directory_store_name/default/issuers/certs (.DER or .PEM files)
+ * - Directory_store_name/default/issuers/crl (.DER or .PEM files)
  *
- * - Directory_store_name/trustList/trusted/certs (.DER files)
- * - Directory_store_name/trustList/trusted/crl (.DER files)
- * - Directory_store_name/trustList/issuers/certs (.DER files)
- * - Directory_store_name/trustList/issuers/crl (.DER files)
+ * - Directory_store_name/trustList/trusted/certs (.DER or .PEM files)
+ * - Directory_store_name/trustList/trusted/crl (.DER or .PEM files)
+ * - Directory_store_name/trustList/issuers/certs (.DER or .PEM files)
+ * - Directory_store_name/trustList/issuers/crl (.DER or .PEM files)
  *
- * The trustList could be empty but not the default fodler.
- * Default folder is use when \p bDefaultBuild is set to True.
- * If \p bDefaultBuild is set to False, the function attempts to build the PKI from the trustList folder
+ * The trustList could be empty but not the default folder.
+ * The function attempts to build the PKI from the trustList folder
  * and in case of error, it switches from the default folder.
  * For both folders, default and trustList, each subfolder certs and crl is mandatory.
  *
@@ -318,7 +324,7 @@ typedef struct SOPC_PKI_ValidationArgs
  * \note Content of the pki is NULL when return value is not SOPC_STATUS_OK.
  *
  * \param directoryStorePath The directory path where certificates are store.
- * \param bDefaultBuild Defined if the PKI is build from directory_store_name/default forlder.
+ * \param pConfig A valid pointer to the configuration.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
  *
@@ -326,7 +332,7 @@ typedef struct SOPC_PKI_ValidationArgs
  *          and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
-                                                      bool bDefaultBuild,
+                                                      SOPC_PKI_Config* pConfig,
                                                       SOPC_PKIProviderNew** ppPKI);
 
 /**
@@ -353,6 +359,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  * \param pTrustedCrl A valid pointer to the trusted CRL list.
  * \param pIssuerCerts A valid pointer to the issuer certificate list.
  * \param pIssuerCrl A valid pointer to the issuer CRL list.
+ * \param pConfig A valid pointer to the configuration.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              SOPC_PKIProviderNew_Free().
  *
@@ -363,6 +370,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
                                                      SOPC_CRLList* pIssuerCrl,
+                                                     SOPC_PKI_Config* pConfig,
                                                      SOPC_PKIProviderNew** ppPKI);
 
 /** \brief Validation function for a certificate with the PKI chain
@@ -371,27 +379,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param pToValidate A valid pointer to the Certificate to validate.
- * \param pConfig A valid pointer to the configuration.
- * \param pArgs A valid pointer to additional arguments. (Set to NULL if not used)
- * \param error The OpcUa error code for certificate validation.
- *
- * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
- *
- * \return SOPC_STATUS_OK when the certificate is successfully validated, and
- *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
- */
-SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_PKIProviderNew* pPKI,
-                                                                    const SOPC_CertificateList* pToValidate,
-                                                                    const SOPC_PKI_Profile* pConfig,
-                                                                    const SOPC_PKI_ValidationArgs* pArgs,
-                                                                    uint32_t* error);
-
-/** \brief Validation function for a leaf certificate
- *
- * \param pPKI A valid pointer to the PKIProvider.
- * \param pToValidate A valid pointer to the Certificate to validate.
- * \param pConfig A valid pointer to the configuration.
- * \param pArgs A valid pointer to additional arguments. (Set to NULL if not used)
+ * \param pProfile A valid pointer to the PKI profile.
  * \param error The OpcUa error code for certificate validation.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
@@ -401,18 +389,35 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate_WithChain(const SOPC_P
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
                                                           const SOPC_CertificateList* pToValidate,
-                                                          const SOPC_PKI_LeafProfile* pConfig,
-                                                          const SOPC_PKI_ValidationArgs* pArgs,
+                                                          const SOPC_PKI_Profile* pProfile,
                                                           uint32_t* error);
 
-/** \brief Write the certificate DER files in the trustList folder of the PKI storage.
+/** \brief Check leaf certificate properties
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param error The OpcUa error code for certificate validation.
+ *
+ * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
+ *
+ * \return SOPC_STATUS_OK when the certificate is successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKIProviderNew* pPKI,
+                                                           const SOPC_CertificateList* pToValidate,
+                                                           const SOPC_PKI_LeafProfile* pProfile,
+                                                           uint32_t* error);
+
+/** \brief Write the certificate files in the trustList folder of the PKI storage.
  *         The trustList folder is created if it is missing.
+ *         The format of the written files is DER.
  *         The trustList folder has the same tree structure as the default folder:
  *
- *         - trustList/trusted/certs (.DER files)
- *         - trustList/trusted/crl (.DER files)
- *         - trustList/issuers/certs (.DER files)
- *         - trustList/issuers/crl (.DER files)
+ *         - trustList/trusted/certs
+ *         - trustList/trusted/crl
+ *         - trustList/issuers/certs
+ *         - trustList/issuers/crl
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the the trustList folder should be deleted.

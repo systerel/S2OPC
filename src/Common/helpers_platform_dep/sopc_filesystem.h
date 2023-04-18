@@ -86,22 +86,6 @@ SOPC_FileSystem_CreationResult SOPC_FileSystem_mkdir(const char* directoryPath);
 SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath);
 
 /**
- * \brief Request to list the files names of a directory with the given path in the file system.
- *
- * \param directoryPath    The directory path in which last item (regarding path delimiter) is the directory to read.
- *                         Path delimiter is still dependent on O.S. but '/' path delimiter should be supported for
- *                         relative paths.
- * \param ppFileNames      A newly allocated array of file names (list of NULL terminated C string). You should freed it
- *                         with SOPC_Array_Delete.
- *
- * \note                   In case of error, \p ppFileNames is set to NULL.
- *
- * \return                 SOPC_ReadDir_OK if directory read succeeded or SOPC_Error_* value in other
- *                         cases.
- */
-SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFileNames(const char* directoryPath, SOPC_Array** ppFileNames);
-
-/**
  * \brief Request to list all the file paths of a directory with the given path in the file system.
  *
  * \param directoryPath    The directory path in which last item (regarding path delimiter) is the directory to read.

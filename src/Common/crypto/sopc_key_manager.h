@@ -512,7 +512,7 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_Seriali
  *
  * \return          NULL if error otherwise the SHA-1 thumbprint of \p pCert .
  */
-char* SOPC_KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert);
+char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pCert);
 
 /**
  * \brief Releases all resources associated to a serialized certificate.

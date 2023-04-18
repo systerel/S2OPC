@@ -206,18 +206,6 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
     return SOPC_FileSystem_GetDir_OK;
 }
 
-SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFileNames(const char* directoryPath, SOPC_Array** ppFileNames)
-{
-    if (NULL == directoryPath || NULL == ppFileNames)
-    {
-        return SOPC_FileSystem_GetDir_Error_InvalidParameters;
-    }
-
-    SOPC_FileSystem_GetDirResult res = get_dir_files_infos(directoryPath, ppFileNames, true);
-
-    return res;
-}
-
 SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directoryPath, SOPC_Array** ppFilePaths)
 {
     if (NULL == directoryPath || NULL == ppFilePaths)

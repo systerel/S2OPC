@@ -30,7 +30,7 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
-#define STR_MARGIN_SIZE 5
+#define STR_ZERO_TERMINATED_SIZE 1u
 
 int SOPC_strncmp_ignore_case(const char* s1, const char* s2, size_t size)
 {
@@ -415,7 +415,7 @@ SOPC_ReturnStatus SOPC_StrConcat(const char* left, const char* right, char** str
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    size_t size_path = strlen(left) + strlen(right) + STR_MARGIN_SIZE;
+    size_t size_path = strlen(left) + strlen(right) + STR_ZERO_TERMINATED_SIZE; // \0
     char* pOut = SOPC_Calloc(size_path, sizeof(char));
     if (NULL == pOut)
     {

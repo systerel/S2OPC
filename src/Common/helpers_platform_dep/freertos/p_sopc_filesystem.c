@@ -36,13 +36,6 @@ FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype)
     return (FILE*) fmemopen(buf, size, opentype);
 }
 
-SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFileNames(const char* directoryPath, SOPC_Array** ppFileNames)
-{
-    (void) directoryPath;
-    (void) ppFileNames;
-    SOPC_ASSERT(false && "NOT IMPLEMENTED");
-    return SOPC_FileSystem_Creation_OK;
-}
 SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directoryPath, SOPC_Array** ppFilePaths)
 {
     (void) directoryPath;
