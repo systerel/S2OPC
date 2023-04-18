@@ -142,7 +142,7 @@ check_commit_signature:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:49c739e69ea8d0beeb0f108a9c3069b9fec0a18220a4563a15e6e9abc27ec900 # digest of build:1.34
   script:
-    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit 1'
+    - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:12e94f0631ca8a3c9121d142a467351a89d120eaf6d1819e728a9d41d06e218b'
@@ -173,6 +173,23 @@ build-linux64-ASan:
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
+
+# Used by ALL_BUILDS to check we still manage to build with missing libs
+# (Paho for PubSub and Expat for ClientServer)
+build-with_missing_libs:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+  script:
+    - rm -fr /usr/local/lib/cmake/eclipse-paho-mqtt-c || exit $?
+    - ./build.sh || exit $?
+    - rm -fr /usr/local/lib/cmake/expat-* || exit $?
+    - ./clean.sh || exit $?
+    - S2OPC_CLIENTSERVER_ONLY=1 ./build.sh || exit $?
+  rules:
+    - if: "$ALL_BUILDS != null"
+      when: on_success
+  artifacts:
 
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
 build-linux64-pys2opc:
