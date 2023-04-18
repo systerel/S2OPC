@@ -36,3 +36,4 @@ the legal rights to contribute.
 * Sebastien Tajan <sebastien.tajan@systerel.fr>
 * Lebeau <nathan.lebeau@systerel.fr>
 * Eloïse Rotondo <eloise.rotondo@systerel.fr>
+* Nicolas Beauger <nicolas.beauger@systerel.fr>
