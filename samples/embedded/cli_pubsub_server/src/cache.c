@@ -472,7 +472,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
         }
         SOPC_ASSERT(result > 0);
 
-        char* type = "";
+        const char* type = "";
         switch (dv->Value.ArrayType)
         {
         case SOPC_VariantArrayType_Matrix:

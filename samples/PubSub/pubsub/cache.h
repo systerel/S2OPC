@@ -63,10 +63,41 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
 /** The SOPC_SetTargetVariables_Func-compatible implementation that copies the values to the cache */
 bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
+/** Prints on console a human-readable representation of a nid and a Datavalue
+
+ * @param pNid The NodeId to display
+ * @param dv The DataValue to display
+ */
+void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv);
+
+/** Prints on console a human-readable representation of the whole cache
+ * Note:  this call locks the cache during all operation, which will prevent
+ * other tasks to respond in time.
+ * This is only a debug function
+ */
+void Cache_Dump(void);
+
+typedef struct
+{
+    void (*pExec)(const SOPC_NodeId* nid, SOPC_DataValue* dv);
+} Cache_ForEach_Exec;
+/**
+ * Execute a callback for each element of the cache.
+ */
+void Cache_ForEach(Cache_ForEach_Exec* exec);
+
 /** The Cache shall be locked before accessing data (and its content, to prevent it from being freed) */
 void Cache_Lock(void);
+/** Unlock the cache previously locked by ::Cache_Lock */
 void Cache_Unlock(void);
-
+/** Deletes the cache */
 void Cache_Clear(void);
+/** Prints the content of a given NodeId */
+void Cache_Dump_NodeId(const SOPC_NodeId* pNid);
+
+/**
+ * Update a variant using a string. The string will be converted to matching type if possible
+ */
+bool Cache_UpdateVariant(SOPC_BuiltinId type, SOPC_VariantValue* variant, const char* value);
 
 #endif /* CACHE_H_ */
