@@ -53,7 +53,7 @@ static int32_t clientConfigure(void);
 */
 static SOPC_ReturnStatus clientBrowse(int32_t connectionId,
                                       const char* nodeId,
-                                      SOPC_ClientHelper_BrowseResult* browseResult);
+                                      SOPC_ClientCmd_BrowseResult* browseResult);
 /* Do a write request to nodeId "ns=1;s=Int32_001" which store a counter incrementing each time the function is called
  */
 static SOPC_ReturnStatus clientWrite(int32_t connectionId);
@@ -84,7 +84,7 @@ void cbToolkit_test_client(void)
     int32_t configurationId = 0;
     int32_t connectionId = 0;
     eEthernetIfResult ethResult = ETHERNET_IF_RESULT_OK;
-    SOPC_ClientHelper_BrowseResult* browseResult = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_BrowseResult));
+    SOPC_ClientCmd_BrowseResult* browseResult = SOPC_Calloc(1, sizeof(SOPC_ClientCmd_BrowseResult));
     uint32_t timeoutIf = UINT32_MAX;
 
     // Initialize Client Toolkit
@@ -104,7 +104,7 @@ void cbToolkit_test_client(void)
         ethResult = P_ETHERNET_IF_IsReady(timeoutIf);
         if (ETHERNET_IF_RESULT_OK == ethResult)
         {
-            connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+            connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
             if (connectionId <= 0)
             {
                 status = SOPC_STATUS_NOK;
@@ -142,7 +142,7 @@ void cbToolkit_test_client(void)
     SOPC_Free(browseResult);
 
     // Clear S2OPC Client
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_Common_Clear();
 }
 
@@ -169,7 +169,7 @@ SOPC_ReturnStatus clientInitialize(void)
     if (SOPC_STATUS_OK == status)
     {
         // Initialize client and set callback when client disconnect
-        res = SOPC_ClientHelper_Initialize(cbDisconnect);
+        res = SOPC_ClientCmd_Initialize(cbDisconnect);
         if (res < 0)
         {
             status = SOPC_STATUS_NOK;
@@ -181,12 +181,12 @@ SOPC_ReturnStatus clientInitialize(void)
 int32_t clientConfigure(void)
 {
     int32_t configurationId = 0;
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = ENDPOINT_URL,
         .serverUri = SERVER_URI,
         .reverseConnectionConfigId = 0,
     };
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .path_cert_auth = NULL,
         .path_cert_cli = NULL,
         .path_cert_srv = NULL,
@@ -200,12 +200,12 @@ int32_t clientConfigure(void)
     };
 
     // Configure client
-    configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+    configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
 
     return configurationId;
 }
 
-SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_ClientHelper_BrowseResult* browseResult)
+SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_ClientCmd_BrowseResult* browseResult)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t res = 0;
@@ -213,19 +213,19 @@ SOPC_ReturnStatus clientBrowse(int32_t connectionId, const char* nodeId, SOPC_Cl
     {
         nodeId = "ns=0;i=85";
     }
-    SOPC_ClientHelper_BrowseRequest browseRequest = {
+    SOPC_ClientCmd_BrowseRequest browseRequest = {
         .direction = OpcUa_BrowseDirection_Forward, // forward
         .nodeId = nodeId,
         .referenceTypeId = NULL, // all reference types
         .includeSubtypes = true,
     };
 
-    res = SOPC_ClientHelper_Browse(connectionId, &browseRequest, 1, browseResult);
+    res = SOPC_ClientCmd_Browse(connectionId, &browseRequest, 1, browseResult);
     if (0 == res)
     {
         for (int32_t i = 0; i < browseResult->nbOfReferences; i++)
         {
-            const SOPC_ClientHelper_BrowseResultReference* ref = &browseResult->references[i];
+            const SOPC_ClientCmd_BrowseResultReference* ref = &browseResult->references[i];
             PRINTF("Item #%i \r\n", i);
             PRINTF("- nodeId: %s\r\n", ref->nodeId);
             PRINTF("- displayName: %s\r\n", ref->displayName);
@@ -252,7 +252,7 @@ SOPC_ReturnStatus clientWrite(int32_t connectionId)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t res = 0;
 
-    SOPC_ClientHelper_WriteValue* writeValue = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_WriteValue));
+    SOPC_ClientCmd_WriteValue* writeValue = SOPC_Calloc(1, sizeof(SOPC_ClientCmd_WriteValue));
     SOPC_StatusCode statusCode = 0;
     SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
 
@@ -271,7 +271,7 @@ SOPC_ReturnStatus clientWrite(int32_t connectionId)
     writeValue->value = dv;
 
     // Send write Request Helper
-    res = SOPC_ClientHelper_Write(connectionId, writeValue, 1, &statusCode);
+    res = SOPC_ClientCmd_Write(connectionId, writeValue, 1, &statusCode);
     if (res < 0)
     {
         status = SOPC_STATUS_NOK;
@@ -285,7 +285,7 @@ SOPC_ReturnStatus clientWrite(int32_t connectionId)
 SOPC_ReturnStatus clientRead(int32_t connectionId)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ClientHelper_ReadValue* readValue = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_ReadValue));
+    SOPC_ClientCmd_ReadValue* readValue = SOPC_Calloc(1, sizeof(SOPC_ClientCmd_ReadValue));
     SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
     SOPC_DataValue_Initialize(dv);
 
@@ -293,7 +293,7 @@ SOPC_ReturnStatus clientRead(int32_t connectionId)
     readValue->attributeId = SOPC_AttributeId_Value;
     readValue->indexRange = NULL;
 
-    status = SOPC_ClientHelper_Read(connectionId, readValue, 1, dv);
+    status = SOPC_ClientCmd_Read(connectionId, readValue, 1, dv);
 
     PRINTF("Read node %s \r\n", readValue->nodeId);
     PRINTF("- Value %u \r\n", dv->Value.Value.Uint32);

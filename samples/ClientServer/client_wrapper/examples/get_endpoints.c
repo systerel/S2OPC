@@ -33,7 +33,7 @@
 #include "libs2opc_common_config.h"
 #include "sopc_macros.h"
 
-static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
+static void print_endpoints(SOPC_ClientCmd_GetEndpointsResult* result)
 {
     if (NULL == result)
     {
@@ -50,7 +50,7 @@ static void print_endpoints(SOPC_ClientHelper_GetEndpointsResult* result)
         printf(" - security policy Uri: %s\n", result->endpoints[i].security_policyUri);
         printf(" - transport profile Uri: %s\n", result->endpoints[i].transportProfileUri);
 
-        SOPC_ClientHelper_UserIdentityToken* userIds = result->endpoints[i].userIdentityTokens;
+        SOPC_ClientCmd_UserIdentityToken* userIds = result->endpoints[i].userIdentityTokens;
         for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
         {
             printf("  - User Identity #%d\n", j);
@@ -85,30 +85,30 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        int32_t init = SOPC_ClientHelper_Initialize(NULL);
+        int32_t init = SOPC_ClientCmd_Initialize(NULL);
         if (init < 0)
         {
             res = -1;
         }
     }
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
     };
 
     /* GetEndpoints */
-    SOPC_ClientHelper_GetEndpointsResult* getEndpointResult = NULL;
+    SOPC_ClientCmd_GetEndpointsResult* getEndpointResult = NULL;
     if (0 == res)
     {
-        res = SOPC_ClientHelper_GetEndpoints(&endpoint, &getEndpointResult);
+        res = SOPC_ClientCmd_GetEndpoints(&endpoint, &getEndpointResult);
     }
 
     if (0 == res)
     {
         print_endpoints(getEndpointResult);
-        SOPC_ClientHelper_GetEndpointsResult_Free(&getEndpointResult);
+        SOPC_ClientCmd_GetEndpointsResult_Free(&getEndpointResult);
     }
     else
     {
@@ -116,7 +116,7 @@ int main(int argc, char* const argv[])
     }
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_CommonHelper_Clear();
 
     return res;

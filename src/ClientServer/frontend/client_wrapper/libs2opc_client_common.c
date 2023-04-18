@@ -777,7 +777,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientHelper_EndpointConnection* connection,
+SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientCmd_EndpointConnection* connection,
                                                                  uintptr_t requestContext)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -937,7 +937,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
 }
 
 SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_ConnectionId cliId,
-                                                       SOPC_ClientHelper_DataChangeCbk cbkWrapper)
+                                                       SOPC_ClientCmd_DataChangeCbk cbkWrapper)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;

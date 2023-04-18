@@ -63,14 +63,14 @@ int main(int argc, char* const argv[])
 
     if (0 == res)
     {
-        int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
+        int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
         if (init < 0)
         {
             res = -1;
         }
     }
 
-    SOPC_ClientHelper_Security security = {
+    SOPC_ClientCmd_Security security = {
         .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
         .security_mode = OpcUa_MessageSecurityMode_Sign,
         .path_cert_auth = "./trusted/cacert.der",
@@ -85,7 +85,7 @@ int main(int argc, char* const argv[])
         .path_key_x509_token = NULL,
     };
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
+    SOPC_ClientCmd_EndpointConnection endpoint = {
         .endpointUrl = "opc.tcp://localhost:4841",
         .serverUri = NULL,
         .reverseConnectionConfigId = 0,
@@ -104,7 +104,7 @@ int main(int argc, char* const argv[])
     int32_t configurationId = 0;
     if (0 == res)
     {
-        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
+        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
         if (configurationId <= 0)
         {
             res = -1;
@@ -114,7 +114,7 @@ int main(int argc, char* const argv[])
     int32_t connectionId = 0;
     if (0 == res)
     {
-        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
+        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
 
         if (connectionId <= 0)
         {
@@ -126,7 +126,7 @@ int main(int argc, char* const argv[])
     if (0 == res)
     {
         SOPC_StatusCode writeResult = SOPC_UncertainStatusMask;
-        SOPC_ClientHelper_WriteValue writeValue;
+        SOPC_ClientCmd_WriteValue writeValue;
 
         /* initialize write value parameters */
         writeValue.nodeId = node_id;
@@ -143,7 +143,7 @@ int main(int argc, char* const argv[])
         writeValue.value->Value.Value.Uint64 = 32;
 
         /* write the value and get result */
-        res = SOPC_ClientHelper_Write(connectionId, &writeValue, 1, &writeResult);
+        res = SOPC_ClientCmd_Write(connectionId, &writeValue, 1, &writeResult);
 
         if (SOPC_STATUS_OK == writeResult && 0 == res)
         {
@@ -158,12 +158,12 @@ int main(int argc, char* const argv[])
 
     if (connectionId > 0)
     {
-        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
+        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
         res = res != 0 ? res : discoRes;
     }
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_CommonHelper_Clear();
 
     return res;

@@ -44,7 +44,7 @@
 
 #define REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 
-static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
+static SOPC_ClientCmd_Security valid_security_signAndEncrypt_b256sha256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
@@ -62,14 +62,14 @@ static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
 START_TEST(test_wrapper_reverse_connections)
 {
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
 
     /* create reverse endpoint */
 
-    int32_t reverseEpId = SOPC_ClientHelper_CreateReverseEndpoint(REVERSE_ENDPOINT_URL);
+    int32_t reverseEpId = SOPC_ClientCmd_CreateReverseEndpoint(REVERSE_ENDPOINT_URL);
     ck_assert_int_gt(reverseEpId, 0);
 
-    SOPC_ClientHelper_EndpointConnection reverse_connection_endpoint = {
+    SOPC_ClientCmd_EndpointConnection reverse_connection_endpoint = {
         .endpointUrl = INVALID_URL,
         .serverUri = NULL,
         .reverseConnectionConfigId = (uint32_t) reverseEpId,
@@ -77,27 +77,27 @@ START_TEST(test_wrapper_reverse_connections)
 
     /* invalid server URL */
     {
-        SOPC_ClientHelper_GetEndpointsResult* result;
-        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(&reverse_connection_endpoint, &result));
+        SOPC_ClientCmd_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientCmd_GetEndpoints(&reverse_connection_endpoint, &result));
     }
 
     reverse_connection_endpoint.endpointUrl = VALID_URL;
     reverse_connection_endpoint.serverUri = "invalid_uri";
     /* invalid server URI */
     {
-        SOPC_ClientHelper_GetEndpointsResult* result;
-        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(&reverse_connection_endpoint, &result));
+        SOPC_ClientCmd_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientCmd_GetEndpoints(&reverse_connection_endpoint, &result));
     }
 
     reverse_connection_endpoint.serverUri = "urn:S2OPC:localhost";
     /* get endpoints  valid */
     {
-        SOPC_ClientHelper_GetEndpointsResult* result;
-        ck_assert_int_eq(0, SOPC_ClientHelper_GetEndpoints(&reverse_connection_endpoint, &result));
+        SOPC_ClientCmd_GetEndpointsResult* result;
+        ck_assert_int_eq(0, SOPC_ClientCmd_GetEndpoints(&reverse_connection_endpoint, &result));
         /* check result content */
         ck_assert_int_ge(result->nbOfEndpoints, 1);
         /* free result */
-        SOPC_ClientHelper_GetEndpointsResult_Free(&result);
+        SOPC_ClientCmd_GetEndpointsResult_Free(&result);
     }
 
     /* callback to retrieve the client's private key password */
@@ -105,24 +105,24 @@ START_TEST(test_wrapper_reverse_connections)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&reverse_connection_endpoint,
+    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&reverse_connection_endpoint,
                                                                   &valid_security_signAndEncrypt_b256sha256, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* read one node */
     {
-        SOPC_ClientHelper_ReadValue readValue1[1] = {
+        SOPC_ClientCmd_ReadValue readValue1[1] = {
             {.nodeId = "ns=1;s=UInt64_001", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults1;
-        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue1, 1, &readResults1));
+        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValue1, 1, &readResults1));
         /* check datavalue */
         ck_assert_int_eq(SOPC_STATUS_OK, readResults1.Status);
         ck_assert_int_eq(SOPC_UInt64_Id, readResults1.Value.BuiltInTypeId);
         ck_assert_uint_ne(0, readResults1.Value.Value.Uint64);
         /* free results */
-        SOPC_ClientHelper_ReadResults_Free(1, &readResults1);
+        SOPC_ClientCmd_ReadResults_Free(1, &readResults1);
     }
 }
 END_TEST
@@ -140,7 +140,7 @@ static void setup(void)
 
 static void teardown(void)
 {
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientCmd_Finalize();
     SOPC_CommonHelper_Clear();
 }
 
