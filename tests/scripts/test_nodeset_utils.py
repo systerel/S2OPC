@@ -29,6 +29,8 @@ from nodeset_address_space_utils import run_merge, make_argparser
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESOURCE_DIR = pj(SCRIPT_DIR, 'resources')
 
+# remove the temporary files produced during the tests
+# set to False to keep the actual files and analyse them
 CLEANUP_TEMP = True
 
 
@@ -40,7 +42,7 @@ def assert_content_equal(expected, actual):
 
 
 def make_temp_dir():
-    tmp_dir = 'actual'
+    tmp_dir = pj(RESOURCE_DIR, 'actual')
     if not os.path.isdir(tmp_dir):
         os.mkdir(tmp_dir)
     return tmp_dir
@@ -79,6 +81,15 @@ class MergeTests(unittest.TestCase):
     def test_merge_pressure_with_ref_to_temperature(self):
         run_test('test_merge_pressure_with_ref_to_temperature.xml',
                  'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS_with_TemperatureNS.NodeSet2.xml')
+    
+    def test_merge_with_ns_srv_arrays(self):
+        run_test('test_merge_with_ns_srv_arrays.xml',
+                 'ns0.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml')
+    
+    def test_merge_with_ns_srv_arrays2(self):
+        # pressure is given before temperature
+        run_test('test_merge_with_ns_srv_arrays2.xml',
+                 'ns0.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml')
 
 
 if __name__ == '__main__':
