@@ -427,7 +427,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
 
 /** \brief Check leaf certificate properties
  *
- * \param pPKI A valid pointer to the PKIProvider.
+ * \param pConfig A valid pointer to the PKI configuration.
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the leaf profile.
  * \param error The OpcUa error code for certificate validation.

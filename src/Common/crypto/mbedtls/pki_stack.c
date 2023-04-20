@@ -929,7 +929,9 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     }
     if (bErr)
     {
-        fprintf(stderr, "> PKI validation failed : unexpected key type for certificate thumbprint %s\n", thumbprint);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : unexpected key type for certificate thumbprint %s",
+                               thumbprint);
         SOPC_Free(thumbprint);
         return SOPC_STATUS_NOK;
     }
@@ -938,7 +940,9 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     // Verifies key length: min-max
     if (keyLenBits < pConfig->RSAMinimumKeySize || keyLenBits > pConfig->RSAMaximumKeySize)
     {
-        fprintf(stderr, "> PKI validation failed : unexpected key size for certificate thumbprint %s\n", thumbprint);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : unexpected key size for certificate thumbprint %s",
+                               thumbprint);
         SOPC_Free(thumbprint);
         return SOPC_STATUS_NOK;
     }
@@ -976,8 +980,9 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     }
     if (bErr)
     {
-        fprintf(stderr, "> PKI validation failed : unexpected signing algorithm for certificate thumbprint %s\n",
-                thumbprint);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : unexpected signing algorithm for certificate thumbprint %s",
+                               thumbprint);
     }
 
     SOPC_Free(thumbprint);
@@ -1040,8 +1045,9 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
         err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
         if (err)
         {
-            fprintf(stderr, "> PKI validation failed : missing expected key usage for certificate thumbprint %s\n",
-                    thumbprint);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "> PKI validation failed : missing expected key usage for certificate thumbprint %s", thumbprint);
         }
     }
     /* Check extended key usages for client or server cert */
@@ -1067,8 +1073,9 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
         }
         if (missing)
         {
-            fprintf(stderr, "> PKI validation : missing expected extended key usage for certificate thumbprint %s\n",
-                    thumbprint);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "> PKI validation : missing expected extended key usage for certificate thumbprint %s", thumbprint);
             err = 1;
         }
     }
@@ -1162,7 +1169,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     if (pToValidate->crt.ca_istrue && !bIsSelfSign)
     {
         *error = SOPC_CertificateValidationError_UseNotAllowed;
-        fprintf(stderr, "> PKI validation failed : certificate thumbprint %s is a CA root\n", thumbprint);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : certificate thumbprint %s is a CA root", thumbprint);
         SOPC_Free(thumbprint);
         return SOPC_STATUS_NOK;
     }
@@ -1191,7 +1199,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
         status = SOPC_PKIProviderNew_CheckLeafCertificate(pPKI->pConfig, pToValidate, pConfig->leafProfile, error);
         if (SOPC_STATUS_OK != status)
         {
-            fprintf(stderr, "> PKI validation failed : bad properties of certificate thumbprint %s\n", thumbprint);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : bad properties of certificate thumbprint %s",
+                                   thumbprint);
             SOPC_Free(thumbprint);
             return SOPC_STATUS_NOK;
         }
@@ -1227,8 +1237,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
                                                  &failure_reasons, verify_cert, &bIsTrusted) != 0)
         {
             *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
-            fprintf(stderr, "> PKI validation failed with error code %u for certificate thumbprint %s\n", *error,
-                    thumbprint);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed with error code %u for certificate thumbprint %s", *error,
+                                   thumbprint);
             status = SOPC_STATUS_NOK;
         }
     }
@@ -1298,7 +1309,8 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
     SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(basePath, &pFilePaths);
     if (SOPC_FileSystem_GetDir_OK != dirRes)
     {
-        fprintf(stderr, "> PKI creation error: failed to open directory <%s>.\n", basePath);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: failed to open directory <%s>.",
+                               basePath);
         return SOPC_STATUS_NOK;
     }
     /* Get the size and iterate for each item */
@@ -1306,7 +1318,7 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
     for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
         pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
-        fprintf(stderr, "> PKI loading file <%s>\n", pFilePath);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "> PKI loading file <%s>", pFilePath);
         if (bIscrl)
         {
             /* Load CRL */
@@ -1670,7 +1682,7 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
 
     if (NULL == pTrustedCerts)
     {
-        fprintf(stderr, "> PKI creation error: no trusted certificate is provided.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: no trusted certificate is provided.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     get_list_stats(pTrustedCerts, &trusted_ca_count, &trusted_list_length, &trusted_root_count);
@@ -1678,16 +1690,17 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     /* trusted CA => trusted CRL*/
     if (0 != trusted_ca_count && NULL == pTrustedCrl)
     {
-        fprintf(stderr, "> PKI creation error: trusted CA certificates are provided but no CRL.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI creation error: trusted CA certificates are provided but no CRL.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* check and warn in case there is no trusted certificates and no trusted root (only trusted intermediate CA). */
     if ((0 == issued_cert_count) && (0 == trusted_root_count))
     {
         /* In this case, no certificates will be accepted. */
-        fprintf(stderr,
-                "> PKI creation error: no trusted certificate and no trusted root is given: no certificates will be "
-                "accepted.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI creation error: no trusted certificate and no trusted root is given: no "
+                               "certificates will be accepted.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -1695,30 +1708,31 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     /* issuer CA => issuer CRL*/
     if (0 != issuer_ca_count && NULL == pIssuerCrl)
     {
-        fprintf(stderr, "> PKI creation error: issuer CA certificates are provided but no CRL.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI creation error: issuer CA certificates are provided but no CRL.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* Check if issuerCerts list is only filled with CA. */
     if (issuer_list_length != issuer_ca_count)
     {
-        fprintf(stderr, "> PKI creation error: not all issuer certificates are CAs.\n");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: not all issuer certificates are CAs.");
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* check and warn in case there is no trusted certificates but issuer certificates. */
     if ((0 != issuer_ca_count) && (0 == issued_cert_count))
     {
         /* In this case, only trusted root CA will be accepted (if Backward interoperability is enabled). */
-        fprintf(stderr,
-                "> PKI creation warning: issuer certificates are given but no trusted certificates: only trusted root "
-                "CA will be accepted (if backward interoperability is enabled)\n");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: issuer certificates are given but no trusted certificates: "
+                                 "only trusted root CA will be accepted (if backward interoperability is enabled)");
     }
     /* check and warn in case no root defined and trusted certificates defined. */
     if ((0 == issuer_root_count) && (0 == trusted_root_count) && (0 != issued_cert_count))
     {
         /* In this case, only trusted self-signed issued certificates will be accepted. */
-        fprintf(stderr,
-                "> PKI creation warning: no root (CA) defined: only trusted self-signed issued certificates will be "
-                "accepted without possibility to revoke them (no CRL).\n");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: no root (CA) defined: only trusted self-signed issued "
+                                 "certificates will be accepted without possibility to revoke them (no CRL).");
     }
     return status;
 }
@@ -1810,17 +1824,17 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     {
         if (!bTrustedCRL)
         {
-            fprintf(
-                stderr,
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_COMMON,
                 "> PKI creation warning: Not all certificate authorities in given trusted certificates have a single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+                "certificate revocation list! Certificates issued by these CAs will be refused.");
         }
         if (!bIssuerCRL)
         {
-            fprintf(
-                stderr,
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_COMMON,
                 "> PKI creation warning: Not all certificate authorities in given issuer certificates have a single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.\n");
+                "certificate revocation list! Certificates issued by these CAs will be refused.");
         }
     }
     /* Retrieve the root from list */
@@ -1932,7 +1946,8 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         NULL == pIssuerCrl)
     {
         status = SOPC_STATUS_NOK;
-        fprintf(stderr, "> PKI creation error: certificate store is empty (%s).\n", path);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: certificate store is empty (%s).",
+                               path);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1942,7 +1957,8 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     /* if error then try with default build */
     if (!bDefaultBuild && SOPC_STATUS_OK != status)
     {
-        fprintf(stderr, "> PKI creation warning: trustList missing or bad build switch to default store.\n");
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: trustList missing or bad build switch to default store.");
         status = pki_create_from_store(directoryStorePath, true, pConfig, ppPKI);
     }
     /* Copy the directoryStorePath */
@@ -2025,7 +2041,8 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath)
     SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(directoryPath, &pFilePaths);
     if (SOPC_FileSystem_GetDir_OK != dirRes)
     {
-        fprintf(stderr, "> PKI write to store: failed to open directory <%s>.\n", directoryPath);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI write to store: failed to open directory <%s>.",
+                               directoryPath);
         return SOPC_STATUS_NOK;
     }
     size_t nbFiles = SOPC_Array_Size(pFilePaths);
