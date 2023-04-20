@@ -702,6 +702,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 /* ****************************************************************** */
 /* ************************* NEW API ******************************** */
 #include "sopc_assert.h"
+#include "sopc_crypto_profiles.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 
@@ -729,7 +730,7 @@ policy.
  */
 struct SOPC_PKIProviderNew
 {
-    SOPC_PKI_Config* pConfig;
+    const SOPC_PKI_Config* pConfig;
     char* directoryStorePath;
     SOPC_CertificateList* pTrustedCerts;
     SOPC_CertificateList* pTrustedRoots;
@@ -743,6 +744,153 @@ struct SOPC_PKIProviderNew
     SOPC_CRLList* pAllCrl;
 };
 
+static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha256_2048_4096 = {
+    .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
+    .pkAlgo = SOPC_PKI_PK_RSA,
+    .RSAMinimumKeySize = 2048,
+    .RSAMaximumKeySize = 4096,
+};
+
+static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha1_1024_2048 = {
+    .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+    .pkAlgo = SOPC_PKI_PK_RSA,
+    .RSAMinimumKeySize = 1024,
+    .RSAMaximumKeySize = 2048,
+};
+static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha256_2048 = {.curves = SOPC_PKI_CURVES_ANY,
+                                                                      .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
+                                                                      .pkAlgo = SOPC_PKI_PK_RSA,
+                                                                      .RSAMinimumKeySize = 2048};
+static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha1_1024 = {.curves = SOPC_PKI_CURVES_ANY,
+                                                                    .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+                                                                    .pkAlgo = SOPC_PKI_PK_RSA,
+                                                                    .RSAMinimumKeySize = 1024};
+static const SOPC_PKI_Profile g_profile_rsa_sha256_2048_4096 = {
+    .leafProfile = &g_leaf_profile_rsa_sha256_2048_4096,
+    .chainProfile = &g_chain_profile_rsa_sha256_2048,
+};
+static const SOPC_PKI_Profile g_profile_rsa_sha1_1024_2048 = {
+    .leafProfile = &g_leaf_profile_rsa_sha1_1024_2048,
+    .chainProfile = &g_chain_profile_rsa_sha1_1024,
+};
+static const SOPC_PKI_Config g_config_user = {
+    .type = SOPC_PKI_TYPE_USER,
+    .bBackwardInteroperability = false,
+    .keyUsage = SOPC_PKI_KU_DIGITAL_SIGNATURE, // it is not part of the OPC UA but it makes sense to keep it
+};
+/* TODO RBA: removed const properties for client and server configuration structures (URI + HostName to configure later
+ * by user) */
+static const SOPC_PKI_Config g_config_client_app = {
+    .type = SOPC_PKI_TYPE_CLIENT_APP,
+    .bBackwardInteroperability = true,
+    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
+                SOPC_PKI_KU_NON_REPUDIATION,
+};
+static const SOPC_PKI_Config g_config_server_app = {
+    .type = SOPC_PKI_TYPE_SERVER_APP,
+    .bBackwardInteroperability = true,
+    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
+                SOPC_PKI_KU_NON_REPUDIATION,
+};
+static const SOPC_PKI_Config g_config_client_server_app = {
+    .type = SOPC_PKI_TYPE_CLIENT_SERVER_APP,
+    .bBackwardInteroperability = true,
+    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
+                SOPC_PKI_KU_NON_REPUDIATION,
+};
+
+const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri)
+{
+    if (NULL == uri)
+    {
+        return NULL;
+    }
+
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
+                                 strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
+    {
+        return &g_leaf_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
+                                 strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
+    {
+        return &g_leaf_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                 strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
+    {
+        return &g_leaf_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
+        0)
+    {
+        return &g_leaf_profile_rsa_sha1_1024_2048;
+    }
+
+    return NULL;
+}
+
+const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri)
+{
+    if (NULL == uri)
+    {
+        return NULL;
+    }
+
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
+                                 strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
+    {
+        return &g_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
+                                 strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
+    {
+        return &g_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
+                                 strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
+    {
+        return &g_profile_rsa_sha256_2048_4096;
+    }
+    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
+        0)
+    {
+        return &g_profile_rsa_sha1_1024_2048;
+    }
+
+    return NULL;
+}
+
+const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void)
+{
+    /* Minimal profile for the chain.
+       The leaf profile is not used for users during the validation process but the user certificate properties
+       are checked according to the security policy during the activation session */
+    return &g_profile_rsa_sha256_2048_4096;
+}
+
+const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type)
+{
+    switch (type)
+    {
+    case SOPC_PKI_TYPE_USER:
+        return &g_config_user;
+        break;
+    case SOPC_PKI_TYPE_CLIENT_APP:
+        return &g_config_client_app;
+        break;
+    case SOPC_PKI_TYPE_SERVER_APP:
+        return &g_config_server_app;
+        break;
+    case SOPC_PKI_TYPE_CLIENT_SERVER_APP:
+        return &g_config_client_server_app;
+        break;
+    default:
+        break;
+    }
+    return NULL;
+}
+
 static bool cert_is_self_sign(mbedtls_x509_crt* crt);
 
 static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToValidate,
@@ -751,7 +899,6 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     SOPC_AsymmetricKey pub_key;
     size_t keyLenBits = 0;
     bool bErr = false;
-
     // Retrieve key
     SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pToValidate, &pub_key);
     if (SOPC_STATUS_OK != status)
@@ -873,11 +1020,10 @@ static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pk
 }
 
 static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pToValidate,
-                                                 const SOPC_PKI_LeafProfile* pProfile,
-                                                 const SOPC_PKI_Type PKIType)
+                                                 const SOPC_PKI_Config* pConfig)
 {
     SOPC_ASSERT(NULL != pToValidate);
-    SOPC_ASSERT(NULL != pProfile);
+    SOPC_ASSERT(NULL != pConfig);
 
     char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
     if (NULL == thumbprint)
@@ -887,9 +1033,9 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     unsigned int usages = 0;
     int err = 0;
     /* Check key usages */
-    if (SOPC_PKI_KU_DISABLE_CHECK != pProfile->keyUsage)
+    if (SOPC_PKI_KU_DISABLE_CHECK != pConfig->keyUsage)
     {
-        usages = get_lib_ku_from_sopc_ku(pProfile->keyUsage);
+        usages = get_lib_ku_from_sopc_ku(pConfig->keyUsage);
         err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
         if (err)
         {
@@ -901,17 +1047,17 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     if (0 == err)
     {
         bool missing = false;
-        if (SOPC_PKI_TYPE_SERVER_APP == PKIType)
+        if (SOPC_PKI_TYPE_SERVER_APP == pConfig->type)
         {
             missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
                                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
         }
-        if (SOPC_PKI_TYPE_CLIENT_APP == PKIType)
+        if (SOPC_PKI_TYPE_CLIENT_APP == pConfig->type)
         {
             missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
                                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
         }
-        if (SOPC_PKI_TYPE_CLIENT_SERVER_APP == PKIType)
+        if (SOPC_PKI_TYPE_CLIENT_SERVER_APP == pConfig->type)
         {
             missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
                                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
@@ -1041,7 +1187,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     /* Apply verification on the certificate */
     if (SOPC_PKI_TYPE_USER != pPKI->pConfig->type)
     {
-        status = SOPC_PKIProviderNew_CheckLeafCertificate(pPKI, pToValidate, &pConfig->leafProfile, error);
+        status = SOPC_PKIProviderNew_CheckLeafCertificate(pPKI->pConfig, pToValidate, pConfig->leafProfile, error);
         if (SOPC_STATUS_OK != status)
         {
             fprintf(stderr, "> PKI validation failed : bad properties of certificate thumbprint %s\n", thumbprint);
@@ -1051,7 +1197,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     }
     /* Set the profile from configuration */
     mbedtls_x509_crt_profile crt_profile = {0};
-    set_profile_from_configuration(&pConfig->chainProfile, &crt_profile);
+    set_profile_from_configuration(pConfig->chainProfile, &crt_profile);
 
     SOPC_CertificateList* trust_list = bIsTrusted ? pPKI->pAllRoots : pPKI->pTrustedRoots;
     SOPC_CRLList* cert_crl = pPKI->pAllCrl;
@@ -1097,14 +1243,14 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
         1. check_security_policy(pToValidate, pProfile)
         2. check_host_name(pToValidate, pPKI->pConfig)
         3. check_uri(pToValidate, pPKI->pConfig)
-        4. check_certificate_usage(pToValidate, pProfile, pPKI->pConfig)
+        4. check_certificate_usage(pToValidate, pPKI->pConfig)
 */
-SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKIProviderNew* pPKI,
+SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config* pConfig,
                                                            const SOPC_CertificateList* pToValidate,
                                                            const SOPC_PKI_LeafProfile* pProfile,
                                                            uint32_t* error)
 {
-    if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
+    if (NULL == pConfig || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1118,7 +1264,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKIProvide
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = check_certificate_usage(pToValidate, pProfile, pPKI->pConfig->type);
+        status = check_certificate_usage(pToValidate, pConfig);
         if (SOPC_STATUS_OK != status)
         {
             *error = SOPC_CertificateValidationError_UseNotAllowed;
@@ -1594,7 +1740,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
                                                      SOPC_CRLList* pIssuerCrl,
-                                                     SOPC_PKI_Config* pConfig,
+                                                     const SOPC_PKI_Config* pConfig,
                                                      SOPC_PKIProviderNew** ppPKI)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1757,7 +1903,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
 
 static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
                                                bool bDefaultBuild,
-                                               SOPC_PKI_Config* pConfig,
+                                               const SOPC_PKI_Config* pConfig,
                                                SOPC_PKIProviderNew** ppPKI)
 {
     SOPC_ASSERT(NULL != directoryStorePath);
@@ -1839,7 +1985,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
-                                                      SOPC_PKI_Config* pConfig,
+                                                      const SOPC_PKI_Config* pConfig,
                                                       SOPC_PKIProviderNew** ppPKI)
 {
     if (NULL == directoryStorePath || NULL == pConfig || NULL == ppPKI)

@@ -606,28 +606,20 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         SOPC_CertificateList* pUserCert = NULL;
         SOPC_StatusCode errorStatus;
 
-        /* TODO RBA: Move profiles in the PKI API with an accesor from the security policy.*/
-        const SOPC_PKI_Profile rsa_sha256_2048_4096 = {
-            .leafProfile = {.keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
-                                        SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION,
-                            .mdSign = SOPC_PKI_MD_SHA256,
-                            .pkAlgo = SOPC_PKI_PK_RSA,
-                            .RSAMinimumKeySize = 2048,
-                            .RSAMaximumKeySize = 4096},
-            .chainProfile = {.curves = SOPC_PKI_CURVES_ANY,
-                             .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
-                             .pkAlgo = SOPC_PKI_PK_ANY,
-                             .RSAMinimumKeySize = 2048}};
-        /* TODO RBA: Add SOPC_PKIProviderNew_ValidateCertificate in
+        const SOPC_PKI_Profile* pProfile = SOPC_PKIProviderNew_GetMinimalUserProfile();
+        status = NULL != pProfile ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        /* TODO RBA: Add SOPC_PKIProviderNew_CheckLeafCertificate in
                      user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
-
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_KeyManager_Certificate_CreateOrAddFromDER(rawCert->Data, (uint32_t) rawCert->Length, &pUserCert);
+        }
 
         if (SOPC_STATUS_OK == status)
         {
             // Verify certificate through PKIProvider callback
-            status =
-                SOPC_PKIProviderNew_ValidateCertificate(pkiProvider, pUserCert, &rsa_sha256_2048_4096, &errorStatus);
+            status = SOPC_PKIProviderNew_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
             // status = pkiProvider->pFnValidateCertificate(pkiProvider, pUserCert, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
@@ -698,7 +690,7 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_PKI_Config pki_config = {.type = SOPC_PKI_TYPE_USER, .bBackwardInteroperability = false};
+    const SOPC_PKI_Config* pPKIConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_USER);
 
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_CertificateList* userCAcert = NULL;
@@ -715,12 +707,12 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, &pki_config, &pX509_UserIdentity_PKI);
+            SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, pPKIConfig, &pX509_UserIdentity_PKI);
     }
     SOPC_KeyManager_Certificate_Free(userCAcert);
     SOPC_KeyManager_CRL_Free(userCAcrl);
 #else
-    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", &pki_config, &pX509_UserIdentity_PKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", pPKIConfig, &pX509_UserIdentity_PKI);
     // status = SOPC_PKIProviderStack_CreateFromPaths(
     //     x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
     //     x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers,

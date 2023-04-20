@@ -249,7 +249,6 @@ typedef struct SOPC_PKI_LeafProfile
 {
     SOPC_PKI_MdSign mdSign;
     SOPC_PKI_PkAlgo pkAlgo;
-    SOPC_PKI_KeyUsage_Mask keyUsage;
     uint32_t RSAMinimumKeySize;
     uint32_t RSAMaximumKeySize;
 } SOPC_PKI_LeafProfile;
@@ -270,8 +269,8 @@ typedef struct SOPC_PKI_ChainProfile
  */
 typedef struct SOPC_PKI_Profile
 {
-    SOPC_PKI_LeafProfile leafProfile;   /**< Validation configuration for the leaf certificate. */
-    SOPC_PKI_ChainProfile chainProfile; /**< Validation configuration for the chain. */
+    const SOPC_PKI_LeafProfile* leafProfile;   /**< Validation configuration for the leaf certificate. */
+    const SOPC_PKI_ChainProfile* chainProfile; /**< Validation configuration for the chain. */
 } SOPC_PKI_Profile;
 
 /* TODO RBA: Add uri and hostName */
@@ -280,7 +279,18 @@ typedef struct SOPC_PKI_Config
     SOPC_PKI_Type type;             /* user, app client, app server, app client server */
     bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
                                          set to True will be marked as root CA and as trusted certificates.*/
+    SOPC_PKI_KeyUsage_Mask keyUsage;
 } SOPC_PKI_Config;
+
+/**
+ * \brief Get a default PKI configuration from an enumerate which describes the type of PKI.
+ *
+ * \param type The PKI type desired. Should be SOPC_PKI_TYPE_USER, SOPC_PKI_TYPE_CLIENT_APP, SOPC_PKI_TYPE_SERVER_APP,
+ *             or SOPC_PKI_TYPE_CLIENT_SERVER_APP.
+ *
+ * \return A constant SOPC_PKI_Config* which should not be modified. NULL in case of error.
+ */
+const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
 
 /**
  * \brief Create the PKIProvider from a directory where certificates are store.
@@ -332,7 +342,7 @@ typedef struct SOPC_PKI_Config
  *          and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
-                                                      SOPC_PKI_Config* pConfig,
+                                                      const SOPC_PKI_Config* pConfig,
                                                       SOPC_PKIProviderNew** ppPKI);
 
 /**
@@ -370,8 +380,35 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
                                                      SOPC_CRLList* pIssuerCrl,
-                                                     SOPC_PKI_Config* pConfig,
+                                                     const SOPC_PKI_Config* pConfig,
                                                      SOPC_PKIProviderNew** ppPKI);
+
+/**
+ * \brief Get a leaf certificate profile for checking properties
+ *        from a string containing the desired security policy URI.
+ *
+ * \param uri The URI describing the security policy. Should not be NULL.
+ *
+ * \return A constant SOPC_PKI_LeafProfile* which should not be modified. NULL in case of error.
+ */
+const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri);
+
+/**
+ * \brief Get a PKI profile for a validation process
+ *        from a string containing the desired security policy URI.
+ *
+ * \param uri The URI describing the security policy. Should not be NULL.
+ *
+ * \return A constant SOPC_PKI_Profile* which should not be modified. NULL in case of error.
+ */
+const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri);
+
+/**
+ * \brief Get a minimal PKI profile for user validation process.
+ *
+ * \return A constant SOPC_PKI_Profile* which should not be modified.
+ */
+const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void);
 
 /** \brief Validation function for a certificate with the PKI chain
  *
@@ -404,7 +441,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
  * \return SOPC_STATUS_OK when the certificate is successfully validated, and
  *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKIProviderNew* pPKI,
+SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config* pConfig,
                                                            const SOPC_CertificateList* pToValidate,
                                                            const SOPC_PKI_LeafProfile* pProfile,
                                                            uint32_t* error);
