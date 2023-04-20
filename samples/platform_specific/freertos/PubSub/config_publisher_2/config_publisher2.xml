@@ -1,0 +1,13 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="opc.udp://232.1.2.100:4840" publisherId="123" mode="publisher" >
+        <message publishingInterval="2000." groupId="14" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;i=5" displayName="PubBoolean" dataType="Boolean"/>
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=2;i=6" displayName="PubUInt32" dataType="UInt32"/>
+                <variable nodeId="ns=2;i=7" displayName="PubUInt16" dataType="UInt16"/>
+            </dataset>
+        </message>
+    </connection>
+</PubSub>

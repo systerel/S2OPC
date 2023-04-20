@@ -613,6 +613,8 @@ static void* thread_start_publish(void* arg)
     status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
+    vTaskDelay(5000); // better to do
+
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
     {
         /* Wake-up: find which message(s) needs to be sent */

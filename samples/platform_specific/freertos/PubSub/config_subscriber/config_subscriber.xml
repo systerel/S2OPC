@@ -1,0 +1,19 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="14" groupVersion="1" publishingInterval="2000." publisherId="123">
+          <dataset>
+            <variable nodeId="ns=1;s=Toto" displayName="SubBoolean" dataType="Boolean"/>
+          </dataset>
+          <dataset>
+              <variable nodeId="ns=2;i=6" displayName="SubUInt32" dataType="UInt32"/>
+              <variable nodeId="ns=2;i=7" displayName="SubUInt16" dataType="UInt16"/>
+          </dataset>
+        </message>
+        <message groupId="15" groupVersion="1" publishingInterval="1000." publisherId="123">
+          <dataset>
+            <variable nodeId="ns=1;s=Tata" displayName="SubInt16" dataType="Int16"/>
+            <variable nodeId="ns=1;s=Chaine" displayName="SubString" dataType="String"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
