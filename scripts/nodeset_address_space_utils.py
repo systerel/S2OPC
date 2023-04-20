@@ -38,6 +38,12 @@ PREFIX_IDX_MATCHER = re.compile(r'(\d+):(.+)')
 PREFIX_IDX_FORMATTER = '{}:{}'
 
 
+UA_URI = 'http://opcfoundation.org/UA/'
+UA_NODESET_URI = 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd'
+UA_TYPES_URI = 'http://opcfoundation.org/UA/2008/02/Types.xsd'
+STRING_TAG = f'{{{UA_TYPES_URI}}}String'
+
+
 def indent(level):
     return '\n' + INDENT_SPACES*level
 
@@ -101,7 +107,7 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
 
 def get_ns0_version(tree_models):
     for model in tree_models:
-        if model.get('ModelUri') == "http://opcfoundation.org/UA/":
+        if model.get('ModelUri') == UA_URI:
             return model.get('Version')
     return None
 
@@ -192,12 +198,16 @@ def merge(tree, new, namespaces):
     new_models = new.find('uanodeset:Models', namespaces)
     tree_models[-1].tail = indent(2)
     for model in new_models:
-        req_ns0 = model.find('uanodeset:RequiredModel[@ModelUri="http://opcfoundation.org/UA/"]', namespaces)
+        req_ns0 = model.find(f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]', namespaces)
         if req_ns0 is not None:
             req_ns0_version = req_ns0.get('Version')
             if req_ns0_version != ns0_version:
                 raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
         tree_models.append(model)
+
+    # Merge ServerArray and NamespaceArray:
+    __fill_namespace_array(tree, namespaces)
+    __merge_server_array(tree, new, namespaces)
 
     # Merge Aliases
     tree_aliases = tree.find('uanodeset:Aliases', namespaces)
@@ -440,6 +450,76 @@ def sanitize(tree, namespaces):
     return True
 
 
+def __fetch_subelement(elem, subtag, namespaces, indentation=-1) -> ET.Element:
+    subelem = elem.find(subtag, namespaces)
+    if subelem is None:
+        if len(elem) > 0:
+            last = elem[-1]
+            last.tail += INDENT_SPACES
+        subelem = ET.SubElement(elem, subtag)
+        if indentation >= 0:
+            subelem.text = indent(indentation)
+            subelem.tail = indent(indentation - 2)
+    return subelem
+
+def __fill_namespace_and_server_arrays(tree: ET.ElementTree, namespaces: dict):
+    __fill_namespace_array(tree, namespaces)
+    __merge_server_array(tree, namespaces)
+
+
+def __append_strings(parent_l_str: ET.Element, str_values):
+    if len(str_values) == 0:
+        # nothing to do
+        return
+    parent_l_str.text = indent(4)
+    parent_l_str.tail = indent(2)
+    # indent after last pre-existing child, if any
+    children = list(parent_l_str)
+    if len(children) > 0:
+        children[-1].tail = indent(4)
+    for str_val in str_values:
+        str_elem = ET.SubElement(parent_l_str, STRING_TAG)
+        str_elem.text = str_val
+        str_elem.tail = indent(4)
+    # dedent after last child
+    str_elem.tail = indent(3)
+
+
+def __merge_server_array(tree: ET.ElementTree, new: ET.ElementTree, namespaces: dict):
+    # The UAVariable corresponding to the server array is required
+    # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
+    tree_server_array = tree.find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']", namespaces)
+    if tree_server_array is None:
+        raise Exception("Missing UAVariable ServerArray (i=2254) in NS0")
+    tree_value = __fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value', namespaces, 3)
+    tree_l_str = __fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString', namespaces, 4)
+    tree_uris = [uri.text for uri in tree_l_str.findall(f'{{{UA_TYPES_URI}}}String', namespaces)]
+    new_uris = [uri.text for uri in new.findall(f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String", namespaces)]
+    ns1_uri = tree.find('uanodeset:NamespaceUris/uanodeset:Uri', namespaces)
+    if len(tree_uris) > 0 and tree_uris[0] != ns1_uri.text:
+        raise Exception(f"Invalid local server URI in node id 2254: {tree_uris[0]}, expecting {ns1_uri} instead")
+    new_uris.insert(0, ns1_uri.text)
+    set_new_uris = set(new_uris) - set(tree_uris)
+    unique_new_uris = list()
+    for uri in new_uris:
+        if uri in set_new_uris and uri not in unique_new_uris:
+            unique_new_uris.append(uri)
+    __append_strings(tree_l_str, unique_new_uris)
+
+
+def __fill_namespace_array(tree: ET.ElementTree, namespaces: dict):
+    # The UAVariable corresponding to the namespace array is required
+    # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
+    namespace_array_node = tree.find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']", namespaces)
+    if namespace_array_node is None:
+        raise Exception("Missing UAVariable NamespaceArray (i=2255) in NS0")
+    value = __fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value', namespaces, 3)
+    l_str = __fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString', namespaces)
+    l_str.clear()
+    ns_uris = tree.findall('uanodeset:NamespaceUris/uanodeset:Uri', namespaces)
+    __append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
+
+
 def run_merge(args):
     # Load and merge all address spaces
     tree = None
@@ -459,6 +539,7 @@ def run_merge(args):
             # We have to name it to be able to use it.
             if '' in namespaces:
                 namespaces['uanodeset'] = namespaces['']
+            __fill_namespace_array(tree, namespaces)
         else:
             merge(tree, new_tree, namespaces)
 
@@ -495,7 +576,7 @@ def make_argparser():
             Path (or - for stdin) the address spaces to merge. In case of conflicting elements,
             the element from the first address space in the argument order is kept.
             The models must be for the same OPC UA version (e.g. 1.03).
-            The first address space shall be the namespace NS0.
+            The first address space shall contain the OPC UA namespace NS0.
             The following address spaces, if any, will be the namespaces 1 to N.
                              ''')
     parser.add_argument('--output', '-o', metavar='XML', dest='fn_out', #required=True,
