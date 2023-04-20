@@ -65,7 +65,9 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .getServerKeyPassword = NULL,
 };
 
-SOPC_ServerHelper_Config sopc_server_helper_config;
+SOPC_ServerHelper_Config sopc_server_helper_config = {
+    .initialized = false, // ensures it will indicated not initialized before first init
+};
 
 // Manage configuration state
 bool SOPC_ServerInternal_IsConfiguring(void)
