@@ -91,7 +91,7 @@ SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath);
  * \param directoryPath    The directory path in which last item (regarding path delimiter) is the directory to read.
  *                         Path delimiter is still dependent on O.S. but '/' path delimiter should be supported for
  *                         relative paths.
- * \param ppFilePaths      A newly allocated array of file paths (list of NULL terminated C string). You should freed it
+ * \param ppFilePaths      A newly allocated array of file paths (list of NULL terminated C string). You should free it
  *                         with SOPC_Array_Delete.
  *
  * \note                   In case of error, \p ppFilePaths is set to NULL.

@@ -152,13 +152,13 @@ bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest);
 char* SOPC_strdup(const char* s);
 
 /**
- * \brief    Concatenate two given C string.
+ * \brief    Concatenates the two given C strings.
  *
  * \param left  The C string at the left side.
  * \param right The C string at the right side.
- * \param str   The newly C string = \p left + \p right . You should freed it with SOPC_Free.
+ * \param str   The newly C string = \p left + \p right . You should free it with SOPC_Free.
  *
- * \return   SOPC_STATUS_OK when success.
+ * \return   SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_StrConcat(const char* left, const char* right, char** str);
 

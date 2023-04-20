@@ -98,7 +98,7 @@ static SOPC_ReturnStatus get_file_path(const char* pDirectoryPath, const char* p
 static bool is_regular_file(WIN32_FIND_DATA fileData)
 {
     bool result = false;
-    /* Only keep rugular file */
+    /* Only keep regular file */
     if (!(fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
     {
         result = true;
@@ -152,7 +152,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
     {
         /* We don't want sub folders! Is it a regular file? */
         bIsRegular = is_regular_file(fileData);
-        /* Only keep rugular file */
+        /* Only keep regular file */
         if (!bIsRegular)
         {
             /* Next iteration */

@@ -65,12 +65,12 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCert
  * \brief   Define whether the PKI is used for user or application certificates,
  *          The extensions verification for users:
  *              - The keyUsage is expected to be filled with digitalSignature.
- *              - The extendedkeyUsage is not checked.
+ *              - The extendedKeyUsage is not checked.
  *              - The CA flag is expected to be FALSE
  *          The extensions verification for applications:
  *              - The keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
  *                and dataEncipherment.
- *              - The extendedkeyUsage is filled with serverAuth and/or clientAuth.
+ *              - The extendedKeyUsage is filled with serverAuth and/or clientAuth.
  *
  * \note By default, the PKI is used for application instance certificates.
  *
@@ -166,7 +166,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 /* ************************* NEW API ******************************** */
 
 /*
- The directory store shall be form as following:
+ The directory store shall be organized as follows:
   .
   |
   ---- Directory_store_name
@@ -288,14 +288,14 @@ typedef struct SOPC_PKI_Config
  * \param type The PKI type desired. Should be SOPC_PKI_TYPE_USER, SOPC_PKI_TYPE_CLIENT_APP, SOPC_PKI_TYPE_SERVER_APP,
  *             or SOPC_PKI_TYPE_CLIENT_SERVER_APP.
  *
- * \return A constant SOPC_PKI_Config* which should not be modified. NULL in case of error.
+ * \return A constant pointer of ::SOPC_PKI_Config which should not be modified. NULL in case of error.
  */
 const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
 
 /**
- * \brief Create the PKIProvider from a directory where certificates are store.
+ * \brief Creates the PKIProvider from a directory where certificates are stored.
  *
- * The directory store shall be form as following:
+ * The directory store shall be organized as follows:
  *
  * - Directory_store_name/default/trusted/certs (.DER or .PEM files)
  * - Directory_store_name/default/trusted/crl (.DER or .PEM files)
@@ -309,7 +309,7 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
  *
  * The trustList could be empty but not the default folder.
  * The function attempts to build the PKI from the trustList folder
- * and in case of error, it switches from the default folder.
+ * and in case of error, it switches to the default folder.
  * For both folders, default and trustList, each subfolder certs and crl is mandatory.
  *
  *
@@ -323,20 +323,18 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
  *   trusted/certs.
  * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
  *
- * This function check :
- * - That the certificate store is not empty.
- * - That at least one cert from trusted/certs is provided.
- * - That each certificate from issuer/certs are CA.
- * - That each CA has exactly one Certificate Revocation List (CRL).
- * - todo: That each CA keyUsage is filed with keyCertSign and keyCrlSign.
- * - todo: That the chain of signatures is rigth for each certificate.
+ * This function checks that :
+ * - the certificate store is not empty.
+ * - at least one cert from trusted/certs is provided.
+ * - each certificate from issuer/certs are CA.
+ * - each CA has exactly one Certificate Revocation List (CRL).
  *
- * \note Content of the pki is NULL when return value is not SOPC_STATUS_OK.
+ * \note Content of the PKI is NULL when return value is not SOPC_STATUS_OK.
  *
- * \param directoryStorePath The directory path where certificates are store.
+ * \param directoryStorePath The directory path where certificates are stored.
  * \param pConfig A valid pointer to the configuration.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
- *              SOPC_PKIProviderNew_Free().
+ *              ::SOPC_PKIProviderNew_Free().
  *
  * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *          and SOPC_STATUS_NOK when there was an error.
@@ -358,20 +356,18 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  *   trusted/certs.
  * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
  *
- * This function check :
- * - That at least one cert from \p pTrustedCerts is provided.
- * - That each certificate from \p pIssuerCerts are CA.
- * - That each CA has exactly one Certificate Revocation List (CRL).
- * - todo: That each CA keyUsage is filed with keyCertSign and keyCrlSign.
- * - todo: That the chain of signatures is rigth for each certificate.
+ * This function checks that :
+ * - at least one cert from \p pTrustedCerts is provided.
+ * - each certificate from \p pIssuerCerts are CA.
+ * - each CA has exactly one Certificate Revocation List (CRL).
  *
  * \param pTrustedCerts A valid pointer to the trusted certificate list.
  * \param pTrustedCrl A valid pointer to the trusted CRL list.
- * \param pIssuerCerts A valid pointer to the issuer certificate list.
- * \param pIssuerCrl A valid pointer to the issuer CRL list.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if not used.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if not used.
  * \param pConfig A valid pointer to the configuration.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
- *              SOPC_PKIProviderNew_Free().
+ *              ::SOPC_PKIProviderNew_Free().
  *
  * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *          and SOPC_STATUS_NOK when there was an error.
@@ -389,7 +385,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
  *
  * \param uri The URI describing the security policy. Should not be NULL.
  *
- * \return A constant SOPC_PKI_LeafProfile* which should not be modified. NULL in case of error.
+ * \return A constant pointer of ::SOPC_PKI_LeafProfile which should not be modified. NULL in case of error.
  */
 const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri);
 
@@ -399,14 +395,14 @@ const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri);
  *
  * \param uri The URI describing the security policy. Should not be NULL.
  *
- * \return A constant SOPC_PKI_Profile* which should not be modified. NULL in case of error.
+ * \return A constant pointer of ::SOPC_PKI_Profile which should not be modified. NULL in case of error.
  */
 const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri);
 
 /**
  * \brief Get a minimal PKI profile for user validation process.
  *
- * \return A constant SOPC_PKI_Profile* which should not be modified.
+ * \return A constant pointer of ::SOPC_PKI_Profile which should not be modified.
  */
 const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void);
 
@@ -438,8 +434,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *
- * \return SOPC_STATUS_OK when the certificate is successfully validated, and
- *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
+ * \return SOPC_STATUS_OK when the certificate properties are successfully validated, and
+ *         SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config* pConfig,
                                                            const SOPC_CertificateList* pToValidate,
@@ -457,21 +453,21 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config
  *         - trustList/issuers/crl
  *
  * \param pPKI A valid pointer to the PKIProvider.
- * \param bEraseExistingFiles whether the existing files of the the trustList folder should be deleted.
+ * \param bEraseExistingFiles whether the existing files of the the trustList folder shall be deleted.
  *
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles);
 
-/** \brief Update the PKI with new lists of certificates an CRL.
+/** \brief Update the PKI with new lists of certificates and CRL.
  *
  * \param ppPKI A valid pointer to the PKIProvider.
- * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part should not updated.
- * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part should not updated.
- * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part should not updated.
- * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if this part should not updated.
- * \param bIncludeExistingList whether the update should includes the existing certificates of \p ppPKI plus
- *                             \p pTrustedCerts \p pTrustedCrl \p pIssuerCerts \p pIssuerCrl .
+ * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part shall not updated.
+ * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part shall not updated.
+ * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part shall not updated.
+ * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if this part shall not updated.
+ * \param bIncludeExistingList whether the update shall includes the existing certificates of \p ppPKI plus
+ *                             \p pTrustedCerts , \p pTrustedCrl , \p pIssuerCerts  and \p pIssuerCrl .
  *
  * \return SOPC_STATUS_OK when successful.
  */

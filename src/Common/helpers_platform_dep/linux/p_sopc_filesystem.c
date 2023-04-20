@@ -108,7 +108,7 @@ static SOPC_ReturnStatus is_regular_file(const char* pFilePath, bool* result)
     struct stat info = {0};
     int res = stat(pFilePath, &info);
     SOPC_ReturnStatus status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-    /* Only keep rugular file => avoid dir, fifo, link ...*/
+    /* Only keep regular file => avoid dir, fifo, link ...*/
     if (SOPC_STATUS_OK == status)
     {
         if (!S_ISREG(info.st_mode))
@@ -163,7 +163,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
             /* We don't want sub folders! Is it a regular file? */
             status = is_regular_file(pFilePath, &bIsRegular);
         }
-        /* Only keep rugular file */
+        /* Only keep regular file */
         if (!bIsRegular && SOPC_STATUS_OK == status)
         {
             /* Next iteration */
@@ -178,7 +178,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
             {
                 pFileName = SOPC_strdup(dir->d_name);
                 bResAppend = SOPC_Array_Append(pFileInfos, pFileName);
-                SOPC_Free(pFilePath); // We do not need filePath anymore and have to freed it.
+                SOPC_Free(pFilePath); // We do not need filePath anymore and have to free it.
             }
             else
             {
@@ -189,7 +189,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
         /* Next iteration */
         dir = readdir(d);
     }
-    /* Clore after while */
+    /* Close after while */
     closedir(d);
     /* Clear */
     if (SOPC_STATUS_OK != status)

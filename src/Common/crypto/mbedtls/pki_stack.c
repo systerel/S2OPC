@@ -203,7 +203,7 @@ static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_d
         }
     }
 
-    /* Only fatal errors whould be returned here, as this error code will be forwarded to the caller of
+    /* Only fatal errors could be returned here, as this error code will be forwarded to the caller of
      * mbedtls_x509_crt_verify_with_profile, and the verification stopped.
      * Errors may be MBEDTLS_ERR_X509_FATAL_ERROR, or application specific */
     return 0;
@@ -336,7 +336,7 @@ static void PKIProviderStack_Free(SOPC_PKIProvider* pPKI)
     }
 
     /* Deleting the untrusted list will also clear the trusted list, as they are linked.
-     * Hence mbedtls will call free on (&pPKI->pUserTrustedIssersList.crt), which is pPKI->pUserTrustedIssersList.
+     * Hence mbedtls will call free on (&pPKI->pUserTrustedIssuersList.crt), which is pPKI->pUserTrustedIssuersList.
      */
     /* TODO: As the lists are not always generated the same way, there may be cases were they are not linked.
      *       (see Create, as opposed to CreateFromPaths).
@@ -529,7 +529,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
      * Links issuers are used to complete the chain between end-entry certificates
      * (certificate received in the OPN process) and the roots.
      *
-     * In practise, as certificates are linked lists in mbedtls,
+     * In practice, as certificates are linked lists in mbedtls,
      * to verify issued certificates, we chain untrusted and trusted certificates,
      * we create a single list, and chain them: untrusted -> trusted.
      */
@@ -718,11 +718,12 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 /*
 TODO RBA:
 
-    - Maybe create a new interface sopc_certificates.h or move some functions into sopc_key_mannager.h
-    - Add static config structure for validation in crypto provider API or in PKI API with an accesor from the security
-policy.
-    - Replace fprintf by log
-    - Add mutex
+    - Handled that the security level of the update is not higher than the security level of the endpoint
+    - Add a new crypto interface to rule certificates
+    - Add unit test for file system API
+    - Add unit test for PKI API
+    - Add WriteToList function (embedded system)
+    - Add mutex in API
 */
 
 /**
@@ -778,7 +779,7 @@ static const SOPC_PKI_Config g_config_user = {
     .bBackwardInteroperability = false,
     .keyUsage = SOPC_PKI_KU_DIGITAL_SIGNATURE, // it is not part of the OPC UA but it makes sense to keep it
 };
-/* TODO RBA: removed const properties for client and server configuration structures (URI + HostName to configure later
+/* TODO RBA: Removed const properties for client and server configuration structures (URI + HostName to configure later
  * by user) */
 static const SOPC_PKI_Config g_config_client_app = {
     .type = SOPC_PKI_TYPE_CLIENT_APP,
@@ -1131,7 +1132,7 @@ static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProf
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* Set minimun RSA key size allowed */
+    /* Set minimum RSA key size allowed */
     pProfile->rsa_min_bitlen = pConfig->RSAMinimumKeySize;
 
     return SOPC_STATUS_OK;
@@ -1241,9 +1242,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
 /*
     TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
         1. check_security_policy(pToValidate, pProfile)
-        2. check_host_name(pToValidate, pPKI->pConfig)
-        3. check_uri(pToValidate, pPKI->pConfig)
-        4. check_certificate_usage(pToValidate, pPKI->pConfig)
+        2. check_host_name(pToValidate, pConfig)
+        3. check_uri(pToValidate, pConfig)
+        4. check_certificate_usage(pToValidate, pConfig)
 */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config* pConfig,
                                                            const SOPC_CertificateList* pToValidate,
@@ -1260,7 +1261,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config
     SOPC_ReturnStatus status = check_security_policy(pToValidate, pProfile);
     if (SOPC_STATUS_OK != status)
     {
-        *error = SOPC_CertificateValidationError_Invalid; // TODO RBA: replace by Bad_CertificatePolicyCheckFailed?
+        *error = SOPC_CertificateValidationError_Invalid; // TODO RBA: Replace by Bad_CertificatePolicyCheckFailed?
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1392,7 +1393,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     return status;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
+/* TODO RBA: Add into sop_key_manager.h */
 static bool cert_is_self_sign(mbedtls_x509_crt* crt)
 {
     SOPC_ASSERT(NULL != crt);
@@ -1422,11 +1423,10 @@ static bool cert_is_self_sign(mbedtls_x509_crt* crt)
     return is_self_sign;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
 /**
  * \brief Delete the roots of the list ppCerts. Create a new list ppRootCa with all roots from ppCerts.
- *        If there is no root, the contain of ppRootCa is set to NULL.
- *        If ppCerts become empty, its contains is set to NULL.
+ *        If there is no root, the content of ppRootCa is set to NULL.
+ *        If ppCerts becomes empty, its content is set to NULL.
  */
 static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCerts, SOPC_CertificateList** ppRootCa)
 {
@@ -1520,7 +1520,7 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
     return status;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
+/* TODO RBA: Add into sop_key_manager.h */
 static SOPC_ReturnStatus copy_certificate(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1545,7 +1545,6 @@ static SOPC_ReturnStatus copy_certificate(SOPC_CertificateList* pCert, SOPC_Cert
     return status;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
 static SOPC_ReturnStatus merge_certificates(SOPC_CertificateList* pLeft,
                                             SOPC_CertificateList* pRight,
                                             SOPC_CertificateList** ppRes)
@@ -1576,7 +1575,7 @@ static SOPC_ReturnStatus merge_certificates(SOPC_CertificateList* pLeft,
     return status;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
+/* TODO RBA: Add into sop_key_manager.h */
 static SOPC_ReturnStatus copy_crl(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1601,7 +1600,6 @@ static SOPC_ReturnStatus copy_crl(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
     return status;
 }
 
-/* TODO RBA: Maybe add into sop_key_manager.h */
 static SOPC_ReturnStatus merge_crls(SOPC_CRLList* pLeft, SOPC_CRLList* pRight, SOPC_CRLList** ppRes)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1677,7 +1675,7 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     }
     get_list_stats(pTrustedCerts, &trusted_ca_count, &trusted_list_length, &trusted_root_count);
     issued_cert_count = trusted_list_length - trusted_ca_count;
-    /* trusted CA --> trusted CRL*/
+    /* trusted CA => trusted CRL*/
     if (0 != trusted_ca_count && NULL == pTrustedCrl)
     {
         fprintf(stderr, "> PKI creation error: trusted CA certificates are provided but no CRL.\n");
@@ -1694,7 +1692,7 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     }
 
     get_list_stats(pIssuerCerts, &issuer_ca_count, &issuer_list_length, &issuer_root_count);
-    /* issuer CA --> issuer CRL*/
+    /* issuer CA => issuer CRL*/
     if (0 != issuer_ca_count && NULL == pIssuerCrl)
     {
         fprintf(stderr, "> PKI creation error: issuer CA certificates are provided but no CRL.\n");
@@ -1725,17 +1723,6 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     return status;
 }
 
-/*
-RBA TODO:
-    - Check that each CA keyUsage is filed with keyCertSign and keyCrlSign.
-    - Add the chain of signatures verification.
-    - Add a configuration to raise a warning or to return an error if the chain of signatures is not rigth for each.
-certificate.
-        --> The objectif is to fail during the PKI update (certificate manager part 12) but not during a "nominal"
-operation.
-    - Maybe all the list check (check_lists() function) can be done during the validation and return
-Bad_CertificateChainIncomplete (but it is in conflict with the PKI update)
-*/
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
@@ -1753,7 +1740,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
 
     SOPC_CertificateList* tmp_pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
     SOPC_CRLList* tmp_pTrustedCrl = NULL;           /* CRLs of trusted intermediate CA and trusted root CA */
-    SOPC_CertificateList* tmp_pIssuerCerts = NULL;  /* issuer intermediate CA + iussuer root CA */
+    SOPC_CertificateList* tmp_pIssuerCerts = NULL;  /* issuer intermediate CA + issuer root CA */
     SOPC_CRLList* tmp_pIssuerCrl = NULL;            /* CRLs of issuer intermediate CA and issuer root CA */
 
     if (NULL == pConfig || NULL == ppPKI)
@@ -1766,7 +1753,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
        - Check if issuerCerts list is only filled with CA.
        - Check and warn if issuerCerts is not empty but pTrustedCerts is only filed with CA.
          In this case, if there is no root into pTrustedCerts then
-         no certififcates will be accepted during validation process.
+         no certificates will be accepted during validation process.
        - Check and warn in case no root defined but trusted certificates defined.
          In this case, only trusted self-signed issued certificates will be accepted.
     */
@@ -1832,7 +1819,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         {
             fprintf(
                 stderr,
-                "> PKI creation warning: Not all certificate authorities in given issuer certififcates have a single "
+                "> PKI creation warning: Not all certificate authorities in given issuer certificates have a single "
                 "certificate revocation list! Certificates issued by these CAs will be refused.\n");
         }
     }
@@ -2122,7 +2109,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* The case of the PKI is build from buffer (there is no store) */
+    /* The case of the PKI is built from buffer (there is no store) */
     if (NULL == pPKI->directoryStorePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -2202,7 +2189,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
     SOPC_CertificateList* tmp_pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
     SOPC_CertificateList* tmp_pTrustedCertsTmp = NULL;
     SOPC_CRLList* tmp_pTrustedCrl = NULL;          /* CRLs of trusted intermediate CA and trusted root CA */
-    SOPC_CertificateList* tmp_pIssuerCerts = NULL; /* issuer intermediate CA + iussuer root CA */
+    SOPC_CertificateList* tmp_pIssuerCerts = NULL; /* issuer intermediate CA + issuer root CA */
     SOPC_CertificateList* tmp_pIssuerCertsTmp = NULL;
     SOPC_CRLList* tmp_pIssuerCrl = NULL; /* CRLs of issuer intermediate CA and issuer root CA */
 
