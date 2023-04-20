@@ -128,6 +128,7 @@ typedef struct
     const char* password;
     const char* path_cert_x509_token;
     const char* path_key_x509_token;
+    bool key_x509_token_encrypted;
 } SOPC_ClientCmd_Security;
 
 /**

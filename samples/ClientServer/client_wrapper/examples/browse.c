@@ -105,6 +105,7 @@ int main(int argc, char* const argv[])
         .password = NULL,
         .path_cert_x509_token = NULL,
         .path_key_x509_token = NULL,
+        .key_x509_token_encrypted = false,
     };
 
     SOPC_ClientCmd_EndpointConnection endpoint = {

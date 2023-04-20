@@ -48,10 +48,12 @@ typedef struct SOPC_ClientHelper_Config
     int32_t openedReverseEndpointsIdx[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
 
     SOPC_ServiceAsyncResp_Fct* asyncRespCb;
-} SOPC_ClientHelper_Config;
 
-// The default value of the configuration structure
-extern const SOPC_ClientHelper_Config sopc_client_helper_config_default;
+    SOPC_GetPassword_Fct* getClientKeyPasswordCb;
+
+    SOPC_GetClientUserPassword_Fct* getUserKeyPasswordCb;
+    SOPC_GetClientUserPassword_Fct* getUserNamePasswordCb;
+} SOPC_ClientHelper_Config;
 
 // The singleton configuration structure
 extern SOPC_ClientHelper_Config sopc_client_helper_config;
@@ -86,20 +88,24 @@ bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword);
 bool SOPC_ClientInternal_IsEncryptedClientKey(void);
 
 /**
- * \brief Function to call the callback to retrieve password for decryption of the User private key.
+ * \brief Function to call the callback to retrieve password for decryption of the user private key associated to given
+ *        cert Sha1.
  *
  * \param[out] outPassword   the newly allocated password.
  *
  * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_GetUserKeyPassword(char** outPassword);
+bool SOPC_ClientInternal_GetUserKeyPassword(const char* cert1Sha1, char** outPassword);
 
 /**
- * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetUserKeyPasswordCallback (i.e.
- * the user's key is encrypted).
+ * \brief Function to call the callback to retrieve password associated to given username
+ *
+ * \param[out] outPassword   the newly allocated password.
+ *
+ * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_IsEncryptedUserKey(void);
+bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPassword);
 
 #endif /* LIBS2OPC_CLIENT_INTERNAL_H_ */

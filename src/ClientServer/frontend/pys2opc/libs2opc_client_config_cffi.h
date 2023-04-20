@@ -57,18 +57,4 @@ typedef bool SOPC_GetPassword_Fct(char** outPassword);
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
 
-/**
- * \brief Define the callback to retrieve password for decryption of the user X509 token private key.
- *
- * This is optional but if used it shall be defined before starting client and loading its configuration.
- *
- * \param getUserKeyPassword  The callback to retrieve the password
- *
- * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p getUserKeyPassword is
- *          invalid.
- *
- * \note    This function must be called before the configuration of the secure channel.
- */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getUserKeyPassword);
-
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */

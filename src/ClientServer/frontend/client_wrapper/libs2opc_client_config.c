@@ -38,9 +38,16 @@ const SOPC_ClientHelper_Config sopc_client_helper_config_default = {
     .secureConnections = {NULL},
     .openedReverseEndpointsIdx = {0},
     .asyncRespCb = NULL,
+
+    .getClientKeyPasswordCb = NULL,
+    .getUserKeyPasswordCb = NULL,
+
+    .getUserNamePasswordCb = NULL,
 };
 
-SOPC_ClientHelper_Config sopc_client_helper_config;
+SOPC_ClientHelper_Config sopc_client_helper_config = {
+    .initialized = false, // ensures it will indicated not initialized before first init
+};
 
 bool SOPC_ClientInternal_IsInitialized(void)
 {
@@ -226,6 +233,16 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
         }
     }
 
+    if (SOPC_STATUS_OK == status && OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType)
+    {
+        bool res = SOPC_ClientInternal_GetUserNamePassword(secConnConfig->sessionConfig.userToken.userName.userName,
+                                                           &secConnConfig->sessionConfig.userToken.userName.userPwd);
+        if (!res)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
     return status;
 }
 
@@ -279,11 +296,9 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAs
     return status;
 }
 
-static SOPC_GetPassword_Fct* FctGetClientKeyPassword = NULL;
-static SOPC_GetPassword_Fct* FctGetUserKeyPassword = NULL;
-
 static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC_GetPassword_Fct* getKeyPassword)
 {
+    /* TODO: check init state of config when it will be stored in config */
     SOPC_ASSERT(NULL != destCb);
     if (NULL == getKeyPassword)
     {
@@ -293,18 +308,39 @@ static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
+static SOPC_ReturnStatus SetUserPasswordCallback(SOPC_GetClientUserPassword_Fct** destCb,
+                                                 SOPC_GetClientUserPassword_Fct* getUserPassword)
 {
-    return SetPasswordCallback(&FctGetClientKeyPassword, getClientKeyPassword);
+    /* TODO: check init state of config when it will be stored in config */
+    SOPC_ASSERT(NULL != destCb);
+    if (NULL == getUserPassword)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    *destCb = getUserPassword;
+    return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getUserKeyPassword)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
 {
-    return SetPasswordCallback(&FctGetUserKeyPassword, getUserKeyPassword);
+    return SetPasswordCallback(&sopc_client_helper_config.getClientKeyPasswordCb, getClientKeyPassword);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUsernamePasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientUsernamePassword)
+{
+    return SetUserPasswordCallback(&sopc_client_helper_config.getUserNamePasswordCb, getClientUsernamePassword);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientX509userKeyPassword)
+{
+    return SetUserPasswordCallback(&sopc_client_helper_config.getUserKeyPasswordCb, getClientX509userKeyPassword);
 }
 
 static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, const char* cbName, char** outPassword)
 {
+    /* TODO: check init state of config when it will be stored in config */
     if (NULL == passwordCb)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
@@ -313,24 +349,42 @@ static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, co
     return passwordCb(outPassword);
 }
 
-// Get password to decrypt user private key from internal callback
-bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
+static bool SOPC_ClientInternal_GetUserPassword(SOPC_GetClientUserPassword_Fct* userpasswordCb,
+                                                const char* cbName,
+                                                const char* userId,
+                                                char** outPassword)
 {
-    return SOPC_ClientInternal_GetPassword(FctGetClientKeyPassword, "ClientKeyPasswordCallback", outPassword);
+    /* TODO: check init state of config when it will be stored in config */
+    if (NULL == userpasswordCb)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
+        return false;
+    }
+    return userpasswordCb(userId, outPassword);
 }
 
 // Get password to decrypt user private key from internal callback
-bool SOPC_ClientInternal_GetUserKeyPassword(char** outPassword)
+bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
 {
-    return SOPC_ClientInternal_GetPassword(FctGetUserKeyPassword, "UserKeyPasswordCallback", outPassword);
+    return SOPC_ClientInternal_GetPassword(sopc_client_helper_config.getClientKeyPasswordCb,
+                                           "ClientKeyPasswordCallback", outPassword);
+}
+
+// Get password to decrypt user private key from internal callback
+bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPassword)
+{
+    return SOPC_ClientInternal_GetUserPassword(sopc_client_helper_config.getUserKeyPasswordCb,
+                                               "UserKeyPasswordCallback", certSha1, outPassword);
+}
+
+// Get password associated to username from internal callback
+bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPassword)
+{
+    return SOPC_ClientInternal_GetUserPassword(sopc_client_helper_config.getUserNamePasswordCb,
+                                               "UserNamePasswordCallback", username, outPassword);
 }
 
 bool SOPC_ClientInternal_IsEncryptedClientKey(void)
 {
-    return NULL != FctGetClientKeyPassword;
-}
-
-bool SOPC_ClientInternal_IsEncryptedUserKey(void)
-{
-    return NULL != FctGetUserKeyPassword;
+    return NULL != sopc_client_helper_config.getClientKeyPasswordCb;
 }

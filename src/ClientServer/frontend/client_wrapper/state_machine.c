@@ -58,7 +58,7 @@ struct SOPC_StaMac_Machine
     uint32_t iCliId;      /* LibSub connection ID, used by the callback. It shall be unique. */
 
     /* Keeping two callbacks to avoid modification of LibSub API */
-    SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;             /* Callback when subscribed data changed */
+    SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;          /* Callback when subscribed data changed */
     SOPC_ClientCmd_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
 
     SOPC_LibSub_EventCbk* pCbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
@@ -85,9 +85,10 @@ struct SOPC_StaMac_Machine
     const char* szPassword;                 /* See SOPC_LibSub_ConnectionCfg */
     const char* szPath_cert_x509_token;     /* path of the x509 certificate for X509IdentiyToken (DER format) */
     const char* szPath_key_x509_token;      /* path of the private key for X509IdentiyToken (PEM format)*/
-    int64_t iTimeoutMs;                     /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
-    SOPC_SLinkedList* dataIdToNodeIdList;   /* A list of data ids to node ids */
-    uintptr_t userContext;                  /* A state machine user defined context */
+    bool key_x509_token_encrypted;
+    int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
+    uintptr_t userContext;                /* A state machine user defined context */
 };
 
 /* Internal functions */
@@ -165,6 +166,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPassword,
                                      const char* szPath_cert_x509_token,
                                      const char* szPath_key_x509_token,
+                                     bool key_x509_token_encrypted,
                                      SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
@@ -210,6 +212,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szPassword = NULL;
         pSM->szPath_cert_x509_token = NULL;
         pSM->szPath_key_x509_token = NULL;
+        pSM->key_x509_token_encrypted = false;
         pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
         pSM->userContext = userContext;
@@ -273,6 +276,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         if (NULL != pSM->szPath_key_x509_token)
         {
             strcpy((char*) pSM->szPath_key_x509_token, szPath_key_x509_token);
+            pSM->key_x509_token_encrypted = key_x509_token_encrypted;
         }
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
@@ -400,15 +404,25 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
             {
                 char* password = NULL;
                 size_t lenPassword = 0;
-                bool userKeyEncrypted = SOPC_ClientInternal_IsEncryptedUserKey();
-                if (userKeyEncrypted)
+                if (pSM->key_x509_token_encrypted)
                 {
-                    bool res = SOPC_ClientInternal_GetUserKeyPassword(&password);
-                    if (!res)
+                    SOPC_CertificateList* cert = NULL;
+                    status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertX509, &cert);
+
+                    if (SOPC_STATUS_OK == status)
                     {
-                        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                                    "Failed to retrieve the password of the user private key from callback.");
-                        status = SOPC_STATUS_NOK;
+                        char* certSha1 = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
+                        SOPC_KeyManager_Certificate_Free(cert);
+                        cert = NULL;
+
+                        bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
+                        if (!res)
+                        {
+                            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                        "Failed to retrieve the password of the user private key from callback.");
+                            status = SOPC_STATUS_NOK;
+                        }
+                        SOPC_Free(certSha1);
                     }
                 }
 

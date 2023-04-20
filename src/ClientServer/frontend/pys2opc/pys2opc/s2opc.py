@@ -100,9 +100,9 @@ def _callback_get_client_key_password(password):
     return True
 
 @ffi.def_extern()
-def _callback_get_user_key_password(password):
+def _callback_get_user_key_password(certSha1, password):
     try:
-        pwd = PyS2OPC_Client.get_user_key_password()
+        pwd = PyS2OPC_Client.get_user_key_password(certSha1)
         pwd = pwd.encode() + b'\0' # Add protection to avoid buffer overrun with C code
         password[0] = allocator_no_gc('char[{}]'.format(len(pwd)), pwd)
     except Exception:
@@ -381,6 +381,7 @@ class PyS2OPC_Client(PyS2OPC):
                                  'password': _password,
                                  'path_cert_x509_token': ffi.NULL if path_cert_user is None else ffi.new('char[]', path_cert_user.encode()),
                                  'path_key_x509_token': ffi.NULL if path_key_user is None else ffi.new('char[]', path_key_user.encode()),
+                                 'key_x509_token_encrypted' : user_key_encrypted,
                                  'publish_period_ms': publish_period,
                                  'n_max_keepalive': n_max_keepalive,
                                  'n_max_lifetime': n_max_lifetime,
@@ -394,7 +395,7 @@ class PyS2OPC_Client(PyS2OPC):
             status = libsub.SOPC_HelperConfigClient_SetClientKeyPasswordCallback(libsub._callback_get_client_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the client private key.'
         if user_key_encrypted:
-            status = libsub.SOPC_HelperConfigClient_SetUserKeyPasswordCallback(libsub._callback_get_user_key_password)
+            status = libsub.SOPC_HelperConfigClient_SetX509userPasswordCallback(libsub._callback_get_user_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the user private key.'
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
@@ -487,13 +488,13 @@ class PyS2OPC_Client(PyS2OPC):
         return PyS2OPC._get_password("Client private key password:")
 
     @staticmethod
-    def get_user_key_password():
+    def get_user_key_password(certSha1):
         """
         Default method that is called during configuration phase if an encrypted private key is used,
         it shall return the password to decrypt the user private key.
         It uses the `_get_password` which uses get_pass library.
         """
-        return PyS2OPC._get_password("User private key password:")
+        return PyS2OPC._get_password('User private key password for user cert{}:'.format(certSha1))
 
 
 class PyS2OPC_Server(PyS2OPC):

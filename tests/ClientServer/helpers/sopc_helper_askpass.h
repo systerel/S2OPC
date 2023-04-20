@@ -30,7 +30,7 @@
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 
 /**
- * \brief               Get a password from an environement variable.
+ * \brief               Get a password from an environment variable.
  *
  * \param outPassword   The newly allocated password, you should free it.
  *
@@ -43,5 +43,10 @@
  *
  */
 bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword);
+
+/**
+ * \brief               Identical to ::SOPC_TestHelper_AskPassWithContext_FromEnv with an ignored context.
+ */
+bool SOPC_TestHelper_AskPassWithContext_FromEnv(const char* context, char** outPassword);
 
 #endif /* SOPC_HELPER_ASKPASS_H_ */
