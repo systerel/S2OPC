@@ -140,6 +140,48 @@ typedef void SOPC_ServiceAsyncResp_Fct(SOPC_EncodeableType* type, const void* re
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb);
 
 /**
+ * \brief Type of callback to retrieve password for username or password for decryption of the user private key
+ *
+ * \param      userId        user ID which might be a username or a user certificate thumbprint
+ * \param[out] outPassword   out parameter, the newly allocated password which shall be a zero-terminated string in case
+ *                           of success.
+ *
+ * \return true in case of success, otherwise false.
+ *
+ * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
+ * failure.
+ */
+typedef bool SOPC_GetClientUserPassword_Fct(const char* userId, char** outPassword);
+
+/**
+ * \brief Defines the callback to retrieve the password associated to the given username
+ *        This is necessary if a username token type is used
+ *        and shall be defined before starting client and loading its configuration.
+ *
+ * \param getClientUsernamePassword  The callback to retrieve the password associated to the given username
+ *
+ * \return  SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE or SOPC_STATUS_INVALID_PARAMETERS otherwise.
+ *
+ * \note    This function must be called before the configuration of the secure channel.
+ */
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUsernamePasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientUsernamePassword);
+
+/**
+ * \brief Defines the callback to retrieve password for decryption of the user X509 token private key.
+ *
+ * This is optional but if used it shall be defined before starting client and loading its configuration.
+ *
+ * \param getClientX509userKeyPassword  The callback to retrieve the user X509 token private key password
+ *
+ * \return  SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE or SOPC_STATUS_INVALID_PARAMETERS otherwise.
+ *
+ * \note    This function must be called before the configuration of the secure channel.
+ */
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
+    SOPC_GetClientUserPassword_Fct* getClientX509userKeyPassword);
+
+/**
  * \brief Type of callback to retrieve password for decryption of the client application private key
  *        or the user x509 token private key.
  *
@@ -154,7 +196,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAs
 typedef bool SOPC_GetPassword_Fct(char** outPassword);
 
 /**
- * \brief Define the callback to retrieve password for decryption of the client private key.
+ * \brief Defines the callback to retrieve password for decryption of the client private key.
  *
  * This is optional but if used it shall be defined before starting client and loading its configuration.
  *
@@ -166,40 +208,5 @@ typedef bool SOPC_GetPassword_Fct(char** outPassword);
  * \note    This function must be called before the configuration of the secure channel.
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
-
-/* TODO: remove replaced by  the two following functions */
-/**
- * \brief Define the callback to retrieve password for decryption of the user X509 token private key.
- *
- * This is optional but if used it shall be defined before starting client and loading its configuration.
- *
- * \param getUserKeyPassword  The callback to retrieve the password
- *
- * \return  SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS if \p getUserKeyPassword is
- *          invalid.
- *
- * \note    This function must be called before the configuration of the secure channel.
- */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(SOPC_GetPassword_Fct* getUserKeyPassword);
-
-/**
- * \brief Type of callback to retrieve password for username or password for decryption of the user private key
- *
- * \param      userId        user ID which might be a username or a user certificate thumbprint
- * \param[out] outPassword   out parameter, the newly allocated password which shall be a zero-terminated string in case
- *                           of success.
- *
- * \return true in case of success, otherwise false.
- *
- * \warning The implementation of the user callback must free the \p outPassword and set it back to NULL in case of
- * failure.
- */
-typedef bool SOPC_GetClientUserPassword_Fct(const char* userId, char** outPassword);
-
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUsernamePasswordCallback(
-    SOPC_GetClientUserPassword_Fct* getClientUsernamePassword);
-
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
-    SOPC_GetClientUserPassword_Fct* getClientX509userKeyPassword);
 
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */

@@ -117,9 +117,9 @@ static int32_t client_create_configuration(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientCmd_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
-                                                             DEFAULT_APPLICATION_NAME, "fr-FR",
-                                                             OpcUa_ApplicationType_Client);
+        status =
+            SOPC_ClientCmd_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+                                                     DEFAULT_APPLICATION_NAME, "fr-FR", OpcUa_ApplicationType_Client);
     }
 
     // Retrieve endpoints from server
@@ -154,6 +154,7 @@ static int32_t client_create_configuration(void)
         .password = NULL,
         .path_cert_x509_token = "./user_public/user_2k_cert.der",
         .path_key_x509_token = "./user_private/encrypted_user_2k_key.pem",
+        .key_x509_token_encrypted = true,
     };
 
     SOPC_ClientCmd_EndpointConnection endpoint = {
@@ -168,7 +169,7 @@ static int32_t client_create_configuration(void)
         printf("<Test_Server_Client: Failed to configure the client key password callback\n");
     }
 
-    status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_HelperConfigClient_SetX509userPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the user key password callback\n");

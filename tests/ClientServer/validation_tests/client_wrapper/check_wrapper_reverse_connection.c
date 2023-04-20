@@ -57,6 +57,7 @@ static SOPC_ClientCmd_Security valid_security_signAndEncrypt_b256sha256 = {
     .password = NULL,
     .path_cert_x509_token = NULL,
     .path_key_x509_token = NULL,
+    .key_x509_token_encrypted = false,
 };
 
 START_TEST(test_wrapper_reverse_connections)
@@ -106,7 +107,7 @@ START_TEST(test_wrapper_reverse_connections)
 
     /* create a connection */
     int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&reverse_connection_endpoint,
-                                                                  &valid_security_signAndEncrypt_b256sha256, NULL);
+                                                               &valid_security_signAndEncrypt_b256sha256, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
     int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);

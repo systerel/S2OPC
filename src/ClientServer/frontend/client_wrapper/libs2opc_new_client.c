@@ -461,6 +461,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
 
             const char* userX509certPath = NULL;
             const char* userX509keyPath = NULL;
+            bool userX509keyEncrypted = false;
 
             if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
             {
@@ -472,11 +473,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
                 SOPC_ASSERT(secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded);
                 userX509certPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath;
                 userX509keyPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath;
+                userX509keyEncrypted =
+                    secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted;
             }
 
             status = SOPC_StaMac_Create(cfgId, reverseConfigIdx, secConnConfig->secureConnectionIdx,
                                         secConnConfig->sessionConfig.userPolicyId, username, password, userX509certPath,
-                                        userX509keyPath, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS,
+                                        userX509keyPath, userX509keyEncrypted, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS,
                                         TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT, TMP_PUBLISH_N_TOKEN,
                                         TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
         }

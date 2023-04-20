@@ -28,6 +28,7 @@
 #include "sopc_assert.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 
 bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
 {
@@ -45,4 +46,10 @@ bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
     }
     *outPassword = SOPC_strdup(_outPassword); // Do a copy
     return NULL != *outPassword;
+}
+
+bool SOPC_TestHelper_AskPassWithContext_FromEnv(const char* context, char** outPassword)
+{
+    SOPC_UNUSED_ARG(context);
+    return SOPC_TestHelper_AskPass_FromEnv(outPassword);
 }

@@ -491,6 +491,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
                 if (NULL != pCfg->path_key_x509_token)
                 {
                     strcpy((char*) pCfgCpy->path_key_x509_token, pCfg->path_key_x509_token);
+                    pCfgCpy->key_x509_token_encrypted = pCfg->key_x509_token_encrypted;
                 }
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }
@@ -580,9 +581,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         clientId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, pCfg->reverse_config_idx, clientId, pCfg->policyId, pCfg->username,
                                     pCfg->password, pCfg->path_cert_x509_token, pCfg->path_key_x509_token,
-                                    pCfg->data_change_callback, (double) pCfg->publish_period_ms, pCfg->n_max_keepalive,
-                                    pCfg->n_max_lifetime, pCfg->token_target, pCfg->timeout_ms,
-                                    pCfg->generic_response_callback, (uintptr_t) inhibitDisconnectCallback, &pSM);
+                                    pCfg->key_x509_token_encrypted, pCfg->data_change_callback,
+                                    (double) pCfg->publish_period_ms, pCfg->n_max_keepalive, pCfg->n_max_lifetime,
+                                    pCfg->token_target, pCfg->timeout_ms, pCfg->generic_response_callback,
+                                    (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
 
     /* Adds it to the list and modify pCliId */

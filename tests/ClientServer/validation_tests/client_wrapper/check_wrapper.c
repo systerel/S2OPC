@@ -85,6 +85,7 @@ static SOPC_ClientCmd_Security valid_security_none = {
     .password = NULL,
     .path_cert_x509_token = NULL,
     .path_key_x509_token = NULL,
+    .key_x509_token_encrypted = false,
 };
 
 static SOPC_ClientCmd_Security valid_security_signAndEncrypt_b256sha256 = {
@@ -100,6 +101,7 @@ static SOPC_ClientCmd_Security valid_security_signAndEncrypt_b256sha256 = {
     .password = "password",
     .path_cert_x509_token = NULL,
     .path_key_x509_token = NULL,
+    .key_x509_token_encrypted = false,
 };
 
 static void datachange_callback_none(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
@@ -609,8 +611,7 @@ START_TEST(test_wrapper_read)
 {
     /* read before toolkit is initialized */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
         ck_assert_int_eq(-100, SOPC_ClientCmd_Read(1, readValue, 1, &readResults));
     }
@@ -620,8 +621,7 @@ START_TEST(test_wrapper_read)
 
     /* read before connection is created */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
         ck_assert_int_eq(-100, SOPC_ClientCmd_Read(1, readValue, 1, &readResults));
     }
@@ -638,11 +638,9 @@ START_TEST(test_wrapper_read)
 
     /* invalid arguments */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
-        SOPC_ClientCmd_ReadValue readValue2[2] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
-            {.nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue2[2] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
+                                                  {.nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
         SOPC_DataValue readResults2[2];
 
@@ -662,8 +660,7 @@ START_TEST(test_wrapper_read)
     }
     /* read one node */
     {
-        SOPC_ClientCmd_ReadValue readValue1[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue1[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults1;
         ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValue1, 1, &readResults1));
         /* check datavalue */
@@ -687,8 +684,7 @@ START_TEST(test_wrapper_read)
             readValueMultiple[i].indexRange = NULL;
         }
         SOPC_DataValue readResultsMultiple[NB_READ_VALUES];
-        ck_assert_int_eq(0,
-                         SOPC_ClientCmd_Read(valid_con_id, readValueMultiple, NB_READ_VALUES, readResultsMultiple));
+        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValueMultiple, NB_READ_VALUES, readResultsMultiple));
 
         for (size_t i = 0; i < NB_READ_VALUES; i++)
         {
@@ -739,8 +735,7 @@ START_TEST(test_wrapper_read)
 
     /* read after connection is closed */
     {
-        SOPC_ClientCmd_ReadValue readValue5[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue5[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults5;
         ck_assert_int_eq(-100, SOPC_ClientCmd_Read(valid_con_id, readValue5, 1, &readResults5));
     }
@@ -750,8 +745,7 @@ START_TEST(test_wrapper_read)
 
     /* read after toolkit is closed */
     {
-        SOPC_ClientCmd_ReadValue readValue6[1] = {
-            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientCmd_ReadValue readValue6[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults6;
         ck_assert_int_eq(-100, SOPC_ClientCmd_Read(valid_con_id, readValue6, 1, &readResults6));
     }
@@ -906,9 +900,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(1, browseRequest, 1, browseResult));
@@ -921,9 +915,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(1, browseRequest, 1, browseResult));
@@ -939,9 +933,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         /* invalid connection id */
@@ -957,9 +951,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         ck_assert_int_eq(0, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -1027,13 +1021,13 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ and Root/Objects - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[2] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true},
-                                                            {.nodeId = "ns=0;i=85",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true},
+                                                         {.nodeId = "ns=0;i=85",
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[2];
 
         ck_assert_int_eq(0, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 2, browseResult));
@@ -1082,9 +1076,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));
@@ -1097,9 +1091,9 @@ START_TEST(test_wrapper_browse)
     {
         // Root/ - Hierarchical references
         SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                             .direction = OpcUa_BrowseDirection_Forward,
-                                                             .referenceTypeId = "ns=0;i=33",
-                                                             .includeSubtypes = true}};
+                                                          .direction = OpcUa_BrowseDirection_Forward,
+                                                          .referenceTypeId = "ns=0;i=33",
+                                                          .includeSubtypes = true}};
         SOPC_ClientCmd_BrowseResult browseResult[1];
 
         ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));

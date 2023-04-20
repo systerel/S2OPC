@@ -323,6 +323,7 @@ static int cmd_demo_configure(WordList* pList)
         .password = NULL,
         .path_cert_x509_token = NULL,
         .path_key_x509_token = NULL,
+        .key_x509_token_encrypted = false,
     };
 
     if (gConfigurationId > 0)

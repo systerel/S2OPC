@@ -657,6 +657,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->password = security->password;
     cfg_con->path_cert_x509_token = cert_x509_token;
     cfg_con->path_key_x509_token = key_x509_token;
+    cfg_con->key_x509_token_encrypted = security->key_x509_token_encrypted;
     cfg_con->publish_period_ms = PUBLISH_PERIOD_MS;
     cfg_con->n_max_keepalive = MAX_KEEP_ALIVE_COUNT;
     cfg_con->n_max_lifetime = MAX_LIFETIME_COUNT;
