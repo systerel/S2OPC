@@ -161,9 +161,6 @@ typedef struct SOPC_HelperConfigInternal_Ctx
     } eventCtx;
 } SOPC_HelperConfigInternal_Ctx;
 
-// The default value of the configuration structure
-extern const SOPC_ServerHelper_Config sopc_server_helper_config_default;
-
 // The singleton configuration structure
 extern SOPC_ServerHelper_Config sopc_server_helper_config;
 
