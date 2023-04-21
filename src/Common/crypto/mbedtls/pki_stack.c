@@ -892,7 +892,22 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type)
     return NULL;
 }
 
-static bool cert_is_self_sign(mbedtls_x509_crt* crt);
+static SOPC_ReturnStatus cert_is_self_sign(mbedtls_x509_crt* crt, bool* pbIsSelfSign)
+{
+    SOPC_ASSERT(NULL != crt);
+
+    SOPC_CertificateList cert = {.crt = *crt};
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_IsSelfSigned(&cert, pbIsSelfSign);
+    if (SOPC_STATUS_OK != status)
+    {
+        char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(&cert);
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI unexpected error : failed to run a self-signature check for certificate thumbprint %s", thumbprint);
+        SOPC_Free(thumbprint);
+    }
+    return status;
+}
 
 static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToValidate,
                                                const SOPC_PKI_LeafProfile* pConfig)
@@ -1045,9 +1060,9 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
         err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
         if (err)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_COMMON,
-                "> PKI validation failed : missing expected key usage for certificate thumbprint %s", thumbprint);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : missing expected key usage for certificate thumbprint %s",
+                                   thumbprint);
         }
     }
     /* Check extended key usages for client or server cert */
@@ -1161,10 +1176,14 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool bIsTrusted = false;
     mbedtls_x509_crt crt = pToValidate->crt;
-    bool bIsSelfSign = cert_is_self_sign(&crt);
+    bool bIsSelfSign = false;
+    SOPC_ReturnStatus status = cert_is_self_sign(&crt, &bIsSelfSign);
+    if (SOPC_STATUS_NOK == status)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
     /* CA certificates that are not roots are always rejected */
     if (pToValidate->crt.ca_istrue && !bIsSelfSign)
     {
@@ -1200,8 +1219,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : bad properties of certificate thumbprint %s",
-                                   thumbprint);
+                                   "> PKI validation failed : bad properties of certificate thumbprint %s", thumbprint);
             SOPC_Free(thumbprint);
             return SOPC_STATUS_NOK;
         }
@@ -1405,36 +1423,6 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     return status;
 }
 
-/* TODO RBA: Add into sop_key_manager.h */
-static bool cert_is_self_sign(mbedtls_x509_crt* crt)
-{
-    SOPC_ASSERT(NULL != crt);
-
-    bool is_self_sign = false;
-    /* Verify that the CA is self sign */
-    int res = memcmp(crt->issuer_raw.p, crt->subject_raw.p, crt->issuer_raw.len);
-    if (crt->issuer_raw.len == crt->subject_raw.len && 0 == res)
-    {
-        /* Is it correctly signed? Inspired by x509_crt_check_signature */
-        const mbedtls_md_info_t* md_info = mbedtls_md_info_from_type(crt->sig_md);
-        unsigned char hash[MBEDTLS_MD_MAX_SIZE];
-
-        /* First hash the certificate, then verify it is signed */
-        res = mbedtls_md(md_info, crt->tbs.p, crt->tbs.len, hash);
-        if (0 == res)
-        {
-            res = mbedtls_pk_verify_ext(crt->sig_pk, crt->sig_opts, &crt->pk, crt->sig_md, hash,
-                                        mbedtls_md_get_size(md_info), crt->sig.p, crt->sig.len);
-            if (0 == res)
-            {
-                /* Finally accept the certificate */
-                is_self_sign = true;
-            }
-        }
-    }
-    return is_self_sign;
-}
-
 /**
  * \brief Delete the roots of the list ppCerts. Create a new list ppRootCa with all roots from ppCerts.
  *        If there is no root, the content of ppRootCa is set to NULL.
@@ -1466,12 +1454,12 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
         {
             is_root = false;
         }
-        self_sign = cert_is_self_sign(cur);
+        status = cert_is_self_sign(cur, &self_sign);
         if (!self_sign && is_root)
         {
             is_root = false;
         }
-        if (is_root)
+        if (is_root && SOPC_STATUS_OK == status)
         {
             status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cur->raw.p, (uint32_t) cur->raw.len, &pHeadRoots);
 
@@ -1532,31 +1520,6 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
     return status;
 }
 
-/* TODO RBA: Add into sop_key_manager.h */
-static SOPC_ReturnStatus copy_certificate(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == pCert && NULL == ppCertCopy)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_CertificateList* pCertCopy = *ppCertCopy;
-    mbedtls_x509_crt* crt = &pCert->crt;
-    while (NULL != crt && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pCertCopy);
-        crt = crt->next;
-    }
-    /* clear if error */
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_Certificate_Free(pCertCopy);
-        pCertCopy = NULL;
-    }
-    *ppCertCopy = pCertCopy;
-    return status;
-}
-
 static SOPC_ReturnStatus merge_certificates(SOPC_CertificateList* pLeft,
                                             SOPC_CertificateList* pRight,
                                             SOPC_CertificateList** ppRes)
@@ -1570,12 +1533,12 @@ static SOPC_ReturnStatus merge_certificates(SOPC_CertificateList* pLeft,
     /* Left part */
     if (NULL != pLeft)
     {
-        status = copy_certificate(pLeft, &pRes);
+        status = SOPC_KeyManager_Certificate_Copy(pLeft, &pRes);
     }
     /* Right part */
     if (NULL != pRight && SOPC_STATUS_OK == status)
     {
-        status = copy_certificate(pRight, &pRes);
+        status = SOPC_KeyManager_Certificate_Copy(pRight, &pRes);
     }
     /* clear if error */
     if (SOPC_STATUS_OK != status)
@@ -1584,31 +1547,6 @@ static SOPC_ReturnStatus merge_certificates(SOPC_CertificateList* pLeft,
         pRes = NULL;
     }
     *ppRes = pRes;
-    return status;
-}
-
-/* TODO RBA: Add into sop_key_manager.h */
-static SOPC_ReturnStatus copy_crl(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
-{
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (NULL == pCrl && NULL == ppCrlCopy)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_CRLList* pCrlCopy = *ppCrlCopy;
-    mbedtls_x509_crl* crl = &pCrl->crl;
-    while (NULL != crl && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(crl->raw.p, (uint32_t) crl->raw.len, &pCrlCopy);
-        crl = crl->next;
-    }
-    /* clear if error */
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_CRL_Free(pCrlCopy);
-        pCrlCopy = NULL;
-    }
-    *ppCrlCopy = pCrlCopy;
     return status;
 }
 
@@ -1623,12 +1561,12 @@ static SOPC_ReturnStatus merge_crls(SOPC_CRLList* pLeft, SOPC_CRLList* pRight, S
     /* Left part */
     if (NULL != pLeft)
     {
-        status = copy_crl(pLeft, &pRes);
+        status = SOPC_KeyManager_CRL_Copy(pLeft, &pRes);
     }
     /* Right part */
     if (NULL != pRight && SOPC_STATUS_OK == status)
     {
-        status = copy_crl(pRight, &pRes);
+        status = SOPC_KeyManager_CRL_Copy(pRight, &pRes);
     }
     /* clear if error */
     if (SOPC_STATUS_OK != status)
@@ -1654,7 +1592,7 @@ static void get_list_stats(SOPC_CertificateList* pCert, uint32_t* caCount, uint3
         if (crt->ca_istrue)
         {
             *caCount = *caCount + 1;
-            is_self_sign = cert_is_self_sign(crt);
+            cert_is_self_sign(crt, &is_self_sign);
             if (is_self_sign)
             {
                 *rootCount = *rootCount + 1;
@@ -1780,18 +1718,18 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         }
     }
     /* Copy the lists */
-    status = copy_certificate(pTrustedCerts, &tmp_pTrustedCerts);
+    status = SOPC_KeyManager_Certificate_Copy(pTrustedCerts, &tmp_pTrustedCerts);
     if (SOPC_STATUS_OK == status)
     {
-        status = copy_crl(pTrustedCrl, &tmp_pTrustedCrl);
+        status = SOPC_KeyManager_CRL_Copy(pTrustedCrl, &tmp_pTrustedCrl);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = copy_certificate(pIssuerCerts, &tmp_pIssuerCerts);
+        status = SOPC_KeyManager_Certificate_Copy(pIssuerCerts, &tmp_pIssuerCerts);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = copy_crl(pIssuerCrl, &tmp_pIssuerCrl);
+        status = SOPC_KeyManager_CRL_Copy(pIssuerCrl, &tmp_pIssuerCrl);
     }
 
     /* Check the CRL-CA association before creating the PKI. */
@@ -1946,8 +1884,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         NULL == pIssuerCrl)
     {
         status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: certificate store is empty (%s).",
-                               path);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: certificate store is empty (%s).", path);
     }
     if (SOPC_STATUS_OK == status)
     {

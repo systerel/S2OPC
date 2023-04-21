@@ -1040,6 +1040,69 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_Cert
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_CertificateList* pCert, bool* pbIsSelfSigned)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pCert)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    *pbIsSelfSigned = false;
+    const mbedtls_x509_crt* crt = &pCert->crt;
+    /* Verify that the CA is self sign */
+    int res = memcmp(crt->issuer_raw.p, crt->subject_raw.p, crt->issuer_raw.len);
+    if (crt->issuer_raw.len == crt->subject_raw.len && 0 == res)
+    {
+        /* Is it correctly signed? Inspired by x509_crt_check_signature */
+        const mbedtls_md_info_t* md_info = mbedtls_md_info_from_type(crt->sig_md);
+        unsigned char hash[MBEDTLS_MD_MAX_SIZE];
+
+        /* First hash the certificate, then verify it is signed */
+        res = mbedtls_md(md_info, crt->tbs.p, crt->tbs.len, hash);
+        if (0 == res)
+        {
+            mbedtls_pk_context crt_pk = crt->pk;
+            res = mbedtls_pk_verify_ext(crt->sig_pk, crt->sig_opts, &crt_pk, crt->sig_md, hash,
+                                        mbedtls_md_get_size(md_info), crt->sig.p, crt->sig.len);
+            if (0 == res)
+            {
+                /* Finally the certificate is self signed */
+                *pbIsSelfSigned = true;
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pCert && NULL == ppCertCopy)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateList* pCertCopy = *ppCertCopy;
+    mbedtls_x509_crt* crt = &pCert->crt;
+    while (NULL != crt && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pCertCopy);
+        crt = crt->next;
+    }
+    /* clear if error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCertCopy);
+        pCertCopy = NULL;
+    }
+    *ppCertCopy = pCertCopy;
+    return status;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
@@ -1154,6 +1217,30 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
         status = raw_buf_to_der_file(&crl->raw, directoryPath);
         crl = crl->next;
     }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL == pCrl && NULL == ppCrlCopy)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CRLList* pCrlCopy = *ppCrlCopy;
+    mbedtls_x509_crl* crl = &pCrl->crl;
+    while (NULL != crl && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(crl->raw.p, (uint32_t) crl->raw.len, &pCrlCopy);
+        crl = crl->next;
+    }
+    /* clear if error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCrlCopy);
+        pCrlCopy = NULL;
+    }
+    *ppCrlCopy = pCrlCopy;
     return status;
 }
 

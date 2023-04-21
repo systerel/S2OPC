@@ -504,7 +504,7 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_Seriali
 /**
  * \brief           Returns the SHA-1 thumbprint of a certificate.
  *
- * \param pCert     A pointer to a single Certificate to find in the list.
+ * \param pCert     A pointer to a single Certificate.
  *
  * \warning         \p pCert must contain a single certificate.
  *
@@ -513,6 +513,30 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_Seriali
  * \return          NULL if error otherwise the SHA-1 thumbprint of \p pCert .
  */
 char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pCert);
+
+/**
+ * \brief                Whether the first item of a certificate list is self signed.
+ *
+ * \param pCert          A valid pointer to the certificate list.
+ * \param pbIsSelfSigned A valid pointer to the result.
+ *
+ * \note            Only the first certificate of \p pCert is processed.
+ *
+ * \return          SOPC_STATUS_OK if error otherwise SOPC_STATUS_NOK.
+ *
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_CertificateList* pCert, bool* pbIsSelfSigned);
+
+/**
+ * \brief            Makes a copy of a given certificate list.
+ *
+ * \param pCert      A valid pointer to the certificate list to copy.
+ * \param ppCertCopy A valid pointer to the certificate list copied. You should free it.
+ *
+ * \return           SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy);
 
 /**
  * \brief Releases all resources associated to a serialized certificate.
@@ -580,6 +604,17 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
  * \return          SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath);
+
+/**
+ * \brief           Makes a copy of a given CRL list.
+ *
+ * \param pCrl      A valid pointer to the CRL list to copy.
+ * \param ppCrlCopy A valid pointer to the CRL list copied. You should free it.
+ *
+ * \return          SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
 
 /**
  * \brief           Frees a Certificate created with SOPC_KeyManager_CRL_CreateOrAddFromFile() or
