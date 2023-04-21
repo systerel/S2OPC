@@ -24,10 +24,13 @@
 #define USE_MQTT_PAHO 0
 #endif
 #if USE_MQTT_PAHO == 1
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
 
 #include "MQTTAsync.h"
+
+#define POLLING_CYCLE_MS 100
 
 typedef struct MQTT_SUBSCRIBER_CONTEXT
 {
@@ -48,19 +51,27 @@ struct MQTT_CONTEXT_CLIENT
     SubscriberContext subContext;
 
     int nbReconnectTries; /* Store number of connection and reconnection tries */
-
+    MqttClientState* clientState;
     void* pUser; /* User Context */
 };
 
 /* callback used by paho library */
 
-void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response);
-int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* message);
+static void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response);
+static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* response);
+static void cb_connexion_lost(void* context, char* cause);
+static void cb_disconnect_success(void* context, MQTTAsync_successData* response);
+static void cb_disconnect_failed(void* context, MQTTAsync_failureData* response);
+static int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* message);
 
 /* mqtt layer helpers */
-int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic);
+static int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic);
 
-uint64_t get_unique_client_id(void);
+static uint64_t get_unique_client_id(void);
+
+/************************************************************************/
+/*                          Public API                                  */
+/************************************************************************/
 
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
 {
@@ -110,14 +121,14 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
     return status;
 }
 
-SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
-                                              const char* uri,
-                                              const char* username,
-                                              const char* password,
-                                              const char** subTopic,
-                                              uint16_t nbSubTopic,
-                                              FctMessageReceived* cbMessageReceived,
-                                              void* userContext)
+SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* contextClient,
+                                                        const char* uri,
+                                                        const char* username,
+                                                        const char* password,
+                                                        const char** subTopic,
+                                                        uint16_t nbSubTopic,
+                                                        FctMessageReceived* cbMessageReceived,
+                                                        void* userContext)
 {
     MQTTAsync_deliveryComplete* cbDeliveryComplete = NULL;
     MQTTAsync_connectOptions options = MQTTAsync_connectOptions_initializer;
@@ -128,6 +139,9 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
     contextClient->subContext.cbMessageArrived = cbMessageReceived;
     contextClient->subContext.nbTopic = nbSubTopic;
     contextClient->pUser = userContext;
+    contextClient->clientState = SOPC_Calloc(1, sizeof(*contextClient->clientState));
+    SOPC_ASSERT(NULL != contextClient->clientState);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_UNITIALIZED;
     memset(contextClient->clientId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
 
     uint64_t clientId = get_unique_client_id();
@@ -150,11 +164,12 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 
         if (SOPC_STATUS_OK == status)
         {
-            MQTTAsync_setCallbacks(contextClient->client, contextClient, NULL, cb_msg_arrived, cbDeliveryComplete);
-
+            *contextClient->clientState = SOPC_MQTT_CLIENT_INITIALIZED;
+            MQTTAsync_setCallbacks(contextClient->client, contextClient, cb_connexion_lost, cb_msg_arrived,
+                                   cbDeliveryComplete);
             options.keepAliveInterval = MQTT_LIB_KEEPALIVE;
             options.connectTimeout = MQTT_LIB_CONNECTION_TIMEOUT;
-            options.onFailure = NULL;
+            options.onFailure = cb_on_connexion_failed;
             options.onSuccess = cb_subscribe_on_connexion_success;
             options.context = contextClient;
             options.automaticReconnect = true;
@@ -169,6 +184,19 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Client connect request wasn't accepted");
                 status = SOPC_STATUS_NOK;
+                *contextClient->clientState = SOPC_MQTT_CLIENT_FAILED_CONNECT;
+            }
+            else
+            {
+                // wait for connexion result
+                while (*contextClient->clientState == SOPC_MQTT_CLIENT_INITIALIZED)
+                {
+                    SOPC_Sleep(POLLING_CYCLE_MS);
+                }
+                if (*contextClient->clientState != SOPC_MQTT_CLIENT_CONNECTED)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
             }
         }
     }
@@ -190,8 +218,44 @@ SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient)
 
 void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
 {
-    MQTTAsync_disconnectOptions options = MQTTAsync_disconnectOptions_initializer;
-    MQTTAsync_disconnect(contextClient->client, &options);
+    SOPC_ASSERT(NULL != contextClient);
+    if (NULL != contextClient->clientState)
+    {
+        MQTTAsync_disconnectOptions options = MQTTAsync_disconnectOptions_initializer;
+        options.onSuccess = cb_disconnect_success;
+        options.onFailure = cb_disconnect_failed;
+        options.context = contextClient;
+        int resDisconnect = 0;
+        switch (*contextClient->clientState)
+        {
+        case SOPC_MQTT_CLIENT_UNITIALIZED:
+        case SOPC_MQTT_CLIENT_INITIALIZED:
+        case SOPC_MQTT_CLIENT_DISCONNECTED:
+        case SOPC_MQTT_CLIENT_LOST_CONNECTION:
+        case SOPC_MQTT_CLIENT_FAILED_CONNECT:
+            break;
+        case SOPC_MQTT_CLIENT_CONNECTED:
+            resDisconnect = MQTTAsync_disconnect(contextClient->client, &options);
+            if (MQTTASYNC_SUCCESS != resDisconnect)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s failed to request disconnection",
+                                       contextClient->clientId);
+            }
+            else
+            {
+                while (SOPC_MQTT_CLIENT_DISCONNECTED != *contextClient->clientState)
+                {
+                    SOPC_Sleep(POLLING_CYCLE_MS);
+                }
+            }
+            break;
+        default:
+            // should'nt come here
+            SOPC_ASSERT(false);
+            break;
+        }
+        SOPC_Free(contextClient->clientState);
+    }
     SOPC_Free(contextClient);
 }
 
@@ -201,14 +265,24 @@ bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
     {
         return false;
     }
-    if (MQTTAsync_isConnected(contextClient->client))
-    {
-        return true;
-    }
-    return false;
+    return MQTTAsync_isConnected(contextClient->client);
 }
+
+MqttClientState SOPC_MQTT_Client_Get_State(MqttContextClient* contextClient)
+{
+    if (NULL == contextClient || NULL == contextClient->clientState)
+    {
+        return SOPC_MQTT_CLIENT_UNITIALIZED;
+    }
+    return *contextClient->clientState;
+}
+
+/************************************************************************/
+/*                          Internal functions                          */
+/************************************************************************/
+
 /* Callback called on Succeed connection, if client is subscriber then subscribe to topics */
-void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response)
+static void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response)
 {
     SOPC_UNUSED_ARG(response);
     MqttContextClient* contextClient = (MqttContextClient*) context;
@@ -217,9 +291,12 @@ void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* res
         MQTTAsync_subscribeMany(contextClient->client, contextClient->subContext.nbTopic,
                                 contextClient->subContext.topic, contextClient->subContext.qos, NULL);
     }
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s successfully connected to the server",
+                           contextClient->clientId);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_CONNECTED;
 }
 
-int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* message)
+static int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* message)
 {
     SOPC_UNUSED_ARG(topic);
     SOPC_UNUSED_ARG(topicLen);
@@ -231,8 +308,41 @@ int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_message* 
     return true;
 }
 
+static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* response)
+{
+    MqttContextClient* contextClient = (MqttContextClient*) context;
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection failed, error code %d",
+                           contextClient->clientId, response->code);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_FAILED_CONNECT;
+}
+
+static void cb_connexion_lost(void* context, char* cause)
+{
+    MqttContextClient* contextClient = (MqttContextClient*) context;
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection lost, cause %s", contextClient->clientId,
+                           cause);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_LOST_CONNECTION;
+}
+
+static void cb_disconnect_failed(void* context, MQTTAsync_failureData* response)
+{
+    MqttContextClient* contextClient = (MqttContextClient*) context;
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                           "Mqtt client %s failed to disconnect, failure code %d. consider client hase disconnected "
+                           "anyway and release memory",
+                           contextClient->clientId, response->code);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_DISCONNECTED;
+}
+static void cb_disconnect_success(void* context, MQTTAsync_successData* response)
+{
+    SOPC_UNUSED_ARG(response);
+    MqttContextClient* contextClient = (MqttContextClient*) context;
+    SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s succeed to disconnect", contextClient->clientId);
+    *contextClient->clientState = SOPC_MQTT_CLIENT_DISCONNECTED;
+}
+
 /* Set topic to subscribe if nbSubTopic superior to 0 */
-int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic)
+static int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic, const char** subTopic)
 {
     if (nbSubTopic > 0)
     {
@@ -257,14 +367,14 @@ int set_subscriber_options(MqttContextClient* contextClient, uint16_t nbSubTopic
 }
 
 /* Generate a random ID to avoid conflictual client IDs connecting to Mqtt servers */
-uint64_t get_unique_client_id(void)
+static uint64_t get_unique_client_id(void)
 {
     static uint64_t unique_clientId = 1;
     unique_clientId += SOPC_TimeReference_GetCurrent();
     return unique_clientId;
 }
 
-#else
+#else // USE_MQTT_PAHO == 1
 
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
 {
@@ -274,14 +384,14 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
-                                              const char* uri,
-                                              const char* username,
-                                              const char* password,
-                                              const char** subTopic,
-                                              uint16_t nbSubTopic,
-                                              FctMessageReceived* cbMessageReceived,
-                                              void* userContext)
+SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* contextClient,
+                                                        const char* uri,
+                                                        const char* username,
+                                                        const char* password,
+                                                        const char** subTopic,
+                                                        uint16_t nbSubTopic,
+                                                        FctMessageReceived* cbMessageReceived,
+                                                        void* userContext)
 {
     SOPC_UNUSED_ARG(contextClient);
     SOPC_UNUSED_ARG(uri);
@@ -311,4 +421,4 @@ bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
     return false;
 }
 
-#endif
+#endif // USE_MQTT_PAHO == 1

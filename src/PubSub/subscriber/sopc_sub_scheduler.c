@@ -614,7 +614,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             }
                             else
                             {
-                                status = SOPC_MQTT_Initialize_Client(
+                                status = SOPC_MQTT_InitializeAndConnect_Client(
                                     schedulerCtx.transport[iIter].mqttClient, &address[strlen(MQTT_PREFIX)],
                                     SOPC_PubSubConnection_Get_MqttUsername(connection),
                                     SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbTopic,

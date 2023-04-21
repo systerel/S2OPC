@@ -33,6 +33,7 @@
 #include "sopc_mqtt_transport_layer.h"
 
 static const char* URI_MQTT_BROKER = "127.0.0.1:1883";
+static const char* BAD_PORT_URI_MQTT_BROKER = "127.0.0.1:18";
 static const char* MQTT_LIB_TOPIC_NAME[MQTT_LIB_MAX_NB_TOPIC_NAME] = {"test1", "test2", "test3"};
 static const uint16_t NB_TOPIC = 3;
 static const char* USERNAME = "user1";
@@ -63,13 +64,6 @@ static void cbMessageArrivedTest(uint8_t* data, uint16_t size, void* user)
     }
 }
 
-static void verifyClientConnected(MqttContextClient* contextClient)
-{
-    for (int i = 0; i < TRY_IF_CONNECTED && !SOPC_MQTT_Client_Is_Connected(contextClient); i++)
-    {
-        SOPC_Sleep(WAIT_CONNECTION);
-    }
-}
 START_TEST(test_create_client)
 {
     MqttContextClient* contextClient;
@@ -84,8 +78,8 @@ START_TEST(test_difference_topic_nbTopic_fail)
     MqttContextClient* contextClient;
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME, NB_TOPIC + 2,
-                                         cbMessageArrivedTest, NULL);
+    status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME,
+                                                   NB_TOPIC + 2, cbMessageArrivedTest, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     SOPC_MQTT_Release_Client(contextClient);
 }
@@ -96,8 +90,20 @@ START_TEST(test_username_noPassword_fail)
     MqttContextClient* contextClient;
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, "randomUsername", NULL, MQTT_LIB_TOPIC_NAME,
-                                         NB_TOPIC + 2, cbMessageArrivedTest, NULL);
+    status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, "randomUsername", NULL,
+                                                   MQTT_LIB_TOPIC_NAME, NB_TOPIC + 2, cbMessageArrivedTest, NULL);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    SOPC_MQTT_Release_Client(contextClient);
+}
+END_TEST
+
+START_TEST(test_connexion_fail)
+{
+    MqttContextClient* contextClient;
+    SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status =
+        SOPC_MQTT_InitializeAndConnect_Client(contextClient, BAD_PORT_URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     SOPC_MQTT_Release_Client(contextClient);
 }
@@ -108,9 +114,8 @@ START_TEST(test_publisher_send)
     MqttContextClient* contextClient;
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL, NULL);
+    status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    verifyClientConnected(contextClient);
     for (int i = 0; i < NB_TOPIC; i++)
     {
         status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
@@ -125,10 +130,9 @@ START_TEST(test_callback_subscription)
     MqttContextClient* contextClient;
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME, NB_TOPIC,
-                                         cbMessageArrivedTest, NULL);
+    status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME,
+                                                   NB_TOPIC, cbMessageArrivedTest, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    verifyClientConnected(contextClient);
     status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[0], encoded_network_msg);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_MQTT_Release_Client(contextClient);
@@ -140,8 +144,9 @@ START_TEST(test_connexion_authentification)
     MqttContextClient* contextClient;
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_MQTT_Initialize_Client(contextClient, URI_MQTT_BROKER, USERNAME, PASSWORD, NULL, 0, NULL, NULL);
-    verifyClientConnected(contextClient);
+    status =
+        SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, USERNAME, PASSWORD, NULL, 0, NULL, NULL);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     for (int i = 0; i < NB_TOPIC; i++)
     {
         status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
@@ -162,6 +167,7 @@ int main(void)
     tcase_add_test(tc_client, test_create_client);
     tcase_add_test(tc_client, test_difference_topic_nbTopic_fail);
     tcase_add_test(tc_client, test_username_noPassword_fail);
+    tcase_add_test(tc_client, test_connexion_fail);
 
     TCase* tc_publisher_client = tcase_create("Mqtt publisher");
     suite_add_tcase(suite, tc_publisher_client);

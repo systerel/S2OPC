@@ -854,9 +854,10 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Not enougth space to allocate mqttClient");
             return false;
         }
-        status = SOPC_MQTT_Initialize_Client(pubSchedulerCtx.transport[index].mqttClient, &address[strlen(MQTT_PREFIX)],
-                                             SOPC_PubSubConnection_Get_MqttUsername(connection),
-                                             SOPC_PubSubConnection_Get_MqttPassword(connection), NULL, 0, NULL, NULL);
+        status = SOPC_MQTT_InitializeAndConnect_Client(
+            pubSchedulerCtx.transport[index].mqttClient, &address[strlen(MQTT_PREFIX)],
+            SOPC_PubSubConnection_Get_MqttUsername(connection), SOPC_PubSubConnection_Get_MqttPassword(connection),
+            NULL, 0, NULL, NULL);
 
         if (SOPC_STATUS_OK != status)
         {

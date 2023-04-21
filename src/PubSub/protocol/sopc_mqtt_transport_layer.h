@@ -43,6 +43,18 @@
 
 typedef struct MQTT_CONTEXT_CLIENT MqttContextClient; /* Mqtt context client */
 
+typedef enum MQTT_CLIENT_STATE
+{
+    SOPC_MQTT_CLIENT_UNITIALIZED =
+        0, /* Client isn't initialized with function ::SOPC_MQTT_InitializeAndConnect_Client */
+    SOPC_MQTT_CLIENT_INITIALIZED = 1,     /* Client is successfully initialized with function
+                                                ::SOPC_MQTT_InitializeAndConnect_Client */
+    SOPC_MQTT_CLIENT_DISCONNECTED = 2,    /* Client is disconnected */
+    SOPC_MQTT_CLIENT_CONNECTED = 3,       /* Client is successfully connected */
+    SOPC_MQTT_CLIENT_FAILED_CONNECT = 4,  /* Client failed to connect */
+    SOPC_MQTT_CLIENT_LOST_CONNECTION = 5, /* Client lost connection */
+} MqttClientState;
+
 /* Callback called to notify a message reception. */
 
 typedef void FctMessageReceived(uint8_t* data, /* Data received */
@@ -50,8 +62,8 @@ typedef void FctMessageReceived(uint8_t* data, /* Data received */
                                 void* pUser);  /* Connexion context */
 
 /**
- * @brief Send message to topic destination with mqtt client, contextClient must be initialized with
- * SOPC_MQTT_Initialize_Client before using this function
+ * @brief Send message to topic destination with mqtt client, contextClient must be successfully initialized with
+ * ::SOPC_MQTT_InitializeAndConnect_Client before using this function
  *
  * @param contextClient Context for mqtt library containing mqtt client
  * @param topic Topic destination
@@ -61,7 +73,7 @@ typedef void FctMessageReceived(uint8_t* data, /* Data received */
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message);
 
 /**
- * @brief Initialise mqtt client connexion, Shall be called after ::SOPC_MQTT_Create_Client
+ * @brief Initialise mqtt client and connexion, Shall be called after ::SOPC_MQTT_Create_Client
  * To use mqtt client as a subscriber, number of sub topic must be superior to 0 and Topics to subscribe can't be NULL
  *
  * @param contextClient Context for mqtt library containing mqtt client
@@ -73,16 +85,16 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
  * @param cbMessageReceived Callback of message reception
  * @param userContext Connexion context of user
  * @return ::SOPC_STATUS_OK if succeed to initialize mqtt contextClient, ::SOPC_STATUS_NOK if failed to create a mqtt
- * Client
+ * Client or failed to connect
  */
-SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
-                                              const char* uri,
-                                              const char* username,
-                                              const char* password,
-                                              const char** subTopic,
-                                              uint16_t nbSubTopic,
-                                              FctMessageReceived* cbMessageReceived,
-                                              void* userContext);
+SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* contextClient,
+                                                        const char* uri,
+                                                        const char* username,
+                                                        const char* password,
+                                                        const char** subTopic,
+                                                        uint16_t nbSubTopic,
+                                                        FctMessageReceived* cbMessageReceived,
+                                                        void* userContext);
 
 /**
  * @brief Allocate memory for mqtt context client. Must be freed with ::SOPC_MQTT_Release_Client
@@ -107,5 +119,13 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient);
  * @return false if client is not connected or if parameters are invalid
  */
 bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient);
+
+/**
+ * @brief Return state of the client
+ *
+ * @param contextClient A valid mqtt client context from a successful ::SOPC_MQTT_Create_Client
+ * @return MqttClientState state of client. Refers to enum description
+ */
+MqttClientState SOPC_MQTT_Client_Get_State(MqttContextClient* contextClient);
 
 #endif
