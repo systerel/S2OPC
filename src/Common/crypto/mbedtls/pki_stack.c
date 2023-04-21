@@ -2187,7 +2187,117 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
     return status;
 }
 
+static SOPC_ReturnStatus check_cert_security_level_is_lower_than_endpoint(const SOPC_CertificateList* pAppCert,
+                                                                          mbedtls_x509_crt* pCert)
+{
+    SOPC_ASSERT(NULL != pAppCert);
+    SOPC_ASSERT(NULL != pCert);
+
+    // Retrieves the endpoint public key
+    SOPC_AsymmetricKey appPublicKey = {0};
+    SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pAppCert, &appPublicKey);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    // Retrieve keys type
+    mbedtls_pk_type_t appKeyType = mbedtls_pk_get_type(&appPublicKey.pk);
+    mbedtls_pk_type_t KeyType = mbedtls_pk_get_type(&pCert->pk);
+    /* Assumes that we only accept the same key types for the trustList update (RSA in our case)
+       Between RSA and ECC studies exist. The weakness of the ECC security will probably be the way chosen to replace
+       this asymmetric encryption which does not exist in ECC */
+    if (KeyType != appKeyType)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    // Retrieves keys length
+    size_t appKeyLenBits = mbedtls_pk_get_bitlen(&appPublicKey.pk);
+    size_t keyLenBits = mbedtls_pk_get_bitlen(&pCert->pk);
+    // Verifies keys length
+    if (keyLenBits > appKeyLenBits)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    // Verifies signing algorithm:
+    mbedtls_md_type_t appMd = pAppCert->crt.sig_md;
+    mbedtls_md_type_t md = pCert->sig_md;
+    if (md > appMd)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus check_crl_security_level_is_lower_than_endpoint(const SOPC_CertificateList* pAppCert,
+                                                                         mbedtls_x509_crl* pCrl)
+{
+    SOPC_ASSERT(NULL != pAppCert);
+    SOPC_ASSERT(NULL != pCrl);
+
+    // Retrieves the endpoint public key
+    SOPC_AsymmetricKey appPublicKey = {0};
+    SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pAppCert, &appPublicKey);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    // Retrieve keys type
+    mbedtls_pk_type_t appKeyType = mbedtls_pk_get_type(&appPublicKey.pk);
+    mbedtls_pk_type_t KeyType = pCrl->sig_pk;
+    /* Assumes that we only accept the same key types for the trustList update (RSA in our case)
+       Between RSA and ECC studies exist. The weakness of the ECC security will probably be the way chosen to replace
+       this asymmetric encryption which does not exist in ECC */
+    if (KeyType != appKeyType)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    // Verifies signing algorithm:
+    mbedtls_md_type_t appMd = pAppCert->crt.sig_md;
+    mbedtls_md_type_t md = pCrl->sig_md;
+    if (md > appMd)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus check_security_level_of_cert_list(const SOPC_CertificateList* pAppCert,
+                                                           SOPC_CertificateList* pCerts)
+{
+    SOPC_ASSERT(NULL != pAppCert);
+    SOPC_ASSERT(NULL != pCerts);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    /* Iterates for each certificate in the list */
+    mbedtls_x509_crt* crt = &pCerts->crt;
+    while (NULL != crt && SOPC_STATUS_OK == status)
+    {
+        status = check_cert_security_level_is_lower_than_endpoint(pAppCert, crt);
+        crt = crt->next;
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus check_security_level_of_crl_list(const SOPC_CertificateList* pAppCert, SOPC_CRLList* pCrl)
+{
+    SOPC_ASSERT(NULL != pAppCert);
+    SOPC_ASSERT(NULL != pCrl);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    /* Iterates for each CRL in the list */
+    mbedtls_x509_crl* crl = &pCrl->crl;
+    while (NULL != crl && SOPC_STATUS_OK == status)
+    {
+        status = check_crl_security_level_is_lower_than_endpoint(pAppCert, crl);
+        crl = crl->next;
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI,
+                                                     SOPC_CertificateList* pAppCert,
                                                      SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
@@ -2196,12 +2306,52 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
 {
     SOPC_PKIProviderNew* pPKI = *ppPKI;
     /* Check parameters */
-    if (NULL == pPKI)
+    if (NULL == pPKI || NULL == pAppCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    /* pAppCert shall contain a single certificate */
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pAppCert, &nCert);
+    if (SOPC_STATUS_OK != status || 1 != nCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Handle that the security level of the update isn't higher than the security level of the endpoint. (§7.3.4 part 2
+     * v1.05) */
+    if (NULL != pTrustedCerts)
+    {
+        status = check_security_level_of_cert_list(pAppCert, pTrustedCerts);
+        if (SOPC_STATUS_OK != status)
+        {
+            return status;
+        }
+    }
+    if (NULL != pTrustedCrl)
+    {
+        status = check_security_level_of_crl_list(pAppCert, pTrustedCrl);
+        if (SOPC_STATUS_OK != status)
+        {
+            return status;
+        }
+    }
+    if (NULL != pIssuerCerts)
+    {
+        status = check_security_level_of_cert_list(pAppCert, pIssuerCerts);
+        if (SOPC_STATUS_OK != status)
+        {
+            return status;
+        }
+    }
+    if (NULL != pIssuerCerts)
+    {
+        status = check_security_level_of_crl_list(pAppCert, pIssuerCrl);
+        if (SOPC_STATUS_OK != status)
+        {
+            return status;
+        }
+    }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_PKIProviderNew* pTmpPKI = NULL;
     SOPC_CertificateList* tmp_pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
     SOPC_CertificateList* tmp_pTrustedCertsTmp = NULL;

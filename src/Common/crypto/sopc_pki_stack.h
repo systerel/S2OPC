@@ -462,6 +462,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
  * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pAppCert A valid pointer to the application certificate.
  * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part shall not updated.
  * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part shall not updated.
  * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part shall not updated.
@@ -472,6 +473,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI,
+                                                     SOPC_CertificateList* pAppCert,
                                                      SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,
