@@ -455,7 +455,7 @@ test-uactt:
 
 windows-appveyor:
   stage: build-others
-  image: docker.io/library/debian@sha256:de3eac83cd481c04c5d6c7344cd7327625a1d8b2540e82a8231b5675cef0ae5f  # debian:9
+  image: docker.io/library/debian@sha256:0a78ed641b76252739e28ebbbe8cdbd80dc367fba4502565ca839e5803cfd86e # digest of debian:11
   script:
     - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
   tags:
