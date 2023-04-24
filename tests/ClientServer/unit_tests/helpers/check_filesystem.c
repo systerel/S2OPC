@@ -27,6 +27,7 @@
 
 #include <check.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "check_helpers.h"
 
@@ -60,10 +61,77 @@ START_TEST(test_rmdir)
 }
 END_TEST
 
+static bool find_sub_path(const char* pFindSubPath, SOPC_Array* pArray)
+{
+    ck_assert(NULL != pFindSubPath && NULL != pArray);
+    bool find = false;
+    char* pFilePath = NULL;
+    char* pStart = NULL;
+    size_t nbFiles = SOPC_Array_Size(pArray);
+    for (size_t idx = 0; idx < nbFiles; idx++)
+    {
+        pFilePath = SOPC_Array_Get(pArray, char*, idx);
+        pStart = strstr(pFilePath, pFindSubPath);
+        if (NULL != pStart)
+        {
+            find = true;
+        }
+    }
+    return find;
+}
+
+START_TEST(test_get_dir_file_paths)
+{
+    SOPC_Array* pFilePaths = NULL;
+    /* Invalid parameters */
+    SOPC_FileSystem_GetDirResult getRes = SOPC_FileSystem_GetDirFilePaths(NULL, NULL);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_Error_InvalidParameters);
+    getRes = SOPC_FileSystem_GetDirFilePaths("./test_get_dir_file_paths", NULL);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_Error_InvalidParameters);
+    getRes = SOPC_FileSystem_GetDirFilePaths(NULL, &pFilePaths);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_Error_InvalidParameters);
+    /* Invalid path */
+    getRes = SOPC_FileSystem_GetDirFilePaths("./test_get_dir_file_paths", &pFilePaths);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_Error_PathInvalid);
+    /* Empty folder */
+    SOPC_FileSystem_CreationResult creationRes = SOPC_FileSystem_mkdir("./test_get_dir_file_paths");
+    ck_assert(creationRes == SOPC_FileSystem_Creation_OK);
+    getRes = SOPC_FileSystem_GetDirFilePaths("./test_get_dir_file_paths", &pFilePaths);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_OK);
+    ck_assert(NULL != pFilePaths);
+    size_t nbFiles = SOPC_Array_Size(pFilePaths);
+    ck_assert(0 == nbFiles);
+    SOPC_Array_Delete(pFilePaths);
+    /* Creates files */
+    FILE* file_1 = fopen("./test_get_dir_file_paths/file_1.txt", "w+");
+    ck_assert(NULL != file_1);
+    FILE* file_2 = fopen("./test_get_dir_file_paths/file_2.txt", "w+");
+    ck_assert(NULL != file_2);
+    fclose(file_1);
+    fclose(file_2);
+    /* Retrieves them */
+    getRes = SOPC_FileSystem_GetDirFilePaths("./test_get_dir_file_paths", &pFilePaths);
+    ck_assert(getRes == SOPC_FileSystem_GetDir_OK);
+    ck_assert(NULL != pFilePaths);
+    nbFiles = SOPC_Array_Size(pFilePaths);
+    ck_assert(2 == nbFiles);
+    bool find_file_1 = find_sub_path("/test_get_dir_file_paths/file_1.txt", pFilePaths);
+    ck_assert(true == find_file_1);
+    bool find_file_2 = find_sub_path("/test_get_dir_file_paths/file_2.txt", pFilePaths);
+    ck_assert(true == find_file_2);
+    /* Clear */
+    SOPC_Array_Delete(pFilePaths);
+    ck_assert(0 == remove("./test_get_dir_file_paths/file_1.txt"));
+    ck_assert(0 == remove("./test_get_dir_file_paths/file_2.txt"));
+    SOPC_FileSystem_RemoveResult rmdirRes = SOPC_FileSystem_rmdir("./test_get_dir_file_paths");
+    ck_assert(rmdirRes == SOPC_FileSystem_Remove_OK);
+}
+END_TEST
+
 Suite* tests_make_suite_filesystem(void)
 {
     Suite* s;
-    TCase *tc_mkdir, *tc_rmdir;
+    TCase *tc_mkdir, *tc_rmdir, *tc_get_dir_file_paths;
 
     s = suite_create("File system helper tests");
     tc_mkdir = tcase_create("mkdir");
@@ -73,6 +141,10 @@ Suite* tests_make_suite_filesystem(void)
     tc_rmdir = tcase_create("rmdir");
     tcase_add_test(tc_rmdir, test_rmdir);
     suite_add_tcase(s, tc_rmdir);
+
+    tc_get_dir_file_paths = tcase_create("get_dir_file_paths");
+    tcase_add_test(tc_get_dir_file_paths, test_get_dir_file_paths);
+    suite_add_tcase(s, tc_get_dir_file_paths);
 
     return s;
 }
