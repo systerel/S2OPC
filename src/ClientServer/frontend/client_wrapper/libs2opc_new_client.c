@@ -28,6 +28,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 
@@ -41,15 +42,13 @@ struct SOPC_ClientConnection
 
     // Synchronous treatment
     Condition syncCond;
-    Mutex syncMutex;
-    bool syncActionRunning;
+    Mutex syncConnMutex;
     bool syncConnection;
-    bool syncServiceCalling;
-    void* syncResp;
 
     uint16_t secureConnectionIdx;
     SOPC_SecureChannelConfigIdx cfgId;
-    SOPC_StaMac_Machine* stateMachine;
+    bool isDiscovery;
+    SOPC_StaMac_Machine* stateMachine; // only if !isDiscovery
 };
 
 /* The generic request context is used to managed the canceled request
@@ -185,14 +184,15 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
     const SOPC_S2OPC_Config* config,
     SOPC_SecureConnection_Config* secConnConfig)
 {
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // If configuration is not finalized yet, do it now
     if (!secConnConfig->finalized)
     {
         // TODO: check config content (mandatory + secu mode vs secu policy vs certs vs user policy vs ...)
         const SOPC_Client_Config* cConfig = &config->clientConfig;
-        return SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
+        status = SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
     }
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 /*
@@ -267,6 +267,12 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
                 SOPC_EncodeableObject_Initialize(pEncType, (void*) response);
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "SOPC_ClientInternal_EventCbk: unexpected error for %s creation",
+                                       pEncType->TypeName);
+            }
         } // else: response is NULL and status is not OK
     }
     genCtx->status = status;
@@ -296,12 +302,12 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
         SE_ACTIVATED_SESSION == event)
     {
         bool isSyncConn = false;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&cc->syncMutex);
+        SOPC_ReturnStatus statusMutex = Mutex_Lock(&cc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         isSyncConn = cc->syncConnection;
 
-        Mutex_Unlock(&cc->syncMutex);
+        Mutex_Unlock(&cc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         if (isSyncConn)
@@ -358,6 +364,8 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
+    SOPC_ClientHelper_ReqCtx* serviceReqCtx = NULL;
+
     switch (event)
     {
     /* appCtx is request context */
@@ -365,8 +373,8 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
     case SE_RCV_DISCOVERY_RESPONSE:
     case SE_SND_REQUEST_FAILED:
         SOPC_ASSERT(0 != appContext);
-        cc = sopc_client_helper_config.secureConnections
-                 [((SOPC_ClientHelper_ReqCtx*) (((SOPC_StaMac_ReqCtx*) appContext)->appCtx))->secureConnectionIdx];
+        serviceReqCtx = (SOPC_ClientHelper_ReqCtx*) ((SOPC_StaMac_ReqCtx*) appContext)->appCtx;
+        cc = sopc_client_helper_config.secureConnections[serviceReqCtx->secureConnectionIdx];
         break;
     /* appCtx is session context */
     case SE_SESSION_ACTIVATION_FAILURE:
@@ -383,19 +391,260 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                                "ClientInternal_ToolkitEventCallback: unexpected event %d received.", event);
         return;
     }
-    // TODO: check cc is not NULL ?
-
-    pSM = sopc_client_helper_config.secureConnections[cc->secureConnectionIdx]->stateMachine;
-    SOPC_ASSERT(NULL != pSM);
-
-    if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+    if (NULL == cc)
     {
-        /* Post process the event for callbacks. */
-        SOPC_ClientInternal_ConnectionStateCallback(event, param, cc);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ClientInternal_ToolkitEventCallback: unexpected context received for event %d.", event);
+        return;
+    }
+
+    if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
+    {
+        // Discovery service call (no session) not managed by state machine: direct call to event callback
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        SOPC_LibSub_ApplicativeEvent libsubEvent = SOPC_LibSub_ApplicativeEvent_Response;
+        if (SE_RCV_DISCOVERY_RESPONSE != event)
+        {
+            status = SOPC_STATUS_NOK;
+            libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
+        }
+        SOPC_ClientInternal_EventCbk(cc->secureConnectionIdx, libsubEvent, status, param, (uintptr_t) serviceReqCtx);
+        SOPC_Free((void*) appContext);
+    }
+    else
+    {
+        // Connection management or service on session call managed by state machine
+        pSM = sopc_client_helper_config.secureConnections[cc->secureConnectionIdx]->stateMachine;
+        SOPC_ASSERT(NULL != pSM);
+
+        if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext))
+        {
+            /* Post process the event for callbacks. */
+            SOPC_ClientInternal_ConnectionStateCallback(event, param, cc);
+        }
     }
 
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+}
+
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
+    const SOPC_SecureConnection_Config* secConnConfig,
+    bool isDiscovery,
+    SOPC_ClientConnection** outClientConnection)
+{
+    SOPC_ASSERT(secConnConfig != NULL);
+    SOPC_ASSERT(outClientConnection != NULL);
+    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
+
+    SOPC_ClientConnection* res = SOPC_Calloc(sizeof(*res), 1);
+    if (NULL == res)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (NULL != secConnConfig->reverseURL)
+    {
+        // TODO: manage reverse EPs
+        SOPC_ASSERT(false);
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_SecureChannelConfigIdx cfgId = 0;
+    SOPC_StaMac_Machine* stateMachine = NULL;
+    /* TODO: propagate the const in low level API ? */
+    SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+    cfgId = SOPC_ToolkitClient_AddSecureChannelConfig(&secConnConfig->scConfig);
+    SOPC_GCC_DIAGNOSTIC_RESTORE
+    if (0 != cfgId)
+    {
+        status = SOPC_STATUS_OK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Note: still create state machine even in discovery since it might be used for non-discovery later
+        const char* username = NULL;
+        const char* password = NULL;
+
+        const char* userX509certPath = NULL;
+        const char* userX509keyPath = NULL;
+        bool userX509keyEncrypted = false;
+
+        if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
+        {
+            username = secConnConfig->sessionConfig.userToken.userName.userName;
+            password = secConnConfig->sessionConfig.userToken.userName.userPwd;
+        }
+        else if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_Certificate)
+        {
+            SOPC_ASSERT(secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded);
+            userX509certPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath;
+            userX509keyPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath;
+            userX509keyEncrypted = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted;
+        }
+
+        status = SOPC_StaMac_Create(cfgId, reverseConfigIdx, secConnConfig->secureConnectionIdx,
+                                    secConnConfig->sessionConfig.userPolicyId, username, password, userX509certPath,
+                                    userX509keyPath, userX509keyEncrypted, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS,
+                                    TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT, TMP_PUBLISH_N_TOKEN,
+                                    TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Data for synchronous calls
+        SOPC_ReturnStatus mutStatus = Condition_Init(&res->syncCond);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        mutStatus = Mutex_Initialization(&res->syncConnMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+        res->cfgId = cfgId;
+        res->secureConnectionIdx = secConnConfig->secureConnectionIdx;
+        res->isDiscovery = isDiscovery;
+        res->stateMachine = stateMachine;
+        *outClientConnection = res;
+    }
+    else
+    {
+        SOPC_Free(res);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynchronous,
+                                                                    SOPC_SecureConnection_Config* secConnConfig,
+                                                                    void* request,
+                                                                    void** response,
+                                                                    uintptr_t userContext)
+{
+    if (NULL == secConnConfig || NULL == request)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (isSynchronous && NULL == response)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    // Check connection is valid and is not already created
+    if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
+        (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
+    {
+        Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
+
+    SOPC_ClientConnection* res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
+    if (SOPC_STATUS_OK == status && NULL == res)
+    {
+        status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, true, &res);
+        if (SOPC_STATUS_OK == status)
+        {
+            sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx] = res;
+        }
+    }
+
+    /* Call discovery service */
+    SOPC_StaMac_ReqCtx* smReqCtx = NULL;
+    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        /* create a context wrapper */
+
+        smReqCtx = SOPC_Calloc(1, sizeof(*smReqCtx));
+        if (isSynchronous)
+        {
+            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateSync(res->secureConnectionIdx, response, true);
+        }
+        else
+        {
+            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
+                res->secureConnectionIdx, true, sopc_client_helper_config.asyncRespCb, userContext);
+        }
+        if (NULL == reqCtx)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        if (NULL == smReqCtx || NULL == reqCtx)
+        {
+            SOPC_Free(smReqCtx);
+            SOPC_Free(reqCtx);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            smReqCtx->appCtx = (uintptr_t) reqCtx;
+            smReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
+            smReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
+        }
+    }
+
+    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    /* send the request and wait for the result if sync operation */
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ReturnStatus statusMutex = Mutex_Lock(&reqCtx->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+
+        /* send the request */
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = 0, // TODO !!!!!!!
+                                                                .secureChannelConfigIdx = res->cfgId};
+
+            status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);
+        }
+
+        if (isSynchronous && SOPC_STATUS_OK == status)
+        {
+            /* Wait for the response => status OK (response received) */
+            status = SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeout(reqCtx);
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = reqCtx->status;
+            }
+        }
+
+        statusMutex = Mutex_Unlock(&reqCtx->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
+
+        if (isSynchronous && NULL != reqCtx)
+        {
+            SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
+        }
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                          void* request,
+                                                          uintptr_t userContext)
+{
+    return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                         void* request,
+                                                         void** response)
+{
+    return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0);
 }
 
 SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
@@ -416,102 +665,55 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Check connection is valid and is not already created
-    if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
-        NULL != sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx])
+    SOPC_ClientConnection* res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig))
     {
-        Mutex_Unlock(&sopc_client_helper_config.configMutex);
-        return SOPC_STATUS_INVALID_STATE;
+        status = SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
-
-    SOPC_ClientConnection* res = NULL;
-    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
     if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_Calloc(sizeof(*res), 1);
-        if (NULL == res)
-        {
-            return SOPC_STATUS_OUT_OF_MEMORY;
-        }
-
-        if (NULL != secConnConfig->reverseURL)
-        {
-            // TODO: manage reverse EPs
-            SOPC_ASSERT(false);
-        }
+        status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
     }
 
-    SOPC_SecureChannelConfigIdx cfgId = 0;
-    SOPC_StaMac_Machine* stateMachine = NULL;
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != res)
     {
-        /* TODO: propagate the const in low level API ? */
-        SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-        cfgId = SOPC_ToolkitClient_AddSecureChannelConfig(&secConnConfig->scConfig);
-        SOPC_GCC_DIAGNOSTIC_RESTORE
-        if (0 == cfgId)
+        if (res->isDiscovery)
         {
-            status = SOPC_STATUS_NOK;
+            // The only case authorized for an existing connection is a discovery connection which is also valid for
+            // non-discovery (<=> !secConnConfig->isDiscoveryConnection)
+            res->isDiscovery = false;
         }
         else
         {
-            const char* username = NULL;
-            const char* password = NULL;
-
-            const char* userX509certPath = NULL;
-            const char* userX509keyPath = NULL;
-            bool userX509keyEncrypted = false;
-
-            if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
-            {
-                username = secConnConfig->sessionConfig.userToken.userName.userName;
-                password = secConnConfig->sessionConfig.userToken.userName.userPwd;
-            }
-            else if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_Certificate)
-            {
-                SOPC_ASSERT(secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded);
-                userX509certPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath;
-                userX509keyPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath;
-                userX509keyEncrypted =
-                    secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted;
-            }
-
-            status = SOPC_StaMac_Create(cfgId, reverseConfigIdx, secConnConfig->secureConnectionIdx,
-                                        secConnConfig->sessionConfig.userPolicyId, username, password, userX509certPath,
-                                        userX509keyPath, userX509keyEncrypted, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS,
-                                        TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT, TMP_PUBLISH_N_TOKEN,
-                                        TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
+            // Connect already called, do not allow a new connect call
+            status = SOPC_STATUS_INVALID_STATE;
         }
     }
-    if (SOPC_STATUS_OK == status)
-    {
-        // Data for synchronous calls
-        mutStatus = Condition_Init(&res->syncCond);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = Mutex_Initialization(&res->syncMutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        res->connCb = connectEventCb;
-        res->cfgId = cfgId;
-        res->stateMachine = stateMachine;
-        res->secureConnectionIdx = secConnConfig->secureConnectionIdx;
-        sopc_client_helper_config.secureConnections[res->secureConnectionIdx] = res;
+    if (SOPC_STATUS_OK == status && NULL == res)
+    {
+        status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, false, &res);
+        if (SOPC_STATUS_OK == status)
+        {
+            sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx] = res;
+        }
     }
+
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Starts the machine */
     if (SOPC_STATUS_OK == status)
     {
-        mutStatus = Mutex_Lock(&res->syncMutex);
+        mutStatus = Mutex_Lock(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        if (!res->syncActionRunning)
+        if (!res->syncConnection)
         {
             res->syncConnection = true;
-            res->syncActionRunning = true;
-            status = SOPC_StaMac_StartSession(stateMachine);
+            status = SOPC_StaMac_StartSession(res->stateMachine);
         }
         else
         {
@@ -520,24 +722,23 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
 
         if (SOPC_STATUS_OK == status)
         {
-            while (SOPC_STATUS_OK == status && !SOPC_StaMac_IsError(stateMachine) &&
-                   !SOPC_StaMac_IsConnected(stateMachine))
+            while (SOPC_STATUS_OK == status && !SOPC_StaMac_IsError(res->stateMachine) &&
+                   !SOPC_StaMac_IsConnected(res->stateMachine))
             {
                 // Note: we use the low layer timeouts and do not need a new one
-                status = Mutex_UnlockAndWaitCond(&res->syncCond, &res->syncMutex);
+                status = Mutex_UnlockAndWaitCond(&res->syncCond, &res->syncConnMutex);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
             }
 
-            if (SOPC_StaMac_IsError(stateMachine) || !SOPC_StaMac_IsConnected(stateMachine))
+            if (SOPC_StaMac_IsError(res->stateMachine) || !SOPC_StaMac_IsConnected(res->stateMachine))
             {
                 status = SOPC_STATUS_CLOSED;
             }
         }
 
         res->syncConnection = false;
-        res->syncActionRunning = false;
 
-        mutStatus = Mutex_Unlock(&res->syncMutex);
+        mutStatus = Mutex_Unlock(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
@@ -547,9 +748,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     }
     else
     {
-        if (NULL != stateMachine)
+        if (NULL != res && NULL != res->stateMachine)
         {
-            SOPC_StaMac_Delete(&stateMachine);
+            SOPC_StaMac_Delete(&res->stateMachine);
         }
         if (NULL != res)
         {
@@ -596,13 +797,12 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
 
     if (SOPC_StaMac_IsConnected(pSM))
     {
-        mutStatus = Mutex_Lock(&pSc->syncMutex);
+        mutStatus = Mutex_Lock(&pSc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        if (!pSc->syncActionRunning)
+        if (!pSc->syncConnection)
         {
             pSc->syncConnection = true;
-            pSc->syncActionRunning = true;
             status = SOPC_StaMac_StopSession(pSM);
         }
         else
@@ -613,14 +813,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
         while (SOPC_STATUS_OK == status && !SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))
         {
             // Note: we use the low layer timeouts and do not need a new one
-            status = Mutex_UnlockAndWaitCond(&pSc->syncCond, &pSc->syncMutex);
+            status = Mutex_UnlockAndWaitCond(&pSc->syncCond, &pSc->syncConnMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
 
         pSc->syncConnection = false;
-        pSc->syncActionRunning = false;
 
-        mutStatus = Mutex_Unlock(&pSc->syncMutex);
+        mutStatus = Mutex_Unlock(&pSc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
@@ -631,7 +830,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
 
         mutStatus = Condition_Clear(&(*secureConnection)->syncCond);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = Mutex_Clear(&(*secureConnection)->syncMutex);
+        mutStatus = Mutex_Clear(&(*secureConnection)->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
         sopc_client_helper_config.secureConnections[(*secureConnection)->secureConnectionIdx] = NULL;
@@ -646,14 +845,24 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
-                                                 void* request,
-                                                 uintptr_t userContext)
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
+                                                           SOPC_ClientConnection* secureConnection,
+                                                           void* request,
+                                                           void** response,
+                                                           uintptr_t userContext)
 {
-    if (NULL == secureConnection)
+    if (NULL == secureConnection || NULL == request)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    if (isSynchronous && NULL == response)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    // TODO: filter request types ? (also depends on subscription choices)
+
     if (!SOPC_ClientInternal_IsInitialized())
     {
         return SOPC_STATUS_INVALID_STATE;
@@ -664,106 +873,83 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
-    if (NULL == sopc_client_helper_config.asyncRespCb ||
-        secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
+
+    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
+        (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
+    /* Call service */
     if (SOPC_STATUS_OK == status)
     {
         pSM = secureConnection->stateMachine;
-        reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(secureConnection->secureConnectionIdx, false,
-                                                                 sopc_client_helper_config.asyncRespCb, userContext);
+        /* create a request context */
+        if (isSynchronous)
+        {
+            reqCtx =
+                SOPC_ClientHelperInternal_GenReqCtx_CreateSync(secureConnection->secureConnectionIdx, response, false);
+        }
+        else
+        {
+            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
+                secureConnection->secureConnectionIdx, false, sopc_client_helper_config.asyncRespCb, userContext);
+        }
         if (NULL == reqCtx)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    // TODO: filter request types ? (also depends on subscription choices)
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_SendRequest(pSM, request, (uintptr_t) reqCtx, SOPC_REQUEST_SCOPE_APPLICATION,
-                                         SOPC_REQUEST_TYPE_USER);
-    }
-
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    return status;
-}
-
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
-{
-    if (NULL == secureConnection)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_StaMac_Machine* pSM = NULL;
-    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
-    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
-    {
-        status = SOPC_STATUS_INVALID_STATE;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        pSM = secureConnection->stateMachine;
-        reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateSync(secureConnection->secureConnectionIdx, response, false);
-        if (NULL == reqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    // TODO: filter request types ? (also depends on subscription choices)
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_StaMac_SendRequest(pSM, request, (uintptr_t) reqCtx, SOPC_REQUEST_SCOPE_APPLICATION,
-                                         SOPC_REQUEST_TYPE_USER);
-    }
-
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    /* wait for the request result */
+    /* send the request and wait for the result if sync operation */
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
         SOPC_ReturnStatus statusMutex = Mutex_Lock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
+        /* send the request */
+
         if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, request, (uintptr_t) reqCtx, SOPC_REQUEST_SCOPE_APPLICATION,
+                                             SOPC_REQUEST_TYPE_USER);
+        }
+
+        if (isSynchronous && SOPC_STATUS_OK == status)
         {
             /* Wait for the response => status OK (response received) */
             status = SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeout(reqCtx);
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = reqCtx->status;
+            }
         }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = reqCtx->status;
-        }
-
-        /* Free or cancel the request context */
         statusMutex = Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
-    }
 
-    if (NULL != reqCtx)
-    {
-        SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
+        if (isSynchronous && NULL != reqCtx)
+        {
+            SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
+        }
     }
 
     return status;
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
+                                                 void* request,
+                                                 uintptr_t userContext)
+{
+    return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext);
+}
+
+SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
+{
+    return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0);
 }
