@@ -442,6 +442,18 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config
                                                            const SOPC_PKI_LeafProfile* pProfile,
                                                            uint32_t* error);
 
+/** \brief Redefines the directory store where the certificates will be stored with ::SOPC_PKIProviderNew_WriteToStore
+ *
+ * \param directoryStorePath The directory path where the certificates will be stored.
+ * \param pPKI A valid pointer to the PKIProvider.
+ *
+ * \note The directory is created if \p directoryStorePath does not exist.
+ * \warning In case of error, \p pPKI is unchanged.
+ *
+ * \return SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK in case of error.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePath, SOPC_PKIProviderNew* pPKI);
+
 /** \brief Write the certificate files in the trustList folder of the PKI storage.
  *         The trustList folder is created if it is missing.
  *         The format of the written files is DER.

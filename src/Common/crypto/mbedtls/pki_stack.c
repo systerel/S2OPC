@@ -2057,6 +2057,32 @@ static SOPC_ReturnStatus may_create_pki_folder(const char* pBasePath, const char
     return status;
 }
 
+SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePath, SOPC_PKIProviderNew* pPKI)
+{
+    if (NULL == pPKI || NULL == directoryStorePath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Create if necessary the store */
+    SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_mkdir(directoryStorePath);
+    if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdir_res && SOPC_FileSystem_Creation_OK != mkdir_res)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Copy the  directory store path before exchange the data */
+    char* pCopyPath = SOPC_strdup(directoryStorePath);
+    if (NULL == pCopyPath)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    SOPC_Free(pPKI->directoryStorePath);
+    pPKI->directoryStorePath = pCopyPath;
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
 {
     if (NULL == pPKI)
@@ -2339,7 +2365,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
                                                     &pTmpPKI);
     }
     /* Copy the  directory store path before exchange the data */
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pPKI->directoryStorePath)
     {
         pTmpPKI->directoryStorePath = SOPC_strdup(pPKI->directoryStorePath);
         if (NULL == pTmpPKI->directoryStorePath)
