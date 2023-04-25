@@ -42,24 +42,6 @@
 #include "libs2opc_client_config.h"
 
 /**
- * \brief Send a discovery request without user session creation and activation.
- *        Supported discovery requests are the following:
- *        - ::OpcUa_FindServersRequest
- *        - ::OpcUa_FindServersOnNetworkRequest
- *        - ::OpcUa_GetEndpointsRequest
- *        - ::OpcUa_RegisterServerRequest
- *        - ::OpcUa_RegisterServer2Request
- *  \param secConnecConfig  The secure connection configuration.
- *                          Only server URL, server URI and optional reverse connection parameters are used.
- *
- *  \warning If the server endpoint is not a discovery endpoint or an activated session is expected
- *           usual connection and generic services functions shall be used.
- */
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(const SOPC_SecureConnection_Config* secConnConfig);
-
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(const SOPC_SecureConnection_Config* secConnConfig);
-
-/**
  * \brief Structure representing a secure connection to a server
  */
 typedef struct SOPC_ClientConnection SOPC_ClientConnection;
@@ -91,6 +73,69 @@ typedef enum
 typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
                                             SOPC_ClientConnectionEvent event,
                                             SOPC_StatusCode status);
+
+/**
+ * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
+ *
+ * \param secConnConfig  The secure connection configuration.
+ * \param request   An instance of one of the following OPC UA request:
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_GetEndpointsRequest
+ *                  - ::OpcUa_RegisterServerRequest
+ *                  - ::OpcUa_RegisterServer2Request
+ * \param userContext  User defined context that will be provided with the corresponding response in
+ *                     ::SOPC_LocalServiceAsyncResp_Fct
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
+ *
+ *  \warning If the server endpoint is not a discovery endpoint or an activated session is expected
+ *           usual connection and generic services functions shall be used.
+ */
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                          void* request,
+                                                          uintptr_t userContext);
+
+/**
+ * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
+ *
+ * \param secConnConfig  The secure connection configuration.
+ * \param request   An instance of one of the following OPC UA request:
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_GetEndpointsRequest
+ *                  - ::OpcUa_RegisterServerRequest
+ *                  - ::OpcUa_RegisterServer2Request
+ * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
+ *                     \li ::OpcUa_FindServersRequest
+ *                     \li ::OpcUa_FindServersOnNetworkRequest
+ *                     \li ::OpcUa_GetEndpointsRequest
+ *                     \li ::OpcUa_GetEndpointsResponse
+ *                     \li ::OpcUa_RegisterServerRequest
+ *                     \li ::OpcUa_RegisterServer2Request
+ *
+ *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
+ *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
+ *
+ * \note request memory is managed by the client after a successful return or in case of timeout
+ * \note caller is responsible of output response memory after successful call
+ *
+ * \warning If the server endpoint is not a discovery endpoint or an activated session is expected
+ *          usual connection and generic services functions shall be used.
+ *
+ * \warning local service synchronous call shall only be called from the application thread and shall not be called from
+ * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,
+ * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
+ * situation.
+ */
+SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                         void* request,
+                                                         void** response);
 
 /**
  * NOT IMPLEMENTED
@@ -146,7 +191,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *       and the connection shall be still active
  *
  * \param config    The connection configuration
- * \param request   An instance of on of the following OPC UA request:
+ * \param request   An instance of one of the following OPC UA request:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
@@ -200,16 +245,15 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
- *         SOPC_STATUS_INVALID_STATE if the client is not running otherwise
- *         SOPC_STATUS_TIMEOUT if ::SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS is reached before response provided.
+ *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
  * \note request memory is managed by the client after a successful return or in case of timeout
  * \note caller is responsible of output response memory after successful call
  *
  * \warning local service synchronous call shall only be called from the application thread and shall not be called from
  * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,
- * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a temporary
- * deadlock situation which will lead to fail with SOPC_STATUS_TIMEOUT.
+ * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
+ * situation.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection,
                                                 void* request,
