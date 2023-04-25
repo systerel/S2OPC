@@ -471,6 +471,35 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles);
 
+/** \brief Extracts certificates from the PKI object.
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param ppTrustedCerts Write: a valid pointer to a copy of the trusted certificate list.
+ *                       Append: a pointer to a pointer to a certificate list to which append the trusted certificate
+ *                       list. In either cases, you should free this object.
+ * \param ppTrustedCrl Write: a valid pointer to a copy of the trusted CRL list.
+ *                     Append: a pointer to a pointer to a certificate list to which append the trusted CRL list.
+ *                     In either cases, you should free this object.
+ * \param ppIssuerCerts Write: a valid pointer to a copy of the issuer certificate list.
+ *                      Append: a pointer to a pointer to a certificate list to which append the issuer certificate
+ *                      list. In either cases, you should free this object.
+ * \param ppIssuerCrl Write: a valid pointer to a copy of the issuer CRL list.
+ *                    Append: a pointer to a pointer to a certificate list to which append the issuer CRL list.
+ *                    In either cases, you should free this object.
+ *
+ * \note In case of error, the whole lists
+ *       ( \p ppTrustedCerts , \p ppTrustedCrl , \p ppIssuerCerts and \p ppIssuerCrl ) are free and set to NULL.
+ *
+ * \note If the \p pPKI contains an empty list then nothing is write or append for this list.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProviderNew* pPKI,
+                                                          SOPC_CertificateList** ppTrustedCerts,
+                                                          SOPC_CRLList** ppTrustedCrl,
+                                                          SOPC_CertificateList** ppIssuerCerts,
+                                                          SOPC_CRLList** ppIssuerCrl);
+
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
  * \param ppPKI A valid pointer to the PKIProvider.

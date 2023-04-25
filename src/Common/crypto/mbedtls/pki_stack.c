@@ -2083,6 +2083,52 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProviderNew* pPKI,
+                                                          SOPC_CertificateList** ppTrustedCerts,
+                                                          SOPC_CRLList** ppTrustedCrl,
+                                                          SOPC_CertificateList** ppIssuerCerts,
+                                                          SOPC_CRLList** ppIssuerCrl)
+{
+    if (NULL == pPKI || NULL == ppTrustedCerts || NULL == ppTrustedCrl || NULL == ppIssuerCerts || NULL == ppIssuerCrl)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateList* pTrustedCerts = *ppTrustedCerts;
+    SOPC_CRLList* pTrustedCrl = *ppTrustedCrl;
+    SOPC_CertificateList* pIssuerCerts = *ppIssuerCerts;
+    SOPC_CRLList* pIssuerCrl = *ppIssuerCrl;
+    SOPC_ReturnStatus status = merge_certificates(pPKI->pTrustedRoots, pPKI->pTrustedCerts, &pTrustedCerts);
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pTrustedCrl)
+    {
+        status = SOPC_KeyManager_CRL_Copy(pPKI->pTrustedCrl, &pTrustedCrl);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = merge_certificates(pPKI->pIssuerRoots, pPKI->pIssuerCerts, &pIssuerCerts);
+    }
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pIssuerCrl)
+    {
+        status = SOPC_KeyManager_CRL_Copy(pPKI->pIssuerCrl, &pIssuerCrl);
+    }
+    /* Clear if error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(pIssuerCerts);
+        SOPC_KeyManager_CRL_Free(pTrustedCrl);
+        SOPC_KeyManager_CRL_Free(pIssuerCrl);
+        pTrustedCerts = NULL;
+        pIssuerCerts = NULL;
+        pTrustedCrl = NULL;
+        pIssuerCrl = NULL;
+    }
+    *ppTrustedCerts = pTrustedCerts;
+    *ppIssuerCerts = pIssuerCerts;
+    *ppTrustedCrl = pTrustedCrl;
+    *ppIssuerCrl = pIssuerCrl;
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
 {
     if (NULL == pPKI)
