@@ -302,6 +302,14 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
         pSecConnConfig->scConfig.requestedLifetime = SOPC_DEFAULT_REQ_LIFETIME_MS;
     }
 
+    pSecConnConfig->sessionConfig.userPolicyId =
+        SOPC_strdup(""); // Empty user policy id per default (anonymous without policy)
+    if (NULL == pSecConnConfig->sessionConfig.userPolicyId)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
     ctx->currentSecConnConfig = pSecConnConfig;
 
     return true;
@@ -317,11 +325,6 @@ static bool end_connection(struct parse_context_t* ctx)
     if (OpcUa_MessageSecurityMode_Invalid == ctx->currentSecConnConfig->scConfig.msgSecurityMode)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no security mode defined for the connection");
-        return false;
-    }
-    if (NULL == ctx->currentSecConnConfig->sessionConfig.userPolicyId)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no user policy id defined for the connection");
         return false;
     }
     if (NULL == ctx->currentSecConnConfig->serverCertPath &&
@@ -420,7 +423,9 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         LOG_XML_ERROR(ctx->helper_ctx.parser, "policyId attribute missing");
         return false;
     }
-
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_Free((void*) ctx->currentSecConnConfig->sessionConfig.userPolicyId); // free default empty C string
+    SOPC_GCC_DIAGNOSTIC_RESTORE
     ctx->currentSecConnConfig->sessionConfig.userPolicyId = SOPC_strdup(attr_val);
     if (NULL == ctx->currentSecConnConfig->sessionConfig.userPolicyId)
     {

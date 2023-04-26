@@ -313,8 +313,8 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="policyId"  use="required"/> <!-- Might be optional in the future if auto-selection --> 
-    <xs:attribute type="TokenType" name="tokenType"  use="required"/>
+    <xs:attribute type="xs:string" name="policyId" use="required"/> <!-- Might be optional in the future if auto-selection --> 
+    <xs:attribute type="TokenType" name="tokenType" use="required"/>
     <!-- <xs:attribute type="SecurityURI" name="securityUri" use="optional"/> Determined by policyId until it becames optionnal -->
   </xs:complexType>
   <xs:complexType name="ConnectionType">
@@ -322,10 +322,10 @@
       <xs:element type="CertificateType" name="ServerCertificate"/>
       <xs:element type="SimpleSecurityPolicyType" name="SecurityPolicy"/>
       <xs:element type="SecurityModeType" name="SecurityMode"/>
-      <xs:element type="ConnectionUserPolicyType" name="UserPolicy">
+      <xs:element type="ConnectionUserPolicyType" name="UserPolicy" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
-            If not defined the user token type is anonymous and no policy id is set.
+            If not defined the user token type is anonymous and empty policy id is set.
             Note: the user policy id might be required by server even in anonymous mode.
           </xs:documentation>
         </xs:annotation>
