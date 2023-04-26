@@ -20,6 +20,8 @@
 #ifndef SOPC_HELPER_EXPAT_H_
 #define SOPC_HELPER_EXPAT_H_
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -89,4 +91,5 @@ bool SOPC_HelperExpat_IsSkipTagActive(SOPC_HelperExpatCtx* ctx);
  */
 bool SOPC_HelperExpat_PopSkipTag(SOPC_HelperExpatCtx* ctx, const char* name);
 
+#endif
 #endif /* SOPC_HELPER_EXPAT_H_ */

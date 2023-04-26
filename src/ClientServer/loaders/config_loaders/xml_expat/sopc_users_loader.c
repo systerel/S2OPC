@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
+
 #include "sopc_users_loader.h"
 
 #include <errno.h>
@@ -1641,3 +1643,4 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     sopc_free_certificate_lists(&ctx);
     return true;
 }
+#endif

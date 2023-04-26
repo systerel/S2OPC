@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_uanodeset_loader.h"
 
 #include <errno.h>
@@ -2466,3 +2467,4 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
         return NULL;
     }
 }
+#endif

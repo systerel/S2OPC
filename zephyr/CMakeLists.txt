@@ -21,6 +21,7 @@ add_definitions (-DSOPC_MAX_PENDING_REQUESTS=64)
 add_definitions (-DSOPC_PUBSUB_BUFFER_SIZE=256)
 add_definitions (-DSOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER=1)
 add_definitions (-DSOPC_PUBSUB_MAX_MESSAGE_PER_PUBLISHER=4)
+add_definitions (-DSOPC_WITH_EXPAT=0)
 
 #add_definitions (-DWITH_NO_ASSERT=1)
 add_definitions (-DWITH_USER_ASSERT=1)
@@ -82,13 +83,8 @@ file(GLOB SOPC_ZEPHYR_SRC ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr/*.c
 
 # Include other files
 file(GLOB_RECURSE SOPC_CLIENT_SERVER_SRC ${S2OPC_SRC}/ClientServer/*.c)
-list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/config_loaders/.*" )
-list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/address_space_loaders/xml_expat/.*" )
-list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/helpers/.*" )
-list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/frontend/server_wrapper/libs2opc_server_config_xml.*" )
 
 file(GLOB_RECURSE SOPC_PUBSUB_SRC ${S2OPC_SRC}/PubSub/*.c)
-list(FILTER SOPC_PUBSUB_SRC EXCLUDE REGEX "${S2OPC_SRC}/PubSub/config_loaders/.*" )
 
 zephyr_library_sources(
     ${SOPC_COMMON_SRC}

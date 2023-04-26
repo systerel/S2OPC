@@ -20,9 +20,11 @@
 #ifndef SOPC_NODESET_LOADER_H_
 #define SOPC_NODESET_LOADER_H_
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include <stdio.h>
 #include "sopc_address_space.h"
 
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd);
 
+#endif
 #endif /* SOPC_NODESET_LOADER_H_ */

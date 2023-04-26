@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include <stdio.h>
 #include <string.h>
 
@@ -114,3 +115,5 @@ bool SOPC_HelperExpat_PopSkipTag(SOPC_HelperExpatCtx* ctx, const char* name)
     }
     return false;
 }
+
+#endif

@@ -20,6 +20,8 @@
 #ifndef SOPC_USERS_LOADER_H_
 #define SOPC_USERS_LOADER_H_
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
+
 #include <stdio.h>
 
 #include "sopc_user_manager_internal.h"
@@ -35,5 +37,7 @@
 bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
                             SOPC_UserAuthorization_Manager** authorization);
+
+#endif
 
 #endif /* SOPC_USERS_LOADER_H_ */

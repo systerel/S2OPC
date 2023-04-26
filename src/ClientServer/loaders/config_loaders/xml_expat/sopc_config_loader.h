@@ -20,6 +20,8 @@
 #ifndef SOPC_CONFIG_LOADER_H_
 #define SOPC_CONFIG_LOADER_H_
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
+
 #include <stdio.h>
 
 #include "sopc_user_app_itf.h"
@@ -33,4 +35,5 @@
  * */
 bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);
 
+#endif
 #endif /* SOPC_CONFIG_LOADER_H_ */

@@ -19,6 +19,7 @@
 
 // WARNING: this source file is only included if the XML library (Expat) is available
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -263,3 +264,4 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
 
     return SOPC_STATUS_OK;
 }
+#endif

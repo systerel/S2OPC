@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_config_loader.h"
 
 #include <errno.h>
@@ -1653,3 +1654,4 @@ bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config)
         return false;
     }
 }
+#endif

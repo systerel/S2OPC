@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_xml_loader.h"
 
 #include <errno.h>
@@ -1280,3 +1281,4 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_ParseXML(FILE* fd)
 
     return config;
 }
+#endif
