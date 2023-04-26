@@ -47,8 +47,8 @@
 
 #include "logging.h"
 
-#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.67:4841" //Home
-//#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.168:4841" //Office
+//#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.67:4841" //Home
+#define DEFAULT_ENDPOINT_URL "opc.tcp://192.168.1.168:4841" //Office
 //#define DEFAULT_ENDPOINT_URL "opc.tcp://10.42.0.230:4841" //Local
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"

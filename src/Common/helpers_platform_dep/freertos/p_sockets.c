@@ -153,15 +153,6 @@ static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 }
 
 
-#ifndef IPPROTO_IPV6
-#define IPPROTO_IPV6 41
-#endif
-
-#ifndef IPV6_V6ONLY
-#define IPV6_V6ONLY 27
-#endif
-
-
 SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
                                         bool setReuseAddr,
                                         bool setNonBlocking,
