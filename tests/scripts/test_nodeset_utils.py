@@ -18,6 +18,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
+import difflib
 import os
 from os.path import join as pj
 import shutil
@@ -34,13 +35,6 @@ RESOURCE_DIR = pj(SCRIPT_DIR, 'resources')
 CLEANUP_TEMP = True
 
 
-def assert_content_equal(expected, actual):
-    with open(expected, encoding='utf-8') as exp_file, open(actual, encoding='utf-8') as act_file:
-        exp = '\n'.join(exp_file.readlines())
-        act = '\n'.join(act_file.readlines())
-        assert exp == act
-
-
 def make_temp_dir():
     tmp_dir = pj(RESOURCE_DIR, 'actual')
     if not os.path.isdir(tmp_dir):
@@ -48,48 +42,55 @@ def make_temp_dir():
     return tmp_dir
 
 
-def run_test(result_name, *src_paths):
-    parser = make_argparser()
-    # TODO: with tempfile.TemporaryDirectory() as tmp_dir:
-    tmp_dir = make_temp_dir()
-    try:
-        expected = pj(RESOURCE_DIR, 'expected', result_name)
-        actual = pj(tmp_dir, result_name)
-        res_src_paths = [pj(RESOURCE_DIR, src) for src in src_paths]
-        args = parser.parse_args([*res_src_paths, '-o', actual])
-        run_merge(args)
-        assert_content_equal(expected, actual)
-    finally:
-        if CLEANUP_TEMP:
-            shutil.rmtree(tmp_dir)
-
-
 class MergeTests(unittest.TestCase):
 
+    def assert_content_equal(self, expected, actual):
+        with open(expected, encoding='utf-8') as exp_file, open(actual, encoding='utf-8') as act_file:
+            exp = exp_file.readlines()
+            act = act_file.readlines()
+            if exp != act:
+                d = difflib.Differ()
+                self.fail(''.join(d.compare(exp, act)))
+
+    def run_test(self, result_name, *src_paths):
+        parser = make_argparser()
+        # TODO: with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_dir = make_temp_dir()
+        try:
+            expected = pj(RESOURCE_DIR, 'expected', result_name)
+            actual = pj(tmp_dir, result_name)
+            res_src_paths = [pj(RESOURCE_DIR, src) for src in src_paths]
+            args = parser.parse_args([*res_src_paths, '-o', actual])
+            run_merge(args)
+            self.assert_content_equal(expected, actual)
+        finally:
+            if CLEANUP_TEMP:
+                shutil.rmtree(tmp_dir)
+
     def test_ns0_alone(self):
-        run_test('test_ns0_alone.xml',
-                 'ns0.xml')
+        self.run_test('test_ns0_alone.xml',
+                      'ns0.xml')
     
     def test_merge_ns0_temperature(self):
-        run_test('test_merge_ns0_temperature.xml',
-                 'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+        self.run_test('test_merge_ns0_temperature.xml',
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
     
     def test_merge_ns0_temperature_pressure(self):
-        run_test('test_merge_ns0_temperature_pressure.xml',
-                 'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS.NodeSet2.xml')
+        self.run_test('test_merge_ns0_temperature_pressure.xml',
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS.NodeSet2.xml')
     
     def test_merge_pressure_with_ref_to_temperature(self):
-        run_test('test_merge_pressure_with_ref_to_temperature.xml',
-                 'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS_with_TemperatureNS.NodeSet2.xml')
+        self.run_test('test_merge_pressure_with_ref_to_temperature.xml',
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS_with_TemperatureNS.NodeSet2.xml')
     
     def test_merge_with_ns_srv_arrays(self):
-        run_test('test_merge_with_ns_srv_arrays.xml',
-                 'ns0.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml')
+        self.run_test('test_merge_with_ns_srv_arrays.xml',
+                      'ns0.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml')
     
     def test_merge_with_ns_srv_arrays2(self):
         # pressure is given before temperature
-        run_test('test_merge_with_ns_srv_arrays2.xml',
-                 'ns0.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml')
+        self.run_test('test_merge_with_ns_srv_arrays2.xml',
+                      'ns0.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml')
 
 
 if __name__ == '__main__':
