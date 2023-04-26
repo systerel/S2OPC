@@ -45,7 +45,7 @@
 
 #include "sopc_macros.h"
 
-#define SUBSCRIBER_THREAD_PRIORITY 0
+#define SUBSCRIBER_THREAD_PRIORITY 3
 #define SLEEP_TIMEOUT 100
 
 static void log_userCallback(const char* context, const char* text)
@@ -76,6 +76,8 @@ void cbToolkit_subscriber(void)
                                   0x00,
                                   pdTRUE,
                                   portMAX_DELAY );
+
+    vTaskDelay(5000);
 
     //eEthernetIfResult ethResult = ETHERNET_IF_RESULT_NOK;
     SOPC_PubSubConfiguration* config = NULL;
