@@ -275,6 +275,7 @@ def merge(tree, new, namespaces):
         for ref in refsb:
             _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=(ref.get('IsForward') != 'false'))
 
+    tree_root[-1].tail = indent(0)
     return True
 
 def remove_max_monit(tree, namespaces):
