@@ -83,8 +83,12 @@ def _remove_refs_to_nids(tree, nids, namespaces):
 
 def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
     # Add a reference from a node to the other NodeId nid in the given direction
+    attribs = {'ReferenceType': ref_type}
+    if not is_forward:
+        attribs['IsForward'] = 'false'
+
     refs_nodes = node.findall('uanodeset:References', namespaces)
-    if len(refs_nodes) < 1:
+    if len(refs_nodes) == 0:
         refs = ET.Element('uanodeset:References', namespaces)
         # Manual identation with ET... This might not adjust well, we should also indent the latest brother
         refs.text = indent(2)
@@ -92,9 +96,11 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
         node.append(refs)
     else:
         refs, = refs_nodes
-    attribs = {'ReferenceType': ref_type}
-    if not is_forward:
-        attribs['IsForward'] = 'false'
+        for ref in refs:
+            if ref.text == tgt and ref.attrib == attribs:
+                # avoid duplicate reference
+                return
+
     elem = ET.Element('Reference', attribs)
     elem.text = tgt
     if len(refs) > 0:
