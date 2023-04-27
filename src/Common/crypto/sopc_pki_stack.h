@@ -503,7 +503,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProvider
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
  * \param ppPKI A valid pointer to the PKIProvider.
- * \param pAppCert A valid pointer to the application certificate.
+ * \param securityPolicyUri The URI describing the security policy of the secure channel.
  * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part shall not updated.
  * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part shall not updated.
  * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part shall not updated.
@@ -511,10 +511,12 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProvider
  * \param bIncludeExistingList whether the update shall includes the existing certificates of \p ppPKI plus
  *                             \p pTrustedCerts , \p pTrustedCrl , \p pIssuerCerts  and \p pIssuerCrl .
  *
+ * \warning \p securityPolicyUri is not used and could be NULL.
+ *
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI,
-                                                     SOPC_CertificateList* pAppCert,
+                                                     const char* securityPolicyUri,
                                                      SOPC_CertificateList* pTrustedCerts,
                                                      SOPC_CRLList* pTrustedCrl,
                                                      SOPC_CertificateList* pIssuerCerts,

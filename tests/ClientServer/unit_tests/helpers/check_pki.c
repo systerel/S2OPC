@@ -114,18 +114,7 @@ START_TEST(invalid_update)
     status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(NULL != pPKI);
-    /* update 4k cert with a 2k */
-    SOPC_CertificateList* pServerCert = NULL;
-    SOPC_CertificateList* pClientCert = NULL;
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pServerCert);
-    ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_4k_cert.der", &pClientCert);
-    ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_PKIProviderNew_UpdateFromList(&pPKI, pServerCert, pClientCert, NULL, NULL, NULL, true);
-    ck_assert(SOPC_STATUS_NOK == status);
 
-    SOPC_KeyManager_Certificate_Free(pServerCert);
-    SOPC_KeyManager_Certificate_Free(pClientCert);
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
     SOPC_KeyManager_CRL_Free(pTrustedCrl);
     SOPC_PKIProviderNew_Free(pPKI);
@@ -179,17 +168,14 @@ START_TEST(functional_test_from_list)
     status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert(SOPC_STATUS_NOK == status);
     /* Update the PKI with cacert.der and  cacrl.der */
-    SOPC_CertificateList* pCertApp = NULL;
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
     SOPC_CRLList* pTrustedCrlToUpdate = NULL;
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_4k_cert.der", &pCertApp);
-    ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCertToUpdate);
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrlToUpdate);
     ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_PKIProviderNew_UpdateFromList(&pPKI, pCertApp, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL,
-                                                true);
+    status =
+        SOPC_PKIProviderNew_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
     ck_assert(SOPC_STATUS_OK == status);
     /* Validation is OK */
     status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
@@ -201,7 +187,6 @@ START_TEST(functional_test_from_list)
     ck_assert(SOPC_STATUS_OK == status);
 
     SOPC_KeyManager_Certificate_Free(pCertToValidate);
-    SOPC_KeyManager_Certificate_Free(pCertApp);
     SOPC_KeyManager_Certificate_Free(pTrustedCertToUpdate);
     SOPC_KeyManager_CRL_Free(pTrustedCrlToUpdate);
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
