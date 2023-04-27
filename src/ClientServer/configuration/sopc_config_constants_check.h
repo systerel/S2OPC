@@ -39,6 +39,11 @@
 #error "Max number of secure connections cannot be more than INT32_MAX"
 #endif
 
+/* It is expected by specification that server supports one more SecureChannel than Sessions*/
+#if SOPC_MAX_SECURE_CONNECTIONS <= SOPC_MAX_SESSIONS
+#error "Maximum number of secure channel shall be greater than maximum number of session"
+#endif
+
 /* Maximum value accepted in B model */
 #if SOPC_MAX_SESSIONS > INT32_MAX
 #error "Max number of sessions cannot be more than INT32_MAX"

@@ -74,7 +74,7 @@
 
 /** @brief Maximum number of secure channel connections (and configurations) established */
 #ifndef SOPC_MAX_SECURE_CONNECTIONS
-#define SOPC_MAX_SECURE_CONNECTIONS 20
+#define SOPC_MAX_SECURE_CONNECTIONS 21
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /** @brief SOPC_MAX_SECURE_CONNECTIONS defines the simultaneous stable SC,
