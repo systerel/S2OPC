@@ -990,6 +990,7 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
     }
 
     OpcUa_UserTokenPolicy* userPolicy = &secuPolicy->userTokenPolicies[secuPolicy->nbOfUserTokenPolicies];
+    OpcUa_UserTokenPolicy_Initialize(userPolicy);
 
     SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&userPolicy->PolicyId, attr_val);
 
