@@ -491,7 +491,10 @@ void user_authentication_bs__shallow_copy_user_token(
         case constants__e_userTokenType_anonymous:
             anonS = user_authentication_bs__p_user_token->Body.Object.Value;
             anonD = token;
-            status = SOPC_String_AttachFrom(&anonD->PolicyId, &anonS->PolicyId);
+            if (anonS->PolicyId.Length > 0)
+            {
+                status = SOPC_String_AttachFrom(&anonD->PolicyId, &anonS->PolicyId);
+            } // else allow empty policy for anonymous
             break;
         case constants__e_userTokenType_userName:
             usernameS = user_authentication_bs__p_user_token->Body.Object.Value;
