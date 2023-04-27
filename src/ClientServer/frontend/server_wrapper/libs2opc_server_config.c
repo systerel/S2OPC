@@ -103,6 +103,17 @@ bool SOPC_ServerInternal_IsStopped(void)
     return res;
 }
 
+static uint64_t string_hash(const void* s)
+{
+    const SOPC_String* str = s;
+    return SOPC_DJBHash(str->Data, (size_t) str->Length);
+}
+
+static bool string_equal(const void* a, const void* b)
+{
+    return SOPC_String_Equal((const SOPC_String*) a, (const SOPC_String*) b);
+}
+
 // Check configuration is correct
 static bool SOPC_HelperConfigServer_CheckConfig(void)
 {
@@ -116,6 +127,8 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     bool hasSecurity = false;
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
+    SOPC_Dict* uniqueUserPolicies = SOPC_Dict_Create(NULL, string_hash, string_equal, NULL, NULL);
+
     for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
         SOPC_Endpoint_Config* ep = sopc_server_helper_config.endpoints[i];
@@ -136,6 +149,25 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                 {
                     // Note that SOPC_SecurityPolicy_AddUserTokenPolicy already warns when used with None security SC
                     hasUserName = true;
+                }
+                bool found = false;
+                OpcUa_UserTokenPolicy* uniqueUtp = SOPC_Dict_Get(uniqueUserPolicies, &utp->PolicyId, &found);
+                if (found)
+                {
+                    int32_t compareRes = -1;
+                    SOPC_ReturnStatus status = SOPC_EncodeableObject_Compare(&OpcUa_UserTokenPolicy_EncodeableType,
+                                                                             uniqueUtp, utp, &compareRes);
+                    if (SOPC_STATUS_OK != status || 0 != compareRes)
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "Server user token policies shall use unique PolicyId (same id implies "
+                                               "same user token policy content)");
+                        res = false;
+                    }
+                }
+                else
+                {
+                    SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, &utp);
                 }
             }
         }
@@ -191,7 +223,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
 }
 
 // Finalize checked configuration
-static bool SOPC_HelperConfigServer_FinaliseCheckedConfig(void)
+static bool SOPC_HelperConfigServer_FinalizeCheckedConfig(void)
 {
     bool res = true;
 
@@ -302,7 +334,7 @@ bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void)
         }
         if (res)
         {
-            res = SOPC_HelperConfigServer_FinaliseCheckedConfig();
+            res = SOPC_HelperConfigServer_FinalizeCheckedConfig();
         }
         if (res)
         {
