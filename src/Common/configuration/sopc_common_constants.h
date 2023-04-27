@@ -68,6 +68,14 @@ SOPC_Common_EncodingConstants SOPC_Common_GetDefaultEncodingConstants(void);
  */
 bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 
+/**
+ * \brief Retrieve the S2OPC encoding constants "initialized" state
+ *
+ * \return True if the encoding constants are already initialized (when ::SOPC_Common_SetEncodingConstants is called))
+ *
+ */
+bool SOPC_Common_EncodingConstantsGetInitialized(void);
+
 /** @brief Maximum chunk buffer size used (must be >= SOPC_TCP_UA_MIN_BUFFER_SIZE) */
 #ifndef SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE
 #define SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE UINT16_MAX

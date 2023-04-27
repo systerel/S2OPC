@@ -102,3 +102,8 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config)
         return false;
     }
 }
+
+bool SOPC_Common_EncodingConstantsGetInitialized(void)
+{
+    return SOPC_Atomic_Int_Get(&globalEncodingConfigSet);
+}
