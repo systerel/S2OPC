@@ -156,7 +156,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
                                                                     uintptr_t sessionContext,
                                                                     const char* policyId)
 {
-    if (NULL == policyId || strlen(policyId) == 0)
+    if (NULL == policyId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
