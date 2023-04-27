@@ -26,6 +26,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_hash.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -160,20 +161,22 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                     if (SOPC_STATUS_OK != status || 0 != compareRes)
                     {
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "Server user token policies shall use unique PolicyId (same id implies "
-                                               "same user token policy content)");
+                                               "Server user token policies shall use unique PolicyId: %s is not.",
+                                               SOPC_String_GetRawCString(&utp->PolicyId));
                         res = false;
                     }
                 }
                 else
                 {
-                    SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, &utp);
+                    SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, utp);
                 }
             }
         }
 
         // Other verifications to be done by SOPC_ToolkitServer_AddEndpointConfig
     }
+    SOPC_Dict_Delete(uniqueUserPolicies);
+    uniqueUserPolicies = NULL;
     // Check that the server defines certificates and PKI provider if endpoint uses security
     if (hasSecurity)
     {
