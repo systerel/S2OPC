@@ -52,7 +52,7 @@ class MergeTests(unittest.TestCase):
                 d = difflib.Differ()
                 self.fail(''.join(d.compare(exp, act)))
 
-    def run_test(self, result_name, *src_paths):
+    def run_test(self, result_name, options, *src_paths):
         parser = make_argparser()
         # TODO: with tempfile.TemporaryDirectory() as tmp_dir:
         tmp_dir = make_temp_dir()
@@ -60,7 +60,7 @@ class MergeTests(unittest.TestCase):
             expected = pj(RESOURCE_DIR, 'expected', result_name)
             actual = pj(tmp_dir, result_name)
             res_src_paths = [pj(RESOURCE_DIR, src) for src in src_paths]
-            args = parser.parse_args([*res_src_paths, '-o', actual])
+            args = parser.parse_args([*options, *res_src_paths, '-o', actual])
             run_merge(args)
             self.assert_content_equal(expected, actual)
         finally:
@@ -68,28 +68,28 @@ class MergeTests(unittest.TestCase):
                 shutil.rmtree(tmp_dir)
 
     def test_ns0_alone(self):
-        self.run_test('test_ns0_alone.xml',
+        self.run_test('test_ns0_alone.xml', [],
                       'ns0.xml')
-    
+
     def test_merge_ns0_temperature(self):
-        self.run_test('test_merge_ns0_temperature.xml',
+        self.run_test('test_merge_ns0_temperature.xml', [],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
-    
+
     def test_merge_ns0_temperature_pressure(self):
-        self.run_test('test_merge_ns0_temperature_pressure.xml',
+        self.run_test('test_merge_ns0_temperature_pressure.xml', [],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS.NodeSet2.xml')
-    
+
     def test_merge_pressure_with_ref_to_temperature(self):
-        self.run_test('test_merge_pressure_with_ref_to_temperature.xml',
+        self.run_test('test_merge_pressure_with_ref_to_temperature.xml', [],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml', 'TestPressureNS_with_TemperatureNS.NodeSet2.xml')
     
     def test_merge_with_ns_srv_arrays(self):
-        self.run_test('test_merge_with_ns_srv_arrays.xml',
+        self.run_test('test_merge_with_ns_srv_arrays.xml', [],
                       'ns0.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml')
-    
+
     def test_merge_with_ns_srv_arrays2(self):
         # pressure is given before temperature
-        self.run_test('test_merge_with_ns_srv_arrays2.xml',
+        self.run_test('test_merge_with_ns_srv_arrays2.xml', [],
                       'ns0.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml')
 
 
