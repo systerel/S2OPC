@@ -199,7 +199,9 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
  */
 typedef struct SOPC_PKIProviderNew SOPC_PKIProviderNew;
 
-/* Message digests for signatures */
+/**
+ * \brief  Message digests for signatures
+ */
 typedef enum
 {
     SOPC_PKI_MD_SHA1,
@@ -208,20 +210,26 @@ typedef enum
     SOPC_PKI_MD_SHA256_OR_ABOVE,
 } SOPC_PKI_MdSign;
 
-/* Public key algorithms */
+/**
+ * \brief Public key algorithms
+ */
 typedef enum
 {
     SOPC_PKI_PK_ANY,
     SOPC_PKI_PK_RSA
 } SOPC_PKI_PkAlgo;
 
-/* Elliptic curves for ECDSA */
+/**
+ * \brief Elliptic curves for ECDSA
+ */
 typedef enum
 {
     SOPC_PKI_CURVES_ANY,
 } SOPC_PKI_EllipticCurves;
 
-/* Key usage */
+/**
+ * \brief Key usage
+ */
 typedef enum
 {
     SOPC_PKI_KU_DISABLE_CHECK = 0x0000,
@@ -233,17 +241,30 @@ typedef enum
     SOPC_PKI_KU_KEY_CRL_SIGN = 0x00100
 } SOPC_PKI_KeyUsage_Mask;
 
-/* Type of PKI */
+/**
+ * \brief Type of PKI
+ */
 typedef enum
 {
-    SOPC_PKI_TYPE_CLIENT_APP,
-    SOPC_PKI_TYPE_SERVER_APP,
-    SOPC_PKI_TYPE_CLIENT_SERVER_APP,
-    SOPC_PKI_TYPE_USER
+    SOPC_PKI_TYPE_CLIENT_APP, /**< Application client to validate server certificates */
+    SOPC_PKI_TYPE_SERVER_APP, /**< Application server to validate server certificates */
+    SOPC_PKI_TYPE_USER        /**< Application server to validate user certificates*/
 } SOPC_PKI_Type;
 
 /**
- * \brief Leaf certificate profile for validation
+ * @struct SOPC_PKI_LeafProfile
+ * @brief
+ *   Structure containing the leaf certificate profile for validation
+ *   with ::SOPC_PKIProviderNew_ValidateCertificate or with
+ *   ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ * @var SOPC_PKI_LeafProfile::mdSign
+ *   The message digest algorithm of the signature algorithm allowed.
+ * @var SOPC_PKI_LeafProfile::pkAlgo
+ *   The Public Key algorithm allowed.
+ * @var SOPC_PKI_LeafProfile::RSAMinimumKeySize
+ *   The minimum RSA key size allowed.
+ * @var SOPC_PKI_LeafProfile::RSAMaximumKeySize
+ *   The maximum RSA key size allowed.
  */
 typedef struct SOPC_PKI_LeafProfile
 {
@@ -254,7 +275,18 @@ typedef struct SOPC_PKI_LeafProfile
 } SOPC_PKI_LeafProfile;
 
 /**
- * \brief Certificate chain profile for validation
+ * @struct SOPC_PKI_ChainProfile
+ * @brief
+ *   Structure containing the certificate chain profile for the validation
+ *   with ::SOPC_PKIProviderNew_ValidateCertificate .
+ * @var SOPC_PKI_ChainProfile::mdSign
+ *   The message digest algorithm of the signature algorithm allowed.
+ * @var SOPC_PKI_ChainProfile::pkAlgo
+ *   The Public Key algorithm allowed.
+ * @var SOPC_PKI_ChainProfile::curves
+ *   The elliptic curves allowed.
+ * @var SOPC_PKI_ChainProfile::RSAMinimumKeySize
+ *   The minimum RSA key size allowed.
  */
 typedef struct SOPC_PKI_ChainProfile
 {
@@ -265,20 +297,49 @@ typedef struct SOPC_PKI_ChainProfile
 } SOPC_PKI_ChainProfile;
 
 /**
- * \brief Validation configuration
+ * @struct SOPC_PKI_Profile
+ * @brief
+ *   Structure containing the validation configuration
+ * @var SOPC_PKI_Profile::leafProfile
+ *   Validation configuration for the leaf certificate.
+ *   In case of user PKI, the leaf certificate is not verified with
+ *   ::SOPC_PKIProviderNew_ValidateCertificate and the properties of the user leaf should be
+ *   checked separately with ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ * @var SOPC_PKI_Profile::chainProfile
+ *   Validation configuration for the chain. Each certificate properties in the chain are
+ *   verified during ::SOPC_PKIProviderNew_ValidateCertificate .
  */
 typedef struct SOPC_PKI_Profile
 {
-    const SOPC_PKI_LeafProfile* leafProfile;   /**< Validation configuration for the leaf certificate. */
-    const SOPC_PKI_ChainProfile* chainProfile; /**< Validation configuration for the chain. */
+    const SOPC_PKI_LeafProfile* leafProfile;
+    const SOPC_PKI_ChainProfile* chainProfile;
 } SOPC_PKI_Profile;
 
-/* TODO RBA: Add uri and hostName */
-typedef struct SOPC_PKI_Config
+/**
+ * @struct SOPC_PKI_Config
+ * @brief
+ *   Structure containing the PKI configuration
+ * @var SOPC_PKI_Config::type
+ *   Type of the PKI :
+ *    - SOPC_PKI_TYPE_CLIENT_APP (application client to validate server certificates).
+ *    - SOPC_PKI_TYPE_SERVER_APP (application server to validate client certificates).
+ *    - SOPC_PKI_TYPE_USER (application server to validate user certificates).
+ *      In case of SOPC_PKI_TYPE_USER, the leaf certificate is not checked with
+ *      ::SOPC_PKIProviderNew_ValidateCertificate . The properties of the user leaf should be
+ *      checked separately with ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ * @var SOPC_PKI_Config::bBackwardInteroperability
+ *   Defined if self-signed certificates whose basicConstraints CA flag
+ *   set to True will be marked as root CA and as trusted certificates.
+ * @var SOPC_PKI_Config::keyUsage
+ *  Defined the key usages mask of the certificates to validate.
+ *  If SOPC_PKI_KU_DISABLE_CHECK is set then the key usages are not checked during
+ *  ::SOPC_PKIProviderNew_ValidateCertificate and ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ *
+ */
+typedef struct SOPC_PKI_Config // TODO RBA: Add uri and hostName to configure with ::SOPC_PKIProviderNew_GetConfig
 {
-    SOPC_PKI_Type type;             /* user, app client, app server, app client server */
-    bool bBackwardInteroperability; /**< Defined if self-signed certificates whose basicConstraints CA flag
-                                         set to True will be marked as root CA and as trusted certificates.*/
+    SOPC_PKI_Type type;
+    bool bBackwardInteroperability;
     SOPC_PKI_KeyUsage_Mask keyUsage;
 } SOPC_PKI_Config;
 
@@ -417,6 +478,9 @@ const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void);
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *
+ * \warning In case of user PKI, the leaf profile part of \p pProfile is not applied to the certificate.
+ *          The user leaf properties should be checked separately with ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ *
  * \return SOPC_STATUS_OK when the certificate is successfully validated, and
  *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
  */
@@ -511,7 +575,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProvider
  * \param bIncludeExistingList whether the update shall includes the existing certificates of \p ppPKI plus
  *                             \p pTrustedCerts , \p pTrustedCrl , \p pIssuerCerts  and \p pIssuerCrl .
  *
- * \warning \p securityPolicyUri is not used and could be NULL.
+ * \warning \p securityPolicyUri is not used yet and could be NULL.
  *
  * \return SOPC_STATUS_OK when successful.
  */

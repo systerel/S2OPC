@@ -793,12 +793,6 @@ static const SOPC_PKI_Config g_config_server_app = {
     .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
                 SOPC_PKI_KU_NON_REPUDIATION,
 };
-static const SOPC_PKI_Config g_config_client_server_app = {
-    .type = SOPC_PKI_TYPE_CLIENT_SERVER_APP,
-    .bBackwardInteroperability = true,
-    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
-                SOPC_PKI_KU_NON_REPUDIATION,
-};
 
 const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri)
 {
@@ -882,9 +876,6 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type)
         break;
     case SOPC_PKI_TYPE_SERVER_APP:
         return &g_config_server_app;
-        break;
-    case SOPC_PKI_TYPE_CLIENT_SERVER_APP:
-        return &g_config_client_server_app;
         break;
     default:
         break;
@@ -1069,20 +1060,13 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     if (0 == err)
     {
         bool missing = false;
-        if (SOPC_PKI_TYPE_SERVER_APP == pConfig->type)
-        {
-            missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
-                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
-        }
         if (SOPC_PKI_TYPE_CLIENT_APP == pConfig->type)
         {
-            missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
-                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
-        }
-        if (SOPC_PKI_TYPE_CLIENT_SERVER_APP == pConfig->type)
-        {
             missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
                                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
+        }
+        if (SOPC_PKI_TYPE_SERVER_APP == pConfig->type)
+        {
             missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
                                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
         }
