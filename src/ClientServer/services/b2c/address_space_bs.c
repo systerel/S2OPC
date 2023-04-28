@@ -331,8 +331,13 @@ void address_space_bs__read_AddressSpace_AccessLevelEx_value(
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
 
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    // Note: always returns 0 since we always support atomic read/write operations + write with index range
-    *address_space_bs__variant = util_variant__new_Variant_from_uint32(0);
+    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
+    // Note: keep only supported access level flags
+    accessLevel = (accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite |
+                                  SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite));
+    // Note: always returns 0 for extension bytes since we always support atomic read/write operations
+    // + write with index range
+    *address_space_bs__variant = util_variant__new_Variant_from_uint32((uint32_t) accessLevel);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
