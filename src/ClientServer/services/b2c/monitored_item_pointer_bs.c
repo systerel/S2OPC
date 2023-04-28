@@ -198,8 +198,12 @@ void monitored_item_pointer_bs__check_monitored_item_filter_valid(
         if (OpcUa_NodeClass_Variable == *ncl)
         {
             dataTypeId = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-            result = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(address_space_bs__nodes, RECURSION_LIMIT,
-                                                                        dataTypeId, dataTypeId, &Number_DataType);
+            result = SOPC_NodeId_Equal(dataTypeId, &Number_DataType);
+            if (!result)
+            {
+                result = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(address_space_bs__nodes, RECURSION_LIMIT,
+                                                                            dataTypeId, dataTypeId, &Number_DataType);
+            }
             /* Keep the absolute deadband value as context */
             *monitored_item_pointer_bs__filterAbsDeadbandCtx = monitored_item_pointer_bs__p_filter->DeadbandValue;
             if (result)
