@@ -28,7 +28,11 @@ set(USERS_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Users_
 
 # Define a demo XML address space configuration
 if (NOT S2OPC_NANO_PROFILE)
-  set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+  if(NOT S2OPC_NODE_MANAGEMENT)
+    set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc.xml")
+  else()
+    set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_node_mgt.xml")
+  endif()
   set(DEMO_ADDRESS_SPACE_XML_FILE "S2OPC_Demo_NodeSet.xml")
 else()
   set(DEMO_ADDRESS_SPACE_XML_ORIGIN "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_nano.xml")

@@ -19,8 +19,15 @@
 
 set -euo pipefail
 
-# Generate demo NodeSet for Nano extended profile
-../../../../scripts/nodeset-address-space-utils.py --output s2opc.xml.tmp s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+# Generate demo NodeSet for Micro profile + node management
+../../../../scripts/nodeset-address-space-utils.py --output s2opc_node_mgt.xml.tmp s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+cat licence.xml > s2opc_node_mgt.xml
+sed '1d' s2opc_node_mgt.xml.tmp >> s2opc_node_mgt.xml
+echo '' >> s2opc_node_mgt.xml
+rm s2opc_node_mgt.xml.tmp
+
+# Generate demo NodeSet for Micro profile
+../../../../scripts/nodeset-address-space-utils.py --output s2opc.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 cat licence.xml > s2opc.xml
 sed '1d' s2opc.xml.tmp >> s2opc.xml
 echo '' >> s2opc.xml

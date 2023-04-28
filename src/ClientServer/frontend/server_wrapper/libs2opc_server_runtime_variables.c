@@ -533,8 +533,12 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
     size_t nbNodesToSet = 5;
 #if S2OPC_NANO_PROFILE
 #else
+#if S2OPC_NODE_MANAGEMENT
     nbNodesToSet += 3; // Subscription, MethodCall and AddNodes operations
-#endif
+#else
+    nbNodesToSet += 2; // Subscription and MethodCall operations
+#endif // S2OPC_NODE_MANAGEMENT
+#endif // S2OPC_NANO_PROFILE
     OpcUa_WriteValue* values = append_write_values(write_values, nbNodesToSet);
     if (NULL == values)
     {
@@ -558,9 +562,11 @@ static bool set_server_capabilities_operation_limits_variables(SOPC_Array* write
                            vars->maximum_operations_per_request);
     set_write_value_uint32(&values[6], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerMethodCall,
                            vars->maximum_operations_per_request);
+#if S2OPC_NODE_MANAGEMENT
     set_write_value_uint32(&values[7], OpcUaId_Server_ServerCapabilities_OperationLimits_MaxNodesPerNodeManagement,
                            vars->maximum_heavy_operations_per_request);
-#endif
+#endif // S2OPC_NODE_MANAGEMENT
+#endif // S2OPC_NANO_PROFILE
     return true;
 }
 

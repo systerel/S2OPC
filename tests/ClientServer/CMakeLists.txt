@@ -76,7 +76,11 @@ set(TEST_LIGHT_ADDRESS_SPACE_XML "${S2OPC_ROOT_PATH}/samples/ClientServer/data/a
 if (S2OPC_NANO_PROFILE)
   set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_nano.xml")
 else()
-  set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
+  if(S2OPC_NODE_MANAGEMENT)
+    set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc_node_mgt.xml")
+  else()
+    set(TEST_ADDRESS_SPACE_XML_ORIGIN "${S2OPC_ROOT_PATH}/samples/ClientServer/data/address_space/s2opc.xml")
+  endif()
 endif()
 set(TEST_ADDRESS_SPACE_XML_FILE "S2OPC_Test_NodeSet.xml")
 
