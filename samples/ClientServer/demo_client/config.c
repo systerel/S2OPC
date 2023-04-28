@@ -60,7 +60,7 @@ static bool SOPC_UserPrivateKeyAskPass_FromTerminal(char** outPassword)
 Config_GetPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskPass_FromTerminal;
 Config_GetPassword_Fct* getUserKeyPassword_Fct = &SOPC_UserPrivateKeyAskPass_FromTerminal;
 
-char* USER_POLICY_ID = "user";
+char* USER_POLICY_ID = "username_Basic256Sha256";
 char* USER_NAME = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
@@ -143,7 +143,7 @@ struct argparse_option CONN_OPTIONS[17] = {
     OPT_STRING(0,
                "user_policy_id",
                &USER_POLICY_ID,
-               "(default: 'user') user policy id used to establish session",
+               "(default: 'username_Basic256Sha256') user policy id used to establish session",
                NULL,
                0,
                0),
