@@ -228,6 +228,18 @@ static bool set_write_value_datetime(OpcUa_WriteValue* wv, uint32_t id, SOPC_Dat
     return true;
 }
 
+#if S2OPC_NANO_PROFILE
+#else
+/* Only used in micro profile for now */
+static bool set_write_value_double(OpcUa_WriteValue* wv, uint32_t id, double value)
+{
+    set_write_value_id(wv, id);
+    set_variant_scalar(&wv->Value.Value, SOPC_Double_Id);
+    wv->Value.Value.Value.Doublev = value;
+    return true;
+}
+#endif // S2OPC_NANO_PROFILE
+
 static bool set_write_value_uint16(OpcUa_WriteValue* wv, uint32_t id, uint16_t value)
 {
     set_write_value_id(wv, id);
@@ -508,7 +520,13 @@ static bool set_server_service_level_value(OpcUa_WriteValue* wv, SOPC_Byte level
 
 static bool set_server_capabilities_max_variables(SOPC_Array* write_values)
 {
-    OpcUa_WriteValue* values = append_write_values(write_values, 4);
+    size_t nbNodesToSet = 4;
+#if S2OPC_NANO_PROFILE
+#else
+    nbNodesToSet += 1; // Subscription property
+#endif // S2OPC_NANO_PROFILE
+
+    OpcUa_WriteValue* values = append_write_values(write_values, nbNodesToSet);
     if (NULL == values)
     {
         return false;
@@ -524,6 +542,12 @@ static bool set_server_capabilities_max_variables(SOPC_Array* write_values)
     /* MaxByteStringLength */
     set_write_value_uint32(&values[3], OpcUaId_Server_ServerCapabilities_MaxByteStringLength,
                            SOPC_DEFAULT_MAX_STRING_LENGTH);
+#if S2OPC_NANO_PROFILE
+#else
+    /* MinSupportedSampleRate */
+    set_write_value_double(&values[4], OpcUaId_Server_ServerCapabilities_MinSupportedSampleRate, 0);
+#endif // S2OPC_NANO_PROFILE
+
     return true;
 }
 
