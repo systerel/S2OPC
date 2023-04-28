@@ -600,7 +600,7 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
     wv->Value.Value.ArrayType = SOPC_VariantArrayType_Array;
     wv->Value.Value.BuiltInTypeId = SOPC_String_Id;
 
-    SOPC_String* profiles = SOPC_Malloc(sizeof(SOPC_String));
+    SOPC_String* profiles = SOPC_Calloc(1, sizeof(*profiles));
     if (profiles == NULL)
     {
         return false;
@@ -611,8 +611,15 @@ static bool set_server_capabilities_server_profile_array(OpcUa_WriteValue* wv)
     wv->Value.Value.Value.Array.Content.StringArr = profiles;
     wv->Value.Value.Value.Array.Length = 1;
 
-    SOPC_ReturnStatus status =
-        SOPC_String_CopyFromCString(&profiles[0], "http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice");
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+#if S2OPC_NANO_PROFILE
+    status = SOPC_String_CopyFromCString(&profiles[0], "http://opcfoundation.org/UA-Profile/Server/NanoEmbeddedDevice");
+#else
+    status =
+        SOPC_String_CopyFromCString(&profiles[0], "http://opcfoundation.org/UA-Profile/Server/MicroEmbeddedDevice2017");
+#endif // S2OPC_NANO_PROFILE
+
     if (status != SOPC_STATUS_OK)
     {
         return false;
