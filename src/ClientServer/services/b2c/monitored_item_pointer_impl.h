@@ -23,7 +23,7 @@
 #include "constants.h"
 #include "sopc_numeric_range.h"
 
-typedef struct SOPC_InternalMontitoredItem
+typedef struct SOPC_InternalMonitoredItem
 {
     uint32_t monitoredItemId;
     constants__t_subscription_i subId;
@@ -35,11 +35,11 @@ typedef struct SOPC_InternalMontitoredItem
     constants__t_client_handle_i clientHandle;
     SOPC_NumericRange* indexRange;
     OpcUa_DataChangeFilter* filter;
-    double filterAbsoluteDeadandeContext;
+    double filterAbsoluteDeadbandContext;
     SOPC_Variant* lastCachedValueForFilter;
     bool discardOldest;
     int32_t queueSize;
     SOPC_SLinkedList* notifQueue;
-} SOPC_InternalMontitoredItem;
+} SOPC_InternalMonitoredItem;
 
 #endif /* SOPC_MONITORED_ITEM_POINTER_IMPL_H_ */
