@@ -706,25 +706,13 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 
-#define STR_DEFAULT "/default"
-#define STR_TRUSTLIST "/trustList"
+#define STR_TRUSTLIST_NAME "/updatedTrustList"
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
 #define STR_ISSUERS "/issuers"
 #define STR_ISSUERS_CERTS "/issuers/certs"
 #define STR_ISSUERS_CRL "/issuers/crl"
-
-/*
-TODO RBA:
-
-    - Handled that the security level of the update is not higher than the security level of the endpoint
-    - Add a new crypto interface to rule certificates
-    - Add unit test for file system API
-    - Add unit test for PKI API
-    - Add WriteToList function (embedded system)
-    - Add mutex in API
-*/
 
 /**
  * \brief The PKIProvider object for the Public Key Infrastructure.
@@ -733,6 +721,7 @@ struct SOPC_PKIProviderNew
 {
     const SOPC_PKI_Config* pConfig;
     char* directoryStorePath;
+    char* trustListName;
     SOPC_CertificateList* pTrustedCerts;
     SOPC_CertificateList* pTrustedRoots;
     SOPC_CRLList* pTrustedCrl;
@@ -779,8 +768,6 @@ static const SOPC_PKI_Config g_config_user = {
     .bBackwardInteroperability = false,
     .keyUsage = SOPC_PKI_KU_DIGITAL_SIGNATURE, // it is not part of the OPC UA but it makes sense to keep it
 };
-/* TODO RBA: Removed const properties for client and server configuration structures (URI + HostName to configure later
- * by user) */
 static const SOPC_PKI_Config g_config_client_app = {
     .type = SOPC_PKI_TYPE_CLIENT_APP,
     .bBackwardInteroperability = true,
@@ -1804,6 +1791,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         pPKI->pAllRoots = tmp_pAllRoots;
         pPKI->pAllCrl = tmp_pAllCrl;
         pPKI->directoryStorePath = NULL;
+        pPKI->trustListName = NULL;
         pPKI->pConfig = pConfig;
     }
     else
@@ -1820,11 +1808,22 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         SOPC_Free(pPKI);
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        pPKI->trustListName = SOPC_strdup(STR_TRUSTLIST_NAME);
+        if (NULL == pPKI->trustListName)
+        {
+            SOPC_PKIProviderNew_Free(pPKI);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     *ppPKI = pPKI;
     return status;
 }
 
 static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
+                                               const char* trustListName,
                                                bool bDefaultBuild,
                                                const SOPC_PKI_Config* pConfig,
                                                SOPC_PKIProviderNew** ppPKI)
@@ -1840,11 +1839,28 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     SOPC_CRLList* pIssuerCrl = NULL;            /* CRLs of issuer intermediate CA and issuer root CA */
     const char* basePath = NULL;
     char* path = NULL;
+    char* trust_list_name = NULL;
 
     /* Select the right folder*/
-    if (bDefaultBuild)
+    if (!bDefaultBuild)
     {
-        status = SOPC_StrConcat(directoryStorePath, STR_DEFAULT, &path);
+        if (NULL != trustListName)
+        {
+            status = SOPC_StrConcat("/", trustListName, &trust_list_name);
+            if (SOPC_STATUS_OK != status)
+            {
+                return status;
+            }
+        }
+        else
+        {
+            trust_list_name = SOPC_strdup(STR_TRUSTLIST_NAME);
+            if (NULL == trust_list_name)
+            {
+                return SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        status = SOPC_StrConcat(directoryStorePath, trust_list_name, &path);
         if (SOPC_STATUS_OK != status)
         {
             return status;
@@ -1853,12 +1869,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     }
     else
     {
-        status = SOPC_StrConcat(directoryStorePath, STR_TRUSTLIST, &path);
-        if (SOPC_STATUS_OK != status)
-        {
-            return status;
-        }
-        basePath = path;
+        basePath = directoryStorePath;
     }
     /* Load the files from the directory Store path */
     status =
@@ -1875,12 +1886,13 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         status =
             SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, pConfig, ppPKI);
     }
-    /* if error then try with default build */
+    /* if error then try with trusted and issuers folder. */
     if (!bDefaultBuild && SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                 "> PKI creation warning: trustList missing or bad build switch to default store.");
-        status = pki_create_from_store(directoryStorePath, true, pConfig, ppPKI);
+                                 "> PKI creation warning: updated trustList is missing or bad built, switch to trusted "
+                                 "and issuers folders.");
+        status = pki_create_from_store(directoryStorePath, trust_list_name, true, pConfig, ppPKI);
     }
     /* Copy the directoryStorePath */
     if (SOPC_STATUS_OK == status)
@@ -1895,10 +1907,12 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
+        SOPC_PKIProviderNew_SetTrustListName(trustListName, (*ppPKI));
     }
 
     /* Clear */
     SOPC_Free(path);
+    SOPC_Free(trust_list_name);
 
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
     SOPC_KeyManager_Certificate_Free(pIssuerCerts);
@@ -1909,6 +1923,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
 }
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
+                                                      const char* trustListName,
                                                       const SOPC_PKI_Config* pConfig,
                                                       SOPC_PKIProviderNew** ppPKI)
 {
@@ -1917,7 +1932,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = pki_create_from_store(directoryStorePath, false, pConfig, ppPKI);
+    SOPC_ReturnStatus status = pki_create_from_store(directoryStorePath, trustListName, false, pConfig, ppPKI);
     return status;
 }
 
@@ -1937,6 +1952,7 @@ static void sopc_pki_clear(SOPC_PKIProviderNew* pPKI)
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
     SOPC_Free(pPKI->directoryStorePath);
+    SOPC_Free(pPKI->trustListName);
 }
 
 void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
@@ -2055,7 +2071,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    /* Copy the  directory store path before exchange the data */
+    /* Copy the directory store path before exchange the data */
     char* pCopyPath = SOPC_strdup(directoryStorePath);
     if (NULL == pCopyPath)
     {
@@ -2063,6 +2079,26 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
     }
     SOPC_Free(pPKI->directoryStorePath);
     pPKI->directoryStorePath = pCopyPath;
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_SetTrustListName(const char* trustListName, SOPC_PKIProviderNew* pPKI)
+{
+    if (NULL == pPKI || NULL == trustListName)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Copy the trustList name before exchange the data */
+    char* pCopyName = NULL;
+    SOPC_ReturnStatus status = SOPC_StrConcat("/", trustListName, &pCopyName);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    SOPC_Free(pPKI->trustListName);
+    pPKI->trustListName = pCopyName;
 
     return SOPC_STATUS_OK;
 }
@@ -2120,13 +2156,13 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* The case of the PKI is built from buffer (there is no store) */
-    if (NULL == pPKI->directoryStorePath)
+    if (NULL == pPKI->directoryStorePath || NULL == pPKI->trustListName)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     char* basePath = NULL;
     char* path = NULL;
-    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, STR_TRUSTLIST, &basePath);
+    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, pPKI->trustListName, &basePath);
     if (SOPC_STATUS_OK != status)
     {
         return status;
@@ -2276,11 +2312,22 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
         status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, pPKI->pConfig,
                                                     &pTmpPKI);
     }
-    /* Copy the  directory store path before exchange the data */
+    /* Copy the directory store path before exchange the data */
     if (SOPC_STATUS_OK == status && NULL != pPKI->directoryStorePath)
     {
         pTmpPKI->directoryStorePath = SOPC_strdup(pPKI->directoryStorePath);
         if (NULL == pTmpPKI->directoryStorePath)
+        {
+            SOPC_PKIProviderNew_Free(pTmpPKI);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    /* Copy the trustList name before exchange the data */
+    if (SOPC_STATUS_OK == status && NULL != pPKI->trustListName)
+    {
+        SOPC_Free(pTmpPKI->trustListName);
+        pTmpPKI->trustListName = SOPC_strdup(pPKI->trustListName);
+        if (NULL == pTmpPKI->trustListName)
         {
             SOPC_PKIProviderNew_Free(pTmpPKI);
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2300,6 +2347,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
         pPKI->pAllRoots = pTmpPKI->pAllRoots;
         pPKI->pAllCrl = pTmpPKI->pAllCrl;
         pPKI->directoryStorePath = pTmpPKI->directoryStorePath;
+        pPKI->trustListName = pTmpPKI->trustListName;
         pPKI->pConfig = pTmpPKI->pConfig;
         SOPC_Free(pTmpPKI);
     }

@@ -91,7 +91,7 @@ START_TEST(invalid_create)
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* invalid store path */
-    status = SOPC_PKIProviderNew_CreateFromStore("./path_does_not_exist", pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./path_does_not_exist", NULL, pConfig, &pPKI);
     ck_assert(SOPC_STATUS_NOK == status);
 
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
@@ -199,7 +199,7 @@ START_TEST(functional_test_from_store)
 {
     SOPC_PKIProviderNew* pPKI = NULL;
     const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateFromStore("./unit_test_pki", pConfig, &pPKI);
+    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateFromStore("./unit_test_pki", NULL, pConfig, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
 
     uint32_t error = 0;

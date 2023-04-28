@@ -169,9 +169,18 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
  The directory store shall be organized as follows:
   .
   |
-  ---- Directory_store_name
+  ---- <Directory_store_name>
        |
-       ---- default
+       |---- trusted
+       |     |
+       |     ---- certs
+       |     ---- crl
+       |---- issuers
+       |     |
+       |     ---- certs
+       |     ---- crl
+       |
+       ---- updatedTrustList
        |    |
        |    ---- trusted
        |    |    |
@@ -181,17 +190,21 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
        |         |
        |         ---- certs
        |         ---- crl
-       |
-       ---- trustList
-       |    |
-       |    ---- trusted
-       |    |    |
-       |    |    ---- certs
-       |    |    ---- crl
-       |    ---- issuers
-       |         |
-       |         ---- certs
-       |         ---- crl
+*/
+
+/*
+TODO RBA:
+    - Remove bBackwardInteroperability and keyUsage from PKI config.
+    - Add bBackwardInteroperability in the chain profile.
+    - Add keyUsage in the leaf profile.
+    - Add extendedKeyUsage in leaf profile.
+    - Update GetLeafProfile and GetProfile with SOPC_PKI_TYPE.
+    - Add a new field bApplyLeafProfile to the chain profile to manage the users case
+    - Add mutex in API
+    - Handled that the security level of the update is not higher than the security level of the endpoint
+    - Add internal fields URI and HostName for the PKI object.
+    - Add function to set the URI and the HostName to the PKI object.
+      If the internal PKI fields for URI and HostName are NULL then it is not check during validation.
 */
 
 /**
@@ -358,21 +371,21 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
  *
  * The directory store shall be organized as follows:
  *
- * - Directory_store_name/default/trusted/certs (.DER or .PEM files)
- * - Directory_store_name/default/trusted/crl (.DER or .PEM files)
- * - Directory_store_name/default/issuers/certs (.DER or .PEM files)
- * - Directory_store_name/default/issuers/crl (.DER or .PEM files)
+ * - \<Directory_store_name\>/trusted/certs (.DER or .PEM files)
+ * - \<Directory_store_name\>/trusted/crl (.DER or .PEM files)
+ * - \<Directory_store_name\>/issuers/certs (.DER or .PEM files)
+ * - \<Directory_store_name\>/issuers/crl (.DER or .PEM files)
  *
- * - Directory_store_name/trustList/trusted/certs (.DER or .PEM files)
- * - Directory_store_name/trustList/trusted/crl (.DER or .PEM files)
- * - Directory_store_name/trustList/issuers/certs (.DER or .PEM files)
- * - Directory_store_name/trustList/issuers/crl (.DER or .PEM files)
+ * - \<Directory_store_name\>/updatedTrustList/trusted/certs (.DER or .PEM files)
+ * - \<Directory_store_name\>/updatedTrustList/trusted/crl (.DER or .PEM files)
+ * - \<Directory_store_name\>/updatedTrustList/issuers/certs (.DER or .PEM files)
+ * - \<Directory_store_name\>/updatedTrustList/issuers/crl (.DER or .PEM files)
  *
- * The trustList could be empty but not the default folder.
- * The function attempts to build the PKI from the trustList folder
- * and in case of error, it switches to the default folder.
- * For both folders, default and trustList, each subfolder certs and crl is mandatory.
- *
+ * At the store root, the updatedTrustList folder could be empty, missing,
+ * or bad organized but not the trusted and the issuers folders because
+ * the function attempts to build the PKI from the updatedTrustList folder
+ * and in case of error, it switches to the trusted and issuers folders.
+ * The name of the the updatedTrustList folder could be changed through \p trustListName .
  *
  * Notions :
  * - CA is a root CA if it is self-signed.
@@ -386,13 +399,14 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
  *
  * This function checks that :
  * - the certificate store is not empty.
- * - at least one cert from trusted/certs is provided.
- * - each certificate from issuer/certs are CA.
+ * - at least one trusted certificate is provided.
+ * - each certificate from subfolder issuer/certs is CA.
  * - each CA has exactly one Certificate Revocation List (CRL).
  *
  * \note Content of the PKI is NULL when return value is not SOPC_STATUS_OK.
  *
  * \param directoryStorePath The directory path where certificates are stored.
+ * \param trustListName Name of the updated trustList folder. Set to NULL if you want to keep updatedTrustList as name.
  * \param pConfig A valid pointer to the configuration.
  * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *              ::SOPC_PKIProviderNew_Free().
@@ -401,6 +415,7 @@ const SOPC_PKI_Config* SOPC_PKIProviderNew_GetConfig(const SOPC_PKI_Type type);
  *          and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
+                                                      const char* trustListName,
                                                       const SOPC_PKI_Config* pConfig,
                                                       SOPC_PKIProviderNew** ppPKI);
 
@@ -419,7 +434,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  *
  * This function checks that :
  * - at least one cert from \p pTrustedCerts is provided.
- * - each certificate from \p pIssuerCerts are CA.
+ * - each certificate from \p pIssuerCerts is CA.
  * - each CA has exactly one Certificate Revocation List (CRL).
  *
  * \param pTrustedCerts A valid pointer to the trusted certificate list.
@@ -518,18 +533,36 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_PKI_Config
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePath, SOPC_PKIProviderNew* pPKI);
 
-/** \brief Write the certificate files in the trustList folder of the PKI storage.
- *         The trustList folder is created if it is missing.
- *         The format of the written files is DER.
- *         The trustList folder has the same tree structure as the default folder:
+/** \brief Redefines the updated trustList folder name.
  *
- *         - trustList/trusted/certs
- *         - trustList/trusted/crl
- *         - trustList/issuers/certs
- *         - trustList/issuers/crl
+ * \param trustListName Name of the updated trustList folder.
+ * \param pPKI A valid pointer to the PKIProvider.
+ *
+ * \warning In case of error, \p pPKI is unchanged.
+ *
+ * \return SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK in case of error.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_SetTrustListName(const char* trustListName, SOPC_PKIProviderNew* pPKI);
+
+/** \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
+ *         The updatedTrustList folder is created if it is missing.
+ *         The format of the written files is DER.
+ *         The updatedTrustList folder is organized as follows:
+ *
+ *         - updatedTrustList/trusted/certs
+ *         - updatedTrustList/trusted/crl
+ *         - updatedTrustList/issuers/certs
+ *         - updatedTrustList/issuers/crl
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the the trustList folder shall be deleted.
+ *
+ * \note The name of the updated trustList folder could be redefined with ::SOPC_PKIProviderNew_SetTrustListName .
+ *       By default, the name is updatedTrustList when \p pPKI is built from lists (
+ * ::SOPC_PKIProviderNew_CreateFromList ).
+ *
+ * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProviderNew_CreateFromList ) then
+ *          you shall define the directory store path with ::SOPC_PKIProviderNew_SetStorePath .
  *
  * \return SOPC_STATUS_OK when successful.
  */

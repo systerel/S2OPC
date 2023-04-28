@@ -456,21 +456,21 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/user_public
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/user_private
   # Add UaCTT user certs in test_user_PKI
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/trusted/certs/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/trusted/crl/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/issuers/certs/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/issuers/crl/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/trusted/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/trusted/crl/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/issuers/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/issuers/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/issuers/crl/
   # Add S2OPC user certs in test_user_PKI
-  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/trusted/crl
-  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/default/trusted/certs
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/trusted/crl
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_user_PKI/trusted/certs
   # Add UaCTT application certs in test_app_PKI
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/trusted/certs/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/trusted/crl/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/issuers/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/issuers/certs/
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/issuers/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/issuers/crl/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/trusted/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/trusted/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/trusted/crl/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/issuers/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/issuers/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/ApplicationInstance_PKI/issuers/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/issuers/crl/
   # Add S2OPC application certs in test_app_PKI
-  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/trusted/certs
-  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/default/trusted/crl
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/trusted/certs
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/test_app_PKI/trusted/crl
 
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/trusted/
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/revoked/
