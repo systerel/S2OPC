@@ -679,7 +679,8 @@ void monitored_item_pointer_bs__is_notification_triggered(
             monitored_item_pointer_bs__p_new_wv_pointer->Value.Status)
         {
             // If DataChangeTrigger defined, check if timestamp is included in change detection
-            if (NULL != filter && OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger)
+            if (NULL != filter && OpcUa_DataChangeTrigger_StatusValueTimestamp == filter->Trigger &&
+                OpcUa_DeadbandType_None == filter->DeadbandType)
             {
                 if (monitored_item_pointer_bs__p_old_wv_pointer->Value.SourceTimestamp !=
                         monitored_item_pointer_bs__p_new_wv_pointer->Value.SourceTimestamp ||
