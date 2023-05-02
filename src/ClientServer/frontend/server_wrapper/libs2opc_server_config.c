@@ -104,13 +104,14 @@ bool SOPC_ServerInternal_IsStopped(void)
     return res;
 }
 
-static uint64_t string_hash(const void* s)
+static uint64_t SOPC_Internal_String_Hash(const void* s)
 {
+    SOPC_ASSERT(NULL != s);
     const SOPC_String* str = s;
     return SOPC_DJBHash(str->Data, (size_t) str->Length);
 }
 
-static bool string_equal(const void* a, const void* b)
+static bool SOPC_Internal_String_Equal(const void* a, const void* b)
 {
     return SOPC_String_Equal((const SOPC_String*) a, (const SOPC_String*) b);
 }
@@ -128,7 +129,8 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     bool hasSecurity = false;
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
-    SOPC_Dict* uniqueUserPolicies = SOPC_Dict_Create(NULL, string_hash, string_equal, NULL, NULL);
+    SOPC_Dict* uniqueUserPolicies =
+        SOPC_Dict_Create(NULL, SOPC_Internal_String_Hash, SOPC_Internal_String_Equal, NULL, NULL);
 
     for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
