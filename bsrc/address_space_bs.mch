@@ -566,6 +566,40 @@ OPERATIONS
     END
     ;
 
+    /* Raw node value access without locale nor index range: to be used for DataChange evaluation in subscription */
+    sc, variant, val_sc, val_ts_src <-- read_AddressSpace_Raw_Node_Value_value(p_node, p_nid, p_aid) =
+    PRE
+        p_node : t_Node_i &
+        p_node : t_Node &
+        p_nid : t_NodeId_i &
+        p_nid : t_NodeId &
+        p_nid = a_NodeId(p_node) &
+        p_aid : t_AttributeId_i &
+        p_aid = e_aid_Value &
+        p_node : dom(a_Value) &
+        /* Read must be authorized */
+        conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            val_sc := c_RawStatusCode_BadInvalidState ||
+            val_ts_src := c_Timestamp_null ||
+            sc := e_sc_bad_out_of_memory
+        OR
+            variant :(variant : t_Variant_i & variant = a_Value(p_node)) ||
+            sc := e_sc_ok ||
+            IF a_NodeClass(p_node) = e_ncl_Variable THEN
+                val_sc := a_Value_StatusCode(p_node) ||
+                val_ts_src := a_Value_SourceTimestamp(p_node)
+            ELSE
+                /* VariableType */
+                val_sc := c_RawStatusCode_Good ||
+                val_ts_src := c_Timestamp_null
+            END
+        END
+    END
+    ;
+
     sc, variant <-- read_AddressSpace_ValueRank_value(p_node) =
     PRE
         p_node : t_Node_i          &

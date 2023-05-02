@@ -555,6 +555,46 @@ void address_space_bs__read_AddressSpace_NodeId_value(
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     }
 }
+
+/* Raw means no index range or preferred locales filtering */
+void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    const constants__t_NodeId_i address_space_bs__p_nid,
+    const constants__t_AttributeId_i address_space_bs__p_aid,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant,
+    constants__t_RawStatusCode* const address_space_bs__val_sc,
+    constants__t_Timestamp* const address_space_bs__val_ts_src)
+{
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable ||
+                address_space_bs__p_node->node_class == OpcUa_NodeClass_VariableType);
+    // Arguments used for B preconditions only
+    SOPC_UNUSED_ARG(address_space_bs__p_nid);
+    SOPC_UNUSED_ARG(address_space_bs__p_aid);
+
+    *address_space_bs__val_sc = OpcUa_BadInvalidState;
+    *address_space_bs__val_ts_src = constants_bs__c_Timestamp_null;
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+
+    *address_space_bs__variant = util_variant__new_Variant_from_Variant(
+        SOPC_AddressSpace_Get_Value(address_space_bs__nodes, address_space_bs__p_node));
+    if (NULL == *address_space_bs__variant)
+    {
+        return;
+    }
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    if (address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable)
+    {
+        *address_space_bs__val_sc = SOPC_AddressSpace_Get_StatusCode(address_space_bs__nodes, address_space_bs__p_node);
+        *address_space_bs__val_ts_src =
+            SOPC_AddressSpace_Get_SourceTs(address_space_bs__nodes, address_space_bs__p_node);
+    }
+    else
+    {
+        *address_space_bs__val_sc = SOPC_GoodGenericStatus;
+    }
+}
+
 void address_space_bs__read_AddressSpace_Symmetric_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,

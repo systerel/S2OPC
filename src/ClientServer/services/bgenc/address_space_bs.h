@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 09/03/2023 18:03:40
+ Date                 : 02/05/2023 14:15:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -188,6 +188,14 @@ extern void address_space_bs__read_AddressSpace_NodeId_value(
    const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_Raw_Node_Value_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   const constants__t_NodeId_i address_space_bs__p_nid,
+   const constants__t_AttributeId_i address_space_bs__p_aid,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant,
+   constants__t_RawStatusCode * const address_space_bs__val_sc,
+   constants__t_Timestamp * const address_space_bs__val_ts_src);
 extern void address_space_bs__read_AddressSpace_Symmetric_value(
    const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,

@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 09/03/2023 18:03:10
+ Date                 : 02/05/2023 15:02:54
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -118,7 +118,6 @@ void address_space__treat_write_request_WriteValue(
       constants__t_Node_i address_space__l_node;
       constants__t_access_level address_space__l_access_lvl;
       t_bool address_space__l_access_read;
-      t_bool address_space__l_prev_local_treatment;
       t_bool address_space__l_isvalid;
       t_bool address_space__l_local_treatment;
       constants__t_WriteValuePointer_i address_space__l_wv;
@@ -157,21 +156,15 @@ void address_space__treat_write_request_WriteValue(
          constants__is_t_access_level_currentRead(address_space__l_access_lvl,
             &address_space__l_access_read);
          if (address_space__l_access_read == true) {
-            address_space_local__is_local_service_treatment(&address_space__l_prev_local_treatment);
-            address_space_local__set_local_service_treatment(true);
-            address_space__read_AddressSpace_Attribute_value(address_space__p_user,
-               address_space__p_locales,
-               address_space__l_node,
+            address_space_bs__read_AddressSpace_Raw_Node_Value_value(address_space__l_node,
                address_space__l_nid,
                address_space__l_aid,
-               constants__c_IndexRange_indet,
                &address_space__l_new_sc,
                &address_space__l_new_val,
                &address_space__l_new_val_sc,
-               &address_space__l_new_val_ts_src,
-               &address_space__l_new_val_ts_srv);
-            address_space_local__set_local_service_treatment(address_space__l_prev_local_treatment);
+               &address_space__l_new_val_ts_src);
             if (address_space__l_new_sc == constants_statuscodes_bs__e_sc_ok) {
+               constants__get_CurrentTimestamp(&address_space__l_new_val_ts_srv);
                gen_subscription_event_bs__gen_data_changed_event(address_space__l_nid,
                   address_space__l_aid,
                   address_space__l_prev_dataValue,

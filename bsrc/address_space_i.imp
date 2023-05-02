@@ -347,7 +347,7 @@ LOCAL_OPERATIONS
             sc = e_sc_bad_out_of_memory)
           ) &
 
-          /* In case of success set other output paramaters */
+          /* In case of success set other output parameters */
           (sc = e_sc_ok =>
             /* Set Variant value */
             (p_aid = e_aid_AccessLevel     => val = conv_AccessLevel_Variant(a_AccessLevel(p_node)))         &
@@ -471,14 +471,12 @@ OPERATIONS
             l_access_lvl <-- get_AccessLevel(l_node);
             l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
             IF l_access_read = TRUE THEN
-                /* Read updated value after write: necessary since write value item can be partial due to indexRange */
-                /* Set local treatment since user can be anyone in subscription: avoid user right verification */
-                l_prev_local_treatment <-- is_local_service_treatment;
-                set_local_service_treatment(TRUE);
-                l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv
-                <-- read_AddressSpace_Attribute_value(p_user, p_locales, l_node, l_nid, l_aid, c_IndexRange_indet);
-                set_local_service_treatment(l_prev_local_treatment);
+                /* Read updated value after write: necessary since write value item can be partial due to indexRange
+                                                   and to retrieve all LocalizedText alternatives */
+                /* Variable(Type) node class / Value attribute are guaranteed by success of treat_write_1 */
+                l_new_sc, l_new_val, l_new_val_sc, l_new_val_ts_src <-- read_AddressSpace_Raw_Node_Value_value (l_node, l_nid, l_aid);
                 IF l_new_sc = e_sc_ok THEN
+                    l_new_val_ts_srv <-- get_CurrentTimestamp; /* Server timestamp is the current one */
                     gen_data_changed_event (l_nid, l_aid, l_prev_dataValue, l_new_val, l_new_val_sc, l_new_val_ts_src, l_new_val_ts_srv)
                 ELSE
                     gen_data_changed_event_failed
@@ -720,7 +718,6 @@ OPERATIONS
         END
     END
     ;
-
 
     /* END LOCAL_OPERATIONS */
 
