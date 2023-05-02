@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 07/11/2022 10:15:50
+ Date                 : 02/05/2023 12:42:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -86,6 +86,7 @@ extern void monitored_item_pointer_bs__getall_monitoredItemPointer(
    constants__t_monitoringMode_i * const monitored_item_pointer_bs__p_monitoringMode,
    constants__t_client_handle_i * const monitored_item_pointer_bs__p_clientHandle);
 extern void monitored_item_pointer_bs__is_notification_triggered(
+   const constants__t_LocaleIds_i monitored_item_pointer_bs__p_localeIds,
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
    const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_old_wv_pointer,
    const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,

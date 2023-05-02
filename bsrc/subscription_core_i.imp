@@ -1540,7 +1540,7 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification_on_value_change (p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
+    server_subscription_add_notification_on_value_change (p_localeIds, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     VAR
         l_bres,
         l_notif_queue
@@ -1548,9 +1548,9 @@ OPERATIONS
         l_bres, l_notif_queue <-- get_monitored_item_notification_queue (p_monitoredItemPointer);
         IF l_bres = TRUE
         THEN
-            /* Note: indexRange filtering on value done in C implementation */
+            /* Note: indexRange and locales filtering on value done in C implementation */
             l_bres <-- add_monitored_item_notification_to_queue
-            (p_monitoredItemPointer, l_notif_queue, p_timestampToReturn, p_writeValuePointer)
+            (p_localeIds, p_monitoredItemPointer, l_notif_queue, p_timestampToReturn, p_writeValuePointer)
         END
 
     END

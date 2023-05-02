@@ -34,6 +34,7 @@
 #include "sopc_mem_alloc.h"
 
 #include "util_b2c.h"
+#include "util_variant.h"
 
 static const SOPC_NodeId Number_DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Number};
 
@@ -577,7 +578,40 @@ static SOPC_ReturnStatus compare_deadband_absolute(const void* customContext,
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* numRange,
+static SOPC_ReturnStatus compare_monitored_item_LT_values(char** localeIds,
+                                                          const SOPC_NumericRange* numRange,
+                                                          const SOPC_Variant* oldValue,
+                                                          const SOPC_Variant* newValue,
+                                                          int32_t* comparison)
+{
+    SOPC_Variant* tmpOldValue = util_variant__new_Variant_from_Variant(oldValue);
+    SOPC_Variant* tmpNewValue = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    if (NULL != tmpOldValue)
+    {
+        // Get preferred localized text(s) for old value
+        tmpOldValue = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpOldValue, localeIds);
+    }
+    if (NULL != tmpOldValue)
+    {
+        tmpNewValue = util_variant__new_Variant_from_Variant(newValue);
+    }
+    if (NULL != tmpNewValue)
+    {
+        // Get preferred localized text(s) for new value
+        tmpNewValue = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&tmpNewValue, localeIds);
+    }
+    if (NULL != tmpNewValue)
+    {
+        status = SOPC_Variant_CompareRange(tmpOldValue, tmpNewValue, numRange, comparison);
+    }
+    SOPC_Variant_Delete(tmpOldValue);
+    SOPC_Variant_Delete(tmpNewValue);
+    return status;
+}
+
+static SOPC_ReturnStatus compare_monitored_item_values(char** localeIds,
+                                                       const SOPC_NumericRange* numRange,
                                                        const OpcUa_DataChangeFilter* filter,
                                                        const void* filterAbsDeadandCtx,
                                                        const SOPC_Variant* oldValue,
@@ -613,7 +647,15 @@ static SOPC_ReturnStatus compare_monitored_item_values(const SOPC_NumericRange* 
     else
     {
         // No filter active
-        status = SOPC_Variant_CompareRange(oldValue, newValue, numRange, comparison);
+        // Check if value has localized text type and apply locales
+        if (SOPC_LocalizedText_Id == oldValue->BuiltInTypeId && SOPC_LocalizedText_Id == newValue->BuiltInTypeId)
+        {
+            status = compare_monitored_item_LT_values(localeIds, numRange, oldValue, newValue, comparison);
+        }
+        else
+        {
+            status = SOPC_Variant_CompareRange(oldValue, newValue, numRange, comparison);
+        }
     }
     return status;
 }
@@ -663,6 +705,7 @@ static const SOPC_Variant* monitored_item_get_last_cached_value(const SOPC_Inter
 }
 
 void monitored_item_pointer_bs__is_notification_triggered(
+    const constants__t_LocaleIds_i monitored_item_pointer_bs__p_localeIds,
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
     const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_old_wv_pointer,
     const constants__t_WriteValuePointer_i monitored_item_pointer_bs__p_new_wv_pointer,
@@ -702,7 +745,8 @@ void monitored_item_pointer_bs__is_notification_triggered(
                 lastCachedValue = monitored_item_get_last_cached_value(
                     monitItem, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value);
                 status = compare_monitored_item_values(
-                    monitItem->indexRange, filter, &monitItem->filterAbsoluteDeadbandContext, lastCachedValue,
+                    monitored_item_pointer_bs__p_localeIds, monitItem->indexRange, filter,
+                    &monitItem->filterAbsoluteDeadbandContext, lastCachedValue,
                     &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
             }
         }

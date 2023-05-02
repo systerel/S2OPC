@@ -30,6 +30,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "util_b2c.h"
+#include "util_variant.h"
 
 typedef struct SOPC_InternalNotificationElement
 {
@@ -272,6 +273,7 @@ void monitored_item_notification_queue_bs__add_first_monitored_item_notification
 }
 
 void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
+    const constants__t_LocaleIds_i monitored_item_notification_queue_bs__p_localeIds,
     const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
     const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
     const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
@@ -282,43 +284,60 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
                 ((SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
     *monitored_item_notification_queue_bs__bres = false;
 
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_OUT_OF_MEMORY;
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
     SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
     OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status;
     constants_statuscodes_bs__t_StatusCode_i readSC = constants_statuscodes_bs__c_StatusCode_indet;
+    bool isLTvalue = false;
+    SOPC_Variant* newValue = &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value;
     if (NULL != notifElt && NULL != pNewWriteValue)
     {
         OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
         notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
         notifElt->value = pNewWriteValue;
 
-        /* IMPORTANT NOTE: indexRange filtering on value shall be done here ! */
+        /* Set the preferred locale in case of LT value */
+        if (SOPC_LocalizedText_Id == newValue->BuiltInTypeId)
+        {
+            isLTvalue = true;
+            newValue = util_variant__new_Variant_from_Variant(newValue);
+            if (NULL != newValue)
+            {
+                newValue = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(
+                    &newValue, monitored_item_notification_queue_bs__p_localeIds);
+            }
+            if (NULL == newValue)
+            {
+                retStatus = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+
+        /* IndexRange filtering */
         SOPC_NumericRange* indexRange =
             ((SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->indexRange;
-        if (NULL != indexRange)
+        if (SOPC_STATUS_OK == retStatus)
         {
-            readSC = util_read_value_indexed_helper(
-                &pNewWriteValue->Value.Value, &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value,
-                indexRange);
-            // Manage no data and exclude index range invalid which is a syntax error and shall occur on createMI
-            if (constants_statuscodes_bs__e_sc_bad_index_range_no_data == readSC)
+            if (NULL != indexRange)
             {
-                retStatus = SOPC_STATUS_OK;
-                util_status_code__B_to_C(readSC, &valueStatus);
+                readSC = util_read_value_indexed_helper(&pNewWriteValue->Value.Value, newValue, indexRange);
+                // Manage no data and exclude index range invalid which is a syntax error and shall occur on createMI
+                if (constants_statuscodes_bs__e_sc_bad_index_range_no_data == readSC)
+                {
+                    retStatus = SOPC_STATUS_OK;
+                    util_status_code__B_to_C(readSC, &valueStatus);
+                }
+                else
+                {
+                    retStatus = util_status_code__B_to_return_status_C(readSC);
+                }
             }
             else
             {
-                retStatus = util_status_code__B_to_return_status_C(readSC);
+                retStatus = SOPC_Variant_Copy(&pNewWriteValue->Value.Value, newValue);
             }
         }
-        else
-        {
-            retStatus = SOPC_Variant_Copy(&pNewWriteValue->Value.Value,
-                                          &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value);
-        }
-
-        if (retStatus == SOPC_STATUS_OK)
+        if (SOPC_STATUS_OK == retStatus)
         {
             SOPC_Value_Timestamp srcTs = (SOPC_Value_Timestamp){
                 monitored_item_notification_queue_bs__p_writeValuePointer->Value.SourceTimestamp,
@@ -368,6 +387,10 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
             "%" PRIu32 " or read failed with sc=%d",
             ((SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->monitoredItemId,
             readSC);
+    }
+    if (isLTvalue)
+    {
+        SOPC_Variant_Delete(newValue);
     }
 }
 

@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 15/03/2023 14:35:32
+ Date                 : 02/05/2023 12:42:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1548,6 +1548,7 @@ void subscription_core__server_subscription_core_publish_timeout_return_moreNoti
 }
 
 void subscription_core__server_subscription_add_notification_on_value_change(
+   const constants__t_LocaleIds_i subscription_core__p_localeIds,
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_WriteValuePointer_i subscription_core__p_writeValuePointer) {
@@ -1559,7 +1560,8 @@ void subscription_core__server_subscription_add_notification_on_value_change(
          &subscription_core__l_bres,
          &subscription_core__l_notif_queue);
       if (subscription_core__l_bres == true) {
-         monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(subscription_core__p_monitoredItemPointer,
+         monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(subscription_core__p_localeIds,
+            subscription_core__p_monitoredItemPointer,
             subscription_core__l_notif_queue,
             subscription_core__p_timestampToReturn,
             subscription_core__p_writeValuePointer,

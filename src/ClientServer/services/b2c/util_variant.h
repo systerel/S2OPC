@@ -55,7 +55,7 @@ SOPC_Variant* util_variant__new_Variant_from_Indet(void);
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */
-SOPC_Variant* util_variant__new_Variant_from_Variant(SOPC_Variant* pvara);
+SOPC_Variant* util_variant__new_Variant_from_Variant(const SOPC_Variant* pvara);
 
 /**
  * The returned Variant is malloced and shall be freed by the consumer.

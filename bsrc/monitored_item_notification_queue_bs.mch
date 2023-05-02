@@ -173,11 +173,14 @@ OPERATIONS
     ;
 
     /* Note: indexRange filtering on value done in C implementation */
-    bres <-- add_monitored_item_notification_to_queue (p_monitoredItem,
+    bres <-- add_monitored_item_notification_to_queue (p_localeIds,
+                                                       p_monitoredItem,
                                                        p_queue,
                                                        p_timestampToReturn,
                                                        p_writeValuePointer) =
     PRE
+        p_localeIds : t_LocaleIds_i &
+        p_localeIds : t_LocaleIds &
         p_monitoredItem : t_monitoredItemPointer_i &
         p_monitoredItem : t_monitoredItemPointer &
         p_queue : t_notificationQueue_i &

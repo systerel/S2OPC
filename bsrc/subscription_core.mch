@@ -1262,8 +1262,10 @@ OPERATIONS
     END
     ;
 
-    server_subscription_add_notification_on_value_change (p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
+    server_subscription_add_notification_on_value_change (p_localeIds, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     PRE
+        p_localeIds : t_LocaleIds_i &
+        p_localeIds : t_LocaleIds &
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer &
         p_timestampToReturn : t_TimestampsToReturn_i &
@@ -1366,8 +1368,10 @@ OPERATIONS
     END
     ;
 
-    bres <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
+    bres <-- is_notification_triggered (p_localeIds, p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
+        p_localeIds : t_LocaleIds_i &
+        p_localeIds : t_LocaleIds &
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : t_monitoredItemPointer &
         p_old_wv_pointer : t_WriteValuePointer_i &

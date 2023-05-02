@@ -902,6 +902,7 @@ OPERATIONS
     local_create_notification_on_monitored_items_if_data_changed (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     VAR
         l_notification_triggered,
+        l_notification_with_locales_triggered,
         l_monitoredItemId,
         l_subscription,
         l_valid_subscription,
@@ -909,6 +910,7 @@ OPERATIONS
         l_session_valid,
         l_user,
         l_valid_user_access,
+        l_locales,
         l_nid,
         l_aid,
         l_indexRange,
@@ -916,8 +918,6 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle
     IN
-        /* Check if notification is triggered: indexRange is evaluated here */
-        l_notification_triggered <-- is_notification_triggered (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer);
         l_monitoredItemId,
         l_subscription,
         l_nid,
@@ -927,10 +927,11 @@ OPERATIONS
         l_monitoringMode,
         l_clientHandle <--getall_monitoredItemPointer (p_monitoredItemPointer);
         l_valid_subscription <-- is_valid_subscription (l_subscription);
+        l_notification_triggered := FALSE;
         l_valid_user_access := FALSE;
-        IF l_valid_subscription = TRUE & l_notification_triggered = TRUE
+        IF l_valid_subscription = TRUE
         THEN
-            /* Note: AccessLevel not checked here, it shall be a condition to generate a DataChange event (inhibition if read forbidden)*/
+            /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
             l_session <-- getall_session (l_subscription);
             l_session_valid <-- is_valid_session (l_session);
             IF l_session_valid = TRUE
@@ -939,14 +940,21 @@ OPERATIONS
                 /* TODO: when user access right property will be modifiable previous user right shall be
                 checked to notify a user access denied status when it is newly denied for the user
                 */
-                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user)
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user);
+                l_locales <-- get_server_session_preferred_locales(l_session)
             END
         END
         ;
-        IF l_valid_user_access = TRUE & l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
+        IF l_valid_user_access = TRUE
+        THEN
+            /* Check if notification is triggered: indexRange and locales are evaluated here */
+            l_notification_triggered <-- is_notification_triggered (l_locales, p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer)
+        END
+        ;
+        IF l_notification_triggered = TRUE & l_monitoringMode = e_monitoringMode_reporting
         THEN
             /* Note: indexRange filtering on value done in C implementation for now */
-            server_subscription_add_notification_on_value_change (p_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
+            server_subscription_add_notification_on_value_change (l_locales, p_monitoredItemPointer, l_timestampToReturn, p_new_wv_pointer)
         END
     END
     ;
