@@ -371,6 +371,26 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     assert(NULL != nodesToWrite && nbValues > 0);
     assert(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
 
+    /*
+// Add
+    //SOPC_QualifiedName* Qname = NULL;
+    SOPC_QualifiedName* Qname = SOPC_Calloc(1, sizeof(SOPC_QualifiedName));
+    SOPC_QualifiedName_Initialize(Qname);
+    //Not supported
+    //Qname->NamespaceIndex = 1;
+    //const char* name = "SubString";
+    //SOPC_String_CopyFromCString(&(Qname->Name),name);
+
+    OpcUa_ReadValueId* nodesToRead = SOPC_Calloc(1,sizeof(OpcUa_ReadValueId));
+    OpcUa_ReadValueId_Initialize(nodesToRead);
+    nodesToRead->AttributeId = nodesToWrite->AttributeId;
+    nodesToRead->IndexRange = nodesToWrite->IndexRange;
+    nodesToRead->NodeId = nodesToWrite->NodeId;
+    nodesToRead->encodeableType = nodesToWrite->encodeableType;
+    nodesToRead->DataEncoding = *Qname;
+//
+ */
+
     bool ok = true;
     Cache_Lock();
     for (int32_t i = 0; ok && i < nbValues; ++i)
@@ -408,6 +428,16 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     }
     Cache_Unlock();
     SOPC_Free(nodesToWrite);
+/*
+    SOPC_DataValue* Data = NULL;
+    Data = Cache_GetSourceVariables(nodesToRead, 1);
+
+    SOPC_Free(nodesToRead);
+    SOPC_QualifiedName_Clear(Qname);
+    SOPC_Free(Qname);
+    SOPC_DataValue_Clear(Data);
+    SOPC_Free(Data);
+*/
 
     return ok;
 }

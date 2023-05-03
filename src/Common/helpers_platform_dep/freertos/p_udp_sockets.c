@@ -18,6 +18,8 @@
  */
 
 #include "sopc_udp_sockets.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
 
 #include "lwipopts.h"
 
@@ -28,8 +30,6 @@
 #include "lwip/opt.h"
 #include "lwip/timeouts.h"
 #include "netif/etharp.h"
-
-//#include "ethernetif.h" // problème -> utilisation de wifi
 
 #include "lwip/init.h"
 #include "lwip/netif.h"
@@ -128,6 +128,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
                                                 const SOPC_Socket_AddressInfo* multicast,
                                                 const SOPC_Socket_AddressInfo* local)
 {
+	// This argument is needed to match prototype function (common to all OS implementations)
+	// But is not used because of the lack of an element (int imr_ifindex) in the
+	// ip_mreq structure in lwip (2.1.2) compared to POSIX ip_mreqn structure.
+	SOPC_UNUSED_ARG(interfaceName);
     int setOptStatus = -1;
 
     if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
@@ -166,6 +170,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
                                                  const SOPC_Socket_AddressInfo* multicast,
                                                  const SOPC_Socket_AddressInfo* local)
 {
+	// This argument is needed to match protype function (common to all OS implementations)
+	// But is not used because of the lack of an element (int imr_ifindex) in the
+	// ip_mreq structure in lwip (2.1.2) compared to POSIX ip_mreqn structure.
+	SOPC_UNUSED_ARG(interfaceName);
     int setOptStatus = -1;
 
     if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
@@ -214,14 +222,36 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
             setOptStatus = 0;
         }
 
-        if (SOPC_STATUS_OK == status && false != setReuseAddr)
+        if (SOPC_STATUS_OK == status && setReuseAddr)
         {
             setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status && setNonBlocking)
+        {
+            setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
 
-        if (setOptStatus < 0)
+        if (SOPC_STATUS_OK == status && NULL != interfaceName)
         {
-            status = SOPC_STATUS_NOK;
+        	// Requires 6 characters but only takes the first two
+            setOptStatus =
+                setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, interfaceName, (socklen_t) strlen(interfaceName));
+            if (EINVAL == errno)
+            {
+            	SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "interfaceName length must be greater than 6");
+            }
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
     return status;

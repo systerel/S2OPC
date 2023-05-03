@@ -69,5 +69,9 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
 
 SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig,
                                                     const SOPC_PublishedDataSet* pubDataset);
+#if SENSOR_READ
+bool SOPC_PubSourceVariable_SetVariables_FromSensor(const SOPC_PubSourceVariableConfig* sourceConfig,
+        														const SOPC_PublishedDataSet* pubDataset);
+#endif
 
 #endif /* SOPC_PUB_SOURCE_VARIABLE_H_ */

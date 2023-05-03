@@ -43,7 +43,7 @@
 
 #include "sopc_macros.h"
 
-#define PUBLISHER_THREAD_PRIORITY 3
+#define PUBLISHER_THREAD_PRIORITY 30
 #define SLEEP_TIMEOUT 100
 
 static void log_userCallback(const char* context, const char* text)

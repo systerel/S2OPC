@@ -565,7 +565,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             schedulerCtx.nbSockets++;
                             status = SOPC_UDP_Socket_CreateToReceive(
                                 multicastAddr, SOPC_PubSubConnection_Get_InterfaceName(connection), true, true,
-                                &schedulerCtx.transport[iIter].sock);
+                                &schedulerCtx.transport[iIter].sock); //setNonBlocking sock option
                             // Add socket to multicast group
                             if (SOPC_STATUS_OK == status)
                             {

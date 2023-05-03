@@ -473,7 +473,14 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
         SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
+#if SENSOR_READ
+        if (!SOPC_PubSourceVariable_SetVariables_FromSensor(pubSchedulerCtx.sourceConfig, dataset))//change
+        {
+        	SOPC_ASSERT(false);
+        }
+#endif
         SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dataset);
+
         SOPC_ASSERT(NULL != values);
 
         /* Check value-type compatibility and encode */
@@ -827,7 +834,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].udpAddr = outUDPaddr;
         allocSuccess =
             (SOPC_STATUS_OK == SOPC_UDP_Socket_CreateToSend(
-                                   outUDPaddr, SOPC_PubSubConnection_Get_InterfaceName(connection), true, &outSock));
+                                   outUDPaddr, SOPC_PubSubConnection_Get_InterfaceName(connection), true, &outSock)); //setNonBlocking sock option
         if (!allocSuccess)
         {
             *ctx = NULL;

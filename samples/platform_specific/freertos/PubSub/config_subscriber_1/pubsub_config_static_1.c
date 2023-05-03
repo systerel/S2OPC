@@ -89,8 +89,10 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Set subscriber id and address
         connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
         alloc = SOPC_PubSubConnection_Set_Address(connection, "opc.udp://232.1.2.100:4840");
-        const char* mx_interface_name = "mx1";
+
+        const char* mx_interface_name = "mx1fherhe";
         SOPC_PubSubConnection_Set_InterfaceName(connection, mx_interface_name);
+
     }
 
     if (alloc)
