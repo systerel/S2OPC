@@ -170,7 +170,8 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                 }
                 else
                 {
-                    SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, utp);
+                    bool inserted = SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, utp);
+                    SOPC_ASSERT(inserted);
                 }
             }
         }
