@@ -906,10 +906,14 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
-            else
+            else if (!SOPC_AddressSpace_AreReadOnlyNodes(addSpace))
             {
                 bool res = SOPC_AddressSpace_Set_StatusCode(addSpace, boolMatrix, SOPC_GoodGenericStatus);
                 status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            }
+            else
+            {
+                status = SOPC_STATUS_OK;
             }
         }
         if (SOPC_STATUS_OK != status)
@@ -951,10 +955,14 @@ static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
-            else
+            else if (!SOPC_AddressSpace_AreReadOnlyNodes(addSpace))
             {
                 bool res = SOPC_AddressSpace_Set_StatusCode(addSpace, byteMatrix, SOPC_GoodGenericStatus);
                 status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            }
+            else
+            {
+                status = SOPC_STATUS_OK;
             }
         }
         if (SOPC_STATUS_OK != status)
