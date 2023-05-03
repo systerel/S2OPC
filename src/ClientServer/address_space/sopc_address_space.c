@@ -564,7 +564,6 @@ SOPC_AddressSpace* SOPC_AddressSpace_CreateReadOnlyNodes(uint32_t nb_nodes,
 bool SOPC_AddressSpace_AreReadOnlyNodes(const SOPC_AddressSpace* space)
 {
     SOPC_ASSERT(space != NULL);
-
     return space->readOnlyNodes;
 }
 

@@ -323,24 +323,38 @@ void address_space_bs__readall_AddressSpace_Node(const constants__t_NodeId_i add
     }
 }
 
+static SOPC_Byte SOPC_Internal_ComputeAccessLevel_Value(const SOPC_AddressSpace_Node* node)
+{
+    SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Variable);
+    SOPC_Byte accessLevel = node->data.variable.AccessLevel;
+    SOPC_Byte supportedFlags = (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite);
+    bool onlyValueWritable = SOPC_AddressSpace_AreReadOnlyNodes(address_space_bs__nodes);
+    if (!onlyValueWritable)
+    {
+        // Status and Ts are only writable when nodes are not in "read only except value" mode
+        supportedFlags |= (SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite);
+    }
+    // Note: keep only supported access level flags in final value
+    return (accessLevel & supportedFlags);
+}
+
 void address_space_bs__read_AddressSpace_AccessLevelEx_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
-
-    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
-    // Note: keep only supported access level flags
-    accessLevel = (accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite |
-                                  SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite));
-    // Note: always returns 0 for extension bytes since we always support atomic read/write operations
+    SOPC_Byte accessLevel = SOPC_Internal_ComputeAccessLevel_Value(address_space_bs__p_node);
+    // Note: always returns 0 for extension bytes since we always support atomic
+    // read/write operations
     // + write with index range
     *address_space_bs__variant = util_variant__new_Variant_from_uint32((uint32_t) accessLevel);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    }
+    else
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     }
 }
 
@@ -349,16 +363,15 @@ void address_space_bs__read_AddressSpace_AccessLevel_value(
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
     constants__t_Variant_i* const address_space_bs__variant)
 {
-    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
-    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
-    // Note: keep only supported access level flags
-    accessLevel = (accessLevel & (SOPC_AccessLevelMask_CurrentRead | SOPC_AccessLevelMask_CurrentWrite |
-                                  SOPC_AccessLevelMask_StatusWrite | SOPC_AccessLevelMask_TimestampWrite));
-    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    SOPC_Byte accessLevel = SOPC_Internal_ComputeAccessLevel_Value(address_space_bs__p_node);
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(accessLevel);
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    }
+    else
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
     }
 }
 
@@ -619,7 +632,7 @@ void address_space_bs__read_AddressSpace_UserAccessLevel_value(
 {
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_Variable);
     /* UserAccess Level can be only more restrictive than access level  */
-    SOPC_Byte accessLevel = address_space_bs__p_node->data.variable.AccessLevel;
+    SOPC_Byte accessLevel = SOPC_Internal_ComputeAccessLevel_Value(address_space_bs__p_node);
     SOPC_Byte userAccessLevel = 0;
     if (address_space_bs__p_is_user_read_auth)
     {
