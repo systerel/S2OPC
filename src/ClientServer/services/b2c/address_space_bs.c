@@ -1095,7 +1095,7 @@ void address_space_bs__set_Value_SourceTimestamp(const constants__t_user_i addre
     if (!result)
     {
         static bool warned = false;
-        if (!warned)
+        if (!warned && (address_space_bs__p_ts.timestamp != 0 || address_space_bs__p_ts.picoSeconds != 0))
         {
             char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
             SOPC_Logger_TraceWarning(
@@ -1122,7 +1122,7 @@ void address_space_bs__set_Value_StatusCode(const constants__t_user_i address_sp
     if (!result)
     {
         static bool warned = false;
-        if (!warned)
+        if (!warned && !SOPC_IsGoodStatus(address_space_bs__p_sc))
         {
             char* nodeId = SOPC_NodeId_ToCString(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,

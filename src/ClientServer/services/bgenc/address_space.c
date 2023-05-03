@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 02/05/2023 15:02:54
+ Date                 : 03/05/2023 10:43:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -226,6 +226,7 @@ void address_space__treat_write_1(
       constants__t_Variant_i address_space__l_variant;
       constants__t_Timestamp address_space__l_source_ts;
       constants__t_RawStatusCode address_space__l_raw_sc;
+      constants_statuscodes_bs__t_StatusCode_i address_space__l_sc;
       
       *address_space__node = constants__c_Node_indet;
       *address_space__prev_dataValue = constants__c_DataValue_indet;
@@ -287,7 +288,18 @@ void address_space__treat_write_1(
                         &address_space__l_access_write_status);
                      constants__is_t_access_level_timestampWrite(address_space__l_access_lvl,
                         &address_space__l_access_write_timestamp);
-                     if (address_space__l_access_write == true) {
+                     if (address_space__l_access_write_status == false) {
+                        constants_statuscodes_bs__getall_conv_RawStatusCode_To_StatusCode(address_space__l_raw_sc,
+                           &address_space__l_sc);
+                        address_space__l_access_write_status = (address_space__l_sc == constants_statuscodes_bs__e_sc_ok);
+                     }
+                     if (address_space__l_access_write_timestamp == false) {
+                        constants__is_Timestamps_Null(address_space__l_source_ts,
+                           &address_space__l_access_write_timestamp);
+                     }
+                     if (((address_space__l_access_write == true) &&
+                        (address_space__l_access_write_status == true)) &&
+                        (address_space__l_access_write_timestamp == true)) {
                         user_authorization_bs__get_user_authorization(constants__e_operation_type_write,
                            address_space__nid,
                            address_space__aid,
@@ -303,16 +315,12 @@ void address_space__treat_write_1(
                               address_space__serviceStatusCode,
                               address_space__prev_dataValue);
                            if (*address_space__serviceStatusCode == constants_statuscodes_bs__e_sc_ok) {
-                              if (address_space__l_access_write_status == true) {
-                                 address_space_bs__set_Value_StatusCode(address_space__p_user,
-                                    *address_space__node,
-                                    address_space__l_raw_sc);
-                              }
-                              if (address_space__l_access_write_timestamp == true) {
-                                 address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
-                                    *address_space__node,
-                                    address_space__l_source_ts);
-                              }
+                              address_space_bs__set_Value_StatusCode(address_space__p_user,
+                                 *address_space__node,
+                                 address_space__l_raw_sc);
+                              address_space_bs__set_Value_SourceTimestamp(address_space__p_user,
+                                 *address_space__node,
+                                 address_space__l_source_ts);
                            }
                         }
                         else {

@@ -206,6 +206,13 @@ void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i
     }
 }
 
+void constants_bs__is_Timestamps_Null(const constants_bs__t_Timestamp constants_bs__p_ts,
+                                      t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (constants_bs__c_Timestamp_null.timestamp == constants_bs__p_ts.timestamp &&
+                           constants_bs__c_Timestamp_null.picoSeconds == constants_bs__p_ts.picoSeconds);
+}
+
 void constants_bs__free_ExpandedNodeId(const constants_bs__t_ExpandedNodeId_i constants_bs__p_in)
 {
     if (NULL != constants_bs__p_in)

@@ -282,6 +282,8 @@ extern void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_Qualifie
 extern void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i constants_bs__name1,
                                                   const constants_bs__t_QualifiedName_i constants_bs__name2,
                                                   t_bool* const constants_bs__p_bool);
+extern void constants_bs__is_Timestamps_Null(const constants_bs__t_Timestamp constants_bs__p_ts,
+                                             t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,
                                                         t_bool* const constants_bs__bres);
 extern void constants_bs__is_t_access_level_currentWrite(const constants_bs__t_access_level constants_bs__p_access_lvl,

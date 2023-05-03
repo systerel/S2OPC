@@ -190,21 +190,25 @@ LOCAL_OPERATIONS
                     ) &
                     (local_service_treatment = FALSE
                     =>
-                        (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE
+                        (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE or
+                            e_sc_ok = conv_RawStatusCode_To_StatusCode(DataValue_StatusCode(dataValue))
                         =>
                             a_Value_StatusCode = a_Value_StatusCode$0
                                 <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)}
                         ) &
-                        (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE)
+                        (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE or
+                                e_sc_ok = conv_RawStatusCode_To_StatusCode(DataValue_StatusCode(dataValue)))
                         =>
                             a_Value_StatusCode = a_Value_StatusCode$0) &
 
-                        (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE
+                        (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE or
+                            c_Timestamp_null = DataValue_SourceTimestamp(dataValue)
                         =>
                             a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
                                 <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
                         ) &
-                        (not(conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE)
+                        (not(conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE or
+                                c_Timestamp_null = DataValue_SourceTimestamp(dataValue))
                         =>
                             a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
                     )
@@ -517,7 +521,8 @@ OPERATIONS
         l_local_treatment,
         l_variant,
         l_source_ts,
-        l_raw_sc
+        l_raw_sc,
+        l_sc
     IN
         node := c_Node_indet;
         prev_dataValue := c_DataValue_indet;
@@ -549,28 +554,26 @@ OPERATIONS
                             l_access_write <-- is_t_access_level_currentWrite(l_access_lvl);
                             l_access_write_status <-- is_t_access_level_statusWrite(l_access_lvl);
                             l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_lvl);
-                            IF l_access_write = TRUE THEN
+                            IF l_access_write_status = FALSE THEN
+                                l_sc <-- getall_conv_RawStatusCode_To_StatusCode(l_raw_sc);
+                                /* From part 3 table 40 v1.04: 0 means only StatusCode Good is writable */
+                                l_access_write_status := bool(l_sc = e_sc_ok)
+                            END
+                            ;
+                            IF l_access_write_timestamp = FALSE THEN
+                                /* From part 3 table 40 v1.04: 0 means only null timestamps are writable */
+                                l_access_write_timestamp <-- is_Timestamps_Null(l_source_ts)
+                            END
+                            ;
+                            IF l_access_write = TRUE & l_access_write_status = TRUE & l_access_write_timestamp = TRUE THEN
                                 /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
                                 l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
                                 IF l_authorized_write = TRUE THEN
                                     serviceStatusCode, prev_dataValue
                                       <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv,  index_range);
                                     IF serviceStatusCode = e_sc_ok THEN
-                                        /* Note: we set Status/Ts values if access level authorize it but we do not check
-                                           client attempt to write Status/Ts whereas it is forbidden by access level.
-                                           The reason is that we cannot differentiate a Good status (0) from no status
-                                           or minimumTs (0) from no Ts.
-                                           See mantis issue 3504, this has been solved since spec 1.04 (part 3 table 40)
-                                           by always accepting to write 0 value if access level unset for Status/Ts.
-                                           For other values if access level unset for Status/Ts,
-                                           returns Bad_NotWritable since access level does not authorize it (part 4 table 178).
-                                        */
-                                        IF l_access_write_status = TRUE THEN
-                                            set_Value_StatusCode(p_user, node, l_raw_sc)
-                                        END;
-                                        IF l_access_write_timestamp = TRUE THEN
-                                            set_Value_SourceTimestamp(p_user, node, l_source_ts)
-                                        END
+                                        set_Value_StatusCode(p_user, node, l_raw_sc);
+                                        set_Value_SourceTimestamp(p_user, node, l_source_ts)
                                     END
                                 ELSE
                                     serviceStatusCode := e_sc_bad_user_access_denied

@@ -1326,6 +1326,14 @@ OPERATIONS
     END
     ;
 
+    bres <-- is_Timestamps_Null (p_ts) =
+    PRE
+        p_ts : t_Timestamp
+    THEN
+        bres := bool(p_ts = c_Timestamp_null)
+    END
+    ;
+
     /* Returns true if clients are allowed to use NodeManagement service set, false otherwise */
     bres <-- is_ClientNodeManagementActive =
     BEGIN
