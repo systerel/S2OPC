@@ -929,6 +929,7 @@ OPERATIONS
         l_valid_subscription <-- is_valid_subscription (l_subscription);
         l_notification_triggered := FALSE;
         l_valid_user_access := FALSE;
+        l_locales := c_LocaleIds_empty;
         IF l_valid_subscription = TRUE
         THEN
             /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
