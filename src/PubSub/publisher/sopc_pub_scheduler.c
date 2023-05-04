@@ -992,12 +992,16 @@ static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
 
 bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
 {
-    bool result = true;
+    bool result = false;
+    if (!pubSchedulerCtx.isStarted)
+    {
+        return result;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
     if (NULL == ctx)
     {
-        return false;
+        return result;
     }
     status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
