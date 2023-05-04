@@ -32,7 +32,7 @@ NID_CONFIGURATION = u"ns=1;s=PubSubConfiguration"
 NID_START_STOP = u"ns=1;s=PubSubStartStop"
 NID_STATUS = u"ns=1;s=PubSubStatus"
 NID_ACYCLIC_SEND = u"ns=1;s=AcyclicPubSend"
-
+NID_ACYCLIC_SEND_STATUS= u"ns=1;s=AcyclicPubSendStatus"
 NID_SUB_STRING = u"ns=1;s=SubString"
 NID_SUB_BOOL = u"ns=1;s=SubBool"
 NID_SUB_UINT16 = u"ns=1;s=SubUInt16"
@@ -53,6 +53,12 @@ DEFAULT_XML_PATH = 'config_pubsub_server.xml'
 STATIC_CONF_PUB_INTERVAL = 1.2
 DYN_CONF_PUB_INTERVAL_1000 = 2.1
 DYN_CONF_PUB_INTERVAL_200 = 0.5
+
+PUBLISHER_ACYCLIC_NOT_TRIGGERED = 0
+PUBLISHER_ACYCLIC_IN_PROGRESS = 1
+PUBLISHER_ACYCLIC_SENT = 2
+PUBLISHER_ACYCLIC_ERROR = 3
+
 
 NODE_VARIANT_TYPE = { NID_SUB_BOOL : ua.VariantType.Boolean,
                       NID_SUB_UINT16 : ua.VariantType.UInt16,
@@ -648,16 +654,18 @@ def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
     expected = pPubsubserver.getValue(nodeId)
     pLogger.add_test('write in %s succeeded' % nodeId , expected == value)
 
+def helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger):
+    state = pPubsubServer.getAcyclicSendStatus()
+    while(PUBLISHER_ACYCLIC_NOT_TRIGGERED == state or PUBLISHER_ACYCLIC_IN_PROGRESS == state):
+        sleep(DYN_CONF_PUB_INTERVAL_200)
+        state = pPubsubServer.getAcyclicSendStatus()
+    pLogger.add_test('send request succeed', PUBLISHER_ACYCLIC_SENT == state)
+
 def helpTestSetSendValue(pPubsubServer,value,pLogger):
     pPubsubServer.setAcyclicSend(value)
     expected = pPubsubServer.getAcyclicSend()
     pLogger.add_test('write in %s succedded' % NID_ACYCLIC_SEND, expected == value)
-    nbPollingAcyclicSendNode = 10
-    for i in range(nbPollingAcyclicSendNode):
-        sleep(DYN_CONF_PUB_INTERVAL_200)
-        if(0 == pPubsubServer.getAcyclicSend()):
-            break
-    pLogger.add_test('publisher send message with writer group id %i' %value, i < nbPollingAcyclicSendNode - 1)
+    helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger)
 
 def helpAssertState(psserver, expected, pLogger):
     state = psserver.getPubSubState()
@@ -709,7 +717,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 def testPubSubDynamicConf():
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
     defaultXml2Restore = False
 
     try:

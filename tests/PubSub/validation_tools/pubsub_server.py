@@ -36,11 +36,10 @@ class PubSubState(Enum):
     # This value is not part of the C structure
     EXCEPTION = 4
 
-
 class PubSubServer:
     """Wraps a client that connects to the sample pubsub_server"""
 
-    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_acyclicSend):
+    def __init__(self, uri, nid_configuration, nid_start_stop, nid_status, nid_acyclicSend, nid_acyclicSendStatus):
         self.uri = uri
         self.client = Client(self.uri)
         self.client.application_uri = "urn:S2OPC:localhost"
@@ -48,6 +47,7 @@ class PubSubServer:
         self.nid_start_stop = nid_start_stop
         self.nid_status = nid_status
         self.nid_acyclicSend = nid_acyclicSend
+        self.nid_acyclicSendStatus = nid_acyclicSendStatus
 
     # Connect to the Pub/Sub server. Shall be called before other methods
     def connect(self):
@@ -57,6 +57,7 @@ class PubSubServer:
         self.nodeStartStop = self.client.get_node(self.nid_start_stop)
         self.nodeStatus = self.client.get_node(self.nid_status)
         self.nodeAcyclicSend = self.client.get_node(self.nid_acyclicSend)
+        self.nodeAcyclicSendStatus = self.client.get_node(self.nid_acyclicSendStatus)
 
     # Is connected to Pub/Sub server
     def isConnected(self):
@@ -138,6 +139,22 @@ class PubSubServer:
     def getAcyclicSend(self):
         try:
             return self.nodeAcyclicSend.get_value()
+        except: #TODO exception too broad
+            print('Client probably not connected to PubSubServer')
+            return None
+
+    # Set Writer group Id on node Acyclic send
+    # If writer group Id match with one writer group id of acyclic publisher configuration if will send all datasets
+    def setAcyclicSendStatus(self,value):
+        try:
+            self.nodeAcyclicSendStatus.set_value(ua.Variant(value,ua.VariantType.Byte))
+        except: #TODO exception too broad
+            print('Client probably not connected to PubSubServer')
+
+    # Get Writer group Id on acyclic publisher send command
+    def getAcyclicSendStatus(self):
+        try:
+            return self.nodeAcyclicSendStatus.get_value()
         except: #TODO exception too broad
             print('Client probably not connected to PubSubServer')
             return None
