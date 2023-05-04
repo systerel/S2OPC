@@ -51,7 +51,7 @@
 #     - test-zephyr
 #########################################################
 
-# Ensures job failure whenn intermediate script line fails
+# Ensures job failure when intermediate script line fails
 # (see gitlab issues #25394 and #383355)
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
@@ -147,6 +147,15 @@ check_commit_signature:
    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
      when: always
 
+check_commit_validity:
+  stage: doc
+  image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
+  script:
+    # Unnecessary for R-O access on public project: ${CI_JOB_TOKEN}
+    - './.check_ref_commit.sh -v "${SOPC_CURRENT_MILESTONE}" "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" "${CI_MERGE_REQUEST_IID}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}"'
+  rules:
+   - if: "$CI_PIPELINE_SOURCE == 'merge_request_event'"
+     when: always
 ###
 # Compilation jobs
 ###
@@ -542,9 +551,9 @@ test-zephyr:
 
 windows-appveyor:
   stage: build-others
-  image: docker.io/library/debian@sha256:0a78ed641b76252739e28ebbbe8cdbd80dc367fba4502565ca839e5803cfd86e # digest of debian:11
+  image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
   script:
-    - 'apt-get update && apt-get -y install curl && curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
+    - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
   tags:
     - linux
   rules:
