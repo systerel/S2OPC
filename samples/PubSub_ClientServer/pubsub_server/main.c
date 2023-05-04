@@ -161,7 +161,7 @@ int main(int argc, char* const argv[])
             if (SOPC_STATUS_NOK == status)
             {
                 printf("# Warning: Acyclic send request failed with writer group id %" PRIu16
-                       ". \n Check that publisher is set "
+                       ". \n Check that PubSub is started and if publisher is set "
                        "as acyclic publisher and writer group id correspond to configuration. \n",
                        writerGroupId);
             }

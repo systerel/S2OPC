@@ -355,6 +355,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=PubSubConfiguration</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=PubSubStartStop</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=AcyclicPubSend</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=AcyclicPubSendStatus</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">i=84</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
@@ -783,6 +784,17 @@
     </References>
     <Value>
       <uax:UInt16>0</uax:UInt16>
+    </Value>
+  </UAVariable>
+  <UAVariable AccessLevel="3" BrowseName="Publisher Acyclic Send Status" DataType="Byte" NodeId="ns=1;s=AcyclicPubSendStatus" ParentNodeId="i=85">
+    <DisplayName>Publisher Acyclic Send Status</DisplayName>
+    <Description>Status of acyclic pub request : 0 = not_trigger; 1 = in_progress; 2 = sent; 3 = error</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="Organizes">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Byte>0</uax:Byte>
     </Value>
   </UAVariable>
 

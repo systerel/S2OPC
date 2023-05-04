@@ -46,6 +46,7 @@
 #define NODEID_PUBSUB_CONFIG "ns=1;s=PubSubConfiguration"
 #define NODEID_PUBSUB_COMMAND "ns=1;s=PubSubStartStop"
 #define NODEID_ACYCLICPUB_SEND "ns=1;s=AcyclicPubSend"
+#define NODEID_ACYCLICPUB_SEND_STATUS "ns=1;s=AcyclicPubSendStatus"
 #define SYNCHRONOUS_READ_TIMEOUT 10000
 #define PUBSUB_SKS_SIGNING_KEY "./signingKey.key"
 #define PUBSUB_SKS_ENCRYPT_KEY "./encryptKey.key"

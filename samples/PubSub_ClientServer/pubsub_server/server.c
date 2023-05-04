@@ -56,7 +56,8 @@ static uint32_t epConfigIdx = 0;
 static int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
-static int32_t pubAcyclicSendRequest = 0;
+static int32_t pubAcyclicSendRequest = false;
+static int32_t pubAcyclicSendWriterId = 0;
 
 static SOPC_AddressSpace* address_space = NULL;
 static uint8_t lastPubSubCommand = 0;
@@ -66,6 +67,14 @@ static char* default_trusted_certs[] = {CA_CERT_PATH, NULL};
 static char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
 static char* empty_certs[] = {NULL};
 
+typedef enum PublisherSendStatus
+{
+    PUBLISHER_ACYCLIC_NOT_TRIGGERED = 0,
+    PUBLISHER_ACYCLIC_IN_PROGRESS = 1,
+    PUBLISHER_ACYCLIC_SENT = 2,
+    PUBLISHER_ACYCLIC_ERROR = 3,
+} PublisherSendStatus;
+
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_App_AddSpace_Event event,
@@ -73,6 +82,8 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
                                       SOPC_StatusCode opStatus);
 static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
+static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state);
+
 SOPC_ReturnStatus Server_Initialize(void)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
@@ -477,10 +488,16 @@ bool Server_PubSubStart_Requested(void)
 
 int32_t Server_PubAcyclicSend_Requested(void)
 {
-    /* Writer group id cannot be equal to 0 */
-    int32_t writerGroupId = SOPC_Atomic_Int_Get(&pubAcyclicSendRequest);
-    if (writerGroupId)
+    int32_t acyclicSendReq = SOPC_Atomic_Int_Get(&pubAcyclicSendRequest);
+    int32_t writerGroupId = 0;
+    if (acyclicSendReq)
     {
+        writerGroupId = SOPC_Atomic_Int_Get(&pubAcyclicSendWriterId);
+        if (0 == writerGroupId)
+        {
+            Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_ERROR);
+            printf("# Warning : writerGroupId cannot be equal to 0\n");
+        }
         /* Reset since request is transmitted on return */
         SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, 0);
     }
@@ -618,54 +635,13 @@ bool Server_Trigger_Publisher(uint16_t writerGroupId)
     }
 
     bool res = SOPC_PubScheduler_AcyclicSend(writerGroupId);
-
-    /* Create a WriteRequest with a single WriteValue */
-    OpcUa_WriteRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
-    assert(SOPC_STATUS_OK == status);
-    OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
-
-    /* Avoid the creation of the NodeId each call of the function */
-    static SOPC_NodeId* nidSend = NULL;
-    if (NULL == nidSend)
+    if (res)
     {
-        nidSend = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND, strlen(NODEID_ACYCLICPUB_SEND));
-    }
-
-    if (NULL == request || NULL == wv || NULL == nidSend)
-    {
-        SOPC_Free(wv);
-        SOPC_Free(nidSend);
-        return false;
-    }
-
-    SOPC_DataValue* dv = &wv->Value;
-    SOPC_Variant* val = &dv->Value;
-
-    request->NoOfNodesToWrite = 1;
-    request->NodesToWrite = wv;
-
-    wv->AttributeId = 13;
-    dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
-    val->BuiltInTypeId = SOPC_UInt16_Id;
-    val->ArrayType = SOPC_VariantArrayType_SingleValue;
-    val->Value.Uint16 = 0;
-
-    status = SOPC_NodeId_Copy(&wv->NodeId, nidSend);
-    SOPC_NodeId_Clear(nidSend);
-    SOPC_Free(nidSend);
-    nidSend = NULL;
-
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_SENT);
     }
     else
     {
-        SOPC_Free(wv);
-        wv = NULL;
-        SOPC_Free(request);
-        request = NULL;
+        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_ERROR);
     }
     return res;
 }
@@ -788,6 +764,59 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
     default:
         printf("# Warning: Unexpected endpoint event: %d.\n", event);
         return;
+    }
+}
+
+static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
+{
+    /* Create a WriteRequest with a single WriteValue */
+    OpcUa_WriteRequest* request = NULL;
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    assert(SOPC_STATUS_OK == status);
+    OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
+
+    /* Avoid the creation of the NodeId each call of the function */
+    static SOPC_NodeId* nidSendStatus = NULL;
+    if (NULL == nidSendStatus)
+    {
+        nidSendStatus = SOPC_NodeId_FromCString(NODEID_ACYCLICPUB_SEND_STATUS, strlen(NODEID_ACYCLICPUB_SEND_STATUS));
+    }
+
+    if (NULL == request || NULL == wv || NULL == nidSendStatus)
+    {
+        SOPC_Free(wv);
+        SOPC_Free(nidSendStatus);
+    }
+    else
+    {
+        SOPC_DataValue* dv = &wv->Value;
+        SOPC_Variant* val = &dv->Value;
+
+        request->NoOfNodesToWrite = 1;
+        request->NodesToWrite = wv;
+
+        wv->AttributeId = 13;
+        dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+        val->BuiltInTypeId = SOPC_Byte_Id;
+        val->ArrayType = SOPC_VariantArrayType_SingleValue;
+        val->Value.Byte = (SOPC_Byte) state;
+
+        status = SOPC_NodeId_Copy(&wv->NodeId, nidSendStatus);
+        SOPC_NodeId_Clear(nidSendStatus);
+        SOPC_Free(nidSendStatus);
+        nidSendStatus = NULL;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+        }
+        else
+        {
+            SOPC_Free(wv);
+            wv = NULL;
+            SOPC_Free(request);
+            request = NULL;
+        }
     }
 }
 
@@ -944,10 +973,9 @@ static void Server_Event_Write(OpcUa_WriteValue* pwv)
 
         /* Command processing */
         uint16_t command = variant->Value.Uint16;
-        if (command)
-        {
-            SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) command);
-        }
+        SOPC_Atomic_Int_Set(&pubAcyclicSendRequest, (int32_t) true);
+        SOPC_Atomic_Int_Set(&pubAcyclicSendWriterId, (int32_t) command);
+        Server_request_change_sendAcyclicStatus(PUBLISHER_ACYCLIC_IN_PROGRESS);
     }
 }
 
