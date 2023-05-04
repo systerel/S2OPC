@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 03/05/2023 10:43:26
+ Date                 : 05/05/2023 08:10:19
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -225,6 +225,8 @@ void address_space__treat_write_1(
       t_bool address_space__l_local_treatment;
       constants__t_Variant_i address_space__l_variant;
       constants__t_Timestamp address_space__l_source_ts;
+      constants__t_Timestamp address_space__l_server_ts;
+      t_bool address_space__l_server_ts_null;
       constants__t_RawStatusCode address_space__l_raw_sc;
       constants_statuscodes_bs__t_StatusCode_i address_space__l_sc;
       
@@ -253,7 +255,12 @@ void address_space__treat_write_1(
                   address_space__l_var_vr,
                   &address_space__l_compatible_type,
                   &address_space__l_compat_with_conv);
-               if (address_space__l_compatible_type == true) {
+               data_value_pointer_bs__get_conv_DataValue_ServerTimestamp(address_space__dataValue,
+                  &address_space__l_server_ts);
+               constants__is_Timestamps_Null(address_space__l_server_ts,
+                  &address_space__l_server_ts_null);
+               if ((address_space__l_compatible_type == true) &&
+                  (address_space__l_server_ts_null == true)) {
                   address_space_local__is_local_service_treatment(&address_space__l_local_treatment);
                   data_value_pointer_bs__get_conv_DataValue_Variant(address_space__dataValue,
                      &address_space__l_variant);
@@ -332,8 +339,11 @@ void address_space__treat_write_1(
                      }
                   }
                }
-               else {
+               else if (address_space__l_compatible_type == false) {
                   *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_type_mismatch;
+               }
+               else {
+                  *address_space__serviceStatusCode = constants_statuscodes_bs__e_sc_bad_write_not_supported;
                }
             }
             else {

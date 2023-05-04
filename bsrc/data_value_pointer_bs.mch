@@ -89,6 +89,15 @@ OPERATIONS
     END
     ;
 
+    p_st <-- get_conv_DataValue_ServerTimestamp(p_dataValue) =
+    PRE
+        p_dataValue : t_DataValue_i &
+        p_dataValue : t_DataValue
+    THEN
+        p_st := DataValue_ServerTimestamp(p_dataValue)
+    END
+    ;
+
     p_dt <-- get_conv_DataValue_LocalDataType(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
