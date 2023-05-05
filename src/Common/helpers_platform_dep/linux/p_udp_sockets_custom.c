@@ -132,6 +132,8 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     return SOPC_STATUS_OK;
 }
 
+/* TODO Rework parameters of this function
+   Use SOPC_Buffer and SOPC_AddressInfo */
 SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
                                    void* txBuffer,
                                    uint32_t txBuffLen,

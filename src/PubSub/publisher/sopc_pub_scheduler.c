@@ -26,6 +26,7 @@
 #include "sopc_atomic.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dataset_layer.h"
+#include "sopc_etf_sockets.h"
 #include "sopc_eth_sockets.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
@@ -60,6 +61,12 @@ static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 // Send an UDP message. Implements SOPC_PubScheduler_TransportCtx_Send
 static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
 
+// Clear a Transport UDP context. Implements SOPC_PubScheduler_TransportCtx_Clear
+static void SOPC_PubScheduler_CtxUdpEtf_Clear(SOPC_PubScheduler_TransportCtx* ctx);
+
+// Send and UDP message in ETF mode. Implement SOPC_PubScheduler_TransportCtx_Send
+static void SOPC_PubScheduler_CtxUdpEtf_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer);
+
 // Clear a Transport MQTT context. Implements SOPC_PubScheduler_TransportCtx_Clear
 static void SOPC_PubScheduler_CtxMqtt_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 
@@ -88,6 +95,11 @@ struct SOPC_PubScheduler_TransportCtx
 
     /* Is publisher in acyclic mode. If yes message will not be considered when looking for most expire one */
     bool isAcyclic;
+
+    /* Etf mode properties */
+    bool isEtf;
+    uint64_t deltaUs;
+    uint64_t txtime;
 };
 
 typedef struct MessageCtx
@@ -104,6 +116,8 @@ typedef struct MessageCtx
     const char* mqttTopic;
     bool warned; /**< Have we warned about expired messages yet? */
     uint64_t keepAliveTimeUs;
+    uint8_t soPriority;
+    uint64_t txtime;
 } MessageCtx;
 
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
@@ -374,6 +388,12 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         return false;
     }
 
+    if(ctx->isEtf)
+    {
+        // Interface has been set before no reason to set it again
+        result = (SOPC_STATUS_OK == SOPC_UDP_SO_TXTIME_Socket_Option(&ctx->sock, false, SOPC_WriterGroup_Get_SoPriority(group)));
+    }
+
     /* Fill in security context */
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
@@ -552,6 +572,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         }
 
         context->transport->mqttTopic = context->mqttTopic;
+        context->transport->txtime = context->txtime;
 
         context->transport->pFctSend(context->transport, buffer);
         SOPC_Buffer_Delete(buffer);
@@ -831,9 +852,18 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
             *ctx = NULL;
             return false;
         }
+        pubSchedulerCtx.transport[index].isEtf = SOPC_PubSubConnection_Get_EtfPublihser(connection);
+        if (pubSchedulerCtx.transport[index].isEtf)
+        {
+            pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxUdpEtf_Clear;
+            pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxUdpEtf_Send;
+        }
+        else
+        {
+            pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxUdp_Clear;
+            pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxUdp_Send;
+        }
         pubSchedulerCtx.transport[index].sock = outSock;
-        pubSchedulerCtx.transport[index].pFctClear = &SOPC_PubScheduler_CtxUdp_Clear;
-        pubSchedulerCtx.transport[index].pFctSend = &SOPC_PubScheduler_CtxUdp_Send;
         pubSchedulerCtx.transport[index].isAcyclic = SOPC_PubSubConnection_Get_AcyclicPublisher(connection);
         *ctx = &pubSchedulerCtx.transport[index];
         return true;
@@ -925,6 +955,20 @@ static void SOPC_PubScheduler_CtxUdp_Send(SOPC_PubScheduler_TransportCtx* ctx, S
     {
         // TODO: Some verifications should maybe added...
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_UDP_Socket_SendTo error %s ...", strerror(errno));
+    }
+}
+
+static void SOPC_PubScheduler_CtxUdpEtf_Clear(SOPC_PubScheduler_TransportCtx* ctx)
+{
+    SOPC_PubScheduler_CtxUdp_Clear(ctx);
+}
+
+static void SOPC_PubScheduler_CtxUdpEtf_Send(SOPC_PubScheduler_TransportCtx* ctx, SOPC_Buffer* buffer)
+{
+    SOPC_ReturnStatus result = SOPC_TX_UDP_send(&ctx->sock, buffer, ctx->txtime, ctx->udpAddr);
+    if (SOPC_STATUS_OK != result)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_TX_UDP_Send failed");
     }
 }
 
