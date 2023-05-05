@@ -284,15 +284,20 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
                 ((SOPC_InternalMonitoredItem*) monitored_item_notification_queue_bs__p_monitoredItem)->notifQueue);
     *monitored_item_notification_queue_bs__bres = false;
 
-    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
     SOPC_InternalNotificationElement* notifElt = SOPC_Malloc(sizeof(SOPC_InternalNotificationElement));
     OpcUa_WriteValue* pNewWriteValue = SOPC_Malloc(sizeof(OpcUa_WriteValue));
     SOPC_StatusCode valueStatus = monitored_item_notification_queue_bs__p_writeValuePointer->Value.Status;
     constants_statuscodes_bs__t_StatusCode_i readSC = constants_statuscodes_bs__c_StatusCode_indet;
     bool isLTvalue = false;
     SOPC_Variant* newValue = &monitored_item_notification_queue_bs__p_writeValuePointer->Value.Value;
-    if (NULL != notifElt && NULL != pNewWriteValue)
+    if (NULL == notifElt || NULL == pNewWriteValue)
     {
+        retStatus = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    else
+    {
+        retStatus = SOPC_STATUS_OK;
         OpcUa_WriteValue_Initialize((void*) pNewWriteValue);
         notifElt->monitoredItemPointer = monitored_item_notification_queue_bs__p_monitoredItem;
         notifElt->value = pNewWriteValue;
@@ -324,7 +329,6 @@ void monitored_item_notification_queue_bs__add_monitored_item_notification_to_qu
                 // Manage no data and exclude index range invalid which is a syntax error and shall occur on createMI
                 if (constants_statuscodes_bs__e_sc_bad_index_range_no_data == readSC)
                 {
-                    retStatus = SOPC_STATUS_OK;
                     util_status_code__B_to_C(readSC, &valueStatus);
                 }
                 else
