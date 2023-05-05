@@ -139,6 +139,12 @@ void SOPC_PubSubConnection_Set_Enabled(SOPC_PubSubConnection* connection, bool e
 void SOPC_PubSubConnection_Set_AcyclicPublisher(SOPC_PubSubConnection* connection, bool acyclicPublisher);
 bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* connection);
 
+void SOPC_PubSubConnection_Set_EtfPublisher(SOPC_PubSubConnection* connection, const bool etfPublisher);
+bool SOPC_PubSubConnection_Get_EtfPublihser(const SOPC_PubSubConnection* connection);
+
+void SOPC_PubSubConnection_Set_Delta(SOPC_PubSubConnection* connection, const double delta);
+double SOPC_PubSubConnection_Get_Delta(const SOPC_PubSubConnection* connection);
+
 const SOPC_Conf_PublisherId* SOPC_PubSubConnection_Get_PublisherId(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_PublisherId_UInteger(SOPC_PubSubConnection* connection, uint64_t id);
 // make a copy of id
@@ -264,6 +270,10 @@ void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offs
 /* Expected only for acyclic publisher */
 double SOPC_WriterGroup_Get_KeepAlive(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms);
+
+/* Expected only for etf publisher */
+uint32_t SOPC_WriterGroup_Get_SoPriority(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_SoPriority(SOPC_WriterGroup* group, uint32_t soPriority);
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,

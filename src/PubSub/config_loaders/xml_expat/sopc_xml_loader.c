@@ -83,6 +83,8 @@
 #define ATTR_CONNECTION_MQTTUSERNAME "mqttUsername"
 #define ATTR_CONNECTION_MQTTPASSWORD "mqttPassword"
 #define ATTR_CONNECTION_ACYCLIC_PUBLISHER "acyclicPublisher"
+#define ATTR_CONNECTION_ETF "etf"
+#define ATTR_CONNECTION_DELTA "delta"
 
 #define ATTR_MESSAGE_PUBLISHING_ITV "publishingInterval"
 #define ATTR_MESSAGE_PUBLISHING_OFF "publishingOffset"
@@ -95,6 +97,7 @@
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
 #define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
+#define ATTR_MESSAGE_SO_PRIORITY "soPriority"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
 #define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
@@ -146,6 +149,7 @@ struct sopc_xml_pubsub_message_t
     char* mqttPublisherTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
+    uint8_t soPriority;
 };
 
 struct sopc_xml_pubsub_connection_t
@@ -160,6 +164,8 @@ struct sopc_xml_pubsub_connection_t
     char* mqttPassword;
     char* mqttTopic;
     bool is_acyclic;
+    bool is_etf;
+    double delta;
     struct sopc_xml_pubsub_message_t* messageArr;
 };
 
@@ -429,6 +435,15 @@ static bool parse_connection_attributes(const char* attr_name,
     {
         result = parse_boolean(attr_val, strlen(attr_val), &connection->is_acyclic);
     }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_ETF, attr_name))
+    {
+        result = parse_boolean(attr_val, strlen(attr_val), &connection->is_etf);
+    }
+    else if (TEXT_EQUALS(ATTR_CONNECTION_DELTA, attr_name))
+    {
+        result = SOPC_strtodouble(attr_val, strlen(attr_val), 64, &connection->delta);
+        result &= connection->delta > 0.;
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'connection' attribute <%s>", attr_name);
@@ -440,7 +455,8 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
 {
     struct sopc_xml_pubsub_connection_t* connection = &ctx->connectionArr[ctx->nb_connections - 1];
     memset(connection, 0, sizeof *connection);
-
+    connection->delta = 0.0; // TODO I guess it's better to set it to negative value and after all convert to uint64
+                             // value and set it to 0
     bool result = parse_attributes(attrs, parse_connection_attributes, ctx, (void*) connection);
 
     if (result)
@@ -463,6 +479,11 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
         else if (!connection->is_publisher && connection->publisher_id != 0)
         {
             LOG_XML_ERROR("Connection mode is 'subscriber' and a 'publisherId' is defined");
+            result = false;
+        }
+        else if (!connection->is_publisher && connection->is_etf)
+        {
+            LOG_XML_ERROR("Connection mode is 'subscriber' and 'etf' is set to true");
             result = false;
         }
         else
@@ -535,6 +556,10 @@ static bool parse_message_attributes(const char* attr_name,
     {
         result = SOPC_strtodouble(attr_val, strlen(attr_val), sizeof(double) * 8, &msg->keepAliveTime);
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_SO_PRIORITY, attr_name))
+    {
+        result = parse_unsigned_value(attr_val, strlen(attr_val), 8, &msg->soPriority);
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'message' attribute <%s>", attr_name);
@@ -547,7 +572,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     memset(msg, 0, sizeof *msg);
     // Security is disabled if it is not configured
     msg->security_mode = SOPC_SecurityMode_None;
-    msg->publishing_interval = 0.0;
+    msg->publishing_interval = 0.0; // TODO should be set to negative value to be sure that user set something
     msg->publishing_offset = -1;
     msg->keepAliveTime = -1.0;
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);

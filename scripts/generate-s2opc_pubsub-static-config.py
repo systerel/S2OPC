@@ -31,6 +31,8 @@ ATTRIBUTE_CONNECTION_MQTT_TOPIC = "mqttTopic"
 ATTRIBUTE_CONNECTION_MQTT_USERNAME = "mqttUsername"
 ATTRIBUTE_CONNECTION_MQTT_PASSWORD = "mqttPassword"
 ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER = "acyclicPublisher"
+ATTRIBUTE_CONNECTION_ETF = "etf"
+ATTRIBUTE_CONNECTION_DELTA = "delta"
 VALUE_CONNECTION_MODE_PUBLISHER = "publisher"
 VALUE_CONNECTION_MODE_SUBSCRIBER = "subscriber"
 
@@ -45,6 +47,7 @@ VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
 VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
+ATTRIBUTE_MESSAGE_SO_PRIORITY = "soPriority"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -109,7 +112,9 @@ class CnxContext:
         self.mqttTopic = connection.get(ATTRIBUTE_CONNECTION_MQTT_TOPIC)
         self.mqttUsername = connection.get(ATTRIBUTE_CONNECTION_MQTT_USERNAME)
         self.mqttPassword = connection.get(ATTRIBUTE_CONNECTION_MQTT_PASSWORD)
-        self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER,False))
+        self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER, False))
+        self.etf = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ETF, False))
+        self.delta = int(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_DELTA, 0))
         self.messages = connection.findall("./%s" % TAG_MESSAGE)
 
 
@@ -122,7 +127,7 @@ class MessageContext:
         self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,-1))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
         self.keepAliveTime = float(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL,-1.))
-
+        self.soPriority = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_SO_PRIORITY, 0))
 
 def getCSecurityMode(mode):
     assert mode in [VALUE_MESSAGE_SECURITY_MODE_NONE,
@@ -254,6 +259,16 @@ def handlePubConnection(publisherId, connection, index, result):
     """ % (cnxContext.acyclicPublisher))
 
         result.add("""
+    // Set Etf publisher mode
+    SOPC_PubSubConnection_Set_EtfPublisher(connection, %d);
+        """ % (cnxContext.etf))
+
+        result.add("""
+    // Set Delta, used in etf mode
+    SOPC_PubSubConnection_Set_Delta(connection, %d);
+        """ % (cnxContext.delta))
+
+        result.add("""
     if (alloc)
     {
         // Allocate %d writer groups (messages)
@@ -324,6 +339,15 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
             SOPC_WriterGroup_Set_KeepAlive(writerGroup, %f);
         }
         """ %(msgContext.keepAliveTime))
+
+    if(cnxContext.etf):
+        result.add("""
+        if(alloc)
+        {
+            SOPC_WriterGroup_Set_SoPriority(writerGroup, %d);
+        }
+        """ % (msgContext.soPriority))
+
     #Get Publishing Offset:
     #result.add("""
     #    int32_t publishingOffset = SOPC_WriterGroup_Get_PublishingOffset(writerGroup);
@@ -659,7 +683,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ASSERT(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     SOPC_ASSERT(allocSuccess);
-    
+
     return readerGroup;
 }
 

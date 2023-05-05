@@ -57,6 +57,8 @@
     <xs:attribute name="mqttPassword" type="xs:string" use="optional"/>
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
     <xs:attribute name="acyclicPublisher" type="xs:boolean" use="optional"/> <!-- true to enable acyclic publisher. Default is false -->
+    <xs:attribute name="etf" type="xs:boolean" use="optional"/> <!-- true to enable etf mechanism for publisher. Default is false -->
+    <xs:attribute name="delta" type="xs:double" use="optional"/> <!-- Only used for etf publisher. Default value is 0 -->
   </xs:complexType>
   <xs:complexType name="message">
     <xs:sequence>
@@ -69,6 +71,7 @@
     <xs:attribute name="groupId" type="xs:unsignedShort" use="required"/>
     <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
     <xs:attribute name="keepAliveTime" type="xs:double" use="optional"/> <!-- required if is acyclic publisher. Time scale is milliseconds -->
+    <xs:attribute name="soPriority" type="xs:unsignedShort" use="optional"/> <!-- Default set to 0 -->
    </xs:complexType>
   <xs:complexType name="dataset">
     <xs:sequence>

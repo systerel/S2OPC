@@ -84,6 +84,10 @@ struct SOPC_PubSubConnection
 
     bool acyclicPublisher;
 
+    // specific ETF
+    bool etfMode;
+    double delta;
+
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
     // KeyValuePair *connectionProperties: not used;
@@ -139,6 +143,9 @@ struct SOPC_WriterGroup
     char* mqttTopic;
 
     double keepAliveTimeMs;
+
+    // Specific Etf
+    uint32_t soPriority;
 
     // For the next version:
     // Priority
@@ -382,6 +389,30 @@ bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* con
 {
     SOPC_ASSERT(NULL != connection);
     return connection->acyclicPublisher;
+}
+
+void SOPC_PubSubConnection_Set_EtfPublisher(SOPC_PubSubConnection* connection, const bool etfPublisher)
+{
+    SOPC_ASSERT(NULL != connection);
+    connection->etfMode = etfPublisher;
+}
+
+bool SOPC_PubSubConnection_Get_EtfPublihser(const SOPC_PubSubConnection* connection)
+{
+    SOPC_ASSERT(NULL != connection);
+    return connection->etfMode;
+}
+
+void SOPC_PubSubConnection_Set_Delta(SOPC_PubSubConnection* connection, const double delta)
+{
+    SOPC_ASSERT(NULL != connection);
+    connection->delta = delta;
+}
+
+double SOPC_PubSubConnection_Get_Delta(const SOPC_PubSubConnection* connection)
+{
+    SOPC_ASSERT(NULL != connection);
+    return connection->delta;
 }
 
 static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
@@ -1037,6 +1068,19 @@ void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms
 {
     SOPC_ASSERT(NULL != group);
     group->keepAliveTimeMs = keepAlive_ms;
+}
+
+/* Expected only for etf publisher */
+uint32_t SOPC_WriterGroup_Get_SoPriority(const SOPC_WriterGroup* group)
+{
+    SOPC_ASSERT(NULL != group);
+    return group->soPriority;
+}
+
+void SOPC_WriterGroup_Set_SoPriority(SOPC_WriterGroup* group, uint32_t soPriority)
+{
+    SOPC_ASSERT(NULL != group);
+    group->soPriority = soPriority;
 }
 
 /** DataSetWriter **/
