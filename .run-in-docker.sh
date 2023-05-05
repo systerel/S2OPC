@@ -22,6 +22,7 @@ set -e
 # Set the RUN_INTERACTIVELY environment variable to run the Docker
 # container in interactive mode. By default it will run in batch mode.
 interactive="${RUN_INTERACTIVELY:+-it}"
+network_host="${HOST_NETWORK:+--network host}"
 
 IMAGE=$1
 shift
@@ -32,4 +33,4 @@ uid=$(id -u $SUDO_USER)
 # Mount point is the path of this script
 mount_point="$PWD/$(dirname "$0")"
 
-docker run --rm $interactive --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
+docker run $network_host --rm $interactive --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
