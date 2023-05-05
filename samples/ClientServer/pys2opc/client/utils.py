@@ -57,6 +57,7 @@ class PyS2OPC_Client_Test():
     def get_client_key_password():
         pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
         if pwd is None:
+            print("{} not set: set it or enter it interactively".format(TEST_PASSWORD_PRIV_KEY_ENV_NAME))
             pwd = getpass.getpass(prompt='Client private key password:')
         return pwd
 
@@ -64,6 +65,7 @@ class PyS2OPC_Client_Test():
     def get_user_key_password():
         pwd = os.getenv(TEST_PASSWORD_USER_PRIV_KEY_ENV_NAME)
         if pwd is None:
+            print("{} not set: set it or enter it interactively".format(TEST_PASSWORD_USER_PRIV_KEY_ENV_NAME))
             pwd = getpass.getpass(prompt='User private key password:')
         return pwd
 
@@ -71,6 +73,7 @@ class PyS2OPC_Client_Test():
     def get_user_password(username):
         pwd = os.getenv(TEST_PASSWORD_USER_ENV_NAME)
         if pwd is None:
+            print("{} not set: set it or enter it interactively".format(TEST_PASSWORD_USER_ENV_NAME))
             pwd = getpass.getpass(prompt='({}) username password:'.format(username))
         return pwd
 

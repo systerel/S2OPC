@@ -43,6 +43,7 @@ class PyS2OPC_Server_Test():
     def get_server_key_password():
         pwd = os.getenv(TEST_PASSWORD_PRIV_KEY_ENV_NAME)
         if pwd is None:
+            print("{} not set: set it or enter it interactively".format(TEST_PASSWORD_PRIV_KEY_ENV_NAME))
             pwd = getpass.getpass(prompt='Server private key password:')
         return pwd
 
