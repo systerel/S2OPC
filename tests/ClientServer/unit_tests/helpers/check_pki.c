@@ -34,10 +34,6 @@
 
 START_TEST(invalid_create)
 {
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(10);
-    ck_assert(NULL == pConfig);
-    pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    ck_assert(NULL != pConfig);
     SOPC_PKIProviderNew* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CertificateList* pIssuersCerts = NULL;
@@ -55,43 +51,39 @@ START_TEST(invalid_create)
     ck_assert(SOPC_STATUS_OK == status);
 
     /* No trusted certificate is provided */
-    status = SOPC_PKIProviderNew_CreateFromList(NULL, pTrustedCrl, pIssuersCerts, pIssuersCrl, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(NULL, pTrustedCrl, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* Only intermediate CA is provided for trustedCerts */
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* Trusted CA certificates is provided but no CRL */
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
     ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, NULL, pIssuersCerts, pIssuersCrl, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, NULL, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* Issuer CA certificate is provided but no CRL */
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, NULL, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* Not all issuer certificates are CAs */
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pIssuersCerts);
     ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* No certificates */
-    status = SOPC_PKIProviderNew_CreateFromList(NULL, NULL, NULL, NULL, pConfig, &pPKI);
-    ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
-    ck_assert(NULL == pPKI);
-    /* Invalid config */
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, NULL, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(NULL, NULL, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* Invalid PKI */
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, pConfig, NULL);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, NULL);
     ck_assert(SOPC_STATUS_INVALID_PARAMETERS == status);
     ck_assert(NULL == pPKI);
     /* invalid store path */
-    status = SOPC_PKIProviderNew_CreateFromStore("./path_does_not_exist", NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./path_does_not_exist", NULL, &pPKI);
     ck_assert(SOPC_STATUS_NOK == status);
 
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
@@ -110,8 +102,7 @@ START_TEST(invalid_update)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(NULL != pPKI);
 
@@ -130,8 +121,7 @@ START_TEST(invalid_write)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(NULL != pPKI);
     /* Directory store path is not defined */
@@ -156,15 +146,15 @@ START_TEST(functional_test_from_list)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/ctt_ca1T.crl", &pTrustedCrl);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     /* Validation will failed as expected (missing root cacert.der and its CRL cacrl.der) */
     uint32_t error = 0;
     SOPC_CertificateList* pCertToValidate = NULL;
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCertToValidate);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Profile* pProfile = SOPC_PKIProviderNew_GetProfile(SOPC_SecurityPolicy_Basic256Sha256_URI);
+    const SOPC_PKI_Profile* pProfile =
+        SOPC_PKIProviderNew_GetProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, SOPC_PKI_TYPE_SERVER_APP);
     status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert(SOPC_STATUS_NOK == status);
     /* Update the PKI with cacert.der and  cacrl.der */
@@ -198,15 +188,15 @@ END_TEST
 START_TEST(functional_test_from_store)
 {
     SOPC_PKIProviderNew* pPKI = NULL;
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateFromStore("./unit_test_pki", NULL, pConfig, &pPKI);
+    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateFromStore("./unit_test_pki", NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
 
     uint32_t error = 0;
     SOPC_CertificateList* pCertToValidate = NULL;
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCertToValidate);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Profile* pProfile = SOPC_PKIProviderNew_GetProfile(SOPC_SecurityPolicy_Basic256Sha256_URI);
+    const SOPC_PKI_Profile* pProfile =
+        SOPC_PKIProviderNew_GetProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, SOPC_PKI_TYPE_SERVER_APP);
     status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert(SOPC_STATUS_OK == status);
 
@@ -224,8 +214,7 @@ START_TEST(functional_test_write_to_list)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(NULL != pPKI);
     /* Extracts the PKI certificates */
@@ -267,8 +256,7 @@ START_TEST(functional_test_append_to_list)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
     ck_assert(SOPC_STATUS_OK == status);
-    const SOPC_PKI_Config* pConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_SERVER_APP);
-    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, pConfig, &pPKI);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert(NULL != pPKI);
 

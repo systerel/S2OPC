@@ -690,8 +690,6 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    const SOPC_PKI_Config* pPKIConfig = SOPC_PKIProviderNew_GetConfig(SOPC_PKI_TYPE_USER);
-
 #ifdef WITH_STATIC_SECURITY_DATA
     SOPC_CertificateList* userCAcert = NULL;
     SOPC_CRLList* userCAcrl = NULL;
@@ -706,13 +704,12 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, pPKIConfig, &pX509_UserIdentity_PKI);
+        status = SOPC_PKIProviderNew_CreateFromList(userCAcert, userCAcrl, NULL, NULL, &pX509_UserIdentity_PKI);
     }
     SOPC_KeyManager_Certificate_Free(userCAcert);
     SOPC_KeyManager_CRL_Free(userCAcrl);
 #else
-    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", NULL, pPKIConfig, &pX509_UserIdentity_PKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", NULL, &pX509_UserIdentity_PKI);
     // status = SOPC_PKIProviderStack_CreateFromPaths(
     //     x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
     //     x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers,
