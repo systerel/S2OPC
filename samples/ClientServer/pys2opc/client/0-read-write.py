@@ -68,6 +68,9 @@ if __name__ == '__main__':
             nodes = [node for node,dv in zip(NODES_TO_READ, respRead.results) if dv.variantType == VariantType.Double]
             newValues = [DataValue.from_python(Variant(10*random.random(), variantType=VariantType.Double))
                          for dv in respRead.results if dv.variantType == VariantType.Double]
+            for dv in newValues:
+                dv.timestampSource = 0
+
             # It is also possible to change the source timestamp manually, ot the status code
             #for dv in newValues:
             #    dv.timestampSource = 0
