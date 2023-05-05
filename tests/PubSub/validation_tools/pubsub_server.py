@@ -74,7 +74,7 @@ class PubSubServer:
     def __setStartStop(self, value):
         try:
             # Set value and wait until value changes or timeout expires
-            self.nodeStartStop.set_value(ua.Variant(value, ua.VariantType.Byte))
+            self.nodeStartStop.set_value(ua.DataValue(variant=ua.Variant(value, ua.VariantType.Byte)))
             state = PubSubState.OPERATIONAL if value else PubSubState.DISABLED
             timeout = PUBSUBSERVER_TIMEOUT_MAX
             while self.getPubSubState() != state and timeout > 0:
@@ -114,7 +114,7 @@ class PubSubServer:
     # Value is a XML in a string
     def setConfiguration(self, value):
         try:
-            self.nodeConfiguration.set_value(ua.Variant(value, ua.VariantType.String))
+            self.nodeConfiguration.set_value(ua.DataValue(variant=ua.Variant(value, ua.VariantType.String)))
         except:  # TODO: exception too broad
             print('Client probably not connected to PubSubServer')
 
@@ -130,7 +130,7 @@ class PubSubServer:
     # If writer group Id match with one writer group id of acyclic publisher configuration if will send all datasets
     def setAcyclicSend(self,value):
         try:
-            self.nodeAcyclicSend.set_value(ua.Variant(value,ua.VariantType.UInt16))
+            self.nodeAcyclicSend.set_value(ua.DataValue(variant=ua.Variant(value,ua.VariantType.UInt16)))
         except: #TODO exception too broad
             print('Client probably not connected to PubSubServer')
 
@@ -153,5 +153,5 @@ class PubSubServer:
     # - value type depends of varianttype
     def setValue(self, nid, varianttype, value):
         node = self.client.get_node(nid)
-        node.set_value(value=value, varianttype=varianttype)
+        node.set_value(ua.DataValue(ua.Variant(value, varianttype)))
 

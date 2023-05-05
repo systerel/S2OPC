@@ -32,7 +32,7 @@ def attribute_write_values_tests(client, logger):
 
         # write new value
         print(' Expected Value for Node {}:'.format(nid), newValue)
-        node.set_value(ua.Variant(newValue, variantType))
+        node.set_value(ua.DataValue(variant=ua.Variant(newValue, variantType)))
 
         # check value
         value = node.get_value()
@@ -45,7 +45,7 @@ def attribute_write_values_tests(client, logger):
             logger.add_test('Write Test - Value for Node {}'.format(nid), value == newValue)
 
         # write back initial value
-        node.set_value(ua.Variant(initialValue, variantType))
+        node.set_value(ua.DataValue(variant=ua.Variant(initialValue, variantType)))
 
 def attribute_write_values_two_clients_tests(client1, client2, logger):
 
@@ -59,7 +59,7 @@ def attribute_write_values_two_clients_tests(client1, client2, logger):
 
         # write new value on client 1
         print(' Expected Value for Node {}:'.format(nid), newValue)
-        node1.set_value(ua.Variant(newValue, variantType))
+        node1.set_value(ua.DataValue(variant=ua.Variant(newValue, variantType)))
 
         # check value with client 2
         value = node2.get_value()
@@ -72,4 +72,4 @@ def attribute_write_values_two_clients_tests(client1, client2, logger):
             logger.add_test('Read/Write Test with several connexions - Value for Node {}'.format(nid), value == newValue)
 
         # write back initial value with client 1
-        node1.set_value(ua.Variant(initialValue, variantType))
+        node1.set_value(ua.DataValue(ua.Variant(initialValue, variantType)))
