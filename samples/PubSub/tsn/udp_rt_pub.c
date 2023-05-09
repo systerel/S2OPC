@@ -25,9 +25,9 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "p_sopc_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_etf_sockets.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_network_layer.h"
@@ -43,6 +43,8 @@
 #define DEFAULT_MCAST_ADDR "232.1.2.100"
 /* Ethernet interface selection */
 #define DEFAULT_ETH_INTERFACE "enp1s0"
+
+#define NANOSECONDS_TO_SECONDS (1000000000)
 
 static int32_t stopPublisher = false;
 static uint64_t cycle_time = DEFAULT_CYCLE_TIME;
@@ -154,6 +156,7 @@ static void usage(char* progname)
         "  -c [num]           period in nanoseconds (default %d)\n"
         "  -d [num]           delta from wake up to txtime in nanoseconds (default %d)\n"
         "  -p [num]           set SO_PRIORITY to 'num' (default %d)\n"
+        "  -E                 enable catching error queues\n"
         "  -h                 print this message and exit\n"
         "  -a [addr]          multicast address used (default %s)\n"
         "  -u [port]          udp port used (default %s)\n"
@@ -170,9 +173,10 @@ int main(int argc, char* argv[])
 
     // Parse argument
     int opt = 0;
+    bool errorQueue = false;
     char* progname = strrchr(argv[0], '/');
     progname = progname ? 1 + progname : argv[0];
-    while ((opt = getopt(argc, argv, "hi:c:d:p:a:u:")) != -1)
+    while ((opt = getopt(argc, argv, "hi:c:d:Ep:a:u:")) != -1)
     {
         switch (opt)
         {
@@ -191,6 +195,9 @@ int main(int argc, char* argv[])
             break;
         case 'p':
             so_priority = atoi(optarg);
+            break;
+        case 'E':
+            errorQueue = true;
             break;
         case 'a':
             mcastAddr = optarg;
@@ -215,17 +222,16 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     Socket sock = SOPC_INVALID_SOCKET;
     struct timespec sleepTime;
-    struct pollfd sockErrPoll;
 
     SOPC_Helper_EndiannessCfg_Initialize();
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, mcastAddr, mcastPort);
-    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
+    status = SOPC_UDP_Socket_CreateToSend(multicastAddr, interface, true, &sock);
     if (SOPC_STATUS_NOK == status)
     {
         return -1;
     }
 
-    status = SOPC_UDP_SO_TXTIME_Socket_Option((const char*) interface, &sock, (uint32_t) so_priority);
+    status = SOPC_ETF_Socket_Option(&sock, false, (uint32_t) so_priority, errorQueue);
     if (SOPC_STATUS_INVALID_PARAMETERS == status)
     {
         printf("Invalid parameters\n");
@@ -248,12 +254,10 @@ int main(int argc, char* argv[])
     /* Get current time and start 1 second in future and add wake tx delay */
     clock_gettime(CLOCKID, &sleepTime);
     sleepTime.tv_sec += 1;
-    sleepTime.tv_nsec = ONE_SEC - (long) wake_delay;
+    sleepTime.tv_nsec = NANOSECONDS_TO_SECONDS - (long) wake_delay;
     Timestamp_Normalize(&sleepTime);
-    txtime = (uint64_t)(sleepTime.tv_sec * ONE_SEC + sleepTime.tv_nsec);
+    txtime = (uint64_t)(sleepTime.tv_sec * NANOSECONDS_TO_SECONDS + sleepTime.tv_nsec);
     txtime += wake_delay;
-    memset(&sockErrPoll, 0, sizeof(sockErrPoll));
-    sockErrPoll.fd = sock;
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {
         printf("\nFirst packet txtime %" PRIu64 "\n", txtime);
@@ -263,8 +267,7 @@ int main(int argc, char* argv[])
             switch (clockErr)
             {
             case 0:
-                status = SOPC_TX_UDP_send(sock, buffer->data, buffer->length, txtime, (const char*) mcastAddr,
-                                          (const char*) mcastPort);
+                status = SOPC_ETF_Socket_send(sock, buffer, txtime, multicastAddr);
                 if (status == SOPC_STATUS_NOK)
                 {
                     printf("TX buffer send failed\n");
@@ -272,14 +275,7 @@ int main(int argc, char* argv[])
                 sleepTime.tv_nsec += (long) cycle_time;
                 Timestamp_Normalize(&sleepTime);
                 txtime += cycle_time;
-                if (poll(&sockErrPoll, 1, 0) && sockErrPoll.revents & POLLERR) // 0x008
-                {
-                    if (SOPC_TX_UDP_Socket_Error_Queue(sock))
-                    {
-                        // Operation error identifier
-                        returnCode = -ECANCELED;
-                    }
-                }
+                status = SOPC_ETF_Socket_Error_Queue(sock);
                 break;
             case EINTR:
                 continue;
