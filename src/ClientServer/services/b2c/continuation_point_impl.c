@@ -19,9 +19,9 @@
 
 #include "continuation_point_impl.h"
 
-#include <sopc_buffer.h>
-#include <sopc_encoder.h>
 #include "sopc_assert.h"
+#include "sopc_buffer.h"
+#include "sopc_encoder.h"
 
 SOPC_ReturnStatus SOPC_ContinuationPointId_Encode(uint64_t continuationPointId, SOPC_ByteString* bs)
 {

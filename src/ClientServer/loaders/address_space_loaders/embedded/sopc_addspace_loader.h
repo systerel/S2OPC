@@ -20,7 +20,7 @@
 #ifndef SOPC_ADDSPACE_LOADER_H_
 #define SOPC_ADDSPACE_LOADER_H_
 
-#include <sopc_address_space.h>
+#include "sopc_address_space.h"
 
 SOPC_AddressSpace* SOPC_Embedded_AddressSpace_Load(void);
 
