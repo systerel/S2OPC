@@ -152,7 +152,7 @@ bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
     return true;
 }
 
-static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
+void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
 {
     SOPC_ASSERT(NULL != t);
 
@@ -175,6 +175,32 @@ static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
     }
 }
 
+void SOPC_RealTime_SubDuration(SOPC_RealTime* t, uint64_t duration_us)
+{
+    SOPC_ASSERT(NULL != t);
+
+    if(t->tv_sec <=  (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS))
+    {
+        t = NULL;
+    }
+    else
+    {
+        t->tv_sec -= (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS);
+        /* This may add a negative or positive number */
+        t->tv_nsec -= (long) ((duration_us % SOPC_SECONDS_TO_MICROSECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
+            /* Normalize */
+        if (t->tv_nsec < 0)
+        {
+            t->tv_sec -= 1;
+            t->tv_nsec += SOPC_SECOND_TO_NANOSECONDS;
+        }
+        else if (t->tv_nsec > SOPC_SECOND_TO_NANOSECONDS)
+        {
+            t->tv_sec += 1;
+            t->tv_nsec -= SOPC_SECOND_TO_NANOSECONDS;
+        }
+    }
+}
 /***************************************************/
 void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
 {

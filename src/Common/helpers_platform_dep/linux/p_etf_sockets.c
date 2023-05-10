@@ -37,12 +37,15 @@
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_logger.h"
+#include "sopc_platform_time.h"
 
 #ifndef SO_EE_ORIGIN_TXTIME
 #define SO_EE_ORIGIN_TXTIME 6
 #define SO_EE_CODE_TXTIME_INVALID_PARAM 1
 #define SO_EE_CODE_TXTIME_MISSED 2
 #endif
+
+#define SOPC_SECOND_TO_NANOSECONDS 1000000000
 
 /* Additional References:
 https://github.com/torvalds/linux/blob/master/include/uapi/linux/net_tstamp.h
@@ -113,11 +116,12 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(Socket* sock, bool deadlineMo
 
 SOPC_ReturnStatus SOPC_TX_UDP_send(Socket* sock,
                                    SOPC_Buffer* buffer,
-                                   uint64_t txtime,
+                                   SOPC_RealTime* txtime,
                                    SOPC_Socket_Address* sockAddr)
 {
+    uint64_t txtime64 = (uint64_t)(txtime->tv_sec * SOPC_SECOND_TO_NANOSECONDS + txtime->tv_nsec);
     // CMSG - control message used to send additional header
-    char control[CMSG_SPACE(sizeof(txtime))] = {0};
+    char control[CMSG_SPACE(sizeof(txtime64))] = {0};
     ssize_t res;
     struct cmsghdr* controlMessage;
     struct msghdr message;
@@ -144,7 +148,7 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(Socket* sock,
     controlMessage->cmsg_type = SCM_TXTIME;
     // Txtime length
     controlMessage->cmsg_len = CMSG_LEN(sizeof(uint64_t));
-    memcpy(CMSG_DATA(controlMessage), &txtime, sizeof(uint64_t));
+    memcpy(CMSG_DATA(controlMessage), &txtime64, sizeof(uint64_t));
     // Send message on socket
     res = sendmsg(*sock, &message, 0);
     if ((uint32_t) res != buffer->length || res < 1)

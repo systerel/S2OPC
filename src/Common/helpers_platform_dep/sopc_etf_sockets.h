@@ -25,13 +25,13 @@
 
 #include "p_sockets.h"
 #include "sopc_buffer.h"
+#include "sopc_platform_time.h"
 
 #ifndef SO_TXTIME
 #define SO_TXTIME 61
 #define SCM_TXTIME SO_TXTIME
 #endif
 
-#define ONE_SEC (1000 * 1000 * 1000)
 #define CLOCKID CLOCK_TAI
 
 /*
@@ -85,7 +85,7 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(Socket* sock, bool deadlineMo
  */
 SOPC_ReturnStatus SOPC_TX_UDP_send(Socket* sock,
                                    SOPC_Buffer* buffer,
-                                   uint64_t txtime,
+                                   SOPC_RealTime* txtime,
                                    SOPC_Socket_Address* sockAddr);
 
 /**

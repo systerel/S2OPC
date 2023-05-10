@@ -58,7 +58,7 @@
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
     <xs:attribute name="acyclicPublisher" type="xs:boolean" use="optional"/> <!-- true to enable acyclic publisher. Default is false -->
     <xs:attribute name="etf" type="xs:boolean" use="optional"/> <!-- true to enable etf mechanism for publisher. Default is false -->
-    <xs:attribute name="delta" type="xs:double" use="optional"/> <!-- Only used for etf publisher. Default value is 0 -->
+    <xs:attribute name="delta" type="xs:double" use="optional"/> <!-- Only used for etf publisher, unit ms. Default value is 0 -->
   </xs:complexType>
   <xs:complexType name="message">
     <xs:sequence>

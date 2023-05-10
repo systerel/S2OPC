@@ -147,6 +147,21 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us);
 
 /**
+ * @brief 
+ * 
+ * @param t 
+ * @param duration_us 
+ */
+void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us);
+
+/**
+ * @brief 
+ * 
+ * @param t 
+ * @param duration_us 
+ */
+void SOPC_RealTime_SubDuration(SOPC_RealTime* t, uint64_t duration_us);
+/**
  * \brief Checks is a date is in the future (relatively to another date)
  * \param t A non-NULL date
  * \param now if non-NULL, this date will be compared to t. If NULL, the current date will be
