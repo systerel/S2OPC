@@ -309,7 +309,7 @@
       </xs:element>
       <xs:element type="ConnectionUserCertType" name="UserX509" minOccurs="0" maxOccurs="1">
         <xs:annotation>
-          <xs:documentation>Mandatory if tokenType is 'username'</xs:documentation>
+          <xs:documentation>Mandatory if tokenType is 'certificate'</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -319,7 +319,11 @@
   </xs:complexType>
   <xs:complexType name="ConnectionType">
     <xs:sequence>
-      <xs:element type="CertificateType" name="ServerCertificate"/>
+      <xs:element type="CertificateType" name="ServerCertificate" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Mandatory if SecurityMode is not 'None' or user token type is 'username'</xs:documentation>
+        </xs:annotation>
+      </xs:element>
       <xs:element type="SimpleSecurityPolicyType" name="SecurityPolicy"/>
       <xs:element type="SecurityModeType" name="SecurityMode"/>
       <xs:element type="ConnectionUserPolicyType" name="UserPolicy" minOccurs="0">
