@@ -34,6 +34,7 @@
 #include "libs2opc_new_client.h"
 
 #include "sopc_mutexes.h"
+#include "sopc_toolkit_config.h"
 #include "sopc_user_app_itf.h"
 
 // The client helper dedicated configuration in addition to configuration ::SOPC_S2OPC_Config
@@ -43,9 +44,16 @@ typedef struct SOPC_ClientHelper_Config
     // and singleton config is initialized
     int32_t initialized;
     Mutex configMutex;
+    Condition reverseEPsClosedCond;
 
     SOPC_ClientConnection* secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
-    int32_t openedReverseEndpointsIdx[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
+    SOPC_ReverseEndpointConfigIdx
+        configuredReverseEndpointsToCfgIdx[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; // Max 1 per secure connection
+    bool openedReverseEndpointsFromCfgIdx[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS +
+                                          1]; // index is valid
+                                              // (SOPC_ReverseEndpointConfigIdx -
+                                              // SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+                                              // : ]0 : SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]
 
     SOPC_ServiceAsyncResp_Fct* asyncRespCb;
 
@@ -107,5 +115,7 @@ bool SOPC_ClientInternal_GetUserKeyPassword(const char* cert1Sha1, char** outPas
  *
  */
 bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPassword);
+
+uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx);
 
 #endif /* LIBS2OPC_CLIENT_INTERNAL_H_ */
