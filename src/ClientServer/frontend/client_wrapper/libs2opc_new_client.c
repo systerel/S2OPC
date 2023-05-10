@@ -30,6 +30,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
 #include "state_machine.h"
@@ -384,21 +385,24 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         cc = sopc_client_helper_config.secureConnections[appContext];
         break;
     case SE_REVERSE_ENDPOINT_CLOSED:
-        // TODO: update reverse endpoint state
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Reverse endpoint '%s' closed",
+                              SOPC_ToolkitClient_GetReverseEndpointURL(IdOrStatus));
+        sopc_client_helper_config
+            .openedReverseEndpointsFromCfgIdx[SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(IdOrStatus)] = false;
+        mutStatus = Condition_SignalAll(&sopc_client_helper_config.reverseEPsClosedCond);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         break;
     default:
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ClientInternal_ToolkitEventCallback: unexpected event %d received.", event);
         return;
     }
-    if (NULL == cc)
+    if (NULL == cc && event != SE_REVERSE_ENDPOINT_CLOSED)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ClientInternal_ToolkitEventCallback: unexpected context received for event %d.", event);
-        return;
     }
-
-    if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
+    else if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
     {
         // Discovery service call (no session) not managed by state machine: direct call to event callback
         SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -411,7 +415,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         SOPC_ClientInternal_EventCbk(cc->secureConnectionIdx, libsubEvent, status, param, (uintptr_t) serviceReqCtx);
         SOPC_Free((void*) appContext);
     }
-    else
+    else if (event != SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs
     {
         // Connection management or service on session call managed by state machine
         pSM = sopc_client_helper_config.secureConnections[cc->secureConnectionIdx]->stateMachine;
@@ -426,6 +430,58 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
 
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+}
+
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC_SecureConnection_Config* secConnConfig,
+                                                                      SOPC_ReverseEndpointConfigIdx* res)
+{
+    if (NULL == secConnConfig->reverseURL)
+    {
+        return SOPC_STATUS_OK;
+    }
+    SOPC_ASSERT(NULL != res);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    const SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    bool foundIdx = false;
+    uint16_t rEPidx = 0;
+    for (uint16_t i = 0; !foundIdx && i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
+    {
+        if (0 == strcmp(pConfig->clientConfig.reverseEndpointURLs[i], secConnConfig->reverseURL))
+        {
+            foundIdx = true;
+            rEPidx = i;
+        }
+    }
+
+    SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
+        sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
+    if (0 == reverseConfigIdx)
+    {
+        reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
+    }
+    if (0 != reverseConfigIdx)
+    {
+        // If the reverse endpoint is not opened, open ti
+        const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
+        if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
+        {
+            // Store the reverse EP configuration index
+            sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx] = reverseConfigIdx;
+            // Open the reverse endpoint
+            SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseConfigIdx);
+            sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset] = true;
+        }
+        *res = reverseConfigIdx;
+        status = SOPC_STATUS_OK;
+    }
+    else
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "SOPC_ClientHelperInternal_MayCreateReverseEp: creation of reverse endpoint config %s failed",
+            secConnConfig->reverseURL);
+    }
+    return status;
 }
 
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
@@ -443,22 +499,20 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (NULL != secConnConfig->reverseURL)
-    {
-        // TODO: manage reverse EPs
-        SOPC_ASSERT(false);
-    }
+    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayCreateReverseEp(secConnConfig, &reverseConfigIdx);
 
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_SecureChannelConfigIdx cfgId = 0;
     SOPC_StaMac_Machine* stateMachine = NULL;
-    /* TODO: propagate the const in low level API ? */
-    SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-    cfgId = SOPC_ToolkitClient_AddSecureChannelConfig(&secConnConfig->scConfig);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-    if (0 != cfgId)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_OK;
+        /* TODO: propagate the const in low level API ? */
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        cfgId = SOPC_ToolkitClient_AddSecureChannelConfig((SOPC_SecureChannel_Config*) &secConnConfig->scConfig);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        if (0 != cfgId)
+        {
+            status = SOPC_STATUS_OK;
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -546,6 +600,12 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
 
     SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
 
+    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelperInternal_MayCreateReverseEp(secConnConfig, &reverseConfigIdx);
+    }
+
     SOPC_ClientConnection* res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
     if (SOPC_STATUS_OK == status && NULL == res)
     {
@@ -604,7 +664,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         /* send the request */
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = 0, // TODO !!!!!!!
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = reverseConfigIdx,
                                                                 .secureChannelConfigIdx = res->cfgId};
 
             status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);

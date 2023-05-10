@@ -91,7 +91,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientCon
  *         or NULL if none is found.
  *
  */
-const SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId);
+SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId);
 
 /**
  * \brief Type of callback to provide asynchronous service response

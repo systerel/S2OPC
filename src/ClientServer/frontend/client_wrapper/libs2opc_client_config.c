@@ -31,12 +31,14 @@
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
 const SOPC_ClientHelper_Config sopc_client_helper_config_default = {
     .initialized = false,
     .secureConnections = {NULL},
-    .openedReverseEndpointsIdx = {0},
+    .configuredReverseEndpointsToCfgIdx = {0},
+    .openedReverseEndpointsFromCfgIdx = {false},
     .asyncRespCb = NULL,
 
     .getClientKeyPasswordCb = NULL,
@@ -72,10 +74,10 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
     pConfig->clientConfig.freeCstringsFlag = true;
 
     // Client state initialization
-    // Mutex_Initialization(&sopc_client_helper_config.stateMutex);
-    // sopc_server_helper_config.state = SOPC_CLIENT_STATE_INITIALIZED;
-
     SOPC_ReturnStatus mutStatus = Mutex_Initialization(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    mutStatus = Condition_Init(&sopc_client_helper_config.reverseEPsClosedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(SOPC_ClientInternal_ToolkitEventCallback);
@@ -88,6 +90,20 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
     return status;
 }
 
+static bool SOPC_Internal_AllReverseEPsClosed(SOPC_S2OPC_Config* pConfig)
+{
+    for (uint16_t i = 0; i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
+    {
+        uint32_t cfgIdx = sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[i];
+        if (sopc_client_helper_config
+                .openedReverseEndpointsFromCfgIdx[SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(cfgIdx)])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
 void SOPC_HelperConfigClient_Clear(void)
 {
     if (!SOPC_ClientInternal_IsInitialized())
@@ -95,15 +111,44 @@ void SOPC_HelperConfigClient_Clear(void)
         // Client wrapper not initialized
         return;
     }
+
     SOPC_ToolkitClient_ClearAllSCs();
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+
+    // Close all reverse endpoints
+    SOPC_ReverseEndpointConfigIdx rEPcfgIdx = 0;
+    uint32_t rEPcfgIdxNoOffset = 0;
+    for (uint16_t i = 0; i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
+    {
+        rEPcfgIdx = sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[i];
+        rEPcfgIdxNoOffset = SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(rEPcfgIdx);
+        if (0 != rEPcfgIdx && sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[rEPcfgIdxNoOffset])
+        {
+            SOPC_ToolkitClient_AsyncCloseReverseEndpoint(
+                sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[i]);
+        }
+    }
+
+    // Wait for all reverse endpoints to be closed
+    if (pConfig->clientConfig.nbReverseEndpointURLs > 0)
+    {
+        while (!SOPC_Internal_AllReverseEPsClosed(pConfig))
+        {
+            mutStatus = Mutex_UnlockAndWaitCond(&sopc_client_helper_config.reverseEPsClosedCond,
+                                                &sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+    }
+
     SOPC_ClientConfig_Clear(&pConfig->clientConfig);
 
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = Condition_Clear(&sopc_client_helper_config.reverseEPsClosedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     mutStatus = Mutex_Clear(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -248,7 +293,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
     return status;
 }
 
-const SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId)
+SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -389,4 +434,14 @@ bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPas
 bool SOPC_ClientInternal_IsEncryptedClientKey(void)
 {
     return NULL != sopc_client_helper_config.getClientKeyPasswordCb;
+}
+
+uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx)
+{
+    if (rEPcfgIdx > SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS &&
+        rEPcfgIdx <= 2 * SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
+    {
+        return (rEPcfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
+    }
+    return 0;
 }
