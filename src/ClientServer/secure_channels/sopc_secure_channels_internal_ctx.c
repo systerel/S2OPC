@@ -76,7 +76,14 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx)
 
 void SOPC_SecureChannelsInternalContext_Clear(void)
 {
+    // Set to NULL handlers deallocated by SOPC_Looper_Delete call
+    secureChannelsInputEventHandler = NULL;
+    secureChannelsInternalEventHandler = NULL;
+    secureChannelsSocketsEventHandler = NULL;
+    secureChannelsTimerEventHandler = NULL;
+    secureChannelsEventHandler = NULL;
     SOPC_Looper_Delete(secureChannelsLooper);
+    secureChannelsLooper = NULL;
 }
 
 const SOPC_CertificateList* SC_OwnCertificate(SOPC_SecureConnection* conn)

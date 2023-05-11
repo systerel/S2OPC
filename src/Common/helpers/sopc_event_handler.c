@@ -61,6 +61,10 @@ static SOPC_ReturnStatus post(SOPC_EventHandler* handler,
                               uintptr_t auxParam,
                               bool asNext)
 {
+    if (NULL == handler)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     struct Event* ev = SOPC_Calloc(1, sizeof(struct Event));
 
     if (ev == NULL)

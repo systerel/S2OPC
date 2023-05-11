@@ -656,7 +656,11 @@ void SOPC_Services_Clear(void)
 {
     io_dispatch_mgr__UNINITIALISATION();
 
+    // Set to NULL handlers deallocated by SOPC_Looper_Delete call
+    servicesEventHandler = NULL;
+    secureChannelsEventHandler = NULL;
     SOPC_Looper_Delete(servicesLooper);
+    servicesLooper = NULL;
 
     closeAllConnectionsSync.allDisconnectedFlag = false;
     closeAllConnectionsSync.clientOnlyFlag = false;
