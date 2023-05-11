@@ -322,9 +322,22 @@ void SOPC_EventTimer_Initialize(void)
     }
 }
 
+void SOPC_EventTimer_PreClear(void)
+{
+    if (!is_stopped())
+    {
+        // Stop timer cyclic evaluation thread
+        SOPC_Atomic_Int_Set(&stop, 1);
+        SOPC_Thread_Join(cyclicEvalThread);
+    }
+}
+
 void SOPC_EventTimer_Clear(void)
 {
-    SOPC_Atomic_Int_Set(&stop, 1);
+    SOPC_EventTimer_PreClear();
+    // Note: set initialized to false to avoid concurrent call execution with others functions checking this flag.
+    //       A concurrent call with SOPC_EventTimer_Initialize is not expected and cannot be managed properly.
+    SOPC_Atomic_Int_Set(&initialized, 0);
     Mutex_Lock(&timersMutex);
     SOPC_SLinkedList_Apply(timers, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Delete(timers);
@@ -333,8 +346,6 @@ void SOPC_EventTimer_Clear(void)
     SOPC_SLinkedList_Delete(periodicTimersToRestart);
     periodicTimersToRestart = NULL;
     Mutex_Unlock(&timersMutex);
-    SOPC_Thread_Join(cyclicEvalThread);
-    SOPC_Atomic_Int_Set(&initialized, 0);
     Mutex_Clear(&timersMutex);
 }
 

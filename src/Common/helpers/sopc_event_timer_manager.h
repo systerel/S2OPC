@@ -52,8 +52,15 @@
 void SOPC_EventTimer_Initialize(void);
 
 /**
+ * \brief PreClear the event timer manager: thread triggering timers is stopped.
+ *        It might be called prior to ::SOPC_EventTimer_Clear to ensure no new timer is triggered until clearing memory.
+ *        ::SOPC_EventTimer_Clear shall be called shortly to completely clear event timer data.
+ */
+void SOPC_EventTimer_PreClear(void);
+
+/**
  * \brief Clear the event timer manager (cancel all timers not already triggered)
- *
+ *        ::SOPC_EventTimer_PreClear is automatically called if not called prior to this call.
  */
 void SOPC_EventTimer_Clear(void);
 
