@@ -293,11 +293,14 @@ void SOPC_Toolkit_Clear(void)
         // It must be done before stopping the services
         SOPC_Services_CloseAllSCs(false);
 
+        // Ensure no new events are triggered by timers
+        SOPC_EventTimer_PreClear();
+
         SOPC_Sockets_Clear();
-        SOPC_EventTimer_Clear();
         SOPC_SecureChannels_Clear();
         SOPC_Services_Clear();
         SOPC_App_Clear();
+        SOPC_EventTimer_Clear();
 
         Mutex_Lock(&tConfig.mut);
 
