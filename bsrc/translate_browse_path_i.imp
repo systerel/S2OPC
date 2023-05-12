@@ -678,14 +678,14 @@ LOCAL_OPERATIONS
                 =>
                 BrowsePathResult = BrowsePathResult$0 &
 
-                (out_BrowseResult_NodeId(browseResult_index) :
-                    dom(conv_ExpandedNodeId_NodeId)
+                ((out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId) or
+                  out_BrowseResult_NodeId(browseResult_index) = c_ExpandedNodeId_indet)
                     =>
                     BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
                     BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
                 ) &
-                (not(out_BrowseResult_NodeId(browseResult_index) :
-                    dom(conv_ExpandedNodeId_NodeId))
+                ((out_BrowseResult_NodeId(browseResult_index) /: dom(conv_ExpandedNodeId_NodeId) &
+                  out_BrowseResult_NodeId(browseResult_index) /= c_ExpandedNodeId_indet)
                     =>
                     (statusCode_operation = e_sc_uncertain_reference_out_of_server
                     =>
