@@ -53,19 +53,6 @@ PROMOTES
     continuation_points_UNINITIALISATION
 
 DEFINITIONS
-    d_var_browse_value_in ==
-        in_session,
-        in_maxReferencesPerNode,
-        in_BrowseView,
-        in_BrowseValue_NodeId,
-        in_BrowseValue_BrowseDirection,
-        in_BrowseValue_ReferenceTypeId,
-        in_BrowseValue_IncludeSubtypes,
-        in_BrowseValue_NodeClassMask,
-        in_BrowseValue_ResultMask,
-        in_ReleasePrevContinuationPoint,
-        isBrowseValueContextDefined;
-
     d_var_browse_result_out ==
         out_BrowseResult_BrowseStatus,
         out_BrowseResult_ContinuationPointId,
@@ -103,20 +90,6 @@ DEFINITIONS
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         ;
-
-    d_inv_browse_value_in ==
-    (   in_session                       : t_session_i           &
-        in_maxReferencesPerNode          : NAT                   &
-        in_BrowseView                    : t_NodeId_i            &
-        in_BrowseValue_NodeId            : t_NodeId_i            &
-        in_BrowseValue_BrowseDirection   : t_BrowseDirection_i   &
-        in_BrowseValue_ReferenceTypeId   : t_NodeId_i            &
-        in_BrowseValue_IncludeSubtypes   : BOOL                  &
-        in_BrowseValue_NodeClassMask     : t_BrowseNodeClassMask_i &
-        in_BrowseValue_ResultMask        : t_BrowseResultMask_i  &
-        in_ReleasePrevContinuationPoint  : BOOL                  &
-        isBrowseValueContextDefined      : BOOL
-    );
 
     d_inv_browse_result_out ==
     (   out_BrowseResult_BrowseStatus        : t_StatusCode_i             &
@@ -193,9 +166,7 @@ LOCAL_OPERATIONS
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
 
-        d_var_browse_value_in,
         d_var_browse_result_out:(
-            d_inv_browse_value_in &
             d_inv_browse_result_out
         )
     END
@@ -232,10 +203,8 @@ LOCAL_OPERATIONS
         ) ||
 
         d_var_browse_source_it,
-        d_var_browse_value_in,
         d_var_browse_result_out:(
             d_inv_browse_source_it &
-            d_inv_browse_value_in &
             d_inv_browse_result_out
         )
     END
@@ -305,10 +274,8 @@ LOCAL_OPERATIONS
         ) ||
 
         d_var_browse_source_it,
-        d_var_browse_value_in,
         d_var_browse_result_out:(
             d_inv_browse_source_it &
-            d_inv_browse_value_in &
             d_inv_browse_result_out
         )
     END
@@ -639,9 +606,7 @@ LOCAL_OPERATIONS
             (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE)
         ) ||
 
-        d_var_browse_value_in,
         d_var_browse_result_out:(
-            d_inv_browse_value_in &
             d_inv_browse_result_out
         )
     END
@@ -797,11 +762,10 @@ LOCAL_OPERATIONS
             BrowsePathRemainingIndex : seq(NAT1)
         ) ||
 
-        d_var_browse_value_in,
         d_var_browse_result_out,
         d_var_browse_source_it,
         d_var_element_it
-        :(  d_inv_browse_value_in &
+        :(
             d_inv_browse_result_out &
             d_inv_browse_source_it  &
             d_inv_element_it
@@ -836,10 +800,8 @@ LOCAL_OPERATIONS
         ) ||
 
         d_var_browse_source_it,
-        d_var_browse_value_in,
         d_var_browse_result_out
         :(  d_inv_browse_source_it &
-            d_inv_browse_value_in &
             d_inv_browse_result_out
         )
     END
