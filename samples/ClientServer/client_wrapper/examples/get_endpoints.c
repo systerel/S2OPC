@@ -19,46 +19,73 @@
 
 /** \file
  *
- * \brief A getEnpoints example using the high-level client API
+ * \brief A get endpoints example using the high-level client API
  *
- * Requires the toolkit_test_server to be running.
- * Retrieve GetEndpoints information.
- * Then closes the toolkit.
+ * Requires an OPC UA server with a discovery endpoint at the given URL.
+ * Connect to the server and get endpoints from the given discovery endpoint URL.
+ * Then disconnect and closes the toolkit.
  *
  */
 
 #include <stdio.h>
 
-#include "libs2opc_client_cmds.h"
+#include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "sopc_macros.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
-static void print_endpoints(SOPC_ClientCmd_GetEndpointsResult* result)
+#include "sopc_askpass.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+
+#define DEFAULT_CLIENT_CONFIG_XML "S2OPC_Client_Wrapper_Config.xml"
+
+#define DEFAULT_CONFIG_ID "discovery"
+
+static const char* token_type_string(OpcUa_UserTokenType tokenType)
 {
-    if (NULL == result)
+    switch (tokenType)
+    {
+    case OpcUa_UserTokenType_Anonymous:
+        return "Anonymous";
+    case OpcUa_UserTokenType_UserName:
+        return "UserName";
+    case OpcUa_UserTokenType_Certificate:
+        return "Certificate";
+    case OpcUa_UserTokenType_IssuedToken:
+        return "IssuedToken";
+    default:
+        return "INVALID TOKEN TYPE";
+    }
+}
+
+static void print_endpoints(OpcUa_GetEndpointsResponse* resp)
+{
+    if (NULL == resp)
     {
         return;
     }
-    printf("Server has %d endpoints.\n", result->nbOfEndpoints);
+    printf("Server has %" PRIi32 " endpoints.\n", resp->NoOfEndpoints);
 
-    for (int32_t i = 0; i < result->nbOfEndpoints; i++)
+    for (int32_t i = 0; i < resp->NoOfEndpoints; i++)
     {
-        printf("Endpoint #%d:\n", i);
-        printf(" - url: %s\n", result->endpoints[i].endpointUrl);
-        printf(" - security level: %d\n", result->endpoints[i].securityLevel);
-        printf(" - security mode: %d\n", result->endpoints[i].security_mode);
-        printf(" - security policy Uri: %s\n", result->endpoints[i].security_policyUri);
-        printf(" - transport profile Uri: %s\n", result->endpoints[i].transportProfileUri);
+        printf("Endpoint #%" PRIi32 ":\n", i);
+        printf(" - url: %s\n", SOPC_String_GetRawCString(&resp->Endpoints[i].EndpointUrl));
+        printf(" - security level: %" PRIu8 "\n", resp->Endpoints[i].SecurityLevel);
+        printf(" - security mode: %d\n", resp->Endpoints[i].SecurityMode);
+        printf(" - security policy Uri: %s\n", SOPC_String_GetRawCString(&resp->Endpoints[i].SecurityPolicyUri));
+        printf(" - transport profile Uri: %s\n", SOPC_String_GetRawCString(&resp->Endpoints[i].TransportProfileUri));
 
-        SOPC_ClientCmd_UserIdentityToken* userIds = result->endpoints[i].userIdentityTokens;
-        for (int32_t j = 0; j < result->endpoints[i].nbOfUserIdentityTokens; j++)
+        OpcUa_UserTokenPolicy* userIds = resp->Endpoints[i].UserIdentityTokens;
+        for (int32_t j = 0; j < resp->Endpoints[i].NoOfUserIdentityTokens; j++)
         {
-            printf("  - User Identity #%d\n", j);
-            printf("    - policy Id: %s\n", userIds[j].policyId);
-            printf("    - token type: %d\n", userIds[j].tokenType);
-            printf("    - issued token type: %s\n", userIds[j].issuedTokenType);
-            printf("    - issuer endpoint Url: %s\n", userIds[j].issuerEndpointUrl);
-            printf("    - security policy Uri: %s\n", userIds[j].securityPolicyUri);
+            printf("  - User Identity #%" PRIi32 "\n", j);
+            printf("    - policy Id: %s\n", SOPC_String_GetRawCString(&userIds[j].PolicyId));
+            printf("    - token type: %s\n", token_type_string(userIds[j].TokenType));
+            printf("    - issued token type: %s\n", SOPC_String_GetRawCString(&userIds[j].IssuedTokenType));
+            printf("    - issuer endpoint Url: %s\n", SOPC_String_GetRawCString(&userIds[j].IssuerEndpointUrl));
+            printf("    - security policy Uri: %s\n", SOPC_String_GetRawCString(&userIds[j].SecurityPolicyUri));
         }
     }
 }
@@ -67,7 +94,16 @@ int main(int argc, char* const argv[])
 {
     SOPC_UNUSED_ARG(argc);
     SOPC_UNUSED_ARG(argv);
-
+    /* TODO : use API config for discovery
+     if (argc != 2)
+     {
+         printf("Usage: %s <discovery endpoint URL> (e.g. %s \"opc.tcp://localhost:4841\").\nThe '" DEFAULT_CONFIG_ID
+                "' connection configuration "
+                "from " DEFAULT_CLIENT_CONFIG_XML " is used.\n",
+                argv[0], argv[0]);
+         return -2;
+     }
+     */
     int res = 0;
 
     /* Initialize client/server toolkit and client wrapper */
@@ -78,46 +114,83 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        res = -1;
+        status = SOPC_HelperConfigClient_Initialize();
     }
 
-    if (0 == res)
+    size_t nbConfigs = 0;
+    SOPC_SecureConnection_Config** scConfigArray = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t init = SOPC_ClientCmd_Initialize(NULL);
-        if (init < 0)
+        status = SOPC_HelperConfigClient_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_get_endpoints: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
         }
     }
 
-    SOPC_ClientCmd_EndpointConnection endpoint = {
-        .endpointUrl = "opc.tcp://localhost:4841",
-        .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
-    };
-
-    /* GetEndpoints */
-    SOPC_ClientCmd_GetEndpointsResult* getEndpointResult = NULL;
-    if (0 == res)
+    SOPC_SecureConnection_Config* discConnCfg = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_ClientCmd_GetEndpoints(&endpoint, &getEndpointResult);
+        discConnCfg = SOPC_HelperConfigClient_GetConfigFromId(DEFAULT_CONFIG_ID);
+
+        if (NULL == discConnCfg)
+        {
+            printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
+                   "' from XML config file %s\n",
+                   DEFAULT_CLIENT_CONFIG_XML);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
     }
 
-    if (0 == res)
+    /* Define callback to retrieve the client's private key password */
+    if (SOPC_STATUS_OK == status)
     {
-        print_endpoints(getEndpointResult);
-        SOPC_ClientCmd_GetEndpointsResult_Free(&getEndpointResult);
+        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
     }
-    else
+
+    OpcUa_GetEndpointsRequest* getEndpointsRequest = NULL;
+    OpcUa_GetEndpointsResponse* getEndpointsResponse = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        printf("GetEndpoints FAILED, error code: %d\n", res);
+        getEndpointsRequest = SOPC_GetEndpointsRequest_Create(argv[1]);
+        status = (NULL == getEndpointsRequest ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+
+    /* Call Discovery Service without secure connection */
+    if (SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_ClientHelper_DiscoveryServiceSync(discConnCfg, getEndpointsRequest, (void**) &getEndpointsResponse);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_IsGoodStatus(getEndpointsResponse->ResponseHeader.ServiceResult))
+        {
+            print_endpoints(getEndpointsResponse);
+        }
+        else
+        {
+            printf(
+                "<Example_wrapper_get_endpoints: GetEndpoints service call on URL %s failed with status: 0x%08" PRIX32
+                "\n",
+                argv[1], getEndpointsResponse->ResponseHeader.ServiceResult);
+        }
+    }
+    if (NULL != getEndpointsResponse)
+    {
+        SOPC_Encodeable_Delete(getEndpointsResponse->encodeableType, (void**) &getEndpointsResponse);
     }
 
     /* Close the toolkit */
-    SOPC_ClientCmd_Finalize();
+    SOPC_HelperConfigClient_Clear();
     SOPC_CommonHelper_Clear();
 
+    res = (SOPC_STATUS_OK == status ? 0 : -1);
     return res;
 }

@@ -21,31 +21,228 @@
  *
  * \brief A write example using the high-level client API
  *
- * Requires the toolkit_test_server to be running.
- * Connect to the server and writes a UInt64 value to a predefined node.
+ * Requires the toolkit_demo_server to be running.
+ * Connect to the server and write the given value for the given node.
  * Then disconnect and closes the toolkit.
  *
  */
 
 #include <stdio.h>
+#include <string.h>
 
-#include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "sopc_askpass.h"
-#include "sopc_assert.h"
-#include "sopc_macros.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
-static void disconnect_callback(const uint32_t c_id)
+#include "sopc_askpass.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+
+#define DEFAULT_CLIENT_CONFIG_XML "S2OPC_Client_Wrapper_Config.xml"
+#define DEFAULT_CONFIG_ID "write"
+
+static void ClientConnectionEvent(SOPC_ClientConnection* config,
+                                  SOPC_ClientConnectionEvent event,
+                                  SOPC_StatusCode status)
 {
-    printf("===> connection #%d has been terminated!\n", c_id);
+    SOPC_UNUSED_ARG(config);
+
+    // We do not expect events since we use synchronous connection / disconnection, only for degraded case
+    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
+}
+
+static void PrintReadResponse(const char* nodeId, OpcUa_ReadResponse* pResp)
+{
+    printf("Previous node \"%s\" value:\n", nodeId);
+    SOPC_DataValue* pVal = &pResp->Results[0];
+    printf("StatusCode: 0x%08" PRIX32 "\n", pVal->Status);
+    SOPC_Variant_Print(&(pVal->Value));
+    printf("\n");
+}
+
+static SOPC_DataValue* ParseValue(SOPC_BuiltinId builtinId, const char* val)
+{
+    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(*dv));
+    SOPC_DataValue_Initialize(dv);
+    dv->Value.BuiltInTypeId = builtinId;
+    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    int scanRes = 0;
+    /* Note: SCNu8 / SCNi8 not managed by mingw, use int and uint and then check max values */
+    int i8 = 0;
+    unsigned int u8 = 0;
+    switch (builtinId)
+    {
+    case SOPC_Boolean_Id:
+    case SOPC_Byte_Id:
+        scanRes = sscanf(val, "%u", &u8);
+        if (0 != scanRes && u8 <= UINT8_MAX)
+        {
+            if (SOPC_Byte_Id == builtinId)
+            {
+                dv->Value.Value.Byte = (SOPC_Byte) u8;
+            }
+            else
+            {
+                dv->Value.Value.Boolean = (SOPC_Boolean) u8;
+            }
+        }
+        else
+        {
+            scanRes = 0;
+        }
+        break;
+    case SOPC_SByte_Id:
+        scanRes = sscanf(val, "%d", &i8);
+        if (0 != scanRes && i8 <= INT8_MAX && i8 >= INT8_MIN)
+        {
+            dv->Value.Value.Sbyte = (SOPC_SByte) i8;
+        }
+        else
+        {
+            scanRes = 0;
+        }
+        break;
+    case SOPC_Int16_Id:
+        scanRes = sscanf(val, "%" SCNi16, &dv->Value.Value.Int16);
+        break;
+    case SOPC_UInt16_Id:
+        scanRes = sscanf(val, "%" SCNu16, &dv->Value.Value.Uint16);
+        break;
+    case SOPC_Int32_Id:
+        scanRes = sscanf(val, "%" SCNi32, &dv->Value.Value.Int32);
+        break;
+    case SOPC_UInt32_Id:
+        scanRes = sscanf(val, "%" SCNu32, &dv->Value.Value.Uint32);
+        break;
+    case SOPC_Int64_Id:
+        scanRes = sscanf(val, "%" SCNi64, &dv->Value.Value.Int64);
+        break;
+    case SOPC_UInt64_Id:
+        scanRes = sscanf(val, "%" SCNu64, &dv->Value.Value.Uint64);
+        break;
+    case SOPC_Float_Id:
+        scanRes = sscanf(val, "%f", &dv->Value.Value.Floatv);
+        break;
+    case SOPC_Double_Id:
+        scanRes = sscanf(val, "%lf", &dv->Value.Value.Doublev);
+        break;
+    case SOPC_String_Id:
+        SOPC_String_Initialize(&dv->Value.Value.String);
+        if (SOPC_STATUS_OK == SOPC_String_CopyFromCString(&dv->Value.Value.String, val))
+        {
+            scanRes = true;
+        }
+        break;
+    default:
+        scanRes = false;
+        break;
+    }
+
+    dv->SourceTimestamp = SOPC_Time_GetCurrentTimeUTC();
+
+    if (0 == scanRes)
+    {
+        SOPC_DataValue_Clear(dv);
+        SOPC_Free(dv);
+        dv = NULL;
+    }
+    return dv;
+}
+
+static SOPC_ReturnStatus ReadPreviousValue(SOPC_ClientConnection* secureConnection,
+                                           const char* nodeIdStr,
+                                           SOPC_BuiltinId* outBuiltinTypeId,
+                                           SOPC_VariantArrayType* outArrayType)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    // Create a read request on value to write
+    OpcUa_ReadRequest* readRequest = NULL;
+    OpcUa_ReadResponse* readResponse = NULL;
+
+    readRequest = SOPC_ReadRequest_Create(1, OpcUa_TimestampsToReturn_Both);
+    if (NULL != readRequest)
+    {
+        status = SOPC_ReadRequest_SetReadValueFromStrings(readRequest, 0, nodeIdStr, SOPC_AttributeId_Value, NULL);
+    }
+    else
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    // Call the read service
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_IsGoodStatus(readResponse->ResponseHeader.ServiceResult))
+        {
+            if (1 == readResponse->NoOfResults && SOPC_IsGoodStatus(readResponse->Results[0].Status))
+            {
+                PrintReadResponse(nodeIdStr, readResponse);
+                *outBuiltinTypeId = readResponse->Results[0].Value.BuiltInTypeId;
+                *outArrayType = readResponse->Results[0].Value.ArrayType;
+            }
+            else
+            {
+                printf("Pre-required read value failed with status: 0x%08" PRIX32 "\n",
+                       readResponse->Results[0].Status);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            printf("Pre-required read service failed with status: 0x%08" PRIX32 "\n",
+                   readResponse->ResponseHeader.ServiceResult);
+
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (NULL != readResponse)
+    {
+        SOPC_Encodeable_Delete(readResponse->encodeableType, (void**) &readResponse);
+    }
+
+    return status;
+}
+
+static bool AskUserPass_FromTerminal(const char* user, char** outPassword)
+{
+    const char* promptPrefix = "Password for user ";
+    size_t promptPrefixLen = strlen(promptPrefix);
+    size_t userLen = strlen(user);
+    char* prompt = SOPC_Calloc(promptPrefixLen + userLen + 2, sizeof(*prompt));
+    memcpy(prompt, promptPrefix, promptPrefixLen);
+    memcpy(prompt + promptPrefixLen, user, userLen);
+    memcpy(prompt + promptPrefixLen + userLen, ":", 2);
+
+    bool res = SOPC_AskPass_CustomPromptFromTerminal(prompt, outPassword);
+    SOPC_Free(prompt);
+    return res;
+}
+
+static bool AskKeyPass_FromTerminal(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("Password for client key:", outPassword);
 }
 
 int main(int argc, char* const argv[])
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
+    if (argc != 3)
+    {
+        printf("Usage: %s <nodeId> <value> (e.g. %s \"ns=1;i=1012\" 42).\nThe '" DEFAULT_CONFIG_ID
+               "' connection configuration "
+               "from " DEFAULT_CLIENT_CONFIG_XML
+               " is used.\n"
+               "The node is first read and the concrete value type is used (cannot be a NULL value).\n",
+               argv[0], argv[0]);
+        return -2;
+    }
+    const char* nodeIdStr = argv[1];
+    const char* valueStr = argv[2];
     int res = 0;
 
     /* Initialize client/server toolkit and client wrapper */
@@ -56,116 +253,162 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        res = -1;
+        status = SOPC_HelperConfigClient_Initialize();
     }
 
-    if (0 == res)
+    size_t nbConfigs = 0;
+    SOPC_SecureConnection_Config** scConfigArray = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
-        if (init < 0)
+        status = SOPC_HelperConfigClient_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_write: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
         }
     }
 
-    SOPC_ClientCmd_Security security = {
-        .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
-        .security_mode = OpcUa_MessageSecurityMode_Sign,
-        .path_cert_auth = "./trusted/cacert.der",
-        .path_crl = "./revoked/cacrl.der",
-        .path_cert_srv = "./server_public/server_2k_cert.der",
-        .path_cert_cli = "./client_public/client_2k_cert.der",
-        .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
-        .path_cert_x509_token = NULL,
-        .path_key_x509_token = NULL,
-        .key_x509_token_encrypted = false,
-    };
+    SOPC_SecureConnection_Config* writeConnCfg = NULL;
 
-    SOPC_ClientCmd_EndpointConnection endpoint = {
-        .endpointUrl = "opc.tcp://localhost:4841",
-        .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
-    };
-    char* node_id = "ns=1;i=1012";
-
-    /* callback to retrieve the client's private key password */
-    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        printf("<Example_wrapper_write: Failed to configure the client key user password callback\n");
-        res = -1;
+        writeConnCfg = SOPC_HelperConfigClient_GetConfigFromId(DEFAULT_CONFIG_ID);
+
+        if (NULL == writeConnCfg)
+        {
+            printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
+                   "' from XML config file %s\n",
+                   DEFAULT_CLIENT_CONFIG_XML);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    /* Define callback to retrieve the client's private key password */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&AskKeyPass_FromTerminal);
+    }
+
+    /* Define callback to retrieve the client's user password */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&AskUserPass_FromTerminal);
     }
 
     /* connect to the endpoint */
-    int32_t configurationId = 0;
-    if (0 == res)
+    SOPC_ClientConnection* secureConnection = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
-        if (configurationId <= 0)
+        status = SOPC_ClientHelper_Connect(writeConnCfg, ClientConnectionEvent, &secureConnection);
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_write: Failed to connect\n");
         }
     }
 
-    int32_t connectionId = 0;
-    if (0 == res)
+    // Read previous value and retrieve concrete type information
+    SOPC_BuiltinId builtinTypeId = SOPC_Null_Id;
+    SOPC_VariantArrayType arrayType = SOPC_VariantArrayType_SingleValue;
+    if (SOPC_STATUS_OK == status)
     {
-        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
-
-        if (connectionId <= 0)
-        {
-            /* connectionId is invalid */
-            res = -1;
-        }
+        status = ReadPreviousValue(secureConnection, nodeIdStr, &builtinTypeId, &arrayType);
     }
 
-    if (0 == res)
+    // Parse the value to write depending on current variable value concrete type
+    SOPC_DataValue* writeValue = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_StatusCode writeResult = SOPC_UncertainStatusMask;
-        SOPC_ClientCmd_WriteValue writeValue;
-
-        /* initialize write value parameters */
-        writeValue.nodeId = node_id;
-
-        writeValue.indexRange = NULL;
-        writeValue.value = malloc(sizeof(SOPC_DataValue));
-
-        SOPC_ASSERT(writeValue.value != NULL);
-        SOPC_DataValue_Initialize(writeValue.value);
-
-        writeValue.value->Value.DoNotClear = false;
-        writeValue.value->Value.BuiltInTypeId = SOPC_UInt64_Id;
-        writeValue.value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-        writeValue.value->Value.Value.Uint64 = 32;
-
-        /* write the value and get result */
-        res = SOPC_ClientCmd_Write(connectionId, &writeValue, 1, &writeResult);
-
-        if (SOPC_STATUS_OK == writeResult && 0 == res)
+        if (SOPC_VariantArrayType_SingleValue == arrayType)
         {
-            printf("Write OK\n");
+            writeValue = ParseValue(builtinTypeId, valueStr);
+            if (NULL == writeValue)
+            {
+                printf(
+                    "Parsing of provided value %s failed for the read value concrete type. Value is invalid or type is "
+                    "not supported.\n",
+                    valueStr);
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
         }
         else
         {
-            printf("Write Failed\n");
+            printf("Only single value is supported and the current value is an array/matrix\n");
+            status = SOPC_STATUS_NOK;
         }
-        free(writeValue.value);
     }
 
-    if (connectionId > 0)
+    // Create a write request to write the given node value
+    OpcUa_WriteRequest* writeRequest = NULL;
+    OpcUa_WriteResponse* writeResponse = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
-        res = res != 0 ? res : discoRes;
+        writeRequest = SOPC_WriteRequest_Create(1);
+        if (NULL != writeRequest)
+        {
+            status = SOPC_WriteRequest_SetWriteValueFromStrings(writeRequest, 0, nodeIdStr, SOPC_AttributeId_Value,
+                                                                NULL, writeValue);
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (NULL != writeValue)
+    {
+        SOPC_DataValue_Clear(writeValue);
+        SOPC_Free(writeValue);
+        writeValue = NULL;
+    }
+
+    // Call the write service
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, writeRequest, (void**) &writeResponse);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_IsGoodStatus(writeResponse->ResponseHeader.ServiceResult))
+        {
+            if (1 == writeResponse->NoOfResults && SOPC_IsGoodStatus(writeResponse->Results[0]))
+            {
+                printf("Write of value %s succeeded\n", valueStr);
+            }
+            else
+            {
+                printf("Write of value %s failed with status: 0x%08" PRIX32 "\n", valueStr, writeResponse->Results[0]);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            printf("Write service failed with status: 0x%08" PRIX32 "\n", writeResponse->ResponseHeader.ServiceResult);
+
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (NULL != writeResponse)
+    {
+        SOPC_Encodeable_Delete(writeResponse->encodeableType, (void**) &writeResponse);
+    }
+
+    // Close the connection
+    if (NULL != secureConnection)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
+        if (SOPC_STATUS_OK != localStatus)
+        {
+            printf("<Example_wrapper_read: Failed to disconnect\n");
+        }
     }
 
     /* Close the toolkit */
-    SOPC_ClientCmd_Finalize();
+    SOPC_HelperConfigClient_Clear();
     SOPC_CommonHelper_Clear();
 
+    res = (SOPC_STATUS_OK == status ? 0 : -1);
     return res;
 }
