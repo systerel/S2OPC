@@ -606,8 +606,8 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         SOPC_CertificateList* pUserCert = NULL;
         SOPC_StatusCode errorStatus;
 
-        const SOPC_PKI_Profile* pProfile = SOPC_PKIProviderNew_GetMinimalUserProfile();
-        status = NULL != pProfile ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        SOPC_PKI_Profile* pProfile = NULL;
+        status = SOPC_PKIProviderNew_CreateMinimalUserProfile(&pProfile);
         /* TODO RBA: Add SOPC_PKIProviderNew_CheckLeafCertificate in
                      user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
         if (SOPC_STATUS_OK == status)
@@ -651,6 +651,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 
         /* Clear */
         SOPC_KeyManager_Certificate_Free(pUserCert);
+        SOPC_PKIProviderNew_DeleteProfile(pProfile);
     }
 
     return status;

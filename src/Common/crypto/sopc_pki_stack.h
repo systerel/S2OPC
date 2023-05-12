@@ -194,13 +194,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
 /*
 TODO :
-    - Add mutex in API
+    - Replaced the error codes SOPC_CertificateValidationXXXXX directly by OpcUa_BadCertificateXXXXX
+    - Refactored S2OPC with the new API.
+    - Add mutex in the new API.
     - Handled that the security level of the update is not higher than the security level of the endpoint
-    - Add internal fields URI and HostName for the PKI object or to the SOPC_PKI_LeafProfile structure.
-    - Add function(s) to set the URI and the HostName to the PKI object or directly set through
-      GetLeafProfile and GetProfile accessors.
-      If the internal PKI fields for URI and HostName are NULL (or field of the SOPC_PKI_LeafProfile structure)
-      then it is not check during validation.
 */
 
 /**
@@ -285,10 +282,20 @@ typedef enum
  *   The minimum RSA key size allowed.
  * @var SOPC_PKI_LeafProfile::RSAMaximumKeySize
  *   The maximum RSA key size allowed.
+ * @var SOPC_PKI_LeafProfile::bApplySecurityPolicy
+ *   Defines if mdSign, pkAlgo, RSAMinimumKeySize and RSAMaximumKeySize should be checked.
  * @var SOPC_PKI_LeafProfile::keyUsage
- *   Defined the key usages mask of the certificates to validate.
- *   If SOPC_PKI_KU_DISABLE_CHECK is set then the key usages are not checked during
- *   ::SOPC_PKIProviderNew_ValidateCertificate and ::SOPC_PKIProviderNew_CheckLeafCertificate .
+ *   Defines the key usages mask of the certificates to validate.
+ *   If SOPC_PKI_KU_DISABLE_CHECK is set then the key usages are not checked.
+ * @var SOPC_PKI_LeafProfile::extendedKeyUsage
+ *   Defines the extended key usages mask of the certificates to validate.
+ *   If SOPC_PKI_EKU_DISABLE_CHECK is set then the extended key usages are not checked.
+ * @var SOPC_PKI_LeafProfile::sanApplicationUri
+ *   The application URI to check in the subjectAltName field.
+ *   If NULL is set then the URI is not checked.
+ * @var SOPC_PKI_LeafProfile::sanURL
+ *   The endpoint URL used for connection to check the HostName in the subjectAltName field.
+ *   If NULL is set then the HostName is not checked.
  */
 typedef struct SOPC_PKI_LeafProfile
 {
@@ -296,8 +303,11 @@ typedef struct SOPC_PKI_LeafProfile
     SOPC_PKI_PkAlgo pkAlgo;
     uint32_t RSAMinimumKeySize;
     uint32_t RSAMaximumKeySize;
+    bool bApplySecurityPolicy;
     SOPC_PKI_KeyUsage_Mask keyUsage;
     SOPC_PKI_ExtendedKeyUsage_Mask extendedKeyUsage;
+    char* sanApplicationUri; /* extension subjectAltName */
+    char* sanURL;            /* extension subjectAltName */
 } SOPC_PKI_LeafProfile;
 
 /**
@@ -334,15 +344,15 @@ typedef struct SOPC_PKI_ChainProfile
  *   Validation configuration for the chain. Each certificate properties in the chain are
  *   verified during ::SOPC_PKIProviderNew_ValidateCertificate .
  * @var SOPC_PKI_Profile::bBackwardInteroperability
- *   Defined if self-signed certificates whose basicConstraints CA flag
+ *   Defines if self-signed certificates whose basicConstraints CA flag
  *   set to True will be marked as root CA and as trusted certificates.
  * @var SOPC_PKI_Profile::bApplyLeafProfile
- *   Defined if the leaf properties is check during ::SOPC_PKIProviderNew_ValidateCertificate .
+ *   Defines if the leaf properties is check during ::SOPC_PKIProviderNew_ValidateCertificate .
  */
 typedef struct SOPC_PKI_Profile
 {
-    const SOPC_PKI_LeafProfile* leafProfile;
-    const SOPC_PKI_ChainProfile* chainProfile;
+    SOPC_PKI_LeafProfile* leafProfile;
+    SOPC_PKI_ChainProfile* chainProfile;
     bool bBackwardInteroperability;
     bool bApplyLeafProfile;
 } SOPC_PKI_Profile;
@@ -433,33 +443,147 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_PKIProviderNew** ppPKI);
 
 /**
- * \brief Get a leaf certificate profile for checking properties
- *        from a string containing the desired security policy URI.
+ * \brief Create a leaf certificate profile to check certificate properties.
  *
- * \param uri The URI describing the security policy. Should not be NULL.
- * \param PKIType Define the type of PKI (client, server or user)
+ *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then
+ *        they will not be checked by functions that use this profile.
  *
- * \return A constant pointer of ::SOPC_PKI_LeafProfile which should not be modified. NULL in case of error.
+ * \param securityPolicyUri The URI describing the security policy. If NULL then an empty profile is created.
+ * \param ppProfile The newly created leaf profile. You should delete it with ::SOPC_PKIProviderNew_DeleteLeafProfile .
+ *
+ * \note If the profile is empty ( \p securityPolicyUri is NULL) then the functions that use this profile will not run
+ * any checks.
+ *
+ * \return SOPC_STATUS_OK when successful.
  */
-const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri, SOPC_PKI_Type PKIType);
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateLeafProfile(const char* securityPolicyUri,
+                                                        SOPC_PKI_LeafProfile** ppProfile);
 
 /**
- * \brief Get a PKI profile for a validation process
- *        from a string containing the desired security policy URI.
+ * \brief Set the keyUsage and extendedKeyUsage to the leaf profile from the PKI type.
  *
- * \param uri The URI describing the security policy. Should not be NULL.
- * \param PKIType Define the type of PKI (client, server or user)
+ *        For users : the keyUsage is expected to be filled with digitalSignature and the extendedKeyUsage is not
+ *        checked.
+ *        For clients : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *        and dataEncipherment. The extendedKeyUsage is filled with serverAuth.
+ *        For server : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *        and dataEncipherment. The extendedKeyUsage is filled with clientAuth.
  *
- * \return A constant pointer of ::SOPC_PKI_Profile which should not be modified. NULL in case of error.
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param PKIType Defines the type of PKI (user, client or server)
+ *
+ * \return SOPC_STATUS_OK when successful.
  */
-const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri, SOPC_PKI_Type PKIType);
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile,
+                                                                  SOPC_PKI_Type PKIType);
 
 /**
- * \brief Get a minimal PKI profile for user validation process.
+ * \brief Set the application URI to the leaf profile.
  *
- * \return A constant pointer of ::SOPC_PKI_Profile which should not be modified.
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param applicationUri The application URI
+ *
+ * \warning The application URI is copied in \p pProfile, you should free it.
+ *          If the application URI is already defined in \p pProfile , you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
  */
-const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void);
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProfile, const char* applicationUri);
+
+/**
+ * \brief Set the endpoint URL used for connection to the leaf profile.
+ *
+ * \param pProfile A valid pointer to the leaf profile.
+ * \param url The endpoint URL used for connection.
+ *
+ * \warning The URL is copied in \p pProfile, you should free it.
+ *          If the URL is already defined in \p pProfile , you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProfile, const char* url);
+
+/**
+ * \brief Delete a leaf profile.
+ *
+ * \param pProfile The leaf profile.
+ */
+void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile* pProfile);
+
+/**
+ * \brief Create a PKI profile for a validation process.
+ *        Backward interoperability is enabled.
+ *        Leaf profile and chain profile are created according the security policy.
+ *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then
+ *        they will not be checked by functions that use this profile.
+ *
+ * \param securityPolicyUri The URI describing the security policy. Shall not be NULL.
+ * \param ppProfile The newly created profile. You should delete it with ::SOPC_PKIProviderNew_DeleteProfile .
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateProfile(const char* securityPolicyUri, SOPC_PKI_Profile** ppProfile);
+
+/**
+ * \brief Set the properties to the PKI profile from the PKI type.
+ *
+ *        For users : the backward interoperability is disabled and the leaf profile will not be applied during
+ *        ::SOPC_PKIProviderNew_ValidateCertificate.
+ *        For clients : the keyUsage is expected to be filled with digitalSignature,
+ *        nonRepudiation, keyEncipherment and dataEncipherment. The extendedKeyUsage is filled with serverAuth. Finally
+ *        the backward interoperability is enabled.
+ *        For Server : the keyUsage is expected to be filled with digitalSignature, nonRepudiation, keyEncipherment
+ *        and dataEncipherment. The extendedKeyUsage is filled with clientAuth. Finally the backward interoperability
+ *        is enabled.
+ *
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param PKIType Defines the type of PKI (user, client or server)
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType);
+
+/**
+ * \brief Set the application URI to the PKI profile.
+ *
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param applicationUri The application URI
+ *
+ * \warning The application URI is copied in SOPC_PKI_Profile::leafProfile, you should free it.
+ *          If the application URI is already defined in \p pProfile , you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri);
+
+/**
+ * \brief Set the endpoint URL used for connection to the PKI profile.
+ *
+ * \param pProfile A valid pointer to the PKI profile.
+ * \param url The endpoint URL used for connection.
+ *
+ * \warning The URL is copied in SOPC_PKI_Profile::leafProfile, you should free it.
+ *          If the URL is already defined in \p pProfile , you can not define it again.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url);
+
+/**
+ * \brief Create a minimal PKI profile for user validation process.
+ *
+ * \param ppProfile The newly created profile. You should delete it with ::SOPC_PKIProviderNew_DeleteProfile .
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateMinimalUserProfile(SOPC_PKI_Profile** ppProfile);
+
+/**
+ * \brief Delete a PKI profile.
+ *
+ * \param pProfile The PKI profile.
+ */
+void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile* pProfile);
 
 /** \brief Validation function for a certificate with the PKI chain
  *
@@ -597,7 +721,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
                                                      SOPC_CRLList* pIssuerCrl,
                                                      const bool bIncludeExistingList);
 /**
- * \brief   Free a PKI provider.
+ * \brief Free a PKI provider.
+ *
+ * \param pPKI The PKI.
  */
 void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI);
 

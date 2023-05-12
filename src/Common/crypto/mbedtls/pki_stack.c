@@ -701,6 +701,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
 /* ****************************************************************** */
 /* ************************* NEW API ******************************** */
+#include "mbedtls/x509_crt.h"
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_filesystem.h"
@@ -733,131 +734,45 @@ struct SOPC_PKIProviderNew
     SOPC_CRLList* pAllCrl;
 };
 
-static const SOPC_PKI_LeafProfile g_server_leaf_profile_rsa_sha256_2048_4096 = {
-    .mdSign = SOPC_PKI_MD_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 2048,
-    .RSAMaximumKeySize = 4096,
-    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
-                SOPC_PKI_KU_NON_REPUDIATION,
-    .extendedKeyUsage = SOPC_PKI_EKU_CLIENT_AUTH};
+static const SOPC_PKI_KeyUsage_Mask g_appKU = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
+                                              SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION;
+static const SOPC_PKI_KeyUsage_Mask g_usrKU =
+    SOPC_PKI_KU_DIGITAL_SIGNATURE; // it is not part of the OPC UA but it makes sense to keep it
+static const SOPC_PKI_ExtendedKeyUsage_Mask g_clientEKU = SOPC_PKI_EKU_SERVER_AUTH;
+static const SOPC_PKI_ExtendedKeyUsage_Mask g_serverEKU = SOPC_PKI_EKU_CLIENT_AUTH;
+static const SOPC_PKI_ExtendedKeyUsage_Mask g_userEKU = SOPC_PKI_EKU_DISABLE_CHECK;
 
-static const SOPC_PKI_LeafProfile g_server_leaf_profile_rsa_sha1_1024_2048 = {
-    .mdSign = SOPC_PKI_MD_SHA1_AND_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 1024,
-    .RSAMaximumKeySize = 2048,
-    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
-                SOPC_PKI_KU_NON_REPUDIATION,
-    .extendedKeyUsage = SOPC_PKI_EKU_CLIENT_AUTH};
+static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha256_2048_4096 = {.mdSign = SOPC_PKI_MD_SHA256,
+                                                                         .pkAlgo = SOPC_PKI_PK_RSA,
+                                                                         .RSAMinimumKeySize = 2048,
+                                                                         .RSAMaximumKeySize = 4096,
+                                                                         .bApplySecurityPolicy = true,
+                                                                         .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
+                                                                         .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                                                         .sanApplicationUri = NULL,
+                                                                         .sanURL = NULL};
 
-static const SOPC_PKI_LeafProfile g_client_leaf_profile_rsa_sha256_2048_4096 = {
-    .mdSign = SOPC_PKI_MD_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 2048,
-    .RSAMaximumKeySize = 4096,
-    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
-                SOPC_PKI_KU_NON_REPUDIATION,
-    .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH};
+static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha1_1024_2048 = {.mdSign = SOPC_PKI_MD_SHA1_AND_SHA256,
+                                                                       .pkAlgo = SOPC_PKI_PK_RSA,
+                                                                       .RSAMinimumKeySize = 1024,
+                                                                       .RSAMaximumKeySize = 2048,
+                                                                       .bApplySecurityPolicy = true,
+                                                                       .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
+                                                                       .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                                                       .sanApplicationUri = NULL,
+                                                                       .sanURL = NULL};
 
-static const SOPC_PKI_LeafProfile g_client_leaf_profile_rsa_sha1_1024_2048 = {
-    .mdSign = SOPC_PKI_MD_SHA1_AND_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 1024,
-    .RSAMaximumKeySize = 2048,
-    .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
-                SOPC_PKI_KU_NON_REPUDIATION,
-    .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH};
-
-static const SOPC_PKI_LeafProfile g_usr_leaf_profile_rsa_sha256_2048_4096 = {
-    .mdSign = SOPC_PKI_MD_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 2048,
-    .RSAMaximumKeySize = 4096,
-    .keyUsage = SOPC_PKI_KU_DIGITAL_SIGNATURE, // it is not part of the OPC UA but it makes sense to keep it
-    .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK};
-
-static const SOPC_PKI_LeafProfile g_usr_leaf_profile_rsa_sha1_1024_2048 = {
-    .mdSign = SOPC_PKI_MD_SHA1_AND_SHA256,
-    .pkAlgo = SOPC_PKI_PK_RSA,
-    .RSAMinimumKeySize = 1024,
-    .RSAMaximumKeySize = 2048,
-    .keyUsage = SOPC_PKI_KU_DIGITAL_SIGNATURE, // it is not part of the OPC UA but it makes sense to keep it
-    .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK};
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha256_2048 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                       .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
                                                                       .pkAlgo = SOPC_PKI_PK_RSA,
                                                                       .RSAMinimumKeySize = 2048};
+
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha1_1024 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                     .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                                                     .pkAlgo = SOPC_PKI_PK_RSA,
                                                                     .RSAMinimumKeySize = 1024};
 
-static const SOPC_PKI_Profile g_server_profile_rsa_sha256_2048_4096 = {
-    .leafProfile = &g_server_leaf_profile_rsa_sha256_2048_4096,
-    .chainProfile = &g_chain_profile_rsa_sha256_2048,
-    .bBackwardInteroperability = true,
-    .bApplyLeafProfile = true};
-static const SOPC_PKI_Profile g_server_profile_rsa_sha1_1024_2048 = {
-    .leafProfile = &g_server_leaf_profile_rsa_sha1_1024_2048,
-    .chainProfile = &g_chain_profile_rsa_sha1_1024,
-    .bBackwardInteroperability = true,
-    .bApplyLeafProfile = true};
-static const SOPC_PKI_Profile g_client_profile_rsa_sha256_2048_4096 = {
-    .leafProfile = &g_client_leaf_profile_rsa_sha256_2048_4096,
-    .chainProfile = &g_chain_profile_rsa_sha256_2048,
-    .bBackwardInteroperability = true,
-    .bApplyLeafProfile = true};
-static const SOPC_PKI_Profile g_client_profile_rsa_sha1_1024_2048 = {
-    .leafProfile = &g_client_leaf_profile_rsa_sha1_1024_2048,
-    .chainProfile = &g_chain_profile_rsa_sha1_1024,
-    .bBackwardInteroperability = true,
-    .bApplyLeafProfile = true};
-static const SOPC_PKI_Profile g_usr_profile_rsa_sha256_2048_4096 = {
-    .leafProfile = &g_usr_leaf_profile_rsa_sha256_2048_4096,
-    .chainProfile = &g_chain_profile_rsa_sha256_2048,
-    .bBackwardInteroperability = false,
-    .bApplyLeafProfile = false};
-static const SOPC_PKI_Profile g_usr_profile_rsa_sha1_1024_2048 = {.leafProfile = &g_usr_leaf_profile_rsa_sha1_1024_2048,
-                                                                  .chainProfile = &g_chain_profile_rsa_sha1_1024,
-                                                                  .bBackwardInteroperability = false,
-                                                                  .bApplyLeafProfile = false};
-
-static const SOPC_PKI_LeafProfile* get_rsa_sha256_2048_4096_leaf_profile_from_type(SOPC_PKI_Type PKIType)
-{
-    switch (PKIType)
-    {
-    case SOPC_PKI_TYPE_CLIENT_APP:
-        return &g_client_leaf_profile_rsa_sha256_2048_4096;
-    case SOPC_PKI_TYPE_SERVER_APP:
-        return &g_server_leaf_profile_rsa_sha256_2048_4096;
-    case SOPC_PKI_TYPE_USER:
-        return &g_usr_leaf_profile_rsa_sha256_2048_4096;
-    default:
-        return NULL;
-    }
-
-    return NULL;
-}
-
-static const SOPC_PKI_Profile* get_rsa_sha256_2048_4096_profile_from_type(SOPC_PKI_Type PKIType)
-{
-    switch (PKIType)
-    {
-    case SOPC_PKI_TYPE_CLIENT_APP:
-        return &g_client_profile_rsa_sha256_2048_4096;
-    case SOPC_PKI_TYPE_SERVER_APP:
-        return &g_server_profile_rsa_sha256_2048_4096;
-    case SOPC_PKI_TYPE_USER:
-        return &g_usr_profile_rsa_sha256_2048_4096;
-    default:
-        return NULL;
-    }
-
-    return NULL;
-}
-
-const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri, SOPC_PKI_Type PKIType)
+static const SOPC_PKI_LeafProfile* get_leaf_profile_from_security_policy(const char* uri)
 {
     if (NULL == uri)
     {
@@ -867,38 +782,28 @@ const SOPC_PKI_LeafProfile* SOPC_PKIProviderNew_GetLeafProfile(const char* uri, 
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
                                  strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_leaf_profile_from_type(PKIType);
+        return &g_leaf_profile_rsa_sha256_2048_4096;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
                                  strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_leaf_profile_from_type(PKIType);
+        return &g_leaf_profile_rsa_sha256_2048_4096;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
                                  strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_leaf_profile_from_type(PKIType);
+        return &g_leaf_profile_rsa_sha256_2048_4096;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
         0)
     {
-        switch (PKIType)
-        {
-        case SOPC_PKI_TYPE_CLIENT_APP:
-            return &g_client_leaf_profile_rsa_sha1_1024_2048;
-        case SOPC_PKI_TYPE_SERVER_APP:
-            return &g_server_leaf_profile_rsa_sha1_1024_2048;
-        case SOPC_PKI_TYPE_USER:
-            return &g_usr_leaf_profile_rsa_sha1_1024_2048;
-        default:
-            return NULL;
-        }
+        return &g_leaf_profile_rsa_sha1_1024_2048;
     }
 
     return NULL;
 }
 
-const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri, SOPC_PKI_Type PKIType)
+static const SOPC_PKI_ChainProfile* get_chain_profile_from_security_policy(const char* uri)
 {
     if (NULL == uri)
     {
@@ -908,43 +813,253 @@ const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetProfile(const char* uri, SOPC_PKI
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
                                  strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_profile_from_type(PKIType);
+        return &g_chain_profile_rsa_sha256_2048;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
                                  strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_profile_from_type(PKIType);
+        return &g_chain_profile_rsa_sha256_2048;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
                                  strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
     {
-        return get_rsa_sha256_2048_4096_profile_from_type(PKIType);
+        return &g_chain_profile_rsa_sha256_2048;
     }
     if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
         0)
     {
-        switch (PKIType)
-        {
-        case SOPC_PKI_TYPE_CLIENT_APP:
-            return &g_client_profile_rsa_sha1_1024_2048;
-        case SOPC_PKI_TYPE_SERVER_APP:
-            return &g_server_profile_rsa_sha1_1024_2048;
-        case SOPC_PKI_TYPE_USER:
-            return &g_usr_profile_rsa_sha1_1024_2048;
-        default:
-            return NULL;
-        }
+        return &g_chain_profile_rsa_sha1_1024;
     }
 
     return NULL;
 }
 
-const SOPC_PKI_Profile* SOPC_PKIProviderNew_GetMinimalUserProfile(void)
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateLeafProfile(const char* securityPolicyUri, SOPC_PKI_LeafProfile** ppProfile)
+{
+    if (NULL == ppProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    const SOPC_PKI_LeafProfile* pProfileRef = NULL;
+    if (NULL != securityPolicyUri)
+    {
+        pProfileRef = get_leaf_profile_from_security_policy(securityPolicyUri);
+        if (NULL == pProfileRef)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    SOPC_PKI_LeafProfile* pProfile = SOPC_Calloc(1, sizeof(SOPC_PKI_LeafProfile));
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    if (NULL != securityPolicyUri)
+    {
+        pProfile->mdSign = pProfileRef->mdSign;
+        pProfile->pkAlgo = pProfileRef->pkAlgo;
+        pProfile->RSAMinimumKeySize = pProfileRef->RSAMinimumKeySize;
+        pProfile->RSAMaximumKeySize = pProfileRef->RSAMaximumKeySize;
+        pProfile->bApplySecurityPolicy = pProfileRef->bApplySecurityPolicy;
+        pProfile->keyUsage = pProfileRef->keyUsage;
+        pProfile->extendedKeyUsage = pProfileRef->extendedKeyUsage;
+        pProfile->sanApplicationUri = pProfileRef->sanApplicationUri;
+        pProfile->sanURL = pProfileRef->sanURL;
+    }
+
+    *ppProfile = pProfile;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile, SOPC_PKI_Type PKIType)
+{
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    switch (PKIType)
+    {
+    case SOPC_PKI_TYPE_CLIENT_APP:
+        pProfile->keyUsage = g_appKU;
+        pProfile->extendedKeyUsage = g_clientEKU;
+        break;
+    case SOPC_PKI_TYPE_SERVER_APP:
+        pProfile->keyUsage = g_appKU;
+        pProfile->extendedKeyUsage = g_serverEKU;
+        break;
+    case SOPC_PKI_TYPE_USER:
+        pProfile->keyUsage = g_usrKU;
+        pProfile->extendedKeyUsage = g_userEKU;
+        break;
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProfile, const char* applicationUri)
+{
+    if (NULL == pProfile || NULL == applicationUri)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL != pProfile->sanApplicationUri)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    pProfile->sanApplicationUri = SOPC_strdup(applicationUri);
+    if (NULL == pProfile->sanApplicationUri)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProfile, const char* url)
+{
+    if (NULL == pProfile || NULL == url)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL != pProfile->sanURL)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    pProfile->sanURL = SOPC_strdup(url);
+    if (NULL == pProfile->sanURL)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return SOPC_STATUS_OK;
+}
+
+void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile* pProfile)
+{
+    if (NULL != pProfile)
+    {
+        SOPC_Free(pProfile->sanApplicationUri);
+        SOPC_Free(pProfile->sanURL);
+        SOPC_Free(pProfile);
+    }
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateProfile(const char* securityPolicyUri, SOPC_PKI_Profile** ppProfile)
+{
+    if (NULL == ppProfile || NULL == securityPolicyUri)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    const SOPC_PKI_ChainProfile* pChainProfileRef = get_chain_profile_from_security_policy(securityPolicyUri);
+    if (NULL == pChainProfileRef)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_PKI_ChainProfile* pChainProfile = SOPC_Calloc(1, sizeof(SOPC_PKI_ChainProfile));
+    if (NULL == pChainProfile)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    pChainProfile->mdSign = pChainProfileRef->mdSign;
+    pChainProfile->pkAlgo = pChainProfileRef->pkAlgo;
+    pChainProfile->curves = pChainProfileRef->curves;
+    pChainProfile->RSAMinimumKeySize = pChainProfileRef->RSAMinimumKeySize;
+
+    SOPC_PKI_LeafProfile* pLeafProfile = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateLeafProfile(securityPolicyUri, &pLeafProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        pProfile = SOPC_Calloc(1, sizeof(SOPC_PKI_Profile));
+        if (NULL == pProfile)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pProfile->leafProfile = pLeafProfile;
+        pProfile->chainProfile = pChainProfile;
+        pProfile->bBackwardInteroperability = true;
+        pProfile->bApplyLeafProfile = true;
+    }
+    else
+    {
+        SOPC_Free(pChainProfile);
+        SOPC_PKIProviderNew_DeleteLeafProfile(pLeafProfile);
+    }
+    *ppProfile = pProfile;
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType)
+{
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_PKIProviderNew_LeafProfileSetUsageFromType(pProfile->leafProfile, PKIType);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    switch (PKIType)
+    {
+    case SOPC_PKI_TYPE_CLIENT_APP:
+        pProfile->bApplyLeafProfile = true;
+        pProfile->bBackwardInteroperability = true;
+        break;
+    case SOPC_PKI_TYPE_SERVER_APP:
+        pProfile->bApplyLeafProfile = true;
+        pProfile->bBackwardInteroperability = true;
+        break;
+    case SOPC_PKI_TYPE_USER:
+        pProfile->bApplyLeafProfile = false;
+        pProfile->bBackwardInteroperability = false;
+        break;
+    default:
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri)
+{
+    return SOPC_PKIProviderNew_LeafProfileSetURI(pProfile->leafProfile, applicationUri);
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url)
+{
+    return SOPC_PKIProviderNew_LeafProfileSetURL(pProfile->leafProfile, url);
+}
+
+void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile* pProfile)
+{
+    if (NULL != pProfile)
+    {
+        SOPC_Free(pProfile->chainProfile);
+        SOPC_PKIProviderNew_DeleteLeafProfile(pProfile->leafProfile);
+        SOPC_Free(pProfile);
+    }
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateMinimalUserProfile(SOPC_PKI_Profile** ppProfile)
 {
     /* Minimal profile for the chain.
        The leaf profile is not used for users during the validation process but the user certificate properties
        are checked according to the security policy during the activate session */
-    return &g_usr_profile_rsa_sha256_2048_4096;
+    if (NULL == ppProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_ReturnStatus status = SOPC_PKIProviderNew_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProviderNew_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_USER);
+    }
+    *ppProfile = pProfile;
+    return status;
 }
 
 static SOPC_ReturnStatus cert_is_self_sign(mbedtls_x509_crt* crt, bool* pbIsSelfSign)
@@ -1063,6 +1178,78 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
 
     SOPC_Free(thumbprint);
     return bErr ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate, const char* url)
+{
+    if (NULL == pToValidate || NULL == url)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    const mbedtls_x509_sequence* asn1_seq = &pToValidate->crt.subject_alt_names;
+    mbedtls_x509_subject_alternative_name san_out = {0};
+    int err = 0;
+    bool found = false;
+    char* dns = NULL;
+    char* substring = NULL;
+    while (NULL != asn1_seq && !found && 0 == err)
+    {
+        err = mbedtls_x509_parse_subject_alt_name(&asn1_seq->buf, &san_out);
+        if (MBEDTLS_ERR_X509_FEATURE_UNAVAILABLE == err)
+        {
+            /* Only "dnsName" and "otherName" is supported by mbedtls */
+            err = 0;
+        }
+        if (0 != err)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "> PKI validation failed : Subject Alternative Name parse failed with error code:: -0x%X",
+                (unsigned int) -err);
+        }
+        if (MBEDTLS_X509_SAN_DNS_NAME == san_out.type)
+        {
+            /*
+            - part 6 table 43 §6.2.2 v1.05 :
+            The servers shall specify a partial or a fully qualified dNSName or a static IPAddress
+            - part 4 table 106 §6.1.3 v1.05 :
+            The HostName in the URL used to connect to the server shall be the same as one of the HostNames
+            specified in the Certificate.
+            */
+            dns = SOPC_Malloc((san_out.san.unstructured_name.len + 1) * sizeof(char));
+            memcpy(dns, san_out.san.unstructured_name.p, san_out.san.unstructured_name.len);
+            dns[san_out.san.unstructured_name.len] = '\0';
+            substring = strstr(url, dns);
+            if (NULL != substring)
+            {
+                /* stop research */
+                found = true;
+            }
+            SOPC_Free(dns);
+        }
+        /* next iteration */
+        memset(&san_out, 0, sizeof(mbedtls_x509_subject_alternative_name));
+        asn1_seq = asn1_seq->next;
+    }
+    if (!found || 0 != err)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    else
+    {
+        return SOPC_STATUS_OK;
+    }
+}
+
+static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToValidate, const char* applicationUri)
+{
+    if (NULL == pToValidate || NULL == applicationUri)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* TODO: remove SOPC_KeyManager_Certificate_CheckApplicationUri from the key manager interface */
+    bool ok = SOPC_KeyManager_Certificate_CheckApplicationUri(pToValidate, applicationUri);
+    return ok ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pki_ku)
@@ -1330,13 +1517,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     return status;
 }
 
-/*
-    TODO RBA: add URI and hostName check functions according the order of part 4 v1.04
-        1. check_security_policy(pToValidate, pProfile)
-        2. check_host_name(pToValidate, pProfile)
-        3. check_uri(pToValidate, pProfile)
-        4. check_certificate_usage(pToValidate, pProfile)
-*/
 SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
                                                            const SOPC_PKI_LeafProfile* pProfile,
                                                            uint32_t* error)
@@ -1347,11 +1527,30 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_Certificat
     }
 
     *error = SOPC_CertificateValidationError_Unkown;
-
-    SOPC_ReturnStatus status = check_security_policy(pToValidate, pProfile);
-    if (SOPC_STATUS_OK != status)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (pProfile->bApplySecurityPolicy)
     {
-        *error = SOPC_CertificateValidationError_Invalid; // TODO RBA: Replace by Bad_CertificatePolicyCheckFailed?
+        status = check_security_policy(pToValidate, pProfile);
+        if (SOPC_STATUS_OK != status)
+        {
+            *error = SOPC_CertificateValidationError_Invalid; // TODO: Replace by Bad_CertificatePolicyCheckFailed?
+        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != pProfile->sanURL)
+    {
+        status = check_host_name(pToValidate, pProfile->sanURL);
+        if (SOPC_STATUS_OK != status)
+        {
+            *error = SOPC_CertificateValidationError_HostNameInvalid;
+        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != pProfile->sanApplicationUri)
+    {
+        status = check_application_uri(pToValidate, pProfile->sanApplicationUri);
+        if (SOPC_STATUS_OK != status)
+        {
+            *error = SOPC_CertificateValidationError_UriInvalid;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -2311,7 +2510,7 @@ static SOPC_ReturnStatus check_security_level_of_the_update(const SOPC_Certifica
 
     -1 Add a way to configure the security level for each security policy uri (give them a weight)
     -2 For each certificate, retrieve their security policies in which their are attached to from their properties.
-       How to do it? We need a specification with a table of certificate properties for each security policy ...
+       How to do it?
     */
 
     SOPC_UNUSED_ARG(pTrustedCerts);
