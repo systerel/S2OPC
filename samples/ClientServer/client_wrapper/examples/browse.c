@@ -21,33 +21,47 @@
  *
  * \brief A browse example using the high-level client API
  *
- * Requires the toolkit_test_server to be running.
- * Connect to the server and browse the "/Root/Objects" node.
+ * Requires the toolkit_demo_server to be running.
+ * Connect to the server and browse the given node.
  * Then disconnect and closes the toolkit.
  *
  */
 
 #include <stdio.h>
 
-#include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
+
 #include "sopc_askpass.h"
+#include "sopc_encodeable.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 
-/* Define USE_REVERSE_HELLO to 1 to use a ReverseConnection */
-#define USE_REVERSE_HELLO 0
+#define DEFAULT_CLIENT_CONFIG_XML "S2OPC_Client_Wrapper_Config.xml"
+#define DEFAULT_CONFIG_ID "read"
 
-static void disconnect_callback(const uint32_t c_id)
+static void ClientConnectionEvent(SOPC_ClientConnection* config,
+                                  SOPC_ClientConnectionEvent event,
+                                  SOPC_StatusCode status)
 {
-    printf("===> connection #%d has been terminated!\n", c_id);
+    SOPC_UNUSED_ARG(config);
+
+    // We do not expect events since we use synchronous connection / disconnection, only for degraded case
+    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
 }
 
 int main(int argc, char* const argv[])
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
+    if (argc != 2)
+    {
+        printf("Usage: %s <nodeId> (e.g. %s \"ns=0;i=85\").\nThe '" DEFAULT_CONFIG_ID
+               "' connection configuration "
+               "from " DEFAULT_CLIENT_CONFIG_XML " is used.\n",
+               argv[0], argv[0]);
+        return -2;
+    }
     int res = 0;
 
     /* Initialize client/server toolkit and client wrapper */
@@ -58,140 +72,129 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        res = -1;
+        status = SOPC_HelperConfigClient_Initialize();
     }
 
-    if (0 == res)
+    size_t nbConfigs = 0;
+    SOPC_SecureConnection_Config** scConfigArray = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
-        if (init < 0)
+        status = SOPC_HelperConfigClient_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_browse: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
         }
     }
 
-    uint32_t rev_ep = 0;
-#if USE_REVERSE_HELLO
-    /* create a reverse endpoint*/
-    if (0 == res)
+    SOPC_SecureConnection_Config* readConnCfg = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        static const char* REVERSE_EP_URL = "opc.tcp://localhost:4844";
-        int32_t tmp_ep = SOPC_ClientHelper_CreateReverseEndpoint(REVERSE_EP_URL);
-        if (tmp_ep <= 0)
+        readConnCfg = SOPC_HelperConfigClient_GetConfigFromId(DEFAULT_CONFIG_ID);
+
+        if (NULL == readConnCfg)
         {
-            printf("<Example_wrapper_browse: Failed to create reverse endpoint\n");
-            res = -1;
-        }
-        else
-        {
-            printf("<Example_wrapper_browse: Using reverse endpoint: %s\n", REVERSE_EP_URL);
-            rev_ep = (uint32_t) tmp_ep;
+            printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
+                   "' from XML config file %s\n",
+                   DEFAULT_CLIENT_CONFIG_XML);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-#endif
 
-    SOPC_ClientCmd_Security security = {
-        .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
-        .security_mode = OpcUa_MessageSecurityMode_Sign,
-        .path_cert_auth = "./trusted/cacert.der",
-        .path_crl = "./revoked/cacrl.der",
-        .path_cert_srv = "./server_public/server_2k_cert.der",
-        .path_cert_cli = "./client_public/client_2k_cert.der",
-        .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
-        .path_cert_x509_token = NULL,
-        .path_key_x509_token = NULL,
-        .key_x509_token_encrypted = false,
-    };
-
-    SOPC_ClientCmd_EndpointConnection endpoint = {
-        .endpointUrl = "opc.tcp://localhost:4841",
-        .serverUri = NULL,
-        .reverseConnectionConfigId = rev_ep,
-    };
-
-    /* callback to retrieve the client's private key password */
-    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
-    if (SOPC_STATUS_OK != status)
+    /* Define callback to retrieve the client's private key password */
+    if (SOPC_STATUS_OK == status)
     {
-        printf("<Example_wrapper_browse: Failed to configure the client key user password callback\n");
-        res = -1;
+        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
     }
 
     /* connect to the endpoint */
-    int32_t configurationId = 0;
-    if (0 == res)
+    SOPC_ClientConnection* secureConnection = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
-        if (configurationId <= 0)
+        status = SOPC_ClientHelper_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
+        if (SOPC_STATUS_OK != status)
         {
-            printf("<Example_wrapper_browse: Failed to create configuration\n");
-            res = -1;
+            printf("<Example_wrapper_browse: Failed to connect\n");
         }
     }
 
-    int32_t connectionId = 0;
-    if (0 == res)
+    OpcUa_BrowseRequest* browseRequest = NULL;
+    OpcUa_BrowseResponse* browseResponse = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
-
-        if (connectionId <= 0)
+        browseRequest = SOPC_BrowseRequest_Create(1, 0, NULL);
+        if (NULL != browseRequest)
         {
-            /* connectionId is invalid */
-            printf("<Example_wrapper_browse: Failed to create connection (code=%d)\n", connectionId);
-            res = -1;
-        }
-    }
-
-    if (0 == res)
-    {
-        SOPC_ClientCmd_BrowseRequest browseRequest;
-        SOPC_ClientCmd_BrowseResult browseResult;
-
-        browseRequest.nodeId = "ns=0;i=85";                      // Root/Objects/
-        browseRequest.direction = OpcUa_BrowseDirection_Forward; // forward
-        browseRequest.referenceTypeId = "";                      // all reference types
-        browseRequest.includeSubtypes = true;
-
-        /* Browse specified node */
-        res = SOPC_ClientCmd_Browse(connectionId, &browseRequest, 1, &browseResult);
-
-        if (0 == res)
-        {
-            printf("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
-            for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
-            {
-                const SOPC_ClientCmd_BrowseResultReference* ref = &browseResult.references[i];
-                printf("Item #%d\n", i);
-                printf("- nodeId: %s\n", ref->nodeId);
-                printf("- displayName: %s\n", ref->displayName);
-
-                free(ref->nodeId);
-                free(ref->displayName);
-                free(ref->browseName);
-                free(ref->referenceTypeId);
-            }
-            free(browseResult.references);
+            status = SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(
+                browseRequest, 0, argv[1], OpcUa_BrowseDirection_Forward, NULL, true, 0,
+                SOPC_ResultMask_ReferenceType | SOPC_ResultMask_DisplayName);
         }
         else
         {
-            printf("Call to Browse service through client wrapper failed with return code: %d\n", res);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (connectionId > 0)
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
-        res = res != 0 ? res : discoRes;
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, browseRequest, (void**) &browseResponse);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (SOPC_IsGoodStatus(browseResponse->ResponseHeader.ServiceResult) && 1 == browseResponse->NoOfResults)
+        {
+            OpcUa_BrowseResult* result = &browseResponse->Results[0];
+
+            printf("status: 0x%08" PRIX32 ", nbOfReferences: %" PRIi32 "\n", result->StatusCode,
+                   result->NoOfReferences);
+            if (SOPC_IsGoodStatus(result->StatusCode))
+            {
+                printf("Ref from %s:\n", argv[1]);
+                for (int32_t i = 0; i < result->NoOfReferences; i++)
+                {
+                    OpcUa_ReferenceDescription* ref = &result->References[i];
+                    char* strNodeId = SOPC_NodeId_ToCString(&ref->NodeId.NodeId);
+                    char* strRefTypeId = SOPC_NodeId_ToCString(&ref->ReferenceTypeId);
+                    printf("#%" PRIi32 "\n", i);
+                    printf("- nodeId: %s\n", strNodeId);
+                    printf("- displayName: %s\n", SOPC_String_GetRawCString(&ref->DisplayName.defaultText));
+                    printf("- refTypeId: %s\n", strRefTypeId);
+
+                    SOPC_Free(strNodeId);
+                    SOPC_Free(strRefTypeId);
+                }
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (NULL != browseResponse)
+    {
+        SOPC_Encodeable_Delete(browseResponse->encodeableType, (void**) &browseResponse);
+    }
+
+    // Close the connection
+    if (NULL != secureConnection)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
+        if (SOPC_STATUS_OK != localStatus)
+        {
+            printf("<Example_wrapper_browse: Failed to disconnect\n");
+        }
     }
 
     /* Close the toolkit */
-    SOPC_ClientCmd_Finalize();
+    SOPC_HelperConfigClient_Clear();
     SOPC_CommonHelper_Clear();
 
+    res = (SOPC_STATUS_OK == status ? 0 : -1);
     return res;
 }

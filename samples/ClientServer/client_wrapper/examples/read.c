@@ -21,31 +21,67 @@
  *
  * \brief A read example using the high-level client API
  *
- * Requires the toolkit_test_server to be running.
- * Connect to the server and reads a UInt64 value in a predefined node.
+ * Requires the toolkit_demo_server to be running.
+ * Connect to the server and reads the value of the given node.
  * Then disconnect and closes the toolkit.
  *
  */
 
-#include <inttypes.h>
 #include <stdio.h>
 
-#include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "sopc_askpass.h"
-#include "sopc_macros.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
-static void disconnect_callback(const uint32_t c_id)
+#include "sopc_askpass.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+
+#define DEFAULT_CLIENT_CONFIG_XML "S2OPC_Client_Wrapper_Config.xml"
+#define DEFAULT_CONFIG_ID "read"
+
+static bool AskKeyPass_FromTerminal(char** outPassword)
 {
-    printf("===> connection #%d has been terminated!\n", c_id);
+    return SOPC_AskPass_CustomPromptFromTerminal("Password for client key:", outPassword);
+}
+
+static void ClientConnectionEvent(SOPC_ClientConnection* config,
+                                  SOPC_ClientConnectionEvent event,
+                                  SOPC_StatusCode status)
+{
+    SOPC_UNUSED_ARG(config);
+
+    // We do not expect events since we use synchronous connection / disconnection, only for degraded case
+    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
+}
+
+static void PrintReadResponse(char* const* nodeIds, OpcUa_ReadResponse* pResp)
+{
+    SOPC_DataValue* pVal = NULL;
+
+    for (int32_t i = 0; i < pResp->NoOfResults; ++i)
+    {
+        printf("Read node \"%s\" value:\n", nodeIds[i]);
+
+        pVal = &pResp->Results[i];
+        printf("StatusCode: 0x%08" PRIX32 "\n", pVal->Status);
+        SOPC_Variant_Print(&(pVal->Value));
+        printf("\n");
+    }
 }
 
 int main(int argc, char* const argv[])
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
+    if (argc < 2)
+    {
+        printf("Usage: %s <nodeId> [<nodeId>] (e.g. %s \"ns=1;i=1012\").\nThe '" DEFAULT_CONFIG_ID
+               "' connection configuration "
+               "from " DEFAULT_CLIENT_CONFIG_XML " is used.\n",
+               argv[0], argv[0]);
+        return -2;
+    }
     int res = 0;
 
     /* Initialize client/server toolkit and client wrapper */
@@ -56,102 +92,113 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        res = -1;
-    }
-    int32_t init = SOPC_ClientCmd_Initialize(disconnect_callback);
-    if (init < 0)
-    {
-        res = -1;
+        status = SOPC_HelperConfigClient_Initialize();
     }
 
-    SOPC_ClientCmd_Security security = {
-        .security_policy = SOPC_SecurityPolicy_None_URI,
-        .security_mode = OpcUa_MessageSecurityMode_None,
-        .path_cert_auth = "./trusted/cacert.der",
-        .path_crl = "./revoked/cacrl.der",
-        .path_cert_srv = "./server_public/server_2k_cert.der",
-        .path_cert_cli = "./client_public/client_2k_cert.der",
-        .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
-        .path_cert_x509_token = NULL,
-        .path_key_x509_token = NULL,
-        .key_x509_token_encrypted = false,
-    };
+    size_t nbConfigs = 0;
+    SOPC_SecureConnection_Config** scConfigArray = NULL;
 
-    SOPC_ClientCmd_EndpointConnection endpoint = {
-        .endpointUrl = "opc.tcp://localhost:4841",
-        .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
-    };
-
-    char* node_id = "ns=1;i=1012";
-
-    /* callback to retrieve the client's private key password */
-    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        printf("<Example_wrapper_read: Failed to configure the client key user password callback\n");
-        res = -1;
+        status = SOPC_HelperConfigClient_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Example_wrapper_read: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
+        }
+    }
+
+    SOPC_SecureConnection_Config* readConnCfg = NULL;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        readConnCfg = SOPC_HelperConfigClient_GetConfigFromId(DEFAULT_CONFIG_ID);
+
+        if (NULL == readConnCfg)
+        {
+            printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
+                   "' from XML config file %s\n",
+                   DEFAULT_CLIENT_CONFIG_XML);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    /* Define callback to retrieve the client's private key password */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&AskKeyPass_FromTerminal);
     }
 
     /* connect to the endpoint */
-    int32_t configurationId = 0;
-    if (0 == res)
+    SOPC_ClientConnection* secureConnection = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        configurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
-        if (configurationId <= 0)
+        status = SOPC_ClientHelper_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_read: Failed to connect\n");
         }
     }
 
-    int32_t connectionId = 0;
-    if (0 == res)
+    OpcUa_ReadRequest* readRequest = NULL;
+    OpcUa_ReadResponse* readResponse = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        connectionId = SOPC_ClientCmd_CreateConnection(configurationId);
-
-        if (connectionId <= 0)
+        readRequest = SOPC_ReadRequest_Create((size_t)(argc - 1), OpcUa_TimestampsToReturn_Both);
+        if (NULL != readRequest)
         {
-            /* connectionId is invalid */
-            res = -1;
+            for (size_t i = 1; SOPC_STATUS_OK == status && i < (size_t) argc; i++)
+            {
+                status =
+                    SOPC_ReadRequest_SetReadValueFromStrings(readRequest, i - 1, argv[i], SOPC_AttributeId_Value, NULL);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (0 == res)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_ClientCmd_ReadValue readValue;
-
-        /* initalize read value structure */
-        readValue.nodeId = node_id;
-        readValue.attributeId = 13; // value
-        readValue.indexRange = NULL;
-
-        SOPC_DataValue readDataValue;
-
-        /* read the node id value */
-        res = SOPC_ClientCmd_Read(connectionId, &readValue, 1, &readDataValue);
-
-        if (0 == res)
-        {
-            printf("NodeId:\"%s\" - Value:\n", node_id);
-            SOPC_Variant_Print(&readDataValue.Value);
-        }
-        SOPC_DataValue_Clear(&readDataValue);
+        status = SOPC_ClientHelper_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
     }
 
-    if (connectionId > 0)
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
-        res = res != 0 ? res : discoRes;
+        if (SOPC_IsGoodStatus(readResponse->ResponseHeader.ServiceResult) && (argc - 1) == readResponse->NoOfResults)
+        {
+            PrintReadResponse(&argv[1], readResponse);
+        }
+        else
+        {
+            printf("Read failed with status: 0x%08" PRIX32 "\n", readResponse->ResponseHeader.ServiceResult);
+
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    if (NULL != readResponse)
+    {
+        SOPC_Encodeable_Delete(readResponse->encodeableType, (void**) &readResponse);
+    }
+
+    // Close the connection
+    if (NULL != secureConnection)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
+        if (SOPC_STATUS_OK != localStatus)
+        {
+            printf("<Example_wrapper_read: Failed to disconnect\n");
+        }
     }
 
     /* Close the toolkit */
-    SOPC_ClientCmd_Finalize();
+    SOPC_HelperConfigClient_Clear();
     SOPC_CommonHelper_Clear();
 
+    res = (SOPC_STATUS_OK == status ? 0 : -1);
     return res;
 }

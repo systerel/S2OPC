@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ClientConfiguration>
+    <PreferredLocales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </PreferredLocales>
+    <ApplicationCertificates>
+      <ClientCertificate path="client_public/client_4k_cert.der"/>
+      <ClientKey path="client_private/encrypted_client_4k_key.pem" encrypted="true"/>
+      <TrustedIssuers>
+        <!-- List of trusted CAs for which issued certificates are trusted -->
+        <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
+      </TrustedIssuers>
+      <!-- or/and <IssuedCertificates> if trusted issued certificates (self-signed or from known untrusted issuer) -->
+      <!-- with <UntrustedIssuers> for untrusted issuers -->
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="S2OPC toolkit client example" locale="en-US"/>
+    </ApplicationDescription>
+    <Connections>
+      <Connection serverURL="opc.tcp://localhost:4841" id="discovery">
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+        <SecurityMode mode="None"/>
+      </Connection>
+      <Connection serverURL="opc.tcp://localhost:4841" id="read">
+        <ServerCertificate path="server_public/server_4k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="Sign"/>
+        <!-- anonymous -->
+      </Connection>
+      <Connection serverURL="opc.tcp://localhost:4841" id="write">
+        <ServerCertificate path="server_public/server_4k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="Sign"/>
+        <UserPolicy policyId="username_Basic256Sha256" tokenType="username">
+          <UserName name="user1"/>
+        </UserPolicy>
+      </Connection>
+      <Connection reverseEndpointURL="opc.tcp://localhost:4844" serverURL="opc.tcp://localhost:4841" id="reverse">
+        <ServerCertificate path="server_public/server_4k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+        <UserPolicy policyId="X509" tokenType="certificate">
+          <UserX509 cert_path="user_public/user_2k_cert.der" key_path="user_private/encrypted_user_2k_key.pem" encrypted="true"/>
+        </UserPolicy>
+      </Connection>
+    </Connections>
+  </ClientConfiguration>
+</S2OPC>
