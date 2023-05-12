@@ -184,7 +184,7 @@ build-linux64-NoASan-NoPyS2OPC:
 
 build-win64: &build_win64
   stage: build-others
-  image: docker.aix.systerel.fr/c838/mingw_build@sha256:b9d5619a72109f24f8fe4c7cce03216153542cd20734a9eaae01104ca5166b8a # digest of mingw_build:1.12
+  image: docker.aix.systerel.fr/c838/mingw_build@sha256:240150f4332ebc99084f92d7121fbf5d7ad688b4003564b9f8821c016a5047be # digest of mingw_build:1.13
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
