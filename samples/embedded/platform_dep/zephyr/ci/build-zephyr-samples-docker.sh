@@ -53,6 +53,11 @@ cd ${S2OPCDIR} || exit 3
 
 
 cd ${SAMPLESDIR} || exit 4
+
+# Trust user directory in order to get commit signature
+# User in docker and outside docker could have different UID which leads to warnings from git
+git config --global --add safe.directory /host_zephyr
+
 build_app() {
   export BOARD=$1
   export APP=$2
