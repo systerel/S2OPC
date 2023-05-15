@@ -687,6 +687,7 @@ void SOPC_ToolkitClient_ClearAllSCs(void)
     {
         return;
     }
+    // TODO: close all sessions !
     SOPC_Services_CloseAllSCs(true);
     Mutex_Lock(&tConfig.mut);
     memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
