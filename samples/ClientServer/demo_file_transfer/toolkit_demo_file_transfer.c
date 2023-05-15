@@ -35,6 +35,7 @@
 #include "libs2opc_server_config.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
@@ -80,6 +81,14 @@ static char* Server_ConfigLogPath(const char* logPrefix)
     }
 
     return logDirPath;
+}
+
+/*
+ * Server callback definition to ask for private key password during configuration phase
+ */
+static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
+{
+    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
 }
 
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
@@ -262,6 +271,13 @@ int main(int argc, char* argv[])
         {
             printf("******* Unable to initialize the S2OPC Server frontend configuration.\n");
         }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* This function must be called after the initialization functions of the server library and
+           before starting the server and its configuration. */
+        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
     }
 
     if (SOPC_STATUS_OK == status)

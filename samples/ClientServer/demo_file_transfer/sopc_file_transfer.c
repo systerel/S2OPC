@@ -323,7 +323,7 @@ static SOPC_StatusCode local_write_default_UserWritable(const SOPC_FileType* fil
  * \param value the pointer on the SOPC_FileType
  * \param user_data use to get SOPC_StatusCode (SOPC_STATUT_OK if no error)
  */
-static void local_write_all(const void* key, const void* value, void* user_data);
+static void local_write_all(const void* key, void* value, void* user_data);
 
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
@@ -1999,7 +1999,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     return status;
 }
 
-static void local_write_all(const void* key, const void* value, void* user_data)
+static void local_write_all(const void* key, void* value, void* user_data)
 {
     (void) key;
     const SOPC_FileType* file = value;
