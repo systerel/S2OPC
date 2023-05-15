@@ -1053,6 +1053,56 @@ static bool StaMac_GiveAuthorization_SendRequestFailed(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
+static const char* SOPC_ClientAppComEvent_ToString(SOPC_App_Com_Event event)
+{
+    switch (event)
+    {
+    case SE_REVERSE_ENDPOINT_CLOSED:
+        return "SE_REVERSE_ENDPOINT_CLOSED";
+    case SE_SESSION_ACTIVATION_FAILURE:
+        return "SE_SESSION_ACTIVATION_FAILURE";
+    case SE_ACTIVATED_SESSION:
+        return "SE_ACTIVATED_SESSION";
+    case SE_SESSION_REACTIVATING:
+        return "SE_SESSION_REACTIVATING";
+    case SE_RCV_SESSION_RESPONSE:
+        return "SE_RCV_SESSION_RESPONSE";
+    case SE_CLOSED_SESSION:
+        return "SE_CLOSED_SESSION";
+    case SE_RCV_DISCOVERY_RESPONSE:
+        return "SE_RCV_DISCOVERY_RESPONSE";
+    case SE_SND_REQUEST_FAILED:
+        return "SE_SND_REQUEST_FAILED";
+    default:
+        return "UNKNOWN EVENT VALUE";
+    }
+}
+
+static const char* SOPC_StaMacState_ToString(SOPC_StaMac_State state)
+{
+    switch (state)
+    {
+    case stError:
+        return "stError";
+    case stInit:
+        return "stInit";
+    case stActivating:
+        return "stActivating";
+    case stActivated:
+        return "stActivated";
+    case stCreatingSubscr:
+        return "stCreatingSubscr";
+    case stCreatingMonIt:
+        return "stCreatingMonIt";
+    case stDeletingSubscr:
+        return "stDeletingSubscr";
+    case stClosing:
+        return "stClosing";
+    default:
+        return "UNKNOWN STATE VALUE";
+    }
+}
+
 bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                                  uintptr_t* pAppCtx,
                                  SOPC_App_Com_Event event,
@@ -1135,7 +1185,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             case stInit:
             default:
                 processingAuthorization = false;
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Dispatching in unknown state %i, event %i.", pSM->state, event);
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Dispatching in unknown state %s, event %s.",
+                            SOPC_StaMacState_ToString(pSM->state), SOPC_ClientAppComEvent_ToString(event));
                 break;
             }
 
@@ -1190,7 +1241,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     }
                     else
                     {
-                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unknown message in event %d", event);
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Received unknown message in event %s",
+                                    SOPC_ClientAppComEvent_ToString(event));
                         pSM->state = stError;
                     }
                 }
@@ -1208,8 +1260,8 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
             else
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                            "Received unexpected message or event (%d) in state %d, switching to error state", event,
-                            pSM->state);
+                            "Received unexpected message or event '%s' in state '%s', switching to error state",
+                            SOPC_ClientAppComEvent_ToString(event), SOPC_StaMacState_ToString(pSM->state));
                 pSM->state = stError;
             }
         }
