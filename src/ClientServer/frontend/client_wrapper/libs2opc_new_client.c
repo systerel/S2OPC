@@ -761,6 +761,11 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        res->connCb = connectEventCb;
+    }
+
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
