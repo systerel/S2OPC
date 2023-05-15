@@ -986,7 +986,7 @@ SOPC_String* SOPC_String_Create(void)
 SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (dest != NULL && src != NULL && src->Length > 0 && src->Data != NULL)
+    if (dest != NULL && src != NULL && src->Length >= 0 && src->Data != NULL)
     {
         status = SOPC_STATUS_OK;
         dest->Length = src->Length;
