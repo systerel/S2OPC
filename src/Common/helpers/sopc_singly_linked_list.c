@@ -397,8 +397,7 @@ void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id)
 
 void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val))
 {
-    SOPC_ASSERT(pFn != NULL);
-    if (NULL == list)
+    if (NULL == list || NULL == pFn)
     {
         return;
     }
