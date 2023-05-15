@@ -171,12 +171,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
                                             SOPC_ClientConnection** secureConnection);
 
 /**
- * \brief Disconnects the connection established with SOPC_ClientHelper_Connect.
+ * \brief Disconnects the connection established with SOPC_ClientHelper_Connect in a blocking way (synchronously).
  *
  * \param secureConnection  The secure connection to stop
- *
- * \note: Blocking ? + disconnect event in all case
- *
+ * *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the connection is already disconnected
  */
