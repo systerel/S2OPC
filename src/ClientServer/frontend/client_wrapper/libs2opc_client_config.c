@@ -24,6 +24,8 @@
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
+// TODO: remove, only to set logger in state machine
+#include "toolkit_helpers.h"
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -56,6 +58,27 @@ bool SOPC_ClientInternal_IsInitialized(void)
     return SOPC_Atomic_Int_Get(&sopc_client_helper_config.initialized);
 }
 
+static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, const char* text)
+{
+    switch (log_level)
+    {
+    case SOPC_LOG_LEVEL_ERROR:
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_WARNING:
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_INFO:
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    case SOPC_LOG_LEVEL_DEBUG:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "%s", text);
+        break;
+    default:
+        SOPC_ASSERT(false);
+    }
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
 {
     if (!SOPC_CommonHelper_GetInitialized() || SOPC_ClientInternal_IsInitialized())
@@ -82,6 +105,9 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
 
     SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(SOPC_ClientInternal_ToolkitEventCallback);
     SOPC_Atomic_Int_Set(&sopc_client_helper_config.initialized, (int32_t) true);
+
+    // TODO: to be deleted and state machine shall use library logger
+    Helpers_SetLogger(SOPC_ClientHelper_Logger);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -112,17 +138,28 @@ void SOPC_HelperConfigClient_Clear(void)
         return;
     }
 
-    // Inhibition of client events (avoid possible lock attempt on config mutex by callbacks)
-    SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(NULL);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-
-    // Close open connections
-    SOPC_ToolkitClient_ClearAllSCs();
+    SOPC_S2OPC_Config* pConfig = NULL;
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    pConfig = SOPC_CommonHelper_GetConfiguration();
+
+    // Close connections/sessions if not already done
+    SOPC_ClientConnection* secureConnection = NULL;
+    for (size_t i = 0; i < pConfig->clientConfig.nbSecureConnections; i++)
+    {
+        secureConnection = sopc_client_helper_config.secureConnections[i];
+        if (NULL != secureConnection)
+        {
+            // TODO: replace by a DisconnectAll operation ?
+            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            SOPC_ClientHelper_Disconnect(&secureConnection);
+            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        }
+    }
 
     // Close all reverse endpoints
     SOPC_ReverseEndpointConfigIdx rEPcfgIdx = 0;
@@ -148,6 +185,19 @@ void SOPC_HelperConfigClient_Clear(void)
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
     }
+
+    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    // Inhibition of client events (avoid possible lock attempt on config mutex by callbacks)
+    SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(NULL);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    // Close open connections
+    SOPC_ToolkitClient_ClearAllSCs();
+
+    mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ClientConfig_Clear(&pConfig->clientConfig);
 
