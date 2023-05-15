@@ -35,6 +35,9 @@ add_definitions (-Werror)
 # =====================
 execute_process(COMMAND git rev-parse HEAD OUTPUT_VARIABLE BUILD_SRC_COMMIT)
 string(REGEX REPLACE "\n$" "" BUILD_SRC_COMMIT "${BUILD_SRC_COMMIT}")
+if ("${BUILD_SRC_COMMIT}" STREQUAL "")
+    set(BUILD_SRC_COMMIT "UNDEFINED")
+endif()
 
 add_definitions (-DBUILD_SRC_COMMIT="${BUILD_SRC_COMMIT}")
 add_definitions (-DBUILD_DOCKER_ID="N.A.")
