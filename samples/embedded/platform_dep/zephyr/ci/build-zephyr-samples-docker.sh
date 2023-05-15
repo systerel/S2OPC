@@ -58,7 +58,8 @@ build_app() {
   export APP=$2
   echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
   cd ${SAMPLESDIR}/${APP} || return 1
-  rm -rf build && west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+  sudo rm -rf build || return  1
+  west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
   mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
   if ! [ -f build/zephyr/zephyr.bin ] ; then
     echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
