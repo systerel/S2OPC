@@ -349,8 +349,10 @@ target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS
 # Server scenario for file transfer
 if (NOT WIN32 AND expat_FOUND)
   add_executable(toolkit_test_server_file_transfer "validation_tests/server/toolkit_test_server_file_transfer.c"
-                                                    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c")
-  target_include_directories(toolkit_test_server_file_transfer PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer")
+                                                    "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer/sopc_file_transfer.c"
+                                                    ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  target_include_directories(toolkit_test_server_file_transfer PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer"
+                                                                        ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
   target_link_libraries(toolkit_test_server_file_transfer PRIVATE s2opc_serverwrapper s2opc_clientserver-xml-loaders-expat)
   target_compile_options(toolkit_test_server_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno and mkstemp functions.
   target_compile_definitions(toolkit_test_server_file_transfer PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")

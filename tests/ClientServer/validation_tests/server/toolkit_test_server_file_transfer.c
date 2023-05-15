@@ -26,6 +26,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_file_transfer.h"
+#include "sopc_helper_askpass.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -156,6 +157,10 @@ int main(int argc, char* argv[])
         status = SOPC_HelperConfigServer_Initialize();
     }
     SOPC_ASSERT("<test_server_file_transfer: Server initialization failed" && SOPC_STATUS_OK == status);
+
+    // Define the callback to retrieve the password of server private key
+    status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    SOPC_ASSERT("<test_server_file_transfer: SetKeyPasswordCallback failed" && SOPC_STATUS_OK == status);
 
     // load config from XML file :
     status = Server_LoadServerConfigurationFromPaths();
