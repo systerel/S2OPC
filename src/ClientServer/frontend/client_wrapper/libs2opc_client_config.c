@@ -112,6 +112,11 @@ void SOPC_HelperConfigClient_Clear(void)
         return;
     }
 
+    // Inhibition of client events (avoid possible lock attempt on config mutex by callbacks)
+    SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(NULL);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    // Close open connections
     SOPC_ToolkitClient_ClearAllSCs();
 
     SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
