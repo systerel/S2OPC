@@ -163,13 +163,9 @@ static void SOPC_SecureChannelConfig_Clear(SOPC_SecureChannel_Config* scConfig)
     SOPC_Free((void*) scConfig->reqSecuPolicyUri);
     scConfig->reqSecuPolicyUri = NULL;
     scConfig->url = NULL;
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_cli);
-    scConfig->crt_cli = NULL;
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) scConfig->key_priv_cli);
-    scConfig->key_priv_cli = NULL;
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_srv);
-    scConfig->crt_srv = NULL;
-    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&scConfig->pki));
+
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->peerAppCert);
+    scConfig->peerAppCert = NULL;
     SOPC_GCC_DIAGNOSTIC_RESTORE
     scConfig->clientConfigPtr = NULL;
 
@@ -188,7 +184,7 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
         }
         SOPC_Free(config->clientLocaleIds);
 
-        if (config->freeCstringsFlag && config->isConfigFromPathsNeeded && NULL != config->configFromPaths)
+        if (config->freeCstringsFlag && NULL != config->configFromPaths)
         {
             SOPC_Client_ConfigFromPaths* pathsConfig = config->configFromPaths;
 
@@ -244,6 +240,15 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
             config->configFromPaths = NULL;
         }
     }
+
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) config->clientCertificate);
+    config->clientCertificate = NULL;
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) config->clientKey);
+    config->clientKey = NULL;
+    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&config->clientPKI));
+    config->clientPKI = NULL;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     for (uint16_t i = 0; i < config->nbSecureConnections; i++)
     {

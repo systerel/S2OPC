@@ -212,27 +212,14 @@ void SOPC_HelperConfigClient_Clear(void)
     return;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const SOPC_Client_Config* cConfig,
-                                                                          SOPC_SecureConnection_Config* secConnConfig)
+static SOPC_ReturnStatus SOPC_HelperConfigClient_MayFinalize_ClientConfigFromPaths(SOPC_Client_Config* cConfig)
 {
     SOPC_ASSERT(NULL != cConfig);
-    SOPC_ASSERT(NULL != secConnConfig);
-    SOPC_ASSERT(secConnConfig == cConfig->secureConnections[secConnConfig->secureConnectionIdx]);
-    SOPC_SecureChannel_Config* scConfig = (SOPC_SecureChannel_Config*) &secConnConfig->scConfig;
-    SOPC_ASSERT(NULL != scConfig);
-    SOPC_ASSERT(scConfig->clientConfigPtr == cConfig);
-
-    if (secConnConfig->finalized)
-    {
-        // Configuration already done
-        return SOPC_STATUS_INVALID_STATE;
-    }
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (cConfig->isConfigFromPathsNeeded)
     {
         SOPC_PKIProvider* pki = NULL;
-        SOPC_SerializedCertificate* srvCert = NULL;
         SOPC_SerializedCertificate* cliCert = NULL;
         SOPC_SerializedAsymmetricKey* cliKey = NULL;
 
@@ -244,28 +231,14 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
             configFromPaths->issuedCertificatesList, configFromPaths->certificateRevocationPathList, &pki);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Connection[%" PRIu16 "]: Failed to create PKI.",
-                                   secConnConfig->secureConnectionIdx);
-        }
-        if (SOPC_STATUS_OK == status && secConnConfig->isServerCertFromPathNeeded &&
-            NULL != secConnConfig->serverCertPath)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(secConnConfig->serverCertPath, &srvCert);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Connection[%" PRIu16 "]: Failed to load server certificate.",
-                                       secConnConfig->secureConnectionIdx);
-            }
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create client config PKI from paths.");
         }
         if (SOPC_STATUS_OK == status && NULL != configFromPaths->clientCertPath)
         {
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(configFromPaths->clientCertPath, &cliCert);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Connection[%" PRIu16 "]: Failed to load client certificate.",
-                                       secConnConfig->secureConnectionIdx);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load client certificate from path.");
             }
         }
         if (SOPC_STATUS_OK == status && NULL != configFromPaths->clientKeyPath)
@@ -280,9 +253,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
                 {
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
-                        "Connection[%" PRIu16
-                        "]: Failed to retrieve the password of the client's private key from callback.",
-                        secConnConfig->secureConnectionIdx);
+                        "Failed to retrieve the password of the client's private key from callback.");
                     status = SOPC_STATUS_NOK;
                 }
             }
@@ -302,11 +273,10 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
                     configFromPaths->clientKeyPath, &cliKey, password, (uint32_t) lenPassword);
                 if (SOPC_STATUS_OK != status)
                 {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "Connection[%" PRIu16
-                                           "]: Failed to load client private key. Please check the password if the key "
-                                           "is encrypted and check the key format (PEM)",
-                                           secConnConfig->secureConnectionIdx);
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "Failed to load client private key from path. Please check the password if the key "
+                        "is encrypted and check the key format (PEM)");
                 }
             }
 
@@ -318,18 +288,62 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const 
 
         if (SOPC_STATUS_OK == status)
         {
-            scConfig->pki = pki;
-            scConfig->crt_srv = srvCert;
-            scConfig->crt_cli = cliCert;
-            scConfig->key_priv_cli = cliKey;
-            secConnConfig->finalized = true;
+            cConfig->clientPKI = pki;
+            cConfig->clientCertificate = cliCert;
+            cConfig->clientKey = cliKey;
+            cConfig->isConfigFromPathsNeeded = false;
         }
         else
         {
             SOPC_PKIProvider_Free(&pki);
-            SOPC_KeyManager_SerializedCertificate_Delete(srvCert);
             SOPC_KeyManager_SerializedCertificate_Delete(cliCert);
             SOPC_KeyManager_SerializedAsymmetricKey_Delete(cliKey);
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_OK;
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
+                                                                          SOPC_SecureConnection_Config* secConnConfig)
+{
+    SOPC_ASSERT(NULL != cConfig);
+    SOPC_ASSERT(NULL != secConnConfig);
+    SOPC_ASSERT(secConnConfig == cConfig->secureConnections[secConnConfig->secureConnectionIdx]);
+    SOPC_SecureChannel_Config* scConfig = (SOPC_SecureChannel_Config*) &secConnConfig->scConfig;
+    SOPC_ASSERT(NULL != scConfig);
+    SOPC_ASSERT(scConfig->clientConfigPtr == cConfig);
+
+    if (secConnConfig->finalized)
+    {
+        // Configuration already done
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus status = SOPC_HelperConfigClient_MayFinalize_ClientConfigFromPaths(cConfig);
+    if (SOPC_STATUS_OK == status && secConnConfig->isServerCertFromPathNeeded)
+    {
+        SOPC_SerializedCertificate* srvCert = NULL;
+        if (NULL != secConnConfig->serverCertPath)
+        {
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(secConnConfig->serverCertPath, &srvCert);
+            if (SOPC_STATUS_OK == status)
+            {
+                scConfig->peerAppCert = srvCert;
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Connection[%" PRIu16 "]: Failed to load server certificate.",
+                                       secConnConfig->secureConnectionIdx);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
 

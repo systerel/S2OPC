@@ -182,7 +182,7 @@ static bool SOPC_ClientHelperInternal_CheckConnectionValid(const SOPC_S2OPC_Conf
 }
 
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
-    const SOPC_S2OPC_Config* config,
+    SOPC_S2OPC_Config* config,
     SOPC_SecureConnection_Config* secConnConfig)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -190,7 +190,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
     if (!secConnConfig->finalized)
     {
         // TODO: check config content (mandatory + secu mode vs secu policy vs certs vs user policy vs ...)
-        const SOPC_Client_Config* cConfig = &config->clientConfig;
+        SOPC_Client_Config* cConfig = &config->clientConfig;
         status = SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
     }
     return status;

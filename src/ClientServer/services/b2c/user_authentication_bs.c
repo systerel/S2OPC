@@ -404,7 +404,6 @@ void user_authentication_bs__is_valid_user_x509_authentication(
     const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
     const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
     const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
-    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
 {
     SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
@@ -413,20 +412,18 @@ void user_authentication_bs__is_valid_user_x509_authentication(
     SOPC_Endpoint_Config* epConfig =
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     SOPC_ASSERT(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr->serverCertificate);
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
 
-    const SOPC_SecureChannel_Config* pSCCfg =
-        SOPC_ToolkitServer_GetSecureChannelConfig(user_authentication_bs__p_channel_config_idx);
     const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
-    SOPC_ASSERT(NULL != pSCCfg);
-    SOPC_ASSERT(NULL != pSCCfg->crt_srv);
 
-    status = is_valid_user_token_signature(user_authentication_bs__p_user_token,
-                                           user_authentication_bs__p_user_token_signature,
-                                           user_authentication_bs__p_server_nonce, pSCCfg->crt_srv, usedSecuPolicy);
+    status = is_valid_user_token_signature(
+        user_authentication_bs__p_user_token, user_authentication_bs__p_user_token_signature,
+        user_authentication_bs__p_server_nonce, epConfig->serverConfigPtr->serverCertificate, usedSecuPolicy);
     if (SOPC_STATUS_OK == status)
     {
         status = is_cert_comply_with_security_policy(user_authentication_bs__p_user_token, usedSecuPolicy);

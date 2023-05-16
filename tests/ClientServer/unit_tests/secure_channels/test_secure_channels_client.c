@@ -38,6 +38,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_SecureChannel_Config scConfig;
+    SOPC_Client_Config clientConfig;
     uint32_t scConfigIdx = 0;
     SOPC_Event* serviceEvent = NULL;
     SOPC_EventRecorder* servicesEvents = NULL;
@@ -294,15 +296,17 @@ int main(int argc, char* argv[])
     if (SOPC_STATUS_OK == status)
     {
         memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
+        SOPC_ClientConfig_Initialize(&clientConfig);
         scConfig.isClientSc = true;
+        scConfig.clientConfigPtr = &clientConfig;
         scConfig.msgSecurityMode = messageSecurityMode;
         scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;
-        scConfig.crt_cli = crt_cli;
-        scConfig.crt_srv = crt_srv;
-        scConfig.key_priv_cli = priv_cli;
-        scConfig.pki = pki;
+        scConfig.peerAppCert = crt_srv;
         scConfig.requestedLifetime = 100000;
         scConfig.url = sEndpointUrl;
+        clientConfig.clientCertificate = crt_cli;
+        clientConfig.clientKey = priv_cli;
+        clientConfig.clientPKI = pki;
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         SOPC_ASSERT(scConfigIdx != 0);

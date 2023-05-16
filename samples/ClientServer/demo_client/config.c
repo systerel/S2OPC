@@ -238,19 +238,17 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
             SOPC_ASSERT(SOPC_STATUS_OK == status);
             pscConfig->clientConfigPtr = clientAppCfg;
             pscConfig->url = ENDPOINT_URL;
-            pscConfig->crt_cli = NULL;
-            pscConfig->key_priv_cli = NULL;
-            pscConfig->crt_srv = NULL;
-            pscConfig->pki = pPki;
+            pscConfig->peerAppCert = NULL;
             pscConfig->requestedLifetime = SC_LIFETIME;
             pscConfig->reqSecuPolicyUri = reqSecuPolicyUri;
             pscConfig->msgSecurityMode = msgSecurityMode;
+            clientAppCfg->clientPKI = pPki;
 
             if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
             {
-                pscConfig->crt_cli = pCrtCli;
-                pscConfig->crt_srv = pCrtSrv;
-                pscConfig->key_priv_cli = pKeyCli;
+                clientAppCfg->clientCertificate = pCrtCli;
+                pscConfig->peerAppCert = pCrtSrv;
+                clientAppCfg->clientKey = pKeyCli;
             }
         }
         else

@@ -765,8 +765,10 @@ OPERATIONS
     END
     ;
 
-    p_valid <-- server_activate_session_check_crypto(p_session, p_channel, p_channel_config_idx, p_activate_req_msg) =
+    p_valid <-- server_activate_session_check_crypto(p_endpoint_config_idx, p_session, p_channel, p_channel_config_idx, p_activate_req_msg) =
     PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
         p_session : t_session_i &
         p_session : t_session &
         p_session : dom(a_NonceClient) &

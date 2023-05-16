@@ -104,7 +104,8 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && OpcUa_MessageSecurityMode_None != msgSecurityMode &&
+        NULL == clientAppCfg->clientPKI)
     {
         if (!bDisablePKI)
         {
@@ -144,7 +145,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
         }
 
-        if (SOPC_STATUS_OK == status && NULL != szPathCertClient)
+        if (SOPC_STATUS_OK == status && NULL != szPathCertClient && NULL == clientAppCfg->clientCertificate)
         {
             status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertClient, &pCrtCli);
             if (SOPC_STATUS_OK != status)
@@ -153,7 +154,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
         }
 
-        if (SOPC_STATUS_OK == status)
+        if (SOPC_STATUS_OK == status && NULL == clientAppCfg->clientKey)
         {
             char* password = NULL;
             size_t lenPassword = 0;
@@ -200,15 +201,25 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
+        if (NULL == clientAppCfg->clientCertificate)
+        {
+            clientAppCfg->clientCertificate = pCrtCli;
+        }
+        if (NULL == clientAppCfg->clientKey)
+        {
+            clientAppCfg->clientKey = pKeyCli;
+        }
+        if (NULL == clientAppCfg->clientPKI)
+        {
+            clientAppCfg->clientPKI = pPki;
+        }
+
         pscConfig = SOPC_Calloc(1, sizeof(SOPC_SecureChannel_Config));
 
         if (NULL != pscConfig)
         {
             pscConfig->isClientSc = true;
-            pscConfig->crt_cli = pCrtCli;
-            pscConfig->key_priv_cli = pKeyCli;
-            pscConfig->crt_srv = pCrtSrv;
-            pscConfig->pki = pPki;
+            pscConfig->peerAppCert = pCrtSrv;
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->msgSecurityMode = msgSecurityMode;
             pscConfig->expectedEndpoints = expectedEndpoints;
@@ -282,10 +293,7 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
     SOPC_SecureChannel_Config* pscConfig = *ppscConfig;
 
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_cli);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) pscConfig->key_priv_cli);
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->crt_srv);
-    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&pscConfig->pki));
+    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->peerAppCert);
     SOPC_Free((void*) pscConfig->serverUri);
     SOPC_Free((void*) pscConfig->url);
     SOPC_Free((void*) pscConfig->reqSecuPolicyUri);
