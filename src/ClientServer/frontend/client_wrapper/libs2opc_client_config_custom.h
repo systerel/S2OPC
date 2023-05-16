@@ -46,7 +46,7 @@
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p localeIds is invalid when \p nbLocales \> 0
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, preferred localesIds already defined, client connection initiated).
+ *         (wrapper not initialized, preferred localesIds already defined, client connection initiated).
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds);
 
@@ -63,7 +63,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p applicationUri, \p productUri or \p defaultAppName are invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, application description already set, client connection initiated).
+ *         (wrapper not initialized, application description already set, client connection initiated).
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* applicationUri,
                                                                     const char* productUri,
@@ -81,7 +81,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* 
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p pki is invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, PKI already defined, server already started).
+ *         (wrapper not initialized, PKI already defined, server already started).
  *
  * \note A default PKI provider compliant with OPC UA standard is provided in sopc_pki_stack.h
  */
@@ -91,14 +91,14 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPKIprovider(SOPC_PKIProvider* pki);
  * \brief Sets asymmetrical certificate and key of client from file paths.
  *        Certificate files shall use DER format, key file shall use DER or PEM format.
  *
- * \param clientCertPath  Path to client certificate file at DER format
- * \param clientKeyPath   Path to client key file at DER or PEM format
+ * \param clientCertPath  Path to client certificate file at DER format (copied by function)
+ * \param clientKeyPath   Path to client key file at DER or PEM format (copied by function)
  * \param encrypted       Whether if the key is encrypted or not
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p clientCertPath or \p clientKeyPath are invalid
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, key/cert pair already set, connection initiated).
+ *         (wrapper not initialized, key/cert pair already set, connection initiated).
  */
 SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* clientCertPath,
                                                                  const char* clientKeyPath,
@@ -109,35 +109,39 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* cli
  *        Certificate shall be in DER format, key file shall be in DER or PEM format.
  *
  * \param certificateNbBytes Number of elements in \p clientCertificate array
- * \param clientCertificate  Array of bytes containing client certificate at DER format
+ * \param clientCertificate  Array of bytes containing client certificate at DER format (copied by function)
  * \param keyNbBytes         Number of elements in \p clientPrivateKey array
- * \param clientPrivateKey   Array of bytes containing client key file at DER or PEM format
+ * \param clientPrivateKey   Array of bytes containing client key file at DER or PEM format (copied by function)
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
- *         if \p certificateNbBytes, \p clientCertificate, \p keyNbBytes or \p clientKeyPath are invalid (0 or NULL)
+ *         if \p certificateNbBytes, \p clientCertificate, \p keyNbBytes or \p clientPrivateKey are invalid (0 or NULL)
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
- *         (toolkit not initialized, key/cert pair already set, connection initiated).
+ *         (wrapper not initialized, key/cert pair already set).
  */
-/* NOT IMPLEMENTED
- *
- * SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certificateNbBytes,
- *                                                                  const unsigned char* clientCertificate,
- *                                                                  size_t keyNbBytes,
- *                                                                  const unsigned char* clientPrivateKey);
- */
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+                                                                  const unsigned char* clientCertificate,
+                                                                  size_t keyNbBytes,
+                                                                  const unsigned char* clientPrivateKey);
 
 /**
  * \brief Create a new secure channel configuration in client be completed by using the functions below
- * (::SOPC_SecureConnectionConfig_AddSecurityConfig, etc.)
+ * (::SOPC_SecureConnectionConfig_AddServerCertificateFromPath or
+ *  ::SOPC_SecureConnectionConfig_AddServerCertificateFromBytes, etc.)
  *
+ * \param userDefinedId  A user defined identifier to retrieve the secure connection configuration
+ *                       using ::SOPC_HelperConfigClient_GetConfigFromId.
  * \param endpointUrl    URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
  * \param secuMode       Security mode required for this SecureConnection: None, Sign or SignAndEncrypt.
- *                       If value different from None, ::SOPC_SecureConnectionConfig_AddSecurityConfig shall be called.
+ *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
+ *                       called.
+ * \param secuPolicy     Security policy URI required for this SecureConnection.
+ *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
+ *                       called.
  *
  * \return SOPC_SecureConnectionConfig pointer to configuration structure to be filled
  *         with ::SOPC_SecureConnectionConfig_AddSecurityConfig.
  *         Otherwise Returns NULL if no more configuration slots are available
- *         (see ::SOPC_MAX_SECURE_CONNECTIONS).
+ *         (see ::SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG).
  */
 SOPC_SecureConnection_Config* SOPC_HelperConfigClient_CreateSecureConnection(const char* userDefinedId,
                                                                              const char* endpointUrl,
@@ -148,21 +152,34 @@ SOPC_SecureConnection_Config* SOPC_HelperConfigClient_CreateSecureConnection(con
  * \brief Defines the Secure Connection expected EndpointsDescription from given GetEndpointsResponse.
  *        If defined, it is used for verification of coherence during the session activation.
  *
- * \param scConfig               The secure connection configuration to set
- * \param getEndpointsResponse   The client reverse endpoint to be used for reverse connection with the server
+ * \param scConfig               The secure connection configuration to modify
+ * \param getEndpointsResponse   The client expected endpoint description to be returned by the server during
+ *                               connection. Connection will be aborted otherwise.
+ *                               The response will be copied and might be deallocated after call.
+ *
+ *  \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *          SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *          or connection config cannot be modified (already used for a connection
+ *          or expected endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
     SOPC_SecureConnection_Config* secConnConfig,
-    OpcUa_GetEndpointsResponse* getEndpointsResponse);
+    const OpcUa_GetEndpointsResponse* getEndpointsResponse);
 
 /**
  * \brief Sets the Secure Connection in reverse connection mode
  *
- * \param scConfig               The secure connection configuration to set
- * \param clientReverseEndpoint  The client reverse endpoint to be used for reverse connection with the server
+ * \param scConfig                  The secure connection configuration to set
+ * \param clientReverseEndpointUri  The client reverse endpoint URI to be used to listen for reverse connection from the
+ * server
+ *
+ *  \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *          SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *          or connection config cannot be modified (already used for a connection
+ *          or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureConnection_Config* secConnConfig,
-                                                                   const char* clientReverseEndpoint);
+                                                                   const char* clientReverseEndpointUri);
 
 /**
  * A default value is used if not provided.
@@ -173,17 +190,13 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
                                                              uint32_t reqLifetime);
 
-/* Well known server: secu policy + certificate */
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
+                                                                           const char* serverCertPath);
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddSecurityConfigFromPath(SOPC_SecureConnection_Config* secConnConfig,
-                                                                        const char* serverCertPath);
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
+                                                                            size_t certificateNbBytes,
+                                                                            const unsigned char* serverCertificate);
 
-/* NOT IMPLEMENTED
- *
- * SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddSecurityConfigFromBytes(SOPC_SecureConnection_Config* secConnConfig,
- *                                                                         size_t certificateNbBytes,
- *                                                                        const unsigned char* serverCertificate);
- */
 /* NOT IMPLEMENTED
  *
  * Unknown server certificate / policy:
@@ -200,24 +213,74 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddSecurityConfigFromPath(SOPC_Sec
 
 /* User configuration: not configured == anonymous, only 1 configuration possible */
 
+/**
+ * \brief Defines the user authentication mode as anonymous for the secure connection
+ *        and set the associated user policy Id to be used in server
+ *
+ * \note By default, the user authentication mode is anonymous and user policy Id is ""
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ * \param userPolicyId   The user policy Id to be used in server for anonymous
+ *                       (might not be verified by server for anonymous)
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (user authentication mode already set).
+ */
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection_Config* secConnConfig,
+                                                           const char* userPolicyId);
+
+/**
+ * \brief Defines the user authentication mode as username/password for the secure connection,
+ *        sets the associated user policy Id to be used in server
+ *        and sets the username/password to be used for authentication.
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ * \param userPolicyId   The user policy Id to be used in server for username/password
+ * \param userName       The username to be used for authentication
+ * \param password       The password to be used for authentication or NULL to be retrieved from the callback defined
+ *                       with ::SOPC_HelperConfigClient_SetUsernamePasswordCallback.
+ *                       Note: the password should not be hardcoded string in the code.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (user authentication mode already set).
+ */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_Config* secConnConfig,
                                                           const char* userPolicyId,
-                                                          const char* userName);
+                                                          const char* userName,
+                                                          const char* password);
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPath(SOPC_SecureConnection_Config* secConnConfig,
-                                                                  const char* userCertPath,
-                                                                  const char* userKeyPath,
-                                                                  bool encrypted);
+/**
+ * \brief Defines the user authentication mode as X509 certificate for the secure connection,
+ *       sets the associated user policy Id to be used in server
+ *       and sets the certificate/key paths to be used for authentication.
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ * \param userPolicyId   The user policy Id to be used in server for X509 certificate
+ * \param userCertPath   The path to the user certificate file at DER format (copied by function)
+ * \param userKeyPath    The path to the user key file at DER or PEM format (copied by function)
+ * \param encrypted      Whether if the key is encrypted or not
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (user authentication mode already set).
+ */
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
+                                                                   const char* userPolicyId,
+                                                                   const char* userCertPath,
+                                                                   const char* userKeyPath,
+                                                                   bool encrypted);
 
-// Note: any interest not to provide password through those functions and use callbacks ? And in server ?
-
+/* NOT IMPLEMENTED
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                    size_t certificateNbBytes,
                                                                    const unsigned char* userCertificate,
                                                                    size_t keyNbBytes,
                                                                    const unsigned char* userPrivateKey);
+*/
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_GetSecureConnectionConfigs(size_t* nbScConfigs,
-                                                                     SOPC_SecureConnection_Config** scConfigArray);
+                                                                     SOPC_SecureConnection_Config*** scConfigArray);
 
 #endif

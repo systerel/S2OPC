@@ -391,7 +391,8 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
 
     OpcUa_UserTokenType sessionTokenType = secConnConfig->sessionConfig.userTokenType;
 
-    if (SOPC_STATUS_OK == status && OpcUa_UserTokenType_UserName == sessionTokenType)
+    if (SOPC_STATUS_OK == status && OpcUa_UserTokenType_UserName == sessionTokenType &&
+        NULL == secConnConfig->sessionConfig.userToken.userName.userPwd)
     {
         bool res = SOPC_ClientInternal_GetUserNamePassword(secConnConfig->sessionConfig.userToken.userName.userName,
                                                            &secConnConfig->sessionConfig.userToken.userName.userPwd);
