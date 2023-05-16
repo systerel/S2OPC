@@ -45,6 +45,8 @@
 #include "opcua_statuscodes.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
 #include "sopc_mem_alloc.h"
@@ -265,9 +267,9 @@ static bool handle_equal(const void* a, const void* b);
 static uint64_t handle_hash(const void* handle);
 
 /**
- * \brief Function to generate a random SOPC_FileHandle (current time is used as seed).
+ * \brief Function to generate a random SOPC_FileHandle.
  * \note The handle generated is different form 0 which is the invalid internal value.
- * \return the SOPC_FileHandle generate
+ * \return the SOPC_FileHandle generate (INVALID_HANDLE_VALUE in case of error)
  */
 static SOPC_FileHandle generate_random_handle(void);
 
@@ -427,15 +429,30 @@ static uint64_t handle_hash(const void* handle)
     return hash;
 }
 
+static uint32_t buff_to_int(SOPC_ExposedBuffer* pBuff)
+{
+    SOPC_ASSERT(NULL != pBuff);
+    uint32_t out = INVALID_HANDLE_VALUE;
+    out = (uint32_t)(pBuff[0] + (pBuff[1] << 8) + (pBuff[2] << 16) + (pBuff[3] << 24));
+    return out;
+}
+
 static SOPC_FileHandle generate_random_handle(void)
 {
-    /* Initialisation of the seed to generate random handle */
-    srand((unsigned int) time(NULL));
-    SOPC_FileHandle gen = (uint32_t) rand();
-    while (INVALID_HANDLE_VALUE == gen)
+    SOPC_FileHandle gen = INVALID_HANDLE_VALUE;
+    SOPC_ExposedBuffer* pBuff = NULL;
+    SOPC_CryptoProvider* pCrypto = SOPC_CryptoProvider_Create(SOPC_SecurityPolicy_None_URI);
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_GenerateRandomBytes(pCrypto, 4, &pBuff);
+    if (SOPC_STATUS_OK == status)
     {
-        gen = (uint32_t) rand();
+        gen = buff_to_int(pBuff);
+        if (INVALID_HANDLE_VALUE == gen)
+        {
+            gen = 1;
+        }
     }
+    SOPC_Free(pBuff);
+    SOPC_CryptoProvider_Free(pCrypto);
     return gen;
 }
 
@@ -554,6 +571,12 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     /* g_handle_to_file is reserved for future use (deviation from the OPC UA specification: Currently we don't support
      * multiple handles for the same file)*/
     file->handle = generate_random_handle();
+    if (INVALID_HANDLE_VALUE == file->handle)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "FileTransfer:Method_Open: unable to create random handle");
+        return OpcUa_BadUnexpectedError;
+    }
     bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
     if (false == res)
     {
@@ -1401,6 +1424,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
     }
     if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
+        mode_t old_pem = umask(S_IXUSR | S_IRWXG | S_IRWXO);
         filedes = mkstemp(tmp_file_path);
         if (0 > filedes)
         {
@@ -1408,6 +1432,7 @@ static SOPC_StatusCode FileTransfer_FileType_Create_TmpFile(SOPC_FileType* file)
                                    "FileTransfer:CreateTmpFile: the mkstemp function has failed (file '%s')", Cpath);
             status = OpcUa_BadUnexpectedError;
         }
+        umask(old_pem);
     }
     if (0 == (status & SOPC_GoodStatusOppositeMask))
     {
@@ -1442,7 +1467,7 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
     int res = -1;
     int filedes = -1;
     char Cmode[5] = {0};
-    bool mode_is_ok = check_openModeArg(file->mode);
+    bool mode_is_ok = false;
 
     if (NULL == file)
     {
@@ -1450,6 +1475,8 @@ static SOPC_StatusCode FileTransfer_Open_TmpFile(SOPC_FileType* file)
                                "FileTransfer:OpenTmpFile: the FileType object is not initialized in the API");
         return OpcUa_BadUnexpectedError;
     }
+
+    mode_is_ok = check_openModeArg(file->mode);
 
     if (false == mode_is_ok)
     {
