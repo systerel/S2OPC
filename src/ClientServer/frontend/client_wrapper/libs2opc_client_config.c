@@ -400,8 +400,15 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAs
 
 static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC_GetPassword_Fct* getKeyPassword)
 {
-    /* TODO: check init state of config when it will be stored in config */
     SOPC_ASSERT(NULL != destCb);
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
     if (NULL == getKeyPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -413,8 +420,15 @@ static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC
 static SOPC_ReturnStatus SetUserPasswordCallback(SOPC_GetClientUserPassword_Fct** destCb,
                                                  SOPC_GetClientUserPassword_Fct* getUserPassword)
 {
-    /* TODO: check init state of config when it will be stored in config */
     SOPC_ASSERT(NULL != destCb);
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
     if (NULL == getUserPassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -442,7 +456,18 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
 
 static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, const char* cbName, char** outPassword)
 {
-    /* TODO: check init state of config when it will be stored in config */
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
+    if (NULL == outPassword)
+    {
+        return false;
+    }
     if (NULL == passwordCb)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
@@ -451,18 +476,29 @@ static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, co
     return passwordCb(outPassword);
 }
 
-static bool SOPC_ClientInternal_GetUserPassword(SOPC_GetClientUserPassword_Fct* userpasswordCb,
+static bool SOPC_ClientInternal_GetUserPassword(SOPC_GetClientUserPassword_Fct* userPasswordCb,
                                                 const char* cbName,
                                                 const char* userId,
                                                 char** outPassword)
 {
-    /* TODO: check init state of config when it will be stored in config */
-    if (NULL == userpasswordCb)
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
+    if (NULL == outPassword)
+    {
+        return false;
+    }
+    if (NULL == userPasswordCb)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
         return false;
     }
-    return userpasswordCb(userId, outPassword);
+    return userPasswordCb(userId, outPassword);
 }
 
 // Get password to decrypt user private key from internal callback

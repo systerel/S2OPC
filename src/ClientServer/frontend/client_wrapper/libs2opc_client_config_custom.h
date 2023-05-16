@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include "libs2opc_client_config.h"
+#include "libs2opc_common_config.h"
 
 /** \brief Client configuration without XML */
 
