@@ -235,6 +235,8 @@ void SOPC_ClientCommon_Clear(void)
     SOPC_Array_Delete(pArrScConfig);
     pArrScConfig = NULL;
 
+    SOPC_ClientConfig_Clear(&appConfig->clientConfig);
+
     mutStatus = Mutex_Unlock(&mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     Mutex_Clear(&mutex);

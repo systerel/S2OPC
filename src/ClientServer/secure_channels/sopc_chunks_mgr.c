@@ -357,10 +357,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     {
         // CLIENT side: config is mandatory and security mode to be enforced
         SOPC_ASSERT(scConfig != NULL);
+        SOPC_ASSERT(scConfig->clientConfigPtr != NULL);
         runningAppCert = scConnection->clientCertificate;
-        pkiProvider = scConfig->pki;
+        pkiProvider = scConfig->clientConfigPtr->clientPKI;
         enforceSecuMode = true;
-        if (scConfig->crt_srv != NULL)
+        if (scConfig->peerAppCert != NULL)
         {
             // retrieve expected sender certificate as a ByteString
             status =
@@ -382,7 +383,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         if (scConfig != NULL)
         {
             enforceSecuMode = true;
-            if (scConfig->crt_cli != NULL)
+            if (scConfig->peerAppCert != NULL)
             {
                 // retrieve expected sender certificate as a ByteString
                 status = SOPC_KeyManager_Certificate_ToDER(scConnection->clientCertificate, &otherBsAppCert.Data,

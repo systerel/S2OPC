@@ -61,15 +61,13 @@ typedef struct SOPC_SecureChannel_Config
                                 This value might be specified for reverse connection in order to be verified
                                 on ReverseHello reception. */
     const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
-    /* TODO: move crt_cli / key_priv_cli / pki into client config ? */
-    const SOPC_SerializedCertificate* crt_cli;
-    const SOPC_SerializedAsymmetricKey* key_priv_cli;
-    const SOPC_SerializedCertificate* crt_srv;
-    const SOPC_PKIProvider*
-        pki; /**< PKI shall not be shared between several configurations except if it is thread-safe */
-    const char* reqSecuPolicyUri;              /**< Requested Security Policy URI */
-    uint32_t requestedLifetime;                /**< Requested Secure channel lifetime */
-    OpcUa_MessageSecurityMode msgSecurityMode; /**< Requested Security Mode */
+
+    const SOPC_SerializedCertificate* peerAppCert; /*< Peer application certificate:
+                                                       isClientSc => serverCertificate (configuration data)
+                                                       !isClientSc => clientCertificate (runtime data) */
+    const char* reqSecuPolicyUri;                  /**< Requested Security Policy URI */
+    uint32_t requestedLifetime;                    /**< Requested Secure channel lifetime */
+    OpcUa_MessageSecurityMode msgSecurityMode;     /**< Requested Security Mode */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
                                        connecting phase) */
@@ -223,7 +221,7 @@ typedef struct SOPC_SecureConnection_Config
 
 typedef struct SOPC_Client_ConfigFromPaths
 {
-    char* clientCertPath;    /**< Temporary path to the client certificate (crt_cli shall be instantiated by
+    char* clientCertPath;    /**< Temporary path to the client certificate (clientCertificate shall be instantiated by
                                 applicative code) */
     char* clientKeyPath;     /**< Temporary path to the client key (key_priv_cli shall be instantiated by applicative
                                 code) */
@@ -271,16 +269,17 @@ struct SOPC_Client_Config
                                  The first LocaleId in the array has the highest priority. */
 
     bool isConfigFromPathsNeeded; /**< True if the following field shall be treated to configure the client */
-    SOPC_Client_ConfigFromPaths*
-        configFromPaths; /**< The paths configuration to use for PKI and client certificate and
-                            key if if isConfigFromPathsNeeded is true.  NULL otherwise.
-                            (used to configure SecureChannel_Config pki , crt_cli and key_priv_cli fields) */
+    SOPC_Client_ConfigFromPaths* configFromPaths; /**< The paths configuration to use for PKI and client certificate and
+                                                     key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                                                     (used to configure clientCertificate, clientKey and clientPKI) */
+
+    const SOPC_SerializedCertificate* clientCertificate; /**< Certificate might be set from paths */
+    const SOPC_SerializedAsymmetricKey* clientKey;       /**< Key might be set from paths */
+    const SOPC_PKIProvider* clientPKI;                   /**< PKI might be set from paths */
 
     uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
     SOPC_SecureConnection_Config*
-        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.
-                                                                           Certificate/Key might be set from paths
-                                                                           PKI might be set from paths */
+        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.*/
     uint16_t nbReverseEndpointURLs;
     char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
                                                                              per secure connection config. */

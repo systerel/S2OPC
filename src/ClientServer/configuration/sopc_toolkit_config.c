@@ -268,7 +268,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
         // => only client certificate was specifically allocated
         // Exceptional case: configuration added internally and shall be freed on clear call
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_cli);
+        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->peerAppCert);
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(scConfig);
         tConfig.serverScConfigs[serverScConfigIdxWithoutOffset] = NULL;
@@ -356,29 +356,37 @@ static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChanne
                                scConfig->requestedLifetime, (uint32_t) SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME);
         result = false;
     }
-    if ((NULL != scConfig->reqSecuPolicyUri &&
-         (0 != strcmp(scConfig->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI))) ||
-        scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
+    if (NULL == scConfig->clientConfigPtr)
     {
-        if (NULL == scConfig->pki)
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "AddSecureChannelConfig check: client application configuration (clientConfigPtr) is not defined.");
+        result = false;
+    }
+    else if ((NULL != scConfig->reqSecuPolicyUri &&
+              (0 != strcmp(scConfig->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI))) ||
+             scConfig->msgSecurityMode != OpcUa_MessageSecurityMode_None)
+    {
+        if (NULL == scConfig->clientConfigPtr->clientPKI)
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,
                 "AddSecureChannelConfig check: PKI is not defined but is required due to Security policy / mode");
             result = false;
         }
-        if (NULL == scConfig->crt_cli || NULL == scConfig->key_priv_cli)
+        if (NULL == scConfig->clientConfigPtr->clientCertificate || NULL == scConfig->clientConfigPtr->clientKey)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "AddSecureChannelConfig check: Client certificate or key is not defined but is "
                                    "required due to Security policy / mode");
             result = false;
         }
-        if (NULL == scConfig->crt_srv)
+        if (NULL == scConfig->peerAppCert)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "AddSecureChannelConfig check: Server certificate is not defined but is required "
-                                   "due to Security policy / mode");
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "AddSecureChannelConfig check: Server certificate (peerAppCert) is not defined but is required "
+                "due to Security policy / mode");
             result = false;
         }
     }

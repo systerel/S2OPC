@@ -127,12 +127,12 @@ void msg_session_bs__write_create_session_req_msg_crypto(
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
 
-    if (NULL == pSCCfg)
+    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr)
     {
         return;
     }
 
-    pSerialCertCli = pSCCfg->crt_cli;
+    pSerialCertCli = pSCCfg->clientConfigPtr->clientCertificate;
 
     if (NULL == pSerialCertCli)
     {
@@ -250,24 +250,25 @@ void msg_session_bs__write_create_session_msg_server_endpoints(
 
 void msg_session_bs__write_create_session_resp_cert(
     const constants__t_msg_i msg_session_bs__p_msg,
-    const constants__t_channel_config_idx_i msg_session_bs__p_channel_config_idx,
+    const constants__t_endpoint_config_idx_i msg_session_bs__endpoint_config_idx,
     t_bool* const msg_session_bs__bret)
 {
-    SOPC_SecureChannel_Config* pSCCfg = NULL;
+    SOPC_Endpoint_Config* pEndpointConfig = NULL;
+
     const SOPC_Buffer* pCrtSrv = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_msg;
 
     /* Retrieve the certificate */
-    pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(msg_session_bs__p_channel_config_idx);
-    if (NULL == pSCCfg)
+    pEndpointConfig = SOPC_ToolkitServer_GetEndpointConfig(msg_session_bs__endpoint_config_idx);
+    if (NULL == pEndpointConfig || NULL == pEndpointConfig->serverConfigPtr)
     {
         result = false;
     }
     if (result)
     {
-        pCrtSrv = pSCCfg->crt_srv;
+        pCrtSrv = pEndpointConfig->serverConfigPtr->serverCertificate;
         if (NULL == pCrtSrv)
         {
             result = false;
@@ -572,11 +573,11 @@ static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i
     /* If SC certificate provided, check if the certificate is the same. */
     if (scHasCertificate && pCreateSessionCert->Length > 0)
     {
-        const SOPC_Buffer* scSrvCert = SOPC_KeyManager_SerializedCertificate_Data(scCertificate);
+        const SOPC_Buffer* scCert = SOPC_KeyManager_SerializedCertificate_Data(scCertificate);
 
-        if (scSrvCert->length == (uint32_t) pCreateSessionCert->Length)
+        if (scCert->length == (uint32_t) pCreateSessionCert->Length)
         {
-            int comparison = memcmp(scSrvCert->data, pCreateSessionCert->Data, (size_t) scSrvCert->length);
+            int comparison = memcmp(scCert->data, pCreateSessionCert->Data, (size_t) scCert->length);
             sameCertificate = (comparison == 0);
         }
     }
@@ -646,7 +647,7 @@ void msg_session_bs__create_session_req_check_client_certificate(
     }
 
     *msg_session_bs__valid = check_certificate_same_as_SC(
-        msg_session_bs__p_channel_config_idx, pSCCfg->reqSecuPolicyUri, pSCCfg->crt_cli, &pReq->ClientCertificate);
+        msg_session_bs__p_channel_config_idx, pSCCfg->reqSecuPolicyUri, pSCCfg->peerAppCert, &pReq->ClientCertificate);
 }
 
 void msg_session_bs__create_session_resp_check_server_certificate(
@@ -668,7 +669,7 @@ void msg_session_bs__create_session_resp_check_server_certificate(
     }
 
     *msg_session_bs__valid = check_certificate_same_as_SC(
-        msg_session_bs__p_channel_config_idx, pSCCfg->reqSecuPolicyUri, pSCCfg->crt_srv, &pResp->ServerCertificate);
+        msg_session_bs__p_channel_config_idx, pSCCfg->reqSecuPolicyUri, pSCCfg->peerAppCert, &pResp->ServerCertificate);
 }
 
 void msg_session_bs__create_session_resp_check_server_endpoints(

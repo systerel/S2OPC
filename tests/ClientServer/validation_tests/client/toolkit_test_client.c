@@ -269,10 +269,7 @@ SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
                                       .expectedEndpoints = NULL,
                                       .serverUri = NULL,
                                       .url = DEFAULT_ENDPOINT_URL,
-                                      .crt_cli = NULL,
-                                      .key_priv_cli = NULL,
-                                      .crt_srv = NULL,
-                                      .pki = NULL,
+                                      .peerAppCert = NULL,
                                       .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
                                       .requestedLifetime = 20000,
                                       .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
@@ -370,7 +367,7 @@ int main(void)
         else
         {
             printf(">>Stub_Client: Client certificate loaded\n");
-            scConfig.crt_cli = crt_cli;
+            clientAppConfig->clientCertificate = crt_cli;
         }
     }
 
@@ -384,7 +381,7 @@ int main(void)
         else
         {
             printf(">>Stub_Client: Server certificate loaded\n");
-            scConfig.crt_srv = crt_srv;
+            scConfig.peerAppCert = crt_srv;
         }
     }
 
@@ -427,7 +424,7 @@ int main(void)
         if (SOPC_STATUS_OK == status)
         {
             printf(">>Stub_Client: Client private key loaded\n");
-            scConfig.key_priv_cli = priv_cli;
+            clientAppConfig->clientKey = priv_cli;
         }
     }
 
@@ -449,7 +446,7 @@ int main(void)
         else
         {
             printf(">>Stub_Client: PKI created\n");
-            scConfig.pki = pki;
+            clientAppConfig->clientPKI = pki;
         }
     }
 
@@ -833,10 +830,7 @@ int main(void)
     // Clear locally allocated memory
     if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
     {
-        SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
         SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
-        SOPC_PKIProvider_Free(&pki);
     }
 
     SOPC_AddressSpace_Delete(address_space);

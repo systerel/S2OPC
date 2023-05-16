@@ -75,7 +75,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                                               uintptr_t appContext);
 
 // Finalize the SecureChannel configuration by parsing the necessary files
-SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(const SOPC_Client_Config* cConfig,
+SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
                                                                           SOPC_SecureConnection_Config* secConnConfig);
 
 /**

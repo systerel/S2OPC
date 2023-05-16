@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 19/01/2023 10:52:39
+ Date                 : 16/05/2023 13:05:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -97,7 +97,6 @@ extern void user_authentication_bs__is_valid_user_x509_authentication(
    const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
-   const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
 extern void user_authentication_bs__is_valid_username_pwd_authentication(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,

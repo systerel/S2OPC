@@ -47,6 +47,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
+#include "sopc_user_app_itf.h"
 #include "stub_sc_sopc_sockets_api.h"
 
 #include "opcua_identifiers.h"
@@ -57,6 +58,7 @@ static const char* sEndpointUrl = "opc.tcp://localhost:8888/myEndPoint";
 static const uint32_t pendingRequestHandle = 1000;
 
 static SOPC_SecureChannel_Config scConfig;
+static SOPC_Client_Config clientConfig;
 
 // Configuration SC idx provided on configuration (used also as socket / scIdx)
 uint32_t scConfigIdx = 0;
@@ -238,15 +240,17 @@ static void establishSC(void)
     Check_SC_Init();
 
     memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
+    SOPC_ClientConfig_Initialize(&clientConfig);
     scConfig.isClientSc = true;
+    scConfig.clientConfigPtr = &clientConfig;
     scConfig.msgSecurityMode = messageSecurityMode;
     scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;
     scConfig.requestedLifetime = 100000;
     scConfig.url = sEndpointUrl;
-    scConfig.crt_cli = crt_cli;
-    scConfig.crt_srv = crt_srv;
-    scConfig.key_priv_cli = priv_cli;
-    scConfig.pki = &pki;
+    scConfig.peerAppCert = crt_srv;
+    clientConfig.clientCertificate = crt_cli;
+    clientConfig.clientKey = priv_cli;
+    clientConfig.clientPKI = &pki;
 
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     ck_assert(scConfigIdx != 0);

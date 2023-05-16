@@ -638,9 +638,12 @@ int main(int argc, char** argv)
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     SOPC_SecureChannel_Config scConfig;
+    SOPC_Client_Config clientConfig;
     memset(&scConfig, 0, sizeof(SOPC_SecureChannel_Config));
+    SOPC_ClientConfig_Initialize(&clientConfig);
 
     scConfig.isClientSc = true;
+    scConfig.clientConfigPtr = &clientConfig;
     scConfig.url = getenv_default("SOPC_SERVER_URL", DEFAULT_SERVER_URL);
     scConfig.reqSecuPolicyUri = security_policy;
     scConfig.msgSecurityMode = msg_sec_mode;
@@ -666,10 +669,10 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        scConfig.crt_cli = cert;
-        scConfig.crt_srv = server_cert;
-        scConfig.key_priv_cli = key;
-        scConfig.pki = pki;
+        scConfig.peerAppCert = server_cert;
+        clientConfig.clientCertificate = cert;
+        clientConfig.clientKey = key;
+        clientConfig.clientPKI = pki;
     }
 
     uint32_t configIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);

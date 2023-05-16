@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 19/01/2023 10:52:37
+ Date                 : 16/05/2023 13:05:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -155,6 +155,7 @@ extern void session_core_bs__remove_NonceServer(
    const constants__t_session_i session_core_bs__p_session,
    const t_bool session_core_bs__p_is_client);
 extern void session_core_bs__server_activate_session_check_crypto(
+   const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
    const constants__t_session_i session_core_bs__p_session,
    const constants__t_channel_i session_core_bs__p_channel,
    const constants__t_channel_config_idx_i session_core_bs__p_channel_config_idx,

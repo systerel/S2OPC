@@ -124,13 +124,13 @@ OPERATIONS
     ;
 
     /* Fills the Certificate. Do not call when (SC:Sec_pol is None with UserToken:Sec_pol being all None) */
-    bret <-- write_create_session_resp_cert(p_msg, p_channel_config_idx) =
+    bret <-- write_create_session_resp_cert(p_msg, p_endpoint_config_idx) =
     PRE
         p_msg : t_msg_i &
         p_msg = c_msg_out &
         a_msg_out_type = e_msg_session_create_resp &
-        p_channel_config_idx : t_channel_config_idx_i &
-        p_channel_config_idx : t_channel_config_idx
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx
     THEN
         bret :: BOOL
     END

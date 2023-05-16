@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 22/03/2023 10:04:24
+ Date                 : 16/05/2023 16:34:12
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,6 +52,7 @@ void session_core__server_internal_activate_req_and_resp(
    {
       constants__t_channel_config_idx_i session_core__l_channel_config_idx;
       constants__t_SecurityPolicy session_core__l_secpol;
+      constants__t_endpoint_config_idx_i session_core__l_endpoint_config_idx;
       constants__t_Nonce_i session_core__l_nonce;
       constants__t_LocaleIds_i session_core__l_localeIds;
       
@@ -59,8 +60,11 @@ void session_core__server_internal_activate_req_and_resp(
          &session_core__l_channel_config_idx);
       channel_mgr__get_SecurityPolicy(session_core__channel,
          &session_core__l_secpol);
+      channel_mgr__server_get_endpoint_config(session_core__channel,
+         &session_core__l_endpoint_config_idx);
       if (session_core__l_secpol != constants__e_secpol_None) {
-         session_core_1__server_activate_session_check_crypto(session_core__session,
+         session_core_1__server_activate_session_check_crypto(session_core__l_endpoint_config_idx,
+            session_core__session,
             session_core__channel,
             session_core__l_channel_config_idx,
             session_core__activate_req_msg,
@@ -242,7 +246,7 @@ void session_core__server_create_session_req_and_resp_sm(
                   }
                   if (session_core__l_set_cert == true) {
                      msg_session_bs__write_create_session_resp_cert(session_core__create_resp_msg,
-                        session_core__l_channel_config_idx,
+                        session_core__l_endpoint_config_idx,
                         &session_core__l_bret);
                   }
                   else {

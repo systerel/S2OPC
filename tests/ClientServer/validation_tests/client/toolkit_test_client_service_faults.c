@@ -170,15 +170,14 @@ static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatu
 }
 
 // A Secure channel connection configuration
+SOPC_Client_Config clientConfig;
+
 SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
-                                      .clientConfigPtr = NULL,
+                                      .clientConfigPtr = &clientConfig,
                                       .expectedEndpoints = NULL,
                                       .serverUri = NULL,
                                       .url = DEFAULT_ENDPOINT_URL,
-                                      .crt_cli = NULL,
-                                      .key_priv_cli = NULL,
-                                      .crt_srv = NULL,
-                                      .pki = NULL,
+                                      .peerAppCert = NULL,
                                       .reqSecuPolicyUri = SOPC_SecurityPolicy_None_URI,
                                       .requestedLifetime = 20000,
                                       .msgSecurityMode = OpcUa_MessageSecurityMode_None};
@@ -198,6 +197,7 @@ int main(void)
     SOPC_PKIProvider* pki = NULL;
 
     /* Initialize SOPC_Common */
+    SOPC_ClientConfig_Initialize(&clientConfig);
 
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_service_faults_logs/";
@@ -244,7 +244,7 @@ int main(void)
         else
         {
             printf(">>Stub_Client: PKI created\n");
-            scConfig.pki = pki;
+            clientConfig.clientPKI = pki;
         }
     }
 

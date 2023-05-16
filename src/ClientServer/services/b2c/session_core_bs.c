@@ -130,14 +130,14 @@ void session_core_bs__may_validate_server_certificate(
     /* Retrieve the certificate */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
 
-    if (NULL == pSCCfg)
+    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr)
     {
         return;
     }
 
-    if (NULL == pSCCfg->crt_srv)
+    if (NULL == pSCCfg->peerAppCert)
     {
-        if (NULL == pSCCfg->pki)
+        if (NULL == pSCCfg->clientConfigPtr->clientPKI)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Services: session=%" PRIu32
@@ -164,7 +164,8 @@ void session_core_bs__may_validate_server_certificate(
             session_core_bs__p_user_server_cert->data, session_core_bs__p_user_server_cert->length, &serverCert);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->pki, serverCert, &errorCode);
+            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI, serverCert,
+                                                              &errorCode);
             *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
 
             if (SOPC_STATUS_OK != status)
@@ -849,7 +850,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
 
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__channel_config_idx);
-    if ((NULL == pSCCfg) || (NULL == pSCCfg->crt_srv))
+    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr || NULL == pSCCfg->peerAppCert)
     {
         return;
     }
@@ -865,7 +866,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
     if (SOPC_STATUS_OK == status)
     {
         // retrieve expected sender certificate as a ByteString
-        serverCert = pSCCfg->crt_srv;
+        serverCert = pSCCfg->peerAppCert;
     }
 
     int res = strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI);
@@ -882,8 +883,8 @@ void session_core_bs__client_activate_session_req_do_crypto(
         OpcUa_SignatureData_Initialize(pSign);
 
         /* Use the client private key to sign the server certificate + server nonce */
-        status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->key_priv_cli, serverNonce,
-                                             serverCert, &errorReason);
+        status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->clientConfigPtr->clientKey,
+                                             serverNonce, serverCert, &errorReason);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1289,7 +1290,8 @@ void session_core_bs__client_create_session_check_crypto(
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
 
-    if (NULL == pSCCfg || NULL == pSCCfg->crt_cli || NULL == pSCCfg->crt_srv)
+    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr || NULL == pSCCfg->clientConfigPtr->clientCertificate ||
+        NULL == pSCCfg->peerAppCert)
     {
         return;
     }
@@ -1303,7 +1305,7 @@ void session_core_bs__client_create_session_check_crypto(
     }
 
     const char* errorReason = "";
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_srv, &pCrtSrv);
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->peerAppCert, &pCrtSrv);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1312,8 +1314,9 @@ void session_core_bs__client_create_session_check_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, pSCCfg->crt_cli,
-                                 &pSession->nonceClient, &pSignCandid->Signature, &errorReason);
+        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv,
+                                 pSCCfg->clientConfigPtr->clientCertificate, &pSession->nonceClient,
+                                 &pSignCandid->Signature, &errorReason);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1331,6 +1334,7 @@ void session_core_bs__client_create_session_check_crypto(
 }
 
 void session_core_bs__server_activate_session_check_crypto(
+    const constants__t_endpoint_config_idx_i session_core_bs__p_endpoint_config_idx,
     const constants__t_session_i session_core_bs__session,
     const constants__t_channel_i session_core_bs__channel,
     const constants__t_channel_config_idx_i session_core_bs__channel_config_idx,
@@ -1345,6 +1349,7 @@ void session_core_bs__server_activate_session_check_crypto(
     const OpcUa_SignatureData* pSignCandid = &pReq->ClientSignature;
     SOPC_CertificateList* pCrtCli = NULL;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
+    SOPC_Endpoint_Config* epConfig = NULL;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -1370,7 +1375,13 @@ void session_core_bs__server_activate_session_check_crypto(
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitServer_GetSecureChannelConfig(session_core_bs__channel_config_idx);
 
-    if (NULL == pSCCfg || NULL == pSCCfg->crt_cli || NULL == pSCCfg->crt_srv)
+    if (NULL == pSCCfg || NULL == pSCCfg->peerAppCert)
+    {
+        return;
+    }
+
+    epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
+    if (NULL == epConfig || NULL == epConfig->serverConfigPtr || NULL == epConfig->serverConfigPtr->serverCertificate)
     {
         return;
     }
@@ -1384,7 +1395,7 @@ void session_core_bs__server_activate_session_check_crypto(
     }
 
     const char* errorReason = "";
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->crt_cli, &pCrtCli);
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->peerAppCert, &pCrtCli);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1393,8 +1404,9 @@ void session_core_bs__server_activate_session_check_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtCli, pSCCfg->crt_srv, pNonce,
-                                 &pSignCandid->Signature, &errorReason);
+        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtCli,
+                                 epConfig->serverConfigPtr->serverCertificate, pNonce, &pSignCandid->Signature,
+                                 &errorReason);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

@@ -1906,12 +1906,9 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
 
         if (result)
         {
-            nconfig->crt_cli = cert_buffer;
-            nconfig->crt_srv = epConfig->serverConfigPtr->serverCertificate;
+            nconfig->peerAppCert = cert_buffer;
             nconfig->isClientSc = false;
-            nconfig->key_priv_cli = NULL;
             nconfig->msgSecurityMode = opnReq->SecurityMode;
-            nconfig->pki = epConfig->serverConfigPtr->pki;
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
             nconfig->requestedLifetime = opnReq->RequestedLifetime;
             nconfig->url = epConfig->endpointURL;
@@ -2552,9 +2549,10 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     {
         SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
         SOPC_ASSERT(scConfig != NULL);
-        serialized_private_key = scConfig->key_priv_cli;
-        cert_data = scConfig->crt_cli;
-        peer_cert_data = scConfig->crt_srv;
+        SOPC_ASSERT(scConfig->clientConfigPtr != NULL);
+        serialized_private_key = scConfig->clientConfigPtr->clientKey;
+        cert_data = scConfig->clientConfigPtr->clientCertificate;
+        peer_cert_data = scConfig->peerAppCert;
     }
 
     if (serialized_private_key == NULL || cert_data == NULL)

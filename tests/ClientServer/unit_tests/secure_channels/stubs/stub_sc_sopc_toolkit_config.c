@@ -143,7 +143,7 @@ static void SOPC_ToolkitServer_ClearScConfig_WithoutLock(uint32_t serverScConfig
         // => only client certificate was specifically allocated
         // Exceptional case: configuration added internally and shall be freed on clear call
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->crt_cli);
+        SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->peerAppCert);
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(scConfig);
         tConfig.serverScConfigs[serverScConfigIdxWithoutOffset] = NULL;
@@ -400,4 +400,11 @@ SOPC_ReturnStatus SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_AddressSpaceNot
 
     // No services implemented
     return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config)
+{
+    memset(config, 0, sizeof(*config));
+    OpcUa_ApplicationDescription_Initialize(&config->clientDescription);
+    config->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
 }

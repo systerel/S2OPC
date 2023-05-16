@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 19/01/2023 10:52:26
+ Date                 : 16/05/2023 13:04:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -157,7 +157,6 @@ void user_authentication__allocate_valid_and_authenticated_user(
                user_authentication__p_user_token_signature,
                user_authentication__p_server_nonce,
                user_authentication__l_used_security_policy,
-               user_authentication__p_channel_config_idx,
                &user_authentication__l_sc_user_authentication);
          }
          else if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) {
