@@ -43,6 +43,18 @@ UA_NODESET_URI = 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd'
 UA_TYPES_URI = 'http://opcfoundation.org/UA/2008/02/Types.xsd'
 STRING_TAG = f'{{{UA_TYPES_URI}}}String'
 
+HIERARCHICAL_REFERENCE_TYPES = frozenset([
+    'HasEventSource',
+    'HasChild',
+    'Organizes',
+    'HasNotifier,'
+    'Aggregates',
+    'HasSubtype',
+    'HasProperty',
+    'HasComponent',
+    'HasOrderedComponent'
+    ])
+
 
 def indent(level):
     return '\n' + INDENT_SPACES*level
@@ -61,11 +73,14 @@ def parse_xmlns(source):
                 ns_map[prefix] = uri
     return ns_map
 
+def _find_node_with_nid(tree, nid):
+    return tree.find(f'*[@NodeId="{nid}"]')
+
 def _remove_nids(tree, nids):
-    # Remove nodes that matches all NodeIds in nids
+    # Remove the nodes that match the NodeIds given in nids
     root = tree.getroot()
     for nid in nids:
-        node = root.find('*[@NodeId="{}"]'.format(nid))
+        node = _find_node_with_nid(tree, nid)
         if node is not None:
             # if args.verbose:
             #     print('RemoveNode: {}'.format(nid), file=sys.stderr)
@@ -80,6 +95,10 @@ def _remove_refs_to_nids(tree, nids, namespaces):
                 # if args.verbose:
                 #     print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
                 refs.remove(ref)
+
+def _remove_nids_and_refs(tree, nids, namespaces):
+    _remove_nids(tree, nids)
+    _remove_refs_to_nids(tree, nids, namespaces)
 
 def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
     # Add a reference from a node to the other NodeId nid in the given direction
@@ -109,6 +128,10 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
         refs.text = indent(3)
     elem.tail = indent(2)
     refs.append(elem)
+
+
+def _is_forward(ref: ET.Element):
+    return ref.get('IsForward') != 'false'
 
 
 def get_ns0_version(tree_models):
@@ -279,27 +302,25 @@ def merge(tree, new, namespaces):
             continue
         nodea = tree_nodes[nid]
         for ref in refsb:
-            _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=(ref.get('IsForward') != 'false'))
+            _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=_is_forward(ref))
 
     tree_root[-1].tail = indent(0)
     return True
 
 def remove_max_monit(tree, namespaces):
     # Delete MaxMonitoredItemsPerCall
-    _remove_nids(tree, ['i=11714'])
+    _remove_nids_and_refs(tree, ['i=11714'], namespaces)
 
     # We have to remove references to MaxMonitoredItemsPerCall manually,
-    #  as there may exist references to unknown nodes in an address space.
-    _remove_refs_to_nids(tree, ['i=11714'], namespaces)
+    # as there may exist references to unknown nodes in an address space.
 
 def remove_max_node_mgt(tree, namespaces):
     # Delete MaxNodesPerNodeManagemeent
-    _remove_nids(tree, ['i=11713'])
+    _remove_nids_and_refs(tree, ['i=11713'], namespaces)
 
     # We have to remove references to MaxNodesPerNodeManagemeent manually,
     #  as there may exist references to unknown nodes in an address space.
-    _remove_refs_to_nids(tree, ['i=11713'], namespaces)
-    
+
 def remove_methods(tree, namespaces):
     # Delete methods that are instances of other methods.
     # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
@@ -313,11 +334,10 @@ def remove_methods(tree, namespaces):
         refs, = method_node.iterfind('uanodeset:References', namespaces)
         for ref in refs:
             ref_type = ref.get('ReferenceType')
-            if ref.get('IsForward') != 'false' and (ref_type == 'HasProperty' or ref_type == 'i=46'):
+            if _is_forward(ref) and (ref_type == 'HasProperty' or ref_type == 'i=46'):
                 methods_properties.append(ref.text.strip())
 
-    _remove_nids(tree, methods+methods_properties+['i=11709'])
-    _remove_refs_to_nids(tree, methods+methods_properties+['i=11709'], namespaces)
+    _remove_nids_and_refs(tree, methods+methods_properties+['i=11709'], namespaces)
 
 def remove_node_ids_greater_than(tree, namespaces, intMaxId):
     ns0nidPattern = re.compile('i=([0-9]+)')
@@ -332,8 +352,68 @@ def remove_node_ids_greater_than(tree, namespaces, intMaxId):
             if int(match.group(1)) > intMaxId:
                 nodes_to_remove.append(nid)
     # Delete the concerned nodes and references associated
-    _remove_nids(tree, nodes_to_remove)
-    _remove_refs_to_nids(tree, nodes_to_remove, namespaces)
+    _remove_nids_and_refs(tree, nodes_to_remove, namespaces)
+
+def _is_hierarchical_ref(ref: ET.Element):
+    ref_type = ref.get('ReferenceType')
+    return ref_type in HIERARCHICAL_REFERENCE_TYPES
+
+def _iter_hierarchical(n: ET.Element, namespaces: dict, downwards=True):
+    for ref in n.iterfind("uanodeset:References/uanodeset:Reference", namespaces):
+        if _is_forward(ref) != downwards:
+            continue
+        child_nid = ref.text.strip()
+        if not child_nid.startswith('ns='):
+            # ignore NS0 children
+            continue
+        if _is_hierarchical_ref(ref):
+            yield child_nid
+
+def _rec_compute_subtree(tree: ET.ElementTree, namespaces: dict, root_nid, subtree: dict):
+    n = _find_node_with_nid(tree, root_nid)
+    if n is None:
+        return
+    for child_nid in _iter_hierarchical(n, namespaces):
+        if root_nid not in subtree:
+            subtree[root_nid] = set()
+        subtree[root_nid].add(child_nid)
+        if child_nid not in subtree:
+            subtree[child_nid] = set()
+            _rec_compute_subtree(tree, namespaces, child_nid, subtree)
+
+def _rec_bf_remove_subtree(tree: ET.ElementTree, namespaces: dict, remove_siblings: set, subtree: dict, is_root=False):
+    # Breadth-First Removal of children with no parents outside the removed subtree
+    children = set()
+    removed_nids = set()
+    for nid in remove_siblings:
+        if nid not in subtree:
+            # deleted, not to be removed
+            continue
+        n = _find_node_with_nid(tree, nid)
+        outer_parents = [parent_nid for parent_nid in _iter_hierarchical(n, namespaces, downwards=False) if parent_nid not in subtree]
+        if outer_parents and not is_root:
+            # there is a parent not to be removed: don't remove this node and all its subtree
+            # except for the 'root' nodes, that the user explicitly requested to remove
+            print(f"Not removing {nid} because of outer parents: {outer_parents}")
+            del subtree[nid]
+        else:
+            tree.getroot().remove(n)
+            children.update(subtree[nid])
+            removed_nids.add(nid)
+    _remove_refs_to_nids(tree, removed_nids, namespaces)
+    if children:
+        _rec_bf_remove_subtree(tree, namespaces, children, subtree)
+
+def remove_subtree(tree: ET.ElementTree, namespaces: dict, remove_root_nid):
+    subtree = dict()
+    _rec_compute_subtree(tree, namespaces, remove_root_nid, subtree)
+    # retain nodes with a parent outside the subtree
+    # Important note: due to the possibility of specifying node relations with cycles,
+    # some of the parents of a given node may appear after discovering the node
+    # even with a Breadth-First Search; so we start with the entire subtree, then
+    # retain only the nodes with no outer parent
+    _rec_bf_remove_subtree(tree, namespaces, {remove_root_nid}, subtree, is_root=True)
+
 
 def sanitize(tree, namespaces):
     """
@@ -378,8 +458,7 @@ def sanitize(tree, namespaces):
         for ref in list(refs):  # Make a list so that we can remove elements while iterating
             type_ref = ref.get('ReferenceType')
             nidt = ref.text.strip()  # The destination node of this reference
-            is_fwd = ref.get('IsForward') != 'false'
-            if is_fwd:
+            if _is_forward(ref):
                 # We are in the case a -> b,
                 #  so a = nids, and b = nidt
                 if (nids, type_ref, nidt) in refs_fwd:
@@ -563,10 +642,13 @@ def run_merge(args):
     if args.remove_node_ids_gt > 0:
         remove_node_ids_greater_than(tree, namespaces, args.remove_node_ids_gt)
 
-    if args.sanitize:
+    if args.sanitize or args.remove_subtree > 0:
         res = sanitize(tree, namespaces)
     else:
         res = True
+
+    if res and args.remove_subtree is not None:
+        remove_subtree(tree, namespaces, args.remove_subtree)
 
     if res:
         tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
@@ -599,6 +681,11 @@ def make_argparser():
                         help='Remove the MaxNodesPerNodeManagement node and references to it')
     parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
                         help='Remove the nodes of NS 0 with a NodeId greater than the given value')
+    parser.add_argument('--remove-subtree', default=0, type=str, dest='remove_subtree',
+                        help='''
+                        Remove the node with the given NodeId along with all its descendants, except for those with another ancestry.
+                        This  option forces the creation of reciprocal references (sanitize).
+                        ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''
             Suppress the normal behavior which is to sanitize the model after merge/additions/removal.

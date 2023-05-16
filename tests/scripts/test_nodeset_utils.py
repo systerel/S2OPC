@@ -92,6 +92,10 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_merge_with_ns_srv_arrays2.xml', [],
                       'ns0.xml', 'TestPressureNS_with_ns_srv_arrays.NodeSet2.xml', 'TestTemperatureNS_with_ns_srv_arrays.NodeSet2.xml')
 
-
+    def test_remove_subtree(self):
+        self.run_test('test_remove_subtree.xml', ['--remove-subtree', 'ns=1;i=15009'],
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+        
+        
 if __name__ == '__main__':
     unittest.main()
