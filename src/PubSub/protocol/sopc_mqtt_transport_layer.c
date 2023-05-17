@@ -266,6 +266,225 @@ uint64_t get_unique_client_id(void)
 
 #else
 
+#ifndef USE_CORE_MQTT
+#define USE_CORE_MQTT = 0
+#endif
+#if USE_CORE_MQTT == 1
+
+/* include */
+
+#include "S2OPC_mqtt_agent_task.h"
+#include "core_mqtt.h"
+#include "lwip/sockets.h"
+
+/* Functions */
+
+int sopc_createsock (int domain, int type, int protocol, Socket* sock)
+{
+	*sock = socket(domain, type, protocol);
+	return 0;
+}
+
+int32_t sopc_sendsock (NetworkContext_t * pNetworkContext, const void * pdata, size_t bytesToSend )
+{
+	ssize_t res = 0;
+    res = send(pNetworkContext->sock, pdata, bytesToSend, 0);
+    return res;
+}
+
+int32_t sopc_recvsock (NetworkContext_t * pNetworkContext, void * pdata, size_t dataSize )
+{
+	ssize_t sReadCount = 0;
+	sReadCount = recv(pNetworkContext->sock, pdata, dataSize, 0);
+    return sReadCount;
+}
+
+int sopc_connectsock (Socket sock, SOPC_Socket_AddressInfo* SA)
+{
+	int connectStatus = -1;
+    connectStatus = connect(sock, SA->ai_addr, SA->ai_addrlen);
+    return connectStatus;
+}
+
+static void sopc_MqttEventCallback ()
+{
+	LogInfo("mqtt event callback");//TODO
+}
+
+static uint32_t ulGlobalEntryTimeMs;
+static uint32_t sopc_prvGetTimeMs( void )
+{
+    uint32_t ulTimeMs = 0UL;
+    /* Determine the elapsed time in the application */
+    ulTimeMs = ( uint32_t ) ( xTaskGetTickCount() * portTICK_PERIOD_MS ) - ulGlobalEntryTimeMs;
+    return ulTimeMs;
+}
+
+SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
+{
+    MQTTStatus_t statusM = MQTTIllegalState;
+	MQTTPublishInfo_t publishInfo;
+	uint16_t packetId; //needed for QoS > 0
+
+	publishInfo.qos = MQTTQoS0;
+	if (MQTTQoS0 == publishInfo.qos)
+	{
+		publishInfo.dup = false;
+	}
+
+	publishInfo.pTopicName = topic;
+	publishInfo.topicNameLength = (uint16_t) strlen(topic);
+	publishInfo.pPayload = message.data;
+	publishInfo.payloadLength = message.length;
+
+	packetId = MQTT_GetPacketId(contextClient);
+	LogDebug("PacketId = %d",packetId);
+
+	statusM = MQTT_Publish(contextClient, &publishInfo, packetId);
+
+	if (MQTTSuccess != statusM)
+	{
+		LogDebug("Status Mqtt Error : %d",statusM);
+		return SOPC_STATUS_NOK;
+	}
+	LogInfo("publish message send !");
+ /*
+	if (packetId > 10)
+	{
+		SOPC_MQTT_Release_Client(contextClient);
+	}
+*/
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
+                                              const char* uri,
+                                              const char* username,
+                                              const char* password,
+                                              const char** subTopic,
+                                              uint16_t nbSubTopic,
+                                              FctMessageReceived* cbMessageReceived,
+                                              void* userContext)
+{
+    SOPC_UNUSED_ARG(subTopic);
+    SOPC_UNUSED_ARG(nbSubTopic);
+	SOPC_UNUSED_ARG(cbMessageReceived);
+    SOPC_UNUSED_ARG(userContext);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+	MQTTStatus_t statusM = MQTTIllegalState;
+    NetworkContext_t * xNetworkContext = SOPC_Calloc(1, sizeof(NetworkContext_t));
+    //A corriger
+	TransportInterface_t xTransport = {0}; // not to make an alloc because MQTT_Init just copies the content of the pointer and does not put this structure at the end of its own
+	MQTTFixedBuffer_t fixedBuffer = {0}; // same
+
+	// Set buffer
+	uint8_t * pbuffer = SOPC_Calloc(4096, sizeof(uint8_t));
+	fixedBuffer.pBuffer = pbuffer;
+	fixedBuffer.size = 4096;
+
+	char * addrUri = SOPC_Malloc((strlen(uri)) * sizeof(char));;
+	strcpy(addrUri,uri);
+
+	char * pIP = strtok(addrUri, ":");
+	char * pPort = strtok(NULL, ":");
+	SOPC_Free(addrUri);
+	addrUri = NULL;
+	SOPC_Socket_AddressInfo* addrs = NULL;
+	status = SOPC_Socket_AddrInfo_Get(pIP, pPort, &addrs);
+
+	if (SOPC_STATUS_OK != status)
+	{
+		return status;
+	}
+
+	Socket sock1 = -1;
+	xNetworkContext->sock = sock1;
+
+	sopc_createsock(2, SOCK_STREAM, 0, &xNetworkContext->sock); //@parameter SOCK_STREAM involves tcp on lwip (@param 1 and 3 unused)
+	sopc_connectsock(xNetworkContext->sock, addrs);
+
+	// - Init Mqtt context - //
+	xTransport.pNetworkContext = xNetworkContext;
+	xTransport.recv = sopc_recvsock;
+	xTransport.send = sopc_sendsock;
+
+	statusM = MQTT_Init(contextClient, &xTransport, sopc_prvGetTimeMs, sopc_MqttEventCallback, &fixedBuffer);
+
+	if (MQTTSuccess != statusM)
+	{
+		LogDebug("Status Mqtt Error : %d",statusM);
+		return SOPC_STATUS_NOK;
+	}
+
+
+	// - Connect to the borker - //
+
+	MQTTConnectInfo_t connectInfo = { 0 };
+	connectInfo.cleanSession = true;
+	connectInfo.pClientIdentifier = "someClientID";
+	connectInfo.clientIdentifierLength = (uint16_t) strlen( connectInfo.pClientIdentifier );
+	connectInfo.keepAliveSeconds = 60;
+	connectInfo.pUserName = username;
+	if (NULL == username)
+	{
+		connectInfo.userNameLength = 0;
+	}
+	else  {connectInfo.userNameLength = (uint16_t) strlen(username);}
+	connectInfo.pPassword = password;
+	if (NULL == password)
+	{
+		connectInfo.passwordLength = 0;
+	}
+	else  {connectInfo.passwordLength = (uint16_t) strlen(username);}
+	bool sessionPresent = false;
+
+	statusM = MQTT_Connect(contextClient, &connectInfo, NULL, 1000, &sessionPresent );
+
+	if (MQTTSuccess != statusM)
+	{
+		LogDebug("Status Mqtt Error : %d",statusM);
+		return SOPC_STATUS_NOK;
+	}
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    *contextClient = SOPC_Calloc(1, sizeof(MqttContextClient));
+
+    if (NULL == *contextClient)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return status;
+}
+
+void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
+{
+	MQTT_Disconnect(contextClient);
+
+	//Delete
+	SOPC_Free(contextClient->transportInterface.pNetworkContext);
+	contextClient->transportInterface.pNetworkContext = NULL;
+	contextClient->transportInterface.recv = 0;
+	contextClient->transportInterface.send = 0;
+	SOPC_Free(contextClient->networkBuffer.pBuffer);
+	contextClient->networkBuffer.pBuffer = NULL;
+	contextClient->networkBuffer.size = 0;
+	SOPC_Free(contextClient);
+}
+
+bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
+{
+	return contextClient->connectStatus;
+}
+
+
+#else
+
 SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const char* topic, SOPC_Buffer message)
 {
     SOPC_UNUSED_ARG(contextClient);
@@ -311,4 +530,5 @@ bool SOPC_MQTT_Client_Is_Connected(MqttContextClient* contextClient)
     return false;
 }
 
+#endif
 #endif

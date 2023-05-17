@@ -32,6 +32,7 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_types.h"
+#include "p_sockets.h"
 
 /* MQTT connection hard coded configuration */
 
@@ -41,8 +42,11 @@
 #define MQTT_LIB_CONNECTION_TIMEOUT (4)    /* Connection lib timeout = 4 s*/
 #define MQTT_LIB_KEEPALIVE (4)             /* Connection lost detection set to 4 s*/
 
+#if USE_CORE_MQTT
+typedef struct MQTTContext	 MqttContextClient; /* Mqtt context client */
+#else
 typedef struct MQTT_CONTEXT_CLIENT MqttContextClient; /* Mqtt context client */
-
+#endif
 /* Callback called to notify a message reception. */
 
 typedef void FctMessageReceived(uint8_t* data, /* Data received */

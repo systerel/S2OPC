@@ -45,6 +45,8 @@
 #include "sopc_threads.h"
 #include "sopc_udp_sockets.h"
 
+#include "core_mqtt.h"
+
 /* Transport context. One per connection */
 typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
 
@@ -52,8 +54,8 @@ typedef struct SOPC_PubScheduler_TransportCtx SOPC_PubScheduler_TransportCtx;
 typedef void SOPC_PubScheduler_TransportCtx_Clear(SOPC_PubScheduler_TransportCtx*);
 
 // Function to send a message. To be implemented for each protocol
-typedef void SOPC_PubScheduler_TransportCtx_Send(SOPC_PubScheduler_TransportCtx*, SOPC_Buffer*);
 
+typedef void SOPC_PubScheduler_TransportCtx_Send(SOPC_PubScheduler_TransportCtx*, SOPC_Buffer*);
 // Clear a Transport UDP context. Implements SOPC_PubScheduler_TransportCtx_Clear
 static void SOPC_PubScheduler_CtxUdp_Clear(SOPC_PubScheduler_TransportCtx* ctx);
 
@@ -1016,4 +1018,48 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
     status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return result;
+}
+
+MQTTStatus_t mqtt_init (MessageCtx* context)
+
+{
+	  MQTTStatus_t status = MQTTIllegalState;
+
+	  // Function for obtaining a timestamp.
+	  uint32_t getTimeStampMs();
+	  // Callback function for receiving packets.
+	  void eventCallback(
+	       MQTTContext_t * pContext,
+	       MQTTPacketInfo_t * pPacketInfo,
+	       MQTTDeserializedInfo_t * pDeserializedInfo
+	  );
+	  // Network send.
+	  int32_t networkSend( NetworkContext_t * pContext, const void * pBuffer, size_t bytes );
+	  // Network receive.
+	  int32_t networkRecv( NetworkContext_t * pContext, void * pBuffer, size_t bytes );
+
+	  MQTTContext_t mqttContext;
+	  TransportInterface_t transport;
+	  MQTTFixedBuffer_t fixedBuffer;
+	  uint8_t buffer[ 1024 ];
+
+	  // Clear context.
+	  memset( ( void * ) &mqttContext, 0x00, sizeof( MQTTContext_t ) );
+
+	  // Set transport interface members.
+	  transport.pNetworkContext = (NetworkContext_t *) context->transport;
+	  transport.send = networkSend;
+	  transport.recv = networkRecv;
+
+	  // Set buffer members.
+	  fixedBuffer.pBuffer = buffer;
+	  fixedBuffer.size = 1024;
+
+	  status = MQTT_Init( &mqttContext, &transport, getTimeStampMs, eventCallback, &fixedBuffer );
+
+	  if( status == MQTTSuccess )
+	  {
+	       // Do something with mqttContext. The transport and fixedBuffer structs were
+	       // copied into the context, so the original structs do not need to stay in scope.
+	  }
 }
