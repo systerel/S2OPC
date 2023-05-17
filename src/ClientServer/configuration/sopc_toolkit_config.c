@@ -82,7 +82,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (SOPC_STATUS_OK == status && !SOPC_Common_IsInitialized())
+    bool bRet = SOPC_Common_IsInitialized();
+    if (SOPC_STATUS_OK == status && !bRet)
     {
         /* Initialize with default log configuration */
         SOPC_Log_Configuration defaultLogConfiguration = SOPC_Common_GetDefaultLogConfiguration();
@@ -104,7 +105,9 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             sopc_appEventCallback = pAppFct;
 
             // Ensure constants cannot be modified later
-            SOPC_Common_SetEncodingConstants(SOPC_Common_GetDefaultEncodingConstants());
+            // Return value is not check as the encoding config could be already set.
+            SOPC_Common_EncodingConstants defEncConst = SOPC_Common_GetDefaultEncodingConstants();
+            bRet = SOPC_Common_SetEncodingConstants(defEncConst);
             SOPC_Helper_EndiannessCfg_Initialize();
 
             if (SOPC_STATUS_OK == status)

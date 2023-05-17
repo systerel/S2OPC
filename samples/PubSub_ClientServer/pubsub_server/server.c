@@ -542,14 +542,30 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        fseek(fd, 0, SEEK_END);
-        long fileSize = ftell(fd);
-        fseek(fd, 0, SEEK_SET);
-
-        if (fileSize < 0)
+        long fileSize = -1L;
+        int res = fseek(fd, 0, SEEK_END);
+        if (0 != res)
         {
-            printf("# Error: invalid configuration file size (file: %s)\n", PUBSUB_CONFIG_PATH);
+            printf("# Error: could not seek from end of file (file: %s)\n", PUBSUB_CONFIG_PATH);
             status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            fileSize = ftell(fd);
+            if (fileSize < 0)
+            {
+                printf("# Error: invalid configuration file size (file: %s)\n", PUBSUB_CONFIG_PATH);
+                status = SOPC_STATUS_INVALID_STATE;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            res = fseek(fd, 0, SEEK_SET);
+            if (0 != res)
+            {
+                printf("# Error: could not seek from beginning of file (file: %s)\n", PUBSUB_CONFIG_PATH);
+                status = SOPC_STATUS_INVALID_STATE;
+            }
         }
 
         if (SOPC_STATUS_OK == status)

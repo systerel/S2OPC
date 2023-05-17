@@ -247,9 +247,10 @@ START_TEST(invalid_file_handle_get_position)
 {
     SOPC_ClientHelper_CallMethodResult callResults = {0};
     uint32_t fileHandleItem1 = INVALID_FILE_HANDLE;
-    SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, true, &callResults, fileHandleItem1);
+    uint64_t pos = SOPC_TEST_FileTransfer_GetPositionMethod(g_coId, true, &callResults, fileHandleItem1);
     ck_assert(OpcUa_BadInvalidArgument == callResults.status);
     ck_assert_ptr_null(callResults.outputParams);
+    ck_assert(INVALID_POSITION == pos);
     SOPC_ClientHelper_CallMethodResults_Clear(1, &callResults);
 }
 END_TEST
