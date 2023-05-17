@@ -222,3 +222,22 @@ char** SOPC_CommonHelper_Copy_Char_Array(size_t nbElts, const char** src)
 
     return sArray;
 }
+
+const char* SOPC_SecurityPolicyUriToCstring(SOPC_SecurityPolicy_URI secuUri)
+{
+    switch (secuUri)
+    {
+    case SOPC_SecurityPolicy_None:
+        return SOPC_SecurityPolicy_None_URI;
+    case SOPC_SecurityPolicy_Basic256:
+        return SOPC_SecurityPolicy_Basic256_URI;
+    case SOPC_SecurityPolicy_Basic256Sha256:
+        return SOPC_SecurityPolicy_Basic256Sha256_URI;
+    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep:
+        return SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI;
+    case SOPC_SecurityPolicy_Aes256Sha256RsaPss:
+        return SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI;
+    default:
+        return NULL;
+    }
+}
