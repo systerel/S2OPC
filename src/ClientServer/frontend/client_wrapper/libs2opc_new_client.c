@@ -452,34 +452,43 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC
             rEPidx = i;
         }
     }
-
-    SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
-        sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
-    if (0 == reverseConfigIdx)
+    if (foundIdx)
     {
-        reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
-    }
-    if (0 != reverseConfigIdx)
-    {
-        // If the reverse endpoint is not opened, open ti
-        const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
-        if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
+        SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
+            sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
+        if (0 == reverseConfigIdx)
         {
-            // Store the reverse EP configuration index
-            sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx] = reverseConfigIdx;
-            // Open the reverse endpoint
-            SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseConfigIdx);
-            sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset] = true;
+            reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
         }
-        *res = reverseConfigIdx;
-        status = SOPC_STATUS_OK;
+        if (0 != reverseConfigIdx)
+        {
+            // If the reverse endpoint is not opened, open ti
+            const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
+            if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
+            {
+                // Store the reverse EP configuration index
+                sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx] = reverseConfigIdx;
+                // Open the reverse endpoint
+                SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseConfigIdx);
+                sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset] = true;
+            }
+            *res = reverseConfigIdx;
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SOPC_ClientHelperInternal_MayCreateReverseEp: creation of reverse endpoint config %s failed",
+                secConnConfig->reverseURL);
+        }
     }
     else
     {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "SOPC_ClientHelperInternal_MayCreateReverseEp: creation of reverse endpoint config %s failed",
-            secConnConfig->reverseURL);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ClientHelperInternal_MayCreateReverseEp: unexpected: reverse endpoint URL %s not "
+                               "recorded in client config",
+                               secConnConfig->reverseURL);
     }
     return status;
 }
