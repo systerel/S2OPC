@@ -476,9 +476,6 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                         "ChunksMgr (asym cert): sender certificate validation failed (epCfgIdx=%" PRIu32
                         " scCfgIdx=%" PRIu32 ") with error: %" PRIX32 "",
                         epConfigIdx, scConfigIdx, *errorStatus);
-
-                    // TODO:  keep reason in some cases ?
-                    *errorStatus = OpcUa_BadTcpInternalError;
                 }
 
                 if (!scConnection->isServerConnection || status != SOPC_STATUS_OK)
@@ -921,8 +918,24 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
     if (!result && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
         scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
     {
-        // Replace any error with generic error to be used before connection establishment
-        *errorStatus = OpcUa_BadSecurityChecksFailed;
+        switch (*errorStatus)
+        {
+        case OpcUa_BadCertificateTimeInvalid:
+        case OpcUa_BadCertificateHostNameInvalid:
+        case OpcUa_BadCertificateUriInvalid:
+        case OpcUa_BadCertificateUseNotAllowed:
+        case OpcUa_BadCertificateIssuerUseNotAllowed:
+        case OpcUa_BadCertificateRevocationUnknown:
+        case OpcUa_BadCertificateIssuerRevocationUnknown:
+        case OpcUa_BadCertificateRevoked:
+        case OpcUa_BadCertificateIssuerRevoked:
+            // keep status code as specified in part 4 - table 106 - Certificate Validation Steps
+            break;
+        default:
+            // Replace any other error with generic error to be used before connection establishment
+            *errorStatus = OpcUa_BadSecurityChecksFailed;
+            break;
+        }
     }
     return result;
 }
