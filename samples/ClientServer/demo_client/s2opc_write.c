@@ -433,7 +433,7 @@ static void PrintWriteResponse(OpcUa_WriteResponse* pResp)
     int32_t i = 0;
     char* sNid = NULL;
 
-    if (SOPC_GoodGenericStatus != pResp->ResponseHeader.ServiceResult)
+    if (!SOPC_IsGoodStatus(pResp->ResponseHeader.ServiceResult))
     {
         printf("# Error: Write failed with status code %i.\n", pResp->ResponseHeader.ServiceResult);
         exitStatus = 3;
@@ -450,7 +450,10 @@ static void PrintWriteResponse(OpcUa_WriteResponse* pResp)
         printf("Write node \"%s\", attribute %i:\n", sNid, g_iAttr);
         SOPC_Free(sNid);
         sNid = NULL;
-
+        if (!SOPC_IsGoodStatus(pResp->Results[i]))
+        {
+            exitStatus = 4;
+        }
         printf("  StatusCode: 0x%08X\n", pResp->Results[i]);
     }
 }
