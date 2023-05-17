@@ -376,25 +376,9 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
         return NULL;
     }
     SOPC_SecurityConfig* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
-    const char* sUri = NULL;
-    switch (uri)
+    const char* sUri = SOPC_SecurityPolicyUriToCstring(uri);
+    if (NULL == sUri)
     {
-    case SOPC_SecurityPolicy_None:
-        sUri = SOPC_SecurityPolicy_None_URI;
-        break;
-    case SOPC_SecurityPolicy_Basic256:
-        sUri = SOPC_SecurityPolicy_Basic256_URI;
-        break;
-    case SOPC_SecurityPolicy_Basic256Sha256:
-        sUri = SOPC_SecurityPolicy_Basic256Sha256_URI;
-        break;
-    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep:
-        sUri = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI;
-        break;
-    case SOPC_SecurityPolicy_Aes256Sha256RsaPss:
-        sUri = SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI;
-        break;
-    default:
         return NULL;
     }
     SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER

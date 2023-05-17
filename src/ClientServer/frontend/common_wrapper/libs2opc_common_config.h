@@ -90,4 +90,13 @@ SOPC_S2OPC_Config* SOPC_CommonHelper_GetConfiguration(void);
  */
 bool SOPC_CommonHelper_GetInitialized(void);
 
+/**
+ * \brief Returns the C string matching the security policy URI enum value
+ *
+ * \param secuUri The security policy URI enum value
+ * \return The C string matching the security policy URI enum value or NULL if value invalid
+ *
+ */
+const char* SOPC_SecurityPolicyUriToCstring(SOPC_SecurityPolicy_URI secuUri);
+
 #endif
