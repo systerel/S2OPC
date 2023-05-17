@@ -63,9 +63,12 @@ toolkit_test_suite_client.tap
 validation.tap
 s2opc_write.tap
 s2opc_write_X509.tap
+s2opc_wrapper_write.tap
 s2opc_read.tap
 s2opc_read_X509.tap
+s2opc_wrapper_read.tap
 s2opc_browse.tap
+s2opc_wrapper_browse.tap
 s2opc_discovery.tap'
 
 PUBSUB_TAP_FILES='interop_pub_test.tap

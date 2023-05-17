@@ -192,29 +192,37 @@ if(NOT WIN32)
 endif(NOT WIN32)
 
 # Samples with S2OPC client wrapper:
-add_executable(example_wrapper_write "client_wrapper/examples/write.c")
-target_include_directories(example_wrapper_write PRIVATE s2opc_clientwrapper)
-target_link_libraries(example_wrapper_write PRIVATE s2opc_clientwrapper)
-target_compile_options(example_wrapper_write PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(example_wrapper_write PRIVATE ${S2OPC_DEFINITIONS})
+set(CLIENT_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Demo_Config.xml")
+set(CLIENT_WRAPPER_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Wrapper_Config.xml")
 
-add_executable(example_wrapper_read "client_wrapper/examples/read.c")
-target_include_directories(example_wrapper_read PRIVATE s2opc_clientwrapper)
-target_link_libraries(example_wrapper_read PRIVATE s2opc_clientwrapper)
-target_compile_options(example_wrapper_read PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(example_wrapper_read PRIVATE ${S2OPC_DEFINITIONS})
+add_custom_command(
+  TARGET example_wrapper_connect POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CLIENT_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
 
-add_executable(example_wrapper_browse "client_wrapper/examples/browse.c")
-target_include_directories(example_wrapper_browse PRIVATE s2opc_clientwrapper)
-target_link_libraries(example_wrapper_browse PRIVATE s2opc_clientwrapper)
-target_compile_options(example_wrapper_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(example_wrapper_browse PRIVATE ${S2OPC_DEFINITIONS})
+add_executable(s2opc_wrapper_write "client_wrapper/examples/write.c")
+target_include_directories(s2opc_wrapper_write PRIVATE s2opc_clientwrapper)
+target_link_libraries(s2opc_wrapper_write PRIVATE s2opc_clientwrapper)
+target_compile_options(s2opc_wrapper_write PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_wrapper_write PRIVATE ${S2OPC_DEFINITIONS})
 
-add_executable(example_wrapper_get_endpoints "client_wrapper/examples/get_endpoints.c")
-target_include_directories(example_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
-target_link_libraries(example_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
-target_compile_options(example_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(example_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
+add_executable(s2opc_wrapper_read "client_wrapper/examples/read.c")
+target_include_directories(s2opc_wrapper_read PRIVATE s2opc_clientwrapper)
+target_link_libraries(s2opc_wrapper_read PRIVATE s2opc_clientwrapper)
+target_compile_options(s2opc_wrapper_read PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_wrapper_read PRIVATE ${S2OPC_DEFINITIONS})
+
+add_executable(s2opc_wrapper_browse "client_wrapper/examples/browse.c")
+target_include_directories(s2opc_wrapper_browse PRIVATE s2opc_clientwrapper)
+target_link_libraries(s2opc_wrapper_browse PRIVATE s2opc_clientwrapper)
+target_compile_options(s2opc_wrapper_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_wrapper_browse PRIVATE ${S2OPC_DEFINITIONS})
+
+add_executable(s2opc_wrapper_get_endpoints "client_wrapper/examples/get_endpoints.c")
+target_include_directories(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
+target_link_libraries(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
+target_compile_options(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
 
 add_executable(example_wrapper_subscribe "client_wrapper/examples/subscribe.c")
 target_include_directories(example_wrapper_subscribe PRIVATE s2opc_clientwrapper)
@@ -247,7 +255,7 @@ if (expat_FOUND)
     "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
     "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-    "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;s=Byte_001" -t 3 42)
+    "$<TARGET_FILE:s2opc_write>" -u user1 -n "ns=1;i=1008" -t 3 42)
   set_tests_properties("validation::s2opc_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
     )
 
@@ -259,8 +267,20 @@ if (expat_FOUND)
   "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
   "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
-  "$<TARGET_FILE:s2opc_write>" --user_policy_id=X509_Basic256Sha256 --user_cert=user_public/user_2k_cert.der --user_key=user_private/encrypted_user_2k_key.pem -n "ns=1;s=Byte_001" -t 3 42)
+  "$<TARGET_FILE:s2opc_write>" --user_policy_id=X509_Basic256Sha256 --user_cert=user_public/user_2k_cert.der --user_key=user_private/encrypted_user_2k_key.pem -n "ns=1;i=1008" -t 3 42)
   set_tests_properties("validation::s2opc_write_X509" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_write_X509.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+  )
+
+  add_test(NAME "validation::s2opc_wrapper_write"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 3
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+  "$<TARGET_FILE:s2opc_wrapper_write>" "ns=1;i=1008" 42)
+set_tests_properties("validation::s2opc_wrapper_write" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_wrapper_write.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
   #read
@@ -288,6 +308,18 @@ if (expat_FOUND)
   set_tests_properties("validation::s2opc_read_X509" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_read_X509.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
   )
 
+  add_test(NAME "validation::s2opc_wrapper_read"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+  "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+  "$<TARGET_FILE:s2opc_wrapper_read>" "ns=1;i=1008" "ns=1;s=Array_Boolean_097")
+set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_wrapper_read.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+  )
+
   #browse
   add_test(NAME "validation::s2opc_browse"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
@@ -299,6 +331,18 @@ if (expat_FOUND)
     "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
     "$<TARGET_FILE:s2opc_browse>" -n "ns=1;i=20002")
   set_tests_properties("validation::s2opc_browse" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_browse.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+    )
+
+  add_test(NAME "validation::s2opc_wrapper_browse"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+    "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+    "$<TARGET_FILE:s2opc_wrapper_browse>" "ns=1;i=20002")
+  set_tests_properties("validation::s2opc_wrapper_browse" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_wrapper_browse.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
     )
 
   #discovery

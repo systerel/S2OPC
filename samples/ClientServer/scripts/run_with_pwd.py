@@ -46,7 +46,7 @@ def run_with_password(cmd, nb_pwd, interact):
     binProc = pexpect.spawn(cmd)
     try:
         for i in range(0,nb_pwd):
-           binProc.expect('.*[Pp]assword:')
+           binProc.expect('.*[Pp]assword.*:')
            binProc.sendline(PASSWORD)
            # Display output prior to expected prompt
            stdout.write(binProc.before)
