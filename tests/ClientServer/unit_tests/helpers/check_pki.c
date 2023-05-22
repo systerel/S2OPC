@@ -32,7 +32,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_pki_stack.h"
 
-#define S2OPC_DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define S2OPC_DEFAULT_ENDPOINT_URL "opc.tcp://LOCALhost:4841"
 #define S2OPC_DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 
 START_TEST(invalid_create)

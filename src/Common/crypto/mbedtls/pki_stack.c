@@ -706,6 +706,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 #include "sopc_crypto_profiles.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
+#include "sopc_helper_uri.h"
 
 #define STR_TRUSTLIST_NAME "/updatedTrustList"
 #define STR_TRUSTED "/trusted"
@@ -1182,16 +1183,27 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
 
 static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate, const char* url)
 {
+    /*
+        TODO : Add a domain name resolution.
+    */
     if (NULL == pToValidate || NULL == url)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_UriType type = SOPC_URI_UNDETERMINED;
+    char* pHostName = NULL;
+    char* pPort = NULL;
+    SOPC_ReturnStatus status = SOPC_Helper_URI_SplitUri(url, &type, &pHostName, &pPort);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
     }
     const mbedtls_x509_sequence* asn1_seq = &pToValidate->crt.subject_alt_names;
     mbedtls_x509_subject_alternative_name san_out = {0};
     int err = 0;
     bool found = false;
-    char* dns = NULL;
-    char* substring = NULL;
+    char* pCertDns = NULL;
+    int match = -1;
     while (NULL != asn1_seq && !found && 0 == err)
     {
         err = mbedtls_x509_parse_subject_alt_name(&asn1_seq->buf, &san_out);
@@ -1209,23 +1221,16 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
         }
         if (MBEDTLS_X509_SAN_DNS_NAME == san_out.type)
         {
-            /*
-            - part 6 table 43 §6.2.2 v1.05 :
-            The servers shall specify a partial or a fully qualified dNSName or a static IPAddress
-            - part 4 table 106 §6.1.3 v1.05 :
-            The HostName in the URL used to connect to the server shall be the same as one of the HostNames
-            specified in the Certificate.
-            */
-            dns = SOPC_Malloc((san_out.san.unstructured_name.len + 1) * sizeof(char));
-            memcpy(dns, san_out.san.unstructured_name.p, san_out.san.unstructured_name.len);
-            dns[san_out.san.unstructured_name.len] = '\0';
-            substring = strstr(url, dns);
-            if (NULL != substring)
+            pCertDns = SOPC_Malloc((san_out.san.unstructured_name.len + 1) * sizeof(char));
+            memcpy(pCertDns, san_out.san.unstructured_name.p, san_out.san.unstructured_name.len);
+            pCertDns[san_out.san.unstructured_name.len] = '\0';
+            match = SOPC_strcmp_ignore_case(pHostName, pCertDns);
+            if (0 == match)
             {
                 /* stop research */
                 found = true;
             }
-            SOPC_Free(dns);
+            SOPC_Free(pCertDns);
         }
         /* next iteration */
         memset(&san_out, 0, sizeof(mbedtls_x509_subject_alternative_name));
@@ -1233,12 +1238,17 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     }
     if (!found || 0 != err)
     {
-        return SOPC_STATUS_NOK;
+        status = SOPC_STATUS_NOK;
     }
     else
     {
-        return SOPC_STATUS_OK;
+        status = SOPC_STATUS_OK;
     }
+
+    SOPC_Free(pHostName);
+    SOPC_Free(pPort);
+
+    return status;
 }
 
 static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToValidate, const char* applicationUri)
