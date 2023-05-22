@@ -1108,7 +1108,7 @@ def testPubSubDynamicConf():
 def testPubSubStaticConf():
 
     logger = TapLogger("pubsub_server_test.tap")
-    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND)
+    pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS)
 
     defaultXml2Restore = False
 
