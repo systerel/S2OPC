@@ -59,7 +59,7 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_minimal = {
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
-    // Order compliant with part 4 (1.03) Table 104
+    // Order compliant with part 4 (1.04) Table 106
 
     /* Certificate structure */
     if ((failure_reasons & MBEDTLS_X509_BADCERT_MISSING) != 0)
@@ -98,7 +98,12 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     }
 
     /* Trust list check*/
-    // Cf. generic error below: validity period hidden if generic error used here
+
+    /* Generic signature error */
+    if ((failure_reasons & MBEDTLS_X509_BADCERT_NOT_TRUSTED) != 0)
+    {
+        return SOPC_CertificateValidationError_Untrusted;
+    }
 
     /* Validity period */
     else if ((failure_reasons & MBEDTLS_X509_BADCERT_EXPIRED) != 0)
@@ -108,12 +113,6 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     else if ((failure_reasons & MBEDTLS_X509_BADCERT_FUTURE) != 0)
     {
         return SOPC_CertificateValidationError_TimeInvalid;
-    }
-
-    /* Generic signature error (may include validity period) */
-    if ((failure_reasons & MBEDTLS_X509_BADCERT_NOT_TRUSTED) != 0)
-    {
-        return SOPC_CertificateValidationError_Untrusted;
     }
 
     /* Host Name */
@@ -177,7 +176,8 @@ static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_d
      * - (signature algorithms are also already checked)
      */
     bool bIssued = *(bool*) is_issued;
-    if (bIssued && 0 == certificate_depth && MBEDTLS_X509_BADCERT_NOT_TRUSTED == *flags)
+    if (bIssued && 0 == certificate_depth &&
+        MBEDTLS_X509_BADCERT_NOT_TRUSTED == (*flags & MBEDTLS_X509_BADCERT_NOT_TRUSTED))
     {
         /* Is it self-signed? Issuer and subject are the same.
          * Note: this verification is not sufficient by itself to conclude that the certificate is self-signed,
@@ -196,8 +196,8 @@ static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_d
                 if (mbedtls_pk_verify_ext(crt->sig_pk, crt->sig_opts, &crt->pk, crt->sig_md, hash,
                                           mbedtls_md_get_size(md_info), crt->sig.p, crt->sig.len) == 0)
                 {
-                    /* Finally accept the certificate */
-                    *flags = 0;
+                    /* Finally set the certificate as trusted */
+                    *flags = (*flags & ~(uint32_t) MBEDTLS_X509_BADCERT_NOT_TRUSTED);
                 }
             }
         }
