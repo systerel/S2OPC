@@ -40,6 +40,7 @@
 #include "sopc_key_manager.h"
 
 #define SOPC_CertificateValidationError_Invalid 0x80120000
+#define SOPC_CertificateValidationError_PolicyCheckFailed 0x81140000
 #define SOPC_CertificateValidationError_TimeInvalid 0x80140000
 #define SOPC_CertificateValidationError_IssuerTimeInvalid 0x80150000
 #define SOPC_CertificateValidationError_HostNameInvalid 0x80160000

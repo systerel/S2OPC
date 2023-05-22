@@ -1897,7 +1897,9 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProv
     // Let the lib-specific code handle the verification for the current security policy
     if (pProfile->pFnCertVerify(pProvider, pCert) != SOPC_STATUS_OK)
     {
-        *error = SOPC_CertificateValidationError_Invalid;
+        // Note: still validate the certificate to have a constant time validation
+        pPKI->pFnValidateCertificate(pPKI, pCert, error);
+        *error = SOPC_CertificateValidationError_PolicyCheckFailed;
         return SOPC_STATUS_NOK;
     }
 
