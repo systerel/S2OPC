@@ -402,6 +402,11 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
         }
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        secConnConfig->finalized = true;
+    }
+
     return status;
 }
 
