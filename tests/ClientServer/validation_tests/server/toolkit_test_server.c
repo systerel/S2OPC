@@ -984,15 +984,22 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+#ifndef WITH_STATIC_SECURITY_DATA
+    // Define a callback to retrieve the server key password (from environment variable)
+    status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+#endif
+
     const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
     const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
     const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
 
-    if (NULL != xml_server_config_path || NULL != xml_address_space_config_path || NULL != xml_users_config_path)
+    if (SOPC_STATUS_OK == status &&
+        (NULL != xml_server_config_path || NULL != xml_address_space_config_path || NULL != xml_users_config_path))
     {
 #ifdef WITH_EXPAT
         status = SOPC_HelperConfigServer_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
                                                           xml_users_config_path, NULL);
+
 #else
         printf(
             "Error: an XML server configuration file path provided whereas XML library not available (Expat).\n"
@@ -1050,15 +1057,6 @@ int main(int argc, char* argv[])
 
     /* Initialize the server library (start library threads) */
     status = Server_Initialize(logDirPath);
-
-#ifdef WITH_EXPAT
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
-    }
-
-#endif
 
     /* Configuration of:
      * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
