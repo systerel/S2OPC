@@ -42,7 +42,7 @@
 #endif
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "static_security_data.h"
+#include "pubsub_static_security_data.h"
 #endif
 
 static int32_t pubsubOnline = 0;

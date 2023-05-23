@@ -42,7 +42,7 @@
 #include "xml_expat/sopc_uanodeset_loader.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "static_security_data.h"
+#include "server_static_security_data.h"
 #endif
 
 #include "config.h"
