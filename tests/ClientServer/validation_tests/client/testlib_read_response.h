@@ -49,6 +49,6 @@
  *  2 -> 1 + prints the comparisons
  * Returns true when ReadResponse is deemed ok.
  */
-bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode status_code, int verbose_level);
+bool test_read_request_response(const OpcUa_ReadResponse* pReadResp, SOPC_StatusCode status_code, int verbose_level);
 
 #endif /* TEST_READ_RESPONSE_H_ */

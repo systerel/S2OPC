@@ -38,11 +38,11 @@ OpcUa_WriteRequest* tlibw_new_WriteRequest(const SOPC_AddressSpace* address_spac
 void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq);
 
 /** Verifies that the response is ok and the response of each request is ok too */
-bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* pWriteResp);
+bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, const OpcUa_WriteResponse* pWriteResp);
 /** Generates a new ReadRequest, that asks for the modified values. Must be coherent with tlibw_new_WriteRequest... */
 OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void);
 /** Client-side, after sending the tlib_new_ReadRequest, verifies the ReadResponse against the initial WriteRequest.
  * Values should match. */
-bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadResponse* pReadResp);
+bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, const OpcUa_ReadResponse* pReadResp);
 
 #endif /* TESTLIB_WRITE_H_ */

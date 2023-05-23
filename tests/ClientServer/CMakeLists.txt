@@ -310,7 +310,7 @@ add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.
   ${TEST_LIGHT_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 add_dependencies(toolkit_test_client make-light-address-space)
-target_link_libraries(toolkit_test_client PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_link_libraries(toolkit_test_client PRIVATE s2opc_clientwrapper s2opc_serverwrapper s2opc_clientserver-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})

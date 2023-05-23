@@ -50,7 +50,7 @@ static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Node* node, uint32_
     }
 }
 
-bool test_read_request_response(OpcUa_ReadResponse* pReadResp, SOPC_StatusCode statusCode, int verbose)
+bool test_read_request_response(const OpcUa_ReadResponse* pReadResp, SOPC_StatusCode statusCode, int verbose)
 {
     printf("--> ReadRequest test result: ");
     if (verbose > 0)
