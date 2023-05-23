@@ -27,7 +27,6 @@ TAG_PUBSUB = "PubSub"
 TAG_CONNECTION = "connection"
 ATTRIBUTE_CONNECTION_ADDRESS = "address"
 ATTRIBUTE_CONNECTION_MODE = "mode"
-ATTRIBUTE_CONNECTION_MQTT_TOPIC = "mqttTopic"
 ATTRIBUTE_CONNECTION_MQTT_USERNAME = "mqttUsername"
 ATTRIBUTE_CONNECTION_MQTT_PASSWORD = "mqttPassword"
 ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER = "acyclicPublisher"
@@ -45,6 +44,7 @@ VALUE_MESSAGE_SECURITY_MODE_SIGN = "sign"
 VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
+ATTRIBUTE_MESSAGE_MQTT_TOPIC = "mqttTopic"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -106,7 +106,6 @@ class CnxContext:
     def __init__(self, connection):
         self.publisherId = None
         self.address = connection.get(ATTRIBUTE_CONNECTION_ADDRESS)
-        self.mqttTopic = connection.get(ATTRIBUTE_CONNECTION_MQTT_TOPIC)
         self.mqttUsername = connection.get(ATTRIBUTE_CONNECTION_MQTT_USERNAME)
         self.mqttPassword = connection.get(ATTRIBUTE_CONNECTION_MQTT_PASSWORD)
         self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER,False))
@@ -122,6 +121,7 @@ class MessageContext:
         self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,-1))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
         self.keepAliveTime = float(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL,-1.))
+        self.mqttTopic = str (getOptionalAttribute(message,ATTRIBUTE_MESSAGE_MQTT_TOPIC,None))
 
 
 def getCSecurityMode(mode):
@@ -261,15 +261,6 @@ def handlePubConnection(publisherId, connection, index, result):
     }
 
     """ % (len(cnxContext.messages), len(cnxContext.messages)))
-        if(cnxContext.mqttTopic):
-            result.add("""
-    if (alloc)
-    {
-        // Set MQTT topic
-        alloc = SOPC_PubSubConnection_Set_MqttTopic(connection, "%s");
-    }
-    """ %cnxContext.mqttTopic
-            )
         if(cnxContext.mqttUsername and cnxContext.mqttPassword):
             result.add("""
     if (alloc)
@@ -309,12 +300,23 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // GroupVersion = %s
         // Interval = %f ms
         // Offest = %d us
- """ % (msgContext.id, msgContext.version, msgContext.interval,msgContext.offset))
-    result.add("""
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s);
-       alloc = NULL != writerGroup;
-    }
- """ % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
+        // topic = %s
+ """ % (msgContext.id, msgContext.version, msgContext.interval,msgContext.offset,msgContext.mqttTopic))
+ 
+    if(msgContext.mqttTopic != "None"):
+    	result.add("""
+       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s,"%s");
+       	alloc = NULL != writerGroup;
+    	}
+ 	""" % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic))
+        
+    if(msgContext.mqttTopic == "None"):
+    	result.add("""
+       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s,NULL);
+       	alloc = NULL != writerGroup;
+    	}
+ 	""" % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
         msgContext.offset, getCSecurityMode(msgContext.securityMode)))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
@@ -468,15 +470,6 @@ def handleSubConnection(connection, index, result):
     }
 
         """ % (index, cnxContext.address, nbMsg, nbMsg))
-        if(cnxContext.mqttTopic):
-            result.add("""
-    if (alloc)
-    {
-        // Set MQTT topic
-        alloc = SOPC_PubSubConnection_Set_MqttTopic(connection, "%s");
-    }
-    """ %cnxContext.mqttTopic
-            )
         if(cnxContext.mqttUsername and cnxContext.mqttPassword):
             result.add("""
     if (alloc)
@@ -575,13 +568,18 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            uint32_t groupVersion,
                                                            double interval,
                                                            int32_t offsetUs,
-                                                           SOPC_SecurityMode_Type securityMode)
+                                                           SOPC_SecurityMode_Type securityMode,
+                                                           const char * topic)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
+    if (NULL != topic)
+    {
+    	SOPC_WriterGroup_Set_MqttTopic(group, topic);
+    }
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);

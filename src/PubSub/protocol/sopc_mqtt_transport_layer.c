@@ -324,9 +324,10 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 {
     MQTTStatus_t statusM = MQTTIllegalState;
 	MQTTPublishInfo_t publishInfo;
-	uint16_t packetId; //needed for QoS > 0
+	uint16_t packetId = 1; //needed for QoS > 0 but can be static (just != 0)
+							// Be careful with packetId collision
 
-	publishInfo.qos = MQTTQoS0;
+	publishInfo.qos = MQTTQoS1;
 	if (MQTTQoS0 == publishInfo.qos)
 	{
 		publishInfo.dup = false;
@@ -341,6 +342,12 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 	LogDebug("PacketId = %d",packetId);
 
 	statusM = MQTT_Publish(contextClient, &publishInfo, packetId);
+
+	if ( (MQTTSuccess == statusM) & (publishInfo.qos > MQTTQoS0) )
+	{
+		MQTT_ReceiveLoop(contextClient, 1);
+		LogInfo("ACK !");
+	}
 
 	if (MQTTSuccess != statusM)
 	{
@@ -374,7 +381,6 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 	MQTTStatus_t statusM = MQTTIllegalState;
     NetworkContext_t * xNetworkContext = SOPC_Calloc(1, sizeof(NetworkContext_t));
-    //A corriger
 	TransportInterface_t xTransport = {0}; // not to make an alloc because MQTT_Init just copies the content of the pointer and does not put this structure at the end of its own
 	MQTTFixedBuffer_t fixedBuffer = {0}; // same
 

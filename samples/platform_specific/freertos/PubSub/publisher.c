@@ -75,7 +75,7 @@ void cbToolkit_publisher(void)
                                   pdTRUE,
                                   portMAX_DELAY );
 
-    vTaskDelay(5000);
+    vTaskDelay(1000);
 
     SOPC_PubSubConfiguration* config = NULL;
     bool res = false;

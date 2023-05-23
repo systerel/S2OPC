@@ -18,17 +18,14 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
-														   const char * topic)
+                                                           const char * topic)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
-    if (topic != NULL)
-    {
-    	SOPC_WriterGroup_Set_MqttTopic(group, topic); //Ajout ici
-    }
+    SOPC_WriterGroup_Set_MqttTopic(group, topic);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
@@ -130,9 +127,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupVersion = 1
         // Interval = 2000.000000 ms
         // Offest = -1 us
-    	// topic = "mqtt_topic"
+        // topic = S2OPC
  
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 2000.000000,-1, SOPC_SecurityMode_None,"mqtt_topic");
+       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 2000.000000,-1, SOPC_SecurityMode_None,"S2OPC");
        alloc = NULL != writerGroup;
     }
  
@@ -149,7 +146,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_PublishedDataSet* dataset = NULL;
     if (alloc)
     {
-    	//SOPC_WriterGroup_Set_MqttTopic(writerGroup,"S2OPC"); //add
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 51
@@ -169,9 +165,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupVersion = 1
         // Interval = 1000.000000 ms
         // Offest = -1 us
-    	// topic = "S2OPC"
+        // topic = None
  
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000,-1, SOPC_SecurityMode_None, "S2OPC");
+       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000,-1, SOPC_SecurityMode_None,"None");
        alloc = NULL != writerGroup;
     }
  
@@ -186,7 +182,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     
     if (alloc)
     {
-    	//SOPC_WriterGroup_Set_MqttTopic(writerGroup,"test"); //add
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 52
