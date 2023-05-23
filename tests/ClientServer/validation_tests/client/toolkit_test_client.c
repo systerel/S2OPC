@@ -23,7 +23,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "test_results.h"
+#include "libs2opc_client_config.h"
+#include "libs2opc_client_config_custom.h"
+#include "libs2opc_new_client.h"
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
@@ -32,17 +34,17 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_encodeable.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_time.h"
-#include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
-#include "testlib_write.h"
-#include "wrap_read.h"
 
 #include "test_results.h"
 #include "testlib_read_response.h"
+#include "testlib_write.h"
+#include "wrap_read.h"
 
 #include "embedded/sopc_addspace_loader.h"
 
@@ -51,18 +53,22 @@
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define APPLICATION_NAME "S2OPC_TestClient"
 
-static char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
+#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
+#define REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
 
-static int32_t sessionsActivated = 0;
-static int32_t sessionsClosed = 0;
-static int32_t sendFailures = 0;
-static int32_t reverseEpClosedRequested = 0;
-static int32_t reverseEpClosed = 0;
-static uint32_t session = 0;
-static uint32_t session2 = 0;
-static uint32_t session3 = 0;
-static uintptr_t sessionContext[3] = {1, 2, 3};
-static uint32_t context2session[4] = {0, 0, 0, 0};
+// Client certificate path
+#define CLI_CERT_PATH "./client_public/client_2k_cert.der"
+// Server certificate path
+#define SRV_CERT_PATH "./server_public/server_2k_cert.der"
+// Client private key path
+#define CLI_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
+
+// User certificate path
+#define USER_CERT_PATH "./user_public/user_2k_cert.der"
+// User key path
+#define USER_KEY_PATH "./user_private/encrypted_user_2k_key.pem"
+
+static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 
 static int32_t getEndpointsReceived = 0;
 
@@ -76,166 +82,76 @@ static uint32_t cptReadResps = 0;
 #define TEST_SUB_SERVICE_UNSUPPORTED false
 #endif
 
-static void Test_ComEvent_FctClient(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
+static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
 {
-    uintptr_t sessionContext0 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
-    uintptr_t sessionContext1 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[1]);
-    uintptr_t sessionContext2 = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[2]);
-
-    if (event == SE_RCV_SESSION_RESPONSE)
+    if (encType == &OpcUa_ReadResponse_EncodeableType)
     {
-        if (NULL != param)
+        printf(">>Test_Client_Toolkit: received ReadResponse \n");
+        const OpcUa_ReadResponse* readResp = (const OpcUa_ReadResponse*) response;
+        cptReadResps++;
+        // Check context value is same as those provided with request
+        SOPC_ASSERT(cptReadResps == appContext);
+        if (cptReadResps <= 1)
         {
-            SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
-            if (encType == &OpcUa_ReadResponse_EncodeableType)
-            {
-                printf(">>Test_Client_Toolkit: received ReadResponse \n");
-                OpcUa_ReadResponse* readResp = (OpcUa_ReadResponse*) param;
-                cptReadResps++;
-                // Check context value is same as those provided with request
-                SOPC_ASSERT(cptReadResps == appContext);
-                if (cptReadResps <= 1)
-                {
-                    test_results_set_service_result(
-                        test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
-                }
-                else
-                {
-                    // Second read response is to test write effect (through read result)
-                    test_results_set_service_result(
-                        tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
-                }
-            }
-            else if (encType == &OpcUa_WriteResponse_EncodeableType)
-            {
-                // Check context value is same as one provided with request
-                SOPC_ASSERT(1 == appContext);
-                printf(">>Test_Client_Toolkit: received WriteResponse \n");
-                OpcUa_WriteResponse* writeResp = (OpcUa_WriteResponse*) param;
-                test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
-            }
-            else if (encType == &OpcUa_ServiceFault_EncodeableType)
-            {
-                printf(">>Test_Client_Toolkit: received ServiceFault \n");
-                OpcUa_ServiceFault* serviceFaultResp = (OpcUa_ServiceFault*) param;
-                test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
-                                                OpcUa_BadServiceUnsupported ==
-                                                    serviceFaultResp->ResponseHeader.ServiceResult);
-            }
-        }
-    }
-    else if (event == SE_RCV_DISCOVERY_RESPONSE)
-    {
-        if (NULL != param)
-        {
-            // Check context value is same as one provided with request
-            SOPC_ASSERT(1 == appContext);
-
-            SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) param;
-            if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
-            {
-                printf(">>Test_Client_Toolkit: received GetEndpointsResponse \n");
-                SOPC_String endpointUrl;
-                SOPC_String_Initialize(&endpointUrl);
-                SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, DEFAULT_ENDPOINT_URL);
-                bool validEndpoints = true;
-                OpcUa_GetEndpointsResponse* getEndpointsResp = (OpcUa_GetEndpointsResponse*) param;
-
-                if (testStatus != SOPC_STATUS_OK || getEndpointsResp->NoOfEndpoints <= 0)
-                {
-                    // At least one endpoint shall be described with the correct endpoint URL
-                    validEndpoints = false;
-                }
-
-                for (int32_t idx = 0; idx < getEndpointsResp->NoOfEndpoints && validEndpoints != false; idx++)
-                {
-                    validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
-                }
-
-                SOPC_Atomic_Int_Add(&getEndpointsReceived, validEndpoints ? 1 : 0);
-            }
-        }
-    }
-    else if (event == SE_ACTIVATED_SESSION)
-    {
-        int n_sessions_activated = SOPC_Atomic_Int_Add(&sessionsActivated, 1);
-        n_sessions_activated++; // SOPC_Atomic_Int_Add returns the old value
-
-        // Check context value is same as one provided with activation request
-        if (n_sessions_activated == 1)
-        {
-            SOPC_Atomic_Int_Set((int32_t*) &session, (int32_t) idOrStatus);
-        }
-        else if (n_sessions_activated == 2)
-        {
-            SOPC_Atomic_Int_Set((int32_t*) &session2, (int32_t) idOrStatus);
-        }
-        else if (n_sessions_activated == 3)
-        {
-            SOPC_Atomic_Int_Set((int32_t*) &session3, (int32_t) idOrStatus);
+            test_results_set_service_result(
+                test_read_request_response(readResp, readResp->ResponseHeader.ServiceResult, 0) ? true : false);
         }
         else
         {
-            SOPC_ASSERT(false);
+            // Second read response is to test write effect (through read result)
+            test_results_set_service_result(tlibw_verify_response_remote(test_results_get_WriteRequest(), readResp));
+        }
+    }
+    else if (encType == &OpcUa_WriteResponse_EncodeableType)
+    {
+        // Check context value is same as one provided with request
+        SOPC_ASSERT(1 == appContext);
+        printf(">>Test_Client_Toolkit: received WriteResponse \n");
+        const OpcUa_WriteResponse* writeResp = (const OpcUa_WriteResponse*) response;
+        test_results_set_service_result(tlibw_verify_response(test_results_get_WriteRequest(), writeResp));
+    }
+    else if (encType == &OpcUa_GetEndpointsResponse_EncodeableType)
+    {
+        // Check context value is same as one provided with request
+        SOPC_ASSERT(1 == appContext);
+
+        printf(">>Test_Client_Toolkit: received GetEndpointsResponse \n");
+        SOPC_String endpointUrl;
+        SOPC_String_Initialize(&endpointUrl);
+        SOPC_ReturnStatus testStatus = SOPC_String_AttachFromCstring(&endpointUrl, DEFAULT_ENDPOINT_URL);
+        bool validEndpoints = true;
+        const OpcUa_GetEndpointsResponse* getEndpointsResp = (const OpcUa_GetEndpointsResponse*) response;
+
+        if (testStatus != SOPC_STATUS_OK || getEndpointsResp->NoOfEndpoints <= 0)
+        {
+            // At least one endpoint shall be described with the correct endpoint URL
+            validEndpoints = false;
         }
 
-        uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
+        for (int32_t idx = 0; idx < getEndpointsResp->NoOfEndpoints && validEndpoints != false; idx++)
+        {
+            validEndpoints = SOPC_String_Equal(&getEndpointsResp->Endpoints[idx].EndpointUrl, &endpointUrl);
+        }
 
-        if (appContext != 0 &&
-            (appContext == sessionContext0 || appContext == sessionContext1 || appContext == sessionContext2) &&
-            session_idx == 0)
-        {
-            SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], (int32_t) idOrStatus);
-        }
-        else
-        {
-            // Invalid context
-            SOPC_ASSERT(false);
-        }
+        SOPC_Atomic_Int_Add(&getEndpointsReceived, validEndpoints ? 1 : 0);
     }
-    else if (event == SE_SESSION_ACTIVATION_FAILURE || event == SE_CLOSED_SESSION)
+    else if (encType == &OpcUa_ServiceFault_EncodeableType)
     {
-        if (appContext != 0 &&
-            (appContext == sessionContext0 || appContext == sessionContext1 || appContext == sessionContext2))
-        {
-            // Context valid but not yet associated to a session Id (never activated before failure)
-            // OR context is the one associated to the session Id (activated once before failure)
-            uint32_t session_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &context2session[appContext]);
-            SOPC_ASSERT(session_idx == 0 || session_idx == idOrStatus);
-            int32_t n_sessions_activated = 0;
-            n_sessions_activated = SOPC_Atomic_Int_Get(&sessionsActivated);
-            if (n_sessions_activated > 0)
-            {
-                n_sessions_activated--;
-            }
-            SOPC_Atomic_Int_Set((int32_t*) &sessionsActivated, (int32_t) n_sessions_activated);
-        }
-        else
-        {
-            // Invalid context
-            SOPC_ASSERT(false);
-        }
-        SOPC_Atomic_Int_Add(&sessionsClosed, 1);
+        printf(">>Test_Client_Toolkit: received ServiceFault \n");
+        const OpcUa_ServiceFault* serviceFaultResp = (const OpcUa_ServiceFault*) response;
+        test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
+                                        OpcUa_BadServiceUnsupported == serviceFaultResp->ResponseHeader.ServiceResult);
     }
-    else if (event == SE_SND_REQUEST_FAILED)
-    {
-        SOPC_Atomic_Int_Add(&sendFailures, 1);
-    }
-    else if (event == SE_REVERSE_ENDPOINT_CLOSED)
-    {
-        if (0 == SOPC_Atomic_Int_Get(&reverseEpClosedRequested))
-        {
-            SOPC_ASSERT(false && "Unexpected reverse endpoint closure");
-        }
-        else
-        {
-            SOPC_Atomic_Int_Add(&reverseEpClosed, 1);
-        }
-    }
-    else
-    {
-        SOPC_ASSERT(false);
-    }
+}
+
+static void SOPC_Client_ConnEventCb(SOPC_ClientConnection* config,
+                                    SOPC_ClientConnectionEvent event,
+                                    SOPC_StatusCode status)
+{
+    SOPC_UNUSED_ARG(config);
+    SOPC_UNUSED_ARG(event);
+    SOPC_UNUSED_ARG(status);
+    SOPC_ASSERT(false && "Unexpected connection event");
 }
 
 /* Function to build the read service request message */
@@ -263,38 +179,25 @@ static void* getGetEndpoints_message(void)
     return getEndpointReq;
 }
 
-// A Secure channel connection configuration
-SOPC_SecureChannel_Config scConfig = {.isClientSc = true,
-                                      .clientConfigPtr = NULL,
-                                      .expectedEndpoints = NULL,
-                                      .serverUri = NULL,
-                                      .url = DEFAULT_ENDPOINT_URL,
-                                      .peerAppCert = NULL,
-                                      .reqSecuPolicyUri = SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                      .requestedLifetime = 20000,
-                                      .msgSecurityMode = OpcUa_MessageSecurityMode_SignAndEncrypt};
-
 static bool lastConnectionTypeIsClassic = false;
-static SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_Create(SOPC_ReverseEndpointConfigIdx reverseEpConfigIdx,
-                                                                    SOPC_SecureChannelConfigIdx configIdx,
-                                                                    unsigned int connectionType)
+static SOPC_ReturnStatus SOPC_SetReverseConnection(SOPC_SecureConnection_Config* config, unsigned int connectionType)
 {
     switch (connectionType)
     {
     case 0: // Classic
-        return SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
+        return SOPC_STATUS_OK;
     case 1: // Reverse
-        return SOPC_EndpointConnectionCfg_CreateReverse(reverseEpConfigIdx, configIdx);
+        return SOPC_SecureConnectionConfig_SetReverseConnection(config, REVERSE_ENDPOINT_URL);
     default: // Alternate classic and reverse
         if (lastConnectionTypeIsClassic)
         {
             lastConnectionTypeIsClassic = false;
-            return SOPC_EndpointConnectionCfg_CreateReverse(reverseEpConfigIdx, configIdx);
+            return SOPC_SecureConnectionConfig_SetReverseConnection(config, REVERSE_ENDPOINT_URL);
         }
         else
         {
             lastConnectionTypeIsClassic = true;
-            return SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
+            return SOPC_STATUS_OK;
         }
     }
 }
@@ -308,40 +211,45 @@ int main(void)
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
+    /* Initialize client/server toolkit and client wrapper */
+
+    // Get default log config and set the custom path
+    SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
+    logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_logs/";
+    logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_Initialize();
+    }
+
     SOPC_PKIProvider* pki = NULL;
     SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL;
     SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
     // Define client application configuration
-    SOPC_S2OPC_Config appConfig;
-    SOPC_S2OPC_Config_Initialize(&appConfig);
-    SOPC_Client_Config* clientAppConfig = &appConfig.clientConfig;
-    clientAppConfig->clientDescription.ApplicationType = OpcUa_ApplicationType_Client;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationUri, APPLICATION_URI);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = SOPC_String_AttachFromCstring(&clientAppConfig->clientDescription.ApplicationName.defaultText,
-                                           APPLICATION_NAME);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    clientAppConfig->clientLocaleIds = preferred_locale_ids;
-    scConfig.clientConfigPtr = clientAppConfig;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetPreferredLocaleIds(sizeof(preferred_locale_ids) - 1, preferred_locale_ids);
+    }
 
-    SOPC_SecureChannelConfigIdx channel_config_idx = 0;
-    SOPC_SecureChannelConfigIdx channel_config_idx2 = 0;
-    SOPC_SecureChannelConfigIdx channel_config_idx3 = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetApplicationDescription(APPLICATION_URI, APPLICATION_URI, APPLICATION_NAME,
+                                                                   NULL, OpcUa_ApplicationType_Client);
+    }
 
-    SOPC_ReverseEndpointConfigIdx reverse_ep_config_idx = 0;
+    SOPC_SecureConnection_Config** secureConnConfigArray = NULL;
+    size_t previousNbSecConnCfgs = 0;
+    size_t nbSecConnCfgs = 0;
+
+    SOPC_ClientConnection* secureConnection1 = NULL;
+    SOPC_ClientConnection* secureConnection2 = NULL;
+    SOPC_ClientConnection* secureConnection3 = NULL;
 
     OpcUa_WriteRequest* pWriteReqSent = NULL;
     OpcUa_WriteRequest* pWriteReqCopy = NULL;
-
-    // Paths to client certificate/key and server certificate
-    // Client certificate name
-    char* certificateLocation = "./client_public/client_2k_cert.der";
-    // Server certificate name
-    char* certificateSrvLocation = "./server_public/server_2k_cert.der";
-    // Client private key
-    char* keyLocation = "./client_private/encrypted_client_2k_key.pem";
 
     SOPC_AddressSpace* address_space = SOPC_Embedded_AddressSpace_Load();
 
@@ -356,10 +264,10 @@ int main(void)
 
     // If security mode is set, load certificates and key
 
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
+    if (MSG_SECURITY_MODE != OpcUa_MessageSecurityMode_None)
     {
-        // The certificates: load
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateLocation, &crt_cli);
+        // Load client certificate
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(CLI_CERT_PATH, &crt_cli);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load client certificate\n");
@@ -367,65 +275,58 @@ int main(void)
         else
         {
             printf(">>Stub_Client: Client certificate loaded\n");
-            clientAppConfig->clientCertificate = crt_cli;
         }
-    }
-
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf(">>Stub_Client: Failed to load server certificate\n");
-        }
-        else
-        {
-            printf(">>Stub_Client: Server certificate loaded\n");
-            scConfig.peerAppCert = crt_srv;
-        }
-    }
-
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
-    {
-        // Private key: Retrieve the password
-        char* password = NULL;
-        size_t lenPassword = 0;
-
-        bool res = SOPC_TestHelper_AskPass_FromEnv(&password);
-        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-
+        // Load client private key
         if (SOPC_STATUS_OK == status)
         {
-            lenPassword = strlen(password);
-            if (UINT32_MAX < lenPassword)
+            // Private key: Retrieve the password
+            char* password = NULL;
+            size_t lenPassword = 0;
+
+            bool res = SOPC_TestHelper_AskPass_FromEnv(&password);
+            status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+            if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_STATUS_NOK;
+                lenPassword = strlen(password);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                // Private key: Decrypt and Load
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    CLI_KEY_PATH, &priv_cli, password, (uint32_t) lenPassword);
+                if (SOPC_STATUS_OK != status)
+                {
+                    printf(
+                        ">>Stub_Client: Failed to decrypt client private key, please check the password or key format "
+                        "(PEM)\n");
+                }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                printf(">>Stub_Client: Client private key loaded\n");
             }
         }
-
         if (SOPC_STATUS_OK == status)
         {
-            // Private key: Decrypt and Load
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
-                                                                                    (uint32_t) lenPassword);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf(
-                    ">>Stub_Client: Failed to decrypt client private key, please check the password or key format "
-                    "(PEM)\n");
-            }
+            const SOPC_ExposedBuffer* privKeyData = SOPC_SecretBuffer_Expose(priv_cli);
+            status = SOPC_HelperConfigClient_SetKeyCertPairFromBytes(
+                (size_t) crt_cli->length, crt_cli->data, (size_t) SOPC_SecretBuffer_GetLength(priv_cli), privKeyData);
+            SOPC_SecretBuffer_Unexpose(privKeyData, priv_cli);
         }
-
-        if (NULL != password)
-        {
-            SOPC_Free(password);
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            printf(">>Stub_Client: Client private key loaded\n");
-            clientAppConfig->clientKey = priv_cli;
-        }
+        SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
     }
 
     // Init PKI provider with certificate authority
@@ -446,31 +347,14 @@ int main(void)
         else
         {
             printf(">>Stub_Client: PKI created\n");
-            clientAppConfig->clientPKI = pki;
+            status = SOPC_HelperConfigClient_SetPKIprovider(pki);
         }
     }
 
-    /* Initialize SOPC_Common */
+    // Set asynchronous response callback
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
-        logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./toolkit_test_client_logs/";
-        logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-        status = SOPC_Common_Initialize(logConfiguration);
-    }
-
-    /* Init stack configuration */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(Test_ComEvent_FctClient);
-        if (SOPC_STATUS_OK != status)
-        {
-            printf(">>Test_Client_Toolkit: Failed initializing\n");
-        }
-        else
-        {
-            printf(">>Test_Client_Toolkit: Stack initialized\n");
-        }
+        status = SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_Client_AsyncRespCb);
     }
 
     // Set an address space (to check test result valid)
@@ -491,13 +375,16 @@ int main(void)
     // Test will run 3 times: 1 with classic endpoint connection, 1 with reverse endpoint connection and 1 with both
     for (unsigned int connectionType = 0; SOPC_STATUS_OK == status && connectionType <= 2; connectionType++)
     {
-        // Configure the 2 secure channel connections to use and retrieve channel configuration index
+        // Configure the 3 secure channel connections to use and retrieve channel configuration index
         if (SOPC_STATUS_OK == status)
         {
-            channel_config_idx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-            channel_config_idx2 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-            channel_config_idx3 = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
-            if (channel_config_idx != 0 && channel_config_idx2 != 0 && channel_config_idx3 != 0)
+            SOPC_SecureConnection_Config* secureConnConfig1 = SOPC_HelperConfigClient_CreateSecureConnection(
+                "1", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+            SOPC_SecureConnection_Config* secureConnConfig2 = SOPC_HelperConfigClient_CreateSecureConnection(
+                "2", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+            SOPC_SecureConnection_Config* secureConnConfig3 = SOPC_HelperConfigClient_CreateSecureConnection(
+                "3", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+            if (secureConnConfig1 != NULL && secureConnConfig2 != NULL && secureConnConfig3 != NULL)
             {
                 printf(">>Test_Client_Toolkit: Client configured\n");
             }
@@ -508,27 +395,89 @@ int main(void)
             }
         }
 
-        /* Create a Reverse Endpoint to create a Secure Channel through a connection initiated by server */
         if (SOPC_STATUS_OK == status)
         {
-            reverse_ep_config_idx = SOPC_ToolkitClient_AddReverseEndpointConfig(REVERSE_ENDPOINT_URL);
-            if (0 == reverse_ep_config_idx)
-            {
-                status = SOPC_STATUS_NOK;
-            }
+            previousNbSecConnCfgs = nbSecConnCfgs;
+            status = SOPC_HelperConfigClient_GetSecureConnectionConfigs(&nbSecConnCfgs, &secureConnConfigArray);
         }
-        if (SOPC_STATUS_OK == status)
+
+        // Load server certificate
+        if (MSG_SECURITY_MODE != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
         {
-            SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverse_ep_config_idx);
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(SRV_CERT_PATH, &crt_srv);
+            if (SOPC_STATUS_OK != status)
+            {
+                printf(">>Stub_Client: Failed to load server certificate\n");
+            }
+            else
+            {
+                printf(">>Stub_Client: Server certificate loaded\n");
+            }
+            for (size_t i = previousNbSecConnCfgs; SOPC_STATUS_OK == status && i < nbSecConnCfgs; i++)
+            {
+                status = SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(secureConnConfigArray[i],
+                                                                                   crt_srv->length, crt_srv->data);
+                // Set username  as authentication mode for second connection
+                if (i == 1)
+                {
+                    // Username: retrieve the password
+                    char* password = NULL;
+                    size_t lenPassword = 0;
+
+                    bool res = SOPC_TestHelper_AskPass_FromEnv(&password);
+                    status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+                    if (SOPC_STATUS_OK == status)
+                    {
+                        lenPassword = strlen(password);
+                        if (UINT32_MAX < lenPassword)
+                        {
+                            status = SOPC_STATUS_NOK;
+                        }
+                    }
+
+                    if (SOPC_STATUS_OK == status)
+                    {
+                    }
+
+                    status = SOPC_SecureConnectionConfig_AddUserName(secureConnConfigArray[i],
+                                                                     "username_Basic256Sha256", "user1", password);
+
+                    if (NULL != password)
+                    {
+                        SOPC_Free(password);
+                    }
+                }
+                // Set X509 as authentication mode for third connection
+                else if (i == 2)
+                {
+                    // TODO: replace by SOPC_SecureConnectionConfig_AddUserX509FromBytes when available
+                    /*
+                    status = SOPC_SecureConnectionConfig_AddUserX509FromPaths(secureConnConfigArray[i], "X509",
+                                                                              USER_CERT_PATH, USER_KEY_PATH, true);
+                    */
+                    status = SOPC_SecureConnectionConfig_AddAnonymous(secureConnConfigArray[i], "anon");
+                }
+            }
+            SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
         }
 
         /* Asynchronous request to get endpoints */
         if (SOPC_STATUS_OK == status)
         {
-            // Use 1 as getEndpoints request context
-            SOPC_EndpointConnectionCfg endpointConnectionCfg =
-                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx3, connectionType);
-            status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, getGetEndpoints_message(), 1);
+            SOPC_SecureConnection_Config* currentSecureConfig = SOPC_HelperConfigClient_GetConfigFromId("3");
+            if (NULL != currentSecureConfig)
+            {
+                status = SOPC_SetReverseConnection(currentSecureConfig, connectionType);
+            }
+            else
+            {
+                status = SOPC_STATUS_INVALID_STATE;
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_ClientHelper_DiscoveryServiceAsync(currentSecureConfig, getGetEndpoints_message(), 1);
+            }
             printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
         }
 
@@ -542,7 +491,7 @@ int main(void)
             SOPC_Sleep(sleepTimeout);
         }
 
-        if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
+        if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0)
         {
             printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
             status = SOPC_STATUS_NOK;
@@ -552,90 +501,29 @@ int main(void)
             printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
         }
 
-        /* Asynchronous request to create 3 sessions on 2 secure channels
-         * (and underlying secure channel connections if necessary). */
+        /* Create the 3 connections */
         if (SOPC_STATUS_OK == status)
         {
-            // Use 1, 2, 3 as session contexts
-            SOPC_EndpointConnectionCfg endpointConnectionCfg =
-                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx, connectionType);
-            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[0],
-                                                              "anonymous");
-            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[1],
-                                                              "anonymous");
-
-            endpointConnectionCfg =
-                SOPC_EndpointConnectionCfg_Create(reverse_ep_config_idx, channel_config_idx2, connectionType);
-            SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, sessionContext[2],
-                                                              "anonymous");
-            printf(">>Test_Client_Toolkit: Creating/Activating 3 sessions on 2 SC: OK\n");
-        }
-
-        /* Wait until session is activated or timeout */
-        loopCpt = 0;
-        while (SOPC_STATUS_OK == status &&
-               (SOPC_Atomic_Int_Get(&sessionsActivated) + SOPC_Atomic_Int_Get(&sessionsClosed)) < NB_SESSIONS &&
-               loopCpt * sleepTimeout <= loopTimeout)
-        {
-            loopCpt++;
-            // Retrieve received messages on socket
-            SOPC_Sleep(sleepTimeout);
-        }
-
-        if (loopCpt * sleepTimeout > loopTimeout)
-        {
-            status = SOPC_STATUS_TIMEOUT;
-        }
-
-        if (SOPC_Atomic_Int_Get(&sessionsClosed) != 0 || SOPC_Atomic_Int_Get(&sendFailures) > 0)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-
-        if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsActivated) == NB_SESSIONS)
-        {
-            printf(">>Test_Client_Toolkit: Sessions activated: OK'\n");
-        }
-        else
-        {
-            printf(">>Test_Client_Toolkit: Sessions activated: NOK'\n");
-        }
-
-        /* Close reverse endpoint */
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_ToolkitClient_AsyncCloseReverseEndpoint(reverse_ep_config_idx);
-            SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 1);
-        }
-
-        loopCpt = 0;
-        while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&reverseEpClosed) &&
-               loopCpt * sleepTimeout <= loopTimeout)
-        {
-            loopCpt++;
-            // Retrieve received messages on socket
-            SOPC_Sleep(sleepTimeout);
-        }
-
-        if (loopCpt * sleepTimeout > loopTimeout)
-        {
-            status = SOPC_STATUS_TIMEOUT;
+            for (size_t i = previousNbSecConnCfgs; SOPC_STATUS_OK == status && i < nbSecConnCfgs; i++)
+            {
+                status =
+                    SOPC_ClientHelper_Connect(secureConnConfigArray[i], SOPC_Client_ConnEventCb, &secureConnection1);
+            }
         }
 
         if (SOPC_STATUS_OK == status)
         {
+            printf(">>Test_Client_Toolkit: Activated 3 sessions on 3 SCs: OK\n");
             /* Create a service request message and send it through session (read service)*/
             // msg freed when sent
             // Use 1 as read request context
-            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                         getReadRequest_message(), 1);
+            status = SOPC_ClientHelper_ServiceAsync(secureConnection1, getReadRequest_message(), 1);
             printf(">>Test_Client_Toolkit: read request sending\n");
         }
 
         /* Wait until service response is received */
         loopCpt = 0;
-        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-               loopCpt * sleepTimeout <= loopTimeout)
+        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
         {
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
@@ -644,10 +532,6 @@ int main(void)
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             status = SOPC_STATUS_TIMEOUT;
-        }
-        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-        {
-            status = SOPC_STATUS_NOK;
         }
 
         if (SOPC_STATUS_OK == status)
@@ -664,16 +548,13 @@ int main(void)
             test_results_set_WriteRequest(pWriteReqCopy);
 
             // Use 1 as write request context
-            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                         pWriteReqSent, 1);
-
+            status = SOPC_ClientHelper_ServiceAsync(secureConnection1, pWriteReqSent, 1);
             printf(">>Test_Client_Toolkit: write request sending\n");
         }
 
         /* Wait until service response is received */
         loopCpt = 0;
-        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-               loopCpt * sleepTimeout <= loopTimeout)
+        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
         {
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
@@ -682,10 +563,6 @@ int main(void)
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             status = SOPC_STATUS_TIMEOUT;
-        }
-        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-        {
-            status = SOPC_STATUS_NOK;
         }
 
         if (SOPC_STATUS_OK == status)
@@ -696,16 +573,13 @@ int main(void)
             /* The callback will call the verification */
             // msg freed when sent
             // Use 2 as read request context
-            SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                         getReadRequest_verif_message(), 2);
-
+            status = SOPC_ClientHelper_ServiceAsync(secureConnection1, getReadRequest_verif_message(), 2);
             printf(">>Test_Client_Toolkit: read request sending\n");
         }
 
         /* Wait until service response is received */
         loopCpt = 0;
-        while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
-               loopCpt * sleepTimeout <= loopTimeout)
+        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
         {
             loopCpt++;
             SOPC_Sleep(sleepTimeout);
@@ -714,10 +588,6 @@ int main(void)
         if (loopCpt * sleepTimeout > loopTimeout)
         {
             status = SOPC_STATUS_TIMEOUT;
-        }
-        else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-        {
-            status = SOPC_STATUS_NOK;
         }
 
         /* Now the request can be freed */
@@ -744,15 +614,14 @@ int main(void)
                 // Reset expected result
                 test_results_set_service_result(false);
 
-                SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session),
-                                                             createSubReq, OpcUa_BadServiceUnsupported);
+                status = SOPC_ClientHelper_ServiceAsync(secureConnection1, createSubReq, OpcUa_BadServiceUnsupported);
 
                 printf(">>Test_Client_Toolkit: create subscription sending\n");
             }
 
             /* Wait until service response is received */
             loopCpt = 0;
-            while (SOPC_STATUS_OK == status && test_results_get_service_result() == false &&
+            while (SOPC_STATUS_OK == status && !test_results_get_service_result() &&
                    loopCpt * sleepTimeout <= loopTimeout)
             {
                 loopCpt++;
@@ -763,78 +632,35 @@ int main(void)
             {
                 status = SOPC_STATUS_TIMEOUT;
             }
-            else if (SOPC_Atomic_Int_Get(&sendFailures) > 0)
-            {
-                status = SOPC_STATUS_NOK;
-            }
         }
 
-        uint32_t session1_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session);
-        uint32_t session2_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session2);
-        uint32_t session3_idx = (uint32_t) SOPC_Atomic_Int_Get((int32_t*) &session3);
-
-        /* Close the session */
-        if (0 != session1_idx)
+        /* Close the connections */
+        SOPC_ReturnStatus discoStatus = SOPC_STATUS_NOK;
+        if (NULL != secureConnection1)
         {
-            SOPC_ToolkitClient_AsyncCloseSession(session1_idx);
+            discoStatus = SOPC_ClientHelper_Disconnect(&secureConnection1);
+            SOPC_ASSERT(SOPC_STATUS_OK == discoStatus);
         }
 
-        if (0 != session2_idx)
+        if (NULL != secureConnection2)
         {
-            SOPC_ToolkitClient_AsyncCloseSession(session2_idx);
+            discoStatus = SOPC_ClientHelper_Disconnect(&secureConnection2);
+            SOPC_ASSERT(SOPC_STATUS_OK == discoStatus);
         }
 
-        if (0 != session3_idx)
+        if (NULL != secureConnection3)
         {
-            SOPC_ToolkitClient_AsyncCloseSession(session3_idx);
+            discoStatus = SOPC_ClientHelper_Disconnect(&secureConnection3);
+            SOPC_ASSERT(SOPC_STATUS_OK == discoStatus);
         }
-
-        /* Wait until session is closed or timeout */
-        loopCpt = 0;
-        do
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        } while (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&sessionsClosed) < NB_SESSIONS &&
-                 loopCpt * sleepTimeout <= loopTimeout);
-
-        if (loopCpt * sleepTimeout > loopTimeout)
-        {
-            status = SOPC_STATUS_TIMEOUT;
-        }
-
-        // Clear session ids
-        SOPC_Atomic_Int_Set((int32_t*) &session, 0);
-        SOPC_Atomic_Int_Set((int32_t*) &session2, 0);
-        SOPC_Atomic_Int_Set((int32_t*) &session3, 0);
-        // Clear all context to session
-        uintptr_t appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[0]);
-        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
-        appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[1]);
-        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
-        appContext = (uintptr_t) SOPC_Atomic_Ptr_Get((void**) &sessionContext[2]);
-        SOPC_Atomic_Int_Set((int32_t*) &context2session[appContext], 0);
-        // Clear session closed
-        SOPC_Atomic_Int_Set(&sessionsClosed, 0);
-        // Clear reverse endpoint close variables
-        SOPC_Atomic_Int_Set(&reverseEpClosedRequested, 0);
-        SOPC_Atomic_Int_Set(&reverseEpClosed, 0);
-
-        SOPC_ToolkitClient_ClearAllSCs();
 
         cptReadResps = 0;
     }
-
-    SOPC_Toolkit_Clear();
-
-    // Clear locally allocated memory
-    if (scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None)
-    {
-        SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
-    }
+    /* Close the toolkit */
+    SOPC_HelperConfigClient_Clear();
+    SOPC_CommonHelper_Clear();
 
     SOPC_AddressSpace_Delete(address_space);
-    SOPC_S2OPC_Config_Clear(&appConfig);
 
     if (SOPC_STATUS_OK == status && test_results_get_service_result() != false)
     {

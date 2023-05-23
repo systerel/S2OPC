@@ -224,7 +224,7 @@ void tlibw_free_WriteRequest(OpcUa_WriteRequest** ppWriteReq)
     *ppWriteReq = NULL;
 }
 
-bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, OpcUa_WriteResponse* pWriteResp)
+bool tlibw_verify_response(OpcUa_WriteRequest* pWriteReq, const OpcUa_WriteResponse* pWriteResp)
 {
     bool bVerif = true;
     int32_t i;
@@ -284,7 +284,7 @@ OpcUa_ReadRequest* tlibw_new_ReadRequest_check(void)
     return pReadReq;
 }
 
-bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, OpcUa_ReadResponse* pReadResp)
+bool tlibw_verify_response_remote(OpcUa_WriteRequest* pWriteReq, const OpcUa_ReadResponse* pReadResp)
 {
     bool bVerif = true;
     int32_t i;
