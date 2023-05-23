@@ -65,11 +65,16 @@ static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 // Client private key path
 #define CLI_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
 
+#ifdef WITH_STATIC_SECURITY_DATA
+#include "client_static_security_data.h"
+#include "server_static_security_data.h"
+#else
 // PKI trusted CA
 static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
                                                NULL};
 static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
 static char* default_empty_cert_paths[] = {NULL};
+#endif // WITH_STATIC_SECURITY_DATA
 
 // User certificate path
 #define USER_CERT_PATH "./user_public/user_2k_cert.der"
@@ -77,8 +82,6 @@ static char* default_empty_cert_paths[] = {NULL};
 #define USER_KEY_PATH "./user_private/encrypted_user_2k_key.pem"
 
 static int32_t getEndpointsReceived = 0;
-
-#define NB_SESSIONS 3
 
 static uint32_t cptReadResps = 0;
 
@@ -219,7 +222,7 @@ static SOPC_ReturnStatus Client_Initialize(void)
  * - Client certificate and key
  * - Public Key Infrastructure: using a single certificate as Certificate Authority or Trusted Certificate
  */
-static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
+static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
@@ -231,9 +234,9 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
         SOPC_SerializedCertificate* serializedCAcert = NULL;
         SOPC_CRLList* serializedCAcrl = NULL;
 
-        /* Load client/server certificates and server key from C source files (no filesystem needed) */
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
-                                                                 sizeof(server_2k_key), server_2k_key);
+        /* Load client certificates and key from C source files (no filesystem needed) */
+        status = SOPC_HelperConfigClient_SetKeyCertPairFromBytes(sizeof(client_2k_cert), client_2k_cert,
+                                                                 sizeof(client_2k_key), client_2k_key);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
@@ -252,7 +255,7 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
         SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 #else // WITH_STATIC_SECURITY_DATA == false
 
-        /* Load client/server certificates and server key from files */
+        /* Load client certificate and key from files */
         status = SOPC_HelperConfigClient_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
 
         /* Create the PKI (Public Key Infrastructure) provider */
@@ -297,8 +300,6 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
 static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
                                                         SOPC_SecureConnection_Config*** secureConnConfigArray)
 {
-    SOPC_SerializedCertificate* crt_srv = NULL;
-
     // Define client application configuration
     SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetPreferredLocaleIds(
         (sizeof(preferred_locale_ids) / sizeof(preferred_locale_ids[0]) - 1), preferred_locale_ids);
@@ -314,7 +315,7 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
      */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_SetDefaultAppsAuthConfig();
+        status = Client_SetDefaultAppsAuthConfig();
     }
 
     // Configure the 3 secure channel connections to use and retrieve channel configuration index
@@ -350,8 +351,14 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
     {
         for (size_t i = 0; SOPC_STATUS_OK == status && i < *nbSecConnCfgs; i++)
         {
+#ifdef WITH_STATIC_SECURITY_DATA
+            status = SOPC_SecureConnectionConfig_AddServerCertificateFromBytes((*secureConnConfigArray)[i],
+                                                                               sizeof(server_2k_cert), server_2k_cert);
+#else
             status =
                 SOPC_SecureConnectionConfig_AddServerCertificateFromPath((*secureConnConfigArray)[i], SRV_CERT_PATH);
+#endif
+
             // Set username  as authentication mode for second connection
             if (i == 1)
             {
@@ -364,7 +371,6 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
                 status = SOPC_SecureConnectionConfig_AddUserX509FromPaths((*secureConnConfigArray)[i], "X509",
                                                                           USER_CERT_PATH, USER_KEY_PATH, true);
             }
-            SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
         }
     }
     return status;
@@ -402,17 +408,18 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     {
         status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     }
-    // Set callback necessary to retrieve user password (from environment variable)
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
-    }
+#endif
+    // TODO: move to !WITH_STATIC_SECURITY_DATA when X509 certs are configured statically
     // Set callback necessary to retrieve user key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigClient_SetX509userPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     }
-#endif
+    // Set callback necessary to retrieve user password (from environment variable)
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+    }
 
     if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)
     {

@@ -46,6 +46,10 @@
 
 #include "server.h"
 
+#ifdef WITH_STATIC_SECURITY_DATA
+#include "pubsub_static_security_data.h"
+#endif
+
 #ifdef PUBSUB_STATIC_CONFIG
 #include "pubsub_config_static.h"
 #endif

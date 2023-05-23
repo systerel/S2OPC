@@ -320,6 +320,12 @@ if (expat_FOUND)
   target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver-xml-loaders-expat)
   target_compile_definitions(toolkit_test_client PRIVATE "WITH_EXPAT")
 endif()
+if (WITH_STATIC_SECURITY_DATA)
+  target_compile_definitions(toolkit_test_client PRIVATE "WITH_STATIC_SECURITY_DATA")
+  # Reuse data of test server
+  target_include_directories(toolkit_test_client PRIVATE "validation_tests/server")
+endif()
+
 
 add_custom_command(
   TARGET toolkit_test_client POST_BUILD

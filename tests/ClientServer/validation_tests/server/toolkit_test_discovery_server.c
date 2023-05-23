@@ -37,7 +37,7 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
-#include "static_security_data.h"
+#include "server_static_security_data.h"
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
