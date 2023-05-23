@@ -112,8 +112,6 @@ SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *                     In case of sending failure the response is NULL.
  *
- *                     TODO: keep it const ? or provide a "copy" ?
- *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ClientHelper_ServiceAsync call
  *

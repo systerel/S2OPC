@@ -76,6 +76,8 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
 
 /**
  * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
+ *        Service response callback configured through ::SOPC_HelperConfigClient_SetServiceAsyncResponse will be
+ *        called on service response or in case of service request sending failure.
  *
  * \param secConnConfig  The secure connection configuration.
  * \param request   An instance of one of the following OPC UA request:
@@ -162,7 +164,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
  * \param connectEventCb         Callback called on connection event, it is only used in case of further disconnection
  * \param[out] secureConnection  Pointer to the secure connection established when returned value is SOPC_STATUS_OK
  *
- * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_CLOSED in case of failure,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, connection state unexpected).
  */
@@ -183,7 +186,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
 /**
  * \brief Executes an OPC UA service on server (read, write, browse or discovery service) asynchronously.
  *        Service response callback configured through ::SOPC_HelperConfigClient_SetServiceAsyncResponse will be
- * called.
+ *        called on service response or in case of service request sending failure.
  *
  * \note ::SOPC_ClientHelper_StartConnect or ::SOPC_ClientHelper_Connect shall have been called
  *       and the connection shall be still active
