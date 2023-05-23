@@ -302,6 +302,8 @@ target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEF
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
 
 # Client scenario
+set(TEST_CLIENT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Test_Config.xml")
+
 add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.c"
   "validation_tests/client/wrap_read.c"
   "validation_tests/client/testlib_write.c"
@@ -314,6 +316,16 @@ target_link_libraries(toolkit_test_client PRIVATE s2opc_clientwrapper s2opc_serv
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
+if (expat_FOUND)
+  target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver-xml-loaders-expat)
+  target_compile_definitions(toolkit_test_client PRIVATE "WITH_EXPAT")
+endif()
+
+add_custom_command(
+  TARGET toolkit_test_client POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+)
+
 
 # Client scenario with service faults
 add_executable(toolkit_test_client_service_faults "validation_tests/client/toolkit_test_client_service_faults.c")
