@@ -61,34 +61,33 @@ struct SOPC_StaMac_Machine
     SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;          /* Callback when subscribed data changed */
     SOPC_ClientCmd_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
 
-    SOPC_LibSub_EventCbk* pCbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
-    uintptr_t iSessionCtx;                  /* Toolkit Session Context, used to identify session events */
-    uint32_t iSessionID;                    /* S2OPC Session ID */
-    SOPC_SLinkedList* pListReqCtx;          /* List of yet-to-be-answered requests,
-                                             * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
-    double fPublishInterval;                /* The publish interval, in ms */
-    uint32_t iCntMaxKeepAlive;              /* Number of skipped response before sending an empty KeepAlive */
-    uint32_t iCntLifetime;                  /* Number of deprived publish cycles before subscription deletion */
-    uint32_t iSubscriptionID;               /* OPC UA subscription ID, non 0 when subscription is created */
-    uint32_t nMonItClientHandle;            /* Number of client handle generated for monitored items,
-                                             * used as unique identifier */
-    SOPC_SLinkedList* pListMonIt;           /* List of monitored items, where the appCtx is the list value,
-                                             * and the id is the uint32_t OPC UA monitored item ID */
-    uint32_t nTokenTarget;                  /* Target number of available tokens */
-    uint32_t nTokenUsable;                  /* Tokens available to the server
-                                             * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;                        /* Indicates whether an acknowledgement should be sent
-                                             * in the next PublishRequest */
-    uint32_t iAckSeqNum;                    /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId;                 /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername;                 /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword;                 /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPath_cert_x509_token;     /* path of the x509 certificate for X509IdentiyToken (DER format) */
-    const char* szPath_key_x509_token;      /* path of the private key for X509IdentiyToken (PEM format)*/
-    bool key_x509_token_encrypted;
-    int64_t iTimeoutMs;                   /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
-    SOPC_SLinkedList* dataIdToNodeIdList; /* A list of data ids to node ids */
-    uintptr_t userContext;                /* A state machine user defined context */
+    SOPC_LibSub_EventCbk* pCbkGenericEvent;    /* Callback when received event that is out of the LibSub scope */
+    uintptr_t iSessionCtx;                     /* Toolkit Session Context, used to identify session events */
+    uint32_t iSessionID;                       /* S2OPC Session ID */
+    SOPC_SLinkedList* pListReqCtx;             /* List of yet-to-be-answered requests,
+                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
+    double fPublishInterval;                   /* The publish interval, in ms */
+    uint32_t iCntMaxKeepAlive;                 /* Number of skipped response before sending an empty KeepAlive */
+    uint32_t iCntLifetime;                     /* Number of deprived publish cycles before subscription deletion */
+    uint32_t iSubscriptionID;                  /* OPC UA subscription ID, non 0 when subscription is created */
+    uint32_t nMonItClientHandle;               /* Number of client handle generated for monitored items,
+                                                * used as unique identifier */
+    SOPC_SLinkedList* pListMonIt;              /* List of monitored items, where the appCtx is the list value,
+                                                * and the id is the uint32_t OPC UA monitored item ID */
+    uint32_t nTokenTarget;                     /* Target number of available tokens */
+    uint32_t nTokenUsable;                     /* Tokens available to the server
+                                                * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;                           /* Indicates whether an acknowledgement should be sent
+                                                * in the next PublishRequest */
+    uint32_t iAckSeqNum;                       /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId;                    /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername;                    /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword;                    /* See SOPC_LibSub_ConnectionCfg */
+    SOPC_SerializedCertificate* pUserCertX509; /* X509 serialized certificate for X509IdentiyToken (DER format) */
+    SOPC_SerializedAsymmetricKey* pUserKey;    /* Serialized private key for X509IdentiyToken (PEM format) */
+    int64_t iTimeoutMs;                        /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    SOPC_SLinkedList* dataIdToNodeIdList;      /* A list of data ids to node ids */
+    uintptr_t userContext;                     /* A state machine user defined context */
 };
 
 /* Internal functions */
@@ -164,9 +163,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPolicyId,
                                      const char* szUsername,
                                      const char* szPassword,
-                                     const char* szPath_cert_x509_token,
-                                     const char* szPath_key_x509_token,
-                                     bool key_x509_token_encrypted,
+                                     const SOPC_SerializedCertificate* pUserCertX509,
+                                     const SOPC_SerializedAsymmetricKey* pUserKey,
                                      SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,
@@ -210,9 +208,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->szPolicyId = NULL;
         pSM->szUsername = NULL;
         pSM->szPassword = NULL;
-        pSM->szPath_cert_x509_token = NULL;
-        pSM->szPath_key_x509_token = NULL;
-        pSM->key_x509_token_encrypted = false;
+        pSM->pUserCertX509 = NULL;
+        pSM->pUserKey = NULL;
         pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
         pSM->userContext = userContext;
@@ -240,43 +237,29 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
-        if (NULL != szPath_cert_x509_token)
+        if (NULL != pUserCertX509)
         {
-            pSM->szPath_cert_x509_token = SOPC_Malloc(strlen(szPath_cert_x509_token) + 1);
-            if (NULL == pSM->szPath_cert_x509_token)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(pUserCertX509->data, pUserCertX509->length,
+                                                                         &pSM->pUserCertX509);
         }
-        if (NULL != szPath_key_x509_token)
+        if (NULL != pUserKey)
         {
-            pSM->szPath_key_x509_token = SOPC_Malloc(strlen(szPath_key_x509_token) + 1);
-            if (NULL == pSM->szPath_key_x509_token)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            const SOPC_ExposedBuffer* key = SOPC_SecretBuffer_Expose(pUserKey);
+            pSM->pUserKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, SOPC_SecretBuffer_GetLength(pUserKey));
+            SOPC_SecretBuffer_Unexpose(key, pUserKey);
         }
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        if (NULL != pSM->szPolicyId)
+        if (NULL != pSM->szPolicyId && NULL != szPolicyId)
         {
             strcpy((char*) pSM->szPolicyId, szPolicyId);
         }
-        if (NULL != pSM->szUsername)
+        if (NULL != pSM->szUsername && NULL != szUsername)
         {
             strcpy((char*) pSM->szUsername, szUsername);
         }
-        if (NULL != pSM->szPassword)
+        if (NULL != pSM->szPassword && NULL != szPassword)
         {
             strcpy((char*) pSM->szPassword, szPassword);
-        }
-        if (NULL != pSM->szPath_cert_x509_token)
-        {
-            strcpy((char*) pSM->szPath_cert_x509_token, szPath_cert_x509_token);
-        }
-        if (NULL != pSM->szPath_key_x509_token)
-        {
-            strcpy((char*) pSM->szPath_key_x509_token, szPath_key_x509_token);
-            pSM->key_x509_token_encrypted = key_x509_token_encrypted;
         }
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
@@ -346,8 +329,8 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Delete(pSM->dataIdToNodeIdList);
         pSM->dataIdToNodeIdList = NULL;
-        SOPC_Free((void*) pSM->szPath_cert_x509_token);
-        SOPC_Free((void*) pSM->szPath_key_x509_token);
+        SOPC_KeyManager_SerializedCertificate_Delete(pSM->pUserCertX509);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSM->pUserKey);
 
         SOPC_GCC_DIAGNOSTIC_RESTORE
         SOPC_Free(pSM);
@@ -387,80 +370,17 @@ SOPC_ReturnStatus SOPC_StaMac_StartSession(SOPC_StaMac_Machine* pSM)
                 endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->szUsername,
                 (const uint8_t*) pSM->szPassword, pSM->szPassword != NULL ? (int32_t) strlen(pSM->szPassword) : 0);
         }
-        else if (NULL != pSM->szPath_cert_x509_token && NULL != pSM->szPath_key_x509_token)
+        else if (NULL != pSM->pUserCertX509 && NULL != pSM->pUserKey)
         {
-            SOPC_SerializedCertificate* pCertX509 = NULL;
-            SOPC_SerializedAsymmetricKey* pKey = NULL;
-
-            /* Temporary load the x509 certificate as SOPC_SerializedCertificate
-            (SOPC_ToolkitClient_AsyncActivateSession_Certificate will build an internal extention object with it) */
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(pSM->szPath_cert_x509_token, &pCertX509);
-            if (SOPC_STATUS_OK != status)
-            {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken certificate.");
-            }
-            /* Load the x509 private key and not freed it, let the toolkit do it */
-            if (SOPC_STATUS_OK == status)
-            {
-                char* password = NULL;
-                size_t lenPassword = 0;
-                if (pSM->key_x509_token_encrypted)
-                {
-                    SOPC_CertificateList* cert = NULL;
-                    status = SOPC_KeyManager_SerializedCertificate_Deserialize(pCertX509, &cert);
-
-                    if (SOPC_STATUS_OK == status)
-                    {
-                        char* certSha1 = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
-                        SOPC_KeyManager_Certificate_Free(cert);
-                        cert = NULL;
-
-                        bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
-                        if (!res)
-                        {
-                            Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                                        "Failed to retrieve the password of the user private key from callback.");
-                            status = SOPC_STATUS_NOK;
-                        }
-                        SOPC_Free(certSha1);
-                    }
-                }
-
-                if (SOPC_STATUS_OK == status && NULL != password)
-                {
-                    lenPassword = strlen(password);
-                    if (UINT32_MAX < lenPassword)
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
-                }
-
-                if (SOPC_STATUS_OK == status)
-                {
-                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                        pSM->szPath_key_x509_token, &pKey, password, (uint32_t) lenPassword);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken private key.");
-                    }
-                }
-
-                if (NULL != password)
-                {
-                    SOPC_Free(password);
-                }
-            }
-
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_ToolkitClient_AsyncActivateSession_Certificate(
-                    endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pCertX509, pKey);
+                    endpointConnectionCfg, NULL, (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId, pSM->pUserCertX509,
+                    pSM->pUserKey);
+                pSM->pUserKey = NULL; // now owned by toolkit
             }
-
-            /* Clear the temporary certificate */
-            SOPC_KeyManager_SerializedCertificate_Delete(pCertX509);
         }
-        else if (NULL == pSM->szPath_cert_x509_token && NULL == pSM->szPath_key_x509_token)
+        else if (NULL == pSM->pUserCertX509 && NULL == pSM->pUserKey)
         {
             status = SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL,
                                                                        (uintptr_t) pSM->iSessionCtx, pSM->szPolicyId);

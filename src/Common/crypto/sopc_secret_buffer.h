@@ -53,7 +53,7 @@ typedef uint8_t SOPC_ExposedBuffer;
  *
  * \return          The SecretBuffer when successful, otherwise a NULL.
  */
-SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* buf, uint32_t len);
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(const SOPC_ExposedBuffer* buf, uint32_t len);
 
 /**
  * \brief Creates a new SecretBuffer from a file.

@@ -114,8 +114,8 @@ typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
  * \param szPolicyId              Zero-terminated user identity policy id, see SOPC_LibSub_ConnectionCfg
  * \param szUsername              Zero-terminated username, see SOPC_LibSub_ConnectionCfg
  * \param szPassword              Zero-terminated password, see SOPC_LibSub_ConnectionCfg
- * \param szPath_cert_x509_token  Zero-terminated path of the x509 certificate for X509IdentiyToken (DER format)
- * \param szPath_key_x509_token   Zero-terminated path of the private key for X509IdentiyToken (PEM format)
+ * \param pUserCertX509           X509 serialized certificate for X509IdentiyToken (DER format)
+ * \param pUserKey                Serialized private key for X509IdentiyToken (PEM format)
  * \param cbkLibSubDataChanged    The callback to trigger when a PublishResponse is received
  * \param fPublishInterval        Subscription publish interval, in milliseconds
  * \param iCntMaxKeepAlive        The number of times an empty PublishResponse is not sent
@@ -136,9 +136,8 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      const char* szPolicyId,
                                      const char* szUsername,
                                      const char* szPassword,
-                                     const char* szPath_cert_x509_token,
-                                     const char* szPath_key_x509_token,
-                                     bool key_x509_token_encrypted,
+                                     const SOPC_SerializedCertificate* pUserCertX509,
+                                     const SOPC_SerializedAsymmetricKey* pUserKey,
                                      SOPC_LibSub_DataChangeCbk* cbkLibSubDataChanged,
                                      double fPublishInterval,
                                      uint32_t iCntMaxKeepAlive,

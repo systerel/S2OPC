@@ -349,6 +349,101 @@ static SOPC_ReturnStatus SOPC_HelperConfigClient_MayFinalize_ClientConfigFromPat
     return status;
 }
 
+static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_SerializedCertificate* pUserCertX509 = NULL;
+    SOPC_SerializedAsymmetricKey* pUserKey = NULL;
+    if (NULL != secConnConfig->sessionConfig.userToken.userX509.configFromPaths &&
+        NULL != secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath &&
+        NULL != secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(
+            secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath, &pUserCertX509);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Connection[%" PRIu16 "]: Failed to load x509 UserIdentityToken certificate %s.",
+                                   secConnConfig->secureConnectionIdx,
+                                   secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            char* password = NULL;
+            size_t lenPassword = 0;
+            if (secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted)
+            {
+                SOPC_CertificateList* cert = NULL;
+                status = SOPC_KeyManager_SerializedCertificate_Deserialize(pUserCertX509, &cert);
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    char* certSha1 = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
+                    SOPC_KeyManager_Certificate_Free(cert);
+                    cert = NULL;
+
+                    bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
+                    if (!res)
+                    {
+                        SOPC_Logger_TraceError(
+                            SOPC_LOG_MODULE_CLIENTSERVER,
+                            "Connection[%" PRIu16
+                            "]: Failed to retrieve the password of the user private key %s from callback.",
+                            secConnConfig->secureConnectionIdx,
+                            secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath);
+                        status = SOPC_STATUS_NOK;
+                    }
+                    SOPC_Free(certSha1);
+                }
+            }
+
+            if (SOPC_STATUS_OK == status && NULL != password)
+            {
+                lenPassword = strlen(password);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath, &pUserKey, password,
+                    (uint32_t) lenPassword);
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "Connection[%" PRIu16 "]: Failed to load x509 UserIdentityToken private key %s.",
+                        secConnConfig->secureConnectionIdx,
+                        secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath);
+                }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
+            }
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        secConnConfig->sessionConfig.userToken.userX509.certX509 = pUserCertX509;
+        secConnConfig->sessionConfig.userToken.userX509.keyX509 = pUserKey;
+    }
+    else
+    {
+        SOPC_KeyManager_SerializedCertificate_Delete(pUserCertX509);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(pUserKey);
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
                                                                           SOPC_SecureConnection_Config* secConnConfig)
 {
@@ -391,17 +486,25 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
 
     OpcUa_UserTokenType sessionTokenType = secConnConfig->sessionConfig.userTokenType;
 
-    if (SOPC_STATUS_OK == status && OpcUa_UserTokenType_UserName == sessionTokenType &&
-        NULL == secConnConfig->sessionConfig.userToken.userName.userPwd)
+    if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_ClientInternal_GetUserNamePassword(secConnConfig->sessionConfig.userToken.userName.userName,
-                                                           &secConnConfig->sessionConfig.userToken.userName.userPwd);
-        if (!res)
+        if (OpcUa_UserTokenType_UserName == sessionTokenType &&
+            NULL == secConnConfig->sessionConfig.userToken.userName.userPwd)
         {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            bool res =
+                SOPC_ClientInternal_GetUserNamePassword(secConnConfig->sessionConfig.userToken.userName.userName,
+                                                        &secConnConfig->sessionConfig.userToken.userName.userPwd);
+            if (!res)
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
+        }
+        else if (OpcUa_UserTokenType_Certificate == sessionTokenType &&
+                 secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded)
+        {
+            status = SOPC_Internal_ConfigUserX509FromPaths(secConnConfig);
         }
     }
-
     if (SOPC_STATUS_OK == status)
     {
         secConnConfig->finalized = true;

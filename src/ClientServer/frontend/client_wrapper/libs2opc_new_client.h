@@ -94,6 +94,10 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  *
  *  \warning If the server endpoint is not a discovery endpoint or an activated session is expected
  *           usual connection and generic services functions shall be used.
+ *
+ * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
+ *          and prior to call ::SOPC_HelperConfigClient_Clear.
+ *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
                                                           void* request,
@@ -210,6 +214,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
  *
  * \note request memory is managed by the client after a successful return
+ *
+ * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
+ *          and prior to call ::SOPC_HelperConfigClient_Clear.
+ *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
                                                  void* request,

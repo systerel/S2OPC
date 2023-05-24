@@ -279,7 +279,6 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
                 SOPC_Free(secConnConfig->sessionConfig.userToken.userX509.configFromPaths);
                 secConnConfig->sessionConfig.userToken.userX509.configFromPaths = NULL;
             }
-
             SOPC_KeyManager_SerializedCertificate_Delete(secConnConfig->sessionConfig.userToken.userX509.certX509);
             SOPC_KeyManager_SerializedAsymmetricKey_Delete(secConnConfig->sessionConfig.userToken.userX509.keyX509);
         }

@@ -49,6 +49,7 @@
 #include "sopc_types.h"
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client_common.h"
+#include "libs2opc_client_internal.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 
@@ -576,18 +577,81 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         }
     }
 
+    SOPC_SerializedCertificate* pUserCertX509 = NULL;
+    SOPC_SerializedAsymmetricKey* pUserKey = NULL;
+    if (SOPC_STATUS_OK == status && NULL != pCfg->path_cert_x509_token && NULL != pCfg->path_key_x509_token)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(pCfg->path_cert_x509_token, &pUserCertX509);
+        if (SOPC_STATUS_OK != status)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken certificate.");
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            char* password = NULL;
+            size_t lenPassword = 0;
+            if (pCfg->key_x509_token_encrypted)
+            {
+                SOPC_CertificateList* cert = NULL;
+                status = SOPC_KeyManager_SerializedCertificate_Deserialize(pUserCertX509, &cert);
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    char* certSha1 = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
+                    SOPC_KeyManager_Certificate_Free(cert);
+                    cert = NULL;
+
+                    bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
+                    if (!res)
+                    {
+                        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                                    "Failed to retrieve the password of the user private key from callback.");
+                        status = SOPC_STATUS_NOK;
+                    }
+                    SOPC_Free(certSha1);
+                }
+            }
+
+            if (SOPC_STATUS_OK == status && NULL != password)
+            {
+                lenPassword = strlen(password);
+                if (UINT32_MAX < lenPassword)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+                    pCfg->path_key_x509_token, &pUserKey, password, (uint32_t) lenPassword);
+                if (SOPC_STATUS_OK != status)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load x509 UserIdentityToken private key.");
+                }
+            }
+
+            if (NULL != password)
+            {
+                SOPC_Free(password);
+            }
+        }
+    }
+
     /* Creates a client state machine */
     if (SOPC_STATUS_OK == status)
     {
         ++nCreatedClient;
         clientId = nCreatedClient;
         status = SOPC_StaMac_Create(cfgId, pCfg->reverse_config_idx, clientId, pCfg->policyId, pCfg->username,
-                                    pCfg->password, pCfg->path_cert_x509_token, pCfg->path_key_x509_token,
-                                    pCfg->key_x509_token_encrypted, pCfg->data_change_callback,
+                                    pCfg->password, pUserCertX509, pUserKey, pCfg->data_change_callback,
                                     (double) pCfg->publish_period_ms, pCfg->n_max_keepalive, pCfg->n_max_lifetime,
                                     pCfg->token_target, pCfg->timeout_ms, pCfg->generic_response_callback,
                                     (uintptr_t) inhibitDisconnectCallback, &pSM);
     }
+
+    SOPC_KeyManager_SerializedCertificate_Delete(pUserCertX509);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pUserKey);
 
     /* Adds it to the list and modify pCliId */
     if (SOPC_STATUS_OK == status)
@@ -613,9 +677,10 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
         {
             /* Release the lock so that the event handler can work properly while waiting
              *
-             * Note: concurrent changes of state machines state are only allowed during sleep call in Connect function.
-             * It is necessary to manage inhibition of disconnection callback properly since it shall still be called if
-             * connection operation succeeded and then connection immediately fails before Connect function returns.
+             * Note: concurrent changes of state machines state are only allowed during sleep call in Connect
+             * function. It is necessary to manage inhibition of disconnection callback properly since it shall
+             * still be called if connection operation succeeded and then connection immediately fails before
+             * Connect function returns.
              */
             mutStatus = Mutex_Unlock(&mutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -1176,7 +1241,8 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
                     if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event)
                     {
                         bool inhibitDisconnectCallback = (bool) SOPC_StaMac_GetUserContext(pSM);
-                        /* Check if the disconnection callback shall be inhibited (Connect operation still running) */
+                        /* Check if the disconnection callback shall be inhibited (Connect operation still running)
+                         */
                         if (!inhibitDisconnectCallback && NULL != cbkDisco)
                         {
                             /* The disconnect callback shall be called after the client has been destroyed */
