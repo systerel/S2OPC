@@ -625,8 +625,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection
         }
         else
         {
-            SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-            SOPC_Free(secConnConfig->sessionConfig.userPolicyId);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((char*) secConnConfig->sessionConfig.userPolicyId);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             secConnConfig->sessionConfig.userPolicyId = userPolicyIdCopy;
         }
@@ -673,8 +673,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_
         }
         else
         {
-            SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-            SOPC_Free(secConnConfig->sessionConfig.userPolicyId);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((char*) secConnConfig->sessionConfig.userPolicyId);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             secConnConfig->sessionConfig.userPolicyId = userPolicyIdCopy;
             secConnConfig->sessionConfig.userToken.userName.userName = userNameCopy;
@@ -729,8 +729,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureCo
         }
         else
         {
-            SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-            SOPC_Free(secConnConfig->sessionConfig.userPolicyId);
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((char*) secConnConfig->sessionConfig.userPolicyId);
             SOPC_GCC_DIAGNOSTIC_RESTORE
             secConnConfig->sessionConfig.userPolicyId = userPolicyIdCopy;
             secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath = userCertPathCopy;
@@ -745,15 +745,78 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureCo
     return status;
 }
 
-/*
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
+                                                                   const char* userPolicyId,
                                                                    size_t certificateNbBytes,
                                                                    const unsigned char* userCertificate,
                                                                    size_t keyNbBytes,
                                                                    const unsigned char* userPrivateKey)
 {
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == userCertificate || 0 == certificateNbBytes || NULL == userPrivateKey || 0 == keyNbBytes)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType)
+    {
+        // User token already defined
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_SerializedCertificate* cert = NULL;
+        SOPC_SerializedAsymmetricKey* key = NULL;
+        char* userPolicyIdCopy = SOPC_strdup(userPolicyId);
+
+        if (NULL == userPolicyIdCopy)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            status =
+                SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(userPrivateKey, (uint32_t) keyNbBytes, &key);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(userCertificate, (uint32_t) certificateNbBytes,
+                                                                         &cert);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            SOPC_Free((char*) secConnConfig->sessionConfig.userPolicyId);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+            secConnConfig->sessionConfig.userPolicyId = userPolicyIdCopy;
+            secConnConfig->sessionConfig.userToken.userX509.certX509 = cert;
+            secConnConfig->sessionConfig.userToken.userX509.keyX509 = key;
+            secConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Certificate;
+        }
+        else
+        {
+            SOPC_Free(userPolicyIdCopy);
+            SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
+            SOPC_KeyManager_SerializedCertificate_Delete(cert);
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
 }
-*/
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_GetSecureConnectionConfigs(size_t* nbScConfigs,
                                                                      SOPC_SecureConnection_Config*** scConfigArray)
