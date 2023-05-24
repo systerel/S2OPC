@@ -272,13 +272,28 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureCo
                                                                    const char* userKeyPath,
                                                                    bool encrypted);
 
-/* NOT IMPLEMENTED
+/**
+ * \brief Sets asymmetrical certificate and key of user from byte arrays.
+ *        Certificate shall be in DER format, key file shall be in DER or PEM format.
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ * \param userPolicyId   The user policy Id to be used in server for X509 certificate
+ * \param certificateNbBytes Number of elements in \p clientCertificate array
+ * \param userCertificate    Array of bytes containing user certificate at DER format (copied by function)
+ * \param keyNbBytes         Number of elements in \p clientPrivateKey array
+ * \param userPrivateKey     Array of bytes containing user key file at DER or PEM format (copied by function)
+ *
+ * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
+ *         if \p certificateNbBytes, \p userCertificate, \p keyNbBytes or \p userPrivateKey are invalid (0 or NULL)
+ *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *         (wrapper not initialized, key/cert pair already set).
+ */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
+                                                                   const char* userPolicyId,
                                                                    size_t certificateNbBytes,
                                                                    const unsigned char* userCertificate,
                                                                    size_t keyNbBytes,
                                                                    const unsigned char* userPrivateKey);
-*/
 
 SOPC_ReturnStatus SOPC_HelperConfigClient_GetSecureConnectionConfigs(size_t* nbScConfigs,
                                                                      SOPC_SecureConnection_Config*** scConfigArray);
