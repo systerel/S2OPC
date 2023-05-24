@@ -329,15 +329,10 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
             "3", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
         status = SOPC_SecureConnectionConfig_SetReverseConnection(secureConnConfig3, REVERSE_ENDPOINT_URL);
 
-        if (secureConnConfig1 != NULL && secureConnConfig2 != NULL && secureConnConfig3 != NULL &&
-            SOPC_STATUS_OK == status)
-        {
-            printf(">>Test_Client_Toolkit: Client configured\n");
-        }
-        else
+        if (secureConnConfig1 == NULL || secureConnConfig2 == NULL || secureConnConfig3 == NULL ||
+            SOPC_STATUS_OK != status)
         {
             status = SOPC_STATUS_NOK;
-            printf(">>Test_Client_Toolkit: Client configuration failed\n");
         }
     }
 
@@ -368,11 +363,18 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
             // Set X509 as authentication mode for third connection
             else if (i == 2)
             {
+#ifdef WITH_STATIC_SECURITY_DATA
+                status = SOPC_SecureConnectionConfig_AddUserX509FromBytes((*secureConnConfigArray)[i], "X509",
+                                                                          sizeof(user_2k_cert), user_2k_cert,
+                                                                          sizeof(user_2k_key), user_2k_key);
+#else
                 status = SOPC_SecureConnectionConfig_AddUserX509FromPaths((*secureConnConfigArray)[i], "X509",
                                                                           USER_CERT_PATH, USER_KEY_PATH, true);
+#endif
             }
         }
     }
+
     return status;
 }
 
@@ -424,6 +426,15 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)
     {
         status = Client_SetDefaultConfiguration(nbSecConnCfgs, secureConnConfigArray);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        printf(">>Test_Client_Toolkit: Client configured\n");
+    }
+    else
+    {
+        printf(">>Test_Client_Toolkit: Client configuration failed\n");
     }
 
     return status;
