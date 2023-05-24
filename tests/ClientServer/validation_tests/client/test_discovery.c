@@ -20,50 +20,59 @@
 #include <check.h>
 #include <stdbool.h>
 
-#include "sopc_atomic.h"
-#include "sopc_common.h"
-#include "sopc_helper_string.h"
-#include "sopc_time.h"
-#include "sopc_toolkit_config.h"
-
-#include "config.h"
-#include "sopc_helper_askpass.h"
-#include "state_machine.h"
 #include "test_suite_client.h"
-#include "wait_machines.h"
 
-static StateMachine_Machine* g_pSM = NULL;
-static int32_t atomicValidatingResult = 0;
+#include "libs2opc_client_config_custom.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
+#include "sopc_encodeable.h"
+#include "sopc_mem_alloc.h"
+
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_None
+#define REQ_SECURITY_POLICY SOPC_SecurityPolicy_None
+
+#define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
+#define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
+#define GATEWAY_SERVER_URI ""
 
 /* Event handlers of the Discovery */
-static void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+static void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp);
 
 START_TEST(test_getEndpoints)
 {
+    // Get default log config and set the custom path
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_getEndpoints_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperConfigClient_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+        "discovery", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    OpcUa_GetEndpointsRequest* getEpReq = SOPC_GetEndpointsRequest_Create(DEFAULT_ENDPOINT_URL);
+    ck_assert_ptr_nonnull(getEpReq);
+    OpcUa_GetEndpointsResponse* getEpResp = NULL;
+
+    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, getEpReq, (void**) &getEpResp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateGetEndpoints) == SOPC_STATUS_OK);
-    g_pSM = StateMachine_Create();
-    ck_assert(NULL != g_pSM);
-    Config_Client_SetClientKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
-    ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
+    ValidateGetEndpointsResponse(getEpResp);
 
-    ck_assert(StateMachine_StartDiscovery(g_pSM) == SOPC_STATUS_OK);
-    wait_for_machine(&atomicValidatingResult, g_pSM);
-
-    SOPC_Toolkit_Clear();
-    StateMachine_Delete(&g_pSM);
+    /* Close the toolkit */
+    SOPC_HelperConfigClient_Clear();
+    SOPC_CommonHelper_Clear();
 }
 END_TEST
 
-void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
+void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
 {
-    uintptr_t appCtx = 0;
-    OpcUa_GetEndpointsResponse* pResp = NULL;
+    ck_assert(&OpcUa_GetEndpointsResponse_EncodeableType == pResp->encodeableType);
+
     OpcUa_EndpointDescription* pEndp = NULL;
     int32_t i = 0;
     bool bNoneChecked = false;
@@ -76,144 +85,130 @@ void EventDispatcher_ValidateGetEndpoints(SOPC_App_Com_Event event, uint32_t arg
     SOPC_ByteString* pBufCert = NULL;
     SOPC_CertificateList* pCert = NULL;
 
-    // Set result is still validating since machine state will change on next instruction
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
-    ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
-    switch (event)
+    /* Check the presence of the None and Basic256 sec policy (free opc ua does not support B256S256 */
+    for (i = 0; i < pResp->NoOfEndpoints; ++i)
     {
-    case SE_RCV_DISCOVERY_RESPONSE:
-        /* Testing the response is, in fact, a test of the server */
-        pResp = (OpcUa_GetEndpointsResponse*) pParam;
-        /* Check the presence of the None and Basic256 sec policy (free opc ua does not support B256S256 */
-        for (i = 0; i < pResp->NoOfEndpoints; ++i)
+        pEndp = &pResp->Endpoints[i];
+        /* As we asked for a GetEndpoints on ENDPOINT_URL, it should only return endpoints with that URL */
+        /* TODO: freeopcua translates the given hostname to an IP, so it is not possible to check that */
+        /* ck_assert(strncmp(SOPC_String_GetRawCString(&pEndp->EndpointUrl), ENDPOINT_URL, strlen(ENDPOINT_URL)
+         * + 1)
+         * == 0); */
+        /* Check that SecPol None <=> SecMode None */
+        bInconsistentPolicyMode = false;
+        bInconsistentPolicyMode = strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri),
+                                          SOPC_SecurityPolicy_None_URI, strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0;
+        bInconsistentPolicyMode ^= OpcUa_MessageSecurityMode_None == pEndp->SecurityMode;
+        ck_assert(!bInconsistentPolicyMode);
+
+        /* If it is None, there is nothing more to check. */
+        if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
+                    strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
         {
-            pEndp = &pResp->Endpoints[i];
-            /* As we asked for a GetEndpoints on ENDPOINT_URL, it should only return endpoints with that URL */
-            /* TODO: freeopcua translates the given hostname to an IP, so it is not possible to check that */
-            /* ck_assert(strncmp(SOPC_String_GetRawCString(&pEndp->EndpointUrl), ENDPOINT_URL, strlen(ENDPOINT_URL)
-             * + 1)
-             * == 0); */
-            /* Check that SecPol None <=> SecMode None */
-            bInconsistentPolicyMode = false;
-            bInconsistentPolicyMode =
-                strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
-                        strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0;
-            bInconsistentPolicyMode ^= OpcUa_MessageSecurityMode_None == pEndp->SecurityMode;
-            ck_assert(!bInconsistentPolicyMode);
-
-            /* If it is None, there is nothing more to check. */
-            if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_None_URI,
-                        strlen(SOPC_SecurityPolicy_None_URI) + 1) == 0)
-            {
-                bNoneChecked = true;
-                iSecLevelNone = pEndp->SecurityLevel;
-            }
-
-            /* Check the received certificate: it shall be present */
-            if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256_URI,
-                        strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0 &&
-                pEndp->ServerCertificate.Length > 0)
-            {
-                bB256Checked = true;
-                iSecLevelB256 = pEndp->SecurityLevel;
-                pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
-                                                                         &pCert) == SOPC_STATUS_OK);
-                SOPC_KeyManager_Certificate_Free(pCert);
-                pCert = NULL;
-                pBufCert = NULL;
-            }
-
-            if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256Sha256_URI,
-                        strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0 &&
-                pEndp->ServerCertificate.Length > 0)
-            {
-                bB256S256Checked = true;
-                iSecLevelB256S256 = pEndp->SecurityLevel;
-                pBufCert = &pEndp->ServerCertificate;
-                ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
-                                                                         &pCert) == SOPC_STATUS_OK);
-                SOPC_KeyManager_Certificate_Free(pCert);
-                pCert = NULL;
-                pBufCert = NULL;
-            }
+            bNoneChecked = true;
+            iSecLevelNone = pEndp->SecurityLevel;
         }
 
-        /* Does not check that a security policy is not described multiple times */
-        ck_assert(bNoneChecked && (bB256Checked || bB256S256Checked));
-        if (bB256Checked)
+        /* Check the received certificate: it shall be present */
+        if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256_URI,
+                    strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0 &&
+            pEndp->ServerCertificate.Length > 0)
         {
-            /* Freeopcua always use 0 as SecurityLevel... */
-            ck_assert(iSecLevelB256 >= iSecLevelNone);
+            bB256Checked = true;
+            iSecLevelB256 = pEndp->SecurityLevel;
+            pBufCert = &pEndp->ServerCertificate;
+            ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                     &pCert) == SOPC_STATUS_OK);
+            SOPC_KeyManager_Certificate_Free(pCert);
+            pCert = NULL;
+            pBufCert = NULL;
         }
-        if (bB256S256Checked)
+
+        if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256Sha256_URI,
+                    strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0 &&
+            pEndp->ServerCertificate.Length > 0)
         {
-            /* Freeopcua always use 0 as SecurityLevel... */
-            ck_assert(iSecLevelB256S256 >= iSecLevelNone);
+            bB256S256Checked = true;
+            iSecLevelB256S256 = pEndp->SecurityLevel;
+            pBufCert = &pEndp->ServerCertificate;
+            ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
+                                                                     &pCert) == SOPC_STATUS_OK);
+            SOPC_KeyManager_Certificate_Free(pCert);
+            pCert = NULL;
+            pBufCert = NULL;
         }
-        break;
-    default:
-        /* TODO: Unhandle "not connected" error" */
-        ck_assert_msg(false, "Unexpected event");
-        break;
     }
 
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
-}
+    /* Does not check that a security policy is not described multiple times */
+    ck_assert(bNoneChecked && (bB256Checked || bB256S256Checked));
+    if (bB256Checked)
+    {
+        /* Freeopcua always use 0 as SecurityLevel... */
+        ck_assert(iSecLevelB256 >= iSecLevelNone);
+    }
+    if (bB256S256Checked)
+    {
+        /* Freeopcua always use 0 as SecurityLevel... */
+        ck_assert(iSecLevelB256S256 >= iSecLevelNone);
+    }
 
-/* Event handlers of the Discovery */
-static void EventDispatcher_ValidateRegisterServer(SOPC_App_Com_Event event,
-                                                   uint32_t arg,
-                                                   void* pParam,
-                                                   uintptr_t smCtx);
+    SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
+}
 
 START_TEST(test_registerServer)
 {
+    // Get default log config and set the custom path
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_discovery_registerServer_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperConfigClient_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+        "discovery", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
 
-    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_ValidateRegisterServer) == SOPC_STATUS_OK);
-    g_pSM = StateMachine_Create();
-    ck_assert(NULL != g_pSM);
-    Config_Client_SetClientKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
-    ck_assert(StateMachine_ConfigureMachine(g_pSM, false, false) == SOPC_STATUS_OK);
+    OpcUa_RegisterServerRequest* pReq = NULL;
+    status = SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_LocalizedText* serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
+    ck_assert_ptr_nonnull(serverName);
+    SOPC_String* discoveryURL = SOPC_String_Create();
+    ck_assert_ptr_nonnull(discoveryURL);
 
-    ck_assert(StateMachine_StartRegisterServer(g_pSM) == SOPC_STATUS_OK);
-    wait_for_machine(&atomicValidatingResult, g_pSM);
+    OpcUa_RegisteredServer* pServ = &pReq->Server;
 
-    SOPC_Toolkit_Clear();
-    StateMachine_Delete(&g_pSM);
-}
-END_TEST
+    bool fillRequest =
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ServerUri, DEFAULT_APPLICATION_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->ProductUri, DEFAULT_PRODUCT_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->GatewayServerUri, GATEWAY_SERVER_URI)) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&pServ->SemaphoreFilePath, "")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultLocale, "Locale")) &&
+        (SOPC_STATUS_OK == SOPC_String_AttachFromCstring(&serverName->defaultText, "Text")) &&
+        (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(discoveryURL, "opc.tcp://test"));
+    ck_assert(fillRequest);
+    pServ->NoOfServerNames = 1;
+    pServ->ServerNames = serverName;
+    pServ->NoOfDiscoveryUrls = 1;
+    pServ->DiscoveryUrls = discoveryURL;
+    pServ->IsOnline = true;
+    pServ->ServerType = OpcUa_ApplicationType_Server;
 
-static void EventDispatcher_ValidateRegisterServer(SOPC_App_Com_Event event,
-                                                   uint32_t arg,
-                                                   void* pParam,
-                                                   uintptr_t smCtx)
-{
-    uintptr_t appCtx = 0;
     OpcUa_RegisterServerResponse* pResp = NULL;
 
-    // Set result is still validating since machine state will change on next instruction
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
-    ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
-    switch (event)
-    {
-    case SE_RCV_DISCOVERY_RESPONSE:
-        /* Testing the response is, in fact, a test of the server */
-        pResp = (OpcUa_RegisterServerResponse*) pParam;
-        ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);
-        break;
-    default:
-        /* TODO: Unhandle "not connected" error" */
-        ck_assert_msg(false, "Unexpected event");
-        break;
-    }
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
+    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);
+    SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
+
+    /* Close the toolkit */
+    SOPC_HelperConfigClient_Clear();
+    SOPC_CommonHelper_Clear();
 }
+END_TEST
 
 Suite* client_suite_make_discovery(void)
 {

@@ -24,64 +24,101 @@
 #include <check.h>
 #include <stdbool.h>
 
-#include "sopc_atomic.h"
-#include "sopc_common.h"
-#include "sopc_time.h"
-#include "sopc_toolkit_config.h"
-
-#include "config.h"
 #include "sopc_helper_askpass.h"
-#include "state_machine.h"
 #include "test_suite_client.h"
-#include "wait_machines.h"
 
-static StateMachine_Machine* g_pSM = NULL;
-static int32_t atomicValidatingResult = 0;
+#include "libs2opc_client_config_custom.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 
-static void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx);
+#define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
+#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_Sign
+#define REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
+
+// Client certificate path
+#define CLI_CERT_PATH "./client_public/client_4k_cert.der"
+// Server certificate path
+#define SRV_CERT_PATH "./server_public/server_4k_cert.der"
+// Client private key path
+#define CLI_KEY_PATH "./client_private/encrypted_client_4k_key.pem"
+
+// PKI trusted CA
+static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
+                                               NULL};
+static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
+static char* default_empty_cert_paths[] = {NULL};
+
+static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
+                                         SOPC_ClientConnectionEvent event,
+                                         SOPC_StatusCode status)
+{
+    SOPC_UNUSED_ARG(config);
+    SOPC_UNUSED_ARG(event);
+    SOPC_UNUSED_ARG(status);
+    ck_assert(false);
+}
 
 START_TEST(test_username_password)
 {
+    // Get default log config and set the custom path
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_session_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperConfigClient_Initialize();
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Set callback to retrieve password (from environment variable)
+    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Set callback necessary to retrieve user password (from environment variable)
+    status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    ck_assert(SOPC_Toolkit_Initialize(EventDispatcher_QuitAfterConnect) == SOPC_STATUS_OK);
-    g_pSM = StateMachine_Create();
-    ck_assert(NULL != g_pSM);
-    Config_Client_SetClientKeyPassword_Fct(&SOPC_TestHelper_AskPass_FromEnv);
-    ck_assert(StateMachine_ConfigureMachine(g_pSM, true, false) == SOPC_STATUS_OK);
+    /* Load client certificate and key from files */
+    status = SOPC_HelperConfigClient_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    ck_assert(StateMachine_StartSession_UsernamePassword(g_pSM, "username", "user", "password") == SOPC_STATUS_OK);
-    wait_for_machine(&atomicValidatingResult, g_pSM);
+    /* Create the PKI (Public Key Infrastructure) provider */
+    SOPC_PKIProvider* pkiProvider = NULL;
+    status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, default_empty_cert_paths,
+                                                   default_empty_cert_paths, default_empty_cert_paths,
+                                                   default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pkiProvider);
+    /* Set PKI provider as client PKI*/
+    status = SOPC_HelperConfigClient_SetPKIprovider(pkiProvider);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    SOPC_Toolkit_Clear();
-    StateMachine_Delete(&g_pSM);
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+        "user_session", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
+    ck_assert_ptr_nonnull(secureConnConfig);
+
+    status = SOPC_SecureConnectionConfig_AddServerCertificateFromPath(secureConnConfig, SRV_CERT_PATH);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    status = SOPC_SecureConnectionConfig_AddUserName(secureConnConfig, "username", "user", NULL);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_ClientConnection* secureConnection = NULL;
+    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(secureConnection);
+
+    status = SOPC_ClientHelper_Disconnect(&secureConnection);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(secureConnection);
+
+    /* Close the toolkit */
+    SOPC_HelperConfigClient_Clear();
+    SOPC_CommonHelper_Clear();
 }
 END_TEST
-
-void EventDispatcher_QuitAfterConnect(SOPC_App_Com_Event event, uint32_t arg, void* pParam, uintptr_t smCtx)
-{
-    uintptr_t appCtx = 0;
-    // Set result is still validating since machine state will change on next instruction
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 1);
-    ck_assert(StateMachine_EventDispatcher(g_pSM, &appCtx, event, arg, pParam, smCtx));
-
-    switch (event)
-    {
-    case SE_ACTIVATED_SESSION:
-        StateMachine_StopSession(g_pSM);
-        break;
-    case SE_CLOSED_SESSION:
-        break;
-    default:
-        ck_assert_msg(false, "Unexpected event");
-        break;
-    }
-    SOPC_Atomic_Int_Set(&atomicValidatingResult, 0);
-}
 
 Suite* client_suite_make_session(void)
 {

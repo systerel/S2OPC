@@ -342,13 +342,9 @@ set(S2OPC_CLIENTDEMO_INCLUDES ${S2OPC_ROOT_PATH}/samples/ClientServer/demo_clien
 
 add_executable(toolkit_test_suite_client "validation_tests/client/test_suite_client.c"
   "validation_tests/client/test_discovery.c"
-  "validation_tests/client/wait_machines.c"
   "validation_tests/client/test_session.c"
-  # Use code common with samples
-  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/config.c"
-  "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_client/state_machine.c"
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientserver Check::check)
+target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientwrapper Check::check)
 target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_CLIENTDEMO_INCLUDES} ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_suite_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS})
