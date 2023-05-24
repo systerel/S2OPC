@@ -110,7 +110,7 @@ SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
- *                     In case of sending failure the response is NULL.
+ *                     In case of sending failure the response is NULL and only the userContext is provided.
  *
  * \param userContext  The context that was provided with the corresponding request provided on
  *                     ::SOPC_ClientHelper_ServiceAsync call

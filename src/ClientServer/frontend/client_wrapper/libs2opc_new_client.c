@@ -227,11 +227,6 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
 {
     SOPC_UNUSED_ARG(c_id); // TODO: check connection still exists ? It should not be necessary with a sync disc
 
-    if (SOPC_LibSub_ApplicativeEvent_Response != event)
-    {
-        return;
-    }
-
     bool isAsync = false;
     SOPC_ClientHelper_ReqCtx* genCtx = (SOPC_ClientHelper_ReqCtx*) genContext;
     SOPC_ReturnStatus statusMutex = Mutex_Lock(&genCtx->mutex);
