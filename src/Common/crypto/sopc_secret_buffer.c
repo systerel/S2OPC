@@ -31,7 +31,7 @@ struct SOPC_SecretBuffer
     uint8_t* buf;
 };
 
-SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(SOPC_ExposedBuffer* buf, uint32_t len)
+SOPC_SecretBuffer* SOPC_SecretBuffer_NewFromExposedBuffer(const SOPC_ExposedBuffer* buf, uint32_t len)
 {
     SOPC_SecretBuffer* sec = NULL;
 

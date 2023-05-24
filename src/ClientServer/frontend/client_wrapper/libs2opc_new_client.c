@@ -525,9 +525,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         const char* username = NULL;
         const char* password = NULL;
 
-        const char* userX509certPath = NULL;
-        const char* userX509keyPath = NULL;
-        bool userX509keyEncrypted = false;
+        const SOPC_SerializedCertificate* pUserCertX509 = NULL;
+        const SOPC_SerializedAsymmetricKey* pUserKey = NULL;
 
         if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
         {
@@ -536,17 +535,15 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         }
         else if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_Certificate)
         {
-            SOPC_ASSERT(secConnConfig->sessionConfig.userToken.userX509.isConfigFromPathNeeded);
-            userX509certPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath;
-            userX509keyPath = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath;
-            userX509keyEncrypted = secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyEncrypted;
+            pUserCertX509 = secConnConfig->sessionConfig.userToken.userX509.certX509;
+            pUserKey = secConnConfig->sessionConfig.userToken.userX509.keyX509;
         }
 
         status = SOPC_StaMac_Create(cfgId, reverseConfigIdx, secConnConfig->secureConnectionIdx,
-                                    secConnConfig->sessionConfig.userPolicyId, username, password, userX509certPath,
-                                    userX509keyPath, userX509keyEncrypted, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS,
-                                    TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT, TMP_PUBLISH_N_TOKEN,
-                                    TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
+                                    secConnConfig->sessionConfig.userPolicyId, username, password, pUserCertX509,
+                                    pUserKey, TMP_DataChangeCbk, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT,
+                                    TMP_MAX_LIFETIME_COUNT, TMP_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS,
+                                    SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
     }
 
     if (SOPC_STATUS_OK == status)
