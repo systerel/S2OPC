@@ -232,6 +232,9 @@ target_include_directories(s2opc_clientwrapper
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
+if (expat_FOUND)
+  target_compile_definitions(s2opc_clientwrapper PRIVATE "WITH_EXPAT")
+endif()
 
 list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
                                          "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
@@ -239,6 +242,7 @@ list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${CLIENTWRAPPER_PATH}/libs2opc_client.
                                          "${CLIENTWRAPPER_PATH}/libs2opc_client_common.h"
                                          "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h")
 set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${CLIENT_WRAPPER_INCLUDE_FILES}")
+
 
 install(TARGETS s2opc_clientwrapper
         EXPORT s2opc_clientserver-clientwrapper-export # export our project to be importable after install
@@ -279,6 +283,10 @@ target_include_directories(s2opc_serverwrapper
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
   )
+if (expat_FOUND)
+  target_compile_definitions(s2opc_serverwrapper PRIVATE "WITH_EXPAT")
+endif()
+
 list(APPEND SERVER_WRAPPER_INCLUDE_FILES "${SERVERWRAPPER_PATH}/libs2opc_server.h"
                                          "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
                                          "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h")
