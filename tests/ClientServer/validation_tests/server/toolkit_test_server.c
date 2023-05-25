@@ -984,14 +984,18 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    const char* xml_server_config_path = NULL;
+    const char* xml_address_space_config_path = NULL;
+    const char* xml_users_config_path = NULL;
+
 #ifndef WITH_STATIC_SECURITY_DATA
     // Define a callback to retrieve the server key password (from environment variable)
     status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
-#endif
 
-    const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
-    const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
-    const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
+    xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
+    xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
+    xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
+#endif
 
     if (SOPC_STATUS_OK == status &&
         (NULL != xml_server_config_path || NULL != xml_address_space_config_path || NULL != xml_users_config_path))

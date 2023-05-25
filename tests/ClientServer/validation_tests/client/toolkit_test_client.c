@@ -406,8 +406,10 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
      */
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const char* xml_client_config_path = NULL;
 
-    const char* xml_client_config_path = getenv("TEST_CLIENT_XML_CONFIG");
+#ifndef WITH_STATIC_SECURITY_DATA
+    xml_client_config_path = getenv("TEST_CLIENT_XML_CONFIG");
 
     if (NULL != xml_client_config_path)
     {
@@ -420,22 +422,21 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
             "Do not define environment variables TEST_CLIENT_XML_CONFIG.\n"
             "Or compile with XML library available.\n");
         status = SOPC_STATUS_INVALID_PARAMETERS;
-#endif
+#endif // WITH_EXPAT
     }
 
-#ifndef WITH_STATIC_SECURITY_DATA
     // Set callback necessary to retrieve client key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     }
-#endif
-    // TODO: move to !WITH_STATIC_SECURITY_DATA when X509 certs are configured statically
     // Set callback necessary to retrieve user key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     }
+#endif // WITH_STATIC_SECURITY_DATA
+
     // Set callback necessary to retrieve user password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
