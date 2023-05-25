@@ -169,7 +169,7 @@ static int32_t client_create_configuration(void)
         printf("<Test_Server_Client: Failed to configure the client key password callback\n");
     }
 
-    status = SOPC_HelperConfigClient_SetX509userPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+    status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the user key password callback\n");

@@ -62,6 +62,25 @@ static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
     ck_assert(false);
 }
 
+static bool SOPC_GetClientUser1Password(char** outUserName, char** outPassword)
+{
+    const char* user1 = "user";
+    char* userName = SOPC_Calloc(strlen(user1) + 1, sizeof(*userName));
+    if (NULL == userName)
+    {
+        return false;
+    }
+    memcpy(userName, user1, strlen(user1) + 1);
+    bool res = SOPC_TestHelper_AskPassWithContext_FromEnv(user1, outPassword);
+    if (!res)
+    {
+        SOPC_Free(userName);
+        return false;
+    }
+    *outUserName = userName;
+    return true;
+}
+
 START_TEST(test_username_password)
 {
     // Get default log config and set the custom path
@@ -77,7 +96,7 @@ START_TEST(test_username_password)
     status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Set callback necessary to retrieve user password (from environment variable)
-    status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+    status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Load client certificate and key from files */
@@ -102,7 +121,7 @@ START_TEST(test_username_password)
     status = SOPC_SecureConnectionConfig_AddServerCertificateFromPath(secureConnConfig, SRV_CERT_PATH);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    status = SOPC_SecureConnectionConfig_AddUserName(secureConnConfig, "username", "user", NULL);
+    status = SOPC_SecureConnectionConfig_AddUserName(secureConnConfig, "username", NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
