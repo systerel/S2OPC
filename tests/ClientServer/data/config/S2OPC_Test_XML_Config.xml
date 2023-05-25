@@ -158,9 +158,7 @@
         <ServerCertificate path="server_cert.der"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
         <SecurityMode mode="SignAndEncrypt"/>
-        <UserPolicy policyId="user" tokenType="username">
-          <UserName name="user1"/>
-        </UserPolicy>
+        <UserPolicy policyId="user" tokenType="username"/>
       </Connection>
       <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="ThirdConnection">
         <ServerCertificate path="server_cert.der"/>

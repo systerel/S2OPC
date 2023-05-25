@@ -802,8 +802,7 @@ static void check_parsed_s2opc_client_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(OpcUa_UserTokenType_UserName, secConnConfig->sessionConfig.userTokenType);
     ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userPolicyId);
     ck_assert_int_eq(0, strcmp("user", secConnConfig->sessionConfig.userPolicyId));
-    ck_assert_ptr_nonnull(secConnConfig->sessionConfig.userToken.userName.userName);
-    ck_assert_int_eq(0, strcmp("user1", secConnConfig->sessionConfig.userToken.userName.userName));
+    ck_assert_ptr_null(secConnConfig->sessionConfig.userToken.userName.userName);
     ck_assert_ptr_null(secConnConfig->sessionConfig.userToken.userName.userPwd);
 
     /* 3rd connection */
