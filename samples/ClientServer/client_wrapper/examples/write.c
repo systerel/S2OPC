@@ -28,6 +28,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "libs2opc_client_config.h"
@@ -37,6 +38,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -209,18 +211,46 @@ static SOPC_ReturnStatus ReadPreviousValue(SOPC_ClientConnection* secureConnecti
     return status;
 }
 
-static bool AskUserPass_FromTerminal(const char* user, char** outPassword)
+static bool AskUserKeyPass_FromTerminal(const char* userCertThumb, char** outPassword)
 {
-    const char* promptPrefix = "Password for user ";
+    const char* promptPrefix = "Password for user certificate thumbprint ";
     size_t promptPrefixLen = strlen(promptPrefix);
-    size_t userLen = strlen(user);
+    size_t userLen = strlen(userCertThumb);
     char* prompt = SOPC_Calloc(promptPrefixLen + userLen + 2, sizeof(*prompt));
     memcpy(prompt, promptPrefix, promptPrefixLen);
-    memcpy(prompt + promptPrefixLen, user, userLen);
+    memcpy(prompt + promptPrefixLen, userCertThumb, userLen);
     memcpy(prompt + promptPrefixLen + userLen, ":", 2);
 
     bool res = SOPC_AskPass_CustomPromptFromTerminal(prompt, outPassword);
     SOPC_Free(prompt);
+    return res;
+}
+
+static bool AskUserNamePass_FromTerminal(char** userName, char** outPassword)
+{
+    const char* prompt1 = "UserName of user (e.g.: 'user1') : ";
+    const char* prompt2 = "Password for user : ";
+
+    /* For test use case: use environment variable TEST_USER as user */
+    const char* userEnv = getenv("TEST_USER");
+    if (NULL != userEnv)
+    {
+        *userName = SOPC_strdup(userEnv);
+    }
+    else
+    {
+        bool res = SOPC_AskPass_CustomPromptFromTerminal(prompt1, userName);
+        if (!res)
+        {
+            return false;
+        }
+    }
+    bool res = SOPC_AskPass_CustomPromptFromTerminal(prompt2, outPassword);
+    if (!res)
+    {
+        SOPC_Free(*userName);
+        return false;
+    }
     return res;
 }
 
@@ -296,7 +326,13 @@ int main(int argc, char* const argv[])
     /* Define callback to retrieve the client's user password */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&AskUserPass_FromTerminal);
+        status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&AskUserNamePass_FromTerminal);
+    }
+
+    /* Define callback to retrieve the client's user password */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&AskUserKeyPass_FromTerminal);
     }
 
     /* connect to the endpoint */

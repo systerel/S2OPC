@@ -358,7 +358,7 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
             if (i == 1)
             {
                 status = SOPC_SecureConnectionConfig_AddUserName((*secureConnConfigArray)[i], "username_Basic256Sha256",
-                                                                 "user1", NULL);
+                                                                 NULL, NULL);
             }
             // Set X509 as authentication mode for third connection
             else if (i == 2)
@@ -376,6 +376,25 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
     }
 
     return status;
+}
+
+static bool SOPC_GetClientUser1Password(char** outUserName, char** outPassword)
+{
+    const char* user1 = "user1";
+    char* userName = SOPC_Calloc(strlen(user1) + 1, sizeof(*userName));
+    if (NULL == userName)
+    {
+        return false;
+    }
+    memcpy(userName, user1, strlen(user1) + 1);
+    bool res = SOPC_TestHelper_AskPassWithContext_FromEnv(user1, outPassword);
+    if (!res)
+    {
+        SOPC_Free(userName);
+        return false;
+    }
+    *outUserName = userName;
+    return true;
 }
 
 static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
@@ -415,12 +434,12 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     // Set callback necessary to retrieve user key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetX509userPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+        status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     }
     // Set callback necessary to retrieve user password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUsernamePasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+        status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
     }
 
     if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)
@@ -445,7 +464,7 @@ int main(void)
     // Sleep timeout in milliseconds
     const uint32_t sleepTimeout = 200;
     // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 3000;
+    const uint32_t loopTimeout = 10000;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
