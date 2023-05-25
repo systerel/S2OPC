@@ -62,7 +62,6 @@ typedef enum
     PARSE_SECURITY_POLICY,   // ........Security policy
     PARSE_SECURITY_MODE,     // ........Security mode
     PARSE_USER_POLICY,       // ........In user policy tag
-    PARSE_USER_NAME,         // ........Username configuration
     PARSE_USER_CERT,         // ........UserX509 configuration
     PARSE_SRVCONFIG          //..In a server config tag to skip
 } parse_state_t;
@@ -471,14 +470,6 @@ static bool end_user_policy(struct parse_context_t* ctx)
         return false;
     }
 
-    if (OpcUa_UserTokenType_UserName == ctx->currentSecConnConfig->sessionConfig.userTokenType &&
-        (NULL == ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName ||
-         0 == strlen(ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName)))
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "no user name defined for the connection");
-        return false;
-    }
-
     if (OpcUa_UserTokenType_Certificate == ctx->currentSecConnConfig->sessionConfig.userTokenType)
     {
         SOPC_Session_UserX509* userX509 = &ctx->currentSecConnConfig->sessionConfig.userToken.userX509;
@@ -492,26 +483,6 @@ static bool end_user_policy(struct parse_context_t* ctx)
             LOG_XML_ERROR(ctx->helper_ctx.parser, "no user key path defined for the connection");
             return false;
         }
-    }
-
-    return true;
-}
-
-static bool start_user_name(struct parse_context_t* ctx, const XML_Char** attrs)
-{
-    const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "name", attrs);
-
-    if (NULL == attr_val)
-    {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "user name attribute missing");
-        return false;
-    }
-
-    ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName = SOPC_strdup(attr_val);
-    if (NULL == ctx->currentSecConnConfig->sessionConfig.userToken.userName.userName)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
     }
 
     return true;
@@ -867,16 +838,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_USER_POLICY:
-        if (strcmp(name, "UserName") == 0)
-        {
-            if (!start_user_name(ctx, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-            ctx->state = PARSE_USER_NAME;
-        }
-        else if (strcmp(name, "UserX509") == 0)
+        if (strcmp(name, "UserX509") == 0)
         {
             if (!start_user_cert(ctx, attrs))
             {
@@ -906,9 +868,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
     switch (ctx->state)
     {
-    case PARSE_USER_NAME:
-        ctx->state = PARSE_USER_POLICY;
-        break;
     case PARSE_USER_CERT:
         ctx->state = PARSE_USER_POLICY;
         break;
