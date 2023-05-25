@@ -239,7 +239,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection
  * \param userPolicyId   The user policy Id to be used in server for username/password
  * \param userName       The username to be used for authentication
  * \param password       The password to be used for authentication or NULL to be retrieved from the callback defined
- *                       with ::SOPC_HelperConfigClient_SetUsernamePasswordCallback.
+ *                       with ::SOPC_HelperConfigClient_SetUserNamePasswordCallback.
  *                       Note: the password should not be hardcoded string in the code.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,

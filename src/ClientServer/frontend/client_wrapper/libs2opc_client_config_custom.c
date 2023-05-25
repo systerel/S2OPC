@@ -647,7 +647,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_
         // Client wrapper not initialized
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == secConnConfig || NULL == userPolicyId || NULL == userName)
+    if (NULL == secConnConfig || NULL == userPolicyId || (NULL == userName && NULL != password) ||
+        (NULL != userName && NULL == password))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -664,7 +665,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_
         char* userPolicyIdCopy = SOPC_strdup(userPolicyId);
         char* userNameCopy = SOPC_strdup(userName);
         char* passwordCopy = SOPC_strdup(password);
-        if (NULL == userPolicyIdCopy || NULL == userNameCopy || (NULL == passwordCopy && NULL != password))
+        if (NULL == userPolicyIdCopy || (NULL == userNameCopy && NULL != userName) ||
+            (NULL == passwordCopy && NULL != password))
         {
             SOPC_Free(userPolicyIdCopy);
             SOPC_Free(userNameCopy);
