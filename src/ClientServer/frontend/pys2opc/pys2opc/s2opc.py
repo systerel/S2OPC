@@ -395,7 +395,7 @@ class PyS2OPC_Client(PyS2OPC):
             status = libsub.SOPC_HelperConfigClient_SetClientKeyPasswordCallback(libsub._callback_get_client_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the client private key.'
         if user_key_encrypted:
-            status = libsub.SOPC_HelperConfigClient_SetX509userPasswordCallback(libsub._callback_get_user_key_password)
+            status = libsub.SOPC_HelperConfigClient_SetUserKeyPasswordCallback(libsub._callback_get_user_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the user private key.'
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))
@@ -718,8 +718,10 @@ class PyS2OPC_Server(PyS2OPC):
 
         # Creates the configuration
         config = ffi.new('SOPC_S2OPC_Config *')
+        pServerCfg = ffi.addressof(config, 'serverConfig')
+
         with open(xml_path, 'r') as fd:
-            assert libsub.SOPC_Config_Parse(fd, config)
+            assert libsub.SOPC_ConfigServer_Parse(fd, pServerCfg)
 
         # Finish the configuration by setting the manual fields: server certificate and key, create the pki,
         #  the user auth* managers, and the method call manager

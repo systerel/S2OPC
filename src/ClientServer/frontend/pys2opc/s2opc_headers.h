@@ -223,7 +223,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
                                                         SOPC_PKIProvider** ppPKI);
 
 /* XML Expat: Server config, User config and Address Space */
-bool SOPC_Config_Parse(FILE* fd, SOPC_S2OPC_Config* config);
+bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* configServer);
 bool SOPC_UsersConfig_Parse(FILE* fd,
                             SOPC_UserAuthentication_Manager** authentication,
                             SOPC_UserAuthorization_Manager** authorization);
