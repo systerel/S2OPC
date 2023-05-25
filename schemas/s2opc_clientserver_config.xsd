@@ -292,9 +292,6 @@
       <xs:element type="EndpointsType" name="Endpoints" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ConnectionUserNameType">
-    <xs:attribute type="xs:string" name="name" use="required"/>
-  </xs:complexType>
   <xs:complexType name="ConnectionUserCertType">
     <xs:attribute type="xs:string" name="cert_path" use="required"/>
     <xs:attribute type="xs:string" name="key_path" use="required"/>
@@ -302,11 +299,6 @@
   </xs:complexType>
   <xs:complexType name="ConnectionUserPolicyType">
     <xs:sequence>
-      <xs:element type="ConnectionUserNameType" name="UserName" minOccurs="0" maxOccurs="1">
-        <xs:annotation>
-          <xs:documentation>Mandatory if tokenType is 'username'</xs:documentation>
-        </xs:annotation>
-      </xs:element>
       <xs:element type="ConnectionUserCertType" name="UserX509" minOccurs="0" maxOccurs="1">
         <xs:annotation>
           <xs:documentation>Mandatory if tokenType is 'certificate'</xs:documentation>
