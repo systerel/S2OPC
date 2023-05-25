@@ -189,7 +189,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
     // If configuration is not finalized yet, do it now
     if (!secConnConfig->finalized)
     {
-        // TODO: check config content (mandatory + secu mode vs secu policy vs certs vs user policy vs ...)
         SOPC_Client_Config* cConfig = &config->clientConfig;
         status = SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
     }

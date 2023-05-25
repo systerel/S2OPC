@@ -363,8 +363,8 @@ static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnec
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Connection[%" PRIu16 "]: Failed to load x509 UserIdentityToken certificate %s.",
-                                   secConnConfig->secureConnectionIdx,
+                                   "Connection %s [%" PRIu16 "]: Failed to load x509 UserIdentityToken certificate %s.",
+                                   secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx,
                                    secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userCertPath);
         }
         if (SOPC_STATUS_OK == status)
@@ -415,8 +415,8 @@ static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnec
                 {
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_CLIENTSERVER,
-                        "Connection[%" PRIu16 "]: Failed to load x509 UserIdentityToken private key %s.",
-                        secConnConfig->secureConnectionIdx,
+                        "Connection %s [%" PRIu16 "]: Failed to load x509 UserIdentityToken private key %s.",
+                        secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx,
                         secConnConfig->sessionConfig.userToken.userX509.configFromPaths->userKeyPath);
                 }
             }
@@ -440,6 +440,72 @@ static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnec
     {
         SOPC_KeyManager_SerializedCertificate_Delete(pUserCertX509);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pUserKey);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config* cConfig,
+                                                             SOPC_SecureConnection_Config* secConnConfig)
+{
+    bool securityNeeded = false;
+    if (secConnConfig->scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None ||
+        OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType)
+    {
+        // security mode is not None or user token is UserName (need encryption for password)
+        securityNeeded = true;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (securityNeeded)
+    {
+        if (cConfig->clientCertificate == NULL || cConfig->clientKey == NULL)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Connection %s [%" PRIu16
+                                   "]: client certificate/key configuration missing whereas security is needed "
+                                   "(security active or user password need to be encrypted)",
+                                   secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        if (cConfig->clientPKI == NULL)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Connection %s [%" PRIu16
+                                   "]: client PKI configuration missing whereas security is needed "
+                                   "(security active or user password need to be encrypted)",
+                                   secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        if (secConnConfig->scConfig.peerAppCert == NULL)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "Connection %s [%" PRIu16
+                                   "]: server certificate configuration missing whereas security is needed "
+                                   "(security active or user password need to be encrypted)",
+                                   secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType &&
+        0 == strlen(secConnConfig->sessionConfig.userPolicyId))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Connection %s [%" PRIu16
+                               "]: user policy id is empty with a user token type different from Anonymous",
+                               secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+    }
+    if (OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType &&
+        (NULL == secConnConfig->sessionConfig.userToken.userName.userName &&
+         NULL == secConnConfig->sessionConfig.userToken.userName.userPwd))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Connection %s [%" PRIu16
+                               "]: user name or password missing whereas user token type is UserName",
+                               secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
     return status;
 }
@@ -473,9 +539,9 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Connection[%" PRIu16 "]: Failed to load server certificate.",
-                                       secConnConfig->secureConnectionIdx);
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER, "Connection %s [%" PRIu16 "]: Failed to load server certificate %s.",
+                    secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx, secConnConfig->serverCertPath);
             }
         }
         else
@@ -508,6 +574,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
     }
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ClientConfigHelper_CheckConfig(cConfig, secConnConfig);
         secConnConfig->finalized = true;
     }
 
