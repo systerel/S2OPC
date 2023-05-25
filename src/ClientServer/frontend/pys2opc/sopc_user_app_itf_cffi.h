@@ -31,28 +31,37 @@
 //#include "sopc_types.h"
 //#include "sopc_user_manager.h"
 
+/**
+ * \brief OPC UA client configuration type
+ */
 typedef struct SOPC_Client_Config SOPC_Client_Config;
 
+/**
+ *  \brief Client configuration of a Secure Channel
+ */
 typedef struct SOPC_SecureChannel_Config
 {
-    uint8_t isClientSc;
-    const SOPC_Client_Config*
-        clientConfigPtr; /**< Pointer to the client configuration containing this secure channel. */
+    uint8_t isClientSc; /**< Flag to indicate if this secure channel configuration is on client side.
+                             It shall always be true if not created internally. */
+    const SOPC_Client_Config* clientConfigPtr; /**< Pointer to the client configuration containing this secure channel.
+                                                    It should be defined to provide client application information
+                                                    (locales, description, etc.) for session establishment. */
 
     const OpcUa_GetEndpointsResponse* expectedEndpoints; /**< Response returned by prior call to GetEndpoints service
                                                              and checked to be the same during session establishment,
                                                              NULL otherwise (no verification will be done).*/
     const char* serverUri; /**< This value shall only be specified if the server is accessed through a gateway server.
-                                In this case this value is the applicationUri for the underlying Server. */
-    const char* url;       /**< The endpoint URL used for connection. */
-    const SOPC_SerializedCertificate* crt_cli;
-    const SOPC_SerializedAsymmetricKey* key_priv_cli;
-    const SOPC_SerializedCertificate* crt_srv;
-    const SOPC_PKIProvider*
-        pki; /**< PKI shall not be shared between several configurations except if it is thread-safe */
-    const char* reqSecuPolicyUri;
-    uint32_t requestedLifetime;
-    OpcUa_MessageSecurityMode msgSecurityMode;
+                                In this case this value is the applicationUri for the underlying Server.
+                                This value might be specified for reverse connection in order to be verified
+                                on ReverseHello reception. */
+    const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
+
+    const SOPC_SerializedCertificate* peerAppCert; /*< Peer application certificate:
+                                                       isClientSc => serverCertificate (configuration data)
+                                                       !isClientSc => clientCertificate (runtime data) */
+    const char* reqSecuPolicyUri;                  /**< Requested Security Policy URI */
+    uint32_t requestedLifetime;                    /**< Requested Secure channel lifetime */
+    OpcUa_MessageSecurityMode msgSecurityMode;     /**< Requested Security Mode */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
                                        connecting phase) */
@@ -73,6 +82,22 @@ typedef struct SOPC_SecureChannel_Config
 #define SOPC_MAX_REVERSE_CLIENT_CONNECTIONS 5
 #endif
 
+/** @brief Maximum number of secure channel connections (and configurations) established */
+#ifndef SOPC_MAX_SECURE_CONNECTIONS
+#define SOPC_MAX_SECURE_CONNECTIONS 21
+#endif /* SOPC_MAX_SECURE_CONNECTIONS */
+
+#ifndef SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG
+#define SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG SOPC_MAX_SECURE_CONNECTIONS
+#else
+#if SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG > UINT16_MAX
+#error "Maximum number of secure connections configuration cannot be > UINT16_MAX"
+#endif
+#endif
+
+/**
+ * \brief Endpoint security policy configuration
+ */
 typedef struct SOPC_SecurityPolicy
 {
     SOPC_String securityPolicy; /**< Security policy URI supported */
@@ -87,8 +112,20 @@ typedef struct SOPC_SecurityPolicy
                                                         */
 } SOPC_SecurityPolicy;
 
+/**
+ * \brief OPC UA server configuration type
+ */
 typedef struct SOPC_Server_Config SOPC_Server_Config;
 
+/**
+ * \brief OPC UA server client to reverse connect configuration type.
+ *        From specification part 6 (v1.05.01):
+ *        "For each Client, the administrator shall provide
+ *         an ApplicationUri and an EndpointUrl for the Client."
+ *
+ * \note There is no indication to validate the ApplicationUri in specification.
+ *       It might be checked in the future using the CreateSessionRequest content .
+ */
 typedef struct SOPC_Server_ClientToConnect
 {
     char* clientApplicationURI; /**< The client application URI.
@@ -127,6 +164,98 @@ typedef struct SOPC_Endpoint_Config
                                                                      to clients */
 } SOPC_Endpoint_Config;
 
+typedef struct SOPC_Session_UserX509_ConfigFromPaths
+{
+    char* userCertPath; /**< Temporary path to the user certificate (certX509 shall be instantiated by applicative code)
+                         */
+    char* userKeyPath;  /**< Temporary path to the user key (keyX509 shall be instantiated by applicative code) */
+    bool userKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
+} SOPC_Session_UserX509_ConfigFromPaths;
+
+typedef struct SOPC_Session_UserX509
+{
+    SOPC_SerializedCertificate* certX509;
+    SOPC_SerializedAsymmetricKey* keyX509;
+
+    bool isConfigFromPathNeeded; /**< True if the following field shall be treated to configure the X509 user for
+                                    session */
+    SOPC_Session_UserX509_ConfigFromPaths* configFromPaths; /**< The paths configuration to use for user certificate and
+                                   key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                                   (used to configure certX509 and keyX509) */
+} SOPC_Session_UserX509;
+
+typedef struct SOPC_Session_UserName
+{
+    char* userName;
+    char* userPwd;
+} SOPC_Session_UserName;
+
+typedef struct SOPC_Session_Config
+{
+    const char* userPolicyId;
+    OpcUa_UserTokenType userTokenType;
+    union {
+        SOPC_Session_UserName userName;
+        SOPC_Session_UserX509 userX509;
+    } userToken;
+
+} SOPC_Session_Config;
+
+/**
+ * \brief Structure representing a secure connection configuration (secure channel + session) which allow to establish a
+ * connection to a server
+ */
+typedef struct SOPC_SecureConnection_Config
+{
+    const char* userDefinedId; // Optional user defined id
+
+    SOPC_SecureChannel_Config scConfig;
+    const char* reverseURL;
+
+    bool isServerCertFromPathNeeded; /**< True if the following field shall be treated to configure the client */
+    char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
+                               (scConfig.crt_srv shall be instantiated by applicative code) */
+
+    SOPC_Session_Config sessionConfig;
+
+    uint16_t secureConnectionIdx; /**< Index into ::SOPC_Client_Config secureConnections array */
+    bool finalized; /** < Set when the configuration of the secure connection is frozen and configuration from paths
+                          has been done. */
+} SOPC_SecureConnection_Config;
+
+typedef struct SOPC_Client_ConfigFromPaths
+{
+    char* clientCertPath;    /**< Temporary path to the client certificate (clientCertificate shall be instantiated by
+                                applicative code) */
+    char* clientKeyPath;     /**< Temporary path to the client key (key_priv_cli shall be instantiated by applicative
+                                code) */
+    bool clientKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
+    char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
+                                  validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                  provider shall be instantiated using it by applicative code) */
+    char** trustedIntermediateIssuersList; /**< A pointer to an array of paths to each trusted intermediate CA issuer to
+                                  use in the validation chain. The array must contain a NULL pointer to indicate its
+                                  end. (PKI provider shall be instantiated using it by applicative code) */
+    char** issuedCertificatesList;         /**< A pointer to an array of paths to each issued certificate to use in the
+                                              validation chain. The array must contain a NULL pointer to indicate its end. (PKI
+                                              provider shall be instantiated using it by applicative code) */
+    char** untrustedRootIssuersList; /**< A pointer to an array of paths to each untrusted root CA issuer to use in the
+                                        validation chain. Each issued certificate must have its signing certificate
+                                        chain in the untrusted issuers list. (PKI provider shall be instantiated using
+                                        it by applicative code) */
+    char** untrustedIntermediateIssuersList; /**< A pointer to an array of paths to each untrusted intermediate CA
+                                                issuer to use in the validation chain.   Each issued certificate must
+                                                have its signing certificate chain in the untrusted issuers list. (PKI
+                                                provider shall be instantiated using it by applicative code) */
+    char** certificateRevocationPathList;    /**<  A pointer to an array of paths to each certificate revocation list to
+                                                use.    Each CA of the trusted issuers list and the untrusted issuers list
+                                                must have a    CRL in the list. (PKI provider shall be instantiated using
+                                                it    by applicative code)*/
+} SOPC_Client_ConfigFromPaths;
+
+/**
+ * \brief OPC UA client configuration structure
+ */
 struct SOPC_Client_Config
 {
     OpcUa_ApplicationDescription
@@ -142,6 +271,22 @@ struct SOPC_Client_Config
                                  It might be NULL if there are no preferred locale ids.
                                  The array of locale ids indicates priority order for localized strings.
                                  The first LocaleId in the array has the highest priority. */
+
+    bool isConfigFromPathsNeeded; /**< True if the following field shall be treated to configure the client */
+    SOPC_Client_ConfigFromPaths* configFromPaths; /**< The paths configuration to use for PKI and client certificate and
+                                                     key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                                                     (used to configure clientCertificate, clientKey and clientPKI) */
+
+    const SOPC_SerializedCertificate* clientCertificate; /**< Certificate might be set from paths */
+    const SOPC_SerializedAsymmetricKey* clientKey;       /**< Key might be set from paths */
+    const SOPC_PKIProvider* clientPKI;                   /**< PKI might be set from paths */
+
+    uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
+    SOPC_SecureConnection_Config*
+        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.*/
+    uint16_t nbReverseEndpointURLs;
+    char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
+                                                                             per secure connection config. */
 };
 
 /**
@@ -159,21 +304,23 @@ struct SOPC_Client_Config
  * \warning This callback shall not block the thread that calls it, and shall return immediately.
  *
  *
- * \param      nodeId       NodeId that is not part of the server address space yet
- *                          and which is requested in a MonitoredItemCreateRequest.
- *                          It might be added by AddNode service later.
- * \param[out] outNodeClass The NodeClass of the known node when it will be available.
- *                          It shall always be the same for the same NodeId.
- * \param[out] outBadStatus The appropriate Bad StatusCode to return in the Publish response.
- *                          OpcUa_UnavailableData or OpcUa_WouldBlock are recommended.
+ * \param      nodeId                   NodeId that is not part of the server address space yet
+ *                                      and which is requested in a MonitoredItemCreateRequest.
+ *                                      It might be added by AddNode service later.
+ * \param[out] outNodeClass             The NodeClass of the known node when it will be available.
+ *                                      It shall always be the same for the same NodeId.
+ * \param[out] outUnavailabilityStatus  The appropriate Bad StatusCode to return in the Publish response.
+ *                                      ::OpcUa_BadDataUnavailable or ::OpcUa_BadWouldBlock are recommended.
  *
- * \return                  true when CreateMonitoredItem for this \p nodeId shall succeed, false otherwise.
+ * \return                              true when CreateMonitoredItem for this \p nodeId shall succeed, false otherwise.
  */
-typedef bool(SOPC_CreateMI_NodeAvailFunc)(const SOPC_NodeId* nodeId,
-                                          OpcUa_NodeClass* outNodeClass,
-                                          SOPC_StatusCode* outUnavailabilityStatus);
+typedef bool SOPC_CreateMI_NodeAvailFunc(const SOPC_NodeId* nodeId,
+                                         OpcUa_NodeClass* outNodeClass,
+                                         SOPC_StatusCode* outUnavailabilityStatus);
 
-/* OPC UA server configuration structure */
+/**
+ * \brief OPC UA server configuration structure
+ */
 struct SOPC_Server_Config
 {
     bool freeCstringsFlag; /**< A flag to indicate if the C strings contained in the server configuration
@@ -191,6 +338,7 @@ struct SOPC_Server_Config
                              applicative code) */
     char* serverKeyPath;  /**< Temporary path to the server key (serverCertificate shall be instantiated by applicative
                              code) */
+    bool serverKeyEncrypted;       /**< Boolean to indicate if the private key is encrypted */
     char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
                                   validation chain. The array must contain a NULL pointer to indicate its end. (PKI
                                   provider shall be instantiated using it by applicative code) */
@@ -216,29 +364,38 @@ struct SOPC_Server_Config
     SOPC_Endpoint_Config* endpoints;         /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
-    SOPC_SerializedCertificate* serverCertificate;
-    SOPC_SerializedAsymmetricKey* serverKey;
-    bool serverKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
-    SOPC_PKIProvider* pki;
+    SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
+    SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
+    SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
+                              or ::SOPC_PKIProviderStack_Create. */
     SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
                                                      Can be instantiated with SOPC_MethodCallManager_Create()
                                                      or specific code by applicative code.
                                                      Can be NULL if Method Call service is not used. */
     SOPC_CreateMI_NodeAvailFunc* nodeAvailFunc; /**< If defined, the callback is called by CreateMonitoredItem service
                                                      when NodeId is not already part of server AddressSpace.
-                                                     The callback indicates if  it should be considered known by server
+                                                     The callback indicates if it should be considered known by server
                                                      (and might exist later).
-                                                     See ::SOPC_CreateMonitoredItem_NodeAvailability for details. */
+                                                     See ::SOPC_CreateMI_NodeAvailFunc for details. */
 };
 
-/* S2OPC server configuration */
+/**
+ * \brief S2OPC configuration
+ */
 typedef struct SOPC_S2OPC_Config
 {
-    SOPC_Server_Config serverConfig;
-    SOPC_Client_Config clientConfig;
+    SOPC_Server_Config serverConfig; /**< server configuration */
+    SOPC_Client_Config clientConfig; /**< client configuration */
 } SOPC_S2OPC_Config;
 
-/* Client and Server communication events to be managed by applicative code*/
+/**
+ * \brief Session identifier type, instances are generated by SE_ACTIVATED_SESSION
+ */
+typedef uint32_t SOPC_SessionId;
+
+/**
+ *  \brief Client and Server communication events to be managed by applicative code
+ */
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
@@ -295,13 +452,17 @@ typedef enum SOPC_App_Com_Event
                                */
 } SOPC_App_Com_Event;
 
-/* Server address space access/modification notifications to applicative code */
+/* Server only interfaces */
+
+/**
+ * \brief Server address space access/modification notifications to applicative code
+ */
 typedef enum SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT = 0x800, /* opParam = (OpcUa_WriteValue*) single write value operation
-                       opStatus = status of the write operation
-                     */
+    AS_WRITE_EVENT = 0x800, /**< opParam = (OpcUa_WriteValue*) single write value operation<br/>
+                             *   opStatus = status of the write operation
+                             */
 } SOPC_App_AddSpace_Event;
 
 /**
