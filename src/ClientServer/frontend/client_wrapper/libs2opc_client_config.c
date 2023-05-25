@@ -489,10 +489,11 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
     if (SOPC_STATUS_OK == status)
     {
         if (OpcUa_UserTokenType_UserName == sessionTokenType &&
+            NULL == secConnConfig->sessionConfig.userToken.userName.userName &&
             NULL == secConnConfig->sessionConfig.userToken.userName.userPwd)
         {
             bool res =
-                SOPC_ClientInternal_GetUserNamePassword(secConnConfig->sessionConfig.userToken.userName.userName,
+                SOPC_ClientInternal_GetUserNamePassword(&secConnConfig->sessionConfig.userToken.userName.userName,
                                                         &secConnConfig->sessionConfig.userToken.userName.userPwd);
             if (!res)
             {
@@ -582,10 +583,14 @@ static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus SetUserPasswordCallback(SOPC_GetClientUserPassword_Fct** destCb,
-                                                 SOPC_GetClientUserPassword_Fct* getUserPassword)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
 {
-    SOPC_ASSERT(NULL != destCb);
+    return SetPasswordCallback(&sopc_client_helper_config.getClientKeyPasswordCb, getClientKeyPassword);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserNamePasswordCallback(
+    SOPC_GetClientUserNamePassword_Fct* getClientUsernamePassword)
+{
     // TODO: uncomment when only new API available
     /*
     if (!SOPC_ClientInternal_IsInitialized())
@@ -594,29 +599,31 @@ static SOPC_ReturnStatus SetUserPasswordCallback(SOPC_GetClientUserPassword_Fct*
         return SOPC_STATUS_INVALID_STATE;
     }
     */
-    if (NULL == getUserPassword)
+    if (NULL == getClientUsernamePassword)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    *destCb = getUserPassword;
+    sopc_client_helper_config.getUserNamePasswordCb = getClientUsernamePassword;
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
+SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(
+    SOPC_GetClientUserKeyPassword_Fct* getClientX509userKeyPassword)
 {
-    return SetPasswordCallback(&sopc_client_helper_config.getClientKeyPasswordCb, getClientKeyPassword);
-}
-
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUsernamePasswordCallback(
-    SOPC_GetClientUserPassword_Fct* getClientUsernamePassword)
-{
-    return SetUserPasswordCallback(&sopc_client_helper_config.getUserNamePasswordCb, getClientUsernamePassword);
-}
-
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetX509userPasswordCallback(
-    SOPC_GetClientUserPassword_Fct* getClientX509userKeyPassword)
-{
-    return SetUserPasswordCallback(&sopc_client_helper_config.getUserKeyPasswordCb, getClientX509userKeyPassword);
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
+    if (NULL == getClientX509userKeyPassword)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    sopc_client_helper_config.getUserKeyPasswordCb = getClientX509userKeyPassword;
+    return SOPC_STATUS_OK;
 }
 
 static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, const char* cbName, char** outPassword)
@@ -641,10 +648,15 @@ static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, co
     return passwordCb(outPassword);
 }
 
-static bool SOPC_ClientInternal_GetUserPassword(SOPC_GetClientUserPassword_Fct* userPasswordCb,
-                                                const char* cbName,
-                                                const char* userId,
-                                                char** outPassword)
+// Get password to decrypt user private key from internal callback
+bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
+{
+    return SOPC_ClientInternal_GetPassword(sopc_client_helper_config.getClientKeyPasswordCb,
+                                           "ClientKeyPasswordCallback", outPassword);
+}
+
+// Get password to decrypt user private key from internal callback
+bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPassword)
 {
     // TODO: uncomment when only new API available
     /*
@@ -658,33 +670,39 @@ static bool SOPC_ClientInternal_GetUserPassword(SOPC_GetClientUserPassword_Fct* 
     {
         return false;
     }
-    if (NULL == userPasswordCb)
+    if (NULL == sopc_client_helper_config.getUserKeyPasswordCb)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "The following callback isn't configured: %s", cbName);
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "The callback UserKeyPasswordCallback isn't configured and is necessary to decrypt user key");
         return false;
     }
-    return userPasswordCb(userId, outPassword);
-}
-
-// Get password to decrypt user private key from internal callback
-bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
-{
-    return SOPC_ClientInternal_GetPassword(sopc_client_helper_config.getClientKeyPasswordCb,
-                                           "ClientKeyPasswordCallback", outPassword);
-}
-
-// Get password to decrypt user private key from internal callback
-bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPassword)
-{
-    return SOPC_ClientInternal_GetUserPassword(sopc_client_helper_config.getUserKeyPasswordCb,
-                                               "UserKeyPasswordCallback", certSha1, outPassword);
+    return sopc_client_helper_config.getUserKeyPasswordCb(certSha1, outPassword);
 }
 
 // Get password associated to username from internal callback
-bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPassword)
+bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassword)
 {
-    return SOPC_ClientInternal_GetUserPassword(sopc_client_helper_config.getUserNamePasswordCb,
-                                               "UserNamePasswordCallback", username, outPassword);
+    // TODO: uncomment when only new API available
+    /*
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    */
+    if (NULL == outPassword)
+    {
+        return false;
+    }
+    if (NULL == sopc_client_helper_config.getUserNamePasswordCb)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "The callback UserNamePasswordCallback isn't configured and is necessary to decrypt user key");
+        return false;
+    }
+    return sopc_client_helper_config.getUserNamePasswordCb(outUserName, outPassword);
 }
 
 bool SOPC_ClientInternal_IsEncryptedClientKey(void)

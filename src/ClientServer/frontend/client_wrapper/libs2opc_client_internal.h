@@ -59,8 +59,8 @@ typedef struct SOPC_ClientHelper_Config
 
     SOPC_GetPassword_Fct* getClientKeyPasswordCb;
 
-    SOPC_GetClientUserPassword_Fct* getUserKeyPasswordCb;
-    SOPC_GetClientUserPassword_Fct* getUserNamePasswordCb;
+    SOPC_GetClientUserKeyPassword_Fct* getUserKeyPasswordCb;
+    SOPC_GetClientUserNamePassword_Fct* getUserNamePasswordCb;
 } SOPC_ClientHelper_Config;
 
 // The singleton configuration structure
@@ -109,12 +109,13 @@ bool SOPC_ClientInternal_GetUserKeyPassword(const char* cert1Sha1, char** outPas
 /**
  * \brief Function to call the callback to retrieve password associated to given username
  *
+ * \param[out] outUserName   the newly allocated user name.
  * \param[out] outPassword   the newly allocated password.
  *
  * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_GetUserNamePassword(const char* username, char** outPassword);
+bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassword);
 
 uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx);
 
