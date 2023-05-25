@@ -32,7 +32,9 @@
 #include "sopc_macros.h"
 #include "sopc_user_app_itf.h"
 
+#ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
+#endif
 
 static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 {
@@ -71,7 +73,12 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientCon
     }
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+#ifdef WITH_EXPAT
     bool res = SOPC_ConfigClient_Parse(fd, &pConfig->clientConfig);
+#else
+    // XML loaders not available
+    bool res = false;
+#endif
     fclose(fd);
 
     if (!res)
