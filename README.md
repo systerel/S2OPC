@@ -1,31 +1,27 @@
 ## S2OPC OPC UA Toolkit
 
-This OPC UA Toolkit project provides a Client/Server C source code implementation
+- Safe: IEC61508 and EN50128 integration ready,
+- Secure: ongoing CSPN certification, IEC62443 targeted,
+- Open-source: Apache 2.0 (non contaminating, no copy-left, no paid version),
+- Embedded: multiplatform (Linux, Windows, FreeRTOS, Zephyr), optimized footprint, real-time capable,
+- Industrial support by Systerel: support, training, specific integration and developments, certification support.
+
+For more information about support pricing, please contact us at `s2opc@systerel.fr`
+
+Its demo server is certified by the OPC Foundation (see Certification).
+
+### S2OPC technical overview
+
+S2OPC OPC UA Toolkit project provides a Client/Server C source code implementation
 including an OPC UA communication stack, B model and C source code
 implementation for a minimal set of services and a cryptographic
 library adaptation for OPC UA needs (using mbedtls).
 This OPC UA Toolkit project also provides a PubSub C source code implementation,
 it shares some components with Client/Server part (cryptographic services, OPC UA types, etc.).
 
-The S2OPC OPC UA Client / server Toolkit is the result of the Research and Development project INGOPCS (2016-2018).
-Systematic and Minalogic centers of innovation supported the project as part of the French FUI CFP.
-
-INGOPCS goals:
-- Develop an open-source and secure implementation of the OPC-UA standard (IEC 62541),
-- Verify the implementation with specialized tools (applying formal methods),
-- Demonstrate conformance to OPC-UA interoperability requirements,
-- Demonstrate compliance of the OPC-UA standard with the security requirements of sensitive Industrial Control Systems.
-
-INGOPCS initial consortium:
-- Systerel (leader)
-- ARC Informatique
-- Atos Worldgrid
-- CEA List
-- EDF
-- Eolane
-- Schneider Electric Automation
-- Telecom ParisTech
-- TrustInSoft
+### About Systerel
+Systerel has been creating, designing, and implementing innovative solutions for over 20 years in the area
+of real-time and safety-critical systems.
 
 ## Certification
 
@@ -313,4 +309,27 @@ tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT License 1.00
 ## Commercial support
 
 For S2OPC commercial support, see https://www.s2opc.com.
+
+## History
+
+The S2OPC OPC UA Client / server Toolkit is the result of the Research and Development project INGOPCS (2016-2018).
+Systematic and Minalogic centers of innovation supported the project as part of the French FUI CFP.
+
+INGOPCS goals:
+- Develop an open-source and secure implementation of the OPC-UA standard (IEC 62541),
+- Verify the implementation with specialized tools (applying formal methods),
+- Demonstrate conformance to OPC-UA interoperability requirements,
+- Demonstrate compliance of the OPC-UA standard with the security requirements of sensitive Industrial Control Systems.
+
+INGOPCS initial consortium:
+- Systerel (leader)
+- ARC Informatique
+- Atos Worldgrid
+- CEA List
+- EDF
+- Eolane
+- Schneider Electric Automation
+- Telecom ParisTech
+- TrustInSoft
+
 
