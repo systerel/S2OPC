@@ -29,7 +29,7 @@
 // 3 additional characters to guarantee retrieved value ends with "\n\0\0"
 #define PWD_BUFFER_ADDITIONAL_CHARACTERS 3
 
-bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
+bool SOPC_AskPass_CustomPromptFromTerminal(const char* prompt, char** outPassword)
 {
     char* result = NULL;
 

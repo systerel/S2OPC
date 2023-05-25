@@ -21,7 +21,7 @@
 #include "sopc_assert.h"
 #include "sopc_macros.h"
 
-bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
+bool SOPC_AskPass_CustomPromptFromTerminal(const char* prompt, char** outPassword)
 {
     SOPC_UNUSED_ARG(prompt);
     SOPC_UNUSED_ARG(outPassword);
