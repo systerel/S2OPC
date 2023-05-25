@@ -25,7 +25,7 @@
 // additional character to catch end character '\n' or '\r'
 #define PWD_BUFFER_ADDITIONAL_CHARACTERS 1
 
-bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword)
+bool SOPC_AskPass_CustomPromptFromTerminal(const char* prompt, char** outPassword)
 {
     if (NULL == prompt || NULL == outPassword)
     {

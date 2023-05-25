@@ -62,6 +62,6 @@ bool SOPC_AskPass_FromTerminal(char** outPassword);
  * \return              true in case of success, otherwise false.
  *
  */
-bool SOPC_AskPass_CustomPromptFromTerminal(char* prompt, char** outPassword);
+bool SOPC_AskPass_CustomPromptFromTerminal(const char* prompt, char** outPassword);
 
 #endif /* SOPC_ASKPASS_H_ */
