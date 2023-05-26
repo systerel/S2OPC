@@ -31,24 +31,24 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
+#include "sopc_encodeable.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
-#include "sopc_toolkit_config.h"
-#include "sopc_user_app_itf.h"
-#include "sopc_user_manager.h"
 
-#include "libs2opc_client_cmds.h"
-#include "libs2opc_common_config.h"
+#include "libs2opc_client_config_custom.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
 // project includes
 #include "test_config.h"
 
 static int stopSignal = 0;
-static int32_t gConfigurationId = -1;
+static SOPC_SecureConnection_Config* gConfiguration = NULL;
+static SOPC_ClientConnection* gConnection = NULL;
 static char* epURL = NULL;
 
 /***************************************************/
@@ -125,9 +125,14 @@ static const char* CLI_GetNextWord(WordList* pList)
 }
 
 /***************************************************/
-static void disconnect_callback(const uint32_t c_id)
+// Callback for unexpected connection events
+static void client_ConnectionEventCallback(SOPC_ClientConnection* config,
+                                           SOPC_ClientConnectionEvent event,
+                                           SOPC_StatusCode status)
 {
-    PRINT("===> connection #%d has been terminated!\n", c_id);
+    SOPC_UNUSED_ARG(config);
+    PRINT("UNEXPECTED CONNECTION EVENT %d with status 0x%08" PRIX32 "\n", event, status);
+    stopSignal = 1;
 }
 
 /***************************************************/
@@ -151,43 +156,51 @@ static void log_UserCallback(const char* context, const char* text)
 }
 
 /***************************************************/
-static void client_tester(int connectionId)
+static void client_tester(void)
 {
     static const char* root_node_id = "ns=0;i=85";
-    int res;
     PRINT("Browse Root.Objects\n");
 
-    SOPC_ClientCmd_BrowseRequest browseRequest;
-    SOPC_ClientCmd_BrowseResult browseResult;
-
-    browseRequest.nodeId = root_node_id;                     // Root/Objects/
-    browseRequest.direction = OpcUa_BrowseDirection_Forward; // forward
-    browseRequest.referenceTypeId = "";                      // all reference types
-    browseRequest.includeSubtypes = true;
+    OpcUa_BrowseResponse* resp = NULL;
+    OpcUa_BrowseRequest* req = SOPC_BrowseRequest_Create(1, 0, NULL);
+    SOPC_ReturnStatus status = SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(
+        req, 0, root_node_id, OpcUa_BrowseDirection_Forward, NULL, true, 0, OpcUa_BrowseResultMask_All);
 
     /* Browse specified node */
-    res = SOPC_ClientCmd_Browse(connectionId, &browseRequest, 1, &browseResult);
-
-    if (0 == res)
+    if (SOPC_STATUS_OK == status)
     {
-        PRINT("status: %d, nbOfResults: %d\n", browseResult.statusCode, browseResult.nbOfReferences);
-        for (int32_t i = 0; i < browseResult.nbOfReferences; i++)
-        {
-            const SOPC_ClientCmd_BrowseResultReference* ref = &browseResult.references[i];
-            PRINT("Item #%d\n", i);
-            PRINT("- nodeId: %s\n", ref->nodeId);
-            PRINT("- displayName: %s\n", ref->displayName);
+        status = SOPC_ClientHelper_ServiceSync(gConnection, req, (void**) &resp);
+    }
 
-            SOPC_Free(ref->nodeId);
-            SOPC_Free(ref->displayName);
-            SOPC_Free(ref->browseName);
-            SOPC_Free(ref->referenceTypeId);
+    if (SOPC_STATUS_OK == status)
+    {
+        // Check response is expected type and not a ServiceFault
+        if (&OpcUa_BrowseResponse_EncodeableType == resp->encodeableType)
+        {
+            SOPC_ASSERT(1 == resp->NoOfResults);
+            OpcUa_BrowseResult* browseResult = &resp->Results[0];
+            PRINT("status: 0x%08" PRIX32 ", nbOfResults: %d\n", browseResult->StatusCode, browseResult->NoOfReferences);
+            for (int32_t i = 0; i < browseResult->NoOfReferences; i++)
+            {
+                OpcUa_ReferenceDescription* ref = &browseResult->References[i];
+                char* nodeIdStr = SOPC_NodeId_ToCString(&ref->NodeId.NodeId);
+                PRINT("Item #%d\n", i);
+                PRINT("- nodeId: %s\n", nodeIdStr);
+                PRINT("- displayName: %s\n", SOPC_String_GetRawCString(&ref->DisplayName.defaultText));
+
+                SOPC_Free(nodeIdStr);
+            }
         }
-        SOPC_Free(browseResult.references);
+        else
+        {
+            PRINT("Call to Browse service through failed with return code: 0x%08" PRIX32 "\n",
+                  resp->ResponseHeader.ServiceResult);
+        }
+        SOPC_Encodeable_Delete(resp->encodeableType, (void**) &resp);
     }
     else
     {
-        PRINT("Call to Browse service through client wrapper failed with return code: %d\n", res);
+        PRINT("Call to Browse service through client wrapper failed with return code: %d\n", status);
     }
 }
 
@@ -254,7 +267,8 @@ void SOPC_Platform_Main(void)
     PRINT("Embedded S2OPC client demo\n");
 
     /* Initialize the toolkit */
-    SOPC_ClientCmd_Initialize(disconnect_callback);
+    status = SOPC_HelperConfigClient_Initialize();
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigClient_Initialize failed");
 
     while (stopSignal == 0)
     {
@@ -264,7 +278,8 @@ void SOPC_Platform_Main(void)
     PRINT("==========\r\n");
 
     /* Close the toolkit */
-    SOPC_ClientCmd_Finalize();
+    SOPC_HelperConfigClient_Clear();
+    SOPC_CommonHelper_Clear();
     SOPC_Free(epURL);
 
     LOG_INFO("# Info: Client demo stopped.\n");
@@ -302,7 +317,7 @@ static int cmd_demo_info(WordList* pList)
     PRINT("Server src commit     : %s\n", buildInfo.buildSrcCommit);
     PRINT("Server docker Id      : %s\n", buildInfo.buildDockerId);
     PRINT("Server build date     : %s\n", buildInfo.buildBuildDate);
-    PRINT("Client configured     : %s\n", YES_NO(gConfigurationId > 0));
+    PRINT("Client configured     : %s\n", YES_NO(gConfiguration != NULL));
 
     return 0;
 }
@@ -310,23 +325,7 @@ static int cmd_demo_info(WordList* pList)
 /***************************************************/
 static int cmd_demo_configure(WordList* pList)
 {
-    SOPC_ClientCmd_Security security = {
-        .security_policy = SOPC_SecurityPolicy_None_URI,
-        .security_mode = OpcUa_MessageSecurityMode_None,
-        .path_cert_auth = NULL,
-        .path_crl = NULL,
-        .path_cert_srv = NULL,
-        .path_cert_cli = NULL,
-        .path_key_cli = NULL,
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
-        .path_cert_x509_token = NULL,
-        .path_key_x509_token = NULL,
-        .key_x509_token_encrypted = false,
-    };
-
-    if (gConfigurationId > 0)
+    if (NULL != gConfiguration)
     {
         PRINT("\nClient already configured!\n");
         return 0;
@@ -345,17 +344,12 @@ static int cmd_demo_configure(WordList* pList)
     }
     SOPC_ASSERT(epURL != NULL);
 
-    SOPC_ClientCmd_EndpointConnection endpoint = {
-        .endpointUrl = epURL,
-        .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
-    };
-
-    /* connect to the endpoint */
-    gConfigurationId = SOPC_ClientCmd_CreateConfiguration(&endpoint, &security, NULL);
-    if (gConfigurationId <= 0)
+    /* configure the connection */
+    gConfiguration = SOPC_HelperConfigClient_CreateSecureConnection("CLI_Client", epURL, OpcUa_MessageSecurityMode_None,
+                                                                    SOPC_SecurityPolicy_None);
+    if (NULL == gConfiguration)
     {
-        PRINT("\nSOPC_ClientHelper_CreateConfiguration failed with code %d\r\n", gConfigurationId);
+        PRINT("\nSOPC_HelperConfigClient_CreateSecureConnection failed \n");
     }
     else
     {
@@ -369,19 +363,25 @@ static int cmd_demo_connect(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
 
-    int32_t connectionId = SOPC_ClientCmd_CreateConnection(gConfigurationId);
-
-    if (connectionId <= 0)
+    if (NULL == gConfiguration)
     {
-        PRINT("\nSOPC_ClientHelper_CreateConnection failed with code %d\r\n", connectionId);
+        PRINT("\nClient not configured!\n");
+        return 0;
+    }
+
+    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(gConfiguration, client_ConnectionEventCallback, &gConnection);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        PRINT("\nSOPC_ClientHelper_Connect failed with status %d\r\n", status);
     }
     else
     {
-        client_tester(connectionId);
-        int32_t discoRes = SOPC_ClientCmd_Disconnect(connectionId);
-        if (discoRes != 0)
+        client_tester();
+        status = SOPC_ClientHelper_Disconnect(&gConnection);
+        if (SOPC_STATUS_OK != status)
         {
-            PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", discoRes);
+            PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);
         }
     }
     return 0;
