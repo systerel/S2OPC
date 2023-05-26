@@ -58,7 +58,7 @@ START_TEST(test_getEndpoints)
     ck_assert_ptr_nonnull(getEpReq);
     OpcUa_GetEndpointsResponse* getEpResp = NULL;
 
-    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, getEpReq, (void**) &getEpResp);
+    status = SOPC_ClientHelperNew_DiscoveryServiceSync(secureConnConfig, getEpReq, (void**) &getEpResp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ValidateGetEndpointsResponse(getEpResp);
@@ -198,7 +198,7 @@ START_TEST(test_registerServer)
 
     OpcUa_RegisterServerResponse* pResp = NULL;
 
-    status = SOPC_ClientHelper_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
+    status = SOPC_ClientHelperNew_DiscoveryServiceSync(secureConnConfig, (void*) pReq, (void**) &pResp);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);

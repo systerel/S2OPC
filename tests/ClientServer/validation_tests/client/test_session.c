@@ -125,11 +125,11 @@ START_TEST(test_username_password)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_ClientConnection* secureConnection = NULL;
-    status = SOPC_ClientHelper_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
+    status = SOPC_ClientHelperNew_Connect(secureConnConfig, &SOPC_ClientConnectionEventCb, &secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(secureConnection);
 
-    status = SOPC_ClientHelper_Disconnect(&secureConnection);
+    status = SOPC_ClientHelperNew_Disconnect(&secureConnection);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_null(secureConnection);
 

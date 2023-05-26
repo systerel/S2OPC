@@ -165,7 +165,7 @@ int main(int argc, char* const argv[])
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_ClientHelper_DiscoveryServiceSync(discConnCfg, getEndpointsRequest, (void**) &getEndpointsResponse);
+            SOPC_ClientHelperNew_DiscoveryServiceSync(discConnCfg, getEndpointsRequest, (void**) &getEndpointsResponse);
     }
 
     if (SOPC_STATUS_OK == status)

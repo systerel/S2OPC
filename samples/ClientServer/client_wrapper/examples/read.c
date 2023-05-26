@@ -136,7 +136,7 @@ int main(int argc, char* const argv[])
     SOPC_ClientConnection* secureConnection = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelper_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
+        status = SOPC_ClientHelperNew_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Example_wrapper_read: Failed to connect\n");
@@ -164,7 +164,7 @@ int main(int argc, char* const argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelper_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
+        status = SOPC_ClientHelperNew_ServiceSync(secureConnection, readRequest, (void**) &readResponse);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -188,7 +188,7 @@ int main(int argc, char* const argv[])
     // Close the connection
     if (NULL != secureConnection)
     {
-        SOPC_ReturnStatus localStatus = SOPC_ClientHelper_Disconnect(&secureConnection);
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_Disconnect(&secureConnection);
         if (SOPC_STATUS_OK != localStatus)
         {
             printf("<Example_wrapper_read: Failed to disconnect\n");
