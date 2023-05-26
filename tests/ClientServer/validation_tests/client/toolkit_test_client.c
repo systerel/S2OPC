@@ -267,11 +267,11 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
         }
         if (SOPC_STATUS_OK != status)
         {
-            printf(">>Stub_Client: Failed to create PKI\n");
+            printf(">>Test_Client: Failed to create PKI\n");
         }
         else
         {
-            printf(">>Stub_Client: PKI created\n");
+            printf(">>Test_Client: PKI created\n");
         }
 
 #endif
