@@ -637,7 +637,7 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
  * \brief Creates an CreateMonitoredItems request
  *
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
- *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
  *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
  * \param nbMonitoredItems      Number of MonitoredItem to create with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.
@@ -787,7 +787,7 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
  * \brief Creates an ModifyMonitoredItems request
  *
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
- *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
  *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
  * \param nbMonitoredItems      Number of MonitoredItem to modify with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.
@@ -845,7 +845,7 @@ SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
  * \brief Creates an DeleteMonitoredItems request
  *
  * \param subscriptionId        The identifier of the subscription for which monitored items will be deleted
- *                              (obtained with ::SOPC_ClientHelper_Subscription_GetSubscriptionId
+ *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
  *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
  * \param nbMonitoredItems      Number of MonitoredItem to delete with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.

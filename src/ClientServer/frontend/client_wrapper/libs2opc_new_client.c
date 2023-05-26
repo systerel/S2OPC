@@ -693,23 +693,23 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
-                                                          void* request,
-                                                          uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                             void* request,
+                                                             uintptr_t userContext)
 {
     return SOPC_ClientHelperInternal_DiscoveryService(false, secConnConfig, request, NULL, userContext);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
-                                                         void* request,
-                                                         void** response)
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                            void* request,
+                                                            void** response)
 {
     return SOPC_ClientHelperInternal_DiscoveryService(true, secConnConfig, request, response, 0);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
-                                            SOPC_ClientConnectionEvent_Fct* connectEventCb,
-                                            SOPC_ClientConnection** secureConnection)
+SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* secConnConfig,
+                                               SOPC_ClientConnectionEvent_Fct* connectEventCb,
+                                               SOPC_ClientConnection** secureConnection)
 {
     if (NULL == secConnConfig || NULL == connectEventCb || NULL == secureConnection)
     {
@@ -827,7 +827,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secCon
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureConnection)
+SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secureConnection)
 {
     if (NULL == secureConnection || NULL == *secureConnection)
     {
@@ -1007,14 +1007,16 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
-                                                 void* request,
-                                                 uintptr_t userContext)
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secureConnection,
+                                                    void* request,
+                                                    uintptr_t userContext)
 {
     return SOPC_ClientHelperInternal_Service(false, secureConnection, request, NULL, userContext);
 }
 
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection, void* request, void** response)
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
+                                                   void* request,
+                                                   void** response)
 {
     return SOPC_ClientHelperInternal_Service(true, secureConnection, request, response, 0);
 }

@@ -516,7 +516,7 @@ int main(void)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_ClientHelper_DiscoveryServiceAsync(reverseSecureConnConfig, getGetEndpoints_message(), 1);
+            status = SOPC_ClientHelperNew_DiscoveryServiceAsync(reverseSecureConnConfig, getGetEndpoints_message(), 1);
         }
         printf(">>Test_Client_Toolkit: Get endpoints on 1 SC without session: OK\n");
     }
@@ -546,7 +546,7 @@ int main(void)
         for (size_t i = 0; SOPC_STATUS_OK == status && i < nbSecConnCfgs; i++)
         {
             status =
-                SOPC_ClientHelper_Connect(secureConnConfigArray[i], SOPC_Client_ConnEventCb, &secureConnections[i]);
+                SOPC_ClientHelperNew_Connect(secureConnConfigArray[i], SOPC_Client_ConnEventCb, &secureConnections[i]);
         }
     }
 
@@ -557,7 +557,7 @@ int main(void)
         /* Create a service request message and send it through session (read service)*/
         // msg freed when sent
         // Use 1 as read request context
-        status = SOPC_ClientHelper_ServiceAsync(secureConnections[0], getReadRequest_message(), 1);
+        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], getReadRequest_message(), 1);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -589,7 +589,7 @@ int main(void)
         test_results_set_WriteRequest(pWriteReqCopy);
 
         // Use 1 as write request context
-        status = SOPC_ClientHelper_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
+        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
     /* Wait until service response is received */
@@ -614,7 +614,7 @@ int main(void)
         /* The callback will call the verification */
         // msg freed when sent
         // Use 2 as read request context
-        status = SOPC_ClientHelper_ServiceAsync(secureConnections[0], getReadRequest_verif_message(), 2);
+        status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], getReadRequest_verif_message(), 2);
         printf(">>Test_Client_Toolkit: read request sending\n");
     }
 
@@ -654,7 +654,7 @@ int main(void)
             // Reset expected result
             test_results_set_service_result(false);
 
-            status = SOPC_ClientHelper_ServiceAsync(secureConnections[0], createSubReq, OpcUa_BadServiceUnsupported);
+            status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], createSubReq, OpcUa_BadServiceUnsupported);
 
             printf(">>Test_Client_Toolkit: create subscription sending\n");
         }
@@ -678,7 +678,7 @@ int main(void)
     {
         if (NULL != secureConnections[i])
         {
-            SOPC_ReturnStatus discoStatus = SOPC_ClientHelper_Disconnect(&secureConnections[i]);
+            SOPC_ReturnStatus discoStatus = SOPC_ClientHelperNew_Disconnect(&secureConnections[i]);
             SOPC_ASSERT(SOPC_STATUS_OK == discoStatus);
         }
     }

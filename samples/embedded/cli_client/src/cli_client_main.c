@@ -169,7 +169,7 @@ static void client_tester(void)
     /* Browse specified node */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientHelper_ServiceSync(gConnection, req, (void**) &resp);
+        status = SOPC_ClientHelperNew_ServiceSync(gConnection, req, (void**) &resp);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -369,7 +369,8 @@ static int cmd_demo_connect(WordList* pList)
         return 0;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelper_Connect(gConfiguration, client_ConnectionEventCallback, &gConnection);
+    SOPC_ReturnStatus status =
+        SOPC_ClientHelperNew_Connect(gConfiguration, client_ConnectionEventCallback, &gConnection);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -378,7 +379,7 @@ static int cmd_demo_connect(WordList* pList)
     else
     {
         client_tester();
-        status = SOPC_ClientHelper_Disconnect(&gConnection);
+        status = SOPC_ClientHelperNew_Disconnect(&gConnection);
         if (SOPC_STATUS_OK != status)
         {
             PRINT("\nSOPC_ClientHelper_Disconnect failed with code %d\r\n", status);

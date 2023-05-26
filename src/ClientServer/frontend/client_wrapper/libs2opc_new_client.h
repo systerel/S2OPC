@@ -22,12 +22,12 @@
  * \brief High level interface to run an OPC UA client.
  *
  * Once the client is configured using functions of libs2opc_client_config.h,
- * the client should establish connection using ::SOPC_ClientHelper_StartConnect (or ::SOPC_ClientHelper_Connect).
- * Until connection is stopped by a call to ::SOPC_ClientHelper_CloseConnection or due to an error (listening address
+ * the client should establish connection using ::SOPC_ClientHelperNew_Connect.
+ * Until connection is stopped by a call to ::SOPC_ClientHelperNew_CloseConnection or due to an error (listening address
  * busy, etc.), the client application might use the connections.
  * This is done using same OPC UA services client are using but in a local way called
- * "local services" in this client API trough ::SOPC_ClientHelper_LocalServiceAsync (or
- * ::SOPC_ClientHelper_LocalServiceSync)
+ * "local services" in this client API trough ::SOPC_ClientHelperNew_LocalServiceAsync (or
+ * ::SOPC_ClientHelperNew_LocalServiceSync)
  *
  */
 
@@ -51,11 +51,11 @@ typedef enum
     SOPC_ClientConnectionEvent_Disconnected, /* Connection terminated, it will not be established again unless a new
                                                 connection attempt is done.
                                                 To do a new attempt the following functions shall be called:
-                                                - ::SOPC_ClientHelper_Disconnect on current connection
-                                                - ::SOPC_ClientHelper_Connect to create a new connection
+                                                - ::SOPC_ClientHelperNew_Disconnect on current connection
+                                                - ::SOPC_ClientHelperNew_Connect to create a new connection
                                               */
     SOPC_ClientConnectionEvent_Connected,    /* Connection established (SC & session), only triggered when
-                                                ::SOPC_ClientHelper_StartConnection is used. */
+                                                ::SOPC_ClientHelperNew_StartConnection is used. */
     SOPC_ClientConnectionEvent_Reconnecting, /* Connection temporarily interrupted, attempt to re-establish connection
                                                 on-going.
                                                 TODO: not implemented in state machine */
@@ -99,9 +99,9 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  *          and prior to call ::SOPC_HelperConfigClient_Clear.
  *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
-                                                          void* request,
-                                                          uintptr_t userContext);
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
+                                                             void* request,
+                                                             uintptr_t userContext);
 
 /**
  * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
@@ -139,9 +139,9 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceAsync(SOPC_SecureConnection_
  * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
  * situation.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
-                                                         void* request,
-                                                         void** response);
+SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
+                                                            void* request,
+                                                            void** response);
 
 /**
  * NOT IMPLEMENTED
@@ -156,7 +156,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, connection state unexpected).
  */
-/*SOPC_ReturnStatus SOPC_ClientHelper_StartConnection(SOPC_SecureChannel_Config* config,
+/*SOPC_ReturnStatus SOPC_ClientHelperNew_StartConnection(SOPC_SecureChannel_Config* config,
                                                       SOPC_ClientConnectionEvent_Fct* connectEventCb,
                                                       SOPC_ClientSecureConnection** secureConnection);
 */
@@ -173,26 +173,26 @@ SOPC_ReturnStatus SOPC_ClientHelper_DiscoveryServiceSync(SOPC_SecureConnection_C
  *         otherwise SOPC_STATUS_INVALID_STATE
  *         if the configuration is not possible (toolkit not initialized, connection state unexpected).
  */
-SOPC_ReturnStatus SOPC_ClientHelper_Connect(SOPC_SecureConnection_Config* secConnConfig,
-                                            SOPC_ClientConnectionEvent_Fct* connectEventCb,
-                                            SOPC_ClientConnection** secureConnection);
+SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* secConnConfig,
+                                               SOPC_ClientConnectionEvent_Fct* connectEventCb,
+                                               SOPC_ClientConnection** secureConnection);
 
 /**
- * \brief Disconnects the connection established with SOPC_ClientHelper_Connect in a blocking way (synchronously).
+ * \brief Disconnects the connection established with SOPC_ClientHelperNew_Connect in a blocking way (synchronously).
  *
  * \param secureConnection  The secure connection to stop
  * *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the connection is already disconnected
  */
-SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureConnection);
+SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secureConnection);
 
 /**
  * \brief Executes an OPC UA service on server (read, write, browse or discovery service) asynchronously.
  *        Service response callback configured through ::SOPC_HelperConfigClient_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
- * \note ::SOPC_ClientHelper_StartConnect or ::SOPC_ClientHelper_Connect shall have been called
+ * \note ::SOPC_ClientHelperNew_StartConnect or ::SOPC_ClientHelperNew_Connect shall have been called
  *       and the connection shall be still active
  *
  * \param config    The connection configuration
@@ -219,14 +219,14 @@ SOPC_ReturnStatus SOPC_ClientHelper_Disconnect(SOPC_ClientConnection** secureCon
  *          and prior to call ::SOPC_HelperConfigClient_Clear.
  *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureConnection,
-                                                 void* request,
-                                                 uintptr_t userContext);
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secureConnection,
+                                                    void* request,
+                                                    uintptr_t userContext);
 
 /**
  * \brief Executes a local OPC UA service on client (read, write, browse or discovery service) synchronously.
  *
- * \note ::SOPC_ClientHelper_StartConnect or ::SOPC_ClientHelper_Connect shall have been called
+ * \note ::SOPC_ClientHelperNew_Connect shall have been called
  *       and the connection shall be still active
  * \param config    The connection configuration
  * \param request   An instance of OPC UA request:
@@ -264,11 +264,11 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
  * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
  * situation.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_ServiceSync(SOPC_ClientConnection* secureConnection,
-                                                void* request,
-                                                void** response);
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
+                                                   void* request,
+                                                   void** response);
 
-typedef struct SOPC_ClientHelper_Subscription SOPC_ClientHelper_Subscription;
+typedef struct SOPC_ClientHelperNew_Subscription SOPC_ClientHelperNew_Subscription;
 
 /**
  * NEED for subscription error (from server + timeout on client side to manage)
@@ -282,7 +282,7 @@ typedef struct SOPC_ClientHelper_Subscription SOPC_ClientHelper_Subscription;
  * \param publishResp   Publish response received for the subscription (use helpers to extract data)
  * \param userParam     User defined parameter
  */
-typedef void SOPC_ClientSubscriptionNotification_Fct(SOPC_ClientHelper_Subscription* subscription,
+typedef void SOPC_ClientSubscriptionNotification_Fct(SOPC_ClientHelperNew_Subscription* subscription,
                                                      SOPC_StatusCode status,
                                                      OpcUa_PublishResponse* publishResp,
                                                      uintptr_t userParam);
@@ -291,7 +291,7 @@ typedef void SOPC_ClientSubscriptionNotification_Fct(SOPC_ClientHelper_Subscript
  * Subscription helper: manage only Publish tokens, the rest is in Request/Response helpers
  * Note: limited to 1 per connection, synchronous, all params managed ?
  */
-SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
+SOPC_ClientHelperNew_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     SOPC_ClientConnection* secureConnection,
     uint32_t nbPublishTokens,
     OpcUa_CreateSubscriptionRequest* subParams,
@@ -301,12 +301,12 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelper_CreateSubscription(
 /**
  * \brief Gets the secure connection on which the subscription relies on
  */
-SOPC_ClientConnection* SOPC_ClientHelper_GetSecureConnection(SOPC_ClientHelper_Subscription* subscription);
+SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(SOPC_ClientHelperNew_Subscription* subscription);
 
 /**
  * FORBIDS SubscriptionId use in generic services with CreateSubscription / DeleteSubscription / PublishRequest
  */
-uint32_t SOPC_ClientHelper_Subscription_GetSubscriptionId(SOPC_ClientHelper_Subscription* subscription);
+uint32_t SOPC_ClientHelperNew_Subscription_GetSubscriptionId(SOPC_ClientHelperNew_Subscription* subscription);
 
 /* NOT PROVIDED since can be done through generic services
 SOPC_ReturnStatus SOPC_ClientHelper_SetSubscriptionPublishingMode(SOPC_SecureChannel_Config* config,
@@ -323,7 +323,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_RepublishSubscription(SOPC_SecureChannel_Con
 */
 /* AddMI / ModifyMI / DeleteMI in same case */
 
-SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription);
+SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelperNew_Subscription** subscription);
 
 /**
  * \brief An optional monitored items manager which records the created monitored items in a subscription to:
@@ -332,28 +332,28 @@ SOPC_ReturnStatus SOPC_ClientHelper_DeleteSubscription(SOPC_ClientHelper_Subscri
  *
  * \warning In order to be up to date for a subscription in which the manager is used,
  *          the following functions shall be called for each call to the services:
- *          - CreateMonitoredItems: ::SOPC_ClientHelper_MonitoredItemsManager_CreateHandlers
- *          - ModifyMonitoredItems: ::SOPC_ClientHelper_MonitoredItemsManager_UpdateHandlers
- *          - DeleteMonitoredItems: ::SOPC_ClientHelper_MonitoredItemsManager_DeleteHandlers
+ *          - CreateMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers
+ *          - ModifyMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_UpdateHandlers
+ *          - DeleteMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_DeleteHandlers
  *
  * \note Provides fresh client handle ids generator ?
  *       => already done elsewhere but not efficient if mass freed ids,
  *          we need a tested helper to manage it efficiently ...
  */
-typedef struct SOPC_ClientHelper_MonitoredItemsManager SOPC_ClientHelper_MonitoredItemsManager;
+typedef struct SOPC_ClientHelperNew_MonitoredItemsManager SOPC_ClientHelperNew_MonitoredItemsManager;
 
 /**
  * \brief Gets the monitored items manager associated to the given subscription.
  *
  * \warning Do not keep reference on returned manager after use since it will not be valid anymore after
- *          ::SOPC_ClientHelper_DeleteSubscription on the corresponding subscription
+ *          ::SOPC_ClientHelperNew_DeleteSubscription on the corresponding subscription
  *
- * \param subscription A subscription created by ::SOPC_ClientHelper_CreateSubscription and not deleted yet.
+ * \param subscription A subscription created by ::SOPC_ClientHelperNew_CreateSubscription and not deleted yet.
  *
  * \return The monitored items manager associated to the given subscription or NULL if the subscription is invalid.
  */
-SOPC_ClientHelper_MonitoredItemsManager* SOPC_ClientHelper_Subscription_GetMonitoredItemsManager(
-    SOPC_ClientHelper_Subscription* subscription);
+SOPC_ClientHelperNew_MonitoredItemsManager* SOPC_ClientHelperNew_Subscription_GetMonitoredItemsManager(
+    SOPC_ClientHelperNew_Subscription* subscription);
 
 /**
  * \brief Creates handlers for the successfully created monitored items.
@@ -363,8 +363,8 @@ SOPC_ClientHelper_MonitoredItemsManager* SOPC_ClientHelper_Subscription_GetMonit
  * \note This function ignores the monitored items creation which are not a success in the response \p resp.
  *
  * \warning Since the CreateMonitoredItems request memory is managed by function calling the service,
- *          a copy of the request shall be done prior to call to ::SOPC_ClientHelper_ServiceAsync or
- *          ::SOPC_ClientHelper_ServiceSync.
+ *          a copy of the request shall be done prior to call to ::SOPC_ClientHelperNew_ServiceAsync or
+ *          ::SOPC_ClientHelperNew_ServiceSync.
  *
  * \param manager         The monitored items manager of the concerned subscription
  * \param req             The create monitored items request that was used to call the service.
@@ -381,8 +381,8 @@ SOPC_ClientHelper_MonitoredItemsManager* SOPC_ClientHelper_Subscription_GetMonit
  * \return SOPC_STATUS_OK in case of successfully created handlers,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_CreateHandlers(
-    SOPC_ClientHelper_MonitoredItemsManager* manager,
+SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers(
+    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
     const OpcUa_CreateMonitoredItemsRequest* req,
     size_t nbClientCtx,
     uintptr_t* clientCtxArray,
@@ -393,13 +393,13 @@ SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_CreateHandlers(
  *        This function uses the ModifyMonitoredItems request and response
  *        and an optional array of additional client context to record the monitored items created.
  *        The client context associated to monitored items during the creation remains unchanged
- *        (see :: SOPC_ClientHelper_MonitoredItemsManager_CreateHandlers).
+ *        (see :: SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers).
  *
  * \note This function ignores the monitored items modification which are not a success in the response \p resp.
  *
  * \warning Since the ModifyMonitoredItems request memory is managed by function calling the service,
- *          a copy of the request shall be done prior to call to ::SOPC_ClientHelper_ServiceAsync or
- *          ::SOPC_ClientHelper_ServiceSync.
+ *          a copy of the request shall be done prior to call to ::SOPC_ClientHelperNew_ServiceAsync or
+ *          ::SOPC_ClientHelperNew_ServiceSync.
  *
  * \param manager         The monitored items manager of the concerned subscription
  * \param req             The modify monitored items request that was used to call the service.
@@ -411,8 +411,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_CreateHandlers(
  * \return SOPC_STATUS_OK in case of successfully created handlers,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_UpdateHandlers(
-    SOPC_ClientHelper_MonitoredItemsManager* manager,
+SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_UpdateHandlers(
+    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
     const OpcUa_ModifyMonitoredItemsRequest* req,
     const OpcUa_ModifyMonitoredItemsResponse* resp);
 
@@ -429,8 +429,8 @@ SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_UpdateHandlers(
  * \return SOPC_STATUS_OK in case of successfully created handlers,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
  */
-SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_DeleteHandlers(
-    SOPC_ClientHelper_MonitoredItemsManager* manager,
+SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_DeleteHandlers(
+    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
     const OpcUa_DeleteMonitoredItemsRequest* req);
 
 /**
@@ -446,9 +446,10 @@ SOPC_ReturnStatus SOPC_ClientHelper_MonitoredItemsManager_DeleteHandlers(
  * \return true if the client handle id is returned in \p clientHandleId,
  *         false otherwise if not found or several associated to the NodeId.
  */
-bool SOPC_ClientHelper_MonitoredItemsManager_GetClientHandleId(const SOPC_ClientHelper_MonitoredItemsManager* manager,
-                                                               const SOPC_NodeId* nodeId,
-                                                               uint32_t* clientHandleId);
+bool SOPC_ClientHelperNew_MonitoredItemsManager_GetClientHandleId(
+    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
+    const SOPC_NodeId* nodeId,
+    uint32_t* clientHandleId);
 
 /**
  * \brief Gets the monitored item id associated by the server to the client handle id
@@ -461,9 +462,10 @@ bool SOPC_ClientHelper_MonitoredItemsManager_GetClientHandleId(const SOPC_Client
  * \return true if the monitored item id is returned in \p monitoredItemId,
  *         false otherwise if client hanldled id invalid.
  */
-bool SOPC_ClientHelper_MonitoredItemsManager_GetMonitoredItemId(const SOPC_ClientHelper_MonitoredItemsManager* manager,
-                                                                uint32_t clientHandleId,
-                                                                uint32_t* monitoredItemId);
+bool SOPC_ClientHelperNew_MonitoredItemsManager_GetMonitoredItemId(
+    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
+    uint32_t clientHandleId,
+    uint32_t* monitoredItemId);
 
 /**
  * \brief Gets the monitored item client context associated to the client handle id
@@ -476,9 +478,9 @@ bool SOPC_ClientHelper_MonitoredItemsManager_GetMonitoredItemId(const SOPC_Clien
  * \return true if the client context is returned in \p clientCtx,
  *         false otherwise if client hanldled id invalid.
  */
-bool SOPC_ClientHelper_MonitoredItemsManager_GetClientCtx(const SOPC_ClientHelper_MonitoredItemsManager* manager,
-                                                          uint32_t clientHandleId,
-                                                          uintptr_t* clientCtx);
+bool SOPC_ClientHelperNew_MonitoredItemsManager_GetClientCtx(const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
+                                                             uint32_t clientHandleId,
+                                                             uintptr_t* clientCtx);
 
 /**
  * \brief Gets the monitored item identification associated to the client handle id
@@ -491,8 +493,8 @@ bool SOPC_ClientHelper_MonitoredItemsManager_GetClientCtx(const SOPC_ClientHelpe
  *
  * \return
  */
-const SOPC_NodeId* SOPC_ClientHelper_MonitoredItemsManager_GetIdentification(
-    const SOPC_ClientHelper_MonitoredItemsManager* manager,
+const SOPC_NodeId* SOPC_ClientHelperNew_MonitoredItemsManager_GetIdentification(
+    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
     uint32_t clientHandleId,
     const SOPC_NodeId** nodeId,
     SOPC_AttributeId* attribute,

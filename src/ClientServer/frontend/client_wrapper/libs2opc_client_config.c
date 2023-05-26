@@ -155,7 +155,7 @@ void SOPC_HelperConfigClient_Clear(void)
             // TODO: replace by a DisconnectAll operation ?
             mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-            SOPC_ClientHelper_Disconnect(&secureConnection);
+            SOPC_ClientHelperNew_Disconnect(&secureConnection);
             mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
