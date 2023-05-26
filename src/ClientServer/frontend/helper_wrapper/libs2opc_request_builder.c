@@ -77,14 +77,13 @@ static inline bool SOPC_TypeHelperInternal_CheckBrowseDirection(OpcUa_BrowseDire
     }
 }
 
-const SOPC_BrowseRequest_NodeClassMask NodeClassMask_ALL =
-    SOPC_NodeClassMask_Object | SOPC_NodeClassMask_Variable | SOPC_NodeClassMask_Method |
-    SOPC_NodeClassMask_ObjectType | SOPC_NodeClassMask_VariableType | SOPC_NodeClassMask_ReferenceType |
-    SOPC_NodeClassMask_DataType | SOPC_NodeClassMask_View;
+const OpcUa_NodeClass NodeClassMask_ALL =
+    OpcUa_NodeClass_Object | OpcUa_NodeClass_Variable | OpcUa_NodeClass_Method | OpcUa_NodeClass_ObjectType |
+    OpcUa_NodeClass_VariableType | OpcUa_NodeClass_ReferenceType | OpcUa_NodeClass_DataType | OpcUa_NodeClass_View;
 
-static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(SOPC_BrowseRequest_NodeClassMask ncm)
+static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(OpcUa_NodeClass ncm)
 {
-    SOPC_BrowseRequest_NodeClassMask filtered_ncm = ncm & NodeClassMask_ALL;
+    OpcUa_NodeClass filtered_ncm = ncm & NodeClassMask_ALL;
 
     if (filtered_ncm != ncm)
     {
@@ -94,13 +93,9 @@ static inline bool SOPC_TypeHelperInternal_CheckNodeClassMask(SOPC_BrowseRequest
     return true;
 }
 
-const SOPC_BrowseRequest_ResultMask ResultMask_ALL = SOPC_ResultMask_ReferenceType | SOPC_ResultMask_IsForward |
-                                                     SOPC_ResultMask_NodeClass | SOPC_ResultMask_BrowseName |
-                                                     SOPC_ResultMask_DisplayName | SOPC_ResultMask_TypeDefinition;
-
-static inline bool SOPC_TypeHelperInternal_CheckResultMask(SOPC_BrowseRequest_ResultMask rm)
+static inline bool SOPC_TypeHelperInternal_CheckResultMask(OpcUa_BrowseResultMask rm)
 {
-    SOPC_BrowseRequest_ResultMask filtered_rm = rm & ResultMask_ALL;
+    OpcUa_BrowseResultMask filtered_rm = rm & OpcUa_BrowseResultMask_All;
 
     if (filtered_rm != rm)
     {
@@ -381,13 +376,12 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
     return req;
 }
 
-static OpcUa_BrowseDescription* BrowseRequest_InitializeBrowsedescPointer(
-    OpcUa_BrowseRequest* browseRequest,
-    size_t index,
-    OpcUa_BrowseDirection browseDirection,
-    bool includeSubtypes,
-    SOPC_BrowseRequest_NodeClassMask nodeClassMask,
-    SOPC_BrowseRequest_ResultMask resultMask)
+static OpcUa_BrowseDescription* BrowseRequest_InitializeBrowsedescPointer(OpcUa_BrowseRequest* browseRequest,
+                                                                          size_t index,
+                                                                          OpcUa_BrowseDirection browseDirection,
+                                                                          bool includeSubtypes,
+                                                                          OpcUa_NodeClass nodeClassMask,
+                                                                          OpcUa_BrowseResultMask resultMask)
 {
     if (!CHECK_ELEMENT_EXISTS(browseRequest, NoOfNodesToBrowse, index) ||
         !SOPC_TypeHelperInternal_CheckBrowseDirection(browseDirection) ||
@@ -410,8 +404,8 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
                                                                      OpcUa_BrowseDirection browseDirection,
                                                                      const char* referenceTypeId,
                                                                      bool includeSubtypes,
-                                                                     SOPC_BrowseRequest_NodeClassMask nodeClassMask,
-                                                                     SOPC_BrowseRequest_ResultMask resultMask)
+                                                                     OpcUa_NodeClass nodeClassMask,
+                                                                     OpcUa_BrowseResultMask resultMask)
 {
     OpcUa_BrowseDescription* browseDesc = BrowseRequest_InitializeBrowsedescPointer(
         browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
@@ -438,8 +432,8 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
                                                           OpcUa_BrowseDirection browseDirection,
                                                           const SOPC_NodeId* referenceTypeId,
                                                           bool includeSubtypes,
-                                                          SOPC_BrowseRequest_NodeClassMask nodeClassMask,
-                                                          SOPC_BrowseRequest_ResultMask resultMask)
+                                                          OpcUa_NodeClass nodeClassMask,
+                                                          OpcUa_BrowseResultMask resultMask)
 {
     OpcUa_BrowseDescription* browseDesc = BrowseRequest_InitializeBrowsedescPointer(
         browseRequest, index, browseDirection, includeSubtypes, nodeClassMask, resultMask);
