@@ -30,6 +30,7 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "libs2opc_client_config.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
@@ -44,12 +45,33 @@
 #define SKIP_S2OPC_DEFINITIONS
 #include "libs2opc_client.h"
 
-#include "toolkit_helpers.h"
-
 #define SLEEP_TIME 10
 #define CONNECTION_TIMEOUT 10000
 #define ROBUSTNESS_TIMEOUT 20000
 #define ROBUSTNESS_RETRY_PERIOD 2000
+
+/**
+ * \brief OPC-UA time (hundreds of nanosecs since 1601/01/01 00:00:00 UTC) to NTP time
+ *        (2**-32 seconds since 1900/01/01 00:00:00 UTC).
+ */
+static uint64_t Helpers_OPCTimeToNTP(SOPC_DateTime ts)
+{
+    /* We are not before 1601 */
+    SOPC_ASSERT(0 <= ts);
+    /* So we can use unsigned arithmetics, and get rid of warnings. */
+    uint64_t uts = (uint64_t) ts;
+
+    /* First, subtract the difference between epochs */
+    uts -= 9435484800 * 10000000;
+    /* For the fraction of seconds, take modulo, then multiply, then divide,
+     * which never overflows because modulo is < 2^32 */
+    uint64_t fraction = (((uts % 10000000) << 32) / 10000000);
+    /* for the second part, divide first, then multiply, which keeps the most significant bits of ts */
+    uint64_t seconds = ((uts / 10000000) << 32);
+
+    /* seconds are always > 2**32, fraction is always < 2**32, it is possible to OR them without mask */
+    return seconds | fraction;
+}
 
 START_TEST(test_time_conversion)
 {

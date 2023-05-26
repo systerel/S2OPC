@@ -213,15 +213,15 @@ if (expat_FOUND)
   set(CLIENT_WRAPPER_XML_DEP s2opc_clientserver-xml-loaders-expat)
 endif()
 
-add_library(s2opc_clientwrapper "${CLIENTWRAPPER_PATH}/libs2opc_client.c"
+add_library(s2opc_clientwrapper "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.c"
                                 "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
-                                "${CLIENTWRAPPER_PATH}/libs2opc_client_cmds.c"
-                                "${CLIENTWRAPPER_PATH}/libs2opc_client_common.c"
+                                "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.c"
+                                "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.c"
                                 "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
                                 "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
-                                "${CLIENTWRAPPER_PATH}/toolkit_helpers.c"
-                                "${CLIENTWRAPPER_PATH}/state_machine.c"
-                                "${CLIENTWRAPPER_PATH}/pki_permissive.c"
+                                "${CLIENTWRAPPER_PATH}/internal/toolkit_helpers.c"
+                                "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
+                                "${CLIENTWRAPPER_PATH}/internal/pki_permissive.c"
                                 ${CLIENT_WRAPPER_XML_CONFIG}
                                 )
 target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_commonwrapper ${CLIENT_WRAPPER_XML_DEP})
@@ -230,7 +230,10 @@ target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
 target_include_directories(s2opc_clientwrapper
   PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/deprecated>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
+  PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal>"
   )
 if (expat_FOUND)
   target_compile_definitions(s2opc_clientwrapper PRIVATE "WITH_EXPAT")
@@ -238,9 +241,9 @@ endif()
 
 list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
                                          "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
-                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_cmds.h"
-                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_common.h"
-                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h")
+                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
+                                         "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.h"
+                                         "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.h")
 set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${CLIENT_WRAPPER_INCLUDE_FILES}")
 
 

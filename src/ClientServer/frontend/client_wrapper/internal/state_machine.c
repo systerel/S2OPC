@@ -58,7 +58,7 @@ struct SOPC_StaMac_Machine
     uint32_t iCliId;      /* LibSub connection ID, used by the callback. It shall be unique. */
 
     /* Keeping two callbacks to avoid modification of LibSub API */
-    SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;          /* Callback when subscribed data changed */
+    SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;             /* Callback when subscribed data changed */
     SOPC_ClientHelper_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
 
     SOPC_LibSub_EventCbk* pCbkGenericEvent;    /* Callback when received event that is out of the LibSub scope */
