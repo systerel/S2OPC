@@ -257,7 +257,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_ServiceAsync(SOPC_ClientConnection* secureCo
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
  * \note request memory is managed by the client after a successful return or in case of timeout
- * \note caller is responsible of output response memory after successful call
+ * \note caller is responsible of output response memory after successful call. E.g. use ::SOPC_Encodeable_Delete.
  *
  * \warning local service synchronous call shall only be called from the application thread and shall not be called from
  * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,

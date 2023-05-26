@@ -230,36 +230,10 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
                                                   const SOPC_DataValue* value);
 
 /**
- * \brief Enumerated node class mask values authorized for use with ::SOPC_BrowseRequest_SetBrowseDescription.
- *        Those values are masks which means they might be used with OR bitwise operation to
- *        select several node classes.
- */
-typedef enum
-{
-    SOPC_NodeClassMask_Object = 0x01,
-    SOPC_NodeClassMask_Variable = 0x02,
-    SOPC_NodeClassMask_Method = 0x04,
-    SOPC_NodeClassMask_ObjectType = 0x08,
-    SOPC_NodeClassMask_VariableType = 0x10,
-    SOPC_NodeClassMask_ReferenceType = 0x20,
-    SOPC_NodeClassMask_DataType = 0x40,
-    SOPC_NodeClassMask_View = 0x80,
-} SOPC_BrowseRequest_NodeClassMask;
-
-/**
  * \brief Enumerated result fields mask values authorized for use with ::SOPC_BrowseRequest_SetBrowseDescription.
  *        Those values are masks which means they might be used with OR bitwise operation to
  *        select several result fields.
  */
-typedef enum
-{
-    SOPC_ResultMask_ReferenceType = 0x01,
-    SOPC_ResultMask_IsForward = 0x02,
-    SOPC_ResultMask_NodeClass = 0x04,
-    SOPC_ResultMask_BrowseName = 0x08,
-    SOPC_ResultMask_DisplayName = 0x10,
-    SOPC_ResultMask_TypeDefinition = 0x20,
-} SOPC_BrowseRequest_ResultMask;
 
 /**
  * \brief Creates a browse request
@@ -311,11 +285,11 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
  * \param nodeClassMask    Mask specifying the node classes of the target nodes.
  *                         Only TargetNodes with the selected node classes are returned.
  *                         If set to zero, then all NodeClasses are returned.
- *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_NodeClassMask
+ *                         Value shall be a bitwise OR of ::OpcUa_NodeClass
  *
  * \param resultMask       Mask specifying the fields in the ::OpcUa_ReferenceDescription structure
  *                         that should be returned.
- *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_ResultMask
+ *                         Value shall be a bitwise OR of ::OpcUa_BrowseResultMask
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid browse request, index, nodeId or browseDirection.
@@ -326,8 +300,8 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
                                                                      OpcUa_BrowseDirection browseDirection,
                                                                      const char* referenceTypeId,
                                                                      bool includeSubtypes,
-                                                                     SOPC_BrowseRequest_NodeClassMask nodeClassMask,
-                                                                     SOPC_BrowseRequest_ResultMask resultMask);
+                                                                     OpcUa_NodeClass nodeClassMask,
+                                                                     OpcUa_BrowseResultMask resultMask);
 
 /**
  * \brief Sets the node to browse at given index in browse request
@@ -354,11 +328,11 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(OpcUa_Brows
  * \param nodeClassMask    Mask specifying the node classes of the target nodes.
  *                         Only TargetNodes with the selected node classes are returned.
  *                         If set to zero, then all NodeClasses are returned.
- *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_NodeClassMask
+ *                         Value shall be a bitwise OR of ::OpcUa_NodeClass
  *
  * \param resultMask       Mask specifying the fields in the ::OpcUa_ReferenceDescription structure
  *                         that should be returned.
- *                         Value shall be a bitwise OR of ::SOPC_BrowseRequest_ResultMask
+ *                         Value shall be a bitwise OR of ::OpcUa_BrowseResultMask
  *
  * \return SOPC_STATUS_OK in case of success,
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid browse request, index, nodeId or browseDirection.
@@ -369,8 +343,8 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
                                                           OpcUa_BrowseDirection browseDirection,
                                                           const SOPC_NodeId* referenceTypeId,
                                                           bool includeSubtypes,
-                                                          SOPC_BrowseRequest_NodeClassMask nodeClassMask,
-                                                          SOPC_BrowseRequest_ResultMask resultMask);
+                                                          OpcUa_NodeClass nodeClassMask,
+                                                          OpcUa_BrowseResultMask resultMask);
 
 /**
  * \brief Creates a browse next request

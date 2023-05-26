@@ -132,7 +132,7 @@ int main(int argc, char* const argv[])
         {
             status = SOPC_BrowseRequest_SetBrowseDescriptionFromStrings(
                 browseRequest, 0, argv[1], OpcUa_BrowseDirection_Forward, NULL, true, 0,
-                SOPC_ResultMask_ReferenceType | SOPC_ResultMask_DisplayName);
+                OpcUa_BrowseResultMask_ReferenceTypeId | OpcUa_BrowseResultMask_DisplayName);
         }
         else
         {
