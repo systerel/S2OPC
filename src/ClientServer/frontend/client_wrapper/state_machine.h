@@ -152,7 +152,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
  * \brief Changes the callback for data change notifications on subscription
  */
 SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
-                                                          SOPC_ClientCmd_DataChangeCbk* pCbkClientHelper);
+                                                          SOPC_ClientHelper_DataChangeCbk* pCbkClientHelper);
 
 /**
  * \brief Deletes and deallocate the machine.

@@ -59,7 +59,7 @@ struct SOPC_StaMac_Machine
 
     /* Keeping two callbacks to avoid modification of LibSub API */
     SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;          /* Callback when subscribed data changed */
-    SOPC_ClientCmd_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
+    SOPC_ClientHelper_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
 
     SOPC_LibSub_EventCbk* pCbkGenericEvent;    /* Callback when received event that is out of the LibSub scope */
     uintptr_t iSessionCtx;                     /* Toolkit Session Context, used to identify session events */
@@ -284,7 +284,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
 }
 
 SOPC_ReturnStatus SOPC_StaMac_ConfigureDataChangeCallback(SOPC_StaMac_Machine* pSM,
-                                                          SOPC_ClientCmd_DataChangeCbk* pCbkClientHelper)
+                                                          SOPC_ClientHelper_DataChangeCbk* pCbkClientHelper)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == pSM)

@@ -278,8 +278,8 @@ static void SOPC_BrowseContext_Initialization(BrowseContext* ctx)
 
 typedef struct
 {
-    int32_t nbElements;                       /* (input) the number of result elements expected in results received */
-    SOPC_ClientCmd_CallMethodResult* results; /* (output) results filled using service results received */
+    int32_t nbElements; /* (input) the number of result elements expected in results received */
+    SOPC_ClientHelper_CallMethodResult* results; /* (output) results filled using service results received */
 } CallMethodContext;
 
 static void SOPC_CallMethodContext_Initialization(CallMethodContext* ctx)
@@ -291,7 +291,7 @@ static void SOPC_CallMethodContext_Initialization(CallMethodContext* ctx)
 
 typedef struct
 {
-    SOPC_ClientCmd_GetEndpointsResult* endpoints;
+    SOPC_ClientHelper_GetEndpointsResult* endpoints;
 } GetEndpointsContext;
 
 static void SOPC_GetEndpointsContext_Initialization(GetEndpointsContext* ctx)
@@ -310,24 +310,24 @@ static void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 /* static functions */
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
-                                                 SOPC_ClientCmd_EndpointConnection* connection,
-                                                 SOPC_ClientCmd_Security* security,
+                                                 SOPC_ClientHelper_EndpointConnection* connection,
+                                                 SOPC_ClientHelper_Security* security,
                                                  OpcUa_GetEndpointsResponse* expectedEndpoints);
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
-                                               SOPC_ClientCmd_ReadValue* readValues);
+                                               SOPC_ClientHelper_ReadValue* readValues);
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                                                       SOPC_ReturnStatus status,
                                                       OpcUa_WriteValue* nodesToWrite,
-                                                      SOPC_ClientCmd_WriteValue* writeValues);
+                                                      SOPC_ClientHelper_WriteValue* writeValues);
 static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElements,
                                                                    SOPC_ReturnStatus status,
                                                                    SOPC_ByteString** continuationPointsArray);
 static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
                                                               SOPC_ReturnStatus status,
                                                               OpcUa_BrowseDescription* nodesToBrowse,
-                                                              SOPC_ClientCmd_BrowseRequest* browseRequests);
+                                                              SOPC_ClientHelper_BrowseRequest* browseRequests);
 static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
                                                               SOPC_ReturnStatus status,
                                                               SOPC_Array** browseResultsListArray);
@@ -371,7 +371,7 @@ static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, SOPC_LibSub
 }
 
 // Return 0 if succeeded
-int32_t SOPC_ClientCmd_Initialize(SOPC_ClientCmd_DisconnectCbk* const disconnect_callback)
+int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disconnect_callback)
 {
     if (SOPC_Atomic_Int_Get(&initialized))
     {
@@ -418,7 +418,7 @@ int32_t SOPC_ClientCmd_Initialize(SOPC_ClientCmd_DisconnectCbk* const disconnect
     return 0;
 }
 
-void SOPC_ClientCmd_Finalize(void)
+void SOPC_ClientHelper_Finalize(void)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -441,8 +441,8 @@ void SOPC_ClientCmd_Finalize(void)
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
-int32_t SOPC_ClientCmd_GetEndpoints(SOPC_ClientCmd_EndpointConnection* connection,
-                                    SOPC_ClientCmd_GetEndpointsResult** result)
+int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* connection,
+                                       SOPC_ClientHelper_GetEndpointsResult** result)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -503,8 +503,8 @@ int32_t SOPC_ClientCmd_GetEndpoints(SOPC_ClientCmd_EndpointConnection* connectio
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         // Note: SOPC_Client*_EndpointConnection shall remain the same, do a minimal check on size
-        SOPC_ASSERT(sizeof(SOPC_ClientCmd_EndpointConnection) == sizeof(SOPC_ClientCmd_EndpointConnection));
-        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest((SOPC_ClientCmd_EndpointConnection*) connection,
+        SOPC_ASSERT(sizeof(SOPC_ClientHelper_EndpointConnection) == sizeof(SOPC_ClientHelper_EndpointConnection));
+        status = SOPC_ClientCommon_AsyncSendGetEndpointsRequest((SOPC_ClientHelper_EndpointConnection*) connection,
                                                                 (uintptr_t) genReqCtx);
 
         if (SOPC_STATUS_OK == status)
@@ -541,13 +541,13 @@ int32_t SOPC_ClientCmd_GetEndpoints(SOPC_ClientCmd_EndpointConnection* connectio
     return res;
 }
 
-void SOPC_ClientCmd_GetEndpointsResult_Free(SOPC_ClientCmd_GetEndpointsResult** getEpResult)
+void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsResult** getEpResult)
 {
     if (NULL == getEpResult || NULL == *getEpResult)
     {
         return;
     }
-    SOPC_ClientCmd_GetEndpointsResult* result = *getEpResult;
+    SOPC_ClientHelper_GetEndpointsResult* result = *getEpResult;
 
     if (NULL != result->endpoints)
     {
@@ -576,8 +576,8 @@ void SOPC_ClientCmd_GetEndpointsResult_Free(SOPC_ClientCmd_GetEndpointsResult** 
 }
 
 static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_con,
-                                                 SOPC_ClientCmd_EndpointConnection* connection,
-                                                 SOPC_ClientCmd_Security* security,
+                                                 SOPC_ClientHelper_EndpointConnection* connection,
+                                                 SOPC_ClientHelper_Security* security,
                                                  OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
     bool security_none = false;
@@ -657,7 +657,6 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     cfg_con->password = security->password;
     cfg_con->path_cert_x509_token = cert_x509_token;
     cfg_con->path_key_x509_token = key_x509_token;
-    cfg_con->key_x509_token_encrypted = security->key_x509_token_encrypted;
     cfg_con->publish_period_ms = PUBLISH_PERIOD_MS;
     cfg_con->n_max_keepalive = MAX_KEEP_ALIVE_COUNT;
     cfg_con->n_max_lifetime = MAX_LIFETIME_COUNT;
@@ -670,7 +669,7 @@ static int32_t ConnectHelper_CreateConfiguration(SOPC_LibSub_ConnectionCfg* cfg_
     return 0;
 }
 
-int32_t SOPC_ClientCmd_CreateReverseEndpoint(const char* reverseEndpointURL)
+int32_t SOPC_ClientHelper_CreateReverseEndpoint(const char* reverseEndpointURL)
 {
     if (NULL == reverseEndpointURL)
     {
@@ -687,9 +686,9 @@ int32_t SOPC_ClientCmd_CreateReverseEndpoint(const char* reverseEndpointURL)
 
 // Return configuration Id > 0 if succeeded, -<n> with <n> argument number (starting from 1) if invalid argument
 // detected or '-100' if configuration failed
-int32_t SOPC_ClientCmd_CreateConfiguration(SOPC_ClientCmd_EndpointConnection* connection,
-                                           SOPC_ClientCmd_Security* security,
-                                           OpcUa_GetEndpointsResponse* expectedEndpoints)
+int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnection* connection,
+                                              SOPC_ClientHelper_Security* security,
+                                              OpcUa_GetEndpointsResponse* expectedEndpoints)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -744,7 +743,7 @@ int32_t SOPC_ClientCmd_CreateConfiguration(SOPC_ClientCmd_EndpointConnection* co
 
 // Return connection Id > 0 if succeeded
 // or '0' if connection failed
-int32_t SOPC_ClientCmd_CreateConnection(int32_t cfg_id)
+int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -810,7 +809,7 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
     /* convert getEndpointsResp to SOPC_ClientHelper_GetEndpointsResult */
     if (SOPC_STATUS_OK == status && 0 != getEndpointsResp->NoOfEndpoints)
     {
-        ctx->endpoints = SOPC_Calloc(1, sizeof(SOPC_ClientCmd_GetEndpointsResult));
+        ctx->endpoints = SOPC_Calloc(1, sizeof(SOPC_ClientHelper_GetEndpointsResult));
 
         if (NULL == ctx->endpoints)
         {
@@ -821,8 +820,8 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
         {
             ctx->endpoints->nbOfEndpoints = getEndpointsResp->NoOfEndpoints;
 
-            SOPC_ClientCmd_EndpointDescription* endpoints =
-                SOPC_Calloc((size_t) getEndpointsResp->NoOfEndpoints, sizeof(SOPC_ClientCmd_EndpointDescription));
+            SOPC_ClientHelper_EndpointDescription* endpoints =
+                SOPC_Calloc((size_t) getEndpointsResp->NoOfEndpoints, sizeof(SOPC_ClientHelper_EndpointDescription));
             if (NULL == endpoints)
             {
                 status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -847,8 +846,8 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
                     // avoid data cleared after callback call
                     descriptions[i].ServerCertificate.DoNotClear = true;
 
-                    SOPC_ClientCmd_UserIdentityToken* userIds = SOPC_Calloc(
-                        (size_t) descriptions[i].NoOfUserIdentityTokens, sizeof(SOPC_ClientCmd_UserIdentityToken));
+                    SOPC_ClientHelper_UserIdentityToken* userIds = SOPC_Calloc(
+                        (size_t) descriptions[i].NoOfUserIdentityTokens, sizeof(SOPC_ClientHelper_UserIdentityToken));
                     if (NULL == userIds)
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -974,7 +973,7 @@ static SOPC_ReturnStatus GenericCallbackHelper_Browse(const void* response, Brow
             SOPC_ByteString_Copy(responseContext->continuationPoints[i], &browseResp->Results[i].ContinuationPoint);
         for (int32_t j = 0; j < browseResp->Results[i].NoOfReferences && SOPC_STATUS_OK == status; j++)
         {
-            SOPC_ClientCmd_BrowseResultReference resultReference;
+            SOPC_ClientHelper_BrowseResultReference resultReference;
             OpcUa_ReferenceDescription* reference = &browseResp->Results[i].References[j];
 
             resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
@@ -1054,7 +1053,7 @@ static SOPC_ReturnStatus GenericCallbackHelper_BrowseNext(const void* response, 
                                       &browseNextResp->Results[i].ContinuationPoint);
         for (int32_t j = 0; j < browseNextResp->Results[i].NoOfReferences && SOPC_STATUS_OK == status; j++)
         {
-            SOPC_ClientCmd_BrowseResultReference resultReference;
+            SOPC_ClientHelper_BrowseResultReference resultReference;
             OpcUa_ReferenceDescription* reference = &browseNextResp->Results[i].References[j];
 
             resultReference.referenceTypeId = SOPC_NodeId_ToCString(&reference->ReferenceTypeId);
@@ -1103,7 +1102,7 @@ static SOPC_ReturnStatus GenericCallbackHelper_CallMethod(const void* response, 
 
     for (int32_t i = 0; i < responseContext->nbElements; i++)
     {
-        SOPC_ClientCmd_CallMethodResult* cres = &responseContext->results[i];
+        SOPC_ClientHelper_CallMethodResult* cres = &responseContext->results[i];
         OpcUa_CallMethodResult* res = &callRes->Results[i];
         cres->nbOfOutputParams = res->NoOfOutputArguments;
         cres->outputParams = res->OutputArguments;
@@ -1202,7 +1201,7 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
 static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
                                                size_t nbElements,
                                                OpcUa_ReadValueId* nodesToRead,
-                                               SOPC_ClientCmd_ReadValue* readValues)
+                                               SOPC_ClientHelper_ReadValue* readValues)
 {
     if (SOPC_STATUS_OK == status)
     {
@@ -1241,10 +1240,10 @@ static SOPC_ReturnStatus ReadHelper_Initialize(SOPC_ReturnStatus status,
     return status;
 }
 
-int32_t SOPC_ClientCmd_Read(int32_t connectionId,
-                            SOPC_ClientCmd_ReadValue* readValues,
-                            size_t nbElements,
-                            SOPC_DataValue* values)
+int32_t SOPC_ClientHelper_Read(int32_t connectionId,
+                               SOPC_ClientHelper_ReadValue* readValues,
+                               size_t nbElements,
+                               SOPC_DataValue* values)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1391,7 +1390,7 @@ int32_t SOPC_ClientCmd_Read(int32_t connectionId,
     }
 }
 
-void SOPC_ClientCmd_ReadResults_Free(size_t nbElements, SOPC_DataValue* values)
+void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue* values)
 {
     if (0 == nbElements || NULL == values)
     {
@@ -1403,7 +1402,7 @@ void SOPC_ClientCmd_ReadResults_Free(size_t nbElements, SOPC_DataValue* values)
     }
 }
 
-int32_t SOPC_ClientCmd_CreateSubscription(int32_t connectionId, SOPC_ClientCmd_DataChangeCbk* callback)
+int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk* callback)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1431,10 +1430,10 @@ int32_t SOPC_ClientCmd_CreateSubscription(int32_t connectionId, SOPC_ClientCmd_D
     return res;
 }
 
-int32_t SOPC_ClientCmd_AddMonitoredItems(int32_t connectionId,
-                                         char** nodeIds,
-                                         size_t nbNodeIds,
-                                         SOPC_StatusCode* results)
+int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
+                                            char** nodeIds,
+                                            size_t nbNodeIds,
+                                            SOPC_StatusCode* results)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1528,7 +1527,7 @@ int32_t SOPC_ClientCmd_AddMonitoredItems(int32_t connectionId,
     return result;
 }
 
-int32_t SOPC_ClientCmd_Unsubscribe(int32_t connectionId)
+int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1552,7 +1551,7 @@ int32_t SOPC_ClientCmd_Unsubscribe(int32_t connectionId)
     return 0;
 }
 
-int32_t SOPC_ClientCmd_Disconnect(int32_t connectionId)
+int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1594,7 +1593,7 @@ static void default_disconnect_callback(const uint32_t c_id)
 static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
                                                       SOPC_ReturnStatus status,
                                                       OpcUa_WriteValue* nodesToWrite,
-                                                      SOPC_ClientCmd_WriteValue* writeValues)
+                                                      SOPC_ClientHelper_WriteValue* writeValues)
 {
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
@@ -1631,10 +1630,10 @@ static SOPC_ReturnStatus WriteHelper_InitializeValues(size_t nbElements,
     return status;
 }
 
-int32_t SOPC_ClientCmd_Write(int32_t connectionId,
-                             SOPC_ClientCmd_WriteValue* writeValues,
-                             size_t nbElements,
-                             SOPC_StatusCode* writeResults)
+int32_t SOPC_ClientHelper_Write(int32_t connectionId,
+                                SOPC_ClientHelper_WriteValue* writeValues,
+                                size_t nbElements,
+                                SOPC_StatusCode* writeResults)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -1784,7 +1783,7 @@ static SOPC_ReturnStatus BrowseHelper_InitializeContinuationPoints(size_t nbElem
 static SOPC_ReturnStatus BrowseHelper_InitializeNodesToBrowse(size_t nbElements,
                                                               SOPC_ReturnStatus status,
                                                               OpcUa_BrowseDescription* nodesToBrowse,
-                                                              SOPC_ClientCmd_BrowseRequest* browseRequests)
+                                                              SOPC_ClientHelper_BrowseRequest* browseRequests)
 {
     for (size_t i = 0; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
@@ -1846,7 +1845,7 @@ static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
 
     for (; i < nbElements && SOPC_STATUS_OK == status; i++)
     {
-        browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientCmd_BrowseResultReference), 10, SOPC_Free);
+        browseResultsListArray[i] = SOPC_Array_Create(sizeof(SOPC_ClientHelper_BrowseResultReference), 10, SOPC_Free);
         if (NULL == browseResultsListArray[i])
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -1863,8 +1862,8 @@ static SOPC_ReturnStatus BrowseHelper_InitializeBrowseResults(size_t nbElements,
     return status;
 }
 
-void SOPC_ClientCmd_BrowseResultReference_Move(SOPC_ClientCmd_BrowseResultReference* dest,
-                                               SOPC_ClientCmd_BrowseResultReference* src)
+void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResultReference* dest,
+                                                  SOPC_ClientHelper_BrowseResultReference* src)
 {
     if (NULL == dest || NULL == src)
     {
@@ -1872,10 +1871,10 @@ void SOPC_ClientCmd_BrowseResultReference_Move(SOPC_ClientCmd_BrowseResultRefere
     }
 
     *dest = *src;
-    memset(src, 0, sizeof(SOPC_ClientCmd_BrowseResultReference));
+    memset(src, 0, sizeof(SOPC_ClientHelper_BrowseResultReference));
 }
 
-void SOPC_ClientCmd_BrowseResultReference_Clear(SOPC_ClientCmd_BrowseResultReference* brr)
+void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr)
 {
     if (NULL == brr)
     {
@@ -1885,10 +1884,10 @@ void SOPC_ClientCmd_BrowseResultReference_Clear(SOPC_ClientCmd_BrowseResultRefer
     SOPC_Free(brr->displayName);
     SOPC_Free(brr->nodeId);
     SOPC_Free(brr->referenceTypeId);
-    memset(brr, 0, sizeof(SOPC_ClientCmd_BrowseResultReference));
+    memset(brr, 0, sizeof(SOPC_ClientHelper_BrowseResultReference));
 }
 
-static void SOPC_ClientHelper_BrowseResult_Clear(SOPC_ClientCmd_BrowseResult* br)
+static void SOPC_ClientHelper_BrowseResult_Clear(SOPC_ClientHelper_BrowseResult* br)
 {
     if (NULL == br)
     {
@@ -1896,12 +1895,12 @@ static void SOPC_ClientHelper_BrowseResult_Clear(SOPC_ClientCmd_BrowseResult* br
     }
     for (int32_t i = 0; i < br->nbOfReferences; i++)
     {
-        SOPC_ClientCmd_BrowseResultReference_Clear(&br->references[i]);
+        SOPC_ClientHelper_BrowseResultReference_Clear(&br->references[i]);
     }
     SOPC_Free(br->references);
 }
 
-void SOPC_ClientCmd_BrowseResults_Clear(size_t nbElements, SOPC_ClientCmd_BrowseResult* results)
+void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results)
 {
     if (NULL == results || 0 == nbElements)
     {
@@ -1913,10 +1912,10 @@ void SOPC_ClientCmd_BrowseResults_Clear(size_t nbElements, SOPC_ClientCmd_Browse
     }
 }
 
-int32_t SOPC_ClientCmd_Browse(int32_t connectionId,
-                              SOPC_ClientCmd_BrowseRequest* browseRequests,
-                              size_t nbElements,
-                              SOPC_ClientCmd_BrowseResult* browseResults)
+int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
+                                 SOPC_ClientHelper_BrowseRequest* browseRequests,
+                                 size_t nbElements,
+                                 SOPC_ClientHelper_BrowseResult* browseResults)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -2266,10 +2265,10 @@ static bool ContainsContinuationPoints(SOPC_ByteString** continuationPointsArray
     return result;
 }
 
-int32_t SOPC_ClientCmd_CallMethod(int32_t connectionId,
-                                  SOPC_ClientCmd_CallMethodRequest* callRequests,
-                                  size_t nbOfElements,
-                                  SOPC_ClientCmd_CallMethodResult* callResults)
+int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
+                                     SOPC_ClientHelper_CallMethodRequest* callRequests,
+                                     size_t nbOfElements,
+                                     SOPC_ClientHelper_CallMethodResult* callResults)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -2305,7 +2304,7 @@ int32_t SOPC_ClientCmd_CallMethod(int32_t connectionId,
 
     for (size_t i = 0; SOPC_STATUS_OK == status && i < nbOfElements; i++)
     {
-        SOPC_ClientCmd_CallMethodRequest* creq = &callRequests[i];
+        SOPC_ClientHelper_CallMethodRequest* creq = &callRequests[i];
         OpcUa_CallMethodRequest* req = &lrs[i];
 
         OpcUa_CallMethodRequest_Initialize(req);
@@ -2406,7 +2405,7 @@ int32_t SOPC_ClientCmd_CallMethod(int32_t connectionId,
     return 0;
 }
 
-void SOPC_ClientCmd_CallMethodResults_Clear(size_t nbElements, SOPC_ClientCmd_CallMethodResult* results)
+void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHelper_CallMethodResult* results)
 {
     if (0 == nbElements || NULL == results)
     {
@@ -2419,11 +2418,11 @@ void SOPC_ClientCmd_CallMethodResults_Clear(size_t nbElements, SOPC_ClientCmd_Ca
             SOPC_Variant_Clear(&results[i].outputParams[j]);
         }
         SOPC_Free(results[i].outputParams);
-        memset(&results[i], 0, sizeof(SOPC_ClientCmd_CallMethodResult));
+        memset(&results[i], 0, sizeof(SOPC_ClientHelper_CallMethodResult));
     }
 }
 
-SOPC_ReturnStatus SOPC_ClientCmd_GenericService(int32_t connectionId, void* requestMsg, void** responseMsg)
+SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* requestMsg, void** responseMsg)
 {
     if (!SOPC_Atomic_Int_Get(&initialized))
     {
@@ -2471,16 +2470,16 @@ SOPC_ReturnStatus SOPC_ClientCmd_GenericService(int32_t connectionId, void* requ
     return status;
 }
 
-SOPC_ReturnStatus SOPC_ClientCmd_SetLocaleIds(size_t nbLocales, const char** localeIds)
+SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     return SOPC_ClientCommon_SetLocaleIds(nbLocales, localeIds);
 }
 
-SOPC_ReturnStatus SOPC_ClientCmd_SetApplicationDescription(const char* applicationUri,
-                                                           const char* productUri,
-                                                           const char* defaultAppName,
-                                                           const char* defaultAppNameLocale,
-                                                           OpcUa_ApplicationType applicationType)
+SOPC_ReturnStatus SOPC_ClientHelper_SetApplicationDescription(const char* applicationUri,
+                                                              const char* productUri,
+                                                              const char* defaultAppName,
+                                                              const char* defaultAppNameLocale,
+                                                              OpcUa_ApplicationType applicationType)
 {
     return SOPC_ClientCommon_SetApplicationDescription(applicationUri, productUri, defaultAppName, defaultAppNameLocale,
                                                        applicationType);

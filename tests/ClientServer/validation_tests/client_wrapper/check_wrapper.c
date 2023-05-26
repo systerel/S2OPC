@@ -54,25 +54,25 @@
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
 
-static SOPC_ClientCmd_EndpointConnection valid_endpoint = {
+static SOPC_ClientHelper_EndpointConnection valid_endpoint = {
     .endpointUrl = VALID_URL,
     .serverUri = NULL,
     .reverseConnectionConfigId = 0,
 };
 
-static SOPC_ClientCmd_EndpointConnection invalid_endpoint_NULL = {
+static SOPC_ClientHelper_EndpointConnection invalid_endpoint_NULL = {
     .endpointUrl = NULL,
     .serverUri = NULL,
     .reverseConnectionConfigId = 0,
 };
 
-static SOPC_ClientCmd_EndpointConnection invalid_endpoint = {
+static SOPC_ClientHelper_EndpointConnection invalid_endpoint = {
     .endpointUrl = INVALID_URL,
     .serverUri = NULL,
     .reverseConnectionConfigId = 0,
 };
 
-static SOPC_ClientCmd_Security valid_security_none = {
+static SOPC_ClientHelper_Security valid_security_none = {
     .security_policy = SOPC_SecurityPolicy_None_URI,
     .security_mode = OpcUa_MessageSecurityMode_None,
     .path_cert_auth = "./trusted/cacert.der",
@@ -88,7 +88,7 @@ static SOPC_ClientCmd_Security valid_security_none = {
     .key_x509_token_encrypted = false,
 };
 
-static SOPC_ClientCmd_Security valid_security_signAndEncrypt_b256sha256 = {
+static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
     .path_cert_auth = "./trusted/cacert.der",
@@ -142,125 +142,125 @@ static void datachange_callback_check_counter(const int32_t c_id, const char* no
 START_TEST(test_wrapper_initialize_finalize)
 {
     /* simple initialization */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
     /* double finalize shall not fail*/
-    SOPC_ClientCmd_Finalize();
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* double initialization shall fail */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Initialize(NULL));
 
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 }
 END_TEST
 
 START_TEST(test_wrapper_create_configuration)
 {
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* configuration of a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
 
     /* check multiple configurations */
     int32_t conf_ids;
-    conf_ids = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
-    conf_ids = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    conf_ids = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(conf_ids, 0);
 
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* configure a connection without wrapper being initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL));
 }
 END_TEST
 
 START_TEST(test_wrapper_create_connection)
 {
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* configuration of a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
 
     /* configuration of an invalid url */
-    int32_t invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&invalid_endpoint, &valid_security_none, NULL);
+    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&invalid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(invalid_conf_id, 0);
 
     /* connect using a valid configuration */
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* connect multiple times using a valid configuration */
     int32_t con_ids[5];
-    con_ids[0] = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    con_ids[0] = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(con_ids[0], 0);
-    con_ids[1] = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    con_ids[1] = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(con_ids[1], 0);
-    con_ids[2] = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    con_ids[2] = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(con_ids[2], 0);
-    con_ids[3] = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    con_ids[3] = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(con_ids[3], 0);
-    con_ids[4] = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    con_ids[4] = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(con_ids[4], 0);
 
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(con_ids[0]));
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(con_ids[1]));
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(con_ids[2]));
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(con_ids[3]));
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(con_ids[4]));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(con_ids[0]));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(con_ids[1]));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(con_ids[2]));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(con_ids[3]));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(con_ids[4]));
 
     /* connect using an invalid configuration */
-    int32_t invalid_con_id = SOPC_ClientCmd_CreateConnection(invalid_conf_id);
+    int32_t invalid_con_id = SOPC_ClientHelper_CreateConnection(invalid_conf_id);
     ck_assert_int_eq(invalid_con_id, -100);
 
     /* connect using a non-existing configuration */
-    int32_t invalid_con_id_2 = SOPC_ClientCmd_CreateConnection(valid_conf_id + invalid_conf_id);
+    int32_t invalid_con_id_2 = SOPC_ClientHelper_CreateConnection(valid_conf_id + invalid_conf_id);
     ck_assert_int_eq(invalid_con_id_2, -100);
 
     /* connect using a non-existing configuration */
-    int32_t invalid_con_id_3 = SOPC_ClientCmd_CreateConnection(-1);
+    int32_t invalid_con_id_3 = SOPC_ClientHelper_CreateConnection(-1);
     ck_assert_int_eq(invalid_con_id_3, -1);
 
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* connect without wrapper being initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateConnection(valid_conf_id));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateConnection(valid_conf_id));
 }
 END_TEST
 
 START_TEST(test_wrapper_config_invalid_arguments)
 {
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
-    int32_t invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(NULL, &valid_security_none, NULL);
+    int32_t invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(NULL, &valid_security_none, NULL);
     ck_assert_int_eq(-1, invalid_conf_id);
 
     {
-        SOPC_ClientCmd_Security invalid_security = valid_security_none;
+        SOPC_ClientHelper_Security invalid_security = valid_security_none;
         invalid_security.security_policy = NULL;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-11, invalid_conf_id);
         invalid_security.security_policy = "InvalidSecurityPolicy";
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-11, invalid_conf_id);
     }
     {
-        SOPC_ClientCmd_Security invalid_security = valid_security_none;
+        SOPC_ClientHelper_Security invalid_security = valid_security_none;
         invalid_security.security_mode = 0;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-12, invalid_conf_id);
         invalid_security.security_mode = 4;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-12, invalid_conf_id);
     }
     {
@@ -268,131 +268,131 @@ START_TEST(test_wrapper_config_invalid_arguments)
         SOPC_ReturnStatus status =
             SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
-        SOPC_ClientCmd_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_srv = NULL;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-15, invalid_conf_id);
     }
     {
-        SOPC_ClientCmd_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_cli = NULL;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-16, invalid_conf_id);
     }
     {
-        SOPC_ClientCmd_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_key_cli = NULL;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-17, invalid_conf_id);
     }
     {
-        SOPC_ClientCmd_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
+        SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.policyId = NULL;
-        invalid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
+        invalid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &invalid_security, NULL);
         ck_assert_int_eq(-18, invalid_conf_id);
     }
     /* cannot test username and password */
 
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 }
 END_TEST
 
 START_TEST(test_wrapper_disconnect)
 {
     /* disconnect before wrapper has been initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Disconnect(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Disconnect(1));
 
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* connection to a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* disconnect a valid endpoint */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* disconnect a non valid connection */
-    ck_assert_int_eq(-1, SOPC_ClientCmd_Disconnect(-1));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_Disconnect(-1));
 
     /* disconnect an already closed connection */
-    ck_assert_int_eq(-3, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(-3, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* disconnect a non existing connection */
-    ck_assert_int_eq(-3, SOPC_ClientCmd_Disconnect(31));
+    ck_assert_int_eq(-3, SOPC_ClientHelper_Disconnect(31));
 
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* disconnect after wrapper has been closed */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Disconnect(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Disconnect(1));
 }
 END_TEST
 
 START_TEST(test_wrapper_create_subscription)
 {
     /* create subscription before wrapper has been initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateSubscription(1, datachange_callback_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(1, datachange_callback_none));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* connection to a valid endpoint */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* create connection using invalid connection id */
-    ck_assert_int_eq(-1, SOPC_ClientCmd_CreateSubscription(-1, datachange_callback_none));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_CreateSubscription(-1, datachange_callback_none));
 
     /* create a connection using an invalid callback */
-    ck_assert_int_eq(-2, SOPC_ClientCmd_CreateSubscription(valid_con_id, NULL));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_CreateSubscription(valid_con_id, NULL));
 
     /* create a connection using a non existing connection */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateSubscription(valid_con_id + 1, datachange_callback_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id + 1, datachange_callback_none));
 
     /* create a valid subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* call the subscription creation a second time */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* delete subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
     /* create a subscription a second time */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* create a subscription after wrapper has been closed */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 }
 END_TEST
 
 START_TEST(test_wrapper_create_subscription_after_disconnect)
 {
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* create a subscription after being disconnected */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 }
 END_TEST
 
@@ -412,78 +412,78 @@ START_TEST(test_wrapper_add_monitored_items)
                                   SOPC_UncertainStatusMask};
 
     /* add monitored items before toolkit being initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(1, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1, NULL));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* add monitored items before being connected */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(1, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(1, nodeIds1, 1, NULL));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* add monitored items before subscription being created */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* create a subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* invalid argument: connection id*/
-    ck_assert_int_eq(-1, SOPC_ClientCmd_AddMonitoredItems(-1, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_AddMonitoredItems(-1, nodeIds1, 1, NULL));
     /* invalid argument: nodeIds */
-    ck_assert_int_eq(-2, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, NULL, 1, NULL));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, NULL, 1, NULL));
     /* invalid argument: nodeIds content */
-    ck_assert_int_eq(-3, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, invalidNodeIds, 1, NULL));
-    ck_assert_int_eq(-4, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, invalidNodeIds2, 2, NULL));
+    ck_assert_int_eq(-3, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds, 1, NULL));
+    ck_assert_int_eq(-4, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, invalidNodeIds2, 2, NULL));
     /* invalid argument: nbNodeIds */
-    ck_assert_int_eq(-2, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 0, NULL));
+    ck_assert_int_eq(-2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 0, NULL));
 
     /* add one monitored item */
-    ck_assert_int_eq(0, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 1, results));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, results));
     ck_assert(SOPC_IsGoodStatus(results[0]));
     /* add one more monitored item */
-    ck_assert_int_eq(0, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds2, 1, results));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2, 1, results));
     ck_assert(SOPC_IsGoodStatus(results[0]));
     /* add multiple monitored items */
-    ck_assert_int_eq(0, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds3, 3, results));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3, 3, results));
     ck_assert(SOPC_IsGoodStatus(results[0]));
     ck_assert(SOPC_IsGoodStatus(results[1]));
     ck_assert(SOPC_IsGoodStatus(results[2]));
 
     /* add multiple monitored items with 1 unkown node id*/
-    ck_assert_int_eq(1, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds3_plus_unknown, 4, results));
+    ck_assert_int_eq(1, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds3_plus_unknown, 4, results));
     ck_assert(SOPC_IsGoodStatus(results[0]));
     ck_assert(SOPC_IsGoodStatus(results[1]));
     ck_assert(SOPC_IsGoodStatus(results[2]));
     ck_assert(!SOPC_IsGoodStatus(results[3]));
 
-    ck_assert_int_eq(2, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds2_plus_2_unknown, 4, results));
+    ck_assert_int_eq(2, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds2_plus_2_unknown, 4, results));
     ck_assert(!SOPC_IsGoodStatus(results[0]));
     ck_assert(SOPC_IsGoodStatus(results[1]));
     ck_assert(SOPC_IsGoodStatus(results[2]));
     ck_assert(!SOPC_IsGoodStatus(results[3]));
 
     /* delete subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* add monitored items after subscription being deleted */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* add monitored items after being disconnected */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* add monitored items after toolkit being closed */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds1, 1, NULL));
 }
 END_TEST
 
@@ -492,16 +492,16 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     char* nodeIds[1] = {"ns=0;s=Counter"};
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* create a subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_check_counter));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_check_counter));
 
     /* initialize mutex and condition */
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&check_counter_mutex));
@@ -510,7 +510,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_counter_mutex));
 
     /* add one monitored item */
-    ck_assert_int_eq(0, SOPC_ClientCmd_AddMonitoredItems(valid_con_id, nodeIds, 1, NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds, 1, NULL));
 
     /* verify that callback is called correctly */
     /* use a mutex and a condition to wait until datachange has been received (use a 1.2 sec timeout)*/
@@ -545,10 +545,10 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_counter_mutex));
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* clear mutex and condition */
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&check_counter_mutex));
@@ -559,51 +559,51 @@ END_TEST
 START_TEST(test_wrapper_unsubscribe)
 {
     /* delete subscription before toolkit is initialized */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* delete subscription before connection */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(1));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* delete subscription before subscription is created */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* create a subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* invalid argument: connection id */
-    ck_assert_int_eq(-1, SOPC_ClientCmd_Unsubscribe(-1));
+    ck_assert_int_eq(-1, SOPC_ClientHelper_Unsubscribe(-1));
 
     /* delete subscription */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Unsubscribe(valid_con_id));
     /* delete subscription once again */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* delete subscription non existing connection id */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(valid_con_id + 1));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id + 1));
 
     /* create a subscription again */
-    ck_assert_int_eq(0, SOPC_ClientCmd_CreateSubscription(valid_con_id, datachange_callback_none));
+    ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_none));
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* delete subscription after disconnection */
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* delete subscription after toolkit is closed*/
-    ck_assert_int_eq(-100, SOPC_ClientCmd_Unsubscribe(valid_con_id));
+    ck_assert_int_eq(-100, SOPC_ClientHelper_Unsubscribe(valid_con_id));
 }
 END_TEST
 
@@ -611,19 +611,21 @@ START_TEST(test_wrapper_read)
 {
     /* read before toolkit is initialized */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Read(1, readValue, 1, &readResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, &readResults));
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* read before connection is created */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Read(1, readValue, 1, &readResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(1, readValue, 1, &readResults));
     }
 
     /* callback to retrieve the client's private key password */
@@ -631,48 +633,51 @@ START_TEST(test_wrapper_read)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* create a connection */
     int32_t valid_conf_id =
-        SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_signAndEncrypt_b256sha256, NULL);
+        SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_signAndEncrypt_b256sha256, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* invalid arguments */
     {
-        SOPC_ClientCmd_ReadValue readValue[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
-        SOPC_ClientCmd_ReadValue readValue2[2] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
-                                                  {.nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue2[2] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
+            {.nodeId = NULL, .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults;
         SOPC_DataValue readResults2[2];
 
         /* invalid connection id */
-        ck_assert_int_eq(-1, SOPC_ClientCmd_Read(-1, readValue, 1, &readResults));
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Read(valid_con_id + 1, readValue, 1, &readResults));
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Read(-1, readValue, 1, &readResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id + 1, readValue, 1, &readResults));
         /* invalid readValue */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Read(valid_con_id, NULL, 1, &readResults));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Read(valid_con_id, NULL, 1, &readResults));
         /* invalid nbElements */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Read(valid_con_id, readValue, 0, &readResults));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Read(valid_con_id, readValue, 0, &readResults));
         /* invalid values */
-        ck_assert_int_eq(-3, SOPC_ClientCmd_Read(valid_con_id, readValue, 1, NULL));
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Read(valid_con_id, readValue, 1, NULL));
         /* invalid readValue content (nodeId) */
         readValue[0].nodeId = NULL;
-        ck_assert_int_eq(-4, SOPC_ClientCmd_Read(valid_con_id, readValue, 1, &readResults));
-        ck_assert_int_eq(-5, SOPC_ClientCmd_Read(valid_con_id, readValue2, 2, readResults2));
+        ck_assert_int_eq(-4, SOPC_ClientHelper_Read(valid_con_id, readValue, 1, &readResults));
+        ck_assert_int_eq(-5, SOPC_ClientHelper_Read(valid_con_id, readValue2, 2, readResults2));
     }
     /* read one node */
     {
-        SOPC_ClientCmd_ReadValue readValue1[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue1[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults1;
-        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValue1, 1, &readResults1));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue1, 1, &readResults1));
         /* check datavalue */
         ck_assert_int_eq(SOPC_STATUS_OK, readResults1.Status);
         ck_assert_int_eq(SOPC_UInt64_Id, readResults1.Value.BuiltInTypeId);
         ck_assert_uint_ne(0, readResults1.Value.Value.Uint64);
         /* free results */
-        SOPC_ClientCmd_ReadResults_Free(1, &readResults1);
+        SOPC_ClientHelper_ReadResults_Free(1, &readResults1);
     }
     /* read multiple nodes */
     {
-        SOPC_ClientCmd_ReadValue readValueMultiple[NB_READ_VALUES];
+        SOPC_ClientHelper_ReadValue readValueMultiple[NB_READ_VALUES];
         /* = {
             {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL},
             {.nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL}};
@@ -684,7 +689,8 @@ START_TEST(test_wrapper_read)
             readValueMultiple[i].indexRange = NULL;
         }
         SOPC_DataValue readResultsMultiple[NB_READ_VALUES];
-        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValueMultiple, NB_READ_VALUES, readResultsMultiple));
+        ck_assert_int_eq(0,
+                         SOPC_ClientHelper_Read(valid_con_id, readValueMultiple, NB_READ_VALUES, readResultsMultiple));
 
         for (size_t i = 0; i < NB_READ_VALUES; i++)
         {
@@ -696,26 +702,26 @@ START_TEST(test_wrapper_read)
         }
 
         /* free results */
-        SOPC_ClientCmd_ReadResults_Free(NB_READ_VALUES, readResultsMultiple);
+        SOPC_ClientHelper_ReadResults_Free(NB_READ_VALUES, readResultsMultiple);
     }
     /* read invalid node */
     {
-        SOPC_ClientCmd_ReadValue readValue3[1] = {
+        SOPC_ClientHelper_ReadValue readValue3[1] = {
             {.nodeId = "ns=0;s=CounterThatShouldNotExist", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults3;
-        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValue3, 1, &readResults3));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue3, 1, &readResults3));
         /* check datavalue */
         ck_assert_int_ne(SOPC_STATUS_OK, readResults3.Status);
         /* free results */
-        SOPC_ClientCmd_ReadResults_Free(1, &readResults3);
+        SOPC_ClientHelper_ReadResults_Free(1, &readResults3);
     }
     /* read mix of invalid nodes and valid nodes */
     {
-        SOPC_ClientCmd_ReadValue readValue4[2] = {
+        SOPC_ClientHelper_ReadValue readValue4[2] = {
             {.nodeId = "ns=0;s=CounterThatShouldNotExist", .attributeId = 13, .indexRange = NULL},
             {.nodeId = "ns=0;i=1001", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults4[2];
-        ck_assert_int_eq(0, SOPC_ClientCmd_Read(valid_con_id, readValue4, 2, readResults4));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Read(valid_con_id, readValue4, 2, readResults4));
         /* check first datavalue */
         ck_assert_ptr_ne(NULL, readResults4);
         ck_assert_int_ne(SOPC_STATUS_OK, readResults4[0].Status);
@@ -727,27 +733,29 @@ START_TEST(test_wrapper_read)
         ck_assert_int_ne(0, readResults4[1].Value.Value.Int64);
 
         /* free results */
-        SOPC_ClientCmd_ReadResults_Free(2, readResults4);
+        SOPC_ClientHelper_ReadResults_Free(2, readResults4);
     }
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* read after connection is closed */
     {
-        SOPC_ClientCmd_ReadValue readValue5[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue5[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults5;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Read(valid_con_id, readValue5, 1, &readResults5));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue5, 1, &readResults5));
     }
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* read after toolkit is closed */
     {
-        SOPC_ClientCmd_ReadValue readValue6[1] = {{.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
+        SOPC_ClientHelper_ReadValue readValue6[1] = {
+            {.nodeId = "ns=0;s=Counter", .attributeId = 13, .indexRange = NULL}};
         SOPC_DataValue readResults6;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Read(valid_con_id, readValue6, 1, &readResults6));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Read(valid_con_id, readValue6, 1, &readResults6));
     }
 }
 END_TEST
@@ -757,7 +765,7 @@ START_TEST(test_wrapper_write)
     /* write a node before toolkit is initialized */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -766,16 +774,16 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[0].value->Value.Value.Int64 = -500;
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Write(1, writeValues, 1, writeResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(1, writeValues, 1, writeResults));
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* write a node before connection */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -784,19 +792,19 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[0].value->Value.Value.Int64 = -500;
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Write(1, writeValues, 1, writeResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(1, writeValues, 1, writeResults));
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* invalid arguments */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -806,19 +814,19 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.Value.Int64 = -500;
 
         /* invalid connection id */
-        ck_assert_int_eq(-1, SOPC_ClientCmd_Write(-1, writeValues, 1, writeResults));
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Write(-1, writeValues, 1, writeResults));
         /* invalid write values */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Write(valid_con_id, NULL, 1, writeResults));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Write(valid_con_id, NULL, 1, writeResults));
         /* invalid nbElements */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Write(valid_con_id, writeValues, 0, writeResults));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Write(valid_con_id, writeValues, 0, writeResults));
         /* invalid writeResults */
-        ck_assert_int_eq(-3, SOPC_ClientCmd_Write(valid_con_id, writeValues, 1, NULL));
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, NULL));
     }
 
     /* write a node */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -827,13 +835,13 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[0].value->Value.Value.Int64 = -500;
 
-        ck_assert_int_eq(0, SOPC_ClientCmd_Write(valid_con_id, writeValues, 1, writeResults));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
         ck_assert_int_eq(SOPC_STATUS_OK, writeResults[0]);
     }
     /* write multiple nodes */
     {
         SOPC_DataValue value[2];
-        SOPC_ClientCmd_WriteValue writeValues[2] = {
+        SOPC_ClientHelper_WriteValue writeValues[2] = {
             {.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value[0]},
             {.nodeId = "ns=0;i=1009", .indexRange = NULL, .value = &value[1]},
         };
@@ -851,18 +859,18 @@ START_TEST(test_wrapper_write)
         writeValues[1].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[1].value->Value.Value.Int64 = -20;
 
-        ck_assert_int_eq(0, SOPC_ClientCmd_Write(valid_con_id, writeValues, 2, writeResults));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Write(valid_con_id, writeValues, 2, writeResults));
         ck_assert_int_eq(SOPC_STATUS_OK, writeResults[0]);
         ck_assert_int_eq(SOPC_STATUS_OK, writeResults[1]);
     }
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* write a node after disconnection */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -871,16 +879,16 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[0].value->Value.Value.Int64 = -500;
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Write(valid_con_id, writeValues, 1, writeResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
     }
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* write a node after toolkit is closed */
     {
         SOPC_DataValue value;
-        SOPC_ClientCmd_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
+        SOPC_ClientHelper_WriteValue writeValues[1] = {{.nodeId = "ns=0;i=1001", .indexRange = NULL, .value = &value}};
         SOPC_StatusCode writeResults[1] = {SOPC_UncertainStatusMask};
 
         SOPC_DataValue_Initialize(writeValues[0].value);
@@ -889,7 +897,7 @@ START_TEST(test_wrapper_write)
         writeValues[0].value->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         writeValues[0].value->Value.Value.Int64 = -500;
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Write(valid_con_id, writeValues, 1, writeResults));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Write(valid_con_id, writeValues, 1, writeResults));
     }
 }
 END_TEST
@@ -899,64 +907,64 @@ START_TEST(test_wrapper_browse)
     /* browse before initialization */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(1, browseRequest, 1, browseResult));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* browse before connection */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(1, browseRequest, 1, browseResult));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(1, browseRequest, 1, browseResult));
     }
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* invalid arguments */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
         /* invalid connection id */
-        ck_assert_int_eq(-1, SOPC_ClientCmd_Browse(-1, browseRequest, 1, browseResult));
+        ck_assert_int_eq(-1, SOPC_ClientHelper_Browse(-1, browseRequest, 1, browseResult));
         /* invalid browseRequests */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Browse(valid_con_id, NULL, 1, browseResult));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Browse(valid_con_id, NULL, 1, browseResult));
         /*  invalid nbElements */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 0, browseResult));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 0, browseResult));
         /*  invalid browseResults */
-        ck_assert_int_eq(-3, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, NULL));
+        ck_assert_int_eq(-3, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, NULL));
     }
     /* browse */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
-        ck_assert_int_eq(0, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
         ck_assert_int_eq(SOPC_STATUS_OK, browseResult[0].statusCode);
         ck_assert_int_eq(3, browseResult[0].nbOfReferences);
 
@@ -1020,17 +1028,17 @@ START_TEST(test_wrapper_browse)
     } /* browse multiple nodes */
     {
         // Root/ and Root/Objects - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[2] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true},
-                                                         {.nodeId = "ns=0;i=85",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[2];
+        SOPC_ClientHelper_BrowseRequest browseRequest[2] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true},
+                                                            {.nodeId = "ns=0;i=85",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[2];
 
-        ck_assert_int_eq(0, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 2, browseResult));
+        ck_assert_int_eq(0, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 2, browseResult));
         ck_assert_int_eq(SOPC_STATUS_OK, browseResult[0].statusCode);
         ck_assert_int_eq(3, browseResult[0].nbOfReferences);
         ck_assert_int_eq(16, browseResult[1].nbOfReferences);
@@ -1070,33 +1078,33 @@ START_TEST(test_wrapper_browse)
     }
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* browse after disconnection */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
     }
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* browse after toolkit is closed */
     {
         // Root/ - Hierarchical references
-        SOPC_ClientCmd_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
-                                                          .direction = OpcUa_BrowseDirection_Forward,
-                                                          .referenceTypeId = "ns=0;i=33",
-                                                          .includeSubtypes = true}};
-        SOPC_ClientCmd_BrowseResult browseResult[1];
+        SOPC_ClientHelper_BrowseRequest browseRequest[1] = {{.nodeId = "ns=0;i=84",
+                                                             .direction = OpcUa_BrowseDirection_Forward,
+                                                             .referenceTypeId = "ns=0;i=33",
+                                                             .includeSubtypes = true}};
+        SOPC_ClientHelper_BrowseResult browseResult[1];
 
-        ck_assert_int_eq(-100, SOPC_ClientCmd_Browse(valid_con_id, browseRequest, 1, browseResult));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_Browse(valid_con_id, browseRequest, 1, browseResult));
     }
 }
 END_TEST
@@ -1105,43 +1113,43 @@ START_TEST(test_wrapper_get_endpoints)
 {
     /* get endpoints before initialization */
     {
-        SOPC_ClientCmd_GetEndpointsResult* result;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_GetEndpoints(&valid_endpoint, &result));
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(&valid_endpoint, &result));
     }
 
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(NULL));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(NULL));
 
     /* get endpoints  valid request */
     {
-        SOPC_ClientCmd_GetEndpointsResult* result;
-        ck_assert_int_eq(0, SOPC_ClientCmd_GetEndpoints(&valid_endpoint, &result));
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(0, SOPC_ClientHelper_GetEndpoints(&valid_endpoint, &result));
         /* check result content */
         ck_assert_int_ge(result->nbOfEndpoints, 1);
         /* free result */
-        SOPC_ClientCmd_GetEndpointsResult_Free(&result);
+        SOPC_ClientHelper_GetEndpointsResult_Free(&result);
     }
 
     /* invalid arguments */
     {
-        SOPC_ClientCmd_GetEndpointsResult* result;
+        SOPC_ClientHelper_GetEndpointsResult* result;
         /* bad connection NULL */
-        ck_assert_int_eq(-1, SOPC_ClientCmd_GetEndpoints(NULL, &result));
+        ck_assert_int_eq(-1, SOPC_ClientHelper_GetEndpoints(NULL, &result));
         /* bad url NULL */
-        ck_assert_int_eq(-2, SOPC_ClientCmd_GetEndpoints(&invalid_endpoint_NULL, &result));
+        ck_assert_int_eq(-2, SOPC_ClientHelper_GetEndpoints(&invalid_endpoint_NULL, &result));
         /* bad result NULL */
-        ck_assert_int_eq(-10, SOPC_ClientCmd_GetEndpoints(&valid_endpoint, NULL));
+        ck_assert_int_eq(-10, SOPC_ClientHelper_GetEndpoints(&valid_endpoint, NULL));
         /* bad invalid_url */
-        ck_assert_int_eq(-100, SOPC_ClientCmd_GetEndpoints(&invalid_endpoint, &result));
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(&invalid_endpoint, &result));
     }
 
     /* close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 
     /* get endpoints after toolkit is closed */
     {
-        SOPC_ClientCmd_GetEndpointsResult* result;
-        ck_assert_int_eq(-100, SOPC_ClientCmd_GetEndpoints(&valid_endpoint, &result));
+        SOPC_ClientHelper_GetEndpointsResult* result;
+        ck_assert_int_eq(-100, SOPC_ClientHelper_GetEndpoints(&valid_endpoint, &result));
     }
 }
 END_TEST
@@ -1149,16 +1157,16 @@ END_TEST
 START_TEST(test_wrapper_disconnect_callback)
 {
     /* initialize wrapper */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Initialize(disconnect_callback));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Initialize(disconnect_callback));
 
     /* create a connection */
-    int32_t valid_conf_id = SOPC_ClientCmd_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
+    int32_t valid_conf_id = SOPC_ClientHelper_CreateConfiguration(&valid_endpoint, &valid_security_none, NULL);
     ck_assert_int_gt(valid_conf_id, 0);
-    int32_t valid_con_id = SOPC_ClientCmd_CreateConnection(valid_conf_id);
+    int32_t valid_con_id = SOPC_ClientHelper_CreateConnection(valid_conf_id);
     ck_assert_int_gt(valid_con_id, 0);
 
     /* disconnect */
-    ck_assert_int_eq(0, SOPC_ClientCmd_Disconnect(valid_con_id));
+    ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
 
     /* wait until timeout or until callback is called */
     int iCnt = 0;
@@ -1172,7 +1180,7 @@ START_TEST(test_wrapper_disconnect_callback)
     ck_assert(SOPC_Atomic_Int_Get(&disconnected) == 1);
 
     /* Close wrapper */
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
 }
 END_TEST
 
@@ -1189,7 +1197,7 @@ static void setup(void)
 
 static void teardown(void)
 {
-    SOPC_ClientCmd_Finalize();
+    SOPC_ClientHelper_Finalize();
     SOPC_CommonHelper_Clear();
 }
 
