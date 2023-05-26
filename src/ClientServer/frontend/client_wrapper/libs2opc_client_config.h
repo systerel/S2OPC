@@ -31,7 +31,7 @@
 #include "sopc_user_app_itf.h"
 /**
  * \brief Initialize the S2OPC client frontend configuration
- *        Call to ::SOPC_HelperConfigClient_Initialize is required before any other operation
+ *        Call to ::SOPC_ClientConfigHelper_Initialize is required before any other operation
  *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
  * The default log configuration is provided by the ::SOPC_Common_GetDefaultLogConfiguration function. \n
@@ -42,13 +42,13 @@
  *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void);
 
 /**
  * \brief Clear the S2OPC client frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  */
-void SOPC_HelperConfigClient_Clear(void);
+void SOPC_ClientConfigHelper_Clear(void);
 
 /**
  * \brief
@@ -74,7 +74,7 @@ typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
  *             SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientConfigPath,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientConfigPath,
                                                            SOPC_ConfigClientXML_Custom* customConfig,
                                                            size_t* nbScConfigs,
                                                            SOPC_SecureConnection_Config*** scConfigArray);
@@ -91,7 +91,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientCon
  *         or NULL if none is found.
  *
  */
-SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId);
+SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_GetConfigFromId(const char* userDefinedId);
 
 /**
  * \brief Type of callback to provide asynchronous service response
@@ -135,7 +135,7 @@ typedef void SOPC_ServiceAsyncResp_Fct(SOPC_EncodeableType* type, const void* re
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call (other instance of data change notification, service sync/async response, etc.).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb);
 
 /**
  * \brief Type of callback to retrieve username and password for session activation
@@ -163,7 +163,7 @@ typedef bool SOPC_GetClientUserNamePassword_Fct(char** outUserName, char** outPa
  *
  * \note    This function must be called before the configuration of the secure channel.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserNamePasswordCallback(
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserNamePasswordCallback(
     SOPC_GetClientUserNamePassword_Fct* getClientUsernamePassword);
 
 /**
@@ -191,7 +191,7 @@ typedef bool SOPC_GetClientUserKeyPassword_Fct(const char* userCertThumb, char**
  *
  * \note    This function must be called before the configuration of the secure channel.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(
     SOPC_GetClientUserKeyPassword_Fct* getClientX509userKeyPassword);
 
 /**
@@ -220,6 +220,6 @@ typedef bool SOPC_GetPassword_Fct(char** outPassword);
  *
  * \note    This function must be called before the configuration of the secure channel.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
 
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */

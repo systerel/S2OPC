@@ -76,7 +76,7 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
 
 /**
  * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
- *        Service response callback configured through ::SOPC_HelperConfigClient_SetServiceAsyncResponse will be
+ *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
  * \param secConnConfig  The secure connection configuration.
@@ -96,7 +96,7 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  *           usual connection and generic services functions shall be used.
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
- *          and prior to call ::SOPC_HelperConfigClient_Clear.
+ *          and prior to call ::SOPC_ClientConfigHelper_Clear.
  *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnection_Config* secConnConfig,
@@ -189,7 +189,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
 
 /**
  * \brief Executes an OPC UA service on server (read, write, browse or discovery service) asynchronously.
- *        Service response callback configured through ::SOPC_HelperConfigClient_SetServiceAsyncResponse will be
+ *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
  * \note ::SOPC_ClientHelperNew_StartConnect or ::SOPC_ClientHelperNew_Connect shall have been called
@@ -216,7 +216,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  * \note request memory is managed by the client after a successful return
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
- *          and prior to call ::SOPC_HelperConfigClient_Clear.
+ *          and prior to call ::SOPC_ClientConfigHelper_Clear.
  *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secureConnection,

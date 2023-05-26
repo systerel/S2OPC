@@ -392,10 +392,10 @@ class PyS2OPC_Client(PyS2OPC):
                                  'generic_response_callback': libsub._callback_client_event}
 
         if client_key_encrypted:
-            status = libsub.SOPC_HelperConfigClient_SetClientKeyPasswordCallback(libsub._callback_get_client_key_password)
+            status = libsub.SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(libsub._callback_get_client_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the client private key.'
         if user_key_encrypted:
-            status = libsub.SOPC_HelperConfigClient_SetUserKeyPasswordCallback(libsub._callback_get_user_key_password)
+            status = libsub.SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(libsub._callback_get_user_key_password)
             assert status == ReturnStatus.OK, 'Enable to configure the callback to retrieve the password for decryption of the user private key.'
         status = libsub.SOPC_LibSub_ConfigureConnection([dConnectionParameters], pCfgId)
         assert status == ReturnStatus.OK, 'Configuration failed with status {}.'.format(ReturnStatus.get_both_from_id(status))

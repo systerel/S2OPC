@@ -49,7 +49,7 @@ static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
     return fd;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_ConfigureFromXML(const char* clientConfigPath,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientConfigPath,
                                                            SOPC_ConfigClientXML_Custom* customConfig,
                                                            size_t* nbScConfigs,
                                                            SOPC_SecureConnection_Config*** scConfigArray)

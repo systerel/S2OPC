@@ -48,7 +48,7 @@
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (wrapper not initialized, preferred localesIds already defined, client connection initiated).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
  * \brief Defines client application description
@@ -65,7 +65,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (wrapper not initialized, application description already set, client connection initiated).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* applicationUri,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetApplicationDescription(const char* applicationUri,
                                                                     const char* productUri,
                                                                     const char* defaultAppName,
                                                                     const char* defaultAppNameLocale,
@@ -76,7 +76,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* 
  *
  * \param pki  The PKI provider to be used.
  *             It will be automatically deallocated using ::SOPC_PKIProvider_Free on call to
- *             ::SOPC_HelperConfigClient_Clear.
+ *             ::SOPC_ClientConfigHelper_Clear.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p pki is invalid
@@ -85,7 +85,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* 
  *
  * \note A default PKI provider compliant with OPC UA standard is provided in sopc_pki_stack.h
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetPKIprovider(SOPC_PKIProvider* pki);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki);
 
 /**
  * \brief Sets asymmetrical certificate and key of client from file paths.
@@ -100,7 +100,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPKIprovider(SOPC_PKIProvider* pki);
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (wrapper not initialized, key/cert pair already set, connection initiated).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* clientCertPath,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* clientCertPath,
                                                                  const char* clientKeyPath,
                                                                  bool encrypted);
 
@@ -118,7 +118,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* cli
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (wrapper not initialized, key/cert pair already set).
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* clientCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* clientPrivateKey);
@@ -129,7 +129,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certifi
  *  ::SOPC_SecureConnectionConfig_AddServerCertificateFromBytes, etc.)
  *
  * \param userDefinedId  A user defined identifier to retrieve the secure connection configuration
- *                       using ::SOPC_HelperConfigClient_GetConfigFromId.
+ *                       using ::SOPC_ClientConfigHelper_GetConfigFromId.
  * \param endpointUrl    URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
  * \param secuMode       Security mode required for this SecureConnection: None, Sign or SignAndEncrypt.
  *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
@@ -143,7 +143,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certifi
  *         Otherwise Returns NULL if no more configuration slots are available
  *         (see ::SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG).
  */
-SOPC_SecureConnection_Config* SOPC_HelperConfigClient_CreateSecureConnection(const char* userDefinedId,
+SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(const char* userDefinedId,
                                                                              const char* endpointUrl,
                                                                              OpcUa_MessageSecurityMode secuMode,
                                                                              SOPC_SecurityPolicy_URI secuPolicy);
@@ -239,7 +239,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection
  * \param userPolicyId   The user policy Id to be used in server for username/password
  * \param userName       The username to be used for authentication
  * \param password       The password to be used for authentication or NULL to be retrieved from the callback defined
- *                       with ::SOPC_HelperConfigClient_SetUserNamePasswordCallback.
+ *                       with ::SOPC_ClientConfigHelper_SetUserNamePasswordCallback.
  *                       Note: the password should not be hardcoded string in the code.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
@@ -295,7 +295,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureCo
                                                                    size_t keyNbBytes,
                                                                    const unsigned char* userPrivateKey);
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_GetSecureConnectionConfigs(size_t* nbScConfigs,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_GetSecureConnectionConfigs(size_t* nbScConfigs,
                                                                      SOPC_SecureConnection_Config*** scConfigArray);
 
 #endif

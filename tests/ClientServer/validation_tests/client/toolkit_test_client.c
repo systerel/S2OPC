@@ -211,7 +211,7 @@ static SOPC_ReturnStatus Client_Initialize(void)
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_Initialize();
+        status = SOPC_ClientConfigHelper_Initialize();
     }
 
     return status;
@@ -235,7 +235,7 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
         SOPC_CRLList* serializedCAcrl = NULL;
 
         /* Load client certificates and key from C source files (no filesystem needed) */
-        status = SOPC_HelperConfigClient_SetKeyCertPairFromBytes(sizeof(client_2k_cert), client_2k_cert,
+        status = SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(sizeof(client_2k_cert), client_2k_cert,
                                                                  sizeof(client_2k_key), client_2k_key);
         if (SOPC_STATUS_OK == status)
         {
@@ -256,7 +256,7 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
 #else // WITH_STATIC_SECURITY_DATA == false
 
         /* Load client certificate and key from files */
-        status = SOPC_HelperConfigClient_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
+        status = SOPC_ClientConfigHelper_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
@@ -278,7 +278,7 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_HelperConfigClient_SetPKIprovider(pkiProvider);
+            status = SOPC_ClientConfigHelper_SetPKIprovider(pkiProvider);
         }
 
         if (SOPC_STATUS_OK != status)
@@ -301,12 +301,12 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
                                                         SOPC_SecureConnection_Config*** secureConnConfigArray)
 {
     // Define client application configuration
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetPreferredLocaleIds(
+    SOPC_ReturnStatus status = SOPC_ClientConfigHelper_SetPreferredLocaleIds(
         (sizeof(preferred_locale_ids) / sizeof(preferred_locale_ids[0]) - 1), preferred_locale_ids);
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetApplicationDescription(APPLICATION_URI, APPLICATION_URI, APPLICATION_NAME,
+        status = SOPC_ClientConfigHelper_SetApplicationDescription(APPLICATION_URI, APPLICATION_URI, APPLICATION_NAME,
                                                                    NULL, OpcUa_ApplicationType_Client);
     }
 
@@ -321,11 +321,11 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
     // Configure the 3 secure channel connections to use and retrieve channel configuration index
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SecureConnection_Config* secureConnConfig1 = SOPC_HelperConfigClient_CreateSecureConnection(
+        SOPC_SecureConnection_Config* secureConnConfig1 = SOPC_ClientConfigHelper_CreateSecureConnection(
             "1", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
-        SOPC_SecureConnection_Config* secureConnConfig2 = SOPC_HelperConfigClient_CreateSecureConnection(
+        SOPC_SecureConnection_Config* secureConnConfig2 = SOPC_ClientConfigHelper_CreateSecureConnection(
             "2", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
-        SOPC_SecureConnection_Config* secureConnConfig3 = SOPC_HelperConfigClient_CreateSecureConnection(
+        SOPC_SecureConnection_Config* secureConnConfig3 = SOPC_ClientConfigHelper_CreateSecureConnection(
             "3", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
         status = SOPC_SecureConnectionConfig_SetReverseConnection(secureConnConfig3, REVERSE_ENDPOINT_URL);
 
@@ -338,7 +338,7 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_GetSecureConnectionConfigs(nbSecConnCfgs, secureConnConfigArray);
+        status = SOPC_ClientConfigHelper_GetSecureConnectionConfigs(nbSecConnCfgs, secureConnConfigArray);
     }
 
     // Load server certificate
@@ -414,7 +414,7 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     if (NULL != xml_client_config_path)
     {
 #ifdef WITH_EXPAT
-        status = SOPC_HelperConfigClient_ConfigureFromXML(xml_client_config_path, NULL, nbSecConnCfgs,
+        status = SOPC_ClientConfigHelper_ConfigureFromXML(xml_client_config_path, NULL, nbSecConnCfgs,
                                                           secureConnConfigArray);
 #else
         printf(
@@ -428,19 +428,19 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     // Set callback necessary to retrieve client key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+        status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     }
     // Set callback necessary to retrieve user key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+        status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     }
 #endif // WITH_STATIC_SECURITY_DATA
 
     // Set callback necessary to retrieve user password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
+        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
     }
 
     if (SOPC_STATUS_OK == status && NULL == xml_client_config_path)
@@ -487,7 +487,7 @@ int main(void)
     // Set asynchronous response callback
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_Client_AsyncRespCb);
+        status = SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_Client_AsyncRespCb);
     }
 
     // Set an address space for test purpose only to check test result valid (not expected in a client)
@@ -509,7 +509,7 @@ int main(void)
     /* Asynchronous request to get endpoints using reverse connection */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SecureConnection_Config* reverseSecureConnConfig = SOPC_HelperConfigClient_GetConfigFromId("3");
+        SOPC_SecureConnection_Config* reverseSecureConnConfig = SOPC_ClientConfigHelper_GetConfigFromId("3");
         if (NULL == reverseSecureConnConfig)
         {
             status = SOPC_STATUS_INVALID_STATE;
@@ -686,7 +686,7 @@ int main(void)
     cptReadResps = 0;
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     SOPC_AddressSpace_Delete(address_space);

@@ -40,7 +40,7 @@
 // The client helper dedicated configuration in addition to configuration ::SOPC_S2OPC_Config
 typedef struct SOPC_ClientHelper_Config
 {
-    // Flag atomically set when the structure is initialized during call to SOPC_HelperConfigClient_Initialize
+    // Flag atomically set when the structure is initialized during call to SOPC_ClientConfigHelper_Initialize
     // and singleton config is initialized
     int32_t initialized;
     Mutex configMutex;
@@ -75,7 +75,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                                               uintptr_t appContext);
 
 // Finalize the SecureChannel configuration by parsing the necessary files
-SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
                                                                           SOPC_SecureConnection_Config* secConnConfig);
 
 /**
@@ -89,7 +89,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
 bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword);
 
 /**
- * \brief Function to know if the callback has been defined ::SOPC_HelperConfigClient_SetClientKeyPasswordCallback (i.e.
+ * \brief Function to know if the callback has been defined ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback (i.e.
  * the client's key is encrypted).
  *
  */

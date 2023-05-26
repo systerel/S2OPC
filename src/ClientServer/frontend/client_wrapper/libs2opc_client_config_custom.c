@@ -32,7 +32,7 @@
 
 #define SOPC_DEFAULT_REQ_LIFETIME_MS 3600000
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds)
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPreferredLocaleIds(size_t nbLocales, const char** localeIds)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -72,7 +72,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPreferredLocaleIds(size_t nbLocales
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* applicationUri,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetApplicationDescription(const char* applicationUri,
                                                                     const char* productUri,
                                                                     const char* defaultAppName,
                                                                     const char* defaultAppNameLocale,
@@ -121,7 +121,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetApplicationDescription(const char* 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetPKIprovider(SOPC_PKIProvider* pki)
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -153,7 +153,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetPKIprovider(SOPC_PKIProvider* pki)
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* clientCertPath,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* clientCertPath,
                                                                  const char* clientKeyPath,
                                                                  bool encrypted)
 {
@@ -215,7 +215,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromPath(const char* cli
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* clientCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* clientPrivateKey)
@@ -269,7 +269,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetKeyCertPairFromBytes(size_t certifi
     return status;
 }
 
-SOPC_SecureConnection_Config* SOPC_HelperConfigClient_CreateSecureConnection(const char* userDefinedId,
+SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(const char* userDefinedId,
                                                                              const char* endpointUrl,
                                                                              OpcUa_MessageSecurityMode secuMode,
                                                                              SOPC_SecurityPolicy_URI secuPolicy)
@@ -307,8 +307,8 @@ SOPC_SecureConnection_Config* SOPC_HelperConfigClient_CreateSecureConnection(con
                     SOPC_LOG_MODULE_CLIENTSERVER,
                     "Attempt to create a secure connection (!= None mode) without client key/certificate configured.");
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Call SOPC_HelperConfigClient_SetKeyCertPair* function prior to "
-                                       "SOPC_HelperConfigClient_CreateSecureConnection.");
+                                       "Call SOPC_ClientConfigHelper_SetKeyCertPair* function prior to "
+                                       "SOPC_ClientConfigHelper_CreateSecureConnection.");
                 status = SOPC_STATUS_INVALID_STATE;
             }
             if (SOPC_STATUS_OK == status)
@@ -820,7 +820,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureCo
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_GetSecureConnectionConfigs(size_t* nbScConfigs,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_GetSecureConnectionConfigs(size_t* nbScConfigs,
                                                                      SOPC_SecureConnection_Config*** scConfigArray)
 {
     if (!SOPC_ClientInternal_IsInitialized())
