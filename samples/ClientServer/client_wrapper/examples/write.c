@@ -285,7 +285,7 @@ int main(int argc, char* const argv[])
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_Initialize();
+        status = SOPC_ClientConfigHelper_Initialize();
     }
 
     size_t nbConfigs = 0;
@@ -293,7 +293,7 @@ int main(int argc, char* const argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+        status = SOPC_ClientConfigHelper_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -305,7 +305,7 @@ int main(int argc, char* const argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        writeConnCfg = SOPC_HelperConfigClient_GetConfigFromId(DEFAULT_CONFIG_ID);
+        writeConnCfg = SOPC_ClientConfigHelper_GetConfigFromId(DEFAULT_CONFIG_ID);
 
         if (NULL == writeConnCfg)
         {
@@ -320,19 +320,19 @@ int main(int argc, char* const argv[])
     /* Define callback to retrieve the client's private key password */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&AskKeyPass_FromTerminal);
+        status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&AskKeyPass_FromTerminal);
     }
 
     /* Define callback to retrieve the client's user password */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&AskUserNamePass_FromTerminal);
+        status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&AskUserNamePass_FromTerminal);
     }
 
     /* Define callback to retrieve the client's user password */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&AskUserKeyPass_FromTerminal);
+        status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&AskUserKeyPass_FromTerminal);
     }
 
     /* connect to the endpoint */
@@ -442,7 +442,7 @@ int main(int argc, char* const argv[])
     }
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     res = (SOPC_STATUS_OK == status ? 0 : -1);

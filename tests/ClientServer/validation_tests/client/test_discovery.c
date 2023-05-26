@@ -48,9 +48,9 @@ START_TEST(test_getEndpoints)
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_HelperConfigClient_Initialize();
+    status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
         "discovery", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
 
@@ -64,7 +64,7 @@ START_TEST(test_getEndpoints)
     ValidateGetEndpointsResponse(getEpResp);
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 }
 END_TEST
@@ -164,9 +164,9 @@ START_TEST(test_registerServer)
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_HelperConfigClient_Initialize();
+    status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
         "discovery", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
 
@@ -205,7 +205,7 @@ START_TEST(test_registerServer)
     SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 }
 END_TEST

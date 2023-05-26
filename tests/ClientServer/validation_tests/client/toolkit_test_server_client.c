@@ -127,17 +127,17 @@ static OpcUa_GetEndpointsResponse* expectedEndpoints = NULL;
 
 static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Config** outSecureConnConfig)
 {
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_Initialize();
+    SOPC_ReturnStatus status = SOPC_ClientConfigHelper_Initialize();
     if (SOPC_STATUS_OK != status)
     {
         return status;
     }
 
-    status = SOPC_HelperConfigClient_SetPreferredLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
+    status = SOPC_ClientConfigHelper_SetPreferredLocaleIds(2, (const char*[]){"fr-FR", "en-US"});
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+        status = SOPC_ClientConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    DEFAULT_APPLICATION_NAME, "fr-FR",
                                                                    OpcUa_ApplicationType_Client);
     }
@@ -161,13 +161,13 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
         return status;
     }
 
-    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the client key password callback\n");
     }
 
-    status = SOPC_HelperConfigClient_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+    status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the user key password callback\n");
@@ -176,7 +176,7 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
     /* Load client certificate and key from files */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
+        status = SOPC_ClientConfigHelper_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
     }
     /* Create the PKI (Public Key Infrastructure) provider */
     SOPC_PKIProvider* pkiProvider = NULL;
@@ -188,7 +188,7 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigClient_SetPKIprovider(pkiProvider);
+        status = SOPC_ClientConfigHelper_SetPKIprovider(pkiProvider);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -200,7 +200,7 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
         printf(">>Test_Client: PKI created\n");
     }
     /* connect to the endpoint */
-    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
         "Test", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     if (NULL != secureConnConfig)
     {
@@ -730,7 +730,7 @@ START_TEST(test_server_client)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Clear client wrapper layer*/
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
 
     /* Asynchronous request to close the endpoint */
     SOPC_ReturnStatus stopStatus = SOPC_ServerHelper_StopServer();

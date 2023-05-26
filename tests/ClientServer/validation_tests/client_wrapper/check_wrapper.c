@@ -266,7 +266,7 @@ START_TEST(test_wrapper_config_invalid_arguments)
     {
         /* callback to retrieve the client's private key password */
         SOPC_ReturnStatus status =
-            SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+            SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
         SOPC_ClientHelper_Security invalid_security = valid_security_signAndEncrypt_b256sha256;
         invalid_security.path_cert_srv = NULL;
@@ -629,7 +629,7 @@ START_TEST(test_wrapper_read)
     }
 
     /* callback to retrieve the client's private key password */
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    SOPC_ReturnStatus status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* create a connection */
     int32_t valid_conf_id =

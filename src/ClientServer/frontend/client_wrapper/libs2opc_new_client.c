@@ -190,7 +190,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
     if (!secConnConfig->finalized)
     {
         SOPC_Client_Config* cConfig = &config->clientConfig;
-        status = SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
+        status = SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(cConfig, secConnConfig);
     }
     return status;
 }

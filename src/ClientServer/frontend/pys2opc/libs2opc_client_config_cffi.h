@@ -54,7 +54,7 @@ typedef bool SOPC_GetClientUserKeyPassword_Fct(const char* userCertThumb, char**
  *
  * \note    This function must be called before the configuration of the secure channel.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(
     SOPC_GetClientUserKeyPassword_Fct* getClientX509userKeyPassword);
 
 /**
@@ -83,6 +83,6 @@ typedef bool SOPC_GetPassword_Fct(char** outPassword);
  *
  * \note    This function must be called before the configuration of the secure channel.
  */
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword);
 
 #endif /* LIBS2OPC_CLIENT_CONFIG_H_ */

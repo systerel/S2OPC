@@ -90,17 +90,17 @@ START_TEST(test_username_password)
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_HelperConfigClient_Initialize();
+    status = SOPC_ClientConfigHelper_Initialize();
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Set callback to retrieve password (from environment variable)
-    status = SOPC_HelperConfigClient_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Set callback necessary to retrieve user password (from environment variable)
-    status = SOPC_HelperConfigClient_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
+    status = SOPC_ClientConfigHelper_SetUserNamePasswordCallback(&SOPC_GetClientUser1Password);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Load client certificate and key from files */
-    status = SOPC_HelperConfigClient_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
+    status = SOPC_ClientConfigHelper_SetKeyCertPairFromPath(CLI_CERT_PATH, CLI_KEY_PATH, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Create the PKI (Public Key Infrastructure) provider */
@@ -111,10 +111,10 @@ START_TEST(test_username_password)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pkiProvider);
     /* Set PKI provider as client PKI*/
-    status = SOPC_HelperConfigClient_SetPKIprovider(pkiProvider);
+    status = SOPC_ClientConfigHelper_SetPKIprovider(pkiProvider);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    SOPC_SecureConnection_Config* secureConnConfig = SOPC_HelperConfigClient_CreateSecureConnection(
+    SOPC_SecureConnection_Config* secureConnConfig = SOPC_ClientConfigHelper_CreateSecureConnection(
         "user_session", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
     ck_assert_ptr_nonnull(secureConnConfig);
 
@@ -134,7 +134,7 @@ START_TEST(test_username_password)
     ck_assert_ptr_null(secureConnection);
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 }
 END_TEST

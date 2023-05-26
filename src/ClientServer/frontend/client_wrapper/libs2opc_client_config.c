@@ -79,7 +79,7 @@ static void SOPC_ClientHelper_Logger(const SOPC_Log_Level log_level, const char*
     }
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
+SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void)
 {
     if (!SOPC_CommonHelper_GetInitialized() || SOPC_ClientInternal_IsInitialized())
     {
@@ -111,7 +111,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Initialize(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_HelperConfigClient_Clear();
+        SOPC_ClientConfigHelper_Clear();
     }
     return status;
 }
@@ -130,7 +130,7 @@ static bool SOPC_Internal_AllReverseEPsClosed(SOPC_S2OPC_Config* pConfig)
     return true;
 }
 
-void SOPC_HelperConfigClient_Clear(void)
+void SOPC_ClientConfigHelper_Clear(void)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -212,7 +212,7 @@ void SOPC_HelperConfigClient_Clear(void)
     return;
 }
 
-static SOPC_ReturnStatus SOPC_HelperConfigClient_MayFinalize_ClientConfigFromPaths(SOPC_Client_Config* cConfig)
+static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPaths(SOPC_Client_Config* cConfig)
 {
     SOPC_ASSERT(NULL != cConfig);
 
@@ -510,7 +510,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
+SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
                                                                           SOPC_SecureConnection_Config* secConnConfig)
 {
     SOPC_ASSERT(NULL != cConfig);
@@ -526,7 +526,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ReturnStatus status = SOPC_HelperConfigClient_MayFinalize_ClientConfigFromPaths(cConfig);
+    SOPC_ReturnStatus status = SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPaths(cConfig);
     if (SOPC_STATUS_OK == status && secConnConfig->isServerCertFromPathNeeded)
     {
         SOPC_SerializedCertificate* srvCert = NULL;
@@ -581,7 +581,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_Finalize_SecureConnectionConfig(SOPC_C
     return status;
 }
 
-SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char* userDefinedId)
+SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_GetConfigFromId(const char* userDefinedId)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -601,7 +601,7 @@ SOPC_SecureConnection_Config* SOPC_HelperConfigClient_GetConfigFromId(const char
     return res;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb)
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb)
 {
     if (NULL == asyncRespCb)
     {
@@ -650,12 +650,12 @@ static SOPC_ReturnStatus SetPasswordCallback(SOPC_GetPassword_Fct** destCb, SOPC
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(SOPC_GetPassword_Fct* getClientKeyPassword)
 {
     return SetPasswordCallback(&sopc_client_helper_config.getClientKeyPasswordCb, getClientKeyPassword);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserNamePasswordCallback(
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserNamePasswordCallback(
     SOPC_GetClientUserNamePassword_Fct* getClientUsernamePassword)
 {
     // TODO: uncomment when only new API available
@@ -674,7 +674,7 @@ SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserNamePasswordCallback(
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigClient_SetUserKeyPasswordCallback(
+SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(
     SOPC_GetClientUserKeyPassword_Fct* getClientX509userKeyPassword)
 {
     // TODO: uncomment when only new API available

@@ -267,8 +267,8 @@ void SOPC_Platform_Main(void)
     PRINT("Embedded S2OPC client demo\n");
 
     /* Initialize the toolkit */
-    status = SOPC_HelperConfigClient_Initialize();
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigClient_Initialize failed");
+    status = SOPC_ClientConfigHelper_Initialize();
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ClientConfigHelper_Initialize failed");
 
     while (stopSignal == 0)
     {
@@ -278,7 +278,7 @@ void SOPC_Platform_Main(void)
     PRINT("==========\r\n");
 
     /* Close the toolkit */
-    SOPC_HelperConfigClient_Clear();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
     SOPC_Free(epURL);
 
@@ -345,11 +345,11 @@ static int cmd_demo_configure(WordList* pList)
     SOPC_ASSERT(epURL != NULL);
 
     /* configure the connection */
-    gConfiguration = SOPC_HelperConfigClient_CreateSecureConnection("CLI_Client", epURL, OpcUa_MessageSecurityMode_None,
+    gConfiguration = SOPC_ClientConfigHelper_CreateSecureConnection("CLI_Client", epURL, OpcUa_MessageSecurityMode_None,
                                                                     SOPC_SecurityPolicy_None);
     if (NULL == gConfiguration)
     {
-        PRINT("\nSOPC_HelperConfigClient_CreateSecureConnection failed \n");
+        PRINT("\nSOPC_ClientConfigHelper_CreateSecureConnection failed \n");
     }
     else
     {
