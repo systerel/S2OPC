@@ -28,6 +28,10 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_logger.h"
 
+/* Note: it should be removed and OpcUa_BadLocaleNotSupported should be used once published
+         on OPC UA NodeSet git repository */
+#define TMP_OpcUa_BadLocaleNotSupported 0x80ED0000
+
 void util_message__get_encodeable_type(const constants__t_msg_type_i message__msg_type,
                                        SOPC_EncodeableType** reqEncType,
                                        SOPC_EncodeableType** respEncType,
@@ -818,6 +822,9 @@ void util_status_code__B_to_C(constants_statuscodes_bs__t_StatusCode_i bstatus, 
     case constants_statuscodes_bs__e_sc_bad_type_mismatch:
         *status = OpcUa_BadTypeMismatch;
         break;
+    case constants_statuscodes_bs__e_sc_bad_locale_not_supported:
+        *status = TMP_OpcUa_BadLocaleNotSupported;
+        break;
     case constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid:
         *status = OpcUa_BadReferenceTypeIdInvalid;
         break;
@@ -1184,6 +1191,9 @@ void util_status_code__C_to_B(SOPC_StatusCode status, constants_statuscodes_bs__
         break;
     case OpcUa_BadTypeMismatch:
         *bstatus = constants_statuscodes_bs__e_sc_bad_type_mismatch;
+        break;
+    case TMP_OpcUa_BadLocaleNotSupported:
+        *bstatus = constants_statuscodes_bs__e_sc_bad_locale_not_supported;
         break;
     case OpcUa_BadReferenceTypeIdInvalid:
         *bstatus = constants_statuscodes_bs__e_sc_bad_reference_type_id_invalid;

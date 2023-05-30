@@ -91,6 +91,7 @@ SETS
                       e_sc_bad_not_writable,
                       e_sc_bad_not_readable,
                       e_sc_bad_type_mismatch,
+                      e_sc_bad_locale_not_supported,
                       e_sc_uncertain_reference_out_of_server,
                       e_sc_bad_too_many_matches,
                       e_sc_bad_query_too_complex,

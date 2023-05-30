@@ -90,7 +90,7 @@ DEFINITIONS
     d_VariantIndex_HasRange_Valid(dVal, idxRange, locale) ==
        ({FALSE |-> e_sc_bad_index_range_invalid,
           TRUE |-> {FALSE |-> e_sc_bad_index_range_no_data,
-                    TRUE |-> {FALSE |-> e_sc_bad_invalid_argument,
+                    TRUE |-> {FALSE |-> e_sc_bad_locale_not_supported,
                               TRUE |-> e_sc_ok
                              }(IsSupportedLocales_Variant(DataValue_Variant(dVal) |-> locale))
                    }(HasRange_VariantIndex(DataValue_Variant(dVal) |-> idxRange))

@@ -678,8 +678,8 @@ OPERATIONS
             THEN
                 serviceStatusCode := e_sc_bad_index_range_no_data ||
                 prev_dataValue := c_DataValue_indet
-            ELSE /* Locale unsupported: note that it should be Bad_LocaleNotSupported but it is not defined in schemas */
-                serviceStatusCode := e_sc_bad_invalid_argument ||
+            ELSE
+                serviceStatusCode := e_sc_bad_locale_not_supported ||
                 prev_dataValue := c_DataValue_indet
             END
         OR

@@ -21,7 +21,7 @@
 
  File Name            : constants_statuscodes_bs.h
 
- Date                 : 14/02/2023 10:16:18
+ Date                 : 30/05/2023 11:46:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -112,6 +112,7 @@ typedef enum {
    constants_statuscodes_bs__e_sc_bad_not_writable,
    constants_statuscodes_bs__e_sc_bad_not_readable,
    constants_statuscodes_bs__e_sc_bad_type_mismatch,
+   constants_statuscodes_bs__e_sc_bad_locale_not_supported,
    constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server,
    constants_statuscodes_bs__e_sc_bad_too_many_matches,
    constants_statuscodes_bs__e_sc_bad_query_too_complex,

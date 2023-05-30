@@ -911,8 +911,7 @@ static constants_statuscodes_bs__t_StatusCode_i set_value_full(char** supportedL
     case SOPC_STATUS_OK:
         return constants_statuscodes_bs__e_sc_ok;
     case SOPC_STATUS_NOT_SUPPORTED:
-        // Note: should be BadLocaleNotSupported regarding spec 1.03 but does not exist in 1.03 schemas / uactt
-        return constants_statuscodes_bs__e_sc_bad_invalid_argument;
+        return constants_statuscodes_bs__e_sc_bad_locale_not_supported;
     default:
         return constants_statuscodes_bs__e_sc_bad_internal_error;
     }

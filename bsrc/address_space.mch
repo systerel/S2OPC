@@ -78,7 +78,7 @@ OPERATIONS
                     e_sc_bad_user_access_denied,
                     e_sc_bad_index_range_invalid,
                     e_sc_bad_index_range_no_data,
-                    e_sc_bad_invalid_argument,
+                    e_sc_bad_locale_not_supported,
                     e_sc_bad_out_of_memory,
                     e_sc_ok
                 }
