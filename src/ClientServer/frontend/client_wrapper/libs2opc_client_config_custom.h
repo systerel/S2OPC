@@ -125,8 +125,8 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
 
 /**
  * \brief Create a new secure channel configuration in client be completed by using the functions below
- * (::SOPC_SecureConnectionConfig_AddServerCertificateFromPath or
- *  ::SOPC_SecureConnectionConfig_AddServerCertificateFromBytes, etc.)
+ * (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath or
+ *  ::SOPC_SecureConnectionConfig_SetServerCertificateFromBytes, etc.)
  *
  * \param userDefinedId  A user defined identifier to retrieve the secure connection configuration
  *                       using ::SOPC_ClientConfigHelper_GetConfigFromId.
@@ -187,13 +187,13 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
  *  \param reqLifetime Requested lifetime for the secure channel between 2 renewal.
  *
  */
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
                                                              uint32_t reqLifetime);
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
                                                                            const char* serverCertPath);
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                             size_t certificateNbBytes,
                                                                             const unsigned char* serverCertificate);
 
@@ -227,7 +227,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(SOPC
  *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection_Config* secConnConfig,
                                                            const char* userPolicyId);
 
 /**
@@ -246,7 +246,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection
  *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_Config* secConnConfig,
                                                           const char* userPolicyId,
                                                           const char* userName,
                                                           const char* password);
@@ -266,7 +266,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_
  *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
                                                                    const char* userPolicyId,
                                                                    const char* userCertPath,
                                                                    const char* userKeyPath,
@@ -288,7 +288,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureCo
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (wrapper not initialized, key/cert pair already set).
  */
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                    const char* userPolicyId,
                                                                    size_t certificateNbBytes,
                                                                    const unsigned char* userCertificate,

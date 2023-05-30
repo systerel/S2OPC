@@ -347,28 +347,28 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
         for (size_t i = 0; SOPC_STATUS_OK == status && i < *nbSecConnCfgs; i++)
         {
 #ifdef WITH_STATIC_SECURITY_DATA
-            status = SOPC_SecureConnectionConfig_AddServerCertificateFromBytes((*secureConnConfigArray)[i],
+            status = SOPC_SecureConnectionConfig_SetServerCertificateFromBytes((*secureConnConfigArray)[i],
                                                                                sizeof(server_2k_cert), server_2k_cert);
 #else
             status =
-                SOPC_SecureConnectionConfig_AddServerCertificateFromPath((*secureConnConfigArray)[i], SRV_CERT_PATH);
+                SOPC_SecureConnectionConfig_SetServerCertificateFromPath((*secureConnConfigArray)[i], SRV_CERT_PATH);
 #endif
 
             // Set username  as authentication mode for second connection
             if (i == 1)
             {
-                status = SOPC_SecureConnectionConfig_AddUserName((*secureConnConfigArray)[i], "username_Basic256Sha256",
+                status = SOPC_SecureConnectionConfig_SetUserName((*secureConnConfigArray)[i], "username_Basic256Sha256",
                                                                  NULL, NULL);
             }
             // Set X509 as authentication mode for third connection
             else if (i == 2)
             {
 #ifdef WITH_STATIC_SECURITY_DATA
-                status = SOPC_SecureConnectionConfig_AddUserX509FromBytes((*secureConnConfigArray)[i], "X509",
+                status = SOPC_SecureConnectionConfig_SetUserX509FromBytes((*secureConnConfigArray)[i], "X509",
                                                                           sizeof(user_2k_cert), user_2k_cert,
                                                                           sizeof(user_2k_key), user_2k_key);
 #else
-                status = SOPC_SecureConnectionConfig_AddUserX509FromPaths((*secureConnConfigArray)[i], "X509",
+                status = SOPC_SecureConnectionConfig_SetUserX509FromPaths((*secureConnConfigArray)[i], "X509",
                                                                           USER_CERT_PATH, USER_KEY_PATH, true);
 #endif
             }

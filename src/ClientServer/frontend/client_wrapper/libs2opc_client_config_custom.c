@@ -483,7 +483,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
                                                              uint32_t reqLifetime)
 {
     if (!SOPC_ClientInternal_IsInitialized())
@@ -514,7 +514,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddReqLifetime(SOPC_SecureConnecti
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
                                                                            const char* serverCertPath)
 {
     if (!SOPC_ClientInternal_IsInitialized())
@@ -554,7 +554,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromPath(SOPC_
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                             size_t certificateNbBytes,
                                                                             const unsigned char* serverCertificate)
 {
@@ -594,7 +594,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddServerCertificateFromBytes(SOPC
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection_Config* secConnConfig,
                                                            const char* userPolicyId)
 {
     if (!SOPC_ClientInternal_IsInitialized())
@@ -637,7 +637,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAnonymous(SOPC_SecureConnection
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_Config* secConnConfig,
                                                           const char* userPolicyId,
                                                           const char* userName,
                                                           const char* password)
@@ -689,7 +689,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserName(SOPC_SecureConnection_
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
                                                                    const char* userPolicyId,
                                                                    const char* userCertPath,
                                                                    const char* userKeyPath,
@@ -747,7 +747,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromPaths(SOPC_SecureCo
     return status;
 }
 
-SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                    const char* userPolicyId,
                                                                    size_t certificateNbBytes,
                                                                    const unsigned char* userCertificate,
