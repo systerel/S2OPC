@@ -212,11 +212,11 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SecureConnectionConfig_AddServerCertificateFromPath(secureConnConfig, SRV_CERT_PATH);
+        status = SOPC_SecureConnectionConfig_SetServerCertificateFromPath(secureConnConfig, SRV_CERT_PATH);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_SecureConnectionConfig_AddUserX509FromPaths(
+        status = SOPC_SecureConnectionConfig_SetUserX509FromPaths(
             secureConnConfig, SOPC_UserTokenPolicy_X509Basic256Sha256_ID, USER_CERT_PATH, USER_KEY_PATH, true);
     }
     if (SOPC_STATUS_OK == status)
