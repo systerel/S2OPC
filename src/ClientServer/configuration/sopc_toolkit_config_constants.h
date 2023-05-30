@@ -46,12 +46,12 @@
 
 /** @brief Maximum number of TCP sockets (listeners and connections) */
 #ifndef SOPC_MAX_SOCKETS
-#define SOPC_MAX_SOCKETS 150
+#define SOPC_MAX_SOCKETS 1500
 #endif /* SOPC_MAX_SOCKETS */
 
 /** @brief Maximum number of TCP sockets connections on a socket listener */
 #ifndef SOPC_MAX_SOCKETS_CONNECTIONS
-#define SOPC_MAX_SOCKETS_CONNECTIONS 50
+#define SOPC_MAX_SOCKETS_CONNECTIONS 1500
 #endif /* SOPC_MAX_SOCKETS_CONNECTIONS */
 
 /** @brief Minimum byte buffer size allocated to read data from socket and send it to chunk manager */
@@ -74,7 +74,7 @@
 
 /** @brief Maximum number of secure channel connections (and configurations) established */
 #ifndef SOPC_MAX_SECURE_CONNECTIONS
-#define SOPC_MAX_SECURE_CONNECTIONS 21
+#define SOPC_MAX_SECURE_CONNECTIONS 1001
 #endif /* SOPC_MAX_SECURE_CONNECTIONS */
 
 /** @brief SOPC_MAX_SECURE_CONNECTIONS defines the simultaneous stable SC,
@@ -127,7 +127,7 @@
 
 /** @brief Maximum number of sessions (and subscriptions: 1 per session) established */
 #ifndef SOPC_MAX_SESSIONS
-#define SOPC_MAX_SESSIONS 20
+#define SOPC_MAX_SESSIONS 1000
 #endif /* SOPC_MAX_SESSIONS */
 
 /** @brief Maximum number of sessions per secure channel connection */
