@@ -164,12 +164,17 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
         io_dispatch_mgr__client_secure_channel_timeout(id);
         break;
     case SC_DISCONNECTED:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: SC_SC_DISCONNECTED scIdx=%" PRIu32, id);
-        // id == connection Id ==> TMP: secure channel config idx
+        channel_config_idx = (uint32_t) params;
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: SC_SC_DISCONNECTED scIdx=%" PRIu32 " scCfgIdx=%" PRIu32
+                               " with status=x%08" PRIX32,
+                               id, channel_config_idx, (uint32_t) auxParam);
+        // id == connection Id
+        // params == secure channel configuration index (server only)
         // auxParam = status
-        // => B model entry point to add
-        // secure_channel_lost call !
         io_dispatch_mgr__secure_channel_lost(id);
+        // Acknowledge the disconnected state is set in service layer to free the connection index
+        SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECTED_ACK, id, params, 0);
         break;
     case SC_SERVICE_RCV_MSG:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
