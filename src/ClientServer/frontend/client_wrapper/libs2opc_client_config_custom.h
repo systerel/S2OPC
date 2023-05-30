@@ -228,22 +228,6 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
                                                                             size_t certificateNbBytes,
                                                                             const unsigned char* serverCertificate);
 
-/* NOT IMPLEMENTED
- *
- * Unknown server certificate / policy:
- * - retrieve server certificate through getEndpoints
- * - might require a minimum security policy or not
- * SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddAutoSecurityConfig(SOPC_SecureConnectionConfig* scConfig,
- *                                                                  SOPC_SecurityPolicy_URI* reqSecuPolicy);
- */
-
-/* NOT IMPLEMENTED
- * SOPC_ReturnStatus SOPC_SecureConnectionConfig_AddSessionConfig(SOPC_SecureConnectionConfig* scConfig,
- *                                                             uint32_t reqSessionTimeout)
- */
-
-/* User configuration: not configured == anonymous, only 1 configuration possible */
-
 /**
  * \brief Defines the user authentication mode as anonymous for the secure connection
  *        and set the associated user policy Id to be used in server
