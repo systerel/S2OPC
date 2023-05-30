@@ -2331,7 +2331,26 @@ SOPC_ReturnStatus SOPC_DiagnosticInfo_Copy(SOPC_DiagnosticInfo* dest, const SOPC
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != dest && NULL != src)
     {
-        status = SOPC_DiagnosticInfo_Copy(dest->InnerDiagnosticInfo, src->InnerDiagnosticInfo);
+        if (NULL != dest->InnerDiagnosticInfo)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else if (NULL == dest->InnerDiagnosticInfo && NULL != src->InnerDiagnosticInfo)
+        {
+            dest->InnerDiagnosticInfo = SOPC_Calloc(1, sizeof(SOPC_DiagnosticInfo));
+            if (NULL == dest->InnerDiagnosticInfo)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                status = SOPC_DiagnosticInfo_Copy(dest->InnerDiagnosticInfo, src->InnerDiagnosticInfo);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_OK;
+        }
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_Copy(&dest->AdditionalInfo, &src->AdditionalInfo);
