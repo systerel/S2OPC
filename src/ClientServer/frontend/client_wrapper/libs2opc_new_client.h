@@ -142,25 +142,6 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
 SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
                                                             void* request,
                                                             void** response);
-
-/**
- * NOT IMPLEMENTED
- *
- * \brief Starts the connection establishment in a non blocking way (asynchronously).
- *
- * \param config                 the connection
- * \param connectEventCb         callback called on connection event, ::SOPC_ClientConnectionEvent_Connected
- *                               shall be awaited prior to use OPC UA services
- * \param[out] secureConnection  Pointer to the secure connection established when returned value is SOPC_STATUS_OK
- *
- * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE
- *         if the configuration is not possible (toolkit not initialized, connection state unexpected).
- */
-/*SOPC_ReturnStatus SOPC_ClientHelperNew_StartConnection(SOPC_SecureChannel_Config* config,
-                                                      SOPC_ClientConnectionEvent_Fct* connectEventCb,
-                                                      SOPC_ClientSecureConnection** secureConnection);
-*/
-
 /**
  * \brief Establishes the connection in a blocking way (synchronously).
  *
