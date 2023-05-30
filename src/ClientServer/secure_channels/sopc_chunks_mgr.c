@@ -4056,7 +4056,8 @@ void SOPC_ChunksMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event, uint32_t eltId
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     SOPC_Buffer* buffer = (void*) params;
 
-    if (scConnection == NULL || buffer == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
+    if (scConnection == NULL || buffer == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED ||
+        scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSING)
     {
         SOPC_Buffer_Delete(buffer);
         return;
@@ -4454,7 +4455,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
     SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
     bool failedWithAbortMessage = false;
 
-    if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
+    if (scConnection != NULL && scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
+        scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSING)
     {
         switch (event)
         {

@@ -133,7 +133,8 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
     if (connectionIdx > 0 && connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
     {
         scConnection = &(secureConnectionsArray[connectionIdx]);
-        if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
+        SOPC_SecureConnection_State prevState = scConnection->state;
+        if (prevState != SECURE_CONNECTION_STATE_SC_CLOSED)
         {
             result = true;
             SOPC_ScInternalContext_ClearInputChunksContext(&scConnection->chunksCtx);
@@ -199,28 +200,18 @@ bool SC_CloseConnection(uint32_t connectionIdx, bool socketFailure)
                                           (uintptr_t) connectionIdx);
             }
 
-            if (scConnection->isServerConnection)
-            {
-                // Remove the connection configuration created on connection establishment
-                bool configRes = SOPC_ToolkitServer_RemoveSecureChannelConfig(scConnection->secureChannelConfigIdx);
-                if (!configRes && scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT &&
-                    scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT &&
-                    scConnection->state != SECURE_CONNECTION_STATE_TCP_NEGOTIATE &&
-                    scConnection->state != SECURE_CONNECTION_STATE_SC_INIT)
-                {
-                    // Note: configuration is only added after treatment of OPN request: do not consider previous states
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "ScStateMgr: SC_CloseConnection: scCfgIdx=%" PRIu32 " not found",
-                                           scConnection->secureChannelConfigIdx);
-                }
-            }
-
             SOPC_KeyManager_AsymmetricKey_Free(scConnection->privateKey);
             SOPC_KeyManager_Certificate_Free(scConnection->serverCertificate);
             SOPC_KeyManager_Certificate_Free(scConnection->clientCertificate);
 
             // Clear the rest (state=0 <=> SC_CLOSED)
             memset(scConnection, 0, sizeof(SOPC_SecureConnection));
+            if (prevState == SECURE_CONNECTION_STATE_SC_CONNECTED ||
+                prevState == SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
+            {
+                // Use closing state until service layer is notified and acknowledged the connection closure
+                scConnection->state = SECURE_CONNECTION_STATE_SC_CLOSING;
+            }
         }
     }
     return result;
@@ -468,11 +459,11 @@ static void SC_Client_SendCloseSecureChannelRequestAndClose(SOPC_SecureConnectio
 
     if (!result)
     {
-        // Immediatly close the connection if failed
+        // Immediately close the connection if failed
         if (SC_CloseConnection(scConnectionIdx, false))
         {
             // Notify services in case of successful closure
-            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_DISCONNECTED, scConnectionIdx, (uintptr_t) NULL,
+            SOPC_EventHandler_Post(secureChannelsEventHandler, SC_DISCONNECTED, scConnectionIdx, (uintptr_t) 0,
                                    OpcUa_BadSecureChannelClosed);
         }
     }
@@ -519,12 +510,13 @@ static void SC_CloseSecureConnection(
                 if (SC_CloseConnection(scConnectionIdx, socketFailure))
                 {
                     // Notify services in case of successful closure
-                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_DISCONNECTED, scConnectionIdx,
-                                           (uintptr_t) NULL, errorStatus);
+                    SOPC_EventHandler_Post(secureChannelsEventHandler, SC_DISCONNECTED, scConnectionIdx, (uintptr_t) 0,
+                                           errorStatus);
                 }
             }
         }
         else if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
+                 scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSING &&
                  SC_CloseConnection(scConnectionIdx, socketFailure))
         { // => Immediate close
             // Notify services in case of successful closure
@@ -536,7 +528,8 @@ static void SC_CloseSecureConnection(
     else
     {
         // SERVER case
-        if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED)
+        if (scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSED &&
+            scConnection->state != SECURE_CONNECTION_STATE_SC_CLOSING)
         {
             // Secure Channel is NOT closed nor in init state
             if (!immediateClose)
@@ -578,7 +571,7 @@ static void SC_CloseSecureConnection(
                     {
                         // Notify services in case of successful closure of a SC connected
                         SOPC_EventHandler_Post(secureChannelsEventHandler, SC_DISCONNECTED, scConnectionIdx,
-                                               (uintptr_t) NULL, OpcUa_BadSecureChannelClosed);
+                                               (uintptr_t) scConfigIdx, OpcUa_BadSecureChannelClosed);
                     }
                     // Server side: notify listener that connection closed
                     SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_DISCONNECTED, serverEndpointConfigIdx,
@@ -2005,7 +1998,8 @@ static bool SC_Server_GenerateFreshSecureChannelAndTokenId(SOPC_SecureConnection
                     if (scListener->isUsedConnectionIdxArray[idx])
                     {
                         connectionIdx = scListener->connectionIdxArray[idx];
-                        if (secureConnectionsArray[connectionIdx].state != SECURE_CONNECTION_STATE_SC_CLOSED)
+                        if (secureConnectionsArray[connectionIdx].state != SECURE_CONNECTION_STATE_SC_CLOSED &&
+                            secureConnectionsArray[connectionIdx].state != SECURE_CONNECTION_STATE_SC_CLOSING)
                         {
                             if (newSecureChannelId ==
                                 secureConnectionsArray[connectionIdx].currentSecurityToken.secureChannelId)
@@ -2078,6 +2072,7 @@ static uint32_t SC_Server_GenerateFreshTokenId(SOPC_SecureConnection* scConnecti
                     {
                         connectionIdx = scListener->connectionIdxArray[idx];
                         if (secureConnectionsArray[connectionIdx].state != SECURE_CONNECTION_STATE_SC_CLOSED &&
+                            secureConnectionsArray[connectionIdx].state != SECURE_CONNECTION_STATE_SC_CLOSING &&
                             newTokenId == secureConnectionsArray[connectionIdx].currentSecurityToken.tokenId)
                         {
                             // If same SC id we will have to generate a new one
@@ -3489,7 +3484,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
 
         SOPC_SecureConnection* scConnection = SC_GetConnection(eltId);
 
-        if (scConnection == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED)
+        if (scConnection == NULL || scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSED ||
+            scConnection->state == SECURE_CONNECTION_STATE_SC_CLOSING)
         {
             return;
         }
@@ -3725,6 +3721,24 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
             SC_CloseSecureConnection(scConnection, eltId, false, false, (SOPC_StatusCode) params,
                                      "Error requested by services layer");
         } // else: this event is only used by server and send failure on abort message should be ignored
+        break;
+    case SC_DISCONNECTED_ACK:
+        scCfgIdx = (uint32_t) params;
+        scConnection = SC_GetConnection(eltId);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SC_DISCONNECTED_ACK scIdx=%" PRIu32 " scCfgIdx=%" PRIX32, eltId, scCfgIdx);
+        if (0 != scCfgIdx)
+        {
+            result = SOPC_ToolkitServer_RemoveSecureChannelConfig(scCfgIdx);
+            if (!result)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "ServicesMgr: SC_DISCONNECTED_ACK: remove scCfgIdx=%" PRIu32 " failed (not found)", scCfgIdx);
+            }
+        }
+        // Finalize to free the SC connection for further use
+        scConnection->state = SECURE_CONNECTION_STATE_SC_CLOSED;
         break;
     default:
         // Already filtered by secure channels API module
