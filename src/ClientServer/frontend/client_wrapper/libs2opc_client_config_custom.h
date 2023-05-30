@@ -139,9 +139,10 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
  *                       called.
  *
  * \return SOPC_SecureConnectionConfig pointer to configuration structure to be filled
- *         with ::SOPC_SecureConnectionConfig_AddSecurityConfig.
- *         Otherwise Returns NULL if no more configuration slots are available
- *         (see ::SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG).
+ *         with SOPC_SecureConnectionConfig_Set* functions
+ *         (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath, etc.).
+ *         Otherwise Returns NULL if no more configuration slots are available (see
+ *         ::SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG).
  */
 SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(const char* userDefinedId,
                                                                              const char* endpointUrl,
@@ -152,15 +153,15 @@ SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(con
  * \brief Defines the Secure Connection expected EndpointsDescription from given GetEndpointsResponse.
  *        If defined, it is used for verification of coherence during the session activation.
  *
- * \param scConfig               The secure connection configuration to modify
+ * \param secConnConfig          The secure connection configuration to modify
  * \param getEndpointsResponse   The client expected endpoint description to be returned by the server during
  *                               connection. Connection will be aborted otherwise.
  *                               The response will be copied and might be deallocated after call.
  *
- *  \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
- *          SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
- *          or connection config cannot be modified (already used for a connection
- *          or expected endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (already used for a connection
+ *         or expected endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
     SOPC_SecureConnection_Config* secConnConfig,
@@ -169,29 +170,59 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
 /**
  * \brief Sets the Secure Connection in reverse connection mode
  *
- * \param scConfig                  The secure connection configuration to set
+ * \param secConnConfig             The secure connection configuration to set
  * \param clientReverseEndpointUri  The client reverse endpoint URI to be used to listen for reverse connection from the
  * server
  *
- *  \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
- *          SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
- *          or connection config cannot be modified (already used for a connection
- *          or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (already used for a connection
+ *         or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureConnection_Config* secConnConfig,
                                                                    const char* clientReverseEndpointUri);
 
 /**
- * A default value is used if not provided.
+ * \brief Defines the lifetime requested to the server for this secure connection (symmetric keys renewal)
+ *        A default value is used if not set.
  *
- *  \param reqLifetime Requested lifetime for the secure channel between 2 renewal.
+ * \param secConnConfig  The secure connection configuration to set
+ * \param reqLifetime    Requested lifetime in millisecond for the secure channel between 2 renewal.
  *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (already used for a connection
+ *         or reverse endpoint already set).
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReqLifetime(SOPC_SecureConnection_Config* secConnConfig,
                                                              uint32_t reqLifetime);
 
+/**
+ * \brief Defines the server certificate DER file path to be used to establish the secure connection
+ *
+ * \param secConnConfig  The secure connection configuration to set
+ * \param serverCertPath The server certificate DER file path
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (already used for a connection
+ *         or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
+ */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromPath(SOPC_SecureConnection_Config* secConnConfig,
                                                                            const char* serverCertPath);
+
+/**
+ * \brief Defines the server certificate DER encoded bytes to be used to establish the secure connection
+ *
+ * \param secConnConfig      The secure connection configuration to set
+ * \param certificateNbBytes The server certificate DER encoded bytes size
+ * \param serverCertificate  The server certificate DER encoded bytes
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ *         or connection config cannot be modified (already used for a connection
+ *         or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
+ */
 
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC_SecureConnection_Config* secConnConfig,
                                                                             size_t certificateNbBytes,
@@ -224,7 +255,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
  *                       (might not be verified by server for anonymous)
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
- *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection_Config* secConnConfig,
@@ -243,7 +274,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection
  *                       Note: the password should not be hardcoded string in the code.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
- *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_Config* secConnConfig,
@@ -263,7 +294,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_
  * \param encrypted      Whether if the key is encrypted or not
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
- *         SOPC_STATUS_INVALID_STATE if the if the configuration is not possible (wrapper not initialized)
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
  *         or connection config cannot be modified (user authentication mode already set).
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureConnection_Config* secConnConfig,
@@ -295,6 +326,15 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
                                                                    size_t keyNbBytes,
                                                                    const unsigned char* userPrivateKey);
 
+/**
+ * \brief Gets the configured secure connections array
+ *
+ * \param[out] nbScConfigs     The number of secure connection configurations
+ * \param[out] scConfigArray   The array of secure connection configuration pointers
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
+ */
 SOPC_ReturnStatus SOPC_ClientConfigHelper_GetSecureConnectionConfigs(size_t* nbScConfigs,
                                                                      SOPC_SecureConnection_Config*** scConfigArray);
 

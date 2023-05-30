@@ -35,7 +35,7 @@
 
 /**
  * \brief Enumerated values authorized for use with ::SOPC_EndpointConfig_AddSecurityConfig or
- * ::SOPC_SecureChannelConfig_AddSecurityConfig.
+ * ::SOPC_ClientConfigHelper_CreateSecureConnection.
  * Values are limited to the security policies supported by client/server.
  */
 typedef enum

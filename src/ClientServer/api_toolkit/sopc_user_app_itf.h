@@ -210,7 +210,7 @@ typedef struct SOPC_SecureConnection_Config
 
     bool isServerCertFromPathNeeded; /**< True if the following field shall be treated to configure the client */
     char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
-                               (scConfig.crt_srv shall be instantiated by applicative code) */
+                               (scConfig.peerAppCert shall be instantiated by applicative code) */
 
     SOPC_Session_Config sessionConfig;
 

@@ -65,8 +65,8 @@ typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
  * \param clientConfigPath        Path to server configuration XML file (s2opc_clientserver_config.xsd schema)
  * \param customConfig            Shall be NULL. Reserved for future customization of configuration from XML
  *                                (PKI provider, etc.).
- * \param nbScConfigs[out]        Number of secure connection configurations parsed in the XML configuration
- * \param scConfig[out]           Pointer to the array of secure connection configurations of length \p nbScConfigs.
+ * \param[out] nbScConfigs        Number of secure connection configurations parsed in the XML configuration
+ * \param[out] scConfigArray      Pointer to the array of secure connection configurations of length \p nbScConfigs.
  *
  *
  * \return     SOPC_STATUS_OK in case of success,
