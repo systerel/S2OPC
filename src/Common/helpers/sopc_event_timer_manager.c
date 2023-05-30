@@ -43,7 +43,7 @@ typedef struct SOPC_EventTimer
     uint64_t periodMs;
 } SOPC_EventTimer;
 
-#define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
+#define SOPC_MAX_TIMERS UINT16_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
 
 static bool usedTimerIds[SOPC_MAX_TIMERS + 1]; // 0 idx value is invalid (max idx = MAX)
 static uint32_t latestTimerId = 0;
