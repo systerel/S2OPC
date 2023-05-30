@@ -809,7 +809,7 @@ OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint3
  * \param modifyMIrequest  The modify monitored item request to configure
  * \param index            Index of the create monitored item to configure in the request.
  *                         \p index < number of monitored items configured in ::SOPC_ModifyMonitoredItemsRequest_Create
- * \param monitoredItemId  The monitored item identifier returned in the ::OpcUa_CreateMonitoredItemResponse.
+ * \param monitoredItemId  The monitored item identifier returned in the ::OpcUa_CreateMonitoredItemsResponse.
  * \param clientHandle     Client-supplied id of the MonitoredItem, it will be provided in Notifications of the
  *                         ::OpcUa_PublishResponse messages received.
  * \param samplingInterval The interval defines the sampling interval for the monitored item.

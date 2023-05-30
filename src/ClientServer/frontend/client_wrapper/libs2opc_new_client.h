@@ -22,13 +22,14 @@
  * \brief High level interface to run an OPC UA client.
  *
  * Once the client is configured using functions of libs2opc_client_config.h,
- * the client should establish connection using ::SOPC_ClientHelperNew_Connect.
- * Until connection is stopped by a call to ::SOPC_ClientHelperNew_CloseConnection or due to an error (listening address
+ * the client should establish connection using ::SOPC_ClientHelperNew_Connect or call a discovery service
+ * using ::SOPC_ClientHelperNew_DiscoveryServiceAsync (or ::SOPC_ClientHelperNew_DiscoveryServiceSync).
+ * Until connection is stopped by a call to ::SOPC_ClientHelperNew_Disconnect or due to an error (listening address
  * busy, etc.), the client application might use the connections.
- * This is done using same OPC UA services client are using but in a local way called
- * "local services" in this client API trough ::SOPC_ClientHelperNew_LocalServiceAsync (or
- * ::SOPC_ClientHelperNew_LocalServiceSync)
- *
+ * This is done using OPC UA services using ::SOPC_ClientHelperNew_ServiceAsync (or
+ * ::SOPC_ClientHelperNew_ServiceSync).
+ * The request messages might be built using the helper functions of libs2opc_request_builder.h
+ * (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  */
 
 #ifndef LIBS2OPC_NEW_CLIENT_H_
@@ -136,8 +137,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *
  * \warning local service synchronous call shall only be called from the application thread and shall not be called from
  * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,
- * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
- * situation.
+ * ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock situation.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnection_Config* secConnConfig,
                                                             void* request,
@@ -192,19 +192,18 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
- * \note ::SOPC_ClientHelperNew_StartConnect or ::SOPC_ClientHelperNew_Connect shall have been called
- *       and the connection shall be still active
+ * \note ::SOPC_ClientHelperNew_Connect shall have been called and the connection shall be still active
  *
- * \param config    The connection configuration
+ * \param secureConnection The client connection instance to use to execute the service
  * \param request   An instance of one of the following OPC UA request:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
  *                  - ::OpcUa_TranslateBrowsePathsToNodeIdsRequest
  *                  - ::OpcUa_GetEndpointsRequest
- *                  - ::OpcUa_FindClientsRequest
- *                  - ::OpcUa_FindClientsOnNetworkRequest
- *                  - ::OpcUa_RegisterClient2Request
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_RegisterServer2Request
  *                  - :: TO BE COMPLETED (MI, etc.)
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
@@ -224,20 +223,20 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
                                                     uintptr_t userContext);
 
 /**
- * \brief Executes a local OPC UA service on client (read, write, browse or discovery service) synchronously.
+ * \brief Executes an OPC UA service on server (read, write, browse or discovery service) synchronously.
  *
  * \note ::SOPC_ClientHelperNew_Connect shall have been called
  *       and the connection shall be still active
- * \param config    The connection configuration
+ * \param secureConnection The client connection instance to use to execute the service
  * \param request   An instance of OPC UA request:
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
  *                  - ::OpcUa_TranslateBrowsePathsToNodeIdsRequest
  *                  - ::OpcUa_GetEndpointsRequest
- *                  - ::OpcUa_FindClientsRequest
- *                  - ::OpcUa_FindClientsOnNetworkRequest
- *                  - ::OpcUa_RegisterClient2Request
+ *                  - ::OpcUa_FindServersRequest
+ *                  - ::OpcUa_FindServersOnNetworkRequest
+ *                  - ::OpcUa_RegisterServer2Request
  *                  - :: TO BE COMPLETED (MI, etc.)
  *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
@@ -259,10 +258,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  * \note request memory is managed by the client after a successful return or in case of timeout
  * \note caller is responsible of output response memory after successful call. E.g. use ::SOPC_Encodeable_Delete.
  *
- * \warning local service synchronous call shall only be called from the application thread and shall not be called from
- * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,
- * ::SOPC_DataChangeNotif_Fct,  ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock
- * situation.
+ * \warning service synchronous call shall only be called from the application thread and shall not be called from
+ * client callbacks used for asynchronous response, connections event, etc. (::SOPC_ServiceAsyncResp_Fct,
+ * ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock situation.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
                                                    void* request,
