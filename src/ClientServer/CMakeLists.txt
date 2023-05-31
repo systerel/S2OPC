@@ -275,7 +275,7 @@ endif()
 add_library(s2opc_serverwrapper "${SERVERWRAPPER_PATH}/libs2opc_server.c"
                                 "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
                                 "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
-                                "${SERVERWRAPPER_PATH}/libs2opc_server_runtime_variables.c"
+                                "${SERVERWRAPPER_PATH}/internal/libs2opc_server_runtime_variables.c"
                                 ${SERVERWRAPPER_XML_CONFIG}
                                 )
 target_link_libraries(s2opc_serverwrapper PUBLIC s2opc_commonwrapper ${SERVERWRAPPER_XML_DEP})
@@ -285,6 +285,8 @@ target_include_directories(s2opc_serverwrapper
   PUBLIC
   "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
+  PRIVATE
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
   )
 if (expat_FOUND)
   target_compile_definitions(s2opc_serverwrapper PRIVATE "WITH_EXPAT")
