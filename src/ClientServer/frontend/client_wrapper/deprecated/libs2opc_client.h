@@ -19,6 +19,9 @@
 
 /** \file
  *
+ * \deprecated This file is deprecated since version 1.5.0 and will be removed in version 1.6.0.
+ *             Please use libs2opc_client_new.h instead.
+ *
  * \brief Interface of an example client library supporting the subscription management.
  *
  * The functions of this interface are threadsafe, except stated otherwise.
@@ -107,24 +110,31 @@ void SOPC_Sleep(unsigned int milliseconds);
 #endif
 
 /* C String type */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef char* SOPC_LibSub_String;
 
 /* C Const String type */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef const char* SOPC_LibSub_CstString;
 
 /* Connnection configuration identifier */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef uint32_t SOPC_LibSub_ConfigurationId;
 
 /* Connection identifier */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef uint32_t SOPC_LibSub_ConnectionId;
 
 /* Data identifier (used for subscription change notification) */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef uint32_t SOPC_LibSub_DataId;
 
 /* Timestamp (NTP Format) */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef uint64_t SOPC_LibSub_Timestamp;
 
 /* Data value type */
+/** \deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0. */
 typedef enum
 {
     SOPC_LibSub_DataType_bool = 1,
@@ -135,6 +145,7 @@ typedef enum
 } SOPC_LibSub_DataType;
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @struct SOPC_LibSub_Value
   @brief
     Structure defining the value of a node
@@ -162,6 +173,7 @@ typedef struct
 } SOPC_LibSub_Value;
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     AttributeIds, as defined in the OPC UA Reference, Part 6 Annex A */
 typedef uint32_t SOPC_LibSub_AttributeId;
@@ -190,6 +202,7 @@ typedef uint32_t SOPC_LibSub_AttributeId;
 #define SOPC_LibSub_AttributeId_UserExecutable 22
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     The event passed to the connection SOPC_LibSub_EventCbk.
     Either an error or a valid response notification.
@@ -201,6 +214,7 @@ typedef enum SOPC_LibSub_ApplicativeEvent
 } SOPC_LibSub_ApplicativeEvent;
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     Log callback type
   @param log_level
@@ -210,6 +224,7 @@ typedef enum SOPC_LibSub_ApplicativeEvent
 typedef void SOPC_LibSub_LogCbk(const SOPC_Log_Level log_level, SOPC_LibSub_CstString text);
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     Callback type for disconnect event
   @param c_id
@@ -217,6 +232,7 @@ typedef void SOPC_LibSub_LogCbk(const SOPC_Log_Level log_level, SOPC_LibSub_CstS
 typedef void SOPC_LibSub_DisconnectCbk(const SOPC_LibSub_ConnectionId c_id);
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     Callback type for data change event (related to a subscription)
   @param c_id
@@ -233,6 +249,7 @@ typedef void SOPC_LibSub_DataChangeCbk(const SOPC_LibSub_ConnectionId c_id,
                                        const SOPC_LibSub_Value* value);
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @brief
     Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession().
   @param c_id
@@ -265,6 +282,7 @@ typedef void SOPC_LibSub_EventCbk(SOPC_LibSub_ConnectionId c_id,
  ===================== */
 
 /**
+ @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @struct SOPC_LibSub_StaticCfg
  @brief
    Static configuration of OPC client library
@@ -286,6 +304,7 @@ typedef struct
 } SOPC_LibSub_StaticCfg;
 
 /**
+ @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @struct SOPC_LibSub_ConnectionCfg
  @brief
    Connection configuration to a remote OPC server
@@ -398,11 +417,13 @@ typedef struct
  =================== */
 
 /**
+    \deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
     \brief Return the current version of the library
 */
 SOPC_LibSub_CstString SOPC_LibSub_GetVersion(void);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
@@ -423,6 +444,7 @@ SOPC_ReturnStatus SOPC_LibSub_Initialize(const SOPC_LibSub_StaticCfg* pCfg);
 void SOPC_LibSub_Clear(void);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Configure a future connection. This function shall be called once per connection before
     a call to SOPC_LibSub_Configured(). The given /p pCfgId is later used to create connections.
@@ -437,6 +459,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
                                                   SOPC_LibSub_ConfigurationId* pCfgId);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Mark the library as configured. All calls to SOPC_LibSub_ConfigureConnection() shall
     be done prior to calling this function. All calls to SOPC_LibSub_Connect() shall be done
@@ -448,6 +471,7 @@ SOPC_ReturnStatus SOPC_LibSub_ConfigureConnection(const SOPC_LibSub_ConnectionCf
 SOPC_ReturnStatus SOPC_LibSub_Configured(void);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Creates a new connection to a remote OPC server from configuration id cfg_id.
     The connection represent the whole client and is later identified by the returned cli_id.
@@ -467,6 +491,7 @@ SOPC_ReturnStatus SOPC_LibSub_Configured(void);
 SOPC_ReturnStatus SOPC_LibSub_Connect(const SOPC_LibSub_ConfigurationId cfgId, SOPC_LibSub_ConnectionId* pCliId);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Add variables to the subscription of the connection.
     This call is synchroneous: it waits for the server response, or the Toolkit times out.
@@ -496,6 +521,7 @@ SOPC_ReturnStatus SOPC_LibSub_AddToSubscription(const SOPC_LibSub_ConnectionId c
                                                 SOPC_LibSub_DataId* lDataId);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Sends a generic request on the connection. The request must be accepted by the SOPC encoders
  (OpcUa_<MessageStruct>*) which are defined in "sopc_types.h". Upon response, the SOPC_LibSub_EventCbk callback
@@ -511,6 +537,7 @@ SOPC_ReturnStatus SOPC_LibSub_AsyncSendRequestOnSession(SOPC_LibSub_ConnectionId
                                                         void* requestStruct,
                                                         uintptr_t requestContext);
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
@@ -530,12 +557,14 @@ SOPC_ReturnStatus SOPC_LibSub_Disconnect(const SOPC_LibSub_ConnectionId cliId);
 --------------------------------*/
 
 /**
+ * \deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * \brief Buffers a log message, then calls the callback configured with the LibSub.
  *
  */
 void Helpers_Log(const SOPC_Log_Level log_level, const char* format, ...);
 
 /**
+ * \deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * \brief Helper logger, prints a log message to stdout, with the following format "# log_level: text\n".
  */
 void Helpers_LoggerStdout(const SOPC_Log_Level log_level, const SOPC_LibSub_CstString text);

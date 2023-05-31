@@ -18,6 +18,8 @@
  */
 
 /** \file
+ * \deprecated This file is deprecated since version 1.5.0 and will be removed in version 1.6.0.
+ *             Please use libs2opc_client_new.h instead.
  *
  * \brief Common internal interface for different client libraries
  *
