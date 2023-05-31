@@ -13,8 +13,8 @@ and a python wheel for Py3.6 is produced by the build process.
 - setuptools (tested with version >= 38)
 - gcc (tested with 4.8.5)
 - s2opc libraries and its dependencies, compiled with `-fPIC`:
-  - libs2opc_clientwrapper.a
-  - libs2opc.a
+  - libs2opc_clientserver.a
+  - libs2opc_common.a
   - libmbedcrypto.a
   - libmbedtls.a
   - libmbedx509.a

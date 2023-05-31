@@ -73,7 +73,7 @@ if (WITH_STATIC_SECURITY_DATA)
 endif()
 
 
-target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded s2opc_clientserver-xml-loaders-expat)
+target_link_libraries(pubsub_server PRIVATE s2opc_pubsub s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_include_directories(pubsub_server PRIVATE pubsub_server)
 
 # Copy data

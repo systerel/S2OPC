@@ -70,7 +70,6 @@ if(NOT S2OPC_CLIENTSERVER_ONLY)
 endif()
 if(NOT S2OPC_PUBSUB_ONLY)
   target_link_libraries(${SAMPLE_PROJECT_NAME} PRIVATE
-    s2opc_clientwrapper
-    s2opc_serverwrapper
+    s2opc_clientserver
     s2opc_clientserver-loader-embedded)
 endif()

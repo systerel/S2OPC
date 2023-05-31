@@ -49,26 +49,115 @@ set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
     "services/bgenc"
 )
 
+# define S2OPC wrappers source files
+
+set(XML_LOADERS_PATH "loaders")
+set(COMMONWRAPPER_PATH "frontend/common_wrapper")
+set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
+set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
+set(SERVERWRAPPER_PATH "frontend/server_wrapper")
+
+set(WRAPPERS_XML_CONFIG "")
+set(LOADER_XML_PRIVATE_DEP "")
+if (expat_FOUND)
+  set(WRAPPERS_XML_CONFIG
+      "${XML_LOADERS_PATH}/helpers/sopc_helper_expat.c"
+      "${XML_LOADERS_PATH}/address_space_loaders/xml_expat/sopc_uanodeset_loader.c"
+      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_loader_internal.c"
+      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_server_loader.c"
+      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_client_loader.c"
+      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_users_loader.c"
+      "${CLIENTWRAPPER_PATH}/libs2opc_client_config_xml.c"
+      "${SERVERWRAPPER_PATH}/libs2opc_server_config_xml.c")
+  set(LOADER_XML_PRIVATE_DEP expat::expat)
+  else()
+  message("-- Expat library NOT found: XML config loaders will not be available")
+  message(WARNING "Without the Expat library, the XML config loaders will not be compiled.")
+endif()
+
+set(S2OPC_WRAPPERS_SRC
+    "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
+    "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.c"
+    "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.c"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.c"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
+    "${CLIENTWRAPPER_PATH}/internal/toolkit_helpers.c"
+    "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
+    "${CLIENTWRAPPER_PATH}/internal/pki_permissive.c"
+    "${SERVERWRAPPER_PATH}/libs2opc_server.c"
+    "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
+    "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
+    "${SERVERWRAPPER_PATH}/internal/libs2opc_server_runtime_variables.c"
+    ${WRAPPERS_XML_CONFIG}
+    )
+
+list(APPEND WRAPPERS_INCLUDE_FILES
+    "${COMMONWRAPPER_PATH}/libs2opc_common_config.h"
+    "${HELPERWRAPPER_PATH}/libs2opc_request_builder.h"
+    "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.h"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.h"
+    "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.h"
+    "${SERVERWRAPPER_PATH}/libs2opc_server.h"
+    "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
+    "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h")
+
+set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES "")
+set(S2OPC_XML_LOADERS_PRIVATE_INCLUDES "")
+if(expat_FOUND)
+  list(APPEND WRAPPERS_INCLUDE_FILES
+       "${XML_LOADERS_PATH}/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
+       "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_loader.h"
+       "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_users_loader.h")
+  set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES
+      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders"
+      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/config_loaders")
+  set(S2OPC_XML_LOADERS_PRIVATE_INCLUDES
+      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers")
+endif()
+
+
 ### Configure S2OPC client/server library and its properties ###
 
-add_library(s2opc_clientserver ${S2OPC_CLIENTSERVER_SRCS} ${S2OPC_TOOLKIT_BUILD_INFO_C})
+add_library(s2opc_clientserver
+            ${S2OPC_CLIENTSERVER_SRCS}
+            ${S2OPC_TOOLKIT_BUILD_INFO_C}
+            ${S2OPC_WRAPPERS_SRC})
 target_compile_options(s2opc_clientserver PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(s2opc_clientserver PUBLIC s2opc_common)
+target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
+target_link_libraries(s2opc_clientserver PUBLIC s2opc_common PRIVATE ${LOADER_XML_PRIVATE_DEP})
+if (expat_FOUND)
+  target_compile_definitions(s2opc_clientserver PRIVATE "WITH_EXPAT")
+endif()
+
 
 target_include_directories(s2opc_clientserver
   PUBLIC
   "$<BUILD_INTERFACE:${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES}>" # when building (quotes needed to interpret list correclty)
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/deprecated>"
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
+  "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
   $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
-  PRIVATE ${S2OPC_CLIENTSERVER_PRIVATE_INCLUDES})
+  PRIVATE
+  ${S2OPC_CLIENTSERVER_PRIVATE_INCLUDES}
+  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal;${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
+  "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PRIVATE_INCLUDES}>")
 
 ### Installation and export of S2OPC client/server toolkit library ###
 foreach(dir ${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES})
     file(GLOB temp_files "${dir}/*.h")
     list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES ${temp_files})
 endforeach()
+list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES "${WRAPPERS_INCLUDE_FILES}")
+
 # set public header property
-set_target_properties(s2opc_clientserver PROPERTIES PUBLIC_HEADER "${S2OPC_CLIENTSERVER_INCLUDE_FILES}")
+set_target_properties(s2opc_clientserver PROPERTIES PUBLIC_HEADER
+                      "${S2OPC_CLIENTSERVER_INCLUDE_FILES}")
 # install files
 install(TARGETS s2opc_clientserver
         EXPORT s2opc_clientserver-export # export our project to be importable after install
@@ -122,195 +211,6 @@ install(EXPORT s2opc_clientserver-loader-embedded-export
 export(EXPORT s2opc_clientserver-loader-embedded-export
   FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-loader-embedded-export.cmake"
   )
-
-# XML addresss space loader, XML server configuration loader and XML server users configuration loader
-if (expat_FOUND)
-  message(STATUS "Expat library found: XML server config loaders compilation active")
-  add_library(s2opc_clientserver-xml-loaders-expat loaders/helpers/sopc_helper_expat.c
-                                             loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.c
-                                             loaders/config_loaders/xml_expat/sopc_config_loader_internal.c
-                                             loaders/config_loaders/xml_expat/sopc_config_server_loader.c
-                                             loaders/config_loaders/xml_expat/sopc_config_client_loader.c
-                                             loaders/config_loaders/xml_expat/sopc_users_loader.c)
-  target_compile_options(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_clientserver-xml-loaders-expat PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
-  target_link_libraries(s2opc_clientserver-xml-loaders-expat PUBLIC s2opc_clientserver PRIVATE expat::expat)
-  set(S2OPC_XML_LOADERS_PUBLIC_INCLUDES
-      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/address_space_loaders"
-      "${CMAKE_CURRENT_SOURCE_DIR}/loaders/config_loaders"
-      )
-  target_include_directories(s2opc_clientserver-xml-loaders-expat
-                             PUBLIC
-                             "$<BUILD_INTERFACE:${S2OPC_XML_LOADERS_PUBLIC_INCLUDES}>"
-                             $<INSTALL_INTERFACE:include/s2opc/clientserver> # when installed
-                             PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/loaders/helpers)
-  set_property(TARGET s2opc_clientserver-xml-loaders-expat PROPERTY
-               PUBLIC_HEADER "loaders/address_space_loaders/xml_expat/sopc_uanodeset_loader.h"
-                             "loaders/config_loaders/xml_expat/sopc_config_loader.h"
-                             "loaders/config_loaders/xml_expat/sopc_users_loader.h")
-  install(TARGETS s2opc_clientserver-xml-loaders-expat
-          EXPORT s2opc_clientserver-xml-loaders-expat-export # export our project to be importable after install
-          LIBRARY DESTINATION lib
-          ARCHIVE DESTINATION lib
-          PUBLIC_HEADER DESTINATION include/s2opc/clientserver/xml_expat)
-
-  # install the export as a cmake file
-  install(EXPORT s2opc_clientserver-xml-loaders-expat-export
-          FILE s2opc_clientserver-xml-loaders-expat-export.cmake
-          DESTINATION lib/cmake/s2opc)
-
-  # export cmake file for use in build tree without install
-  export(EXPORT s2opc_clientserver-xml-loaders-expat-export
-         FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-xml-loaders-expat-export.cmake"
-         )
-else()
-  message("-- Expat library NOT found: XML config loaders will not be available")
-endif()
-
-## Common wrapper library ##
-set(COMMONWRAPPER_PATH "frontend/common_wrapper")
-set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
-# Set empty implementation and dependency if Expat not available
-
-add_library(s2opc_commonwrapper "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
-                                "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
-                                )
-target_link_libraries(s2opc_commonwrapper PUBLIC s2opc_clientserver)
-target_compile_options(s2opc_commonwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_commonwrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(s2opc_commonwrapper
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${COMMONWRAPPER_PATH};${CMAKE_CURRENT_SOURCE_DIR}/${HELPERWRAPPER_PATH}>"
-  $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
-  )
-list(APPEND COMMON_WRAPPER_INCLUDE_FILES "${COMMONWRAPPER_PATH}/libs2opc_common_config.h"
-                                         "${HELPERWRAPPER_PATH}/libs2opc_request_builder.h")
-set_target_properties(s2opc_commonwrapper PROPERTIES PUBLIC_HEADER "${COMMON_WRAPPER_INCLUDE_FILES}")
-
-install(TARGETS s2opc_commonwrapper
-        EXPORT s2opc_clientserver-commonwrapper-export # export our project to be importable after install
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/frontend)
-
-# install the export as a cmake file
-install(EXPORT s2opc_clientserver-commonwrapper-export
-        FILE s2opc_clientserver-commonwrapper-export.cmake
-        DESTINATION lib/cmake/s2opc)
-
-# export cmake file for use in build tree without install
-export(EXPORT s2opc_clientserver-commonwrapper-export
-       FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-commonwrapper-export.cmake")
-
-
-## Client wrapper library ##
-set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
-# Set empty implementation and dependency if Expat not available
-set(CLIENT_WRAPPER_XML_CONFIG "")
-set(CLIENT_WRAPPER_XML_DEP "")
-if (expat_FOUND)
-  set(CLIENT_WRAPPER_XML_CONFIG "${CLIENTWRAPPER_PATH}/libs2opc_client_config_xml.c")
-  set(CLIENT_WRAPPER_XML_DEP s2opc_clientserver-xml-loaders-expat)
-endif()
-
-add_library(s2opc_clientwrapper "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.c"
-                                "${CLIENTWRAPPER_PATH}/libs2opc_new_client.c"
-                                "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.c"
-                                "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.c"
-                                "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"
-                                "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
-                                "${CLIENTWRAPPER_PATH}/internal/toolkit_helpers.c"
-                                "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
-                                "${CLIENTWRAPPER_PATH}/internal/pki_permissive.c"
-                                ${CLIENT_WRAPPER_XML_CONFIG}
-                                )
-target_link_libraries(s2opc_clientwrapper PUBLIC s2opc_commonwrapper ${CLIENT_WRAPPER_XML_DEP})
-target_compile_options(s2opc_clientwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_clientwrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(s2opc_clientwrapper
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}>"
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/deprecated>"
-  $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
-  PRIVATE
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${CLIENTWRAPPER_PATH}/internal>"
-  )
-if (expat_FOUND)
-  target_compile_definitions(s2opc_clientwrapper PRIVATE "WITH_EXPAT")
-endif()
-
-list(APPEND CLIENT_WRAPPER_INCLUDE_FILES "${CLIENTWRAPPER_PATH}/libs2opc_client.h"
-                                         "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
-                                         "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
-                                         "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.h"
-                                         "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.h")
-set_target_properties(s2opc_clientwrapper PROPERTIES PUBLIC_HEADER "${CLIENT_WRAPPER_INCLUDE_FILES}")
-
-
-install(TARGETS s2opc_clientwrapper
-        EXPORT s2opc_clientserver-clientwrapper-export # export our project to be importable after install
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/frontend)
-
-# install the export as a cmake file
-install(EXPORT s2opc_clientserver-clientwrapper-export
-        FILE s2opc_clientserver-clientwrapper-export.cmake
-        DESTINATION lib/cmake/s2opc)
-
-# export cmake file for use in build tree without install
-export(EXPORT s2opc_clientserver-clientwrapper-export
-       FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
-
-## Server wrapper library ##
-set(SERVERWRAPPER_PATH "frontend/server_wrapper")
-# Set empty implementation and dependency if Expat not available
-set(SERVERWRAPPER_XML_CONFIG "")
-set(SERVERWRAPPER_XML_DEP "")
-if (expat_FOUND)
-  set(SERVERWRAPPER_XML_CONFIG "${SERVERWRAPPER_PATH}/libs2opc_server_config_xml.c")
-  set(SERVERWRAPPER_XML_DEP s2opc_clientserver-xml-loaders-expat)
-endif()
-
-add_library(s2opc_serverwrapper "${SERVERWRAPPER_PATH}/libs2opc_server.c"
-                                "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
-                                "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
-                                "${SERVERWRAPPER_PATH}/internal/libs2opc_server_runtime_variables.c"
-                                ${SERVERWRAPPER_XML_CONFIG}
-                                )
-target_link_libraries(s2opc_serverwrapper PUBLIC s2opc_commonwrapper ${SERVERWRAPPER_XML_DEP})
-target_compile_options(s2opc_serverwrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_serverwrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_include_directories(s2opc_serverwrapper
-  PUBLIC
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}>"
-  $<INSTALL_INTERFACE:include/s2opc/clientserver/frontend> # when installed
-  PRIVATE
-  "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${SERVERWRAPPER_PATH}/internal>"
-  )
-if (expat_FOUND)
-  target_compile_definitions(s2opc_serverwrapper PRIVATE "WITH_EXPAT")
-endif()
-
-list(APPEND SERVER_WRAPPER_INCLUDE_FILES "${SERVERWRAPPER_PATH}/libs2opc_server.h"
-                                         "${SERVERWRAPPER_PATH}/libs2opc_server_config.h"
-                                         "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.h")
-set_target_properties(s2opc_serverwrapper PROPERTIES PUBLIC_HEADER "${SERVER_WRAPPER_INCLUDE_FILES}")
-
-install(TARGETS s2opc_serverwrapper
-        EXPORT s2opc_clientserver-serverwrapper-export # export our project to be importable after install
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        PUBLIC_HEADER DESTINATION include/s2opc/clientserver/frontend)
-
-# install the export as a cmake file
-install(EXPORT s2opc_clientserver-serverwrapper-export
-        FILE s2opc_clientserver-serverwrapper-export.cmake
-        DESTINATION lib/cmake/s2opc)
-
-# export cmake file for use in build tree without install
-export(EXPORT s2opc_clientserver-serverwrapper-export
-       FILE "${CMAKE_BINARY_DIR}/s2opc_clientserver-serverwrapper-export.cmake")
 
 # Add the PyS2OPC folder lately, as it requires the above library
 add_subdirectory(frontend/pys2opc)
