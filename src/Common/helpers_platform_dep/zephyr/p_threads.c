@@ -103,15 +103,22 @@ typedef struct sopcThreadConfig
 static tThreadWks gGlbThreadWks[T_THREAD_NB_THREADS];
 
 // Define various tasks
-K_KERNEL_STACK_DEFINE(gThreadStack_Timers, SOPC_UTILITY_TASK_STACK_SIZE);
 
-K_KERNEL_STACK_DEFINE(gThreadStack_Application, SOPC_MAIN_TASK_STACK_SIZE);
-K_KERNEL_STACK_DEFINE(gThreadStack_SubSocketMgr, SOPC_MAIN_TASK_STACK_SIZE);
-K_KERNEL_STACK_DEFINE(gThreadStack_Sockets, SOPC_MAIN_TASK_STACK_SIZE);
-K_KERNEL_STACK_DEFINE(gThreadStack_Publisher, SOPC_MAIN_TASK_STACK_SIZE);
+#ifdef CONFIG_SOPC_ALLOC_SECTION
+#define SECTION __attribute__((section(CONFIG_SOPC_ALLOC_SECTION)))
+#define SOPC_STACK_DEFINE(sym, size) Z_KERNEL_STACK_DEFINE_IN(sym, size, SECTION);
+#else
+#define SOPC_STACK_DEFINE(sym, size) K_KERNEL_STACK_DEFINE(sym, size);
+#endif
+SOPC_STACK_DEFINE(gThreadStack_Timers, SOPC_UTILITY_TASK_STACK_SIZE);
 
-K_KERNEL_STACK_DEFINE(gThreadStack_Secure_Chann, SOPC_LARGE_TASK_STACK_SIZE);
-K_KERNEL_STACK_DEFINE(gThreadStack_Services, SOPC_LARGE_TASK_STACK_SIZE);
+SOPC_STACK_DEFINE(gThreadStack_Application, SOPC_MAIN_TASK_STACK_SIZE);
+SOPC_STACK_DEFINE(gThreadStack_SubSocketMgr, SOPC_MAIN_TASK_STACK_SIZE);
+SOPC_STACK_DEFINE(gThreadStack_Sockets, SOPC_MAIN_TASK_STACK_SIZE);
+SOPC_STACK_DEFINE(gThreadStack_Publisher, SOPC_MAIN_TASK_STACK_SIZE);
+
+SOPC_STACK_DEFINE(gThreadStack_Secure_Chann, SOPC_LARGE_TASK_STACK_SIZE);
+SOPC_STACK_DEFINE(gThreadStack_Services, SOPC_LARGE_TASK_STACK_SIZE);
 
 // All SOPC tasks. These threads have predefined stack sizes tuned to actual needs.
 static sopcThreadConfig gSopcTasks[NB_SOPC_THREADS] = {{.nameFilter = "Application",
@@ -144,7 +151,15 @@ static sopcThreadConfig gSopcTasks[NB_SOPC_THREADS] = {{.nameFilter = "Applicati
                                                         .pWks = &gGlbThreadWks[6]}};
 
 // All user stack size
-K_THREAD_STACK_ARRAY_DEFINE(gThreadStacks, CONFIG_SOPC_MAX_USER_TASKS, CONFIG_SOPC_USER_STACK_SIZE* KILOBYTE);
+#ifdef CONFIG_SOPC_ALLOC_SECTION
+Z_KERNEL_STACK_ARRAY_DEFINE_IN(gThreadStacks,
+                               CONFIG_SOPC_MAX_USER_TASKS,
+                               CONFIG_SOPC_USER_STACK_SIZE* KILOBYTE,
+                               SECTION);
+#else
+K_KERNEL_STACK_ARRAY_DEFINE(gThreadStacks, CONFIG_SOPC_MAX_USER_TASKS, CONFIG_SOPC_USER_STACK_SIZE* KILOBYTE);
+#endif
+
 static sopcThreadConfig gUserTasks[CONFIG_SOPC_MAX_USER_TASKS];
 
 // This is the handle returned to caller
