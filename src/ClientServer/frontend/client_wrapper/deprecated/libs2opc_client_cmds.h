@@ -19,6 +19,9 @@
 
 /** \file
  *
+ * \deprecated This file is deprecated since version 1.5.0 and will be removed in version 1.6.0.
+ *             Please use libs2opc_client_new.h instead.
+ *
  * \brief Interface of a library supporting the subscription management, read/write operation and browse.
  *
  * The functions of this interface are synchronous and mutually excluded: functions wait for server's response and 2
@@ -39,6 +42,8 @@
 #include "sopc_user_app_itf.h"
 
 /**
+   @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
+
   @brief
     Callback type for data change event (related to a subscription)
   @warning
@@ -56,6 +61,7 @@ typedef void SOPC_ClientHelper_DataChangeCbk(const int32_t connectionId,
                                              const SOPC_DataValue* value);
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @brief
  *   Callback type for disconnection.
  * @warning
@@ -67,6 +73,7 @@ typedef void SOPC_ClientHelper_DataChangeCbk(const int32_t connectionId,
 typedef void SOPC_ClientHelper_DisconnectCbk(const uint32_t connectionId);
 
 /**
+ @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @struct SOPC_ClientHelper_Security
  @brief
    Connection configuration to a remote OPC server
@@ -134,6 +141,7 @@ typedef struct
 } SOPC_ClientHelper_Security;
 
 /**
+ @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @struct SOPC_ClientHelper_EndpointConnection
  @brief
    Connection configuration to a remote OPC server
@@ -155,6 +163,7 @@ typedef struct
 } SOPC_ClientHelper_EndpointConnection;
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @struct SOPC_ClientHelper_WriteValue
   @brief
     Structure defining a node and value to write.
@@ -177,6 +186,7 @@ typedef struct
 } SOPC_ClientHelper_WriteValue;
 
 /**
+  @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @struct SOPC_ClientHelper_ReadValue
   @brief
     Structure defining a node, an attribute.
@@ -199,6 +209,7 @@ typedef struct
 } SOPC_ClientHelper_ReadValue;
 
 /**
+  @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @struct SOPC_ClientHelper_BrowseRequest
   @brief
     Structure defining a node, an attribute and a value.
@@ -225,6 +236,7 @@ typedef struct
 } SOPC_ClientHelper_BrowseRequest;
 
 /**
+  @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
   @struct SOPC_ClientHelper_BrowseResultReference
   @brief
     Structure defining a node, an attribute and a value.
@@ -253,6 +265,7 @@ typedef struct
 } SOPC_ClientHelper_BrowseResultReference;
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_BrowseResult
  * @brief
  *   structure containing the result of a browse request
@@ -271,6 +284,7 @@ typedef struct
 } SOPC_ClientHelper_BrowseResult;
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Move the content of the SOPC_ClientHelper_BrowseResultReference from source to destination.
     Note: after use of move function, clearing source has no effect on destination structure content
@@ -282,6 +296,7 @@ typedef struct
 void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResultReference* dest,
                                                   SOPC_ClientHelper_BrowseResultReference* src);
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Clears the content of the SOPC_ClientHelper_BrowseResultReference structure pointed by \p brr
 
@@ -290,6 +305,7 @@ void SOPC_ClientHelper_BrowseResultReference_Move(SOPC_ClientHelper_BrowseResult
 void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResultReference* brr);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Clears the content of the SOPC_ClientHelper_BrowseResult[] \p results.
     The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_Browse.
@@ -302,6 +318,7 @@ void SOPC_ClientHelper_BrowseResultReference_Clear(SOPC_ClientHelper_BrowseResul
 void SOPC_ClientHelper_BrowseResults_Clear(size_t nbElements, SOPC_ClientHelper_BrowseResult* results);
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_CallMethodRequest
  * @brief
  *   structure containing the requested method to call and input parameters
@@ -323,6 +340,7 @@ typedef struct
 } SOPC_ClientHelper_CallMethodRequest;
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_CallMethodResult
  * @brief
  *   structure containing the result of a method call
@@ -341,6 +359,7 @@ typedef struct
 } SOPC_ClientHelper_CallMethodResult;
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_UserIdentityToken
  * @brief
  *   structure containing a user identity token
@@ -370,6 +389,7 @@ typedef struct
 } SOPC_ClientHelper_UserIdentityToken;
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_EndpointDescription
  * @brief
  *   structure containing an endpoint description
@@ -411,6 +431,7 @@ typedef struct
 } SOPC_ClientHelper_EndpointDescription;
 
 /**
+ * @deprecated This type is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @struct SOPC_ClientHelper_GetEndpointsResult
  * @brief
  *   structure containing the result of a GetEndpoints request
@@ -427,6 +448,7 @@ typedef struct
 } SOPC_ClientHelper_GetEndpointsResult;
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Configure the library. This function shall be called once by the host application
     before any other service can be used.
@@ -442,6 +464,7 @@ typedef struct
 int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disconnect_callback);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Clears the connections and configurations.
     It shall be done before a call to ::SOPC_CommonHelper_Clear
@@ -450,6 +473,7 @@ int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disc
 void SOPC_ClientHelper_Finalize(void);
 
 /**
+ * @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * @brief
  *   Sends a GetEndpoints request to the endpointUrl and provide the results
  *  @param connection
@@ -472,6 +496,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
                                        SOPC_ClientHelper_GetEndpointsResult** result);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief Free the get endpoints result and its content.
         Make copy or move data to be kept prior to call this function.
 
@@ -480,6 +505,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
 void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsResult** getEpResult);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Creates a new reverse endpoint to be used for reverse connection mechanism
     Return a reverse endpoint id or error code.
@@ -495,6 +521,7 @@ void SOPC_ClientHelper_GetEndpointsResult_Free(SOPC_ClientHelper_GetEndpointsRes
 int32_t SOPC_ClientHelper_CreateReverseEndpoint(const char* reverseEndpointURL);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Creates a new configuration to connect to a remote OPC server.
     Return a configuration id or error code.
@@ -522,6 +549,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
                                               OpcUa_GetEndpointsResponse* expectedEndpoints);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Creates a new connection to a remote OPC server.
     The connection represent the whole client and is later identified by the returned connectionId.
@@ -540,6 +568,7 @@ int32_t SOPC_ClientHelper_CreateConfiguration(SOPC_ClientHelper_EndpointConnecti
 int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Create a subscription associated to the given connection
     The given callback will be called on data changes.
@@ -562,6 +591,7 @@ int32_t SOPC_ClientHelper_CreateConnection(int32_t cfg_id);
 int32_t SOPC_ClientHelper_CreateSubscription(int32_t connectionId, SOPC_ClientHelper_DataChangeCbk* callback);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Adds monitored items to the subscription associated to the given connection.
     SOPC_ClientHelper_CreateSubscription() should have been called previously.
@@ -597,6 +627,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
                                             SOPC_StatusCode* results);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Delete subscription associated to the given connection.
     If this function succeed, no more data changes notification is received about this connection until
@@ -612,6 +643,7 @@ int32_t SOPC_ClientHelper_AddMonitoredItems(int32_t connectionId,
 int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Disconnect from a remote OPC server.
     The function waits until the client is effectively disconnected, or the Toolkit times out.
@@ -627,6 +659,7 @@ int32_t SOPC_ClientHelper_Unsubscribe(int32_t connectionId);
 int32_t SOPC_ClientHelper_Disconnect(int32_t connectionId);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Write values to attributes "Value" of one or more Nodes.
     This function waits for the server response, or the Toolkit times out.
@@ -657,6 +690,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
                                 SOPC_StatusCode* writeResults);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Read one or more attributes of one or more Nodes.
     Return both the source and Server timestamps for each requested Variable Value Attribute.
@@ -691,6 +725,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
                                size_t nbElements,
                                SOPC_DataValue* values);
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Free the result provided by SOPC_ClientHelper_Read.
 
@@ -707,6 +742,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
 void SOPC_ClientHelper_ReadResults_Free(size_t nbElements, SOPC_DataValue* values);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Discover the references of a Node using Browse and browseNext services.
     If Browse Response returns ContinuationPoint, a BrowseNext Request is sent until no ContinuationPoint is returned.
@@ -746,6 +782,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
                                  SOPC_ClientHelper_BrowseResult* browseResults);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Call a method
 
@@ -772,6 +809,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
                                      SOPC_ClientHelper_CallMethodResult* callResults);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Call a generic OPC UA service using OPC UA request/response types.
     Note: request builder module functions might be used (see example below in \p requestMsg documentation).
@@ -790,6 +828,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
 SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* requestMsg, void** responseMsg);
 
 /**
+ @deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  @brief
     Clears the content of the SOPC_ClientHelper_CallMethodResult[] \p results.
     The array is not deallocated since it is managed by the caller of SOPC_ClientHelper_CallMethod.
@@ -803,6 +842,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* r
 void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHelper_CallMethodResult* results);
 
 /**
+ * \deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * \brief Define client preferred locales ids from an array of locale strings.
  *
  * \param nbLocales  The number of locales defined in the array. It might be 0 if no locale defined (only default exist)
@@ -818,6 +858,7 @@ void SOPC_ClientHelper_CallMethodResults_Clear(size_t nbElements, SOPC_ClientHel
 SOPC_ReturnStatus SOPC_ClientHelper_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
+ * \deprecated This function is deprecated since version 1.5.0 and will be removed in version 1.6.0.
  * \brief Define client application description
  *
  * \param applicationUri        The globally unique identifier for the application instance.
