@@ -228,7 +228,7 @@ static SOPC_ReturnStatus Server_Initialize(const char* logDirPath)
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -267,7 +267,7 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
         SOPC_CRLList* serializedCAcrl = NULL;
 
         /* Load client/server certificates and server key from C source files (no filesystem needed) */
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
+        status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                                  sizeof(server_2k_key), server_2k_key);
         if (SOPC_STATUS_OK == status)
         {
@@ -287,9 +287,9 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
         SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 #else // WITH_STATIC_SECURITY_DATA == false
         /* Configure the callback */
-        SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+        SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         /* Load client/server certificates and server key from files */
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath(default_server_cert, default_key_cert, true);
+        status = SOPC_ServerConfigHelper_SetKeyCertPairFromPath(default_server_cert, default_key_cert, true);
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
@@ -302,7 +302,7 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
+            status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
         }
 
         if (SOPC_STATUS_OK != status)
@@ -324,24 +324,24 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
 static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
 {
     // Set namespaces
-    SOPC_ReturnStatus status = SOPC_HelperConfigServer_SetNamespaces(sizeof(default_app_namespace_uris) / sizeof(char*),
+    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetNamespaces(sizeof(default_app_namespace_uris) / sizeof(char*),
                                                                      default_app_namespace_uris);
     // Set locale ids
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetLocaleIds(sizeof(default_locale_ids) / sizeof(char*), default_locale_ids);
+        status = SOPC_ServerConfigHelper_SetLocaleIds(sizeof(default_locale_ids) / sizeof(char*), default_locale_ids);
     }
 
     // Set application description of server to be returned by discovery services (GetEndpoints, FindServers)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+        status = SOPC_ServerConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", "en-US",
                                                                    OpcUa_ApplicationType_Server);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_AddApplicationNameLocale("S2OPC toolkit: exemple de serveur", "fr-FR");
+        status = SOPC_ServerConfigHelper_AddApplicationNameLocale("S2OPC toolkit: exemple de serveur", "fr-FR");
     }
 
     /*
@@ -350,7 +350,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     SOPC_Endpoint_Config* ep = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+        ep = SOPC_ServerConfigHelper_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
         status = NULL == ep ? SOPC_STATUS_OUT_OF_MEMORY : status;
     }
 
@@ -716,8 +716,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
         authenticationManager->pData = pX509_UserIdentity_PKI;
-        SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
-        SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
+        SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
+        SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);
     }
     else
     {
@@ -749,7 +749,7 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetAddressSpace(addSpace);
+        status = SOPC_ServerConfigHelper_SetAddressSpace(addSpace);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -778,7 +778,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
     SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetMethodCallManager(mcm);
+        status = SOPC_ServerConfigHelper_SetMethodCallManager(mcm);
     }
 
     /* Add methods implementation in the method call manager used */
@@ -869,7 +869,7 @@ static SOPC_ReturnStatus Server_InitDefaultCallMethodService(void)
 static SOPC_ReturnStatus Server_SetMatrixVariablesProperties(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
-    SOPC_AddressSpace* addSpace = SOPC_HelperConfigServer_GetAddressSpace();
+    SOPC_AddressSpace* addSpace = SOPC_ServerConfigHelper_GetAddressSpace();
     if (NULL == addSpace)
     {
         return status;
@@ -990,7 +990,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
 
 #ifndef WITH_STATIC_SECURITY_DATA
     // Define a callback to retrieve the server key password (from environment variable)
-    status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
 
     xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
     xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
@@ -1001,7 +1001,7 @@ static SOPC_ReturnStatus Server_LoadServerConfiguration(void)
         (NULL != xml_server_config_path || NULL != xml_address_space_config_path || NULL != xml_users_config_path))
     {
 #ifdef WITH_EXPAT
-        status = SOPC_HelperConfigServer_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
+        status = SOPC_ServerConfigHelper_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
                                                           xml_users_config_path, NULL);
 
 #else
@@ -1086,7 +1086,7 @@ int main(int argc, char* argv[])
     /* Define address space write notification callback */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetWriteNotifCallback(Demo_WriteNotificationCallback);
+        status = SOPC_ServerConfigHelper_SetWriteNotifCallback(Demo_WriteNotificationCallback);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1117,7 +1117,7 @@ int main(int argc, char* argv[])
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK != status)

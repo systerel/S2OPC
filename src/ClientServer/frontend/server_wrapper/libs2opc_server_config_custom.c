@@ -33,7 +33,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config.h"
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
@@ -56,7 +56,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, con
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
@@ -126,7 +126,7 @@ static SOPC_ReturnStatus SOPC_Internal_AddApplicationNameLocale(OpcUa_Applicatio
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* applicationUri,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetApplicationDescription(const char* applicationUri,
                                                                     const char* productUri,
                                                                     const char* defaultAppName,
                                                                     const char* defaultAppNameLocale,
@@ -162,7 +162,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_AddApplicationNameLocale(const char* additionalAppName,
                                                                    const char* additionalAppNameLocale)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
@@ -183,7 +183,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
                                                   additionalAppNameLocale);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
@@ -199,7 +199,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* serverCertPath,
                                                                  const char* serverKeyPath,
                                                                  bool encrypted)
 {
@@ -274,7 +274,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
     return status;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* serverCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey)
@@ -324,7 +324,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
     return status;
 }
 
-SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery)
+SOPC_Endpoint_Config* SOPC_ServerConfigHelper_CreateEndpoint(const char* url, bool hasDiscovery)
 {
     if (NULL == url || !SOPC_ServerInternal_IsConfiguring() ||
         sopc_server_helper_config.nbEndpoints >= SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
@@ -466,7 +466,7 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint)
     return true;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -485,7 +485,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
     return status;
 }
 
-SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void)
+SOPC_AddressSpace* SOPC_ServerConfigHelper_GetAddressSpace(void)
 {
     if (!SOPC_ServerInternal_IsConfiguring() || NULL == sopc_server_helper_config.addressSpace)
     {
@@ -494,7 +494,7 @@ SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void)
     return sopc_server_helper_config.addressSpace;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr)
 {
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.authenticationManager)
@@ -511,7 +511,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
 {
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.authorizationManager)
     {
@@ -527,7 +527,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo)
 {
     if (!SOPC_ServerInternal_IsConfiguring() || NULL != sopc_server_helper_config.buildInfo)
     {
@@ -555,4 +555,82 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
     }
 
     return status;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces)
+{
+    return SOPC_ServerConfigHelper_SetNamespaces(nbNamespaces, namespaces);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds)
+{
+    return SOPC_ServerConfigHelper_SetLocaleIds(nbLocales, localeIds);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* applicationUri,
+                                                                    const char* productUri,
+                                                                    const char* defaultAppName,
+                                                                    const char* defaultAppNameLocale,
+                                                                    OpcUa_ApplicationType applicationType)
+{
+    return SOPC_ServerConfigHelper_SetApplicationDescription(applicationUri, productUri, defaultAppName,
+                                                             defaultAppNameLocale, applicationType);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
+                                                                   const char* additionalAppNameLocale)
+{
+    return SOPC_ServerConfigHelper_AddApplicationNameLocale(additionalAppName, additionalAppNameLocale);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki)
+{
+    return SOPC_ServerConfigHelper_SetPKIprovider(pki);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+                                                                 const char* serverKeyPath,
+                                                                 bool encrypted)
+{
+    return SOPC_ServerConfigHelper_SetKeyCertPairFromPath(serverCertPath, serverKeyPath, encrypted);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+                                                                  const unsigned char* serverCertificate,
+                                                                  size_t keyNbBytes,
+                                                                  const unsigned char* serverPrivateKey)
+{
+    return SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(certificateNbBytes, serverCertificate, keyNbBytes,
+                                                           serverPrivateKey);
+}
+
+SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery)
+{
+    return SOPC_ServerConfigHelper_CreateEndpoint(url, hasDiscovery);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig)
+{
+    return SOPC_ServerConfigHelper_SetAddressSpace(addressSpaceConfig);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+    SOPC_UserAuthentication_Manager* authenticationMgr)
+{
+    return SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationMgr);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr)
+{
+    return SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationMgr);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo)
+{
+    return SOPC_ServerConfigHelper_SetSoftwareBuildInfo(buildInfo);
+}
+
+SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void)
+{
+    return SOPC_ServerConfigHelper_GetAddressSpace();
 }

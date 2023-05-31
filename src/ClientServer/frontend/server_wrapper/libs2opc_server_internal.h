@@ -67,7 +67,7 @@ typedef enum
 // The server helper dedicated configuration in addition to configuration ::SOPC_S2OPC_Config
 typedef struct SOPC_ServerHelper_Config
 {
-    // Flag atomically set when the structure is initialized during call to SOPC_HelperConfigServer_Initialize
+    // Flag atomically set when the structure is initialized during call to SOPC_ServerConfigHelper_Initialize
     // and singleton config is initialized
     int32_t initialized;
     // Server state
@@ -87,8 +87,8 @@ typedef struct SOPC_ServerHelper_Config
     SOPC_GetServerKeyPassword_Fct*
         getServerKeyPassword; /* If it is defined and if the serverKey is encrypted,
                                  then the callback is called during call to
-                                 ::SOPC_HelperConfigServer_SetKeyCertPairFromPath
-                                 or ::SOPC_HelperConfigServer_ConfigureFromXML.
+                                 ::SOPC_ServerConfigHelper_SetKeyCertPairFromPath
+                                 or ::SOPC_ServerConfigHelper_ConfigureFromXML.
                                  The callback allows to retrieve the password for decryption */
 
     // Synchronous local service response management

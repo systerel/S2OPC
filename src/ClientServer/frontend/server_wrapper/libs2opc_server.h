@@ -70,13 +70,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
  * \brief Call to stop the server started with SOPC_ServerHelper_StartServer.
  *        If server started with ::SOPC_ServerHelper_StartServer, this call is blocking during shutdown phase and
  *        ::SOPC_ServerStopped_Fct is called on actual shutdown. Caller is responsible to wait for
- *        ::SOPC_ServerStopped_Fct call prior to use any ::SOPC_HelperConfigServer_Clear function.
+ *        ::SOPC_ServerStopped_Fct call prior to use any ::SOPC_ServerConfigHelper_Clear function.
  *        If server started with ::SOPC_ServerHelper_Serve, this call is asynchronous and server is actually stopped on
  *        ::SOPC_ServerHelper_Serve return (after shutdown phase).
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE if the server is not running.
  *
- * \note Server stops after configured seconds for shutdown phase (see ::SOPC_HelperConfigServer_SetShutdownCountdown )
+ * \note Server stops after configured seconds for shutdown phase (see ::SOPC_ServerConfigHelper_SetShutdownCountdown )
  *       to indicate shutdown in ServerState node
  */
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
@@ -95,7 +95,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
  *         if the configuration is not possible (toolkit not initialized, server already started),
  *         otherwise error status.
  *
- * \note Server stops after configured seconds for shutdown phase (see ::SOPC_HelperConfigServer_SetShutdownCountdown )
+ * \note Server stops after configured seconds for shutdown phase (see ::SOPC_ServerConfigHelper_SetShutdownCountdown )
  *       to indicate shutdown in ServerState node
  *
  */
@@ -103,7 +103,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
 
 /**
  * \brief Executes a local OPC UA service on server (read, write, browse or discovery service) asynchronously.
- *        On local service response callback configured through ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse
+ *        On local service response callback configured through ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse
  *        will be called.
  *
  * \note ::SOPC_ServerHelper_StartServer or ::SOPC_ServerHelper_Serve shall have been called

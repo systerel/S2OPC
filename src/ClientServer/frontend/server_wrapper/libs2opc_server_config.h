@@ -33,9 +33,15 @@
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
 
+/** @brief Default period value in milliseconds for refreshing the current time value
+ *         in the Server.ServerStatus.CurrentTime variable node. */
+#ifndef SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS
+#define SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS 1000
+#endif
+
 /**
  * \brief Initialize the S2OPC Server frontend configuration
- *        Call to ::SOPC_HelperConfigServer_Initialize is required before any other operation
+ *        Call to ::SOPC_ServerConfigHelper_Initialize is required before any other operation
  *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
  * The default log configuration is provided by the SOPC_Common_GetDefaultLogConfiguration function in sopc_common.c. \n
@@ -46,13 +52,13 @@
  *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void);
 
 /**
  * \brief Clear the S2OPC Server frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  */
-void SOPC_HelperConfigServer_Clear(void);
+void SOPC_ServerConfigHelper_Clear(void);
 
 /**
  * \brief
@@ -82,7 +88,7 @@ typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
  *             SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverConfigPath,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverConfigPath,
                                                            const char* addressSpaceConfigPath,
                                                            const char* userConfigPath,
                                                            SOPC_ConfigServerXML_Custom* customConfig);
@@ -112,10 +118,10 @@ typedef bool SOPC_GetServerKeyPassword_Fct(char** outPassword);
  * started).
  *
  * \note   This function must be called after the initialization functions of the server library.
- *         When the callback is configured, it is called during call to ::SOPC_HelperConfigServer_SetKeyCertPairFromPath
- *         or ::SOPC_HelperConfigServer_ConfigureFromXML.
+ *         When the callback is configured, it is called during call to ::SOPC_ServerConfigHelper_SetKeyCertPairFromPath
+ *         or ::SOPC_ServerConfigHelper_ConfigureFromXML.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword);
 
 /**
  * \brief Method Call service configuration.
@@ -130,7 +136,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerK
  *             or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).
  * */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMethodCallManager(SOPC_MethodCallManager* mcm);
 
 /**
  * \brief Type of callback to provide to receive write notification on address space.
@@ -167,7 +173,7 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
 
 /**
  * \brief Type of the callback called by CreateMonitoredItem service when a NodeId is not already part of server
@@ -212,7 +218,7 @@ typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
  *
  * \warning This callback shall not block the thread that calls it, and shall return immediately.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb);
 
 /**
  * \brief Type of callback to provide to receive asynchronous local service response
@@ -255,7 +261,7 @@ typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* res
  * \warning The callback function shall not do anything blocking or long treatment since it will block any other
  *          callback call (other instance of write notification, local service sync/async response, etc.).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb);
 
 /**
  * \brief Define duration of the shutdown phase when stopping the server.
@@ -271,20 +277,74 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
  * \note Default value is SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS (5 seconds) if not set.
  *       Value 0 should not be used for OPC UA certification compliance.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetShutdownCountdown(uint16_t secondsTillShutdown);
 
 /**
  * \brief Define interval in milliseconds used to refresh the server status current time information.
  *
  * \param intervalMs  The frequency used to refresh the server status current time information.
- *                    It might be set to 0 to deactivate the CurrentTime value update.
+ *                    It might be set to 0 to deactivate the Server.ServerStatus.CurrentTime value update.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_INVALID_PARAMETER in case the value is
  *         less than minimum interval defined by 2 times ::SOPC_TIMER_RESOLUTION_MS.
  *         Otherwise SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, server already started).
  *
- * \note Default value is SOPC_DEFAULT_CURRENT_TIME_REFERSH_FREQ_MS (1 second) if not set.
+ * \note Default value is ::SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS (1 second) if not set.
+ */
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval(uint16_t intervalMs);
+
+/* TODO: remove deprecated function in version 1.6.0 */
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_Initialize instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_Clear instead
+ */
+void SOPC_HelperConfigServer_Clear(void);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_ConfigureFromXML instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverConfigPath,
+                                                           const char* addressSpaceConfigPath,
+                                                           const char* userConfigPath,
+                                                           SOPC_ConfigServerXML_Custom* customConfig);
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetKeyPasswordCallback instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetMethodCallManager instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetWriteNotifCallback instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetShutdownCountdown instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval instead
  */
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetCurrentTimeRefreshInterval(uint16_t intervalMs);
 

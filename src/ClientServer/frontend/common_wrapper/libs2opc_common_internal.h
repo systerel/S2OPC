@@ -58,7 +58,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetClientComEvent(SOPC_ComEvent_Fct* clientC
 /**
  * \brief Define a function to be called for server side communication events.
  *        It should be called by a server wrapper to be record/unrecord its events callback
- *        (automatically done by ::SOPC_HelperConfigServer_Initialize)
+ *        (automatically done by ::SOPC_ServerConfigHelper_Initialize)
  *
  * \note The callback definition and use is protected by a mutex
  *
