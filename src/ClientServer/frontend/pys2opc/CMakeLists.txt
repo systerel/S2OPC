@@ -38,8 +38,8 @@ if(WITH_PYS2OPC)
   if(S2OPC_NANO_PROFILE)
     message(SEND_ERROR "-- PyS2OPC requires S2OPC_NANO_PROFILE=0")
   endif()
-  if(NOT TARGET s2opc_clientwrapper OR NOT TARGET s2opc_clientserver-xml-loaders-expat)
-    message(SEND_ERROR "-- PyS2OPC requires the S2OPC client wrapper and S2OPC xml loaders with Expat")
+  if(NOT expat_FOUND)
+    message(SEND_ERROR "-- PyS2OPC requires the S2OPC xml loaders with Expat")
   endif()
   # No Warning on PUBSUB_ONLY, as this file is not loaded in this case...
 
@@ -69,7 +69,7 @@ if(WITH_PYS2OPC)
 
   # Produce the expanded header
   s2opc_expand_header(${CMAKE_CURRENT_SOURCE_DIR}/s2opc_headers.h
-                      "s2opc_clientwrapper;s2opc_clientserver-xml-loaders-expat"
+                      "s2opc_clientserver"
                       ${PYS2OPC_INCLUDE}
                       )
 
@@ -92,8 +92,7 @@ if(WITH_PYS2OPC)
   add_custom_target(pys2opc ALL
                     DEPENDS ${PYS2OPC_WHEEL_PATH}
                     )
-  add_dependencies(pys2opc s2opc_clientwrapper)
-  add_dependencies(pys2opc s2opc_clientserver-xml-loaders-expat)
+  add_dependencies(pys2opc s2opc_clientserver)
 
   # Installation target
   # This is both required to test the installation of the wheel AND to be able to run the other tests AND to generate the doc...

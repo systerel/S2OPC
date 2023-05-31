@@ -51,11 +51,11 @@ if (expat_FOUND)
     "demo_server/toolkit_demo_server_methods.c"
     "demo_server/toolkit_demo_server.c")
   target_include_directories(${TOOLKIT_DEMO_SERVER} PRIVATE demo_server)
-  target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_serverwrapper)
+  target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver)
   target_compile_options(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 
-  target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
+  target_link_libraries(${TOOLKIT_DEMO_SERVER} PRIVATE s2opc_clientserver)
   target_compile_definitions(${TOOLKIT_DEMO_SERVER} PRIVATE "WITH_EXPAT")
 
   add_custom_command(
@@ -154,47 +154,50 @@ if(NOT WIN32)
   add_executable(s2opc_subscription_client "client_wrapper/client_subscription.c")
   target_compile_options(s2opc_subscription_client PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_subscription_client PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(s2opc_subscription_client PRIVATE s2opc_clientwrapper)
+  target_link_libraries(s2opc_subscription_client PRIVATE s2opc_clientserver)
 endif(NOT WIN32)
 
 # Samples with S2OPC client wrapper:
-set(CLIENT_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Demo_Config.xml")
-set(CLIENT_WRAPPER_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Wrapper_Config.xml")
+if (expat_FOUND)
 
-add_custom_command(
-  TARGET example_wrapper_connect POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CLIENT_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-)
+  set(CLIENT_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Demo_Config.xml")
+  set(CLIENT_WRAPPER_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Wrapper_Config.xml")
 
-add_executable(s2opc_wrapper_write "client_wrapper/examples/write.c")
-target_include_directories(s2opc_wrapper_write PRIVATE s2opc_clientwrapper)
-target_link_libraries(s2opc_wrapper_write PRIVATE s2opc_clientwrapper)
-target_compile_options(s2opc_wrapper_write PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_wrapper_write PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(s2opc_wrapper_write "client_wrapper/examples/write.c")
+  target_include_directories(s2opc_wrapper_write PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_write PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_write PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_write PRIVATE ${S2OPC_DEFINITIONS})
 
-add_executable(s2opc_wrapper_read "client_wrapper/examples/read.c")
-target_include_directories(s2opc_wrapper_read PRIVATE s2opc_clientwrapper)
-target_link_libraries(s2opc_wrapper_read PRIVATE s2opc_clientwrapper)
-target_compile_options(s2opc_wrapper_read PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_wrapper_read PRIVATE ${S2OPC_DEFINITIONS})
+  add_custom_command(
+    TARGET s2opc_wrapper_write POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CLIENT_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
 
-add_executable(s2opc_wrapper_browse "client_wrapper/examples/browse.c")
-target_include_directories(s2opc_wrapper_browse PRIVATE s2opc_clientwrapper)
-target_link_libraries(s2opc_wrapper_browse PRIVATE s2opc_clientwrapper)
-target_compile_options(s2opc_wrapper_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_wrapper_browse PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(s2opc_wrapper_read "client_wrapper/examples/read.c")
+  target_include_directories(s2opc_wrapper_read PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_read PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_read PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_read PRIVATE ${S2OPC_DEFINITIONS})
 
-add_executable(s2opc_wrapper_get_endpoints "client_wrapper/examples/get_endpoints.c")
-target_include_directories(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
-target_link_libraries(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientwrapper)
-target_compile_options(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(s2opc_wrapper_browse "client_wrapper/examples/browse.c")
+  target_include_directories(s2opc_wrapper_browse PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_browse PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_browse PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_browse PRIVATE ${S2OPC_DEFINITIONS})
 
-add_executable(example_wrapper_subscribe "client_wrapper/examples/subscribe.c")
-target_include_directories(example_wrapper_subscribe PRIVATE s2opc_clientwrapper)
-target_link_libraries(example_wrapper_subscribe PRIVATE s2opc_clientwrapper)
-target_compile_options(example_wrapper_subscribe PRIVATE ${S2OPC_COMPILER_FLAGS})
-target_compile_definitions(example_wrapper_subscribe PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(s2opc_wrapper_get_endpoints "client_wrapper/examples/get_endpoints.c")
+  target_include_directories(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_get_endpoints PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
+
+  add_executable(example_wrapper_subscribe "client_wrapper/examples/subscribe.c")
+  target_include_directories(example_wrapper_subscribe PRIVATE s2opc_clientserver)
+  target_link_libraries(example_wrapper_subscribe PRIVATE s2opc_clientserver)
+  target_compile_options(example_wrapper_subscribe PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(example_wrapper_subscribe PRIVATE ${S2OPC_DEFINITIONS})
+endif()
 
 # Benchmark tool demo
 add_executable(bench_tool "benchmarks/bench_tool.c")
@@ -205,7 +208,7 @@ target_compile_definitions(bench_tool PRIVATE ${S2OPC_DEFINITIONS})
 # TODO: XML parsing demo: make a unit test / validation test with it instead of demo
 if (expat_FOUND)
   add_executable(s2opc_parse_uanodeset "loaders/s2opc_parse_uanodeset.c")
-  target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver-xml-loaders-expat)
+  target_link_libraries(s2opc_parse_uanodeset PRIVATE s2opc_clientserver)
   target_compile_options(s2opc_parse_uanodeset PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_parse_uanodeset PRIVATE ${S2OPC_DEFINITIONS})
 endif()

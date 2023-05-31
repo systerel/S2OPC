@@ -19,7 +19,7 @@
 # under the License.
 
 """
-The `pys2opc` module is a Python3 wrapper of the client library `s2opc_clientwrapper`, based on `s2opc`.
+The `pys2opc` module is a Python3 wrapper of the library `s2opc_clientserver`, based on `s2opc`.
 It uses CFFI to bind Python with C.
 The wrapper provides Python classes for OPC UA concepts.
 

@@ -105,7 +105,6 @@ target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2op
 target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
 if(expat_FOUND)
-  target_link_libraries(check_helpers PRIVATE s2opc_clientserver-xml-loaders-expat)
   target_compile_definitions(check_helpers PRIVATE "WITH_EXPAT")
 endif()
 if(WITH_CONST_ADDSPACE)
@@ -263,15 +262,13 @@ add_executable(toolkit_test_server_client
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 add_dependencies(toolkit_test_server_client make-light-address-space)
 target_link_libraries(toolkit_test_server_client PRIVATE
-  s2opc_serverwrapper
-  s2opc_clientwrapper
+  s2opc_clientserver
   s2opc_clientserver-loader-embedded
   Check::check)
 target_include_directories(toolkit_test_server_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_server_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_server_client PRIVATE ${S2OPC_DEFINITIONS})
 if (expat_FOUND)
-  target_link_libraries(toolkit_test_server_client PRIVATE s2opc_clientserver-xml-loaders-expat)
   target_compile_definitions(toolkit_test_server_client PRIVATE "WITH_EXPAT")
 endif()
 s2opc_unit_test(toolkit_test_server_client)
@@ -286,7 +283,7 @@ add_executable(toolkit_test_server_local_service "validation_tests/server/toolki
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 add_dependencies(toolkit_test_server_local_service make-light-address-space)
 target_include_directories(toolkit_test_server_local_service PRIVATE "validation_tests/client" ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
@@ -302,12 +299,11 @@ add_executable(toolkit_test_client "validation_tests/client/toolkit_test_client.
   ${TEST_LIGHT_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 add_dependencies(toolkit_test_client make-light-address-space)
-target_link_libraries(toolkit_test_client PRIVATE s2opc_clientwrapper s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_include_directories(toolkit_test_client PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_client PRIVATE ${S2OPC_DEFINITIONS})
 if (expat_FOUND)
-  target_link_libraries(toolkit_test_client PRIVATE s2opc_clientserver-xml-loaders-expat)
   target_compile_definitions(toolkit_test_client PRIVATE "WITH_EXPAT")
 endif()
 if (WITH_STATIC_SECURITY_DATA)
@@ -344,7 +340,7 @@ add_executable(toolkit_test_suite_client "validation_tests/client/test_suite_cli
   "validation_tests/client/test_discovery.c"
   "validation_tests/client/test_session.c"
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
-target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientwrapper Check::check)
+target_link_libraries(toolkit_test_suite_client PRIVATE s2opc_clientserver Check::check)
 target_include_directories(toolkit_test_suite_client PRIVATE ${S2OPC_CLIENTDEMO_INCLUDES} ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(toolkit_test_suite_client PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_suite_client PRIVATE ${S2OPC_DEFINITIONS})
@@ -364,14 +360,13 @@ add_executable(${TOOLKIT_TEST_SERVER}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
   "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/toolkit_demo_server_methods.c")
 add_dependencies(${TOOLKIT_TEST_SERVER} make-server-address-space)
-target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_include_directories(${TOOLKIT_TEST_SERVER} PRIVATE
   ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
   "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
 target_compile_options(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE ${S2OPC_DEFINITIONS})
 if (expat_FOUND)
-  target_link_libraries(${TOOLKIT_TEST_SERVER} PRIVATE s2opc_clientserver-xml-loaders-expat)
   target_compile_definitions(${TOOLKIT_TEST_SERVER} PRIVATE "WITH_EXPAT")
 endif()
 
@@ -487,7 +482,7 @@ add_executable(toolkit_test_discovery_server
   "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/toolkit_test_discovery_server.c"
   ${TEST_SERVER_ADDRESS_SPACE_C})
 add_dependencies(toolkit_test_discovery_server make-server-address-space)
-target_link_libraries(toolkit_test_discovery_server PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+target_link_libraries(toolkit_test_discovery_server PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_compile_options(toolkit_test_discovery_server PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_discovery_server PRIVATE ${S2OPC_DEFINITIONS})
 
@@ -605,21 +600,21 @@ add_executable(check_libsub "validation_tests/client_wrapper/check_libsub.c" ${S
 target_include_directories(check_libsub PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(check_libsub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_libsub PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_libsub PRIVATE s2opc_clientwrapper Check::check)
+target_link_libraries(check_libsub PRIVATE s2opc_clientserver Check::check)
 s2opc_client_validation_test(check_libsub)
 
 add_executable(check_wrapper "validation_tests/client_wrapper/check_wrapper.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 target_include_directories(check_wrapper PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(check_wrapper PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_wrapper PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_wrapper PRIVATE s2opc_clientwrapper Check::check)
+target_link_libraries(check_wrapper PRIVATE s2opc_clientserver Check::check)
 s2opc_client_validation_test(check_wrapper)
 
 add_executable(check_wrapper_reverse_connection "validation_tests/client_wrapper/check_wrapper_reverse_connection.c" ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
 target_include_directories(check_wrapper_reverse_connection PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
 target_compile_options(check_wrapper_reverse_connection PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_wrapper_reverse_connection PRIVATE ${S2OPC_DEFINITIONS})
-target_link_libraries(check_wrapper_reverse_connection PRIVATE s2opc_clientwrapper Check::check)
+target_link_libraries(check_wrapper_reverse_connection PRIVATE s2opc_clientserver Check::check)
 s2opc_client_self_validation_test(check_wrapper_reverse_connection)
 
 ## PyS2OPC library validation tests ##

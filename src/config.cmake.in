@@ -15,18 +15,8 @@ else()
 endif()
 if(@S2OPC_PUBSUB_ONLY@)
 else()
-  # Config loaders
   include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-export.cmake")
   include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-loader-embedded-export.cmake")
-  if(@expat_FOUND@)
-    include ("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-xml-loaders-expat-export.cmake")
-  endif()
-  # Common wrapper
-  include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-commonwrapper-export.cmake")
-  # Client wrapper
-  include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-clientwrapper-export.cmake")
-  # Server wrapper
-  include("${CMAKE_CURRENT_LIST_DIR}/s2opc_clientserver-serverwrapper-export.cmake")
 endif()
 
 # Trigger find_package(expat ...) when using find_package(s2opc CONFIG)
