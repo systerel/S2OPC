@@ -481,7 +481,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
     if (sock != SOPC_INVALID_SOCKET && data != NULL && count <= INT32_MAX && sentBytes != NULL)
     {
         status = SOPC_STATUS_NOK;
-        res = send(sock, data, count, 0);
+        res = send(sock, data, count, MSG_NOSIGNAL);
 
         if (res >= 0)
         {
