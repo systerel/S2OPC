@@ -144,6 +144,14 @@ config SOPC_LARGE_TASK_STACK_SIZE
 	help
 	  Stack size (Kb) for "Secure_Chann" & "Services" S2OPC tasks
 
+config SOPC_ALLOC_SECTION
+    string  "Link area where stack and heap will be mapped"
+    default ".noinit"
+    depends on S2OPC
+    help
+      Link area where stack and heap will be mapped.
+      See possible sections for each device under zephyr/linker/section_tags.h
+
 config SOPC_HELPER_IMPL_INSTRUM
 	bool "Debug S2OPC ZEPHYR implementation"
 	default 0
