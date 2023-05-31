@@ -143,6 +143,11 @@ bool SOPC_Common_SetEncodingConstants(SOPC_Common_EncodingConstants config);
 #define SOPC_HAS_FILESYSTEM true
 #endif /* SOPC_HAS_FILESYSTEM */
 
+/** @brief Maximum number of timers. */
+#ifndef SOPC_MAX_TIMERS
+#define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
+#endif
+
 /** @brief define host-specific console print function
  * If no console is provided or log wants to be omitted, the following can be used:
  * \code{.c}

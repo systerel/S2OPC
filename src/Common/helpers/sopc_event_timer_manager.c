@@ -24,6 +24,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_common_constants.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -42,8 +43,6 @@ typedef struct SOPC_EventTimer
     bool isPeriodicTimer;
     uint64_t periodMs;
 } SOPC_EventTimer;
-
-#define SOPC_MAX_TIMERS UINT8_MAX /* TODO: avoid static maximum (see monitoredItems Id creation) */
 
 static bool usedTimerIds[SOPC_MAX_TIMERS + 1]; // 0 idx value is invalid (max idx = MAX)
 static uint32_t latestTimerId = 0;
