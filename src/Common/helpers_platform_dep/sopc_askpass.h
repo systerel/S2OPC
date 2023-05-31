@@ -47,7 +47,7 @@
  * \note                This function is useful to configure the client/server callback to retrieve
  *                      the password of the private key. It can be passed directly as input argument to
  *                      ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback,
- *                      ::SOPC_HelperConfigServer_SetKeyPasswordCallback
+ *                      ::SOPC_ServerConfigHelper_SetKeyPasswordCallback
  *
  */
 bool SOPC_AskPass_FromTerminal(char** outPassword);

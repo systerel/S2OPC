@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
     status = SOPC_CommonHelper_Initialize(&logConfiguration);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -162,7 +162,7 @@ int main(int argc, char* argv[])
     // Secu policy configuration
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Endpoint_Config* ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+        SOPC_Endpoint_Config* ep = SOPC_ServerConfigHelper_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
         SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
         if (NULL == ep || NULL == sp)
@@ -182,12 +182,12 @@ int main(int argc, char* argv[])
     }
 
     // Configure the callback
-    SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
 
     // Server certificates configuration
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
+        status = SOPC_ServerConfigHelper_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
                                                                 "./server_private/encrypted_server_2k_key.pem", true);
     }
 
@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
                                                   lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
+            status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
         }
     }
     if (SOPC_STATUS_OK != status)
@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
     {
         // Set namespaces
         const char* namespaces[] = {DEFAULT_APPLICATION_URI};
-        status = SOPC_HelperConfigServer_SetNamespaces(1, namespaces);
+        status = SOPC_ServerConfigHelper_SetNamespaces(1, namespaces);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+        status = SOPC_ServerConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", NULL,
                                                                    OpcUa_ApplicationType_DiscoveryServer);
 
@@ -252,13 +252,13 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
+        status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
     }
 
     // Configure the local service asynchronous response callback
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncRespCallback);
+        status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncRespCallback);
     }
 
     // Asynchronous request to start server
@@ -465,7 +465,7 @@ int main(int argc, char* argv[])
     }
 
     // Clear the toolkit configuration and stop toolkit threads
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK == status && SOPC_STATUS_OK == stopStatus)

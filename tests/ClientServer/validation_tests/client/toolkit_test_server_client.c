@@ -459,7 +459,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
      * use an embedded default demo server configuration.
      */
 
-    SOPC_Endpoint_Config* ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
+    SOPC_Endpoint_Config* ep = SOPC_ServerConfigHelper_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
     SOPC_SecurityPolicy* sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
     if (NULL == ep || NULL == sp)
@@ -488,7 +488,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     {
         SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
         pConfig->serverConfig.serverKeyEncrypted = true;
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Test_Server_Client: Failed to configure the server key user password callback\n");
@@ -496,7 +496,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
+        status = SOPC_ServerConfigHelper_SetKeyCertPairFromPath("./server_public/server_2k_cert.der",
                                                                 "./server_private/encrypted_server_2k_key.pem", true);
     }
 
@@ -509,7 +509,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
                                                        default_empty_cert_paths, default_revoked_certs, &pkiProvider);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
+            status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
         }
     }
     if (SOPC_STATUS_OK != status)
@@ -525,7 +525,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     {
         // Set namespaces
         const char* namespaces[] = {DEFAULT_APPLICATION_URI};
-        status = SOPC_HelperConfigServer_SetNamespaces(1, namespaces);
+        status = SOPC_ServerConfigHelper_SetNamespaces(1, namespaces);
 
         if (SOPC_STATUS_OK != status)
         {
@@ -535,7 +535,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
+        status = SOPC_ServerConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
                                                                    "S2OPC toolkit server example", NULL,
                                                                    OpcUa_ApplicationType_Server);
 
@@ -572,7 +572,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_HelperConfigServer_SetAddressSpace(address_space);
+            status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
         }
     }
 
@@ -606,7 +606,7 @@ START_TEST(test_server_client)
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -743,7 +743,7 @@ START_TEST(test_server_client)
     }
 
     /* Clear the server wrapper layer */
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
 
     /* Clear the client/server toolkit library (stop all library threads) */
     SOPC_CommonHelper_Clear();

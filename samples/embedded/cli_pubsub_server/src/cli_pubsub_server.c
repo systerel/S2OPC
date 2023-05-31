@@ -406,32 +406,32 @@ static void setupServer(void)
 {
     SOPC_ReturnStatus status;
 
-    status = SOPC_HelperConfigServer_Initialize();
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_Initialize failed");
+    status = SOPC_ServerConfigHelper_Initialize();
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_Initialize failed");
 
     log_UserCallback(NULL, "S2OPC initialization OK");
 
     //////////////////////////////////
     // Namespaces initialization
-    status = SOPC_HelperConfigServer_SetNamespaces(1, g_userNamespaces);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_SetNamespaces failed");
+    status = SOPC_ServerConfigHelper_SetNamespaces(1, g_userNamespaces);
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_SetNamespaces failed");
 
-    status = SOPC_HelperConfigServer_SetLocaleIds(1, g_localesArray);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_SetLocaleIds failed");
+    status = SOPC_ServerConfigHelper_SetLocaleIds(1, g_localesArray);
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_SetLocaleIds failed");
 
     //////////////////////////////////
     // Global descriptions initialization
-    status = SOPC_HelperConfigServer_SetApplicationDescription(APPLICATION_URI, PRODUCT_URI, SERVER_DESCRIPTION,
+    status = SOPC_ServerConfigHelper_SetApplicationDescription(APPLICATION_URI, PRODUCT_URI, SERVER_DESCRIPTION,
                                                                LOCALE_ID, OpcUa_ApplicationType_Server);
-    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_HelperConfigServer_SetApplicationDescription failed");
+    SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_SetApplicationDescription failed");
 
     //////////////////////////////////
     // Create endpoints configuration
     SOPC_SecurityPolicy* sp;
 
     PRINT("Create endpoint '%s'\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
-    g_epConfig = SOPC_HelperConfigServer_CreateEndpoint(CONFIG_SOPC_ENDPOINT_ADDRESS, true);
-    SOPC_ASSERT(NULL != g_epConfig && "SOPC_HelperConfigServer_CreateEndpoint failed");
+    g_epConfig = SOPC_ServerConfigHelper_CreateEndpoint(CONFIG_SOPC_ENDPOINT_ADDRESS, true);
+    SOPC_ASSERT(NULL != g_epConfig && "SOPC_ServerConfigHelper_CreateEndpoint failed");
 
     log_UserCallback(NULL, "Setting up security...");
 
@@ -477,9 +477,9 @@ static void setupServer(void)
     SOPC_SerializedCertificate* serializedCAcert = NULL;
     SOPC_CRLList* serializedCAcrl = NULL;
     SOPC_PKIProvider* pkiProvider = NULL;
-    status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
+    status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetKeyCertPairFromBytes() failed");
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetKeyCertPairFromBytes() failed");
 
     status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_SerializedCertificate_CreateFromDER() failed");
@@ -490,8 +490,8 @@ static void setupServer(void)
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_PKIProviderStack_Create() failed");
     SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
 
-    status = SOPC_HelperConfigServer_SetPKIprovider(pkiProvider);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetPKIprovider failed");
+    status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetPKIprovider failed");
 
     log_UserCallback(NULL, "Test_Server_Client: Certificates and key loaded");
 
@@ -506,8 +506,8 @@ static void setupServer(void)
     SOPC_ASSERT(NULL != addSpace && "SOPC_AddressSpace_Create failed");
     LOG_INFO("# Address space loaded\n");
 
-    status = SOPC_HelperConfigServer_SetAddressSpace(addSpace);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetAddressSpace failed");
+    status = SOPC_ServerConfigHelper_SetAddressSpace(addSpace);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetAddressSpace failed");
 
     SOPC_UserAuthorization_Manager* authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
     SOPC_ASSERT(NULL != authorizationManager && "Failed to allocate SOPC_UserAuthentication_Manager");
@@ -525,25 +525,25 @@ static void setupServer(void)
     authenticationManager->pData = (void*) NULL;
 
     authenticationManager->pFunctions = &authentication_functions;
-    SOPC_HelperConfigServer_SetUserAuthenticationManager(authenticationManager);
-    SOPC_HelperConfigServer_SetUserAuthorizationManager(authorizationManager);
+    SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
+    SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);
 
-    status = SOPC_HelperConfigServer_SetWriteNotifCallback(&serverWriteEvent);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetWriteNotifCallback failed");
+    status = SOPC_ServerConfigHelper_SetWriteNotifCallback(&serverWriteEvent);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetWriteNotifCallback failed");
 
     //////////////////////////////////
     // Set the asynchronous event callback
-    status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(localServiceAsyncRespCallback);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_HelperConfigServer_SetLocalServiceAsyncResponse failed");
+    status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(localServiceAsyncRespCallback);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse failed");
 
-    SOPC_HelperConfigServer_SetShutdownCountdown(1);
+    SOPC_ServerConfigHelper_SetShutdownCountdown(1);
 }
 
 /***************************************************/
 static void clearServer(void)
 {
-    LOG_DEBUG("SOPC_HelperConfigServer_Clear");
-    SOPC_HelperConfigServer_Clear();
+    LOG_DEBUG("SOPC_ServerConfigHelper_Clear");
+    SOPC_ServerConfigHelper_Clear();
 }
 
 /***************************************************/

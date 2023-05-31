@@ -49,13 +49,13 @@
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, namesapces already defined, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces);
 
 /**
  * \brief Define server locales ids supported from an array of locale strings.
  *
  * \warning The application name shall be defined for each supported locale defined here
- *          (use ::SOPC_HelperConfigServer_AddApplicationNameLocale when more than one locale supported)
+ *          (use ::SOPC_ServerConfigHelper_AddApplicationNameLocale when more than one locale supported)
  *
  * \param nbLocales  The number of locales defined in the array. It might be 0 if no locale defined (only default exist)
  * \param localeIds  The array of locales. Array and its content is copied by function.
@@ -65,7 +65,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, con
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, localesIds already defined, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
  * \brief Define server application description
@@ -82,11 +82,11 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const c
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, application description already set, server already started).
  *
- * \note Supported locales shall be defined using ::SOPC_HelperConfigServer_SetLocaleIds prior to this function call.
+ * \note Supported locales shall be defined using ::SOPC_ServerConfigHelper_SetLocaleIds prior to this function call.
  * \note If several locales are supported by server, application name shall be defined for each supported locale.
- *       Use ::SOPC_HelperConfigServer_AddApplicationNameLocale to add all application name necessary.
+ *       Use ::SOPC_ServerConfigHelper_AddApplicationNameLocale to add all application name necessary.
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* applicationUri,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetApplicationDescription(const char* applicationUri,
                                                                     const char* productUri,
                                                                     const char* defaultAppName,
                                                                     const char* defaultAppNameLocale,
@@ -104,11 +104,11 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* 
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, server already started).
  *
- * \note Supported locales shall be defined using ::SOPC_HelperConfigServer_SetLocaleIds prior to this function call.
+ * \note Supported locales shall be defined using ::SOPC_ServerConfigHelper_SetLocaleIds prior to this function call.
  * \note This function shall not be called before defining default name and locale with
- * ::SOPC_HelperConfigServer_SetApplicationDescription
+ * ::SOPC_ServerConfigHelper_SetApplicationDescription
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_AddApplicationNameLocale(const char* additionalAppName,
                                                                    const char* additionalAppNameLocale);
 
 /**
@@ -116,7 +116,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
  *
  * \param pki  The PKI provider to be used.
  *             It will be automatically deallocated using ::SOPC_PKIProvider_Free on call to
- *             ::SOPC_HelperConfigServer_Clear.
+ *             ::SOPC_ServerConfigHelper_Clear.
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
  *         if \p pki is invalid
@@ -125,7 +125,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* a
  *
  * \note A default PKI provider compliant with OPC UA standard is provided in sopc_pki_stack.h
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki);
 
 /**
  * \brief Set asymmetrical certificate and key of server from file paths.
@@ -140,7 +140,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, key/cert pair already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* serverCertPath,
                                                                  const char* serverKeyPath,
                                                                  bool encrypted);
 
@@ -158,7 +158,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* ser
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, key/cert pair already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certificateNbBytes,
                                                                   const unsigned char* serverCertificate,
                                                                   size_t keyNbBytes,
                                                                   const unsigned char* serverPrivateKey);
@@ -181,7 +181,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certifi
  * \note The returned pointer points to static memory and should not be freed or reused once configuration completed.
  *
  */
-SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery);
+SOPC_Endpoint_Config* SOPC_ServerConfigHelper_CreateEndpoint(const char* url, bool hasDiscovery);
 
 /**
  * \brief The structure containing an endpoint security configuration.
@@ -191,7 +191,7 @@ typedef SOPC_SecurityPolicy SOPC_SecurityConfig;
 /**
  * \brief Add a security policy to the endpoint configuration
  *
- * \param destEndpoint Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
+ * \param destEndpoint Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
  * \param uri          Security policy ::SOPC_SecurityPolicy_URI supported by \p destEndpoint
  *
  * \return A pointer to the new security configuration supported
@@ -258,7 +258,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
 /**
  * \brief Add a reverse connection configuration for a client to the server endpoint configuration
  *
- * \param destEndpoint       Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
+ * \param destEndpoint       Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
  * \param clientAppUri       The client ApplicationUri. It might be empty since it is not checked for now.
  * \param clientEndpointUrl  The client endpoint URL to connect to establish the reverse connection.
  *
@@ -273,7 +273,7 @@ bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
  *        in case only reverse connections shall be possible.
  *        It will fail if no reverse connection is configured.
  *
- * \param destEndpoint  Pointer to endpoint created with ::SOPC_HelperConfigServer_CreateEndpoint
+ * \param destEndpoint  Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
  *
  * \return True if the server endpoint is correctly configured to not listen for incoming connections from client.
  *         False in case no reverse connection configuration was defined with ::SOPC_EndpointConfig_AddClientToConnect
@@ -287,7 +287,7 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
  * \brief Configure the server with the given address space
  *
  * \param addressSpaceConfig  the address space definition, in case of successful operation
- *                            it is then deallocated on call to ::SOPC_HelperConfigServer_Clear
+ *                            it is then deallocated on call to ::SOPC_ServerConfigHelper_Clear
  *
  *  \return SOPC_STATUS_OK if configuration succeeded,
  *          SOPC_STATUS_INVALID_STATE if the configuration is not possible
@@ -296,7 +296,7 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
  *
  *  \note only one address space can be set, further call will be refused
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig);
 
 /* User authentication and authorization managers configuration without XML */
 
@@ -312,7 +312,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* add
  *
  *  \note if not called default user managers allowing any user will be instantiated
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr);
 
 /**
@@ -327,7 +327,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
  *
  *  \note if not called default user manager allowing any access will be instantiated
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
 
 /**
  * \brief Change the software build information to be displayed in the server build info node
@@ -340,7 +340,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserA
  *         or SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *         (toolkit not initialized, build info already set, server already started).
  */
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
 
 /**
  * \brief Get the server configured address space.
@@ -349,6 +349,84 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
  *  \return NULL if toolkit is not initialized,
  *          address space not defined or server already started,
  *          the configured address space otherwise.
+ */
+SOPC_AddressSpace* SOPC_ServerConfigHelper_GetAddressSpace(void);
+
+/* TODO: remove deprecated name in version 1.6.0 */
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetNamespaces instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetNamespaces(size_t nbNamespaces, const char** namespaces);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetLocaleIds instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocaleIds(size_t nbLocales, const char** localeIds);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetApplicationDescription instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetApplicationDescription(const char* applicationUri,
+                                                                    const char* productUri,
+                                                                    const char* defaultAppName,
+                                                                    const char* defaultAppNameLocale,
+                                                                    OpcUa_ApplicationType applicationType);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_AddApplicationNameLocale instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_AddApplicationNameLocale(const char* additionalAppName,
+                                                                   const char* additionalAppNameLocale);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetPKIprovider instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetPKIprovider(SOPC_PKIProvider* pki);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetKeyCertPairFromPath instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromPath(const char* serverCertPath,
+                                                                 const char* serverKeyPath,
+                                                                 bool encrypted);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetKeyCertPairFromBytes instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyCertPairFromBytes(size_t certificateNbBytes,
+                                                                  const unsigned char* serverCertificate,
+                                                                  size_t keyNbBytes,
+                                                                  const unsigned char* serverPrivateKey);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_CreateEndpoint instead
+ */
+SOPC_Endpoint_Config* SOPC_HelperConfigServer_CreateEndpoint(const char* url, bool hasDiscovery);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetAddressSpace instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetAddressSpace(SOPC_AddressSpace* addressSpaceConfig);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetUserAuthenticationManager instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthenticationManager(
+    SOPC_UserAuthentication_Manager* authenticationMgr);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetUserAuthorizationManager instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_SetSoftwareBuildInfo instead
+ */
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
+
+/**
+ * \deprecated Use ::SOPC_ServerConfigHelper_GetAddressSpace instead
  */
 SOPC_AddressSpace* SOPC_HelperConfigServer_GetAddressSpace(void);
 

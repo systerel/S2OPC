@@ -54,7 +54,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .serverStoppedStatus = SOPC_STATUS_OK,
     .stoppedCb = NULL,
     .configuredSecondsTillShutdown = SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
-    .configuredCurrentTimeRefreshIntervalMs = 1000,
+    .configuredCurrentTimeRefreshIntervalMs = SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS,
     .currentTimeRefreshTimerId = 0,
     .authenticationManager = NULL,
     .authorizationManager = NULL,
@@ -119,7 +119,7 @@ static bool SOPC_Internal_String_Equal(const uintptr_t a, const uintptr_t b)
 }
 
 // Check configuration is correct
-static bool SOPC_HelperConfigServer_CheckConfig(void)
+static bool SOPC_ServerConfigHelper_CheckConfig(void)
 {
     bool res = sopc_server_helper_config.nbEndpoints > 0;
     if (!res)
@@ -232,7 +232,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
 }
 
 // Finalize checked configuration
-static bool SOPC_HelperConfigServer_FinalizeCheckedConfig(void)
+static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
 {
     bool res = true;
 
@@ -339,11 +339,11 @@ bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void)
         res = SOPC_SERVER_STATE_CONFIGURING == sopc_server_helper_config.state;
         if (res)
         {
-            res = SOPC_HelperConfigServer_CheckConfig();
+            res = SOPC_ServerConfigHelper_CheckConfig();
         }
         if (res)
         {
-            res = SOPC_HelperConfigServer_FinalizeCheckedConfig();
+            res = SOPC_ServerConfigHelper_FinalizeCheckedConfig();
         }
         if (res)
         {
@@ -465,7 +465,7 @@ static void SOPC_ServerHelper_AdressSpaceNotifCb(const SOPC_CallContext* callCtx
     sopc_server_helper_config.writeNotifCb(callCtxPtr, (OpcUa_WriteValue*) opParam, opStatus);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void)
 {
     if (!SOPC_CommonHelper_GetInitialized() || SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
@@ -502,7 +502,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
     status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_ServerHelper_AdressSpaceNotifCb);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_HelperConfigServer_Clear();
+        SOPC_ServerConfigHelper_Clear();
     }
     else
     {
@@ -511,7 +511,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
     return status;
 }
 
-void SOPC_HelperConfigServer_Clear(void)
+void SOPC_ServerConfigHelper_Clear(void)
 {
     if (!SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
@@ -558,7 +558,7 @@ void SOPC_HelperConfigServer_Clear(void)
     SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -572,7 +572,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerK
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMethodCallManager(SOPC_MethodCallManager* mcm)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -588,7 +588,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallMa
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -602,7 +602,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -618,7 +618,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_Cre
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -632,7 +632,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_Loca
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetShutdownCountdown(uint16_t secondsTillShutdown)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -642,7 +642,7 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsT
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_SetCurrentTimeRefreshInterval(uint16_t intervalMs)
+SOPC_ReturnStatus SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval(uint16_t intervalMs)
 {
     if (!SOPC_ServerInternal_IsConfiguring())
     {
@@ -681,4 +681,49 @@ void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
         }
     }
     // Do not clear user managers since it is managed in a global way in high level API
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
+{
+    return SOPC_ServerConfigHelper_Initialize();
+}
+
+void SOPC_HelperConfigServer_Clear(void)
+{
+    SOPC_ServerConfigHelper_Clear();
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)
+{
+    return SOPC_ServerConfigHelper_SetKeyPasswordCallback(getServerKeyPassword);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMethodCallManager(SOPC_MethodCallManager* mcm)
+{
+    return SOPC_ServerConfigHelper_SetMethodCallManager(mcm);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetWriteNotifCallback(SOPC_WriteNotif_Fct* writeNotifCb)
+{
+    return SOPC_ServerConfigHelper_SetWriteNotifCallback(writeNotifCb);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetMonitItemNodeAvailCallback(SOPC_CreateMI_NodeAvail_Fct* nodeAvailCb)
+{
+    return SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(nodeAvailCb);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb)
+{
+    return SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(asyncRespCb);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetShutdownCountdown(uint16_t secondsTillShutdown)
+{
+    return SOPC_ServerConfigHelper_SetShutdownCountdown(secondsTillShutdown);
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_SetCurrentTimeRefreshInterval(uint16_t intervalMs)
+{
+    return SOPC_ServerConfigHelper_SetCurrentTimeRefreshInterval(intervalMs);
 }

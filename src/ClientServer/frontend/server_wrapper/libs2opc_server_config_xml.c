@@ -215,7 +215,7 @@ static bool SOPC_HelperInternal_LoadUsersConfigFromFile(const char* filename)
     return res;
 }
 
-SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverConfigPath,
+SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverConfigPath,
                                                            const char* addressSpaceConfigPath,
                                                            const char* userConfigPath,
                                                            SOPC_ConfigServerXML_Custom* customConfig)
@@ -277,4 +277,13 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverCon
     }
 
     return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_HelperConfigServer_ConfigureFromXML(const char* serverConfigPath,
+                                                           const char* addressSpaceConfigPath,
+                                                           const char* userConfigPath,
+                                                           SOPC_ConfigServerXML_Custom* customConfig)
+{
+    return SOPC_ServerConfigHelper_ConfigureFromXML(serverConfigPath, addressSpaceConfigPath, userConfigPath,
+                                                    customConfig);
 }
