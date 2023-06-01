@@ -550,12 +550,19 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             SOPC_Free(security->msgNonceRandom);
             security->msgNonceRandom = NULL;
         }
-
         context->transport->mqttTopic = context->mqttTopic;
-
-        context->transport->pFctSend(context->transport, buffer);
-        SOPC_Buffer_Delete(buffer);
-        buffer = NULL;
+        if (NULL == buffer)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                   "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                                   (const void*) message, (unsigned) SOPC_UADP_NetworkMessage_Get_Last_Error());
+        }
+        else
+        {
+            context->transport->pFctSend(context->transport, buffer);
+            SOPC_Buffer_Delete(buffer);
+            buffer = NULL;
+        }
     }
 }
 
