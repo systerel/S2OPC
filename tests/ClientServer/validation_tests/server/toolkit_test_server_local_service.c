@@ -44,7 +44,6 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"
-#include "util_variant.h"
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"

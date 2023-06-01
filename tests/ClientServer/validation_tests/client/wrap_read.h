@@ -20,7 +20,6 @@
 #ifndef WRAP_READ_H_
 #define WRAP_READ_H_
 
-#include <stdbool.h>
 #include "sopc_types.h"
 
 /* The lib */

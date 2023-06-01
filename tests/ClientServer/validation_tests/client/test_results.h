@@ -20,13 +20,14 @@
 #ifndef TEST_RESULTS_H_
 #define TEST_RESULTS_H_
 
-#include "b2c.h"
+#include <stdbool.h>
+
 #include "sopc_types.h"
 
-void test_results_set_service_result(t_bool res);
+void test_results_set_service_result(bool res);
 void test_results_set_WriteRequest(OpcUa_WriteRequest* pWriteReq);
 
-t_bool test_results_get_service_result(void);
+bool test_results_get_service_result(void);
 OpcUa_WriteRequest* test_results_get_WriteRequest(void);
 
 #endif

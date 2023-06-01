@@ -24,8 +24,6 @@
 
 #include "wrap_read.h"
 
-#include "b2c.h"
-
 #include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
 
