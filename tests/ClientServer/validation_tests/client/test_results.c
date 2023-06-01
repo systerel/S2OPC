@@ -24,7 +24,7 @@
 static int32_t valid_service_result = 0;
 static OpcUa_WriteRequest* current_pWriteRequest = NULL;
 
-void test_results_set_service_result(t_bool res)
+void test_results_set_service_result(bool res)
 {
     SOPC_Atomic_Int_Set(&valid_service_result, res ? 1 : 0);
 }
@@ -34,7 +34,7 @@ void test_results_set_WriteRequest(OpcUa_WriteRequest* pWriteReq)
     SOPC_Atomic_Ptr_Set((void**) &current_pWriteRequest, pWriteReq);
 }
 
-t_bool test_results_get_service_result(void)
+bool test_results_get_service_result(void)
 {
     return SOPC_Atomic_Int_Get(&valid_service_result) == 1;
 }

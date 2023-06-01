@@ -27,7 +27,6 @@
 #include "sopc_address_space.h"
 #include "sopc_mem_alloc.h"
 #include "testlib_read_response.h"
-#include "util_variant.h"
 
 extern SOPC_AddressSpace* address_space_bs__nodes;
 
@@ -36,18 +35,38 @@ extern SOPC_AddressSpace* address_space_bs__nodes;
  */
 static SOPC_Variant* get_attribute_variant(SOPC_AddressSpace_Node* node, uint32_t attr_id)
 {
+    SOPC_ReturnStatus retStatus = SOPC_STATUS_OK;
+    SOPC_Variant* result = SOPC_Variant_Create();
+    if (NULL == result)
+    {
+        return result;
+    }
+    result->ArrayType = SOPC_VariantArrayType_SingleValue;
+    result->DoNotClear = true;
+
     switch (attr_id)
     {
     case 1: // NodeId attribute
-        return util_variant__new_Variant_from_NodeId(SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node));
+        result->BuiltInTypeId = SOPC_NodeId_Id;
+        result->Value.NodeId = SOPC_AddressSpace_Get_NodeId(address_space_bs__nodes, node);
+        break;
     case 2: // NodeClass attribute
-        return util_variant__new_Variant_from_NodeClass(node->node_class);
+        result->BuiltInTypeId = SOPC_Int32_Id;
+        result->Value.Int32 = (int32_t) node->node_class;
+        break;
     case 13: // Value attribute
-        return util_variant__new_Variant_from_Variant(SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node));
+        retStatus = SOPC_Variant_ShallowCopy(result, SOPC_AddressSpace_Get_Value(address_space_bs__nodes, node));
+        break;
     /* TODO: rest of mandatory attributes */
     default:
-        return NULL;
+        retStatus = SOPC_STATUS_NOT_SUPPORTED;
     }
+    if (retStatus != SOPC_STATUS_OK)
+    {
+        SOPC_Variant_Delete(result);
+        result = NULL;
+    }
+    return result;
 }
 
 bool test_read_request_response(const OpcUa_ReadResponse* pReadResp, SOPC_StatusCode statusCode, int verbose)

@@ -29,11 +29,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "testlib_write.h"
+
 #include "libs2opc_request_builder.h"
 #include "opcua_statuscodes.h"
 #include "sopc_mem_alloc.h"
-#include "testlib_write.h"
-#include "util_variant.h"
 
 extern SOPC_AddressSpace* address_space_bs__nodes;
 

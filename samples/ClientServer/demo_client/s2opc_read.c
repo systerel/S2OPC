@@ -29,7 +29,6 @@
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
-#include "util_variant.h"
 
 #include "argparse.h"
 #include "config.h"

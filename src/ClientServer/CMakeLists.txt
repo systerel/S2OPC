@@ -39,7 +39,6 @@ set(S2OPC_CLIENTSERVER_PUBLIC_INCLUDES
     "${CMAKE_CURRENT_SOURCE_DIR}/address_space"
     "${CMAKE_CURRENT_SOURCE_DIR}/api_toolkit"
     "${CMAKE_CURRENT_SOURCE_DIR}/configuration"
-    "${CMAKE_CURRENT_SOURCE_DIR}/services/b2c"
 )
 
 set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
@@ -47,6 +46,7 @@ set(S2OPC_CLIENTSERVER_PRIVATE_INCLUDES
     "secure_channels"
     "services"
     "services/bgenc"
+    "services/b2c"
 )
 
 # define S2OPC wrappers source files
@@ -153,6 +153,8 @@ foreach(dir ${S2OPC_CLIENTSERVER_PUBLIC_INCLUDES})
     file(GLOB temp_files "${dir}/*.h")
     list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES ${temp_files})
 endforeach()
+# Exclude internal headers
+list(FILTER S2OPC_CLIENTSERVER_INCLUDE_FILES EXCLUDE REGEX ".*internal.*\.h")
 list(APPEND S2OPC_CLIENTSERVER_INCLUDE_FILES "${WRAPPERS_INCLUDE_FILES}")
 
 # set public header property
