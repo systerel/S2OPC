@@ -56,6 +56,9 @@ HIERARCHICAL_REFERENCE_TYPES = frozenset([
     ])
 
 
+TYPE_DEFINITION_REFERENCE_TYPE = 'HasTypeDefinition'
+
+
 def indent(level):
     return '\n' + INDENT_SPACES*level
 
@@ -243,7 +246,7 @@ def merge(tree, new, namespaces):
     if tree_aliases is None:
         print('Merge: Aliases expected to be present in first address space')
         return False
-    tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}  # Assumes that the model does not have the same alias defined multiple times
+    tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}
     new_aliases = new.find('uanodeset:Aliases', namespaces)
     new_alias_dict = {}
     if new_aliases is not None:
@@ -413,6 +416,66 @@ def remove_subtree(tree: ET.ElementTree, namespaces: dict, remove_root_nid):
     # even with a Breadth-First Search; so we start with the entire subtree, then
     # retain only the nodes with no outer parent
     _rec_bf_remove_subtree(tree, namespaces, {remove_root_nid}, subtree, is_root=True)
+
+
+def __get_aliases(tree, namespaces):
+    tree_aliases = tree.find('uanodeset:Aliases', namespaces)
+    if tree_aliases is None:
+        return {}
+    return {alias.text: alias.get('Alias') for alias in tree_aliases}
+
+
+def __exists_ref(tree, search, nids_or_aliases: set, namespaces):
+    for ref_node in tree.iterfind(search, namespaces):
+        ref_nid = ref_node.text.strip()
+        if ref_nid in nids_or_aliases:
+            return True
+    return False
+
+
+def remove_unused(tree: ET.ElementTree, namespaces: dict):
+    # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
+    aliases = __get_aliases(tree, namespaces)
+    for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject/uanodeset:References/uanodeset:Reference", False),
+               ('UAVariableType', ".//uanodeset:UAVariable/uanodeset:References/uanodeset:Reference", False),
+               ('UADataType', ".//uanodeset:UAVariable[@DataType='{}']", True),
+               ('UAReferenceType', ".//*/uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
+        while True:
+            # loop while the removed types produce unused types
+            removed_nids = set()
+            for ty_node in tree.iterfind(f"uanodeset:{ty}", namespaces):
+                nid = ty_node.get('NodeId')
+                if not nid.startswith('ns='):
+                    # ignore NS0 types
+                    continue
+                alias = aliases.get(nid)
+                refs = set([nid])
+                if alias is not None:
+                    refs.add(alias)
+                subtype_search = f".//uanodeset:{ty}/uanodeset:References/uanodeset:Reference[@ReferenceType='HasSubtype'][@IsForward='false']"
+                if __exists_ref(tree, subtype_search, refs, namespaces):
+                    # this type is subtyped
+                    continue
+                if is_full_request:
+                    found = False
+                    for ref in refs:
+                        req = search.format(ref)
+                        if tree.find(req, namespaces) is not None:
+                            # this type is used by data
+                            found = True
+                            break
+                    if found:
+                        continue
+                else:
+                    # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
+                    if __exists_ref(tree, search, refs, namespaces):
+                        # this type is used by data
+                        continue
+                tree.getroot().remove(ty_node)
+                removed_nids.add(nid)
+            if len(removed_nids) == 0:
+                break
+            _remove_refs_to_nids(tree, removed_nids, namespaces)
 
 
 def sanitize(tree, namespaces):
@@ -642,13 +705,16 @@ def run_merge(args):
     if args.remove_node_ids_gt > 0:
         remove_node_ids_greater_than(tree, namespaces, args.remove_node_ids_gt)
 
-    if args.sanitize or args.remove_subtree > 0:
+    if args.sanitize or args.remove_subtree is not None or args.remove_unused:
         res = sanitize(tree, namespaces)
     else:
         res = True
 
     if res and args.remove_subtree is not None:
         remove_subtree(tree, namespaces, args.remove_subtree)
+
+    if res and args.remove_unused:
+        remove_unused(tree, namespaces)
 
     if res:
         tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
@@ -684,6 +750,12 @@ def make_argparser():
     parser.add_argument('--remove-subtree', default=0, type=str, dest='remove_subtree',
                         help='''
                         Remove the node with the given NodeId along with all its descendants, except for those with another ancestry.
+                        This  option forces the creation of reciprocal references (sanitize).
+                        ''')
+    parser.add_argument('--remove-unused', action='store_true', dest='remove_unused',
+                        help='''
+                        Remove all of the type definitions which are not used by the model 
+                        (except for basic/standard datatypes which are mandatory).
                         This  option forces the creation of reciprocal references (sanitize).
                         ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
