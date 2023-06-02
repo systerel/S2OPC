@@ -1,0 +1,18 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="42">
+        <message groupId="93" groupVersion="1" publishingInterval=".1" securityMode="signAndEncrypt">
+          <dataset>
+            <variable nodeId="ns=1;i=0" dataType="UInt32" displayName="ignored"/>
+          </dataset>
+        </message>
+    </connection>
+    <!-- The emitter subscribes to the variable that has been looped-back,
+         but stores it in another cell of the cache -->
+    <connection address="opc.udp://232.1.2.101:4840" mode="subscriber">
+        <message groupId="93" groupVersion="1" publishingInterval=".1" securityMode="signAndEncrypt" publisherId="43">
+          <dataset>
+            <variable nodeId="ns=1;i=1" dataType="UInt32" displayName="ignored"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>

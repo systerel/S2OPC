@@ -1,0 +1,39 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <!-- one to many -->
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="42">
+        <!-- one to many -->
+        <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt">
+          <dataset>
+          <!-- one to many -->
+            <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+          </dataset>
+        </message>
+        <message groupId="15" groupVersion="1" publishingInterval="1000.">
+          <dataset>
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>
+          </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <!-- one to many -->
+        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
+          <dataset>
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>
+            <!-- the nodeId is used to retrieve the variable in the adresse space -->
+          </dataset>
+        </message>
+        <message groupId="15" groupVersion="1" publishingInterval="1000." publisherId="42">
+          <dataset>
+            <!-- one to many -->
+            <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=SubUInt" displayName="varUInt" dataType="UInt64"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
