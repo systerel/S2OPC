@@ -100,8 +100,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - notification: write notification events are reported through application API
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
-- Address space with all mandatory attributes: AccessLevel, BrowseName, ContainsNoLoop, DataType, DisplayName, EvenNotifier, Executable, Historizing,
-  IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value (with single value and array Variants), ValueRank (and References)
+- Address space with all mandatory attributes: AccessLevel, (AccessLevelEx), (ArrayDimensions), BrowseName, ContainsNoLoop, DataType, DisplayName,
+  EvenNotifier, Executable, Historizing, IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value, ValueRank (and References)
 
 ### Address space definition and generation
 
@@ -197,7 +197,7 @@ Prerequisites:
 - Make (tested with GNU Make version 4.3)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
 - GCC (tested with GCC version 11.2.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.2)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.3)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.5.0 compiled with CMake)
 - Python3 (tested with version 3.6.3)
@@ -235,8 +235,8 @@ Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.16.2 and 3.22.2)
 - Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.16.12)
-- [expat](https://libexpat.github.io/) (tested with expat version 2.4.3)
+- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.28.2)
+- [expat](https://libexpat.github.io/) (tested with expat version 2.5.0)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 
 To build S2OPC libraries and tests with default configuration on current stable release, you can use the build_s2opc.bat script by adapting few parameters through environment variables:
@@ -249,7 +249,7 @@ By setting environment variables S2OPC_NANO_PROFILE, S2OPC_NODE_MANAGEMENT, BUIL
 - S2OPC_DYNAMIC_TYPE_RESOLUTION (OFF by default): if set to ON, type resolution uses the HasSubType references of address space if the already static extracted types of NS0 are not sufficient.
 - BUILD_SHARED_LIBS (ON by default): if set to OFF, it builds static S2OPC libraries (necessary for ENABLE_TESTING=ON)
 - ENABLE_TESTING (OFF by default): if set to ON, it builds the S2OPC unit tests and validation tests (BUILD_SHARED_LIBS=OFF necessary)
-- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,8ful$
+- ENABLE_SAMPLES (OFF by default): if set to ON, it builds the S2OPC demonstration samples (demo server, command line client tools,
 etc.)
 - WITH_PYS2OPC (OFF by default): if set to ON, it builds the Python binding wheel for S2OPC and PYS2OPC_WHEEL_NAME variable shall also be set to define the wheel file name.
 - (deprecated) WITH_NANO_EXTENDED: equivalent to S2OPC_NANO_PROFILE set to OFF (default)
@@ -292,11 +292,10 @@ Run all tests:
 - Tests results are provided in build/bin/*.tap files and shall indicate "ok" status for each test
 
 Run OPC UA Compliance Test Tool (UACTT: tool available for OPC foundation corporate members only):
-- Run toolkit server in build/bin/ directory: ./toolkit_test_nano_server
+- Run toolkit server in build/bin/ directory: ./toolkit_test_server
 - Run the UACTT tests using the UACTT project configuration file `tests/ClientServer/acceptance_tools/Acceptation_S2OPC/Acceptation_S2OPC.ctt.xml`
 
-Note: ./toolkit_test_nano_server shall be killed when test is finished
-Note 2: if compiled with WITH_NANO_EXTENDED set to 1, ./toolkit_test_nano_server binary name is changed to ./toolkit_test_server
+Note: ./toolkit_test_server shall be killed when test is finished
 
 ## Licenses
 
