@@ -3737,8 +3737,17 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                     "ServicesMgr: SC_DISCONNECTED_ACK: remove scCfgIdx=%" PRIu32 " failed (not found)", scCfgIdx);
             }
         }
-        // Finalize to free the SC connection for further use
-        scConnection->state = SECURE_CONNECTION_STATE_SC_CLOSED;
+        if (NULL != scConnection && SECURE_CONNECTION_STATE_SC_CLOSING == scConnection->state)
+        {
+            // Finalize to free the SC connection for further use
+            scConnection->state = SECURE_CONNECTION_STATE_SC_CLOSED;
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ServicesMgr: SC_DISCONNECTED_ACK: invalid connection or state for scIdx=%" PRIu32,
+                                   eltId);
+        }
         break;
     default:
         // Already filtered by secure channels API module
