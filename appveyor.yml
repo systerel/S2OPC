@@ -41,7 +41,7 @@ test_script:
     - set S2OPC_CLIENTSERVER_ONLY=1
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
-    - set PYS2OPC_WHEEL_NAME=pys2opc-1.4.0-cp36-cp36m-win_amd64.whl
+    - set PYS2OPC_WHEEL_NAME=pys2opc-1.4.1-cp36-cp36m-win_amd64.whl
     - set VS_VERSION="Visual Studio 15 2017 Win64"
     - set ENABLE_SAMPLES=on
     - set TEST_PASSWORD_PRIVATE_KEY=password
