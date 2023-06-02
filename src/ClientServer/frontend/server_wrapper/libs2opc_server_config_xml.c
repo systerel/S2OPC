@@ -34,11 +34,9 @@
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
 
-#ifdef WITH_EXPAT
 #include "xml_expat/sopc_config_loader.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 #include "xml_expat/sopc_users_loader.h"
-#endif
 
 static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 {
@@ -133,12 +131,8 @@ static bool SOPC_HelperInternal_LoadServerConfigFromFile(const char* filename)
     {
         return false;
     }
-#ifdef WITH_EXPAT
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     bool res = SOPC_ConfigServer_Parse(fd, &pConfig->serverConfig);
-#else
-    bool res = false;
-#endif
     fclose(fd);
 
     if (!res)
@@ -162,11 +156,7 @@ static bool SOPC_HelperInternal_LoadAddressSpaceConfigFromFile(const char* filen
     {
         return false;
     }
-#ifdef WITH_EXPAT
     SOPC_AddressSpace* space = SOPC_UANodeSet_Parse(fd);
-#else
-    SOPC_AddressSpace* space = NULL;
-#endif
     fclose(fd);
 
     if (space == NULL)
@@ -198,12 +188,8 @@ static bool SOPC_HelperInternal_LoadUsersConfigFromFile(const char* filename)
     {
         return false;
     }
-#ifdef WITH_EXPAT
     bool res = SOPC_UsersConfig_Parse(fd, &sopc_server_helper_config.authenticationManager,
                                       &sopc_server_helper_config.authorizationManager);
-#else
-    bool res = false;
-#endif
     fclose(fd);
 
     if (!res)

@@ -86,10 +86,12 @@ file(GLOB SOPC_ZEPHYR_SRC ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr/*.c
 
 # Include other files
 file(GLOB_RECURSE SOPC_CLIENT_SERVER_SRC ${S2OPC_SRC}/ClientServer/*.c)
+# Exclude files for XML configuration management
 list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/config_loaders/.*" )
 list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/address_space_loaders/xml_expat/.*" )
 list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/loaders/helpers/.*" )
 list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/frontend/server_wrapper/libs2opc_server_config_xml.*" )
+list(FILTER SOPC_CLIENT_SERVER_SRC EXCLUDE REGEX "${S2OPC_SRC}/ClientServer/frontend/client_wrapper/libs2opc_client_config_xml.*" )
 
 file(GLOB_RECURSE SOPC_PUBSUB_SRC ${S2OPC_SRC}/PubSub/*.c)
 list(FILTER SOPC_PUBSUB_SRC EXCLUDE REGEX "${S2OPC_SRC}/PubSub/config_loaders/.*" )

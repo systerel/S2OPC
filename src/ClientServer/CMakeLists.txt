@@ -130,10 +130,6 @@ add_library(s2opc_clientserver
 target_compile_options(s2opc_clientserver PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_clientserver PRIVATE ${S2OPC_DEFINITIONS} "UANODESET_LOADER_LOG")
 target_link_libraries(s2opc_clientserver PUBLIC s2opc_common PRIVATE ${LOADER_XML_PRIVATE_DEP})
-if (expat_FOUND)
-  target_compile_definitions(s2opc_clientserver PRIVATE "WITH_EXPAT")
-endif()
-
 
 target_include_directories(s2opc_clientserver
   PUBLIC
