@@ -194,7 +194,6 @@ endif(NOT WIN32)
 # Samples with S2OPC client wrapper:
 if (expat_FOUND)
 
-  set(CLIENT_DEMO_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Demo_Config.xml")
   set(CLIENT_WRAPPER_CONFIG_XML  "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Wrapper_Config.xml")
 
   add_executable(s2opc_wrapper_write "client_wrapper/examples/write.c")
@@ -205,7 +204,7 @@ if (expat_FOUND)
 
   add_custom_command(
     TARGET s2opc_wrapper_write POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CLIENT_DEMO_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND ${CMAKE_COMMAND} -E copy ${CLIENT_WRAPPER_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   )
 
   add_executable(s2opc_wrapper_read "client_wrapper/examples/read.c")
