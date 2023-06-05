@@ -127,7 +127,8 @@ static void MessageCtx_Array_Clear(void);
 // Traverse allocated message array to initialize transport context associated to message. Increment "current" field.
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
-                                       SOPC_WriterGroup* group);
+                                       SOPC_WriterGroup* group,
+                                       const SOPC_RealTime* tRef);
 
 /* Finds the message with the smallest next_timeout
    return NULL if every publisher is acyclic */
@@ -280,7 +281,8 @@ static void MessageCtx_Array_Clear(void)
 
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
-                                       SOPC_WriterGroup* group)
+                                       SOPC_WriterGroup* group,
+                                       const SOPC_RealTime* tRef)
 {
     SOPC_ASSERT(ctx != NULL);
     SOPC_ASSERT(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
@@ -322,7 +324,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
     context->writerMessageSequence = 1;
-    context->next_timeout = SOPC_RealTime_Create(NULL);
+    context->next_timeout = SOPC_RealTime_Create(tRef);
 
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
@@ -747,15 +749,17 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         {
             resultSOPC = SOPC_STATUS_NOK;
         }
+        SOPC_RealTime* t0 = SOPC_RealTime_Create(NULL);
         for (uint16_t j = 0; SOPC_STATUS_OK == resultSOPC && j < nbWriterGroup; j++)
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
 
-            if (!MessageCtx_Array_Init_Next(transportCtx, *pubId, group))
+            if (!MessageCtx_Array_Init_Next(transportCtx, *pubId, group, t0))
             {
                 resultSOPC = SOPC_STATUS_NOK;
             }
         }
+        SOPC_RealTime_Delete(&t0);
     }
 
     /* Creation of the thread (time-sensitive or not) */
