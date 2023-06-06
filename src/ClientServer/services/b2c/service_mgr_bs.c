@@ -91,7 +91,7 @@ void service_mgr_bs__client_async_discovery_request_without_channel(
             elt->msgToSend = service_mgr_bs__req_msg;
             elt->msgType = service_mgr_bs__req_typ;
             elt->msgAppContext = service_mgr_bs__app_context;
-            addedMsg = SOPC_SLinkedList_Append(sLinkedList, 0, elt);
+            addedMsg = (void*) SOPC_SLinkedList_Append(sLinkedList, 0, (uintptr_t) elt);
         }
         if (NULL != elt && addedMsg == (void*) elt)
         {
@@ -121,7 +121,7 @@ void service_mgr_bs__client_channel_connected_event_discovery(
             {
                 while (NULL != listIt)
                 {
-                    elt = SOPC_SLinkedList_Next(&listIt);
+                    elt = (SOPC_DiscoveryRequest_ToSend*) SOPC_SLinkedList_Next(&listIt);
                     if (elt != NULL)
                     {
                         SOPC_Internal_DiscoveryContext* discoveryContext = SOPC_Calloc(1, sizeof(*discoveryContext));
@@ -159,10 +159,10 @@ void service_mgr_bs__client_channel_connected_event_discovery(
     }
 }
 
-static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, void* val)
+static void SOPC_ServiceMgrBs_DicoveryReqSendingFailure(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    SOPC_DiscoveryRequest_ToSend* elt = val;
+    SOPC_DiscoveryRequest_ToSend* elt = (SOPC_DiscoveryRequest_ToSend*) val;
     SOPC_EncodeableType* reqEncType = NULL;
     SOPC_EncodeableType* respEncType = NULL;
     bool isReq = false;
@@ -193,10 +193,10 @@ void service_mgr_bs__client_discovery_req_failures_on_final_connection_failure(
     }
 }
 
-static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, void* val)
+static void SOPC_ServiceMgrBs_DeallocateMsgs(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    SOPC_DiscoveryRequest_ToSend* elt = val;
+    SOPC_DiscoveryRequest_ToSend* elt = (SOPC_DiscoveryRequest_ToSend*) val;
     if (NULL != elt)
     {
         message_out_bs__dealloc_msg_out(elt->msgToSend);

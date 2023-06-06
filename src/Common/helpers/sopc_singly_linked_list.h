@@ -54,11 +54,13 @@ SOPC_SLinkedList* SOPC_SLinkedList_Create(size_t sizeMax);
  *  \param list     Pointer on the linked list in which new element must be added
  *  \param id       Unique identifier to associate with the element
  *                  (if not unique Prepend has LIFO behavior for Find and Remove)
- *  \param value    Pointer to the value of the element to prepend
+ *  \param value    Pointer to the value or unsigned integer value of the element to prepend.
+ *                  Value 0 is considered invalid.
  *
- *  \return         Pointer to the value prepended, provided as parameter, if succeeded, NULL otherwise
+ *  \return         Pointer to the value or unsigned integer value prepended, provided as parameter,
+ *                  if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value);
+uintptr_t SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, uintptr_t value);
 
 /**
  *  \brief          Add a new element (and allocate new list element) to the tail of the given linked list.
@@ -66,11 +68,12 @@ void* SOPC_SLinkedList_Prepend(SOPC_SLinkedList* list, uint32_t id, void* value)
  *  \param list     Pointer on the linked list in which new element must be added
  *  \param id       Unique identifier to associate with the element
  *                  (if not unique Append has FIFO behavior for Find and Remove)
- *  \param value    Pointer to the value of the element to append
- *
- *  \return         Pointer to the value appended, provided as parameter, if succeeded, NULL otherwise
+ *  \param value    Pointer to the value or unsigned integer value of the element to append
+ *                  Value 0 is considered invalid.
+ *  \return         Pointer to the value or unsigned integer value appended, provided as parameter,
+ *                  if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
+uintptr_t SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, uintptr_t value);
 
 /**
  * \brief           Insert element in sorted list in correct index regarding compare function.
@@ -82,25 +85,27 @@ void* SOPC_SLinkedList_Append(SOPC_SLinkedList* list, uint32_t id, void* value);
  *
  * \param list      Pointer to the linked list
  * \param id        Identifier of the given value
- * \param value     Value to insert in the sorted list
+ * \param value     Value to insert in the sorted list.
+ *                  Value 0 is considered invalid.
  * \param pCompFn   Compare function pointer returning a int8_t equals to -1 if left value < right value, 0 if left
  * value == right value and 1 if left value > right value
  *
- *  \return         Pointer to the value insterted, provided as parameter, if succeeded, NULL otherwise
+ *  \return         Pointer to the value or unsigned integer value inserted, provided as parameter,
+ *                  if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
-                                    uint32_t id,
-                                    void* value,
-                                    int8_t (*pCompFn)(void* left, void* right));
+uintptr_t SOPC_SLinkedList_SortedInsert(SOPC_SLinkedList* list,
+                                        uint32_t id,
+                                        uintptr_t value,
+                                        int8_t (*pCompFn)(uintptr_t left, uintptr_t right));
 
 /**
  *  \brief          Get and remove the head element of the list
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
  *
- *  \return         Pointer to the head element value of the list or NULL if list is empty
+ *  \return         Pointer to the head element value of the list or 0 (NULL) if list is empty
  */
-void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
+uintptr_t SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Get and remove the last element of the list
@@ -108,9 +113,9 @@ void* SOPC_SLinkedList_PopHead(SOPC_SLinkedList* list);
  *
  *  \param list     Pointer on the linked list from which head element must be returned and removed
  *
- *  \return         Pointer to the last element value of the list or NULL if list is empty
+ *  \return         Pointer to the last element value of the list or 0 (NULL) if list is empty
  */
-void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
+uintptr_t SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Get the head element of the list without removing it.
@@ -118,9 +123,9 @@ void* SOPC_SLinkedList_PopLast(SOPC_SLinkedList* list);
  *
  *  \param list     Pointer on the linked list from which head element must be returned
  *
- *  \return         Pointer to the head element value of the list or NULL if list is empty
+ *  \return         Pointer to the head element value of the list or 0 (NULL) if list is empty
  */
-void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list);
+uintptr_t SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Get the tail element of the list without removing it.
@@ -128,9 +133,9 @@ void* SOPC_SLinkedList_GetHead(SOPC_SLinkedList* list);
  *
  *  \param list     Pointer on the linked list from which tail element must be returned
  *
- *  \return         Pointer to the tail element value of the list or NULL if list is empty
+ *  \return         Pointer to the tail element value of the list or 0 (NULL) if list is empty
  */
-void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list);
+uintptr_t SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list);
 
 /**
  *  \brief          Find the first value associated to the given id in the linked list
@@ -139,20 +144,19 @@ void* SOPC_SLinkedList_GetLast(SOPC_SLinkedList* list);
  *  \param list     Pointer on the linked list in which element must be found
  *  \param id       Unique identifier associated with the element to find
  *
- *  \return         Pointer to the value found if succeeded, NULL otherwise
+ *  \return         Pointer to the value or unsigned integer value found if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
+uintptr_t SOPC_SLinkedList_FindFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
  * \brief           Apply a function to the value of each element of the list.
  *
- *   An example is the SOPC_SLinkedList_EltGenericFree() function which frees the \p void* \p value
- *   of each element of the list.
+ *   An example is the SOPC_SLinkedList_EltGenericFree() function which frees the value of each element of the list.
  *
  * \param list      Pointer to the linked list
  * \param pFn       Function pointer which takes the id and the value of each element
  */
-void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, void* val));
+void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, uintptr_t val));
 
 /**
  *  \brief          Find and remove the first value associated to the given id in the linked list
@@ -161,20 +165,21 @@ void SOPC_SLinkedList_Apply(SOPC_SLinkedList* list, void (*pFn)(uint32_t id, voi
  *  \param list     Pointer on the linked list in which element must be found
  *  \param id       Unique identifier associated with the element to remove
  *
- *  \return         Pointer to the value removed if succeeded, NULL otherwise
+ *  \return         Pointer to the value or unsigned integer value removed if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
+uintptr_t SOPC_SLinkedList_RemoveFromId(SOPC_SLinkedList* list, uint32_t id);
 
 /**
  *  \brief          Find and remove the first value pointer equal in the linked list
  *                  (iterate from head to tail)
  *
  *  \param list     Pointer on the linked list in which element must be found
- *  \param value    Pointer on the value to remove from list
+ *  \param value    Pointer to the value or unsigned integer value of the element to remove.
+ *                  Value 0 is considered invalid.
  *
- *  \return         Pointer to the value removed if succeeded, NULL otherwise
+ *  \return         Pointer to the value or unsigned integer value removed if succeeded, 0 (NULL) otherwise
  */
-void* SOPC_SLinkedList_RemoveFromValuePtr(SOPC_SLinkedList* list, void* value);
+uintptr_t SOPC_SLinkedList_RemoveFromValuePtr(SOPC_SLinkedList* list, uintptr_t value);
 
 /**
  *  \brief          Delete all elements of the given linked list
@@ -196,7 +201,7 @@ void SOPC_SLinkedList_Delete(SOPC_SLinkedList* list);
  *  \param id       Unique identifier associated with the element
  *  \param val      Element to be freed
  */
-void SOPC_SLinkedList_EltGenericFree(uint32_t id, void* val);
+void SOPC_SLinkedList_EltGenericFree(uint32_t id, uintptr_t val);
 
 /**
  * \brief           Get an iterator on a linked list to iterate on elements from head to tail
@@ -223,9 +228,9 @@ bool SOPC_SLinkedList_HasNext(const SOPC_SLinkedListIterator* it);
 
  * \param it        An iterator on a linked list
  *
- * \return          Pointer on the next value of the linked list
+ * \return          Pointer to the value or unsigned integer value of the next element of the linked list
  */
-void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
+uintptr_t SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
 
 /**
  * \brief           Return the next element pointed by iterator in the linked list
@@ -234,9 +239,9 @@ void* SOPC_SLinkedList_Next(SOPC_SLinkedListIterator* it);
  * \param it        An iterator on a linked list
  * \param pId       Pointer in which the next element id of the linked list is set
  *
- * \return          Pointer on the next value of the linked list
+ * \return          Pointer to the value or unsigned integer value of the next element of the linked list
  */
-void* SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId);
+uintptr_t SOPC_SLinkedList_NextWithId(SOPC_SLinkedListIterator* it, uint32_t* pId);
 
 /**
  * \brief           Get the number of elements in the linked list

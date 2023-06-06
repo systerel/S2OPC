@@ -80,8 +80,8 @@ void notification_republish_queue_bs__add_republish_notif_to_queue(
         SOPC_Free(notifMsgCpy);
         return;
     }
-    void* res = SOPC_SLinkedList_Append(notification_republish_queue_bs__p_queue,
-                                        notification_republish_queue_bs__p_seq_num, (void*) notifMsgCpy);
+    void* res = (void*) SOPC_SLinkedList_Append(notification_republish_queue_bs__p_queue,
+                                                notification_republish_queue_bs__p_seq_num, (uintptr_t) notifMsgCpy);
     if (res != notifMsgCpy)
     {
         OpcUa_NotificationMessage_Clear((void*) notifMsgCpy);
@@ -105,11 +105,11 @@ void notification_republish_queue_bs__allocate_new_republish_queue(
     }
 }
 
-static void SOPC_InternalDeallocNotifMsg(uint32_t id, void* val)
+static void SOPC_InternalDeallocNotifMsg(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    OpcUa_NotificationMessage_Clear(val);
-    SOPC_Free(val);
+    OpcUa_NotificationMessage_Clear((void*) val);
+    SOPC_Free((void*) val);
 }
 
 void notification_republish_queue_bs__clear_and_deallocate_republish_queue(
@@ -129,9 +129,9 @@ void notification_republish_queue_bs__clear_republish_queue(
 void notification_republish_queue_bs__discard_oldest_republish_notif(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue)
 {
-    void* removed = SOPC_SLinkedList_PopLast(notification_republish_queue_bs__p_queue);
+    void* removed = (void*) SOPC_SLinkedList_PopLast(notification_republish_queue_bs__p_queue);
     SOPC_ASSERT(NULL != removed); // Guarantee in precondition of B model
-    SOPC_InternalDeallocNotifMsg(0, removed);
+    SOPC_InternalDeallocNotifMsg(0, (uintptr_t) removed);
 }
 
 void notification_republish_queue_bs__get_nb_republish_notifs(
@@ -149,7 +149,7 @@ void notification_republish_queue_bs__get_republish_notif_from_queue(
     constants__t_notif_msg_i* const notification_republish_queue_bs__p_notif_msg)
 {
     *notification_republish_queue_bs__bres = false;
-    *notification_republish_queue_bs__p_notif_msg = SOPC_SLinkedList_FindFromId(
+    *notification_republish_queue_bs__p_notif_msg = (constants__t_notif_msg_i) SOPC_SLinkedList_FindFromId(
         notification_republish_queue_bs__p_queue, notification_republish_queue_bs__p_seq_num);
     if (*notification_republish_queue_bs__p_notif_msg != NULL)
     {

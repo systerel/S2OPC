@@ -499,7 +499,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_ConfigureConnection(const SOPC_LibSub_Connec
     /* Append it to the internal list */
     if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_SLinkedList_Append(pListConfig, cfgId, pCfgCpy) == NULL)
+        if ((void*) SOPC_SLinkedList_Append(pListConfig, cfgId, (uintptr_t) pCfgCpy) == NULL)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -565,7 +565,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     /* Check the configuration Id */
     if (SOPC_STATUS_OK == status)
     {
-        pCfg = SOPC_SLinkedList_FindFromId(pListConfig, cfgId);
+        pCfg = (SOPC_LibSub_ConnectionCfg*) SOPC_SLinkedList_FindFromId(pListConfig, cfgId);
         if (pCfg == NULL)
         {
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -588,7 +588,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
     /* Adds it to the list and modify pCliId */
     if (SOPC_STATUS_OK == status)
     {
-        if (pSM != SOPC_SLinkedList_Append(pListClient, clientId, pSM))
+        if (pSM != (SOPC_StaMac_Machine*) SOPC_SLinkedList_Append(pListClient, clientId, (uintptr_t) pSM))
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
@@ -673,7 +673,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Finds the state machine */
-    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -751,7 +751,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendRequestOnSession(SOPC_LibSub_Connec
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine on which the request will be sent */
-    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -888,7 +888,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Disconnect(const SOPC_LibSub_ConnectionId cl
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the state machine */
-    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -951,7 +951,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_CreateSubscription(const SOPC_LibSub_Connect
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine */
-    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1018,7 +1018,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_DeleteSubscription(const SOPC_LibSub_Connect
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Retrieve the machine */
-    pSM = SOPC_SLinkedList_FindFromId(pListClient, cliId);
+    pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_FindFromId(pListClient, cliId);
     if (NULL == pSM)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -1159,7 +1159,7 @@ static void ToolkitEventCallback(SOPC_App_Com_Event event, uint32_t IdOrStatus, 
         pIterCli = SOPC_SLinkedList_GetIterator(pListClient);
         while (NULL != pIterCli)
         {
-            pSM = SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
+            pSM = (SOPC_StaMac_Machine*) SOPC_SLinkedList_NextWithId(&pIterCli, &cliId);
             // Note : pSM can be NULL if the StaMac has been closed before the event is processed
             if (NULL != pSM)
             {

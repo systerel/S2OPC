@@ -56,8 +56,8 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
     {
         return;
     }
-    void* added = SOPC_SLinkedList_Append(registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId,
-                                          newRecord);
+    void* added = (void*) SOPC_SLinkedList_Append(
+        registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId, (uintptr_t) newRecord);
     if (added == newRecord)
     {
         // Move RegisteredServer
@@ -84,8 +84,8 @@ void service_register_server2_set_bs__add_to_registered_server2_set(
             OpcUa_RegisteredServer_Clear(&newRecord->registeredServer);
             OpcUa_MdnsDiscoveryConfiguration_Clear(&newRecord->mDNSconfig);
 
-            void* removed = SOPC_SLinkedList_RemoveFromId(registeredServer2List,
-                                                          (uint32_t) service_register_server2_set_bs__p_recordId);
+            void* removed = (void*) SOPC_SLinkedList_RemoveFromId(
+                registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId);
             SOPC_ASSERT(added == removed);
             SOPC_Free(newRecord);
         }
@@ -120,7 +120,8 @@ void service_register_server2_set_bs__continue_iter_registered_server2_set(
     constants__t_RegisteredServer2Info_i* const service_register_server2_set_bs__p_registeredServerInfo)
 {
     SOPC_ASSERT(NULL != registeredServer2ListIt);
-    *service_register_server2_set_bs__p_registeredServerInfo = SOPC_SLinkedList_Next(&registeredServer2ListIt);
+    *service_register_server2_set_bs__p_registeredServerInfo =
+        (constants__t_RegisteredServer2Info_i) SOPC_SLinkedList_Next(&registeredServer2ListIt);
     *service_register_server2_set_bs__continue = SOPC_SLinkedList_HasNext(&registeredServer2ListIt);
 }
 
@@ -147,10 +148,10 @@ void service_register_server2_set_bs__get_registered_server2_registered_server(
         &service_register_server2_set_bs__p_registeredServerInfo->registeredServer;
 }
 
-static void freeRecord(uint32_t id, void* val)
+static void freeRecord(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    SOPC_RegisterServer2Record_Internal* record = val;
+    SOPC_RegisterServer2Record_Internal* record = (SOPC_RegisterServer2Record_Internal*) val;
 
     if (NULL != record)
     {
@@ -164,9 +165,9 @@ void service_register_server2_set_bs__remove_from_registered_server2_set(
     const t_entier4 service_register_server2_set_bs__p_recordId)
 {
     SOPC_ASSERT(service_register_server2_set_bs__p_recordId >= 0);
-    SOPC_RegisterServer2Record_Internal* record =
-        SOPC_SLinkedList_RemoveFromId(registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId);
-    freeRecord(0, (void*) record);
+    SOPC_RegisterServer2Record_Internal* record = (SOPC_RegisterServer2Record_Internal*) SOPC_SLinkedList_RemoveFromId(
+        registeredServer2List, (uint32_t) service_register_server2_set_bs__p_recordId);
+    freeRecord(0, (uintptr_t) record);
 }
 
 void service_register_server2_set_bs__reset_registered_server2_set(void)

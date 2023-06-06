@@ -47,7 +47,7 @@ void monitored_item_queue_it_bs__continue_iter_monitored_item(
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     SOPC_SLinkedListIterator* it = (SOPC_SLinkedListIterator*) monitored_item_queue_it_bs__p_iterator;
     SOPC_GCC_DIAGNOSTIC_RESTORE
-    *monitored_item_queue_it_bs__p_monitoredItem = SOPC_SLinkedList_Next(it);
+    *monitored_item_queue_it_bs__p_monitoredItem = (constants__t_monitoredItemPointer_i*) SOPC_SLinkedList_Next(it);
     *monitored_item_queue_it_bs__continue = SOPC_SLinkedList_HasNext(it);
 }
 

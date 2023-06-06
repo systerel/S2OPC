@@ -433,7 +433,7 @@ static void check_parsed_s2opc_config(SOPC_S2OPC_Config* s2opcConfig)
     while (SOPC_SLinkedList_HasNext(&it))
     {
         localeCounter++;
-        SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+        SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
         ck_assert_ptr_nonnull(lt);
         if (2 == localeCounter)
         {

@@ -118,18 +118,18 @@ static uint32_t SOPC_Internal_GetFreshTimerId_WithoutLock(void)
     return result;
 }
 
-static int8_t SOPC_Internal_SLinkedList_EventTimerCompare(void* left, void* right)
+static int8_t SOPC_Internal_SLinkedList_EventTimerCompare(uintptr_t left, uintptr_t right)
 {
     int8_t result;
-    if (NULL == left && NULL == right)
+    if (NULL == (void*) left && NULL == (void*) right)
     {
         result = 0;
     }
-    else if (NULL == left)
+    else if (NULL == (void*) left)
     {
         result = -1;
     }
-    else if (NULL == right)
+    else if (NULL == (void*) right)
     {
         result = 1;
     }
@@ -146,11 +146,12 @@ static void SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(SOPC_EventT
 
     if (usedTimerIds[timer->id])
     {
-        result = SOPC_SLinkedList_RemoveFromId(timers, timer->id);
+        result = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timer->id);
         SOPC_ASSERT(result == timer);
 
         // Set timer
-        result = SOPC_SLinkedList_SortedInsert(timers, timer->id, timer, SOPC_Internal_SLinkedList_EventTimerCompare);
+        result = (SOPC_EventTimer*) SOPC_SLinkedList_SortedInsert(timers, timer->id, (uintptr_t) timer,
+                                                                  SOPC_Internal_SLinkedList_EventTimerCompare);
 
         if (result != timer)
         {
@@ -177,7 +178,7 @@ static void SOPC_Internal_EventTimer_Cancel_WithoutLock(uint32_t timerId)
     SOPC_EventTimer* timer = NULL;
     if (usedTimerIds[timerId])
     {
-        timer = SOPC_SLinkedList_RemoveFromId(timers, timerId);
+        timer = (SOPC_EventTimer*) SOPC_SLinkedList_RemoveFromId(timers, timerId);
         if (timer != NULL)
         {
             SOPC_Free(timer);
@@ -243,7 +244,8 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
             }
 
             // Add to list of timers to restart it
-            if (timer != SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (void*) timer))
+            if (timer !=
+                (SOPC_EventTimer*) SOPC_SLinkedList_Append(periodicTimersToRestart, timer->id, (uintptr_t) timer))
             {
                 SOPC_Logger_TraceError(
                     SOPC_LOG_MODULE_COMMON,
@@ -397,8 +399,8 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     {
         newTimer->id = result;
         // valid timer Id
-        insertResult =
-            SOPC_SLinkedList_SortedInsert(timers, result, newTimer, SOPC_Internal_SLinkedList_EventTimerCompare);
+        insertResult = (void*) SOPC_SLinkedList_SortedInsert(timers, result, (uintptr_t) newTimer,
+                                                             SOPC_Internal_SLinkedList_EventTimerCompare);
         if (insertResult == NULL)
         {
             result = 0;

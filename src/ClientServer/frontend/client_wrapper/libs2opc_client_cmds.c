@@ -152,7 +152,7 @@ static void SOPC_ClientHelper_GenReqCtx_Cancel(SOPC_ClientHelper_GenReqCtx* genR
     // Append to canceled request contexts
     statusMutex = Mutex_Lock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
-    void* found = SOPC_SLinkedList_Append(canceledRequestContexts, 0, genReqCtx);
+    void* found = (void*) SOPC_SLinkedList_Append(canceledRequestContexts, 0, (uintptr_t) genReqCtx);
     SOPC_ASSERT(found != NULL);
     statusMutex = Mutex_Unlock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
@@ -175,14 +175,14 @@ static void SOPC_ClientHelper_Canceled_GenReqCtx_ClearAndFree(SOPC_ClientHelper_
     SOPC_ASSERT(NULL != genReqCtx);
     SOPC_ReturnStatus statusMutex = Mutex_Lock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
-    void* found = SOPC_SLinkedList_RemoveFromValuePtr(canceledRequestContexts, genReqCtx);
+    void* found = (void*) SOPC_SLinkedList_RemoveFromValuePtr(canceledRequestContexts, (uintptr_t) genReqCtx);
     statusMutex = Mutex_Unlock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     SOPC_ASSERT(NULL != found);
     SOPC_ClientHelper_GenReqCtx_ClearAndFree(genReqCtx);
 }
 
-static void SOPC_SLinkedList_GenReqCtxFree(uint32_t id, void* val)
+static void SOPC_SLinkedList_GenReqCtxFree(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_ClientHelper_GenReqCtx_ClearAndFree((SOPC_ClientHelper_GenReqCtx*) val);

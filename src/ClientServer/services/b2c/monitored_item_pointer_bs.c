@@ -332,7 +332,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         else
         {
             // Reuse freed id
-            freshId = (uint32_t)(uintptr_t) SOPC_SLinkedList_PopHead(monitoredItemIdFreed);
+            freshId = (uint32_t) SOPC_SLinkedList_PopHead(monitoredItemIdFreed);
             if (freshId != 0)
             {
                 monitItem->monitoredItemId = freshId;
@@ -424,8 +424,8 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
                            " deletion",
                            monitItem->monitoredItemId);
 
-    uintptr_t appended = (uintptr_t) SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
-                                                             (void*) (uintptr_t) monitItem->monitoredItemId);
+    uintptr_t appended = SOPC_SLinkedList_Append(monitoredItemIdFreed, monitItem->monitoredItemId,
+                                                 (uintptr_t) monitItem->monitoredItemId);
 
     if (appended != (uintptr_t) monitItem->monitoredItemId)
     {

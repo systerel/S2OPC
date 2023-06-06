@@ -47,8 +47,8 @@ void notification_republish_queue_it_bs__continue_iter_notif_republish(
 {
     SOPC_UNUSED_ARG(notification_republish_queue_it_bs__p_queue);
 
-    void* notifMsg = SOPC_SLinkedList_NextWithId(notification_republish_queue_it_bs__p_iterator,
-                                                 notification_republish_queue_it_bs__seq_num);
+    void* notifMsg = (void*) SOPC_SLinkedList_NextWithId(notification_republish_queue_it_bs__p_iterator,
+                                                         notification_republish_queue_it_bs__seq_num);
     SOPC_ASSERT(notifMsg != NULL);
     *notification_republish_queue_it_bs__continue =
         SOPC_SLinkedList_HasNext(notification_republish_queue_it_bs__p_iterator);

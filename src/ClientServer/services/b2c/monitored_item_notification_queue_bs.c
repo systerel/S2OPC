@@ -66,7 +66,7 @@ void monitored_item_notification_queue_bs__allocate_new_monitored_item_notificat
     }
 }
 
-static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, void* val)
+static void SOPC_InternalNotificationQueueElement_Free(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_InternalNotificationElement* notifElt = (SOPC_InternalNotificationElement*) val;
@@ -105,11 +105,11 @@ static void SOPC_InternalDiscardOneNotification(SOPC_SLinkedList* notifQueue, bo
     SOPC_InternalNotificationElement* discardedNotifElt = NULL;
     if (discardOldest)
     {
-        discardedNotifElt = SOPC_SLinkedList_PopHead(notifQueue);
+        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopHead(notifQueue);
     }
     else
     {
-        discardedNotifElt = SOPC_SLinkedList_PopLast(notifQueue);
+        discardedNotifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopLast(notifQueue);
     }
     SOPC_ASSERT(NULL != discardedNotifElt);
     OpcUa_WriteValue_Clear(discardedNotifElt->value);
@@ -125,11 +125,11 @@ static void SOPC_InternalSetOverflowBitAfterDiscard(SOPC_SLinkedList* notifQueue
     if (discardOldest)
     {
         /* New oldest notification DataValue status code should have bit set */
-        notifElt = SOPC_SLinkedList_GetHead(notifQueue);
+        notifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_GetHead(notifQueue);
     }
     else
     { // New last notification DataValue status code should have bit set
-        notifElt = SOPC_SLinkedList_GetLast(notifQueue);
+        notifElt = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_GetLast(notifQueue);
     }
     SOPC_ASSERT(NULL != notifElt);
 
@@ -166,7 +166,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
         notifElt->value->Value.ServerTimestamp = monitored_item_notification_queue_bs__p_val_ts_srv.timestamp;
         notifElt->value->Value.ServerPicoSeconds = monitored_item_notification_queue_bs__p_val_ts_srv.picoSeconds;
 
-        checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+        checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
+            monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
         if (checkAdded != notifElt)
         {
             uint32_t capacity = SOPC_SLinkedList_GetCapacity(monitored_item_notification_queue_bs__p_queue);
@@ -176,7 +177,8 @@ static SOPC_ReturnStatus SOPC_InternalAddCommonFinishAddNotifElt(
                 SOPC_InternalDiscardOneNotification(monitored_item_notification_queue_bs__p_queue,
                                                     notifElt->monitoredItemPointer->discardOldest);
 
-                checkAdded = SOPC_SLinkedList_Append(monitored_item_notification_queue_bs__p_queue, 0, notifElt);
+                checkAdded = (SOPC_InternalNotificationElement*) SOPC_SLinkedList_Append(
+                    monitored_item_notification_queue_bs__p_queue, 0, (uintptr_t) notifElt);
                 if (checkAdded != notifElt)
                 {
                     retStatus = SOPC_STATUS_NOK;
@@ -405,7 +407,7 @@ void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notifi
 {
     *monitored_item_notification_queue_bs__p_continue = false;
     SOPC_InternalNotificationElement* notifElt =
-        SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
+        (SOPC_InternalNotificationElement*) SOPC_SLinkedList_PopHead(monitored_item_notification_queue_bs__p_queue);
 
     SOPC_ASSERT(notifElt != NULL);
 

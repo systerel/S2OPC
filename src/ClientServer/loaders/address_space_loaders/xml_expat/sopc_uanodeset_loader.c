@@ -811,7 +811,8 @@ static bool init_value_complex_ctx(struct parse_context_t* ctx,
     ctx->complex_value_ctx.end_element_restore_context = SOPC_SLinkedList_Create(0);
     /* Append current value complex type context into context stack:
        when stack is empty it indicates end of the value tag */
-    void* appended = SOPC_SLinkedList_Append(ctx->complex_value_ctx.end_element_restore_context, 0, complex_type_tags);
+    void* appended = (void*) SOPC_SLinkedList_Append(ctx->complex_value_ctx.end_element_restore_context, 0,
+                                                     (uintptr_t) complex_type_tags);
     if (ctx->complex_value_ctx.end_element_restore_context == NULL || appended == NULL)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
@@ -1097,7 +1098,8 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
 
         // Enqueue the current context to be restored on end_element_handler
-        SOPC_SLinkedList_Prepend(ctx->complex_value_ctx.end_element_restore_context, 0, ctx->complex_value_ctx.tags);
+        SOPC_SLinkedList_Prepend(ctx->complex_value_ctx.end_element_restore_context, 0,
+                                 (uintptr_t) ctx->complex_value_ctx.tags);
 
         if (NULL != currentTagCtx->childs)
         {
@@ -2259,7 +2261,8 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         SOPC_ASSERT(current_element_has_value(ctx));
         SOPC_ASSERT(NULL != ctx->complex_value_ctx.end_element_restore_context);
         // Restore context of current tag
-        ctx->complex_value_ctx.tags = SOPC_SLinkedList_PopHead(ctx->complex_value_ctx.end_element_restore_context);
+        ctx->complex_value_ctx.tags =
+            (parse_complex_value_tag_t*) SOPC_SLinkedList_PopHead(ctx->complex_value_ctx.end_element_restore_context);
         SOPC_ASSERT(NULL != ctx->complex_value_ctx.tags);
 
         // Check if it is the complex value closing node

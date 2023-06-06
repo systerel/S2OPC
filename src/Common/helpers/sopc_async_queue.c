@@ -107,11 +107,11 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
     {
         if (false == firstOut)
         {
-            enqueuedElt = SOPC_SLinkedList_Append(queue->queueList, 0, element);
+            enqueuedElt = (void*) SOPC_SLinkedList_Append(queue->queueList, 0, (uintptr_t) element);
         }
         else
         {
-            enqueuedElt = SOPC_SLinkedList_Prepend(queue->queueList, 0, element);
+            enqueuedElt = (void*) SOPC_SLinkedList_Prepend(queue->queueList, 0, (uintptr_t) element);
         }
         if (element == enqueuedElt)
         {
@@ -155,7 +155,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
     if (NULL != queue && NULL != element)
     {
         Mutex_Lock(&queue->queueMutex);
-        *element = SOPC_SLinkedList_PopHead(queue->queueList);
+        *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
         if (NULL == *element)
         {
             if (false == isBlocking)
@@ -165,11 +165,11 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
             else
             {
                 queue->waitingThreads++;
-                *element = SOPC_SLinkedList_PopHead(queue->queueList);
+                *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
                 while (NULL == *element)
                 {
                     Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
-                    *element = SOPC_SLinkedList_PopHead(queue->queueList);
+                    *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
                 }
                 status = SOPC_STATUS_OK;
                 queue->waitingThreads--;

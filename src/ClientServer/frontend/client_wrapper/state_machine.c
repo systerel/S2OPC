@@ -526,7 +526,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     pReqCtx->appCtx = appCtx;
     pReqCtx->requestScope = requestScope;
     pReqCtx->requestType = requestType;
-    if (SOPC_SLinkedList_Append(pSM->pListReqCtx, 0, (void*) pReqCtx) != pReqCtx)
+    if ((SOPC_StaMac_ReqCtx*) SOPC_SLinkedList_Append(pSM->pListReqCtx, 0, (uintptr_t) pReqCtx) != pReqCtx)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -692,7 +692,8 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                     pSM->nMonItClientHandle++;
                     lCliHndl[i] = pSM->nMonItClientHandle;
                     strcpy(nodeId, lszNodeId[i]);
-                    result = SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, pSM->nMonItClientHandle, nodeId);
+                    result = (void*) SOPC_SLinkedList_Append(pSM->dataIdToNodeIdList, pSM->nMonItClientHandle,
+                                                             (uintptr_t) nodeId);
                 }
                 if (NULL == result)
                 {
@@ -848,7 +849,7 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitored
 
     while (!bHasMonIt && NULL != pIter)
     {
-        if (SOPC_SLinkedList_Next(&pIter) == (void*) pAppCtx->outCtxId)
+        if (SOPC_SLinkedList_Next(&pIter) == pAppCtx->outCtxId)
         {
             bHasMonIt = true;
         }
@@ -1278,7 +1279,7 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
         // We ensure context address pointer comparison is correct
         // (memory has not been reallocated since we enqueued in pSM->pListReqCtx)
         // by removing from pSM->pListReqCtx and deallocating memory at same time.
-        reqCtx = SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, (void*) toolkitCtx);
+        reqCtx = (void*) SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListReqCtx, toolkitCtx);
         if (NULL != reqCtx)
         {
             bProcess = true;
@@ -1410,7 +1411,8 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
                 }
                 else if (NULL != pSM->pCbkClientHelperDataChanged && INT32_MAX >= pSM->iCliId)
                 {
-                    void* nodeId = SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
+                    void* nodeId =
+                        (void*) SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
                     if (NULL != nodeId)
                     {
                         (*pSM->pCbkClientHelperDataChanged)((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
@@ -1494,8 +1496,8 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
     {
         if (SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
         {
-            if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId,
-                                        (void*) MIappCtx->outCtxId) != (void*) MIappCtx->outCtxId)
+            if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId, MIappCtx->outCtxId) !=
+                MIappCtx->outCtxId)
             {
                 pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".", i);

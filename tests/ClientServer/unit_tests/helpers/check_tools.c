@@ -751,15 +751,15 @@ START_TEST(test_linked_list)
     list = SOPC_SLinkedList_Create(3);
     ck_assert_ptr_nonnull(list);
 
-    value = SOPC_SLinkedList_Prepend(list, 1, &value1);
+    value = (void*) SOPC_SLinkedList_Prepend(list, 1, (uintptr_t) &value1);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(1, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_Prepend(list, 2, &value2);
+    value = (void*) SOPC_SLinkedList_Prepend(list, 2, (uintptr_t) &value2);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(2, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_Append(list, 3, &value3);
+    value = (void*) SOPC_SLinkedList_Append(list, 3, (uintptr_t) &value3);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
     // Capacity cannot be set to value < length:
@@ -772,61 +772,61 @@ START_TEST(test_linked_list)
     ck_assert_ptr_nonnull(it);
     bool hasNext = SOPC_SLinkedList_HasNext(&it);
     ck_assert(hasNext);
-    value = SOPC_SLinkedList_NextWithId(&it, &id);
+    value = (void*) SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(id, 2);
     hasNext = SOPC_SLinkedList_HasNext(&it);
     ck_assert(hasNext);
-    value = SOPC_SLinkedList_Next(&it);
+    value = (void*) SOPC_SLinkedList_Next(&it);
     ck_assert_ptr_eq(value, &value1);
     hasNext = SOPC_SLinkedList_HasNext(&it);
     ck_assert(hasNext);
-    value = SOPC_SLinkedList_NextWithId(&it, &id);
+    value = (void*) SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(id, 3);
     hasNext = SOPC_SLinkedList_HasNext(&it);
     ck_assert(!hasNext);
-    value = SOPC_SLinkedList_NextWithId(&it, &id);
+    value = (void*) SOPC_SLinkedList_NextWithId(&it, &id);
     ck_assert_ptr_null(value);
 
     //// Test degraded case: add in full linked list
-    value = SOPC_SLinkedList_Prepend(list, 4, &value3);
+    value = (void*) SOPC_SLinkedList_Prepend(list, 4, (uintptr_t) &value3);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
     // Test get nominal case
-    value = SOPC_SLinkedList_GetHead(list);
+    value = (void*) SOPC_SLinkedList_GetHead(list);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_GetLast(list);
+    value = (void*) SOPC_SLinkedList_GetLast(list);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
     // Test pop nominal case
-    value = SOPC_SLinkedList_PopHead(list);
+    value = (void*) SOPC_SLinkedList_PopHead(list);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(2, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_PopLast(list);
+    value = (void*) SOPC_SLinkedList_PopLast(list);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(1, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_PopHead(list);
+    value = (void*) SOPC_SLinkedList_PopHead(list);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
     // Test pop degraded case
-    value = SOPC_SLinkedList_PopHead(list);
+    value = (void*) SOPC_SLinkedList_PopHead(list);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
     // Test get degraded case
-    value = SOPC_SLinkedList_GetHead(list);
+    value = (void*) SOPC_SLinkedList_GetHead(list);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_GetLast(list);
+    value = (void*) SOPC_SLinkedList_GetLast(list);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
@@ -841,74 +841,74 @@ START_TEST(test_linked_list)
     /// (Test iterator degraded case)
     it = SOPC_SLinkedList_GetIterator(list);
     ck_assert_ptr_null(it);
-    value = SOPC_SLinkedList_Next(&it);
+    value = (void*) SOPC_SLinkedList_Next(&it);
     ck_assert_ptr_null(value);
 
     /// (Continue initial test)
-    value = SOPC_SLinkedList_Prepend(list, 0, &value1);
+    value = (void*) SOPC_SLinkedList_Prepend(list, 0, (uintptr_t) &value1);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(1, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_Prepend(list, 2, &value2);
+    value = (void*) SOPC_SLinkedList_Prepend(list, 2, (uintptr_t) &value2);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(2, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_Prepend(list, UINT32_MAX, &value3);
+    value = (void*) SOPC_SLinkedList_Prepend(list, UINT32_MAX, (uintptr_t) &value3);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_Prepend(list, UINT32_MAX, &value1);
+    value = (void*) SOPC_SLinkedList_Prepend(list, UINT32_MAX, (uintptr_t) &value1);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(4, SOPC_SLinkedList_GetLength(list));
 
     //// Verify nominal find behavior
-    value = SOPC_SLinkedList_FindFromId(list, 0);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, 0);
     ck_assert_ptr_eq(value, &value1);
-    value = SOPC_SLinkedList_FindFromId(list, 2);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, 2);
     ck_assert_ptr_eq(value, &value2);
     //// Check LIFO behavior in case id not unique
-    value = SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
     ck_assert_ptr_eq(value, &value1);
     //// Verify not found behavior
-    value = SOPC_SLinkedList_FindFromId(list, 1);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, 1);
     ck_assert_ptr_null(value);
 
     //// Verify nominal remove behavior
-    value = SOPC_SLinkedList_RemoveFromId(list, 0);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, 0);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_FindFromId(list, 0);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, 0);
     ck_assert_ptr_null(value);
-    value = SOPC_SLinkedList_RemoveFromId(list, 0);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, 0);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(3, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_RemoveFromValuePtr(list, &value2);
+    value = (void*) SOPC_SLinkedList_RemoveFromValuePtr(list, (uintptr_t) &value2);
     ck_assert_ptr_eq(value, &value2);
     ck_assert_int_eq(2, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_FindFromId(list, 2);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, 2);
     ck_assert_ptr_null(value);
-    value = SOPC_SLinkedList_RemoveFromId(list, 2);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, 2);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(2, SOPC_SLinkedList_GetLength(list));
 
     //// Check LIFO behavior in case id not unique
-    value = SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
     ck_assert_ptr_eq(value, &value1);
     ck_assert_int_eq(1, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
     ck_assert_ptr_eq(value, &value3);
 
-    value = SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
     ck_assert_ptr_eq(value, &value3);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_FindFromId(list, UINT32_MAX);
     ck_assert_ptr_null(value);
-    value = SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
+    value = (void*) SOPC_SLinkedList_RemoveFromId(list, UINT32_MAX);
     ck_assert_ptr_null(value);
     ck_assert_int_eq(0, SOPC_SLinkedList_GetLength(list));
 
@@ -918,15 +918,15 @@ START_TEST(test_linked_list)
     p = SOPC_Malloc(sizeof(int));
     ck_assert_ptr_nonnull(p);
     *(int*) p = 2;
-    ck_assert_ptr_nonnull(SOPC_SLinkedList_Prepend(list, 0, p));
+    ck_assert_ptr_nonnull((void*) SOPC_SLinkedList_Prepend(list, 0, (uintptr_t) p));
     p = SOPC_Malloc(sizeof(double));
     ck_assert(NULL != p);
     *(double*) p = 2.;
-    ck_assert_ptr_nonnull(SOPC_SLinkedList_Prepend(list, 1, p));
+    ck_assert_ptr_nonnull((void*) SOPC_SLinkedList_Prepend(list, 1, (uintptr_t) p));
     p = SOPC_Malloc(sizeof(char) * 5);
     ck_assert_ptr_nonnull(p);
     memcpy(p, "toto", 5);
-    ck_assert_ptr_nonnull(SOPC_SLinkedList_Prepend(list, 2, p));
+    ck_assert_ptr_nonnull((void*) SOPC_SLinkedList_Prepend(list, 2, (uintptr_t) p));
     SOPC_SLinkedList_Apply(list, SOPC_SLinkedList_EltGenericFree);
 
     SOPC_SLinkedList_Delete(list);
@@ -934,9 +934,9 @@ START_TEST(test_linked_list)
 }
 END_TEST
 
-static int8_t CompareUint8_T(void* left, void* right)
+static int8_t CompareUint8_T(uintptr_t left, uintptr_t right)
 {
-    assert(left != NULL && right != NULL);
+    assert((void*) left != NULL && (void*) right != NULL);
     uint8_t leftUint = *(uint8_t*) left;
     uint8_t rightUint = *(uint8_t*) right;
     if (leftUint == rightUint)
@@ -969,47 +969,47 @@ START_TEST(test_sorted_linked_list)
     ck_assert(0 == SOPC_SLinkedList_GetLength(list));
 
     //// Test inserting a value as unique value
-    value = SOPC_SLinkedList_SortedInsert(list, 6, &values[6], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 6, (uintptr_t) &values[6], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(1 == SOPC_SLinkedList_GetLength(list));
 
     //// Test inserting a value as first value
-    value = SOPC_SLinkedList_SortedInsert(list, 1, &values[1], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 1, (uintptr_t) &values[1], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(2 == SOPC_SLinkedList_GetLength(list));
 
     //// Test inserting a value as last value
-    value = SOPC_SLinkedList_SortedInsert(list, 9, &values[9], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 9, (uintptr_t) &values[9], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(3 == SOPC_SLinkedList_GetLength(list));
 
     //// Test inserting the rest
-    value = SOPC_SLinkedList_SortedInsert(list, 7, &values[7], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 7, (uintptr_t) &values[7], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(4 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_SortedInsert(list, 5, &values[5], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 5, (uintptr_t) &values[5], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(5 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_SortedInsert(list, 4, &values[4], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 4, (uintptr_t) &values[4], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(6 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_SortedInsert(list, 3, &values[3], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 3, (uintptr_t) &values[3], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(7 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_SortedInsert(list, 8, &values[8], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 8, (uintptr_t) &values[8], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(8 == SOPC_SLinkedList_GetLength(list));
 
-    value = SOPC_SLinkedList_SortedInsert(list, 2, &values[2], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 2, (uintptr_t) &values[2], CompareUint8_T);
     ck_assert(value != NULL);
     ck_assert(9 == SOPC_SLinkedList_GetLength(list));
 
     //// Test degraded: try to insert when list is full
-    value = SOPC_SLinkedList_SortedInsert(list, 10, &values[10], CompareUint8_T);
+    value = (void*) SOPC_SLinkedList_SortedInsert(list, 10, (uintptr_t) &values[10], CompareUint8_T);
     ck_assert(value == NULL);
     ck_assert(9 == SOPC_SLinkedList_GetLength(list));
 
@@ -1017,13 +1017,13 @@ START_TEST(test_sorted_linked_list)
     it = SOPC_SLinkedList_GetIterator(list);
     for (uint8_t i = 1; i < 10; i++)
     {
-        value = SOPC_SLinkedList_NextWithId(&it, &id);
+        value = (void*) SOPC_SLinkedList_NextWithId(&it, &id);
         ck_assert(value != NULL);
         ck_assert(*(uint8_t*) value == i);
         ck_assert(id == i);
 
         // Remove iterated value (possible during iteration since we remove already iterated item)
-        value = SOPC_SLinkedList_RemoveFromId(list, i);
+        value = (void*) SOPC_SLinkedList_RemoveFromId(list, i);
         ck_assert(value != NULL);
         ck_assert((uint8_t)(9 - i) == SOPC_SLinkedList_GetLength(list));
     }

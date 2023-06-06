@@ -123,14 +123,14 @@ bool SOPC_ScInternalContext_AddIntermediateInputChunk(SOPC_SecureConnection_TcpP
         }
     }
 
-    void* result = SOPC_SLinkedList_Append(chunkCtx->intermediateChunksInputBuffers,
-                                           SOPC_SLinkedList_GetLength(chunkCtx->intermediateChunksInputBuffers),
-                                           intermediateChunk);
+    void* result = (void*) SOPC_SLinkedList_Append(chunkCtx->intermediateChunksInputBuffers,
+                                                   SOPC_SLinkedList_GetLength(chunkCtx->intermediateChunksInputBuffers),
+                                                   (uintptr_t) intermediateChunk);
 
     return NULL != result;
 }
 
-static void SOPC_ScInternalContext_DeleteIntermediateInputBuffer(uint32_t id, void* val)
+static void SOPC_ScInternalContext_DeleteIntermediateInputBuffer(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_Buffer_Delete((SOPC_Buffer*) val);

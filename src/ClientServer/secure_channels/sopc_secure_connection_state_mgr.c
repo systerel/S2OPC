@@ -102,10 +102,10 @@ bool SC_InitNewConnection(uint32_t* newConnectionIdx)
     return result;
 }
 
-static void SC_Client_ClearPendingRequest(uint32_t id, void* val)
+static void SC_Client_ClearPendingRequest(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    SOPC_SentRequestMsg_Context* msgCtx = val;
+    SOPC_SentRequestMsg_Context* msgCtx = (SOPC_SentRequestMsg_Context*) val;
     if (NULL != msgCtx)
     {
         SOPC_EventTimer_Cancel(msgCtx->timerId);
@@ -3490,8 +3490,8 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
             return;
         }
 
-        SOPC_SentRequestMsg_Context* msgCtx =
-            SOPC_SLinkedList_FindFromId(scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
+        SOPC_SentRequestMsg_Context* msgCtx = (SOPC_SentRequestMsg_Context*) SOPC_SLinkedList_FindFromId(
+            scConnection->tcpSeqProperties.sentRequestIds, (uint32_t) auxParam);
 
         if (msgCtx == NULL)
         {

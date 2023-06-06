@@ -72,7 +72,7 @@ SOPC_SLinkedList* SOPC_AddressSpaceAccess_GetOperations(SOPC_AddressSpaceAccess*
     return operations;
 }
 
-static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, void* val)
+static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_AddressSpaceAccessOperation* op = (SOPC_AddressSpaceAccessOperation*) val;
@@ -311,7 +311,7 @@ static SOPC_ReturnStatus SOPC_InternalRecordOperation_Write(SOPC_AddressSpaceAcc
     }
     else
     {
-        addedOp = SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, op);
+        addedOp = (void*) SOPC_SLinkedList_Prepend(addSpaceAccess->operations, 0, (uintptr_t) op);
         status = (NULL == addedOp ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
         OpcUa_WriteValue_Initialize(prevWV);
         OpcUa_WriteValue_Initialize(newWV);

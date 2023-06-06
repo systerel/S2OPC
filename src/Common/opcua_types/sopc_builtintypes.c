@@ -2637,14 +2637,14 @@ static SOPC_ReturnStatus SOPC_LocalizedText_Copy_Internal(int recursionLimit,
             SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(src->localizedTextList);
             while (SOPC_SLinkedList_HasNext(&it) && SOPC_STATUS_OK == status)
             {
-                SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
                 SOPC_ASSERT(NULL != lt);
                 SOPC_LocalizedText* newLt = SOPC_Malloc(sizeof(*newLt));
                 SOPC_LocalizedText_Initialize(newLt);
                 status = SOPC_LocalizedText_Copy_Internal(recursionLimit, newLt, lt);
                 if (SOPC_STATUS_OK == status)
                 {
-                    void* appended = SOPC_SLinkedList_Append(dest->localizedTextList, 0, newLt);
+                    void* appended = (void*) SOPC_SLinkedList_Append(dest->localizedTextList, 0, (uintptr_t) newLt);
                     if (NULL == appended)
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2701,8 +2701,8 @@ static SOPC_ReturnStatus SOPC_LocalizedText_Compare_Internal(int recursionLimit,
                     SOPC_SLinkedListIterator itRight = SOPC_SLinkedList_GetIterator(right->localizedTextList);
                     while (SOPC_SLinkedList_HasNext(&itLeft) && SOPC_STATUS_OK == status && *comparison == 0)
                     {
-                        SOPC_LocalizedText* ltLeft = SOPC_SLinkedList_Next(&itLeft);
-                        SOPC_LocalizedText* ltRight = SOPC_SLinkedList_Next(&itRight);
+                        SOPC_LocalizedText* ltLeft = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&itLeft);
+                        SOPC_LocalizedText* ltRight = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&itRight);
                         SOPC_ASSERT(NULL != ltLeft);
                         SOPC_ASSERT(NULL != ltRight);
                         status = SOPC_LocalizedText_Compare_Internal(recursionLimit, ltLeft, ltRight, comparison);
@@ -2753,11 +2753,11 @@ void SOPC_LocalizedText_ClearAux(void* value)
     SOPC_LocalizedText_Clear((SOPC_LocalizedText*) value);
 }
 
-static void SOPC_LocalizedText_ListEltFree(uint32_t id, void* val)
+static void SOPC_LocalizedText_ListEltFree(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
-    SOPC_LocalizedText_ClearAux(val);
-    SOPC_Free(val);
+    SOPC_LocalizedText_ClearAux((void*) val);
+    SOPC_Free((void*) val);
 }
 
 void SOPC_LocalizedText_Clear(SOPC_LocalizedText* localizedText)
@@ -2818,7 +2818,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyFromArray(SOPC_LocalizedText* destSetOf
             }
             if (SOPC_STATUS_OK == status)
             {
-                void* added = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, lt);
+                void* added = (void*) SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, (uintptr_t) lt);
                 if (lt != added)
                 {
                     status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2879,7 +2879,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_CopyToArray(SOPC_LocalizedText** dstArray,
             SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
             for (int32_t i = 1; SOPC_STATUS_OK == status && i < *nbElts && SOPC_SLinkedList_HasNext(&it); i++)
             {
-                SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
                 status = SOPC_LocalizedText_Copy(&(*dstArray)[i], lt);
             }
         }
@@ -2923,7 +2923,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
         SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(destSetOfLt->localizedTextList);
         while (SOPC_STATUS_OK == status && addToList && SOPC_SLinkedList_HasNext(&it))
         {
-            SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+            SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
             status = SOPC_String_Compare(&lt->defaultLocale, &src->defaultLocale, true, &comparison);
             if (SOPC_STATUS_OK != status)
             {
@@ -2964,7 +2964,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
 
         if (SOPC_STATUS_OK == status)
         {
-            void* appended = SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, newLT);
+            void* appended = (void*) SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, (uintptr_t) newLT);
             status = NULL == appended ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
         }
         if (SOPC_STATUS_OK != status)
@@ -3008,7 +3008,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSuppor
         if (NULL != destSetOfLt->localizedTextList && SOPC_SLinkedList_GetLength(destSetOfLt->localizedTextList) > 0)
         {
             // Replace default by first available in list
-            SOPC_LocalizedText* lt = SOPC_SLinkedList_PopHead(destSetOfLt->localizedTextList);
+            SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_PopHead(destSetOfLt->localizedTextList);
             SOPC_ASSERT(NULL != lt);
             status = SOPC_String_Copy(&destSetOfLt->defaultLocale, &lt->defaultLocale);
             if (SOPC_STATUS_OK == status)
@@ -3027,7 +3027,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSuppor
         SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(destSetOfLt->localizedTextList);
         while (SOPC_STATUS_OK == status && NULL == ltToRemoveFromList && SOPC_SLinkedList_HasNext(&it))
         {
-            SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+            SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
             status = SOPC_String_Compare(&lt->defaultLocale, &src->defaultLocale, true, &comparison);
 
             // If same locale found, set it with new value
@@ -3040,8 +3040,8 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_RemoveSuppor
         // There is localized text existent for this locale remove it
         if (SOPC_STATUS_OK == status && NULL != ltToRemoveFromList)
         {
-            SOPC_LocalizedText* ltRemoved =
-                SOPC_SLinkedList_RemoveFromValuePtr(destSetOfLt->localizedTextList, ltToRemoveFromList);
+            SOPC_LocalizedText* ltRemoved = (SOPC_LocalizedText*) SOPC_SLinkedList_RemoveFromValuePtr(
+                destSetOfLt->localizedTextList, (uintptr_t) ltToRemoveFromList);
             if (ltRemoved == ltToRemoveFromList)
             {
                 SOPC_LocalizedText_Clear(ltRemoved);
@@ -3181,7 +3181,7 @@ SOPC_ReturnStatus SOPC_LocalizedText_GetPreferredLocale(SOPC_LocalizedText* dest
                 SOPC_SLinkedListIterator it = SOPC_SLinkedList_GetIterator(srcSetOfLt->localizedTextList);
                 while (!localeMatch && SOPC_SLinkedList_HasNext(&it))
                 {
-                    const SOPC_LocalizedText* lt = SOPC_SLinkedList_Next(&it);
+                    const SOPC_LocalizedText* lt = (SOPC_LocalizedText*) SOPC_SLinkedList_Next(&it);
                     SOPC_ASSERT(NULL != lt);
                     res = SOPC_LocalizedText_CompareLocales(localeId, SOPC_String_GetRawCString(&lt->defaultLocale),
                                                             cmpWithCountryRegion);

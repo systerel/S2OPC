@@ -52,7 +52,7 @@ void publish_request_queue_bs__allocate_new_publish_queue(
     }
 }
 
-static void SOPC_InternalPublishRequestQueueElement_Free(uint32_t id, void* val)
+static void SOPC_InternalPublishRequestQueueElement_Free(uint32_t id, uintptr_t val)
 {
     SOPC_UNUSED_ARG(id);
     SOPC_InternalPublishRequestQueueElement* elt = (SOPC_InternalPublishRequestQueueElement*) val;
@@ -94,7 +94,7 @@ void publish_request_queue_bs__append_publish_request_to_queue(
         elt->resp_msg = publish_request_queue_bs__p_resp_msg;
         elt->session = publish_request_queue_bs__p_session;
 
-        void* res = SOPC_SLinkedList_Append(publish_request_queue_bs__p_queue, 0, elt);
+        void* res = (void*) SOPC_SLinkedList_Append(publish_request_queue_bs__p_queue, 0, (uintptr_t) elt);
         if (res == elt)
         {
             *publish_request_queue_bs__bres = true;
@@ -114,7 +114,8 @@ void publish_request_queue_bs__discard_oldest_publish_request(
     constants__t_request_context_i* const publish_request_queue_bs__old_req_ctx)
 {
     /* Dequeue oldest publish request */
-    SOPC_InternalPublishRequestQueueElement* elt = SOPC_SLinkedList_PopLast(publish_request_queue_bs__p_queue);
+    SOPC_InternalPublishRequestQueueElement* elt =
+        (SOPC_InternalPublishRequestQueueElement*) SOPC_SLinkedList_PopLast(publish_request_queue_bs__p_queue);
     *publish_request_queue_bs__old_session = elt->session;
     *publish_request_queue_bs__old_req_handle = elt->req_handle;
     *publish_request_queue_bs__old_req_ctx = elt->req_ctx;
@@ -138,7 +139,8 @@ void publish_request_queue_bs__continue_pop_head_iter_publish_request(
     constants__t_request_context_i* const publish_request_queue_bs__p_req_ctx,
     constants__t_msg_i* const publish_request_queue_bs__p_resp_msg)
 {
-    SOPC_InternalPublishRequestQueueElement* elt = SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
+    SOPC_InternalPublishRequestQueueElement* elt =
+        (SOPC_InternalPublishRequestQueueElement*) SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
     *publish_request_queue_bs__p_session = elt->session;
     *publish_request_queue_bs__p_req_exp_time = elt->req_exp_time;
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
@@ -170,7 +172,8 @@ void publish_request_queue_bs__pop_valid_publish_request_queue(
     constants__t_request_context_i* const publish_request_queue_bs__p_req_ctx,
     constants__t_msg_i* const publish_request_queue_bs__p_resp_msg)
 {
-    SOPC_InternalPublishRequestQueueElement* elt = SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
+    SOPC_InternalPublishRequestQueueElement* elt =
+        (SOPC_InternalPublishRequestQueueElement*) SOPC_SLinkedList_PopHead(publish_request_queue_bs__p_queue);
     *publish_request_queue_bs__p_session = elt->session;
     *publish_request_queue_bs__p_req_exp_time = elt->req_exp_time;
     *publish_request_queue_bs__p_req_handle = elt->req_handle;
@@ -198,7 +201,7 @@ void publish_request_queue_bs__prepend_publish_request_to_queue(
         elt->resp_msg = publish_request_queue_bs__p_resp_msg;
         elt->session = publish_request_queue_bs__p_session;
 
-        void* res = SOPC_SLinkedList_Prepend(publish_request_queue_bs__p_queue, 0, elt);
+        void* res = (void*) SOPC_SLinkedList_Prepend(publish_request_queue_bs__p_queue, 0, (uintptr_t) elt);
         if (res == elt)
         {
             *publish_request_queue_bs__bres = true;

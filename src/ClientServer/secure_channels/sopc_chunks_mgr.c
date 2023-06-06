@@ -1202,8 +1202,8 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
         if (isClient)
         {
             // Check received request Id was expected for the received message type
-            recordedMsgCtx =
-                SOPC_SLinkedList_RemoveFromId(scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle);
+            recordedMsgCtx = (SOPC_SentRequestMsg_Context*) SOPC_SLinkedList_RemoveFromId(
+                scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle);
             if (recordedMsgCtx != NULL)
             {
                 *messageTimeoutExpired = recordedMsgCtx->timeoutExpired;
@@ -1213,7 +1213,7 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
 
                     // Re-enqueue the request id in order application receive the request timeout on SC closure
                     SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle,
-                                            (void*) recordedMsgCtx);
+                                            (uintptr_t) recordedMsgCtx);
                     result = false;
                     *errorStatus = OpcUa_BadSecurityChecksFailed;
                 }
@@ -1222,8 +1222,8 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
                     // We receive a part of the response message:
                     // do not deactivate timer and re-enqueue the request id as expected id
                     // (Note: prepend since other chunks for this message shall be the next ones)
-                    void* prependedCtx = SOPC_SLinkedList_Prepend(scConnection->tcpSeqProperties.sentRequestIds,
-                                                                  *requestIdOrHandle, (void*) recordedMsgCtx);
+                    void* prependedCtx = (void*) SOPC_SLinkedList_Prepend(
+                        scConnection->tcpSeqProperties.sentRequestIds, *requestIdOrHandle, (uintptr_t) recordedMsgCtx);
                     result = prependedCtx == recordedMsgCtx;
                 }
                 else
@@ -1653,14 +1653,15 @@ static bool SC_Chunks_TreatMsgMultiChunks(SOPC_SecureConnection* scConnection, S
                 return false;
             }
 
-            SOPC_Buffer* bufferToMerge = SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
+            SOPC_Buffer* bufferToMerge =
+                (SOPC_Buffer*) SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
             while (NULL != bufferToMerge)
             {
                 result = fill_buffer(mergedBuffer, bufferToMerge, totalSize, &remaining);
                 SOPC_ASSERT(result);
                 SOPC_ASSERT(0 == SOPC_Buffer_Remaining(bufferToMerge));
                 SOPC_Buffer_Delete(bufferToMerge);
-                bufferToMerge = SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
+                bufferToMerge = (SOPC_Buffer*) SOPC_SLinkedList_PopHead(chunkCtx->intermediateChunksInputBuffers);
             }
             result = fill_buffer(mergedBuffer, chunkCtx->currentChunkInputBuffer, totalSize, &remaining);
             SOPC_ASSERT(result);
@@ -3589,8 +3590,8 @@ static bool SC_Chunks_CreateClientSentRequestContext(uint32_t scConnectionIdx,
             msgCtx->requestHandle = requestIdOrHandle; // Client side: it contains request handle
             msgCtx->msgType = sendMsgType;
             msgCtx->timerId = SC_Client_StartRequestTimeout(scConnectionIdx, requestIdOrHandle, requestId);
-            msgCtxRes =
-                SOPC_SLinkedList_Append(scConnection->tcpSeqProperties.sentRequestIds, requestId, (void*) msgCtx);
+            msgCtxRes = (SOPC_SentRequestMsg_Context*) SOPC_SLinkedList_Append(
+                scConnection->tcpSeqProperties.sentRequestIds, requestId, (uintptr_t) msgCtx);
 
             result = (msgCtx == msgCtxRes);
         }
