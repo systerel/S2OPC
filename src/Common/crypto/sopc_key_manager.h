@@ -107,6 +107,17 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                uint32_t lenPassword);
 
 /**
+ * \brief  Generate an RSA asymmetric key.
+ *
+ * \param RSAKeySize The RSA key length to generate.
+ * \param ppKey      A handle to the generated key. This object must be freed with a call to
+ *                   SOPC_KeyManager_AsymmetricKey_Free().
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC_AsymmetricKey** ppKey);
+
+/**
  * \brief           Returns the public key of the signed public key.
  *
  * \warning         The returned SOPC_AsymmetricKey must not be used after the Certificate is freed
@@ -162,6 +173,29 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
                                                       uint8_t* pDest,
                                                       uint32_t lenDest,
                                                       uint32_t* pLenWritten);
+
+/**
+ * \brief  Write an asymmetric key to a PEM file.
+ *
+ * \param pKey      A valid pointer to the asymmetric key (public/private).
+ * \param bIsPublic Whether the key is public or private.
+ * \param filePath  Path to the file.
+ * \param pwd       An optional password (!= NULL). The password must be a zero-terminated string with
+ *                  at most \p pwdLen non null chars, and at least \p pwdLen + 1 allocated chars.
+ * \param pwdLen    The length of the password.
+ *
+ * \note            The supported encryption algorithm is AES-256-CBC. \p pwd and \p pwdLen are used only
+ *                  to encrypt the key when it is private.
+ *
+ * \warning         Only PKCS#1 format is supported, In other words, the function is limited to RSA keys.
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pKey,
+                                                          const bool bIsPublic,
+                                                          const char* filePath,
+                                                          const char* pwd,
+                                                          const uint32_t pwdLen);
 
 /**
  * \brief Creates a serialized asymmetric key from a DER or PEM payload.

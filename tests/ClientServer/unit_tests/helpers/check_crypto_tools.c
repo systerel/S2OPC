@@ -27,6 +27,8 @@
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 
+#define PASSWORD "password"
+
 START_TEST(test_crypto_check_app_uri)
 {
     SOPC_CertificateList* crt_uri = SOPC_UnhexlifyCertificate(SRV_CRT);
@@ -58,13 +60,58 @@ START_TEST(test_crypto_get_app_uri)
 }
 END_TEST
 
+START_TEST(test_crypto_gen_rsa_export_import)
+{
+    /* Generate a new RSA key*/
+    SOPC_AsymmetricKey* pGenKey = NULL;
+    SOPC_SerializedAsymmetricKey* pSerGenKey = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_GenRSA(4096, &pGenKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pGenKey, false, &pSerGenKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Export and encrypt the new key */
+    size_t pwdLen = strlen(PASSWORD);
+    ck_assert(pwdLen < UINT32_MAX);
+    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(
+        pGenKey, false, "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/crypto_tools_encrypted_gen_key.pem",
+        PASSWORD, (uint32_t) pwdLen);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Import and decrypt the new key */
+    SOPC_SerializedAsymmetricKey* pSerDecKey = NULL;
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
+        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/crypto_tools_encrypted_gen_key.pem", &pSerDecKey, PASSWORD,
+        (uint32_t) pwdLen);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Compare the generated key with the imported one */
+    uint32_t genKeyLen = SOPC_SecretBuffer_GetLength(pSerGenKey);
+    uint32_t decKeyLen = SOPC_SecretBuffer_GetLength(pSerDecKey);
+    ck_assert(genKeyLen == decKeyLen);
+    SOPC_ExposedBuffer* pRawGenKey = SOPC_SecretBuffer_ExposeModify(pSerGenKey);
+    SOPC_ExposedBuffer* pRawDecKey = SOPC_SecretBuffer_ExposeModify(pSerDecKey);
+    ck_assert_ptr_nonnull(pRawGenKey);
+    ck_assert_ptr_nonnull(pRawDecKey);
+    int match = memcmp(pRawGenKey, pRawDecKey, genKeyLen);
+    ck_assert(0 == match);
+    /* Clear */
+    SOPC_KeyManager_AsymmetricKey_Free(pGenKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGenKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerDecKey);
+}
+END_TEST
+
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
-    TCase* tc_check_app_uri = tcase_create("Check application URI");
+    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL;
+
+    tc_check_app_uri = tcase_create("Check application URI");
+    tc_gen_rsa = tcase_create("Generate RSA keys");
+
+    suite_add_tcase(s, tc_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_get_app_uri);
-    suite_add_tcase(s, tc_check_app_uri);
+    suite_add_tcase(s, tc_gen_rsa);
+    tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
 
     return s;
 }
