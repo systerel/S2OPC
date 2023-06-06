@@ -9,11 +9,5 @@
                 <variable nodeId="ns=2;i=7" displayName="PubUInt16" dataType="UInt16"/>
             </dataset>
         </message>
-        <message publishingInterval="1000." groupId="15" groupVersion="1">
-            <dataset writerId="52">
-                <variable nodeId="ns=1;i=2" displayName="PubInt16" dataType="Int16"/>
-                <variable nodeId="ns=1;i=8" displayName="PubString" dataType="String"/>
-            </dataset>
-        </message>
     </connection>
 </PubSub>

@@ -1,7 +1,7 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
-    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+    <connection address="mqtts://192.168.1.108:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
         <!-- one to many -->
-        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
+        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" mqttTopic="S2OPC">
           <dataset>
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>

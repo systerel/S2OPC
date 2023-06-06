@@ -1,9 +1,0 @@
-<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
-    <connection address="opc.udp://232.1.2.100:4840" publisherId="123" mode="publisher" securityMode="signAndEncrypt">
-        <message publishingInterval="2000." groupId="14" groupVersion="1">
-            <dataset writerId="51">
-                <variable nodeId="ns=2;i=6" displayName="PubFloat" dataType="Float"/>
-            </dataset>
-        </message>
-    </connection>
-</PubSub>
