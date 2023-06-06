@@ -269,13 +269,13 @@ build-win32:
 build-rpi:
   <<: *docker_job
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:9a0d79a685ca3c17664561a16344ddb2fb8fd2641791d26982ddeb6912bd340b # digest of rpi-build:1.5
+  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # digest of rpi-build:1.6
   script:
     - *build_command_line
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_IMAGE: 'sha256:464cfa4e22af6d1933a17b14db182632dfd28febc3495adbd286aa1e5d8265e4'
+    DOCKER_IMAGE: 'sha256:6833a87456545ac3dcfa8a0490a11e20ada97383b3a6768b27f3406940c1b23b'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
   artifacts:
