@@ -235,7 +235,7 @@ static bool start_anonymous(struct parse_context_t* ctx, const XML_Char** attrs)
 static bool end_userpassword(struct parse_context_t* ctx)
 {
     bool found = false;
-    SOPC_Dict_Get(ctx->users, &ctx->currentUserPassword->user, &found);
+    SOPC_Dict_Get(ctx->users, (uintptr_t) &ctx->currentUserPassword->user, &found);
     if (found)
     {
         LOG_XML_ERRORF(ctx->helper_ctx.parser, "Duplicated user name %s found in XML",
@@ -243,7 +243,8 @@ static bool end_userpassword(struct parse_context_t* ctx)
         return false;
     }
 
-    bool res = SOPC_Dict_Insert(ctx->users, &ctx->currentUserPassword->user, ctx->currentUserPassword);
+    bool res =
+        SOPC_Dict_Insert(ctx->users, (uintptr_t) &ctx->currentUserPassword->user, (uintptr_t) ctx->currentUserPassword);
     if (!res)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
@@ -657,7 +658,7 @@ static bool end_issued_cert(struct parse_context_t* ctx)
     if (ctx->currentCert)
     {
         bool found = false;
-        SOPC_Dict_Get(ctx->certificates, &ctx->currentCert->certThumb, &found);
+        SOPC_Dict_Get(ctx->certificates, (uintptr_t) &ctx->currentCert->certThumb, &found);
         if (found)
         {
             const char* thumb = SOPC_String_GetRawCString(&ctx->currentCert->certThumb);
@@ -666,7 +667,8 @@ static bool end_issued_cert(struct parse_context_t* ctx)
             return false;
         }
 
-        bool res = SOPC_Dict_Insert(ctx->certificates, &ctx->currentCert->certThumb, ctx->currentCert);
+        bool res =
+            SOPC_Dict_Insert(ctx->certificates, (uintptr_t) &ctx->currentCert->certThumb, (uintptr_t) ctx->currentCert);
         if (!res)
         {
             LOG_MEMORY_ALLOCATION_FAILURE;
@@ -1058,22 +1060,22 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     }
 }
 
-static uint64_t string_hash(const void* s)
+static uint64_t string_hash(const uintptr_t s)
 {
-    const SOPC_String* str = s;
+    const SOPC_String* str = (SOPC_String*) s;
     return SOPC_DJBHash(str->Data, (size_t) str->Length);
 }
 
-static bool string_equal(const void* a, const void* b)
+static bool string_equal(const uintptr_t a, const uintptr_t b)
 {
     return SOPC_String_Equal((const SOPC_String*) a, (const SOPC_String*) b);
 }
 
-static void userpassword_free(void* up)
+static void userpassword_free(uintptr_t up)
 {
-    if (NULL != up)
+    if (NULL != (void*) up)
     {
-        user_password* userpassword = up;
+        user_password* userpassword = (user_password*) up;
 
         SOPC_String_Clear(&userpassword->user);
         SOPC_ByteString_Clear(&userpassword->hash);
@@ -1082,11 +1084,11 @@ static void userpassword_free(void* up)
     }
 }
 
-static void user_cert_free(void* uc)
+static void user_cert_free(uintptr_t uc)
 {
-    if (NULL != uc)
+    if (NULL != (void*) uc)
     {
-        user_cert* userCert = uc;
+        user_cert* userCert = (user_cert*) uc;
 
         SOPC_String_Clear(&userCert->certThumb);
         SOPC_Free(userCert);
@@ -1176,7 +1178,7 @@ static SOPC_ReturnStatus set_default_password_hash(user_password** up,
     // Clear the structure in case of error
     if (SOPC_STATUS_OK != status)
     {
-        userpassword_free(pwd);
+        userpassword_free((uintptr_t) pwd);
     }
     else
     {
@@ -1202,7 +1204,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
     {
         OpcUa_UserNameIdentityToken* userToken = token->Body.Object.Value;
         SOPC_String* username = &userToken->UserName;
-        user_password* up = SOPC_Dict_Get(config->users, username, NULL);
+        user_password* up = (user_password*) SOPC_Dict_Get(config->users, (uintptr_t) username, NULL);
         // if rejected Token with wrong username: use default password hash configuration to avoid timing attack (to
         // have a constant time during authentication process)
         if (NULL == up)
@@ -1328,7 +1330,7 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
         // Authorize some users to write or execute methods
         const SOPC_String* username = SOPC_User_GetUsername(pUser);
         bool found = false;
-        user_password* up = SOPC_Dict_Get(config->users, username, &found);
+        user_password* up = (user_password*) SOPC_Dict_Get(config->users, (uintptr_t) username, &found);
         if (found)
         {
             switch (operationType)
@@ -1356,7 +1358,7 @@ static SOPC_ReturnStatus authorization_fct(SOPC_UserAuthorization_Manager* autho
         const SOPC_String* certThumb = SOPC_User_GetCertificate_Thumbprint(pUser);
         user_rights* userRights = NULL;
         bool found = false;
-        user_cert* pUserCert = SOPC_Dict_Get(config->certificates, certThumb, &found);
+        user_cert* pUserCert = (user_cert*) SOPC_Dict_Get(config->certificates, (uintptr_t) certThumb, &found);
         if (found)
         {
             userRights = &pUserCert->rights;
@@ -1420,7 +1422,7 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
         {
             SOPC_UsersConfig* config = (SOPC_UsersConfig*) authentication->pData;
             SOPC_Dict_Delete(config->users);
-            userpassword_free(config->rejectedUser);
+            userpassword_free((uintptr_t) config->rejectedUser);
             SOPC_Dict_Delete(config->certificates);
             SOPC_PKIProvider_Free(&config->pX509_UserIdentity_PKI);
             SOPC_Free(authentication->pData);
@@ -1500,8 +1502,8 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
     SOPC_ReturnStatus pki_status = SOPC_STATUS_OK;
     SOPC_PKIProvider* pX509_UserIdentity_PKI = NULL;
 
-    SOPC_Dict* users = SOPC_Dict_Create(NULL, string_hash, string_equal, NULL, userpassword_free);
-    SOPC_Dict* certificates = SOPC_Dict_Create(NULL, string_hash, string_equal, NULL, user_cert_free);
+    SOPC_Dict* users = SOPC_Dict_Create((uintptr_t) NULL, string_hash, string_equal, NULL, userpassword_free);
+    SOPC_Dict* certificates = SOPC_Dict_Create((uintptr_t) NULL, string_hash, string_equal, NULL, user_cert_free);
 
     SOPC_Array* trustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* trustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
@@ -1598,7 +1600,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
             pX509_UserIdentity_PKI = NULL;
             SOPC_Free(config);
             config = NULL;
-            userpassword_free(rejectedUser);
+            userpassword_free((uintptr_t) rejectedUser);
             res = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else

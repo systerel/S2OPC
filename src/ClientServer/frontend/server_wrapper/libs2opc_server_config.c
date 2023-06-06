@@ -104,14 +104,14 @@ bool SOPC_ServerInternal_IsStopped(void)
     return res;
 }
 
-static uint64_t SOPC_Internal_String_Hash(const void* s)
+static uint64_t SOPC_Internal_String_Hash(const uintptr_t s)
 {
-    SOPC_ASSERT(NULL != s);
-    const SOPC_String* str = s;
+    SOPC_ASSERT(NULL != (void*) s);
+    const SOPC_String* str = (SOPC_String*) s;
     return SOPC_DJBHash(str->Data, (size_t) str->Length);
 }
 
-static bool SOPC_Internal_String_Equal(const void* a, const void* b)
+static bool SOPC_Internal_String_Equal(const uintptr_t a, const uintptr_t b)
 {
     return SOPC_String_Equal((const SOPC_String*) a, (const SOPC_String*) b);
 }
@@ -130,7 +130,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
     SOPC_Dict* uniqueUserPolicies =
-        SOPC_Dict_Create(NULL, SOPC_Internal_String_Hash, SOPC_Internal_String_Equal, NULL, NULL);
+        SOPC_Dict_Create((uintptr_t) NULL, SOPC_Internal_String_Hash, SOPC_Internal_String_Equal, NULL, NULL);
 
     for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
     {
@@ -154,7 +154,8 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                     hasUserName = true;
                 }
                 bool found = false;
-                OpcUa_UserTokenPolicy* uniqueUtp = SOPC_Dict_Get(uniqueUserPolicies, &utp->PolicyId, &found);
+                OpcUa_UserTokenPolicy* uniqueUtp =
+                    (OpcUa_UserTokenPolicy*) SOPC_Dict_Get(uniqueUserPolicies, (uintptr_t) &utp->PolicyId, &found);
                 if (found)
                 {
                     int32_t compareRes = -1;
@@ -170,7 +171,7 @@ static bool SOPC_HelperConfigServer_CheckConfig(void)
                 }
                 else
                 {
-                    bool inserted = SOPC_Dict_Insert(uniqueUserPolicies, &utp->PolicyId, utp);
+                    bool inserted = SOPC_Dict_Insert(uniqueUserPolicies, (uintptr_t) &utp->PolicyId, (uintptr_t) utp);
                     SOPC_ASSERT(inserted);
                 }
             }

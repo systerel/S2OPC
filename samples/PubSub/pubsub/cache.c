@@ -40,10 +40,10 @@
 SOPC_Dict* g_cache = NULL;
 Mutex g_lock;
 
-static void free_datavalue(void* value)
+static void free_datavalue(uintptr_t value)
 {
-    SOPC_DataValue_Clear(value);
-    SOPC_Free(value);
+    SOPC_DataValue_Clear((void*) value);
+    SOPC_Free((void*) value);
 }
 
 static SOPC_VariantArrayType valueRankToArrayType(const int32_t valueRank)
@@ -344,13 +344,13 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
 SOPC_DataValue* Cache_Get(const SOPC_NodeId* nid)
 {
     SOPC_ASSERT(NULL != g_cache);
-    return SOPC_Dict_Get(g_cache, nid, NULL);
+    return (SOPC_DataValue*) SOPC_Dict_Get(g_cache, (uintptr_t) nid, NULL);
 }
 
 bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv)
 {
     SOPC_ASSERT(NULL != g_cache);
-    return SOPC_Dict_Insert(g_cache, nid, dv);
+    return SOPC_Dict_Insert(g_cache, (uintptr_t) nid, (uintptr_t) dv);
 }
 
 /* nodesToRead shall be freed by the callee, and returned DataValues will be freed by the caller */
@@ -378,7 +378,7 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
                     "DataEncoding not supported");
 
         /* As ownership is given to the caller, we have to copy all values */
-        SOPC_DataValue* src = SOPC_Dict_Get(g_cache, &rv->NodeId, NULL);
+        SOPC_DataValue* src = (SOPC_DataValue*) SOPC_Dict_Get(g_cache, (uintptr_t) &rv->NodeId, NULL);
         status = SOPC_DataValue_Copy(dv, src);
 
         /* As we have ownership of the rv, clear it */
@@ -561,17 +561,17 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
     SOPC_Free(nidStr);
 }
 
-static void forEach_DoExec(const void* key, void* value, void* user_data)
+static void forEach_DoExec(const uintptr_t key, uintptr_t value, uintptr_t user_data)
 {
-    SOPC_ASSERT(NULL != user_data);
+    SOPC_ASSERT(NULL != (void*) user_data);
     Cache_ForEach_Exec* exec = (Cache_ForEach_Exec*) user_data;
     exec->pExec((const SOPC_NodeId*) key, (SOPC_DataValue*) value);
 }
 
-static void Cache_ForEach_Dump(const void* key, void* value, void* user_data)
+static void Cache_ForEach_Dump(const uintptr_t key, uintptr_t value, uintptr_t user_data)
 {
     (void) user_data;
-    Cache_Dump_VarValue(key, value);
+    Cache_Dump_VarValue((const SOPC_NodeId*) key, (SOPC_DataValue*) value);
 }
 
 void Cache_Dump_NodeId(const SOPC_NodeId* pNid)
@@ -585,7 +585,7 @@ void Cache_Dump_NodeId(const SOPC_NodeId* pNid)
 void Cache_ForEach(Cache_ForEach_Exec* exec)
 {
     Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (void*) exec);
+    SOPC_Dict_ForEach(g_cache, &forEach_DoExec, (uintptr_t) exec);
     Cache_Unlock();
 }
 
@@ -593,7 +593,7 @@ void Cache_Dump(void)
 {
     SOPC_ASSERT(NULL != g_cache);
     Cache_Lock();
-    SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Dump, NULL);
+    SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Dump, (uintptr_t) NULL);
     Cache_Unlock();
 }
 

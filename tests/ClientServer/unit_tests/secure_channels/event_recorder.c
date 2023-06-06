@@ -25,12 +25,12 @@
 
 static SOPC_Dict* queues = NULL;
 
-static uint64_t direct_hash(const void* data)
+static uint64_t direct_hash(const uintptr_t data)
 {
-    return (uint64_t)(uintptr_t) data;
+    return (uint64_t) data;
 }
 
-static bool direct_equal(const void* a, const void* b)
+static bool direct_equal(const uintptr_t a, const uintptr_t b)
 {
     return a == b;
 }
@@ -42,14 +42,14 @@ static bool init_queues(void)
         return true;
     }
 
-    queues = SOPC_Dict_Create(NULL, direct_hash, direct_equal, NULL, NULL);
+    queues = SOPC_Dict_Create(0, direct_hash, direct_equal, NULL, NULL);
     return queues != NULL;
 }
 
 static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     bool found;
-    SOPC_AsyncQueue* queue = SOPC_Dict_Get(queues, handler, &found);
+    SOPC_AsyncQueue* queue = (SOPC_AsyncQueue*) SOPC_Dict_Get(queues, (uintptr_t) handler, &found);
     SOPC_ASSERT(found);
     SOPC_ReturnStatus status;
 
@@ -92,7 +92,8 @@ SOPC_EventRecorder* SOPC_EventRecorder_Create(void)
     SOPC_AsyncQueue* queue;
     SOPC_AsyncQueue_Init(&queue, NULL);
 
-    if (handler == NULL || recorder == NULL || queue == NULL || !SOPC_Dict_Insert(queues, handler, queue))
+    if (handler == NULL || recorder == NULL || queue == NULL ||
+        !SOPC_Dict_Insert(queues, (uintptr_t) handler, (uintptr_t) queue))
     {
         SOPC_Looper_Delete(looper);
         SOPC_Free(recorder);

@@ -497,9 +497,9 @@ void SOPC_AddressSpace_Node_Clear(SOPC_AddressSpace* space, SOPC_AddressSpace_No
     SOPC_AddressSpace_Node_Clear_Local(node);
 }
 
-static void clear_description_node_value(void* data)
+static void clear_description_node_value(uintptr_t data)
 {
-    SOPC_AddressSpace_Node* node = data;
+    SOPC_AddressSpace_Node* node = (SOPC_AddressSpace_Node*) data;
 
     if (node->node_class == OpcUa_NodeClass_Variable || node->node_class == OpcUa_NodeClass_VariableType)
     {
@@ -507,9 +507,9 @@ static void clear_description_node_value(void* data)
     }
 }
 
-static void free_description_node(void* data)
+static void free_description_node(uintptr_t data)
 {
-    SOPC_AddressSpace_Node* node = data;
+    SOPC_AddressSpace_Node* node = (SOPC_AddressSpace_Node*) data;
     SOPC_AddressSpace_Node_Clear_Local(node);
     SOPC_Free(node);
 }
@@ -590,7 +590,7 @@ SOPC_ReturnStatus SOPC_AddressSpace_Append(SOPC_AddressSpace* space, SOPC_Addres
         }
     }
 
-    return SOPC_Dict_Insert(space->dict_nodes, id, node) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    return SOPC_Dict_Insert(space->dict_nodes, (uintptr_t) id, (uintptr_t) node) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 void SOPC_AddressSpace_Delete(SOPC_AddressSpace* space)
@@ -618,7 +618,7 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, con
 
     if (!space->readOnlyNodes)
     {
-        return SOPC_Dict_Get(space->dict_nodes, key, found);
+        return (SOPC_AddressSpace_Node*) SOPC_Dict_Get(space->dict_nodes, (uintptr_t) key, found);
     }
     else
     {
@@ -640,7 +640,7 @@ SOPC_AddressSpace_Node* SOPC_AddressSpace_Get_Node(SOPC_AddressSpace* space, con
 typedef struct
 {
     SOPC_AddressSpace_ForEach_Fct* pFunc;
-    void* user_data;
+    uintptr_t user_data;
 } AddressSpace_Dict_Context;
 
 /* \brief
@@ -650,27 +650,28 @@ typedef struct
  * \param key The dictionary value
  * \param key The AddressSpace_Dict_Context context needed to apply on this \p key / \p value pair.
  */
-static void addressSpace_ForEach_Convert(const void* key, void* value, void* user_data)
+static void addressSpace_ForEach_Convert(const uintptr_t key, uintptr_t value, uintptr_t user_data)
 {
     AddressSpace_Dict_Context* context = (AddressSpace_Dict_Context*) user_data;
-    SOPC_ASSERT(NULL != user_data && NULL != context->pFunc);
+    SOPC_ASSERT(NULL != (void*) user_data && NULL != context->pFunc);
     context->pFunc(key, value, context->user_data);
 }
 
-void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, void* user_data)
+void SOPC_AddressSpace_ForEach(SOPC_AddressSpace* space, SOPC_AddressSpace_ForEach_Fct* pFunc, uintptr_t user_data)
 {
     SOPC_ASSERT(NULL != space && NULL != pFunc);
 
     if (!space->readOnlyNodes)
     {
         AddressSpace_Dict_Context context = {.pFunc = pFunc, .user_data = user_data};
-        SOPC_Dict_ForEach(space->dict_nodes, addressSpace_ForEach_Convert, &context);
+        SOPC_Dict_ForEach(space->dict_nodes, addressSpace_ForEach_Convert, (uintptr_t) &context);
     }
     else
     {
         for (uint32_t i = 0; i < space->nb_nodes; i++)
         {
-            (*pFunc)(SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]), &space->const_nodes[i], user_data);
+            (*pFunc)((uintptr_t) SOPC_AddressSpace_Get_NodeId(space, &space->const_nodes[i]),
+                     (uintptr_t) &space->const_nodes[i], user_data);
         }
     }
 }

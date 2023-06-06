@@ -46,14 +46,19 @@ typedef struct
     SOPC_EncodeableType* encoder;
 } SOPC_EncodeableType_UserTypeValue;
 
-static uint64_t typeId_hash(const void* data)
+static uint64_t typeId_hash(const uintptr_t data)
 {
     return ((const SOPC_EncodeableType_UserTypeKey*) data)->typeId;
 }
 
-static bool typeId_equal(const void* a, const void* b)
+static bool typeId_equal(const uintptr_t a, const uintptr_t b)
 {
     return ((const SOPC_EncodeableType_UserTypeKey*) a)->typeId == ((const SOPC_EncodeableType_UserTypeKey*) b)->typeId;
+}
+
+static void type_free(uintptr_t data)
+{
+    SOPC_Free((void*) data);
 }
 
 static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, const uint32_t typeId)
@@ -76,7 +81,7 @@ static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, con
     }
     pKey->typeId = typeId;
     pValue->encoder = pEncoder;
-    inserted = SOPC_Dict_Insert(g_UserEncodeableTypes, (void*) pKey, (void*) pValue);
+    inserted = SOPC_Dict_Insert(g_UserEncodeableTypes, (uintptr_t) pKey, (uintptr_t) pValue);
 
     if (!inserted)
     {
@@ -108,14 +113,14 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
     if (g_UserEncodeableTypes == NULL)
     {
         // Create dictionnary
-        g_UserEncodeableTypes = SOPC_Dict_Create(NULL, typeId_hash, typeId_equal, SOPC_Free, SOPC_Free);
+        g_UserEncodeableTypes = SOPC_Dict_Create(0, typeId_hash, typeId_equal, type_free, type_free);
         if (g_UserEncodeableTypes == NULL)
         {
             result = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            SOPC_Dict_SetTombstoneKey(g_UserEncodeableTypes, (void*) (uintptr_t) 0xFFFFFFFE);
+            SOPC_Dict_SetTombstoneKey(g_UserEncodeableTypes, (uintptr_t) 0xFFFFFFFE);
         }
     }
 
@@ -149,15 +154,15 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
 
     key.typeId = encoder->TypeId;
 
-    prevEncoder = SOPC_Dict_GetKey(g_UserEncodeableTypes, (const void*) &key, NULL);
+    prevEncoder = (SOPC_EncodeableType*) SOPC_Dict_GetKey(g_UserEncodeableTypes, (const uintptr_t) &key, NULL);
     if (prevEncoder == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);
+    SOPC_Dict_Remove(g_UserEncodeableTypes, (const uintptr_t) &key);
     key.typeId = encoder->BinaryEncodingTypeId;
-    SOPC_Dict_Remove(g_UserEncodeableTypes, (const void*) &key);
+    SOPC_Dict_Remove(g_UserEncodeableTypes, (const uintptr_t) &key);
     // Delete the dictionnay if empty
     if (SOPC_Dict_Size(g_UserEncodeableTypes) == 0)
     {
@@ -172,16 +177,13 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
     SOPC_EncodeableType_UserTypeValue* pValue = NULL;
     SOPC_EncodeableType* result = NULL;
     bool found = false;
-    void* userCoder = NULL;
     if (g_UserEncodeableTypes != NULL)
     {
         // search in user defined encodeable types
         SOPC_EncodeableType_UserTypeKey key = {.typeId = typeId};
-        userCoder = SOPC_Dict_Get(g_UserEncodeableTypes, (void*) &key, &found);
-        if (found && userCoder != NULL)
+        pValue = (SOPC_EncodeableType_UserTypeValue*) SOPC_Dict_Get(g_UserEncodeableTypes, (uintptr_t) &key, &found);
+        if (found && pValue != NULL)
         {
-            pValue = (SOPC_EncodeableType_UserTypeValue*) userCoder;
-            SOPC_ASSERT(pValue != NULL);
             result = pValue->encoder;
             SOPC_ASSERT(result != NULL);
         }

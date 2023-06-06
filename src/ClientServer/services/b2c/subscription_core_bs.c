@@ -37,7 +37,7 @@
 
 SOPC_Dict* nodeIdToMonitoredItemQueue = NULL;
 
-static void free_monitored_item_queue(void* data)
+static void free_monitored_item_queue(uintptr_t data)
 {
     SOPC_SLinkedList* miQueue = (SOPC_SLinkedList*) data;
     // No deallocation for queue elements: done in UNINITIALISATION in monitored_item_pointer_bs
@@ -138,8 +138,8 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
     *subscription_core_bs__p_monitoredItemQueue = constants__c_monitoredItemQueue_indet;
     bool valFound = false;
     bool valAdded = false;
-    SOPC_SLinkedList* monitoredItemQueue =
-        SOPC_Dict_Get(nodeIdToMonitoredItemQueue, subscription_core_bs__p_nid, &valFound);
+    SOPC_SLinkedList* monitoredItemQueue = (SOPC_SLinkedList*) SOPC_Dict_Get(
+        nodeIdToMonitoredItemQueue, (uintptr_t) subscription_core_bs__p_nid, &valFound);
     if (valFound)
     {
         *subscription_core_bs__p_bres = true;
@@ -164,7 +164,7 @@ void subscription_core_bs__get_nodeToMonitoredItemQueue(
 
         if (SOPC_STATUS_OK == retStatus)
         {
-            valAdded = SOPC_Dict_Insert(nodeIdToMonitoredItemQueue, nid, monitoredItemQueue);
+            valAdded = SOPC_Dict_Insert(nodeIdToMonitoredItemQueue, (uintptr_t) nid, (uintptr_t) monitoredItemQueue);
             if (valAdded)
             {
                 *subscription_core_bs__p_bres = true;

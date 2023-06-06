@@ -34,26 +34,26 @@ typedef struct _SOPC_Dict SOPC_Dict;
 /**
  * \brief Type of functions used to free keys and values.
  */
-typedef void SOPC_Dict_Free_Fct(void* data);
+typedef void SOPC_Dict_Free_Fct(uintptr_t data);
 
 /**
  * \brief Type of hash functions.
  */
-typedef uint64_t SOPC_Dict_KeyHash_Fct(const void* data);
+typedef uint64_t SOPC_Dict_KeyHash_Fct(const uintptr_t data);
 
 /**
  * \brief Type of functions used when checking two keys for equality. The
  * function should return \c TRUE if and only if both keys are equal, \c FALSE
  * otherwise.
  */
-typedef bool SOPC_Dict_KeyEqual_Fct(const void* a, const void* b);
+typedef bool SOPC_Dict_KeyEqual_Fct(const uintptr_t a, const uintptr_t b);
 
 /**
  * \brief Type of callback functions for \ref SOPC_Dict_ForEach. Both the key and
  * value belong to the dictionary. The parameter \p value can be modified but not reallocated nor deleted.
  * The value of \p user_data is set when calling \ref SOPC_Dict_ForEach.
  */
-typedef void SOPC_Dict_ForEach_Fct(const void* key, void* value, void* user_data);
+typedef void SOPC_Dict_ForEach_Fct(const uintptr_t key, uintptr_t value, uintptr_t user_data);
 
 /**
  * \brief Creates a new, empty dictionary.
@@ -72,7 +72,7 @@ typedef void SOPC_Dict_ForEach_Fct(const void* key, void* value, void* user_data
  * Removal of values is not supported by default. To enable removing values from
  * the dictionary, set a tombstone key using \ref SOPC_Dict_SetTombstoneKey.
  */
-SOPC_Dict* SOPC_Dict_Create(void* empty_key,
+SOPC_Dict* SOPC_Dict_Create(uintptr_t empty_key,
                             SOPC_Dict_KeyHash_Fct* key_hash,
                             SOPC_Dict_KeyEqual_Fct* key_equal,
                             SOPC_Dict_Free_Fct* key_free,
@@ -113,7 +113,7 @@ bool SOPC_Dict_Reserve(SOPC_Dict* d, size_t n_items);
  * As a safeguard, calling this function is only allowed when the dictionary is
  * completely empty (including tombstones), like right after its creation.
  */
-void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key);
+void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, uintptr_t tombstone_key);
 
 /**
  * \brief Inserts a new key and value in the dictionary.
@@ -127,7 +127,7 @@ void SOPC_Dict_SetTombstoneKey(SOPC_Dict* d, void* tombstone_key);
  * modified after insertion. If an item with the same key was already inserted,
  * it is overwritten.
  */
-bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value);
+bool SOPC_Dict_Insert(SOPC_Dict* d, uintptr_t key, uintptr_t value);
 
 /**
  * \brief Looks up the value associated with a key in the dictionary.
@@ -139,7 +139,7 @@ bool SOPC_Dict_Insert(SOPC_Dict* d, void* key, void* value);
  *
  * The returned value belongs to the dictionary and should not be modified.
  */
-void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found);
+uintptr_t SOPC_Dict_Get(const SOPC_Dict* d, const uintptr_t key, bool* found);
 
 /**
  * \brief Looks up a given key in the dictionary.
@@ -155,7 +155,7 @@ void* SOPC_Dict_Get(const SOPC_Dict* d, const void* key, bool* found);
  * the stored copy of the key passed as a parameter and use it, freeing the
  * original.
  */
-void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
+uintptr_t SOPC_Dict_GetKey(const SOPC_Dict* d, const uintptr_t key, bool* found);
 
 /**
  * \brief Removes a values from the dictionary.
@@ -165,7 +165,7 @@ void* SOPC_Dict_GetKey(const SOPC_Dict* d, const void* key, bool* found);
  * For removals to be supported, a tombstone key MUST have been set before using
  * \ref SOPC_Dict_SetTombstoneKey. Otherwise an assertion failure will occur.
  */
-void SOPC_Dict_Remove(SOPC_Dict* d, const void* key);
+void SOPC_Dict_Remove(SOPC_Dict* d, const uintptr_t key);
 
 /**
  * \brief Retrieves the free function for this dictionary's keys.
@@ -226,6 +226,6 @@ size_t SOPC_Dict_Capacity(const SOPC_Dict* d);
  * The order of the iteration is implementation defined, and should not be relied
  * on.
  */
-void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, void* user_data);
+void SOPC_Dict_ForEach(SOPC_Dict* d, SOPC_Dict_ForEach_Fct* func, uintptr_t user_data);
 
 #endif /* SOPC_DICT_H_ */

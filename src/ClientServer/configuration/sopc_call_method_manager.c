@@ -24,9 +24,9 @@
 #include "sopc_mem_alloc.h"
 
 // Use when clear internal Dict
-static void SOPC_MethodCallManager_Free_MF(void* data)
+static void SOPC_MethodCallManager_Free_MF(uintptr_t data)
 {
-    if (NULL == data)
+    if (NULL == (void*) data)
     {
         return;
     }
@@ -60,7 +60,7 @@ static SOPC_MethodCallFunc* SOPC_MethodCallManager_Get(SOPC_MethodCallManager* m
     }
     SOPC_Dict* dict = (SOPC_Dict*) mcm->pUserData;
     SOPC_ASSERT(NULL != dict);
-    SOPC_MethodCallFunc* methodFunc = (SOPC_MethodCallFunc*) SOPC_Dict_Get(dict, methodId, NULL);
+    SOPC_MethodCallFunc* methodFunc = (SOPC_MethodCallFunc*) SOPC_Dict_Get(dict, (uintptr_t) methodId, NULL);
     return methodFunc;
 }
 
@@ -129,7 +129,7 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
         wrapper->pMethodFunc = methodFunc;
         wrapper->pParam = param;
 
-        bool b = SOPC_Dict_Insert(dict, methodId, wrapper);
+        bool b = SOPC_Dict_Insert(dict, (uintptr_t) methodId, (uintptr_t) wrapper);
         if (false == b)
         {
             wrapper->pFnFree = NULL;

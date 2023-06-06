@@ -2121,14 +2121,14 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len)
     return pNid;
 }
 
-static uint64_t nodeid_hash(const void* id)
+static uint64_t nodeid_hash(const uintptr_t id)
 {
     uint64_t hash;
     SOPC_NodeId_Hash((const SOPC_NodeId*) id, &hash);
     return hash;
 }
 
-static bool nodeid_equal(const void* a, const void* b)
+static bool nodeid_equal(const uintptr_t a, const uintptr_t b)
 {
     int32_t cmp = 0;
 
@@ -2138,18 +2138,19 @@ static bool nodeid_equal(const void* a, const void* b)
     return cmp == 0;
 }
 
-static void nodeid_free(void* id)
+static void nodeid_free(uintptr_t id)
 {
-    if (id != NULL)
+    SOPC_NodeId* nId = (SOPC_NodeId*) id;
+    if (nId != NULL)
     {
-        SOPC_NodeId_Clear(id);
-        SOPC_Free(id);
+        SOPC_NodeId_Clear(nId);
+        SOPC_Free(nId);
     }
 }
 
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free)
 {
-    return SOPC_Dict_Create(NULL, nodeid_hash, nodeid_equal, free_keys ? nodeid_free : NULL, value_free);
+    return SOPC_Dict_Create(0, nodeid_hash, nodeid_equal, free_keys ? nodeid_free : NULL, value_free);
 }
 
 void SOPC_ExpandedNodeId_InitializeAux(void* value)

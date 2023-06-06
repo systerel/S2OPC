@@ -50,28 +50,28 @@ static SOPC_Dict* dictMCast = NULL;
  * DECLARATION OF LOCAL FUNCTIONS
  **************************************************/
 /** Hash for key of type 'int' */
-static uint64_t socketKeyHash(const void* data);
+static uint64_t socketKeyHash(const uintptr_t data);
 /** Equality for key of type 'int' */
-static bool socketKeyEqual(const void* a, const void* b);
+static bool socketKeyEqual(const uintptr_t a, const uintptr_t b);
 static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress);
 static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock);
 
-#define SOCKET_TO_KEY(s) ((void*) (uintptr_t)(s))
-#define KEY_TO_SOCKET(k) ((Socket)(uintptr_t)(k))
+#define SOCKET_TO_KEY(s) ((uintptr_t)(s))
+#define KEY_TO_SOCKET(k) ((Socket)(k))
 
-static void* NO_KEY = SOCKET_TO_KEY(SOPC_INVALID_SOCKET);
-static void* EMPTY_KEY = SOCKET_TO_KEY(-2);
+static uintptr_t NO_KEY = SOCKET_TO_KEY(SOPC_INVALID_SOCKET);
+static uintptr_t EMPTY_KEY = SOCKET_TO_KEY(-2);
 
 /***************************************************
  * IMPLEMENTATION OF LOCAL FUNCTIONS
  **************************************************/
-static uint64_t socketKeyHash(const void* data)
+static uint64_t socketKeyHash(const uintptr_t data)
 {
     return (uint64_t) KEY_TO_SOCKET(data);
 }
 
 /***************************************************/
-static bool socketKeyEqual(const void* a, const void* b)
+static bool socketKeyEqual(const uintptr_t a, const uintptr_t b)
 {
     return KEY_TO_SOCKET(a) == KEY_TO_SOCKET(b);
 }
@@ -79,14 +79,14 @@ static bool socketKeyEqual(const void* a, const void* b)
 /***************************************************/
 static void linkSockToMCast(Socket sock, struct net_if_mcast_addr* mcAddress)
 {
-    void* key = SOCKET_TO_KEY(sock);
+    uintptr_t key = SOCKET_TO_KEY(sock);
     if (NULL == dictMCast)
     {
         dictMCast = SOPC_Dict_Create(NO_KEY, &socketKeyHash, &socketKeyEqual, NULL, NULL);
         SOPC_ASSERT(NULL != dictMCast);
         SOPC_Dict_SetTombstoneKey(dictMCast, EMPTY_KEY);
     }
-    bool res = SOPC_Dict_Insert(dictMCast, key, mcAddress);
+    bool res = SOPC_Dict_Insert(dictMCast, key, (uintptr_t) mcAddress);
     SOPC_ASSERT(res);
 }
 
@@ -97,9 +97,9 @@ static struct net_if_mcast_addr* getAndUnlinkSockFromMCast(Socket sock)
     {
         return 0;
     }
-    void* key = SOCKET_TO_KEY(sock);
+    uintptr_t key = SOCKET_TO_KEY(sock);
 
-    struct net_if_mcast_addr* result = SOPC_Dict_Get(dictMCast, key, NULL);
+    struct net_if_mcast_addr* result = (struct net_if_mcast_addr*) SOPC_Dict_Get(dictMCast, key, NULL);
     SOPC_Dict_Remove(dictMCast, key);
     if (SOPC_Dict_Size(dictMCast) == 0)
     {
@@ -118,7 +118,7 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(Socket sock, const SOPC_Socket_A
     struct net_if* ptrNetIf = NULL;
     if (AF_INET == multicast->ai_family)
     {
-        // Retreive IPV4 address
+        // Retrieve IPV4 address
         struct in_addr* multiAddr = &((struct sockaddr_in*) &multicast->_ai_addr)->sin_addr;
         // Check that this is a multicast address
         if (!net_ipv4_is_addr_mcast(multiAddr))

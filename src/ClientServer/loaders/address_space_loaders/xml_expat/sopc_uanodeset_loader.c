@@ -473,7 +473,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             }
 
             bool is_aliased;
-            const char* aliased = SOPC_Dict_Get(ctx->aliases, attr_val, &is_aliased);
+            const char* aliased = (const char*) SOPC_Dict_Get(ctx->aliases, (uintptr_t) attr_val, &is_aliased);
 
             if (is_aliased)
             {
@@ -589,7 +589,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
             const char* val = attrs[++i];
 
             bool is_aliased;
-            const char* aliased = SOPC_Dict_Get(ctx->aliases, val, &is_aliased);
+            const char* aliased = (const char*) SOPC_Dict_Get(ctx->aliases, (uintptr_t) val, &is_aliased);
 
             if (is_aliased)
             {
@@ -1128,7 +1128,7 @@ static bool finalize_alias(struct parse_context_t* ctx)
     char* target = SOPC_strdup(SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx));
     SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
-    if (target == NULL || !SOPC_Dict_Insert(ctx->aliases, ctx->current_alias_alias, target))
+    if (target == NULL || !SOPC_Dict_Insert(ctx->aliases, (uintptr_t) ctx->current_alias_alias, (uintptr_t) target))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         SOPC_Free(target);
@@ -2397,20 +2397,25 @@ static void char_data_handler(void* user_data, const XML_Char* s, int len)
     }
 }
 
-static uint64_t str_hash(const void* data)
+static uint64_t str_hash(const uintptr_t data)
 {
     return SOPC_DJBHash((const uint8_t*) data, strlen((const char*) data));
 }
 
-static bool str_equal(const void* a, const void* b)
+static bool str_equal(const uintptr_t a, const uintptr_t b)
 {
     return strcmp((const char*) a, (const char*) b) == 0;
+}
+
+static void uintptr_t_free(uintptr_t elt)
+{
+    SOPC_Free((void*) elt);
 }
 
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
 {
     static const size_t char_data_cap_initial = 4096;
-    SOPC_Dict* aliases = SOPC_Dict_Create(NULL, str_hash, str_equal, SOPC_Free, SOPC_Free);
+    SOPC_Dict* aliases = SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, uintptr_t_free, uintptr_t_free);
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
     char* char_data_buffer = SOPC_Calloc(char_data_cap_initial, sizeof(char));
     SOPC_AddressSpace* space = SOPC_AddressSpace_Create(true);

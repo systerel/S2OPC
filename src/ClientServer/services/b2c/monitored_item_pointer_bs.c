@@ -38,7 +38,7 @@
 
 static const SOPC_NodeId Number_DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Number};
 
-static void SOPC_InternalMonitoredItem_Free(void* data)
+static void SOPC_InternalMonitoredItem_Free(uintptr_t data)
 {
     SOPC_InternalMonitoredItem* mi = (SOPC_InternalMonitoredItem*) data;
     if (NULL != mi)
@@ -55,19 +55,18 @@ static void SOPC_InternalMonitoredItem_Free(void* data)
     }
 }
 
-static void SOPC_InternalMonitoredItemId_Free(void* data)
+static void SOPC_InternalMonitoredItemId_Free(uintptr_t data)
 {
     SOPC_UNUSED_ARG(data);
     // Nothing to do: uintptr_t value
 }
 
-static uint64_t SOPC_InternalMonitoredItemId_Hash(const void* data)
+static uint64_t SOPC_InternalMonitoredItemId_Hash(const uintptr_t data)
 {
-    uintptr_t id = (uintptr_t) data;
-    return (uint64_t) id;
+    return (uint64_t) data;
 }
 
-static bool SOPC_InternalMonitoredItemId_Equal(const void* a, const void* b)
+static bool SOPC_InternalMonitoredItemId_Equal(const uintptr_t a, const uintptr_t b)
 {
     // Compare uintptr_t id values
     return a == b;
@@ -327,7 +326,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
                 monitoredItemIdMax++;
                 monitItem->monitoredItemId = monitoredItemIdMax;
                 dictInsertionOK =
-                    SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitoredItemIdMax, monitItem);
+                    SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) monitoredItemIdMax, (uintptr_t) monitItem);
             } // else: all Ids already in use
         }
         else
@@ -337,7 +336,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
             if (freshId != 0)
             {
                 monitItem->monitoredItemId = freshId;
-                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) freshId, monitItem);
+                dictInsertionOK = SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) freshId, (uintptr_t) monitItem);
             }
         }
 
@@ -438,7 +437,7 @@ void monitored_item_pointer_bs__delete_monitored_item_pointer(
 
     // Reset monitored item associated
     // (Caution: it frees the monitItem pointer)
-    bool inserted = SOPC_Dict_Insert(monitoredItemIdDict, (void*) (uintptr_t) monitItem->monitoredItemId, NULL);
+    bool inserted = SOPC_Dict_Insert(monitoredItemIdDict, (uintptr_t) monitItem->monitoredItemId, (uintptr_t) NULL);
 
     if (!inserted)
     {
@@ -468,8 +467,8 @@ void monitored_item_pointer_bs__getall_monitoredItemId(
     if (monitored_item_pointer_bs__p_monitoredItemId != constants_bs__c_monitoredItemId_indet)
     {
         void* miPointer =
-            SOPC_Dict_Get(monitoredItemIdDict, (void*) (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
-                          monitored_item_pointer_bs__bres);
+            (void*) SOPC_Dict_Get(monitoredItemIdDict, (uintptr_t) monitored_item_pointer_bs__p_monitoredItemId,
+                                  monitored_item_pointer_bs__bres);
         if (*monitored_item_pointer_bs__bres && NULL != miPointer)
         {
             *monitored_item_pointer_bs__p_monitoredItemPointer = miPointer;

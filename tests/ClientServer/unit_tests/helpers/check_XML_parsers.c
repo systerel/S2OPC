@@ -124,7 +124,7 @@ static void check_variable_and_type_common(SOPC_AddressSpace* leftSpace,
     }
 }
 
-static void addspace_for_each_equal(const void* key, const void* value, void* user_data)
+static void addspace_for_each_equal(const uintptr_t key, const uintptr_t value, uintptr_t user_data)
 {
     // Uncomment for debugging purpose:
     /*
@@ -135,7 +135,7 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     bool found = false;
     /* Note: we do not have read-only accessors for SOPC_AddressSpace_Node even if in this case we do not modify
      * accessed values */
-    SOPC_AddressSpace** addSpaces = user_data;
+    SOPC_AddressSpace** addSpaces = (SOPC_AddressSpace**) user_data;
 
     SOPC_AddressSpace* leftSpace = addSpaces[0];
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
@@ -143,7 +143,7 @@ static void addspace_for_each_equal(const void* key, const void* value, void* us
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     SOPC_AddressSpace* rightSpace = addSpaces[1];
-    SOPC_AddressSpace_Node* right = SOPC_AddressSpace_Get_Node(rightSpace, key, &found);
+    SOPC_AddressSpace_Node* right = SOPC_AddressSpace_Get_Node(rightSpace, (SOPC_NodeId*) key, &found);
     ck_assert(found);
 
     /* Check item type */
@@ -279,11 +279,11 @@ START_TEST(test_same_address_space_results)
 
     /* Check all data present in embedded are present in dynamic */
     SOPC_AddressSpace* spaces[2] = {spaceEmbedded, spaceDynamic};
-    SOPC_AddressSpace_ForEach(spaceEmbedded, addspace_for_each_equal, spaces);
+    SOPC_AddressSpace_ForEach(spaceEmbedded, addspace_for_each_equal, (uintptr_t) spaces);
 
     /* Check all data present in dynamic are present in embedded */
     SOPC_AddressSpace* spaces2[2] = {spaceDynamic, spaceEmbedded};
-    SOPC_AddressSpace_ForEach(spaceDynamic, addspace_for_each_equal, spaces2);
+    SOPC_AddressSpace_ForEach(spaceDynamic, addspace_for_each_equal, (uintptr_t) spaces2);
 
     SOPC_AddressSpace_Delete(spaceEmbedded);
     SOPC_AddressSpace_Delete(spaceDynamic);
