@@ -20,7 +20,7 @@
 # Define the docker images used in S2OPC
 
 # Public images (registry.gitlab.com/systerel/s2opc)
-BUILD_IMAGE=sha256:12e94f0631ca8a3c9121d142a467351a89d120eaf6d1819e728a9d41d06e218b # build:1.34
+BUILD_IMAGE=sha256:e315999939e864cabfc651c49f0d781ae956f137623899a1c1da0ec09f2cbaa7 # build:1.35
 MINGW_IMAGE=sha256:51364ca5cfa2d75219e616967f4969112c35758704f24738d0083e05f326e061 # mingw_build:1.13
 RPI_IMAGE=sha256:464cfa4e22af6d1933a17b14db182632dfd28febc3495adbd286aa1e5d8265e4 # rpi_build:1.5
 CHECK_IMAGE=sha256:55f5a3f10a3e6dd4b1c2d076df98c818eaeb749d623ef57208f6293061a7b8a4 # check 1.16
