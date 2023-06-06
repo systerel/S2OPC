@@ -173,6 +173,9 @@ struct SOPC_ReaderGroup
     uint32_t groupVersion;
     bool hasNonZeroWriterIds;
     bool hasZeroWriterIds;
+    
+    // Topic Specific to Mqtt
+    char* mqttTopic;
 };
 
 struct SOPC_DataSetReader
@@ -183,8 +186,6 @@ struct SOPC_DataSetReader
     SOPC_SubscribedDataSetType targetType;
     double messageReceiveTimeout; /* ms */
 
-    // Topic Specific to Mqtt
-    char* mqttTopic;
 
     // These fields below are defined in Spec but not used
     // DataSetFieldContentMask
@@ -730,18 +731,75 @@ void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t
     reader->dataSetWriterId = id;
 }
 
-const char* SOPC_DataSetReader_Get_MqttTopic(const SOPC_DataSetReader* reader)
+const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader)
 {
     SOPC_ASSERT(NULL != reader);
     return reader->mqttTopic;
 }
 
-bool SOPC_DataSetReader_Set_MqttTopic(SOPC_DataSetReader* reader, const char* topic)
+bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic)
 {
     SOPC_ASSERT(NULL != topic);
     reader->mqttTopic = SOPC_PubSub_String_Copy(topic);
     return (NULL != reader->mqttTopic);
 }
+
+bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t groupId)
+{
+    char charPublisherId[SOPC_MAX_LENGTH_UINT64_TO_STRING];
+    char charGroupId[SOPC_MAX_LENGTH_UINT16_TO_STRING];
+    const char* dot = ".";
+    const long unsigned int lengthDot = 2;
+    const long unsigned int lengthDefaultTopic =
+        SOPC_MAX_LENGTH_UINT64_TO_STRING + lengthDot + SOPC_MAX_LENGTH_UINT16_TO_STRING;
+
+    char* defaultTopic = SOPC_Calloc(lengthDefaultTopic, sizeof(char));
+    bool result = false;
+
+    memset(charPublisherId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
+    memset(charGroupId, 0, SOPC_MAX_LENGTH_UINT16_TO_STRING);
+
+    int res = snprintf(charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING, "%" PRIu64, publisherId);
+
+    if (res < 0)
+    {
+        defaultTopic = NULL;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Failed to convert publisherId to string with error value %d",
+                                 errno);
+    }
+    else
+    {
+        res = snprintf(charGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING, "%d", groupId);
+        if (res < 0)
+        {
+            defaultTopic = NULL;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                     "Failed to convert writerGroupId to string with error value %d", errno);
+        }
+    }
+
+    if (res >= 0)
+    {
+        /* snprintf guarrantees the strings terminate by \0 */
+        defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
+        strncat(defaultTopic, dot, lengthDot);
+        strncat(defaultTopic, charGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
+        result = SOPC_ReaderGroup_Set_MqttTopic(reader, defaultTopic);
+    }
+
+    if (result)
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Default value of MqttTopic set to %s", defaultTopic);
+    }
+    else
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MqttTopic");
+    }
+
+    SOPC_Free(defaultTopic);
+    return result;
+}
+
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
                                                      SOPC_SubscribedDataSetType type,
@@ -1235,10 +1293,10 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
         for (int i = 0; i < group->dataSetReaders_length; i++)
         {
             SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
-            SOPC_Free(group->dataSetReaders[i].mqttTopic);
         }
         group->dataSetReaders_length = 0;
         SOPC_Free(group->dataSetReaders);
+        SOPC_Free(group->mqttTopic);
     }
 }
 
