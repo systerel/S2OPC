@@ -267,7 +267,7 @@ uint64_t get_unique_client_id(void)
 #else
 
 #ifndef USE_CORE_MQTT
-#define USE_CORE_MQTT = 0
+#define USE_CORE_MQTT 0
 #endif
 #if USE_CORE_MQTT == 1
 
@@ -276,6 +276,8 @@ uint64_t get_unique_client_id(void)
 #include "S2OPC_mqtt_agent_task.h"
 #include "core_mqtt.h"
 #include "lwip/sockets.h"
+#include "cache.h"
+#include "sopc_sub_scheduler.h"
 
 /* Functions */
 
@@ -310,6 +312,102 @@ static void sopc_MqttEventCallback ()
 {
 	LogInfo("mqtt event callback");//TODO
 }
+
+
+/* Target callback */
+bool set_target_variable2(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
+{
+    bool ok = true;
+
+    for (int i = 0; i < nbValues; i++)
+    {
+        OpcUa_WriteValue* wv = &nodesToWrite[i];
+        SOPC_DataValue* dv = &wv->Value;
+
+        /* Print Variant from nodes that have been received */
+        // BEGIN
+        if (SOPC_VariantArrayType_SingleValue == dv->Value.ArrayType)
+        {
+            switch (dv->Value.BuiltInTypeId)
+            {
+            case SOPC_Int16_Id:
+                LogInfo("New value of dv->Value.Value.Int16 = %d\n", dv->Value.Value.Int16);
+                break;
+            case SOPC_UInt16_Id:
+                LogInfo("New value of dv->Value.Value.Uint16 = %d\n", dv->Value.Value.Uint16);
+                break;
+            case SOPC_Int32_Id:
+                LogInfo("New value of dv->Value.Value.Int32 = %d\n", dv->Value.Value.Int32);
+                break;
+            case SOPC_UInt32_Id:
+                LogInfo("New value of dv->Value.Value.Uint32 = %d\n", dv->Value.Value.Uint32);
+                break;
+            case SOPC_Int64_Id:
+                LogInfo("New value of dv->Value.Value.Int64 = %ld\n", dv->Value.Value.Int64);
+                break;
+            case SOPC_UInt64_Id:
+                LogInfo("New value of dv->Value.Value.Uint64 = %ld\n", dv->Value.Value.Uint64);
+                break;
+            case SOPC_String_Id:
+                /* Variant is a SOPC_String. You can add some text to Variant.Value.String */
+                // BEGIN
+                SOPC_Variant_Print_U5(&dv->Value);
+                // END
+                break;
+            default:
+                SOPC_Variant_Print_U5(&dv->Value);
+                break;
+            }
+        }
+        // END
+        /* As we have ownership of the wv, clear it */
+        OpcUa_WriteValue_Clear(wv);
+    }
+
+    SOPC_Free(nodesToWrite);
+
+    return ok;
+}
+
+/* callback used by core_mqtt library */
+MQTTEventCallback_t cb_msg_arrived_core_mqtt ( struct MQTTContext * pContext,
+        							struct MQTTPacketInfo * pPacketInfo,
+									struct MQTTDeserializedInfo * pDeserializedInfo )
+{
+	LogInfo("MQTT CB !!");
+	if (MQTT_PACKET_TYPE_PUBLISH == pPacketInfo->type || 0x32 == pPacketInfo->type || 0x34 == pPacketInfo->type) //32 -> QoS = 1 | 34 -> QoS = 2
+	{
+		uint16_t topicLength = pDeserializedInfo->pPublishInfo->topicNameLength;
+		char pMqttTopic[topicLength + 1];
+		for (int i = 0; i < topicLength; i++)
+		{
+			pMqttTopic[i] = pDeserializedInfo->pPublishInfo->pTopicName[i];
+		}
+		pMqttTopic[topicLength] = '\0';
+
+		LogInfo("Topic = %s", &pMqttTopic);
+		LogInfo("Payload = %s", pDeserializedInfo->pPublishInfo->pPayload);
+
+
+		//Decode
+		SOPC_Buffer * buffer = SOPC_Buffer_Create(pDeserializedInfo->pPublishInfo->payloadLength);
+		memcpy(buffer->data,pDeserializedInfo->pPublishInfo->pPayload,pDeserializedInfo->pPublishInfo->payloadLength);
+		buffer->length = (uint32_t) pDeserializedInfo->pPublishInfo->payloadLength;
+		SOPC_ReturnStatus result = SOPC_STATUS_NOK;
+	    SOPC_SubTargetVariableConfig* targetConfig = NULL;
+	    targetConfig = SOPC_SubTargetVariableConfig_Create(&set_target_variable2); //&Cache_SetTargetVariables (put in cache) //&set_target_variable2 (print)
+		//on_mqtt_message_received(buffer->data, buffer->length,pContext->transportInterface.pNetworkContext->Connection_interface);
+	    result = SOPC_Reader_Read_UADP(pContext->transportInterface.pNetworkContext->Connection_interface, buffer,
+        							   targetConfig,
+									   SOPC_SubScheduler_Get_Security_Infos,
+									   SOPC_SubScheduler_Is_Writer_SN_Newer);
+        //Delete
+		SOPC_Buffer_Delete(buffer);
+		buffer = NULL;
+	}
+}
+
+
 
 static uint32_t ulGlobalEntryTimeMs;
 static uint32_t sopc_prvGetTimeMs( void )
@@ -346,7 +444,7 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 	if ( (MQTTSuccess == statusM) & (publishInfo.qos > MQTTQoS0) )
 	{
 		MQTT_ReceiveLoop(contextClient, 1);
-		LogInfo("ACK !");
+		LogDebug("ACK !");
 	}
 
 	if (MQTTSuccess != statusM)
@@ -373,10 +471,8 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
                                               FctMessageReceived* cbMessageReceived,
                                               void* userContext)
 {
-    SOPC_UNUSED_ARG(subTopic);
-    SOPC_UNUSED_ARG(nbSubTopic);
 	SOPC_UNUSED_ARG(cbMessageReceived);
-    SOPC_UNUSED_ARG(userContext);
+    //SOPC_UNUSED_ARG(userContext);
 
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 	MQTTStatus_t statusM = MQTTIllegalState;
@@ -406,6 +502,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 
 	Socket sock1 = -1;
 	xNetworkContext->sock = sock1;
+	xNetworkContext->Connection_interface = userContext;
 
 	sopc_createsock(2, SOCK_STREAM, 0, &xNetworkContext->sock); //@parameter SOCK_STREAM involves tcp on lwip (@param 1 and 3 unused)
 	sopc_connectsock(xNetworkContext->sock, addrs);
@@ -415,7 +512,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 	xTransport.recv = sopc_recvsock;
 	xTransport.send = sopc_sendsock;
 
-	statusM = MQTT_Init(contextClient, &xTransport, sopc_prvGetTimeMs, sopc_MqttEventCallback, &fixedBuffer);
+	statusM = MQTT_Init(contextClient, &xTransport, sopc_prvGetTimeMs, cb_msg_arrived_core_mqtt, &fixedBuffer);
 
 	if (MQTTSuccess != statusM)
 	{
@@ -428,7 +525,7 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 
 	MQTTConnectInfo_t connectInfo = { 0 };
 	connectInfo.cleanSession = true;
-	connectInfo.pClientIdentifier = "someClientID";
+	connectInfo.pClientIdentifier = "S2OPC_MQTT";
 	connectInfo.clientIdentifierLength = (uint16_t) strlen( connectInfo.pClientIdentifier );
 	connectInfo.keepAliveSeconds = 60;
 	connectInfo.pUserName = username;
@@ -451,6 +548,45 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 	{
 		LogDebug("Status Mqtt Error : %d",statusM);
 		return SOPC_STATUS_NOK;
+	}
+
+	if (nbSubTopic > 0)
+	{
+		//SUB
+		MQTTSubscribeInfo_t subscriptionList[20] = { 0 };
+		uint16_t packetId = 0;
+
+		// This is assumed to be a list of filters we want to subscribe to.
+//		const char * filters[nbSubTopic];
+//		filters[0] = "S2OPC";
+//		filters[1] = "test";
+
+
+		// Set each subscription.
+		for( int i = 0; i < nbSubTopic; i++ )
+		{
+		     subscriptionList[i].qos = MQTTQoS1;
+		     // Each subscription needs a topic filter.
+		     subscriptionList[i].pTopicFilter = subTopic[i];
+		     subscriptionList[i].topicFilterLength = (uint16_t) strlen(subTopic[i]);
+		     // Mettre un print de tous les subs
+		}
+
+		packetId = MQTT_GetPacketId( contextClient );
+
+		statusM = MQTT_Subscribe( contextClient, &subscriptionList[0], nbSubTopic, packetId );
+
+		if( MQTTSuccess == statusM )
+		{
+			LogInfo("SUB");
+			vTaskDelay(2000);
+			for (int i = 0; i < 1000; i++)
+			{
+				MQTT_ReceiveLoop(contextClient, 10000000); //Il faut rester dans la boucle et attendre les messages.
+				//vTaskDelay(500);
+			}
+		}
+
 	}
     return SOPC_STATUS_OK;
 }

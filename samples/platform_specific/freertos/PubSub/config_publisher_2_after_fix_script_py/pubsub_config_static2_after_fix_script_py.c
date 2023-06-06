@@ -100,8 +100,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Set publisher id and address
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_ASSERT(NULL != connection);
-        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 123);
-        alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.64:1883");
+        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
+        alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:1883");
     }
     
     // Set acyclic publisher mode
@@ -128,11 +128,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         // GroupId = 14
         // GroupVersion = 1
-        // Interval = 2000.000000 ms
+        // Interval = 1000.000000 ms
         // Offest = -1 us
         // topic = S2OPC
  
-       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 2000.000000,-1, SOPC_SecurityMode_None,"S2OPC");
+       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 1000.000000,-1, SOPC_SecurityMode_SignAndEncrypt,"S2OPC");
        	alloc = NULL != writerGroup;
     	}
  	
@@ -151,13 +151,14 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
-        // WriterId = 51
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 51, 1);
+        // WriterId = 0
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 0, 2);
         alloc = NULL != dataset;
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=2;i=6", SOPC_Float_Id); // PubFloat
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubBool", SOPC_Boolean_Id); // varBool
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubString", SOPC_String_Id); // varString
     }
     
     /*** Pub Message 15 ***/
@@ -166,11 +167,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         // GroupId = 15
         // GroupVersion = 1
-        // Interval = 1000.000000 ms
+        // Interval = 2000.000000 ms
         // Offest = -1 us
         // topic = None
  
-       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000,-1, SOPC_SecurityMode_None,NULL);
+       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 2000.000000,-1, SOPC_SecurityMode_None,NULL);
        	alloc = NULL != writerGroup;
     	}
  	
@@ -187,13 +188,14 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
-        // WriterId = 52
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 0, 52, 1);
+        // WriterId = 0
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 0, 0, 2);
         alloc = NULL != dataset;
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=2;i=7", SOPC_Float_Id); // PubFloat
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubInt", SOPC_Int64_Id); // varInt
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubUInt", SOPC_UInt64_Id); // varUInt
     }
     
 

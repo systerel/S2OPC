@@ -196,6 +196,10 @@ bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char
  */
 bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
+const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
+bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
+bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t GroupId);
+
 /*******************/
 /** DataSetReader **/
 /*******************/
@@ -215,8 +219,6 @@ bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
 uint16_t SOPC_DataSetReader_Nb_FieldMetaData(const SOPC_DataSetReader* reader);
 SOPC_FieldMetaData* SOPC_DataSetReader_Get_FieldMetaData_At(const SOPC_DataSetReader* reader, uint16_t index);
 
-const char* SOPC_DataSetReader_Get_MqttTopic(const SOPC_DataSetReader* reader);
-bool SOPC_DataSetReader_Set_MqttTopic(SOPC_DataSetReader* reader, const char* topic);
 
 /**********************/
 /** SOPC_FieldTarget **/

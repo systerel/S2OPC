@@ -61,20 +61,6 @@ char* ENDPOINT_URL = NULL;
 static void SOPC_SubScheduler_Add_Security_Ctx(SOPC_ReaderGroup* group);
 
 /**
- * Search in Subscriber security context the data associated to a token id, publisher id and writer group id
- * If no context is found, it means the subscriber is not configured to manage security from this parameter.
- * This function is given as callback to the Network Message decoder.
- *
- * \param tokenId tokenId of a received message
- * \param pubCtx a context related to a Publisher found in the Subscriber security context
- * \param writerGroupId writer group id of a received message
- * \return security data or NULL if not found
- */
-static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
-                                                                      const SOPC_Conf_PublisherId pubId,
-                                                                      uint16_t writerGroupId);
-
-/**
  * Structure to link a key (publisher, writer group) to a security configuration:
  */
 typedef struct SOPC_SubScheduler_Security_Reader_Ctx
@@ -161,19 +147,6 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     uint16_t dataSetMessageSequenceNumber;
 } SOPC_SubScheduler_Writer_Ctx;
 
-/**
- * @brief Check if sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and
- * received sequence number.
- *
- * @param pubId PublisherId attach to a networkMessage
- * @param writerId DataSetW attach to a dataSetMessage
- * @param receivedSN received sequence number
- * @return true if sequence number received is newer and valid
- * @return false if sequence number received is older or invalid
- */
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
-                                                 const uint16_t writerId,
-                                                 const uint16_t receivedSN);
 // End of data set writer context
 
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
@@ -289,18 +262,19 @@ static void get_mqtt_topic_from_dataSetReader(const char** topic,
                                               SOPC_PubSubConnection* connection,
                                               uint16_t nbReaderGroups)
 {
-    uint16_t offset = 0;
+    //uint16_t offset = 0;
     for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
     {
         SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
         uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
         *nbTopic = (uint16_t)(*nbTopic + (uint16_t) nbDataSetReader);
-        for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && *nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME; dsr_i++)
-        {
-            SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
-            topic[offset + dsr_i] = SOPC_DataSetReader_Get_MqttTopic(reader);
-        }
-        offset = (uint16_t)(offset + *nbTopic);
+        topic[rg_i] = SOPC_ReaderGroup_Get_MqttTopic(group);
+//        for (uint8_t dsr_i = 0; dsr_i < nbDataSetReader && *nbTopic < MQTT_LIB_MAX_NB_TOPIC_NAME; dsr_i++)
+//        {
+//            SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, dsr_i);
+//            topic[offset + dsr_i] = SOPC_ReaderGroup_Get_MqttTopic(reader);
+//        }
+        //offset = (uint16_t)(offset + *nbTopic);
     }
 }
 
@@ -320,7 +294,7 @@ static void on_socket_message_received(void* pInputIdentifier, Socket sock);
  * \param size  Size of data received, in bytes
  * \param pInputIdentifier  User context identifying the connection
  */
-static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputIdentifier)
+void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputIdentifier)
 {
     SOPC_ASSERT(NULL != pInputIdentifier);
 
@@ -340,6 +314,7 @@ static void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputI
         }
     }
 }
+
 
 static void on_socket_message_received(void* pInputIdentifier, Socket sock)
 {
@@ -619,7 +594,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                     SOPC_PubSubConnection_Get_MqttUsername(connection),
                                     SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbTopic,
                                     on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
-
+// ici un MQTT_Subscribe
                                 if (SOPC_STATUS_OK != status)
                                 {
                                     SOPC_Logger_TraceError(
@@ -870,9 +845,9 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ct
     return NULL;
 }
 
-static SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
-                                                                      const SOPC_Conf_PublisherId pubId,
-                                                                      uint16_t writerGroupId)
+SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
+                                                               const SOPC_Conf_PublisherId pubId,
+                                                               uint16_t writerGroupId)
 {
     SOPC_SubScheduler_Security_Pub_Ctx* pubCtx = SOPC_SubScheduler_Get_Security_Pub_Ctx(tokenId, pubId);
     if (NULL == pubCtx)
@@ -1069,9 +1044,9 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
 }
 
 // Returns true if the sequence number is newer
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
-                                                 const uint16_t writerId,
-                                                 const uint16_t receivedSN)
+bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
+                                          const uint16_t writerId,
+                                          const uint16_t receivedSN)
 {
     SOPC_ASSERT(NULL != pubId);
     // only Integer publisher id is managed

@@ -100,8 +100,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Set publisher id and address
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_ASSERT(NULL != connection);
-        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 123);
-        alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:1883");
+        SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 64);
+        alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.109:1883");
     }
     
     // Set acyclic publisher mode
@@ -132,7 +132,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
     	// topic = "mqtt_topic"
  
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 2000.000000,-1, SOPC_SecurityMode_None,"mqtt_topic");
+       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 2000.000000,-1, SOPC_SecurityMode_None,NULL);
        alloc = NULL != writerGroup;
     }
  
@@ -171,7 +171,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
     	// topic = "S2OPC"
  
-       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000,-1, SOPC_SecurityMode_None, "S2OPC");
+       writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 1000.000000,-1, SOPC_SecurityMode_None, NULL);
        alloc = NULL != writerGroup;
     }
  

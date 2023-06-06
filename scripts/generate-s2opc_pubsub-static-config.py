@@ -303,16 +303,16 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // topic = %s
  """ % (msgContext.id, msgContext.version, msgContext.interval,msgContext.offset,msgContext.mqttTopic))
  
-    if(msgContext.mqttTopic != "None"):
+    if (msgContext.mqttTopic != "None"):
     	result.add("""
        	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s,"%s");
        	alloc = NULL != writerGroup;
     	}
  	""" % (msgIndex, msgContext.id, msgContext.version, msgContext.interval,
         msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic))
-        
-    if(msgContext.mqttTopic == "None"):
-    	result.add("""
+   
+    if (msgContext.mqttTopic == "None"):
+        result.add("""
        	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s,NULL);
        	alloc = NULL != writerGroup;
     	}
@@ -401,7 +401,6 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     """ % (msgContext.interval,
            dsIndex,
            writerId, msgContext.interval))
-
 
             result.add("""
     if (alloc)
@@ -514,19 +513,38 @@ def handleSubMessage(cnxContext : CnxContext, message, index, result):
     /*** Sub Message %d ***/
     """ % msgContext.id)
 
-    result.add("""
+    if (msgContext.mqttTopic != "None"):
+
+        result.add("""
+    if (alloc)
+       {
+        // Allocate %d datasets
+        // GroupId = %d
+        // GroupVersion = %d
+        // PubId = %s
+        // topic = %s
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %s, %s, %s, %s, %d,"%s");
+        alloc = NULL != readerGroup;
+    }
+    """ % (len(datasets), msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, msgContext.mqttTopic,
+            index, getCSecurityMode(msgContext.securityMode),
+            msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, len(datasets),msgContext.mqttTopic))
+    
+    else:
+        result.add("""
     if (alloc)
     {
         // Allocate %d datasets
         // GroupId = %d
         // GroupVersion = %d
         // PubId = %s
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %s, %s, %s, %s, %d);
+        // topic = NULL
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %s, %s, %s, %s, %d, NULL);
         alloc = NULL != readerGroup;
     }
     """ % (len(datasets), msgContext.id, msgContext.version, msgContext.cnxContext.publisherId,
-           index, getCSecurityMode(msgContext.securityMode),
-           msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, len(datasets)))
+        index, getCSecurityMode(msgContext.securityMode),
+        msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, len(datasets)))
 
 
     dsIndex = 0
@@ -646,7 +664,8 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
                                                            uint16_t groupId,
                                                            uint32_t groupVersion,
                                                            uint32_t publisherId,
-                                                           uint16_t nbDataSets)
+                                                           uint16_t nbDataSets,
+                                                           const char * topic)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     SOPC_ASSERT(readerGroup != NULL);
@@ -657,6 +676,14 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ASSERT(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     SOPC_ASSERT(allocSuccess);
+    if (NULL != topic)
+    {
+    	SOPC_ReaderGroup_Set_MqttTopic(readerGroup,topic);
+    }
+    else
+    {
+    	SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, publisherId, groupId);
+    }
     
     return readerGroup;
 }

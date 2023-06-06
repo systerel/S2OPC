@@ -1,5 +1,5 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
-    <connection address="mqtts://192.168.1.108:1883" publisherId="123" mode="publisher" mqttUsername="user1" mqttPassword="password">
+    <connection address="mqtts://192.168.1.64:1883" publisherId="123" mode="publisher" mqttUsername="user1" mqttPassword="password">
         <message publishingInterval="2000." groupId="14" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="51">
                 <variable nodeId="ns=2;i=6" displayName="PubFloat" dataType="Float"/>

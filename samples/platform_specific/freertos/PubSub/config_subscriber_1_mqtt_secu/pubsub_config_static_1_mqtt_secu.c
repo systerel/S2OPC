@@ -36,7 +36,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetReaderAt(SOPC_ReaderGroup* reade
                                                          uint16_t index,
                                                          uint16_t writerId,
                                                          double interval,
-														 const char * topic)
+                                                         const char * topic)
 {
     SOPC_ASSERT(index < 0x100);
     SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, (uint8_t) index);
@@ -119,13 +119,13 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     
     /*** DataSetMessage No 1 of message 14 ***/
     
-    if (alloc)
-    {
-        // Interval = 100.000000 ms
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 100.000000, "S2OPC1");
-        alloc = NULL != dsReader;
-    }
-    
+    	if (alloc)
+    	{
+		// Interval = 100.000000 ms
+		dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 100.000000, "S2OPC1");
+		alloc = NULL != dsReader;
+    	}
+    	
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, 2);
@@ -147,19 +147,19 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 15
         // GroupVersion = 1
         // PubId = 42
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1);
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_Sign, 15, 1, 42, 1);
         alloc = NULL != readerGroup;
     }
     
     /*** DataSetMessage No 1 of message 15 ***/
     
-    if (alloc)
-    {
-        // Interval = 1000.000000 ms
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 1000.000000, "test");
-        alloc = NULL != dsReader;
-    }
-    
+	    if (alloc)
+	    {
+		// Interval = 1000.000000 ms
+		dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 1000.000000, NULL);
+		alloc = NULL != dsReader;
+	    }
+	    
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, 2);

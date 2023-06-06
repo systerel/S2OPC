@@ -115,7 +115,7 @@ void cbToolkit_subscriber(void)
     SOPC_SubTargetVariableConfig* targetConfig = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        targetConfig = SOPC_SubTargetVariableConfig_Create(&Cache_SetTargetVariables); //&Cache_SetTargetVariables (put in cache) //&set_target_variable (print)
+        targetConfig = SOPC_SubTargetVariableConfig_Create(&set_target_variable); //&Cache_SetTargetVariables (put in cache) //&set_target_variable (print)
         if (NULL == targetConfig)
         {
             status = SOPC_STATUS_NOK;
@@ -304,7 +304,8 @@ void SOPC_Variant_Print_U5(SOPC_Variant* pvar)
                 LogInfo("%c", c);
             else
                 /* Special char */
-                LogInfo("\\x%02" PRIX8, c);
+
+            	LogInfo("\\x%02" PRIX8, c);
         }
         LogInfo("\"\n");
         break;

@@ -124,7 +124,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
-    if (mbedtls_pk_parse_keyfile(&key->pk, szPath, password, 4, NULL) != 0) //4 est arbitraire
+    if (mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
+    //if (mbedtls_pk_parse_keyfile(&key->pk, szPath, password, 4, NULL) != 0) //4 est arbitraire
     {
         SOPC_Free(key);
         return SOPC_STATUS_NOK;

@@ -16,7 +16,8 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
                                                            uint16_t groupId,
                                                            uint32_t groupVersion,
                                                            uint32_t publisherId,
-                                                           uint16_t nbDataSets)
+                                                           uint16_t nbDataSets,
+														   const char * topic)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     SOPC_ASSERT(readerGroup != NULL);
@@ -27,6 +28,14 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ASSERT(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     SOPC_ASSERT(allocSuccess);
+    if (NULL != topic)
+    {
+    	SOPC_ReaderGroup_Set_MqttTopic(readerGroup,topic);
+    }
+    else
+    {
+    	SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, publisherId, groupId);
+    }
     
     return readerGroup;
 }
@@ -35,18 +44,13 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
 static SOPC_DataSetReader* SOPC_PubSubConfig_SetReaderAt(SOPC_ReaderGroup* readerGroup,
                                                          uint16_t index,
                                                          uint16_t writerId,
-                                                         double interval,
-														 const char * topic)
+                                                         double interval)
 {
     SOPC_ASSERT(index < 0x100);
     SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(readerGroup, (uint8_t) index);
     SOPC_ASSERT(reader != NULL);
     SOPC_DataSetReader_Set_DataSetWriterId(reader, writerId);
     SOPC_DataSetReader_Set_ReceiveTimeout(reader, 2.0 * interval);
-    if (NULL != topic)
-    {
-    	SOPC_DataSetReader_Set_MqttTopic(reader,topic);
-    }
     return reader;
 }
 
@@ -93,7 +97,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     {
         // Set subscriber id and address
         connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
-        alloc = SOPC_PubSubConnection_Set_Address(connection, "opc.udp://232.1.2.100:4840");
+        alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.109:1883");
     }
 
     if (alloc)
@@ -113,7 +117,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 14
         // GroupVersion = 1
         // PubId = 42
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_SignAndEncrypt, 14, 1, 42, 1);
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, 14, 1, 42, 1, "S2OPC1");
         alloc = NULL != readerGroup;
     }
     
@@ -122,7 +126,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         // Interval = 100.000000 ms
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 100.000000, "S2OPC1");
+        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 100.000000);
         alloc = NULL != dsReader;
     }
     
@@ -147,7 +151,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 15
         // GroupVersion = 1
         // PubId = 42
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1);
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1, NULL);
         alloc = NULL != readerGroup;
     }
     
@@ -156,7 +160,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         // Interval = 1000.000000 ms
-        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 1000.000000, "test");
+        dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 0, 1000.000000);
         alloc = NULL != dsReader;
     }
     

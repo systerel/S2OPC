@@ -44,6 +44,12 @@
 
 #if USE_CORE_MQTT
 typedef struct MQTTContext	 MqttContextClient; /* Mqtt context client */
+//
+//typedef void (* MQTTEventCallback_t )( struct MQTTContext * pContext,
+//                                       struct MQTTPacketInfo * pPacketInfo,
+//                                       struct MQTTDeserializedInfo * pDeserializedInfo,
+//									   );
+
 #else
 typedef struct MQTT_CONTEXT_CLIENT MqttContextClient; /* Mqtt context client */
 #endif

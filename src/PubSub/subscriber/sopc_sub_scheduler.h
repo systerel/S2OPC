@@ -22,6 +22,7 @@
 
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_target_variable.h"
+#include "sopc_pubsub_security.h"
 
 /* TODO: Move me */
 typedef enum SOPC_PubSubState
@@ -49,6 +50,34 @@ typedef void SOPC_SubscriberDataSetMessageSequenceNumberGap_Func(SOPC_Conf_Publi
                                                                  uint16_t prevSN,
                                                                  uint16_t receivedSN);
 
+/**
+ * Search in Subscriber security context the data associated to a token id, publisher id and writer group id
+ * If no context is found, it means the subscriber is not configured to manage security from this parameter.
+ * This function is given as callback to the Network Message decoder.
+ *
+ * \param tokenId tokenId of a received message
+ * \param pubCtx a context related to a Publisher found in the Subscriber security context
+ * \param writerGroupId writer group id of a received message
+ * \return security data or NULL if not found
+ */
+SOPC_PubSub_SecurityType* SOPC_SubScheduler_Get_Security_Infos(uint32_t tokenId,
+                                                               const SOPC_Conf_PublisherId pubId,
+                                                               uint16_t writerGroupId);
+
+/**
+ * @brief Check if sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and
+ * received sequence number.
+ *
+ * @param pubId PublisherId attach to a networkMessage
+ * @param writerId DataSetW attach to a dataSetMessage
+ * @param receivedSN received sequence number
+ * @return true if sequence number received is newer and valid
+ * @return false if sequence number received is older or invalid
+ */
+bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
+                                          const uint16_t writerId,
+                                          const uint16_t receivedSN);
+
 /* Only state changed callback can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
@@ -57,5 +86,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              int threadPriority);
 
 void SOPC_SubScheduler_Stop(void);
+
+void on_mqtt_message_received(uint8_t* data, uint16_t size, void* pInputIdentifier);
 
 #endif /* SOPC_SUB_SCHEDULER_H_ */
