@@ -72,15 +72,13 @@ START_TEST(test_crypto_gen_rsa_export_import)
     /* Export and encrypt the new key */
     size_t pwdLen = strlen(PASSWORD);
     ck_assert(pwdLen < UINT32_MAX);
-    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(
-        pGenKey, false, "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/crypto_tools_encrypted_gen_key.pem",
-        PASSWORD, (uint32_t) pwdLen);
+    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGenKey, false, "./crypto_tools_encrypted_gen_key.pem", PASSWORD,
+                                                     (uint32_t) pwdLen);
     ck_assert(SOPC_STATUS_OK == status);
     /* Import and decrypt the new key */
     SOPC_SerializedAsymmetricKey* pSerDecKey = NULL;
-    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/crypto_tools_encrypted_gen_key.pem", &pSerDecKey, PASSWORD,
-        (uint32_t) pwdLen);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd("./crypto_tools_encrypted_gen_key.pem",
+                                                                            &pSerDecKey, PASSWORD, (uint32_t) pwdLen);
     ck_assert(SOPC_STATUS_OK == status);
     /* Compare the generated key with the imported one */
     uint32_t genKeyLen = SOPC_SecretBuffer_GetLength(pSerGenKey);
