@@ -36,6 +36,7 @@
 #include "p_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
+#include "sopc_macros.h"
 
 #ifndef SO_EE_ORIGIN_TXTIME
 #define SO_EE_ORIGIN_TXTIME 6
@@ -181,7 +182,9 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
     controlMessage->cmsg_type = SCM_TXTIME;
     // Txtime length
     controlMessage->cmsg_len = CMSG_LEN(sizeof(uint64_t));
-    memcpy(CMSG_DATA(controlMessage), &txtime, sizeof(uint64_t));
+    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_ALIGN
+    *(uint64_t*) CMSG_DATA(controlMessage) = txtime;
+    SOPC_GCC_DIAGNOSTIC_RESTORE
     // Send message on socket
     res = sendmsg(sockAddress, &message, 0);
     if ((uint32_t) res != txBuffLen || res < 1)

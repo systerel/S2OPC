@@ -192,13 +192,11 @@ static double mean(uint64_t* data, uint64_t n)
 
     for (uint64_t i = 0; i < n; ++i)
     {
-        SOPC_ASSERT(data[i] <= DBL_MAX);
         double x = acc + ((double) data[i]);
         SOPC_ASSERT(x >= acc); // In case we overflow
         acc = x;
     }
 
-    SOPC_ASSERT(n <= DBL_MAX);
     acc /= ((double) n);
 
     return acc;
@@ -215,14 +213,12 @@ static double stddev(uint64_t* data, uint64_t n, double mean)
 
     for (uint64_t i = 0; i < n; ++i)
     {
-        SOPC_ASSERT(data[i] <= DBL_MAX);
         double d = (double) data[i];
         double x = var + (d - mean) * (d - mean);
         SOPC_ASSERT(x >= var);
         var = x;
     }
 
-    SOPC_ASSERT((n - 1) <= DBL_MAX);
     var /= ((double) (n - 1));
 
     return sqrt(var);
@@ -257,7 +253,6 @@ static bool bench_cycle_end(struct app_ctx_t* ctx)
     double sd = stddev(ctx->measurements, ctx->n_measurements, m);
 
     // Standard error of the mean
-    SOPC_ASSERT(ctx->n_measurements <= DBL_MAX);
     double sem = sd / sqrt((double) ctx->n_measurements);
 
     double critical_value;
