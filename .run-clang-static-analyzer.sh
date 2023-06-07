@@ -32,7 +32,6 @@ alpha.core.Conversion
 alpha.core.DynamicTypeChecker
 alpha.core.FixedAddr
 alpha.core.IdenticalExpr
-alpha.core.PointerArithm
 alpha.core.SizeofPtr
 alpha.core.StackAddressAsyncEscape
 alpha.core.TestAfterDivZero
@@ -54,6 +53,7 @@ valist.Unterminated
 DISABLED_CHECKERS="
 deadcode.DeadStores
 alpha.core.PointerSub
+alpha.core.PointerArithm
 "
 
 # Analyzers not enabled by default that cause too many false positives:
