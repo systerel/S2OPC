@@ -360,7 +360,7 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
     pWks->taskName = taskName;
     pWks->userCallback = callback;
     pWks->joined = false;
-    pWks->priority = priority - CONFIG_NUM_COOP_PRIORITIES;
+    pWks->priority = priority - CONFIG_NUM_COOP_PRIORITIES - 1;
     PRINTK_DEBUG("Create task %s Stack=%p(0x%04X), entry=%p, filter=%s\n", STRING_SECURE(pWks->taskName),
                  pCfg->stackBase, (unsigned) pCfg->stackSize, pWks->userCallback, STRING_SECURE(pCfg->nameFilter));
     DEBUG_CREATE_THREAD(STRING_SECURE(taskName), pCfg);
@@ -531,7 +531,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
                                                 const char* taskName)
 {
     // No specific limit on priorites on ZEPHYR.
-    if (priority < -CONFIG_NUM_COOP_PRIORITIES || priority >= CONFIG_NUM_PREEMPT_PRIORITIES)
+    if (priority <= 0 || priority > CONFIG_NUM_PREEMPT_PRIORITIES + CONFIG_NUM_COOP_PRIORITIES)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

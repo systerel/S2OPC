@@ -99,29 +99,29 @@ config SOPC_MAX_USER_TASKS
 	  Maximum number of users threads that can be created by S2OPC
 
 config SOPC_PUBLISHER_PRIORITY
-	int "Publisher threads priority"
-	default 8
+	int "Publisher threads priority (1 .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES)"
+	default 18
 	depends on S2OPC
 	help
-	  To ensure SOPC compatibility, an offset of CONFIG_NUM_COOP_PRIORITIES must be included. 
-	  E.g CONFIG_SOPC_PUBLISHER_PRIORITY = 0 => actual priority = -CONFIG_NUM_COOP_PRIORITIES
+	  To ensure SOPC compatibility, an offset of (CONFIG_NUM_COOP_PRIORITIES + 1) must be included. 
+	  E.g CONFIG_SOPC_PUBLISHER_PRIORITY = 1 => actual priority = -CONFIG_NUM_COOP_PRIORITIES
 
 config SOPC_SUBSCRIBER_PRIORITY
-	int "Subscriber threads priority"
-	default 10
+	int "Subscriber threads priority (1 .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES)"
+	default 20
 	depends on S2OPC
 	help
-	  To ensure SOPC compatibility, an offset of CONFIG_NUM_COOP_PRIORITIES must be included. 
-	  E.g SOPC_SUBSCRIBER_PRIORITY = 0 => actual priority = -CONFIG_NUM_COOP_PRIORITIES
+	  To ensure SOPC compatibility, an offset of (CONFIG_NUM_COOP_PRIORITIES + 1) must be included. 
+	  E.g SOPC_SUBSCRIBER_PRIORITY = 1 => actual priority = -CONFIG_NUM_COOP_PRIORITIES
 
 config SOPC_THREAD_DEFAULT_PRIORITY
-	int "Default thread priority for SOPC threads"
+	int "Default thread priority for SOPC threads (1 .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES)"
 	default 27
 	depends on S2OPC
 	help
 	  Default thread priority for SOPC threads (Call to SOPC_Thread_Create)
-	  To ensure SOPC compatibility, an offset of CONFIG_NUM_COOP_PRIORITIES must be included. 
-	  E.g SOPC_THREAD_DEFAULT_PRIORITY = CONFIG_NUM_COOP_PRIORITIES + 5 => actual priority = 5
+	  To ensure SOPC compatibility, an offset of (CONFIG_NUM_COOP_PRIORITIES + 1) must be included. 
+	  E.g SOPC_THREAD_DEFAULT_PRIORITY = CONFIG_NUM_COOP_PRIORITIES + 5 => actual priority = 4
 	
 config SOPC_UTILITY_TASK_STACK_SIZE
 	int  "Stack size for Application and Timers S2OPC tasks"

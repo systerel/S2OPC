@@ -57,16 +57,21 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
  * \note Only supported under Linux for now.
 
  * See SOPC_Thread_Create.
- * This function creates a thread with higher priority, which usually requires administrative privileges.
+ * This function creates a thread with specific priority, which usually requires administrative privileges.
  * It should only be used to create threads that require to be woken up at regular but small intervals (< 1ms).
+ * Note that this interface does not specify the 'order' of priorities regarding the value. (typically on Zephyr,
+ * lower values are the highest priorities, whereas on Linux, this is the contrary).
  *
  * \param thread    Return parameter for the created thread
  * \param startFct  Function called at thread start
  * \param startArgs Arguments of the start function
- * \param priority  Priority of the thread :
+ * \param priority  Priority of the thread (range depends on implementation) :
  *                      Linux: 1 .. 99,
  *                      FreeRTOS: 1 .. configMAX_PRIORITIES
- *                      ZEPHYR: (-CONFIG_NUM_PREEMPT_PRIORITIES) .. CONFIG_NUM_PREEMPT_PRIORITIES -1
+ *                      ZEPHYR: 1  .. CONFIG_NUM_COOP_PRIORITIES + CONFIG_NUM_PREEMPT_PRIORITIES.
+ *                        Note that this is a simple offset of (CONFIG_NUM_COOP_PRIORITIES + 1) regarding
+ *                        the Zephyr native priorities. This is required to ensure consistency with S2OPC interface.
+ *                        In prj.conf, the priorities configured MUST take into account this offset.
  * \param taskName  Name of the created thread
  *
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
