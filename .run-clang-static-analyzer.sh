@@ -26,7 +26,6 @@ SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 EXTRA_CHECKERS="
 alpha.core.BoolAssignment
-alpha.core.CallAndMessageUnInitRefArg
 alpha.core.CastSize
 alpha.core.CastToStruct
 alpha.core.Conversion
