@@ -45,7 +45,8 @@ typedef enum SOPC_DataSet_LL_PublisherIdType
 typedef struct SOPC_Dataset_LL_PublisherId
 {
     SOPC_DataSet_LL_PublisherIdType type;
-    union {
+    union
+    {
         SOPC_Byte byte;
         uint16_t uint16;
         uint32_t uint32;

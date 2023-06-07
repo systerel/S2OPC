@@ -147,7 +147,8 @@ typedef struct SOPC_HelperConfigInternal_Ctx
 
     // Discriminant
     SOPC_App_Com_Event event;
-    union {
+    union
+    {
         struct LocalServiceCtx
         {
             // sync call management

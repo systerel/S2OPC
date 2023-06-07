@@ -95,7 +95,8 @@ typedef enum
 typedef struct SOPC_Conf_PublisherId
 {
     SOPC_Conf_PublisherId_Type type;
-    union {
+    union
+    {
         uint64_t uint;
         SOPC_String string;
     } data;

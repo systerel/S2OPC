@@ -95,7 +95,8 @@ typedef struct SOPC_NodeId
     SOPC_IdentifierType IdentifierType;
     uint16_t Namespace;
 
-    union {
+    union
+    {
         uint32_t Numeric;
         SOPC_String String;
         SOPC_Guid* Guid;
@@ -148,7 +149,8 @@ typedef struct SOPC_ExtensionObject
     SOPC_ExpandedNodeId TypeId;
     SOPC_ExtObjectBodyEncoding Encoding;
 
-    union {
+    union
+    {
         SOPC_ByteString Bstring;
         SOPC_XmlElement Xml;
         struct
@@ -180,7 +182,8 @@ typedef enum SOPC_VariantArrayType
 struct SOPC_DataValue;
 struct SOPC_Variant;
 
-typedef union SOPC_VariantArrayValue {
+typedef union SOPC_VariantArrayValue
+{
     SOPC_Boolean* BooleanArr;
     SOPC_SByte* SbyteArr;
     SOPC_Byte* ByteArr;
@@ -208,7 +211,8 @@ typedef union SOPC_VariantArrayValue {
     SOPC_DiagnosticInfo* DiagInfoArr; // TODO: not present ?
 } SOPC_VariantArrayValue;
 
-typedef union SOPC_VariantValue {
+typedef union SOPC_VariantValue
+{
     SOPC_Boolean Boolean;
     SOPC_SByte Sbyte;
     SOPC_Byte Byte;

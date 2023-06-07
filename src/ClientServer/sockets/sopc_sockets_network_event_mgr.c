@@ -52,7 +52,7 @@ static struct
                      .sigServerConnectionSock = SOPC_INVALID_SOCKET};
 
 /* Variables used to consume signals to interrupt: no functional use */
-#define MAX_CONSUMED_SIG_BYTES 100               // maximum number of signals consumed per loop
+#define MAX_CONSUMED_SIG_BYTES 100 // maximum number of signals consumed per loop
 static uint8_t sigBytes[MAX_CONSUMED_SIG_BYTES]; // read buffer
 
 static bool SOPC_Internal_InitSocketsToInterruptSelect(void)

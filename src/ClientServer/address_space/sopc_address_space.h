@@ -50,7 +50,8 @@ typedef struct
     OpcUa_NodeClass node_class;
     SOPC_StatusCode value_status;
     SOPC_Value_Timestamp value_source_ts;
-    union {
+    union
+    {
         OpcUa_DataTypeNode data_type;
         OpcUa_MethodNode method;
         OpcUa_ObjectNode object;

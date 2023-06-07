@@ -34,7 +34,8 @@ typedef enum
 struct SOPC_User
 {
     user_type_t type;
-    union {
+    union
+    {
         /** The \p username is only valid for the \p USER_USERNAME type. */
         SOPC_String username;
         SOPC_String certificate_thumbprint;

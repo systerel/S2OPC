@@ -2053,7 +2053,7 @@ int mbedtls_mpi_exp_mod(mbedtls_mpi* X,
 #if defined(FREESCALE_PKHA_LONG_OPERANDS_ENABLE)
     if ((sizeE <= FREESCALE_PKHA_INT_MAX_BYTES) && (sizeN <= FREESCALE_PKHA_INT_MAX_BYTES))
     {
-#endif                   /* FREESCALE_PKHA_LONG_OPERANDS_ENABLE */
+#endif /* FREESCALE_PKHA_LONG_OPERANDS_ENABLE */
         mbedtls_mpi* AA; // TODO rename etc.
 
         /*

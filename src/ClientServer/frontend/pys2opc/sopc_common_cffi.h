@@ -65,7 +65,8 @@ typedef enum SOPC_Log_System
 /**
  * \brief Provides possible logging configurations
  */
-typedef union SOPC_Log_SystemConfiguration {
+typedef union SOPC_Log_SystemConfiguration
+{
     SOPC_LogSystem_File_Configuration fileSystemLogConfig; /**< log file system configuration */
     SOPC_LogSystem_User_Configuration userSystemLogConfig; /**< log user system configuration */
 } SOPC_Log_SystemConfiguration;

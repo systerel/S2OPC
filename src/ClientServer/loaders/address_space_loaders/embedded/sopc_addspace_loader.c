@@ -27,7 +27,7 @@ extern const uint32_t SOPC_Embedded_AddressSpace_nNodes;
 extern SOPC_Variant SOPC_Embedded_VariableVariant[];
 extern const uint32_t SOPC_Embedded_VariableVariant_nb;
 
-#define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32    // bit5
+#define SOPC_AccessLevelMask_StatusWrite (uint8_t) 32 // bit5
 #define SOPC_AccessLevelMask_TimestampWrite (uint8_t) 64 // bit6
 
 static bool checkAccessLevelsForbidsStatusAndTs(void)
