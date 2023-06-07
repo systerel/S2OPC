@@ -97,7 +97,7 @@
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
-#define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
+//#define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -128,7 +128,7 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_dataset_t
 {
     uint16_t writer_id;
-    char* mqttSubscriberTopic;
+    //char* mqttSubscriberTopic;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -143,7 +143,7 @@ struct sopc_xml_pubsub_message_t
     uint16_t nb_datasets;
     uint16_t groupId;
     uint32_t groupVersion;
-    char* mqttPublisherTopic;
+    char* mqttTopic;//mqttPublisherTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
 };
@@ -158,7 +158,7 @@ struct sopc_xml_pubsub_connection_t
     uint16_t nb_messages;
     char* mqttUsername;
     char* mqttPassword;
-    char* mqttTopic;
+    //char* mqttTopic;
     bool is_acyclic;
     struct sopc_xml_pubsub_message_t* messageArr;
 };
@@ -529,7 +529,7 @@ static bool parse_message_attributes(const char* attr_name,
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_MQTT_TOPIC, attr_name))
     {
-        result = copy_any_string_attribute_value(&msg->mqttPublisherTopic, attr_val);
+        result = copy_any_string_attribute_value(&msg->mqttTopic, attr_val);
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_KEEP_ALIVE, attr_name))
     {
@@ -611,10 +611,10 @@ static bool parse_dataset_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
-    else if (TEXT_EQUALS(ATTR_DATASET_MQTT_TOPIC, attr_name))
-    {
-        result = copy_any_string_attribute_value(&ds->mqttSubscriberTopic, attr_val);
-    }
+    // else if (TEXT_EQUALS(ATTR_DATASET_MQTT_TOPIC, attr_name))
+    // {
+    //     result = copy_any_string_attribute_value(&ds->mqttSubscriberTopic, attr_val);
+    // }
     else
     {
         LOG_XML_ERRORF("Unexpected 'dataset' attribute <%s>", attr_name);
@@ -1060,9 +1060,9 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
-                if (NULL != msg->mqttPublisherTopic && allocSuccess)
+                if (NULL != msg->mqttTopic && allocSuccess)
                 {
-                    allocSuccess = SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttPublisherTopic);
+                    allocSuccess = SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
                 }
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
@@ -1120,6 +1120,15 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
 
                 SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id);
 
+                if (NULL != msg->mqttTopic && allocSuccess)
+                {
+                    allocSuccess = SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
+                }
+                else
+                {
+                    SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, msg->publisher_id, msg->groupId);
+                }
+
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
                 allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
 
@@ -1135,10 +1144,10 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
                         dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
 
-                    if (NULL != ds->mqttSubscriberTopic && allocSuccess)
-                    {
-                        allocSuccess = SOPC_DataSetReader_Set_MqttTopic(dataSetReader, ds->mqttSubscriberTopic);
-                    }
+                    // if (NULL != ds->mqttSubscriberTopic && allocSuccess)
+                    // {
+                    //     allocSuccess = SOPC_DataSetReader_Set_MqttTopic(dataSetReader, ds->mqttSubscriberTopic);
+                    // }
 
                     for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
                     {
@@ -1215,14 +1224,14 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                 }
                 SOPC_Free(ds->variableArr);
                 ds->variableArr = NULL;
-                SOPC_Free(ds->mqttSubscriberTopic);
-                ds->mqttSubscriberTopic = NULL;
+                // SOPC_Free(ds->mqttSubscriberTopic);
+                // ds->mqttSubscriberTopic = NULL;
             }
 
             SOPC_Free(msg->datasetArr);
             msg->datasetArr = NULL;
-            SOPC_Free(msg->mqttPublisherTopic);
-            msg->mqttPublisherTopic = NULL;
+            SOPC_Free(msg->mqttTopic);
+            msg->mqttTopic = NULL;
         }
 
         SOPC_Free(p_connection->address);
