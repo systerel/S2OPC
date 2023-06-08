@@ -344,9 +344,12 @@ static int sopc_export_private_key(SOPC_AsymmetricKey* pKey, const bool bIsPubli
         errLib = sopc_write_key_pem_file(pPEM, PEMLen, filePath);
     }
     /* Clear */
-    memset(pPEM, 0, PEMSize);
+    if (NULL != pPEM)
+    {
+        memset(pPEM, 0, PEMSize);
+        SOPC_Free(pPEM);
+    }
     memset(pDER, 0, DERSize);
-    SOPC_Free(pPEM);
     SOPC_Free(pDER);
     return errLib;
 }
@@ -593,10 +596,13 @@ static int sopc_encrypt_and_export_private_key(SOPC_AsymmetricKey* pKey,
         errLib = sopc_write_key_pem_file(pPEMToWrite, PEMLenWritten - 1, filePath); // -1 to exclude the \0
     }
     /* Clear */
+    if (NULL != pPEMToWrite)
+    {
+        memset(pPEMToWrite, 0, PEMLenWritten);
+        SOPC_Free(pPEMToWrite);
+    }
     memset(pDER, 0, DERSize);
-    memset(pPEMToWrite, 0, PEMLenWritten);
     SOPC_Free(pDER);
-    SOPC_Free(pPEMToWrite);
     return errLib;
 }
 
