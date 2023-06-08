@@ -268,6 +268,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
     return status;
 }
 
+#if SOPC_HAS_FILESYSTEM
 static int sopc_write_key_pem_file(unsigned char* PEMToWrite, size_t PEMLen, const char* filePath)
 {
     SOPC_ASSERT(NULL != PEMToWrite);
@@ -635,6 +636,21 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
     }
     return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
+#else
+SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pKey,
+                                                          const bool bIsPublic,
+                                                          const char* filePath,
+                                                          const char* pwd,
+                                                          const uint32_t pwdLen)
+{
+    SOPC_UNUSED_ARG(pKey);
+    SOPC_UNUSED_ARG(bIsPublic);
+    SOPC_UNUSED_ARG(filePath);
+    SOPC_UNUSED_ARG(pwd);
+    SOPC_UNUSED_ARG(pwdLen);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* SOPC_HAS_FILESYSTEM */
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SOPC_AsymmetricKey* pKey,
                                                                         bool is_public,
