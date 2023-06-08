@@ -31,6 +31,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_encodeable.h"
+#include "sopc_hash.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -47,6 +48,8 @@
  * =========
  */
 
+static const uintptr_t DICT_TOMBSTONE = UINTPTR_MAX;
+
 /* Structures */
 struct SOPC_StaMac_Machine
 {
@@ -57,23 +60,29 @@ struct SOPC_StaMac_Machine
         reverseConfigIdx; /* Reverse configuration index > 0 if reverse connection mechanism shall be used */
     uint32_t iCliId;      /* LibSub connection ID, used by the callback. It shall be unique. */
 
-    /* Keeping two callbacks to avoid modification of LibSub API */
+    /* Keeping three callbacks waiting the deprecated APIs to be removed for the first 2 cbs */
     SOPC_LibSub_DataChangeCbk* pCbkLibSubDataChanged;             /* Callback when subscribed data changed */
     SOPC_ClientHelper_DataChangeCbk* pCbkClientHelperDataChanged; /* Callback when subscribed data changed */
+    SOPC_StaMacNotification_Fct* pCbkNotification;                /* Callback when subscription notification occurs */
 
-    SOPC_LibSub_EventCbk* pCbkGenericEvent;    /* Callback when received event that is out of the LibSub scope */
-    uintptr_t iSessionCtx;                     /* Toolkit Session Context, used to identify session events */
-    uint32_t iSessionID;                       /* S2OPC Session ID */
-    SOPC_SLinkedList* pListReqCtx;             /* List of yet-to-be-answered requests,
-                                                * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
-    double fPublishInterval;                   /* The publish interval, in ms */
-    uint32_t iCntMaxKeepAlive;                 /* Number of skipped response before sending an empty KeepAlive */
-    uint32_t iCntLifetime;                     /* Number of deprived publish cycles before subscription deletion */
-    uint32_t iSubscriptionID;                  /* OPC UA subscription ID, non 0 when subscription is created */
-    uint32_t nMonItClientHandle;               /* Number of client handle generated for monitored items,
-                                                * used as unique identifier */
-    SOPC_SLinkedList* pListMonIt;              /* List of monitored items, where the appCtx is the list value,
-                                                * and the id is the uint32_t OPC UA monitored item ID */
+    SOPC_LibSub_EventCbk* pCbkGenericEvent; /* Callback when received event that is out of the LibSub scope */
+    uintptr_t iSessionCtx;                  /* Toolkit Session Context, used to identify session events */
+    uint32_t iSessionID;                    /* S2OPC Session ID */
+    SOPC_SLinkedList* pListReqCtx;          /* List of yet-to-be-answered requests,
+                                             * id is unique request identifier, value is a SOPC_StaMac_ReqCtx */
+    double fPublishInterval;                /* The publish interval, in ms */
+    uint32_t iCntMaxKeepAlive;              /* Number of skipped response before sending an empty KeepAlive */
+    uint32_t iCntLifetime;                  /* Number of deprived publish cycles before subscription deletion */
+    uint32_t iSubscriptionID;               /* OPC UA subscription ID */
+    bool bSubscriptionCreated;       /* Flag set when subscription created succesfully and subscription ID is set */
+    uintptr_t subscriptionAppCtx;    /* Application context of the subscription (new API only)*/
+    uint32_t nMonItClientHandle;     /* Latest client handle generated for monitored items,
+                                      * used as unique identifier */
+    SOPC_SLinkedList* pListMonIt;    /* List of monitored items creation request successful, where the
+                                        SOPC_CreateMonitoredItem_Ctx    is the listed value */
+    SOPC_SLinkedList* pListDelMonIt; /* List of monitored items deletion request successful, where the
+                                        SOPC_DeleteMonitoredItem_Ctx is the listed value */
+
     uint32_t nTokenTarget;                     /* Target number of available tokens */
     uint32_t nTokenUsable;                     /* Tokens available to the server
                                                 * (PublishRequest_sent - PublishResponse_sent) */
@@ -87,6 +96,9 @@ struct SOPC_StaMac_Machine
     SOPC_SerializedAsymmetricKey* pUserKey;    /* Serialized private key for X509IdentiyToken (PEM format) */
     int64_t iTimeoutMs;                        /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
     SOPC_SLinkedList* dataIdToNodeIdList;      /* A list of data ids to node ids */
+    SOPC_Dict* miCliHandleToUserAppCtxDict;    /* A dictionary of monitored client handles to user app contexts
+                                                        (new API only)*/
+    SOPC_Dict* miIdToCliHandleDict;            /* A dictionary of ids to client handles (new API only)*/
     uintptr_t userContext;                     /* A state machine user defined context */
 };
 
@@ -135,6 +147,10 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
                                                            uint32_t arg,
                                                            void* pParam,
                                                            uintptr_t appCtx);
+static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                           uint32_t arg,
+                                                           void* pParam,
+                                                           uintptr_t appCtx);
 static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
                                                          uint32_t arg,
                                                          void* pParam,
@@ -156,6 +172,15 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
  * API implementation
  * ==================
  */
+static uint64_t uintptr_hash(const uintptr_t data)
+{
+    return SOPC_DJBHash((const uint8_t*) &data, sizeof(uintptr_t));
+}
+
+static bool direct_equal(const uintptr_t a, const uintptr_t b)
+{
+    return a == b;
+}
 
 SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
                                      SOPC_ReverseEndpointConfigIdx reverseConfigIdx,
@@ -198,8 +223,10 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->iCntMaxKeepAlive = iCntMaxKeepAlive;
         pSM->iCntLifetime = iCntLifetime;
         pSM->iSubscriptionID = 0;
+        pSM->bSubscriptionCreated = false;
         pSM->nMonItClientHandle = 0;
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
+        pSM->pListDelMonIt = SOPC_SLinkedList_Create(0);
         pSM->nTokenTarget = iTokenTarget;
         pSM->nTokenUsable = 0;
         pSM->pCbkGenericEvent = pCbkGenericEvent;
@@ -212,6 +239,11 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->pUserKey = NULL;
         pSM->iTimeoutMs = iTimeoutMs;
         pSM->dataIdToNodeIdList = SOPC_SLinkedList_Create(0);
+        pSM->miCliHandleToUserAppCtxDict = SOPC_Dict_Create(0, uintptr_hash, direct_equal, NULL, NULL);
+        SOPC_Dict_SetTombstoneKey(pSM->miCliHandleToUserAppCtxDict, DICT_TOMBSTONE); // Necessary for remove
+        pSM->miIdToCliHandleDict = SOPC_Dict_Create(0, uintptr_hash, direct_equal, NULL, NULL);
+        SOPC_Dict_SetTombstoneKey(pSM->miIdToCliHandleDict, DICT_TOMBSTONE); // Necessary for remove
+
         pSM->userContext = userContext;
         if (NULL != szPolicyId)
         {
@@ -264,8 +296,9 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 
-    if (SOPC_STATUS_OK == status &&
-        (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt || NULL == pSM->dataIdToNodeIdList))
+    if (SOPC_STATUS_OK == status && (NULL == pSM->pListReqCtx || NULL == pSM->pListMonIt ||
+                                     NULL == pSM->pListDelMonIt || NULL == pSM->dataIdToNodeIdList ||
+                                     NULL == pSM->miCliHandleToUserAppCtxDict || NULL == pSM->miIdToCliHandleDict))
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -319,6 +352,8 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         pSM->pListReqCtx = NULL;
         SOPC_SLinkedList_Delete(pSM->pListMonIt);
         pSM->pListMonIt = NULL;
+        SOPC_SLinkedList_Delete(pSM->pListDelMonIt);
+        pSM->pListDelMonIt = NULL;
         status = Mutex_Unlock(&pSM->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         Mutex_Clear(&pSM->mutex);
@@ -329,6 +364,10 @@ void SOPC_StaMac_Delete(SOPC_StaMac_Machine** ppSM)
         SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
         SOPC_SLinkedList_Delete(pSM->dataIdToNodeIdList);
         pSM->dataIdToNodeIdList = NULL;
+        SOPC_Dict_Delete(pSM->miCliHandleToUserAppCtxDict);
+        pSM->miCliHandleToUserAppCtxDict = NULL;
+        SOPC_Dict_Delete(pSM->miIdToCliHandleDict);
+        pSM->miIdToCliHandleDict = NULL;
         SOPC_KeyManager_SerializedCertificate_Delete(pSM->pUserCertX509);
         SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSM->pUserKey);
 
@@ -457,6 +496,7 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Adds it to the list of yet-to-be-answered requests */
+    pReqCtx->pSM = pSM;
     pReqCtx->appCtx = appCtx;
     pReqCtx->requestScope = requestScope;
     pReqCtx->requestType = requestType;
@@ -490,7 +530,9 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     void* pRequest = NULL;
 
-    if (0 == pSM->iSubscriptionID && stActivated == pSM->state)
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
     {
         /* Creates the subscription */
         /* The request is freed by the Toolkit */
@@ -501,7 +543,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                             SOPC_REQUEST_TYPE_CREATE_SUBSCRIPTION);
+                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -516,7 +558,114 @@ SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
     return status;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
+                                                    OpcUa_CreateSubscriptionRequest* req,
+                                                    uintptr_t userAppContext)
+{
+    if (NULL == pSM || NULL == req || &OpcUa_CreateSubscriptionRequest_EncodeableType != req->encodeableType)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (!pSM->bSubscriptionCreated && stActivated == pSM->state)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_INFO, "Creating subscription using provided request.");
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_StaMac_SendRequest(pSM, req, userAppContext, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM->state = stCreatingSubscr;
+        }
+        else
+        {
+            pSM->state = stError;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return status;
+}
+
+uintptr_t SOPC_StaMac_GetSubscriptionCtx(SOPC_StaMac_Machine* pSM)
+{
+    uintptr_t result = 0;
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (pSM->bSubscriptionCreated)
+    {
+        result = pSM->subscriptionAppCtx;
+    }
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return result;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_GetSubscriptionRevisedParams(SOPC_StaMac_Machine* pSM,
+                                                           double* revisedPublishingInterval,
+                                                           uint32_t* revisedLifetimeCount,
+                                                           uint32_t* revisedMaxKeepAliveCount)
+{
+    if (NULL == pSM)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (pSM->bSubscriptionCreated)
+    {
+        if (NULL != revisedPublishingInterval)
+        {
+            *revisedPublishingInterval = pSM->fPublishInterval;
+        }
+        if (NULL != revisedLifetimeCount)
+        {
+            *revisedLifetimeCount = pSM->iCntLifetime;
+        }
+        if (NULL != revisedMaxKeepAliveCount)
+        {
+            *revisedMaxKeepAliveCount = pSM->iCntMaxKeepAlive;
+        }
+    }
+    else
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_SetSubscriptionNbTokens(SOPC_StaMac_Machine* pSM, uint32_t nbTokens)
+{
+    if (NULL == pSM || 0 == nbTokens)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    pSM->nTokenTarget = nbTokens;
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
@@ -534,8 +683,8 @@ SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                             SOPC_REQUEST_TYPE_DELETE_SUBSCRIPTION);
+            status = SOPC_StaMac_SendRequest(pSM, pRequest, pSM->subscriptionAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                             SOPC_REQUEST_TYPE_SUBSCRIPTION);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -557,12 +706,12 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
                                                   int32_t nElems,
-                                                  SOPC_CreateMonitoredItem_Ctx* pAppCtx,
+                                                  SOPC_CreateMonitoredItems_Ctx* pAppCtx,
                                                   uint32_t* lCliHndl)
 {
     void* pReq = NULL;
 
-    if (NULL == pSM || NULL == lszNodeId || NULL == liAttrId || NULL == lCliHndl || 0 >= nElems)
+    if (NULL == pSM || NULL == lszNodeId || NULL == liAttrId || NULL == pAppCtx || NULL == lCliHndl || 0 >= nElems)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -639,6 +788,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
 
         if (SOPC_STATUS_OK == status)
         {
+            pAppCtx->req = NULL;
             pAppCtx->outCtxId = lCliHndl[0];
             status = Helpers_NewCreateMonitoredItemsRequest(lpNid, liAttrId, nElems, pSM->iSubscriptionID,
                                                             MONIT_TIMESTAMPS_TO_RETURN, lCliHndl, MONIT_QSIZE, &pReq);
@@ -649,7 +799,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_StaMac_SendRequest(pSM, pReq, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                         SOPC_REQUEST_TYPE_CREATE_MONITORED_ITEMS);
+                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
     }
 
     /* Update the machine, the *pAppCtx, and *pCliHndl */
@@ -669,6 +819,217 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     }
     SOPC_Free(lpNid);
     lpNid = NULL;
+
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machine* pSM,
+                                                               SOPC_StaMacNotification_Fct* pNotificationCb)
+{
+    if (NULL == pSM || NULL == pNotificationCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    if (NULL != pSM->pCbkNotification || NULL != pSM->pCbkClientHelperDataChanged || NULL != pSM->pCbkLibSubDataChanged)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        pSM->pCbkNotification = pNotificationCb;
+    }
+
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      OpcUa_CreateMonitoredItemsRequest* req,
+                                                      const uintptr_t* userAppCtxArray,
+                                                      SOPC_CreateMonitoredItems_Ctx* pAppCtx)
+{
+    if (NULL == pSM || NULL == req || 0 >= req->NoOfItemsToCreate || NULL == pAppCtx)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (!SOPC_StaMac_HasSubscription(pSM))
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription to create monitored items.");
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    uint32_t nElems = (uint32_t) req->NoOfItemsToCreate;
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (stActivated != pSM->state)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                    "creating monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    /* Prepare context to keep a copy of request */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
+    }
+
+    /* Create the CreateMonitoredItemRequest */
+    if (SOPC_STATUS_OK == status)
+    {
+        for (uint32_t i = 0; i < nElems; ++i)
+        {
+            bool alreadyUsedCliHandle = false;
+            uint32_t cpt = 0;
+            if (SOPC_STATUS_OK == status && pSM->nMonItClientHandle < UINT32_MAX)
+            {
+                do
+                {
+                    cpt++;
+                    pSM->nMonItClientHandle++;
+                    uintptr_t result = SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict,
+                                                     (uintptr_t) pSM->nMonItClientHandle, &alreadyUsedCliHandle);
+                    SOPC_UNUSED_RESULT(result);
+                    if (!alreadyUsedCliHandle && DICT_TOMBSTONE == (uintptr_t) cpt)
+                    {
+                        alreadyUsedCliHandle = true; // Tombstone value
+                    }
+                } while (cpt < UINT32_MAX && alreadyUsedCliHandle); // Ensure that a free handle id is found
+
+                if (!alreadyUsedCliHandle)
+                {
+                    const uintptr_t userCtx = (userAppCtxArray != NULL ? userAppCtxArray[i] : 0);
+                    bool result = SOPC_Dict_Insert(pSM->miCliHandleToUserAppCtxDict,
+                                                   (uintptr_t) pSM->nMonItClientHandle, userCtx);
+                    if (!result)
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
+                }
+                if (SOPC_STATUS_OK == status)
+                {
+                    req->ItemsToCreate[i].RequestedParameters.ClientHandle = pSM->nMonItClientHandle;
+                }
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            pAppCtx->outCtxId = pSM->nMonItClientHandle; // latest handle as context
+            req->SubscriptionId = pSM->iSubscriptionID;
+            status = SOPC_EncodeableObject_Copy(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void*) pAppCtx->req,
+                                                (void*) req);
+        }
+    }
+
+    /* Send it */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) pAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pSM->state = stCreatingMonIt;
+    }
+
+    mutStatus = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      OpcUa_DeleteMonitoredItemsRequest* req,
+                                                      SOPC_DeleteMonitoredItems_Ctx* outAppCtx)
+{
+    if (NULL == pSM || NULL == req || 0 >= req->NoOfMonitoredItemIds || NULL == outAppCtx)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (!SOPC_StaMac_HasSubscription(pSM))
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR, "the machine shall have a created subscription to create monitored items.");
+        return SOPC_STATUS_INVALID_STATE;
+    }
+
+    SOPC_ReturnStatus mutStatus = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (stActivated != pSM->state)
+    {
+        Helpers_Log(SOPC_LOG_LEVEL_ERROR,
+                    "deleting monitored item, the machine should be in the stActivated state (is in %i).", pSM->state);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+
+    /* Prepare context to keep a copy of request */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Encodeable_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
+    }
+
+    uintptr_t clientHandle = 0;
+    bool findClientHandle = false;
+    if (SOPC_STATUS_OK == status)
+    {
+        for (uint32_t i = 0; !findClientHandle && i < (uint32_t) req->NoOfMonitoredItemIds; i++)
+        {
+            clientHandle =
+                SOPC_Dict_Get(pSM->miIdToCliHandleDict, (uintptr_t) req->MonitoredItemIds[i], &findClientHandle);
+        }
+        if (!findClientHandle)
+        {
+            // No valid monitored item id found
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    /* Create the CreateMonitoredItemRequest */
+    if (SOPC_STATUS_OK == status)
+    {
+        outAppCtx->outCtxId = clientHandle; // first valid client handle
+        req->SubscriptionId = pSM->iSubscriptionID;
+        status = SOPC_EncodeableObject_Copy(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void*) outAppCtx->req,
+                                            (void*) req);
+    }
+
+    /* Send it */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_StaMac_SendRequest(pSM, req, (uintptr_t) outAppCtx, SOPC_REQUEST_SCOPE_STATE_MACHINE,
+                                         SOPC_REQUEST_TYPE_SUBSCRIPTION);
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pSM->state = stDeletingMonIt;
+    }
 
     mutStatus = Mutex_Unlock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -761,14 +1122,30 @@ bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM)
 
     SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    bool return_code = (0 != pSM->iSubscriptionID);
+    bool return_code = pSM->bSubscriptionCreated;
     status = Mutex_Unlock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     return return_code;
 }
 
-bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItem_Ctx* pAppCtx)
+uint32_t SOPC_StaMac_HasSubscriptionId(SOPC_StaMac_Machine* pSM)
+{
+    if (NULL == pSM)
+    {
+        return 0;
+    }
+
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    uint32_t return_code = pSM->iSubscriptionID;
+    status = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    return return_code;
+}
+
+bool SOPC_StaMac_PopMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItems_Ctx* pAppCtx)
 {
     if (NULL == pSM || NULL == pSM->pListMonIt)
     {
@@ -787,6 +1164,45 @@ bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitored
         {
             bHasMonIt = true;
         }
+    }
+
+    if (bHasMonIt)
+    {
+        // Remove context from list since retrieved by client
+        SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListMonIt, pAppCtx->outCtxId);
+    }
+
+    status = Mutex_Unlock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    return bHasMonIt;
+}
+
+bool SOPC_StaMac_PopDeleteMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_DeleteMonitoredItems_Ctx* pAppCtx)
+{
+    if (NULL == pSM || NULL == pSM->pListDelMonIt)
+    {
+        return false;
+    }
+
+    SOPC_ReturnStatus status = Mutex_Lock(&pSM->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    bool bHasMonIt = false;
+    SOPC_SLinkedListIterator pIter = NULL;
+    pIter = SOPC_SLinkedList_GetIterator(pSM->pListDelMonIt);
+
+    while (!bHasMonIt && NULL != pIter)
+    {
+        if (SOPC_SLinkedList_Next(&pIter) == pAppCtx->outCtxId)
+        {
+            bHasMonIt = true;
+        }
+    }
+
+    if (bHasMonIt)
+    {
+        // Remove context from list since retrieved by client
+        SOPC_SLinkedList_RemoveFromValuePtr(pSM->pListDelMonIt, pAppCtx->outCtxId);
     }
 
     status = Mutex_Unlock(&pSM->mutex);
@@ -924,6 +1340,30 @@ static bool StaMac_GiveAuthorization_stCreatingMonIt(SOPC_StaMac_Machine* pSM,
     return authorization;
 }
 
+static bool StaMac_GiveAuthorization_stDeletingMonIt(SOPC_StaMac_Machine* pSM,
+                                                     SOPC_App_Com_Event event,
+                                                     SOPC_EncodeableType* pEncType)
+{
+    bool authorization = false;
+
+    SOPC_UNUSED_ARG(pSM);
+
+    switch (event)
+    {
+    case SE_RCV_SESSION_RESPONSE:
+        if (&OpcUa_DeleteMonitoredItemsResponse_EncodeableType == pEncType ||
+            &OpcUa_PublishResponse_EncodeableType == pEncType)
+        {
+            authorization = true;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return authorization;
+}
+
 static bool StaMac_GiveAuthorization_stDeletingSubscr(SOPC_StaMac_Machine* pSM,
                                                       SOPC_App_Com_Event event,
                                                       SOPC_EncodeableType* pEncType)
@@ -1014,6 +1454,8 @@ static const char* SOPC_StaMacState_ToString(SOPC_StaMac_State state)
         return "stCreatingSubscr";
     case stCreatingMonIt:
         return "stCreatingMonIt";
+    case stDeletingMonIt:
+        return "stDeletingMonIt";
     case stDeletingSubscr:
         return "stDeletingSubscr";
     case stClosing:
@@ -1094,6 +1536,9 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                 processingAuthorization = StaMac_GiveAuthorization_stCreatingMonIt(pSM, event, pEncType);
                 break;
             /* Deleting states */
+            case stDeletingMonIt:
+                processingAuthorization = StaMac_GiveAuthorization_stDeletingMonIt(pSM, event, pEncType);
+                break;
             case stDeletingSubscr:
                 processingAuthorization = StaMac_GiveAuthorization_stDeletingSubscr(pSM, event, pEncType);
                 break;
@@ -1145,6 +1590,10 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     else if (&OpcUa_CreateMonitoredItemsResponse_EncodeableType == pEncType)
                     {
                         StaMac_ProcessMsg_CreateMonitoredItemsResponse(pSM, arg, pParam, appCtx);
+                    }
+                    else if (&OpcUa_DeleteMonitoredItemsResponse_EncodeableType == pEncType)
+                    {
+                        StaMac_ProcessMsg_DeleteMonitoredItemsResponse(pSM, arg, pParam, appCtx);
                     }
                     else if (&OpcUa_CreateSubscriptionResponse_EncodeableType == pEncType)
                     {
@@ -1334,23 +1783,124 @@ static void StaMac_ProcessMsg_CloseSessionResponse(SOPC_StaMac_Machine* pSM,
     pSM->state = stError;
 }
 
+static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
+                                                OpcUa_PublishResponse* pPubResp,
+                                                OpcUa_DataChangeNotification* pDataNotif)
+{
+    SOPC_LibSub_Value* plsVal = NULL;
+    uintptr_t* newAPImonitoredItemCtxArray = NULL;
+    OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
+
+    if (NULL != pSM->pCbkNotification && pDataNotif->NoOfMonitoredItems > 0)
+    {
+        newAPImonitoredItemCtxArray = SOPC_Calloc((size_t) pDataNotif->NoOfMonitoredItems, sizeof(uintptr_t));
+    }
+    for (int32_t i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+    {
+        pMonItNotif = &pDataNotif->MonitoredItems[i];
+        if (NULL != pSM->pCbkNotification)
+        {
+            if (NULL != newAPImonitoredItemCtxArray)
+            {
+                bool found = false;
+                newAPImonitoredItemCtxArray[i] =
+                    SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict, (uintptr_t) pMonItNotif->ClientHandle, &found);
+                if (!found)
+                {
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected monitored item client handle not found.");
+                }
+            }
+        }
+        else
+        {
+            SOPC_ReturnStatus status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
+            if (SOPC_STATUS_OK == status)
+            {
+                if (NULL != pSM->pCbkLibSubDataChanged)
+                {
+                    (*pSM->pCbkLibSubDataChanged)(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
+                }
+                else if (NULL != pSM->pCbkClientHelperDataChanged && INT32_MAX >= pSM->iCliId)
+                {
+                    void* nodeId =
+                        (void*) SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
+                    if (NULL != nodeId)
+                    {
+                        (*pSM->pCbkClientHelperDataChanged)((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
+                    }
+                }
+                SOPC_Free(plsVal->value);
+                plsVal->value = NULL;
+                SOPC_Variant_Delete(plsVal->raw_value);
+                SOPC_Free(plsVal);
+                plsVal = NULL;
+            }
+        }
+    }
+
+    if (NULL != pSM->pCbkNotification)
+    {
+        if (pDataNotif->NoOfMonitoredItems < 0)
+        {
+            pDataNotif->NoOfMonitoredItems = 0;
+        }
+
+        pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult,
+                              &OpcUa_DataChangeNotification_EncodeableType, (uint32_t) pDataNotif->NoOfMonitoredItems,
+                              pDataNotif, newAPImonitoredItemCtxArray);
+
+        SOPC_Free(newAPImonitoredItemCtxArray);
+    }
+}
+
+static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
+                                                     OpcUa_PublishResponse* pPubResp,
+                                                     OpcUa_EventNotificationList* pEventNotif)
+{
+    SOPC_ASSERT(NULL != pSM->pCbkLibSubDataChanged);
+    uintptr_t* newAPImonitoredItemCtxArray = NULL;
+    if (NULL != pSM->pCbkNotification && pEventNotif->NoOfEvents > 0)
+    {
+        newAPImonitoredItemCtxArray = SOPC_Calloc((size_t) pEventNotif->NoOfEvents, sizeof(uintptr_t));
+    }
+    for (int32_t i = 0; NULL != newAPImonitoredItemCtxArray && i < pEventNotif->NoOfEvents; ++i)
+    {
+        bool found = false;
+        uintptr_t userAppCtx = (uintptr_t) SOPC_Dict_Get(pSM->miCliHandleToUserAppCtxDict,
+                                                         (uintptr_t) pEventNotif->Events[i].ClientHandle, &found);
+        newAPImonitoredItemCtxArray[i] = userAppCtx;
+        if (!found)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected monitored item client handle not found.");
+        }
+    }
+
+    if (NULL != pSM->pCbkNotification)
+    {
+        if (pEventNotif->NoOfEvents < 0)
+        {
+            pEventNotif->NoOfEvents = 0;
+        }
+
+        pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult,
+                              &OpcUa_EventNotificationList_EncodeableType, (uint32_t) pEventNotif->NoOfEvents,
+                              pEventNotif, newAPImonitoredItemCtxArray);
+    }
+}
+
 static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
-    SOPC_UNUSED_ARG(appCtx);
+    SOPC_UNUSED_ARG(appCtx); // Nothing in context
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int32_t i = 0;
     OpcUa_PublishResponse* pPubResp = NULL;
     OpcUa_NotificationMessage* pNotifMsg = NULL;
     OpcUa_DataChangeNotification* pDataNotif = NULL;
-    OpcUa_MonitoredItemNotification* pMonItNotif = NULL;
-    SOPC_LibSub_Value* plsVal = NULL;
 
     /* There should be an EncodeableType pointer in the first field of the message struct */
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "PublishResponse received.");
 
-    if (0 == pSM->iSubscriptionID)
+    if (!pSM->bSubscriptionCreated)
     {
         // Ignore PublishResponse since subscription is not valid anymore
         return;
@@ -1380,38 +1930,43 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     /* Traverse the notifications and calls the callback */
     pNotifMsg = &pPubResp->NotificationMessage;
     /* For now, only handles at most a NotificationData */
-    SOPC_ASSERT(1 >= pNotifMsg->NoOfNotificationData);
-    if (0 < pNotifMsg->NoOfNotificationData)
+    SOPC_ASSERT(2 >= pNotifMsg->NoOfNotificationData);
+    if (0 < pNotifMsg->NoOfNotificationData && SOPC_IsGoodStatus(pPubResp->ResponseHeader.ServiceResult))
     {
-        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[0].Encoding);
-        SOPC_ASSERT(&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[0].Body.Object.ObjType);
-        pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[0].Body.Object.Value;
-        for (i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
+        for (int32_t iNotif = 0; iNotif < pNotifMsg->NoOfNotificationData; iNotif++)
         {
-            pMonItNotif = &pDataNotif->MonitoredItems[i];
-            status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
-            if (SOPC_STATUS_OK == status)
+            if (&OpcUa_DataChangeNotification_EncodeableType == pNotifMsg->NotificationData[iNotif].Body.Object.ObjType)
             {
-                if (NULL != pSM->pCbkLibSubDataChanged)
-                {
-                    (*pSM->pCbkLibSubDataChanged)(pSM->iCliId, pMonItNotif->ClientHandle, plsVal);
-                }
-                else if (NULL != pSM->pCbkClientHelperDataChanged && INT32_MAX >= pSM->iCliId)
-                {
-                    void* nodeId =
-                        (void*) SOPC_SLinkedList_FindFromId(pSM->dataIdToNodeIdList, pMonItNotif->ClientHandle);
-                    if (NULL != nodeId)
-                    {
-                        (*pSM->pCbkClientHelperDataChanged)((int32_t) pSM->iCliId, (char*) nodeId, &pMonItNotif->Value);
-                    }
-                }
-                SOPC_Free(plsVal->value);
-                plsVal->value = NULL;
-                SOPC_Variant_Delete(plsVal->raw_value);
-                SOPC_Free(plsVal);
-                plsVal = NULL;
+                SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[iNotif].Encoding);
+
+                pDataNotif = (OpcUa_DataChangeNotification*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
+                StaMac_ProcessMsg_PubResp_NotifData(pSM, pPubResp, pDataNotif);
+            }
+            else if (&OpcUa_EventNotificationList_EncodeableType ==
+                         pNotifMsg->NotificationData[iNotif].Body.Object.ObjType &&
+                     NULL != pSM->pCbkNotification)
+            {
+                SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == pNotifMsg->NotificationData[iNotif].Encoding);
+
+                // New API compatible only
+                OpcUa_EventNotificationList* pEventNotif =
+                    (OpcUa_EventNotificationList*) pNotifMsg->NotificationData[iNotif].Body.Object.Value;
+                StaMac_ProcessMsg_PubResp_EventNotifList(pSM, pPubResp, pEventNotif);
+            }
+            else
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Unexpected notification type received %s.",
+                            pNotifMsg->NotificationData[iNotif].Body.Object.ObjType->TypeName);
             }
         }
+    }
+    else if (pSM->pCbkNotification != NULL)
+    {
+        if (SOPC_IsGoodStatus(pPubResp->ResponseHeader.ServiceResult))
+        {
+            pPubResp->ResponseHeader.ServiceResult = OpcUa_BadNothingToDo;
+        }
+        pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult, NULL, 0, NULL, NULL);
     }
     /* TODO: verify the results[] which contains a status for each Ack */
 }
@@ -1423,12 +1978,17 @@ static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pS
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
-    /* TODO: verify revised values?? */
 
-    SOPC_ASSERT(0 == pSM->iSubscriptionID);
-    pSM->iSubscriptionID = ((OpcUa_CreateSubscriptionResponse*) pParam)->SubscriptionId;
-    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription created.");
+    SOPC_ASSERT(!pSM->bSubscriptionCreated);
+    OpcUa_CreateSubscriptionResponse* resp = (OpcUa_CreateSubscriptionResponse*) pParam;
+    pSM->iSubscriptionID = resp->SubscriptionId;
+    pSM->bSubscriptionCreated = true;
+    pSM->subscriptionAppCtx = appCtx;
+    Helpers_Log(SOPC_LOG_LEVEL_INFO, "Subscription %" PRIu32 " created.", pSM->iSubscriptionID);
     pSM->state = stActivated;
+    pSM->fPublishInterval = resp->RevisedPublishingInterval;
+    pSM->iCntLifetime = resp->RevisedLifetimeCount;
+    pSM->iCntMaxKeepAlive = resp->RevisedMaxKeepAliveCount;
 }
 
 static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pSM,
@@ -1439,7 +1999,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(appCtx);
 
-    SOPC_ASSERT(pSM->iSubscriptionID != 0);
+    SOPC_ASSERT(pSM->bSubscriptionCreated);
     if (1 != ((OpcUa_DeleteSubscriptionsResponse*) pParam)->NoOfResults)
     {
         /* we should have deleted only one subscription */
@@ -1451,10 +2011,24 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
         pSM->state = stError;
     }
     pSM->iSubscriptionID = 0;
+    pSM->bSubscriptionCreated = false;
     pSM->nMonItClientHandle = 0;
     SOPC_SLinkedList_Clear(pSM->pListMonIt);
+    SOPC_SLinkedList_Clear(pSM->pListDelMonIt);
     SOPC_SLinkedList_Apply(pSM->dataIdToNodeIdList, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Clear(pSM->dataIdToNodeIdList);
+    SOPC_Dict_Delete(pSM->miCliHandleToUserAppCtxDict);
+    pSM->miCliHandleToUserAppCtxDict = SOPC_Dict_Create(0, uintptr_hash, direct_equal, NULL, NULL);
+    // Note: avoid to delete the dict by implementing SOPC_Dict_Clear
+    SOPC_ASSERT(NULL != pSM->miCliHandleToUserAppCtxDict);
+    SOPC_Dict_SetTombstoneKey(pSM->miCliHandleToUserAppCtxDict, DICT_TOMBSTONE); // Necessary for remove
+
+    SOPC_Dict_Delete(pSM->miIdToCliHandleDict);
+    pSM->miIdToCliHandleDict = SOPC_Dict_Create(0, uintptr_hash, direct_equal, NULL, NULL);
+    // Note: avoid to delete the dict by implementing SOPC_Dict_Clear
+    SOPC_ASSERT(NULL != pSM->miIdToCliHandleDict);
+    SOPC_Dict_SetTombstoneKey(pSM->miIdToCliHandleDict, DICT_TOMBSTONE); // Necessary for remove
+
     // Reset values that will not be used anymore since no more subscription available
     pSM->nTokenUsable = 0;
     pSM->bAckSubscr = false;
@@ -1474,31 +2048,102 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
     int32_t i = 0;
     OpcUa_CreateMonitoredItemsResponse* pMonItResp = NULL;
 
-    /* There should be only one result element */
     pMonItResp = (OpcUa_CreateMonitoredItemsResponse*) pParam;
-    SOPC_CreateMonitoredItem_Ctx* MIappCtx = (SOPC_CreateMonitoredItem_Ctx*) appCtx;
+    SOPC_CreateMonitoredItems_Ctx* MIappCtx = (SOPC_CreateMonitoredItems_Ctx*) appCtx;
     SOPC_ASSERT(NULL != pMonItResp);
+    OpcUa_CreateMonitoredItemsRequest* pMonItReq = MIappCtx->req;
 
     for (i = 0; i < pMonItResp->NoOfResults; ++i)
     {
         if (SOPC_IsGoodStatus(pMonItResp->Results[i].StatusCode))
         {
-            if (SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[i].MonitoredItemId, MIappCtx->outCtxId) !=
-                MIappCtx->outCtxId)
+            if (NULL != pMonItReq)
             {
-                pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".", i);
+                bool result =
+                    SOPC_Dict_Insert(pSM->miIdToCliHandleDict, (uintptr_t) pMonItResp->Results[i].MonitoredItemId,
+                                     (uintptr_t) pMonItReq->ItemsToCreate[i].RequestedParameters.ClientHandle);
+                if (!result)
+                {
+                    pMonItResp->Results[i].StatusCode = OpcUa_BadInternalError;
+                    Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item with index '%" PRIi32 ".",
+                                i);
+                }
             }
         }
     }
+    if (pMonItResp->NoOfResults > 0)
+    {
+        bool result =
+            SOPC_SLinkedList_Append(pSM->pListMonIt, pMonItResp->Results[0].MonitoredItemId, MIappCtx->outCtxId);
+        if (!result)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating monitored item result context");
+        }
+    }
 
-    OpcUa_CreateMonitoredItemsResponse* resp = ((SOPC_CreateMonitoredItem_Ctx*) appCtx)->Results;
+    OpcUa_CreateMonitoredItemsResponse* resp = ((SOPC_CreateMonitoredItems_Ctx*) appCtx)->Results;
     if (NULL != resp)
     {
         // Transfer response data into app context
         *resp = *pMonItResp;
         SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pMonItResp);
     }
+    SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
+    pSM->state = stActivated;
+}
+
+static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* pSM,
+                                                           uint32_t arg,
+                                                           void* pParam,
+                                                           uintptr_t appCtx)
+{
+    SOPC_UNUSED_ARG(arg);
+
+    int32_t i = 0;
+    OpcUa_DeleteMonitoredItemsResponse* pMonItResp = NULL;
+
+    pMonItResp = (OpcUa_DeleteMonitoredItemsResponse*) pParam;
+    SOPC_DeleteMonitoredItems_Ctx* MIappCtx = (SOPC_DeleteMonitoredItems_Ctx*) appCtx;
+    SOPC_ASSERT(NULL != pMonItResp);
+    OpcUa_DeleteMonitoredItemsRequest* pMonItReq = MIappCtx->req;
+
+    for (i = 0; i < pMonItResp->NoOfResults; ++i)
+    {
+        if (SOPC_IsGoodStatus(pMonItResp->Results[i]))
+        {
+            bool found = false;
+            uintptr_t miCliHandle =
+                SOPC_Dict_Get(pSM->miIdToCliHandleDict, (uintptr_t) pMonItReq->MonitoredItemIds[i], &found);
+            if (found)
+            {
+                // Remove internal context associated
+                SOPC_Dict_Remove(pSM->miIdToCliHandleDict, (uintptr_t) pMonItReq->MonitoredItemIds[i]);
+                SOPC_Dict_Remove(pSM->miCliHandleToUserAppCtxDict, miCliHandle);
+            }
+            else
+            {
+                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error finding monitored item id %" PRIu32,
+                            pMonItReq->MonitoredItemIds[i]);
+            }
+        }
+    }
+    if (pMonItResp->NoOfResults > 0)
+    {
+        bool result = SOPC_SLinkedList_Append(pSM->pListDelMonIt, pMonItReq->MonitoredItemIds[0], MIappCtx->outCtxId);
+        if (!result)
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Internal error creating delete monitored item result context");
+        }
+    }
+
+    OpcUa_DeleteMonitoredItemsResponse* resp = ((SOPC_DeleteMonitoredItems_Ctx*) appCtx)->Results;
+    if (NULL != resp)
+    {
+        // Transfer response data into app context
+        *resp = *pMonItResp;
+        SOPC_EncodeableObject_Initialize(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pMonItResp);
+    }
+    SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
     pSM->state = stActivated;
 }
 
@@ -1628,7 +2273,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
     case stActivated:
     case stCreatingMonIt:
         /* add tokens, but wait for at least a monitored item */
-        if (0 != pSM->iSubscriptionID && pSM->nTokenUsable < pSM->nTokenTarget)
+        if (pSM->bSubscriptionCreated && pSM->nTokenUsable < pSM->nTokenTarget)
         {
             while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
             {
@@ -1637,8 +2282,8 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
                 status = Helpers_NewPublishRequest(pSM->bAckSubscr, pSM->iSubscriptionID, pSM->iAckSeqNum, &pRequest);
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_StaMac_SendRequest(pSM, pRequest, 0, SOPC_REQUEST_SCOPE_STATE_MACHINE,
-                                                     SOPC_REQUEST_TYPE_PUBLISH);
+                    status = SOPC_StaMac_SendRequest(pSM, pRequest, pSM->subscriptionAppCtx,
+                                                     SOPC_REQUEST_SCOPE_STATE_MACHINE, SOPC_REQUEST_TYPE_PUBLISH);
                 }
                 if (SOPC_STATUS_OK == status)
                 {

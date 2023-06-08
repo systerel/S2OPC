@@ -30,6 +30,14 @@
  * ::SOPC_ClientHelperNew_ServiceSync).
  * The request messages might be built using the helper functions of libs2opc_request_builder.h
  * (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
+ *
+ * Dedicated functions are provided to handle subscriptions:
+ * ::SOPC_ClientHelperNew_CreateSubscription (::SOPC_ClientHelperNew_DeleteSubscription) to create (delete) a unique
+ * subscription instance for the connection.
+ * ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems (::SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems)
+ * to create (delete) monitored items in a subscription instance.
+ * ::SOPC_ClientHelperNew_Subscription_AsyncService and ::SOPC_ClientHelperNew_Subscription_SyncService
+ * to call other subscription related services on the subscription instance.
  */
 
 #ifndef LIBS2OPC_NEW_CLIENT_H_
@@ -49,17 +57,17 @@ typedef struct SOPC_ClientConnection SOPC_ClientConnection;
 
 typedef enum
 {
-    SOPC_ClientConnectionEvent_Disconnected, /* Connection terminated, it will not be established again unless a new
+    SOPC_ClientConnectionEvent_Disconnected, /**< Connection terminated, it will not be established again unless a new
                                                 connection attempt is done.
                                                 To do a new attempt the following functions shall be called:
                                                 - ::SOPC_ClientHelperNew_Disconnect on current connection
                                                 - ::SOPC_ClientHelperNew_Connect to create a new connection
                                               */
-    SOPC_ClientConnectionEvent_Connected,    /* Connection established (SC & session), only triggered when
-                                                ::SOPC_ClientHelperNew_StartConnection is used. */
-    SOPC_ClientConnectionEvent_Reconnecting, /* Connection temporarily interrupted, attempt to re-establish connection
-                                                on-going.
-                                                TODO: not implemented in state machine */
+    SOPC_ClientConnectionEvent_Connected,    /**< (NOT IMPLEMENTED YET) Connection established (SC & session), only
+                                                triggered when SOPC_ClientHelperNew_StartConnection is used. */
+    SOPC_ClientConnectionEvent_Reconnecting, /**< (NOT IMPLEMENTED YET) Connection temporarily interrupted,
+                                                  attempt to re-establish connection on-going.
+                                                  Do not use connection until Connected event received */
 } SOPC_ClientConnectionEvent;
 
 /**
@@ -93,8 +101,8 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
  *
- *  \warning If the server endpoint is not a discovery endpoint or an activated session is expected
- *           usual connection and generic services functions shall be used.
+ * \warning If the server endpoint is not a discovery endpoint, or an activated session is expected,
+ *          usual connection and generic services functions shall be used.
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
  *          and prior to call ::SOPC_ClientConfigHelper_Clear.
@@ -115,12 +123,12 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *                  - ::OpcUa_RegisterServerRequest
  *                  - ::OpcUa_RegisterServer2Request
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
- *                     \li ::OpcUa_FindServersRequest
- *                     \li ::OpcUa_FindServersOnNetworkRequest
- *                     \li ::OpcUa_GetEndpointsRequest
+ *                     \li ::OpcUa_FindServersResponse
+ *                     \li ::OpcUa_FindServersOnNetworkResponse
  *                     \li ::OpcUa_GetEndpointsResponse
- *                     \li ::OpcUa_RegisterServerRequest
- *                     \li ::OpcUa_RegisterServer2Request
+ *                     \li ::OpcUa_GetEndpointsResponse
+ *                     \li ::OpcUa_RegisterServerResponse
+ *                     \li ::OpcUa_RegisterServer2Response
  *
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
@@ -129,13 +137,13 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
- * \note request memory is managed by the client after a successful return or in case of timeout
- * \note caller is responsible of output response memory after successful call
+ * \note Request memory is managed by the client after a successful return or in case of timeout
+ * \note Caller is responsible of output response memory after successful call
  *
- * \warning If the server endpoint is not a discovery endpoint or an activated session is expected
+ * \warning If the server endpoint is not a discovery endpoint, or an activated session is expected,
  *          usual connection and generic services functions shall be used.
  *
- * \warning local service synchronous call shall only be called from the application thread and shall not be called from
+ * \warning Service synchronous call shall only be called from the application thread and shall not be called from
  * client callbacks used for notification, asynchronous response, client event, etc. (::SOPC_ServiceAsyncResp_Fct,
  * ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock situation.
  */
@@ -185,7 +193,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
  *                  - ::OpcUa_RegisterServer2Request
- *                  - :: TO BE COMPLETED (MI, etc.)
+ *                  - etc, ...
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
@@ -193,7 +201,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
  *
- * \note request memory is managed by the client after a successful return
+ * \note Request memory is managed by the client after a successful return
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
  *          and prior to call ::SOPC_ClientConfigHelper_Clear.
@@ -208,6 +216,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *
  * \note ::SOPC_ClientHelperNew_Connect shall have been called
  *       and the connection shall be still active
+ *
  * \param secureConnection The client connection instance to use to execute the service
  * \param request   An instance of OPC UA request:
  *                  - ::OpcUa_ReadRequest
@@ -218,7 +227,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
  *                  - ::OpcUa_RegisterServer2Request
- *                  - :: TO BE COMPLETED (MI, etc.)
+ *                  - etc, ...
  *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_ReadResponse
@@ -228,7 +237,205 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *                     \li ::OpcUa_FindServersResponse
  *                     \li ::OpcUa_FindServersOnNetworkResponse
  *                     \li ::OpcUa_RegisterServer2Response
+ *                     \li etc, ...
  *
+ *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
+ *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
+ *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
+ *
+ * \note Request memory is managed by the client after a successful return or in case of timeout.
+ * \note Caller is responsible of output response memory after successful call. E.g. use ::SOPC_Encodeable_Delete.
+ *
+ * \warning service synchronous call shall only be called from the application thread and shall not be called from
+ * client callbacks used for asynchronous response, connections event, etc. (::SOPC_ServiceAsyncResp_Fct,
+ * ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock situation.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
+                                                   void* request,
+                                                   void** response);
+
+typedef struct SOPC_ClientHelper_Subscription SOPC_ClientHelper_Subscription;
+
+/**
+ * \brief Type of callback called on Subscription Notification
+ *
+ * \warning No blocking operation shall be done in callback
+ *          (e.g. call to ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems is forbidden,
+ *                        ::SOPC_ClientHelperNew_Subscription_SyncService)
+ *
+ * \param subscription          Indicates the subscription concerned by the notification
+ * \param status                OPC UA status code, \p notification is only valid when ::SOPC_IsGoodStatus
+ * \param notificationType      Type of notification received (::OpcUa_DataChangeNotification_EncodeableType or
+ *                              ::OpcUa_EventNotificationList_EncodeableType) or NULL (if \p status is not good)
+ * \param nbNotifElts           Number of elements in \p notification received and in \p monitoredItemCtxArray
+ * \param notification          Notification of the type indicated by \p notificationType,
+ *                              either pointer to a ::OpcUa_DataChangeNotification or
+ *                              ::OpcUa_EventNotificationList. Or NULL if \p status is not good.
+ *                              Content is freed after callback return, thus any content to record shall be copied.
+ * \param monitoredItemCtxArray Array of context for monitored items for which notification were received in
+ *                              \p notification.
+ *                              Notification element and monitored item context have the same index in the array.
+ *
+ */
+typedef void SOPC_ClientSubscriptionNotification_Fct(const SOPC_ClientHelper_Subscription* subscription,
+                                                     SOPC_StatusCode status,
+                                                     SOPC_EncodeableType* notificationType,
+                                                     uint32_t nbNotifElts,
+                                                     const void* notification,
+                                                     uintptr_t* monitoredItemCtxArray);
+
+/**
+ * \brief Creates a subscription on the server
+ *
+ * \warning The current implementation is limited to 1 subscription per connection
+ *
+ * \param secureConnection The client connection instance to use to execute the service
+ * \param subParams        The subscription creation request containing subscription parameters
+ *                         (created using ::SOPC_CreateSubscriptionRequest_CreateDefault or
+ *                          :: SOPC_CreateSubscriptionRequest_Create)
+ * \param subNotifCb       The callback to be called on subscription notification
+ * \param userParam        The user parameter associated to the subscription that can be accessed using
+ *                         ::SOPC_ClientHelperNew_Subscription_GetUserParam
+ *
+ * \return The subscription instance or NULL in case of error (invalid parameters, subscription already created, etc.)
+ */
+SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
+    SOPC_ClientConnection* secureConnection,
+    OpcUa_CreateSubscriptionRequest* subParams,
+    SOPC_ClientSubscriptionNotification_Fct* subNotifCb,
+    uintptr_t userParam);
+
+/**
+ * \brief Deletes a subscription on the server
+ *
+ * \param subscription     Pointer to the subscription pointer returned by ::SOPC_ClientHelperNew_CreateSubscription
+ *                         and to be deleted.
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client or subscription is not running.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subscription** subscription);
+
+/**
+ * \brief  Sets the number of publish tokens to be used for the subscription.
+ *         This number shall be greater than 0 and indicate the number of publish request
+ *         sent to the server that might be used to send back notifications.
+ *
+ * \note By default 3 publish tokens are configured.
+ * \note A new publish request token is sent back to the server each time a publish response is received
+ *       (i.e. token consumed)
+ *
+ * \param subscription     The subscription instance
+ * \param nbPublishTokens  The number of publish tokens to be used by the client
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         SOPC_STATUS_INVALID_STATE if the client or subscription is not running.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_ClientHelper_Subscription* subscription,
+                                                                       uint32_t nbPublishTokens);
+
+/**
+ * \brief Gets the created subscription parameters values revised by the server.
+ *
+ * \param subscription                    The subscription instance
+ * \param[out] revisedPublishingInterval  Pointer for the revised publishing interval output value (optional)
+ * \param[out] revisedLifetimeCount       Pointer for the revised lifetime count output value (optional)
+ * \param[out] revisedMaxKeepAliveCount   Pointer for the revised max keep alive count output value (optional)
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid subscription pointer,
+ *         SOPC_STATUS_INVALID_STATE if the client or connection is not running.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_ClientHelper_Subscription* subscription,
+                                                                         double* revisedPublishingInterval,
+                                                                         uint32_t* revisedLifetimeCount,
+                                                                         uint32_t* revisedMaxKeepAliveCount);
+
+/**
+ * \brief Returns the user parameter defined in ::SOPC_ClientHelperNew_CreateSubscription
+ *
+ * \param subscription  The subscription instance
+ *
+ * \return              User defined parameter provided in ::SOPC_ClientHelperNew_CreateSubscription
+ *                      for creation of \p subscription
+ */
+uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper_Subscription* subscription);
+
+/**
+ * \brief Gets the secure connection on which the subscription relies on
+ *
+ * \param subscription  The subscription instance
+ *
+ * \return              The secure connection instance
+ */
+SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_ClientHelper_Subscription* subscription);
+
+/**
+ * \brief Creates new monitored items on the given subscription.
+ *        A context array might be provided and context will be provided
+ *        on notification for corresponding monitored item in notification callback.
+ *        A pointer to empty message response might be provided to retrieve
+ *        the creation result and monitored item id affected by the server
+ *        (needed to modify or delete monitored items prior to subscription deletion)
+ *
+ * \param subscription          The subscription instance on which monitored items shall be created
+ * \param monitoredItemsReq     The create monitored items requests to use for creation parameters.
+ *                              SubscriptionId and ClientHandle parameters are ignored and set automatically.
+ *                              Simplified way to create it is to use ::SOPC_CreateMonitoredItemsRequest_CreateDefault
+ *                              or ::SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings.
+ * \param monitoredItemCtxArray (optional) The array of context for monitored items to be created
+ *                              (might be freed by caller after call only content is recorded in subscription)
+ * \param monitoredItemsResp    (optional) Pointer to the empty response that will be filled
+ *                              with the response received from the server and containing the status result
+ *                              and server monitored items ids.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+    const SOPC_ClientHelper_Subscription* subscription,
+    OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq, // no subscriptionId and no client handle id needed
+    const uintptr_t* monitoredItemCtxArray,
+    OpcUa_CreateMonitoredItemsResponse* monitoredItemsResp);
+
+/**
+ * \brief Deletes monitored items on the given subscription using the server monitored item ids.
+ *        A pointer to empty message response might be provided to retrieve
+ *        the deletion result
+ *
+ * \param subscription             The subscription instance on which monitored items shall be created
+ * \param delMonitoredItemsReq     The delete monitored items requests to use for creation parameters.
+ *                                 SubscriptionId parameter is ignored and set automatically.
+ * \param delMonitoredItemsResp    (optional) Pointer to the empty response that will be filled
+ *                                  with the response received from the server and containing the status result.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
+    const SOPC_ClientHelper_Subscription* subscription,
+    OpcUa_DeleteMonitoredItemsRequest* delMonitoredItemsReq,
+    OpcUa_DeleteMonitoredItemsResponse* delMonitoredItemsResp);
+
+/**
+ * \brief Executes an OPC UA service on server related to the given subscription synchronously.
+ *
+ * \note The subscription identifier part in the request provided is automatically set by this function.
+ * \note The requests to create / delete subscription or monitored items are not supported since dedicated
+ *       API function shall be used.
+ * \note The transfer subscription service is not supported by client.
+ *
+ * \param subscription The subscription instance for which the service shall be executed
+ * \param subOrMIrequest   An instance of one of the following OPC UA request:
+ *                         - ::OpcUa_ModifySubscriptionRequest
+ *                         - ::OpcUa_SetPublishingModeRequest (expecting 1 subscription id to fill in allocated array)
+ *                         - ::OpcUa_ModifyMonitoredItemsRequest
+ *                         - ::OpcUa_SetMonitoringModeRequest
+ *                         - ::OpcUa_SetTriggeringRequest
+ *
+ * \param[out] subOrMIresponse  Pointer into which instance of response complying with the OPC UA request is provided:
+ *                     \li ::OpcUa_ModifySubscriptionResponse
+ *                     \li ::OpcUa_SetPublishingModeResponse
+ *                     \li ::OpcUa_ModifyMonitoredItemsResponse
+ *                     \li ::OpcUa_SetMonitoringModeResponse
+ *                     \li ::OpcUa_SetTriggeringResponse
+
  *                     In case of service failure the response type is always ::OpcUa_ServiceFault,
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
@@ -243,240 +450,43 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  * client callbacks used for asynchronous response, connections event, etc. (::SOPC_ServiceAsyncResp_Fct,
  * ::SOPC_ClientConnectionEvent_Fct, etc.). Otherwise this will lead to a deadlock situation.
  */
-SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceSync(SOPC_ClientConnection* secureConnection,
-                                                   void* request,
-                                                   void** response);
-
-typedef struct SOPC_ClientHelperNew_Subscription SOPC_ClientHelperNew_Subscription;
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                                void* subOrMIrequest,
+                                                                void** subOrMIresponse);
 
 /**
- * NEED for subscription error (from server + timeout on client side to manage)
- * \brief Type of callback called on Subscription Notification
+ * \brief Executes an OPC UA service on server related to the given subscription asynchronously.
+ *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
+ *        called on service response or in case of service request sending failure.
  *
- * \warning No blocking operation shall be done in callback
  *
- * \param config        Indicates the connection concerned by the notification
- * \param subscription  Indicates the subscription concerned by the notification
- * \param status        OPC UA status code, \p publishResp is only valid when ::SOPC_IsGoodStatus
- * \param publishResp   Publish response received for the subscription (use helpers to extract data)
- * \param userParam     User defined parameter
+ * \note The subscription identifier part in the request provided is automatically set by this function.
+ * \note The requests to create / delete subscription or monitored items are not supported since dedicated
+ *       API function shall be used.
+ * \note The transfer subscription service is not supported by client.
+ *
+ * \param subscription The subscription instance for which the service shall be executed
+ * \param subOrMIrequest   An instance of one of the following OPC UA request:
+ *                         - ::OpcUa_ModifySubscriptionRequest
+ *                         - ::OpcUa_SetPublishingModeRequest (expecting 1 subscription id to fill in allocated array)
+ *                         - ::OpcUa_ModifyMonitoredItemsRequest
+ *                         - ::OpcUa_SetMonitoringModeRequest
+ *                         - ::OpcUa_SetTriggeringRequest
+ *
+ * \param userContext  User defined context that will be provided with the corresponding response in
+ *                     ::SOPC_LocalServiceAsyncResp_Fct
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
+ *
+ * \note request memory is managed by the client after a successful return
+ *
+ * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
+ *          and prior to call ::SOPC_ClientConfigHelper_Clear.
+ *          It is necessary to ensure asynchronous context is freed and no memory leak occurs.
  */
-typedef void SOPC_ClientSubscriptionNotification_Fct(SOPC_ClientHelperNew_Subscription* subscription,
-                                                     SOPC_StatusCode status,
-                                                     OpcUa_PublishResponse* publishResp,
-                                                     uintptr_t userParam);
-
-/**
- * Subscription helper: manage only Publish tokens, the rest is in Request/Response helpers
- * Note: limited to 1 per connection, synchronous, all params managed ?
- */
-SOPC_ClientHelperNew_Subscription* SOPC_ClientHelperNew_CreateSubscription(
-    SOPC_ClientConnection* secureConnection,
-    uint32_t nbPublishTokens,
-    OpcUa_CreateSubscriptionRequest* subParams,
-    SOPC_ClientSubscriptionNotification_Fct* subNotifCb,
-    uintptr_t userParam);
-
-/**
- * \brief Gets the secure connection on which the subscription relies on
- */
-SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(SOPC_ClientHelperNew_Subscription* subscription);
-
-/**
- * FORBIDS SubscriptionId use in generic services with CreateSubscription / DeleteSubscription / PublishRequest
- */
-uint32_t SOPC_ClientHelperNew_Subscription_GetSubscriptionId(SOPC_ClientHelperNew_Subscription* subscription);
-
-/* NOT PROVIDED since can be done through generic services
-SOPC_ReturnStatus SOPC_ClientHelper_SetSubscriptionPublishingMode(SOPC_SecureChannel_Config* config,
-                                                                  SOPC_ClientHelper_Subscription* subscription,
-                                                                  bool enable);
-
-SOPC_ReturnStatus SOPC_ClientHelper_ModifySubscription(SOPC_SecureChannel_Config* config,
-                                                       SOPC_ClientHelper_Subscription* subscription,
-                                                       OpcUa_CreateSubscriptionRequest* newParams);
-
-SOPC_ReturnStatus SOPC_ClientHelper_RepublishSubscription(SOPC_SecureChannel_Config* config,
-                                                          SOPC_ClientHelper_Subscription* subscription,
-                                                          OpcUa_RepublishRequest* newParams);
-*/
-/* AddMI / ModifyMI / DeleteMI in same case */
-
-SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelperNew_Subscription** subscription);
-
-/**
- * \brief An optional monitored items manager which records the created monitored items in a subscription to:
- *        - Keep record of the client handle id, monitored item id and node id
- *        - Associate an client context which might be pointer to a monitored item
- *
- * \warning In order to be up to date for a subscription in which the manager is used,
- *          the following functions shall be called for each call to the services:
- *          - CreateMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers
- *          - ModifyMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_UpdateHandlers
- *          - DeleteMonitoredItems: ::SOPC_ClientHelperNew_MonitoredItemsManager_DeleteHandlers
- *
- * \note Provides fresh client handle ids generator ?
- *       => already done elsewhere but not efficient if mass freed ids,
- *          we need a tested helper to manage it efficiently ...
- */
-typedef struct SOPC_ClientHelperNew_MonitoredItemsManager SOPC_ClientHelperNew_MonitoredItemsManager;
-
-/**
- * \brief Gets the monitored items manager associated to the given subscription.
- *
- * \warning Do not keep reference on returned manager after use since it will not be valid anymore after
- *          ::SOPC_ClientHelperNew_DeleteSubscription on the corresponding subscription
- *
- * \param subscription A subscription created by ::SOPC_ClientHelperNew_CreateSubscription and not deleted yet.
- *
- * \return The monitored items manager associated to the given subscription or NULL if the subscription is invalid.
- */
-SOPC_ClientHelperNew_MonitoredItemsManager* SOPC_ClientHelperNew_Subscription_GetMonitoredItemsManager(
-    SOPC_ClientHelperNew_Subscription* subscription);
-
-/**
- * \brief Creates handlers for the successfully created monitored items.
- *        This function uses the CreateMonitoredItems request and response
- *        and an optional array of additional client context to record the monitored items created.
- *
- * \note This function ignores the monitored items creation which are not a success in the response \p resp.
- *
- * \warning Since the CreateMonitoredItems request memory is managed by function calling the service,
- *          a copy of the request shall be done prior to call to ::SOPC_ClientHelperNew_ServiceAsync or
- *          ::SOPC_ClientHelperNew_ServiceSync.
- *
- * \param manager         The monitored items manager of the concerned subscription
- * \param req             The create monitored items request that was used to call the service.
- *                        This parameter shall be a copy made prior to service call using
- *                        ::SOPC_EncodeableObject_Copy function.
- * \param nbClientCtx     The number of client context provided in the array.
- *                        It shall be 0 if no context is provided
- *                        or shall match the number of monitored items in create request.
- * \param clientCtxArray  Pointer to the array of client context which size is \p nbClientCtx
- *                        or NULL if \p nbClientCtx is 0 \param resp
- * \param resp            The create monitored items response that was returned by the service call.
- *                        It shall match the request \p req and as consequence have the same number of monitored items.
- *
- * \return SOPC_STATUS_OK in case of successfully created handlers,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
- */
-SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers(
-    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    const OpcUa_CreateMonitoredItemsRequest* req,
-    size_t nbClientCtx,
-    uintptr_t* clientCtxArray,
-    const OpcUa_CreateMonitoredItemsResponse* resp);
-
-/**
- * \brief Updates the handlers for the successfully modified monitored items.
- *        This function uses the ModifyMonitoredItems request and response
- *        and an optional array of additional client context to record the monitored items created.
- *        The client context associated to monitored items during the creation remains unchanged
- *        (see :: SOPC_ClientHelperNew_MonitoredItemsManager_CreateHandlers).
- *
- * \note This function ignores the monitored items modification which are not a success in the response \p resp.
- *
- * \warning Since the ModifyMonitoredItems request memory is managed by function calling the service,
- *          a copy of the request shall be done prior to call to ::SOPC_ClientHelperNew_ServiceAsync or
- *          ::SOPC_ClientHelperNew_ServiceSync.
- *
- * \param manager         The monitored items manager of the concerned subscription
- * \param req             The modify monitored items request that was used to call the service.
- *                        This parameter shall be a copy made prior to service call using
- *                        ::SOPC_EncodeableObject_Copy function.
- * \param resp            The modify monitored items response that was returned by the service call.
- *                        It shall match the request \p req and as consequence have the same number of monitored items.
- *
- * \return SOPC_STATUS_OK in case of successfully created handlers,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
- */
-SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_UpdateHandlers(
-    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    const OpcUa_ModifyMonitoredItemsRequest* req,
-    const OpcUa_ModifyMonitoredItemsResponse* resp);
-
-/**
- * \brief Deletes the handlers for the deleted monitored items.
- *        The client context associated to the monitored items might be freed by caller after this call.
- *
- * \param manager         The monitored items manager of the concerned subscription
- * \param req             The delete monitored items request that will be used to call the service.
- *                        This parameter might be the actual request prior to the service call
- *                        or it shall be a copy made prior to service call using
- *                        ::SOPC_EncodeableObject_Copy function if service is already called.
- *
- * \return SOPC_STATUS_OK in case of successfully created handlers,
- *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters.
- */
-SOPC_ReturnStatus SOPC_ClientHelperNew_MonitoredItemsManager_DeleteHandlers(
-    SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    const OpcUa_DeleteMonitoredItemsRequest* req);
-
-/**
- * \brief Gets the client monitored item client handle id associated to the given NodeId (if unique).
- *
- * \warning The NodeId shall be unique in the created monitored items in order the function to return a result
- *
- * \param manager              The monitored items manager of the concerned subscription
- * \param nodeId               The NodeId of the monitored item, it shall be unique in order to obtain a result
- * \param[out] clientHandleId  The pointer to the client handle id associated to the monitored item uniquely identified
- *                             by the NodeId if the function returned value is true.
- *
- * \return true if the client handle id is returned in \p clientHandleId,
- *         false otherwise if not found or several associated to the NodeId.
- */
-bool SOPC_ClientHelperNew_MonitoredItemsManager_GetClientHandleId(
-    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    const SOPC_NodeId* nodeId,
-    uint32_t* clientHandleId);
-
-/**
- * \brief Gets the monitored item id associated by the server to the client handle id
- *
- * \param manager               The monitored items manager of the concerned subscription
- * \param clientHandlerId       The client handler id of the monitored item
- * \param[out] monitoredItemId  The pointer to the monitored item id associated to the monitored item uniquely
- *                              identified by the NodeId if the function returned value is true.
- *
- * \return true if the monitored item id is returned in \p monitoredItemId,
- *         false otherwise if client hanldled id invalid.
- */
-bool SOPC_ClientHelperNew_MonitoredItemsManager_GetMonitoredItemId(
-    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    uint32_t clientHandleId,
-    uint32_t* monitoredItemId);
-
-/**
- * \brief Gets the monitored item client context associated to the client handle id
- *
- * \param manager               The monitored items manager of the concerned subscription
- * \param clientHandlerId       The client handler id of the monitored item
- * \param[out] clientCtx        The pointer to the client context associated to the client handle id
- *                              if the function returned value is true.
- *
- * \return true if the client context is returned in \p clientCtx,
- *         false otherwise if client hanldled id invalid.
- */
-bool SOPC_ClientHelperNew_MonitoredItemsManager_GetClientCtx(const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-                                                             uint32_t clientHandleId,
-                                                             uintptr_t* clientCtx);
-
-/**
- * \brief Gets the monitored item identification associated to the client handle id
- *
- * \param manager            The monitored items manager of the concerned subscription
- * \param clientHandlerId    The client handler id of the monitored item
- * \param[out] nodeId
- * \param[out] attribute
- * \param[out] indexRange
- *
- * \return
- */
-const SOPC_NodeId* SOPC_ClientHelperNew_MonitoredItemsManager_GetIdentification(
-    const SOPC_ClientHelperNew_MonitoredItemsManager* manager,
-    uint32_t clientHandleId,
-    const SOPC_NodeId** nodeId,
-    SOPC_AttributeId* attribute,
-    const SOPC_String** indexRange);
+SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_AsyncService(const SOPC_ClientHelper_Subscription* subscription,
+                                                                 void* subOrMIrequest,
+                                                                 uintptr_t userContext);
 
 #endif

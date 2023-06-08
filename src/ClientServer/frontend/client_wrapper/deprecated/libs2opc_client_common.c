@@ -731,7 +731,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
-    SOPC_CreateMonitoredItem_Ctx* appCtx = NULL;
+    SOPC_CreateMonitoredItems_Ctx* appCtx = NULL;
 
     if (!SOPC_Atomic_Int_Get(&libInitialized))
     {
@@ -772,7 +772,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AddToSubscription(const SOPC_LibSub_Connecti
     {
         const int64_t timeout_ms = SOPC_StaMac_GetTimeout(pSM);
         int count = 0;
-        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasMonItByAppCtx(pSM, appCtx) &&
+        while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_PopMonItByAppCtx(pSM, appCtx) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             /* Release the lock so that the event handler can work properly while waiting */
