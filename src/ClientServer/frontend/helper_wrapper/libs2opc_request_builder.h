@@ -26,7 +26,7 @@
  *
  * \note Allocated requests will be deallocated by the library after service call.
  *       Once a service called (e.g. ::SOPC_ServerHelper_LocalServiceSync),
- *       the request is transfered to library and shall not be accessed anymore.
+ *       the request is transferred to library and shall not be accessed anymore.
  *
  */
 
@@ -530,7 +530,7 @@ OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointU
  */
 SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpointsRequest* getEndpointsReq,
                                                                size_t nbLocales,
-                                                               char** localeIds);
+                                                               char* const* localeIds);
 
 /**
  * \brief Requests profile URIs for the endpoints to be returned by the get endpoints service (Optional)
@@ -553,7 +553,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpoint
  */
 SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequest* getEndpointsReq,
                                                           size_t nbProfiles,
-                                                          char** profileURIs);
+                                                          char* const* profileURIs);
 
 /**
  * \brief Creates a complete RegisterServer2 request from the current server configuration.
@@ -634,11 +634,110 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
                                                             SOPC_Boolean* optHistorizing);
 
 /**
- * \brief Creates an CreateMonitoredItems request
+ * \brief Creates a CreateSubscription request with default parameters values
+ *        Default parameters are the following:
+ *         - RequestedPublishingInterval = 500 ms
+ *         - RequestedLifetimeCount = 10 cycles
+ *         - RequestedMaxKeepAliveCount = 3 cycles
+ *         - MaxNotificationsPerPublish = 1000 elements
+ *         - PublishingEnabled = true
+ *         - Priority = 0
+ *
+ * \return allocated CreateSubscription request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_CreateDefault(void);
+
+/**
+ * \brief Creates a CreateSubscription request with given parameters values
+ *
+ * \param reqPublishingInterval   Requested publishing interval in milliseconds
+ * \param reqLifetimeCount        Requested lifetime count for the subscription (number of publishing cycles).
+ *                                When the subscription publishing cycle expired this count of times
+ *                                without Publish token available the subscription is deleted by the server.
+ *                                It shall be at least 3 times \p reqMaxKeepAliveCount
+ * \param reqMaxKeepAliveCount    Requested max keep alive count for the subscription (number of publishing cycles).
+ *                                When the subscription publishing cycle expired this count of times
+ *                                without notification to send, the server sends a keep alive Publish response.
+ *                                \p reqLifetimeCount shall be at least 3 times this value.
+ * \param maxNotifPerPublish      Maximum number of notifications sent in a Publish response.
+ * \param publishingEnabled       true to enable publishing for the subscription, false to activate it later
+ *                                (requires a ::OpcUa_SetPublishingModeRequest to enable publishing later).
+ * \param priority                Priority of the subscription (0 means not special priority).
+ *
+ * \return allocated CreateSubscription request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double reqPublishingInterval,
+                                                                       uint32_t reqLifetimeCount,
+                                                                       uint32_t reqMaxKeepAliveCount,
+                                                                       uint32_t maxNotifPerPublish,
+                                                                       SOPC_Boolean publishingEnabled,
+                                                                       SOPC_Byte priority);
+
+/**
+ * \brief Creates a CreateMonitoredItems request for the given node ids with default parameters values:
+ *        - Monitored item identification: attribute Value and no index range
+ *        - Monitoring parameters:
+ *          - mode = reporting
+ *          - sampling interval = -1 (same as publishing interval for data change monitoring)
+ *          - queue size = 100
+ *          - discard oldest = true
+ *
+ * \param subscriptionId   The identifier of the subscription for which monitored items will be created
+ *                         or 0 if set automatically by client wrapper API.
+ *                         It will be set automatically if it used with
+ *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                         If subscription is managed manually it is contained in the
+ *                         ::OpcUa_CreateSubscriptionResponse received previously.
+ * \param nbMonitoredItems Number of monitored items to create
+ * \param nodeIdsToMonitor Array of node ids to monitor (for attribute Value by default)
+ * \param ts               Define the timestamps (source, server) to be returned for any monitored item.
+ */
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(uint32_t subscriptionId,
+                                                                                  size_t nbMonitoredItems,
+                                                                                  const SOPC_NodeId* nodeIdsToMonitor,
+                                                                                  OpcUa_TimestampsToReturn ts);
+
+/**
+ * \brief Creates a CreateMonitoredItems request for the given node ids C strings with default parameters values:
+ *        - Monitored item identification: attribute Value and no index range
+ *        - Monitoring parameters:
+ *          - mode = reporting
+ *          - sampling interval = -1 (same as publishing interval for data change monitoring)
+ *          - queue size = 100
+ *          - discard oldest = true
+ *
+ * \param subscriptionId   The identifier of the subscription for which monitored items will be created
+ *                         or 0 if set automatically by client wrapper API.
+ *                         It will be set automatically if it used with
+ *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                         If subscription is managed manually it is contained in the
+ *                         ::OpcUa_CreateSubscriptionResponse received previously.
+ * \param nbMonitoredItems Number of monitored items to create
+ * \param nodeIdsToMonitor Array of node ids as C string to monitor (for attribute Value by default).
+ *                         E.g. ['ns=1;s=MyNode'].
+ *                         Format is described in
+ *                         <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                         OPC UA specification</a>.
+ *
+ * \param ts               Define the timestamps (source, server) to be returned for any monitored item.
+ */
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(
+    uint32_t subscriptionId,
+    size_t nbMonitoredItems,
+    char* const* nodeIdsToMonitor,
+    OpcUa_TimestampsToReturn ts);
+
+/**
+ * \brief Creates a CreateMonitoredItems request
  *
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
- *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
- *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ *                              or 0 if set automatically by client wrapper API.
+ *                              It will be set automatically if it used with
+ *                              ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
+ *                              If subscription is managed manually it is contained in the
+ *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to create with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.
  *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
@@ -654,18 +753,23 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
 
 /**
  * \brief Sets the monitored item identification parameters.
- *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams
- *        for the same index to configure monitoring parameters.
+ *        It should be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams
+ *        for the same index to configure monitoring parameters. Otherwise default parameter values are applied:
+ *        - Monitoring parameters:
+ *          - mode = reporting
+ *          - sampling interval = -1 (same as publishing interval for data change monitoring)
+ *          - queue size = 100
+ *          - discard oldest = true
  *
  * \param createMIrequest  The create monitored item request to configure
  *
- * \param index         Index of the create monitored item to configure in the request.
- *                      \p index < number of monitored items configured in ::SOPC_CreateMonitoredItemsRequest_Create
+ * \param index        Index of the create monitored item to configure in the request.
+ *                     \p index < number of monitored items configured in ::SOPC_CreateMonitoredItemsRequest_Create
  *
  * \param nodeId       The id of the node to monitor.
  *                     \p nodeId shall not be NULL
  *
- * \param attribute    The attribute to write in the node.
+ * \param attribute    The attribute to monitor in the node (usually ::SOPC_AttributeId_Value).
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
  *
  *
@@ -689,7 +793,12 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
 /**
  * \brief Sets the monitored item identification parameters using C string parameters.
  *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams
- *        for the same index to configure monitoring parameters.
+ *        for the same index to configure monitoring parameters. Otherwise default parameter values are applied:
+ *        - Monitoring parameters:
+ *          - mode = reporting
+ *          - sampling interval = -1 (same as publishing interval for data change monitoring)
+ *          - queue size = 100
+ *          - discard oldest = true
  *
  * \param createMIrequest  The create monitored item request to configure
  *
@@ -702,7 +811,7 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
  *                     <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
  *                     OPC UA specification</a>.
  *
- * \param attribute    The attribute to write in the node.
+ * \param attribute    The attribute to monitor in the node (usually ::SOPC_AttributeId_Value).
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
  *
  * \param indexRange   The index range used to identify a single element of an array,
@@ -754,12 +863,14 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigge
  *
  * \param clientHandle     Client-supplied id of the MonitoredItem, it will be provided in Notifications of the
  *                         ::OpcUa_PublishResponse messages received.
+ *                         This parameter will be IGNORED when \p createMIrequest is used with
+ *                         ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems.
  * \param samplingInterval The interval defines the sampling interval for the monitored item.
  *                         The value 0 indicates that the Server should use the fastest practical rate
  *                         or is based on an exception-based model.
  *                         The value -1 indicates that the default sampling interval defined by the publishing
  *                         interval of the subscription is requested.
- * \param filter           (optional) A filter used by the Server to determine if the MonitoredItem should generate a
+ * \param optFilter        (optional) A filter used by the Server to determine if the MonitoredItem should generate a
  *                         notification.
  *                         ::SOPC_MonitoredItem_DataChangeFilter should be used to create a DataChangeFilter.
  *                         If not used, this parameter is null. If not null the filter memory is managed by the
@@ -779,16 +890,20 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
     OpcUa_MonitoringMode monitoringMode,
     uint32_t clientHandle,
     double samplingInterval,
-    SOPC_ExtensionObject* filter,
+    SOPC_ExtensionObject* optFilter,
     uint32_t queueSize,
     SOPC_Boolean discardOldest);
 
 /**
- * \brief Creates an ModifyMonitoredItems request
+ * \brief Creates a ModifyMonitoredItems request
  *
  * \param subscriptionId        The identifier of the subscription for which monitored items will be created
- *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
- *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ *                              or 0 if set automatically by client wrapper API.
+ *                              It will be set automatically if it used with
+ *                               ::SOPC_ClientHelperNew_Subscription_SyncService or
+ *                               ::SOPC_ClientHelperNew_Subscription_AsyncService.
+ *                              If subscription is managed manually it is contained in the
+ *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to modify with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.
  *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
@@ -817,7 +932,7 @@ OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint3
  *                         or is based on an exception-based model.
  *                         The value -1 indicates that the default sampling interval defined by the publishing
  *                         interval of the subscription is requested.
- * \param filter           (optional) A filter used by the Server to determine if the MonitoredItem should generate a
+ * \param optFilter        (optional) A filter used by the Server to determine if the MonitoredItem should generate a
  *                         notification.
  *                         ::SOPC_MonitoredItem_DataChangeFilter should be used to create a DataChangeFilter.
  *                         If not used, this parameter is null. If not null the filter memory is managed by the
@@ -837,16 +952,20 @@ SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
     uint32_t monitoredItemId,
     uint32_t clientHandle,
     double samplingInterval,
-    SOPC_ExtensionObject* filter,
+    SOPC_ExtensionObject* optFilter,
     uint32_t queueSize,
     SOPC_Boolean discardOldest);
 
 /**
  * \brief Creates an DeleteMonitoredItems request
  *
- * \param subscriptionId        The identifier of the subscription for which monitored items will be deleted
- *                              (obtained with ::SOPC_ClientHelperNew_Subscription_GetSubscriptionId
- *                               or in a ::OpcUa_CreateSubscriptionResponse if subscription is managed manually)
+ * \param subscriptionId        The identifier of the subscription for which monitored items will be created
+ *                              or 0 if set automatically by client wrapper API.
+ *                              It will be set automatically if it used with
+ *                               ::SOPC_ClientHelperNew_Subscription_SyncService or
+ *                               ::SOPC_ClientHelperNew_Subscription_AsyncService.
+ *                              If subscription is managed manually it is contained in the
+ *                              ::OpcUa_CreateSubscriptionResponse received previously.
  * \param nbMonitoredItems      Number of MonitoredItem to delete with the request.
  *                              \p nbMonitoredItems <= INT32_MAX.
  *                              ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams shall be called
@@ -860,7 +979,7 @@ SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
  */
 OpcUa_DeleteMonitoredItemsRequest* SOPC_DeleteMonitoredItemsRequest_Create(uint32_t subscriptionId,
                                                                            size_t nbMonitoredItems,
-                                                                           const uint32_t** optMonitoredItemIds);
+                                                                           const uint32_t* optMonitoredItemIds);
 
 /**
  * \brief Sets the monitored item identifier to delete.

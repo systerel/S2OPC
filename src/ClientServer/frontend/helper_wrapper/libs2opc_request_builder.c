@@ -25,7 +25,41 @@
 
 #include "sopc_assert.h"
 #include "sopc_encodeable.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+
+/* Default publish period */
+#ifndef SOPC_DEFAULT_PUBLISH_PERIOD_MS
+#define SOPC_DEFAULT_PUBLISH_PERIOD_MS 500
+#endif
+/* Default max keep alive count */
+#ifndef SOPC_DEFAULT_MAX_KEEP_ALIVE_COUNT
+#define SOPC_DEFAULT_MAX_KEEP_ALIVE_COUNT 3
+#endif
+/* Default max lifetime Count of subscriptions */
+#ifndef SOPC_DEFAULT_MAX_LIFETIME_COUNT
+#define SOPC_DEFAULT_MAX_LIFETIME_COUNT 10
+#endif
+
+/* Default max lifetime Count of subscriptions */
+#ifndef SOPC_DEFAULT_MAX_NOTIFS_PER_PUBLISH
+#define SOPC_DEFAULT_MAX_NOTIFS_PER_PUBLISH 1000
+#endif
+
+/* Default sampling interval of monitored items */
+#ifndef SOPC_DEFAULT_MI_SAMPLING_INTERVAL_MS
+#define SOPC_DEFAULT_MI_SAMPLING_INTERVAL_MS (-1)
+#endif
+
+/* Default queue size of monitored items */
+#ifndef SOPC_DEFAULT_MI_QUEUE_SIZE
+#define SOPC_DEFAULT_MI_QUEUE_SIZE 100
+#endif
+
+/* Default discard oldest flag of monitored items */
+#ifndef SOPC_DEFAULT_MI_DISCARD_OLDEST
+#define SOPC_DEFAULT_MI_DISCARD_OLDEST true
+#endif
 
 // Macro used to check if msgPtr is valid and element index is valid in this message
 #define CHECK_ELEMENT_EXISTS(msgPtr, fieldNoOf, index) \
@@ -627,6 +661,13 @@ OpcUa_RelativePathElement* SOPC_RelativePathElements_Create(size_t nbPathElement
         return res;
     }
     res = SOPC_Calloc(nbPathElements, sizeof(OpcUa_RelativePathElement));
+    if (NULL != res)
+    { // Initialize elements
+        for (size_t i = 0; i < nbPathElements; i++)
+        {
+            OpcUa_RelativePathElement_Initialize(&res[i]);
+        }
+    }
 
     return res;
 }
@@ -684,7 +725,8 @@ OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointU
     return getEndpointReq;
 }
 
-static SOPC_String* SOPC_HelperInternal_AllocAndCopyCstringInArray(size_t stringArrayLength, char** cStringsToCopy)
+static SOPC_String* SOPC_HelperInternal_AllocAndCopyCstringInArray(size_t stringArrayLength,
+                                                                   char* const* cStringsToCopy)
 {
     SOPC_String* newStringArray = SOPC_Calloc(sizeof(SOPC_String), stringArrayLength);
 
@@ -714,7 +756,7 @@ static SOPC_String* SOPC_HelperInternal_AllocAndCopyCstringInArray(size_t string
 
 SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpointsRequest* getEndpointsReq,
                                                                size_t nbLocales,
-                                                               char** localeIds)
+                                                               char* const* localeIds)
 {
     if (NULL == getEndpointsReq || 0 == nbLocales || NULL == localeIds)
     {
@@ -740,7 +782,7 @@ SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetPreferredLocales(OpcUa_GetEndpoint
 
 SOPC_ReturnStatus SOPC_GetEndpointsRequest_SetProfileURIs(OpcUa_GetEndpointsRequest* getEndpointsReq,
                                                           size_t nbProfiles,
-                                                          char** profileURIs)
+                                                          char* const* profileURIs)
 {
     if (NULL == getEndpointsReq || NULL == profileURIs)
     {
@@ -1031,12 +1073,41 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
     return status;
 }
 
+OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double reqPublishingInterval,
+                                                                       uint32_t reqLifetimeCount,
+                                                                       uint32_t reqMaxKeepAliveCount,
+                                                                       uint32_t maxNotifPerPublish,
+                                                                       SOPC_Boolean publishingEnabled,
+                                                                       SOPC_Byte priority)
+{
+    OpcUa_CreateSubscriptionRequest* req = NULL;
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return NULL;
+    }
+    req->RequestedPublishingInterval = reqPublishingInterval;
+    req->RequestedLifetimeCount = reqLifetimeCount;
+    req->RequestedMaxKeepAliveCount = reqMaxKeepAliveCount;
+    req->MaxNotificationsPerPublish = maxNotifPerPublish;
+    req->PublishingEnabled = publishingEnabled;
+    req->Priority = priority;
+    return req;
+}
+
+OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_CreateDefault(void)
+{
+    return SOPC_CreateSubscriptionRequest_Create(SOPC_DEFAULT_PUBLISH_PERIOD_MS, SOPC_DEFAULT_MAX_LIFETIME_COUNT,
+                                                 SOPC_DEFAULT_MAX_KEEP_ALIVE_COUNT, SOPC_DEFAULT_MAX_NOTIFS_PER_PUBLISH,
+                                                 true, 0);
+}
+
 OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint32_t subscriptionId,
                                                                            size_t nbMonitoredItems,
                                                                            OpcUa_TimestampsToReturn ts)
 {
     OpcUa_CreateMonitoredItemsRequest* req = NULL;
-    if (nbMonitoredItems > INT32_MAX || 0 == subscriptionId)
+    if (nbMonitoredItems > INT32_MAX)
     {
         return req;
     }
@@ -1048,6 +1119,11 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
     req->ItemsToCreate = SOPC_Calloc(nbMonitoredItems, sizeof(*req->ItemsToCreate));
     if (NULL != req->ItemsToCreate)
     {
+        // Initialize elements
+        for (size_t i = 0; i < nbMonitoredItems; i++)
+        {
+            OpcUa_MonitoredItemCreateRequest_Initialize(&req->ItemsToCreate[i]);
+        }
         req->SubscriptionId = subscriptionId;
         req->TimestampsToReturn = ts;
         req->NoOfItemsToCreate = (int32_t) nbMonitoredItems;
@@ -1058,6 +1134,310 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     return req;
+}
+
+static OpcUa_MonitoredItemCreateRequest* CreateMIrequest_InitializeCreateMonitPointer(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    SOPC_AttributeId attribute)
+{
+    if (!CHECK_ELEMENT_EXISTS(createMIrequest, NoOfItemsToCreate, index) ||
+        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attribute))
+    {
+        return NULL;
+    }
+    OpcUa_MonitoredItemCreateRequest* createMIresult = &createMIrequest->ItemsToCreate[index];
+    createMIresult->ItemToMonitor.AttributeId = attribute;
+    createMIresult->MonitoringMode = OpcUa_MonitoringMode_Reporting;
+    createMIresult->RequestedParameters.SamplingInterval = SOPC_DEFAULT_MI_SAMPLING_INTERVAL_MS;
+    createMIresult->RequestedParameters.QueueSize = SOPC_DEFAULT_MI_QUEUE_SIZE;
+    createMIresult->RequestedParameters.DiscardOldest = SOPC_DEFAULT_MI_DISCARD_OLDEST;
+    return createMIresult;
+}
+
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    const char* nodeId,
+    SOPC_AttributeId attribute,
+    const char* indexRange)
+{
+    OpcUa_MonitoredItemCreateRequest* createMI =
+        CreateMIrequest_InitializeCreateMonitPointer(createMIrequest, index, attribute);
+    if (NULL == createMI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status =
+        SOPC_NodeId_InitializeFromCString(&createMI->ItemToMonitor.NodeId, nodeId, (int32_t) strlen(nodeId));
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_CopyFromCString(&createMI->ItemToMonitor.IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_MonitoredItemCreateRequest_Clear(createMI);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    const SOPC_NodeId* nodeId,
+    SOPC_AttributeId attribute,
+    const SOPC_String* indexRange)
+{
+    OpcUa_MonitoredItemCreateRequest* createMI =
+        CreateMIrequest_InitializeCreateMonitPointer(createMIrequest, index, attribute);
+    if (NULL == createMI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&createMI->ItemToMonitor.NodeId, nodeId);
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_Copy(&createMI->ItemToMonitor.IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_MonitoredItemCreateRequest_Clear(createMI);
+    }
+    return status;
+}
+
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefault(uint32_t subscriptionId,
+                                                                                  size_t nbMonitoredItems,
+                                                                                  const SOPC_NodeId* nodeIdsToMonitor,
+                                                                                  OpcUa_TimestampsToReturn ts)
+{
+    if (NULL == nodeIdsToMonitor)
+    {
+        return NULL;
+    }
+    OpcUa_CreateMonitoredItemsRequest* req =
+        SOPC_CreateMonitoredItemsRequest_Create(subscriptionId, nbMonitoredItems, ts);
+    if (NULL != req)
+    {
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        for (size_t i = 0; SOPC_STATUS_OK == status && i < nbMonitoredItems; i++)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(req, i, &nodeIdsToMonitor[i],
+                                                                         SOPC_AttributeId_Value, NULL);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            OpcUa_CreateMonitoredItemsRequest_Clear(&req);
+            SOPC_Free(req);
+            req = NULL;
+        }
+    }
+    return req;
+}
+
+OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(
+    uint32_t subscriptionId,
+    size_t nbMonitoredItems,
+    char* const* nodeIdsToMonitor,
+    OpcUa_TimestampsToReturn ts)
+{
+    if (NULL == nodeIdsToMonitor)
+    {
+        return NULL;
+    }
+    OpcUa_CreateMonitoredItemsRequest* req =
+        SOPC_CreateMonitoredItemsRequest_Create(subscriptionId, nbMonitoredItems, ts);
+    if (NULL != req)
+    {
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        for (size_t i = 0; SOPC_STATUS_OK == status && i < nbMonitoredItems; i++)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(req, i, nodeIdsToMonitor[i],
+                                                                                    SOPC_AttributeId_Value, NULL);
+        }
+        if (SOPC_STATUS_OK != status)
+        {
+            OpcUa_CreateMonitoredItemsRequest_Clear(&req);
+            SOPC_Free(req);
+            req = NULL;
+        }
+    }
+    return req;
+}
+
+SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigger trigger,
+                                                          OpcUa_DeadbandType deadbandType,
+                                                          double deadbandValue)
+{
+    if (deadbandValue < 0.0 || deadbandType < OpcUa_DeadbandType_None || deadbandType > OpcUa_DeadbandType_Percent ||
+        trigger < OpcUa_DataChangeTrigger_Status || trigger > OpcUa_DataChangeTrigger_StatusValueTimestamp)
+    {
+        return NULL;
+    }
+    OpcUa_DataChangeFilter* filter = NULL;
+    SOPC_ExtensionObject* filterExt = SOPC_Calloc(1, sizeof(*filterExt));
+    if (NULL == filterExt)
+    {
+        return NULL;
+    }
+    SOPC_ReturnStatus status =
+        SOPC_Encodeable_CreateExtension(filterExt, &OpcUa_DataChangeFilter_EncodeableType, (void**) &filter);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        filter->DeadbandType = deadbandType;
+        filter->DeadbandValue = deadbandValue;
+        filter->Trigger = trigger;
+    }
+    else
+    {
+        SOPC_Free(filterExt);
+        filterExt = NULL;
+    }
+    return filterExt;
+}
+
+SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+    OpcUa_CreateMonitoredItemsRequest* createMIrequest,
+    size_t index,
+    OpcUa_MonitoringMode monitoringMode,
+    uint32_t clientHandle,
+    double samplingInterval,
+    SOPC_ExtensionObject* optFilter,
+    uint32_t queueSize,
+    SOPC_Boolean discardOldest)
+{
+    if (NULL == createMIrequest || !CHECK_ELEMENT_EXISTS(createMIrequest, NoOfItemsToCreate, index))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_MonitoredItemCreateRequest* createMI = &createMIrequest->ItemsToCreate[index];
+
+    createMI->MonitoringMode = monitoringMode;
+    createMI->RequestedParameters.ClientHandle = clientHandle;
+    createMI->RequestedParameters.SamplingInterval = samplingInterval;
+    if (NULL != optFilter)
+    {
+        createMI->RequestedParameters.Filter = *optFilter;
+        SOPC_Free(optFilter);
+    }
+    createMI->RequestedParameters.QueueSize = queueSize;
+    createMI->RequestedParameters.DiscardOldest = discardOldest;
+
+    return SOPC_STATUS_OK;
+}
+
+OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           OpcUa_TimestampsToReturn ts)
+{
+    OpcUa_ModifyMonitoredItemsRequest* req = NULL;
+    if (nbMonitoredItems > INT32_MAX)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->ItemsToModify = SOPC_Calloc(nbMonitoredItems, sizeof(*req->ItemsToModify));
+    if (NULL != req->ItemsToModify)
+    {
+        // Initialize elements
+        for (size_t i = 0; i < nbMonitoredItems; i++)
+        {
+            OpcUa_ModifyMonitoredItemsRequest_Initialize(&req->ItemsToModify[i]);
+        }
+        req->SubscriptionId = subscriptionId;
+        req->TimestampsToReturn = ts;
+        req->NoOfItemsToModify = (int32_t) nbMonitoredItems;
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_ModifyMonitoredItemsRequest_SetMonitoredItemParams(
+    OpcUa_ModifyMonitoredItemsRequest* modifyMIrequest,
+    size_t index,
+    uint32_t monitoredItemId,
+    uint32_t clientHandle,
+    double samplingInterval,
+    SOPC_ExtensionObject* optFilter,
+    uint32_t queueSize,
+    SOPC_Boolean discardOldest)
+{
+    if (NULL == modifyMIrequest || !CHECK_ELEMENT_EXISTS(modifyMIrequest, NoOfItemsToModify, index))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_MonitoredItemModifyRequest* modifyMI = &modifyMIrequest->ItemsToModify[index];
+
+    modifyMI->MonitoredItemId = monitoredItemId;
+    modifyMI->RequestedParameters.ClientHandle = clientHandle;
+    modifyMI->RequestedParameters.SamplingInterval = samplingInterval;
+    if (NULL != optFilter)
+    {
+        modifyMI->RequestedParameters.Filter = *optFilter;
+        SOPC_Free(optFilter);
+    }
+    modifyMI->RequestedParameters.QueueSize = queueSize;
+    modifyMI->RequestedParameters.DiscardOldest = discardOldest;
+
+    return SOPC_STATUS_OK;
+}
+
+OpcUa_DeleteMonitoredItemsRequest* SOPC_DeleteMonitoredItemsRequest_Create(uint32_t subscriptionId,
+                                                                           size_t nbMonitoredItems,
+                                                                           const uint32_t* optMonitoredItemIds)
+{
+    OpcUa_DeleteMonitoredItemsRequest* req = NULL;
+    if (nbMonitoredItems > INT32_MAX)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->SubscriptionId = subscriptionId;
+    req->NoOfMonitoredItemIds = (int32_t) nbMonitoredItems;
+    req->MonitoredItemIds = SOPC_Calloc(nbMonitoredItems, sizeof(*req->MonitoredItemIds));
+    if (NULL != req->MonitoredItemIds)
+    {
+        // Initialize elements
+        if (NULL != optMonitoredItemIds)
+        {
+            for (size_t i = 0; i < nbMonitoredItems; i++)
+            {
+                req->MonitoredItemIds[i] = optMonitoredItemIds[i];
+            }
+        }
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
+    OpcUa_DeleteMonitoredItemsRequest* deleteMIrequest,
+    size_t index,
+    uint32_t monitoredItemId)
+{
+    if (NULL == deleteMIrequest || !CHECK_ELEMENT_EXISTS(deleteMIrequest, NoOfMonitoredItemIds, index))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    deleteMIrequest->MonitoredItemIds[index] = monitoredItemId;
+    return SOPC_STATUS_OK;
 }
 
 #undef CHECK_ELEMENT_EXISTS
