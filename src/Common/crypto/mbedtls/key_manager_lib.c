@@ -41,6 +41,7 @@
 #include "mbedtls/pem.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
+#include "mbedtls/x509_csr.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -1715,4 +1716,45 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
     /* Frees all the crls in the chain */
     mbedtls_x509_crl_free(&pCRL->crl);
     SOPC_Free(pCRL);
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Certificate Signing request API
+ * ------------------------------------------------------------------------------------------------
+ */
+
+SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
+                                             const SOPC_AsymmetricKey* pKey,
+                                             const bool bIsServer,
+                                             SOPC_CSR** ppCSR)
+{
+    SOPC_UNUSED_ARG(subjectName);
+    SOPC_UNUSED_ARG(pKey);
+    SOPC_UNUSED_ARG(bIsServer);
+    SOPC_UNUSED_ARG(ppCSR);
+
+    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(const SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
+{
+    SOPC_UNUSED_ARG(pCSR);
+    SOPC_UNUSED_ARG(ppDest);
+    SOPC_UNUSED_ARG(pLenAllocated)
+
+    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+
+    return SOPC_STATUS_OK;
+}
+
+void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
+{
+    if (NULL == pCSR)
+    {
+        return;
+    }
+    mbedtls_x509write_csr_free(&pCSR->csr);
+    SOPC_Free(pCSR);
 }

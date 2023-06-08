@@ -34,6 +34,7 @@ typedef struct SOPC_CryptolibContext SOPC_CryptolibContext;
 typedef struct SOPC_AsymmetricKey SOPC_AsymmetricKey;
 typedef struct SOPC_CertificateList SOPC_CertificateList;
 typedef struct SOPC_CRLList SOPC_CRLList;
+typedef struct SOPC_CSR SOPC_CSR;
 typedef struct SOPC_PKIProvider SOPC_PKIProvider;
 
 #endif /* SOPC_CRYPTO_DECL_H_ */

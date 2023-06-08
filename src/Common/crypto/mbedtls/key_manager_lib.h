@@ -35,6 +35,7 @@
 
 #include "mbedtls/pk.h"
 #include "mbedtls/x509_crt.h"
+#include "mbedtls/x509_csr.h"
 
 /**
  * \brief   The asymmetric key representation.
@@ -81,6 +82,17 @@ struct SOPC_CertificateList
 struct SOPC_CRLList
 {
     mbedtls_x509_crl crl;
+};
+
+/**
+ * \brief The CSR representation.
+ *
+ *  It should be treated as an abstract handle.
+ *  The CSR structure is mainly lib-specific. Its content can be enriched for future uses.
+ */
+struct SOPC_CSR
+{
+    mbedtls_x509write_csr csr; /**< The context of the CSR, mbedtls specific */
 };
 
 /**
