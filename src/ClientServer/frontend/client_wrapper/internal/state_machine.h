@@ -64,6 +64,7 @@ typedef enum
     stActivated,
     stCreatingSubscr,
     stCreatingMonIt,
+    stDeletingMonIt,
     stDeletingSubscr,
     stClosing
 } SOPC_StaMac_State;
@@ -71,13 +72,11 @@ typedef enum
 /* Request types */
 typedef enum
 {
-    SOPC_REQUEST_TYPE_UNKNOWN = 0,            /* Unknown Request */
-    SOPC_REQUEST_TYPE_USER,                   /* User Crafted Request */
-    SOPC_REQUEST_TYPE_PUBLISH,                /* PublishRequest */
-    SOPC_REQUEST_TYPE_CREATE_SUBSCRIPTION,    /* CreateSubscriptionRequest */
-    SOPC_REQUEST_TYPE_CREATE_MONITORED_ITEMS, /* CreateMonitoredItemsRequest */
-    SOPC_REQUEST_TYPE_DELETE_SUBSCRIPTION,    /* DeleteSubscriptionRequest */
-    SOPC_REQUEST_TYPE_GET_ENDPOINTS           /* GetEndpointsRequest */
+    SOPC_REQUEST_TYPE_UNKNOWN = 0,  /* Unknown Request */
+    SOPC_REQUEST_TYPE_USER,         /* User Crafted Request */
+    SOPC_REQUEST_TYPE_PUBLISH,      /* PublishRequest */
+    SOPC_REQUEST_TYPE_SUBSCRIPTION, /* Other internally managed Subscription related request */
+    SOPC_REQUEST_TYPE_GET_ENDPOINTS /* GetEndpointsRequest */
 } SOPC_StaMac_RequestType;
 
 /* Request scopes */
@@ -90,15 +89,16 @@ typedef enum
                                        *  processed by a StaMac */
 } SOPC_StaMac_RequestScope;
 
+/* Machine content is private to the implementation */
+typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
+
 typedef struct
 {
+    SOPC_StaMac_Machine* pSM;              /* The state machine that issued the request */
     uintptr_t appCtx;                      /* Application context, chosen outside of the state machine */
     SOPC_StaMac_RequestScope requestScope; /* Whether the request is started by the state machine or the applicative */
     SOPC_StaMac_RequestType requestType;   /* the type of request */
 } SOPC_StaMac_ReqCtx;
-
-/* Machine content is private to the implementation */
-typedef struct SOPC_StaMac_Machine SOPC_StaMac_Machine;
 
 /* Machine lifecycle */
 
@@ -202,25 +202,55 @@ SOPC_ReturnStatus SOPC_StaMac_SendRequest(SOPC_StaMac_Machine* pSM,
  */
 SOPC_ReturnStatus SOPC_StaMac_CreateSubscription(SOPC_StaMac_Machine* pSM);
 
+/*
+ * \brief Create subscription associated to the given state machine using the subscription request (new API)
+ */
+SOPC_ReturnStatus SOPC_StaMac_NewCreateSubscription(SOPC_StaMac_Machine* pSM,
+                                                    OpcUa_CreateSubscriptionRequest* req,
+                                                    uintptr_t userAppContext);
+
+/**
+ * \brief return the context provided in ::SOPC_StaMac_NewCreateSubscription
+ */
+uintptr_t SOPC_StaMac_GetSubscriptionCtx(SOPC_StaMac_Machine* pSM);
+
+/*
+ * \brief Retrieve the subscription parameters revised by the server (for non-NULL params only)
+ */
+SOPC_ReturnStatus SOPC_StaMac_GetSubscriptionRevisedParams(SOPC_StaMac_Machine* pSM,
+                                                           double* revisedPublishingInterval,
+                                                           uint32_t* revisedLifetimeCount,
+                                                           uint32_t* revisedMaxKeepAliveCount);
+
+/*
+ * \brief Set the number of tokens for the subscription associated to the given state machine
+ */
+SOPC_ReturnStatus SOPC_StaMac_SetSubscriptionNbTokens(SOPC_StaMac_Machine* pSM, uint32_t nbTokens);
+
 /**
  * \brief Delete subscription associated to the given state machine
  */
 SOPC_ReturnStatus SOPC_StaMac_DeleteSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
- * \brief Context structure to be provided when using ::SOPC_StaMac_CreateMonitoredItem
+ * \brief Context structure to be provided when using ::SOPC_StaMac_CreateMonitoredItem or
+ * ::SOPC_StaMac_NewCreateMonitoredItems
  */
-typedef struct SOPC_CreateMonitoredItem_Ctx
+typedef struct SOPC_CreateMonitoredItems_Ctx
 {
-    OpcUa_CreateMonitoredItemsResponse* Results; /* might be NULL if not necessary for application. */
-    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_CreateMonitoredItem */
-} SOPC_CreateMonitoredItem_Ctx;
+    OpcUa_CreateMonitoredItemsResponse* Results; /* It shall be allocated if response expected
+                                                    or might be NULL if not necessary for application. */
+    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_CreateMonitoredItem or
+                           ::SOPC_StaMac_NewCreateMonitoredItems*/
+    OpcUa_CreateMonitoredItemsRequest*
+        req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
+} SOPC_CreateMonitoredItems_Ctx;
 
 /**
  * \brief Creates a MonitoredItem asynchronously.
  *
- * The optional \p pAppCtx may be used to test the effective creation of the MonitoredItem with
- * SOPC_StaMac_HasMonitoredItem().
+ * The \p pAppCtx shall be used to test the effective creation of the MonitoredItem with
+ * ::SOPC_StaMac_PopMonItByAppCtx.
  *
  * \param pSM        The state machine with a subscription used to create monitored items
  * \param lszNodeId  An array of describing the NodeIds to add.
@@ -228,8 +258,8 @@ typedef struct SOPC_CreateMonitoredItem_Ctx
  * \param liAttrId   An array of attributes id. The subscription is created for the attribute lAttrId[i]
  *                   for the node id lszNodeId[i]. It should be at least \p nElems long.
  * \param nElems     The number of elements in previous arrays.
- * \param pAppCtx    The create monitored item application context is stored in this pointer and
- *                   could be used to call ::SOPC_StaMac_HasMonItByAppCtx
+ * \param pAppCtx    The create monitored item application context filled during the call and
+ *                   that shall be used to call ::SOPC_StaMac_PopMonItByAppCtx
  * \param lCliHndl   An array of client handles to be filled.
  *
  * \warning The szNodeId must be \0-terminated.
@@ -238,8 +268,72 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
                                                   char const* const* lszNodeId,
                                                   const uint32_t* liAttrId,
                                                   int32_t nElems,
-                                                  SOPC_CreateMonitoredItem_Ctx* pAppCtx,
+                                                  SOPC_CreateMonitoredItems_Ctx* pAppCtx,
                                                   uint32_t* lCliHndl);
+
+/**
+ * \brief Type of callback called on Subscription Notification
+ *
+ * \param subscriptionAppCtx    The user application context provided in ::SOPC_StaMac_NewCreateSubscription call
+ * \param status                OPC UA status code, \p notification is only valid when ::SOPC_IsGoodStatus
+ * \param notificationType      Type of notification received (::OpcUa_DataChangeNotification_EncodeableType or
+ *                              ::OpcUa_EventNotificationList_EncodeableType)
+ * \param nbNotifElts           Number of elements in \p notification received and in \p monitoredItemCtxArray
+ * \param notification          Notification of the type indicated by \p notificationType,
+ *                              either pointer to a ::OpcUa_DataChangeNotification or
+ *                              ::OpcUa_EventNotificationList.
+ *                              Content is freed after callback return, thus any content to record shall be copied.
+ * \param monitoredItemCtxArray Array of context for monitored items for which notification were received in
+ *                              \p notification.
+ *                              Notification element and monitored item context have the same index in the array.
+ *
+ */
+typedef void SOPC_StaMacNotification_Fct(uintptr_t subscriptionAppCtx,
+                                         SOPC_StatusCode status,
+                                         SOPC_EncodeableType* notificationType,
+                                         uint32_t nbNotifElts,
+                                         const void* notification,
+                                         uintptr_t* monitoredItemCtxArray);
+/*
+ * \brief Changes the callback for data change notifications on subscription
+ */
+SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machine* pSM,
+                                                               SOPC_StaMacNotification_Fct* pNotificationCb);
+
+/**
+ * \brief Creates new monitored items for the state machine subscription using the request (new API)
+ *
+ * The \p pAppCtx shall be used to test the effective creation of the MonitoredItem with
+ * ::SOPC_StaMac_PopMonItByAppCtx.
+ *
+ * \param pSM              The state machine with a subscription used to create monitored items
+ * \param req              The create monitored items request
+ * \param userAppCtxArray  An array of user context defined with the same indexes as the monitored items in \p req.
+ *                         The context will be provided in the callback defined by
+ *                         when a notification occurs on a monitored item.
+ * \param pAppCtx          The create monitored item application context is stored in the pointed structure and
+ *                         could be used to call ::SOPC_StaMac_PopMonItByAppCtx
+ */
+SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      OpcUa_CreateMonitoredItemsRequest* req,
+                                                      const uintptr_t* userAppCtxArray,
+                                                      SOPC_CreateMonitoredItems_Ctx* pAppCtx);
+
+/**
+ * \brief Context structure to be provided when using ::SOPC_StaMac_NewDeleteMonitoredItems
+ */
+typedef struct SOPC_DeleteMonitoredItems_Ctx
+{
+    OpcUa_DeleteMonitoredItemsResponse* Results; /* It shall be allocated if response expected
+                                                    or might be NULL if not necessary for application. */
+    uintptr_t outCtxId; /* Contains unique identifier filled by ::SOPC_StaMac_NewDeleteMonitoredItems */
+    OpcUa_DeleteMonitoredItemsRequest*
+        req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
+} SOPC_DeleteMonitoredItems_Ctx;
+
+SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
+                                                      OpcUa_DeleteMonitoredItemsRequest* req,
+                                                      SOPC_DeleteMonitoredItems_Ctx* outAppCtx);
 
 /**
  * \brief Returns a bool whether the machine is configured and ready for a new SecureChannel.
@@ -271,11 +365,23 @@ void SOPC_StaMac_SetError(SOPC_StaMac_Machine* pSM);
 bool SOPC_StaMac_HasSubscription(SOPC_StaMac_Machine* pSM);
 
 /**
- * \brief Returns whether the machine has created the MonitoredItem with the given \p appCtx or not.
+ * \brief Returns subscription Id whether the machine has an active subscription or not (id = 0).
  */
-bool SOPC_StaMac_HasMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItem_Ctx* pAppCtx);
+uint32_t SOPC_StaMac_HasSubscriptionId(SOPC_StaMac_Machine* pSM);
 
-/** \brief Returns the timeout of the machine, used for the synchroneous calls. */
+/**
+ * \brief Returns whether the machine has created the MonitoredItems with the given \p appCtx or not.
+ *        When it returns true, it is considered acknowledged and the application context is removed from state machine.
+ */
+bool SOPC_StaMac_PopMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_CreateMonitoredItems_Ctx* pAppCtx);
+
+/**
+ * \brief Returns whether the machine has deleted the MonitoredItems with the given \p appCtx or not.
+ *        When it returns true, it is considered acknowledged and the application context is removed from state machine.
+ */
+bool SOPC_StaMac_PopDeleteMonItByAppCtx(SOPC_StaMac_Machine* pSM, SOPC_DeleteMonitoredItems_Ctx* pAppCtx);
+
+/** \brief Returns the timeout of the machine, used for the synchronous calls. */
 int64_t SOPC_StaMac_GetTimeout(SOPC_StaMac_Machine* pSM);
 
 /**
