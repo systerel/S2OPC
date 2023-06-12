@@ -666,21 +666,23 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
 /**
  * \brief              Create a certificate signing request signed with \p pKey
  *
- * \param subjectName  The subject name to set.
+ * \param subjectName  The subject name to set. The format is a sequence of name (OID types)
+ *                     value pairs separated by a ‘,’.
  * \param pKey         A valid pointer to the asymmetric key. The key shall be private.
  * \param bIsServer    Whether this CSR is to request a server or a client certificate.
- * \param ppCSR        A handle to the created CSR. This object must be freed with a call to
- *                     SOPC_KeyManager_CSR_Free().
+ * \param mdType       The MD algorithm (terminated by '\0') use for the signature eg SHA1, SHA256...
+ * \param ppCSR        A handle to the created CSR. This object must be freed
+ *                     with a call to SOPC_KeyManager_CSR_Free().
  *
- * \note  The MD algorithm use for the signature is the same as \p pKey .
- *        The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment.
+ * \note  The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment.
  *        The extendedKeyUsage is filled with serverAuth if \p bIsServer is true, otherwise clientAuth.
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
-                                             const SOPC_AsymmetricKey* pKey,
+                                             SOPC_AsymmetricKey* pKey,
                                              const bool bIsServer,
+                                             const char* mdType,
                                              SOPC_CSR** ppCSR);
 
 /**
@@ -695,7 +697,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
-SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(const SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated);
+SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated);
 
 /**
  * \brief              Frees a CSR created with ::SOPC_KeyManager_CSR_Create

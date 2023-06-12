@@ -34,10 +34,12 @@
 // Note : this file MUST be included before other mbedtls headers
 #include "mbedtls_common.h"
 
+#include "mbedtls/asn1write.h"
 #include "mbedtls/base64.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/md5.h"
+#include "mbedtls/oid.h"
 #include "mbedtls/pem.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
@@ -1723,30 +1725,161 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
  * ------------------------------------------------------------------------------------------------
  */
 
-SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
-                                             const SOPC_AsymmetricKey* pKey,
-                                             const bool bIsServer,
-                                             SOPC_CSR** ppCSR)
+typedef struct c_string_to_md_type_t
 {
-    SOPC_UNUSED_ARG(subjectName);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(bIsServer);
-    SOPC_UNUSED_ARG(ppCSR);
+    char* name;
+    mbedtls_md_type_t md;
+} c_string_to_md_type_t;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+#define SIZE_STR_TO_MD_TABLE 5
+static c_string_to_md_type_t tab_c_string_to_md_type[SIZE_STR_TO_MD_TABLE] = {
+    {"sha1", MBEDTLS_MD_SHA1},     {"sha224", MBEDTLS_MD_SHA224}, {"sha256", MBEDTLS_MD_SHA256},
+    {"sha384", MBEDTLS_MD_SHA384}, {"sha512", MBEDTLS_MD_SHA512},
+};
 
-    return SOPC_STATUS_OK;
+static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const char* oid, size_t oidLen)
+{
+    /* based on tag/length/value */
+    unsigned char tlv[12] = {0};
+    unsigned char* val = tlv + sizeof(tlv); // mbedtls_asn1_write_XXX write data at the end of the buffer
+    int valLen = 0;
+    size_t valLenTot = 0;
+    size_t extKuOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_EXTENDED_KEY_USAGE);
+
+    /* valLen = 1 byte for OID tag + 1 byte for OID length + 8 bytes OID value (CLIENT_AUTH or SERVER_AUTH) = 10 */
+    valLen = mbedtls_asn1_write_oid(&val, tlv, oid, oidLen);
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = (size_t) valLen;
+    /* valLenTot = valLen + 1 byte for the length  = 11 */
+    valLen = mbedtls_asn1_write_len(&val, tlv, (size_t) valLen);
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = valLenTot + (size_t) valLen;
+    /* valLenTot = valLenTot + 1 byte for asn1 tag = 12 */
+    valLen = mbedtls_asn1_write_tag(&val, tlv, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = valLenTot + (size_t) valLen;
+    valLen = mbedtls_x509write_csr_set_extension(ctx, MBEDTLS_OID_EXTENDED_KEY_USAGE, extKuOidLen, val, valLenTot);
+
+    return valLen;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(const SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
+static int sopc_csr_set_md_alg(mbedtls_x509write_csr* ctx, const char* mdType)
 {
-    SOPC_UNUSED_ARG(pCSR);
-    SOPC_UNUSED_ARG(ppDest);
-    SOPC_UNUSED_ARG(pLenAllocated)
+    c_string_to_md_type_t elem = {0};
+    int match = 1;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED");
+    for (uint8_t i; i < SIZE_STR_TO_MD_TABLE && 0 != match; i++)
+    {
+        elem = tab_c_string_to_md_type[i];
+        match = SOPC_strcmp_ignore_case(elem.name, mdType);
+    }
+    if (0 == match)
+    {
+        mbedtls_x509write_csr_set_md_alg(ctx, elem.md);
+    }
+    return 0 == match;
+}
 
-    return SOPC_STATUS_OK;
+SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
+                                             SOPC_AsymmetricKey* pKey,
+                                             const bool bIsServer,
+                                             const char* mdType,
+                                             SOPC_CSR** ppCSR)
+{
+    if (NULL == subjectName || NULL == pKey || NULL == ppCSR || NULL == mdType)
+    {
+        return -1;
+    }
+    SOPC_CSR* pCSR = SOPC_Malloc(sizeof(SOPC_CSR));
+    if (NULL == pCSR)
+    {
+        return -2;
+    }
+    mbedtls_x509write_csr_init(&pCSR->csr);
+    int errLib = mbedtls_x509write_csr_set_subject_name(&pCSR->csr, subjectName);
+    if (!errLib)
+    {
+        mbedtls_x509write_csr_set_key(&pCSR->csr, &pKey->pk);
+        errLib = sopc_csr_set_md_alg(&pCSR->csr, mdType);
+    }
+    if (!errLib)
+    {
+        unsigned char usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE | MBEDTLS_X509_KU_NON_REPUDIATION |
+                               MBEDTLS_X509_KU_KEY_ENCIPHERMENT | MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
+        errLib = mbedtls_x509write_csr_set_key_usage(&pCSR->csr, usages);
+    }
+    if (!errLib && bIsServer)
+    {
+        errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_SERVER_AUTH,
+                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
+    }
+    else
+    {
+        errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_CLIENT_AUTH,
+                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
+    }
+
+    if (errLib)
+    {
+        SOPC_KeyManager_CSR_Free(pCSR);
+        pCSR = NULL;
+    }
+    *ppCSR = pCSR;
+    return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
+{
+    unsigned char buf[4096];
+    uint8_t* pDest = NULL;
+    int lenWritten = 0;
+    mbedtls_entropy_context ctxEnt = {0};
+    mbedtls_ctr_drbg_context ctxDrbg = {0};
+
+    if (NULL == pCSR || NULL == ppDest || NULL == pLenAllocated)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Let mbedtls looks in the host system to get the entropy sources
+      (standards like the /dev/urandom or Windows CryptoAPI.) */
+    mbedtls_entropy_init(&ctxEnt);
+    mbedtls_ctr_drbg_init(&ctxDrbg);
+    int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, mbedtls_entropy_func, &ctxEnt, NULL, 0);
+    if (!errLib)
+    {
+        lenWritten = mbedtls_x509write_csr_der(&pCSR->csr, buf, sizeof(buf), mbedtls_ctr_drbg_random, &ctxDrbg);
+        errLib = 0 < lenWritten ? 0 : -1;
+    }
+    if (!errLib)
+    {
+        *pLenAllocated = (uint32_t) lenWritten;
+        pDest = SOPC_Malloc(*pLenAllocated * sizeof(uint8_t));
+        errLib = NULL != pDest ? 0 : -2;
+    }
+    if (!errLib)
+    {
+        memcpy(pDest, buf + sizeof(buf) - *pLenAllocated, *pLenAllocated);
+    }
+    else
+    {
+        *pLenAllocated = 0;
+        SOPC_Free(pDest);
+    }
+    *ppDest = pDest;
+    /* Clear */
+    mbedtls_entropy_free(&ctxEnt);
+    mbedtls_ctr_drbg_free(&ctxDrbg);
+
+    return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
 void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
