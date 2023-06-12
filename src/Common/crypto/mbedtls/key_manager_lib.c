@@ -1767,7 +1767,7 @@ static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const cha
         return valLen;
     }
     valLenTot = valLenTot + (size_t) valLen;
-    valLen = mbedtls_x509write_csr_set_extension(ctx, MBEDTLS_OID_EXTENDED_KEY_USAGE, extKuOidLen, val, valLenTot);
+    valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_EXTENDED_KEY_USAGE, extKuOidLen, val, valLenTot);
 
     return valLen;
 }
@@ -1777,7 +1777,7 @@ static int sopc_csr_set_md_alg(mbedtls_x509write_csr* ctx, const char* mdType)
     c_string_to_md_type_t elem = {0};
     int match = 1;
 
-    for (uint8_t i; i < SIZE_STR_TO_MD_TABLE && 0 != match; i++)
+    for (uint8_t i = 0; i < SIZE_STR_TO_MD_TABLE && 0 != match; i++)
     {
         elem = tab_c_string_to_md_type[i];
         match = SOPC_strcmp_ignore_case(elem.name, mdType);
@@ -1797,12 +1797,12 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
 {
     if (NULL == subjectName || NULL == pKey || NULL == ppCSR || NULL == mdType)
     {
-        return -1;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_CSR* pCSR = SOPC_Malloc(sizeof(SOPC_CSR));
     if (NULL == pCSR)
     {
-        return -2;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
     mbedtls_x509write_csr_init(&pCSR->csr);
     int errLib = mbedtls_x509write_csr_set_subject_name(&pCSR->csr, subjectName);
@@ -1839,7 +1839,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
 {
-    unsigned char buf[4096];
+    unsigned char buf[4096]; // size use with the mbedtls sample program
     uint8_t* pDest = NULL;
     int lenWritten = 0;
     mbedtls_entropy_context ctxEnt = {0};
