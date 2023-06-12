@@ -21,58 +21,112 @@
  *
  * \brief A subscribe example using the high-level client API
  *
- * Requires the toolkit_test_server to be running.
- * Connect to the server and subscribes to a UInt64 value to a predefined node.
- * Waits 30 seconds and then disconnect and closes the toolkit.
+ * Requires the toolkit_demo_server to be running.
+ * Connect to the server, create a subscription and monitors the value of the given node.
+ * Then disconnect and closes the toolkit.
  *
  */
 
-#include <inttypes.h>
 #include <stdio.h>
 
-#include "libs2opc_client_cmds.h"
 #include "libs2opc_client_config.h"
 #include "libs2opc_common_config.h"
-#include "sopc_askpass.h"
-#include "sopc_macros.h"
+#include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
+#include "sopc_askpass.h"
+#include "sopc_encodeable.h"
+#include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
-static void datachange_callback(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
+#include <signal.h>
+#include <stdlib.h>
+
+#define DEFAULT_CLIENT_CONFIG_XML "S2OPC_Client_Wrapper_Config.xml"
+#define DEFAULT_CONFIG_ID "read"
+
+// Period used to check for catch signal
+#define UPDATE_TIMEOUT_MS 500
+#define SET_SUBSCRIBE_TIMEOUT_ENV "SET_SUBSCRIBE_TIMEOUT"
+
+// Flag used on sig stop
+static int32_t stop = 0;
+
+/*
+ * Management of Ctrl-C to stop the client (callback on stop signal)
+ */
+static void StopSignal(int sig)
 {
-    char sz[1024];
-    size_t n;
+    /* avoid unused parameter compiler warning */
+    SOPC_UNUSED_ARG(sig);
 
-    n = (size_t) snprintf(sz, sizeof(sz) / sizeof(sz[0]),
-                          "Client %" PRIu32 " data change:\n  value id %s\n  new value ", c_id, node_id);
-
-    if (NULL == value)
+    /*
+     * Signal steps:
+     * - 1st signal: wait for stop flag to be seen and gentle stop
+     * - 2rd signal: abrupt exit with error code '1'
+     */
+    if (stop > 0)
     {
-        snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "NULL");
+        exit(1);
     }
     else
     {
-        SOPC_Variant variant = value->Value;
-        if (SOPC_UInt64_Id == variant.BuiltInTypeId)
-        {
-            snprintf(sz + n, sizeof(sz) / sizeof(sz[0]) - n, "%" PRIu64, (int64_t) variant.Value.Uint64);
-        }
+        stop++;
     }
-
-    printf("%s\n", sz);
 }
 
-static void disconnect_callback(const uint32_t c_id)
+static bool AskKeyPass_FromTerminal(char** outPassword)
 {
-    printf("===> connection #%d has been terminated!\n", c_id);
+    return SOPC_AskPass_CustomPromptFromTerminal("Password for client key:", outPassword);
+}
+
+static void ClientConnectionEvent(SOPC_ClientConnection* config,
+                                  SOPC_ClientConnectionEvent event,
+                                  SOPC_StatusCode status)
+{
+    SOPC_UNUSED_ARG(config);
+
+    // We do not expect events since we use synchronous connection / disconnection, only for degraded case
+    printf("ClientConnectionEvent: Unexpected connection event %d with status 0x%08" PRIX32 "\n", event, status);
+}
+
+static void SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* subscription,
+                                        SOPC_StatusCode status,
+                                        SOPC_EncodeableType* notificationType,
+                                        uint32_t nbNotifElts,
+                                        const void* notification,
+                                        uintptr_t* monitoredItemCtxArray)
+{
+    SOPC_UNUSED_ARG(subscription);
+
+    if (SOPC_IsGoodStatus(status) && &OpcUa_DataChangeNotification_EncodeableType == notificationType)
+    {
+        const OpcUa_DataChangeNotification* notifs = (const OpcUa_DataChangeNotification*) notification;
+        for (uint32_t i = 0; i < nbNotifElts; i++)
+        {
+            printf("Value change notification for node %s:\n", (char*) monitoredItemCtxArray[i]);
+            SOPC_Variant_Print(&notifs->MonitoredItems[i].Value.Value);
+            printf("\n");
+        }
+    }
 }
 
 int main(int argc, char* const argv[])
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-
+    if (argc < 2)
+    {
+        printf("Usage: %s <nodeId> [<nodeId>] (e.g. %s \"ns=1;i=1012\").\nThe '" DEFAULT_CONFIG_ID
+               "' connection configuration "
+               "from " DEFAULT_CLIENT_CONFIG_XML " is used.\n",
+               argv[0], argv[0]);
+        return -2;
+    }
     int res = 0;
+
+    // Install signal handler to close the server gracefully when server needs to stop
+    signal(SIGINT, StopSignal);
+    signal(SIGTERM, StopSignal);
 
     /* Initialize client/server toolkit and client wrapper */
 
@@ -82,105 +136,230 @@ int main(int argc, char* const argv[])
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        res = -1;
+        status = SOPC_ClientConfigHelper_Initialize();
     }
 
-    if (0 == res)
+    size_t nbConfigs = 0;
+    SOPC_SecureConnection_Config** scConfigArray = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        int32_t init = SOPC_ClientHelper_Initialize(disconnect_callback);
-        if (init < 0)
+        status = SOPC_ClientConfigHelper_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_subscribe: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
         }
     }
 
-    SOPC_ClientHelper_Security security = {
-        .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
-        .security_mode = OpcUa_MessageSecurityMode_Sign,
-        .path_cert_auth = "./trusted/cacert.der",
-        .path_crl = "./revoked/cacrl.der",
-        .path_cert_srv = "./server_public/server_2k_cert.der",
-        .path_cert_cli = "./client_public/client_2k_cert.der",
-        .path_key_cli = "./client_private/encrypted_client_2k_key.pem",
-        .policyId = "anonymous",
-        .username = NULL,
-        .password = NULL,
-        .path_cert_x509_token = NULL,
-        .path_key_x509_token = NULL,
-        .key_x509_token_encrypted = false,
-    };
+    SOPC_SecureConnection_Config* readConnCfg = NULL;
 
-    SOPC_ClientHelper_EndpointConnection endpoint = {
-        .endpointUrl = "opc.tcp://localhost:4841",
-        .serverUri = NULL,
-        .reverseConnectionConfigId = 0,
-    };
-
-    char* node_id = "ns=1;i=1012";
-
-    /* callback to retrieve the client's private key password */
-    status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&SOPC_AskPass_FromTerminal);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
-        printf("<Example_wrapper_subscribe: Failed to configure the client key user password callback\n");
-        res = -1;
+        readConnCfg = SOPC_ClientConfigHelper_GetConfigFromId(DEFAULT_CONFIG_ID);
+
+        if (NULL == readConnCfg)
+        {
+            printf("<Example_wrapper_subscribe: failed to load configuration id '" DEFAULT_CONFIG_ID
+                   "' from XML config file %s\n",
+                   DEFAULT_CLIENT_CONFIG_XML);
+
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    /* Define callback to retrieve the client's private key password */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientConfigHelper_SetClientKeyPasswordCallback(&AskKeyPass_FromTerminal);
     }
 
     /* connect to the endpoint */
-    int32_t configurationId = 0;
-    if (0 == res)
+    SOPC_ClientConnection* secureConnection = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        configurationId = SOPC_ClientHelper_CreateConfiguration(&endpoint, &security, NULL);
-        if (configurationId <= 0)
+        status = SOPC_ClientHelperNew_Connect(readConnCfg, ClientConnectionEvent, &secureConnection);
+        if (SOPC_STATUS_OK != status)
         {
-            res = -1;
+            printf("<Example_wrapper_subscribe: Failed to connect\n");
         }
     }
 
-    int32_t connectionId = 0;
-    if (0 == res)
+    /* create a subscription */
+    SOPC_ClientHelper_Subscription* subscription = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        connectionId = SOPC_ClientHelper_CreateConnection(configurationId);
-
-        if (connectionId <= 0)
+        subscription =
+            SOPC_ClientHelperNew_CreateSubscription(secureConnection, SOPC_CreateSubscriptionRequest_CreateDefault(),
+                                                    SubscriptionNotification_Cb, (uintptr_t) NULL);
+        if (NULL == subscription)
         {
-            /* connectionId is invalid */
-            res = -1;
+            status = SOPC_STATUS_NOK;
+            printf("<Example_wrapper_subscribe: Failed to create subscription\n");
+        }
+        else
+        {
+            double revisedPublishingInterval = 0;
+            uint32_t revisedLifetimeCount = 0;
+            uint32_t revisedMaxKeepAliveCount = 0;
+            SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_Subscription_GetRevisedParameters(
+                subscription, &revisedPublishingInterval, &revisedLifetimeCount, &revisedMaxKeepAliveCount);
+            if (SOPC_STATUS_OK == localStatus)
+            {
+                printf("Creation of subscription succeeded with revised parameters pubItv=%f lifetimeCpt=%" PRIu32
+                       " keepAliveCpt=%" PRIu32 ".\n",
+                       revisedPublishingInterval, revisedLifetimeCount, revisedMaxKeepAliveCount);
+            }
+            else
+            {
+                printf("<Example_wrapper_subscribe: Failed to retrieve revised parameters of created subscription\n");
+            }
         }
     }
 
-    if (0 == res)
+    // Prepare the creation request for monitored items
+    OpcUa_CreateMonitoredItemsRequest* createMIreq = NULL;
+    if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_ClientHelper_CreateSubscription(connectionId, datachange_callback);
-    }
-
-    if (0 == res)
-    {
-        SOPC_StatusCode result = SOPC_UncertainStatusMask;
-        res = SOPC_ClientHelper_AddMonitoredItems(connectionId, &node_id, 1, &result);
-        if (res > 0)
+        createMIreq = SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings(0, (size_t)(argc - 1), &argv[1],
+                                                                                OpcUa_TimestampsToReturn_Both);
+        if (NULL == createMIreq)
         {
-            printf("Error in add operation for the monitored item: 0x%08" PRIX32 "\n", result);
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
-    if (res == 0)
+    // Create the monitored items
+    // Response is necessary to know if creation succeeded or not
+    OpcUa_CreateMonitoredItemsResponse createMIresp;
+    OpcUa_CreateMonitoredItemsResponse_Initialize(&createMIresp);
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Sleep(30);
-        SOPC_ClientHelper_Unsubscribe(connectionId);
+        // Our context is the array of node ids
+        const uintptr_t* nodeIdsCtxArray = (const uintptr_t*) &argv[1];
+        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(subscription, createMIreq, nodeIdsCtxArray,
+                                                                        &createMIresp);
+        if (SOPC_STATUS_OK != status)
+        {
+            OpcUa_CreateMonitoredItemsRequest_Clear(createMIreq);
+            SOPC_Free(createMIreq);
+            printf("<Example_wrapper_subscribe: Failed to create monitored items\n");
+        }
+        else
+        {
+            bool oneSucceeded = false;
+            for (int32_t i = 0; i < createMIresp.NoOfResults; i++)
+            {
+                if (SOPC_IsGoodStatus(createMIresp.Results[i].StatusCode))
+                {
+                    oneSucceeded = true;
+                    printf("Creation of monitored item for node %s succeeded\n", argv[i + 1]);
+                }
+                else
+                {
+                    printf("Creation of monitored item for node %s: failed with StatusCode: 0x%08" PRIX32 "\n",
+                           argv[i + 1], createMIresp.Results[i].StatusCode);
+                }
+            }
+            if (!oneSucceeded)
+            {
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+        }
     }
 
-    if (connectionId > 0)
+    // Check the timeout flag for from environment variable used for test purpose
+    const char* val = getenv(SET_SUBSCRIBE_TIMEOUT_ENV);
+    unsigned int SUBSCRIBE_TIMEOUT_CYCLES = 0;
+    if (NULL != val)
     {
-        int32_t discoRes = SOPC_ClientHelper_Disconnect(connectionId);
-        res = res != 0 ? res : discoRes;
+        SUBSCRIBE_TIMEOUT_CYCLES = 4;
+    }
+
+    // Wait for stop signal
+    unsigned int cpt = 0;
+    while (SOPC_STATUS_OK == status && !stop && (0 == SUBSCRIBE_TIMEOUT_CYCLES || cpt < SUBSCRIBE_TIMEOUT_CYCLES))
+    {
+        cpt++;
+        SOPC_Sleep(UPDATE_TIMEOUT_MS);
+    }
+
+    // Prepare the delete request for monitored items
+    OpcUa_DeleteMonitoredItemsRequest* deleteMIreq = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        deleteMIreq = SOPC_DeleteMonitoredItemsRequest_Create(0, (size_t) createMIresp.NoOfResults, NULL);
+        if (NULL != deleteMIreq)
+        {
+            for (size_t i = 0; SOPC_STATUS_OK == status && i < (size_t) createMIresp.NoOfResults; i++)
+            {
+                status = SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(deleteMIreq, i,
+                                                                             createMIresp.Results[i].MonitoredItemId);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    // Clear the create monitored items response kept for the monitored item ids
+    OpcUa_CreateMonitoredItemsResponse_Clear(&createMIresp);
+
+    // Delete the monitored items
+    if (SOPC_STATUS_OK == status)
+    {
+        OpcUa_DeleteMonitoredItemsResponse deleteMIresp;
+        OpcUa_DeleteMonitoredItemsResponse_Initialize(&deleteMIresp);
+
+        // Our context is the array of node ids
+        status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, deleteMIreq, &deleteMIresp);
+        if (SOPC_STATUS_OK != status)
+        {
+            OpcUa_DeleteMonitoredItemsRequest_Clear(deleteMIreq);
+            SOPC_Free(deleteMIreq);
+            printf("<Example_wrapper_subscribe: Failed to delete monitored items\n");
+        }
+        else
+        {
+            for (int32_t i = 0; i < deleteMIresp.NoOfResults; i++)
+            {
+                if (!SOPC_IsGoodStatus(deleteMIresp.Results[i]))
+                {
+                    printf("Deletion of monitored item for node %s: failed with StatusCode: 0x%08" PRIX32 "\n",
+                           argv[i + 1], deleteMIresp.Results[i]);
+                }
+            }
+        }
+
+        OpcUa_DeleteMonitoredItemsResponse_Clear(&deleteMIresp);
+    }
+
+    // Close the subscription
+    if (NULL != subscription)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+        if (SOPC_STATUS_OK != localStatus)
+        {
+            printf("<Example_wrapper_subscribe: Failed to delete subscription\n");
+        }
+    }
+
+    // Close the connection
+    if (NULL != secureConnection)
+    {
+        SOPC_ReturnStatus localStatus = SOPC_ClientHelperNew_Disconnect(&secureConnection);
+        if (SOPC_STATUS_OK != localStatus)
+        {
+            printf("<Example_wrapper_subscribe: Failed to disconnect\n");
+        }
     }
 
     /* Close the toolkit */
-    SOPC_ClientHelper_Finalize();
+    SOPC_ClientConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
+    res = (SOPC_STATUS_OK == status ? 0 : -1);
     return res;
 }

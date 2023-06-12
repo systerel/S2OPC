@@ -146,17 +146,6 @@ target_link_libraries(s2opc_register PRIVATE s2opc_clientserver)
 target_compile_options(s2opc_register PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(s2opc_register PRIVATE ${S2OPC_DEFINITIONS})
 
-# Samples with S2OPC subscribing client library
-
-# s2opc_subscription_client is not built on Windows (use getopt GNU library to parse command line)
-if(NOT WIN32)
-  # Demo client
-  add_executable(s2opc_subscription_client "client_wrapper/client_subscription.c")
-  target_compile_options(s2opc_subscription_client PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(s2opc_subscription_client PRIVATE ${S2OPC_DEFINITIONS})
-  target_link_libraries(s2opc_subscription_client PRIVATE s2opc_clientserver)
-endif(NOT WIN32)
-
 # Samples with S2OPC client wrapper:
 if (expat_FOUND)
 
@@ -191,11 +180,11 @@ if (expat_FOUND)
   target_compile_options(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(s2opc_wrapper_get_endpoints PRIVATE ${S2OPC_DEFINITIONS})
 
-  add_executable(example_wrapper_subscribe "client_wrapper/examples/subscribe.c")
-  target_include_directories(example_wrapper_subscribe PRIVATE s2opc_clientserver)
-  target_link_libraries(example_wrapper_subscribe PRIVATE s2opc_clientserver)
-  target_compile_options(example_wrapper_subscribe PRIVATE ${S2OPC_COMPILER_FLAGS})
-  target_compile_definitions(example_wrapper_subscribe PRIVATE ${S2OPC_DEFINITIONS})
+  add_executable(s2opc_wrapper_subscribe "client_wrapper/examples/subscribe.c")
+  target_include_directories(s2opc_wrapper_subscribe PRIVATE s2opc_clientserver)
+  target_link_libraries(s2opc_wrapper_subscribe PRIVATE s2opc_clientserver)
+  target_compile_options(s2opc_wrapper_subscribe PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(s2opc_wrapper_subscribe PRIVATE ${S2OPC_DEFINITIONS})
 endif()
 
 # Benchmark tool demo
@@ -325,6 +314,32 @@ set_tests_properties("validation::s2opc_wrapper_read" PROPERTIES ENVIRONMENT "CK
     "$<TARGET_FILE:s2opc_discovery>" --none)
   set_tests_properties("validation::s2opc_discovery" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_discovery.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
     )
+
+  add_test(NAME "validation::s2opc_wrapper_get_endpoints"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+    "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+    "$<TARGET_FILE:s2opc_wrapper_get_endpoints>")
+  set_tests_properties("validation::s2opc_wrapper_get_endpoints" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_wrapper_get_endpoints.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+    )
+
+  # subscription
+  add_test(NAME "validation::s2opc_wrapper_subscribe"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 2
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_DEMO_SERVER}>
+    "--server-cmd" $<TARGET_FILE:${TOOLKIT_DEMO_SERVER}>
+    "$<TARGET_FILE:s2opc_wrapper_subscribe>" "ns=1;i=1012" "i=2258")
+  set_tests_properties("validation::s2opc_wrapper_subscribe" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=s2opc_wrapper_subscribe.tap;SET_SUBSCRIBE_TIMEOUT=1;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./${DEMO_ADDRESS_SPACE_XML_FILE};TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml"
+    )
+
 endif()
 
 ## PyS2OPC library samples tests ##

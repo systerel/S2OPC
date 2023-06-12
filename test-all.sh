@@ -67,7 +67,9 @@ s2opc_read_X509.tap
 s2opc_wrapper_read.tap
 s2opc_browse.tap
 s2opc_wrapper_browse.tap
-s2opc_discovery.tap'
+s2opc_discovery.tap
+s2opc_wrapper_get_endpoints.tap
+s2opc_wrapper_subscribe.tap'
 
 PUBSUB_TAP_FILES='interop_pub_test.tap
 interop_sub_test.tap
