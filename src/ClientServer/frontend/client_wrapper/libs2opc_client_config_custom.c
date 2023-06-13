@@ -619,7 +619,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection
     if (SOPC_STATUS_OK == status)
     {
         char* userPolicyIdCopy = SOPC_strdup(userPolicyId);
-        if (NULL == secConnConfig->sessionConfig.userPolicyId)
+        if (NULL == userPolicyIdCopy)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }

@@ -152,12 +152,7 @@ void SOPC_ClientConfigHelper_Clear(void)
         secureConnection = sopc_client_helper_config.secureConnections[i];
         if (NULL != secureConnection)
         {
-            // TODO: replace by a DisconnectAll operation ?
-            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_ClientHelperNew_Disconnect(&secureConnection);
-            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
-            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
     }
 
