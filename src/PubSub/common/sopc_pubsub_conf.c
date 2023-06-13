@@ -173,7 +173,7 @@ struct SOPC_ReaderGroup
     uint32_t groupVersion;
     bool hasNonZeroWriterIds;
     bool hasZeroWriterIds;
-    
+
     // Topic Specific to Mqtt
     char* mqttTopic;
 };
@@ -185,7 +185,6 @@ struct SOPC_DataSetReader
     SOPC_DataSetMetaData metaData;
     SOPC_SubscribedDataSetType targetType;
     double messageReceiveTimeout; /* ms */
-
 
     // These fields below are defined in Spec but not used
     // DataSetFieldContentMask
@@ -799,7 +798,6 @@ bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t p
     SOPC_Free(defaultTopic);
     return result;
 }
-
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
                                                      SOPC_SubscribedDataSetType type,

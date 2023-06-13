@@ -97,7 +97,6 @@
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
-//#define ATTR_DATASET_MQTT_TOPIC "mqttTopic"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -128,7 +127,6 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_dataset_t
 {
     uint16_t writer_id;
-    //char* mqttSubscriberTopic;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -143,7 +141,7 @@ struct sopc_xml_pubsub_message_t
     uint16_t nb_datasets;
     uint16_t groupId;
     uint32_t groupVersion;
-    char* mqttTopic;//mqttPublisherTopic;
+    char* mqttTopic;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
 };
@@ -158,7 +156,6 @@ struct sopc_xml_pubsub_connection_t
     uint16_t nb_messages;
     char* mqttUsername;
     char* mqttPassword;
-    //char* mqttTopic;
     bool is_acyclic;
     struct sopc_xml_pubsub_message_t* messageArr;
 };
@@ -611,10 +608,6 @@ static bool parse_dataset_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
-    // else if (TEXT_EQUALS(ATTR_DATASET_MQTT_TOPIC, attr_name))
-    // {
-    //     result = copy_any_string_attribute_value(&ds->mqttSubscriberTopic, attr_val);
-    // }
     else
     {
         LOG_XML_ERRORF("Unexpected 'dataset' attribute <%s>", attr_name);
@@ -1144,11 +1137,6 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     allocSuccess = SOPC_DataSetReader_Allocate_FieldMetaData_Array(
                         dataSetReader, SOPC_TargetVariablesDataType, ds->nb_variables);
 
-                    // if (NULL != ds->mqttSubscriberTopic && allocSuccess)
-                    // {
-                    //     allocSuccess = SOPC_DataSetReader_Set_MqttTopic(dataSetReader, ds->mqttSubscriberTopic);
-                    // }
-
                     for (uint16_t ivar = 0; ivar < ds->nb_variables && allocSuccess; ivar++)
                     {
                         struct sopc_xml_pubsub_variable_t* var = &ds->variableArr[ivar];
@@ -1224,8 +1212,6 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                 }
                 SOPC_Free(ds->variableArr);
                 ds->variableArr = NULL;
-                // SOPC_Free(ds->mqttSubscriberTopic);
-                // ds->mqttSubscriberTopic = NULL;
             }
 
             SOPC_Free(msg->datasetArr);

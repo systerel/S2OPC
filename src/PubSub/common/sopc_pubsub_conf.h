@@ -201,7 +201,6 @@ const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
 bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
 bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t GroupId);
 
-
 /*******************/
 /** DataSetReader **/
 /*******************/

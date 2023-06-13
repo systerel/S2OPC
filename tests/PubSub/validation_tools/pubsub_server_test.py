@@ -133,8 +133,8 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+            <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -160,14 +160,14 @@ XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC" >
+            <dataset writerId="50" >
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             </dataset>
         </message>
-        <message groupId="2" publishingInterval="1000" groupVersion="1" publisherId="1">
-            <dataset writerId="51" mqttTopic="Test">
+        <message groupId="2" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="Test">
+            <dataset writerId="51">
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
                 <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
             </dataset>
@@ -187,8 +187,8 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" >
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
-            <dataset writerId="50" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+            <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -210,8 +210,8 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" >
-            <dataset writerId="50" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+            <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />

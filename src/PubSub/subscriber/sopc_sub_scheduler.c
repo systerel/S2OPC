@@ -285,11 +285,10 @@ static void set_new_state(SOPC_PubSubState new)
 /* Get all topics from each data set reader and store it in an array, inform number of subscription topic on parameter
  * nbTopic */
 static void get_mqtt_topic_from_ReaderGroup(const char** topic,
-                                              uint16_t* nbTopic,
-                                              SOPC_PubSubConnection* connection,
-                                              uint16_t nbReaderGroups)
+                                            uint16_t* nbTopic,
+                                            SOPC_PubSubConnection* connection,
+                                            uint16_t nbReaderGroups)
 {
-    //uint16_t offset = 0;
     for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
     {
         SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
