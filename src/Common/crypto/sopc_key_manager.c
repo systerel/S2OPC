@@ -150,7 +150,14 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint
     }
 
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, der, len);
-    *cert = buf;
+    if (SOPC_STATUS_OK == status)
+    {
+        *cert = buf;
+    }
+    else
+    {
+        SOPC_Buffer_Delete(buf);
+    }
     return status;
 }
 
