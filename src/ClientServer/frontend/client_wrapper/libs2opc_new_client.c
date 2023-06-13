@@ -395,6 +395,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
 
     SOPC_StaMac_ReqCtx* staMacCtx = NULL;
     SOPC_ClientHelper_ReqCtx* serviceReqCtx = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     switch (event)
     {
@@ -428,46 +429,50 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
     default:
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ClientInternal_ToolkitEventCallback: unexpected event %d received.", event);
-        return;
+        status = SOPC_STATUS_NOT_SUPPORTED;
+        break;
     }
-    if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
+    if (SOPC_STATUS_OK == status)
     {
-        // Discovery service call (no session) not managed by state machine: direct call to event callback
-        SOPC_ReturnStatus status = SOPC_STATUS_OK;
-        SOPC_LibSub_ApplicativeEvent libsubEvent = SOPC_LibSub_ApplicativeEvent_Response;
-        if (SE_RCV_DISCOVERY_RESPONSE != event)
+        if (NULL != serviceReqCtx && serviceReqCtx->isDiscoveryModeService)
         {
-            status = SOPC_STATUS_NOK;
-            libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
-        }
-        SOPC_ClientInternal_EventCbk(cc->secureConnectionIdx, libsubEvent, status, param, (uintptr_t) serviceReqCtx);
-        SOPC_Free((void*) appContext);
-    }
-    else if (event != SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs
-    {
-        if (NULL != staMacCtx)
-        {
-            // Service request management provides state machine
-            pSM = staMacCtx->pSM;
-        }
-        else if (NULL != cc)
-        {
-            // Connection management event: retrieve state machine from connection context
-            pSM = sopc_client_helper_config.secureConnections[cc->secureConnectionIdx]->stateMachine;
-        }
-        if (NULL != pSM)
-        {
-            if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext) && NULL != cc)
+            // Discovery service call (no session) not managed by state machine: direct call to event callback
+            SOPC_LibSub_ApplicativeEvent libsubEvent = SOPC_LibSub_ApplicativeEvent_Response;
+            if (SE_RCV_DISCOVERY_RESPONSE != event)
             {
-                /* Post process the event in case of connection management events */
-                SOPC_ClientInternal_ConnectionStateCallback(event, param, cc);
+                status = SOPC_STATUS_NOK;
+                libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
             }
+            SOPC_ClientInternal_EventCbk(cc->secureConnectionIdx, libsubEvent, status, param,
+                                         (uintptr_t) serviceReqCtx);
+            SOPC_Free((void*) appContext);
         }
-        else
+        else if (event != SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "ClientInternal_ToolkitEventCallback: unexpected context received for event %d.",
-                                   event);
+            if (NULL != staMacCtx)
+            {
+                // Service request management provides state machine
+                pSM = staMacCtx->pSM;
+            }
+            else if (NULL != cc)
+            {
+                // Connection management event: retrieve state machine from connection context
+                pSM = sopc_client_helper_config.secureConnections[cc->secureConnectionIdx]->stateMachine;
+            }
+            if (NULL != pSM)
+            {
+                if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext) && NULL != cc)
+                {
+                    /* Post process the event in case of connection management events */
+                    SOPC_ClientInternal_ConnectionStateCallback(event, param, cc);
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "ClientInternal_ToolkitEventCallback: unexpected context received for event %d.",
+                                       event);
+            }
         }
     }
 
@@ -1733,22 +1738,27 @@ static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    void* request = SOPC_ClientHelperInternal_ConfigAndFilterService(subscription, subOrMIrequest);
+    void* request = NULL;
 
-    if (NULL != request)
+    if (SOPC_STATUS_OK == status)
     {
-        if (isSync)
+        request = SOPC_ClientHelperInternal_ConfigAndFilterService(subscription, subOrMIrequest);
+
+        if (NULL != request)
         {
-            status = SOPC_ClientHelperNew_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
+            if (isSync)
+            {
+                status = SOPC_ClientHelperNew_ServiceSync(subscription->secureConnection, request, subOrMIresponse);
+            }
+            else
+            {
+                status = SOPC_ClientHelperNew_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
+            }
         }
         else
         {
-            status = SOPC_ClientHelperNew_ServiceAsync(subscription->secureConnection, request, asyncUserCtx);
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
-    }
-    else
-    {
-        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);

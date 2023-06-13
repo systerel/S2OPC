@@ -224,6 +224,7 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
     if (NULL == *ppSecConnConfig)
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
+        SOPC_Free(url);
         return false;
     }
     SOPC_SecureConnection_Config* pSecConnConfig = *ppSecConnConfig;
