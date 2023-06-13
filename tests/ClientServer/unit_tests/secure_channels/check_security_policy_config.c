@@ -53,8 +53,6 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
                                                     char* userTokenPolicies,
                                                     OpcUa_UserTokenType TokenType)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
     // Initialize Server configuration variable
     SOPC_Server_Config sConfig;
     sConfig.nbEndpoints = 1;
@@ -70,7 +68,7 @@ static SOPC_ReturnStatus check_security_combination(char* securityPolicy,
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = "./test_security_policy_config_logs/";
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_Common_Initialize(logConfiguration);
+    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
     // Endpoint URL
     char* endpointUrl = "opc.tcp://localhost:4841/myEndPoint";
