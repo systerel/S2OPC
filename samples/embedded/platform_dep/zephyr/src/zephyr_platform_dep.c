@@ -163,23 +163,23 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void)
 /***************************************************/
 void SOPC_Platform_Target_Debug(void)
 {
-#if CONFIG_SOPC_HELPER_IMPL_INSTRUM
     // Display stack instrumentation status
     const uint32_t nbSec = k_uptime_get_32() / 1000;
     printk("\n=======\nUptime: t=%d m %d s\n", nbSec / 60, nbSec % 60);
-    printk("Nb Allocs: %u\n", SOPC_MemAlloc_Nb_Allocs());
+#ifdef CONFIG_SYS_HEAP_RUNTIME_STATS
+    extern struct k_heap _system_heap;
 
-    const SOPC_Thread_Info* pInfos = SOPC_Thread_GetAllThreadsInfo();
-    size_t idx = 0;
-    while (NULL != pInfos && pInfos->stack_size > 0)
+    struct sys_memory_stats stats;
+    int res = sys_heap_runtime_stats_get(&_system_heap.heap, &stats);
+    if (res == 0)
     {
-        idx++;
-        printk("Thr #%02u (%.08s): %05u / %05u bytes used (%02d%%)\n", idx, pInfos->name, pInfos->stack_usage,
-               pInfos->stack_size, (100 * pInfos->stack_usage) / pInfos->stack_size);
-        pInfos++;
+        const size_t total = stats.free_bytes + stats.allocated_bytes;
+        printk("HEAP Statistics: TOTAL = %u Kb, FREE = %u Kb, maxUsed = %u Kb\n", total / 1024, stats.free_bytes / 1024,
+               stats.max_allocated_bytes / 1024);
     }
 #else
-    printk("Data unavailable. Set flag CONFIG_SOPC_HELPER_IMPL_INSTRUM to 'y' to enable this feature.\n");
+    printk(
+        "HEAP Statistics: Data unavailable. Set flag CONFIG_SYS_HEAP_RUNTIME_STATS to 'y' to enable this feature.\n");
 #endif
 }
 

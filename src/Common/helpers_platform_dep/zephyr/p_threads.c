@@ -79,9 +79,6 @@ typedef struct T_THREAD_WKS
     const char* taskName;
     bool joined;
     int priority;
-#if CONFIG_SOPC_HELPER_IMPL_INSTRUM
-    uint8_t marker;
-#endif
 } tThreadWks;
 
 /** This structure is used to force thread creation to use a predefined stack, based on its name
@@ -173,105 +170,6 @@ static struct k_mutex gLock;
 
 #define STRING_SECURE(s) ((s) ? (s) : "<NULL>")
 
-////////////////////////////////////////////////////////
-/////////// DEBUG SECTION //////////////////////////////
-////////////////////////////////////////////////////////
-#if CONFIG_SOPC_HELPER_IMPL_INSTRUM
-#define PRINTK_DEBUG printk
-
-// Start stack marker value at any random value, It is incremented for each task, so that
-// each task stack will be filled with an unique remarkable value.
-static uint8_t gNextMarker = 0x90;
-
-// Note: additionnal slot for termination indication.Last element is empty
-SOPC_Thread_Info allThread_Infos[T_THREAD_NB_THREADS + 1];
-static size_t threadsCount = 0;
-
-static bool SOPC_Thread_Debug_FillSingle(const sopcThreadConfig* pCfg, size_t s)
-{
-    bool result = false;
-    SOPC_Thread_Info* pInfo = &allThread_Infos[s];
-    if (pCfg->pWks->userCallback != NULL)
-    {
-        // Fill in result
-        pInfo->name = pCfg->pWks->taskName;
-        pInfo->stack_size = pCfg->stackSize;
-
-        // Compute stack usage for thread. (stack begins on top)
-        const uint32_t* stackBottom = (const uint32_t*) (pCfg->stackBase);
-        const uint32_t* stackTop = (const uint32_t*) (((const char*) pCfg->stackBase) + pCfg->stackSize);
-        const uint32_t marker = ((uint32_t) pCfg->pWks->marker) * 0x01010101;
-
-        const uint32_t* ptr = stackBottom;
-
-        while (marker == (*ptr) && ptr < stackTop)
-        {
-            ptr++;
-        }
-        pInfo->stack_usage = sizeof(*ptr) * (uintptr_t)(stackTop - ptr);
-        pInfo->priority = pCfg->pWks->priority;
-        result = true;
-    }
-    else
-    {
-        pInfo->name = NULL;
-        pInfo->stack_size = 0;
-        pInfo->priority = 255;
-        pInfo->stack_usage = 0;
-    }
-    return result;
-}
-const SOPC_Thread_Info* SOPC_Thread_GetAllThreadsInfo(void)
-{
-    size_t s = 0;
-    sopcThreadConfig* pCfg = gSopcTasks;
-    bool result;
-    for (size_t k = 0; k < NB_SOPC_THREADS; k++)
-    {
-        result = SOPC_Thread_Debug_FillSingle(pCfg, s);
-        if (result)
-        {
-            s++;
-        }
-        pCfg++;
-    }
-    pCfg = gUserTasks;
-    for (size_t k = 0; k < CONFIG_SOPC_MAX_USER_TASKS; k++)
-    {
-        result = SOPC_Thread_Debug_FillSingle(pCfg, s);
-        if (result)
-        {
-            s++;
-        }
-        pCfg++;
-    }
-    return allThread_Infos;
-}
-
-static void DEBUG_DELETE_THREAD(const tThreadWks* pWks) {}
-
-static void DEBUG_CREATE_THREAD(const char* pName, const sopcThreadConfig* pCfg)
-{
-    // note: protected by gLock
-    char* stackBottom = (char*) pCfg->stackBase;
-    pCfg->pWks->marker = gNextMarker;
-    gNextMarker++;
-
-    // Fill stack memory with specific value (marker), so that we can later estimate how much has been used.
-    memset(stackBottom, pCfg->pWks->marker, pCfg->stackSize);
-    PRINTK_DEBUG("Initialize stack [%p.. %p] for thread %s MARK=%02X\n", stackBottom, stackBottom + pCfg->stackSize,
-                 STRING_SECURE(pName), pCfg->pWks->marker);
-    threadsCount++;
-}
-#else
-#define PRINTK_DEBUG(...)
-#define DEBUG_CREATE_THREAD(name, cfg)
-#define DEBUG_DELETE_THREAD(name)
-#endif
-////////////////////////////////////////////////////////
-///////// DEBUG SECTION END ////////////////////////////
-////////////////////////////////////////////////////////
-
 /**** Configure thread-specific tuning ****/
 /**
  * @brief returns the expected stack size of a given task, based on its name.
@@ -331,9 +229,7 @@ static void P_THREAD_InternalCallback(void* pContext, void* pCtx, void* pNotUsed
 
     if (pWks->userCallback != NULL)
     {
-        PRINTK_DEBUG("Entering Thread %s\n", STRING_SECURE(pWks->taskName));
         pWks->userCallback(pCtx);
-        PRINTK_DEBUG("Exit Thread %s\n", STRING_SECURE(pWks->taskName));
     }
 
     k_sem_give(&pWks->kSemThreadEnded);
@@ -376,9 +272,6 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
     pWks->userCallback = callback;
     pWks->joined = false;
     pWks->priority = priority - CONFIG_NUM_COOP_PRIORITIES - 1;
-    PRINTK_DEBUG("Create task %s Stack=%p(0x%04X), entry=%p, filter=%s\n", STRING_SECURE(pWks->taskName),
-                 pCfg->stackBase, (unsigned) pCfg->stackSize, pWks->userCallback, STRING_SECURE(pCfg->nameFilter));
-    DEBUG_CREATE_THREAD(STRING_SECURE(taskName), pCfg);
     pWks->threadHandle = k_thread_create(&pWks->threadControlBlock, pCfg->stackBase, pCfg->stackSize,
                                          P_THREAD_InternalCallback, pWks, pCtx, NULL, pWks->priority, 0, K_NO_WAIT);
 
@@ -389,7 +282,6 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
         memset(pWks, 0, sizeof(tThreadWks));
         pCfg = NULL;
         printk("\n!!Create task %s failed \n", STRING_SECURE(taskName));
-        DEBUG_DELETE_THREAD(pWks);
     }
     else
     {
@@ -433,19 +325,6 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskNam
 
         // Fill-in user threads configuration
         gInitialized = true;
-        PRINTK_DEBUG("STACK AREA = \n");
-        for (int k = 0; k < NB_SOPC_THREADS; k++)
-        {
-            PRINTK_DEBUG("- [%p .. %p] : (SOPC) %s\n", gSopcTasks[k].stackBase,
-                         ((char*) gSopcTasks[k].stackBase) + gSopcTasks[k].stackSize,
-                         STRING_SECURE(gSopcTasks[k].nameFilter));
-        }
-        PRINTK_DEBUG("- [%p .. %p] : (%d * user task)\n", gThreadStacks[0],
-                     (void*) (((uintptr_t) gThreadStacks) + sizeof(gThreadStacks)), (int) CONFIG_SOPC_MAX_USER_TASKS);
-        // Find idle thread
-        PRINTK_DEBUG("- [%p .. %p] : (Idle)\n", (void*) _kernel.cpus[0].idle_thread->stack_info.start,
-                     (void*) (((uintptr_t) _kernel.cpus[0].idle_thread->stack_info.start) +
-                              _kernel.cpus[0].idle_thread->stack_info.size));
     }
 
     k_mutex_lock(&gLock, K_FOREVER);
@@ -480,7 +359,6 @@ bool P_THREAD_Destroy(tThreadHandle** ppHandle)
     if (result)
     {
         tThreadWks* pWks = (*ppHandle)->pCfg->pWks;
-        DEBUG_DELETE_THREAD(pWks);
         pWks->userCallback = NULL;
         pWks->taskName = NULL;
         pWks->threadHandle = 0;

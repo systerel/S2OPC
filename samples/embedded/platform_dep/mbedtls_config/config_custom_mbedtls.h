@@ -20,8 +20,19 @@
 #ifndef __CONFIG_CUSTOM_MBEDTLS_H__
 #define __CONFIG_CUSTOM_MBEDTLS_H__
 
+#define MBEDTLS_PLATFORM_MEMORY
 #define MBEDTLS_THREADING_C
 #define MBEDTLS_THREADING_ALT
+#define MBEDTLS_MEMORY_BUFFER_ALLOC_C
+
+#ifndef MBEDTLS_HEAP_SIZE
+#define MBEDTLS_HEAP_SIZE (64 * 1024)
+#endif
+
+// Use MBEDTLS_HEAP_SECTION to install heaps in a dedicated memory region.
+// E.G for DTCM section (exists in STM32)
+// #define MBEDTLS_HEAP_SECTION __dtcm_data_section
+#define MBEDTLS_HEAP_SECTION
 
 #undef MBEDTLS_NO_DEFAULT_ENTROPY_SOURCES
 #define MBEDTLS_ENTROPY_HARDWARE_ALT

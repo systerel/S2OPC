@@ -51,31 +51,5 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback,     // Callback
  */
 bool P_THREAD_Destroy(tThreadHandle** ppHandle);
 
-#if CONFIG_SOPC_HELPER_IMPL_INSTRUM
-typedef struct SOPC_Thread_Info
-{
-    const char* name;
-    int priority;
-    size_t stack_size;
-    size_t stack_usage;
-} SOPC_Thread_Info;
-
-/**
- * @brief
- *  retrieves all active tasks stack and status informations.
- * @return
- *  An array of SOPC_Thread_Info elements. This array is statically allocated by the
- *  callee which ensures that it is large enough to hold all tasks status.
- *  The caller must stop array when reaching an empty element (stack_size == NULL)
- */
-const SOPC_Thread_Info* SOPC_Thread_GetAllThreadsInfo(void);
-
-/**
- * @return Returns the number of allocations (unfreed)
- */
-const size_t SOPC_MemAlloc_Nb_Allocs(void);
-
-#endif
-
 typedef tThreadHandle* Thread;
 #endif /* SOPC_ZEPHYR_P_THREADS_H_ */

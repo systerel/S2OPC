@@ -152,13 +152,6 @@ config SOPC_ALLOC_SECTION
       Link area where stack and heap will be mapped.
       See possible sections for each device under zephyr/linker/section_tags.h
 
-config SOPC_HELPER_IMPL_INSTRUM
-	bool "Debug S2OPC ZEPHYR implementation"
-	default 0
-	depends on S2OPC
-	help
-	  Set to 1 to allow debug and instrumentations of threading implementation
-	
 config SOPC_PTP_SYNCH_DURATION
 	int  "Duration (s) of one clock synchronization step while PtP SLAVE"
 	default 5

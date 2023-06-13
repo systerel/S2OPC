@@ -23,15 +23,24 @@
 #include "config_custom_mbedtls.h"
 
 #include <mbedtls/memory_buffer_alloc.h>
-
 #include <mbedtls/threading.h>
-#include <zephyr/linker/section_tags.h>
 
 // Place MBEDTLS HEAP into a different RAM section
 #ifdef CONFIG_SOPC_ALLOC_SECTION
 __attribute__((section(CONFIG_SOPC_ALLOC_SECTION)))
 #endif
 static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
+
+#ifdef CONFIG_MBEDTLS_USER_CONFIG_FILE
+#include CONFIG_MBEDTLS_USER_CONFIG_FILE
+#endif
+
+#ifndef MBEDTLS_HEAP_SECTION
+#define MBEDTLS_HEAP_SECTION
+#endif
+
+// Place MBEDTLS HEAP into a different RAM section
+MBEDTLS_HEAP_SECTION static unsigned char _mbedtls_heap[MBEDTLS_HEAP_SIZE];
 
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {
@@ -65,7 +74,6 @@ static int mutex_unlock(mbedtls_threading_mutex_t* pMutex)
 
 void tls_threading_initialize(void)
 {
-    printk("\r\n Thread safe mbedtls init\r\n");
-    mbedtls_memory_buffer_alloc_init(_mbedtls_heap, sizeof(_mbedtls_heap));
     mbedtls_threading_set_alt(mutex_init, mutex_free, mutex_lock, mutex_unlock);
+    mbedtls_memory_buffer_alloc_init(_mbedtls_heap, sizeof(_mbedtls_heap));
 }

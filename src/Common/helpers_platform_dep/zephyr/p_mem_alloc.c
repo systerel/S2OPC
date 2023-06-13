@@ -19,6 +19,7 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <inttypes.h>
 
@@ -28,34 +29,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-#ifdef CONFIG_SOPC_HELPER_IMPL_INSTRUM
-
-static int32_t gNbAllocs = 0;
-static inline void INCREASE_NB_ALLOCS(void* res, int i)
-{
-    if (res != NULL)
-    {
-        SOPC_Atomic_Int_Add(&gNbAllocs, i);
-    }
-}
-
-static inline void CHECK_ALLOC_RESULT(void* res, size_t size)
-{
-    if (res == NULL)
-    {
-        printk("\r\n !!! P_MEM_ALLOC (%u) returned NULL\r\n", size);
-    }
-}
-
-const size_t SOPC_MemAlloc_Nb_Allocs(void)
-{
-    return gNbAllocs;
-}
-#else
-#define INCREASE_NB_ALLOCS(res, i)
-#define CHECK_ALLOC_RESULT(res, size)
-#endif
-
 void* SOPC_Malloc(size_t size)
 {
     // Minimum size = 4 to avoid NULL pointer
@@ -63,16 +36,12 @@ void* SOPC_Malloc(size_t size)
     {
         size = 4;
     }
-    void* result = malloc(size);
-    CHECK_ALLOC_RESULT(result, size);
-    INCREASE_NB_ALLOCS(result, 1);
-    return result;
+    return k_malloc(size);
 }
 
 void SOPC_Free(void* ptr)
 {
-    INCREASE_NB_ALLOCS(ptr, -1);
-    free(ptr);
+    k_free(ptr);
 }
 
 void* SOPC_Calloc(size_t nmemb, size_t size)
@@ -87,16 +56,30 @@ void* SOPC_Calloc(size_t nmemb, size_t size)
     {
         total_size = 4;
     }
-    void* result = calloc(total_size, 1);
-    CHECK_ALLOC_RESULT(result, size);
-    INCREASE_NB_ALLOCS(result, 1);
-    return result;
+    return k_calloc(total_size, 1);
 }
 
 void* SOPC_Realloc(void* ptr, size_t old_size, size_t new_size)
 {
-    SOPC_UNUSED_ARG(old_size);
-    void* result = realloc(ptr, new_size);
-    CHECK_ALLOC_RESULT(result, new_size);
-    return result;
+    /* Do not realloc/copy if size is reduced.
+     * This keeps the larger buffer reserved but avoids the copy. */
+    if (new_size <= old_size)
+    {
+        return ptr;
+    }
+
+    /* realloc(NULL) shall behave as malloc */
+    void* new = SOPC_Malloc(new_size);
+    if (NULL == new)
+    {
+        return NULL;
+    }
+
+    if (NULL != ptr)
+    {
+        memcpy(new, ptr, old_size);
+        SOPC_Free(ptr);
+    }
+
+    return new;
 }
