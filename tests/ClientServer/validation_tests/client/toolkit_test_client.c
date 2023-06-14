@@ -26,6 +26,7 @@
 #include "libs2opc_client_config.h"
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_new_client.h"
+#include "libs2opc_request_builder.h"
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
@@ -55,7 +56,7 @@
 
 static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 
-#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
+#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_Sign
 #define REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
 
 // Client certificate path
@@ -81,15 +82,25 @@ static char* default_empty_cert_paths[] = {NULL};
 // User key path
 #define USER_KEY_PATH "./user_private/encrypted_user_2k_key.pem"
 
+// Sleep timeout in milliseconds
+static const uint32_t sleepTimeout = 200;
+// Loop timeout in milliseconds
+static const uint32_t loopTimeout = 10000;
+
 static int32_t getEndpointsReceived = 0;
 
 static uint32_t cptReadResps = 0;
 
 #if S2OPC_NANO_PROFILE
-#define TEST_SUB_SERVICE_UNSUPPORTED true
+#define TEST_SUB_SERVICE_SUPPORTED false
 #else
-#define TEST_SUB_SERVICE_UNSUPPORTED false
+#define TEST_SUB_SERVICE_SUPPORTED true
 #endif
+
+static const char* monitoredNodeIds[3] = {"ns=1;i=1012", "i=2258", "ns=1;s=Boolean_001"};
+static const uintptr_t monitoredItemIndexes[3] = {0, 1, 2};
+static const unsigned int monitoredItemExpNotifs[3] = {1, 2, 1};
+static unsigned int monitoredItemNotifs[3] = {0, 0, 0};
 
 // Asynchronous service response callback
 static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
@@ -151,6 +162,40 @@ static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* re
         const OpcUa_ServiceFault* serviceFaultResp = (const OpcUa_ServiceFault*) response;
         test_results_set_service_result(OpcUa_BadServiceUnsupported == appContext &&
                                         OpcUa_BadServiceUnsupported == serviceFaultResp->ResponseHeader.ServiceResult);
+    }
+}
+
+static void SOPC_Client_SubscriptionNotification_Cb(const SOPC_ClientHelper_Subscription* subscription,
+                                                    SOPC_StatusCode status,
+                                                    SOPC_EncodeableType* notificationType,
+                                                    uint32_t nbNotifElts,
+                                                    const void* notification,
+                                                    uintptr_t* monitoredItemCtxArray)
+{
+    uintptr_t userCtx = SOPC_ClientHelperNew_Subscription_GetUserParam(subscription);
+    SOPC_ASSERT(12 == userCtx);
+
+    if (SOPC_IsGoodStatus(status) && &OpcUa_DataChangeNotification_EncodeableType == notificationType)
+    {
+        test_results_set_service_result(true);
+        const OpcUa_DataChangeNotification* notifs = (const OpcUa_DataChangeNotification*) notification;
+        for (uint32_t i = 0; i < nbNotifElts; i++)
+        {
+            printf("Value change notification for node %s:\n",
+                   (const char*) monitoredNodeIds[monitoredItemCtxArray[i]]);
+            SOPC_Variant_Print(&notifs->MonitoredItems[i].Value.Value);
+            printf("\n");
+            monitoredItemNotifs[monitoredItemCtxArray[i]]++;
+        }
+        bool expectedResult = true;
+        for (size_t i = 0; i < sizeof(monitoredItemExpNotifs) / sizeof(monitoredItemExpNotifs[0]); i++)
+        {
+            if (monitoredItemNotifs[i] != monitoredItemExpNotifs[i])
+            {
+                expectedResult = false;
+            }
+        }
+        test_results_set_service_result(expectedResult);
     }
 }
 
@@ -460,12 +505,184 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     return status;
 }
 
+static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
+{
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
+    if (TEST_SUB_SERVICE_SUPPORTED)
+    {
+        /* In case the subscription service shall not be supported, check service response is unsupported service*/
+        SOPC_ClientHelper_Subscription* subscription = SOPC_ClientHelperNew_CreateSubscription(
+            connection, createSubReq, SOPC_Client_SubscriptionNotification_Cb, 12);
+        SOPC_ASSERT(NULL != subscription);
+        OpcUa_CreateMonitoredItemsRequest* createMonItReq =
+            SOPC_CreateMonitoredItemsRequest_Create(0, 3, OpcUa_TimestampsToReturn_Both);
+        if (NULL == createMonItReq)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        // 1st MI (with NodeId + some params with deadband filter)
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0], (int32_t) strlen(monitoredNodeIds[0]));
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, nodeId,
+                                                                         SOPC_AttributeId_Value, NULL);
+            SOPC_NodeId_Clear(nodeId);
+            SOPC_Free(nodeId);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ExtensionObject* extObj = SOPC_MonitoredItem_DataChangeFilter(
+                OpcUa_DataChangeTrigger_Status, OpcUa_DeadbandType_Absolute, (double) 1000);
+            SOPC_ASSERT(NULL != extObj);
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+                createMonItReq, 0, OpcUa_MonitoringMode_Reporting, 0, -1, extObj, 1, true);
+        }
+        // 2nd MI (with NodeId  as C string + some params without deadband filter)
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(
+                createMonItReq, 1, monitoredNodeIds[1], SOPC_AttributeId_Value, NULL);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+                createMonItReq, 1, OpcUa_MonitoringMode_Reporting, 0, 0, NULL, 10, true);
+        }
+        // 3rd MI (with NodeId  as C string + default params)
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings(
+                createMonItReq, 2, monitoredNodeIds[2], SOPC_AttributeId_Value, NULL);
+        }
+
+        // Create the monitored items
+        OpcUa_CreateMonitoredItemsResponse createMonItResp;
+        if (SOPC_STATUS_OK == status)
+        {
+            OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
+            status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+                subscription, createMonItReq, (const uintptr_t*) monitoredItemIndexes, &createMonItResp);
+        }
+
+        // Check CreateMonitoredItems response and prepare delete monitored items request
+        OpcUa_DeleteMonitoredItemsRequest* delMonItReq = NULL;
+        OpcUa_DeleteMonitoredItemsResponse delMonItResp;
+        OpcUa_DeleteMonitoredItemsResponse_Initialize(&delMonItResp);
+        bool deleteMonitoredItems = false;
+        if (SOPC_STATUS_OK == status)
+        {
+            // Check CreateMonitoredItems response
+            if (SOPC_IsGoodStatus(createMonItResp.ResponseHeader.ServiceResult) && createMonItResp.NoOfResults == 3)
+            {
+                delMonItReq = SOPC_DeleteMonitoredItemsRequest_Create(0, 3, NULL);
+                for (int32_t i = 0; i < createMonItResp.NoOfResults; i++)
+                {
+                    uint32_t queueSize = 1;
+                    if (!SOPC_IsGoodStatus(createMonItResp.Results[i].StatusCode))
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                    else
+                    {
+                        // Check revised queue size are the one requested (1, 10 and 100)
+                        if (createMonItResp.Results[i].RevisedQueueSize != queueSize)
+                        {
+                            status = SOPC_STATUS_NOK;
+                        }
+                        queueSize *= 10;
+                        SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(delMonItReq, (size_t) i,
+                                                                            createMonItResp.Results[i].MonitoredItemId);
+                    }
+                }
+                deleteMonitoredItems = true;
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Reset expected result
+            test_results_set_service_result(false);
+
+            /* Wait until expected notifications are received */
+            loopCpt = 0;
+            while (SOPC_STATUS_OK == status && !test_results_get_service_result() &&
+                   loopCpt * sleepTimeout <= loopTimeout)
+            {
+                loopCpt++;
+                SOPC_Sleep(sleepTimeout);
+            }
+            if (loopCpt * sleepTimeout > loopTimeout)
+            {
+                status = SOPC_STATUS_TIMEOUT;
+            }
+        }
+
+        if (deleteMonitoredItems)
+        {
+            status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
+            OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
+
+            // Check DeleteMonitoredItems response
+            if (SOPC_STATUS_OK == status)
+            {
+                if (SOPC_IsGoodStatus(delMonItResp.ResponseHeader.ServiceResult) && delMonItResp.NoOfResults == 3)
+                {
+                    for (int32_t i = 0; i < delMonItResp.NoOfResults; i++)
+                    {
+                        if (!SOPC_IsGoodStatus(delMonItResp.Results[i]))
+                        {
+                            status = SOPC_STATUS_NOK;
+                        }
+                    }
+                }
+                else
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+            }
+            OpcUa_DeleteMonitoredItemsResponse_Clear(&delMonItResp);
+        }
+
+        status = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+    }
+    else
+    {
+        // Note: we do not test the dedicated subscription API
+        // because for now the behavior will be to close the connection
+
+        // Reset expected result
+        test_results_set_service_result(false);
+
+        status = SOPC_ClientHelperNew_ServiceAsync(connection, createSubReq, OpcUa_BadServiceUnsupported);
+
+        printf(">>Test_Client_Toolkit: create subscription sending\n");
+
+        /* Wait until service response is received */
+        loopCpt = 0;
+        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
+        {
+            loopCpt++;
+            SOPC_Sleep(sleepTimeout);
+        }
+
+        if (loopCpt * sleepTimeout > loopTimeout)
+        {
+            status = SOPC_STATUS_TIMEOUT;
+        }
+    }
+    return status;
+}
+
 int main(void)
 {
-    // Sleep timeout in milliseconds
-    const uint32_t sleepTimeout = 200;
-    // Loop timeout in milliseconds
-    const uint32_t loopTimeout = 10000;
     // Counter to stop waiting on timeout
     uint32_t loopCpt = 0;
 
@@ -635,42 +852,9 @@ int main(void)
     test_results_set_WriteRequest(NULL);
     tlibw_free_WriteRequest((OpcUa_WriteRequest**) &pWriteReqCopy);
 
-    /* In case the subscription service shall not be supported, check service response is unsupported service*/
-    if (TEST_SUB_SERVICE_UNSUPPORTED)
+    if (SOPC_STATUS_OK == status)
     {
-        if (SOPC_STATUS_OK == status)
-        {
-            OpcUa_CreateSubscriptionRequest* createSubReq = NULL;
-            status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &createSubReq);
-            SOPC_ASSERT(SOPC_STATUS_OK == status);
-
-            createSubReq->MaxNotificationsPerPublish = 0;
-            createSubReq->Priority = 0;
-            createSubReq->PublishingEnabled = true;
-            createSubReq->RequestedLifetimeCount = 3;
-            createSubReq->RequestedMaxKeepAliveCount = 1;
-            createSubReq->RequestedPublishingInterval = 1000;
-
-            // Reset expected result
-            test_results_set_service_result(false);
-
-            status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[0], createSubReq, OpcUa_BadServiceUnsupported);
-
-            printf(">>Test_Client_Toolkit: create subscription sending\n");
-        }
-
-        /* Wait until service response is received */
-        loopCpt = 0;
-        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
-        {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-
-        if (loopCpt * sleepTimeout > loopTimeout)
-        {
-            status = SOPC_STATUS_TIMEOUT;
-        }
+        status = test_subscription(secureConnections[0]);
     }
 
     /* Close the connections */
