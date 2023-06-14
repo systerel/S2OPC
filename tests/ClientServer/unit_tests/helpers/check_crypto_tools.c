@@ -20,6 +20,7 @@
 #include "check_helpers.h"
 
 #include <check.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "check_crypto_certificates.h"
@@ -28,6 +29,14 @@
 #include "sopc_mem_alloc.h"
 
 #define PASSWORD "password"
+#define CSR_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
+#define CSR_PATH "./crypto_tools_csr.der"
+#define CSR_SUBJECT_NAME                           \
+    "C=FR,ST=France,O=Systerel,CN=S2OPC Demo CSR " \
+    "generation,emailAddress=s2opc-support@systerel.fr,L=Aix-en-Provence"
+#define CSR_SAN_URI "URI:urn:S2OPC:localhost"
+#define CSR_SAN_DNS "localhost"
+#define CSR_MD "SHA256"
 
 START_TEST(test_crypto_check_app_uri)
 {
@@ -182,13 +191,48 @@ START_TEST(test_crypto_gen_rsa_export_import_encrypted)
 }
 END_TEST
 
+START_TEST(test_gen_csr)
+{
+    /* The purpose of this test is to generate a CSR file and verify manually
+       its content though an external tool like openssl :
+       > openssl req -inform der -in <csr_der> -out <csr_pem> -outform pem (convert DER to PEM)
+       > openssl req -text -in <csr_pem> -noout -verify (to verify manually the content)
+    */
+    SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_CSR* pCSR = NULL;
+    uint8_t* pDER = NULL;
+    uint32_t pLen = 0;
+    size_t pwdLen = strlen(PASSWORD);
+    ck_assert(pwdLen < UINT32_MAX);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_AsymmetricKey_CreateFromFile(CSR_KEY_PATH, &pKey, PASSWORD, (uint32_t) pwdLen);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_CSR_Create(CSR_SUBJECT_NAME, true, CSR_MD, CSR_SAN_URI, CSR_SAN_DNS, &pCSR);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);
+    ck_assert(SOPC_STATUS_OK == status);
+
+    FILE* fp = NULL;
+    fp = fopen(CSR_PATH, "wb");
+    ck_assert(NULL != fp);
+    size_t nb_written = fwrite(pDER, 1, pLen, fp);
+    fclose(fp);
+    ck_assert(pLen == nb_written);
+
+    SOPC_KeyManager_AsymmetricKey_Free(pKey);
+    SOPC_KeyManager_CSR_Free(pCSR);
+    SOPC_Free(pDER);
+}
+END_TEST
+
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
-    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL;
+    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL;
 
     tc_check_app_uri = tcase_create("Check application URI");
     tc_gen_rsa = tcase_create("Generate RSA keys");
+    tc_gen_csr = tcase_create("Generate CSR");
 
     suite_add_tcase(s, tc_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
@@ -197,6 +241,8 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_encrypted);
+    suite_add_tcase(s, tc_gen_csr);
+    tcase_add_test(tc_gen_csr, test_gen_csr);
 
     return s;
 }
