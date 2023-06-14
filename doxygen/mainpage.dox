@@ -35,33 +35,37 @@ The following sections only concern the C source documentation.
 You will find documentation on the Python binding for S2OPC on following page:
 <a href="pys2opc/index.html">Go to PyS2OPC documentation</a>
 
-\section common High-level Common API
+\section clientserver Client / Server API
 
-The high-level common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API or pubsub API.
-Those functions are shared between all high-level API when including the S2OPC Common library:
-- ::SOPC_Common_Initialize shall be called before any other high-level API function to initialize S2OPC toolkits.
-- ::SOPC_Common_Clear shall be called after any other high-level API function to clear S2OPC toolkits.
-- ::SOPC_Common_GetDefaultLogConfiguration retrieve default log configuration.
+The Client / Server API is composed of high-level (wrapper) API and low-level API, the preferred way to use S2OPC is to use only the high-level API.
+Note that the low-level API will be subject to important changes and refactoring in the future release since the high-level API is designed to address any application need.
+The high-level client API was newly redesigned with this goal in mind for S2OPC 1.5.0 release, 
+the previous client wrapper design is still available but becomes deprecated and will be removed in S2OPC 1.6.0 release.
 
-\section common_client_server High-level Common Client/Server API
+\note High-level client API prefixed with `SOPC_ClientHelperNew` in S2OPC 1.5.0 release will be renamed to `SOPC_ClientHelper` in S2OPC 1.6.0 release.
+
+\subsection common_client_server High-level Common Client/Server API
 
 The high-level common Client/Server API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the high-level client/server API.
 Those functions are shared between high-level server/client API:
 - ::SOPC_CommonHelper_Initialize shall be called before any other high-level API function to initialize S2OPC client/server tooklit.
+  The logger configuration might be provided as parameter, the default configuration might be retrieved using ::SOPC_Common_GetDefaultLogConfiguration 
+  and modified as needed.
 - ::SOPC_CommonHelper_Clear shall be called after any other high-level API function to clear S2OPC client/server tooklit.
 - ::SOPC_CommonHelper_GetBuildInfo provides S2OPC client/server toolkit build info.
 
-\section server High-level Server API
+\subsection server High-level Server API
 
 The high-level server API provides functions for configuration (endpoints and security, address space content, user management, etc.) and functions to manage server execution (start/stop, local service execution, etc.).
 
 The main configuration functions are defined by libs2opc_server_config.h:
-- ::SOPC_HelperConfigServer_Initialize shall be called before any other function of the server wrapper module (and after ::SOPC_CommonHelper_Initialize).
-- ::SOPC_HelperConfigServer_Clear shall be called when server wrapper module is not used anymore.
-- ::SOPC_HelperConfigServer_ConfigureFromXML loads configuration from XML configuration files (server endpoints and security, address space, users). See \ref xml_config "XML file examples".
-- ::SOPC_HelperConfigServer_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is NOT compiled with S2OPC_NANO_PROFILE=1).
-- ::SOPC_HelperConfigServer_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients.
-- ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse sets a callback to use local services on server in an asynchronous way (see ::SOPC_ServerHelper_LocalServiceAsync).
+- ::SOPC_ServerConfigHelper_Initialize shall be called before any other function of the server wrapper module (and after ::SOPC_CommonHelper_Initialize).
+- ::SOPC_ServerConfigHelper_Clear shall be called when server wrapper module is not used anymore.
+- ::SOPC_ServerConfigHelper_ConfigureFromXML loads configuration from XML configuration files (server endpoints and security, address space, users). See \ref xml_config "XML file examples".
+- ::SOPC_ServerConfigHelper_SetMethodCallManager sets a manager for callbacks to use for CallMethod service (available only if s2opc is NOT compiled with S2OPC_NANO_PROFILE=1).
+- ::SOPC_ServerConfigHelper_SetWriteNotifCallback sets a callback to receive notification on address space write operations from clients.
+- ::SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse sets a callback to use local services on server in an asynchronous way (see ::SOPC_ServerHelper_LocalServiceAsync).
+- ::SOPC_ServerConfigHelper_SetKeyPasswordCallback sets a callback to provide the password to decrypt the private key of the server (if encrypted).
 
 In case the dedicated XML configuration files are not used to configure server, use the additional configuration functions located in libs2opc_server_config_custom.h.
 
@@ -81,32 +85,56 @@ or <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/tests/ClientServer/v
 \anchor xml_config
 See XML configuration schemas and examples:
 - Server endpoints and security <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd">XSD schema</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/config/S2OPC_Server_Demo_Config.xml">XML example</a>
-- Address space <a href="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">XSD schema</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/address_space/s2opc_nano.xml">XML example</a>
+- Address space <a href="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">XSD schema</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/address_space/s2opc.xml">XML example</a>
 - Users <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_users_config.xsd">XSD schema</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/config/S2OPC_Users_Demo_Config.xml">XML example</a>
 
-\section sclient Simplified Client API
+Also see the <a href="https://gitlab.com/systerel/S2OPC/-/wikis/Demo">demonstration wiki section</a> for explanation on how to run the server and configure it.
 
-The simplified client interface consists of functions to configure the connection, to establish the connection, to call GetEndpoint, Write, Read and Browse services, and to create a Subscription and add MonitoredItems to it.
+\subsection client High-Level Client API (new) 
 
-The simplified interface functions and types are defined by libs2opc_client_cmds.h.
-- ::SOPC_ClientHelper_Initialize shall be called before any other function of the module (and after ::SOPC_CommonHelper_Initialize).
-- ::SOPC_ClientHelper_Finalize shall be called when module not used anymore.
-- ::SOPC_ClientHelper_GetEndpoints: calls GetEndpoints service of a server and returns when server response received or error occurred (connection failure, response timeout).
-- ::SOPC_ClientHelper_CreateConfiguration: creates a connection configuration (security properties, session user, etc.) to be used for non-discovery services.
-- ::SOPC_ClientHelper_CreateConnection: creates a connection (secure channel + session) to the server given the connection configuration identifier created previously.
-- ::SOPC_ClientHelper_Disconnect: disconnect the previously created connection given the connection identifier.
-- ::SOPC_ClientHelper_Write: calls Write service through given connection and returns when server response received.
-- ::SOPC_ClientHelper_Read: calls Read service through given connection and returns when server response received.
-- ::SOPC_ClientHelper_Browse: calls Browse service through given connection and returns when server response received.
-- ::SOPC_ClientHelper_CreateSubscription: calls CreateSubscription service through given connection. The subscription is created and publish requests / responses automatically managed by the client helper.
-- ::SOPC_ClientHelper_AddMonitoredItems: calls CreateMonitoredItem service through given connection with a subscription successfully created previously.
-- ::SOPC_ClientHelper_Unsubscribe: stops the subscription associated to the given connection.
+\note The previous high-level client API are deprecated and should not be used anymore. They will be removed in a S2OPC 1.6.0 release.
+
+The high-level client API provides functions for configuration (endpoints and security, user type) and functions to manage client execution (start/stop, service execution, etc.).
+
+The main configuration functions are defined by libs2opc_client_config.h:
+- ::SOPC_ClientConfigHelper_Initialize shall be called before any other function of the client wrapper module (and after ::SOPC_CommonHelper_Initialize).
+- ::SOPC_ClientConfigHelper_Clear shall be called when client wrapper module is not used anymore.
+- ::SOPC_ClientConfigHelper_ConfigureFromXML loads configuration from XML configuration files (client connection endpoint and security, user type) and
+  returns the array of configured connections. See \ref client_xml_config "XML file examples".
+- ::SOPC_ClientConfigHelper_SetServiceAsyncResponse sets a callback to use services in an asynchronous way (see ::SOPC_ClientHelperNew_ServiceAsync).
+- ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback sets a callback to provide the password to decrypt the private key of the client (if encrypted).
+- ::SOPC_ClientConfigHelper_SetUserNamePasswordCallback sets a callback to retrieve user/password for connection using UserName type for session activation.
+- ::SOPC_ClientConfigHelper_SetUserKeyPasswordCallback sets a callback to retrieve user private key decryption password for connection using X509 user type (if encrypted).
+- ::SOPC_ClientConfigHelper_GetConfigFromId returns the configuration of a connection from the string id defined in XML configuration.
+
+In case the dedicated XML configuration files are not used to configure client, use the additional configuration functions located in libs2opc_client_config_custom.h.
+
+The main functions for client execution are defined by libs2opc_new_client.h:
+- ::SOPC_ClientHelperNew_DiscoveryServiceAsync: executes a discovery service asynchronously for a connection configuration.
+- ::SOPC_ClientHelperNew_DiscoveryServiceSync: executes a discovery service synchronously for a connection configuration.
+- ::SOPC_ClientHelperNew_Connect: establishes a connection and returns the connection instance.
+- ::SOPC_ClientHelperNew_Disconnect: disconnects a connection instance.
+- ::SOPC_ClientHelperNew_ServiceAsync: executes a service asynchronously on a connection instance.
+- ::SOPC_ClientHelperNew_ServiceSync: executes a service synchronously on a connection instance.
+
+Additional functions are provided and dedicated to subscription related services, it provides management of 1 subscription per connection instance:
+- ::SOPC_ClientHelperNew_CreateSubscription: creates a subscription on a connection and returns the subscription instance.
+- ::SOPC_ClientHelperNew_DeleteSubscription: deletes a subscription instance.
+- ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems: create monitored items on a subscription instance with associated context.
+- ::SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems: delete monitored items on a subscription instance.
+- ::SOPC_ClientHelperNew_Subscription_AsyncService: executes other subscription related services asynchronously on a subscription instance.
+- ::SOPC_ClientHelperNew_Subscription_SyncService: executes other subscription related services synchronously on a subscription instance.
+
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/client_wrapper/examples">\<service>.c</a>
-or <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/client_wrapper/client_subscription.c">client_subscription.c</a>.
+or <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/embedded/cli_client/src/cli_client_main.c">Command Line Interface client</a>,
+and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/tests/ClientServer/validation_tests/client/toolkit_test_client.c">toolkit_test_client.c</a>.
 
-\section lclient Low-level client API
+\anchor client_xml_config
+See XML configuration schemas and examples: client connections endpoint and security <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd">XSD schema</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/data/config/S2OPC_Client_Example_Config.xml">XML example</a>
+
+\subsection lclient Low-level client API (usage not recommended and API subject to changes)
 
 Main configuration functions and types for client are provided by sopc_toolkit_config.h and sopc_user_app_itf.h.
 The functions with `SOPC_ToolkitServer_` prefix shall be ignored.
@@ -130,13 +158,12 @@ It is also possible to send discovery services requests to through a configured 
 Once a session has been activated it will be possible to send all kind of requests using the session identifier to call:
 - ::SOPC_ToolkitClient_AsyncSendRequestOnSession. Response are received with event ::SE_RCV_SESSION_RESPONSE through ::SOPC_ComEvent_Fct callback.
 
-\note The client API provides raw OPC UA responses to the OPC UA requests sent. Only the secure channel and session services are automatically managed by toolkit. See \ref sclient for automated subscription service support.
+\note The client API provides raw OPC UA responses to the OPC UA requests sent. Only the secure channel and session services are automatically managed by toolkit. See \ref client for automated subscription service support.
 
 See implementation examples
-<a href="https://gitlab.com/systerel/S2OPC/-/blob/master/tests/ClientServer/validation_tests/client/toolkit_test_client.c">toolkit_test_client.c</a>,
-and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_client/">command line tools s2opc_<service>.c</a> for dedicated services (read, write, etc.).
+<a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_client/">Command line tools s2opc_<service>.c</a> for dedicated services (read, write, etc.).
 
-\section lserver Low-level server API
+\subsection lserver Low-level server API (usage not recommended and API subject to changes)
 
 Main configuration function and types for server are provided by sopc_toolkit_config.h and sopc_user_app_itf.h.
 The functions with `SOPC_ToolkitClient_` prefix shall be ignored.
@@ -157,7 +184,7 @@ In both cases the \ref users shall be configured for each ::SOPC_Endpoint_Config
 
 Finally for each endpoint of the server (SOPC_Server_Config::endpoints), ::SOPC_ToolkitServer_AddEndpointConfig shall be called to configure it in the server.
 
-\subsection address Configure initial address space
+\subsubsection address Configure initial address space
 
 Address space configuration shall be done to define the initial data present in the address space.
 This configuration shall be defined using <a href="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd">OPC UA standard schema</a>.
@@ -175,7 +202,7 @@ Or use the Python script <a href="https://gitlab.com/systerel/S2OPC/-/blob/maste
 Finally call ::SOPC_ToolkitServer_SetAddressSpaceConfig with the address space structure to configure the server address space content
 and set the client write notification callback with ::SOPC_ToolkitServer_SetAddressSpaceNotifCb to receive notification on client write operation.
 
-\subsection address2 Configure address space update
+\subsubsection address2 Configure address space update
 
 Once the initial address space is configured, you might want to configure behavior on address space update from client or to configure how to update address space locally.
 
@@ -185,7 +212,7 @@ The server application is able to modify the address space on runtime using OPC 
 It is allowed to treat OPC UA service requests (::OpcUa_ReadRequest, ::OpcUa_WriteRequest, ::OpcUa_BrowseRequest and discovery service requests) using ::SOPC_ToolkitServer_AsyncLocalServiceRequest.
 Once the function is called, an asynchronous ::SE_LOCAL_SERVICE_RESPONSE event will be received by the ::SOPC_ComEvent_Fct application callback containing the response message (::OpcUa_ReadResponse, etc.).
 
-\subsection users User authentication and user authorization managers
+\subsubsection users User authentication and user authorization managers
 
 User authentication and user authorization managers shall be implemented for each endpoint (SOPC_Endpoint_Config::authenticationManager and SOPC_Endpoint_Config::authorizationManager).
 
@@ -206,6 +233,16 @@ A basic implementation is provided by ::SOPC_MethodCallManager_Create, this mana
 Examples of Pub or Sub test applications can be found here <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/tests/PubSub/validation_tests/pub_scheduler_test.c">publisher</a> and <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/tests/PubSub/validation_tests/sub_scheduler_conf_test.c">subscriber</a>, and a PubSub-Server sample is implemented <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/PubSub_ClientServer/pubsub_server">here</a>.
 
 Main interface is defined by sopc_pub_scheduler.h and sopc_sub_scheduler.h.
+
+\subsection common Common API (PubSub and Client/Server)
+
+The common API shall be used to initialize (or clear) the S2OPC toolkit prior to use (or after using) the client/server API or pubsub API.
+For the client/server the initialization and clear functions are automatically called by low-level API functions or by high-level API functions.
+Those functions are shared between all API when including the S2OPC Common library:
+- ::SOPC_Common_Initialize shall be called before any other high-level API function to initialize S2OPC toolkit 
+  (constants and platfrom specific checks, logger initalization).
+- ::SOPC_Common_Clear shall be called after any other high-level API function to clear S2OPC toolkits.
+- ::SOPC_Common_GetDefaultLogConfiguration retrieve default log configuration.
 
 \subsection pubsub_config Configuration API
 The PubSub configuration API is provided through sopc_pubsub_conf.h and uses the concepts of OPC UA PubSub specification Common Configuration Model (see §9.1 in OPC UA part 14 v1.04) to define the following elements configuration:
@@ -239,7 +276,8 @@ The Subscriber state changes might be received by providing a handler with the s
 
 \section config_constants OPC UA stack behavior configuration constants
 
-Two sets of constants are defined to configure the OPC UA stack behavior, one is defined for the OPC UA common encoding layer and another for the OPC UA Client/Server services layer.
+Two sets of constants are defined to configure the OPC UA stack behavior, one is defined for the OPC UA common encoding layer (message size, string max length, etc.) 
+and another for the OPC UA Client/Server services layer (maximum number of operatoins per call, etc.).
 Those variables might be changed for specific needs at library compile time and are defined in respectively in sopc_common_constants.h and sopc_toolkit_config_constants.h.
 
  */
