@@ -61,6 +61,12 @@
 #define SOPC_RSA_PEM_HEADER_SIZE 33      // strlen(SOPC_RSA_PEM_HEADER) + \n + \0
 #define SOPC_RSA_PEM_ENC_HEADER_SIZE 112 // strlen(SOPC_RSA_PEM_ENC_HEADER) + 16 hex IV bytes + \n\n + \0
 
+#define SOPC_SIZE_STR_TO_MD_TABLE 5
+#define SOPC_EXT_BASIC_CONSTRAINT_BYTE_SIZE 5
+#define SOPC_EXT_EXTENDED_KU_BYTE_SIZE 12
+#define SOPC_EXT_SAN_BYTE_SIZE 15
+#define SOPC_CSR_MAX_DER_BYTE_SIZE 4096
+
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
  */
@@ -1731,37 +1737,38 @@ typedef struct c_string_to_md_type_t
     mbedtls_md_type_t md;
 } c_string_to_md_type_t;
 
-#define SIZE_STR_TO_MD_TABLE 5
-static c_string_to_md_type_t tab_c_string_to_md_type[SIZE_STR_TO_MD_TABLE] = {
+static c_string_to_md_type_t tab_c_string_to_md_type[SOPC_SIZE_STR_TO_MD_TABLE] = {
     {"sha1", MBEDTLS_MD_SHA1},     {"sha224", MBEDTLS_MD_SHA224}, {"sha256", MBEDTLS_MD_SHA256},
     {"sha384", MBEDTLS_MD_SHA384}, {"sha512", MBEDTLS_MD_SHA512},
 };
 
 static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const char* oid, size_t oidLen)
 {
+    SOPC_ASSERT(NULL != ctx);
+    SOPC_ASSERT(NULL != oid);
+
     /* based on tag/length/value */
-    unsigned char tlv[12] = {0};
+    unsigned char tlv[SOPC_EXT_EXTENDED_KU_BYTE_SIZE] = {0};
     unsigned char* val = tlv + sizeof(tlv); // mbedtls_asn1_write_XXX write data at the end of the buffer
     int valLen = 0;
     size_t valLenTot = 0;
     size_t extKuOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_EXTENDED_KEY_USAGE);
-
-    /* valLen = 1 byte for OID tag + 1 byte for OID length + 8 bytes OID value (CLIENT_AUTH or SERVER_AUTH) = 10 */
-    valLen = mbedtls_asn1_write_oid(&val, tlv, oid, oidLen);
+    valLen = mbedtls_asn1_write_oid(&val, tlv, oid,
+                                    oidLen); /* +10 bytes (1 byte for OID tag
+                                                           + 1 byte for OID length
+                                                           + 8 bytes OID value => CLIENT_AUTH or SERVER_AUTH) */
     if (valLen < 0)
     {
         return valLen;
     }
     valLenTot = (size_t) valLen;
-    /* valLenTot = valLen + 1 byte for the length  = 11 */
-    valLen = mbedtls_asn1_write_len(&val, tlv, (size_t) valLen);
+    valLen = mbedtls_asn1_write_len(&val, tlv, (size_t) valLen); // +1 byte
     if (valLen < 0)
     {
         return valLen;
     }
     valLenTot = valLenTot + (size_t) valLen;
-    /* valLenTot = valLenTot + 1 byte for asn1 tag = 12 */
-    valLen = mbedtls_asn1_write_tag(&val, tlv, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE);
+    valLen = mbedtls_asn1_write_tag(&val, tlv, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE); // +1 byte
     if (valLen < 0)
     {
         return valLen;
@@ -1772,12 +1779,127 @@ static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const cha
     return valLen;
 }
 
+static int sopc_csr_set_basic_constraints(mbedtls_x509write_csr* ctx)
+{
+    SOPC_ASSERT(NULL != ctx);
+
+    int valLen = 0;
+    size_t valLenTot = 0;
+    unsigned char tlv[SOPC_EXT_BASIC_CONSTRAINT_BYTE_SIZE] = {0};
+    unsigned char* val = tlv + sizeof(tlv); // mbedtls_asn1_write_XXX write data at the end of the buffer
+    size_t basicConstraintOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_BASIC_CONSTRAINTS);
+    valLen = mbedtls_asn1_write_bool(&val, tlv, false); // +3 bytes
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = (size_t) valLen;
+    valLen = mbedtls_asn1_write_len(&val, tlv, (size_t) valLen); // +1 byte
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = valLenTot + (size_t) valLen;
+    valLen = mbedtls_asn1_write_tag(&val, tlv, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE); // +1 byte
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = valLenTot + (size_t) valLen;
+    valLen =
+        MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_BASIC_CONSTRAINTS, basicConstraintOidLen, val, valLenTot);
+    return valLen;
+}
+
+static int sopc_csr_set_san_ext(unsigned char** val,
+                                unsigned char* tlv,
+                                unsigned char tag,
+                                const unsigned char* buf,
+                                size_t size)
+{
+    SOPC_ASSERT(NULL != val);
+    SOPC_ASSERT(NULL != tlv);
+    SOPC_ASSERT(NULL != buf);
+
+    int valLen = 0;
+    size_t valLenTot = 0;
+    valLen = mbedtls_asn1_write_raw_buffer(val, tlv, buf, size); // + size bytes
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = (size_t) valLen;
+    valLen = mbedtls_asn1_write_len(val, tlv, (size_t) valLen); // +4 bytes max
+    if (valLen < 0)
+    {
+        return valLen;
+    }
+    valLenTot = valLenTot + (size_t) valLen;
+    valLen = mbedtls_asn1_write_tag(val, tlv, tag); // +1 byte
+    return valLen < 0 ? valLen : (int) valLenTot + valLen;
+}
+
+static int sopc_csr_set_subject_alt_name(mbedtls_x509write_csr* ctx,
+                                         const unsigned char* uri,
+                                         size_t uriLen,
+                                         const unsigned char* dns,
+                                         size_t dnsLen)
+{
+    SOPC_ASSERT(NULL != ctx);
+    SOPC_ASSERT(NULL != uri || NULL != dns);
+    /* +12 bytes max for the length field
+       +3 bytes max for the tag */
+    size_t bufLen = uriLen + dnsLen + SOPC_EXT_SAN_BYTE_SIZE;
+    unsigned char* tlv = SOPC_Malloc(bufLen * sizeof(unsigned char));
+    if (NULL == tlv)
+    {
+        return -1;
+    }
+    unsigned char* val = tlv + bufLen;
+    int valLen = 0;
+    size_t valLenTot = 0;
+    size_t subjectAltNameOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_SUBJECT_ALT_NAME);
+
+    if (NULL != dns)
+    {
+        valLen =
+            sopc_csr_set_san_ext(&val, tlv, MBEDTLS_ASN1_CONTEXT_SPECIFIC | MBEDTLS_X509_SAN_DNS_NAME, dns, dnsLen);
+    }
+    if (0 <= valLen)
+    {
+        valLenTot = (size_t) valLen;
+        valLen = sopc_csr_set_san_ext(
+            &val, tlv, MBEDTLS_ASN1_CONTEXT_SPECIFIC | MBEDTLS_X509_SAN_UNIFORM_RESOURCE_IDENTIFIER, uri, uriLen);
+    }
+    if (0 <= valLen)
+    {
+        valLenTot = valLenTot + (size_t) valLen;
+        valLen = mbedtls_asn1_write_len(&val, tlv, valLenTot); // +4 bytes max
+    }
+    if (0 <= valLen)
+    {
+        valLenTot = valLenTot + (size_t) valLen;
+        valLen = mbedtls_asn1_write_tag(&val, tlv, MBEDTLS_ASN1_CONSTRUCTED | MBEDTLS_ASN1_SEQUENCE); // +1 byte
+    }
+    if (0 <= valLen)
+    {
+        valLenTot = valLenTot + (size_t) valLen;
+        valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_SUBJECT_ALT_NAME, subjectAltNameOidLen, val,
+                                                     valLenTot);
+    }
+    SOPC_Free(tlv);
+    return valLen;
+}
+
 static int sopc_csr_set_md_alg(mbedtls_x509write_csr* ctx, const char* mdType)
 {
-    c_string_to_md_type_t elem = {0};
-    int match = 1;
+    SOPC_ASSERT(NULL != ctx);
+    SOPC_ASSERT(NULL != mdType);
 
-    for (uint8_t i = 0; i < SIZE_STR_TO_MD_TABLE && 0 != match; i++)
+    c_string_to_md_type_t elem = {0};
+    int match = -1;
+
+    for (uint8_t i = 0; i < SOPC_SIZE_STR_TO_MD_TABLE && 0 != match; i++)
     {
         elem = tab_c_string_to_md_type[i];
         match = SOPC_strcmp_ignore_case(elem.name, mdType);
@@ -1786,16 +1908,22 @@ static int sopc_csr_set_md_alg(mbedtls_x509write_csr* ctx, const char* mdType)
     {
         mbedtls_x509write_csr_set_md_alg(ctx, elem.md);
     }
-    return 0 == match;
+    return match;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              SOPC_AsymmetricKey* pKey,
                                              const bool bIsServer,
                                              const char* mdType,
+                                             const char* uri,
+                                             const char* dns,
                                              SOPC_CSR** ppCSR)
 {
     if (NULL == subjectName || NULL == pKey || NULL == ppCSR || NULL == mdType)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == uri)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1822,12 +1950,22 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
         errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_SERVER_AUTH,
                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
     }
-    else
+    if (!errLib && !bIsServer)
     {
         errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_CLIENT_AUTH,
                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
     }
-
+    if (!errLib)
+    {
+        errLib = sopc_csr_set_basic_constraints(&pCSR->csr);
+    }
+    if (!errLib)
+    {
+        size_t uriLen = NULL != uri ? strlen(uri) : 0;
+        size_t dnsLen = NULL != dns ? strlen(dns) : 0;
+        errLib = sopc_csr_set_subject_alt_name(&pCSR->csr, (const unsigned char*) uri, uriLen,
+                                               (const unsigned char*) dns, dnsLen);
+    }
     if (errLib)
     {
         SOPC_KeyManager_CSR_Free(pCSR);
@@ -1839,7 +1977,11 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
 {
-    unsigned char buf[4096]; // size use with the mbedtls sample program
+    /*
+    We can't calculate the exact size of the CSR but 4096
+    seems enough according the mbedtls sample program
+    */
+    unsigned char buf[SOPC_CSR_MAX_DER_BYTE_SIZE];
     uint8_t* pDest = NULL;
     int lenWritten = 0;
     mbedtls_entropy_context ctxEnt = {0};
@@ -1856,6 +1998,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, ui
     int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, mbedtls_entropy_func, &ctxEnt, NULL, 0);
     if (!errLib)
     {
+        /* Let mbedtls failed if the buffer size is too small */
         lenWritten = mbedtls_x509write_csr_der(&pCSR->csr, buf, sizeof(buf), mbedtls_ctr_drbg_random, &ctxDrbg);
         errLib = 0 < lenWritten ? 0 : -1;
     }
