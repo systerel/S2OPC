@@ -668,7 +668,6 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
  *
  * \param subjectName  The subject name to set. The format is a sequence of name (OID types)
  *                     value pairs separated by a ‘,’.
- * \param pKey         A valid pointer to the asymmetric key. The key shall be private.
  * \param bIsServer    Whether this CSR is to request a server or a client certificate.
  * \param mdType       The MD algorithm (terminated by '\0') use for the signature eg SHA1, SHA256...
  * \param uri          The application URI (terminated by '\0'). Shall not be NULL.
@@ -678,11 +677,12 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
  *
  * \note  The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment.
  *        The extendedKeyUsage is filled with serverAuth if \p bIsServer is true, otherwise clientAuth.
+ *        The subject alternative name is filled with \p uri and/or \p dns .
+ *        The basic constraints is set to false for the CA flag.
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
-                                             SOPC_AsymmetricKey* pKey,
                                              const bool bIsServer,
                                              const char* mdType,
                                              const char* uri,
@@ -693,6 +693,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
  * \brief           Encodes a \p pCSR as a DER buffer and writes the result in \p ppDest.
  *
  * \param pCSR     A valid pointer to the CSR.
+ * \param pKey     A valid pointer to the asymmetric key. The key shall be private.
+ *                 The key is attached to the CSR but not freed by ::SOPC_KeyManager_CSR_Free .
  * \param ppDest   A valid pointer to the newly created buffer that stores the DER.
  *                 The allocated buffer must be freed by the caller.
  * \param pLenAllocated  A valid pointer to the length allocated by this operation.
@@ -701,7 +703,10 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
-SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated);
+SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
+                                            SOPC_AsymmetricKey* pKey,
+                                            uint8_t** ppDest,
+                                            uint32_t* pLenAllocated);
 
 /**
  * \brief              Frees a CSR created with ::SOPC_KeyManager_CSR_Create

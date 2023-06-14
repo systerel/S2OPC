@@ -1912,14 +1912,13 @@ static int sopc_csr_set_md_alg(mbedtls_x509write_csr* ctx, const char* mdType)
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
-                                             SOPC_AsymmetricKey* pKey,
                                              const bool bIsServer,
                                              const char* mdType,
                                              const char* uri,
                                              const char* dns,
                                              SOPC_CSR** ppCSR)
 {
-    if (NULL == subjectName || NULL == pKey || NULL == ppCSR || NULL == mdType)
+    if (NULL == subjectName || NULL == ppCSR || NULL == mdType)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1936,7 +1935,6 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     int errLib = mbedtls_x509write_csr_set_subject_name(&pCSR->csr, subjectName);
     if (!errLib)
     {
-        mbedtls_x509write_csr_set_key(&pCSR->csr, &pKey->pk);
         errLib = sopc_csr_set_md_alg(&pCSR->csr, mdType);
     }
     if (!errLib)
@@ -1975,7 +1973,10 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, uint32_t* pLenAllocated)
+SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
+                                            SOPC_AsymmetricKey* pKey,
+                                            uint8_t** ppDest,
+                                            uint32_t* pLenAllocated)
 {
     /*
     We can't calculate the exact size of the CSR but 4096
@@ -1987,10 +1988,12 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR, uint8_t** ppDest, ui
     mbedtls_entropy_context ctxEnt = {0};
     mbedtls_ctr_drbg_context ctxDrbg = {0};
 
-    if (NULL == pCSR || NULL == ppDest || NULL == pLenAllocated)
+    if (NULL == pCSR || NULL == pKey || NULL == ppDest || NULL == pLenAllocated)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    /* Attach key to the CSR before to sign the CSR during the writing to DER buffer */
+    mbedtls_x509write_csr_set_key(&pCSR->csr, &pKey->pk);
     /* Let mbedtls looks in the host system to get the entropy sources
       (standards like the /dev/urandom or Windows CryptoAPI.) */
     mbedtls_entropy_init(&ctxEnt);
