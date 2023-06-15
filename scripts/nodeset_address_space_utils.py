@@ -433,7 +433,7 @@ def __exists_ref(tree, search, nids_or_aliases: set, namespaces):
     return False
 
 
-def remove_unused(tree: ET.ElementTree, namespaces: dict):
+def remove_unused(tree: ET.ElementTree, retain_ns0: bool, retain_types: set, namespaces: dict):
     # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
     aliases = __get_aliases(tree, namespaces)
     for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject/uanodeset:References/uanodeset:Reference", False),
@@ -445,8 +445,8 @@ def remove_unused(tree: ET.ElementTree, namespaces: dict):
             removed_nids = set()
             for ty_node in tree.iterfind(f"uanodeset:{ty}", namespaces):
                 nid = ty_node.get('NodeId')
-                if not nid.startswith('ns='):
-                    # ignore NS0 types
+                if (retain_ns0 and not nid.startswith('ns=')) or nid in retain_types:
+                    # retain this type
                     continue
                 alias = aliases.get(nid)
                 refs = set([nid])
@@ -714,7 +714,7 @@ def run_merge(args):
         remove_subtree(tree, namespaces, args.remove_subtree)
 
     if res and args.remove_unused:
-        remove_unused(tree, namespaces)
+        remove_unused(tree, args.retain_ns0, frozenset(args.retain_types), namespaces)
 
     if res:
         tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
@@ -757,6 +757,14 @@ def make_argparser():
                         Remove all of the type definitions which are not used by the model 
                         (except for basic/standard datatypes which are mandatory).
                         This  option forces the creation of reciprocal references (sanitize).
+                        ''')
+    parser.add_argument('--retain-ns0', action='store_true', dest='retain_ns0',
+                        help='''
+                        Used with --remove-unused: retain all NS0 types.
+                        ''')
+    parser.add_argument('--retain-types', nargs='+', default=[], dest='retain_types',
+                        help='''
+                        Used with --remove-unused: retain the types given by their NS and NodeID
                         ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''

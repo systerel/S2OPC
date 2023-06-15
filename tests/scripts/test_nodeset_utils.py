@@ -60,7 +60,7 @@ class MergeTests(unittest.TestCase):
             expected = pj(RESOURCE_DIR, 'expected', result_name)
             actual = pj(tmp_dir, result_name)
             res_src_paths = [pj(RESOURCE_DIR, src) for src in src_paths]
-            args = parser.parse_args([*options, *res_src_paths, '-o', actual])
+            args = parser.parse_args([*res_src_paths, '-o', actual, *options])
             run_merge(args)
             self.assert_content_equal(expected, actual)
         finally:
@@ -98,6 +98,14 @@ class MergeTests(unittest.TestCase):
 
     def test_remove_unused(self):
         self.run_test('test_remove_unused.xml', ['--remove-unused'],
+                      'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
+
+    def test_remove_unused_retainNS0(self):
+        self.run_test('test_remove_unused_retainNS0.xml', ['--remove-unused', '--retain-ns0'],
+                      'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
+
+    def test_remove_unused_retain_types(self):
+        self.run_test('test_remove_unused_retain_types.xml', ['--remove-unused', '--retain-types', 'i=6', 'i=27'],
                       'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
 
 

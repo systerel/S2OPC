@@ -54,9 +54,26 @@
     <Description>Describes a value that can have any valid DataType.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="Organizes">i=86</Reference>
+      <Reference ReferenceType="HasSubtype">i=26</Reference>
       <Reference ReferenceType="HasSubtype">i=1</Reference>
       <Reference ReferenceType="HasSubtype">i=12</Reference>
       <Reference ReferenceType="HasSubtype">ns=1;i=15032</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="Number" IsAbstract="true" NodeId="i=26">
+    <DisplayName>Number</DisplayName>
+    <Description>Describes a value that can have any numeric DataType.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=27</Reference>
+      </References>
+  </UADataType>
+  <UADataType BrowseName="Integer" IsAbstract="true" NodeId="i=27">
+    <DisplayName>Integer</DisplayName>
+    <Description>Describes a value that can have any integer DataType.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=6</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="Boolean" NodeId="i=1">
@@ -64,6 +81,13 @@
     <Description>Describes a value that is either TRUE or FALSE.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="Int32" NodeId="i=6">
+    <DisplayName>Int32</DisplayName>
+    <Description>Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=27</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="String" NodeId="i=12">

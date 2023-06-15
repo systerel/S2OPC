@@ -54,9 +54,38 @@
     <Description>Describes a value that can have any valid DataType.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="Organizes">i=86</Reference>
+      <Reference ReferenceType="HasSubtype">i=26</Reference>
       <Reference ReferenceType="HasSubtype">i=1</Reference>
       <Reference ReferenceType="HasSubtype">i=12</Reference>
+      <Reference ReferenceType="HasSubtype">i=16</Reference>
+      <Reference ReferenceType="HasSubtype">i=17</Reference>
+      <Reference ReferenceType="HasSubtype">i=18</Reference>
       <Reference ReferenceType="HasSubtype">ns=1;i=15032</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="Number" IsAbstract="true" NodeId="i=26">
+    <DisplayName>Number</DisplayName>
+    <Description>Describes a value that can have any numeric DataType.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=27</Reference>
+      <Reference ReferenceType="HasSubtype">i=28</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="Integer" IsAbstract="true" NodeId="i=27">
+    <DisplayName>Integer</DisplayName>
+    <Description>Describes a value that can have any integer DataType.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=6</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="UInteger" IsAbstract="true" NodeId="i=28">
+    <DisplayName>UInteger</DisplayName>
+    <Description>Describes a value that can have any unsigned integer DataType.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=26</Reference>
+      <Reference ReferenceType="HasSubtype">i=7</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="Boolean" NodeId="i=1">
@@ -66,9 +95,44 @@
       <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
+  <UADataType BrowseName="Int32" NodeId="i=6">
+    <DisplayName>Int32</DisplayName>
+    <Description>Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=27</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="UInt32" NodeId="i=7">
+    <DisplayName>UInt32</DisplayName>
+    <Description>Describes a value that is an integer between 0 and 4,294,967,295.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=28</Reference>
+    </References>
+  </UADataType>
   <UADataType BrowseName="String" NodeId="i=12">
     <DisplayName>String</DisplayName>
     <Description>Describes a value that is a sequence of printable Unicode characters.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="XmlElement" NodeId="i=16">
+    <DisplayName>XmlElement</DisplayName>
+    <Description>Describes a value that is an XML element.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="NodeId" NodeId="i=17">
+    <DisplayName>NodeId</DisplayName>
+    <Description>Describes a value that is an identifier for a node within a Server address space.</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+    </References>
+  </UADataType>
+  <UADataType BrowseName="ExpandedNodeId" NodeId="i=18">
+    <DisplayName>ExpandedNodeId</DisplayName>
+    <Description>Describes a value that is an absolute identifier for a node.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
