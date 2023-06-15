@@ -1371,10 +1371,11 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
     }
 
     pPubResp = (OpcUa_PublishResponse*) pParam;
-    /* Take note to acknowledge later. There is no ack with KeepAlive. */
-    /* TODO: this limits the benefits of having multiple pending PublishRequest, maybe
-     * it would be more appropriate to have a list of SeqNumbsToAck... */
-    SOPC_ASSERT(!pSM->bAckSubscr);
+    /* Take note to acknowledge in next PublishRequest (which should be sent just after this function call).
+       note: there is no ack with KeepAlive. */
+    /* TODO: in the future we should manage need for republish and thus using the actual SN received instead of
+     * available ones. For now it allows the server to avoid keeping them for nothing since no republish will never be
+     * requested by us. */
     if (0 < pPubResp->NoOfAvailableSequenceNumbers)
     {
         pSM->bAckSubscr = true;
@@ -1639,6 +1640,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
     {
     /* Mostly when stActivated is reached */
     case stActivated:
+    case stCreatingMonIt:
         /* add tokens, but wait for at least a monitored item */
         if (0 != pSM->iSubscriptionID && pSM->nTokenUsable < pSM->nTokenTarget)
         {
