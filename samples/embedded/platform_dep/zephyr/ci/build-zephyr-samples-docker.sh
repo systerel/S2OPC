@@ -22,66 +22,67 @@
 # This script is intended to be run from within the docker.
 # It does not require elevation
 
+function fail() {
+    echo $*
+    exit 1
+}
+
+function usage() {
+    echo  "Builds a given Zephyr application"
+    echo "Usage:"
+    echo "  $0    : build a predefined application/board"
+    echo "  $0 <BOARD> <APP> : build the <APP> sample application (default 'cli_pubsub_server') for board <BOARD> (default 'mimxrt1064_evk')"
+    echo "  $0 -h : This help"
+    exit 0
+}
+
+[ "$1" == "-h" ] && usage
+
 P0=$0
-echo "PWD=$(pwd) P0='$P0'"
 cd $(dirname $P0) || exit 1
 cd ../../../../..
 
-HOSTDIR=$(pwd)
-S2OPCDIR=/zephyrproject/modules/lib/s2opc
+S2OPCDIR=$(pwd)
 SAMPLESDIR=${S2OPCDIR}/samples/embedded
-OUTDIR=${HOSTDIR}/build_zephyr
+OUTDIR=${S2OPCDIR}/build_zephyr
 
-echo
-echo "HOSTDIR=$HOSTDIR"
-echo "S2OPCDIR=$S2OPCDIR"
-echo "SAMPLESDIR=$SAMPLESDIR"
-echo "OUTDIR=$OUTDIR"
+#echo "OUTDIR=$OUTDIR"
+#echo "S2OPCDIR=$S2OPCDIR"
+#echo "SAMPLESDIR=$SAMPLESDIR"
+#echo "OUTDIR=$OUTDIR"
 
-rm -rf ${OUTDIR} 2> /dev/null
-mkdir -p ${OUTDIR}
+mkdir -p ${OUTDIR} || exit 2
 
 [ `whoami` != 'user' ] && echo "Unexpected user `whoami`. Is this script executed within the docker?" && exit 2
 
-# Replace S2OPC content by host
-! [ -d ${S2OPCDIR} ] && echo "S2OPC not found in ${S2OPCDIR}" && exit 2
-cd ${S2OPCDIR}/.. || exit 2
-mv s2opc s2opc_bak || exit 2
-ln -s ${HOSTDIR} s2opc || exit 3
-
+# Just check that all folders exist!
 cd ${S2OPCDIR} || exit 3
-
-
 cd ${SAMPLESDIR} || exit 4
 
 # Trust user directory in order to get commit signature
 # User in docker and outside docker could have different UID which leads to warnings from git
-git config --global --add safe.directory /host_zephyr
+git config --global --add safe.directory ${S2OPCDIR}
 
-build_app() {
-  export BOARD=$1
-  export APP=$2
-  echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-  cd ${SAMPLESDIR}/${APP} || return 1
-  sudo rm -rf build || return  1
-  west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
-  mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
-  if ! [ -f build/zephyr/zephyr.bin ] ; then
-    echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-    return 1
-  fi
-  cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-  echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-}
+export BOARD=$1
+export APP=$2
+west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
+[ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
-# Build CLIENT demo on stm32h735g_disco
-build_app stm32h735g_disco cli_client || exit 10
+[[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
+[[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
+ 
 
-# Build PUBSUB+SERVER demo on mimxrt1064_evk
-build_app mimxrt1064_evk cli_pubsub_server || exit 11
-
-# Build PUBSUB+SERVER demo on native_posix_64
-build_app native_posix_64 cli_pubsub_server || exit 12
+echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+cd ${SAMPLESDIR}/${APP} || return 1
+sudo rm -rf build || return  1
+west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
+if ! [ -f build/zephyr/zephyr.bin ] ; then
+  echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+  return 1
+fi
+cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
+echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 
 ls -l ${OUTDIR}/
 

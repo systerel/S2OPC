@@ -23,11 +23,23 @@ export SCRIPT=build-zephyr-samples-docker.sh
 cd "$(dirname "$0")"/../../../../..
 HOST_DIR=$(pwd)
 
+function usage() {
+    echo "Builds a predefined set of Zephyr applications"
+    echo "Usage:"
+    echo "  $0    : build predefined application/boards"
+    echo "  $0 -i : Start an interactive session in zephyr docker. see ${SCRIPT} for more help"
+    echo "  $0 -h : This help"
+    exit 0
+}
+
 # interactive?
 IS_INTERACTIVE=false
+[ "$1" == "-h" ] && usage
 [ "$1" == "-i" ] && IS_INTERACTIVE=true
 
 source .docker-images.sh
+docker inspect ${ZEPHYR_IMAGE} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_IMAGE}" 
+
 rm -rf build_zephyr/* 2>/dev/null
 mkdir -p build_zephyr
 # local user is different from docker container user
@@ -38,13 +50,23 @@ chmod a+rw samples/embedded/cli_pubsub_server/
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
 $IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_IMAGE}" && \
-    (docker run -it --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE})
+    (docker run -it --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_IMAGE})
 $IS_INTERACTIVE && exit 1
 
-(docker run --rm -v ${HOST_DIR}:/host_zephyr -w /host_zephyr ${ZEPHYR_IMAGE} samples/embedded/platform_dep/zephyr/ci/${SCRIPT})&
-wait $!
+function build() {
+  export BOARD=$1
+  export APP=$2
+  echo "Starting docker to build ${APP} for ${BOARD}"
 
-echo "Result = $?"
+  (docker run --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_IMAGE}\
+     samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP})&
+  wait $!
+  echo "Result = $?"
+}
+build stm32h735g_disco cli_client
+build mimxrt1064_evk cli_pubsub_server
+build native_posix_64 cli_pubsub_server
+
 # Check results
 EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin"
 RESULT=true

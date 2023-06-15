@@ -239,9 +239,12 @@ build-rpi:
 
 build-zephyr:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/zephyr_build:v3.2.0@sha256:cd3c4dfe62f866b06917ca16aba7e3ba8856e6e2ae6bfd8dbece625b26e28d8f # digest of zephyr_build :v3.2.0
+  image: docker.aix.systerel.fr/c838/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
   script:
-    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh || exit $?'
+    - 'ln -s $(pwd) /zephyrproject/s2opc'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client || exit $?'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server || exit $?'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_pubsub_server || exit $?'
   variables:
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
