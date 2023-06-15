@@ -47,10 +47,6 @@
 
 /* Timeout for requests */
 #define SYNCHRONOUS_REQUEST_TIMEOUT 10000
-/* Max number of simultaneous connections */
-#define MAX_SIMULTANEOUS_CONNECTIONS 200
-/* Max number of subscribed items per connection */
-#define MAX_SUBSCRIBED_ITEMS 200
 /* Max BrowseNext requests iteration number */
 uint32_t CfgMaxBrowseNextRequests = 50;
 /* Max references per node (BrowseRequest) */
