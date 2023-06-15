@@ -79,7 +79,7 @@ west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
   echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
-  return 1
+  exit 1
 fi
 cp build/zephyr/zephyr.bin ${OUTDIR}/${APP}_${BOARD}.bin 2>&1 |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 echo " ** Build ${APP} OK " |tee -a ${OUTDIR}/${APP}_${BOARD}.log

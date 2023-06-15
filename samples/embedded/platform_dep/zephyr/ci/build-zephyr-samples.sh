@@ -34,8 +34,14 @@ function usage() {
 
 # interactive?
 IS_INTERACTIVE=false
-[ "$1" == "-h" ] && usage
-[ "$1" == "-i" ] && IS_INTERACTIVE=true
+while [[ ! -z $1 ]]; do
+    PARAM=$1
+    shift
+    [[ ${PARAM} == "-h" ]] && usage && exit 1
+    [[ ${PARAM} == "-i" ]] && IS_INTERACTIVE=true && continue
+    echo "Unknown parameter : ${PARAM}"
+    exit 2
+done
 
 source .docker-images.sh
 docker inspect ${ZEPHYR_IMAGE} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_IMAGE}" 
