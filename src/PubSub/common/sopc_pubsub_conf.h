@@ -320,8 +320,15 @@ SOPC_DataSetWriter* SOPC_WriterGroup_Get_DataSetWriter_At(const SOPC_WriterGroup
 /*******************/
 /** DataSetWriter **/
 /*******************/
+typedef struct SOPC_DataSetWriter_Options
+{
+    bool noUseSeqNum; // Negative logic to get default value with 0-fill initializer (Calloc)
+} SOPC_DataSetWriter_Options;
+
 uint16_t SOPC_DataSetWriter_Get_Id(const SOPC_DataSetWriter* writer);
 void SOPC_DataSetWriter_Set_Id(SOPC_DataSetWriter* writer, uint16_t id);
+const SOPC_DataSetWriter_Options* SOPC_DataSetWriter_Get_Options(const SOPC_DataSetWriter* writer);
+void SOPC_DataSetWriter_Set_Options(SOPC_DataSetWriter* writer, const SOPC_DataSetWriter_Options* options);
 
 const SOPC_PublishedDataSet* SOPC_DataSetWriter_Get_DataSet(const SOPC_DataSetWriter* writer);
 void SOPC_DataSetWriter_Set_DataSet(SOPC_DataSetWriter* writer, SOPC_PublishedDataSet* dataset);

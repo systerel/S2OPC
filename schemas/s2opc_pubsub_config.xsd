@@ -81,6 +81,7 @@
       <xs:element type="variable" name="variable" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="writerId" type="xs:unsignedShort" use="optional"/> <!-- If omitted, set as groupId of message -->
+    <xs:attribute name="useSequenceNumber" type="xs:boolean" use="optional"/> <!-- true (default) to enable DataSetMessageSequenceNumber -->
   </xs:complexType>
   <xs:complexType name="variable">
     <xs:attribute name="nodeId" type="xs:string" use="required"/>

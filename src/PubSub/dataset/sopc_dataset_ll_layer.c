@@ -318,11 +318,13 @@ SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(co
 
 void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn)
 {
+    SOPC_ASSERT(NULL != dsm);
     dsm->dataset_message_sequence_number = sn;
 }
 
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm)
 {
+    SOPC_ASSERT(NULL != dsm);
     return dsm->dataset_message_sequence_number;
 }
 

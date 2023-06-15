@@ -89,6 +89,10 @@ SOPC_Dataset_NetworkMessage* SOPC_Create_NetworkMessage_From_WriterGroup(SOPC_Wr
             }
         }
 
+        const SOPC_DataSetWriter_Options* option = SOPC_DataSetWriter_Get_Options(conf_dsw);
+        SOPC_ASSERT(NULL != option);
+        conf.dataSetMessageSequenceNumberFlag = !option->noUseSeqNum;
+
         SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(msg_dsm, &conf);
         if (!isKeepAlive)
         {

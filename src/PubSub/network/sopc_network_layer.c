@@ -102,7 +102,6 @@ const bool DATASET_LL_NETWORK_MESSAGE_NUMBER_ENABLED = false;
 const bool DATASET_LL_SEQUENCE_NUMBER_ENABLED = false;
 
 const bool DATASET_LL_DSM_IS_VALID = true;
-const bool DATASET_LL_DSM_SEQ_NUMBER_ENABLED = true;
 const bool DATASET_LL_DSM_STATUS_ENABLED = false;
 const bool DATASET_LL_DSM_MAJOR_VERSION_ENABLED = false;
 const bool DATASET_LL_DSM_MINOR_VERSION_ENABLED = false;
@@ -663,7 +662,6 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 
         //   - sequence number is enabled
         Network_Message_Set_Bool_Bit(&byte, 3, conf->dataSetMessageSequenceNumberFlag);
-        SOPC_ASSERT(DATASET_LL_DSM_SEQ_NUMBER_ENABLED == conf->dataSetMessageSequenceNumberFlag && "DSM SN allowed");
 
         //   - status
         Network_Message_Set_Bool_Bit(&byte, 4, conf->statusFlag);
@@ -848,7 +846,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
 
         if (SOPC_STATUS_OK == status)
         {
-            dsm_conf.fieldEncoding = data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2);
+            dsm_conf.fieldEncoding = (data & (uint8_t)(C_NETWORK_MESSAGE_BIT_1 + C_NETWORK_MESSAGE_BIT_2)) >> 1;
             if (DataSet_LL_FieldEncoding_Variant != dsm_conf.fieldEncoding)
             {
                 // not managed yet
@@ -897,11 +895,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed);
         if (SOPC_STATUS_OK == status)
         {
-            if (NULL == readerConf->checkDataSetMessageSN_Func)
-            {
-                /* Reader don't check SequenceNumber */
-            }
-            else
+            if (NULL != readerConf->checkDataSetMessageSN_Func && contentMask->dataSetMessageSequenceNumberFlag)
             {
                 /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
                  */

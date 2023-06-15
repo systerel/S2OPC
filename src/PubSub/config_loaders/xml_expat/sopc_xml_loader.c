@@ -99,6 +99,7 @@
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
+#define ATTR_DATASET_SEQ_NUM "useSequenceNumber"
 
 #define ATTR_VARIABLE_NODE_ID "nodeId"
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
@@ -134,6 +135,7 @@ struct sopc_xml_pubsub_variable_t
 struct sopc_xml_pubsub_dataset_t
 {
     uint16_t writer_id;
+    bool useDsmSeqNum;
     uint16_t nb_variables;
     struct sopc_xml_pubsub_variable_t* variableArr;
 };
@@ -629,6 +631,10 @@ static bool parse_dataset_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
+    else if (TEXT_EQUALS(ATTR_DATASET_SEQ_NUM, attr_name))
+    {
+        result = parse_boolean(attr_val, strlen(attr_val), &ds->useDsmSeqNum);
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'dataset' attribute <%s>", attr_name);
@@ -641,6 +647,7 @@ static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_da
     memset(ds, 0, sizeof *ds);
     SOPC_ASSERT(NULL != ctx->currentMessage);
     ds->writer_id = 0;
+    ds->useDsmSeqNum = true;
 
     bool result = parse_attributes(attrs, parse_dataset_attributes, ctx, (void*) ds);
 
@@ -1217,6 +1224,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                     SOPC_DataSetWriter* dataSetWriter = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, ids);
                     SOPC_ASSERT(dataSetWriter != NULL);
                     SOPC_DataSetWriter_Set_Id(dataSetWriter, ds->writer_id);
+                    const SOPC_DataSetWriter_Options dsmOptions = {.noUseSeqNum = !ds->useDsmSeqNum};
+                    SOPC_DataSetWriter_Set_Options(dataSetWriter, &dsmOptions);
 
                     SOPC_DataSetWriter_Set_DataSet(dataSetWriter, pubDataSet);
 

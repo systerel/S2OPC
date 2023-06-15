@@ -162,6 +162,7 @@ struct SOPC_DataSetWriter
     // dataSetName in structure defined in Spec 1.4
     SOPC_PublishedDataSet*
         dataSet; /* IMPORTANT NOTE: memory management of field not managed here (see global config struct)*/
+    SOPC_DataSetWriter_Options options;
     // For the next version:
     // name
     // enabled
@@ -1153,6 +1154,18 @@ void SOPC_DataSetWriter_Set_Id(SOPC_DataSetWriter* writer, uint16_t id)
 {
     SOPC_ASSERT(NULL != writer);
     writer->id = id;
+}
+
+const SOPC_DataSetWriter_Options* SOPC_DataSetWriter_Get_Options(const SOPC_DataSetWriter* writer)
+{
+    SOPC_ASSERT(NULL != writer);
+    return &writer->options;
+}
+
+void SOPC_DataSetWriter_Set_Options(SOPC_DataSetWriter* writer, const SOPC_DataSetWriter_Options* options)
+{
+    SOPC_ASSERT(NULL != writer && NULL != options);
+    writer->options = *options;
 }
 
 void SOPC_DataSetWriter_Set_DataSet(SOPC_DataSetWriter* writer, SOPC_PublishedDataSet* dataset)
