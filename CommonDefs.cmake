@@ -75,7 +75,6 @@ endif()
 
 # Expat have specific requirements for static library and MSCV: XML_STATIC shall be defined by application using it
 if(expat_FOUND)
-  add_definitions (-DSOPC_WITH_EXPAT=1)
   if(WIN32 AND NOT MINGW)
     if (USE_STATIC_EXPAT_LIB)
       target_compile_definitions(expat::expat INTERFACE "XML_STATIC")
