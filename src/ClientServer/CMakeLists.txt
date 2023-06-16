@@ -57,23 +57,17 @@ set(HELPERWRAPPER_PATH "frontend/helper_wrapper")
 set(CLIENTWRAPPER_PATH "frontend/client_wrapper")
 set(SERVERWRAPPER_PATH "frontend/server_wrapper")
 
-set(WRAPPERS_XML_CONFIG "")
-set(LOADER_XML_PRIVATE_DEP "")
-if (expat_FOUND)
-  set(WRAPPERS_XML_CONFIG
-      "${XML_LOADERS_PATH}/helpers/sopc_helper_expat.c"
-      "${XML_LOADERS_PATH}/address_space_loaders/xml_expat/sopc_uanodeset_loader.c"
-      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_loader_internal.c"
-      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_server_loader.c"
-      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_client_loader.c"
-      "${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_users_loader.c"
-      "${CLIENTWRAPPER_PATH}/libs2opc_client_config_xml.c"
-      "${SERVERWRAPPER_PATH}/libs2opc_server_config_xml.c")
-  set(LOADER_XML_PRIVATE_DEP expat::expat)
-  else()
-  message("-- Expat library NOT found: XML config loaders will not be available")
-  message(WARNING "Without the Expat library, the XML config loaders will not be compiled.")
-endif()
+set(WRAPPERS_XML_CONFIG
+"${XML_LOADERS_PATH}/helpers/sopc_helper_expat.c"
+"${XML_LOADERS_PATH}/address_space_loaders/xml_expat/sopc_uanodeset_loader.c"
+"${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_loader_internal.c"
+"${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_server_loader.c"
+"${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_config_client_loader.c"
+"${XML_LOADERS_PATH}/config_loaders/xml_expat/sopc_users_loader.c"
+"${CLIENTWRAPPER_PATH}/libs2opc_client_config_xml.c"
+"${SERVERWRAPPER_PATH}/libs2opc_server_config_xml.c")
+# Add dependency to expat if found
+set(LOADER_XML_PRIVATE_DEP $<IF:$<BOOL:${expat_FOUND}>,expat::expat,"">)
 
 set(S2OPC_WRAPPERS_SRC
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"

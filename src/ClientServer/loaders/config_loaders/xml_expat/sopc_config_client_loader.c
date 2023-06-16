@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include "sopc_config_loader.h"
 #include "sopc_config_loader_internal.h"
 
@@ -1124,3 +1125,5 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
         return false;
     }
 }
+
+#endif /* SOPC_WITH_EXPAT */

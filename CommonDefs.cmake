@@ -82,6 +82,8 @@ if(expat_FOUND)
   endif()
 else()
   add_definitions (-DSOPC_WITH_EXPAT=0)
+  message("-- Expat library NOT found: XML config loaders will not be available")
+  message(WARNING "Without the Expat library, the XML config loaders will not be compiled.")
 endif()
 
 # redefine CMake behavior for find_library(*)

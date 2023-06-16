@@ -19,6 +19,7 @@
 
 // WARNING: this source file is only included if the XML library (Expat) is available
 
+#if !defined(SOPC_WITH_EXPAT) || SOPC_WITH_EXPAT
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -85,3 +86,5 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientCon
 
     return SOPC_STATUS_OK;
 }
+
+#endif /* SOPC_WITH_EXPAT */
