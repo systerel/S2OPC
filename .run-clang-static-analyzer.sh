@@ -53,12 +53,12 @@ valist.Unterminated
 DISABLED_CHECKERS="
 deadcode.DeadStores
 alpha.core.PointerSub
-alpha.core.PointerArithm
 "
 
 # Analyzers not enabled by default that cause too many false positives:
 # - alpha.security.ArrayBoundV2
 # - alpha.deadcode.UnreachableCode
+# - alpha.core.PointerArithm
 
 SCAN_BUILD="
 scan-build
