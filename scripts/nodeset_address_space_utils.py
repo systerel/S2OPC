@@ -288,20 +288,33 @@ def merge(tree, new, namespaces):
         # Restore correct level for next tag which is </Aliases>
         tree_aliases[-1].tail = indent(1)
 
-    # Merge Nodes
-    tree_nodes = {node.get('NodeId'):node for node in tree.iterfind('*[@NodeId]')}
+    # Merge Nodes, detect duplicate Node IDs (forbidden)
+    duplicates = set()
+    tree_nodes = dict()
+    for node in tree.iterfind('*[@NodeId]'):
+        node_id = node.get('NodeId')
+        if node_id in tree_nodes:
+            duplicates.add(node_id)
+        else:
+            tree_nodes[node_id] = node
     new_nodes = dict()
     for node in new.iterfind('*[@NodeId]'):
         # Reassign namespace index for node attributes and subelements
         reassign_node_ns_index(node, ns_idx_reassign, namespaces)
-        new_nodes[node.get('NodeId')] = node
+        node_id = node.get('NodeId')
+        if node_id in tree_nodes or node_id in new_nodes:
+            duplicates.add(node_id)
+        else:
+            new_nodes[node_id] = node
+    # ns0 duplicates are valid
+    # for instance the Server, ServerArray, NamespaceArray nodes may appear in various files
+    ns0_duplicates = filter(_is_ns0, duplicates)
+    user_duplicates = duplicates - set(ns0_duplicates)
+    if len(user_duplicates) > 0:
+        raise Exception(f"There are duplicate Node IDs: {sorted(duplicates)}")
 
-    # New nodes are copied
-    common_nids = set(new_nodes) & set(tree_nodes)
-    for nid in sorted(common_nids):
-        print('Merged: skipped already known node {}'.format(nid), file=sys.stderr)
     # New unique nids
-    new_nids = set(new_nodes) - set(tree_nodes)
+    new_nids = set(new_nodes)
     if len(new_nids) > 0 and len(tree_root) > 0:
         # indent for first node added
         tree_root[-1].tail = indent(1)
@@ -310,7 +323,7 @@ def merge(tree, new, namespaces):
         #     print('Merge: add node {}'.format(nid), file=sys.stderr)
         tree_root.append(new_nodes[nid])
     # References of common nodes are merged
-    for nid in sorted(common_nids):
+    for nid in sorted(ns0_duplicates):
         nodeb = new_nodes[nid]
         refsb = nodeb.find('./uanodeset:References', namespaces)
         if refsb is None:
@@ -373,12 +386,15 @@ def _is_hierarchical_ref(ref: ET.Element):
     ref_type = ref.get('ReferenceType')
     return ref_type in HIERARCHICAL_REFERENCE_TYPES
 
+def _is_ns0(nid):
+    return not nid.startswith('ns=')
+
 def _iter_hierarchical(n: ET.Element, namespaces: dict, downwards=True):
     for ref in n.iterfind("uanodeset:References/uanodeset:Reference", namespaces):
         if _is_forward(ref) != downwards:
             continue
         child_nid = ref.text.strip()
-        if not child_nid.startswith('ns='):
+        if _is_ns0(child_nid):
             # ignore NS0 children
             continue
         if _is_hierarchical_ref(ref):
@@ -457,7 +473,7 @@ def remove_unused(tree: ET.ElementTree, retain_ns0: bool, retain_types: set, nam
             removed_nids = set()
             for ty_node in tree.iterfind(f"uanodeset:{ty}", namespaces):
                 nid = ty_node.get('NodeId')
-                if (retain_ns0 and not nid.startswith('ns=')) or nid in retain_types:
+                if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
                     # retain this type
                     continue
                 alias = aliases.get(nid)
