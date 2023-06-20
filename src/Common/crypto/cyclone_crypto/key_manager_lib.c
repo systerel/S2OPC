@@ -18,18 +18,25 @@
  */
 
 #include <assert.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_key_manager.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include "key_manager_lib.h"
 
-// TODO: the right cyclone_crypto includes here
+#include "cyclone_crypto/pkix/pem_decrypt.h"
+#include "cyclone_crypto/pkix/pem_export.h"
+#include "cyclone_crypto/pkix/pem_import.h"
+#include "cyclone_crypto/pkix/pkcs8_key_parse.h"
+#include "cyclone_crypto/pkix/x509_cert_parse.h"
+#include "cyclone_crypto/pkix/x509_cert_validate.h"
+#include "cyclone_crypto/pkix/x509_crl_parse.h"
+#include "cyclone_crypto/pkix/x509_key_format.h"
+#include "cyclone_crypto/pkix/x509_key_parse.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
@@ -37,19 +44,89 @@
  */
 
 /**
- * Creates an asymmetric key from a \p buffer, in DER or PEM format.
+ * Creates an asymmetric key from a \p buffer.
+ * If the \p buffer contains a private key, the key must NOT be encrypted.
  */
+
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* buffer,
                                                                  uint32_t lenBuf,
                                                                  bool is_public,
                                                                  SOPC_AsymmetricKey** ppKey)
 {
-    SOPC_UNUSED_ARG(buffer);
-    SOPC_UNUSED_ARG(lenBuf);
-    SOPC_UNUSED_ARG(is_public);
-    SOPC_UNUSED_ARG(ppKey);
+    if (NULL == buffer || 0 == lenBuf || NULL == ppKey)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_AsymmetricKey* key = NULL;
+    key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
+    if (NULL == key)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    key->isBorrowedFromCert = false;
+    rsaInitPublicKey(&key->pubKey);
+    rsaInitPrivateKey(&key->privKey);
+
+    int errLib = -1;
+
+    if (is_public)
+    {
+        errLib = pemImportRsaPublicKey((const char_t*) buffer, (size_t) lenBuf, &key->pubKey);
+
+        if (errLib) // The buffer is probably in DER format...
+        {
+            // We will then directly parse it.
+            // Corresponds to the case "PUBLIC KEY" when calling the function pemImportRsaPublicKey.
+            size_t lenParsed = 0;
+            X509SubjectPublicKeyInfo publicKeyInfo = {0};
+            errLib = x509ParseSubjectPublicKeyInfo(buffer, lenBuf, &lenParsed, &publicKeyInfo);
+
+            // If no error, continue...
+            if (!errLib)
+            {
+                errLib = x509ImportRsaPublicKey(&publicKeyInfo, &key->pubKey);
+            }
+        }
+    }
+    else // Key is private
+    {
+        errLib = pemImportRsaPrivateKey((const char_t*) buffer, (size_t) lenBuf, NULL, &key->privKey);
+
+        if (errLib) // The buffer is probably in DER format...
+        {
+            // We will then directly parse it.
+            // Corresponds to the case "RSA PRIVATE KEY" when calling the function pemImportRsaPrivateKey.
+            Pkcs8PrivateKeyInfo privateKeyInfo = {0};
+            errLib = pkcs8ParseRsaPrivateKey(buffer, lenBuf, &privateKeyInfo.rsaPrivateKey);
+
+            // If no error, continue...
+            if (!errLib)
+            {
+                privateKeyInfo.oid = RSA_ENCRYPTION_OID;
+                privateKeyInfo.oidLen = sizeof(RSA_ENCRYPTION_OID);
+                errLib = pkcs8ImportRsaPrivateKey(&privateKeyInfo, &key->privKey);
+            }
+
+            // Clear private key info
+            memset(&privateKeyInfo, 0, sizeof(Pkcs8PrivateKeyInfo));
+        }
+
+        /* If no error, fill the public part */
+        if (!errLib)
+        {
+            errLib = rsaGeneratePublicKey(&key->privKey, &key->pubKey);
+        }
+    }
+
+    if (errLib)
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(key);
+        return SOPC_STATUS_NOK;
+    }
+
+    *ppKey = key;
 
     return SOPC_STATUS_OK;
 }
@@ -64,25 +141,72 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                char* password,
                                                                uint32_t lenPassword)
 {
-    SOPC_UNUSED_ARG(szPath);
-    SOPC_UNUSED_ARG(ppKey);
-    SOPC_UNUSED_ARG(password);
-    SOPC_UNUSED_ARG(lenPassword);
+    if (NULL == szPath || NULL == ppKey)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    // Check password
+    if (NULL == password && 0 != lenPassword)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    if (NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_SecretBuffer* pSecretBuffer = SOPC_SecretBuffer_NewFromFile(szPath);
+    const SOPC_ExposedBuffer* pBuffer = SOPC_SecretBuffer_Expose(pSecretBuffer);
+    uint32_t length = SOPC_SecretBuffer_GetLength(pSecretBuffer);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL ==
+        password) // not-encrypted private key, we can directly call the function AsymmetriKey_CreateFromBuffer()
+    {
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(pBuffer, length, false, ppKey);
+    }
+    else
+    {
+        char_t buffer_decrypted[2 * length]; // Length of the decrypted buffer, 2*size should be enough.
+        size_t lenBuffer_decrypted;
+        int errLib =
+            pemDecryptPrivateKey((const char_t*) pBuffer, length, password, buffer_decrypted, &lenBuffer_decrypted);
+
+        if (!errLib)
+        {
+            status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer((uint8_t*) buffer_decrypted,
+                                                                    (uint32_t) lenBuffer_decrypted, false, ppKey);
+        }
+    }
+
+    SOPC_SecretBuffer_Unexpose(pBuffer, pSecretBuffer);
+    SOPC_SecretBuffer_DeleteClear(pSecretBuffer);
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
                                                                       SOPC_AsymmetricKey** pKey)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pKey);
+    if (NULL == pCert || NULL == pKey)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    *pKey = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
+    if (NULL == *pKey)
+    {
+        return SOPC_STATUS_NOK;
+    }
 
-    return SOPC_STATUS_OK;
+    (*pKey)->isBorrowedFromCert = true;
+
+    rsaInitPublicKey(&(*pKey)->pubKey);
+    rsaInitPrivateKey(&(*pKey)->privKey);
+
+    return KeyManager_Certificate_GetPublicKey(pCert, *pKey);
 }
 
 /**
@@ -92,17 +216,25 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC
  */
 void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey)
 {
-    SOPC_UNUSED_ARG(pKey);
+    if (NULL == pKey)
+    {
+        return;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (false == pKey->isBorrowedFromCert)
+    {
+        rsaFreePublicKey(&pKey->pubKey);
+        rsaFreePrivateKey(&pKey->privKey);
+    }
+
+    SOPC_Free(pKey);
 }
 
 /**
- * \brief   Creates a DER from the AsymmetricKey \p pKey and copies it to \p pDest.
- *
- *   This function does not allocate the buffer containing the DER.
- *   The operation may fail if the allocated buffer is not large enough.
- *   The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
+ * \brief Creates a DER from the AsymmetricKey \p pKey and copies it to \p pDest.
+ * This function does not allocate the buffer containing the DER.
+ * The operation may fail if the allocated buffer is not large enough.
+ * The required length cannot be precisely calculated, but a value of 8 times the key length in bytes is recommended.
  */
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* pKey,
                                                       bool is_public,
@@ -110,28 +242,96 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
                                                       uint32_t lenDest,
                                                       uint32_t* pLenWritten)
 {
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(is_public);
-    SOPC_UNUSED_ARG(pDest);
-    SOPC_UNUSED_ARG(lenDest);
-    SOPC_UNUSED_ARG(pLenWritten);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (NULL == pKey || NULL == pDest || 0 == lenDest || NULL == pLenWritten)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    // Declare and alloc the buffer which will receive the der data
+    uint8_t* buffer = NULL;
+    size_t lengthWritten = 0;
+    buffer = SOPC_Malloc(lenDest);
+    if (NULL == buffer)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    int errLib = -1;
+
+    if (is_public)
+    {
+        // The function x509ExportRsaPublicKey does not give the full DER,
+        // so we first export the key to PEM, then we do PEM to DER.
+        char_t bufferPEM[2 * lenDest];
+        size_t writtenPEM;
+        errLib = pemExportRsaPublicKey(&pKey->pubKey, bufferPEM, &writtenPEM);
+        if (!errLib)
+        {
+            errLib = pemDecodeFile(bufferPEM, writtenPEM, "PUBLIC KEY", buffer, &lengthWritten, NULL, NULL);
+        }
+    }
+    else // Key is private
+    {
+        errLib = x509ExportRsaPrivateKey(&pKey->privKey, buffer, &lengthWritten);
+    }
+
+    if (!errLib)
+    {
+        if (lengthWritten > 0 && (uint32_t) lengthWritten <= lenDest)
+        {
+            *pLenWritten = (uint32_t) lengthWritten;
+            memcpy(pDest, buffer, lengthWritten);
+            status = SOPC_STATUS_OK;
+        }
+    }
+
+    // Clear and free the temporary buffer
+    memset(buffer, 0, lengthWritten);
+    SOPC_Free(buffer);
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SOPC_AsymmetricKey* pKey,
                                                                         bool is_public,
                                                                         SOPC_SerializedAsymmetricKey** out)
 {
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(is_public);
-    SOPC_UNUSED_ARG(out);
+    if (NULL == pKey || NULL == out)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    uint_t lenBits = mpiGetBitLength(&pKey->pubKey.n);
 
-    return SOPC_STATUS_OK;
+    if (lenBits > UINT32_MAX)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    uint32_t lenBytes = (uint32_t)(lenBits / 8);
+    uint8_t* buffer =
+        SOPC_Malloc(sizeof(uint8_t) * lenBytes * 8); // a value of 8 times the key length in bytes is recommended
+    if (NULL == buffer)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    uint32_t pLenWritten = 0;
+
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_ToDER(pKey, is_public, buffer, lenBytes * 8, &pLenWritten);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(buffer, pLenWritten, out);
+    }
+
+    // Clear and free the temporary buffer
+    memset(buffer, 0, pLenWritten);
+    SOPC_Free(buffer);
+
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -139,239 +339,576 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SO
  * ------------------------------------------------------------------------------------------------
  */
 
-/* Create a certificate if \p ppCert points to NULL, do nothing otherwise */
-/* static SOPC_ReturnStatus certificate_maybe_create(SOPC_CertificateList** ppCert)
-{
-    SOPC_UNUSED_ARGppCert;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return SOPC_STATUS_OK;
-} */
-/* Defined but not used */
-
-/* Check lengths of loaded certificates */
-/* static SOPC_ReturnStatus certificate_check_length(SOPC_CertificateList* pCert)
-{
-    SOPC_UNUSED_ARGpCert;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return SOPC_STATUS_OK;
-} */
-/* Defined but not used */
-
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* bufferDER,
                                                                  uint32_t lenDER,
                                                                  SOPC_CertificateList** ppCert)
 {
-    SOPC_UNUSED_ARG(bufferDER);
-    SOPC_UNUSED_ARG(lenDER);
-    SOPC_UNUSED_ARG(ppCert);
+    if (NULL == bufferDER || 0 == lenDER || NULL == ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_CertificateList* pCert = *ppCert;  // Retrieve the content of ppCert.
+    SOPC_CertificateList* pCertCpy = pCert; // Use a copy, otherwise we lose HEAD of pCert.
 
-    return SOPC_STATUS_OK;
+    if (NULL == pCertCpy) // If there's no certificate in the Certificate List
+    {
+        pCertCpy = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
+        pCert =
+            pCertCpy; // We have to do that in this case because otherwise there's no link between pCert and pCertCpy.
+    }
+    else
+    {
+        while (NULL != pCertCpy->next)
+        {
+            pCertCpy = pCertCpy->next;
+        }
+
+        pCertCpy->next = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
+        if (NULL == pCertCpy->next)
+        {
+            return SOPC_STATUS_NOK;
+        }
+
+        pCertCpy = pCertCpy->next;
+    }
+
+    /* Allocate and fill the SOPC_Buffer attached to the certificate */
+    pCertCpy->raw = SOPC_Buffer_Create(lenDER);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(pCertCpy->raw, bufferDER, lenDER);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create the certificate from the attached buffer because Cyclone cert will point on it
+        int errLib = x509ParseCertificate(pCertCpy->raw->data, (size_t) lenDER, &pCertCpy->crt);
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+            fprintf(stderr, "> KeyManager: certificate buffer parse failed with error code: %d\n", errLib);
+        }
+
+        /* Allocate and fill the public key of the cert */
+        rsaInitPublicKey(&pCertCpy->pubKey);
+        errLib = x509ImportRsaPublicKey(&pCertCpy->crt.tbsCert.subjectPublicKeyInfo, &pCertCpy->pubKey);
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCertCpy);
+        *ppCert = NULL;
+    }
+    else
+    {
+        *ppCert = pCert;
+    }
+
+    return status;
 }
 
 /**
  * \note    Tested but not part of the test suites.
+ * The file can be DER, or PEM with only 1 certificate.
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert)
 {
-    SOPC_UNUSED_ARG(szPath);
-    SOPC_UNUSED_ARG(ppCert);
+    if (NULL == szPath || NULL == ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    int errLib = -1;
 
-    return SOPC_STATUS_OK;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_Buffer_ReadFile(szPath, &pBuffer);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCert);
+
+        /* It failed. Maybe the file is PEM ? */
+        if (SOPC_STATUS_OK != status)
+        {
+            uint8_t bufferDER[2 * pBuffer->length];
+            size_t len_bufferDER;
+
+            // Convert the PEM to DER
+            errLib = pemImportCertificate((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
+
+            if (!errLib)
+            {
+                status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCert);
+            }
+        }
+    }
+
+    SOPC_Buffer_Delete(pBuffer);
+
+    return status;
 }
 
 void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert)
 {
-    SOPC_UNUSED_ARG(pCert);
+    if (NULL == pCert)
+    {
+        return;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    /* Free all the data in the cert, then free the Certificate. */
+    SOPC_Buffer_Delete(pCert->raw);
+    rsaFreePublicKey(&pCert->pubKey);
+    SOPC_KeyManager_Certificate_Free(pCert->next);
+    SOPC_Free(pCert);
 }
 
-/* static SOPC_ReturnStatus certificate_check_single(const SOPC_CertificateList* pCert)
+static SOPC_ReturnStatus certificate_check_single(const SOPC_CertificateList* pCert)
 {
-    SOPC_UNUSED_ARGpCert;
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK == status && 1 != nCert)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return SOPC_STATUS_OK;
-} */
-/* Defined but not used */
+    return status;
+}
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* pCert,
                                                     uint8_t** ppDest,
                                                     uint32_t* pLenAllocated)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(ppDest);
-    SOPC_UNUSED_ARG(pLenAllocated);
+    uint32_t lenToAllocate = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (NULL == pCert->raw || NULL == ppDest || NULL == pLenAllocated)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
+
+    /* Allocation */
+    if (SOPC_STATUS_OK == status)
+    {
+        lenToAllocate = pCert->raw->length;
+        if (lenToAllocate == 0)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        (*ppDest) = SOPC_Malloc(lenToAllocate);
+        if (NULL == *ppDest)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    /* Copy */
+    if (SOPC_STATUS_OK == status)
+    {
+        memcpy((void*) (*ppDest), (void*) (pCert->raw->data), lenToAllocate);
+        *pLenAllocated = lenToAllocate;
+    }
+
+    return status;
 }
 
+/**
+ * Hashes the DER-encoded certificate with SHA1.
+ */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
                                                             const SOPC_CertificateList* pCert,
                                                             uint8_t* pDest,
                                                             uint32_t lenDest)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pDest);
-    SOPC_UNUSED_ARG(lenDest);
+    if (NULL == pProvider || NULL == pCert || NULL == pDest || 0 == lenDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
+    if (NULL == pProfile)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    // SOPC_ReturnStatus status = certificate_check_single(pCert);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int errLib = -1;
+
+    /* Assert allocation length */
+    uint32_t lenSupposed = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (lenDest != lenSupposed)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    // Get DER
+    uint8_t* pDER = NULL;
+    uint32_t lenDER = 0;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_ToDER(pCert, &pDER, &lenDER);
+    }
+
+    const HashAlgo* hash = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        // Hash DER with SHA-1
+        switch (pProfile->SecurityPolicyID)
+        {
+        case SOPC_SecurityPolicy_Invalid_ID:
+        default:
+            status = SOPC_STATUS_NOK;
+            break;
+        case SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID:
+        case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
+        case SOPC_SecurityPolicy_Basic256Sha256_ID:
+        case SOPC_SecurityPolicy_Basic256_ID:
+            hash = &sha1HashAlgo;
+            break;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        errLib = hash->compute(pDER, (size_t) lenDER, pDest);
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    SOPC_Free(pDER);
+
+    return status;
 }
 
 /**
- * \brief       Fills \p pKey with public key information retrieved from \p pCert.
- * \warning     \p pKey is not valid anymore when \p pCert is freed.
+ * \brief   Fills \p pKey with RSA public key information retrieved from \p pCert.
+ * Warning : The \p pKey points on the fields of the cert. Free the cert will make the key unusable.
  */
+
 SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pKey);
+    if (NULL == pCert || NULL == pKey)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    memcpy(&pKey->pubKey, &pCert->pubKey, sizeof(RsaPublicKey));
 
     return SOPC_STATUS_OK;
 }
 
-/* static size_t ptr_offset(const void* p, const void* start)
-{
-    SOPC_UNUSED_ARGp;
-    SOPC_UNUSED_ARGstart;
-    size_t ret = 0;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return ret;
-} */
-/* Defined but not used */
-
-/* static void* mem_search(const void* mem, size_t mem_len, const void* needle, size_t needle_len)
-{
-    SOPC_UNUSED_ARGmem;
-    SOPC_UNUSED_ARGmem_len;
-    SOPC_UNUSED_ARGneedle;
-    SOPC_UNUSED_ARGneedle_len;
-    void* ret = NULL;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return ret;
-} */
-/* Defined but not used */
-
-/* Does not copy the string. Returns NULL if nothing found. In this case str_len might have been modified. */
-/* static const uint8_t* get_application_uri_ptr_from_crt_data(const SOPC_CertificateList* crt, uint8_t* str_len)
-{
-    SOPC_UNUSED_ARGcrt;
-    SOPC_UNUSED_ARGstr_len;
-    uint8_t* ret = NULL;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return ret;
-} */
-/* Defined but not used */
-
 bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList* pCert, const char* application_uri)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(application_uri);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != application_uri);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    size_t str_len = 0;
+    size_t application_uri_len = strlen(application_uri);
+    bool bUriFound = false;
+    int comparison = -1;
 
-    return true;
+    for (int i = 0; i < X509_MAX_SUBJECT_ALT_NAMES && (false == bUriFound); i++)
+    {
+        if (X509_GENERAL_NAME_TYPE_URI == pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].type)
+        {
+            str_len = pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length;
+            if (application_uri_len == str_len)
+            {
+                comparison = strncmp(application_uri,
+                                     pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].value, str_len);
+                if (0 == comparison)
+                {
+                    bUriFound = true;
+                }
+            }
+        }
+    }
+
+    return bUriFound;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_CertificateList* pCert,
                                                                      char** ppApplicationUri,
                                                                      size_t* pStringLength)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(ppApplicationUri);
-    SOPC_UNUSED_ARG(pStringLength);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL != ppApplicationUri);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
-    return SOPC_STATUS_OK;
+    size_t str_len = 0;
+    char_t* data_copy = NULL;
+
+    for (int i = 0; i < X509_MAX_SUBJECT_ALT_NAMES && (SOPC_STATUS_OK != status); i++)
+    {
+        if (X509_GENERAL_NAME_TYPE_URI == pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].type)
+        {
+            str_len = pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length;
+            if (0 != str_len)
+            {
+                data_copy = SOPC_Calloc(str_len + 1U, sizeof(char_t)); // Must be freed out of the function.
+                if (NULL != data_copy)
+                {
+                    memcpy(data_copy, pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].value, str_len);
+                    status = SOPC_STATUS_OK; // If we arrive here, we found an ApplicationURI.
+                }
+                else
+                {
+                    str_len = 0;
+                }
+            }
+        }
+    }
+
+    *ppApplicationUri = data_copy;
+    if (NULL != pStringLength)
+    {
+        *pStringLength = str_len;
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pLength);
+    if (NULL == pCert || NULL == pLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    const SOPC_CertificateList* pCertCpy = pCert;
+    size_t i = 0;
+    for (; NULL != pCertCpy; ++i)
+    {
+        pCertCpy = pCertCpy->next;
+    }
+
+    *pLength = i;
 
     return SOPC_STATUS_OK;
 }
 
-/* Creates a new string: free the result */
-/* static char* get_raw_sha1(const int raw)
+/* Creates a new string. Later have to free the result */
+static char* get_raw_sha1(SOPC_Buffer* raw)
 {
-    char* ret = NULL;
+    assert(NULL != raw);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    uint8_t pDest[20];
+
+    int errLib = sha1Compute(raw->data, raw->length, pDest);
+
+    if (errLib)
+    {
+        fprintf(stderr, "Cannot compute thumbprint of certificate, err -0x%X\n", errLib);
+        return NULL;
+    }
+
+    /* Poor-man's SHA-1 format */
+    char* ret = SOPC_Calloc(41, sizeof(char));
+    if (NULL == ret)
+    {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < 20; ++i)
+    {
+        snprintf(ret + 2 * i, 3, "%02X", pDest[i]);
+    }
+    ret[40] = '\0';
 
     return ret;
-} */
-/* Defined but not used */
+}
 
-/* Creates a new string: free the result */
-/* static char* get_crt_sha1(const int crt)
-{
-    char* ret = NULL;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return ret;
-} */
-/* Defined but not used */
-
+/* Get the SHA1 of a CertificateList */
 char* SOPC_KeyManager_Certificate_GetCstring_SHA1(SOPC_CertificateList* pCert)
 {
-    SOPC_UNUSED_ARG(pCert);
-    char* p = NULL;
+    char* sha_1_cert = NULL;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (NULL == pCert)
+    {
+        return sha_1_cert;
+    }
 
-    return p;
+    SOPC_ReturnStatus status = certificate_check_single(pCert);
+    if (SOPC_STATUS_OK != status)
+    {
+        return sha_1_cert;
+    }
+
+    SOPC_Buffer* raw = pCert->raw;
+    sha_1_cert = get_raw_sha1(raw);
+    return sha_1_cert;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch)
 {
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pCRL);
-    SOPC_UNUSED_ARG(pbMatch);
+    if (NULL == pCRL || NULL == pCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    /* For each CA, find its CRL. If not found, log and match = false */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool list_match = true;
+    SOPC_CertificateList* current_cert = pCert;
+    SOPC_CertificateList* prev_cert = NULL; // The parent of the current cert
+    while (NULL != current_cert)
+    {
+        /* Skip certificates that are not authorities */
+        if (!current_cert->crt.tbsCert.extensions.basicConstraints.cA)
+        {
+            prev_cert = current_cert;
+            current_cert = current_cert->next;
+            continue;
+        }
 
-    return SOPC_STATUS_OK;
+        int crl_found = 0;
+        const SOPC_CRLList* current_crl = pCRL;
+        for (; NULL != current_crl; current_crl = current_crl->next)
+        {
+            bool match = x509CompareName(
+                current_crl->crl.tbsCertList.issuer.rawData, current_crl->crl.tbsCertList.issuer.rawDataLen,
+                current_cert->crt.tbsCert.subject.rawData, current_cert->crt.tbsCert.subject.rawDataLen);
+
+            if (crl_found > 0 && match)
+            {
+                if (crl_found)
+                {
+                    char* fpr = get_raw_sha1(current_cert->raw);
+                    fprintf(
+                        stderr,
+                        "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one associated "
+                        "CRL.\n",
+                        fpr);
+                    SOPC_Free(fpr);
+                }
+                if (crl_found < INT_MAX)
+                {
+                    ++crl_found;
+                }
+            }
+            else if (match)
+            {
+                ++crl_found;
+            }
+        }
+
+        if (1 != crl_found)
+        {
+            list_match = false;
+            char* fpr = get_raw_sha1(current_cert->raw);
+            fprintf(stderr,
+                    "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs, and is "
+                    "removed from the CAs list.\n",
+                    fpr);
+            SOPC_Free(fpr);
+
+            /* Remove the certificate from the chain and safely delete it */
+            SOPC_CertificateList* next = current_cert->next;
+            current_cert->next = NULL;
+            SOPC_KeyManager_Certificate_Free(current_cert);
+
+            /* Set new next certificate (if possible) */
+            if (NULL == prev_cert)
+            {
+                if (NULL == next)
+                {
+                    /*
+                     * The list would be empty, but we cannot do it here.
+                     * We have no choice but failing with current design.
+                     */
+                    current_cert = NULL; // make iteration stop
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    /* Head of the chain is a special case */
+                    *current_cert = *next;
+                    /* We have to free the new next certificate (copied as first one) */
+                    SOPC_Free(next);
+
+                    /* Do not iterate: current certificate has changed */
+                }
+            }
+            else
+            {
+                /* We have to free the certificate if it is not the first in the list */
+                prev_cert->next = next;
+
+                /* Iterate */
+                current_cert = next;
+            }
+        }
+        else
+        {
+            /* Iterate */
+            prev_cert = current_cert;
+            current_cert = current_cert->next;
+        }
+    }
+
+    /* There may be unused CRLs */
+    if (NULL != pbMatch)
+    {
+        *pbMatch = list_match;
+    }
+
+    return status;
 }
 
+/* Warning : this function only checks the first cert of the list pCert. */
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,
                                                                  const SOPC_CertificateList* pCert,
                                                                  bool* pbMatch)
 {
-    SOPC_UNUSED_ARG(pList);
-    SOPC_UNUSED_ARG(pCert);
-    SOPC_UNUSED_ARG(pbMatch);
+    if (NULL == pbMatch)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    *pbMatch = false;
+    if (NULL == pList || NULL == pCert)
+    {
+        return SOPC_STATUS_OK;
+    }
+
+    size_t nCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nCert);
+    if (SOPC_STATUS_OK != status && nCert > 1)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    int comparison = -1;
+    SOPC_Buffer* raw = pCert->raw;
+    for (; (!*pbMatch) && NULL != pList; pList = pList->next)
+    {
+        if (pList->raw->length == raw->length)
+        {
+            comparison = memcmp(pList->raw->data, raw->data, raw->length);
+            if (0 == comparison)
+            {
+                *pbMatch = true;
+            }
+        }
+    }
 
     return SOPC_STATUS_OK;
 }
@@ -380,45 +917,116 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_Cert
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
  */
-/* static SOPC_ReturnStatus crl_maybe_create(SOPC_CRLList** ppCRL)
-{
-    SOPC_UNUSED_ARGppCRL;
-
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
-
-    return SOPC_STATUS_OK;
-} */
-/* Defined but not used */
 
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDER,
                                                          uint32_t lenDER,
                                                          SOPC_CRLList** ppCRL)
 {
-    SOPC_UNUSED_ARG(bufferDER);
-    SOPC_UNUSED_ARG(lenDER);
-    SOPC_UNUSED_ARG(ppCRL);
+    if (NULL == bufferDER || 0 == lenDER || NULL == ppCRL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_CRLList* pCRL = *ppCRL;
+    SOPC_CRLList* pCRLCpy = pCRL;
 
-    return SOPC_STATUS_OK;
+    if (NULL == pCRLCpy) // If there's no certificate in the Certificate List
+    {
+        pCRLCpy = SOPC_Calloc(1, sizeof(SOPC_CRLList));
+        pCRL = pCRLCpy;
+    }
+    else
+    {
+        while (NULL != pCRLCpy->next)
+        {
+            pCRLCpy = pCRLCpy->next;
+        }
+
+        pCRLCpy->next = SOPC_Calloc(1, sizeof(SOPC_CRLList));
+        if (NULL == pCRLCpy->next)
+        {
+            return SOPC_STATUS_NOK;
+        }
+
+        pCRLCpy = pCRLCpy->next;
+    }
+
+    /* Allocate and fill the SOPC_Buffer attached to the crl */
+    pCRLCpy->raw = SOPC_Buffer_Create(lenDER);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(pCRLCpy->raw, bufferDER, lenDER);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create the certificate from the attached buffer because Cyclone cert will point on it
+        int errLib = x509ParseCrl(pCRLCpy->raw->data, (size_t) lenDER, &pCRLCpy->crl);
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+            fprintf(stderr, "> KeyManager: crl buffer parse failed with error code: %d. Maybe the CRL is empty ?\n",
+                    errLib);
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCRLCpy);
+        *ppCRL = NULL;
+    }
+    else
+    {
+        *ppCRL = pCRL;
+    }
+
+    return status;
 }
 
 /**
  * \note    Tested but not part of the test suites.
+ * The file can be DER, or PEM with only 1 crl.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SOPC_CRLList** ppCRL)
 {
-    SOPC_UNUSED_ARG(szPath);
-    SOPC_UNUSED_ARG(ppCRL);
+    if (NULL == szPath || NULL == ppCRL)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_Buffer_ReadFile(szPath, &pBuffer);
 
-    return SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCRL);
+
+        /* It failed. Maybe the file is PEM ? */
+        if (SOPC_STATUS_OK != status)
+        {
+            uint8_t bufferDER[2 * pBuffer->length];
+            size_t len_bufferDER;
+
+            // Convert the PEM to DER
+            int errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
+            if (!errLib)
+            {
+                status = SOPC_KeyManager_CRL_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCRL);
+            }
+        }
+    }
+
+    SOPC_Buffer_Delete(pBuffer);
+
+    return status;
 }
 
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
 {
-    SOPC_UNUSED_ARG(pCRL);
+    if (NULL == pCRL)
+    {
+        return;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    /* Free all the data in the cert, then free the Certificate. */
+    SOPC_Buffer_Delete(pCRL->raw);
+    SOPC_KeyManager_CRL_Free(pCRL->next);
+    SOPC_Free(pCRL);
 }

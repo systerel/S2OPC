@@ -27,10 +27,10 @@
 
 #include "hash_based_crypto_lib.h"
 #include "sopc_assert.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-// TODO: the right cyclone_crypto includes here
+#include "cyclone_crypto/hash/sha256.h"
+#include "cyclone_crypto/kdf/pbkdf.h"
 
 SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
                                                                   uint32_t lenSecret,
@@ -40,15 +40,27 @@ SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_Exp
                                                                   SOPC_ExposedBuffer** ppOutput,
                                                                   uint32_t lenOutput)
 {
-    SOPC_UNUSED_ARG(pSecret);
-    SOPC_UNUSED_ARG(lenSecret);
-    SOPC_UNUSED_ARG(pSalt);
-    SOPC_UNUSED_ARG(lenSalt);
-    SOPC_UNUSED_ARG(iteration_count);
-    SOPC_UNUSED_ARG(ppOutput);
-    SOPC_UNUSED_ARG(lenOutput);
+    if (NULL == pSecret || NULL == pSalt || NULL == ppOutput || 0 == lenSalt || 0 == lenOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_ExposedBuffer* pOutput = SOPC_Malloc(sizeof(SOPC_ExposedBuffer) * lenOutput);
+    if (NULL == pOutput)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
+    int errLib = pbkdf2(&sha256HashAlgo, pSecret, (size_t) lenSecret, pSalt, (size_t) lenSalt, (size_t) iteration_count,
+                        pOutput, (size_t) lenOutput);
+
+    if (errLib)
+    {
+        memset(pOutput, 0, lenOutput);
+        SOPC_Free(pOutput);
+        return SOPC_STATUS_NOK;
+    }
+
+    *ppOutput = pOutput;
     return SOPC_STATUS_OK;
 }

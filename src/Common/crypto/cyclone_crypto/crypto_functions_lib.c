@@ -25,22 +25,23 @@
  *              nor sanitize their arguments.
  */
 
-#include <assert.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_secret_buffer.h"
 
 #include "crypto_functions_lib.h"
 #include "crypto_provider_lib.h"
 #include "key_manager_lib.h"
 
 // TODO: the right cyclone_crypto includes here
+#include "cyclone_crypto/cipher/aes.h"
+#include "cyclone_crypto/cipher_modes/cbc.h"
+#include "cyclone_crypto/cipher_modes/ctr.h"
+#include "cyclone_crypto/hash/sha1.h"
+#include "cyclone_crypto/hash/sha256.h"
+#include "cyclone_crypto/mac/hmac.h"
 
 /* ------------------------------------------------------------------------------------------------
  * Aes128-Sha256-RsaOaep
@@ -55,17 +56,45 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
+    /* Use all arguments */
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenPlainText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pIV);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (lenOutput < lenPlainText)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    /* Perform a copy of pIV because pIV is modified during the operation */
+    unsigned char iv_cpy[SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block];
+    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Declare and initialize the AES-128 context, which is lib-specific */
+    AesContext aes = {0};
+    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
+    if (errLib)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Encryption with AES algo in CBC mode */
+        errLib = cbcEncrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenOutput);
+        if (errLib)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    /* Clearing */
+    memset(iv_cpy, 0, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
+
+    /* De-initialize the AES context */
+    aesDeinit(&aes);
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
@@ -77,16 +106,38 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint32_t lenOutput)
 {
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenCipherText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pIV);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (lenOutput < lenCipherText)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    unsigned char iv_cpy[SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block];
+    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    AesContext aes = {0};
+    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
+    if (errLib)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        errLib = cbcDecrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenOutput);
+        if (errLib)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    memset(iv_cpy, 0, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
+
+    aesDeinit(&aes);
+
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -104,16 +155,38 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint32_t lenOutput)
 {
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenPlainText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pIV);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (lenOutput < lenPlainText)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block];
+    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    AesContext aes = {0};
+    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
+    if (errLib)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        errLib = cbcEncrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenOutput);
+        if (errLib)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
+
+    aesDeinit(&aes);
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
@@ -125,61 +198,126 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint32_t lenOutput)
 {
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenCipherText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pIV);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (lenOutput < lenCipherText)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block];
+    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    AesContext aes = {0};
+    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
+    if (0 != errLib)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        errLib = cbcDecrypt(&aesCipherAlgo, &aes, (uint8_t*) iv_cpy, pInput, pOutput, lenOutput);
+        if (errLib)
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
+
+    aesDeinit(&aes);
+
+    return status;
 }
 
 static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
                                                    const uint8_t* pInput,
                                                    uint32_t lenInput,
                                                    const SOPC_ExposedBuffer* pKey,
-                                                   uint8_t* pOutput);
+                                                   uint8_t* pOutput,
+                                                   const HashAlgo* pHash);
+
 static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
                                                      const uint8_t* pInput,
                                                      uint32_t lenInput,
                                                      const SOPC_ExposedBuffer* pKey,
-                                                     const uint8_t* pSignature);
+                                                     const uint8_t* pSignature,
+                                                     const HashAlgo* pHash);
 
 static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
                                                    const uint8_t* pInput,
                                                    uint32_t lenInput,
                                                    const SOPC_ExposedBuffer* pKey,
-                                                   uint8_t* pOutput)
+                                                   uint8_t* pOutput,
+                                                   const HashAlgo* pHash)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pOutput);
+    if (NULL == pInput || NULL == pKey || NULL == pOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    /* Get the key length from the provider */
+    uint32_t lenKey = 0;
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_SignKey(pProvider, &lenKey);
 
-    return SOPC_STATUS_OK;
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Do the HMAC */
+        int errLib = hmacCompute(pHash, pKey, lenKey, pInput, lenInput, pOutput);
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    return status;
 }
 
 static inline SOPC_ReturnStatus HMAC_hashtype_verify(const SOPC_CryptoProvider* pProvider,
                                                      const uint8_t* pInput,
                                                      uint32_t lenInput,
                                                      const SOPC_ExposedBuffer* pKey,
-                                                     const uint8_t* pSignature)
+                                                     const uint8_t* pSignature,
+                                                     const HashAlgo* pHash)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pSignature);
+    if (NULL == pSignature)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    uint32_t lenSig = 0;
+    uint8_t* pCalcSig = NULL;
 
-    return SOPC_STATUS_OK;
+    /* Get the signature length from the provider */
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_SymmetricGetLength_Signature(pProvider, &lenSig);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pCalcSig = SOPC_Malloc(lenSig);
+        if (NULL == pCalcSig)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Get the HMAC in pCalcSig */
+        status = HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pCalcSig, pHash);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Compare pSignature (the original signature) to pCalcSig (the signature we just did) */
+        int res = memcmp(pSignature, pCalcSig, lenSig);
+        status = 0 != res ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    }
+
+    SOPC_Free(pCalcSig);
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -188,7 +326,7 @@ SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA256(const SOPC_CryptoProvider*
                                                       const SOPC_ExposedBuffer* pKey,
                                                       uint8_t* pOutput)
 {
-    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput);
+    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput, &sha256HashAlgo);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -197,7 +335,45 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvide
                                                         const SOPC_ExposedBuffer* pKey,
                                                         const uint8_t* pSignature)
 {
-    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature);
+    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo);
+}
+
+static inline SOPC_ReturnStatus prng_yarrow_get_random(YarrowContext* context,
+                                                       SOPC_ExposedBuffer* pData,
+                                                       uint32_t lenData)
+{
+    /* We add entropy with external sources, gathered in input_random.
+     * Warning : Entropy quantity must be sufficient for a reseed,
+     * otherwise no reseed is done and the context remains the same as before.
+     **/
+
+    // errLib = yarrowAddEntropy(YarrowContext *context, uint_t source, const uint8_t *input,
+    //                        size_t length, size_t entropy);
+
+    uint32_t lenSeeded = (32 > lenData) ? 32 : lenData;
+
+    // We can't use SOPC_Buffer here because the size of the file "dev/urandom" is 0
+    unsigned char input_random[lenSeeded];
+    FILE* file = fopen("/dev/urandom", "rb");
+    size_t read_len = fread(input_random, 1, lenSeeded, file);
+    fclose(file);
+
+    /* We seed the context with the input_random gathered */
+    int errLib = yarrowSeed(context, input_random, lenSeeded);
+
+    if (read_len != lenSeeded)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    /* We write it in pData */
+    errLib = yarrowRead(context, pData, lenData);
+    if (errLib)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    return SOPC_STATUS_OK;
 }
 
 // Fills a buffer with "truly" random data
@@ -205,18 +381,18 @@ SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider
                                             SOPC_ExposedBuffer* pData,
                                             uint32_t lenData)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pData);
-    SOPC_UNUSED_ARG(lenData);
+    SOPC_CryptolibContext* pCtx = NULL;
+    pCtx = pProvider->pCryptolibContext;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    SOPC_ReturnStatus status = prng_yarrow_get_random(&(pCtx->YarrowCtx), pData, lenData);
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 // PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
 // Based on a HMAC with SHA-256.
-static inline SOPC_ReturnStatus PSHA_outer(uint8_t* bufA,
+static inline SOPC_ReturnStatus PSHA_outer(const HashAlgo* pHash,
+                                           uint8_t* bufA,
                                            uint32_t lenBufA,
                                            const SOPC_ExposedBuffer* pSecret,
                                            uint32_t lenSecret,
@@ -225,7 +401,9 @@ static inline SOPC_ReturnStatus PSHA_outer(uint8_t* bufA,
                                            SOPC_ExposedBuffer* pOutput,
                                            uint32_t lenOutput);
 
-static inline SOPC_ReturnStatus PSHA(uint8_t* bufA,
+static inline SOPC_ReturnStatus PSHA(HmacContext* context,
+                                     const HashAlgo* pHash,
+                                     uint8_t* bufA,
                                      uint32_t lenBufA,
                                      const SOPC_ExposedBuffer* pSecret,
                                      uint32_t lenSecret,
@@ -242,20 +420,53 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA256(const SOPC_CryptoProvider
                                                        SOPC_ExposedBuffer* pOutput,
                                                        uint32_t lenOutput)
 {
+    uint8_t* bufA = NULL;
+    uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
+    uint32_t lenHash = 0;
+
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pSecret);
-    SOPC_UNUSED_ARG(lenSecret);
-    SOPC_UNUSED_ARG(pSeed);
-    SOPC_UNUSED_ARG(lenSeed);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    const HashAlgo* pHash = &sha256HashAlgo;
+
+    lenHash = (uint32_t) pHash->digestSize;
+    lenBufA = lenHash + lenSeed;
+    if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    bufA = SOPC_Malloc(lenBufA);
+    if (NULL == bufA)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // bufA contains A(i) + seed where + is the concatenation.
+    // length(A(i)) and the content of seed do not change, so seed is written only once. The beginning of bufA is
+    // initialized later.
+    memcpy(bufA + lenHash, pSeed, lenSeed);
+
+    // Next stage generates a context for the PSHA
+    SOPC_ReturnStatus status = PSHA_outer(pHash, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
+
+    // Clear and release A
+    memset(bufA, 0, lenBufA);
+    SOPC_Free(bufA);
+
+    return status;
 }
 
-static inline SOPC_ReturnStatus PSHA_outer(uint8_t* bufA,
+/**
+ * We do our own hmacCompute() with the 2 fonctions PSHA_outer() and PSHA().
+ * Indeed we can't use hmacCompute() because the algorithm PSHA is too specific.
+ */
+static inline SOPC_ReturnStatus PSHA_outer(const HashAlgo* pHash,
+                                           uint8_t* bufA,
                                            uint32_t lenBufA,
                                            const SOPC_ExposedBuffer* pSecret,
                                            uint32_t lenSecret,
@@ -264,21 +475,28 @@ static inline SOPC_ReturnStatus PSHA_outer(uint8_t* bufA,
                                            SOPC_ExposedBuffer* pOutput,
                                            uint32_t lenOutput)
 {
-    SOPC_UNUSED_ARG(bufA);
-    SOPC_UNUSED_ARG(lenBufA);
-    SOPC_UNUSED_ARG(pSecret);
-    SOPC_UNUSED_ARG(lenSecret);
-    SOPC_UNUSED_ARG(pSeed);
-    SOPC_UNUSED_ARG(lenSeed);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
+    HmacContext* context = NULL;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    // Allocate a memory buffer to hold the HMAC context
+    context = cryptoAllocMem(sizeof(HmacContext));
+    if (NULL == context)
+    {
+        return SOPC_STATUS_NOK;
+    }
 
-    return SOPC_STATUS_OK;
+    // Effectively does the PSHA with the correctly prepared context
+    SOPC_ReturnStatus status =
+        PSHA(context, pHash, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
+
+    // Free previously allocated memory
+    cryptoFreeMem(context);
+
+    return status;
 }
 
-static inline SOPC_ReturnStatus PSHA(uint8_t* bufA,
+static inline SOPC_ReturnStatus PSHA(HmacContext* context,
+                                     const HashAlgo* pHash,
+                                     uint8_t* bufA,
                                      uint32_t lenBufA,
                                      const SOPC_ExposedBuffer* pSecret,
                                      uint32_t lenSecret,
@@ -287,16 +505,56 @@ static inline SOPC_ReturnStatus PSHA(uint8_t* bufA,
                                      SOPC_ExposedBuffer* pOutput,
                                      uint32_t lenOutput)
 {
-    SOPC_UNUSED_ARG(bufA);
-    SOPC_UNUSED_ARG(lenBufA);
-    SOPC_UNUSED_ARG(pSecret);
-    SOPC_UNUSED_ARG(lenSecret);
-    SOPC_UNUSED_ARG(pSeed);
-    SOPC_UNUSED_ARG(lenSeed);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
+    uint32_t lenHash = 0;
+    uint32_t offsetOutput = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    lenHash = (uint32_t) pHash->digestSize;
+
+    /* A(0) is seed, A(1) = HMAC_SHA256(secret, A(0)) */
+    int errLib = hmacInit(context, pHash, pSecret, lenSecret);
+    if (errLib)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    hmacUpdate(context, pSeed, lenSeed);
+    hmacFinal(context, bufA);
+
+    // Iterates and produces output
+    while (offsetOutput < lenOutput)
+    {
+        // P_SHA256(i) = HMAC_SHA256(secret, A(i+1)+seed)
+        errLib = hmacInit(context, pHash, pSecret, lenSecret);
+        if (errLib)
+        {
+            return SOPC_STATUS_NOK;
+        }
+        hmacUpdate(context, bufA, lenBufA);
+
+        // Did we generate enough data yet?
+        if (offsetOutput + lenHash < lenOutput) // Not yet
+        {
+            hmacFinal(context, pOutput + offsetOutput);
+            offsetOutput += lenHash;
+
+            // A(i+2) = HMAC_SHA256(secret, A(i+1))
+            errLib = hmacInit(context, pHash, pSecret, lenSecret);
+            if (errLib)
+            {
+                return SOPC_STATUS_NOK;
+            }
+            hmacUpdate(context, bufA, lenHash);
+            hmacFinal(context, bufA);
+        }
+        // We did generate enough data
+        else
+        {
+            // We can't use pOUtput in hmac_finish anymore, we would overflow pOutput.
+            // Copies P_SHA256 to A because we are not using A again afterwards.
+            hmacFinal(context, bufA);
+            memcpy(pOutput + offsetOutput, bufA, lenOutput - offsetOutput);
+            offsetOutput = lenOutput;
+        }
+    }
 
     return SOPC_STATUS_OK;
 }
@@ -305,30 +563,74 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const uint8_t* pInput,
                                        uint32_t lenPlainText,
                                        const SOPC_AsymmetricKey* pKey,
-                                       uint8_t* pOutput);
+                                       uint8_t* pOutput,
+                                       const HashAlgo* pHash);
 
 SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const uint8_t* pInput,
                                        uint32_t lenCipherText,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
-                                       uint32_t* pLenWritten);
+                                       uint32_t* pLenWritten,
+                                       const HashAlgo* pHash);
 
 SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        const uint8_t* pInput,
                                        uint32_t lenPlainText,
                                        const SOPC_AsymmetricKey* pKey,
-                                       uint8_t* pOutput)
+                                       uint8_t* pOutput,
+                                       const HashAlgo* pHash)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenPlainText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pOutput);
+    /* TODO: lenWritten should be an array where are written all the lengths */
+    size_t lenWritten = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    uint32_t lenMsgPlain = 0;
+    uint32_t lenMsgCiph = 0;
+    uint32_t lenToCiph = 0;
 
-    return SOPC_STATUS_OK;
+    int errLib = -1;
+
+    /**
+     * lenPlainText should be < (n - 2*hash.digestSize - 2), where n is the size of the modulus of the key.
+     * Units are bytes.
+     **/
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    while (lenPlainText > 0 && SOPC_STATUS_OK == status)
+    {
+        if (lenPlainText > lenMsgPlain)
+        {
+            lenToCiph = lenMsgPlain; // A single pass of encrypt takes at most a message
+        }
+        else
+        {
+            lenToCiph = lenPlainText;
+        }
+
+        errLib = rsaesOaepEncrypt(&yarrowPrngAlgo, &pProvider->pCryptolibContext->YarrowCtx, &pKey->pubKey, pHash, NULL,
+                                  pInput, (size_t) lenToCiph, pOutput, &lenWritten);
+
+        if (errLib)
+        {
+            return SOPC_STATUS_NOK;
+            break;
+        }
+
+        // Advance pointers
+        lenPlainText -= lenToCiph;
+        if (0 == lenPlainText)
+        {
+            break;
+        }
+        pInput += lenMsgPlain;
+        pOutput += lenMsgCiph;
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
@@ -336,18 +638,56 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
                                        uint32_t lenCipherText,
                                        const SOPC_AsymmetricKey* pKey,
                                        uint8_t* pOutput,
-                                       uint32_t* pLenWritten)
+                                       uint32_t* pLenWritten,
+                                       const HashAlgo* pHash)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenCipherText);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(pLenWritten);
+    uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
+    size_t lenDeciphed = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    int errLib = -1;
 
-    return SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    if (NULL != pLenWritten)
+    {
+        *pLenWritten = 0;
+    }
+
+    while (lenCipherText > 0 && SOPC_STATUS_OK == status)
+    {
+        errLib = rsaesOaepDecrypt(&pKey->privKey, pHash, NULL, pInput, (size_t) lenMsgCiph, pOutput,
+                                  (size_t) lenMsgCiph, &lenDeciphed);
+
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+            break;
+        }
+
+        if (NULL != pLenWritten)
+        {
+            if (lenDeciphed > UINT32_MAX)
+            {
+                return SOPC_STATUS_NOK;
+            }
+            *pLenWritten += (uint32_t) lenDeciphed;
+        }
+
+        // Advance pointers
+        lenCipherText -= lenMsgCiph;
+        if (0 == lenCipherText)
+        {
+            break;
+        }
+        pInput += lenMsgCiph;
+        pOutput += lenDeciphed;
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
@@ -356,7 +696,7 @@ SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider*
                                                       const SOPC_AsymmetricKey* pKey,
                                                       uint8_t* pOutput)
 {
-    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput);
+    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput, &sha1HashAlgo);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
@@ -366,7 +706,7 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider*
                                                       uint8_t* pOutput,
                                                       uint32_t* pLenWritten)
 {
-    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten);
+    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten, &sha1HashAlgo);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -375,7 +715,7 @@ SOPC_ReturnStatus CryptoProvider_AsymEncrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
                                                              const SOPC_AsymmetricKey* pKey,
                                                              uint8_t* pOutput)
 {
-    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput);
+    return AsymEncrypt_RSA_OAEP(pProvider, pInput, lenPlainText, pKey, pOutput, &sha256HashAlgo);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -385,19 +725,44 @@ SOPC_ReturnStatus CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256(const SOPC_CryptoPr
                                                              uint8_t* pOutput,
                                                              uint32_t* pLenWritten)
 {
-    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten);
+    return AsymDecrypt_RSA_OAEP(pProvider, pInput, lenCipherText, pKey, pOutput, pLenWritten, &sha256HashAlgo);
 }
 
 /**
- * (Internal) Allocates and compute SHA-256 of \p pInput. You must free it.
+ * (Internal) Allocates and compute the \p hashAlgo message digest of \p pInput.
+ * You must free it after calling this function.
  */
-static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput, uint32_t lenInput, uint8_t** ppHash)
+static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
+                                                   uint32_t lenInput,
+                                                   const HashAlgo* pHash,
+                                                   uint8_t** ppHash)
 {
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(ppHash);
+    uint8_t* pHashRes = NULL;
+    size_t hLen = pHash->digestSize;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    /* Check params and empty ppHash */
+    if (NULL == ppHash)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *ppHash = NULL;
+
+    /* Allocate pHash and put it in ppHash */
+    pHashRes = SOPC_Malloc(hLen);
+    if (NULL == pHashRes)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    *ppHash = pHashRes;
+
+    /* Compute the MD */
+    int errLib = pHash->compute(pInput, (size_t) lenInput, pHashRes);
+    if (errLib)
+    {
+        return SOPC_STATUS_NOK;
+    }
 
     return SOPC_STATUS_OK;
 }
@@ -407,8 +772,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   uint32_t lenInput,
                                   const SOPC_AsymmetricKey* pKey,
                                   uint8_t* pSignature,
-                                  int padding,
-                                  unsigned int hash_len,
+                                  const HashAlgo* pHash,
                                   bool pss);
 
 SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
@@ -416,8 +780,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     uint32_t lenInput,
                                     const SOPC_AsymmetricKey* pKey,
                                     const uint8_t* pSignature,
-                                    int padding,
-                                    unsigned int hash_len,
+                                    const HashAlgo* pHash,
                                     bool pss);
 
 SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
@@ -425,22 +788,69 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                                   uint32_t lenInput,
                                   const SOPC_AsymmetricKey* pKey,
                                   uint8_t* pSignature,
-                                  int padding,
-                                  unsigned int hash_len,
+                                  const HashAlgo* pHash,
                                   bool pss)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pSignature);
-    SOPC_UNUSED_ARG(padding);
-    SOPC_UNUSED_ARG(hash_len);
-    SOPC_UNUSED_ARG(pss);
+    uint8_t* hash = NULL;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    int errLib = -1;
 
-    return SOPC_STATUS_OK;
+    // signatureLen will contain the length of the resulting signature
+    size_t signatureLen = 0;
+
+    SOPC_ReturnStatus status = NewMsgDigestBuffer(pInput, lenInput, pHash, &hash);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (true == pss)
+        {
+            /**
+             * We will take the max size for the saltLen, as we did with Mbedtls.
+             * Normally this is the hash length, which is the maximum salt length
+             * according to FIPS 185-4 §5.5 (e) and common practice. But the constraint
+             * is that the hash length plus the salt length plus 2 bytes must be at most
+             * the key length.
+             */
+            size_t maxSaltLen = 0;
+            uint32_t keyLength = 0;
+            size_t hLen = pHash->digestSize;
+
+            status = SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(pProvider, pKey, &keyLength);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                return SOPC_STATUS_NOK;
+            }
+
+            if (keyLength >= hLen + hLen + 2)
+            {
+                maxSaltLen = hLen;
+            }
+            else
+            {
+                maxSaltLen = keyLength - hLen - 2;
+            }
+
+            errLib = rsassaPssSign(&yarrowPrngAlgo, &pProvider->pCryptolibContext->YarrowCtx, &pKey->privKey, pHash,
+                                   maxSaltLen, hash, pSignature, &signatureLen);
+        }
+        else
+        {
+            errLib = rsassaPkcs1v15Sign(&pKey->privKey, pHash, hash, pSignature, &signatureLen);
+        }
+
+        if (errLib) // signature is as long as the key
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (NULL != hash)
+    {
+        SOPC_Free(hash);
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
@@ -448,22 +858,59 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
                                     uint32_t lenInput,
                                     const SOPC_AsymmetricKey* pKey,
                                     const uint8_t* pSignature,
-                                    int padding,
-                                    unsigned int hash_len,
+                                    const HashAlgo* pHash,
                                     bool pss)
 {
-    SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(pKey);
-    SOPC_UNUSED_ARG(pSignature);
-    SOPC_UNUSED_ARG(padding);
-    SOPC_UNUSED_ARG(hash_len);
-    SOPC_UNUSED_ARG(pss);
+    uint8_t* hash = NULL;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    int errLib = -1;
 
-    return SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = NewMsgDigestBuffer(pInput, lenInput, pHash, &hash);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        uint32_t keyLength = 0;
+
+        status = SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(pProvider, pKey, &keyLength);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            return SOPC_STATUS_NOK;
+        }
+
+        if (true == pss)
+        {
+            size_t maxSaltLen = 0;
+            size_t hLen = pHash->digestSize;
+            if (keyLength >= hLen + hLen + 2)
+            {
+                maxSaltLen = hLen;
+            }
+            else
+            {
+                maxSaltLen = keyLength - hLen - 2;
+            }
+
+            // Signature length = key length
+            errLib = rsassaPssVerify(&pKey->pubKey, pHash, maxSaltLen, hash, pSignature, (size_t) keyLength);
+        }
+        else
+        {
+            errLib = rsassaPkcs1v15Verify(&pKey->pubKey, pHash, hash, pSignature, (size_t) keyLength);
+        }
+
+        if (errLib)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (NULL != hash)
+    {
+        SOPC_Free(hash);
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -472,7 +919,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256(const SOPC_C
                                                                     const SOPC_AsymmetricKey* pKey,
                                                                     uint8_t* pSignature)
 {
-    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 32, false);
+    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo, false);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC_CryptoProvider* pProvider,
@@ -481,7 +928,7 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256(const SOPC
                                                                       const SOPC_AsymmetricKey* pKey,
                                                                       const uint8_t* pSignature)
 {
-    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 32, false);
+    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo, false);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
@@ -490,7 +937,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PSS(const SOPC_CryptoProvider* 
                                                      const SOPC_AsymmetricKey* pKey,
                                                      uint8_t* pSignature)
 {
-    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 32, true);
+    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo, true);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider* pProvider,
@@ -499,18 +946,54 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider
                                                        const SOPC_AsymmetricKey* pKey,
                                                        const uint8_t* pSignature)
 {
-    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 32, true);
+    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo, true);
 }
 
 SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
                                                                  const SOPC_CertificateList* pCert)
 {
-    SOPC_UNUSED_ARG(pCrypto);
-    SOPC_UNUSED_ARG(pCert);
+    SOPC_AsymmetricKey pub_key = {0};
+    uint32_t key_length = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    // Retrieve public key
+    SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pCert, &pub_key);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
 
-    return SOPC_STATUS_OK;
+    // Retrieve key length
+    status = SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pCrypto, &pub_key, &key_length);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    // Verifies key length: 2048-4096
+    if (key_length < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
+        key_length > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // Verifies MD algorithm of the signature algorithm: SHA-256
+    X509SignatureAlgo signAlgo = {0};
+    const HashAlgo* hashAlgo = NULL;
+
+    int errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
+    if (errLib)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    errLib = strcmp(hashAlgo->name, "SHA-256");
+    if (errLib)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    // Does not verify that key is capable of encryption and signing... (!!!)
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -524,7 +1007,7 @@ SOPC_ReturnStatus CryptoProvider_SymmSign_HMAC_SHA1(const SOPC_CryptoProvider* p
                                                     const SOPC_ExposedBuffer* pKey,
                                                     uint8_t* pOutput)
 {
-    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput);
+    return HMAC_hashtype_sign(pProvider, pInput, lenInput, pKey, pOutput, &sha1HashAlgo);
 }
 SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider* pProvider,
                                                       const uint8_t* pInput,
@@ -532,7 +1015,7 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA1(const SOPC_CryptoProvider*
                                                       const SOPC_ExposedBuffer* pKey,
                                                       const uint8_t* pSignature)
 {
-    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature);
+    return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature, &sha1HashAlgo);
 }
 SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* pProvider,
                                                      const SOPC_ExposedBuffer* pSecret,
@@ -542,17 +1025,45 @@ SOPC_ReturnStatus CryptoProvider_DeriveData_PRF_SHA1(const SOPC_CryptoProvider* 
                                                      SOPC_ExposedBuffer* pOutput,
                                                      uint32_t lenOutput)
 {
+    uint8_t* bufA = NULL;
+    uint32_t lenBufA = 0; // Stores A(i) + seed except for i = 0
+    uint32_t lenHash = 0;
+
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pSecret);
-    SOPC_UNUSED_ARG(lenSecret);
-    SOPC_UNUSED_ARG(pSeed);
-    SOPC_UNUSED_ARG(lenSeed);
-    SOPC_UNUSED_ARG(pOutput);
-    SOPC_UNUSED_ARG(lenOutput);
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    if (NULL == pSecret || 0 == lenSecret || NULL == pSeed || 0 == lenSeed || NULL == pOutput || 0 == lenOutput)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
-    return SOPC_STATUS_OK;
+    const HashAlgo* pHash = &sha1HashAlgo;
+
+    lenHash = (uint32_t) pHash->digestSize;
+    lenBufA = lenHash + lenSeed;
+    if (lenHash == 0 || lenBufA <= lenSeed) // Test uint overflow
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    bufA = SOPC_Malloc(lenBufA);
+    if (NULL == bufA)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // bufA contains A(i) + seed where + is the concatenation.
+    // length(A(i)) and the content of seed do not change, so seed is written only once. The beginning of bufA is
+    // initialized later.
+    memcpy(bufA + lenHash, pSeed, lenSeed);
+
+    // Next stage generates a context for the PSHA
+    SOPC_ReturnStatus status = PSHA_outer(pHash, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
+
+    // Clear and release A
+    memset(bufA, 0, lenBufA);
+    SOPC_Free(bufA);
+
+    return status;
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
@@ -561,7 +1072,7 @@ SOPC_ReturnStatus CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1(const SOPC_Cry
                                                                   const SOPC_AsymmetricKey* pKey,
                                                                   uint8_t* pSignature)
 {
-    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 20, false);
+    return AsymSign_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha1HashAlgo, false);
 }
 
 SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_CryptoProvider* pProvider,
@@ -570,18 +1081,58 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
                                                                     const SOPC_AsymmetricKey* pKey,
                                                                     const uint8_t* pSignature)
 {
-    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, 0, 20, false);
+    return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha1HashAlgo, false);
 }
 
 SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
                                                                       const SOPC_CertificateList* pCert)
 {
-    SOPC_UNUSED_ARG(pCrypto);
-    SOPC_UNUSED_ARG(pCert);
+    SOPC_AsymmetricKey pub_key = {0};
+    uint32_t key_length = 0;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    // Retrieve public key
+    SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pCert, &pub_key);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
 
-    return SOPC_STATUS_OK;
+    // Retrieve key length
+    status = SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pCrypto, &pub_key, &key_length);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    // Verifies key length: 2048-4096
+    if (key_length < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
+        key_length > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    // Verifies MD algorithm of the signature algorithm: SHA-256
+    X509SignatureAlgo signAlgo = {0};
+    const HashAlgo* hashAlgo = NULL;
+
+    int errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
+    if (errLib)
+    {
+        return SOPC_STATUS_NOK;
+    }
+
+    int error = strcmp(hashAlgo->name, "SHA-256");
+    if (error)
+    {
+        error = strcmp(hashAlgo->name, "SHA-1");
+        if (error)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    // Does not verify that key is capable of encryption and signing... (!!!)
+    return status;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -599,15 +1150,50 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
                                                   uint8_t* pOutput)
 {
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pInput);
-    SOPC_UNUSED_ARG(lenInput);
-    SOPC_UNUSED_ARG(pExpKey);
-    SOPC_UNUSED_ARG(pExpNonce);
-    SOPC_UNUSED_ARG(pRandom);
-    SOPC_UNUSED_ARG(uSequenceNumber);
-    SOPC_UNUSED_ARG(pOutput);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    SOPC_ASSERT(false && "NOT IMPLEMENTED YET");
+    AesContext aes = {0};
+    int errLib = aesInit(&aes, pExpKey, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey);
+    if (errLib)
+    {
+        status = SOPC_STATUS_NOK;
+    }
 
-    return SOPC_STATUS_OK;
+    /* Build the Nonce Counter */
+
+    /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (Little-endian), 4 for block counter
+     * (Big-endian) */
+    SOPC_ASSERT(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
+                       SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
+                       4 /* BlockCounter length */) &&
+                "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
+
+    uint8_t counter[16] = {0};
+    uint8_t* p = counter;
+    memcpy(p, pExpNonce, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce);
+    p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce;
+    memcpy(p, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
+    p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom;
+    memcpy(p, &uSequenceNumber, sizeof(uint32_t));
+    p += sizeof(uint32_t);
+
+    /* BlockCounter, which is big endian is initialized to 1.
+     * This is an errata from 1.04 revision of part 14 (see https://mantis.opcfoundation.org/view.php?id=6852) */
+    p[0] = 0x00;
+    p[1] = 0x00;
+    p[2] = 0x00;
+    p[3] = 0x01;
+
+    p += 4;
+    SOPC_ASSERT(p - counter == 16 && "Invalid pointer arithmetics");
+
+    errLib = ctrEncrypt(&aesCipherAlgo, &aes, 128, counter, pInput, pOutput, (size_t) lenInput);
+    if (errLib)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    aesDeinit(&aes);
+
+    return status;
 }

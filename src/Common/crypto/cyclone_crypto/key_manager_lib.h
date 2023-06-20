@@ -28,40 +28,37 @@
 #include <stdbool.h>
 
 #include "sopc_assert.h"
-#include "sopc_crypto_decl.h"
-#include "sopc_enums.h"
+#include "sopc_key_manager.h"
 
-// TODO: the right cyclone_crypto includes here
+#include "cyclone_crypto/pkix/x509_common.h"
 
 /**
  * \brief   The asymmetric key representation.
- *
- *   It should be treated as an abstract handle.
- *   The asymmetric key structure is mainly lib-specific. Its content can be enriched for future uses.
  */
 struct SOPC_AsymmetricKey
 {
-    int pk;                  /**< The context of the key, mbedtls_ specific */
-    bool isBorrowedFromCert; /**< Says whether the context is borrowed from a context or not. In the latter case, the
-                                context must be mbedtls_freed */
+    RsaPrivateKey privKey; /**< The context of the key, lib-specific */
+    RsaPublicKey pubKey;
+    bool isBorrowedFromCert; /**< Says whether the context is borrowed from a context or not.*/
 };
 
 /**
- * \brief   The signed public key representation, or a chained list of such keys.
+ * \brief   The signed public key representation.
  *
  *   It should be treated as an abstract handle.
  *   The certificate structure is mainly lib-specific.
  *   mbedtls certificates are chained.
- *   This structures represents a chained list of certificates.
  *
- *   Usually, the CertificateList has length 1 when working with asymmetric cryptographic primitives,
- *   and the CertificateList has length > 1 when working with certificate validation.
- *   In the latter case, the certificates are in fact certificate authorities.
- *   See SOPC_KeyManager_Certificate_GetListLength.
+ *   Cyclone: - certificates are not chained.
+ *            - add raw of the certificate because
+ *              cannot export raw certificate with Cyclone
  */
 struct SOPC_CertificateList
 {
-    int crt; /**< Certificate as a lib-dependent format */
+    X509CertificateInfo crt;
+    SOPC_Buffer* raw;    // Raw data of the cert (format DER). Must be freed.
+    RsaPublicKey pubKey; // Public key of the cert. Must be freed.
+    SOPC_CertificateList* next;
 };
 
 /**
@@ -77,7 +74,9 @@ struct SOPC_CertificateList
  */
 struct SOPC_CRLList
 {
-    int crl;
+    X509CrlInfo crl;
+    SOPC_Buffer* raw;
+    SOPC_CRLList* next;
 };
 
 /**

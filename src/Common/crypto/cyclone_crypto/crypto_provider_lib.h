@@ -25,12 +25,10 @@
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
 #define SOPC_CRYPTO_PROVIDER_LIB_H_
 
-// TODO: the right cyclone_crypto includes here
-
+#include "cyclone_crypto/rng/yarrow.h"
 struct SOPC_CryptolibContext
 {
-    int ctxEnt;
-    int ctxDrbg;
+    YarrowContext YarrowCtx;
 };
 
 #endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */
