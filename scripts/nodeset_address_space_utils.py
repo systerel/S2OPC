@@ -219,6 +219,7 @@ def merge(tree, new, namespaces):
             if new_idx != idx + 1:
                 ns_idx_reassign[idx + 1] = new_idx
             tree_ns_uris.append(ns)
+    tree_ns_uris[-1].tail = indent(1)
     # print("Namespace URI reassignments:", ns_idx_reassign)
 
     # Merge Models
@@ -236,6 +237,7 @@ def merge(tree, new, namespaces):
             if req_ns0_version != ns0_version:
                 raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
         tree_models.append(model)
+    tree_models[-1].tail = indent(1)
 
     # Merge ServerArray and NamespaceArray:
     __fill_namespace_array(tree, namespaces)
