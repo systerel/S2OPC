@@ -1119,7 +1119,12 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 }
                 else
                 {
-                    SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, msg->publisher_id, msg->groupId);
+                    char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
+                    bool res = SOPC_Compute_Default_MqttTopic(msg->publisher_id, msg->groupId, defaultTopic,
+                                                              LENGTH_MAX_DEFAULT_TOPIC + 1);
+                    SOPC_ASSERT(res);
+                    SOPC_ReaderGroup_Set_MqttTopic(readerGroup, defaultTopic);
+                    SOPC_Free(defaultTopic);
                 }
 
                 SOPC_ASSERT(msg->nb_datasets < 0x100);

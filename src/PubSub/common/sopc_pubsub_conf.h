@@ -35,6 +35,9 @@ typedef struct SOPC_DataSetMetaData SOPC_DataSetMetaData;
 typedef struct SOPC_FieldMetaData SOPC_FieldMetaData;
 typedef struct SOPC_FieldTarget SOPC_FieldTarget;
 
+#define LENGTH_DOT 2
+#define LENGTH_MAX_DEFAULT_TOPIC (SOPC_MAX_LENGTH_UINT64_TO_STRING + LENGTH_DOT + SOPC_MAX_LENGTH_UINT16_TO_STRING)
+
 typedef struct SOPC_UADP_Configuration
 {
     bool PublisherIdFlag;
@@ -101,6 +104,8 @@ typedef struct SOPC_Conf_PublisherId
         SOPC_String string;
     } data;
 } SOPC_Conf_PublisherId;
+
+bool SOPC_Compute_Default_MqttTopic(uint64_t publisherId, uint16_t groupId, char* defaultTopic, uint8_t sizeMax);
 
 /*************************/
 /** PubSubConfiguration **/
@@ -199,7 +204,6 @@ bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
 const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
 bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
-bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t GroupId);
 
 /*******************/
 /** DataSetReader **/
@@ -276,7 +280,6 @@ void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMod
 
 const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer);
 bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic);
-bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t publisherId, uint16_t writerGroupId);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);
 uint8_t SOPC_WriterGroup_Nb_DataSetWriter(const SOPC_WriterGroup* group);

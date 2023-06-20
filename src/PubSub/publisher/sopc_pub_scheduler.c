@@ -297,15 +297,26 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         if (NULL == topic)
         {
             SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
-            if (SOPC_WriterGroup_Set_Default_MqttTopic(group, pubId.data.uint, SOPC_WriterGroup_Get_Id(group)))
+            char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
+            if (SOPC_Compute_Default_MqttTopic(pubId.data.uint, SOPC_WriterGroup_Get_Id(group), defaultTopic,
+                                               LENGTH_MAX_DEFAULT_TOPIC + 1))
             {
-                context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+                if (SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic))
+                {
+                    context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
+                    return false;
+                }
             }
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to Compute default MQTT topic value");
                 return false;
             }
+            SOPC_Free(defaultTopic);
         }
         else
         {
