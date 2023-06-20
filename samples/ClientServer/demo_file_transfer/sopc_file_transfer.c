@@ -855,7 +855,7 @@ static SOPC_StatusCode FileTransfer_Method_Write(const SOPC_CallContext* callCon
 
     bool found = false;
     SOPC_StatusCode result_code_service = result_code;
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if ((false == found) && (0 == (result_code_service & SOPC_GoodStatusOppositeMask)))
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
