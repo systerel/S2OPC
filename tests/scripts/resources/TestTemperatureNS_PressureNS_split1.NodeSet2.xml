@@ -1,0 +1,208 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UANodeSet LastModified="2021-09-01T00:00:00Z" xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd">
+  <NamespaceUris>
+    <Uri>https://www.systerel.fr/S2OPC/test/temperature</Uri>
+    <Uri>https://www.systerel.fr/S2OPC/test/pressure</Uri>
+  </NamespaceUris>
+  <Models>
+    <Model ModelUri="https://www.systerel.fr/S2OPC/test/temperature" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
+    </Model>
+    <Model ModelUri="https://www.systerel.fr/S2OPC/test/pressure" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
+    </Model>
+  </Models>
+  <Aliases>
+    <Alias Alias="Boolean">i=1</Alias>
+    <Alias Alias="SByte">i=2</Alias>
+    <Alias Alias="Byte">i=3</Alias>
+    <Alias Alias="Int16">i=4</Alias>
+    <Alias Alias="UInt16">i=5</Alias>
+    <Alias Alias="Int32">i=6</Alias>
+    <Alias Alias="UInt32">i=7</Alias>
+    <Alias Alias="Int64">i=8</Alias>
+    <Alias Alias="UInt64">i=9</Alias>
+    <Alias Alias="Float">i=10</Alias>
+    <Alias Alias="Double">i=11</Alias>
+    <Alias Alias="DateTime">i=13</Alias>
+    <Alias Alias="String">i=12</Alias>
+    <Alias Alias="ByteString">i=15</Alias>
+    <Alias Alias="Guid">i=14</Alias>
+    <Alias Alias="XmlElement">i=16</Alias>
+    <Alias Alias="NodeId">i=17</Alias>
+    <Alias Alias="ExpandedNodeId">i=18</Alias>
+    <Alias Alias="QualifiedName">i=20</Alias>
+    <Alias Alias="LocalizedText">i=21</Alias>
+    <Alias Alias="StatusCode">i=19</Alias>
+    <Alias Alias="Structure">i=22</Alias>
+    <Alias Alias="Number">i=26</Alias>
+    <Alias Alias="Integer">i=27</Alias>
+    <Alias Alias="UInteger">i=28</Alias>
+    <Alias Alias="HasComponent">i=47</Alias>
+    <Alias Alias="HasProperty">i=46</Alias>
+    <Alias Alias="Organizes">i=35</Alias>
+    <Alias Alias="HasEventSource">i=36</Alias>
+    <Alias Alias="HasNotifier">i=48</Alias>
+    <Alias Alias="HasSubtype">i=45</Alias>
+    <Alias Alias="HasTypeDefinition">i=40</Alias>
+    <Alias Alias="HasModellingRule">i=37</Alias>
+    <Alias Alias="HasEncoding">i=38</Alias>
+    <Alias Alias="HasDescription">i=39</Alias>
+  </Aliases>
+  <!-- Temperature -->
+  <UAObjectType NodeId="ns=1;i=15001" BrowseName="1:Sensor">
+    <DisplayName>Sensor</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;i=15002</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAVariable NodeId="ns=1;i=15002" BrowseName="1:Temperature" ParentNodeId="ns=1;i=15001" DataType="Double">
+    <DisplayName>Temperature</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15006</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=15007</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15001</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;i=15006" BrowseName="EURange" ParentNodeId="ns=1;i=15002" DataType="i=884">
+    <DisplayName>EURange</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15002</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;i=15007" BrowseName="65535:EngineeringUnits" ParentNodeId="ns=1;i=15002" DataType="i=887">
+    <DisplayName>EngineeringUnits</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15002</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="ns=1;i=15008" BrowseName="1:Sensors">
+    <DisplayName>Sensors</DisplayName>
+    <Description>A set of sensors.</Description>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;i=15009</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;i=15016</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="ns=1;i=15009" BrowseName="1:WaterSensor" ParentNodeId="ns=1;i=15008">
+    <DisplayName>WaterSensor</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;i=15010</Reference>
+      <Reference ReferenceType="HasTypeDefinition">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15008</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="ns=1;i=15010" BrowseName="1:Temperature" ParentNodeId="ns=1;i=15009" DataType="Double">
+    <DisplayName>Temperature</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15014</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15009</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;i=15014" BrowseName="EURange" ParentNodeId="ns=1;i=15010" DataType="i=884">
+    <DisplayName>EURange</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15010</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="ns=1;i=15016" BrowseName="1:AirSensor" ParentNodeId="ns=1;i=15008">
+    <DisplayName>AirSensor</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=1;i=15017</Reference>
+      <Reference ReferenceType="HasTypeDefinition">ns=1;i=15001</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15008</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="ns=1;i=15017" BrowseName="1:Temperature" ParentNodeId="ns=1;i=15016" DataType="Double">
+    <DisplayName>Temperature</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15021</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15016</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;i=15021" BrowseName="EURange" ParentNodeId="ns=1;i=15017" DataType="i=884">
+    <DisplayName>EURange</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15017</Reference>
+    </References>
+  </UAVariable>
+  <!-- Pressure split 1 --><UAObjectType NodeId="ns=2;i=15001" BrowseName="2:Sensor">
+    <DisplayName>Sensor</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=2;i=15002</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAVariable NodeId="ns=2;i=15002" BrowseName="2:Pressure" ParentNodeId="ns=2;i=15001" DataType="Double">
+    <DisplayName>Pressure</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=2;i=15006</Reference>
+      <Reference ReferenceType="HasProperty">ns=2;i=15007</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=2;i=15001</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=2;i=15006" BrowseName="EURange" ParentNodeId="ns=2;i=15002" DataType="i=884">
+    <DisplayName>EURange</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=2;i=15002</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=2;i=15007" BrowseName="65535:EngineeringUnits" ParentNodeId="ns=2;i=15002" DataType="i=887">
+    <DisplayName>EngineeringUnits</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=2;i=15002</Reference>
+    </References>
+  </UAVariable>
+  <UAObject NodeId="ns=2;i=15008" BrowseName="2:Sensors">
+    <DisplayName>Sensors</DisplayName>
+    <Description>A set of sensors.</Description>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=2;i=15009</Reference>
+      <Reference ReferenceType="HasComponent">ns=2;i=15016</Reference>
+      <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="ns=2;i=15009" BrowseName="2:WaterSensor" ParentNodeId="ns=2;i=15008">
+    <DisplayName>WaterSensor</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">ns=2;i=15010</Reference>
+      <Reference ReferenceType="HasTypeDefinition">ns=2;i=15001</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=2;i=15008</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="ns=2;i=15010" BrowseName="2:Pressure" ParentNodeId="ns=2;i=15009" DataType="Double">
+    <DisplayName>Pressure</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=2;i=15014</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=2;i=15009</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="ns=2;i=15014" BrowseName="EURange" ParentNodeId="ns=2;i=15010" DataType="i=884">
+    <DisplayName>EURange</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=2;i=15010</Reference>
+    </References>
+  </UAVariable>
+</UANodeSet>
