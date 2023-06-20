@@ -231,6 +231,16 @@ def merge(tree, new, namespaces):
     new_models = new.find('uanodeset:Models', namespaces)
     tree_models[-1].tail = indent(2)
     for model in new_models:
+        new_model_uri = model.get('ModelUri')
+        already_model = tree_models.find(f'uanodeset:Model[@ModelUri="{new_model_uri}"]', namespaces)
+        if already_model is not None:
+            already_model_version = already_model.get('Version')
+            new_model_version = model.get('Version')
+            if new_model_version == already_model_version:
+                # just skip the duplicate model
+                continue
+            else:
+                raise Exception(f'Incompatible model version: {new_model_uri} provided with versions {already_model_version} and {new_model_version}')
         req_ns0 = model.find(f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]', namespaces)
         if req_ns0 is not None:
             req_ns0_version = req_ns0.get('Version')
