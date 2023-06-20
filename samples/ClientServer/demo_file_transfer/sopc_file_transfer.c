@@ -249,7 +249,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
  * \brief Function to free SOPC_FileType object structure (used for dictionary management purposes).
  * \param value The FileType object
  */
-static void filetype_free(void* value);
+static void filetype_free(uintptr_t value);
 
 /**
  * \brief Function to compare two SOPC_FileHandle (used for dictionary management purposes).
@@ -257,14 +257,14 @@ static void filetype_free(void* value);
  * \param b second SOPC_FileHandle
  * \return true if equal else false
  */
-static bool handle_equal(const void* a, const void* b);
+static bool handle_equal(const uintptr_t a, const uintptr_t b);
 
 /**
  * \brief Function to hash a SOPC_FileHandle (used for dictionary management purposes).
  * \param handle the SOPC_FileHandle to hash
  * \return the hash result
  */
-static uint64_t handle_hash(const void* handle);
+static uint64_t handle_hash(const uintptr_t handle);
 
 /**
  * \brief Function to generate a random SOPC_FileHandle.
@@ -325,7 +325,7 @@ static SOPC_StatusCode local_write_default_UserWritable(const SOPC_FileType* fil
  * \param value the pointer on the SOPC_FileType
  * \param user_data use to get SOPC_StatusCode (SOPC_STATUT_OK if no error)
  */
-static void local_write_all(const void* key, void* value, void* user_data);
+static void local_write_all(const uintptr_t key, uintptr_t value, uintptr_t user_data);
 
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
@@ -410,20 +410,20 @@ static bool check_openModeArg(SOPC_OpenMode mode)
     return ok1 && ok2;
 }
 
-static void filetype_free(void* value)
+static void filetype_free(uintptr_t value)
 {
-    if (NULL != value)
+    if (NULL != (void*) value)
     {
         FileTransfer_FileType_Delete((SOPC_FileType**) &value);
     }
 }
 
-static bool handle_equal(const void* a, const void* b)
+static bool handle_equal(const uintptr_t a, const uintptr_t b)
 {
     return (*(const SOPC_FileHandle*) a == *(const SOPC_FileHandle*) b);
 }
 
-static uint64_t handle_hash(const void* handle)
+static uint64_t handle_hash(const uintptr_t handle)
 {
     uint64_t hash = SOPC_DJBHash((const uint8_t*) handle, (size_t) sizeof(SOPC_FileHandle));
     return hash;
@@ -494,6 +494,11 @@ static SOPC_StatusCode opcuaMode_to_CMode(SOPC_OpenMode mode, char* Cmode)
     return status;
 }
 
+static SOPC_FileType* SOPC_FT_Dict_Get(const SOPC_NodeId* objectId, bool* found)
+{
+    return (SOPC_FileType*) SOPC_Dict_Get(g_objectId_to_file, (const uintptr_t) objectId, found);
+}
+
 static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callContextPtr,
                                                 const SOPC_NodeId* objectId,
                                                 uint32_t nbInputArgs,
@@ -528,7 +533,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:Method_Open: API not initialized with <SOPC_FileTransfer_Initialize>");
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -577,7 +582,7 @@ static SOPC_StatusCode FileTransfer_Method_Open(const SOPC_CallContext* callCont
                                "FileTransfer:Method_Open: unable to create random handle");
         return OpcUa_BadUnexpectedError;
     }
-    bool res = SOPC_Dict_Insert(g_handle_to_file, &file->handle, file);
+    bool res = SOPC_Dict_Insert(g_handle_to_file, (uintptr_t) &file->handle, (uintptr_t) file);
     if (false == res)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -762,7 +767,7 @@ static SOPC_StatusCode FileTransfer_Method_Read(const SOPC_CallContext* callCont
     bool found = false;
     SOPC_FileType* file = NULL;
     SOPC_StatusCode result_code_service = SOPC_GoodStatusOppositeMask;
-    file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -1038,7 +1043,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        g_handle_to_file = SOPC_Dict_Create(NULL, handle_hash, handle_equal, NULL, NULL);
+        g_handle_to_file = SOPC_Dict_Create((uintptr_t) NULL, handle_hash, handle_equal, NULL, NULL);
         if (NULL == g_handle_to_file)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1054,7 +1059,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Init: error while configuring the MethodCallManager");
         }
-        SOPC_Dict_SetTombstoneKey(g_handle_to_file, &g_tombstone_key);
+        SOPC_Dict_SetTombstoneKey(g_handle_to_file, (uintptr_t) &g_tombstone_key);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -1323,7 +1328,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_File(const SOPC_FileType_Config* config)
 
     if (SOPC_STATUS_OK == status)
     {
-        res = SOPC_Dict_Insert(g_objectId_to_file, node_id, file);
+        res = SOPC_Dict_Insert(g_objectId_to_file, (uintptr_t) node_id, (uintptr_t) file);
         if (false == res)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1570,7 +1575,7 @@ static SOPC_StatusCode FileTransfer_Close_TmpFile(SOPC_FileHandle handle, const 
     bool found = false;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:CloseTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -1729,7 +1734,7 @@ static SOPC_StatusCode FileTransfer_Read_TmpFile(SOPC_FileHandle handle,
 
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:ReadTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -1852,7 +1857,7 @@ static SOPC_StatusCode FileTransfer_Write_TmpFile(SOPC_FileHandle handle,
     size_t ret = 0;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:WriteTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -1935,7 +1940,7 @@ static SOPC_StatusCode FileTransfer_GetPos_TmpFile(SOPC_FileHandle handle, const
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:GetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
 
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -1988,7 +1993,7 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     int ret = -1;
     SOPC_ASSERT(g_objectId_to_file != NULL &&
                 "FileTransfer:SetPosTmpFile: API not initialized with <SOPC_FileTransfer_Initialize>");
-    SOPC_FileType* file = SOPC_Dict_Get(g_objectId_to_file, objectId, &found);
+    SOPC_FileType* file = SOPC_FT_Dict_Get(objectId, &found);
     if (false == found)
     {
         char* C_objectId = SOPC_NodeId_ToCString(objectId);
@@ -2026,11 +2031,11 @@ static SOPC_StatusCode FileTransfer_SetPos_TmpFile(SOPC_FileHandle handle, const
     return status;
 }
 
-static void local_write_all(const void* key, void* value, void* user_data)
+static void local_write_all(const uintptr_t key, uintptr_t value, uintptr_t user_data)
 {
     (void) key;
-    const SOPC_FileType* file = value;
-    SOPC_ReturnStatus* status = user_data;
+    const SOPC_FileType* file = (SOPC_FileType*) value;
+    SOPC_ReturnStatus* status = (SOPC_ReturnStatus*) user_data;
     SOPC_StatusCode res = SOPC_GoodGenericStatus;
     res = local_write_default_UserWritable(file);
     if (SOPC_GoodGenericStatus != res)
@@ -2065,7 +2070,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
     if (SOPC_STATUS_OK == status)
     {
         /* Initialize each variables for each each FileType added into the API */
-        SOPC_Dict_ForEach(g_objectId_to_file, &local_write_all, &status);
+        SOPC_Dict_ForEach(g_objectId_to_file, &local_write_all, (uintptr_t) &status);
     }
     return status;
 }
