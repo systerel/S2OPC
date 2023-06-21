@@ -182,6 +182,42 @@ def reassign_node_ns_index(node: ET.Element, ns_idx_reassign: dict, namespaces):
         ref.text = reassigned_ns_index(ref.text, ns_idx_reassign)
 
 
+def _check_declared_nid(nid, ns_count, matcher):
+    m = matcher.match(nid)
+    if m is not None:
+        ns = int(m.group(1))
+        if ns < 0:
+            raise Exception (f"Invalid namespace usage ns={ns} in {nid}")
+        if ns > ns_count:
+            raise Exception(f"Missing namespace declaration for ns={ns} in {nid}, " +
+                            f"whereas {ns_count} namespace{' is' if ns_count <2 else 's are'} declared")
+
+
+def _check_all_namespaces_declared(tree, namespaces):
+    ns_count = 0
+    ns_uris = tree.find('uanodeset:NamespaceUris', namespaces)
+    if ns_uris is not None:
+        uris = ns_uris.findall('uanodeset:Uri', namespaces)
+        declarations = [uri.text for uri in uris]
+        declared_ns = set(declarations)
+        if len(declared_ns) != len(declarations):
+            raise Exception("Duplicate Namespace URI declaration in: " + str(declarations))
+        ns_count = len(declared_ns)
+
+    for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+        for node in tree.iterfind(f'*[@{attr}]'):
+            nid = node.get(attr)
+            _check_declared_nid(nid, ns_count, NS_IDX_MATCHER)
+    for node in tree.iterfind(f'*[@BrowseName]'):
+        nid = node.get('BrowseName')
+        _check_declared_nid(nid, ns_count, PREFIX_IDX_MATCHER)
+    for ref in tree.iterfind('uanodeset:References/uanodeset:Reference', namespaces):
+        _check_declared_nid(ref.get('ReferenceType'), ns_count, NS_IDX_MATCHER)
+        _check_declared_nid(ref.text, ns_count, NS_IDX_MATCHER)
+    for alias in tree.iterfind('uanodeset:Aliases/uanodeset:Alias', namespaces):
+        _check_declared_nid(alias.text, ns_count, NS_IDX_MATCHER)
+
+
 def merge(tree, new, namespaces):
     # Merge new tree into tree
     # The merge is restricted to tags for which we know the semantics
@@ -190,6 +226,7 @@ def merge(tree, new, namespaces):
     tree_root = tree.getroot()
 
     # Merge NamespaceURIs
+    _check_all_namespaces_declared(new, namespaces)
     new_ns_uris = new.find('uanodeset:NamespaceUris', namespaces)
     if new_ns_uris is None:
         print("NamespaceUris is missing in a non-NS0 address space")
@@ -717,6 +754,7 @@ def run_merge(args):
             if '' in namespaces:
                 namespaces['uanodeset'] = namespaces['']
             __fill_namespace_array(tree, namespaces)
+            _check_all_namespaces_declared(tree, namespaces)
         else:
             merge(tree, new_tree, namespaces)
 
