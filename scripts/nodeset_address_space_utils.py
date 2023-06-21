@@ -62,6 +62,15 @@ TYPE_DEFINITION_REFERENCE_TYPE = 'HasTypeDefinition'
 def indent(level):
     return '\n' + INDENT_SPACES*level
 
+
+def close_node_indent(node, indent_level):
+    if len(node) > 0:
+        node[-1].tail = indent(indent_level)
+    else:
+        #TODO: node.text = None to make the node close on 1 line
+        node.text = indent(indent_level)
+
+
 # Namespaces are very hard to handle in XPath and the ET API does not help much
 # {*} notations for namespace in XPath searches only appear in Py3.8
 # Moreover, the original namespaces are not parsed by default
@@ -112,9 +121,6 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
     refs_nodes = node.findall('uanodeset:References', namespaces)
     if len(refs_nodes) == 0:
         refs = ET.Element('uanodeset:References', namespaces)
-        # Manual identation with ET... This might not adjust well, we should also indent the latest brother
-        refs.text = indent(2)
-        refs.tail = indent(2)
         node.append(refs)
     else:
         refs, = refs_nodes
@@ -125,12 +131,9 @@ def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
 
     elem = ET.Element('Reference', attribs)
     elem.text = tgt
-    if len(refs) > 0:
-        refs[-1].tail = indent(3)
-    else:
-        refs.text = indent(3)
-    elem.tail = indent(2)
+    close_node_indent(refs, 3)
     refs.append(elem)
+    close_node_indent(refs, 2)
 
 
 def _is_forward(ref: ET.Element):
@@ -315,10 +318,7 @@ def merge(tree, new, namespaces):
         elem = ET.Element('Alias', {'Alias': alias})
         elem.text = new_alias_dict[alias]
         # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
-        if len(tree_aliases) > 0:
-            tree_aliases[-1].tail = indent(2)
-        else:
-            tree_aliases.text = indent(2)
+        close_node_indent(tree_aliases, 2)
         tree_aliases.append(elem)
 
     if len(tree_aliases) > 0:
@@ -368,6 +368,7 @@ def merge(tree, new, namespaces):
         nodea = tree_nodes[nid]
         for ref in refsb:
             _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=_is_forward(ref))
+        close_node_indent(refsb, 2)
 
     tree_root[-1].tail = indent(0)
     return True
@@ -734,6 +735,34 @@ def __fill_namespace_array(tree: ET.ElementTree, namespaces: dict):
     __append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
 
 
+def __get_all_retain_values(tree: ET.ElementTree, retain: set, namespaces: dict):
+    nid_alias = __get_aliases(tree, namespaces)
+    alias_nid =  {alias: nid for nid, alias in nid_alias.items()}
+    corresp = set() # the corresponding alias or node id for every item in the retain set
+    for r in retain:
+        if r in nid_alias:
+            corresp.add(nid_alias[r])
+        if r in alias_nid:
+            corresp.add(alias_nid[r])
+    return retain | corresp
+
+
+def remove_backward_refs(tree: ET.ElementTree, retain: set, namespaces: dict):
+    all_retain = __get_all_retain_values(tree, retain, namespaces)
+    for node in tree.iterfind('*[@NodeId]'):
+        for refs in node.iterfind('uanodeset:References', namespaces):
+            back_refs = list()
+            for ref in refs:
+                # oddly enough, filtering with a match expression fails
+                # (some back refs are not found, although identical to some that are found)
+                if not _is_forward(ref) and ref.get('ReferenceType') not in all_retain:
+                    # cannot remove while iterating
+                    back_refs.append(ref)
+            for ref in back_refs:
+                refs.remove(ref)
+            close_node_indent(refs, 2)
+
+
 def run_merge(args):
     # Load and merge all address spaces
     tree = None
@@ -781,6 +810,9 @@ def run_merge(args):
 
     if res and args.remove_unused:
         remove_unused(tree, args.retain_ns0, frozenset(args.retain_types), namespaces)
+
+    if res and args.sanitize and args.remove_backward_refs:
+        remove_backward_refs(tree, set(args.remove_backward_refs_retain), namespaces)
 
     if res:
         tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
@@ -839,6 +871,18 @@ def make_argparser():
             generate reciprocal references between nodes when there is a reference in only one direction,
             and remove attribute ParentNodeId when erroneous.
                              ''')
+    parser.add_argument('--remove-backward-refs', action='store_true', dest='remove_backward_refs',
+                        help='''
+                        Remove the backward references, i.e. reference elements with @IsForward="false".
+                        This option requires a sanitized model, else information would be lost.
+                        Thus, it is not compatible with --no-sanitize.
+                        ''')
+    parser.add_argument('--remove-backward-refs-retain', nargs='+', dest='remove_backward_refs_retain',
+                        default=[],
+                        help='''
+                        When removing the backward references, retain those with the given ReferenceType.
+                        The reference types may be given either as node ID or alias.
+                        ''')
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
 
