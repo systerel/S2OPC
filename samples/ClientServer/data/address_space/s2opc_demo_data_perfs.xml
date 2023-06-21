@@ -23,7 +23,9 @@
     <Uri>https://www.systerel.fr/S2OPC/demo/data/perfs</Uri>
   </NamespaceUris>
   <Models>
-    <Model ModelUri="http://opcfoundation.org/UA/" Version="1.03" PublicationDate="2013-12-02T00:00:00Z" />
+    <Model ModelUri="https://www.systerel.fr/S2OPC/demo/data/perfs" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.04.11" PublicationDate="2022-03-29T00:00:00Z" />
+    </Model>
   </Models>
   <Aliases>
     <Alias Alias="Boolean">i=1</Alias>
