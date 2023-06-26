@@ -347,7 +347,7 @@ if (NOT WIN32 AND expat_FOUND)
                                                   "validation_tests/client/file_transfer/check_file_transfer_method.c")
   target_include_directories(check_file_transfer PRIVATE "validation_tests/client/file_transfer")
   add_dependencies(check_file_transfer toolkit_test_server_file_transfer)
-  target_link_libraries(check_file_transfer PRIVATE s2opc_clientwrapper Check::check)
+  target_link_libraries(check_file_transfer PRIVATE s2opc_clientserver Check::check)
   target_compile_options(check_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
   target_compile_definitions(check_file_transfer PRIVATE ${S2OPC_DEFINITIONS})
 endif()
@@ -373,7 +373,7 @@ if (NOT WIN32 AND expat_FOUND)
                                                     ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
   target_include_directories(toolkit_test_server_file_transfer PRIVATE "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_file_transfer"
                                                                         ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
-  target_link_libraries(toolkit_test_server_file_transfer PRIVATE s2opc_serverwrapper s2opc_clientserver-xml-loaders-expat)
+  target_link_libraries(toolkit_test_server_file_transfer PRIVATE s2opc_clientserver)
   target_compile_options(toolkit_test_server_file_transfer PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno and mkstemp functions.
   target_compile_definitions(toolkit_test_server_file_transfer PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")
   add_custom_command(
