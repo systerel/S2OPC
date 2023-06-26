@@ -148,6 +148,35 @@ uint8_t encoded_network_msg_multi_dsm_data[] = {
     0x01, 0x01, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00 // VAR1
 };
 
+uint8_t encoded_network_msg_no_pubId[] = {
+    0x61,                                                       // Flags + Version (NETWORK_MSG_VERSION)
+                                                                // No PublisherId
+    0x03,                                                       // GroupFlags
+    0x2A, 0x00,                                                 // WriterGroupId (NETWORK_MSG_GROUP_ID)
+    0xE8, 0x03, 0x00, 0x00,                                     // GroupVersion (NETWORK_MSG_GROUP_VERSION)
+    0x05,                                                       // Payload header/Message Count
+    0xFF, 0x00,                                                 // DSM WriterId[0]
+    0x00, 0x01, 0x01, 0x01, 0x02, 0x01, 0x03, 0x01,             // DSM WriterId[1..4]
+    0x17, 0x00, 0x12, 0x00, 0x0D, 0x00, 0x0A, 0x00, 0x08, 0x00, // DSM Sizes [0..4]
+    // DSM[0] (Flags, nbFields)
+    0x01, 0x05, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    0x0A, 0x8F, 0xC2, 0xF5, 0x3D,                   // VAR4
+    0x07, 0xBC, 0xA4, 0x05, 0x00,                   // VAR5
+    // DSM[1] (Flags, nbFields)
+    0x01, 0x04, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    0x0A, 0x8F, 0xC2, 0xF5, 0x3D,                   // VAR4
+    // DSM[2] (Flags, nbFields)
+    0x01, 0x03, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF, 0x05, 0x54, 0xFD,                   // VAR2 & 3
+    // DSM[3] (Flags, nbFields)
+    0x01, 0x02, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00, // VAR1
+    0x03, 0xEF,                                     // VAR2
+    // DSM[4] (Flags, nbFields)
+    0x01, 0x01, 0x00, 0x07, 0x2E, 0x34, 0xB8, 0x00 // VAR1
+};
+
 #define NETWORK_MSG_PUBLISHER_ID 46
 #define NETWORK_MSG_VERSION 1
 #define NETWORK_MSG_GROUP_ID 42
@@ -754,6 +783,71 @@ START_TEST(test_hl_network_msg_decode_multi_dsm_nok)
     SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
     // Check that Network message is not decoded
     ck_assert_ptr_null(uadp_nm);
+    SOPC_Buffer_Delete(buffer);
+    SOPC_UADP_NetworkMessage_Delete(uadp_nm);
+    SOPC_PubSubConfiguration_Delete(config);
+}
+END_TEST
+
+START_TEST(test_hl_network_msg_decode_null_pubid)
+{
+    // Initialize endianess for encoders
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    SOPC_DataSetReader* dsr[5];
+    SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 5);
+    ck_assert_ptr_nonnull(config);
+    SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
+    ck_assert_ptr_nonnull(connection);
+
+    const uint32_t bufferLen = sizeof(encoded_network_msg_no_pubId);
+    SOPC_Buffer* buffer = SOPC_Buffer_Create(bufferLen);
+    ck_assert_ptr_nonnull(buffer);
+
+    SOPC_Buffer_Write(buffer, encoded_network_msg_no_pubId, bufferLen);
+    SOPC_Buffer_SetPosition(buffer, 0);
+
+    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
+    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
+    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
+    ck_assert_ptr_nonnull(uadp_nm);
+    SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+    ck_assert_ptr_nonnull(nm);
+
+    // Check that Network message is as expected
+    const SOPC_Dataset_LL_PublisherId* pubId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header);
+    ck_assert_ptr_null(pubId);
+
+    const uint8_t nm_version = SOPC_Dataset_LL_NetworkMessage_GetVersion(header);
+    ck_assert_uint_eq(nm_version, NETWORK_MSG_VERSION);
+
+    const uint16_t nm_groupId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(nm);
+    ck_assert_uint_eq(nm_groupId, NETWORK_MSG_GROUP_ID);
+
+    const uint32_t nm_groupVersion = SOPC_Dataset_LL_NetworkMessage_Get_GroupVersion(nm);
+    ck_assert_uint_eq(nm_groupVersion, NETWORK_MSG_GROUP_VERSION);
+
+    for (uint16_t imsg = 0; imsg < NB_DATASET_MSG; imsg++)
+    {
+        const SOPC_Dataset_LL_DataSetMessage* msg_dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, imsg);
+        const uint16_t nb_vars = (uint16_t)(NB_VARS - imsg);
+        const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(msg_dsm);
+        ck_assert_uint_eq(writerId, (uint16_t)(DATASET_MSG_WRITER_ID_BASE + imsg));
+
+        for (uint16_t i = 0; i < nb_vars; i++)
+        {
+            int32_t comparison = -1;
+            const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(msg_dsm, i);
+            SOPC_ReturnStatus status = SOPC_Variant_Compare(var, &varArr[i], &comparison);
+            ck_assert_int_eq(SOPC_STATUS_OK, status);
+            ck_assert_int_eq(comparison, 0);
+        }
+    }
+    uint32_t position;
+    SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(buffer, &position);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(position, bufferLen);
     SOPC_Buffer_Delete(buffer);
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
     SOPC_PubSubConfiguration_Delete(config);
@@ -1417,6 +1511,7 @@ int main(void)
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_multi_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_multi_dsm_nok);
+    tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_null_pubid);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_uni_keep_alive_dsm);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode_uni_keep_alive_dsm);
 

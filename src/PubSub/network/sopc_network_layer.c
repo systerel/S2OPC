@@ -1605,6 +1605,12 @@ SOPC_UADP_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Get_Last_Error(void
 static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Dataset_LL_PublisherId* src)
 {
     SOPC_Conf_PublisherId result;
+    if (NULL == src)
+    {
+        result.type = SOPC_Null_PublisherId;
+        return result;
+    }
+
     switch (src->type)
     {
     case DataSet_LL_PubId_Byte_Id:
