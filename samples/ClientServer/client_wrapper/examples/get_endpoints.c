@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 
-#include "libs2opc_client_config.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
 #include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
@@ -92,18 +92,28 @@ static void print_endpoints(OpcUa_GetEndpointsResponse* resp)
 
 int main(int argc, char* const argv[])
 {
-    SOPC_UNUSED_ARG(argc);
-    SOPC_UNUSED_ARG(argv);
-    /* TODO : use API config for discovery
-     if (argc != 2)
-     {
-         printf("Usage: %s <discovery endpoint URL> (e.g. %s \"opc.tcp://localhost:4841\").\nThe '" DEFAULT_CONFIG_ID
-                "' connection configuration "
-                "from " DEFAULT_CLIENT_CONFIG_XML " is used.\n",
-                argv[0], argv[0]);
-         return -2;
-     }
-     */
+    printf("Usage: %s <discovery endpoint URL> (e.g. %s \"opc.tcp://localhost:4841\").\nThe '" DEFAULT_CONFIG_ID
+           "' connection configuration "
+           "from " DEFAULT_CLIENT_CONFIG_XML " is used by default if no parameter provided.\n\n",
+           argv[0], argv[0]);
+
+    const char* endpointURL = NULL;
+    if (argc > 2)
+    {
+        printf("ERROR: invalid number of arguments provided\n");
+        return -2;
+    }
+    else if (2 == argc)
+    {
+        endpointURL = argv[1];
+        printf("Calling GetEndpoints on endpoint %s (SecurityMode None)\n\n", endpointURL);
+    }
+    else
+    {
+        printf("Calling GetEndpoints using the '" DEFAULT_CONFIG_ID
+               "' connection configuration "
+               "from " DEFAULT_CLIENT_CONFIG_XML ".\n\n");
+    }
     int res = 0;
 
     /* Initialize client/server toolkit and client wrapper */
@@ -124,11 +134,27 @@ int main(int argc, char* const argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientConfigHelper_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
-
-        if (SOPC_STATUS_OK != status)
+        if (NULL == endpointURL)
         {
-            printf("<Example_wrapper_get_endpoints: failed to load XML config file %s\n", DEFAULT_CLIENT_CONFIG_XML);
+            // Use XML configuration
+            status =
+                SOPC_ClientConfigHelper_ConfigureFromXML(DEFAULT_CLIENT_CONFIG_XML, NULL, &nbConfigs, &scConfigArray);
+
+            if (SOPC_STATUS_OK != status)
+            {
+                printf("<Example_wrapper_get_endpoints: failed to load XML config file %s\n",
+                       DEFAULT_CLIENT_CONFIG_XML);
+            }
+        }
+        else
+        {
+            // Create dedicated configuration
+            SOPC_SecureConnection_Config* tmpConnCfg = SOPC_ClientConfigHelper_CreateSecureConnection(
+                DEFAULT_CONFIG_ID, endpointURL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
+            if (NULL == tmpConnCfg)
+            {
+                status = SOPC_STATUS_INVALID_PARAMETERS;
+            }
         }
     }
 
@@ -140,7 +166,7 @@ int main(int argc, char* const argv[])
         if (NULL == discConnCfg)
         {
             printf("<Example_wrapper_get_endpoints: failed to load configuration id '" DEFAULT_CONFIG_ID
-                   "' from XML config file %s\n",
+                   "' from XML config file %s (or created from command line endpoint URL)\n",
                    DEFAULT_CLIENT_CONFIG_XML);
 
             status = SOPC_STATUS_INVALID_PARAMETERS;
