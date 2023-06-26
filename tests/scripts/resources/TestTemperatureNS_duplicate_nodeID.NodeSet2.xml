@@ -66,7 +66,7 @@
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15006" BrowseName="65535:EngineeringUnits" ParentNodeId="ns=1;i=15001" DataType="i=887">
+  <UAVariable NodeId="ns=1;i=15006" BrowseName="1:EngineeringUnits" ParentNodeId="ns=1;i=15001" DataType="i=887">
     <DisplayName>EngineeringUnits</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
