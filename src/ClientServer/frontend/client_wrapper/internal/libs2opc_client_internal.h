@@ -92,7 +92,7 @@ bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword);
 /**
  * \brief Function to know if the callback has been defined ::SOPC_ClientConfigHelper_SetClientKeyPasswordCallback (i.e.
  * the client's key is encrypted).
- *
+ * TODO: remove when deprecated API removed
  */
 bool SOPC_ClientInternal_IsEncryptedClientKey(void);
 
@@ -108,7 +108,7 @@ bool SOPC_ClientInternal_IsEncryptedClientKey(void);
 bool SOPC_ClientInternal_GetUserKeyPassword(const char* cert1Sha1, char** outPassword);
 
 /**
- * \brief Function to call the callback to retrieve password associated to given username
+ * \brief Function to call the callback to retrieve the username and password for the session to activate
  *
  * \param[out] outUserName   the newly allocated user name.
  * \param[out] outPassword   the newly allocated password.

@@ -67,7 +67,7 @@ typedef enum
     PARSE_USER_POLICIES,       // ............In user polcies tag
     PARSE_USER_POLICY,         // ..............In user policy tag
     PARSE_CLICONFIG            //..In a client config tag to skip
-} parse_state_t;
+} server_parse_state_t;
 
 struct parse_context_t
 {
@@ -104,7 +104,7 @@ struct parse_context_t
     SOPC_Endpoint_Config* currentEpConfig;
     SOPC_Server_Config* serverConfigPtr;
 
-    parse_state_t state;
+    server_parse_state_t state;
 };
 
 #define NS_SEPARATOR "|"
@@ -118,7 +118,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     {
         size_t r = fread(buf, sizeof(char), sizeof(buf) / sizeof(char), fd);
 
-        if ((r == 0) && (ferror(fd) != 0))
+        if ((0 == r) && (ferror(fd) != 0))
         {
             LOGF("Error while reading input file: %s", strerror(errno));
             return SOPC_STATUS_NOK;
@@ -126,7 +126,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
         if (XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
         {
-            enum XML_Error parser_error = XML_GetErrorCode(parser);
+            const enum XML_Error parser_error = XML_GetErrorCode(parser);
 
             if (parser_error != XML_ERROR_NONE)
             {

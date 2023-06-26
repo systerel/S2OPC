@@ -108,9 +108,9 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* cli
  * \brief Sets asymmetrical certificate and key of client from byte arrays.
  *        Certificate shall be in DER format, key file shall be in DER or PEM format.
  *
- * \param certificateNbBytes Number of elements in \p clientCertificate array
+ * \param certificateNbBytes Number of bytes in \p clientCertificate array
  * \param clientCertificate  Array of bytes containing client certificate at DER format (copied by function)
- * \param keyNbBytes         Number of elements in \p clientPrivateKey array
+ * \param keyNbBytes         Number of bytes in \p clientPrivateKey array
  * \param clientPrivateKey   Array of bytes containing client key file at DER or PEM format (copied by function)
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
@@ -293,9 +293,9 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureCo
  *
  * \param secConnConfig  The secure connection configuration to set
  * \param userPolicyId   The user policy Id to be used in server for X509 certificate
- * \param certificateNbBytes Number of elements in \p clientCertificate array
+ * \param certificateNbBytes Number of bytes in \p clientCertificate array
  * \param userCertificate    Array of bytes containing user certificate at DER format (copied by function)
- * \param keyNbBytes         Number of elements in \p clientPrivateKey array
+ * \param keyNbBytes         Number of bytes in \p clientPrivateKey array
  * \param userPrivateKey     Array of bytes containing user key file at DER or PEM format (copied by function)
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS

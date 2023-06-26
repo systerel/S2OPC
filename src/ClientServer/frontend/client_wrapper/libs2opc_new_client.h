@@ -24,8 +24,8 @@
  * Once the client is configured using functions of libs2opc_client_config.h,
  * the client should establish connection using ::SOPC_ClientHelperNew_Connect or call a discovery service
  * using ::SOPC_ClientHelperNew_DiscoveryServiceAsync (or ::SOPC_ClientHelperNew_DiscoveryServiceSync).
- * Until connection is stopped by a call to ::SOPC_ClientHelperNew_Disconnect or due to an error (listening address
- * busy, etc.), the client application might use the connections.
+ * Until connection is stopped by a call to ::SOPC_ClientHelperNew_Disconnect or due to an error
+ * (socket closed, etc.), the client application might use the connections.
  * This is done using OPC UA services using ::SOPC_ClientHelperNew_ServiceAsync (or
  * ::SOPC_ClientHelperNew_ServiceSync).
  * The request messages might be built using the helper functions of libs2opc_request_builder.h
@@ -57,14 +57,16 @@ typedef struct SOPC_ClientConnection SOPC_ClientConnection;
 
 typedef enum
 {
-    SOPC_ClientConnectionEvent_Disconnected, /**< Connection terminated, it will not be established again unless a new
-                                                connection attempt is done.
-                                                To do a new attempt the following functions shall be called:
+    SOPC_ClientConnectionEvent_Disconnected, /**< Connection terminated unexpectedly, it will not be established again
+                                                unless a new connection attempt is done. To do a new attempt the
+                                                following functions shall be called:
                                                 - ::SOPC_ClientHelperNew_Disconnect on current connection
                                                 - ::SOPC_ClientHelperNew_Connect to create a new connection
                                               */
     SOPC_ClientConnectionEvent_Connected,    /**< (NOT IMPLEMENTED YET) Connection established (SC & session), only
-                                                triggered when SOPC_ClientHelperNew_StartConnection is used. */
+                                                triggered when asynchronous SOPC_ClientHelperNew_StartConnection is used
+                                                or in case of reconnection.
+                                              */
     SOPC_ClientConnectionEvent_Reconnecting, /**< (NOT IMPLEMENTED YET) Connection temporarily interrupted,
                                                   attempt to re-establish connection on-going.
                                                   Do not use connection until Connected event received */
@@ -77,14 +79,14 @@ typedef enum
  *
  * \param config  Indicates the connection concerned by the event
  * \param event   The event that occurred on the connection
- * \param status  Indicates the return status of client, SOPC_GoodGenericStatus if stopped on purpose.
+ * \param status  Indicates the return status of client connection
  */
 typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
                                             SOPC_ClientConnectionEvent event,
                                             SOPC_StatusCode status);
 
 /**
- * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
+ * \brief Send a discovery request without user session creation and activation and retrieve response asynchronously.
  *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
@@ -154,7 +156,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceSync(SOPC_SecureConnectio
  * \brief Establishes the connection in a blocking way (synchronously).
  *
  * \param secConnConfig          The secure connection configuration to establish
- * \param connectEventCb         Callback called on connection event, it is only used in case of further disconnection
+ * \param connectEventCb         Callback called on connection event, it is only used in case of further
+ *                               unexpected disconnection
+ *
  * \param[out] secureConnection  Pointer to the secure connection established when returned value is SOPC_STATUS_OK
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_CLOSED in case of failure,
@@ -169,7 +173,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
 /**
  * \brief Disconnects the connection established with SOPC_ClientHelperNew_Connect in a blocking way (synchronously).
  *
- * \param secureConnection  The secure connection to stop
+ * \param secureConnection  Pointer to the secure connection reference to stop, set to NULL during successful call.
  * *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the connection is already disconnected
@@ -177,7 +181,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
 SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secureConnection);
 
 /**
- * \brief Executes an OPC UA service on server (read, write, browse or discovery service) asynchronously.
+ * \brief Executes an OPC UA service on server (read, write, browse, discovery service, etc.) asynchronously.
  *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
@@ -212,7 +216,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
                                                     uintptr_t userContext);
 
 /**
- * \brief Executes an OPC UA service on server (read, write, browse or discovery service) synchronously.
+ * \brief Executes an OPC UA service on server (read, write, browse, discovery service, etc.) synchronously.
  *
  * \note ::SOPC_ClientHelperNew_Connect shall have been called
  *       and the connection shall be still active
@@ -233,6 +237,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse
  *                     \li ::OpcUa_BrowseResponse
+ *                     \li ::OpcUa_TranslateBrowsePathsToNodeIdsResponse
  *                     \li ::OpcUa_GetEndpointsResponse
  *                     \li ::OpcUa_FindServersResponse
  *                     \li ::OpcUa_FindServersOnNetworkResponse
@@ -263,11 +268,12 @@ typedef struct SOPC_ClientHelper_Subscription SOPC_ClientHelper_Subscription;
  * \brief Type of callback called on Subscription Notification
  *
  * \warning No blocking operation shall be done in callback
- *          (e.g. call to ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems is forbidden,
- *                        ::SOPC_ClientHelperNew_Subscription_SyncService)
+ *          (e.g. call to ::SOPC_ClientHelperNew_Subscription_CreateMonitoredItems and
+ *                ::SOPC_ClientHelperNew_Subscription_SyncService are forbidden)
  *
  * \param subscription          Indicates the subscription concerned by the notification
- * \param status                OPC UA status code, \p notification is only valid when ::SOPC_IsGoodStatus
+ * \param status                OPC UA status code for the subscription,
+ *                              \p notification is only valid when ::SOPC_IsGoodStatus
  * \param notificationType      Type of notification received (::OpcUa_DataChangeNotification_EncodeableType or
  *                              ::OpcUa_EventNotificationList_EncodeableType) or NULL (if \p status is not good)
  * \param nbNotifElts           Number of elements in \p notification received and in \p monitoredItemCtxArray
@@ -321,7 +327,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
 
 /**
  * \brief  Sets the number of publish tokens to be used for the subscription.
- *         This number shall be greater than 0 and indicate the number of publish request
+ *         This number shall be greater than 0 and indicates the number of publish request
  *         sent to the server that might be used to send back notifications.
  *
  * \note By default 3 publish tokens are configured.
@@ -364,7 +370,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_Cl
 uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper_Subscription* subscription);
 
 /**
- * \brief Gets the secure connection on which the subscription relies on
+ * \brief Gets the secure connection on which the subscription rely on
  *
  * \param subscription  The subscription instance
  *
@@ -387,13 +393,13 @@ SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_Clien
  *                              or ::SOPC_CreateMonitoredItemsRequest_CreateDefaultFromStrings.
  * \param monitoredItemCtxArray (optional) The array of context for monitored items to be created
  *                              (might be freed by caller after call only content is recorded in subscription)
- * \param monitoredItemsResp    (optional) Pointer to the empty response that will be filled
- *                              with the response received from the server and containing the status result
- *                              and server monitored items ids.
+ * \param[out] monitoredItemsResp    (optional) Pointer to the empty response that will be filled
+ *                                   with the response received from the server and containing the status result
+ *                                   and server monitored items ids.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
-    OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq, // no subscriptionId and no client handle id needed
+    OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq,
     const uintptr_t* monitoredItemCtxArray,
     OpcUa_CreateMonitoredItemsResponse* monitoredItemsResp);
 
@@ -405,8 +411,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
  * \param subscription             The subscription instance on which monitored items shall be created
  * \param delMonitoredItemsReq     The delete monitored items requests to use for creation parameters.
  *                                 SubscriptionId parameter is ignored and set automatically.
- * \param delMonitoredItemsResp    (optional) Pointer to the empty response that will be filled
- *                                  with the response received from the server and containing the status result.
+ * \param[out] delMonitoredItemsResp  (optional) Pointer to the empty response that will be filled
+ *                                    with the response received from the server and containing the status result.
  */
 SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,

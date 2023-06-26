@@ -160,6 +160,10 @@ typedef struct SOPC_Endpoint_Config
                                                                      to clients */
 } SOPC_Endpoint_Config;
 
+/**
+ * \brief Client temporary configuration structure used to store user X509 configuration data from paths.
+ *        Those paths are should be used to load the serialized version for the certificate / key.
+ */
 typedef struct SOPC_Session_UserX509_ConfigFromPaths
 {
     char* userCertPath; /**< Temporary path to the user certificate (certX509 shall be instantiated by applicative code)
@@ -168,6 +172,9 @@ typedef struct SOPC_Session_UserX509_ConfigFromPaths
     bool userKeyEncrypted; /**< Boolean to indicate if the private key is encrypted */
 } SOPC_Session_UserX509_ConfigFromPaths;
 
+/**
+ * \brief Client configuration structure used to store session activation data for an X509 user token type.
+ */
 typedef struct SOPC_Session_UserX509
 {
     SOPC_SerializedCertificate* certX509;
@@ -180,17 +187,24 @@ typedef struct SOPC_Session_UserX509
                                    (used to configure certX509 and keyX509) */
 } SOPC_Session_UserX509;
 
+/**
+ * \brief Client configuration structure used to store session activation data for a user name token type.
+ */
 typedef struct SOPC_Session_UserName
 {
     char* userName;
     char* userPwd;
 } SOPC_Session_UserName;
 
+/**
+ * \brief Client configuration structure used to store session activation configuration data.
+ */
 typedef struct SOPC_Session_Config
 {
     const char* userPolicyId;
     OpcUa_UserTokenType userTokenType;
-    union {
+    union
+    {
         SOPC_Session_UserName userName;
         SOPC_Session_UserX509 userX509;
     } userToken;
@@ -212,13 +226,17 @@ typedef struct SOPC_SecureConnection_Config
     char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
                                (scConfig.peerAppCert shall be instantiated by applicative code) */
 
-    SOPC_Session_Config sessionConfig;
+    SOPC_Session_Config sessionConfig; /**< Session activation data */
 
     uint16_t secureConnectionIdx; /**< Index into ::SOPC_Client_Config secureConnections array */
     bool finalized; /** < Set when the configuration of the secure connection is frozen and configuration from paths
                           has been done. */
 } SOPC_SecureConnection_Config;
 
+/**
+ * \brief Client temporary configuration structure used to store client certificate / key / PKI configuration data from
+ * paths. Those paths are should be used to load the serialized version for the certificate / key and instantiate PKI.
+ */
 typedef struct SOPC_Client_ConfigFromPaths
 {
     char* clientCertPath;    /**< Temporary path to the client certificate (clientCertificate shall be instantiated by
@@ -243,10 +261,10 @@ typedef struct SOPC_Client_ConfigFromPaths
                                                 issuer to use in the validation chain.   Each issued certificate must
                                                 have its signing certificate chain in the untrusted issuers list. (PKI
                                                 provider shall be instantiated using it by applicative code) */
-    char** certificateRevocationPathList;    /**<  A pointer to an array of paths to each certificate revocation list to
-                                                use.    Each CA of the trusted issuers list and the untrusted issuers list
-                                                must have a    CRL in the list. (PKI provider shall be instantiated using
-                                                it    by applicative code)*/
+    char** certificateRevocationPathList;    /**< A pointer to an array of paths to each certificate revocation list to
+                                                use. Each CA of the trusted issuers list and the untrusted issuers list
+                                                must have a CRL in the list. (PKI provider shall be instantiated using
+                                                it by applicative code)*/
 } SOPC_Client_ConfigFromPaths;
 
 /**
@@ -270,7 +288,7 @@ struct SOPC_Client_Config
 
     bool isConfigFromPathsNeeded; /**< True if the following field shall be treated to configure the client */
     SOPC_Client_ConfigFromPaths* configFromPaths; /**< The paths configuration to use for PKI and client certificate and
-                                                     key if if isConfigFromPathsNeeded is true.  NULL otherwise.
+                                                     key if if isConfigFromPathsNeeded is true. NULL otherwise.
                                                      (used to configure clientCertificate, clientKey and clientPKI) */
 
     const SOPC_SerializedCertificate* clientCertificate; /**< Certificate might be set from paths */
@@ -279,7 +297,9 @@ struct SOPC_Client_Config
 
     uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
     SOPC_SecureConnection_Config*
-        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.*/
+        secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Secure connection configuration array.
+                                                                           Indexes [0;nbSecureConnections[ shall contain
+                                                                           non-null configuration. */
     uint16_t nbReverseEndpointURLs;
     char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
                                                                              per secure connection config. */

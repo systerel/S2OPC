@@ -52,7 +52,7 @@ void SOPC_ClientConfigHelper_Clear(void);
 
 /**
  * \brief
- *   Structure reserved for future use in order to custom the configuration through XML.
+ *   Structure reserved for future use in order to customize the configuration through XML.
  *   e.g.: PKI provider alternative, etc.
  */
 typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
@@ -62,7 +62,7 @@ typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
  *
  * If not used or used partially, see libs2opc_client_config_custom.h to manually configure through API.
  *
- * \param clientConfigPath        Path to server configuration XML file (s2opc_clientserver_config.xsd schema)
+ * \param clientConfigPath        Path to client configuration XML file (s2opc_clientserver_config.xsd schema)
  * \param customConfig            Shall be NULL. Reserved for future customization of configuration from XML
  *                                (PKI provider, etc.).
  * \param[out] nbScConfigs        Number of secure connection configurations parsed in the XML configuration
@@ -83,7 +83,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientCon
  * \brief Returns the secure connection configuration which has the given user defined identifier.
  *        The user defined identifier is the id attribute of the connection in XML configuration.
  *
- * \note If several connection have the same identifier, the first match will be returned.
+ * \note If several connections have the same identifier, the first match will be returned.
  *
  * \param userDefinedId  The identifier searched for in secure connections configured
  *

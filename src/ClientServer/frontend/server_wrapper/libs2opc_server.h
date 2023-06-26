@@ -152,6 +152,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse
  *                     \li ::OpcUa_BrowseResponse
+ *                     \li ::OpcUa_TranslateBrowsePathsToNodeIdsResponse
  *                     \li ::OpcUa_GetEndpointsResponse
  *                     \li ::OpcUa_FindServersResponse
  *                     \li ::OpcUa_FindServersOnNetworkResponse

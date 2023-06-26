@@ -76,12 +76,10 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
     OpcUa_EndpointDescription* pEndp = NULL;
     int32_t i = 0;
     bool bNoneChecked = false;
-    bool bB256Checked = false;
-    bool bB256S256Checked = false;
+    bool bSecuChecked = false;
     bool bInconsistentPolicyMode = false;
     SOPC_Byte iSecLevelNone = 0;
-    SOPC_Byte iSecLevelB256 = 0;
-    SOPC_Byte iSecLevelB256S256 = 0;
+    SOPC_Byte iSecLevelWithSecu = 0;
     SOPC_ByteString* pBufCert = NULL;
     SOPC_CertificateList* pCert = NULL;
 
@@ -114,8 +112,8 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
                     strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) == 0 &&
             pEndp->ServerCertificate.Length > 0)
         {
-            bB256Checked = true;
-            iSecLevelB256 = pEndp->SecurityLevel;
+            bSecuChecked = true;
+            iSecLevelWithSecu = pEndp->SecurityLevel;
             pBufCert = &pEndp->ServerCertificate;
             ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
                                                                      &pCert) == SOPC_STATUS_OK);
@@ -128,8 +126,8 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
                     strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0 &&
             pEndp->ServerCertificate.Length > 0)
         {
-            bB256S256Checked = true;
-            iSecLevelB256S256 = pEndp->SecurityLevel;
+            bSecuChecked = true;
+            iSecLevelWithSecu = pEndp->SecurityLevel;
             pBufCert = &pEndp->ServerCertificate;
             ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
                                                                      &pCert) == SOPC_STATUS_OK);
@@ -140,17 +138,9 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
     }
 
     /* Does not check that a security policy is not described multiple times */
-    ck_assert(bNoneChecked && (bB256Checked || bB256S256Checked));
-    if (bB256Checked)
-    {
-        /* Freeopcua always use 0 as SecurityLevel... */
-        ck_assert(iSecLevelB256 >= iSecLevelNone);
-    }
-    if (bB256S256Checked)
-    {
-        /* Freeopcua always use 0 as SecurityLevel... */
-        ck_assert(iSecLevelB256S256 >= iSecLevelNone);
-    }
+    ck_assert(bNoneChecked && bSecuChecked);
+    /* Freeopcua always use 0 as SecurityLevel... */
+    ck_assert(iSecLevelWithSecu >= iSecLevelNone);
 
     SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
 }

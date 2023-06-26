@@ -87,8 +87,6 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void)
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    // SOPC_CommonHelper_SetClientComEvent done by SOPC_ClientCommon_Initialize
-
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
     sopc_client_helper_config = sopc_client_helper_config_default;
@@ -268,8 +266,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
             {
                 char* password = NULL;
                 size_t lenPassword = 0;
-                bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedClientKey();
-                if (clientKeyEncrypted)
+                if (configFromPaths->clientKeyEncrypted)
                 {
                     bool res = SOPC_ClientInternal_GetClientKeyPassword(&password);
                     if (!res)
@@ -457,7 +454,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Connection %s [%" PRIu16
                                    "]: client certificate/key configuration missing whereas security is needed "
-                                   "(security active or user password need to be encrypted)",
+                                   "(security active or user password needs to be encrypted)",
                                    secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
 
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -467,7 +464,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Connection %s [%" PRIu16
                                    "]: client PKI configuration missing whereas security is needed "
-                                   "(security active or user password need to be encrypted)",
+                                   "(security active or user password needs to be encrypted)",
                                    secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
 
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -477,7 +474,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Connection %s [%" PRIu16
                                    "]: server certificate configuration missing whereas security is needed "
-                                   "(security active or user password need to be encrypted)",
+                                   "(security active or user password needs to be encrypted)",
                                    secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
 
             status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -486,10 +483,10 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
     if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType &&
         0 == strlen(secConnConfig->sessionConfig.userPolicyId))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "Connection %s [%" PRIu16
-                               "]: user policy id is empty with a user token type different from Anonymous",
-                               secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Connection %s [%" PRIu16
+                                 "]: user policy id is empty with a user token type different from Anonymous",
+                                 secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx);
     }
     if (OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType &&
         (NULL == secConnConfig->sessionConfig.userToken.userName.userName &&
@@ -695,7 +692,7 @@ static bool SOPC_ClientInternal_GetPassword(SOPC_GetPassword_Fct* passwordCb, co
     if (!SOPC_ClientInternal_IsInitialized())
     {
         // Client wrapper not initialized
-        return SOPC_STATUS_INVALID_STATE;
+        return false;
     }
     */
     if (NULL == outPassword)
@@ -725,7 +722,7 @@ bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPass
     if (!SOPC_ClientInternal_IsInitialized())
     {
         // Client wrapper not initialized
-        return SOPC_STATUS_INVALID_STATE;
+        return false;
     }
     */
     if (NULL == outPassword)
@@ -750,7 +747,7 @@ bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassw
     if (!SOPC_ClientInternal_IsInitialized())
     {
         // Client wrapper not initialized
-        return SOPC_STATUS_INVALID_STATE;
+        return false;
     }
     */
     if (NULL == outPassword)

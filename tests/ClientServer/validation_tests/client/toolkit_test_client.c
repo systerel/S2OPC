@@ -56,7 +56,7 @@
 
 static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 
-#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_Sign
+#define MSG_SECURITY_MODE OpcUa_MessageSecurityMode_SignAndEncrypt
 #define REQ_SECURITY_POLICY SOPC_SecurityPolicy_Basic256Sha256
 
 // Client certificate path
@@ -101,6 +101,29 @@ static const char* monitoredNodeIds[3] = {"ns=1;i=1012", "i=2258", "ns=1;s=Boole
 static const uintptr_t monitoredItemIndexes[3] = {0, 1, 2};
 static const unsigned int monitoredItemExpNotifs[3] = {1, 2, 1};
 static unsigned int monitoredItemNotifs[3] = {0, 0, 0};
+
+static SOPC_ReturnStatus wait_service_response(void)
+{
+    // Counter to stop waiting on timeout
+    uint32_t loopCpt = 0;
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Wait until service response is received */
+    loopCpt = 0;
+    while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+
+    if (loopCpt * sleepTimeout > loopTimeout)
+    {
+        status = SOPC_STATUS_TIMEOUT;
+    }
+
+    return status;
+}
 
 // Asynchronous service response callback
 static void SOPC_Client_AsyncRespCb(SOPC_EncodeableType* encType, const void* response, uintptr_t appContext)
@@ -507,9 +530,6 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
 
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
-    // Counter to stop waiting on timeout
-    uint32_t loopCpt = 0;
-
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_CreateSubscriptionRequest* createSubReq = SOPC_CreateSubscriptionRequest_Create(500, 6, 2, 1000, true, 0);
     if (TEST_SUB_SERVICE_SUPPORTED)
@@ -578,10 +598,10 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
             // Check CreateMonitoredItems response
             if (SOPC_IsGoodStatus(createMonItResp.ResponseHeader.ServiceResult) && createMonItResp.NoOfResults == 3)
             {
+                uint32_t queueSize = 1;
                 delMonItReq = SOPC_DeleteMonitoredItemsRequest_Create(0, 3, NULL);
                 for (int32_t i = 0; i < createMonItResp.NoOfResults; i++)
                 {
-                    uint32_t queueSize = 1;
                     if (!SOPC_IsGoodStatus(createMonItResp.Results[i].StatusCode))
                     {
                         status = SOPC_STATUS_NOK;
@@ -612,26 +632,18 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
             test_results_set_service_result(false);
 
             /* Wait until expected notifications are received */
-            loopCpt = 0;
-            while (SOPC_STATUS_OK == status && !test_results_get_service_result() &&
-                   loopCpt * sleepTimeout <= loopTimeout)
-            {
-                loopCpt++;
-                SOPC_Sleep(sleepTimeout);
-            }
-            if (loopCpt * sleepTimeout > loopTimeout)
-            {
-                status = SOPC_STATUS_TIMEOUT;
-            }
+            status = wait_service_response();
         }
 
+        SOPC_ReturnStatus delMIstatus = SOPC_STATUS_OK;
         if (deleteMonitoredItems)
         {
-            status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
+            delMIstatus =
+                SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
             OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
 
             // Check DeleteMonitoredItems response
-            if (SOPC_STATUS_OK == status)
+            if (SOPC_STATUS_OK == delMIstatus)
             {
                 if (SOPC_IsGoodStatus(delMonItResp.ResponseHeader.ServiceResult) && delMonItResp.NoOfResults == 3)
                 {
@@ -639,19 +651,31 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
                     {
                         if (!SOPC_IsGoodStatus(delMonItResp.Results[i]))
                         {
-                            status = SOPC_STATUS_NOK;
+                            delMIstatus = SOPC_STATUS_NOK;
                         }
                     }
                 }
                 else
                 {
-                    status = SOPC_STATUS_NOK;
+                    delMIstatus = SOPC_STATUS_NOK;
                 }
             }
             OpcUa_DeleteMonitoredItemsResponse_Clear(&delMonItResp);
         }
 
-        status = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+        SOPC_ReturnStatus delSubStatus = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            if (SOPC_STATUS_OK != delMIstatus)
+            {
+                status = delMIstatus;
+            }
+            else if (SOPC_STATUS_OK != delSubStatus)
+            {
+                status = delSubStatus;
+            }
+        }
     }
     else
     {
@@ -666,16 +690,9 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
         printf(">>Test_Client_Toolkit: create subscription sending\n");
 
         /* Wait until service response is received */
-        loopCpt = 0;
-        while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
+        if (SOPC_STATUS_OK == status)
         {
-            loopCpt++;
-            SOPC_Sleep(sleepTimeout);
-        }
-
-        if (loopCpt * sleepTimeout > loopTimeout)
-        {
-            status = SOPC_STATUS_TIMEOUT;
+            status = wait_service_response();
         }
     }
     return status;
@@ -747,12 +764,12 @@ int main(void)
         // Retrieve received messages on socket
         SOPC_Sleep(sleepTimeout);
     }
-    if (SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0)
+    if (SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&getEndpointsReceived) == 0)
     {
         printf(">>Test_Client_Toolkit: GetEndpoints Response received: NOK\n");
         status = SOPC_STATUS_NOK;
     }
-    else
+    else if (SOPC_STATUS_OK == status)
     {
         printf(">>Test_Client_Toolkit: GetEndpoints Response received: OK\n");
     }
@@ -779,16 +796,9 @@ int main(void)
     }
 
     /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
+    if (SOPC_STATUS_OK == status)
     {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
+        status = wait_service_response();
     }
 
     /* Write values on 2nd connection */
@@ -809,17 +819,11 @@ int main(void)
         status = SOPC_ClientHelperNew_ServiceAsync(secureConnections[1], pWriteReqSent, 1);
         printf(">>Test_Client_Toolkit: write request sending\n");
     }
-    /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
-    {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
 
-    if (loopCpt * sleepTimeout > loopTimeout)
+    /* Wait until service response is received */
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_STATUS_TIMEOUT;
+        status = wait_service_response();
     }
 
     /* Re-read values to check previous write effect */
@@ -836,16 +840,9 @@ int main(void)
     }
 
     /* Wait until service response is received */
-    loopCpt = 0;
-    while (SOPC_STATUS_OK == status && !test_results_get_service_result() && loopCpt * sleepTimeout <= loopTimeout)
+    if (SOPC_STATUS_OK == status)
     {
-        loopCpt++;
-        SOPC_Sleep(sleepTimeout);
-    }
-
-    if (loopCpt * sleepTimeout > loopTimeout)
-    {
-        status = SOPC_STATUS_TIMEOUT;
+        status = wait_service_response();
     }
 
     /* Now the request can be freed */

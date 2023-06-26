@@ -59,8 +59,8 @@ struct SOPC_ClientConnection
     SOPC_StaMac_Machine* stateMachine; // only if !isDiscovery
 };
 
-/* The generic request context is used to managed the canceled request
- * (event response not received before timeout) */
+/* The request context is used to manage
+   synchronous/asynchronous context for a request */
 typedef struct
 {
     uint16_t secureConnectionIdx;
@@ -91,7 +91,7 @@ static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateSync(
         result->secureConnectionIdx = secureConnectionIdx;
         // isAsyncCall => already false
         // asyncRespCb => already NULL
-        // subNotifCb => already NULL
+        // userCtx => already NULL
         // finished => already false
         result->status = SOPC_STATUS_NOK;
         result->isDiscoveryModeService = isDiscoveryModeService;
@@ -210,7 +210,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeo
     /* Wait for the response */
     while (SOPC_STATUS_OK == mutStatus && !genReqCtx->finished)
     {
-        Mutex_UnlockAndWaitCond(&genReqCtx->condition, &genReqCtx->mutex);
+        mutStatus = Mutex_UnlockAndWaitCond(&genReqCtx->condition, &genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     return genReqCtx->status;
@@ -241,7 +241,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayFinalizeSecureConnection(
 }
 
 /*
- * TODO: remove and configure dynamically subscription parameters
+ * TODO: remove when old API removed and removed from StaMac creation.
+         Those are ignored when using new API.
  */
 /* Connection global timeout */
 #define TMP_TIMEOUT_MS 10000
@@ -258,7 +259,7 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
                                          const void* response,
                                          uintptr_t genContext)
 {
-    SOPC_UNUSED_ARG(c_id); // TODO: check connection still exists ? It should not be necessary with a sync disc
+    SOPC_UNUSED_ARG(c_id); // managed by caller
 
     bool isAsync = false;
     SOPC_ClientHelper_ReqCtx* genCtx = (SOPC_ClientHelper_ReqCtx*) genContext;
@@ -320,8 +321,6 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
     }
 }
 
-static uintptr_t TMP_StaMacCtx = 0; // inhibit ...
-
 static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event,
                                                         void* param,
                                                         SOPC_ClientConnection* cc)
@@ -341,12 +340,15 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
 
         if (isSyncConn)
         {
-            /* Signal that the response is available */
+            /* Synchronous connection operation:
+               Signal that the response is available */
             statusMutex = Condition_SignalAll(&cc->syncCond);
             SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         }
         else
         {
+            /* Unexpected connection event
+               or asynchronous connection operation response (NOT IMPLEMENTED YET) */
             SOPC_ClientConnectionEvent connEvent;
             SOPC_StatusCode serviceStatus = SOPC_GoodGenericStatus;
             switch (event)
@@ -411,13 +413,14 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             cc = sopc_client_helper_config.secureConnections[serviceReqCtx->secureConnectionIdx];
         }
         break;
-    /* appCtx is session context */
+    /* appCtx session related event context is connection index */
     case SE_SESSION_ACTIVATION_FAILURE:
     case SE_ACTIVATED_SESSION:
     case SE_SESSION_REACTIVATING:
     case SE_CLOSED_SESSION:
         cc = sopc_client_helper_config.secureConnections[appContext];
         break;
+    /* IdOrStatus is reverse endpoint config index */
     case SE_REVERSE_ENDPOINT_CLOSED:
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "Reverse endpoint '%s' closed",
                               SOPC_ToolkitClient_GetReverseEndpointURL(IdOrStatus));
@@ -447,7 +450,8 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                                          (uintptr_t) serviceReqCtx);
             SOPC_Free((void*) appContext);
         }
-        else if (event != SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs
+        else if (event !=
+                 SE_REVERSE_ENDPOINT_CLOSED) // state machine does not manage reverse EPs (excluded from treatment)
         {
             if (NULL != staMacCtx)
             {
@@ -461,6 +465,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             }
             if (NULL != pSM)
             {
+                // Call state machine callback for event treatment
                 if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext) && NULL != cc)
                 {
                     /* Post process the event in case of connection management events */
@@ -485,6 +490,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC
 {
     if (NULL == secConnConfig->reverseURL)
     {
+        // Not a reverse connection, nothing to do
         return SOPC_STATUS_OK;
     }
     SOPC_ASSERT(NULL != res);
@@ -504,13 +510,14 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC
     {
         SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
             sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
+        // If config not already present, create it
         if (0 == reverseConfigIdx)
         {
             reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
         }
         if (0 != reverseConfigIdx)
         {
-            // If the reverse endpoint is not opened, open ti
+            // If the reverse endpoint is not opened, open it
             const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
             if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
             {
@@ -596,7 +603,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
                                     secConnConfig->sessionConfig.userPolicyId, username, password, pUserCertX509,
                                     pUserKey, NULL, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT,
                                     TMP_MAX_LIFETIME_COUNT, SOPC_DEFAULT_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS,
-                                    SOPC_ClientInternal_EventCbk, TMP_StaMacCtx, &stateMachine);
+                                    SOPC_ClientInternal_EventCbk, 0, &stateMachine);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -626,12 +633,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
                                                                     void** response,
                                                                     uintptr_t userContext)
 {
-    if (NULL == secConnConfig || NULL == request)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (isSynchronous && NULL == response)
+    if (NULL == secConnConfig || NULL == request || (isSynchronous && NULL == response))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -675,7 +677,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
     SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        /* create a context wrapper */
+        /* create a context wrapper (use SOPC_StaMac_ReqCtx for unicity with other responses but SM not called) */
 
         smReqCtx = SOPC_Calloc(1, sizeof(*smReqCtx));
         if (isSynchronous)
@@ -687,11 +689,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
                 res->secureConnectionIdx, true, sopc_client_helper_config.asyncRespCb, userContext);
         }
-        if (NULL == reqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-
         if (NULL == smReqCtx || NULL == reqCtx)
         {
             SOPC_Free(smReqCtx);
@@ -844,7 +841,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
             while (SOPC_STATUS_OK == status && !SOPC_StaMac_IsError(res->stateMachine) &&
                    !SOPC_StaMac_IsConnected(res->stateMachine))
             {
-                // Note: we use the low layer timeouts and do not need a new one
+                // Note: we rely on the low layer timeouts and do not need a new one
                 status = Mutex_UnlockAndWaitCond(&res->syncCond, &res->syncConnMutex);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
             }
@@ -964,6 +961,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
     return status;
 }
 
+// Used to filter requests in generic services functions:
+// for now forbids acting on the SM subscription managed internally
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_FilterService(SOPC_ClientConnection* secureConnection, void* request)
 {
     if (!SOPC_StaMac_HasSubscription(secureConnection->stateMachine))
@@ -1672,6 +1671,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
     return status;
 }
 
+// Subscription related: configure internal subscription id for authorized subscription services
+// through API subscription service call
 static void* SOPC_ClientHelperInternal_ConfigAndFilterService(const SOPC_ClientHelper_Subscription* subscription,
                                                               void* request)
 {

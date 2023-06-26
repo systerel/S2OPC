@@ -329,7 +329,7 @@
     </xs:sequence>
     <xs:attribute type="xs:anyURI" name="id">
       <xs:annotation>
-        <xs:documentation>A user defined identifier to retrieve the easily the connection</xs:documentation>
+        <xs:documentation>A user defined identifier to easily retrieve the connection</xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:anyURI" name="serverURL" use="required"/>

@@ -194,7 +194,8 @@ typedef struct SOPC_Session_Config
 {
     const char* userPolicyId;
     OpcUa_UserTokenType userTokenType;
-    union {
+    union
+    {
         SOPC_Session_UserName userName;
         SOPC_Session_UserX509 userX509;
     } userToken;

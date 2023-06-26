@@ -37,7 +37,7 @@ You will find documentation on the Python binding for S2OPC on following page:
 
 \section clientserver Client / Server API
 
-The Client / Server API is composed of high-level (wrapper) API and low-level API, the preferred way to use S2OPC is to use only the high-level API.
+The Client / Server API is composed of high-level (wrapper) API and low-level API. The prefered way to use S2OPC is to use only the high-level API.
 Note that the low-level API will be subject to important changes and refactoring in the future release since the high-level API is designed to address any application need.
 The high-level client API was newly redesigned with this goal in mind for S2OPC 1.5.0 release, 
 the previous client wrapper design is still available but becomes deprecated and will be removed in S2OPC 1.6.0 release.
@@ -288,7 +288,7 @@ The Subscriber state changes might be received by providing a handler with the s
 
 \section config_constants OPC UA stack behavior configuration constants
 
-Two sets of constants are defined to configure the OPC UA stack behavior, one is defined for the OPC UA common encoding layer (message size, string max length, etc.) 
+Two sets of constants are defined to configure the OPC UA stack behavior. One of them is designed for the OPC UA common encoding layer (message size, string max length, etc.) 
 and another for the OPC UA Client/Server services layer (maximum number of operatoins per call, etc.).
 Those variables might be changed for specific needs at library compile time and are defined in respectively in sopc_common_constants.h and sopc_toolkit_config_constants.h.
 

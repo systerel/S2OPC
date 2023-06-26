@@ -253,7 +253,7 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
     for (uint16_t i = 0; i < config->nbSecureConnections; i++)
     {
         SOPC_SecureConnection_Config* secConnConfig = config->secureConnections[i];
-
+        SOPC_ASSERT(NULL != secConnConfig);
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
         SOPC_Free((void*) secConnConfig->userDefinedId);
         SOPC_Free((void*) secConnConfig->reverseURL);

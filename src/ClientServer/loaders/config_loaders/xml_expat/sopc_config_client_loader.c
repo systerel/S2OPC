@@ -64,7 +64,7 @@ typedef enum
     PARSE_USER_POLICY,       // ........In user policy tag
     PARSE_USER_CERT,         // ........UserX509 configuration
     PARSE_SRVCONFIG          //..In a server config tag to skip
-} parse_state_t;
+} client_parse_state_t;
 
 struct parse_context_t
 {
@@ -100,7 +100,7 @@ struct parse_context_t
 
     SOPC_Client_Config* clientConfigPtr;
 
-    parse_state_t state;
+    client_parse_state_t state;
 };
 
 #define NS_SEPARATOR "|"
@@ -114,7 +114,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
     {
         size_t r = fread(buf, sizeof(char), sizeof(buf) / sizeof(char), fd);
 
-        if ((r == 0) && (ferror(fd) != 0))
+        if ((0 == r) && (ferror(fd) != 0))
         {
             LOGF("Error while reading input file: %s", strerror(errno));
             return SOPC_STATUS_NOK;
@@ -122,7 +122,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
         if (XML_Parse(parser, buf, (int) r, 0) != XML_STATUS_OK)
         {
-            enum XML_Error parser_error = XML_GetErrorCode(parser);
+            const enum XML_Error parser_error = XML_GetErrorCode(parser);
 
             if (parser_error != XML_ERROR_NONE)
             {
@@ -148,6 +148,7 @@ static SOPC_ReturnStatus parse(XML_Parser parser, FILE* fd)
 
 static bool end_client_config(struct parse_context_t* ctx)
 {
+    SOPC_ASSERT(ctx != NULL);
     if (!ctx->localesSet)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no preferred locales defined for the client");
@@ -175,14 +176,15 @@ static bool end_client_config(struct parse_context_t* ctx)
                 if (OpcUa_MessageSecurityMode_None !=
                     ctx->clientConfigPtr->secureConnections[i]->scConfig.msgSecurityMode)
                 {
-                    LOG_XML_ERROR(ctx->helper_ctx.parser,
-                                  "client certificate and key not defined whereas security mode is not always None");
+                    LOG_XML_ERROR(
+                        ctx->helper_ctx.parser,
+                        "client certificate and key are not defined whereas security mode is not always None");
                 }
             }
         }
         else
         {
-            LOG_XML_ERROR(ctx->helper_ctx.parser, "client certificate and key not both NULL");
+            LOG_XML_ERROR(ctx->helper_ctx.parser, "client certificate and key are not both NULL");
             return false;
         }
     }
@@ -515,7 +517,6 @@ static bool start_user_cert(struct parse_context_t* ctx, const XML_Char** attrs)
     }
 
     attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "key_path", attrs);
-
     if (NULL == attr_val)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "user key_path attribute missing");
@@ -866,6 +867,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     SOPC_UNUSED_ARG(name);
 
     struct parse_context_t* ctx = user_data;
+    SOPC_ASSERT(ctx != NULL);
 
     switch (ctx->state)
     {

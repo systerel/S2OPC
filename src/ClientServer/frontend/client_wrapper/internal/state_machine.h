@@ -296,6 +296,13 @@ typedef void SOPC_StaMacNotification_Fct(uintptr_t subscriptionAppCtx,
                                          uintptr_t* monitoredItemCtxArray);
 /*
  * \brief Changes the callback for data change notifications on subscription
+ *
+ * \param pSM             The state machine with a subscription used to create monitored items
+ * \param pNotificationCb The callback to be called on data change notifications on created monitored items
+ *
+ * \return SOPC_STATUS_OK if the callback was successfully set,
+ *         otherwise SOPC_STATUS_INVALID_PARAMETER if one of the parameters is NULL or
+ *         SOPC_STATUS_INVALID_STATE if a data change notification callback is already set.
  */
 SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machine* pSM,
                                                                SOPC_StaMacNotification_Fct* pNotificationCb);
@@ -331,6 +338,17 @@ typedef struct SOPC_DeleteMonitoredItems_Ctx
         req; /* Contains the request sent to the server (internal use only, freed during treatment)*/
 } SOPC_DeleteMonitoredItems_Ctx;
 
+/**
+ * \brief Deletes created monitored items for the state machine subscription using the request (new API)
+ *
+ * The \p pAppCtx shall be used to test the effective deletion of the MonitoredItem with
+ * ::SOPC_StaMac_PopDeleteMonItByAppCtx.
+ *
+ * \param pSM              The state machine with a subscription for which monitored items shall be deleted
+ * \param req              The delete monitored items request
+ * \param pAppCtx          The delete monitored item application context is stored in the pointed structure and
+ *                         could be used to call ::SOPC_StaMac_PopDeleteMonItByAppCtx
+ */
 SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
                                                       OpcUa_DeleteMonitoredItemsRequest* req,
                                                       SOPC_DeleteMonitoredItems_Ctx* outAppCtx);

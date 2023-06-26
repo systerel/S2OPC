@@ -888,7 +888,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
         status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
     }
 
-    /* Create the CreateMonitoredItemRequest */
+    /* Fill the unique client handle parameters an record the user context associated to the MI  */
     if (SOPC_STATUS_OK == status)
     {
         for (uint32_t i = 0; i < nElems; ++i)
@@ -1006,7 +1006,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
         }
     }
 
-    /* Create the CreateMonitoredItemRequest */
+    /* Fill the subscription id and copy the request */
     if (SOPC_STATUS_OK == status)
     {
         outAppCtx->outCtxId = clientHandle; // first valid client handle
@@ -1798,8 +1798,9 @@ static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
     for (int32_t i = 0; i < pDataNotif->NoOfMonitoredItems; ++i)
     {
         pMonItNotif = &pDataNotif->MonitoredItems[i];
-        if (NULL != pSM->pCbkNotification)
+        if (NULL != pSM->pCbkNotification) // new API behavior
         {
+            // Retrieve user context associated to each MI and set it in dedicated array (same index as MI)
             if (NULL != newAPImonitoredItemCtxArray)
             {
                 bool found = false;
@@ -1811,7 +1812,7 @@ static void StaMac_ProcessMsg_PubResp_NotifData(SOPC_StaMac_Machine* pSM,
                 }
             }
         }
-        else
+        else // deprecated APIs behavior
         {
             SOPC_ReturnStatus status = Helpers_NewValueFromDataValue(&pMonItNotif->Value, &plsVal);
             if (SOPC_STATUS_OK == status)
@@ -1863,6 +1864,7 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
     {
         newAPImonitoredItemCtxArray = SOPC_Calloc((size_t) pEventNotif->NoOfEvents, sizeof(uintptr_t));
     }
+    // Retrieve user context associated to each MI and set it in dedicated array (same index as MI)
     for (int32_t i = 0; NULL != newAPImonitoredItemCtxArray && i < pEventNotif->NoOfEvents; ++i)
     {
         bool found = false;
