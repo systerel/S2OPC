@@ -84,7 +84,7 @@
     <DisplayName>NonHierarchicalReferences</DisplayName>
     <Description>The abstract base type for all non-hierarchical references.</Description>
     <References>
-        <Reference IsForward="false" ReferenceType="HasSubtype">i=31</Reference>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=31</Reference>
       <Reference ReferenceType="HasSubtype">i=40</Reference>
     </References>
     <InverseName>NonHierarchicalReferences</InverseName>
@@ -93,7 +93,7 @@
     <DisplayName>HasTypeDefinition</DisplayName>
     <Description>The type for references from a instance node its type definition node.</Description>
     <References>
-        <Reference IsForward="false" ReferenceType="HasSubtype">i=32</Reference>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=32</Reference>
     </References>
     <InverseName>TypeDefinitionOf</InverseName>
   </UAReferenceType>
