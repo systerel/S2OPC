@@ -148,6 +148,17 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_remove_unused_retain_types.xml', ['--remove-unused', '--retain-types', 'i=6', 'i=27'],
                       'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
 
+    def test_remove_backward_refs(self):
+        self.run_test('test_remove_backward_refs.xml', ['--remove-backward-refs'],
+                      'ns0.xml')
+
+    def test_remove_backward_refs_retain_nodeid(self):
+        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--remove-backward-refs-retain', 'i=35', 'i=45'],
+                      'ns0.xml')
+
+    def test_remove_backward_refs_retain_alias(self):
+        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--remove-backward-refs-retain', 'Organizes', 'HasSubtype'],
+                      'ns0.xml')
 
 if __name__ == '__main__':
     unittest.main()
