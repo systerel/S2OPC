@@ -85,58 +85,8 @@ def parse_xmlns(source):
                 ns_map[prefix] = uri
     return ns_map
 
-def _find_node_with_nid(tree, nid):
-    return tree.find(f'*[@NodeId="{nid}"]')
 
-def _remove_nids(tree, nids):
-    # Remove the nodes that match the NodeIds given in nids
-    root = tree.getroot()
-    for nid in nids:
-        node = _find_node_with_nid(tree, nid)
-        if node is not None:
-            # if args.verbose:
-            #     print('RemoveNode: {}'.format(nid), file=sys.stderr)
-            root.remove(node)
-
-def _remove_refs_to_nids(tree, nids, namespaces):
-    # Remove Reference elements from all nodes that go to the NodeIds in nids
-    for node in tree.iterfind('./*[uanodeset:References]', namespaces):
-        refs, = node.iterfind('uanodeset:References', namespaces)
-        for ref in list(refs):  # Make a list so that we can remove elements while iterating
-            if ref.text.strip() in nids:  # The destination node of this reference
-                # if args.verbose:
-                #     print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
-                refs.remove(ref)
-
-def _remove_nids_and_refs(tree, nids, namespaces):
-    _remove_nids(tree, nids)
-    _remove_refs_to_nids(tree, nids, namespaces)
-
-def _add_ref(node, ref_type, tgt, namespaces, is_forward=True):
-    # Add a reference from a node to the other NodeId nid in the given direction
-    attribs = {'ReferenceType': ref_type}
-    if not is_forward:
-        attribs['IsForward'] = 'false'
-
-    refs_nodes = node.findall('uanodeset:References', namespaces)
-    if len(refs_nodes) == 0:
-        refs = ET.Element('uanodeset:References', namespaces)
-        node.append(refs)
-    else:
-        refs, = refs_nodes
-        for ref in refs:
-            if ref.text == tgt and ref.attrib == attribs:
-                # avoid duplicate reference
-                return
-
-    elem = ET.Element('Reference', attribs)
-    elem.text = tgt
-    close_node_indent(refs, 3)
-    refs.append(elem)
-    close_node_indent(refs, 2)
-
-
-def _is_forward(ref: ET.Element):
+def is_forward(ref: ET.Element):
     return ref.get('IsForward') != 'false'
 
 
@@ -172,19 +122,6 @@ def reassign_elem_attr(elem: ET.Element, attr: str, ns_idx_reassign: dict, fun_r
         elem.set(attr, r_val)
 
 
-def reassign_node_ns_index(node: ET.Element, ns_idx_reassign: dict, namespaces):
-    # Reassign namespace index for:
-    #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
-    #   References/Reference/@ReferenceType and References/Reference/text
-    for attr in ['NodeId', 'ParentNodeId', 'DataType']:
-        reassign_elem_attr(node, attr, ns_idx_reassign, reassigned_ns_index)
-    reassign_elem_attr(node, 'BrowseName', ns_idx_reassign, reassigned_prefix_index)
-    
-    for ref in node.iterfind('uanodeset:References/uanodeset:Reference', namespaces):
-        reassign_elem_attr(ref, 'ReferenceType', ns_idx_reassign, reassigned_ns_index)
-        ref.text = reassigned_ns_index(ref.text, ns_idx_reassign)
-
-
 def _check_declared_nid(nid, ns_count, matcher):
     m = matcher.match(nid)
     if m is not None:
@@ -196,493 +133,16 @@ def _check_declared_nid(nid, ns_count, matcher):
                             f"whereas {ns_count} namespace{' is' if ns_count <2 else 's are'} declared")
 
 
-def _check_all_namespaces_declared(tree, namespaces):
-    ns_count = 0
-    ns_uris = tree.find('uanodeset:NamespaceUris', namespaces)
-    if ns_uris is not None:
-        uris = ns_uris.findall('uanodeset:Uri', namespaces)
-        declarations = [uri.text for uri in uris]
-        declared_ns = set(declarations)
-        if len(declared_ns) != len(declarations):
-            raise Exception("Duplicate Namespace URI declaration in: " + str(declarations))
-        ns_count = len(declared_ns)
-
-    for attr in ['NodeId', 'ParentNodeId', 'DataType']:
-        for node in tree.iterfind(f'*[@{attr}]'):
-            nid = node.get(attr)
-            _check_declared_nid(nid, ns_count, NS_IDX_MATCHER)
-    for node in tree.iterfind(f'*[@BrowseName]'):
-        nid = node.get('BrowseName')
-        _check_declared_nid(nid, ns_count, PREFIX_IDX_MATCHER)
-    for ref in tree.iterfind('uanodeset:References/uanodeset:Reference', namespaces):
-        _check_declared_nid(ref.get('ReferenceType'), ns_count, NS_IDX_MATCHER)
-        _check_declared_nid(ref.text, ns_count, NS_IDX_MATCHER)
-    for alias in tree.iterfind('uanodeset:Aliases/uanodeset:Alias', namespaces):
-        _check_declared_nid(alias.text, ns_count, NS_IDX_MATCHER)
-
-
-def merge(tree, new, namespaces):
-    # Merge new tree into tree
-    # The merge is restricted to tags for which we know the semantics
-    # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
-
-    tree_root = tree.getroot()
-
-    # Merge NamespaceURIs
-    _check_all_namespaces_declared(new, namespaces)
-    new_ns_uris = new.find('uanodeset:NamespaceUris', namespaces)
-    if new_ns_uris is None:
-        print("NamespaceUris is missing in a non-NS0 address space")
-        return False
-
-    tree_ns_uris = tree.find('uanodeset:NamespaceUris', namespaces)
-    if tree_ns_uris is None:
-        tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
-        tree_root.insert(0, new_ns_uris)
-    else:
-        tree_ns_uris[-1].tail = indent(2)
-    # the new namespace URIs from the new address space need to be translated
-    # but some of the namespace might already be in use
-    ns_uris = dict()
-    for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', namespaces)):
-        ns_uris[ns.text] = idx + 1
-
-    ns_idx_reassign = dict()
-    for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', namespaces)):
-        if ns.text in ns_uris:
-            tree_idx = ns_uris[ns.text]
-            if tree_idx != idx + 1:
-                ns_idx_reassign[idx + 1] = tree_idx
-        else:
-            new_idx = len(ns_uris) + 1
-            ns_uris[ns.text] = new_idx
-            if new_idx != idx + 1:
-                ns_idx_reassign[idx + 1] = new_idx
-            tree_ns_uris.append(ns)
-    tree_ns_uris[-1].tail = indent(1)
-    # print("Namespace URI reassignments:", ns_idx_reassign)
-
-    # Merge Models
-    tree_models = tree.find('uanodeset:Models', namespaces)
-    ns0_version = get_ns0_version(tree_models)
-    if ns0_version is None:
-        print("Missing a NS0 model")
-        return False
-    new_models = new.find('uanodeset:Models', namespaces)
-    tree_models[-1].tail = indent(2)
-    for model in new_models:
-        new_model_uri = model.get('ModelUri')
-        already_model = tree_models.find(f'uanodeset:Model[@ModelUri="{new_model_uri}"]', namespaces)
-        if already_model is not None:
-            already_model_version = already_model.get('Version')
-            new_model_version = model.get('Version')
-            if new_model_version == already_model_version:
-                # just skip the duplicate model
-                continue
-            else:
-                raise Exception(f'Incompatible model version: {new_model_uri} provided with versions {already_model_version} and {new_model_version}')
-        req_ns0 = model.find(f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]', namespaces)
-        if req_ns0 is not None:
-            req_ns0_version = req_ns0.get('Version')
-            if req_ns0_version != ns0_version:
-                raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
-        tree_models.append(model)
-    tree_models[-1].tail = indent(1)
-
-    # Merge ServerArray and NamespaceArray:
-    __fill_namespace_array(tree, namespaces)
-    __merge_server_array(tree, new, namespaces)
-
-    # Merge Aliases
-    tree_aliases = tree.find('uanodeset:Aliases', namespaces)
-    if tree_aliases is None:
-        print('Merge: Aliases expected to be present in first address space')
-        return False
-    tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}
-    new_aliases = new.find('uanodeset:Aliases', namespaces)
-    new_alias_dict = {}
-    if new_aliases is not None:
-        new_alias_dict = {alias.get('Alias'):reassigned_ns_index(alias.text, ns_idx_reassign) for alias in new_aliases}
-    # Assert existing aliases are the same
-    res = True
-    for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
-        if tree_alias_dict[alias] != new_alias_dict[alias]:
-            print('Merge: Alias used for different NodeId ({} is {} or {})'
-                  .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
-            res = False
-    if not res:
-        return res
-
-    # Add new aliases
-    for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
-        elem = ET.Element('Alias', {'Alias': alias})
-        elem.text = new_alias_dict[alias]
-        # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
-        close_node_indent(tree_aliases, 2)
-        tree_aliases.append(elem)
-
-    if len(tree_aliases) > 0:
-        # Restore correct level for next tag which is </Aliases>
-        tree_aliases[-1].tail = indent(1)
-
-    # Merge Nodes, detect duplicate Node IDs (forbidden)
-    duplicates = set()
-    tree_nodes = dict()
-    for node in tree.iterfind('*[@NodeId]'):
-        node_id = node.get('NodeId')
-        if node_id in tree_nodes:
-            duplicates.add(node_id)
-        else:
-            tree_nodes[node_id] = node
-    new_nodes = dict()
-    for node in new.iterfind('*[@NodeId]'):
-        # Reassign namespace index for node attributes and subelements
-        reassign_node_ns_index(node, ns_idx_reassign, namespaces)
-        node_id = node.get('NodeId')
-        if node_id in tree_nodes or node_id in new_nodes:
-            duplicates.add(node_id)
-        else:
-            new_nodes[node_id] = node
-    # ns0 duplicates are valid
-    # for instance the Server, ServerArray, NamespaceArray nodes may appear in various files
-    ns0_duplicates = filter(_is_ns0, duplicates)
-    user_duplicates = duplicates - set(ns0_duplicates)
-    if len(user_duplicates) > 0:
-        raise Exception(f"There are duplicate Node IDs: {sorted(duplicates)}")
-
-    # New unique nids
-    new_nids = set(new_nodes)
-    if len(new_nids) > 0 and len(tree_root) > 0:
-        # indent for first node added
-        tree_root[-1].tail = indent(1)
-    for nid in sorted(new_nids):
-        # if args.verbose:
-        #     print('Merge: add node {}'.format(nid), file=sys.stderr)
-        tree_root.append(new_nodes[nid])
-    # References of common nodes are merged
-    for nid in sorted(ns0_duplicates):
-        nodeb = new_nodes[nid]
-        refsb = nodeb.find('./uanodeset:References', namespaces)
-        if refsb is None:
-            continue
-        nodea = tree_nodes[nid]
-        for ref in refsb:
-            _add_ref(nodea, ref.get('ReferenceType'), ref.text, namespaces, is_forward=_is_forward(ref))
-        close_node_indent(refsb, 2)
-
-    tree_root[-1].tail = indent(0)
-    return True
-
-def remove_max_monit(tree, namespaces):
-    # Delete MaxMonitoredItemsPerCall
-    _remove_nids_and_refs(tree, ['i=11714'], namespaces)
-
-    # We have to remove references to MaxMonitoredItemsPerCall manually,
-    # as there may exist references to unknown nodes in an address space.
-
-def remove_max_node_mgt(tree, namespaces):
-    # Delete MaxNodesPerNodeManagemeent
-    _remove_nids_and_refs(tree, ['i=11713'], namespaces)
-
-    # We have to remove references to MaxNodesPerNodeManagemeent manually,
-    #  as there may exist references to unknown nodes in an address space.
-
-def remove_methods(tree, namespaces):
-    # Delete methods that are instances of other methods.
-    # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
-    # See Part 3 §6 for more information.
-    # (also delete MaxNodesPerMethodCall and its references)
-    # (also delete properties of the methods)
-    methods = []
-    methods_properties = []
-    for method_node in tree.findall('*[@MethodDeclarationId]'):
-        methods.append(method_node.get('NodeId'))
-        refs, = method_node.iterfind('uanodeset:References', namespaces)
-        for ref in refs:
-            ref_type = ref.get('ReferenceType')
-            if _is_forward(ref) and (ref_type == 'HasProperty' or ref_type == 'i=46'):
-                methods_properties.append(ref.text.strip())
-
-    _remove_nids_and_refs(tree, methods+methods_properties+['i=11709'], namespaces)
-
-def remove_node_ids_greater_than(tree, namespaces, intMaxId):
-    ns0nidPattern = re.compile('i=([0-9]+)')
-    # Find Node Ids greater than intMaxId in NS 0
-    root = tree.getroot()
-    nodes = root.findall('*[@NodeId]')
-    nodes_to_remove = []
-    for node in nodes:
-        nid = node.get('NodeId')
-        match = ns0nidPattern.match(nid)
-        if match:
-            if int(match.group(1)) > intMaxId:
-                nodes_to_remove.append(nid)
-    # Delete the concerned nodes and references associated
-    _remove_nids_and_refs(tree, nodes_to_remove, namespaces)
-
 def _is_hierarchical_ref(ref: ET.Element):
     ref_type = ref.get('ReferenceType')
     return ref_type in HIERARCHICAL_REFERENCE_TYPES
 
+
 def _is_ns0(nid):
     return not nid.startswith('ns=')
 
-def _iter_hierarchical(n: ET.Element, namespaces: dict, downwards=True):
-    for ref in n.iterfind("uanodeset:References/uanodeset:Reference", namespaces):
-        if _is_forward(ref) != downwards:
-            continue
-        child_nid = ref.text.strip()
-        if _is_ns0(child_nid):
-            # ignore NS0 children
-            continue
-        if _is_hierarchical_ref(ref):
-            yield child_nid
 
-def _rec_compute_subtree(tree: ET.ElementTree, namespaces: dict, root_nid, subtree: dict):
-    n = _find_node_with_nid(tree, root_nid)
-    if n is None:
-        return
-    for child_nid in _iter_hierarchical(n, namespaces):
-        if root_nid not in subtree:
-            subtree[root_nid] = set()
-        subtree[root_nid].add(child_nid)
-        if child_nid not in subtree:
-            subtree[child_nid] = set()
-            _rec_compute_subtree(tree, namespaces, child_nid, subtree)
-
-def _rec_bf_remove_subtree(tree: ET.ElementTree, namespaces: dict, remove_siblings: set, subtree: dict, is_root=False):
-    # Breadth-First Removal of children with no parents outside the removed subtree
-    children = set()
-    removed_nids = set()
-    for nid in remove_siblings:
-        if nid not in subtree:
-            # deleted, not to be removed
-            continue
-        n = _find_node_with_nid(tree, nid)
-        outer_parents = [parent_nid for parent_nid in _iter_hierarchical(n, namespaces, downwards=False) if parent_nid not in subtree]
-        if outer_parents and not is_root:
-            # there is a parent not to be removed: don't remove this node and all its subtree
-            # except for the 'root' nodes, that the user explicitly requested to remove
-            print(f"Not removing {nid} because of outer parents: {outer_parents}")
-            del subtree[nid]
-        else:
-            tree.getroot().remove(n)
-            children.update(subtree[nid])
-            removed_nids.add(nid)
-    _remove_refs_to_nids(tree, removed_nids, namespaces)
-    if children:
-        _rec_bf_remove_subtree(tree, namespaces, children, subtree)
-
-def remove_subtree(tree: ET.ElementTree, namespaces: dict, remove_root_nid):
-    subtree = dict()
-    _rec_compute_subtree(tree, namespaces, remove_root_nid, subtree)
-    # retain nodes with a parent outside the subtree
-    # Important note: due to the possibility of specifying node relations with cycles,
-    # some of the parents of a given node may appear after discovering the node
-    # even with a Breadth-First Search; so we start with the entire subtree, then
-    # retain only the nodes with no outer parent
-    _rec_bf_remove_subtree(tree, namespaces, {remove_root_nid}, subtree, is_root=True)
-
-
-def __get_aliases(tree, namespaces):
-    tree_aliases = tree.find('uanodeset:Aliases', namespaces)
-    if tree_aliases is None:
-        return {}
-    return {alias.text: alias.get('Alias') for alias in tree_aliases}
-
-
-def __exists_ref(tree, search, nids_or_aliases: set, namespaces):
-    for ref_node in tree.iterfind(search, namespaces):
-        ref_nid = ref_node.text.strip()
-        if ref_nid in nids_or_aliases:
-            return True
-    return False
-
-
-def remove_unused(tree: ET.ElementTree, retain_ns0: bool, retain_types: set, namespaces: dict):
-    # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
-    aliases = __get_aliases(tree, namespaces)
-    for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject/uanodeset:References/uanodeset:Reference", False),
-               ('UAVariableType', ".//uanodeset:UAVariable/uanodeset:References/uanodeset:Reference", False),
-               ('UADataType', ".//uanodeset:UAVariable[@DataType='{}']", True),
-               ('UAReferenceType', ".//*/uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
-        while True:
-            # loop while the removed types produce unused types
-            removed_nids = set()
-            for ty_node in tree.iterfind(f"uanodeset:{ty}", namespaces):
-                nid = ty_node.get('NodeId')
-                if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
-                    # retain this type
-                    continue
-                alias = aliases.get(nid)
-                refs = set([nid])
-                if alias is not None:
-                    refs.add(alias)
-                subtype_search = f".//uanodeset:{ty}/uanodeset:References/uanodeset:Reference[@ReferenceType='HasSubtype'][@IsForward='false']"
-                if __exists_ref(tree, subtype_search, refs, namespaces):
-                    # this type is subtyped
-                    continue
-                if is_full_request:
-                    found = False
-                    for ref in refs:
-                        req = search.format(ref)
-                        if tree.find(req, namespaces) is not None:
-                            # this type is used by data
-                            found = True
-                            break
-                    if found:
-                        continue
-                else:
-                    # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
-                    if __exists_ref(tree, search, refs, namespaces):
-                        # this type is used by data
-                        continue
-                tree.getroot().remove(ty_node)
-                removed_nids.add(nid)
-            if len(removed_nids) == 0:
-                break
-            _remove_refs_to_nids(tree, removed_nids, namespaces)
-
-
-def sanitize(tree, namespaces):
-    """
-    Returns True if the sanitation is a success.
-    Otherwise there is an unrecoverable error which requires more user input (two nodes with the same nodeid, ...).
-    """
-    # Prepare the common structures for find and check for uniqueness
-    nodes = {}
-    error = False
-    for node in tree.iterfind('./*[@NodeId]'):
-        nid = node.get('NodeId')
-        if nid in nodes:
-            print('Sanitize Error: NodeId {} found twice'.format(nid), file=sys.stderr)
-            error = True
-        nodes[nid] = node
-    if error:
-        return False
-
-    # Add reciprocal References
-    # References are a tuple (SourceNode, ReferenceType, TargetNode) (Part 3, §4.3.4)
-    # Only the SourceNode is required to be in the address space.
-    # All References should be unique.
-    # Note that if there is (a, type0, b) and (a, type1, b), they describe the same Reference
-    #  if type0 and type1 are subclasses of the same concrete ReferenceType.
-    # When the reference a -> b exists, and when browsing b, b <- a also exists in the inverse direction.
-    # We add reciprocal References to avoid their computations at browse-time.
-
-    # First, compute the a -> b and b <- a sets of references
-    # If no reference is missing, refs_fwd == refs_inv
-    # In the Address Space, b <- a References are stored in b, hence the difficulty
-    # Set of forward reference (check existence)
-    refs_fwd = set() # {(a,type, b), ...}
-    # List of forward reference (keep refs order)
-    refs_fwd_list = [] # [(a, type, b), ...]
-    # Set of backward reference (check existence)
-    refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
-    # List of backward reference (keep refs order)
-    refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
-    for node in tree.iterfind('./*[uanodeset:References]', namespaces):
-        nids = node.get('NodeId')  # The starting node of the references below
-        refs, = node.iterfind('uanodeset:References', namespaces)
-        for ref in list(refs):  # Make a list so that we can remove elements while iterating
-            type_ref = ref.get('ReferenceType')
-            nidt = ref.text.strip()  # The destination node of this reference
-            if _is_forward(ref):
-                # We are in the case a -> b,
-                #  so a = nids, and b = nidt
-                if (nids, type_ref, nidt) in refs_fwd:
-                    print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nids, nidt, type_ref), file=sys.stderr)
-                else:
-                    refs_fwd.add((nids, type_ref, nidt))
-                    refs_fwd_list.append((nids, type_ref, nidt))
-            else:
-                # We are in the case b <- a,
-                #  so b = nids, and a = nidt
-                #  and nids <- nidt will be stored in forward order (nidt, type, nids)
-                if nidt not in nodes:
-                    print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
-                          .format(nids, nidt, type_ref), file=sys.stderr)
-                    continue
-                if (nidt, type_ref, nids) in refs_inv:
-                    print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidt, nids, type_ref), file=sys.stderr)
-                else:
-                    refs_inv.add((nidt, type_ref, nids))
-                    refs_inv_list.append((nidt, type_ref, nids))
-
-    # Add forward refs a -> b for which b <- a exists
-    for a, t, b in refs_inv_list:
-        if (a, t, b) in refs_fwd:
-            # Already defined
-            continue
-        if a not in nodes:
-            print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
-        else:
-            # if args.verbose:
-            #     print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
-            node = nodes[a]
-            _add_ref(node, t, b, namespaces, is_forward=True)
-
-    # Now add inverse refs b <- a for which a -> b exists
-    for a, t, b in refs_fwd_list:
-        if (a, t, b) in refs_inv:
-            # Already defined
-            continue
-        if b not in nodes:
-            print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
-        else:
-            # if args.verbose:
-            #     print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
-            node = nodes[b]
-            _add_ref(node, t, a, namespaces, is_forward=False)
-
-    # Note: ParentNodeId is an optional attribute. It refers to the parent node.
-    #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
-    # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
-    for node in tree.iterfind('./*[@ParentNodeId]'):
-        # There may be no reference at all
-        refs_nodes = node.findall('uanodeset:References', namespaces)
-        if len(refs_nodes) < 1:
-            print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
-                  .format(node.get('NodeId')), file=sys.stderr)
-            # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
-            del node.attrib['ParentNodeId']
-            continue
-        refs, = refs_nodes
-        pnid = node.get('ParentNodeId')
-        parent_refs = refs.findall('*[@IsForward="false"]')
-        if not any(parent.text.strip() == pnid for parent in parent_refs):
-            print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
-                  .format(node.get('NodeId'), pnid), file=sys.stderr)
-            # Type is unknown in fact
-            #refs.append(ET.Element('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
-            # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
-            del node.attrib['ParentNodeId']
-
-    # Note: we don't check that the Address Space Model specified in Part 3 is valid.
-
-    # TODO: Remove empty <References />
-
-    return True
-
-
-def __fetch_subelement(elem, subtag, namespaces, indentation=-1) -> ET.Element:
-    subelem = elem.find(subtag, namespaces)
-    if subelem is None:
-        if len(elem) > 0:
-            last = elem[-1]
-            last.tail += INDENT_SPACES
-        subelem = ET.SubElement(elem, subtag)
-        if indentation >= 0:
-            subelem.text = indent(indentation)
-            subelem.tail = indent(indentation - 2)
-    return subelem
-
-def __fill_namespace_and_server_arrays(tree: ET.ElementTree, namespaces: dict):
-    __fill_namespace_array(tree, namespaces)
-    __merge_server_array(tree, namespaces)
-
-
-def __append_strings(parent_l_str: ET.Element, str_values):
+def append_strings(parent_l_str: ET.Element, str_values):
     if len(str_values) == 0:
         # nothing to do
         return
@@ -700,122 +160,659 @@ def __append_strings(parent_l_str: ET.Element, str_values):
     str_elem.tail = indent(3)
 
 
-def __merge_server_array(tree: ET.ElementTree, new: ET.ElementTree, namespaces: dict):
-    # The UAVariable corresponding to the server array is required
-    # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
-    tree_server_array = tree.find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']", namespaces)
-    if tree_server_array is None:
-        raise Exception("Missing UAVariable ServerArray (i=2254) in NS0")
-    tree_value = __fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value', namespaces, 3)
-    tree_l_str = __fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString', namespaces, 4)
-    tree_uris = [uri.text for uri in tree_l_str.findall(f'{{{UA_TYPES_URI}}}String', namespaces)]
-    new_uris = [uri.text for uri in new.findall(f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String", namespaces)]
-    ns1_uri = tree.find('uanodeset:NamespaceUris/uanodeset:Uri', namespaces)
-    if len(tree_uris) > 0 and tree_uris[0] != ns1_uri.text:
-        raise Exception(f"Invalid local server URI in node id 2254: {tree_uris[0]}, expecting {ns1_uri} instead")
-    new_uris.insert(0, ns1_uri.text)
-    set_new_uris = set(new_uris) - set(tree_uris)
-    unique_new_uris = list()
-    for uri in new_uris:
-        if uri in set_new_uris and uri not in unique_new_uris:
-            unique_new_uris.append(uri)
-    __append_strings(tree_l_str, unique_new_uris)
+class NodesetMerger:
 
+    def __init__(self, verbose):
+        self.verbose = verbose
+        self.tree = None
+        self.namespaces = dict()
+    
+    def _find_node_with_nid(self, nid):
+        return self.tree.find(f'*[@NodeId="{nid}"]')
 
-def __fill_namespace_array(tree: ET.ElementTree, namespaces: dict):
-    # The UAVariable corresponding to the namespace array is required
-    # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
-    namespace_array_node = tree.find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']", namespaces)
-    if namespace_array_node is None:
-        raise Exception("Missing UAVariable NamespaceArray (i=2255) in NS0")
-    value = __fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value', namespaces, 3)
-    l_str = __fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString', namespaces)
-    l_str.clear()
-    ns_uris = tree.findall('uanodeset:NamespaceUris/uanodeset:Uri', namespaces)
-    __append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
+    def _remove_nids(self, nids):
+        # Remove the nodes that match the NodeIds given in nids
+        root = self.tree.getroot()
+        for nid in nids:
+            node = self._find_node_with_nid(nid)
+            if node is not None:
+                if self.verbose:
+                    print('RemoveNode: {}'.format(nid), file=sys.stderr)
+                root.remove(node)
 
-
-def __get_all_retain_values(tree: ET.ElementTree, retain: set, namespaces: dict):
-    nid_alias = __get_aliases(tree, namespaces)
-    alias_nid =  {alias: nid for nid, alias in nid_alias.items()}
-    corresp = set() # the corresponding alias or node id for every item in the retain set
-    for r in retain:
-        if r in nid_alias:
-            corresp.add(nid_alias[r])
-        if r in alias_nid:
-            corresp.add(alias_nid[r])
-    return retain | corresp
-
-
-def remove_backward_refs(tree: ET.ElementTree, retain: set, namespaces: dict):
-    all_retain = __get_all_retain_values(tree, retain, namespaces)
-    for node in tree.iterfind('*[@NodeId]'):
-        for refs in node.iterfind('uanodeset:References', namespaces):
-            back_refs = list()
+    def _add_ref(self, node, ref_type, tgt, is_forward=True):
+        # Add a reference from a node to the other NodeId nid in the given direction
+        attribs = {'ReferenceType': ref_type}
+        if not is_forward:
+            attribs['IsForward'] = 'false'
+    
+        refs_nodes = node.findall('uanodeset:References', self.namespaces)
+        if len(refs_nodes) == 0:
+            refs = ET.Element('uanodeset:References', self.namespaces)
+            node.append(refs)
+        else:
+            refs, = refs_nodes
             for ref in refs:
-                # oddly enough, filtering with a match expression fails
-                # (some back refs are not found, although identical to some that are found)
-                if not _is_forward(ref) and ref.get('ReferenceType') not in all_retain:
-                    # cannot remove while iterating
-                    back_refs.append(ref)
-            for ref in back_refs:
-                refs.remove(ref)
-            close_node_indent(refs, 2)
+                if ref.text == tgt and ref.attrib == attribs:
+                    # avoid duplicate reference
+                    return
+    
+        elem = ET.Element('Reference', attribs)
+        elem.text = tgt
+        close_node_indent(refs, 3)
+        refs.append(elem)
+        close_node_indent(refs, 2)
+
+    def _remove_refs_to_nids(self, nids):
+        # Remove Reference elements from all nodes that go to the NodeIds in nids
+        for node in self.tree.iterfind('./*[uanodeset:References]', self.namespaces):
+            refs, = node.iterfind('uanodeset:References', self.namespaces)
+            for ref in list(refs):  # Make a list so that we can remove elements while iterating
+                if ref.text.strip() in nids:  # The destination node of this reference
+                    if self.verbose:
+                        print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
+                    refs.remove(ref)
+
+    def _remove_nids_and_refs(self, nids):
+        self._remove_nids(nids)
+        self._remove_refs_to_nids(nids)
+
+    def reassign_node_ns_index(self, node: ET.Element, ns_idx_reassign: dict):
+        # Reassign namespace index for:
+        #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
+        #   References/Reference/@ReferenceType and References/Reference/text
+        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+            reassign_elem_attr(node, attr, ns_idx_reassign, reassigned_ns_index)
+        reassign_elem_attr(node, 'BrowseName', ns_idx_reassign, reassigned_prefix_index)
+        
+        for ref in node.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
+            reassign_elem_attr(ref, 'ReferenceType', ns_idx_reassign, reassigned_ns_index)
+            ref.text = reassigned_ns_index(ref.text, ns_idx_reassign)
+
+    def _check_all_namespaces_declared(self, any_tree):
+        ns_count = 0
+        ns_uris = any_tree.find('uanodeset:NamespaceUris', self.namespaces)
+        if ns_uris is not None:
+            uris = ns_uris.findall('uanodeset:Uri', self.namespaces)
+            declarations = [uri.text for uri in uris]
+            declared_ns = set(declarations)
+            if len(declared_ns) != len(declarations):
+                raise Exception("Duplicate Namespace URI declaration in: " + str(declarations))
+            ns_count = len(declared_ns)
+    
+        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+            for node in any_tree.iterfind(f'*[@{attr}]'):
+                nid = node.get(attr)
+                _check_declared_nid(nid, ns_count, NS_IDX_MATCHER)
+        for node in any_tree.iterfind(f'*[@BrowseName]'):
+            nid = node.get('BrowseName')
+            _check_declared_nid(nid, ns_count, PREFIX_IDX_MATCHER)
+        for ref in any_tree.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
+            _check_declared_nid(ref.get('ReferenceType'), ns_count, NS_IDX_MATCHER)
+            _check_declared_nid(ref.text, ns_count, NS_IDX_MATCHER)
+        for alias in any_tree.iterfind('uanodeset:Aliases/uanodeset:Alias', self.namespaces):
+            _check_declared_nid(alias.text, ns_count, NS_IDX_MATCHER)
+
+    
+    def merge(self, source):
+        # Merge new tree into tree
+        # The merge is restricted to tags for which we know the semantics
+        # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
+        new_ns = parse_xmlns(source)
+        for k,v in new_ns.items():
+            if k not in self.namespaces:
+                # Keep first version of the namespaces
+                ET.register_namespace(k, v)
+                self.namespaces[k] = v
+        new = ET.parse(source)
+        if self.tree is None:
+            self.tree = new
+            # ElementTree does not support XPath search with the default namespace.
+            # We have to name it to be able to use it.
+            if '' in self.namespaces:
+                self.namespaces['uanodeset'] = self.namespaces['']
+            self.__fill_namespace_array()
+            self._check_all_namespaces_declared(self.tree)
+            return
+
+        tree_root = self.tree.getroot()
+    
+        # Merge NamespaceURIs
+        self._check_all_namespaces_declared(new)
+        new_ns_uris = new.find('uanodeset:NamespaceUris', self.namespaces)
+        if new_ns_uris is None:
+            print("NamespaceUris is missing in a non-NS0 address space")
+            return False
+    
+        tree_ns_uris = self.tree.find('uanodeset:NamespaceUris', self.namespaces)
+        if tree_ns_uris is None:
+            tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
+            tree_root.insert(0, new_ns_uris)
+        else:
+            tree_ns_uris[-1].tail = indent(2)
+        # the new namespace URIs from the new address space need to be translated
+        # but some of the namespace might already be in use
+        ns_uris = dict()
+        for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+            ns_uris[ns.text] = idx + 1
+    
+        ns_idx_reassign = dict()
+        for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+            if ns.text in ns_uris:
+                tree_idx = ns_uris[ns.text]
+                if tree_idx != idx + 1:
+                    ns_idx_reassign[idx + 1] = tree_idx
+            else:
+                new_idx = len(ns_uris) + 1
+                ns_uris[ns.text] = new_idx
+                if new_idx != idx + 1:
+                    ns_idx_reassign[idx + 1] = new_idx
+                tree_ns_uris.append(ns)
+        tree_ns_uris[-1].tail = indent(1)
+        # print("Namespace URI reassignments:", ns_idx_reassign)
+    
+        # Merge Models
+        tree_models = self.tree.find('uanodeset:Models', self.namespaces)
+        ns0_version = get_ns0_version(tree_models)
+        if ns0_version is None:
+            print("Missing a NS0 model")
+            return False
+        new_models = new.find('uanodeset:Models', self.namespaces)
+        tree_models[-1].tail = indent(2)
+        for model in new_models:
+            new_model_uri = model.get('ModelUri')
+            already_model = tree_models.find(f'uanodeset:Model[@ModelUri="{new_model_uri}"]', self.namespaces)
+            if already_model is not None:
+                already_model_version = already_model.get('Version')
+                new_model_version = model.get('Version')
+                if new_model_version == already_model_version:
+                    # just skip the duplicate model
+                    continue
+                else:
+                    raise Exception(f'Incompatible model version: {new_model_uri} provided with versions {already_model_version} and {new_model_version}')
+            req_ns0 = model.find(f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]', self.namespaces)
+            if req_ns0 is not None:
+                req_ns0_version = req_ns0.get('Version')
+                if req_ns0_version != ns0_version:
+                    raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
+            tree_models.append(model)
+        tree_models[-1].tail = indent(1)
+    
+        # Merge ServerArray and NamespaceArray:
+        self.__fill_namespace_array()
+        self.__merge_server_array(new)
+    
+        # Merge Aliases
+        tree_aliases = self.tree.find('uanodeset:Aliases', self.namespaces)
+        if tree_aliases is None:
+            print('Merge: Aliases expected to be present in first address space')
+            return False
+        tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}
+        new_aliases = new.find('uanodeset:Aliases', self.namespaces)
+        new_alias_dict = {}
+        if new_aliases is not None:
+            new_alias_dict = {alias.get('Alias'):reassigned_ns_index(alias.text, ns_idx_reassign) for alias in new_aliases}
+        # Assert existing aliases are the same
+        res = True
+        for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
+            if tree_alias_dict[alias] != new_alias_dict[alias]:
+                print('Merge: Alias used for different NodeId ({} is {} or {})'
+                      .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
+                res = False
+        if not res:
+            return res
+    
+        # Add new aliases
+        for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
+            elem = ET.Element('Alias', {'Alias': alias})
+            elem.text = new_alias_dict[alias]
+            # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
+            close_node_indent(tree_aliases, 2)
+            tree_aliases.append(elem)
+    
+        if len(tree_aliases) > 0:
+            # Restore correct level for next tag which is </Aliases>
+            tree_aliases[-1].tail = indent(1)
+    
+        # Merge Nodes, detect duplicate Node IDs (forbidden)
+        duplicates = set()
+        tree_nodes = dict()
+        for node in self.tree.iterfind('*[@NodeId]'):
+            node_id = node.get('NodeId')
+            if node_id in tree_nodes:
+                duplicates.add(node_id)
+            else:
+                tree_nodes[node_id] = node
+        new_nodes = dict()
+        for node in new.iterfind('*[@NodeId]'):
+            # Reassign namespace index for node attributes and subelements
+            self.reassign_node_ns_index(node, ns_idx_reassign)
+            node_id = node.get('NodeId')
+            if node_id in tree_nodes or node_id in new_nodes:
+                duplicates.add(node_id)
+            else:
+                new_nodes[node_id] = node
+        # ns0 duplicates are valid
+        # for instance the Server, ServerArray, NamespaceArray nodes may appear in various files
+        ns0_duplicates = filter(_is_ns0, duplicates)
+        user_duplicates = duplicates - set(ns0_duplicates)
+        if len(user_duplicates) > 0:
+            raise Exception(f"There are duplicate Node IDs: {sorted(duplicates)}")
+    
+        # New unique nids
+        new_nids = set(new_nodes)
+        if len(new_nids) > 0 and len(tree_root) > 0:
+            # indent for first node added
+            tree_root[-1].tail = indent(1)
+        for nid in sorted(new_nids):
+            if self.verbose:
+                print('Merge: add node {}'.format(nid), file=sys.stderr)
+            tree_root.append(new_nodes[nid])
+        # References of common nodes are merged
+        for nid in sorted(ns0_duplicates):
+            nodeb = new_nodes[nid]
+            refsb = nodeb.find('./uanodeset:References', self.namespaces)
+            if refsb is None:
+                continue
+            nodea = tree_nodes[nid]
+            for ref in refsb:
+                self._add_ref(nodea, ref.get('ReferenceType'), ref.text, is_forward=is_forward(ref))
+            close_node_indent(refsb, 2)
+    
+        tree_root[-1].tail = indent(0)
+        return True
+        
+    def remove_max_monit(self):
+        # Delete MaxMonitoredItemsPerCall
+        self._remove_nids_and_refs(['i=11714'])
+    
+        # We have to remove references to MaxMonitoredItemsPerCall manually,
+        # as there may exist references to unknown nodes in an address space.
+    
+    def remove_max_node_mgt(self):
+        # Delete MaxNodesPerNodeManagemeent
+        self._remove_nids_and_refs(['i=11713'])
+    
+        # We have to remove references to MaxNodesPerNodeManagemeent manually,
+        #  as there may exist references to unknown nodes in an address space.
+    
+    def remove_methods(self):
+        # Delete methods that are instances of other methods.
+        # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
+        # See Part 3 §6 for more information.
+        # (also delete MaxNodesPerMethodCall and its references)
+        # (also delete properties of the methods)
+        methods = []
+        methods_properties = []
+        for method_node in self.tree.findall('*[@MethodDeclarationId]'):
+            methods.append(method_node.get('NodeId'))
+            refs, = method_node.iterfind('uanodeset:References', self.namespaces)
+            for ref in refs:
+                ref_type = ref.get('ReferenceType')
+                if is_forward(ref) and (ref_type == 'HasProperty' or ref_type == 'i=46'):
+                    methods_properties.append(ref.text.strip())
+
+        self._remove_nids_and_refs(methods+methods_properties+['i=11709'])
+
+    def remove_node_ids_greater_than(self, intMaxId):
+        ns0nidPattern = re.compile('i=([0-9]+)')
+        # Find Node Ids greater than intMaxId in NS 0
+        nodes = self.tree.findall('*[@NodeId]')
+        nodes_to_remove = []
+        for node in nodes:
+            nid = node.get('NodeId')
+            match = ns0nidPattern.match(nid)
+            if match:
+                if int(match.group(1)) > intMaxId:
+                    nodes_to_remove.append(nid)
+        # Delete the concerned nodes and references associated
+        self._remove_nids_and_refs(nodes_to_remove)
+
+    def _iter_hierarchical(self, n: ET.Element, downwards=True):
+        for ref in n.iterfind("uanodeset:References/uanodeset:Reference", self.namespaces):
+            if is_forward(ref) != downwards:
+                continue
+            child_nid = ref.text.strip()
+            if _is_ns0(child_nid):
+                # ignore NS0 children
+                continue
+            if _is_hierarchical_ref(ref):
+                yield child_nid
+
+    def _rec_compute_subtree(self, root_nid, subtree: dict):
+        n = self._find_node_with_nid(root_nid)
+        if n is None:
+            return
+        for child_nid in self._iter_hierarchical(n):
+            if root_nid not in subtree:
+                subtree[root_nid] = set()
+            subtree[root_nid].add(child_nid)
+            if child_nid not in subtree:
+                subtree[child_nid] = set()
+                self._rec_compute_subtree(child_nid, subtree)
+    
+    def _rec_bf_remove_subtree(self, remove_siblings: set, subtree: dict, is_root=False):
+        # Breadth-First Removal of children with no parents outside the removed subtree
+        children = set()
+        removed_nids = set()
+        for nid in remove_siblings:
+            if nid not in subtree:
+                # deleted, not to be removed
+                continue
+            n = self._find_node_with_nid(nid)
+            outer_parents = [parent_nid for parent_nid in self._iter_hierarchical(n, downwards=False) if parent_nid not in subtree]
+            if outer_parents and not is_root:
+                # there is a parent not to be removed: don't remove this node and all its subtree
+                # except for the 'root' nodes, that the user explicitly requested to remove
+                print(f"Not removing {nid} because of outer parents: {outer_parents}")
+                del subtree[nid]
+            else:
+                self.tree.getroot().remove(n)
+                children.update(subtree[nid])
+                removed_nids.add(nid)
+        self._remove_refs_to_nids(removed_nids)
+        if children:
+            self._rec_bf_remove_subtree(children, subtree)
+    
+    def remove_subtree(self, remove_root_nid):
+        subtree = dict()
+        self._rec_compute_subtree(remove_root_nid, subtree)
+        # retain nodes with a parent outside the subtree
+        # Important note: due to the possibility of specifying node relations with cycles,
+        # some of the parents of a given node may appear after discovering the node
+        # even with a Breadth-First Search; so we start with the entire subtree, then
+        # retain only the nodes with no outer parent
+        self._rec_bf_remove_subtree({remove_root_nid}, subtree, is_root=True)
+
+    def __get_aliases(self):
+        tree_aliases = self.tree.find('uanodeset:Aliases', self.namespaces)
+        if tree_aliases is None:
+            return {}
+        return {alias.text: alias.get('Alias') for alias in tree_aliases}
+
+    def __exists_ref(self, search, nids_or_aliases: set):
+        for ref_node in self.tree.iterfind(search, self.namespaces):
+            ref_nid = ref_node.text.strip()
+            if ref_nid in nids_or_aliases:
+                return True
+        return False
+
+    def remove_unused(self, retain_ns0: bool, retain_types: set):
+        # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
+        aliases = self.__get_aliases()
+        for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject/uanodeset:References/uanodeset:Reference", False),
+                   ('UAVariableType', ".//uanodeset:UAVariable/uanodeset:References/uanodeset:Reference", False),
+                   ('UADataType', ".//uanodeset:UAVariable[@DataType='{}']", True),
+                   ('UAReferenceType', ".//*/uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
+            while True:
+                # loop while the removed types produce unused types
+                removed_nids = set()
+                for ty_node in self.tree.iterfind(f"uanodeset:{ty}", self.namespaces):
+                    nid = ty_node.get('NodeId')
+                    if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
+                        # retain this type
+                        continue
+                    alias = aliases.get(nid)
+                    refs = set([nid])
+                    if alias is not None:
+                        refs.add(alias)
+                    subtype_search = f".//uanodeset:{ty}/uanodeset:References/uanodeset:Reference[@ReferenceType='HasSubtype'][@IsForward='false']"
+                    if self.__exists_ref(subtype_search, refs):
+                        # this type is subtyped
+                        continue
+                    if is_full_request:
+                        found = False
+                        for ref in refs:
+                            req = search.format(ref)
+                            if self.tree.find(req, self.namespaces) is not None:
+                                # this type is used by data
+                                found = True
+                                break
+                        if found:
+                            continue
+                    else:
+                        # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
+                        if self.__exists_ref(search, refs):
+                            # this type is used by data
+                            continue
+                    self.tree.getroot().remove(ty_node)
+                    removed_nids.add(nid)
+                if len(removed_nids) == 0:
+                    break
+                self._remove_refs_to_nids(removed_nids)
+
+    def sanitize(self):
+        """
+        Returns True if the sanitation is a success.
+        Otherwise there is an unrecoverable error which requires more user input (two nodes with the same nodeid, ...).
+        """
+        # Prepare the common structures for find and check for uniqueness
+        nodes = {}
+        error = False
+        for node in self.tree.iterfind('./*[@NodeId]'):
+            nid = node.get('NodeId')
+            if nid in nodes:
+                print('Sanitize Error: NodeId {} found twice'.format(nid), file=sys.stderr)
+                error = True
+            nodes[nid] = node
+        if error:
+            return False
+    
+        # Add reciprocal References
+        # References are a tuple (SourceNode, ReferenceType, TargetNode) (Part 3, §4.3.4)
+        # Only the SourceNode is required to be in the address space.
+        # All References should be unique.
+        # Note that if there is (a, type0, b) and (a, type1, b), they describe the same Reference
+        #  if type0 and type1 are subclasses of the same concrete ReferenceType.
+        # When the reference a -> b exists, and when browsing b, b <- a also exists in the inverse direction.
+        # We add reciprocal References to avoid their computations at browse-time.
+    
+        # First, compute the a -> b and b <- a sets of references
+        # If no reference is missing, refs_fwd == refs_inv
+        # In the Address Space, b <- a References are stored in b, hence the difficulty
+        # Set of forward reference (check existence)
+        refs_fwd = set() # {(a,type, b), ...}
+        # List of forward reference (keep refs order)
+        refs_fwd_list = [] # [(a, type, b), ...]
+        # Set of backward reference (check existence)
+        refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
+        # List of backward reference (keep refs order)
+        refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
+        for node in self.tree.iterfind('./*[uanodeset:References]', self.namespaces):
+            nids = node.get('NodeId')  # The starting node of the references below
+            refs, = node.iterfind('uanodeset:References', self.namespaces)
+            for ref in list(refs):  # Make a list so that we can remove elements while iterating
+                type_ref = ref.get('ReferenceType')
+                nidt = ref.text.strip()  # The destination node of this reference
+                if is_forward(ref):
+                    # We are in the case a -> b,
+                    #  so a = nids, and b = nidt
+                    if (nids, type_ref, nidt) in refs_fwd:
+                        print('Sanitize: duplicate forward Reference {} -> {} (type {})'.format(nids, nidt, type_ref), file=sys.stderr)
+                    else:
+                        refs_fwd.add((nids, type_ref, nidt))
+                        refs_fwd_list.append((nids, type_ref, nidt))
+                else:
+                    # We are in the case b <- a,
+                    #  so b = nids, and a = nidt
+                    #  and nids <- nidt will be stored in forward order (nidt, type, nids)
+                    if nidt not in nodes:
+                        print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'
+                              .format(nids, nidt, type_ref), file=sys.stderr)
+                        continue
+                    if (nidt, type_ref, nids) in refs_inv:
+                        print('Sanitize: duplicate inverse Reference {} <- {} (type {})'.format(nidt, nids, type_ref), file=sys.stderr)
+                    else:
+                        refs_inv.add((nidt, type_ref, nids))
+                        refs_inv_list.append((nidt, type_ref, nids))
+    
+        # Add forward refs a -> b for which b <- a exists
+        for a, t, b in refs_inv_list:
+            if (a, t, b) in refs_fwd:
+                # Already defined
+                continue
+            if a not in nodes:
+                print('Sanitize: inverse Reference from unknown node, cannot add forward reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+            else:
+                if self.verbose:
+                    print('Sanitize: add forward reciprocal Reference {} -> {} (type {})'.format(a, b, t), file=sys.stderr)
+                node = nodes[a]
+                self._add_ref(node, t, b, is_forward=True)
+    
+        # Now add inverse refs b <- a for which a -> b exists
+        for a, t, b in refs_fwd_list:
+            if (a, t, b) in refs_inv:
+                # Already defined
+                continue
+            if b not in nodes:
+                print('Sanitize: Reference to unknown node, cannot add inverse reciprocal ({} -> {}, type {})'.format(a, b, t), file=sys.stderr)
+            else:
+                if self.verbose:
+                    print('Sanitize: add inverse reciprocal Reference {} <- {} (type {})'.format(b, a, t), file=sys.stderr)
+                node = nodes[b]
+                self._add_ref(node, t, a, is_forward=False)
+    
+        # Note: ParentNodeId is an optional attribute. It refers to the parent node.
+        #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
+        # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
+        for node in self.tree.iterfind('./*[@ParentNodeId]'):
+            # There may be no reference at all
+            refs_nodes = node.findall('uanodeset:References', self.namespaces)
+            if len(refs_nodes) < 1:
+                print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
+                      .format(node.get('NodeId')), file=sys.stderr)
+                # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
+                del node.attrib['ParentNodeId']
+                continue
+            refs, = refs_nodes
+            pnid = node.get('ParentNodeId')
+            parent_refs = refs.findall('*[@IsForward="false"]')
+            if not any(parent.text.strip() == pnid for parent in parent_refs):
+                print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
+                      .format(node.get('NodeId'), pnid), file=sys.stderr)
+                # Type is unknown in fact
+                #refs.append(ET.Element('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
+                # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
+                del node.attrib['ParentNodeId']
+    
+        # Note: we don't check that the Address Space Model specified in Part 3 is valid.
+    
+        # TODO: Remove empty <References />
+    
+        return True
+
+    def __fill_namespace_and_server_arrays(self):
+        self.__fill_namespace_array()
+        self.__merge_server_array()
+
+    def __fetch_subelement(self, elem, subtag, indentation=-1) -> ET.Element:
+        subelem = elem.find(subtag, self.namespaces)
+        if subelem is None:
+            if len(elem) > 0:
+                last = elem[-1]
+                last.tail += INDENT_SPACES
+            subelem = ET.SubElement(elem, subtag)
+            if indentation >= 0:
+                subelem.text = indent(indentation)
+                subelem.tail = indent(indentation - 2)
+        return subelem
+
+    def __merge_server_array(self, new: ET.ElementTree):
+        # The UAVariable corresponding to the server array is required
+        # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
+        tree_server_array = self.tree.find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']", self.namespaces)
+        if tree_server_array is None:
+            raise Exception("Missing UAVariable ServerArray (i=2254) in NS0")
+        tree_value = self.__fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value', 3)
+        tree_l_str = self.__fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString', 4)
+        tree_uris = [uri.text for uri in tree_l_str.findall(f'{{{UA_TYPES_URI}}}String', self.namespaces)]
+        new_uris = [uri.text for uri in new.findall(f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String", self.namespaces)]
+        ns1_uri = self.tree.find('uanodeset:NamespaceUris/uanodeset:Uri', self.namespaces)
+        if len(tree_uris) > 0 and tree_uris[0] != ns1_uri.text:
+            raise Exception(f"Invalid local server URI in node id 2254: {tree_uris[0]}, expecting {ns1_uri} instead")
+        new_uris.insert(0, ns1_uri.text)
+        set_new_uris = set(new_uris) - set(tree_uris)
+        unique_new_uris = list()
+        for uri in new_uris:
+            if uri in set_new_uris and uri not in unique_new_uris:
+                unique_new_uris.append(uri)
+        append_strings(tree_l_str, unique_new_uris)
+
+    def __fill_namespace_array(self):
+        # The UAVariable corresponding to the namespace array is required
+        # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
+        namespace_array_node = self.tree.find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']", self.namespaces)
+        if namespace_array_node is None:
+            raise Exception("Missing UAVariable NamespaceArray (i=2255) in NS0")
+        value = self.__fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value', 3)
+        l_str = self.__fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString')
+        l_str.clear()
+        ns_uris = self.tree.findall('uanodeset:NamespaceUris/uanodeset:Uri', self.namespaces)
+        append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
+
+    def __get_all_retain_values(self, retain: set):
+        nid_alias = self.__get_aliases()
+        alias_nid =  {alias: nid for nid, alias in nid_alias.items()}
+        corresp = set() # the corresponding alias or node id for every item in the retain set
+        for r in retain:
+            if r in nid_alias:
+                corresp.add(nid_alias[r])
+            if r in alias_nid:
+                corresp.add(alias_nid[r])
+        return retain | corresp
+
+    def remove_backward_refs(self, retain: set):
+        all_retain = self.__get_all_retain_values(retain)
+        for node in self.tree.iterfind('*[@NodeId]'):
+            for refs in node.iterfind('uanodeset:References', self.namespaces):
+                back_refs = list()
+                for ref in refs:
+                    # oddly enough, filtering with a match expression fails
+                    # (some back refs are not found, although identical to some that are found)
+                    if not is_forward(ref) and ref.get('ReferenceType') not in all_retain:
+                        # cannot remove while iterating
+                        back_refs.append(ref)
+                for ref in back_refs:
+                    refs.remove(ref)
+                close_node_indent(refs, 2)
 
 
 def run_merge(args):
     # Load and merge all address spaces
-    tree = None
-    namespaces = {}
+    merger = NodesetMerger(args.verbose)
     for fname in args.fns_adds:
         source = fname if fname != '-' else sys.stdin
-        new_ns = parse_xmlns(source)
-        for k,v in new_ns.items():
-            if k not in namespaces:
-                # Keep first version of the namespaces
-                ET.register_namespace(k, v)
-                namespaces[k] = v
-        new_tree = ET.parse(source)
-        if tree is None:
-            tree = new_tree
-            # ElementTree does not support XPath search with the default namespace.
-            # We have to name it to be able to use it.
-            if '' in namespaces:
-                namespaces['uanodeset'] = namespaces['']
-            __fill_namespace_array(tree, namespaces)
-            _check_all_namespaces_declared(tree, namespaces)
-        else:
-            merge(tree, new_tree, namespaces)
+        merger.merge(source)
 
     # Apply options afterwards
     if args.remove_max_monit:
-        remove_max_monit(tree, namespaces)
+        merger.remove_max_monit()
 
     if args.remove_methods:
-        remove_methods(tree, namespaces)
+        merger.remove_methods()
 
     if args.remove_max_node_mgt:
-        remove_max_node_mgt(tree, namespaces)
+        merger.remove_max_node_mgt()
 
     if args.remove_node_ids_gt > 0:
-        remove_node_ids_greater_than(tree, namespaces, args.remove_node_ids_gt)
+        merger.remove_node_ids_greater_than(args.remove_node_ids_gt)
 
     if args.sanitize or args.remove_subtree is not None or args.remove_unused:
-        res = sanitize(tree, namespaces)
+        res = merger.sanitize()
     else:
         res = True
 
     if res and args.remove_subtree is not None:
-        remove_subtree(tree, namespaces, args.remove_subtree)
+        merger.remove_subtree(args.remove_subtree)
 
     if res and args.remove_unused:
-        remove_unused(tree, args.retain_ns0, frozenset(args.retain_types), namespaces)
+        merger.remove_unused(args.retain_ns0, frozenset(args.retain_types))
 
     if res and args.sanitize and args.remove_backward_refs:
-        remove_backward_refs(tree, set(args.remove_backward_refs_retain), namespaces)
+        merger.remove_backward_refs(set(args.retain_nodes))
 
     if res:
-        tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
+        merger.tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
     else:
         print('There was some unrecoverable error{}'
               .format(', did not save to {}'.format(args.fn_out) if args.fn_out else ''),

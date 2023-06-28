@@ -153,11 +153,11 @@ class MergeTests(unittest.TestCase):
                       'ns0.xml')
 
     def test_remove_backward_refs_retain_nodeid(self):
-        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--remove-backward-refs-retain', 'i=35', 'i=45'],
+        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--retain-nodes', 'i=35', 'i=45'],
                       'ns0.xml')
 
     def test_remove_backward_refs_retain_alias(self):
-        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--remove-backward-refs-retain', 'Organizes', 'HasSubtype'],
+        self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--retain-nodes', 'Organizes', 'HasSubtype'],
                       'ns0.xml')
 
 if __name__ == '__main__':
