@@ -850,20 +850,6 @@ def make_argparser():
                         Remove the node with the given NodeId along with all its descendants, except for those with another ancestry.
                         This  option forces the creation of reciprocal references (sanitize).
                         ''')
-    parser.add_argument('--remove-unused', action='store_true', dest='remove_unused',
-                        help='''
-                        Remove all of the type definitions which are not used by the model 
-                        (except for basic/standard datatypes which are mandatory).
-                        This  option forces the creation of reciprocal references (sanitize).
-                        ''')
-    parser.add_argument('--retain-ns0', action='store_true', dest='retain_ns0',
-                        help='''
-                        Used with --remove-unused: retain all NS0 types.
-                        ''')
-    parser.add_argument('--retain-types', nargs='+', default=[], dest='retain_types',
-                        help='''
-                        Used with --remove-unused: retain the types given by their NS and NodeID
-                        ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
                         help='''
             Suppress the normal behavior which is to sanitize the model after merge/additions/removal.
@@ -871,20 +857,36 @@ def make_argparser():
             generate reciprocal references between nodes when there is a reference in only one direction,
             and remove attribute ParentNodeId when erroneous.
                              ''')
-    parser.add_argument('--remove-backward-refs', action='store_true', dest='remove_backward_refs',
+    parser.add_argument('--verbose', '-v', action='store_true',
+                        help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
+    rm_unused = parser.add_argument_group('Remove unused nodes')
+    rm_unused.add_argument('--remove-unused', action='store_true', dest='remove_unused',
+                        help='''
+                        Remove all of the type definitions which are not used by the model 
+                        (except for basic/standard datatypes which are mandatory).
+                        This  option forces the creation of reciprocal references (sanitize).
+                        ''')
+    rm_unused.add_argument('--retain-ns0', action='store_true', dest='retain_ns0',
+                        help='''
+                        Retain all NS0 types.
+                        ''')
+    rm_unused.add_argument('--retain-types', nargs='+', metavar='TYPE', default=[], dest='retain_types',
+                        help='''
+                        Retain the types given by their NS and NodeID
+                        ''')
+    rm_back_refs = parser.add_argument_group('Remove backward references')
+    rm_back_refs.add_argument('--remove-backward-refs', action='store_true', dest='remove_backward_refs',
                         help='''
                         Remove the backward references, i.e. reference elements with @IsForward="false".
                         This option requires a sanitized model, else information would be lost.
                         Thus, it is not compatible with --no-sanitize.
                         ''')
-    parser.add_argument('--remove-backward-refs-retain', nargs='+', dest='remove_backward_refs_retain',
+    rm_back_refs.add_argument('--retain-nodes', nargs='+', metavar='ID_OR_ALIAS', dest='retain_nodes',
                         default=[],
                         help='''
                         When removing the backward references, retain those with the given ReferenceType.
                         The reference types may be given either as node ID or alias.
                         ''')
-    parser.add_argument('--verbose', '-v', action='store_true',
-                        help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
 
     return parser
 
