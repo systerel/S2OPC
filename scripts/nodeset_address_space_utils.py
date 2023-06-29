@@ -210,6 +210,7 @@ class NodesetMerger:
         self.verbose = verbose
         self.tree = None
         self.namespaces = dict()
+        self.ns_idx_reassigner = NSIndexReassigner(self.namespaces)
 
     def _find_node_with_nid(self, nid):
         return self.tree.find(f'*[@NodeId="{nid}"]')
@@ -285,31 +286,7 @@ class NodesetMerger:
         for alias in any_tree.iterfind('uanodeset:Aliases/uanodeset:Alias', self.namespaces):
             _check_declared_nid(alias.text, ns_count, NS_IDX_MATCHER)
 
-    
-    def merge(self, source):
-        # Merge new tree into tree
-        # The merge is restricted to tags for which we know the semantics
-        # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
-        new_ns = parse_xmlns(source)
-        for k,v in new_ns.items():
-            if k not in self.namespaces:
-                # Keep first version of the namespaces
-                ET.register_namespace(k, v)
-                self.namespaces[k] = v
-        new = ET.parse(source)
-        if self.tree is None:
-            self.tree = new
-            # ElementTree does not support XPath search with the default namespace.
-            # We have to name it to be able to use it.
-            if '' in self.namespaces:
-                self.namespaces['uanodeset'] = self.namespaces['']
-            self.__fill_namespace_array()
-            self._check_all_namespaces_declared(self.tree)
-            return
-
-        tree_root = self.tree.getroot()
-    
-        # Merge NamespaceURIs
+    def __merge_ns_uris(self, new: ET.ElementTree):
         self._check_all_namespaces_declared(new)
         new_ns_uris = new.find('uanodeset:NamespaceUris', self.namespaces)
         if new_ns_uris is None:
@@ -319,17 +296,16 @@ class NodesetMerger:
         tree_ns_uris = self.tree.find('uanodeset:NamespaceUris', self.namespaces)
         if tree_ns_uris is None:
             tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
-            tree_root.insert(0, new_ns_uris)
+            self.tree.getroot().insert(0, new_ns_uris)
         else:
             tree_ns_uris[-1].tail = indent(2)
 
-        ns_idx_reassigner = NSIndexReassigner(self.namespaces)
-        new_ns_uri_nodes = ns_idx_reassigner.compute_reassignment(tree_ns_uris, new_ns_uris)
+        new_ns_uri_nodes = self.ns_idx_reassigner.compute_reassignment(tree_ns_uris, new_ns_uris)
         for ns in new_ns_uri_nodes:
             tree_ns_uris.append(ns)
         tree_ns_uris[-1].tail = indent(1)
 
-        # Merge Models
+    def __merge_models(self, new: ET.ElementTree):
         tree_models = self.tree.find('uanodeset:Models', self.namespaces)
         ns0_version = get_ns0_version(tree_models)
         if ns0_version is None:
@@ -355,12 +331,8 @@ class NodesetMerger:
                     raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
             tree_models.append(model)
         tree_models[-1].tail = indent(1)
-    
-        # Merge ServerArray and NamespaceArray:
-        self.__fill_namespace_array()
-        self.__merge_server_array(new)
-    
-        # Merge Aliases
+
+    def __merge_aliases(self, new: ET.ElementTree):
         tree_aliases = self.tree.find('uanodeset:Aliases', self.namespaces)
         if tree_aliases is None:
             print('Merge: Aliases expected to be present in first address space')
@@ -369,7 +341,7 @@ class NodesetMerger:
         new_aliases = new.find('uanodeset:Aliases', self.namespaces)
         new_alias_dict = {}
         if new_aliases is not None:
-            new_alias_dict = {alias.get('Alias'):ns_idx_reassigner.get_ns_index(alias.text) for alias in new_aliases}
+            new_alias_dict = {alias.get('Alias'):self.ns_idx_reassigner.get_ns_index(alias.text) for alias in new_aliases}
         # Assert existing aliases are the same
         res = True
         for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
@@ -378,8 +350,8 @@ class NodesetMerger:
                       .format(alias, tree_alias_dict[alias], new_alias_dict[alias]), file=sys.stderr)
                 res = False
         if not res:
-            return res
-    
+            return False
+
         # Add new aliases
         for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
             elem = ET.Element('Alias', {'Alias': alias})
@@ -391,8 +363,9 @@ class NodesetMerger:
         if len(tree_aliases) > 0:
             # Restore correct level for next tag which is </Aliases>
             tree_aliases[-1].tail = indent(1)
-    
-        # Merge Nodes, detect duplicate Node IDs (forbidden)
+        return True
+
+    def __merge_nodes(self, new: ET.ElementTree):
         duplicates = set()
         tree_nodes = dict()
         for node in self.tree.iterfind('*[@NodeId]'):
@@ -404,7 +377,7 @@ class NodesetMerger:
         new_nodes = dict()
         for node in new.iterfind('*[@NodeId]'):
             # Reassign namespace index for node attributes and subelements
-            ns_idx_reassigner.reassign_node_ns_index(node)
+            self.ns_idx_reassigner.reassign_node_ns_index(node)
             node_id = node.get('NodeId')
             if node_id in tree_nodes or node_id in new_nodes:
                 duplicates.add(node_id)
@@ -416,7 +389,8 @@ class NodesetMerger:
         user_duplicates = duplicates - set(ns0_duplicates)
         if len(user_duplicates) > 0:
             raise Exception(f"There are duplicate Node IDs: {sorted(duplicates)}")
-    
+
+        tree_root = self.tree.getroot()
         # New unique nids
         new_nids = set(new_nodes)
         if len(new_nids) > 0 and len(tree_root) > 0:
@@ -436,10 +410,49 @@ class NodesetMerger:
             for ref in refsb:
                 self._add_ref(nodea, ref.get('ReferenceType'), ref.text, is_forward=is_forward(ref))
             close_node_indent(refsb, 2)
-    
+
         tree_root[-1].tail = indent(0)
+
+    def merge(self, source):
+        # Merge new tree into tree
+        # The merge is restricted to tags for which we know the semantics
+        # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
+        new_ns = parse_xmlns(source)
+        for k,v in new_ns.items():
+            if k not in self.namespaces:
+                # Keep first version of the namespaces
+                ET.register_namespace(k, v)
+                self.namespaces[k] = v
+        new = ET.parse(source)
+        if self.tree is None:
+            self.tree = new
+            # ElementTree does not support XPath search with the default namespace.
+            # We have to name it to be able to use it.
+            if '' in self.namespaces:
+                self.namespaces['uanodeset'] = self.namespaces['']
+            self.__fill_namespace_array()
+            self._check_all_namespaces_declared(self.tree)
+            return
+
+        # Merge NamespaceURIs
+        self.__merge_ns_uris(new)
+
+        # Merge Models
+        self.__merge_models(new)
+
+        # Merge ServerArray and NamespaceArray:
+        self.__fill_namespace_array()
+        self.__merge_server_array(new)
+
+        # Merge Aliases
+        if not self.__merge_aliases(new):
+            return False
+
+        # Merge Nodes, detect duplicate Node IDs (forbidden)
+        self.__merge_nodes(new)
+
         return True
-        
+
     def remove_max_monit(self):
         # Delete MaxMonitoredItemsPerCall
         self._remove_nids_and_refs(['i=11714'])
