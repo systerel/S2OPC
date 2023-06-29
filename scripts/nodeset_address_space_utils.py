@@ -97,31 +97,6 @@ def get_ns0_version(tree_models):
     return None
 
 
-def __get_reassigned_expr(expr: str, ns_idx_reassign: dict, matcher, formatter):
-    m = matcher.match(expr)
-    if m is not None:
-        expr_idx = int(m.group(1))
-        new_idx = ns_idx_reassign.get(expr_idx)
-        if new_idx is not None:
-            return formatter.format(new_idx, m.group(2))
-    return expr
-
-
-def reassigned_ns_index(expr: str, ns_idx_reassign: dict):
-    return __get_reassigned_expr(expr, ns_idx_reassign, NS_IDX_MATCHER, NS_IDX_FORMATTER)
-
-
-def reassigned_prefix_index(expr: str, ns_idx_reassign: dict):
-    return __get_reassigned_expr(expr, ns_idx_reassign, PREFIX_IDX_MATCHER, PREFIX_IDX_FORMATTER)
-
-
-def reassign_elem_attr(elem: ET.Element, attr: str, ns_idx_reassign: dict, fun_reassigned):
-    val = elem.get(attr)
-    if val is not None:
-        r_val = fun_reassigned(val, ns_idx_reassign)
-        elem.set(attr, r_val)
-
-
 def _check_declared_nid(nid, ns_count, matcher):
     m = matcher.match(nid)
     if m is not None:
@@ -160,13 +135,82 @@ def append_strings(parent_l_str: ET.Element, str_values):
     str_elem.tail = indent(3)
 
 
+class NSIndexReassigner:
+
+    def __init__(self, namespaces):
+        self.namespaces = namespaces
+        self.ns_idx_reassign = dict()
+
+    def compute_reassignment(self, tree_ns_uris: dict, new_ns_uris: ET.Element):
+        """
+        Compute the NS index reassignments and store it internally.
+        Return the new NS URI nodes that shall be appended in the merged document.
+        """
+        # the new namespace URIs from the new address space need to be translated
+        # but some of the namespace might already be in use
+        ns_uris = dict()
+        for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+            ns_uris[ns.text] = idx + 1
+
+        new_ns_nodes = list()
+        for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+            if ns.text in ns_uris:
+                tree_idx = ns_uris[ns.text]
+                if tree_idx != idx + 1:
+                    self.ns_idx_reassign[idx + 1] = tree_idx
+            else:
+                new_idx = len(ns_uris) + 1
+                ns_uris[ns.text] = new_idx
+                if new_idx != idx + 1:
+                    self.ns_idx_reassign[idx + 1] = new_idx
+                new_ns_nodes.append(ns)
+        # print("Namespace URI reassignments:", self.ns_idx_reassign)
+        return new_ns_nodes
+
+    def get_ns_index(self, expr: str):
+        return self.__reassigned_ns_index(expr)
+
+    def reassign_node_ns_index(self, node: ET.Element):
+        # Reassign namespace index for:
+        #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
+        #   References/Reference/@ReferenceType and References/Reference/text
+        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
+            self.__reassign_elem_attr(node, attr, self.__reassigned_ns_index)
+        self.__reassign_elem_attr(node, 'BrowseName', self.__reassigned_prefix_index)
+        
+        for ref in node.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
+            self.__reassign_elem_attr(ref, 'ReferenceType', self.__reassigned_ns_index)
+            ref.text = self.__reassigned_ns_index(ref.text)
+
+    def __get_reassigned_expr(self, expr: str, matcher, formatter):
+        m = matcher.match(expr)
+        if m is not None:
+            expr_idx = int(m.group(1))
+            new_idx = self.ns_idx_reassign.get(expr_idx)
+            if new_idx is not None:
+                return formatter.format(new_idx, m.group(2))
+        return expr
+
+    def __reassigned_ns_index(self, expr: str):
+        return self.__get_reassigned_expr(expr, NS_IDX_MATCHER, NS_IDX_FORMATTER)
+
+    def __reassigned_prefix_index(self, expr: str):
+        return self.__get_reassigned_expr(expr, PREFIX_IDX_MATCHER, PREFIX_IDX_FORMATTER)
+
+    def __reassign_elem_attr(self, elem: ET.Element, attr: str, fun_reassigned):
+        val = elem.get(attr)
+        if val is not None:
+            r_val = fun_reassigned(val)
+            elem.set(attr, r_val)
+
+
 class NodesetMerger:
 
     def __init__(self, verbose):
         self.verbose = verbose
         self.tree = None
         self.namespaces = dict()
-    
+
     def _find_node_with_nid(self, nid):
         return self.tree.find(f'*[@NodeId="{nid}"]')
 
@@ -216,18 +260,6 @@ class NodesetMerger:
     def _remove_nids_and_refs(self, nids):
         self._remove_nids(nids)
         self._remove_refs_to_nids(nids)
-
-    def reassign_node_ns_index(self, node: ET.Element, ns_idx_reassign: dict):
-        # Reassign namespace index for:
-        #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
-        #   References/Reference/@ReferenceType and References/Reference/text
-        for attr in ['NodeId', 'ParentNodeId', 'DataType']:
-            reassign_elem_attr(node, attr, ns_idx_reassign, reassigned_ns_index)
-        reassign_elem_attr(node, 'BrowseName', ns_idx_reassign, reassigned_prefix_index)
-        
-        for ref in node.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
-            reassign_elem_attr(ref, 'ReferenceType', ns_idx_reassign, reassigned_ns_index)
-            ref.text = reassigned_ns_index(ref.text, ns_idx_reassign)
 
     def _check_all_namespaces_declared(self, any_tree):
         ns_count = 0
@@ -290,27 +322,13 @@ class NodesetMerger:
             tree_root.insert(0, new_ns_uris)
         else:
             tree_ns_uris[-1].tail = indent(2)
-        # the new namespace URIs from the new address space need to be translated
-        # but some of the namespace might already be in use
-        ns_uris = dict()
-        for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', self.namespaces)):
-            ns_uris[ns.text] = idx + 1
-    
-        ns_idx_reassign = dict()
-        for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', self.namespaces)):
-            if ns.text in ns_uris:
-                tree_idx = ns_uris[ns.text]
-                if tree_idx != idx + 1:
-                    ns_idx_reassign[idx + 1] = tree_idx
-            else:
-                new_idx = len(ns_uris) + 1
-                ns_uris[ns.text] = new_idx
-                if new_idx != idx + 1:
-                    ns_idx_reassign[idx + 1] = new_idx
-                tree_ns_uris.append(ns)
+
+        ns_idx_reassigner = NSIndexReassigner(self.namespaces)
+        new_ns_uri_nodes = ns_idx_reassigner.compute_reassignment(tree_ns_uris, new_ns_uris)
+        for ns in new_ns_uri_nodes:
+            tree_ns_uris.append(ns)
         tree_ns_uris[-1].tail = indent(1)
-        # print("Namespace URI reassignments:", ns_idx_reassign)
-    
+
         # Merge Models
         tree_models = self.tree.find('uanodeset:Models', self.namespaces)
         ns0_version = get_ns0_version(tree_models)
@@ -351,7 +369,7 @@ class NodesetMerger:
         new_aliases = new.find('uanodeset:Aliases', self.namespaces)
         new_alias_dict = {}
         if new_aliases is not None:
-            new_alias_dict = {alias.get('Alias'):reassigned_ns_index(alias.text, ns_idx_reassign) for alias in new_aliases}
+            new_alias_dict = {alias.get('Alias'):ns_idx_reassigner.get_ns_index(alias.text) for alias in new_aliases}
         # Assert existing aliases are the same
         res = True
         for alias in sorted(set(tree_alias_dict) & set(new_alias_dict)):
@@ -386,7 +404,7 @@ class NodesetMerger:
         new_nodes = dict()
         for node in new.iterfind('*[@NodeId]'):
             # Reassign namespace index for node attributes and subelements
-            self.reassign_node_ns_index(node, ns_idx_reassign)
+            ns_idx_reassigner.reassign_node_ns_index(node)
             node_id = node.get('NodeId')
             if node_id in tree_nodes or node_id in new_nodes:
                 duplicates.add(node_id)
