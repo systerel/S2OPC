@@ -146,6 +146,9 @@ class NSFinder:
     def _findall(self, base, path):
         return base.findall(path, self.namespaces)
 
+    def _iterfind(self, base, path):
+        yield from base.iterfind(path, self.namespaces)
+
 
 class NSIndexReassigner(NSFinder):
 
@@ -189,8 +192,8 @@ class NSIndexReassigner(NSFinder):
         for attr in ['NodeId', 'ParentNodeId', 'DataType']:
             self.__reassign_elem_attr(node, attr, self.__reassigned_ns_index)
         self.__reassign_elem_attr(node, 'BrowseName', self.__reassigned_prefix_index)
-        
-        for ref in node.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
+
+        for ref in self._iterfind(node, 'uanodeset:References/uanodeset:Reference'):
             self.__reassign_elem_attr(ref, 'ReferenceType', self.__reassigned_ns_index)
             ref.text = self.__reassigned_ns_index(ref.text)
 
@@ -230,15 +233,12 @@ class NodesetMerger(NSFinder):
     def _find_node_with_nid(self, nid):
         return self._find(f'*[@NodeId="{nid}"]')
 
-    def _remove_nids(self, nids):
-        # Remove the nodes that match the NodeIds given in nids
-        root = self.tree.getroot()
-        for nid in nids:
-            node = self._find_node_with_nid(nid)
-            if node is not None:
-                if self.verbose:
-                    print('RemoveNode: {}'.format(nid), file=sys.stderr)
-                root.remove(node)
+    def _iter_nid_nodes_in(self, any_tree: ET.ElementTree):
+        for node in self._iterfind(any_tree, '*[@NodeId]'):
+            yield node, node.get('NodeId')
+
+    def _iter_nid_nodes(self):
+        yield from self._iter_nid_nodes_in(self.tree)
 
     def _add_ref(self, node, ref_type, tgt, is_forward=True):
         # Add a reference from a node to the other NodeId nid in the given direction
@@ -263,10 +263,22 @@ class NodesetMerger(NSFinder):
         refs.append(elem)
         close_node_indent(refs, 2)
 
+    def _remove_nids(self, nids):
+        # Remove the nodes that match the NodeIds given in nids
+        root = self.tree.getroot()
+        for nid in nids:
+            node = self._find_node_with_nid(nid)
+            if node is not None:
+                if self.verbose:
+                    print('RemoveNode: {}'.format(nid), file=sys.stderr)
+                root.remove(node)
+
     def _remove_refs_to_nids(self, nids):
         # Remove Reference elements from all nodes that go to the NodeIds in nids
-        for node in self.tree.iterfind('./*[uanodeset:References]', self.namespaces):
-            refs, = node.iterfind('uanodeset:References', self.namespaces)
+        for node in self._iterfind(self.tree, './*[uanodeset:References]'):
+            refs = self._find_in(node, 'uanodeset:References')
+            if refs is None:
+                return
             for ref in list(refs):  # Make a list so that we can remove elements while iterating
                 if ref.text.strip() in nids:  # The destination node of this reference
                     if self.verbose:
@@ -289,16 +301,16 @@ class NodesetMerger(NSFinder):
             ns_count = len(declared_ns)
     
         for attr in ['NodeId', 'ParentNodeId', 'DataType']:
-            for node in any_tree.iterfind(f'*[@{attr}]'):
+            for node in self._iterfind(any_tree, f'*[@{attr}]'):
                 nid = node.get(attr)
                 _check_declared_nid(nid, ns_count, NS_IDX_MATCHER)
-        for node in any_tree.iterfind(f'*[@BrowseName]'):
+        for node in self._iterfind(any_tree, f'*[@BrowseName]'):
             nid = node.get('BrowseName')
             _check_declared_nid(nid, ns_count, PREFIX_IDX_MATCHER)
-        for ref in any_tree.iterfind('uanodeset:References/uanodeset:Reference', self.namespaces):
+        for ref in self._iterfind(any_tree, 'uanodeset:References/uanodeset:Reference'):
             _check_declared_nid(ref.get('ReferenceType'), ns_count, NS_IDX_MATCHER)
             _check_declared_nid(ref.text, ns_count, NS_IDX_MATCHER)
-        for alias in any_tree.iterfind('uanodeset:Aliases/uanodeset:Alias', self.namespaces):
+        for alias in self._iterfind(any_tree, 'uanodeset:Aliases/uanodeset:Alias'):
             _check_declared_nid(alias.text, ns_count, NS_IDX_MATCHER)
 
     def __merge_ns_uris(self, new: ET.ElementTree):
@@ -383,14 +395,13 @@ class NodesetMerger(NSFinder):
     def __merge_nodes(self, new: ET.ElementTree):
         duplicates = set()
         tree_nodes = dict()
-        for node in self.tree.iterfind('*[@NodeId]'):
-            node_id = node.get('NodeId')
+        for node, node_id in self._iter_nid_nodes():
             if node_id in tree_nodes:
                 duplicates.add(node_id)
             else:
                 tree_nodes[node_id] = node
         new_nodes = dict()
-        for node in new.iterfind('*[@NodeId]'):
+        for node, _ in self._iter_nid_nodes_in(new):
             # Reassign namespace index for node attributes and subelements
             self.ns_idx_reassigner.reassign_node_ns_index(node)
             node_id = node.get('NodeId')
@@ -490,9 +501,11 @@ class NodesetMerger(NSFinder):
         # (also delete properties of the methods)
         methods = []
         methods_properties = []
-        for method_node in self.tree.findall('*[@MethodDeclarationId]'):
+        for method_node in self._iterfind(self.tree, '*[@MethodDeclarationId]'):
             methods.append(method_node.get('NodeId'))
-            refs, = method_node.iterfind('uanodeset:References', self.namespaces)
+            refs = self._find(method_node, 'uanodeset:References')
+            if refs is None:
+                continue
             for ref in refs:
                 ref_type = ref.get('ReferenceType')
                 if is_forward(ref) and (ref_type == 'HasProperty' or ref_type == 'i=46'):
@@ -503,10 +516,8 @@ class NodesetMerger(NSFinder):
     def remove_node_ids_greater_than(self, intMaxId):
         ns0nidPattern = re.compile('i=([0-9]+)')
         # Find Node Ids greater than intMaxId in NS 0
-        nodes = self.tree.findall('*[@NodeId]')
         nodes_to_remove = []
-        for node in nodes:
-            nid = node.get('NodeId')
+        for _, nid in self._iter_nid_nodes():
             match = ns0nidPattern.match(nid)
             if match:
                 if int(match.group(1)) > intMaxId:
@@ -515,7 +526,7 @@ class NodesetMerger(NSFinder):
         self._remove_nids_and_refs(nodes_to_remove)
 
     def _iter_hierarchical(self, n: ET.Element, downwards=True):
-        for ref in n.iterfind("uanodeset:References/uanodeset:Reference", self.namespaces):
+        for ref in self._iterfind(n, "uanodeset:References/uanodeset:Reference"):
             if is_forward(ref) != downwards:
                 continue
             child_nid = ref.text.strip()
@@ -577,7 +588,7 @@ class NodesetMerger(NSFinder):
         return {alias.text: alias.get('Alias') for alias in tree_aliases}
 
     def __exists_ref(self, search, nids_or_aliases: set):
-        for ref_node in self.tree.iterfind(search, self.namespaces):
+        for ref_node in self._iterfind(self.tree, search):
             ref_nid = ref_node.text.strip()
             if ref_nid in nids_or_aliases:
                 return True
@@ -593,7 +604,7 @@ class NodesetMerger(NSFinder):
             while True:
                 # loop while the removed types produce unused types
                 removed_nids = set()
-                for ty_node in self.tree.iterfind(f"uanodeset:{ty}", self.namespaces):
+                for ty_node in self._iterfind(self.tree, f"uanodeset:{ty}"):
                     nid = ty_node.get('NodeId')
                     if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
                         # retain this type
@@ -635,8 +646,7 @@ class NodesetMerger(NSFinder):
         # Prepare the common structures for find and check for uniqueness
         nodes = {}
         error = False
-        for node in self.tree.iterfind('./*[@NodeId]'):
-            nid = node.get('NodeId')
+        for node, nid in self._iter_nid_nodes():
             if nid in nodes:
                 print('Sanitize Error: NodeId {} found twice'.format(nid), file=sys.stderr)
                 error = True
@@ -664,9 +674,9 @@ class NodesetMerger(NSFinder):
         refs_inv = set()  # {(a, type, b), ...}, already existing inverse references b <- a are stored in the forward direction (source to target)
         # List of backward reference (keep refs order)
         refs_inv_list = [] # [(a, type, b), ...], already existing inverse references b <- a
-        for node in self.tree.iterfind('./*[uanodeset:References]', self.namespaces):
+        for node in self._iterfind(self.tree, './*[uanodeset:References]'):
             nids = node.get('NodeId')  # The starting node of the references below
-            refs, = node.iterfind('uanodeset:References', self.namespaces)
+            refs, = self._iterfind(node, 'uanodeset:References')
             for ref in list(refs):  # Make a list so that we can remove elements while iterating
                 type_ref = ref.get('ReferenceType')
                 nidt = ref.text.strip()  # The destination node of this reference
@@ -721,7 +731,7 @@ class NodesetMerger(NSFinder):
         # Note: ParentNodeId is an optional attribute. It refers to the parent node.
         #  In case the ParentNodeId is present, but the reference to the parent is not, the attribute is removed.
         # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
-        for node in self.tree.iterfind('./*[@ParentNodeId]'):
+        for node in self._iterfind(self.tree, './*[@ParentNodeId]'):
             # There may be no reference at all
             refs_nodes = self._findall(node, 'uanodeset:References')
             if len(refs_nodes) < 1:
@@ -809,8 +819,8 @@ class NodesetMerger(NSFinder):
 
     def remove_backward_refs(self, retain: set):
         all_retain = self.__get_all_retain_values(retain)
-        for node in self.tree.iterfind('*[@NodeId]'):
-            for refs in node.iterfind('uanodeset:References', self.namespaces):
+        for node, _ in self._iter_nid_nodes():
+            for refs in self._iterfind(node, 'uanodeset:References'):
                 back_refs = list()
                 for ref in refs:
                     # oddly enough, filtering with a match expression fails
