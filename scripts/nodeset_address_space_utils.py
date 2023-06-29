@@ -135,10 +135,22 @@ def append_strings(parent_l_str: ET.Element, str_values):
     str_elem.tail = indent(3)
 
 
-class NSIndexReassigner:
+class NSFinder:
 
     def __init__(self, namespaces):
         self.namespaces = namespaces
+
+    def _find_in(self, base, path):
+        return base.find(path, self.namespaces)
+
+    def _findall(self, base, path):
+        return base.findall(path, self.namespaces)
+
+
+class NSIndexReassigner(NSFinder):
+
+    def __init__(self, namespaces):
+        super(NSIndexReassigner, self).__init__(namespaces)
         self.ns_idx_reassign = dict()
 
     def compute_reassignment(self, tree_ns_uris: dict, new_ns_uris: ET.Element):
@@ -149,11 +161,11 @@ class NSIndexReassigner:
         # the new namespace URIs from the new address space need to be translated
         # but some of the namespace might already be in use
         ns_uris = dict()
-        for idx, ns in enumerate(tree_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+        for idx, ns in enumerate(self._findall(tree_ns_uris, 'uanodeset:Uri')):
             ns_uris[ns.text] = idx + 1
 
         new_ns_nodes = list()
-        for idx, ns in enumerate(new_ns_uris.findall('uanodeset:Uri', self.namespaces)):
+        for idx, ns in enumerate(self._findall(new_ns_uris, 'uanodeset:Uri')):
             if ns.text in ns_uris:
                 tree_idx = ns_uris[ns.text]
                 if tree_idx != idx + 1:
@@ -204,16 +216,19 @@ class NSIndexReassigner:
             elem.set(attr, r_val)
 
 
-class NodesetMerger:
+class NodesetMerger(NSFinder):
 
     def __init__(self, verbose):
+        super(NodesetMerger, self).__init__(dict())
         self.verbose = verbose
         self.tree = None
-        self.namespaces = dict()
         self.ns_idx_reassigner = NSIndexReassigner(self.namespaces)
 
+    def _find(self, path):
+        return self._find_in(self.tree, path)
+
     def _find_node_with_nid(self, nid):
-        return self.tree.find(f'*[@NodeId="{nid}"]')
+        return self._find(f'*[@NodeId="{nid}"]')
 
     def _remove_nids(self, nids):
         # Remove the nodes that match the NodeIds given in nids
@@ -230,8 +245,8 @@ class NodesetMerger:
         attribs = {'ReferenceType': ref_type}
         if not is_forward:
             attribs['IsForward'] = 'false'
-    
-        refs_nodes = node.findall('uanodeset:References', self.namespaces)
+
+        refs_nodes = self._findall(node, 'uanodeset:References')
         if len(refs_nodes) == 0:
             refs = ET.Element('uanodeset:References', self.namespaces)
             node.append(refs)
@@ -241,7 +256,7 @@ class NodesetMerger:
                 if ref.text == tgt and ref.attrib == attribs:
                     # avoid duplicate reference
                     return
-    
+
         elem = ET.Element('Reference', attribs)
         elem.text = tgt
         close_node_indent(refs, 3)
@@ -264,9 +279,9 @@ class NodesetMerger:
 
     def _check_all_namespaces_declared(self, any_tree):
         ns_count = 0
-        ns_uris = any_tree.find('uanodeset:NamespaceUris', self.namespaces)
+        ns_uris = self._find_in(any_tree, 'uanodeset:NamespaceUris')
         if ns_uris is not None:
-            uris = ns_uris.findall('uanodeset:Uri', self.namespaces)
+            uris = self._findall(ns_uris, 'uanodeset:Uri')
             declarations = [uri.text for uri in uris]
             declared_ns = set(declarations)
             if len(declared_ns) != len(declarations):
@@ -288,12 +303,12 @@ class NodesetMerger:
 
     def __merge_ns_uris(self, new: ET.ElementTree):
         self._check_all_namespaces_declared(new)
-        new_ns_uris = new.find('uanodeset:NamespaceUris', self.namespaces)
+        new_ns_uris = self._find_in(new, 'uanodeset:NamespaceUris')
         if new_ns_uris is None:
             print("NamespaceUris is missing in a non-NS0 address space")
             return False
     
-        tree_ns_uris = self.tree.find('uanodeset:NamespaceUris', self.namespaces)
+        tree_ns_uris = self._find('uanodeset:NamespaceUris')
         if tree_ns_uris is None:
             tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
             self.tree.getroot().insert(0, new_ns_uris)
@@ -306,16 +321,16 @@ class NodesetMerger:
         tree_ns_uris[-1].tail = indent(1)
 
     def __merge_models(self, new: ET.ElementTree):
-        tree_models = self.tree.find('uanodeset:Models', self.namespaces)
+        tree_models = self._find('uanodeset:Models')
         ns0_version = get_ns0_version(tree_models)
         if ns0_version is None:
             print("Missing a NS0 model")
             return False
-        new_models = new.find('uanodeset:Models', self.namespaces)
+        new_models = self._find_in(new, 'uanodeset:Models')
         tree_models[-1].tail = indent(2)
         for model in new_models:
             new_model_uri = model.get('ModelUri')
-            already_model = tree_models.find(f'uanodeset:Model[@ModelUri="{new_model_uri}"]', self.namespaces)
+            already_model = self._find_in(tree_models, f'uanodeset:Model[@ModelUri="{new_model_uri}"]')
             if already_model is not None:
                 already_model_version = already_model.get('Version')
                 new_model_version = model.get('Version')
@@ -324,7 +339,7 @@ class NodesetMerger:
                     continue
                 else:
                     raise Exception(f'Incompatible model version: {new_model_uri} provided with versions {already_model_version} and {new_model_version}')
-            req_ns0 = model.find(f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]', self.namespaces)
+            req_ns0 = self._find_in(model, f'uanodeset:RequiredModel[@ModelUri="{UA_URI}"]')
             if req_ns0 is not None:
                 req_ns0_version = req_ns0.get('Version')
                 if req_ns0_version != ns0_version:
@@ -333,12 +348,12 @@ class NodesetMerger:
         tree_models[-1].tail = indent(1)
 
     def __merge_aliases(self, new: ET.ElementTree):
-        tree_aliases = self.tree.find('uanodeset:Aliases', self.namespaces)
+        tree_aliases = self._find('uanodeset:Aliases')
         if tree_aliases is None:
             print('Merge: Aliases expected to be present in first address space')
             return False
         tree_alias_dict = {alias.get('Alias'):alias.text for alias in tree_aliases}
-        new_aliases = new.find('uanodeset:Aliases', self.namespaces)
+        new_aliases = self._find_in(new, 'uanodeset:Aliases')
         new_alias_dict = {}
         if new_aliases is not None:
             new_alias_dict = {alias.get('Alias'):self.ns_idx_reassigner.get_ns_index(alias.text) for alias in new_aliases}
@@ -403,7 +418,7 @@ class NodesetMerger:
         # References of common nodes are merged
         for nid in sorted(ns0_duplicates):
             nodeb = new_nodes[nid]
-            refsb = nodeb.find('./uanodeset:References', self.namespaces)
+            refsb = self._find_in(nodeb, './uanodeset:References')
             if refsb is None:
                 continue
             nodea = tree_nodes[nid]
@@ -556,7 +571,7 @@ class NodesetMerger:
         self._rec_bf_remove_subtree({remove_root_nid}, subtree, is_root=True)
 
     def __get_aliases(self):
-        tree_aliases = self.tree.find('uanodeset:Aliases', self.namespaces)
+        tree_aliases = self._find('uanodeset:Aliases')
         if tree_aliases is None:
             return {}
         return {alias.text: alias.get('Alias') for alias in tree_aliases}
@@ -595,7 +610,7 @@ class NodesetMerger:
                         found = False
                         for ref in refs:
                             req = search.format(ref)
-                            if self.tree.find(req, self.namespaces) is not None:
+                            if self._find(req) is not None:
                                 # this type is used by data
                                 found = True
                                 break
@@ -708,7 +723,7 @@ class NodesetMerger:
         # The reference to the ParentNodeId should be typed "HasComponent" (not verified)
         for node in self.tree.iterfind('./*[@ParentNodeId]'):
             # There may be no reference at all
-            refs_nodes = node.findall('uanodeset:References', self.namespaces)
+            refs_nodes = self._findall(node, 'uanodeset:References')
             if len(refs_nodes) < 1:
                 print('Sanitize: child Node without references (Node {} has an attribute ParentNodeId but no reference)'
                       .format(node.get('NodeId')), file=sys.stderr)
@@ -737,7 +752,7 @@ class NodesetMerger:
         self.__merge_server_array()
 
     def __fetch_subelement(self, elem, subtag, indentation=-1) -> ET.Element:
-        subelem = elem.find(subtag, self.namespaces)
+        subelem = self._find_in(elem, subtag)
         if subelem is None:
             if len(elem) > 0:
                 last = elem[-1]
@@ -751,14 +766,14 @@ class NodesetMerger:
     def __merge_server_array(self, new: ET.ElementTree):
         # The UAVariable corresponding to the server array is required
         # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
-        tree_server_array = self.tree.find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']", self.namespaces)
+        tree_server_array = self._find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']")
         if tree_server_array is None:
             raise Exception("Missing UAVariable ServerArray (i=2254) in NS0")
         tree_value = self.__fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value', 3)
         tree_l_str = self.__fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString', 4)
-        tree_uris = [uri.text for uri in tree_l_str.findall(f'{{{UA_TYPES_URI}}}String', self.namespaces)]
-        new_uris = [uri.text for uri in new.findall(f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String", self.namespaces)]
-        ns1_uri = self.tree.find('uanodeset:NamespaceUris/uanodeset:Uri', self.namespaces)
+        tree_uris = [uri.text for uri in self._findall(tree_l_str, f'{{{UA_TYPES_URI}}}String')]
+        new_uris = [uri.text for uri in self._findall(new, f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String")]
+        ns1_uri = self._find('uanodeset:NamespaceUris/uanodeset:Uri')
         if len(tree_uris) > 0 and tree_uris[0] != ns1_uri.text:
             raise Exception(f"Invalid local server URI in node id 2254: {tree_uris[0]}, expecting {ns1_uri} instead")
         new_uris.insert(0, ns1_uri.text)
@@ -772,13 +787,13 @@ class NodesetMerger:
     def __fill_namespace_array(self):
         # The UAVariable corresponding to the namespace array is required
         # <NamespaceURIs> is assumed to be filled (and merged if needed) in the given tree
-        namespace_array_node = self.tree.find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']", self.namespaces)
+        namespace_array_node = self._find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']")
         if namespace_array_node is None:
             raise Exception("Missing UAVariable NamespaceArray (i=2255) in NS0")
         value = self.__fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value', 3)
         l_str = self.__fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString')
         l_str.clear()
-        ns_uris = self.tree.findall('uanodeset:NamespaceUris/uanodeset:Uri', self.namespaces)
+        ns_uris = self._findall(self.tree, 'uanodeset:NamespaceUris/uanodeset:Uri')
         append_strings(l_str, [UA_URI] + [uri.text for uri in ns_uris])
 
     def __get_all_retain_values(self, retain: set):
