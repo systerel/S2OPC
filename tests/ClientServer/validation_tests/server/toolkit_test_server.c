@@ -361,7 +361,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     if (SOPC_STATUS_OK == status && secuActive)
     {
         /*
-         * 1st Security policy is Basic256Sha256 with anonymous and username (non encrypted) authentication allowed
+         * 1st Security policy is Basic256Sha256 with anonymous and username authentication allowed
          */
         sp = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
         if (NULL == sp)
@@ -389,7 +389,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
 
         /*
-         * 2nd Security policy is Basic256 with anonymous and username (non encrypted) authentication allowed
+         * 2nd Security policy is Basic256 with anonymous and username authentication allowed
          */
         if (SOPC_STATUS_OK == status)
         {
@@ -421,7 +421,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
 
         /*
-         * 4th Security policy is Aes128-Sha256-RsaOaep with anonymous and username (non encrypted) authentication
+         * 4th Security policy is Aes128-Sha256-RsaOaep with anonymous and username authentication
          * allowed
          */
         if (SOPC_STATUS_OK == status)
@@ -454,7 +454,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         }
 
         /*
-         * 5th Security policy is Aes256-Sha256-RsaPss with anonymous and username (non encrypted) authentication
+         * 5th Security policy is Aes256-Sha256-RsaPss with anonymous and username authentication
          * allowed
          */
         if (SOPC_STATUS_OK == status)
@@ -488,7 +488,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     }
 
     /*
-     * 6th Security policy is None with anonymous and username (non encrypted) authentication allowed
+     * 6th Security policy is None with anonymous and username authentication allowed
      * (for tests only, otherwise users on unsecure channel shall be forbidden
      *  and only discovery endpoint activated on a secured channel configuration)
      */
