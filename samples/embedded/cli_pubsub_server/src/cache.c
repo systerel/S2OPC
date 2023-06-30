@@ -611,6 +611,7 @@ void Cache_Unlock(void)
 
 void Cache_Clear(void)
 {
+    SOPC_Mutex_Clear(&g_lock);
     SOPC_Dict_Delete(g_cache);
     g_cache = NULL;
 }

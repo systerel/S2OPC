@@ -110,7 +110,7 @@ static SOPC_DataSetReader* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnecti
     SOPC_ASSERT(readerGroup != NULL);
     SOPC_ReaderGroup_Set_SecurityMode(readerGroup, securityMode);
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, version);
-    // SOPC_ReaderGroup_Set_GroupId(readerGroup, groupId); // No group defined in this demo
+    SOPC_ReaderGroup_Set_GroupId(readerGroup, messageId);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, 1);
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, publisherId);
     if (allocSuccess)
@@ -199,10 +199,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_DataSetWriter* writer = NULL;
     if (alloc)
     {
-        writer = SOPC_PubSubConfig_SetPubMessageAt(
-            connection, 0, MESSAGE_ID, MESSAGE_VERSION, CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, SOPC_SecurityMode_None
-            // SOPC_SecurityMode_SignAndEncrypt
-        );
+        writer =
+            SOPC_PubSubConfig_SetPubMessageAt(connection, 0, MESSAGE_ID, MESSAGE_VERSION,
+                                              CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, CONFIG_SOPC_PUBSUB_SECURITY_MODE);
         alloc = NULL != writer;
     }
 
@@ -246,7 +245,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID, MESSAGE_VERSION, 1000,
-                                                   SOPC_SecurityMode_None);
+                                                   CONFIG_SOPC_PUBSUB_SECURITY_MODE);
         alloc = NULL != reader;
     }
 

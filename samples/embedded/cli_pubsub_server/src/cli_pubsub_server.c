@@ -55,6 +55,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
+#include "sopc_pubsub_sks.h"
+#include "sopc_sk_manager.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -582,6 +584,60 @@ static bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
     return true;
 }
 
+static SOPC_SKManager* createSKmanager(void)
+{
+    /* Create Service Keys manager and set constant keys */
+    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
+    uint32_t nbKeys = 0;
+    SOPC_Buffer* keysBuffer =
+        SOPC_Buffer_Create(sizeof(pubSub_keySign) + sizeof(pubSub_keyEncrypt) + sizeof(pubSub_keyNonce));
+    SOPC_ReturnStatus status = (NULL == keysBuffer ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, pubSub_keySign, (uint32_t) sizeof(pubSub_keySign));
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, pubSub_keyEncrypt, (uint32_t) sizeof(pubSub_keyEncrypt));
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, pubSub_keyNonce, (uint32_t) sizeof(pubSub_keyNonce));
+    }
+    SOPC_ByteString keys;
+    SOPC_ByteString_Initialize(&keys);
+    SOPC_String securityPolicyUri;
+    SOPC_String_Initialize(&securityPolicyUri);
+    if (SOPC_STATUS_OK == status)
+    {
+        nbKeys = 1;
+        // Set buffer as a byte string for API compatibility
+        keys.DoNotClear = true;
+        keys.Length = (int32_t) keysBuffer->length;
+        keys.Data = (SOPC_Byte*) keysBuffer->data;
+        // Set security policy
+        status = SOPC_String_AttachFromCstring(&securityPolicyUri, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SKManager_SetKeys(skm, &securityPolicyUri, 1, &keys, nbKeys, UINT32_MAX, UINT32_MAX);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_SKManager_Clear(skm);
+        SOPC_Free(skm);
+    }
+    SOPC_Buffer_Delete(keysBuffer);
+
+    return skm;
+}
+
 /*****************************************************
  * @brief Creates and setup the PubSub, using KConfig parameters
  */
@@ -599,8 +655,11 @@ static void setupPubSub(void)
     pSourceConfig = SOPC_PubSourceVariableConfig_Create(&Cache_GetSourceVariables);
     SOPC_ASSERT(NULL != pSourceConfig && "SOPC_PubSourceVariableConfig_Create failed");
 
-    // Configure SKS for PubSub
-    // TODO
+    /* PubSub Security Keys configuration */
+    SOPC_SKManager* skm = createSKmanager();
+    SOPC_ASSERT(NULL != skm && "SOPC_SKManager_SetKeys failed");
+    SOPC_PubSubSKS_Init();
+    SOPC_PubSubSKS_SetSkManager(skm);
 
     Cache_Initialize(pPubSubConfig);
 }
@@ -610,7 +669,7 @@ static void setupPubSub(void)
  * It returns the string pointed to by pList and replaces the
  * next space by a NULL char so that the return value is now a C String
  * containing the first word of the string.
- * pList is modified to point to the next char after the insterted NULL.
+ * pList is modified to point to the next char after the inserted NULL.
  * In case pList reaches the initial NULL char, it is no more modified and
  * an empty string is returned.
  */
