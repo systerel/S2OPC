@@ -1079,27 +1079,25 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == pCert && NULL == ppCertCopy)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_CertificateList* pCertCopy = *ppCertCopy;
-    mbedtls_x509_crt* crt = &pCert->crt;
+    const mbedtls_x509_crt* crt = &pCert->crt;
     while (NULL != crt && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pCertCopy);
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, ppCertCopy);
         crt = crt->next;
     }
     /* clear if error */
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_Certificate_Free(pCertCopy);
-        pCertCopy = NULL;
+        SOPC_KeyManager_Certificate_Free(*ppCertCopy);
+        *ppCertCopy = NULL;
     }
-    *ppCertCopy = pCertCopy;
     return status;
 }
 
@@ -1220,27 +1218,25 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
+SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == pCrl && NULL == ppCrlCopy)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_CRLList* pCrlCopy = *ppCrlCopy;
-    mbedtls_x509_crl* crl = &pCrl->crl;
+    const mbedtls_x509_crl* crl = &pCrl->crl;
     while (NULL != crl && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(crl->raw.p, (uint32_t) crl->raw.len, &pCrlCopy);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(crl->raw.p, (uint32_t) crl->raw.len, ppCrlCopy);
         crl = crl->next;
     }
     /* clear if error */
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_CRL_Free(pCrlCopy);
-        pCrlCopy = NULL;
+        SOPC_KeyManager_CRL_Free(*ppCrlCopy);
+        *ppCrlCopy = NULL;
     }
-    *ppCrlCopy = pCrlCopy;
     return status;
 }
 

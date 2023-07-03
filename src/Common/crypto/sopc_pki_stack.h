@@ -194,10 +194,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 
 /*
 TODO :
-    - Replaced the error codes SOPC_CertificateValidationXXXXX directly by OpcUa_BadCertificateXXXXX
-    - Refactored S2OPC with the new API.
+    - Replace the error codes SOPC_CertificateValidationXXXXX directly by OpcUa_BadCertificateXXXXX
+    - Refactor S2OPC with the new API.
     - Add mutex in the new API.
-    - Handled that the security level of the update is not higher than the security level of the endpoint
+    - Handle that the security level of the update is not higher than the security level of the endpoint
 */
 
 /**
@@ -365,18 +365,17 @@ typedef struct SOPC_PKI_Profile
  * - \<Directory_store_name\>/trusted/certs (.DER or .PEM files)
  * - \<Directory_store_name\>/trusted/crl (.DER or .PEM files)
  * - \<Directory_store_name\>/issuers/certs (.DER or .PEM files)
- * - \<Directory_store_name\>/issuers/crl (.DER or .PEM files)
+ * - \<Directory_store_name\>/issuers/crl (.DER or .PEM files
+ *
+ * Optional updated trust list directory (for runtime update persistence) :
  *
  * - \<Directory_store_name\>/updatedTrustList/trusted/certs (.DER or .PEM files)
  * - \<Directory_store_name\>/updatedTrustList/trusted/crl (.DER or .PEM files)
  * - \<Directory_store_name\>/updatedTrustList/issuers/certs (.DER or .PEM files)
  * - \<Directory_store_name\>/updatedTrustList/issuers/crl (.DER or .PEM files)
  *
- * At the store root, the updatedTrustList folder could be empty, missing,
- * or bad organized but not the trusted and the issuers folders because
- * the function attempts to build the PKI from the updatedTrustList folder
- * and in case of error, it switches to the trusted and issuers folders.
- * The name of the the updatedTrustList folder could be changed through \p trustListName .
+ * The function attempts to build the PKI from the updatedTrustList directory
+ * and in case of error (missing, empty or malformed), it switches to the root trusted and issuers directories.
  *
  * Notions :
  * - CA is a root CA if it is self-signed.
@@ -397,16 +396,13 @@ typedef struct SOPC_PKI_Profile
  * \note Content of the PKI is NULL when return value is not SOPC_STATUS_OK.
  *
  * \param directoryStorePath The directory path where certificates are stored.
- * \param trustListName Name of the updated trustList folder. Set to NULL if you want to keep updatedTrustList as name.
- * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
- *              ::SOPC_PKIProviderNew_Free().
+ * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                   ::SOPC_PKIProviderNew_Free().
  *
  * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *          and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
-                                                      const char* trustListName,
-                                                      SOPC_PKIProviderNew** ppPKI);
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath, SOPC_PKIProviderNew** ppPKI);
 
 /**
  * \brief Create the PKIProvider from list representation.
@@ -430,8 +426,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
  * \param pTrustedCrl A valid pointer to the trusted CRL list.
  * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if not used.
  * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if not used.
- * \param ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
- *              ::SOPC_PKIProviderNew_Free().
+ * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                   ::SOPC_PKIProviderNew_Free().
  *
  * \return  SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *          and SOPC_STATUS_NOK when there was an error.
@@ -443,13 +439,16 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_PKIProviderNew** ppPKI);
 
 /**
- * \brief Create a leaf certificate profile to check certificate properties.
+ * \brief Create a leaf certificate profile from security policy to check certificate properties.
  *
  *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then
- *        they will not be checked by functions that use this profile.
+ *        these properties have to be defined manually or though specific functions eg
+ *        ::SOPC_PKIProviderNew_LeafProfileSetUsageFromType , ::SOPC_PKIProviderNew_LeafProfileSetURI
+ *        and ::SOPC_PKIProviderNew_LeafProfileSetURL
  *
  * \param securityPolicyUri The URI describing the security policy. If NULL then an empty profile is created.
- * \param ppProfile The newly created leaf profile. You should delete it with ::SOPC_PKIProviderNew_DeleteLeafProfile .
+ * \param[out] ppProfile The newly created leaf profile. You should delete it with
+ * ::SOPC_PKIProviderNew_DeleteLeafProfile .
  *
  * \note If the profile is empty ( \p securityPolicyUri is NULL) then the functions that use this profile will not run
  * any checks.
@@ -481,10 +480,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetUsageFromType(SOPC_PKI_LeafP
  * \brief Set the application URI to the leaf profile.
  *
  * \param pProfile A valid pointer to the leaf profile.
- * \param applicationUri The application URI
+ * \param applicationUri The application URI to set in \p pProfile .
  *
- * \warning The application URI is copied in \p pProfile, you should free it.
- *          If the application URI is already defined in \p pProfile , you can not define it again.
+ * \warning If the application URI is already defined in \p pProfile , you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -494,10 +492,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURI(SOPC_PKI_LeafProfile* pP
  * \brief Set the endpoint URL used for connection to the leaf profile.
  *
  * \param pProfile A valid pointer to the leaf profile.
- * \param url The endpoint URL used for connection.
+ * \param url The endpoint URL used for connection to set in \p pProfile .
  *
- * \warning The URL is copied in \p pProfile, you should free it.
- *          If the URL is already defined in \p pProfile , you can not define it again.
+ * \warning If the URL is already defined in \p pProfile , you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -506,19 +503,21 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURL(SOPC_PKI_LeafProfile* pP
 /**
  * \brief Delete a leaf profile.
  *
- * \param pProfile The leaf profile.
+ * \param ppProfile The leaf profile.
  */
-void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile* pProfile);
+void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile);
 
 /**
  * \brief Create a PKI profile for a validation process.
  *        Backward interoperability is enabled.
  *        Leaf profile and chain profile are created according the security policy.
  *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then
- *        they will not be checked by functions that use this profile.
+ *        these properties have to be defined manually or though specific functions eg
+ *        ::SOPC_PKIProviderNew_ProfileSetUsageFromType , ::SOPC_PKIProviderNew_ProfileSetURI
+ *        and ::SOPC_PKIProviderNew_ProfileSetURL
  *
  * \param securityPolicyUri The URI describing the security policy. Shall not be NULL.
- * \param ppProfile The newly created profile. You should delete it with ::SOPC_PKIProviderNew_DeleteProfile .
+ * \param[out] ppProfile The newly created profile. You should delete it with ::SOPC_PKIProviderNew_DeleteProfile .
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -547,10 +546,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetUsageFromType(SOPC_PKI_Profile* 
  * \brief Set the application URI to the PKI profile.
  *
  * \param pProfile A valid pointer to the PKI profile.
- * \param applicationUri The application URI
+ * \param applicationUri The application URI to set in \p pProfile .
  *
- * \warning The application URI is copied in SOPC_PKI_Profile::leafProfile, you should free it.
- *          If the application URI is already defined in \p pProfile , you can not define it again.
+ * \warning If the application URI is already defined in \p pProfile , you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -560,10 +558,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURI(SOPC_PKI_Profile* pProfile, 
  * \brief Set the endpoint URL used for connection to the PKI profile.
  *
  * \param pProfile A valid pointer to the PKI profile.
- * \param url The endpoint URL used for connection.
+ * \param url The endpoint URL used for connection to set in \p pProfile .
  *
- * \warning The URL is copied in SOPC_PKI_Profile::leafProfile, you should free it.
- *          If the URL is already defined in \p pProfile , you can not define it again.
+ * \warning If the URL is already defined in \p pProfile , you can not define it again.
  *
  * \return SOPC_STATUS_OK when successful.
  */
@@ -581,9 +578,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateMinimalUserProfile(SOPC_PKI_Profile*
 /**
  * \brief Delete a PKI profile.
  *
- * \param pProfile The PKI profile.
+ * \param ppProfile The PKI profile.
  */
-void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile* pProfile);
+void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile** ppProfile);
 
 /** \brief Validation function for a certificate with the PKI chain
  *
@@ -592,7 +589,7 @@ void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile* pProfile);
  * \param pPKI A valid pointer to the PKIProvider.
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the PKI profile.
- * \param error The OpcUa error code for certificate validation.
+ * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *
@@ -611,7 +608,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
  *
  * \param pToValidate A valid pointer to the Certificate to validate.
  * \param pProfile A valid pointer to the leaf profile.
- * \param error The OpcUa error code for certificate validation.
+ * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
  *
@@ -634,17 +631,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_Certificat
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePath, SOPC_PKIProviderNew* pPKI);
 
-/** \brief Redefines the updated trustList folder name.
- *
- * \param trustListName Name of the updated trustList folder.
- * \param pPKI A valid pointer to the PKIProvider.
- *
- * \warning In case of error, \p pPKI is unchanged.
- *
- * \return SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK in case of error.
- */
-SOPC_ReturnStatus SOPC_PKIProviderNew_SetTrustListName(const char* trustListName, SOPC_PKIProviderNew* pPKI);
-
 /** \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
  *         The updatedTrustList folder is created if it is missing.
  *         The format of the written files is DER.
@@ -657,10 +643,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetTrustListName(const char* trustListName
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the the trustList folder shall be deleted.
- *
- * \note The name of the updated trustList folder could be redefined with ::SOPC_PKIProviderNew_SetTrustListName .
- *       By default, the name is updatedTrustList when \p pPKI is built from lists (
- * ::SOPC_PKIProviderNew_CreateFromList ).
  *
  * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProviderNew_CreateFromList ) then
  *          you shall define the directory store path with ::SOPC_PKIProviderNew_SetStorePath .

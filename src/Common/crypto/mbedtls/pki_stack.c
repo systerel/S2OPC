@@ -708,7 +708,7 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 
-#define STR_TRUSTLIST_NAME "/updatedTrustList"
+#define STR_DEFAULT_TRUSTLIST_NAME "/updatedTrustList"
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
@@ -722,7 +722,6 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 struct SOPC_PKIProviderNew
 {
     char* directoryStorePath;
-    char* trustListName;
     SOPC_CertificateList* pTrustedCerts;
     SOPC_CertificateList* pTrustedRoots;
     SOPC_CRLList* pTrustedCrl;
@@ -858,15 +857,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateLeafProfile(const char* securityPoli
 
     if (NULL != securityPolicyUri)
     {
-        pProfile->mdSign = pProfileRef->mdSign;
-        pProfile->pkAlgo = pProfileRef->pkAlgo;
-        pProfile->RSAMinimumKeySize = pProfileRef->RSAMinimumKeySize;
-        pProfile->RSAMaximumKeySize = pProfileRef->RSAMaximumKeySize;
-        pProfile->bApplySecurityPolicy = pProfileRef->bApplySecurityPolicy;
-        pProfile->keyUsage = pProfileRef->keyUsage;
-        pProfile->extendedKeyUsage = pProfileRef->extendedKeyUsage;
-        pProfile->sanApplicationUri = pProfileRef->sanApplicationUri;
-        pProfile->sanURL = pProfileRef->sanURL;
+        *pProfile = *pProfileRef;
     }
 
     *ppProfile = pProfile;
@@ -935,13 +926,19 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_LeafProfileSetURL(SOPC_PKI_LeafProfile* pP
     return SOPC_STATUS_OK;
 }
 
-void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile* pProfile)
+void SOPC_PKIProviderNew_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile)
 {
+    if (NULL == ppProfile)
+    {
+        return;
+    }
+    SOPC_PKI_LeafProfile* pProfile = *ppProfile;
     if (NULL != pProfile)
     {
         SOPC_Free(pProfile->sanApplicationUri);
         SOPC_Free(pProfile->sanURL);
         SOPC_Free(pProfile);
+        *ppProfile = NULL;
     }
 }
 
@@ -961,10 +958,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateProfile(const char* securityPolicyUr
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    pChainProfile->mdSign = pChainProfileRef->mdSign;
-    pChainProfile->pkAlgo = pChainProfileRef->pkAlgo;
-    pChainProfile->curves = pChainProfileRef->curves;
-    pChainProfile->RSAMinimumKeySize = pChainProfileRef->RSAMinimumKeySize;
+    *pChainProfile = *pChainProfileRef;
 
     SOPC_PKI_LeafProfile* pLeafProfile = NULL;
     SOPC_PKI_Profile* pProfile = NULL;
@@ -987,7 +981,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateProfile(const char* securityPolicyUr
     else
     {
         SOPC_Free(pChainProfile);
-        SOPC_PKIProviderNew_DeleteLeafProfile(pLeafProfile);
+        SOPC_PKIProviderNew_DeleteLeafProfile(&pLeafProfile);
     }
     *ppProfile = pProfile;
     return SOPC_STATUS_OK;
@@ -1034,13 +1028,19 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ProfileSetURL(SOPC_PKI_Profile* pProfile, 
     return SOPC_PKIProviderNew_LeafProfileSetURL(pProfile->leafProfile, url);
 }
 
-void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile* pProfile)
+void SOPC_PKIProviderNew_DeleteProfile(SOPC_PKI_Profile** ppProfile)
 {
+    if (NULL == ppProfile)
+    {
+        return;
+    }
+    SOPC_PKI_Profile* pProfile = *ppProfile;
     if (NULL != pProfile)
     {
         SOPC_Free(pProfile->chainProfile);
-        SOPC_PKIProviderNew_DeleteLeafProfile(pProfile->leafProfile);
+        SOPC_PKIProviderNew_DeleteLeafProfile(&pProfile->leafProfile);
         SOPC_Free(pProfile);
+        *ppProfile = NULL;
     }
 }
 
@@ -1116,69 +1116,77 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     if (bErr)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : unexpected key type for certificate thumbprint %s",
-                               thumbprint);
-        SOPC_Free(thumbprint);
-        return SOPC_STATUS_NOK;
+                               "> PKI validation failed : unexpected key type %" PRIu32
+                               " for certificate thumbprint %s",
+                               key_type, thumbprint);
+        status = SOPC_STATUS_NOK;
     }
-    // Retrieve key length
-    keyLenBits = mbedtls_pk_get_bitlen(&pub_key.pk);
-    // Verifies key length: min-max
-    if (keyLenBits < pConfig->RSAMinimumKeySize || keyLenBits > pConfig->RSAMaximumKeySize)
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : unexpected key size for certificate thumbprint %s",
-                               thumbprint);
-        SOPC_Free(thumbprint);
-        return SOPC_STATUS_NOK;
+        // Retrieve key length
+        keyLenBits = mbedtls_pk_get_bitlen(&pub_key.pk);
+        // Verifies key length: min-max
+        if (keyLenBits < pConfig->RSAMinimumKeySize || keyLenBits > pConfig->RSAMaximumKeySize)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : unexpected key size %" PRIu32
+                                   " for certificate thumbprint %s",
+                                   (uint32_t) keyLenBits, thumbprint);
+            status = SOPC_STATUS_NOK;
+        }
     }
-    // Verifies signing algorithm:
-    mbedtls_md_type_t md = pToValidate->crt.sig_md;
-    switch (pConfig->mdSign)
+    if (SOPC_STATUS_OK == status)
     {
-    case SOPC_PKI_MD_SHA1_OR_ABOVE:
-        if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA224 != md && MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md &&
-            MBEDTLS_MD_SHA512 != md)
+        // Verifies signing algorithm:
+        mbedtls_md_type_t md = pToValidate->crt.sig_md;
+        switch (pConfig->mdSign)
         {
+        case SOPC_PKI_MD_SHA1_OR_ABOVE:
+            if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA224 != md && MBEDTLS_MD_SHA256 != md &&
+                MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
+            {
+                bErr = true;
+            }
+            break;
+        case SOPC_PKI_MD_SHA256_OR_ABOVE:
+            if (MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
+            {
+                bErr = true;
+            }
+            break;
+        case SOPC_PKI_MD_SHA1:
+            if (MBEDTLS_MD_SHA1 != md)
+            {
+                bErr = true;
+            }
+            break;
+        case SOPC_PKI_MD_SHA256:
+            if (MBEDTLS_MD_SHA256 != md)
+            {
+                bErr = true;
+            }
+            break;
+        case SOPC_PKI_MD_SHA1_AND_SHA256:
+            if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA256 != md)
+            {
+                bErr = true;
+            }
+            break;
+        default:
             bErr = true;
         }
-        break;
-    case SOPC_PKI_MD_SHA256_OR_ABOVE:
-        if (MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
+        if (bErr)
         {
-            bErr = true;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : unexpected signing algorithm %" PRIu32
+                                   " for certificate thumbprint %s",
+                                   md, thumbprint);
+            status = SOPC_STATUS_NOK;
         }
-        break;
-    case SOPC_PKI_MD_SHA1:
-        if (MBEDTLS_MD_SHA1 != md)
-        {
-            bErr = true;
-        }
-        break;
-    case SOPC_PKI_MD_SHA256:
-        if (MBEDTLS_MD_SHA256 != md)
-        {
-            bErr = true;
-        }
-        break;
-    case SOPC_PKI_MD_SHA1_AND_SHA256:
-        if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA256 != md)
-        {
-            bErr = true;
-        }
-        break;
-    default:
-        bErr = true;
-    }
-    if (bErr)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : unexpected signing algorithm for certificate thumbprint %s",
-                               thumbprint);
     }
 
     SOPC_Free(thumbprint);
-    return bErr ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    return status;
 }
 
 static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate, const char* url)
@@ -1190,12 +1198,21 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
+    if (NULL == thumbprint)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
     SOPC_UriType type = SOPC_URI_UNDETERMINED;
     char* pHostName = NULL;
     char* pPort = NULL;
     SOPC_ReturnStatus status = SOPC_Helper_URI_SplitUri(url, &type, &pHostName, &pPort);
     if (SOPC_STATUS_OK != status)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : Unable to split the given url %s to retrieve the hostName",
+                               url);
+        SOPC_Free(thumbprint);
         return SOPC_STATUS_NOK;
     }
     const mbedtls_x509_sequence* asn1_seq = &pToValidate->crt.subject_alt_names;
@@ -1214,10 +1231,10 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
         }
         if (0 != err)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_COMMON,
-                "> PKI validation failed : Subject Alternative Name parse failed with error code:: -0x%X",
-                (unsigned int) -err);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : Subject Alternative Name parse failed with error code:: "
+                                   "-0x%X for certificate thumbprint %s",
+                                   (unsigned int) -err, thumbprint);
         }
         if (MBEDTLS_X509_SAN_DNS_NAME == san_out.type)
         {
@@ -1230,6 +1247,13 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
                 /* stop research */
                 found = true;
             }
+            else
+            {
+                SOPC_Logger_TraceWarning(
+                    SOPC_LOG_MODULE_COMMON,
+                    "> PKI validation : dnsName %s of certificate thumbprint %s is not the expected one (%s)", pCertDns,
+                    thumbprint, pHostName);
+            }
             SOPC_Free(pCertDns);
         }
         /* next iteration */
@@ -1238,6 +1262,10 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     }
     if (!found || 0 != err)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : hostName %s is not found in the dnsName SAN extension of "
+                               "certificate thumbprint %s",
+                               pHostName, thumbprint);
         status = SOPC_STATUS_NOK;
     }
     else
@@ -1247,6 +1275,7 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
 
     SOPC_Free(pHostName);
     SOPC_Free(pPort);
+    SOPC_Free(thumbprint);
 
     return status;
 }
@@ -1259,7 +1288,17 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToVa
     }
     /* TODO: remove SOPC_KeyManager_Certificate_CheckApplicationUri from the key manager interface */
     bool ok = SOPC_KeyManager_Certificate_CheckApplicationUri(pToValidate, applicationUri);
-    return ok ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    if (!ok)
+    {
+        char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : the application URI %s is not stored in the URI SAN "
+                               "extension of certificate thumbprint %s",
+                               applicationUri, thumbprint);
+        SOPC_Free(thumbprint);
+        return SOPC_STATUS_NOK;
+    }
+    return SOPC_STATUS_OK;
 }
 
 static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pki_ku)
@@ -1430,11 +1469,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     }
 
     *error = SOPC_CertificateValidationError_Unkown;
-    char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
-    if (NULL == thumbprint)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
     bool bIsTrusted = false;
     mbedtls_x509_crt crt = pToValidate->crt;
     bool bIsSelfSign = false;
@@ -1443,44 +1477,47 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     {
         return SOPC_STATUS_INVALID_STATE;
     }
+    char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
+    if (NULL == thumbprint)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
     /* CA certificates that are not roots are always rejected */
     if (pToValidate->crt.ca_istrue && !bIsSelfSign)
     {
         *error = SOPC_CertificateValidationError_UseNotAllowed;
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : certificate thumbprint %s is a CA root", thumbprint);
-        SOPC_Free(thumbprint);
-        return SOPC_STATUS_NOK;
+                               "> PKI validation failed : certificate thumbprint %s is not a root CA root", thumbprint);
+        status = SOPC_STATUS_NOK;
     }
-    /* If CA root and backward interoperability */
-    if (pToValidate->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
+    if (SOPC_STATUS_OK == status)
     {
-        /* Root is trusted? */
-        status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidate, &bIsTrusted);
-        if (SOPC_STATUS_OK != status)
+        /* If CA root and backward interoperability */
+        if (pToValidate->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
         {
-            return SOPC_STATUS_INVALID_STATE;
+            /* Root is trusted? */
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidate, &bIsTrusted);
+        }
+
+        if (!pToValidate->crt.ca_istrue)
+        {
+            /* Cert is trusted? */
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidate, &bIsTrusted);
         }
     }
-    else
+    if (SOPC_STATUS_OK == status)
     {
-        /* Cert is trusted? */
-        status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidate, &bIsTrusted);
-        if (SOPC_STATUS_OK != status)
+        /* Apply verification on the certificate */
+        if (pProfile->bApplyLeafProfile)
         {
-            return SOPC_STATUS_INVALID_STATE;
-        }
-    }
-    /* Apply verification on the certificate */
-    if (pProfile->bApplyLeafProfile)
-    {
-        status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidate, pProfile->leafProfile, error);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : bad properties of certificate thumbprint %s", thumbprint);
-            SOPC_Free(thumbprint);
-            return SOPC_STATUS_NOK;
+            status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidate, pProfile->leafProfile, error);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                       "> PKI validation failed : bad properties of certificate thumbprint %s",
+                                       thumbprint);
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
     /* Set the profile from configuration */
@@ -1496,14 +1533,9 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
-    /* Link certificate to validate with intermediate CA certificates (linked with pPKI->pAllCerts or
-     * pPKI->pTrustedCerts) */
-    /* pPKI->pAllCerts is a trusted link to validate a trusted certificate. (pPKI->pAllCerts = pPKI->pTrustedCerts +
-     * pPKI->pIssuersCerts) */
-    /* pPKI->pTrustedCerts is an untrusted link to validate an untrusted certificate  */
-
     /* List length already check in SOPC_KeyManager_CertificateList_FindCertInList */
     SOPC_ASSERT(NULL == mbed_cert_list->next);
+    /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
     mbed_cert_list->next = bIsTrusted ? &pPKI->pAllCerts->crt : &pPKI->pTrustedCerts->crt;
     /* Verify the certificate chain */
     if (SOPC_STATUS_OK == status)
@@ -1543,7 +1575,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_Certificat
         status = check_security_policy(pToValidate, pProfile);
         if (SOPC_STATUS_OK != status)
         {
-            *error = SOPC_CertificateValidationError_Invalid; // TODO: Replace by Bad_CertificatePolicyCheckFailed?
+            *error = SOPC_CertificateValidationError_PolicyCheckFailed;
         }
     }
     if (SOPC_STATUS_OK == status && NULL != pProfile->sanURL)
@@ -1690,6 +1722,17 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
         SOPC_Free(issuerCrlPath);
     }
 
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(*ppTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(*ppIssuerCerts);
+        SOPC_KeyManager_CRL_Free(*ppTrustedCrl);
+        SOPC_KeyManager_CRL_Free(*ppIssuerCrl);
+        *ppTrustedCerts = NULL;
+        *ppIssuerCerts = NULL;
+        *ppTrustedCrl = NULL;
+        *ppIssuerCrl = NULL;
+    }
     return status;
 }
 
@@ -1757,7 +1800,7 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
                         /* We have to free the new next certificate */
                         SOPC_Free(next);
 
-                        /* Do not iterate: current certificate has changed */
+                        /* Do not iterate: current certificate has changed with the new head (cur = &pHeadCerts->crt) */
                     }
                 }
                 else
@@ -2089,7 +2132,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         pPKI->pAllRoots = tmp_pAllRoots;
         pPKI->pAllCrl = tmp_pAllCrl;
         pPKI->directoryStorePath = NULL;
-        pPKI->trustListName = NULL;
     }
     else
     {
@@ -2105,22 +2147,28 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         SOPC_Free(pPKI);
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        pPKI->trustListName = SOPC_strdup(STR_TRUSTLIST_NAME);
-        if (NULL == pPKI->trustListName)
-        {
-            SOPC_PKIProviderNew_Free(pPKI);
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
     *ppPKI = pPKI;
     return status;
 }
 
+/** \brief Return the default directory name for the updated trustList (STR_DEFAULT_TRUSTLIST_NAME)
+ *         or the user's one through WITH_USER_TRUST_LIST_NAME if defined.
+ *         Return NULL in case of error
+ */
+static char* get_dir_updated_trustlist_name(void)
+{
+    char* trust_list_name = NULL;
+
+#ifndef WITH_USER_TRUST_LIST_NAME
+    trust_list_name = SOPC_strdup(STR_DEFAULT_TRUSTLIST_NAME);
+#else
+    status = SOPC_StrConcat("/", WITH_USER_TRUST_LIST_NAME, &trust_list_name);
+#endif /* WITH_USER_TRUST_LIST_NAME */
+
+    return trust_list_name;
+}
+
 static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
-                                               const char* trustListName,
                                                bool bDefaultBuild,
                                                SOPC_PKIProviderNew** ppPKI)
 {
@@ -2139,21 +2187,10 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     /* Select the right folder*/
     if (!bDefaultBuild)
     {
-        if (NULL != trustListName)
+        trust_list_name = get_dir_updated_trustlist_name();
+        if (NULL == trust_list_name)
         {
-            status = SOPC_StrConcat("/", trustListName, &trust_list_name);
-            if (SOPC_STATUS_OK != status)
-            {
-                return status;
-            }
-        }
-        else
-        {
-            trust_list_name = SOPC_strdup(STR_TRUSTLIST_NAME);
-            if (NULL == trust_list_name)
-            {
-                return SOPC_STATUS_OUT_OF_MEMORY;
-            }
+            return SOPC_STATUS_OUT_OF_MEMORY;
         }
         status = SOPC_StrConcat(directoryStorePath, trust_list_name, &path);
         if (SOPC_STATUS_OK != status)
@@ -2186,7 +2223,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
                                  "> PKI creation warning: updated trustList is missing or bad built, switch to trusted "
                                  "and issuers folders.");
-        status = pki_create_from_store(directoryStorePath, trust_list_name, true, ppPKI);
+        status = pki_create_from_store(directoryStorePath, true, ppPKI);
     }
     /* Copy the directoryStorePath */
     if (SOPC_STATUS_OK == status)
@@ -2201,7 +2238,6 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }
-        SOPC_PKIProviderNew_SetTrustListName(trustListName, (*ppPKI));
     }
 
     /* Clear */
@@ -2216,16 +2252,14 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath,
-                                                      const char* trustListName,
-                                                      SOPC_PKIProviderNew** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStorePath, SOPC_PKIProviderNew** ppPKI)
 {
     if (NULL == directoryStorePath || NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = pki_create_from_store(directoryStorePath, trustListName, false, ppPKI);
+    SOPC_ReturnStatus status = pki_create_from_store(directoryStorePath, false, ppPKI);
     return status;
 }
 
@@ -2245,7 +2279,6 @@ static void sopc_pki_clear(SOPC_PKIProviderNew* pPKI)
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
     SOPC_Free(pPKI->directoryStorePath);
-    SOPC_Free(pPKI->trustListName);
 }
 
 void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
@@ -2376,26 +2409,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderNew_SetTrustListName(const char* trustListName, SOPC_PKIProviderNew* pPKI)
-{
-    if (NULL == pPKI || NULL == trustListName)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    /* Copy the trustList name before exchange the data */
-    char* pCopyName = NULL;
-    SOPC_ReturnStatus status = SOPC_StrConcat("/", trustListName, &pCopyName);
-    if (SOPC_STATUS_OK != status)
-    {
-        return status;
-    }
-    SOPC_Free(pPKI->trustListName);
-    pPKI->trustListName = pCopyName;
-
-    return SOPC_STATUS_OK;
-}
-
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProviderNew* pPKI,
                                                           SOPC_CertificateList** ppTrustedCerts,
                                                           SOPC_CRLList** ppTrustedCrl,
@@ -2449,13 +2462,18 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* The case of the PKI is built from buffer (there is no store) */
-    if (NULL == pPKI->directoryStorePath || NULL == pPKI->trustListName)
+    if (NULL == pPKI->directoryStorePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     char* basePath = NULL;
     char* path = NULL;
-    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, pPKI->trustListName, &basePath);
+    char* trustListName = get_dir_updated_trustlist_name();
+    if (NULL == trustListName)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, trustListName, &basePath);
     if (SOPC_STATUS_OK != status)
     {
         return status;
@@ -2503,6 +2521,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
         }
     }
 
+    SOPC_Free(trustListName);
     SOPC_Free(basePath);
     SOPC_Free(path);
 
@@ -2520,7 +2539,7 @@ static SOPC_ReturnStatus check_security_level_of_the_update(const SOPC_Certifica
 
     -1 Add a way to configure the security level for each security policy uri (give them a weight)
     -2 For each certificate, retrieve their security policies in which their are attached to from their properties.
-       How to do it?
+       How to do it? The following issue has been SUBMITTED : https://mantis.opcfoundation.org/view.php?id=8976
     */
 
     SOPC_UNUSED_ARG(pTrustedCerts);
@@ -2601,7 +2620,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
     }
     else
     {
-        /* Create a new tmp PKI */
+        /* Create a new tmp PKI without the existing TrustList */
         status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &pTmpPKI);
     }
     /* Copy the directory store path before exchange the data */
@@ -2610,18 +2629,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
         pTmpPKI->directoryStorePath = SOPC_strdup(pPKI->directoryStorePath);
         if (NULL == pTmpPKI->directoryStorePath)
         {
-            SOPC_PKIProviderNew_Free(pTmpPKI);
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-    /* Copy the trustList name before exchange the data */
-    if (SOPC_STATUS_OK == status && NULL != pPKI->trustListName)
-    {
-        SOPC_Free(pTmpPKI->trustListName);
-        pTmpPKI->trustListName = SOPC_strdup(pPKI->trustListName);
-        if (NULL == pTmpPKI->trustListName)
-        {
-            SOPC_PKIProviderNew_Free(pTmpPKI);
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
@@ -2629,20 +2636,10 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
     if (SOPC_STATUS_OK == status)
     {
         sopc_pki_clear(pPKI);
-        pPKI->pTrustedRoots = pTmpPKI->pTrustedRoots;
-        pPKI->pTrustedCerts = pTmpPKI->pTrustedCerts;
-        pPKI->pTrustedCrl = pTmpPKI->pTrustedCrl;
-        pPKI->pIssuerRoots = pTmpPKI->pIssuerRoots;
-        pPKI->pIssuerCerts = pTmpPKI->pIssuerCerts;
-        pPKI->pIssuerCrl = pTmpPKI->pIssuerCrl;
-        pPKI->pAllCerts = pTmpPKI->pAllCerts;
-        pPKI->pAllRoots = pTmpPKI->pAllRoots;
-        pPKI->pAllCrl = pTmpPKI->pAllCrl;
-        pPKI->directoryStorePath = pTmpPKI->directoryStorePath;
-        pPKI->trustListName = pTmpPKI->trustListName;
-        SOPC_Free(pTmpPKI);
+        *pPKI = *pTmpPKI;
     }
 
+    SOPC_Free(pTmpPKI);
     SOPC_KeyManager_Certificate_Free(tmp_pTrustedCerts);
     SOPC_KeyManager_Certificate_Free(tmp_pTrustedCertsTmp);
     SOPC_KeyManager_Certificate_Free(tmp_pIssuerCerts);

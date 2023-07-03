@@ -92,45 +92,6 @@ static char* default_revoked_certs[] = {"revoked/cacrl.der",          "revoked/c
                                         "revoked/ctt_ca1I.crl",       "revoked/ctt_ca1I_ca2T.crl",
                                         "revoked/ctt_ca1TC_ca2I.crl", NULL};
 
-// Default certificate paths for X509 Identity tokens
-
-// static char* x509_Identity_trusted_root_issuers[] = {
-//     "trusted_usr/user_cacert.der", /* Demo CA */
-//     "trusted_usr/ctt_ca1TC.der",   /* Will be ignored because no CRL associated. Tests 042, 043 */
-//     "trusted_usr/ctt_ca1T.der", NULL};
-
-// static char* x509_Identity_trusted_intermediate_issuers[] = {"trusted_usr/ctt_ca1I_ca2T.der", NULL};
-
-// static char* x509_Identity_issued_certs[] = {"issued_usr/ctt_usrT.der",
-//                                              "issued_usr/ctt_usrTE.der",
-//                                              "issued_usr/ctt_usrTSincorrect.der",
-//                                              "issued_usr/ctt_usrTV.der",
-//                                              "issued_usr/ctt_ca1I_usrT.der",
-//                                              "issued_usr/ctt_ca1I_usrTR.der",
-//                                              "issued_usr/ctt_ca1IC_usrT.der",
-//                                              "issued_usr/ctt_ca1IC_usrTR.der",
-//                                              "issued_usr/ctt_ca1T_usrT.der",
-//                                              "issued_usr/ctt_ca1T_usrTR.der",
-//                                              "issued_usr/ctt_ca1TC_usrT.der",
-//                                              "issued_usr/ctt_ca1TC_usrTR.der",
-//                                              "issued_usr/ctt_ca1U_usrT.der",
-//                                              "issued_usr/ctt_ca1U_usrTR.der",
-//                                              "issued_usr/ctt_ca1I_ca2T_usrT.der",
-//                                              "issued_usr/ctt_ca1I_ca2T_usrTR.der",
-//                                              "issued_usr/ctt_ca1T_ca2U_usrT.der",
-//                                              "issued_usr/ctt_ca1T_ca2U_usrTR.der",
-//                                              "issued_usr/ctt_ca1TC_ca2I_usrT.der",
-//                                              "issued_usr/ctt_ca1TC_ca2I_usrTR.der",
-//                                              NULL};
-// static char* x509_Identity_untrusted_root_issuers[] = {
-//     "untrusted_usr/ctt_ca1IC.der", /* Will be ignored because no CRL associated */
-//     "untrusted_usr/ctt_ca1I.der", NULL};
-// static char* x509_Identity_untrusted_intermediate_issuers[] = {"untrusted_usr/ctt_ca1TC_ca2I.der", /* Test 002 */
-//                                                                NULL};
-// static char* x509_Identity_revoked_certs[] = {"revoked_usr/user_cacrl.der",     "revoked_usr/ctt_ca1I.crl",
-//                                               "revoked_usr/ctt_ca1TC_ca2I.crl", "revoked_usr/ctt_ca1I_ca2T.crl",
-//                                               "revoked_usr/ctt_ca1T.crl",       NULL};
-
 #endif // WITH_STATIC_SECURITY_DATA
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -600,7 +561,6 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         SOPC_ASSERT(NULL != authn->pData);
 
         const SOPC_PKIProviderNew* pkiProvider = authn->pData;
-        // const SOPC_PKIProvider* pkiProvider = authn->pData;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;
         SOPC_CertificateList* pUserCert = NULL;
@@ -608,8 +568,10 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 
         SOPC_PKI_Profile* pProfile = NULL;
         status = SOPC_PKIProviderNew_CreateMinimalUserProfile(&pProfile);
-        /* TODO RBA: Add SOPC_PKIProviderNew_CheckLeafCertificate in
-                     user_authentication_bs__is_valid_user_x509_authentication::is_valid_user_token_signature */
+        /* TODO:
+            After the peer review, start the refactor and add SOPC_PKIProviderNew_CheckLeafCertificate in
+            user_authentication_bs__is_valid_user_x509_authentication::is_cert_comply_with_security_policy
+        */
         if (SOPC_STATUS_OK == status)
         {
             status =
@@ -620,7 +582,6 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
         {
             // Verify certificate through PKIProvider callback
             status = SOPC_PKIProviderNew_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
-            // status = pkiProvider->pFnValidateCertificate(pkiProvider, pUserCert, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -651,7 +612,7 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 
         /* Clear */
         SOPC_KeyManager_Certificate_Free(pUserCert);
-        SOPC_PKIProviderNew_DeleteProfile(pProfile);
+        SOPC_PKIProviderNew_DeleteProfile(&pProfile);
     }
 
     return status;
@@ -664,7 +625,6 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
         if (NULL != authentication->pData)
         {
             SOPC_PKIProviderNew_Free((SOPC_PKIProviderNew*) authentication->pData);
-            // SOPC_PKIProvider_Free((SOPC_PKIProvider**) &authentication->pData);
         }
         SOPC_Free(authentication);
     }
@@ -678,7 +638,6 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_PKIProviderNew* pX509_UserIdentity_PKI = NULL;
-    // SOPC_PKIProvider* pX509_UserIdentity_PKI = NULL;
     SOPC_UserAuthorization_Manager* authorizationManager = NULL;
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 
@@ -710,11 +669,7 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     SOPC_KeyManager_Certificate_Free(userCAcert);
     SOPC_KeyManager_CRL_Free(userCAcrl);
 #else
-    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", NULL, &pX509_UserIdentity_PKI);
-    // status = SOPC_PKIProviderStack_CreateFromPaths(
-    //     x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
-    //     x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers,
-    //     x509_Identity_issued_certs, x509_Identity_revoked_certs, &pX509_UserIdentity_PKI);
+    status = SOPC_PKIProviderNew_CreateFromStore("./test_user_PKI", &pX509_UserIdentity_PKI);
 
 #endif
 
@@ -726,8 +681,6 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        /* Set PKI for user */
-        // SOPC_PKIProviderStack_SetUserCert(pX509_UserIdentity_PKI, true);
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
         authenticationManager->pData = pX509_UserIdentity_PKI;
@@ -738,7 +691,6 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     {
         /* clear */
         SOPC_PKIProviderNew_Free(pX509_UserIdentity_PKI);
-        // SOPC_PKIProvider_Free(&pX509_UserIdentity_PKI);
         SOPC_UserAuthorization_FreeManager(&authorizationManager);
         printf("<Test_Server_Toolkit: Failed to create the user authentication manager: %d\n", status);
     }

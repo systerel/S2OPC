@@ -531,12 +531,14 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
  * \brief            Makes a copy of a given certificate list.
  *
  * \param pCert      A valid pointer to the certificate list to copy.
- * \param ppCertCopy A valid pointer to the certificate list copied. You should free it.
+ * \param ppCertCopy A pointer to store the newly allocated certificate list copy.
+ *                   Caller is responsible to call ::SOPC_KeyManager_Certificate_Free if needed.
  *
  * \return           SOPC_STATUS_OK when successful.
  *
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy);
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* pCert,
+                                                   SOPC_CertificateList** ppCertCopy);
 
 /**
  * \brief Releases all resources associated to a serialized certificate.
@@ -606,15 +608,16 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath);
 
 /**
- * \brief           Makes a copy of a given CRL list.
+ * \brief            Makes a copy of a given CRL list.
  *
- * \param pCrl      A valid pointer to the CRL list to copy.
- * \param ppCrlCopy A valid pointer to the CRL list copied. You should free it.
+ * \param pCrl       A valid pointer to the CRL list to copy.
+ * \param ppCrlCopy  A pointer to store the newly allocated CRL list copy.
+ *                   Caller is responsible to call ::SOPC_KeyManager_CRL_Free if needed.
  *
  * \return          SOPC_STATUS_OK when successful.
  *
  */
-SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
+SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
 
 /**
  * \brief           Frees a Certificate created with SOPC_KeyManager_CRL_CreateOrAddFromFile() or
