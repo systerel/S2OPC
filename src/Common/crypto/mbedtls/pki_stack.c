@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sopc_assert.h"
+#include "sopc_common_constants.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
@@ -2292,6 +2292,7 @@ void SOPC_PKIProviderNew_Free(SOPC_PKIProviderNew* pPKI)
     pPKI = NULL;
 }
 
+#if SOPC_HAS_FILESYSTEM
 static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
     SOPC_ASSERT(NULL != directoryPath);
@@ -2321,6 +2322,13 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath)
     SOPC_Array_Delete(pFilePaths);
     return status;
 }
+#else
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
+{
+    SOPC_UNUSED_ARG(directoryPath);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* SOPC_HAS_FILESYSTEM */
 
 static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
                                                  SOPC_CertificateList* pCerts,

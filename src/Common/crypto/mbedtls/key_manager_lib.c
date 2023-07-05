@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_helper_string.h"
@@ -985,6 +986,7 @@ static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* 
     return status;
 }
 
+#if SOPC_HAS_FILESYSTEM
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* pCerts, const char* directoryPath)
 {
     if (NULL == pCerts)
@@ -1004,6 +1006,14 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
     }
     return status;
 }
+#else
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* pCerts, const char* directoryPath)
+{
+    SOPC_UNUSED_ARG(pCerts);
+    SOPC_UNUSED_ARG(directoryPath);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* SOPC_HAS_FILESYSTEM */
 
 SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_CertificateList* pList,
                                                                  const SOPC_CertificateList* pCert,
@@ -1198,6 +1208,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 #endif
 }
 
+#if SOPC_HAS_FILESYSTEM
 SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath)
 {
     if (NULL == pCrls)
@@ -1217,6 +1228,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
     }
     return status;
 }
+#else
+SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const char* directoryPath)
+{
+    SOPC_UNUSED_ARG(pCrls);
+    SOPC_UNUSED_ARG(directoryPath);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* SOPC_HAS_FILESYSTEM */
 
 SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy)
 {
