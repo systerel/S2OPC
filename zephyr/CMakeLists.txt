@@ -58,6 +58,7 @@ zephyr_include_directories(
     ${S2OPC_SRC}/ClientServer/configuration
     ${S2OPC_SRC}/Common/configuration
     ${S2OPC_SRC}/Common/opcua_types
+    ${S2OPC_SRC}/Common/sks
     ${S2OPC_SRC}/PubSub
     ${S2OPC_SRC}/PubSub/config_loaders/xml_expat
     ${S2OPC_SRC}/PubSub/common
