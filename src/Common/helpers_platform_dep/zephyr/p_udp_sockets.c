@@ -74,7 +74,9 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
         {
             struct ifreq ifr;
             memset(&ifr, 0, sizeof(struct ifreq));
-            strncpy(ifr.ifr_name, interfaceName, sizeof(ifr.ifr_name));
+            size_t ifr_name_len = sizeof(ifr.ifr_name);
+            strncpy(ifr.ifr_name, interfaceName, ifr_name_len);
+            ifr.ifr_name[ifr_name_len - 1] = '\0';
             setOptStatus = setsockopt(sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifr, sizeof(struct ifreq));
             if (setOptStatus < 0)
             {
