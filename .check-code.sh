@@ -196,6 +196,7 @@ if [[ -z $ALREADY_FORMAT ]]; then
     echo "C source code formatting already done" | tee -a $LOGPATH
 else
     echo "ERROR: C source code code formatting not done or not committed" | tee -a $LOGPATH
+    git diff | tee -a $LOGPATH
     EXITCODE=1
 fi
 
