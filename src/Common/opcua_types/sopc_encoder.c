@@ -3527,3 +3527,4 @@ const SOPC_BuiltInType_Encoding SOPC_BuiltInType_EncodingTable[SOPC_BUILTINID_MA
     {SOPC_DataValue_WriteAux, SOPC_DataValue_ReadAux},
     {SOPC_Variant_WriteAux, SOPC_Variant_ReadAux},
     {SOPC_DiagnosticInfo_WriteAux, SOPC_DiagnosticInfo_ReadAux}};
+

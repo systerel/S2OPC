@@ -2,8 +2,8 @@
     <connection address="mqtts://192.168.1.108:1883" publisherId="42" mode="publisher" mqttUsername="user1" mqttPassword="password" >
         <message groupId="14" groupVersion="1" publishingInterval="1000." mqttTopic="S2OPC" >
           <dataset>
-            <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
-            <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
+            <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=2;i=6" displayName="PubFloat" dataType="Float"/>
           </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="2000." >

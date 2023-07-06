@@ -101,7 +101,9 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_ASSERT(NULL != connection);
         SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
+        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.64:1883");
         alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:1883");
+        //alloc = SOPC_PubSubConnection_Set_Address(connection, "opc.udp://232.1.2.100:4840");
     }
     
     // Set acyclic publisher mode
@@ -157,8 +159,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubBool", SOPC_Boolean_Id); // varBool
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubString", SOPC_String_Id); // varString
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubInt", SOPC_Int64_Id); // varInt
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=2;i=6", SOPC_Float_Id); // PubFloat
     }
     
     /*** Pub Message 15 ***/

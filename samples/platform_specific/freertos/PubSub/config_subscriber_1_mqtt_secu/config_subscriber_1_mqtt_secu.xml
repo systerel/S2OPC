@@ -1,5 +1,5 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
-    <connection address="mqtts://192.168.1.109:1883" mode="subscriber">
+    <connection address="mqtts://192.168.1.108:1883" mode="subscriber">
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" mqttTopic="S2OPC1" securityMode="signAndEncrypt">
           <dataset>

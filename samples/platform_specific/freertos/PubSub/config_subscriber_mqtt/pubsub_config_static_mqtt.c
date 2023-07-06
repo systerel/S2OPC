@@ -1,6 +1,7 @@
 /* Copyright (C) Systerel SAS 2019, all rights reserved. */
 
 #include "pubsub_config_static.h"
+#include "sopc_mem_alloc.h"
 
 #include <stdbool.h>
 #include <string.h>
@@ -34,7 +35,10 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     }
     else
     {
-    	SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, publisherId, groupId);
+    	char* defaultTopic = SOPC_Calloc(LENGTHDEAULTTOPIC, sizeof(char));
+		SOPC_Compute_Default_MqttTopic(publisherId, groupId, defaultTopic);
+    	SOPC_ReaderGroup_Set_MqttTopic(readerGroup,defaultTopic);
+    	SOPC_Free(defaultTopic);
     }
     
     return readerGroup;

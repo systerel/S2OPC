@@ -1,0 +1,19 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="mqtts://192.168.1.108:1883" publisherId="42" mode="publisher" mqttUsername="user1" mqttPassword="password" >
+        <message groupId="14" groupVersion="1" publishingInterval="1000." mqttTopic="S2OPC" >
+          <dataset>
+            <variable nodeId="ns=1;s=PubBool" displayName="PubBool" dataType="Boolean"/>
+            <variable nodeId="ns=1;s=PubInt64" displayName="varInt" dataType="Int64"/>
+            <variable nodeId="ns=1;s=PubUInt64" displayName="varInt" dataType="UInt64"/>
+            <variable nodeId="ns=1;s=PubInt32" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubUInt32" displayName="PubFloat" dataType="UInt32"/>
+            <variable nodeId="ns=1;s=PubInt16" displayName="varInt" dataType="Int16"/>
+            <variable nodeId="ns=1;s=PubUInt16" displayName="PubFloat" dataType="UInt16"/>
+            <variable nodeId="ns=2;i=6" displayName="PubFloat" dataType="Float"/>
+            <variable nodeId="ns=1;s=PubDouble" displayName="varDouble" dataType="Double"/>
+            <variable nodeId="ns=1;s=PubString" displayName="PubFloat" dataType="String"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
+

@@ -43,8 +43,8 @@
 
 #include "logging.h"
 
-#define ENDPOINT_URL "opc.tcp://192.168.1.64:4841"
-//#define ENDPOINT_URL "opc.tcp://192.168.1.108:4841"
+//#define ENDPOINT_URL "opc.tcp://192.168.1.64:4841"
+#define ENDPOINT_URL "opc.tcp://192.168.1.108:4841"
 //#define ENDPOINT_URL "opc.tcp://localhost:4841"
 #define SERVER_URI "urn:S2OPC:localhost"
 

@@ -682,7 +682,11 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     }
     else
     {
-    	SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, publisherId, groupId);
+    	char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
+		bool res = SOPC_Compute_Default_MqttTopic(publisherId, groupId, defaultTopic, LENGTH_MAX_DEFAULT_TOPIC + 1);
+		SOPC_ASSERT(res);
+		SOPC_ReaderGroup_Set_MqttTopic(readerGroup,defaultTopic);
+    	SOPC_Free(defaultTopic);
     }
     
     return readerGroup;

@@ -24,7 +24,12 @@
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pubsub_constants.h"
+
+#include <inttypes.h>
+#include "stdio.h"
+#include "string.h"
+#include "sopc_builtintypes.h"
+
 
 static uint32_t network_Error_Code = SOPC_UADP_NetworkMessage_Error_Code_None;
 
@@ -137,6 +142,18 @@ const uint8_t C_NETWORK_MESSAGE_COMP_BIT_4 = 255 - 16;
 const uint8_t C_NETWORK_MESSAGE_COMP_BIT_5 = 255 - 32;
 const uint8_t C_NETWORK_MESSAGE_COMP_BIT_6 = 255 - 64;
 const uint8_t C_NETWORK_MESSAGE_COMP_BIT_7 = 255 - 128;
+
+/*
+ * JSON carateres
+ */
+const uint8_t dix = 10;
+const uint8_t quote = 34;
+const uint8_t openingHook = 123;
+const uint8_t closingHook = 125;
+const uint8_t comma = 44;
+const uint8_t colon = 58;
+const uint8_t openingSquareBracket = 91;
+const uint8_t closingSquareBracket = 93;
 
 /**
  * Set the value of a bit
@@ -419,6 +436,386 @@ static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t p
     {
         return false;
     }
+}
+
+
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Boolean(bool value, char * buffer, size_t sizeBuffer)
+{
+	int res = 0;
+	if (value)
+	{
+		res = snprintf(buffer,sizeBuffer,"%s","true");
+	}
+	else
+	{
+		res = snprintf(buffer,sizeBuffer,"%s","false");
+	}
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Int16(int value, char * buffer, size_t sizeBuffer)
+{
+	int res = snprintf(buffer,sizeBuffer,"%i",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_UInt16(uint16_t value, char * buffer, size_t sizeBuffer)
+{
+	int res = snprintf(buffer,sizeBuffer,"%u",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Int32(long value, char * buffer, size_t sizeBuffer)
+{
+	int res = snprintf(buffer,sizeBuffer,"%li",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_UInt32(uint32_t value, char * buffer, size_t sizeBuffer)
+{
+	int res = snprintf(buffer,sizeBuffer,"%lu",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Int64(long long value, char * buffer, size_t sizeBuffer)
+{
+//TODO
+}
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_UInt64(uint64_t value, char * buffer, size_t sizeBuffer)
+{
+//TODO
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Float(float value, char * buffer, size_t sizeBuffer)
+{
+	//TODO Special floating-point numbers
+	int res = snprintf(buffer,sizeBuffer,"%f",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_Double(double value, char * buffer, size_t sizeBuffer)
+{
+	//TODO Special floating-point numbers
+	int res = snprintf(buffer,sizeBuffer,"%f",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus SOPC_JSON_BuiltInType_String(char * value, char * buffer, size_t sizeBuffer)
+{
+	if (value == NULL)
+	{
+		value = "NULL";
+	}
+	int res = snprintf(buffer,sizeBuffer,"\"%s\"",value);
+	if ( res <= 0 || (int) sizeBuffer  <= res)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+/*
+ *  Encode Variant Value in string format and put the result in the buffer
+ *
+ *  Return SOPC_STATUS_NOT_SUPPORTED, if the type to encode isn't supported
+ *  Return SOPC_STATUS_OK, if data is encoded successfully
+ *
+ */
+static SOPC_ReturnStatus SOPC_JSON_Variant_Encode (const SOPC_Variant* variant, char * buffer,size_t size)
+{
+    switch (variant->BuiltInTypeId)
+    {
+    case SOPC_Boolean_Id:
+    	SOPC_JSON_BuiltInType_Boolean(variant->Value.Boolean,buffer,size);
+		break;
+    case SOPC_Float_Id:
+    	SOPC_JSON_BuiltInType_Float(variant->Value.Floatv,buffer,size);
+		break;
+    case SOPC_UInt16_Id:
+    	SOPC_JSON_BuiltInType_UInt16(variant->Value.Uint16,buffer,size);
+    	break;
+    case SOPC_Int16_Id:
+    	SOPC_JSON_BuiltInType_Int16(variant->Value.Int16,buffer,size);
+    	break;
+    case SOPC_UInt32_Id:
+    	SOPC_JSON_BuiltInType_UInt32(variant->Value.Uint32,buffer,size);
+    	break;
+    case SOPC_Int32_Id:
+    	SOPC_JSON_BuiltInType_Int32(variant->Value.Int32,buffer,size);
+    	break;
+    case SOPC_UInt64_Id:
+    	SOPC_JSON_BuiltInType_UInt64(variant->Value.Uint64,buffer,size);
+    	break;
+    case SOPC_Int64_Id:
+    	SOPC_JSON_BuiltInType_Int64(variant->Value.Int64,buffer,size);
+    	break;
+    case SOPC_Double_Id:
+    	SOPC_JSON_BuiltInType_Double(variant->Value.Doublev,buffer,size);
+    	break;
+    case SOPC_String_Id:
+    	SOPC_JSON_BuiltInType_String( (char*) variant->Value.String.Data,buffer,size);
+    	break;
+    default:
+    	return SOPC_STATUS_NOT_SUPPORTED;
+    	break;
+    }
+    return SOPC_STATUS_OK;
+}
+
+/*
+ *  Encode PublisherId in string format and put the result in the buffer
+ *
+ *  Return SOPC_STATUS_NOK, if encode fail
+ *  Return SOPC_STATUS_OK, if PublisherId is encoded successfully
+ *
+ */
+static SOPC_ReturnStatus SOPC_JSON_PublisherId_Encode (const SOPC_Dataset_LL_PublisherId* PubId, char * buffer, size_t size)
+{
+    switch (PubId->type)
+    {
+    case DataSet_LL_PubId_Byte_Id:
+    	SOPC_JSON_BuiltInType_Float(PubId->data.byte,buffer,size);
+		break;
+    case DataSet_LL_PubId_UInt16_Id:
+    	SOPC_JSON_BuiltInType_UInt16(PubId->data.uint16,buffer,size);
+    	break;
+    case DataSet_LL_PubId_UInt32_Id:
+    	SOPC_JSON_BuiltInType_UInt32(PubId->data.uint32,buffer,size);
+    	break;
+    case DataSet_LL_PubId_UInt64_Id:
+    	SOPC_JSON_BuiltInType_UInt64(PubId->data.uint64,buffer,size);
+    	break;
+    case DataSet_LL_PubId_String_Id:
+    	SOPC_JSON_BuiltInType_String((char*) PubId->data.string.Data,buffer,size);
+    	break;
+    default:
+    	return SOPC_STATUS_NOT_SUPPORTED;
+    	break;
+    }
+    return SOPC_STATUS_OK;
+}
+
+/*
+ * Encode DatasetMessage structure into a JSON format
+ */
+void JSON_Encode_NetworkMessage (SOPC_Buffer * pPayloadJSON, char * MessageId, char * PublisherId)
+{
+
+	SOPC_Buffer_Write (pPayloadJSON, &openingHook, 1);
+	//MessageId
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "MessageId",9);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)MessageId,strlen(MessageId));
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+	//MessageType
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"MessageType",11);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"ua-data",7);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+	//PublisherId
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"PublisherId",11);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)PublisherId,strlen(PublisherId));
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+	//Messages
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"Messages",8);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &openingSquareBracket,1);
+}
+
+/*
+ * Encode DatasetMessage structure into a JSON format
+ */
+void JSON_Encode_DataSetMessage (SOPC_Buffer * pPayloadJSON, uint16_t WriterId)
+{
+
+	char varWriterId [6] = "\0";
+
+	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "DataSetWriterId",15);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	int res = snprintf(varWriterId,5,"%u",WriterId);
+	SOPC_ASSERT(6 - res > 0 && res > 0);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varWriterId,strlen(varWriterId));
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+
+	//MessageType
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"MessageType",11);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"ua-keyframe",11);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+
+	//Payload
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Payload",7);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
+}
+
+/*
+ * Encode Variant into a JSON format
+ */
+void JSON_Encode_Variant (SOPC_Buffer * pPayloadJSON, const SOPC_Variant* variant)
+{
+	char varType [3] = "\0";
+	char varBody [100] = "\0";
+
+	//VariantName
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	//variant
+	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
+	//Type
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Type",4);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	int Type = variant->BuiltInTypeId;
+	sprintf(varType,"%d",Type);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varType,strlen(varType));
+	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
+	//Body
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Body",4);
+	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
+	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
+	SOPC_JSON_Variant_Encode(variant,varBody,100);
+	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varBody,strlen(varBody));
+	SOPC_Buffer_Write (pPayloadJSON, &closingHook,1);
+}
+
+/*
+ * Function which generate unique MessageId with GroupeId and DatasetMessageSequenceNumber(index) (JSON format)
+ *
+ * Return SOPC_STATUS_NOK if there is a problem in writing the buffer,
+ * Return SOPC_STATUS_OK otherwise
+ */
+static SOPC_ReturnStatus SOPC_Generate_MessageId_JSON(char * buffer, uint16_t sizeBuffer,uint16_t GroupeId,uint32_t index)
+{
+	int use = snprintf(buffer,sizeBuffer,"%u-%lu", GroupeId,index);
+	if ( use <= 0 || (int) sizeBuffer  <= use)
+	{
+		return SOPC_STATUS_NOK;
+	}
+	return SOPC_STATUS_OK;
+}
+
+/*
+ * Encode message Pub/Sub to send into JSON format
+ *
+ * Return the JSON file into a SOPC_Buffer
+ */
+SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message)
+{
+	//DatasetMessageSequenceNumber
+	const SOPC_Dataset_LL_DataSetMessage* dsm0 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
+	uint16_t DatasetMessageSequenceNumber = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm0);
+	uint16_t GroupeId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(message);
+	char MessageId[100] = "\0";
+	SOPC_Generate_MessageId_JSON(MessageId,100,GroupeId,DatasetMessageSequenceNumber);
+
+	//PublisherId
+	const SOPC_Dataset_LL_NetworkMessage_Header * Header = SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(message);
+	const SOPC_Dataset_LL_PublisherId * PublisherId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(Header);
+	char bufferPubId[100];
+	SOPC_JSON_PublisherId_Encode(PublisherId, bufferPubId, 100);
+
+	SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+
+    JSON_Encode_NetworkMessage(buffer,MessageId,bufferPubId);
+
+	size_t nDsm = (size_t) SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
+
+    for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
+    {
+    	const SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
+    	uint16_t WriterId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+
+    	JSON_Encode_DataSetMessage(buffer,WriterId);
+
+    	uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+        for (uint16_t iField = 0; iField < nbFields; ++iField)
+        {
+        	const SOPC_Variant * var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm,iField);
+        	JSON_Encode_Variant(buffer,var);
+
+        	//add comma if it's not the last Variant
+        	if ( (iField + 1) < nbFields)
+        	{
+        	SOPC_Buffer_Write (buffer, &comma,1);
+        	}
+        }
+
+        //close Payload on JSON file
+        SOPC_Buffer_Write (buffer, &closingHook,1);
+
+        //close DataSetMessage on JSON file
+        SOPC_Buffer_Write (buffer, &closingHook,1);
+
+    	//add comma if it's not the last DatasetMessage
+    	if ( (iDsm + 1) < nDsm)
+    	{
+    	SOPC_Buffer_Write (buffer, &comma,1);
+    	}
+
+    }
+    //closing NetworkMessage on JSON file
+    SOPC_Buffer_Write (buffer, &closingSquareBracket,1);
+    SOPC_Buffer_Write (buffer, &closingHook,1);
+
+	return buffer;
+
 }
 
 SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_PubSub_SecurityType* security)

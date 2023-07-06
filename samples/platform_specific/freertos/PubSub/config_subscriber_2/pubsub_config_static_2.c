@@ -16,7 +16,8 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
                                                            uint16_t groupId,
                                                            uint32_t groupVersion,
                                                            uint32_t publisherId,
-                                                           uint16_t nbDataSets)
+                                                           uint16_t nbDataSets,
+                                                           const char * topic)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     SOPC_ASSERT(readerGroup != NULL);
@@ -27,6 +28,15 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ASSERT(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     SOPC_ASSERT(allocSuccess);
+    if (NULL != topic)
+    {
+    	SOPC_ReaderGroup_Set_MqttTopic(readerGroup,topic);
+    }
+    else
+    {
+    	SOPC_ReaderGroup_Set_MqttTopic(readerGroup,SOPC_Compute_Default_MqttTopic(publisherId, groupId));
+    	//SOPC_ReaderGroup_Set_Default_MqttTopic(readerGroup, publisherId, groupId);
+    }
     
     return readerGroup;
 }
@@ -108,7 +118,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 14
         // GroupVersion = 1
         // PubId = 42
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, 14, 1, 42, 1);
+        // topic = NULL
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, 14, 1, 42, 1, NULL);
         alloc = NULL != readerGroup;
     }
     
@@ -142,7 +153,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupId = 15
         // GroupVersion = 1
         // PubId = 42
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1);
+        // topic = NULL
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 1, SOPC_SecurityMode_None, 15, 1, 42, 1, NULL);
         alloc = NULL != readerGroup;
     }
     

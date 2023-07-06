@@ -5,7 +5,7 @@
                 <variable nodeId="ns=1;i=5" displayName="PubBoolean" dataType="Boolean"/>
             </dataset>
             <dataset writerId="51">
-                <variable nodeId="ns=2;i=6" displayName="PubUInt32" dataType="UInt32"/>
+                <variable nodeId="ns=2;i=6" displayName="PubFloat" dataType="Float"/>
                 <variable nodeId="ns=2;i=7" displayName="PubUInt16" dataType="UInt16"/>
             </dataset>
         </message>

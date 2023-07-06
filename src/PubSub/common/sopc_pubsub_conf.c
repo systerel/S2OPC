@@ -743,6 +743,17 @@ bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic)
     return (NULL != reader->mqttTopic);
 }
 
+bool SOPC_Compute_Default_MqttTopic(uint64_t publisherId, uint16_t groupId, char * defaultTopic, uint8_t sizeMax)
+{
+    SOPC_ASSERT(NULL != defaultTopic);
+    SOPC_ASSERT(sizeMax > 1);
+    int res = snprintf(defaultTopic, sizeMax - 1, "%" PRIu32 ".%" PRIu16, publisherId, groupId);
+    //int res = snprintf(defaultTopic, sizeMax - 1, "%" PRIu64 ".%" PRIu16, publisherId, groupId); embarqué
+    defaultTopic[res - 1] = '\0';
+    return res > 0 && res != sizeMax;
+}
+
+/*
 bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t groupId)
 {
     char charPublisherId[SOPC_MAX_LENGTH_UINT64_TO_STRING];
@@ -787,7 +798,7 @@ bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t p
 
     if (res >= 0)
     {
-        /* snprintf guarrantees the strings terminate by \0 */
+        // snprintf guarrantees the strings terminate by \0
         defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
         strncat(defaultTopic, dot, lengthDot);
         strncat(defaultTopic, charGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
@@ -806,6 +817,7 @@ bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t p
     SOPC_Free(defaultTopic);
     return result;
 }
+*/
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
                                                      SOPC_SubscribedDataSetType type,
@@ -1036,6 +1048,7 @@ bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic)
     return (NULL != writer->mqttTopic);
 }
 
+/*
 bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t publisherId, uint16_t writerGroupId)
 {
     char charPublisherId[SOPC_MAX_LENGTH_UINT64_TO_STRING];
@@ -1080,7 +1093,7 @@ bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t p
 
     if (res >= 0)
     {
-        /* snprintf guarrantees the strings terminate by \0 */
+        // snprintf guarrantees the strings terminate by \0
         defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
         strncat(defaultTopic, dot, lengthDot);
         strncat(defaultTopic, charWriterGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
@@ -1099,6 +1112,7 @@ bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t p
     SOPC_Free(defaultTopic);
     return result;
 }
+*/
 
 /* Expected only for acyclic publisher */
 double SOPC_WriterGroup_Get_KeepAlive(const SOPC_WriterGroup* group)
@@ -1305,11 +1319,11 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
 {
     if (NULL != group)
     {
-//        for (int i = 0; i < group->dataSetReaders_length; i++)
-//        {
-//            SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
+        for (int i = 0; i < group->dataSetReaders_length; i++)
+        {
+            SOPC_DataSetMetaData_Clear(&(group->dataSetReaders[i].metaData));
 //            SOPC_Free(group->dataSetReaders[i].mqttTopic);
-//        }
+        }
         group->dataSetReaders_length = 0;
         SOPC_Free(group->dataSetReaders);
         SOPC_Free(group->mqttTopic);

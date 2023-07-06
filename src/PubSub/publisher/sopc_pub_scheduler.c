@@ -190,6 +190,7 @@ static void* thread_start_publish(void* arg);
  * /param context The message context to send
  */
 static void MessageCtx_send_publish_message(MessageCtx* context);
+static void MessageCtx_send_publish_message_JSON(MessageCtx* context);
 
 /**
  * @brief Send keep alive message for acyclic publisher
@@ -297,15 +298,25 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         if (NULL == topic)
         {
             SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
-            if (SOPC_WriterGroup_Set_Default_MqttTopic(group, pubId.data.uint, SOPC_WriterGroup_Get_Id(group)))
-            {
-                context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
-            }
+        	char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
+    		if ( SOPC_Compute_Default_MqttTopic(pubId.data.uint, SOPC_WriterGroup_Get_Id(group), defaultTopic, LENGTH_MAX_DEFAULT_TOPIC + 1) )
+    		{
+                if (SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic))
+                {
+                    context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
+                }
+                else
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
+                    return false;
+                }
+    		}
             else
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to Compute default MQTT topic value");
                 return false;
             }
+            SOPC_Free(defaultTopic);
         }
         else
         {
@@ -438,6 +449,63 @@ static uint64_t SOPC_PubScheduler_Nb_Message(SOPC_PubSubConfiguration* config)
     return result;
 }
 
+/*
+static void MessageCtx_send_publish_message_JSON(MessageCtx* context)
+{
+	uint8_t closingSquareBracket = 93;
+	uint8_t closingHook = 125;
+	uint8_t comma = 44;
+
+	SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    //SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode();
+	size_t nDsm = (size_t) SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(context->message);
+
+    JSON_Encode_NetworkMessage(buffer);
+
+    for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
+    {
+    	SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(context->message, (int) iDsm);
+    	uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+
+    	JSON_Encode_DataSetMessage(buffer);
+
+        for (size_t iField = 0; iField < nbFields; ++iField)
+        {
+        	//JSON_Encode_Variant(buffer);
+
+        	//add comma if it's not the last Variant
+        	if ( (iField + 1) < nbFields)
+        	{
+        	SOPC_Buffer_Write (buffer, &comma,1);
+        	}
+        }
+
+        //close Payload on JSON file
+        SOPC_Buffer_Write (buffer, &closingHook,1);
+
+        //close DataSetMessage on JSON file
+        SOPC_Buffer_Write (buffer, &closingHook,1);
+
+    	//add comma if it's not the last DatasetMessage
+    	if ( (iDsm + 1) < nDsm)
+    	{
+    	SOPC_Buffer_Write (buffer, &comma,1);
+    	}
+
+    }
+    //close DataSetMessage on JSON file
+    SOPC_Buffer_Write (buffer, &closingSquareBracket,1);
+    SOPC_Buffer_Write (buffer, &closingHook,1);
+
+    context->transport->mqttTopic = context->mqttTopic;
+
+    context->transport->pFctSend(context->transport, buffer);
+    SOPC_Buffer_Delete(buffer);
+    buffer = NULL;
+
+}
+*/
+
 static void MessageCtx_send_publish_message(MessageCtx* context)
 {
     /* Steps to send a message
@@ -553,7 +621,8 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
             pubSchedulerCtx.sequenceNumber++;
         }
-        SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+        //SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+        SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(message);
         if (NULL != security)
         {
             SOPC_Free(security->msgNonceRandom);
@@ -643,6 +712,7 @@ static void* thread_start_publish(void* arg)
             else
             {
                 MessageCtx_send_publish_message(context);
+                //MessageCtx_send_publish_message_JSON(context);
                 /* Re-schedule this message */
                 SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
                                                  context->publishingOffsetUs);
