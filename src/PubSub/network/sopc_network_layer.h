@@ -47,6 +47,29 @@ typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_Publishe
                                                         const uint16_t writerId,
                                                         const uint16_t receivedSN);
 
+
+/*
+ * Encode DatasetMessage structure into a JSON format
+ */
+void JSON_Encode_NetworkMessage (SOPC_Buffer * pPayloadJSON, char * MessageId,char * PublisherId);
+
+/*
+ * Encode DatasetMessage structure into a JSON format
+ */
+void JSON_Encode_DataSetMessage (SOPC_Buffer * pPayloadJSON, uint16_t WriterId);
+
+/*
+ * Encode Variant into a JSON format
+ */
+void JSON_Encode_Variant (SOPC_Buffer * pPayloadJSON,const SOPC_Variant* variant);
+
+/*
+ * Encode message Pub/Sub to send into JSON format
+ *
+ * Return the JSON file into a SOPC_Buffer
+ */
+SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message);
+
 /**
  * \brief Encode a NetworkMessage with UADP Mapping
  *

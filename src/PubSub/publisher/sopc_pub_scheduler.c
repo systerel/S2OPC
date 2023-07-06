@@ -562,7 +562,8 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
                 SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "# ERROR: Publisher failed to get security keys \n");
             }
         }
-        SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+        //SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+        SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(message);
         if (NULL != security)
         {
             SOPC_Free(security->msgNonceRandom);
