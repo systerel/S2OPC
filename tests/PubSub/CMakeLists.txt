@@ -288,6 +288,14 @@ if(UNIX)
     "${CMAKE_CURRENT_SOURCE_DIR}/bin_interop/open62541_sub")
   set_tests_properties("interop::open62541_sub" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_sub_test.tap")
 
+  add_test(NAME "interop::open62541_pub_encrypted"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/scripts/with-publisher.py"
+  "--publisher-cmd" "${S2OPC_ROOT_PATH}/tests/PubSub/bin_interop/open62541_pub_encrypted"
+  $<TARGET_FILE:interop_sub_test> "encrypted")
+  set_tests_properties("interop::open62541_pub_encrypted" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_encrypted_interop.tap")
 endif()
 
 ## S2OPC fuzzing tests: to be run manually ##
