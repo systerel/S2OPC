@@ -1536,7 +1536,22 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     /* List length already check in SOPC_KeyManager_CertificateList_FindCertInList */
     SOPC_ASSERT(NULL == mbed_cert_list->next);
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
-    mbed_cert_list->next = bIsTrusted ? &pPKI->pAllCerts->crt : &pPKI->pTrustedCerts->crt;
+    SOPC_CertificateList* pLinkCert = NULL;
+    if (bIsTrusted)
+    {
+        if (NULL != pPKI->pAllCerts)
+        {
+            pLinkCert = pPKI->pAllCerts;
+        }
+    }
+    else
+    {
+        if (NULL != pPKI->pTrustedCerts)
+        {
+            pLinkCert = pPKI->pTrustedCerts;
+        }
+    }
+    mbed_cert_list->next = &pLinkCert->crt;
     /* Verify the certificate chain */
     if (SOPC_STATUS_OK == status)
     {
@@ -1918,7 +1933,9 @@ static void get_list_stats(SOPC_CertificateList* pCert, uint32_t* caCount, uint3
 static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
                                      SOPC_CertificateList* pIssuerCerts,
                                      SOPC_CRLList* pTrustedCrl,
-                                     SOPC_CRLList* pIssuerCrl)
+                                     SOPC_CRLList* pIssuerCrl,
+                                     bool* bTrustedCaFound,
+                                     bool* bIssuerCaFound)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     /* Trusted stats */
@@ -1930,6 +1947,8 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     uint32_t issuer_ca_count = 0;
     uint32_t issuer_list_length = 0;
     uint32_t issuer_root_count = 0;
+    *bTrustedCaFound = false;
+    *bIssuerCaFound = false;
 
     if (NULL == pTrustedCerts)
     {
@@ -1985,6 +2004,8 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
                                  "> PKI creation warning: no root (CA) defined: only trusted self-signed issued "
                                  "certificates will be accepted without possibility to revoke them (no CRL).");
     }
+    *bTrustedCaFound = 0 != trusted_ca_count;
+    *bIssuerCaFound = 0 != issuer_ca_count;
     return status;
 }
 
@@ -2006,6 +2027,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     SOPC_CRLList* tmp_pTrustedCrl = NULL;           /* CRLs of trusted intermediate CA and trusted root CA */
     SOPC_CertificateList* tmp_pIssuerCerts = NULL;  /* issuer intermediate CA + issuer root CA */
     SOPC_CRLList* tmp_pIssuerCrl = NULL;            /* CRLs of issuer intermediate CA and issuer root CA */
+    bool bTrustedCaFound = false;
+    bool bIssuerCaFound = false;
 
     if (NULL == ppPKI)
     {
@@ -2023,7 +2046,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     */
     if (SOPC_STATUS_OK == status)
     {
-        status = check_lists(pTrustedCerts, pIssuerCerts, pTrustedCrl, pIssuerCrl);
+        status = check_lists(pTrustedCerts, pIssuerCerts, pTrustedCrl, pIssuerCrl, &bTrustedCaFound, &bIssuerCaFound);
         if (SOPC_STATUS_OK != status)
         {
             return status;
@@ -2031,15 +2054,15 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     }
     /* Copy the lists */
     status = SOPC_KeyManager_Certificate_Copy(pTrustedCerts, &tmp_pTrustedCerts);
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pTrustedCrl)
     {
         status = SOPC_KeyManager_CRL_Copy(pTrustedCrl, &tmp_pTrustedCrl);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pIssuerCerts)
     {
         status = SOPC_KeyManager_Certificate_Copy(pIssuerCerts, &tmp_pIssuerCerts);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pIssuerCrl)
     {
         status = SOPC_KeyManager_CRL_Copy(pIssuerCrl, &tmp_pIssuerCrl);
     }
@@ -2049,7 +2072,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     bool bIssuerCRL = false;
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != tmp_pTrustedCerts)
+        if (bTrustedCaFound)
         {
             status =
                 SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
@@ -2061,7 +2084,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL != tmp_pIssuerCerts)
+        if (bIssuerCaFound)
         {
             status = SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
         }
@@ -2092,7 +2115,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     {
         status = split_root_from_cert_list(&tmp_pTrustedCerts, &tmp_pTrustedRoots);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != tmp_pIssuerCerts)
     {
         status = split_root_from_cert_list(&tmp_pIssuerCerts, &tmp_pIssuerRoots);
     }
