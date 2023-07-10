@@ -618,6 +618,41 @@ START_TEST(functional_test_append_to_list)
 }
 END_TEST
 
+START_TEST(functional_test_pki_permissive)
+{
+    SOPC_PKIProviderNew* pPKI = NULL;
+    SOPC_ReturnStatus status = SOPC_PKIPermissiveNew_Create(&pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Validate anything */
+    status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, NULL, NULL, NULL);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Disable SetStorePath */
+    status = SOPC_PKIProviderNew_SetStorePath("./unit_test_pki", pPKI);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    /* Disable WriteToStore */
+    status = SOPC_PKIProviderNew_WriteToStore(pPKI, true);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    /* Disable WriteOrAppendToList */
+    SOPC_CertificateList* tCrt = NULL;
+    SOPC_CertificateList* iCrt = NULL;
+    SOPC_CRLList* tCrl = NULL;
+    SOPC_CRLList* iCrl = NULL;
+    status = SOPC_PKIProviderNew_WriteOrAppendToList(pPKI, &tCrt, &tCrl, &iCrt, &iCrl);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    /* Disable UpdateFromList */
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &tCrt);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &tCrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProviderNew_UpdateFromList(&pPKI, NULL, tCrt, tCrl, NULL, NULL, true);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+
+    SOPC_KeyManager_Certificate_Free(tCrt);
+    SOPC_KeyManager_CRL_Free(tCrl);
+    SOPC_PKIProviderNew_Free(pPKI);
+}
+END_TEST
+
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
@@ -649,6 +684,7 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(functional, functional_test_from_store);
     tcase_add_test(functional, functional_test_write_to_list);
     tcase_add_test(functional, functional_test_append_to_list);
+    tcase_add_test(functional, functional_test_pki_permissive);
     suite_add_tcase(s, functional);
 
     return s;

@@ -439,6 +439,18 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
                                                      SOPC_PKIProviderNew** ppPKI);
 
 /**
+ * \brief  Creates a PKI Provider without security.
+ *
+ * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
+ *                   ::SOPC_PKIProviderNew_Free().
+ * \warning  Using this PKI is considered harmful for the security of the connection.
+ *           You can't export and update this PKI.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIPermissiveNew_Create(SOPC_PKIProviderNew** ppPKI);
+
+/**
  * \brief Create a leaf certificate profile from security policy to check certificate properties.
  *
  *        KeyUsage, extendedKeyUsage, URI and HostName of subjectAltName are not configured here then

@@ -716,6 +716,11 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 #define STR_ISSUERS_CERTS "/issuers/certs"
 #define STR_ISSUERS_CRL "/issuers/crl"
 
+typedef SOPC_ReturnStatus SOPC_FnValidateCert(const SOPC_PKIProviderNew* pPKI,
+                                              const SOPC_CertificateList* pToValidate,
+                                              const SOPC_PKI_Profile* pProfile,
+                                              uint32_t* error);
+
 /**
  * \brief The PKIProvider object for the Public Key Infrastructure.
  */
@@ -732,6 +737,8 @@ struct SOPC_PKIProviderNew
     SOPC_CertificateList* pAllCerts; /* Use to validate trusted certificate */
     SOPC_CertificateList* pAllRoots; /* Use to validate trusted certificate*/
     SOPC_CRLList* pAllCrl;
+    SOPC_FnValidateCert* pFnValidateCert;
+    bool isPermissive;
 };
 
 static const SOPC_PKI_KeyUsage_Mask g_appKU = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
@@ -1458,10 +1465,10 @@ static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProf
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
-                                                          const SOPC_CertificateList* pToValidate,
-                                                          const SOPC_PKI_Profile* pProfile,
-                                                          uint32_t* error)
+static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProviderNew* pPKI,
+                                                   const SOPC_CertificateList* pToValidate,
+                                                   const SOPC_PKI_Profile* pProfile,
+                                                   uint32_t* error)
 {
     *error = SOPC_CertificateValidationError_Unkown;
 
@@ -1588,6 +1595,35 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
 
     SOPC_Free(thumbprint);
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
+    return status;
+}
+
+static SOPC_ReturnStatus sopc_validate_anything(const SOPC_PKIProviderNew* pPKI,
+                                                const SOPC_CertificateList* pToValidate,
+                                                const SOPC_PKI_Profile* pProfile,
+                                                uint32_t* error)
+{
+    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(pProfile);
+    SOPC_UNUSED_ARG(error);
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProviderNew* pPKI,
+                                                          const SOPC_CertificateList* pToValidate,
+                                                          const SOPC_PKI_Profile* pProfile,
+                                                          uint32_t* error)
+{
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pPKI->pFnValidateCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = pPKI->pFnValidateCert(pPKI, pToValidate, pProfile, error);
     return status;
 }
 
@@ -2172,6 +2208,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
         pPKI->pAllRoots = tmp_pAllRoots;
         pPKI->pAllCrl = tmp_pAllCrl;
         pPKI->directoryStorePath = NULL;
+        pPKI->pFnValidateCert = &sopc_validate_certificate;
+        pPKI->isPermissive = false;
     }
     else
     {
@@ -2301,6 +2339,38 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromStore(const char* directoryStore
 
     SOPC_ReturnStatus status = pki_create_from_store(directoryStorePath, false, ppPKI);
     return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIPermissiveNew_Create(SOPC_PKIProviderNew** ppPKI)
+{
+    SOPC_PKIProviderNew* pPKI = NULL;
+
+    if (NULL == ppPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    pPKI = SOPC_Malloc(sizeof(SOPC_PKIProviderNew));
+
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    pPKI->pTrustedRoots = NULL;
+    pPKI->pTrustedCerts = NULL;
+    pPKI->pTrustedCrl = NULL;
+    pPKI->pIssuerRoots = NULL;
+    pPKI->pIssuerCerts = NULL;
+    pPKI->pIssuerCrl = NULL;
+    pPKI->pAllCerts = NULL;
+    pPKI->pAllRoots = NULL;
+    pPKI->pAllCrl = NULL;
+    pPKI->directoryStorePath = NULL;
+    pPKI->pFnValidateCert = &sopc_validate_anything;
+    pPKI->isPermissive = true;
+    *ppPKI = pPKI;
+    return SOPC_STATUS_OK;
 }
 
 static void sopc_pki_clear(SOPC_PKIProviderNew* pPKI)
@@ -2438,6 +2508,11 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_SetStorePath(const char* directoryStorePat
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (pPKI->isPermissive)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     /* Create if necessary the store */
     SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_mkdir(directoryStorePath);
     if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdir_res && SOPC_FileSystem_Creation_OK != mkdir_res)
@@ -2464,6 +2539,10 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProvider
                                                           SOPC_CRLList** ppIssuerCrl)
 {
     if (NULL == pPKI || NULL == ppTrustedCerts || NULL == ppTrustedCrl || NULL == ppIssuerCerts || NULL == ppIssuerCrl)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (pPKI->isPermissive)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2506,6 +2585,10 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteOrAppendToList(const SOPC_PKIProvider
 SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pPKI, const bool bEraseExistingFiles)
 {
     if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (pPKI->isPermissive)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2611,6 +2694,10 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_UpdateFromList(SOPC_PKIProviderNew** ppPKI
     SOPC_PKIProviderNew* pPKI = *ppPKI;
     /* Check parameters */
     if (NULL == pPKI)
+    {
+        return status;
+    }
+    if (pPKI->isPermissive)
     {
         return status;
     }
