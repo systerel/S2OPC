@@ -41,8 +41,11 @@
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
 #include "sopc_reader_layer.h"
+#include "sopc_sk_manager.h"
+#include "sopc_sk_provider.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
@@ -61,6 +64,83 @@ static int sleepCount = 20;
 static SOPC_PubSubConfiguration* configuration = NULL;
 static SOPC_PubSubConnection* subConnection = NULL;
 
+SOPC_SKManager* g_skmanager = NULL;
+
+SOPC_Byte signingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature] = {0};
+SOPC_Byte encryptingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey] = {0};
+SOPC_Byte keyNonce[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce] = {0};
+
+typedef enum
+{
+    SECU_NONE,
+    SECU_ENCRYPTED
+} subscriberSecurityMode;
+
+subscriberSecurityMode gSubSecuMode = SECU_NONE;
+
+SOPC_PubSub_SecurityType gSubSecurityType;
+
+static void set_subscriber_security_info(void)
+{
+    gSubSecurityType.groupKeys = SOPC_PubSubSKS_GetSecurityKeys(SOPC_PUBSUB_SKS_DEFAULT_GROUPID, 0);
+    gSubSecurityType.mode = SOPC_SecurityMode_SignAndEncrypt;
+    gSubSecurityType.provider = SOPC_CryptoProvider_CreatePubSub(SOPC_SecurityPolicy_PubSub_Aes256_URI);
+}
+
+static SOPC_SKManager* createSKmanager(void)
+{
+    /* Create Service Keys manager and set constant keys */
+    SOPC_SKManager* skm = SOPC_SKManager_Create();
+    SOPC_ASSERT(NULL != skm && "SOPC_SKManager_Create failed");
+    uint32_t nbKeys = 0;
+    SOPC_Buffer* keysBuffer = SOPC_Buffer_Create(sizeof(signingKey) + sizeof(encryptingKey) + sizeof(keyNonce));
+    SOPC_ReturnStatus status = (NULL == keysBuffer ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, signingKey, (uint32_t) sizeof(signingKey));
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, encryptingKey, (uint32_t) sizeof(encryptingKey));
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(keysBuffer, keyNonce, (uint32_t) sizeof(keyNonce));
+    }
+    SOPC_ByteString keys;
+    SOPC_ByteString_Initialize(&keys);
+    SOPC_String securityPolicyUri;
+    SOPC_String_Initialize(&securityPolicyUri);
+    if (SOPC_STATUS_OK == status)
+    {
+        nbKeys = 1;
+        // Set buffer as a byte string for API compatibility
+        keys.DoNotClear = true;
+        keys.Length = (int32_t) keysBuffer->length;
+        keys.Data = (SOPC_Byte*) keysBuffer->data;
+        // Set security policy
+        status = SOPC_String_AttachFromCstring(&securityPolicyUri, SOPC_SecurityPolicy_PubSub_Aes256_URI);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SKManager_SetKeys(skm, &securityPolicyUri, 1, &keys, nbKeys, UINT32_MAX, UINT32_MAX);
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_SKManager_Clear(skm);
+        SOPC_Free(skm);
+        skm = NULL;
+    }
+    SOPC_Buffer_Delete(keysBuffer);
+
+    return skm;
+}
+
 // Create connection, group and setup metadata so that message is accepted
 static void setupConnection(void)
 {
@@ -77,7 +157,21 @@ static void setupConnection(void)
     SOPC_PubSubConnection_Allocate_ReaderGroup_Array(subConnection, 1);
     subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 0);
 
-    SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_None);
+    /* PubSub Security Keys configuration */
+    g_skmanager = createSKmanager();
+    SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
+    SOPC_PubSubSKS_Init();
+    SOPC_PubSubSKS_SetSkManager(g_skmanager);
+
+    if (SECU_NONE == gSubSecuMode)
+    {
+        SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_None);
+    }
+    else
+    {
+        SOPC_ReaderGroup_Set_SecurityMode(subReader, SOPC_SecurityMode_SignAndEncrypt);
+        set_subscriber_security_info();
+    }
     SOPC_ReaderGroup_Allocate_DataSetReader_Array(subReader, 1);
     dsReader = SOPC_ReaderGroup_Get_DataSetReader_At(subReader, 0);
     SOPC_ReaderGroup_Set_GroupId(subReader, (uint16_t) 10);
@@ -97,12 +191,12 @@ static void setupConnection(void)
     SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
-    // Var 2
+    // Var 3
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
     SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Int16_Id);
-    // Var 2
+    // Var 4
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
     SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_Set_ValueRank(meta, -1);
@@ -129,6 +223,16 @@ static void printVariant(const SOPC_Variant* variant)
         break;
     default:
         printf("   - Variant type not managed: %d\n", (int) variant->BuiltInTypeId);
+    }
+}
+
+static void clear_setupConnection(void)
+{
+    if (NULL != g_skmanager)
+    {
+        SOPC_SKManager_Clear(g_skmanager);
+        SOPC_Free(g_skmanager);
+        g_skmanager = NULL;
     }
 }
 
@@ -239,6 +343,24 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
     return result;
 }
 
+static SOPC_PubSub_SecurityType* retrieve_security_info(uint32_t tokenId,
+                                                        const SOPC_Conf_PublisherId pubId,
+                                                        uint16_t writerGroupId)
+{
+    SOPC_UNUSED_ARG(tokenId);
+    SOPC_UNUSED_ARG(pubId);
+    SOPC_UNUSED_ARG(writerGroupId);
+
+    if (SECU_NONE == gSubSecuMode)
+    {
+        return NULL;
+    }
+    else
+    {
+        return &gSubSecurityType;
+    }
+}
+
 static void readyToReceive(void* sockContext, Socket sock)
 {
     SOPC_UNUSED_ARG(sockContext);
@@ -248,7 +370,7 @@ static void readyToReceive(void* sockContext, Socket sock)
     }
 
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
-        .pGetSecurity_Func = NULL,
+        .pGetSecurity_Func = retrieve_security_info,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .checkDataSetMessageSN_Func = NULL,
         .targetConfig = NULL};
@@ -286,12 +408,26 @@ static void tick(void* tickCtx)
     // printf("tick !\n");
 }
 
-int main(void)
+int main(int argc, char** argv)
 {
     Socket sock;
     SOPC_Socket_AddressInfo* listenAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
     SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
-
+    if (argc > 1)
+    {
+        if (0 == strncmp(argv[1], "none", 4))
+        {
+            gSubSecuMode = SECU_NONE;
+        }
+        else if (0 == strncmp(argv[1], "encrypted", 9))
+        {
+            gSubSecuMode = SECU_ENCRYPTED;
+        }
+        else
+        {
+            printf("Error: Security mode accepted are none or encrypted\n");
+        }
+    }
     setupConnection();
 
     SOPC_Helper_EndiannessCfg_Initialize();
@@ -327,6 +463,7 @@ int main(void)
     SOPC_UDP_SocketAddress_Delete(&listenAddr);
     SOPC_UDP_SocketAddress_Delete(&localAddr);
     SOPC_PubSubConfiguration_Delete(configuration);
+    clear_setupConnection();
 
     return returnCode;
 }
