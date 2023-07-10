@@ -222,12 +222,24 @@ The handler shall be built using ::SOPC_PubSourceVariableConfig_Create, by provi
 For a Subscriber application, a data target handler shall be defined to set the data from configured information in the DataSetReader.
 The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by providing a function with the signature ::SOPC_SetTargetVariables_Func, and shall then be provided on Subscriber start.
 
-\subsection pubsub_sks Configure local Key Bunch API
+\subsection pubsub_sks Configure SKS
 
-For Publisher and Subscriber applications a key bunch is used to permit encrypted/signed communication. The PubSub local Key Bunch API is provided through sopc_pubsub_local_sks.h .key files are loaded using the function ::SOPC_KeyBunch_init.
+For Publisher and Subscriber applications a Security Keys manager shall be defined using ::SOPC_PubSubSKS_SetSkManager to permit encrypted/signed communication.
 
-\note A Security Key Services (SKS) is being developed. Key bunch act as a stub to permit encrypted/signed PubSub communication until SKS is finished.
+Publisher and Subscriber schedulers will retrieve the keys directly from the Security Keys manager which in charge to store locally the keys.
+But in order to implement a complete SKS mechanism on Pub/Sub side, the following elements should also be configured to update the keys in the manager:
+- Security Keys Manager (see sopc_sk_manager.h): manages local storage of the keys retrieved from the Security Keys Provider, it should be created using ::SOPC_SKManager_Create.
+- Security Keys Provider (see sopc_sk_provider.h): source providing the Security Keys using Security Keys Services, it should implement a client connection calling the GetSecurityKeys method of the SKS server(s).
+  Several providers might be defined using ::SOPC_SKProvider_TryList_Create to have alternative SKS sources.
+- Security Keys Builder (see sopc_sk_builder.h): provides update function to retrieve keys from the Security Keys Provider and fills the Security Keys Manager.
+  ::SOPC_SKBuilder_Setter_Create should be used to create a builder replacing all keys on update.
+- Security Keys Scheduler (see sopc_sk_scheduler.h): schedules the periodic update of keys retrieved using the builder.
+  ::SOPC_SKscheduler_Create should be used to create the scheduler, then ::SOPC_SKscheduler_AddTask should be called to configure the task with defined Security Keys Builder, Provider and Manager.
+  And finally ::SOPC_SKscheduler_Start should be called to start the scheduler task updating the keys.
 
+Note: Security Keys manager might be configured to stub connection to a real SKS server by using local keys files or data updated externally.
+
+The [`samples/PubSub_ClientServer/pubsub_server/pubsub.c`](https://gitlab.com/systerel/S2OPC/-/blob/master/samples/PubSub_ClientServer/pubsub_server/pubsub.c) provides an example of implementation using Security Key Service with the described elements.
 
 \subsection pubsub_lifecycle PubSub lifecycle
 

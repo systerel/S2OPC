@@ -73,7 +73,7 @@ SOPC_Buffer* SOPC_PubSub_Security_Encrypt(const SOPC_PubSub_SecurityType* securi
  *
  * \param keys object containing crypto function and keys to encrypt.
  * \param src buffer to decrypt. Data to decrypt starts from current position of this buffer.
- * \param size number of byte to decrypt. Remaing byte of the given buffer should be equal or greater.
+ * \param size number of byte to decrypt. Remaining byte of the given buffer should be equal or greater.
  * \return If succeed, the returned buffer contains only the decrypted payload. Otherwise return NULL.
  */
 SOPC_Buffer* SOPC_PubSub_Security_Decrypt(const SOPC_PubSub_SecurityType* keys, SOPC_Buffer* src, uint32_t size);
