@@ -1463,46 +1463,65 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
                                                           const SOPC_PKI_Profile* pProfile,
                                                           uint32_t* error)
 {
+    *error = SOPC_CertificateValidationError_Unkown;
+
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    *error = SOPC_CertificateValidationError_Unkown;
+    size_t listLength = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pToValidate, &listLength);
+    if (1 != listLength || SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CertificateList* pToValidateCpy = NULL;
+    status = SOPC_KeyManager_Certificate_Copy(pToValidate, &pToValidateCpy);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
     bool bIsTrusted = false;
-    mbedtls_x509_crt crt = pToValidate->crt;
+    mbedtls_x509_crt crt = pToValidateCpy->crt;
     bool bIsSelfSign = false;
-    SOPC_ReturnStatus status = cert_is_self_sign(&crt, &bIsSelfSign);
-    if (SOPC_STATUS_NOK == status)
+    char* thumbprint = NULL;
+    status = cert_is_self_sign(&crt, &bIsSelfSign);
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_INVALID_STATE;
+        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
+        if (NULL == thumbprint)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
     }
-    char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
-    if (NULL == thumbprint)
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    /* CA certificates that are not roots are always rejected */
-    if (pToValidate->crt.ca_istrue && !bIsSelfSign)
-    {
-        *error = SOPC_CertificateValidationError_UseNotAllowed;
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : certificate thumbprint %s is not a root CA root", thumbprint);
-        status = SOPC_STATUS_NOK;
+        /* CA certificates that are not roots are always rejected */
+        if (pToValidateCpy->crt.ca_istrue && !bIsSelfSign)
+        {
+            *error = SOPC_CertificateValidationError_UseNotAllowed;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : certificate thumbprint %s is not a root CA root",
+                                   thumbprint);
+            status = SOPC_STATUS_NOK;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
         /* If CA root and backward interoperability */
-        if (pToValidate->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
+        if (pToValidateCpy->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
         {
             /* Root is trusted? */
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidate, &bIsTrusted);
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidateCpy, &bIsTrusted);
         }
 
-        if (!pToValidate->crt.ca_istrue)
+        if (!pToValidateCpy->crt.ca_istrue)
         {
             /* Cert is trusted? */
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidate, &bIsTrusted);
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidateCpy, &bIsTrusted);
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -1510,7 +1529,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
         /* Apply verification on the certificate */
         if (pProfile->bApplyLeafProfile)
         {
-            status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidate, pProfile->leafProfile, error);
+            status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, error);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -1528,30 +1547,27 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
     SOPC_CRLList* cert_crl = pPKI->pAllCrl;
     /* Assumes that mbedtls does not modify the certificates */
     mbedtls_x509_crt* mbed_ca_root = (mbedtls_x509_crt*) (NULL != trust_list ? &trust_list->crt : NULL);
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidate->crt);
+    mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-
-    /* List length already check in SOPC_KeyManager_CertificateList_FindCertInList */
+    /* List length already check in SOPC_KeyManager_Certificate_GetListLength */
     SOPC_ASSERT(NULL == mbed_cert_list->next);
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
-    SOPC_CertificateList* pLinkCert = NULL;
+    mbedtls_x509_crt* pLinkCert = NULL;
     if (bIsTrusted)
     {
         if (NULL != pPKI->pAllCerts)
         {
-            pLinkCert = pPKI->pAllCerts;
+            pLinkCert = &pPKI->pAllCerts->crt;
         }
     }
     else
     {
         if (NULL != pPKI->pTrustedCerts)
         {
-            pLinkCert = pPKI->pTrustedCerts;
+            pLinkCert = &pPKI->pTrustedCerts->crt;
         }
     }
-    mbed_cert_list->next = &pLinkCert->crt;
+    mbed_cert_list->next = pLinkCert;
     /* Verify the certificate chain */
     if (SOPC_STATUS_OK == status)
     {
@@ -1567,10 +1583,11 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
             status = SOPC_STATUS_NOK;
         }
     }
-    /* Unlink mbed_cert_list, otherwise destroying the pToValidate will also destroy trusted or untrusted links */
+    /* Unlink mbed_cert_list, otherwise destroying the pToValidateCpy will also destroy trusted or untrusted links */
     mbed_cert_list->next = NULL;
 
     SOPC_Free(thumbprint);
+    SOPC_KeyManager_Certificate_Free(pToValidateCpy);
     return status;
 }
 
