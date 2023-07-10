@@ -121,7 +121,7 @@ static void SOPC_SubScheduler_Pub_Ctx_Clear(SOPC_SubScheduler_Security_Pub_Ctx* 
  * Search in Subscriber security context the data associated a publisher.
  * If no context is found, it means the subscriber is not configured to manage security from this publisher
  *
- * \param tokenId publisher id of a received message
+ * \param pubId publisher id of a received message
  * \return a context related to a publisher or NULL if not found
  */
 static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(const SOPC_Conf_PublisherId pubId);
