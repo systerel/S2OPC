@@ -75,6 +75,7 @@ s2opc_wrapper_subscribe.tap'
 
 PUBSUB_TAP_FILES='interop_pub_test.tap
 interop_sub_test.tap
+interop_pub_encrypted_interop.tap
 ll_multi_pub_sub_test.tap
 ll_pub_sub_conf_test.tap
 ll_pub_sub_test.tap
