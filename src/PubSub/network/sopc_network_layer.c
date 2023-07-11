@@ -1607,8 +1607,8 @@ static SOPC_Conf_PublisherId Network_Layer_Convert_PublisherId(const SOPC_Datase
     SOPC_Conf_PublisherId result;
     if (NULL == src)
     {
-        result.type = SOPC_Null_PublisherId;
-        return result;
+        static const SOPC_Conf_PublisherId nullPubId = {.type = SOPC_Null_PublisherId};
+        return nullPubId;
     }
 
     switch (src->type)
