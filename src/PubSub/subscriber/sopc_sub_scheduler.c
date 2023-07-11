@@ -282,8 +282,17 @@ static void set_new_state(SOPC_PubSubState new)
     schedulerCtx.state = new;
 }
 
-/* Get all topics from each data set reader and store it in an array, inform number of subscription topic on parameter
- * nbTopic */
+/*
+ * /brief Get all topics from each ReaderGroup and store it in an array.
+ * If the mqttTopic isn't defined in a ReaderGroup, it is filled with the defaultTopic
+ * (see SOPC_Allocate_MQTT_DefaultTopic()) and stored in the array.
+ * Inform number of subscription topic on parameter nbTopic.
+ *
+ * /param topic : Array of pointer storing mqttTopic
+ * /param nbTopic : number of subscription topic
+ * /param connection : PubSubConnection information
+ * /param nbReaderGroups : Number of ReaderGroups
+ */
 static void get_mqtt_topic_from_ReaderGroup(const char** topic,
                                             uint16_t* nbTopic,
                                             SOPC_PubSubConnection* connection,
@@ -292,9 +301,23 @@ static void get_mqtt_topic_from_ReaderGroup(const char** topic,
     for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
     {
         SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
-        uint8_t nbDataSetReader = SOPC_ReaderGroup_Nb_DataSetReader(group);
-        *nbTopic = (uint16_t)(*nbTopic + (uint16_t) nbDataSetReader);
-        topic[rg_i] = SOPC_ReaderGroup_Get_MqttTopic(group);
+        const SOPC_Conf_PublisherId* PubId = SOPC_ReaderGroup_Get_PublisherId(group);
+        SOPC_ASSERT(nbTopic != NULL);
+        (*nbTopic)++;
+        const char* topic_buf = SOPC_ReaderGroup_Get_MqttTopic(group);
+        if (NULL != topic_buf)
+        {
+            topic[rg_i] = topic_buf;
+        }
+        else
+        {
+            char* defaultTopic = SOPC_Allocate_MQTT_DefaultTopic(PubId, SOPC_ReaderGroup_Get_GroupId(group));
+            SOPC_ReaderGroup_Set_MqttTopic(group, defaultTopic); // This function copies defaultTopic to another string
+            topic[rg_i] =
+                SOPC_ReaderGroup_Get_MqttTopic(group); // We therefore need to give the new pointer used in the
+                                                       // WriterGroup, which will be freed with WriterGroup.
+            SOPC_Free(defaultTopic);
+        }
     }
 }
 

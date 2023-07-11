@@ -292,35 +292,20 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->transport = ctx;
     if (NULL != ctx->mqttClient)
     {
-        /* If no topic has been set by user a default one is used */
         const char* topic = SOPC_WriterGroup_Get_MqttTopic(group);
-        if (NULL == topic)
+        if (NULL != topic)
         {
-            SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
-            char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
-            if (SOPC_Compute_Default_MqttTopic(pubId.data.uint, SOPC_WriterGroup_Get_Id(group), defaultTopic,
-                                               LENGTH_MAX_DEFAULT_TOPIC + 1))
-            {
-                if (SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic))
-                {
-                    context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
-                }
-                else
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set default MQTT topic value");
-                    return false;
-                }
-            }
-            else
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to Compute default MQTT topic value");
-                return false;
-            }
-            SOPC_Free(defaultTopic);
+            context->mqttTopic = topic;
         }
         else
         {
-            context->mqttTopic = topic;
+            /* If no topic has been set by user a default one is used */
+            char* defaultTopic = SOPC_Allocate_MQTT_DefaultTopic(&pubId, SOPC_WriterGroup_Get_Id(group));
+            SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic); // This function copies defaultTopic to another string
+            context->mqttTopic =
+                SOPC_WriterGroup_Get_MqttTopic(group); // We therefore need to give the new pointer used in the
+                                                       // WriterGroup, which will be freed with WriterGroup.
+            SOPC_Free(defaultTopic);
         }
     }
     else

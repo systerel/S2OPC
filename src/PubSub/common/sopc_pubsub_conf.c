@@ -736,54 +736,38 @@ const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader)
     return reader->mqttTopic;
 }
 
-bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic)
+void SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic)
 {
-    SOPC_ASSERT(NULL != topic);
-    reader->mqttTopic = SOPC_PubSub_String_Copy(topic);
-    return (NULL != reader->mqttTopic);
+    SOPC_ASSERT(NULL != reader);
+    if (NULL == topic)
+    {
+        reader->mqttTopic = NULL;
+    }
+    else
+    {
+        reader->mqttTopic = SOPC_PubSub_String_Copy(topic);
+        SOPC_ASSERT(NULL != reader->mqttTopic);
+    }
 }
 
-bool SOPC_Compute_Default_MqttTopic(uint64_t publisherId, uint16_t groupId, char* defaultTopic, uint8_t sizeMax)
+char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, uint16_t groupId)
 {
-    char charPublisherId[SOPC_MAX_LENGTH_UINT64_TO_STRING];
-    char charGroupId[SOPC_MAX_LENGTH_UINT16_TO_STRING];
-    const char* dot = ".";
-
-    memset(charPublisherId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
-    memset(charGroupId, 0, SOPC_MAX_LENGTH_UINT16_TO_STRING);
-
+    SOPC_ASSERT(NULL != publisherId);
+    char* defaultTopic = NULL;
     int res = 0;
-    res = snprintf(charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING, "%" PRIu64, publisherId);
 
-    if (res < 0)
+    if (SOPC_UInteger_PublisherId == publisherId->type)
     {
-        defaultTopic = NULL;
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Failed to convert publisherId to string with error value %d",
-                                 errno);
+        defaultTopic =
+            SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char)); // + 1 to store the terminating null character
+        SOPC_ASSERT(NULL != defaultTopic);
+        res = snprintf(defaultTopic, LENGTH_MAX_DEFAULT_TOPIC + 1, "%" PRIu64 ".%" PRIu16, publisherId->data.uint,
+                       groupId);
     }
-    else
-    {
-        res = snprintf(charGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING, "%d", groupId);
-        if (res < 0)
-        {
-            defaultTopic = NULL;
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                     "Failed to convert writerGroupId to string with error value %d", errno);
-        }
-    }
-
-    if (res >= 0 && sizeMax >= LENGTH_MAX_DEFAULT_TOPIC + 1)
-    {
-        /* snprintf guarrantees the strings terminate by \0 */
-        defaultTopic = strncpy(defaultTopic, charPublisherId, SOPC_MAX_LENGTH_UINT64_TO_STRING);
-        strncat(defaultTopic, dot, LENGTH_DOT);
-        strncat(defaultTopic, charGroupId, SOPC_MAX_LENGTH_UINT16_TO_STRING);
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    SOPC_ASSERT(SOPC_String_PublisherId != publisherId->type); // Not handled in current version
+    SOPC_ASSERT(NULL != defaultTopic);
+    SOPC_ASSERT(res > 0 && res < LENGTH_MAX_DEFAULT_TOPIC + 1);
+    return defaultTopic;
 }
 
 bool SOPC_DataSetReader_Allocate_FieldMetaData_Array(SOPC_DataSetReader* reader,
@@ -1008,11 +992,18 @@ const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer)
     return writer->mqttTopic;
 }
 
-bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic)
+void SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic)
 {
-    SOPC_ASSERT(NULL != topic);
-    writer->mqttTopic = SOPC_PubSub_String_Copy(topic);
-    return (NULL != writer->mqttTopic);
+    SOPC_ASSERT(NULL != writer);
+    if (NULL == topic)
+    {
+        writer->mqttTopic = NULL;
+    }
+    else
+    {
+        writer->mqttTopic = SOPC_PubSub_String_Copy(topic);
+        SOPC_ASSERT(NULL != writer->mqttTopic);
+    }
 }
 
 /* Expected only for acyclic publisher */

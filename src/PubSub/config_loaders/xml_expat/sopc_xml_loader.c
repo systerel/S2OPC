@@ -1053,10 +1053,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 allocSuccess = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, (uint8_t) msg->nb_datasets);
                 // msg->publisher_id ignored if present
 
-                if (NULL != msg->mqttTopic && allocSuccess)
-                {
-                    allocSuccess = SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
-                }
+                SOPC_WriterGroup_Set_MqttTopic(writerGroup, msg->mqttTopic);
+
                 for (uint8_t ids = 0; ids < msg->nb_datasets && allocSuccess; ids++)
                 {
                     struct sopc_xml_pubsub_dataset_t* ds = &msg->datasetArr[ids];
@@ -1110,22 +1108,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
                 SOPC_ReaderGroup_Set_GroupVersion(readerGroup, msg->groupVersion);
                 SOPC_ReaderGroup_Set_GroupId(readerGroup, msg->groupId);
-
                 SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id);
-
-                if (NULL != msg->mqttTopic && allocSuccess)
-                {
-                    allocSuccess = SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
-                }
-                else
-                {
-                    char* defaultTopic = SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char));
-                    bool res = SOPC_Compute_Default_MqttTopic(msg->publisher_id, msg->groupId, defaultTopic,
-                                                              LENGTH_MAX_DEFAULT_TOPIC + 1);
-                    SOPC_ASSERT(res);
-                    SOPC_ReaderGroup_Set_MqttTopic(readerGroup, defaultTopic);
-                    SOPC_Free(defaultTopic);
-                }
+                SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
 
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
                 allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) msg->nb_datasets);
