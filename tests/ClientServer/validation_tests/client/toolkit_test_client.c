@@ -49,6 +49,7 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 #define APPLICATION_URI "urn:S2OPC:localhost"
@@ -70,11 +71,8 @@ static const char* preferred_locale_ids[] = {"en-US", "fr-FR", NULL};
 #include "client_static_security_data.h"
 #include "server_static_security_data.h"
 #else
-// PKI trusted CA
-static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
-                                               NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
-static char* default_empty_cert_paths[] = {NULL};
+// PKI path
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 #endif // WITH_STATIC_SECURITY_DATA
 
 // User certificate path
@@ -299,28 +297,29 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
         SOPC_PKIProvider* pkiProvider = NULL;
 
 #ifdef WITH_STATIC_SECURITY_DATA
-        SOPC_SerializedCertificate* serializedCAcert = NULL;
-        SOPC_CRLList* serializedCAcrl = NULL;
+        SOPC_CertificateList* static_cacert = NULL;
+        SOPC_CRLList* static_crl = NULL;
 
         /* Load client certificates and key from C source files (no filesystem needed) */
         status = SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(sizeof(client_2k_cert), client_2k_cert,
                                                                  sizeof(client_2k_key), client_2k_key);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &static_cacert);
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_crl);
         }
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+            status = SOPC_PKIProvider_CreateFromList(static_cacert, static_crl, NULL, NULL, &pkiProvider);
         }
-        SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+        SOPC_KeyManager_Certificate_Free(static_cacert);
+        SOPC_KeyManager_CRL_Free(static_crl);
 #else // WITH_STATIC_SECURITY_DATA == false
 
         /* Load client certificate and key from files */
@@ -329,9 +328,7 @@ static SOPC_ReturnStatus Client_SetDefaultAppsAuthConfig(void)
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProviderStack_CreateFromPaths(
-                default_trusted_root_issuers, default_empty_cert_paths, default_empty_cert_paths,
-                default_empty_cert_paths, default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+            status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
         }
         if (SOPC_STATUS_OK != status)
         {

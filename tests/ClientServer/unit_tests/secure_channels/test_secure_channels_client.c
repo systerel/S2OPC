@@ -43,6 +43,8 @@
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
+
 /*
  * Expected arguments (based on arguments order, last arguments can be unused (default value used)):
  * 1) Security mode (default encrypt): "none", "sign" or "encrypt"
@@ -237,17 +239,9 @@ int main(int argc, char* argv[])
     }
 
     // Init PKI provider and parse certificate and private key
-    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");

@@ -37,6 +37,7 @@
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 
 #define UNEXPECTED_ERROR 1
@@ -229,14 +230,7 @@ int main(void)
     // Init PKI provider with certificate authority
     if (SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to create PKI\n");

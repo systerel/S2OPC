@@ -34,7 +34,6 @@
 
 #include "check_sc_rcv_helpers.h"
 #include "hexlify.h"
-#include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
@@ -63,31 +62,13 @@ static SOPC_Client_Config clientConfig;
 // Configuration SC idx provided on configuration (used also as socket / scIdx)
 uint32_t scConfigIdx = 0;
 
-static SOPC_PKIProvider pki;
-static int32_t pkiValidationAsked = false;
+static SOPC_PKIProvider* pki = NULL;
 static SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
 static SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
 static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
 {
     return Check_Client_Closed_SC(scConfigIdx, scConfigIdx, scConfigIdx, pendingRequestHandle, status);
-}
-
-static SOPC_ReturnStatus PKIStub_ValidateAnything(const SOPC_PKIProvider* pPKI,
-                                                  const SOPC_CertificateList* pToValidate,
-                                                  uint32_t* error)
-{
-    SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(pToValidate);
-    SOPC_UNUSED_ARG(error);
-
-    SOPC_Atomic_Int_Set(&pkiValidationAsked, true);
-    return SOPC_STATUS_OK;
-}
-
-static void PKIStub_Free(SOPC_PKIProvider* pPKI)
-{
-    SOPC_UNUSED_ARG(pPKI);
 }
 
 static void clearToolkit(void)
@@ -204,16 +185,11 @@ static void establishSC(void)
     // (we do not want to validate the loaded certificates since they may have expired)
     if (SOPC_STATUS_OK == status)
     {
-        // The pki function pointer shall be const after this init
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *((SOPC_PKIProvider_Free_Func**) (&pki.pFnFree)) = &PKIStub_Free;
-        *((SOPC_FnValidateCertificate**) (&pki.pFnValidateCertificate)) = &PKIStub_ValidateAnything;
-        SOPC_GCC_DIAGNOSTIC_RESTORE
-        pki.pTrustedIssuerRootsList = NULL;
-        pki.pIssuedCertsList = NULL;
-        pki.pUntrustedIssuerRootsList = NULL;
-        pki.pCertRevocList = NULL;
-        pki.pUserData = (uintptr_t) NULL;
+        status = SOPC_PKIPermissiveNew_Create(&pki);
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("SC_Rcv_Buffer Init: Failed to create PKI permissive\n");
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -250,7 +226,7 @@ static void establishSC(void)
     scConfig.peerAppCert = crt_srv;
     clientConfig.clientCertificate = crt_cli;
     clientConfig.clientKey = priv_cli;
-    clientConfig.clientPKI = &pki;
+    clientConfig.clientPKI = pki;
 
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
     ck_assert(scConfigIdx != 0);
@@ -344,9 +320,6 @@ static void establishSC(void)
     ck_assert(SOPC_STATUS_OK == status);
     printf("SC_Rcv_Buffer Init: Simulate correct OPN message response received\n");
 
-    /* Check PKI validate function was not called until OPN response sent */
-    ck_assert(false == SOPC_Atomic_Int_Get(&pkiValidationAsked));
-
     // Simulate OPN resp. message received on socket
     status = Simulate_Received_Message(
         scConfigIdx,
@@ -402,10 +375,6 @@ static void establishSC(void)
     ck_assert(NULL != serviceEvent);
     SOPC_Free(serviceEvent);
     serviceEvent = NULL;
-
-    /* Check the PKI validate function was called during OPN treatment */
-    ck_assert(true == SOPC_Atomic_Int_Get(&pkiValidationAsked));
-    SOPC_Atomic_Int_Set(&pkiValidationAsked, false);
 
     printf("SC_Rcv_Buffer: request to send an empty MSG and retrieve requestId associated\n");
     buffer = SOPC_Buffer_Create(1000); // Let 24 bytes reserved for the header
@@ -516,10 +485,6 @@ START_TEST(test_unexpected_opn_req_msg_replay)
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadTcpSecureChannelUnknown); // invalid SC ID == 0
     ck_assert(SOPC_STATUS_OK == status);
-
-    /* Check the PKI validate function was not called during OPN treatment
-     * Note: this is due to the fact that SC id == 0 whereas it should be the one defined by server previously */
-    ck_assert(false == SOPC_Atomic_Int_Get(&pkiValidationAsked));
 }
 END_TEST
 
@@ -567,10 +532,6 @@ START_TEST(test_unexpected_opn_resp_msg_replay)
 
     status = Check_Client_Closed_SC_Helper(OpcUa_BadSecurityChecksFailed); // invalid SN / request Id
     ck_assert(SOPC_STATUS_OK == status);
-
-    /* Check the PKI validate function was called during OPN treatment */
-    ck_assert(true == SOPC_Atomic_Int_Get(&pkiValidationAsked));
-    SOPC_Atomic_Int_Set(&pkiValidationAsked, false);
 }
 END_TEST
 

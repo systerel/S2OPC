@@ -47,6 +47,7 @@
 static bool cryptoDeactivated = false;
 
 #define NB_SECU_POLICY_CONFIGS 3
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 
 int main(int argc, char* argv[])
 {
@@ -212,17 +213,9 @@ int main(int argc, char* argv[])
     }
 
     // Init PKI provider and parse certificate and private key
-    // PKIConfig is just used to create the provider but only configuration of PKIType is useful here (paths not used)
     if (SOPC_STATUS_OK == status && cryptoDeactivated == false)
     {
-        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pki);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pki);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Stub_Server: Failed to create PKI\n");

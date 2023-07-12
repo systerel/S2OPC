@@ -45,12 +45,8 @@
 #define SRV_CERT_PATH "./server_public/server_4k_cert.der"
 // Client private key path
 #define CLI_KEY_PATH "./client_private/encrypted_client_4k_key.pem"
-
-// PKI trusted CA
-static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
-                                               NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
-static char* default_empty_cert_paths[] = {NULL};
+// Demo PKI path
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 
 static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
                                          SOPC_ClientConnectionEvent event,
@@ -102,9 +98,7 @@ START_TEST(test_anonymous)
 
     /* Create the PKI (Public Key Infrastructure) provider */
     SOPC_PKIProvider* pkiProvider = NULL;
-    status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, default_empty_cert_paths,
-                                                   default_empty_cert_paths, default_empty_cert_paths,
-                                                   default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+    status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pkiProvider);
     /* Set PKI provider as client PKI*/
@@ -160,9 +154,7 @@ START_TEST(test_username_password)
 
     /* Create the PKI (Public Key Infrastructure) provider */
     SOPC_PKIProvider* pkiProvider = NULL;
-    status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, default_empty_cert_paths,
-                                                   default_empty_cert_paths, default_empty_cert_paths,
-                                                   default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+    status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pkiProvider);
     /* Set PKI provider as client PKI*/

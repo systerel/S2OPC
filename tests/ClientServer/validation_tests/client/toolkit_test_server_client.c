@@ -52,6 +52,8 @@
 #include "test_results.h"
 #include "testlib_read_response.h"
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
+
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
@@ -77,11 +79,6 @@
 // Define number of read values in read request to force multi chunk use in request and response:
 // use max buffer size for 1 chunk and encoded size of a ReadValueId / DataValue which is 18 bytes in this test
 #define NB_READ_VALUES ((SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE / 18) + 1)
-
-static char* default_trusted_root_issuers[] = {"trusted/cacert.der", /* Demo CA */
-                                               NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
-static char* default_empty_cert_paths[] = {NULL};
 
 static int32_t endpointClosed = false;
 
@@ -180,9 +177,7 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
     SOPC_PKIProvider* pkiProvider = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, default_empty_cert_paths,
-                                                       default_empty_cert_paths, default_empty_cert_paths,
-                                                       default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -491,9 +486,7 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         SOPC_PKIProvider* pkiProvider = NULL;
-        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_root_issuers, default_empty_cert_paths,
-                                                       default_empty_cert_paths, default_empty_cert_paths,
-                                                       default_empty_cert_paths, default_revoked_certs, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);

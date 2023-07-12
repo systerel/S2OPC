@@ -104,28 +104,29 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
     {
         SOPC_PKIProvider* pkiProvider = NULL;
 
-        SOPC_SerializedCertificate* serializedCAcert = NULL;
-        SOPC_CRLList* serializedCAcrl = NULL;
+        SOPC_CertificateList* ca_cert = NULL;
+        SOPC_CRLList* crl = NULL;
 
         /* Load client/server certificates and server key from C source files (no filesystem needed) */
         status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                                  sizeof(server_2k_key), server_2k_key);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &ca_cert);
         }
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &crl);
         }
 
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+            status = SOPC_PKIProvider_CreateFromList(ca_cert, crl, NULL, NULL, &pkiProvider);
         }
-        SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+        SOPC_KeyManager_Certificate_Free(ca_cert);
+        SOPC_KeyManager_CRL_Free(crl);
 
         if (SOPC_STATUS_OK == status)
         {

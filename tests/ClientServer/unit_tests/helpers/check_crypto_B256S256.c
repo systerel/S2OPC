@@ -70,7 +70,6 @@ START_TEST(test_crypto_load_B256S256)
     ck_assert(NULL != profile->pFnAsymDecrypt);
     ck_assert(NULL != profile->pFnAsymSign);
     ck_assert(NULL != profile->pFnAsymVerify);
-    ck_assert(NULL != profile->pFnCertVerify);
 }
 END_TEST
 
@@ -986,7 +985,7 @@ START_TEST(test_crypto_asym_uri_B256S256)
 END_TEST
 
 // Fixtures for PKI: server.der certificate and CA
-static SOPC_SerializedCertificate* crt_ca = NULL;
+static SOPC_CertificateList* crt_ca = NULL;
 static SOPC_CRLList* crl = NULL;
 static SOPC_PKIProvider* pki = NULL;
 
@@ -999,34 +998,30 @@ static inline void setup_pki_stack(void)
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
     ck_assert(unhexlify(CA_CRT, der_ca, CA_CRT_LEN) == (int) (CA_CRT_LEN));
-    ck_assert(SOPC_KeyManager_SerializedCertificate_CreateFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
+    ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
               SOPC_STATUS_OK);
 
     crl = SOPC_UnhexlifyCRL(CA_CRL);
 
     // Creates PKI with ca
-    ck_assert(SOPC_PKIProviderStack_Create(crt_ca, crl, &pki) == SOPC_STATUS_OK);
+    ck_assert(SOPC_PKIProvider_CreateFromList(crt_ca, crl, NULL, NULL, &pki) == SOPC_STATUS_OK);
     SOPC_Free(der_ca);
 }
 
 static inline void teardown_pki_stack(void)
 {
     SOPC_PKIProvider_Free(&pki);
-    SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
+    SOPC_KeyManager_Certificate_Free(crt_ca);
+    SOPC_KeyManager_CRL_Free(crl);
 
     teardown_certificate();
 }
 
-START_TEST(test_pki_load_B256S256)
-{
-    ck_assert(NULL != pki->pFnValidateCertificate);
-}
-END_TEST
-
 START_TEST(test_pki_cert_validation_B256S256)
 {
     uint32_t errorStatus;
-    SOPC_ReturnStatus status = SOPC_CryptoProvider_Certificate_Validate(crypto, pki, crt_pub, &errorStatus);
+    SOPC_ReturnStatus status =
+        SOPC_CryptoProvider_Certificate_Validate(crypto, pki, SOPC_PKI_TYPE_CLIENT_APP, crt_pub, &errorStatus);
     // Checks that the PKI validates our server.pub with our cacert.der
     ck_assert_msg(status == SOPC_STATUS_OK, "Validation failed, is this a \"date\" problem?");
 }
@@ -1120,7 +1115,6 @@ Suite* tests_make_suite_crypto_B256S256(void)
 
     suite_add_tcase(s, tc_pki_stack);
     tcase_add_checked_fixture(tc_pki_stack, setup_pki_stack, teardown_pki_stack);
-    tcase_add_test(tc_pki_stack, test_pki_load_B256S256);
     tcase_add_test(tc_pki_stack, test_pki_cert_validation_B256S256);
 
     return s;

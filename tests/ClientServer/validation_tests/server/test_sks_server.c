@@ -49,27 +49,14 @@
 #else
 // Default certificate paths
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
+
 static char* default_server_cert = "server_public/server_2k_cert.der";
 static char* default_key_cert = "server_private/encrypted_server_2k_key.pem";
 
-static char* default_trusted_root_issuers[] = {"trusted/cacert.der", NULL};
-static char* default_trusted_intermediate_issuers[] = {NULL};
-
-static char* default_issued_certs[] = {NULL};
-static char* default_untrusted_root_issuers[] = {NULL};
-static char* default_untrusted_intermediate_issuers[] = {NULL};
-static char* default_revoked_certs[] = {"revoked/cacrl.der", NULL};
-
 // Default certificate paths for X509 Identity tokens
 
-static char* x509_Identity_trusted_root_issuers[] = {"trusted_usr/user_cacert.der", /* Demo CA */ NULL};
-
-static char* x509_Identity_trusted_intermediate_issuers[] = {NULL};
-
-static char* x509_Identity_issued_certs[] = {NULL};
-static char* x509_Identity_untrusted_root_issuers[] = {NULL};
-static char* x509_Identity_untrusted_intermediate_issuers[] = {NULL};
-static char* x509_Identity_revoked_certs[] = {"revoked_usr/user_cacrl.der", NULL};
+#define SOPC_USR_PKI_PATH "./S2OPC_Users_PKI"
 
 #endif // WITH_STATIC_SECURITY_DATA
 
@@ -302,28 +289,29 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
     SOPC_PKIProvider* pkiProvider = NULL;
 
 #ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_SerializedCertificate* serializedCAcert = NULL;
-    SOPC_CRLList* serializedCAcrl = NULL;
+    SOPC_CertificateList* static_cacert = NULL;
+    SOPC_CRLList* static_crl = NULL;
 
     /* Load client/server certificates and server key from C source files (no filesystem needed) */
     status = SOPC_HelperConfigServer_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &static_cacert);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_crl);
     }
 
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromList(static_cacert, static_crl, NULL, NULL, &pkiProvider);
     }
-    SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+    SOPC_KeyManager_Certificate_Free(static_cacert);
+    SOPC_KeyManager_CRL_Free(static_crl);
 #else // WITH_STATIC_SECURITY_DATA == false
     /* Configure the callback */
     status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
@@ -337,9 +325,7 @@ static SOPC_ReturnStatus Server_SetDefaultAppsAuthConfig(void)
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_CreateFromPaths(
-            default_trusted_root_issuers, default_trusted_intermediate_issuers, default_untrusted_root_issuers,
-            default_untrusted_intermediate_issuers, default_issued_certs, default_revoked_certs, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
     }
 #endif
 
@@ -487,6 +473,7 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
         SOPC_ASSERT(NULL != authn->pData);
 
         const SOPC_PKIProvider* pkiProvider = authn->pData;
+        SOPC_PKI_Profile* pProfile = NULL;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;
         SOPC_CertificateList* pUserCert = NULL;
@@ -496,8 +483,13 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
 
         if (SOPC_STATUS_OK == status)
         {
+            status = SOPC_PKIProvider_CreateMinimalUserProfile(&pProfile);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
             // Verify certificate through PKIProvider callback
-            status = pkiProvider->pFnValidateCertificate(pkiProvider, pUserCert, &errorStatus);
+            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -528,6 +520,7 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
 
         /* Clear */
         SOPC_KeyManager_Certificate_Free(pUserCert);
+        SOPC_PKIProvider_DeleteProfile(&pProfile);
     }
 
     return status;
@@ -625,28 +618,26 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     SOPC_UserAuthentication_Manager* authenticationManager = NULL;
 
 #ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_SerializedCertificate* serializedUserCAcert = NULL;
-    SOPC_CRLList* serializedUserCAcrl = NULL;
+    SOPC_CertificateList* static_usr_cacert = NULL;
+    SOPC_CRLList* static_usr_crl = NULL;
 
-    status =
-        SOPC_KeyManager_SerializedCertificate_CreateFromDER(user_cacert, sizeof(user_cacert), &serializedUserCAcert);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(user_cacert, sizeof(user_cacert), &static_usr_cacert);
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(user_cacrl, sizeof(user_cacrl), &serializedUserCAcrl);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(user_cacrl, sizeof(user_cacrl), &static_usr_crl);
     }
 
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(serializedUserCAcert, serializedUserCAcrl, &pX509_UserIdentity_PKI);
+        status =
+            SOPC_PKIProvider_CreateFromList(static_usr_cacert, static_usr_crl, NULL, NULL, &pX509_UserIdentity_PKI);
     }
-    SOPC_KeyManager_SerializedCertificate_Delete(serializedUserCAcert);
+    SOPC_KeyManager_Certificate_Free(static_usr_cacert);
+    SOPC_KeyManager_CRL_Free(static_usr_crl);
 #else
-    status = SOPC_PKIProviderStack_CreateFromPaths(
-        x509_Identity_trusted_root_issuers, x509_Identity_trusted_intermediate_issuers,
-        x509_Identity_untrusted_root_issuers, x509_Identity_untrusted_intermediate_issuers, x509_Identity_issued_certs,
-        x509_Identity_revoked_certs, &pX509_UserIdentity_PKI);
+    status = SOPC_PKIProvider_CreateFromStore(SOPC_USR_PKI_PATH, &pX509_UserIdentity_PKI);
 #endif
 
     if (SOPC_STATUS_OK == status)
@@ -664,8 +655,6 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        /* Set PKI for user */
-        SOPC_PKIProviderStack_SetUserCert(pX509_UserIdentity_PKI, true);
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &sks_authentication_functions;
         authenticationManager->pData = pX509_UserIdentity_PKI;

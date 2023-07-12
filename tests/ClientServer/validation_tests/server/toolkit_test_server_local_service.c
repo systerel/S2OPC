@@ -45,6 +45,8 @@
 #include "testlib_read_response.h"
 #include "testlib_write.h"
 
+#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
+
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 #define DEFAULT_PRODUCT_URI "urn:S2OPC:localhost"
@@ -193,16 +195,8 @@ int main(int argc, char* argv[])
     // Set PKI configuration
     if (SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {"./trusted/cacert.der", NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {"./revoked/cacrl.der", NULL};
         SOPC_PKIProvider* pkiProvider = NULL;
-        status =
-            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                  lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(SOPC_PKI_PATH, &pkiProvider);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
