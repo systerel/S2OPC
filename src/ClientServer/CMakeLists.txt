@@ -86,7 +86,6 @@ set(S2OPC_WRAPPERS_SRC
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.c"
     "${CLIENTWRAPPER_PATH}/internal/toolkit_helpers.c"
     "${CLIENTWRAPPER_PATH}/internal/state_machine.c"
-    "${CLIENTWRAPPER_PATH}/internal/pki_permissive.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config.c"
     "${SERVERWRAPPER_PATH}/libs2opc_server_config_custom.c"
