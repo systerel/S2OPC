@@ -34,6 +34,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
 #include "sopc_secure_channels_api.h"
 #include "sopc_secure_channels_api_internal.h"
@@ -462,13 +463,15 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
 
             if (SOPC_STATUS_OK == status)
             {
+                SOPC_PKI_Type PKIType =
+                    !scConnection->isServerConnection ? SOPC_PKI_TYPE_CLIENT_APP : SOPC_PKI_TYPE_SERVER_APP;
                 SOPC_CertificateList* cert = NULL;
                 status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(senderCertificate.Data,
                                                                         (uint32_t) senderCertificate.Length, &cert);
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider, cert,
-                                                                      errorStatus);
+                    status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider,
+                                                                      PKIType, cert, errorStatus);
                 }
                 if (SOPC_STATUS_OK != status)
                 {

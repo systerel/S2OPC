@@ -29,6 +29,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"
@@ -286,38 +287,38 @@ static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_Extensio
     SOPC_ASSERT(NULL != pUser);
     SOPC_ASSERT(NULL != pUsedSecuPolicy);
 
-    SOPC_CryptoProvider* pProvider = NULL;
+    SOPC_PKI_LeafProfile* pProfile = NULL;
     SOPC_CertificateList* pCrtUser = NULL;
     OpcUa_X509IdentityToken* x509Token = pUser->Body.Object.Value;
-    const SOPC_CryptoProfile* pProfile = NULL;
+    uint32_t validError = 0;
 
-    pProvider = SOPC_CryptoProvider_Create(pUsedSecuPolicy);
-    if (NULL == pProvider)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
-        x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateLeafProfile(pUsedSecuPolicy, &pProfile);
 
     if (SOPC_STATUS_OK == status)
     {
-        pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
-        if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+        status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_USER);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+            x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
     }
 
     if (SOPC_STATUS_OK == status)
     {
         // Let the lib-specific code handle the verification for the current security policy
-        status = pProfile->pFnCertVerify(pProvider, pCrtUser);
+        status = SOPC_PKIProvider_CheckLeafCertificate(pCrtUser, pProfile, &validError);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "User leaf certificate check failed with error: %" PRIX32 "", validError);
+        }
     }
 
     /* Clear */
     SOPC_KeyManager_Certificate_Free(pCrtUser);
-    SOPC_CryptoProvider_Free(pProvider);
+    SOPC_PKIProvider_DeleteLeafProfile(&pProfile);
 
     return status;
 }

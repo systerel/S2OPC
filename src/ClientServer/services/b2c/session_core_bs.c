@@ -38,6 +38,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_time.h"
@@ -164,7 +165,7 @@ void session_core_bs__may_validate_server_certificate(
             session_core_bs__p_user_server_cert->data, session_core_bs__p_user_server_cert->length, &serverCert);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI, serverCert,
+            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI, SOPC_PKI_TYPE_CLIENT_APP, serverCert,
                                                               &errorCode);
             *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
 
@@ -548,8 +549,22 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, 
         return status;
     }
 
-    *ok = SOPC_KeyManager_Certificate_CheckApplicationUri(certificate, SOPC_String_GetRawCString(appUri));
+    SOPC_PKI_LeafProfile* pLeafProfile = NULL;
+    status = SOPC_PKIProvider_CreateLeafProfile(NULL, &pLeafProfile);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        const char* cStringAppUri = SOPC_String_GetRawCString(appUri);
+        status = SOPC_PKIProvider_LeafProfileSetURI(pLeafProfile, cStringAppUri);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        uint32_t error = 0;
+        status = SOPC_PKIProvider_CheckLeafCertificate(certificate, pLeafProfile, &error);
+        *ok = SOPC_STATUS_OK == status;
+    }
     SOPC_KeyManager_Certificate_Free(certificate);
+    SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
 
     return SOPC_STATUS_OK;
 }

@@ -29,7 +29,7 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_key_manager.h"
 #include "sopc_key_sets.h"
-#include "sopc_pki.h"
+#include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_types.h"
 
@@ -1086,8 +1086,9 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  *
  * \param pProvider An initialized cryptographic context.
  * \param pPKI      An initialized public key infrastructure (PKIProvider).
+ * \param PKIType   Defines the type of PKI (user, client or server)
  * \param pCert     A valid pointer to the Certificate to validate.
- * \param error     Ouput error code set when returned status is not SOPC_STATUS_OK (see sopc_pki.h for values)
+ * \param error     Ouput error code set when returned status is not SOPC_STATUS_OK (see sopc_pki_stack.h for values)
  *
  * \note            Contents of the outputs is unspecified when return value is SOPC_STATUS_NOK.
  *
@@ -1099,6 +1100,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
                                                            const SOPC_PKIProvider* pPKI,
+                                                           const SOPC_PKI_Type PKIType,
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error);
 

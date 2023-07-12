@@ -855,44 +855,6 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider
                              true);
 }
 
-SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
-                                                                 const SOPC_CertificateList* pCert)
-{
-    SOPC_AsymmetricKey pub_key;
-    uint32_t key_length = 0;
-
-    // Retrieve key
-    if (KeyManager_Certificate_GetPublicKey(pCert, &pub_key) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    // Verifies key type: RSA
-    switch (mbedtls_pk_get_type(&pub_key.pk))
-    {
-    case MBEDTLS_PK_RSA:
-        // case MBEDTLS_PK_RSASSA_PSS: // Don't know the exact meaning of these two...
-        // case MBEDTLS_PK_RSA_ALT:
-        break;
-    default:
-        return SOPC_STATUS_NOK;
-    }
-
-    // Retrieve key length
-    if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pCrypto, &pub_key, &key_length) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-    // Verifies key length: 2048-4096
-    if (key_length < SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits ||
-        key_length > SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits)
-        return SOPC_STATUS_NOK;
-
-    // Verifies signing algorithm: SHA-256
-    if (pCert->crt.sig_md != MBEDTLS_MD_SHA256)
-        return SOPC_STATUS_NOK;
-
-    // Does not verify that key is capable of encryption and signing... (!!!)
-
-    return SOPC_STATUS_OK;
-}
-
 /* ------------------------------------------------------------------------------------------------
  * Basic256
  * ------------------------------------------------------------------------------------------------
@@ -979,50 +941,6 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
 {
     return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, MBEDTLS_RSA_PKCS_V15, MBEDTLS_MD_SHA1, 20,
                              false);
-}
-
-SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
-                                                                      const SOPC_CertificateList* pCert)
-{
-    SOPC_AsymmetricKey pub_key;
-    uint32_t key_length = 0;
-
-    // Retrieve key
-    if (KeyManager_Certificate_GetPublicKey(pCert, &pub_key) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-
-    // Verifies key type: RSA
-    switch (mbedtls_pk_get_type(&pub_key.pk))
-    {
-    case MBEDTLS_PK_RSA:
-        // case MBEDTLS_PK_RSASSA_PSS: // Don't know the exact meaning of these two...
-        // case MBEDTLS_PK_RSA_ALT:
-        break;
-    default:
-        return SOPC_STATUS_NOK;
-    }
-
-    // Retrieve key length
-    if (SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(pCrypto, &pub_key, &key_length) != SOPC_STATUS_OK)
-        return SOPC_STATUS_NOK;
-    // Verifies key length: 1024-2048
-    if (key_length < SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits ||
-        key_length > SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits)
-        return SOPC_STATUS_NOK;
-
-    // Verifies signing algorithm: SHA-1 or SHA-256
-    switch (pCert->crt.sig_md)
-    {
-    case MBEDTLS_MD_SHA1:
-    case MBEDTLS_MD_SHA256:
-        break;
-    default:
-        return SOPC_STATUS_NOK;
-    }
-
-    // Does not verify that key is capable of encryption and signing... (!!!)
-
-    return SOPC_STATUS_OK;
 }
 
 /* ------------------------------------------------------------------------------------------------

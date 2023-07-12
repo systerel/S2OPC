@@ -27,7 +27,7 @@
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pki.h"
+#include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 
 /* ------------------------------------------------------------------------------------------------
@@ -1877,32 +1877,58 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
                                                            const SOPC_PKIProvider* pPKI,
+                                                           const SOPC_PKI_Type pPKIType,
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error)
 {
     SOPC_ASSERT(NULL != error);
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
     // TODO: where is the key key_pub <-> key_priv association checked?
-    if (NULL == pProvider || NULL == pPKI || NULL == pPKI->pFnValidateCertificate || NULL == pCert)
+    if (NULL == pProvider || NULL == pPKI || NULL == pCert)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
-    if (NULL == pProfile || NULL == pProfile->pFnCertVerify)
+    if (NULL == pProfile)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return status;
     }
 
-    // Let the lib-specific code handle the verification for the current security policy
-    if (pProfile->pFnCertVerify(pProvider, pCert) != SOPC_STATUS_OK)
+    SOPC_PKI_Profile* pPKIProfile = NULL;
+
+    switch (pProfile->SecurityPolicyID)
     {
-        // Note: still validate the certificate to have a constant time validation
-        pPKI->pFnValidateCertificate(pPKI, pCert, error);
-        *error = SOPC_CertificateValidationError_PolicyCheckFailed;
-        return SOPC_STATUS_NOK;
+    case SOPC_SecurityPolicy_Invalid_ID:
+    case SOPC_SecurityPolicy_None_ID:
+    case SOPC_SecurityPolicy_PubSub_Aes256_ID:
+    default:
+        return status;
+    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
+        status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI, &pPKIProfile);
+        break;
+    case SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID:
+        status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI, &pPKIProfile);
+        break;
+    case SOPC_SecurityPolicy_Basic256Sha256_ID:
+        status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pPKIProfile);
+        break;
+    case SOPC_SecurityPolicy_Basic256_ID:
+        status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256_URI, &pPKIProfile);
+        break;
     }
 
-    // Verify certificate through PKIProvider callback
-    return pPKI->pFnValidateCertificate(pPKI, pCert, error);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ProfileSetUsageFromType(pPKIProfile, pPKIType);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCert, pPKIProfile, error);
+    }
+
+    SOPC_PKIProvider_DeleteProfile(&pPKIProfile);
+    return status;
 }

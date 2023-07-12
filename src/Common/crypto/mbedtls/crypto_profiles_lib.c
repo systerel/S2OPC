@@ -41,7 +41,6 @@ const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
     .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP_SHA256,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PSS,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PSS,
-    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
 };
 
 const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
@@ -56,7 +55,6 @@ const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep = {
     .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
-    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
 };
 
 const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
@@ -71,7 +69,6 @@ const SOPC_CryptoProfile sopc_g_cpBasic256Sha256 = {
     .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA256,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA256,
-    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA256_2048_4096,
 };
 
 const SOPC_CryptoProfile sopc_g_cpBasic256 = {
@@ -86,7 +83,6 @@ const SOPC_CryptoProfile sopc_g_cpBasic256 = {
     .pFnAsymDecrypt = &CryptoProvider_AsymDecrypt_RSA_OAEP,
     .pFnAsymSign = &CryptoProvider_AsymSign_RSASSA_PKCS1_v15_w_SHA1,
     .pFnAsymVerify = &CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1,
-    .pFnCertVerify = &CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048,
 };
 
 const SOPC_CryptoProfile sopc_g_cpNone = {
@@ -101,7 +97,6 @@ const SOPC_CryptoProfile sopc_g_cpNone = {
     .pFnAsymDecrypt = NULL,
     .pFnAsymSign = NULL,
     .pFnAsymVerify = NULL,
-    .pFnCertVerify = NULL,
 };
 
 /* PubSub security policies */
