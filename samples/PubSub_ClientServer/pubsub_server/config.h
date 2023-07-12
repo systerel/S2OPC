@@ -34,12 +34,11 @@
 #define ENCRYPTED_SERVER_KEY true /* set to false otherwise */
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
 #define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER"
-#define CA_CERT_PATH "./trusted/cacert.der"
-#define CA_CRL_PATH "./revoked/cacrl.der"
 #define CLIENT_CERT_PATH "./client_public/client_2k_cert.der"
 #define CLIENT_KEY_PATH "./client_private/encrypted_client_2k_key.pem"
 #define ENCRYPTED_CLIENT_KEY true /* set to false otherwise */
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4843"
+#define PKI_PATH "./S2OPC_Demo_PKI"
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"

@@ -378,18 +378,38 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 
     if (0 == nCfgCreated && SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {PATH_CACERT_PUBL, NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {PATH_ISSUED, NULL};
-        char* lPathsCRL[] = {PATH_CACRL, NULL};
-        status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                       lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
+        SOPC_CertificateList* pTrustedCerts = NULL;
+        SOPC_CRLList* pTrustedCrl = NULL;
+
+        /* Load  trusted certificates */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(PATH_CACERT_PUBL, &pTrustedCerts);
+        }
+        if (SOPC_STATUS_OK == status && NULL != PATH_ISSUED)
+        {
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(PATH_ISSUED, &pTrustedCerts);
+        }
+
+        /* Load trusted CRL */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_CRL_CreateOrAddFromFile(PATH_CACRL, &pTrustedCrl);
+        }
+
+        /* Create the PKI (Public Key Infrastructure) provider */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPki);
+        }
+
         if (SOPC_STATUS_OK != status)
         {
             printf("# Error: Failed to create PKI\n");
         }
+        /* Clear */
+        SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+        SOPC_KeyManager_CRL_Free(pTrustedCrl);
     }
 
     nCfgCreated += 1; /* If it failed once, do not try again */

@@ -35,7 +35,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
-#include "pki_permissive.h"
 #include "toolkit_helpers.h"
 
 /* LibSub logger callback, wrapped by a variadic printf-like */
@@ -109,25 +108,43 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         if (!bDisablePKI)
         {
-            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-            char* lPathsTrustedRoots[] = {(char*) szPathCertifAuth, NULL};
-            char* lPathsCRL[] = {(char*) szPathCrl, NULL};
-            char* lPathsTrustedLinks[] = {NULL};
-            char* lPathsUntrustedRoots[] = {NULL};
-            char* lPathsUntrustedLinks[] = {NULL};
-            char* lPathsIssuedCerts[] = {(char*) szPathCertServer, NULL};
-            SOPC_GCC_DIAGNOSTIC_RESTORE
-            status = SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                           lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pPki);
+            SOPC_CertificateList* pTrustedCerts = NULL;
+            SOPC_CRLList* pTrustedCrl = NULL;
+
+            /* Load  trusted certificates */
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(szPathCertifAuth, &pTrustedCerts);
+            }
+            if (SOPC_STATUS_OK == status && NULL != szPathCertServer)
+            {
+                status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(szPathCertServer, &pTrustedCerts);
+            }
+
+            /* Load trusted CRL */
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_CRL_CreateOrAddFromFile(szPathCrl, &pTrustedCrl);
+            }
+
+            /* Create the PKI (Public Key Infrastructure) provider */
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPki);
+            }
+
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");
             }
+            /* Clear */
+            SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+            SOPC_KeyManager_CRL_Free(pTrustedCrl);
         }
         else
         {
             Helpers_Log(SOPC_LOG_LEVEL_WARNING, "DISABLED CERTIFICATE VERIFICATION.");
-            status = SOPC_PKIPermissive_Create(&pPki);
+            status = SOPC_PKIPermissiveNew_Create(&pPki);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");

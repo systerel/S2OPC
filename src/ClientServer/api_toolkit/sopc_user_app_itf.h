@@ -334,9 +334,9 @@ struct SOPC_Server_Config
                              applicative code) */
     char* serverKeyPath;  /**< Temporary path to the server key (serverCertificate shall be instantiated by applicative
                              code) */
-    bool serverKeyEncrypted;       /**< Boolean to indicate if the private key is encrypted */
-    char* serverPkiPath;  /**< Temporary path to the server public key infrastructure */
-    uint8_t nbEndpoints;  /**< Number of endpoints defined by the server */
+    bool serverKeyEncrypted;         /**< Boolean to indicate if the private key is encrypted */
+    char* serverPkiPath;             /**< Temporary path to the server public key infrastructure */
+    uint8_t nbEndpoints;             /**< Number of endpoints defined by the server */
     SOPC_Endpoint_Config* endpoints; /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */

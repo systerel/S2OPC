@@ -222,7 +222,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
         if (NULL == cConfig->clientPKI && NULL != configFromPaths->clientPkiPath)
         {
             // Configure certificates / PKI / key from paths
-            status = SOPC_PKIProvider_CreateFromStore(configFromPaths->clientPkiPath &pki);
+            status = SOPC_PKIProvider_CreateFromStore(configFromPaths->clientPkiPath, &pki);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create client config PKI from paths.");

@@ -477,7 +477,7 @@ static const char* getenv_default(const char* name, const char* default_value)
 static bool load_keys(SOPC_SerializedCertificate** cert,
                       SOPC_SerializedAsymmetricKey** key,
                       SOPC_SerializedCertificate** server_cert,
-                      SOPC_SerializedCertificate** ca,
+                      SOPC_CertificateList** ca,
                       SOPC_CRLList** cacrl)
 {
     const char* cert_path = getenv_default("SOPC_CERT", DEFAULT_CERT_PATH);
@@ -521,7 +521,7 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         fprintf(stderr, "Error while loading server certificate from %s\n", ca_path);
     }
 
-    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(ca_path, ca) != SOPC_STATUS_OK)
+    if (SOPC_KeyManager_Certificate_CreateOrAddFromFile(ca_path, ca) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading CA certificate from %s\n", ca_path);
     }
@@ -547,7 +547,7 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         SOPC_KeyManager_SerializedCertificate_Delete(*server_cert);
         *server_cert = NULL;
 
-        SOPC_KeyManager_SerializedCertificate_Delete(*ca);
+        SOPC_KeyManager_Certificate_Free(*ca);
         *ca = NULL;
 
         SOPC_KeyManager_CRL_Free(*cacrl);
@@ -647,20 +647,22 @@ int main(int argc, char** argv)
     SOPC_SerializedCertificate* cert = NULL;
     SOPC_SerializedAsymmetricKey* key = NULL;
     SOPC_SerializedCertificate* server_cert = NULL;
-    SOPC_SerializedCertificate* ca = NULL;
+    SOPC_CertificateList* ca = NULL;
     SOPC_CRLList* cacrl = NULL;
     SOPC_PKIProvider* pki = NULL;
 
     if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
     {
-        if (!load_keys(&cert, &key, &server_cert, &ca, &cacrl) ||
-            SOPC_PKIProviderStack_Create(ca, cacrl, &pki) != SOPC_STATUS_OK)
+        bool bRet = load_keys(&cert, &key, &server_cert, &ca, &cacrl);
+        status = SOPC_PKIProvider_CreateFromList(ca, cacrl, NULL, NULL, &pki);
+        if (!bRet || SOPC_STATUS_OK != status)
         {
             SOPC_PKIProvider_Free(&pki);
             SOPC_KeyManager_SerializedCertificate_Delete(cert);
             SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
             SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
-            SOPC_KeyManager_SerializedCertificate_Delete(ca);
+            SOPC_KeyManager_Certificate_Free(ca);
+            SOPC_KeyManager_CRL_Free(cacrl);
             return 1;
         }
 
@@ -685,7 +687,8 @@ int main(int argc, char** argv)
     SOPC_KeyManager_SerializedCertificate_Delete(cert);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
     SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
-    SOPC_KeyManager_SerializedCertificate_Delete(ca);
+    SOPC_KeyManager_Certificate_Free(ca);
+    SOPC_KeyManager_CRL_Free(cacrl);
 
     SOPC_Mutex_Clear(&ctx.run_mutex);
     SOPC_Condition_Clear(&ctx.run_cond);

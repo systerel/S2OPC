@@ -475,21 +475,22 @@ static void setupServer(void)
 
     //////////////////////////////////
     // Server certificates configuration
-    SOPC_SerializedCertificate* serializedCAcert = NULL;
-    SOPC_CRLList* serializedCAcrl = NULL;
+    SOPC_CertificateList* ca_cert = NULL;
+    SOPC_CRLList* crl = NULL;
     SOPC_PKIProvider* pkiProvider = NULL;
     status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetKeyCertPairFromBytes() failed");
 
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_SerializedCertificate_CreateFromDER() failed");
-    status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &ca_cert);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_Certificate_CreateOrAddFromDER() failed");
+    status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &crl);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_KeyManager_CRL_CreateOrAddFromDER() failed");
 
-    status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
-    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_PKIProviderStack_Create() failed");
-    SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+    status = SOPC_PKIProvider_CreateFromList(ca_cert, crl, NULL, NULL, &pkiProvider);
+    SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_PKIProvider_CreateFromList() failed");
+    SOPC_KeyManager_Certificate_Free(ca_cert);
+    SOPC_KeyManager_CRL_Free(crl);
 
     status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetPKIprovider failed");

@@ -147,28 +147,32 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
     // Server certificates configuration
     SOPC_PKIProvider* pkiProvider = NULL;
 #ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_SerializedCertificate* serializedCAcert = NULL;
-    SOPC_CRLList* serializedCAcrl = NULL;
+    SOPC_CertificateList* static_cacert = NULL;
+    SOPC_CRLList* static_cacrl = NULL;
 
     /* Load client/server certificates and server key from C source files (no filesystem needed) */
     status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
                                                              sizeof(server_2k_key), server_2k_key);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &static_cacert);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_cacrl);
     }
 
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromList(static_cacert, static_cacrl, NULL, NULL, &pkiProvider);
     }
-    SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+
+    /* Clean in all cases */
+    SOPC_KeyManager_Certificate_Free(static_cacert);
+    SOPC_KeyManager_CRL_Free(static_cacrl);
+
 #else // WITH_STATIC_SECURITY_DATA == false
     if (SOPC_STATUS_OK == status)
     {
@@ -188,12 +192,7 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
     // Set PKI configuration
     if (SOPC_STATUS_OK == status)
     {
-        char* default_trusted_certs[] = {CA_CERT_PATH, NULL};
-        char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
-        char* empty_certs[] = {NULL};
-
-        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_certs, empty_certs, empty_certs, empty_certs,
-                                                       empty_certs, default_revoked_certs, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(PKI_PATH, &pkiProvider);
     }
     if (SOPC_STATUS_OK != status)
     {

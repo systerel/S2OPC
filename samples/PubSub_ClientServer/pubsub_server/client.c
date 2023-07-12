@@ -142,8 +142,8 @@ SOPC_ReturnStatus Client_Initialize(void)
     SOPC_PKIProvider* pkiProvider = NULL;
 
 #ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_SerializedCertificate* serializedCAcert = NULL;
-    SOPC_CRLList* serializedCAcrl = NULL;
+    SOPC_CertificateList* static_cacert = NULL;
+    SOPC_CRLList* static_cacrl = NULL;
 
     /* Load client certificates and key from C source files (no filesystem needed) */
     if (SOPC_STATUS_OK == status)
@@ -154,20 +154,23 @@ SOPC_ReturnStatus Client_Initialize(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(cacert, sizeof(cacert), &static_cacert);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_cacrl);
     }
 
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromList(static_cacert, static_cacrl, NULL, NULL, &pkiProvider);
     }
-    SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+    /* Clean in all cases */
+    SOPC_KeyManager_Certificate_Free(static_cacert);
+    SOPC_KeyManager_CRL_Free(static_cacrl);
+
 #else // WITH_STATIC_SECURITY_DATA == false
 
     if (SOPC_STATUS_OK == status)
@@ -188,15 +191,7 @@ SOPC_ReturnStatus Client_Initialize(void)
     /* Create the PKI (Public Key Infrastructure) provider */
     if (SOPC_STATUS_OK == status)
     {
-        char* lPathsTrustedRoots[] = {CA_CERT_PATH, NULL};
-        char* lPathsTrustedLinks[] = {NULL};
-        char* lPathsUntrustedRoots[] = {NULL};
-        char* lPathsUntrustedLinks[] = {NULL};
-        char* lPathsIssuedCerts[] = {NULL};
-        char* lPathsCRL[] = {CA_CRL_PATH, NULL};
-        status =
-            SOPC_PKIProviderStack_CreateFromPaths(lPathsTrustedRoots, lPathsTrustedLinks, lPathsUntrustedRoots,
-                                                  lPathsUntrustedLinks, lPathsIssuedCerts, lPathsCRL, &pkiProvider);
+        status = SOPC_PKIProvider_CreateFromStore(PKI_PATH, &pkiProvider);
     }
 #endif
 

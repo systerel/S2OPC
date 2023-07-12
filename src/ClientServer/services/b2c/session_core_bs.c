@@ -165,8 +165,8 @@ void session_core_bs__may_validate_server_certificate(
             session_core_bs__p_user_server_cert->data, session_core_bs__p_user_server_cert->length, &serverCert);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI, SOPC_PKI_TYPE_CLIENT_APP, serverCert,
-                                                              &errorCode);
+            status = SOPC_CryptoProvider_Certificate_Validate(cp, pSCCfg->clientConfigPtr->clientPKI,
+                                                              SOPC_PKI_TYPE_CLIENT_APP, serverCert, &errorCode);
             *session_core_bs__valid_cert = (SOPC_STATUS_OK == status);
 
             if (SOPC_STATUS_OK != status)

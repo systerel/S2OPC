@@ -865,7 +865,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_AsyncSendGetEndpointsRequest(SOPC_ClientHelp
     const int32_t security_mode = OpcUa_MessageSecurityMode_None;
 
     status = Helpers_NewSCConfigFromLibSubCfg(
-        connection->endpointUrl, connection->serverUri, security_policy, security_mode, false, NULL, NULL, NULL, NULL,
+        connection->endpointUrl, connection->serverUri, security_policy, security_mode, true, NULL, NULL, NULL, NULL,
         NULL, SOPC_MINIMUM_SECURE_CONNECTION_LIFETIME, NULL, &appConfig->clientConfig, &pscConfig);
 
     /* Store it to be able to free it on clear in SOPC_LibSub_Clear() */
