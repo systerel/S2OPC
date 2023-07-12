@@ -31,31 +31,20 @@
     <xs:attribute type="xs:string" name="hash_length" use="required"/>
     <xs:attribute type="xs:string" name="salt_length" use="required"/>
   </xs:complexType>
-  <xs:complexType name="IssuerType">
+  <xs:complexType name="PublicKeyInfrastructureType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
-        <xs:attribute type="xs:string" name="cert_path" use="required"/>
-        <xs:attribute type="xs:string" name="revocation_list_path" use="required"/>
-        <xs:attribute type="xs:boolean" name="root" use="required"/>
+        <xs:attribute type="xs:string" name="path" use="required"/>
+        <xs:attribute type="xs:boolean" name="read" default="false"/>
+        <xs:attribute type="xs:boolean" name="write" default="false"/>
+        <xs:attribute type="xs:boolean" name="execute" default="false"/>
+        <xs:attribute type="xs:boolean" name="addnode" default="false">
+          <xs:annotation>
+            <xs:documentation>Default certificate authorization for accepted certificate, evaluated as trustworthy according to the PKI</xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="TrustedIssuersType">
-    <xs:sequence>
-      <xs:element type="IssuerType" name="TrustedIssuer" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several trusted certificate authorities</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute type="xs:boolean" name="read" default="false"/>
-    <xs:attribute type="xs:boolean" name="write" default="false"/>
-    <xs:attribute type="xs:boolean" name="execute" default="false"/>
-    <xs:attribute type="xs:boolean" name="addnode" default="false">
-      <xs:annotation>
-        <xs:documentation>Default certificate authorization for accepted issued (not configured) evaluated as trustworthy according to trust chain</xs:documentation>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="IssuedCertificateType">
     <xs:simpleContent>
@@ -64,37 +53,18 @@
         <xs:attribute type="xs:boolean" name="read" default="false"/>
         <xs:attribute type="xs:boolean" name="write" default="false"/>
         <xs:attribute type="xs:boolean" name="execute" default="false"/>
-        <xs:attribute type="xs:boolean" name="addnode" default="false"/>
+        <xs:attribute type="xs:boolean" name="addnode" default="false">
+          <xs:annotation>
+              <xs:documentation>Explicitly certificate authorization for accepted certificate, evaluated as trustworthy according to the PKI </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  <xs:complexType name="IssuedCertificatesType">
-    <xs:sequence>
-      <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several explicitly trusted certificates issued by provided issuers or self-signed</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="UntrustedIssuersType">
-    <xs:sequence>
-      <xs:element type="IssuerType" name="UntrustedIssuer" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several untrusted certificate authorities. Those are only used to validate trust chain of issued certificate.</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
   <xs:complexType name="UserCertificatesType">
     <xs:sequence>
-      <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
-      <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>At least one shall be filled in either TrustedIssuers or IssuedCertificates</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element type="UntrustedIssuersType" name="UntrustedIssuers" minOccurs="0"/>
+      <xs:element type="PublicKeyInfrastructureType" name="PublicKeyInfrastructure" minOccurs="1" maxOccurs="1"/>
+      <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S2OPC_UsersType">

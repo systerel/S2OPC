@@ -76,45 +76,6 @@ bool SOPC_ConfigLoaderInternal_start_key(bool isServer,
                                          bool* encrypted,
                                          const char** attrs);
 
-bool SOPC_ConfigLoaderInternal_end_trusted_issuers(bool isServer,
-                                                   SOPC_HelperExpatCtx* ctx,
-                                                   SOPC_Array* trustedRootIssuers);
-
-bool SOPC_ConfigLoaderInternal_start_issuer(bool isServer,
-                                            SOPC_HelperExpatCtx* ctx,
-                                            SOPC_Array* rootIssuers,
-                                            SOPC_Array* IntermediateIssuers,
-                                            SOPC_Array* crlCertificates,
-                                            const char** attrs);
-
-bool SOPC_ConfigLoaderInternal_end_issued_certs(bool isServer,
-                                                SOPC_HelperExpatCtx* ctx,
-                                                SOPC_Array* issuedCertificates);
-
-bool SOPC_ConfigLoaderInternal_start_issued_cert(SOPC_HelperExpatCtx* ctx,
-                                                 SOPC_Array* issuedCertificates,
-                                                 const XML_Char** attrs);
-
-bool SOPC_ConfigLoaderInternal_end_untrusted_issuers(bool isServer,
-                                                     SOPC_HelperExpatCtx* ctx,
-                                                     SOPC_Array* untrustedRootIssuers,
-                                                     SOPC_Array* untrustedIntermediateIssuers);
-
-bool SOPC_ConfigLoaderInternal_end_application_certificates(bool isServer,
-                                                            SOPC_HelperExpatCtx* ctx,
-                                                            SOPC_Array** trustedRootIssuers,
-                                                            char*** trustedRootIssuersList,
-                                                            SOPC_Array** trustedIntermediateIssuers,
-                                                            char*** trustedIntermediateIssuersList,
-                                                            SOPC_Array** issuedCertificates,
-                                                            char*** issuedCertificatesList,
-                                                            SOPC_Array** untrustedRootIssuers,
-                                                            char*** untrustedRootIssuersList,
-                                                            SOPC_Array** untrustedIntermediateIssuers,
-                                                            char*** untrustedIntermediateIssuersList,
-                                                            SOPC_Array** crlCertificates,
-                                                            char*** crlCertificatesList,
-                                                            bool issuedCertificatesSet,
-                                                            bool trustedIssuersSet);
+bool SOPC_ConfigLoaderInternal_start_pki(bool isServer, SOPC_HelperExpatCtx* ctx, char** pkiPath, const char** attrs);
 
 #endif /* SOPC_CONFIG_LOADER_INTERNAL_H_ */

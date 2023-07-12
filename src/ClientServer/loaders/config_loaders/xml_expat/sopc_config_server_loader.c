@@ -50,12 +50,7 @@ typedef enum
     PARSE_APPLICATION_CERT,    // ....In application certificate
     PARSE_SERVER_CERT,         // ......Server certificate
     PARSE_SERVER_KEY,          // ......Server key
-    PARSE_TRUSTED_ISSUERS,     // ......Trusted issuer certificates
-    PARSE_TRUSTED_ISSUER,      // ........Trusted issuer certificate + crl
-    PARSE_ISSUED_CERTS,        // ......Trusted issued certificates
-    PARSE_ISSUED_CERT,         // ........Trusted issued certificate
-    PARSE_UNTRUSTED_ISSUERS,   // ......Untrusted issuer certificates
-    PARSE_UNTRUSTED_ISSUER,    // ........Untrusted issuer certificate + crl
+    PARSE_SERVER_PKI,          // ......Server PKI
     PARSE_ENDPOINTS,           // ....In an Endpoints tag
     PARSE_ENDPOINT,            // ......In an Endpoint tag
     PARSE_REVERSE_CONNECTIONS, // ........In reverse connections tag
@@ -88,16 +83,7 @@ struct parse_context_t
     char* serverCertificate;
     char* serverKey;
     bool serverKeyEncrypted;
-    bool trustedIssuersSet;
-    SOPC_Array* trustedRootIssuers;
-    SOPC_Array* trustedIntermediateIssuers;
-    bool issuedCertificatesSet;
-    SOPC_Array* issuedCertificates;
-    bool untrustedIssuersSet;
-    SOPC_Array* untrustedRootIssuers;
-    SOPC_Array* untrustedIntermediateIssuers;
-    bool crlSet;
-    SOPC_Array* crlCertificates;
+    char* serverPki;
 
     bool endpointsSet;
     SOPC_Array* endpoints;
@@ -696,36 +682,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             }
             ctx->state = PARSE_SERVER_KEY;
         }
-        else if (strcmp(name, "TrustedIssuers") == 0 && !ctx->trustedIssuersSet)
+        else if (strcmp(name, "ServerPublicKeyInfrastructure") == 0)
         {
-            ctx->state = PARSE_TRUSTED_ISSUERS;
-        }
-        else if (strcmp(name, "IssuedCertificates") == 0 && !ctx->issuedCertificatesSet)
-        {
-            ctx->state = PARSE_ISSUED_CERTS;
-        }
-        else if (strcmp(name, "UntrustedIssuers") == 0 && !ctx->untrustedIssuersSet)
-        {
-            ctx->state = PARSE_UNTRUSTED_ISSUERS;
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-        break;
-    case PARSE_TRUSTED_ISSUERS:
-        if (strcmp(name, "TrustedIssuer") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->trustedRootIssuers,
-                                                        ctx->trustedIntermediateIssuers, ctx->crlCertificates, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_pki(true, &ctx->helper_ctx, &ctx->serverPki, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-
-            ctx->state = PARSE_TRUSTED_ISSUER;
+            ctx->state = PARSE_SERVER_PKI;
         }
         else
         {
@@ -733,43 +697,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
-        break;
-    case PARSE_ISSUED_CERTS:
-        if (strcmp(name, "IssuedCertificate") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issued_cert(&ctx->helper_ctx, ctx->issuedCertificates, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_ISSUED_CERT;
-        break;
-    case PARSE_UNTRUSTED_ISSUERS:
-        if (strcmp(name, "UntrustedIssuer") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
-                                                        ctx->untrustedIntermediateIssuers, ctx->crlCertificates, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_UNTRUSTED_ISSUER;
         break;
     case PARSE_ENDPOINTS:
         if (strcmp(name, "Endpoint") == 0)
@@ -951,62 +878,16 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         }
         ctx->state = PARSE_SRVCONFIG;
         break;
-    case PARSE_TRUSTED_ISSUER:
-        ctx->state = PARSE_TRUSTED_ISSUERS;
-        break;
-    case PARSE_TRUSTED_ISSUERS:
-        if (!SOPC_ConfigLoaderInternal_end_trusted_issuers(true, &ctx->helper_ctx, ctx->trustedRootIssuers))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->trustedIssuersSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
-    case PARSE_ISSUED_CERT:
-        ctx->state = PARSE_ISSUED_CERTS;
-        break;
-    case PARSE_ISSUED_CERTS:
-        if (!SOPC_ConfigLoaderInternal_end_issued_certs(true, &ctx->helper_ctx, ctx->issuedCertificates))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->issuedCertificatesSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
-    case PARSE_UNTRUSTED_ISSUER:
-        ctx->state = PARSE_UNTRUSTED_ISSUERS;
-        break;
-    case PARSE_UNTRUSTED_ISSUERS:
-        if (!SOPC_ConfigLoaderInternal_end_untrusted_issuers(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
-                                                             ctx->untrustedIntermediateIssuers))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->untrustedIssuersSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
     case PARSE_SERVER_KEY:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_SERVER_CERT:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
+    case PARSE_SERVER_PKI:
+        ctx->state = PARSE_APPLICATION_CERT;
+        break;
     case PARSE_APPLICATION_CERT:
-        if (!SOPC_ConfigLoaderInternal_end_application_certificates(
-                true, &ctx->helper_ctx, &ctx->trustedRootIssuers, &ctx->serverConfigPtr->trustedRootIssuersList,
-                &ctx->trustedIntermediateIssuers, &ctx->serverConfigPtr->trustedIntermediateIssuersList,
-                &ctx->issuedCertificates, &ctx->serverConfigPtr->issuedCertificatesList, &ctx->untrustedRootIssuers,
-                &ctx->serverConfigPtr->untrustedRootIssuersList, &ctx->untrustedIntermediateIssuers,
-                &ctx->serverConfigPtr->untrustedIntermediateIssuersList, &ctx->crlCertificates,
-                &ctx->serverConfigPtr->certificateRevocationPathList, ctx->issuedCertificatesSet,
-                ctx->trustedIssuersSet))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
         ctx->state = PARSE_SRVCONFIG;
         break;
     case PARSE_APPLICATION_NAME:
@@ -1098,29 +979,14 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     SOPC_Array* endpoints = SOPC_Array_Create(sizeof(SOPC_Endpoint_Config), 1, NULL);
     SOPC_Array* ns = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
     SOPC_Array* locales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* trustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* trustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* issuedCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* untrustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* untrustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    SOPC_Array* revokedListCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-
-    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales) || (NULL == trustedRootIssuers) ||
-        (NULL == trustedIntermediateIssuers) || (NULL == issuedCerts) || (NULL == untrustedRootIssuers) ||
-        (NULL == untrustedIntermediateIssuers) || (NULL == revokedListCerts))
+    if ((NULL == parser) || (NULL == endpoints) || (NULL == ns) || (NULL == locales))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Array_Delete(endpoints);
         SOPC_Array_Delete(ns);
         SOPC_Array_Delete(locales);
-        SOPC_Array_Delete(trustedRootIssuers);
-        SOPC_Array_Delete(trustedIntermediateIssuers);
-        SOPC_Array_Delete(issuedCerts);
-        SOPC_Array_Delete(untrustedRootIssuers);
-        SOPC_Array_Delete(untrustedIntermediateIssuers);
-        SOPC_Array_Delete(revokedListCerts);
         return false;
     }
 
@@ -1134,12 +1000,6 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     ctx.endpoints = endpoints;
     ctx.namespaces = ns;
     ctx.localeIds = locales;
-    ctx.trustedRootIssuers = trustedRootIssuers;
-    ctx.trustedIntermediateIssuers = trustedIntermediateIssuers;
-    ctx.issuedCertificates = issuedCerts;
-    ctx.untrustedRootIssuers = untrustedRootIssuers;
-    ctx.untrustedIntermediateIssuers = untrustedIntermediateIssuers;
-    ctx.crlCertificates = revokedListCerts;
     ctx.serverConfigPtr = serverConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
@@ -1152,12 +1012,6 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
     XML_ParserFree(parser);
     SOPC_Array_Delete(ctx.namespaces);
     SOPC_Array_Delete(ctx.localeIds);
-    SOPC_Array_Delete(ctx.trustedRootIssuers);
-    SOPC_Array_Delete(ctx.trustedIntermediateIssuers);
-    SOPC_Array_Delete(ctx.issuedCertificates);
-    SOPC_Array_Delete(ctx.untrustedRootIssuers);
-    SOPC_Array_Delete(ctx.untrustedIntermediateIssuers);
-    SOPC_Array_Delete(ctx.crlCertificates);
 
     size_t nbEndpoints = SOPC_Array_Size(endpoints);
 
@@ -1169,6 +1023,7 @@ bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* serverConfig)
         serverConfig->nbEndpoints = (uint8_t) nbEndpoints;
         serverConfig->serverCertPath = ctx.serverCertificate;
         serverConfig->serverKeyPath = ctx.serverKey;
+        serverConfig->serverPkiPath = ctx.serverPki;
         serverConfig->serverKeyEncrypted = ctx.serverKeyEncrypted;
         serverConfig->serverDescription = ctx.appDesc;
         return true;

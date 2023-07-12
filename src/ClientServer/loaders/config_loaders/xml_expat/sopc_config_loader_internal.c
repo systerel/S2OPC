@@ -358,243 +358,32 @@ bool SOPC_ConfigLoaderInternal_start_key(bool isServer,
     return true;
 }
 
-bool SOPC_ConfigLoaderInternal_end_trusted_issuers(bool isServer,
-                                                   SOPC_HelperExpatCtx* ctx,
-                                                   SOPC_Array* trustedRootIssuers)
+bool SOPC_ConfigLoaderInternal_start_pki(bool isServer, SOPC_HelperExpatCtx* ctx, char** pkiPath, const char** attrs)
 {
     SOPC_ASSERT(NULL != ctx);
-    if (0 == SOPC_Array_Size(trustedRootIssuers))
+    SOPC_ASSERT(NULL != pkiPath);
+    if (*pkiPath != NULL)
     {
-        LOG_XML_ERRORF(ctx->parser, "%s: no trusted root CA defined", CLIENT_OR_SERVER(isServer));
+        LOG_XML_ERRORF(ctx->parser, "%s PublicKeyInfrastructure defined several times", CLIENT_OR_SERVER(isServer));
         return false;
     }
-
-    return true;
-}
-
-bool SOPC_ConfigLoaderInternal_start_issuer(bool isServer,
-                                            SOPC_HelperExpatCtx* ctx,
-                                            SOPC_Array* rootIssuers,
-                                            SOPC_Array* IntermediateIssuers,
-                                            SOPC_Array* crlCertificates,
-                                            const XML_Char** attrs)
-{
-    SOPC_ASSERT(NULL != ctx);
-
-    const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "root", attrs);
-
-    if (attr_val == NULL)
-    {
-        LOG_XML_ERRORF(ctx->parser, "%s: root attribute missing in Issuer definition", CLIENT_OR_SERVER(isServer));
-        return false;
-    }
-
-    bool isRoot = (strcmp(attr_val, "true") == 0);
-
-    attr_val = SOPC_HelperExpat_GetAttr(ctx, "cert_path", attrs);
-
-    char* pathCA = SOPC_strdup(attr_val);
-
-    if (pathCA == NULL)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    SOPC_Array* issuers = isRoot ? rootIssuers : IntermediateIssuers;
-
-    if (!SOPC_Array_Append(issuers, pathCA))
-    {
-        SOPC_Free(pathCA);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    attr_val = SOPC_HelperExpat_GetAttr(ctx, "revocation_list_path", attrs);
-
-    char* pathCRL = SOPC_strdup(attr_val);
-
-    if (pathCRL == NULL)
-    {
-        LOGF("%s Warning: CRL missing for the root certificate '%s'", CLIENT_OR_SERVER(isServer), pathCA);
-    }
-    else if (!SOPC_Array_Append(crlCertificates, pathCRL))
-    {
-        SOPC_Free(pathCRL);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    return true;
-}
-
-bool SOPC_ConfigLoaderInternal_end_issued_certs(bool isServer, SOPC_HelperExpatCtx* ctx, SOPC_Array* issuedCertificates)
-{
-    SOPC_ASSERT(NULL != ctx);
-
-    if (0 == SOPC_Array_Size(issuedCertificates))
-    {
-        LOG_XML_ERRORF(ctx->parser, "%s: no issued certificates defined", CLIENT_OR_SERVER(isServer));
-        return false;
-    }
-    return true;
-}
-
-bool SOPC_ConfigLoaderInternal_start_issued_cert(SOPC_HelperExpatCtx* ctx,
-                                                 SOPC_Array* issuedCertificates,
-                                                 const XML_Char** attrs)
-{
-    SOPC_ASSERT(NULL != ctx);
 
     const char* attr_val = SOPC_HelperExpat_GetAttr(ctx, "path", attrs);
 
-    char* path = SOPC_strdup(attr_val);
-
-    if (path == NULL)
+    if (strlen(attr_val) > 0)
     {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
+        char* path = SOPC_strdup(attr_val);
+        if (path == NULL)
+        {
+            LOG_XML_ERRORF(ctx->parser, "%s PublicKeyInfrastructure: no path defined", CLIENT_OR_SERVER(isServer));
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+        *pkiPath = path;
     }
-
-    if (!SOPC_Array_Append(issuedCertificates, path))
+    else
     {
-        SOPC_Free(path);
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-
-    return true;
-}
-
-bool SOPC_ConfigLoaderInternal_end_untrusted_issuers(bool isServer,
-                                                     SOPC_HelperExpatCtx* ctx,
-                                                     SOPC_Array* untrustedRootIssuers,
-                                                     SOPC_Array* untrustedIntermediateIssuers)
-{
-    if (0 == SOPC_Array_Size(untrustedRootIssuers) && 0 == SOPC_Array_Size(untrustedIntermediateIssuers))
-    {
-        LOG_XML_ERRORF(ctx->parser, "%s: no untrusted CA defined", CLIENT_OR_SERVER(isServer));
-        return false;
-    }
-
-    return true;
-}
-
-bool SOPC_ConfigLoaderInternal_end_application_certificates(bool isServer,
-                                                            SOPC_HelperExpatCtx* ctx,
-                                                            SOPC_Array** trustedRootIssuers,
-                                                            char*** trustedRootIssuersList,
-                                                            SOPC_Array** trustedIntermediateIssuers,
-                                                            char*** trustedIntermediateIssuersList,
-                                                            SOPC_Array** issuedCertificates,
-                                                            char*** issuedCertificatesList,
-                                                            SOPC_Array** untrustedRootIssuers,
-                                                            char*** untrustedRootIssuersList,
-                                                            SOPC_Array** untrustedIntermediateIssuers,
-                                                            char*** untrustedIntermediateIssuersList,
-                                                            SOPC_Array** crlCertificates,
-                                                            char*** crlCertificatesList,
-                                                            bool issuedCertificatesSet,
-                                                            bool trustedIssuersSet)
-{
-    SOPC_ASSERT(NULL != ctx);
-    SOPC_ASSERT(NULL != trustedRootIssuers);
-    SOPC_ASSERT(NULL != trustedRootIssuersList);
-    SOPC_ASSERT(NULL != trustedIntermediateIssuers);
-    SOPC_ASSERT(NULL != trustedIntermediateIssuersList);
-    SOPC_ASSERT(NULL != issuedCertificates);
-    SOPC_ASSERT(NULL != issuedCertificatesList);
-    SOPC_ASSERT(NULL != untrustedRootIssuers);
-    SOPC_ASSERT(NULL != untrustedRootIssuersList);
-    SOPC_ASSERT(NULL != untrustedIntermediateIssuers);
-    SOPC_ASSERT(NULL != untrustedIntermediateIssuersList);
-    SOPC_ASSERT(NULL != crlCertificates);
-    SOPC_ASSERT(NULL != crlCertificatesList);
-
-    if (!SOPC_Array_Append_Values(*trustedRootIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *trustedRootIssuersList = SOPC_Array_Into_Raw(*trustedRootIssuers);
-    if (NULL == *trustedRootIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *trustedRootIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(*trustedIntermediateIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *trustedIntermediateIssuersList = SOPC_Array_Into_Raw(*trustedIntermediateIssuers);
-    if (NULL == *trustedIntermediateIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *trustedIntermediateIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(*issuedCertificates, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *issuedCertificatesList = SOPC_Array_Into_Raw(*issuedCertificates);
-    if (NULL == *issuedCertificatesList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *issuedCertificates = NULL;
-
-    if (!SOPC_Array_Append_Values(*untrustedRootIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *untrustedRootIssuersList = SOPC_Array_Into_Raw(*untrustedRootIssuers);
-    if (NULL == *untrustedRootIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *untrustedRootIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(*untrustedIntermediateIssuers, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *untrustedIntermediateIssuersList = SOPC_Array_Into_Raw(*untrustedIntermediateIssuers);
-    if (NULL == *untrustedIntermediateIssuersList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *untrustedIntermediateIssuers = NULL;
-
-    if (!SOPC_Array_Append_Values(*crlCertificates, NULL, 1))
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *crlCertificatesList = SOPC_Array_Into_Raw(*crlCertificates);
-    if (NULL == *crlCertificatesList)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    *crlCertificates = NULL;
-
-    if (!issuedCertificatesSet && !trustedIssuersSet)
-    {
-        LOG_XML_ERRORF(ctx->parser,
-                       "%s: if application certificates section is defined, at least one issued certificate or trusted "
-                       "CA should be defined.",
-                       CLIENT_OR_SERVER(isServer));
+        LOG_XML_ERRORF(ctx->parser, "%s PublicKeyInfrastructure: empty path is forbidden", CLIENT_OR_SERVER(isServer));
         return false;
     }
 

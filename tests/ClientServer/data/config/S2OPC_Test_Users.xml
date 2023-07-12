@@ -27,21 +27,11 @@
   </UserPasswordConfiguration>
   <UserCertificates>
     <!-- default right is read only (accepted issued, not configured but evaluated as trustworthy according to trust chain)-->
-    <TrustedIssuers write="false" read="true" execute="false" addnode="false">
-      <TrustedIssuer root="true" cert_path="trusted_usr/user_cacert.der" revocation_list_path="revoked_usr/user_cacrl.der"/>
-      <TrustedIssuer root="true" cert_path="trusted_usr/ctt_ca1T.der" revocation_list_path="revoked_usr/ctt_ca1T.crl"/>
-      <TrustedIssuer root="false" cert_path="trusted_usr/ctt_ca1I_ca2T.der" revocation_list_path="revoked_usr/ctt_ca1I_ca2T.crl"/>
-    </TrustedIssuers>
-    <IssuedCertificates>
-      <IssuedCertificate path="issued_usr/ctt_usrT.der" write="true"/>  <!-- Read, execute and addnode rights are set to the default value False because rights are partialy defined -->
-      <IssuedCertificate path="issued_usr/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
-      <IssuedCertificate path="issued_usr/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
-      <IssuedCertificate path="issued_usr/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
-      <IssuedCertificate path="issued_usr/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
-    </IssuedCertificates>
-    <UntrustedIssuers>
-      <UntrustedIssuer root="true" cert_path="untrusted_usr/ctt_ca1I.der" revocation_list_path="revoked_usr/ctt_ca1I.crl"/>
-      <UntrustedIssuer root="false" cert_path="untrusted_usr/ctt_ca1TC_ca2I.der" revocation_list_path="revoked_usr/ctt_ca1TC_ca2I.crl"/>
-    </UntrustedIssuers>
+    <PublicKeyInfrastructure path="./S2OPC_Users_PKI" write="false" read="true" execute="false" addnode="false"/>
+    <IssuedCertificate path="issued_usr/ctt_usrT.der" write="true"/>  <!-- Read, execute and addnode rights are set to the default value False because rights are partialy defined -->
+    <IssuedCertificate path="issued_usr/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
+    <IssuedCertificate path="issued_usr/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
+    <IssuedCertificate path="issued_usr/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
+    <IssuedCertificate path="issued_usr/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
   </UserCertificates>
 </S2OPC_Users>

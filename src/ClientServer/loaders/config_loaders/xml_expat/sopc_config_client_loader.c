@@ -45,12 +45,7 @@ typedef enum
     PARSE_APPLICATION_CERT,  // ....In application certificate
     PARSE_CLIENT_CERT,       // ......Client certificate
     PARSE_CLIENT_KEY,        // ......Client key
-    PARSE_TRUSTED_ISSUERS,   // ......Trusted issuer certificates
-    PARSE_TRUSTED_ISSUER,    // ........Trusted issuer certificate + crl
-    PARSE_ISSUED_CERTS,      // ......Trusted issued certificates
-    PARSE_ISSUED_CERT,       // ........Trusted issued certificate
-    PARSE_UNTRUSTED_ISSUERS, // ......Untrusted issuer certificates
-    PARSE_UNTRUSTED_ISSUER,  // ........Untrusted issuer certificate + crl
+    PARSE_CLIENT_PKI,        // ......Client PKI
     PARSE_APPLICATION_DESC,  // ....In application description
     PARSE_APPLICATION_URI,   // ......Application URI
     PARSE_PRODUCT_URI,       // ......Product URI
@@ -82,16 +77,7 @@ struct parse_context_t
     char* clientCertificate;
     char* clientKey;
     bool clientKeyEncrypted;
-    bool trustedIssuersSet;
-    SOPC_Array* trustedRootIssuers;
-    SOPC_Array* trustedIntermediateIssuers;
-    bool issuedCertificatesSet;
-    SOPC_Array* issuedCertificates;
-    bool untrustedIssuersSet;
-    SOPC_Array* untrustedRootIssuers;
-    SOPC_Array* untrustedIntermediateIssuers;
-    bool crlSet;
-    SOPC_Array* crlCertificates;
+    char* clientPki;
 
     bool connectionsSet;
     SOPC_SecureConnection_Config* currentSecConnConfig;
@@ -628,7 +614,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_APPLICATION_DESC:
         if (strcmp(name, "ApplicationURI") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_app_uri(true, &ctx->helper_ctx, &ctx->appDesc, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_app_uri(false, &ctx->helper_ctx, &ctx->appDesc, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -648,7 +634,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         else if (strcmp(name, "ApplicationName") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_app_name(true, &ctx->helper_ctx, &ctx->appDesc,
+            if (!SOPC_ConfigLoaderInternal_start_app_name(false, &ctx->helper_ctx, &ctx->appDesc,
                                                           ctx->clientConfigPtr->clientLocaleIds, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
@@ -659,7 +645,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         else if (strcmp(name, "ApplicationType") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_app_type(true, &ctx->helper_ctx, &ctx->appDesc, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_app_type(false, &ctx->helper_ctx, &ctx->appDesc, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -677,7 +663,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
     case PARSE_APPLICATION_CERT:
         if (strcmp(name, "ClientCertificate") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_cert(true, &ctx->helper_ctx, &ctx->clientCertificate, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_cert(false, &ctx->helper_ctx, &ctx->clientCertificate, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -687,7 +673,7 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         else if (strcmp(name, "ClientKey") == 0)
         {
-            if (!SOPC_ConfigLoaderInternal_start_key(true, &ctx->helper_ctx, &ctx->clientKey, &ctx->clientKeyEncrypted,
+            if (!SOPC_ConfigLoaderInternal_start_key(false, &ctx->helper_ctx, &ctx->clientKey, &ctx->clientKeyEncrypted,
                                                      attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
@@ -695,36 +681,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             }
             ctx->state = PARSE_CLIENT_KEY;
         }
-        else if (strcmp(name, "TrustedIssuers") == 0 && !ctx->trustedIssuersSet)
+        else if (strcmp(name, "ClientPublicKeyInfrastructure") == 0)
         {
-            ctx->state = PARSE_TRUSTED_ISSUERS;
-        }
-        else if (strcmp(name, "IssuedCertificates") == 0 && !ctx->issuedCertificatesSet)
-        {
-            ctx->state = PARSE_ISSUED_CERTS;
-        }
-        else if (strcmp(name, "UntrustedIssuers") == 0 && !ctx->untrustedIssuersSet)
-        {
-            ctx->state = PARSE_UNTRUSTED_ISSUERS;
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-        break;
-    case PARSE_TRUSTED_ISSUERS:
-        if (strcmp(name, "TrustedIssuer") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->trustedRootIssuers,
-                                                        ctx->trustedIntermediateIssuers, ctx->crlCertificates, attrs))
+            if (!SOPC_ConfigLoaderInternal_start_pki(false, &ctx->helper_ctx, &ctx->clientPki, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
             }
-
-            ctx->state = PARSE_TRUSTED_ISSUER;
+            ctx->state = PARSE_CLIENT_PKI;
         }
         else
         {
@@ -732,43 +696,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             XML_StopParser(helperCtx->parser, 0);
             return;
         }
-        break;
-    case PARSE_ISSUED_CERTS:
-        if (strcmp(name, "IssuedCertificate") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issued_cert(&ctx->helper_ctx, ctx->issuedCertificates, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_ISSUED_CERT;
-        break;
-    case PARSE_UNTRUSTED_ISSUERS:
-        if (strcmp(name, "UntrustedIssuer") == 0)
-        {
-            if (!SOPC_ConfigLoaderInternal_start_issuer(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
-                                                        ctx->untrustedIntermediateIssuers, ctx->crlCertificates, attrs))
-            {
-                XML_StopParser(helperCtx->parser, 0);
-                return;
-            }
-        }
-        else
-        {
-            LOG_XML_ERRORF(helperCtx->parser, "Unexpected tag %s", name);
-            XML_StopParser(helperCtx->parser, 0);
-            return;
-        }
-
-        ctx->state = PARSE_UNTRUSTED_ISSUER;
         break;
     case PARSE_CONNECTIONS:
         if (strcmp(name, "Connection") == 0)
@@ -907,64 +834,17 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         }
         ctx->state = PARSE_CLICONFIG;
         break;
-    case PARSE_TRUSTED_ISSUER:
-        ctx->state = PARSE_TRUSTED_ISSUERS;
-        break;
-    case PARSE_TRUSTED_ISSUERS:
-        if (!SOPC_ConfigLoaderInternal_end_trusted_issuers(true, &ctx->helper_ctx, ctx->trustedRootIssuers))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->trustedIssuersSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
-    case PARSE_ISSUED_CERT:
-        ctx->state = PARSE_ISSUED_CERTS;
-        break;
-    case PARSE_ISSUED_CERTS:
-        if (!SOPC_ConfigLoaderInternal_end_issued_certs(true, &ctx->helper_ctx, ctx->issuedCertificates))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->issuedCertificatesSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
-    case PARSE_UNTRUSTED_ISSUER:
-        ctx->state = PARSE_UNTRUSTED_ISSUERS;
-        break;
-    case PARSE_UNTRUSTED_ISSUERS:
-        if (!SOPC_ConfigLoaderInternal_end_untrusted_issuers(true, &ctx->helper_ctx, ctx->untrustedRootIssuers,
-                                                             ctx->untrustedIntermediateIssuers))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        ctx->untrustedIssuersSet = true;
-        ctx->state = PARSE_APPLICATION_CERT;
-        break;
     case PARSE_CLIENT_KEY:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_CLIENT_CERT:
         ctx->state = PARSE_APPLICATION_CERT;
         break;
+    case PARSE_CLIENT_PKI:
+        ctx->state = PARSE_APPLICATION_CERT;
+        break;
     case PARSE_APPLICATION_CERT:
         if (!SOPC_end_app_certs(ctx))
-        {
-            XML_StopParser(ctx->helper_ctx.parser, 0);
-            return;
-        }
-        if (!SOPC_ConfigLoaderInternal_end_application_certificates(
-                true, &ctx->helper_ctx, &ctx->trustedRootIssuers,
-                &ctx->clientConfigPtr->configFromPaths->trustedRootIssuersList, &ctx->trustedIntermediateIssuers,
-                &ctx->clientConfigPtr->configFromPaths->trustedIntermediateIssuersList, &ctx->issuedCertificates,
-                &ctx->clientConfigPtr->configFromPaths->issuedCertificatesList, &ctx->untrustedRootIssuers,
-                &ctx->clientConfigPtr->configFromPaths->untrustedRootIssuersList, &ctx->untrustedIntermediateIssuers,
-                &ctx->clientConfigPtr->configFromPaths->untrustedIntermediateIssuersList, &ctx->crlCertificates,
-                &ctx->clientConfigPtr->configFromPaths->certificateRevocationPathList, ctx->issuedCertificatesSet,
-                ctx->trustedIssuersSet))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
@@ -984,7 +864,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_APPLICATION_DESC;
         break;
     case PARSE_APPLICATION_DESC:
-        if (!SOPC_ConfigLoaderInternal_end_app_desc(true, &ctx->helper_ctx, &ctx->appDesc))
+        if (!SOPC_ConfigLoaderInternal_end_app_desc(false, &ctx->helper_ctx, &ctx->appDesc))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
             return;
@@ -995,7 +875,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_PREFERRED_LOCALES;
         break;
     case PARSE_PREFERRED_LOCALES:
-        if (!SOPC_ConfigLoaderInternal_end_locales(true, &ctx->helper_ctx, ctx->preferredLocaleIds,
+        if (!SOPC_ConfigLoaderInternal_end_locales(false, &ctx->helper_ctx, ctx->preferredLocaleIds,
                                                    &ctx->clientConfigPtr->clientLocaleIds))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);
@@ -1046,27 +926,12 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
     XML_Parser parser = XML_ParserCreateNS(NULL, NS_SEPARATOR[0]);
 
     SOPC_Array* preferredLocales = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* trustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* trustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* issuedCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* untrustedRootIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-    SOPC_Array* untrustedIntermediateIssuers = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
 
-    SOPC_Array* revokedListCerts = SOPC_Array_Create(sizeof(char*), 1, SOPC_Free_CstringFromPtr);
-
-    if ((NULL == parser) || (NULL == preferredLocales) || (NULL == trustedRootIssuers) ||
-        (NULL == trustedIntermediateIssuers) || (NULL == issuedCerts) || (NULL == untrustedRootIssuers) ||
-        (NULL == untrustedIntermediateIssuers) || (NULL == revokedListCerts))
+    if ((NULL == parser) || (NULL == preferredLocales))
     {
         LOG_MEMORY_ALLOCATION_FAILURE;
         XML_ParserFree(parser);
         SOPC_Array_Delete(preferredLocales);
-        SOPC_Array_Delete(trustedRootIssuers);
-        SOPC_Array_Delete(trustedIntermediateIssuers);
-        SOPC_Array_Delete(issuedCerts);
-        SOPC_Array_Delete(untrustedRootIssuers);
-        SOPC_Array_Delete(untrustedIntermediateIssuers);
-        SOPC_Array_Delete(revokedListCerts);
         return false;
     }
 
@@ -1079,12 +944,6 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
     ctx.srv_skip_depth = 0;
     ctx.nbConnections = 0;
     ctx.preferredLocaleIds = preferredLocales;
-    ctx.trustedRootIssuers = trustedRootIssuers;
-    ctx.trustedIntermediateIssuers = trustedIntermediateIssuers;
-    ctx.issuedCertificates = issuedCerts;
-    ctx.untrustedRootIssuers = untrustedRootIssuers;
-    ctx.untrustedIntermediateIssuers = untrustedIntermediateIssuers;
-    ctx.crlCertificates = revokedListCerts;
     ctx.clientConfigPtr = clientConfig;
     ctx.helper_ctx.char_data_buffer = NULL;
     ctx.helper_ctx.char_data_cap = 0;
@@ -1096,12 +955,6 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
     SOPC_ReturnStatus res = parse(parser, fd);
     XML_ParserFree(parser);
     SOPC_Array_Delete(ctx.preferredLocaleIds);
-    SOPC_Array_Delete(ctx.trustedRootIssuers);
-    SOPC_Array_Delete(ctx.trustedIntermediateIssuers);
-    SOPC_Array_Delete(ctx.issuedCertificates);
-    SOPC_Array_Delete(ctx.untrustedRootIssuers);
-    SOPC_Array_Delete(ctx.untrustedIntermediateIssuers);
-    SOPC_Array_Delete(ctx.crlCertificates);
 
     if (res == SOPC_STATUS_OK)
     {
@@ -1112,11 +965,13 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
             clientConfig->configFromPaths->clientCertPath = ctx.clientCertificate;
             clientConfig->configFromPaths->clientKeyPath = ctx.clientKey;
             clientConfig->configFromPaths->clientKeyEncrypted = ctx.clientKeyEncrypted;
+            clientConfig->configFromPaths->clientPkiPath = ctx.clientPki;
         }
         else
         {
             SOPC_ASSERT(NULL == ctx.clientCertificate);
             SOPC_ASSERT(NULL == ctx.clientKey);
+            SOPC_ASSERT(NULL == ctx.clientPki);
         }
         clientConfig->clientDescription = ctx.appDesc;
         return true;

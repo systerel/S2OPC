@@ -298,19 +298,6 @@ const char* expectedNamespaces[3] = {"urn:S2OPC:MY_SERVER_HOST", "urn:S2OPC:MY_S
 const char* serverExpectedLocales[4] = {"en", "es-ES", "fr-FR", NULL};
 const char* clientExpectedLocales[3] = {"en-US", "fr-FR", NULL};
 
-const char* expectedTrustedRootIssuers[3] = {"/mypath/cacert.der", "/mypath/othercacert.der", NULL};
-const char* expectedTrustedIntermediateIssuers[2] = {"/mypath/intermediate_cacert.der", NULL};
-
-const char* expectedIssuedCerts[3] = {"/mypath/self_signed.der", "/mypath/signed_by_not_trusted_ca.der", NULL};
-const char* expectedUntrustedRootIssuers[2] = {"/mypath/not_trusted_ca.der", NULL};
-const char* expectedUntrustedIntermediateIssuers[2] = {"/mypath/not_trusted_intermediate_ca.der", NULL};
-const char* expectedIssuersCRLs[6] = {"/mypath/cacrl.der",
-                                      "/mypath/othercacrl.der",
-                                      "/mypath/intermediate_cacrl.der",
-                                      "/mypath/not_trusted_revoked.crl",
-                                      "/mypath/not_trusted_intermediate_revoked.crl",
-                                      NULL};
-
 // Without EXPAT function is detected as unused and compilation fails
 #ifdef WITH_EXPAT
 static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
@@ -342,76 +329,8 @@ static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", sConfig->serverKeyPath));
     /* Check whether the server's key private is encryted or not. */
     ck_assert_int_eq(true, sConfig->serverKeyEncrypted);
-
-    /* Check trusted CAs */
-    int caCounter = 0;
-    // Root CA
-    for (caCounter = 0; sConfig->trustedRootIssuersList[caCounter] != NULL && expectedTrustedRootIssuers[caCounter];
-         caCounter++)
-    {
-        int cmp_res = strcmp(sConfig->trustedRootIssuersList[caCounter], expectedTrustedRootIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->trustedRootIssuersList[caCounter]);
-    ck_assert_ptr_null(expectedTrustedRootIssuers[caCounter]);
-    // Intermediate CA:
-    for (caCounter = 0;
-         sConfig->trustedIntermediateIssuersList[caCounter] != NULL && expectedTrustedIntermediateIssuers[caCounter];
-         caCounter++)
-    {
-        int cmp_res =
-            strcmp(sConfig->trustedIntermediateIssuersList[caCounter], expectedTrustedIntermediateIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->trustedIntermediateIssuersList[caCounter]);
-    ck_assert_ptr_null(expectedTrustedIntermediateIssuers[caCounter]);
-
-    /* Check trusted issued certificates */
-    int issuedCounter = 0;
-    for (issuedCounter = 0;
-         sConfig->issuedCertificatesList[issuedCounter] != NULL && expectedIssuedCerts[issuedCounter]; issuedCounter++)
-    {
-        int cmp_res = strcmp(sConfig->issuedCertificatesList[issuedCounter], expectedIssuedCerts[issuedCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->issuedCertificatesList[issuedCounter]);
-    ck_assert_ptr_null(expectedIssuedCerts[issuedCounter]);
-
-    /* Check untrusted CAs (used to check issued certificate trust chain) */
-    int untrustedCAcounter = 0;
-    // Root CA:
-    for (untrustedCAcounter = 0; sConfig->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
-                                 expectedUntrustedRootIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(sConfig->untrustedRootIssuersList[untrustedCAcounter],
-                             expectedUntrustedRootIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->untrustedRootIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(expectedUntrustedRootIssuers[untrustedCAcounter]);
-    // Intermediate CA:
-    for (untrustedCAcounter = 0; sConfig->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
-                                 expectedUntrustedIntermediateIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(sConfig->untrustedIntermediateIssuersList[untrustedCAcounter],
-                             expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->untrustedIntermediateIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-
-    /* Check CRLs */
-    int crlCounter = 0;
-    for (crlCounter = 0; sConfig->certificateRevocationPathList[crlCounter] != NULL && expectedIssuersCRLs[crlCounter];
-         crlCounter++)
-    {
-        int cmp_res = strcmp(sConfig->certificateRevocationPathList[crlCounter], expectedIssuersCRLs[crlCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(sConfig->certificateRevocationPathList[crlCounter]);
-    ck_assert_ptr_null(expectedIssuersCRLs[crlCounter]);
+    /* Check PKI */
+    ck_assert_int_eq(0, strcmp("/mypath/myPki", sConfig->serverPkiPath));
 
     /* Check application description */
     int res =
@@ -664,83 +583,8 @@ static void check_parsed_s2opc_client_config(SOPC_S2OPC_Config* s2opcConfig)
     ck_assert_int_eq(0, strcmp("/mypath/mykey.pem", cConfig->configFromPaths->clientKeyPath));
     /* Check whether the server's key private is encryted or not. */
     ck_assert_int_eq(true, cConfig->configFromPaths->clientKeyEncrypted);
-
-    /* Check trusted CAs */
-    int caCounter = 0;
-    // Root CA
-    for (caCounter = 0;
-         cConfig->configFromPaths->trustedRootIssuersList[caCounter] != NULL && expectedTrustedRootIssuers[caCounter];
-         caCounter++)
-    {
-        int cmp_res =
-            strcmp(cConfig->configFromPaths->trustedRootIssuersList[caCounter], expectedTrustedRootIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->trustedRootIssuersList[caCounter]);
-    ck_assert_ptr_null(expectedTrustedRootIssuers[caCounter]);
-    // Intermediate CA:
-    for (caCounter = 0; cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter] != NULL &&
-                        expectedTrustedIntermediateIssuers[caCounter];
-         caCounter++)
-    {
-        int cmp_res = strcmp(cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter],
-                             expectedTrustedIntermediateIssuers[caCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->trustedIntermediateIssuersList[caCounter]);
-    ck_assert_ptr_null(expectedTrustedIntermediateIssuers[caCounter]);
-
-    /* Check trusted issued certificates */
-    int issuedCounter = 0;
-    for (issuedCounter = 0;
-         cConfig->configFromPaths->issuedCertificatesList[issuedCounter] != NULL && expectedIssuedCerts[issuedCounter];
-         issuedCounter++)
-    {
-        int cmp_res =
-            strcmp(cConfig->configFromPaths->issuedCertificatesList[issuedCounter], expectedIssuedCerts[issuedCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->issuedCertificatesList[issuedCounter]);
-    ck_assert_ptr_null(expectedIssuedCerts[issuedCounter]);
-
-    /* Check untrusted CAs (used to check issued certificate trust chain) */
-    int untrustedCAcounter = 0;
-    // Root CA:
-    for (untrustedCAcounter = 0; cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter] != NULL &&
-                                 expectedUntrustedRootIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter],
-                             expectedUntrustedRootIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->untrustedRootIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(expectedUntrustedRootIssuers[untrustedCAcounter]);
-    // Intermediate CA:
-    for (untrustedCAcounter = 0;
-         cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter] != NULL &&
-         expectedUntrustedIntermediateIssuers[untrustedCAcounter];
-         untrustedCAcounter++)
-    {
-        int cmp_res = strcmp(cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter],
-                             expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->untrustedIntermediateIssuersList[untrustedCAcounter]);
-    ck_assert_ptr_null(expectedUntrustedIntermediateIssuers[untrustedCAcounter]);
-
-    /* Check CRLs */
-    int crlCounter = 0;
-    for (crlCounter = 0;
-         cConfig->configFromPaths->certificateRevocationPathList[crlCounter] != NULL && expectedIssuersCRLs[crlCounter];
-         crlCounter++)
-    {
-        int cmp_res = strcmp(cConfig->configFromPaths->certificateRevocationPathList[crlCounter],
-                             expectedIssuersCRLs[crlCounter]);
-        ck_assert_int_eq(0, cmp_res);
-    }
-    ck_assert_ptr_null(cConfig->configFromPaths->certificateRevocationPathList[crlCounter]);
-    ck_assert_ptr_null(expectedIssuersCRLs[crlCounter]);
+    /* Check PKI */
+    ck_assert_int_eq(0, strcmp("/mypath/myPki", cConfig->configFromPaths->clientPkiPath));
 
     /* Check application description */
     int res =

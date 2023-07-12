@@ -71,73 +71,29 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  <xs:complexType name="IssuerType">
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute type="xs:string" name="cert_path" use="required"/>
-        <xs:attribute type="xs:string" name="revocation_list_path" use="required"/>
-        <xs:attribute type="xs:boolean" name="root" use="required"/>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="TrustedIssuersType">
-    <xs:sequence>
-      <xs:element type="IssuerType" name="TrustedIssuer" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several trusted certificate authorities</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="IssuedCertificateType">
+  <xs:complexType name="PublicKeyInfrastructureType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
+        <xs:attribute type="xs:boolean" name="read" default="false"/>
+        <xs:attribute type="xs:boolean" name="write" default="false"/>
+        <xs:attribute type="xs:boolean" name="execute" default="false"/>
+        <xs:attribute type="xs:boolean" name="addnode" default="false"/>
       </xs:extension>
     </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="IssuedCertificatesType">
-    <xs:sequence>
-      <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several explicitly trusted certificates issued by provided issuers or self-signed</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="UntrustedIssuersType">
-    <xs:sequence>
-      <xs:element type="IssuerType" name="UntrustedIssuer" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>One or several untrusted certificate authorities. Those are only used to validate trust chain of issued certificate.</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ServerApplicationCertificatesType">
     <xs:sequence>
       <xs:element type="CertificateType" name="ServerCertificate" />
       <xs:element type="KeyType" name="ServerKey" />
-      <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
-      <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>At least one shall be filled in either TrustedIssuers or IssuedCertificates</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element type="UntrustedIssuersType" name="UntrustedIssuers" minOccurs="0"/>
+      <xs:element type="PublicKeyInfrastructureType" name="ServerPublicKeyInfrastructure" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ClientApplicationCertificatesType">
     <xs:sequence>
       <xs:element type="CertificateType" name="ClientCertificate" />
       <xs:element type="KeyType" name="ClientKey" />
-      <xs:element type="TrustedIssuersType" name="TrustedIssuers" minOccurs="0"/>
-      <xs:element type="IssuedCertificatesType" name="IssuedCertificates" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>At least one shall be filled in either TrustedIssuers or IssuedCertificates</xs:documentation>
-        </xs:annotation>
-      </xs:element>
-      <xs:element type="UntrustedIssuersType" name="UntrustedIssuers" minOccurs="0"/>
+      <xs:element type="PublicKeyInfrastructureType" name="ClientPublicKeyInfrastructure" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ApplicationURIType">
@@ -305,7 +261,7 @@
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute type="xs:string" name="policyId" use="required"/> <!-- Might be optional in the future if auto-selection --> 
+    <xs:attribute type="xs:string" name="policyId" use="required"/> <!-- Might be optional in the future if auto-selection -->
     <xs:attribute type="TokenType" name="tokenType" use="required"/>
     <!-- <xs:attribute type="SecurityURI" name="securityUri" use="optional"/> Determined by policyId until it becames optionnal -->
   </xs:complexType>

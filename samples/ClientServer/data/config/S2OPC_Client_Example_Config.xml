@@ -8,12 +8,7 @@
     <ApplicationCertificates>
       <ClientCertificate path="client_public/client_4k_cert.der"/>
       <ClientKey path="client_private/encrypted_client_4k_key.pem" encrypted="true"/>
-      <TrustedIssuers>
-        <!-- List of trusted CAs for which issued certificates are trusted -->
-        <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
-      </TrustedIssuers>
-      <!-- or/and <IssuedCertificates> if trusted issued certificates (self-signed or from known untrusted issuer) -->
-      <!-- with <UntrustedIssuers> for untrusted issuers -->
+      <ClientPublicKeyInfrastructure path="./S2OPC_Demo_PKI"/>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>
@@ -31,7 +26,7 @@
         <SecurityMode mode="Sign"/>
         <UserPolicy policyId="username_Basic256Sha256" tokenType="username"/>  <!-- for now policyId and no secuURI, in the future both optionals-->
       </Connection>
-      <!--reverseEndpointURL="opc.tcp://localhost:4844"--> 
+      <!--reverseEndpointURL="opc.tcp://localhost:4844"-->
       <Connection reverseEndpointURL="opc.tcp://localhost:4844" serverURL="opc.tcp://localhost:4841" reqLifetimeMs="7200000" id="userCertConnection">
         <ServerCertificate path="server_public/server_2k_cert.der"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
@@ -41,7 +36,7 @@
         </UserPolicy>
       </Connection>
       <!-- AutoConnection Not implemented: call get endpoint + connect to most secure endpoint (min secu policy ?) if trusted server cert
-      <AutoConnection url="opc.tcp://localhost:4842"> 
+      <AutoConnection url="opc.tcp://localhost:4842">
         <SecurityMode mode="SignAndEncrypt"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
         <UserPolicy tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">

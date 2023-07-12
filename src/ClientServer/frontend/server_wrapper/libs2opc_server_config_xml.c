@@ -55,10 +55,7 @@ static bool SOPC_HelperInternal_CreatePKIfromPaths(void)
 {
     SOPC_Server_Config* serverConfig = &SOPC_CommonHelper_GetConfiguration()->serverConfig;
     /* Create the PKI (Public Key Infrastructure) provider */
-    SOPC_ReturnStatus status = SOPC_PKIProviderStack_CreateFromPaths(
-        serverConfig->trustedRootIssuersList, serverConfig->trustedIntermediateIssuersList,
-        serverConfig->untrustedRootIssuersList, serverConfig->untrustedIntermediateIssuersList,
-        serverConfig->issuedCertificatesList, serverConfig->certificateRevocationPathList, &serverConfig->pki);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateFromStore(serverConfig->serverPkiPath, &serverConfig->pki);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(

@@ -11,47 +11,7 @@
     <ApplicationCertificates>
       <ServerCertificate path="./server_public/server_2k_cert.der"/>
       <ServerKey path="./server_private/encrypted_server_2k_key.pem" encrypted="true"/>
-      <TrustedIssuers>
-        <TrustedIssuer root="true" cert_path="trusted/cacert.der" revocation_list_path="revoked/cacrl.der"/>
-        <TrustedIssuer root="true" cert_path="trusted/ctt_ca1T.der" revocation_list_path="revoked/ctt_ca1T.crl"/>
-        <!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
-        <TrustedIssuer root="true" cert_path="trusted/ctt_ca1TC.der"/>
-        <TrustedIssuer root="false" cert_path="trusted/ctt_ca1I_ca2T.der" revocation_list_path="revoked/ctt_ca1I_ca2T.crl"/>
-      </TrustedIssuers>
-      <IssuedCertificates>
-        <IssuedCertificate path="issued/ctt_appT.der"/>
-        <IssuedCertificate path="issued/ctt_appTE.der"/>
-        <IssuedCertificate path="issued/ctt_appTSha1_1024.der"/>
-        <IssuedCertificate path="issued/ctt_appTSha1_2048.der"/>
-        <IssuedCertificate path="issued/ctt_appTSha256_2048.der"/>
-        <IssuedCertificate path="issued/ctt_appTSha256_4096.der"/>
-        <IssuedCertificate path="issued/ctt_appTSincorrect.der"/>
-        <IssuedCertificate path="issued/ctt_appTSip.der"/>
-        <IssuedCertificate path="issued/ctt_appTSuri.der"/>
-        <IssuedCertificate path="issued/ctt_appTV.der"/>
-        <IssuedCertificate path="issued/ctt_ca1I_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1I_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1I_ca2T_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1I_ca2T_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1IC_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1IC_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1T_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1T_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1T_ca2U_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1T_ca2U_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1TC_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1TC_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1TC_ca2I_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1TC_ca2I_appTR.der"/>
-        <IssuedCertificate path="issued/ctt_ca1U_appT.der"/>
-        <IssuedCertificate path="issued/ctt_ca1U_appTR.der"/>
-      </IssuedCertificates>
-      <UntrustedIssuers>
-        <!-- following root certificate without CRL will be ignored by PKI and is forbiden by XSD schema -->
-        <UntrustedIssuer root="true" cert_path="untrusted/ctt_ca1IC.der"/>
-        <UntrustedIssuer root="true" cert_path="untrusted/ctt_ca1I.der" revocation_list_path="revoked/ctt_ca1I.crl"/>
-        <UntrustedIssuer root="false" cert_path="untrusted/ctt_ca1TC_ca2I.der" revocation_list_path="revoked/ctt_ca1TC_ca2I.crl"/>
-      </UntrustedIssuers>
+      <ServerPublicKeyInfrastructure path="./S2OPC_UACTT_PKI"/>
     </ApplicationCertificates>
     <ApplicationDescription>
       <ApplicationURI uri="urn:S2OPC:localhost"/>

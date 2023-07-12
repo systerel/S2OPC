@@ -219,13 +219,10 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
         SOPC_SerializedCertificate* cliCert = NULL;
         SOPC_SerializedAsymmetricKey* cliKey = NULL;
 
-        if (NULL == cConfig->clientPKI && NULL != configFromPaths->trustedRootIssuersList)
+        if (NULL == cConfig->clientPKI && NULL != configFromPaths->clientPkiPath)
         {
             // Configure certificates / PKI / key from paths
-            status = SOPC_PKIProviderStack_CreateFromPaths(
-                configFromPaths->trustedRootIssuersList, configFromPaths->trustedIntermediateIssuersList,
-                configFromPaths->untrustedRootIssuersList, configFromPaths->untrustedIntermediateIssuersList,
-                configFromPaths->issuedCertificatesList, configFromPaths->certificateRevocationPathList, &pki);
+            status = SOPC_PKIProvider_CreateFromStore(configFromPaths->clientPkiPath &pki);
             if (SOPC_STATUS_OK != status)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create client config PKI from paths.");
@@ -233,7 +230,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
         }
         else
         {
-            if (NULL != configFromPaths->trustedRootIssuersList)
+            if (NULL != configFromPaths->clientPkiPath)
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                          "Client config PKI from paths ignored since a PKI is already instantiated.");
