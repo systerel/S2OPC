@@ -339,36 +339,16 @@ struct SOPC_Server_Config
                              applicative code) */
     char* serverKeyPath;  /**< Temporary path to the server key (serverCertificate shall be instantiated by applicative
                              code) */
-    bool serverKeyEncrypted;       /**< Boolean to indicate if the private key is encrypted */
-    char** trustedRootIssuersList; /**< A pointer to an array of paths to each trusted root CA issuer to use in the
-                                  validation chain. The array must contain a NULL pointer to indicate its end. (PKI
-                                  provider shall be instantiated using it by applicative code) */
-    char** trustedIntermediateIssuersList; /**< A pointer to an array of paths to each trusted intermediate CA issuer to
-                                  use in the validation chain. The array must contain a NULL pointer to indicate its
-                                  end. (PKI provider shall be instantiated using it by applicative code) */
-    char** issuedCertificatesList;         /**< A pointer to an array of paths to each issued certificate to use in the
-                                              validation chain. The array must contain a NULL pointer to indicate its end. (PKI
-                                              provider shall be instantiated using it by applicative code) */
-    char** untrustedRootIssuersList; /**< A pointer to an array of paths to each untrusted root CA issuer to use in the
-                                        validation chain. Each issued certificate must have its signing certificate
-                                        chain in the untrusted issuers list. (PKI provider shall be instantiated using
-                                        it by applicative code) */
-    char** untrustedIntermediateIssuersList; /**< A pointer to an array of paths to each untrusted intermediate CA
-                                                issuer to use in the validation chain.   Each issued certificate must
-                                                have its signing certificate chain in the untrusted issuers list. (PKI
-                                                provider shall be instantiated using it by applicative code) */
-    char** certificateRevocationPathList;    /**<  A pointer to an array of paths to each certificate revocation list to
-                                                use.    Each CA of the trusted issuers list and the untrusted issuers list
-                                                must have a    CRL in the list. (PKI provider shall be instantiated using
-                                                it    by applicative code)*/
-    uint8_t nbEndpoints;                     /**< Number of endpoints defined by the server */
-    SOPC_Endpoint_Config* endpoints;         /**< Endpoint configuration array */
+    bool serverKeyEncrypted;         /**< Boolean to indicate if the private key is encrypted */
+    char* serverPkiPath;             /**< Temporary path to the server public key infrastructure */
+    uint8_t nbEndpoints;             /**< Number of endpoints defined by the server */
+    SOPC_Endpoint_Config* endpoints; /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
     SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
     SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
-    SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProviderStack_CreateFromPaths
-                              or ::SOPC_PKIProviderStack_Create. */
+    SOPC_PKIProvider* pki; /**< PKI provider to be instantiated. Possible use of ::SOPC_PKIProvider_CreateFromStore
+                              or ::SOPC_PKIProvider_CreateFromList. */
     SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
                                                      Can be instantiated with SOPC_MethodCallManager_Create()
                                                      or specific code by applicative code.

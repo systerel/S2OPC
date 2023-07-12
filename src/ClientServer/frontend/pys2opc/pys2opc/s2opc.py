@@ -481,7 +481,7 @@ class PyS2OPC_Client(PyS2OPC):
     @staticmethod
     def get_client_key_password():
         """
-        Default method that is called during configuration phase if an encrypted private key is used, 
+        Default method that is called during configuration phase if an encrypted private key is used,
         it shall return the password to decrypt the client private key.
         It uses `_get_password` which uses get_pass library.
         """
@@ -672,7 +672,7 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server._xml_user_manager = PyS2OPC_Server.XMLUserManager(pAuthenticationManager, pAuthorizationManager)
 
     @staticmethod
-    def load_configuration(xml_path, address_space_handler=None, custom_user_handler=None, method_handler=None, pki_handler=None):
+    def load_configuration(xml_path, address_space_handler=None, custom_user_handler=None, method_handler=None):
         """
         Creates a configuration structure for a server from an XML file.
         This configuration is later used to open an endpoint.
@@ -687,13 +687,12 @@ class PyS2OPC_Server(PyS2OPC):
         - address space: no notification of address space events,
         - user authentications and authorizations: allow all user and all operations if `PyS2OPC_Server.load_users` is not called,
         - methods: no callable methods,
-        - pki: the default secure Public Key Infrastructure,
           which thoroughly checks the validity of certificates based on trusted issuers, untrusted issuers, and issued certificates.
 
         This function must be called after `PyS2OPC_Server.initialize`, and before `PyS2OPC_Server.mark_configured`.
         It must be called at most once.
 
-        Note: limitation: for now, changes in user authentications and authorizations, methods, and pki, are not supported.
+        Note: limitation: for now, changes in user authentications and authorizations and methods are not supported.
 
         Args:
             xml_path: Path to the configuration in the s2opc_config.xsd format
@@ -701,7 +700,6 @@ class PyS2OPC_Server(PyS2OPC):
                                    `pys2opc.server_callbacks.BaseAddressSpaceHandler`
             custom_user_handler: None (authenticate all user and authorize all operations if `PyS2OPC_Server.load_users` is not called)
             method_handler: None (no method available)
-            pki_handler: None (certificate authentications based on certificate authorities)
         """
         assert PyS2OPC._initialized_srv and not PyS2OPC._configured and PyS2OPC_Server._config is None,\
             'Toolkit is either not initialized, initialized as a Client, or already configured.'
@@ -709,7 +707,6 @@ class PyS2OPC_Server(PyS2OPC):
         assert custom_user_handler is None or PyS2OPC_Server._xml_user_manager is None, 'User handler cannot be defined both (XML and custom callbacks)'
         assert custom_user_handler is None, 'Custom User Manager not implemented yet'
         assert method_handler is None, 'Custom Method Manager not implemented yet'
-        assert pki_handler is None, 'Custom PKI Manager not implemented yet'
         if address_space_handler is not None:
             assert isinstance(address_space_handler, BaseAddressSpaceHandler)
 
@@ -754,14 +751,9 @@ class PyS2OPC_Server(PyS2OPC):
                     .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
 
             # PKI is not required if no CA is configured
-            if (serverCfg.trustedRootIssuersList != NULL and serverCfg.trustedRootIssuersList[0] != NULL) or\
-               (serverCfg.issuedCertificatesList != NULL and serverCfg.issuedCertificatesList[0] != NULL):
+            if (serverCfg.serverPkiPath != NULL):
                 ppPki = ffi.addressof(serverCfg, 'pki')
-                status = libsub.SOPC_PKIProviderStack_CreateFromPaths(
-                    serverCfg.trustedRootIssuersList, serverCfg.trustedIntermediateIssuersList,
-                    serverCfg.untrustedRootIssuersList, serverCfg.untrustedIntermediateIssuersList,
-                    serverCfg.issuedCertificatesList, serverCfg.certificateRevocationPathList,
-                    ppPki)
+                status = libsub.SOPC_PKIProvider_CreateFromStore(serverCfg.serverPkiPath, ppPki)
 
             # Methods
             serverCfg.mcm  # Leave NULL
@@ -819,8 +811,7 @@ class PyS2OPC_Server(PyS2OPC):
         PyS2OPC_Server.load_configuration(xml_server_config_path,
                                           address_space_handler=address_space_handler,
                                           custom_user_handler=None,
-                                          method_handler=None,
-                                          pki_handler=None)
+                                          method_handler=None)
 
     @staticmethod
     def mark_configured():
@@ -893,12 +884,12 @@ class PyS2OPC_Server(PyS2OPC):
     @staticmethod
     def get_server_key_password():
         """
-        Default method that is called during configuration phase if an encrypted private key is used, 
+        Default method that is called during configuration phase if an encrypted private key is used,
         it shall return the password to decrypt the server private key.
         It uses `_get_password` which uses get_pass library.
         """
         return PyS2OPC._get_password("Server private key password:")
-            
+
     # -----------------------------
     # Local services implementation
 

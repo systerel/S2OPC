@@ -207,20 +207,9 @@ extern const uint8_t SOPC_SecurityMode_SignAndEncrypt_Mask;
 extern const uint8_t SOPC_SecurityMode_Any_Mask;
 extern const uint8_t SOPC_MaxSecuPolicies_CFG;
 
-/* sopc_pki.h */
-void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
-
 /* sopc_pki_stack.h */
-SOPC_ReturnStatus SOPC_PKIProviderStack_Create(SOPC_SerializedCertificate* pCertAuth,
-                                               struct SOPC_CRLList* pRevocationList,
-                                               SOPC_PKIProvider** ppPKI);
-SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssuerRoots,
-                                                        char** lPathTrustedIssuerLinks,
-                                                        char** lPathUntrustedIssuerRoots,
-                                                        char** lPathUntrustedIssuerLinks,
-                                                        char** lPathIssuedCerts,
-                                                        char** lPathCRL,
-                                                        SOPC_PKIProvider** ppPKI);
+void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI);
+SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePath, SOPC_PKIProvider** ppPKI);
 
 /* XML Expat: Server config, User config and Address Space */
 bool SOPC_ConfigServer_Parse(FILE* fd, SOPC_Server_Config* configServer);
