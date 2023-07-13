@@ -299,12 +299,12 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         }
         else
         {
-            /* If no topic has been set by user a default one is used */
+            // If no topic has been set by user a default one is used
             char* defaultTopic = SOPC_Allocate_MQTT_DefaultTopic(&pubId, SOPC_WriterGroup_Get_Id(group));
-            SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic); // This function copies defaultTopic to another string
-            context->mqttTopic =
-                SOPC_WriterGroup_Get_MqttTopic(group); // We therefore need to give the new pointer used in the
-                                                       // WriterGroup, which will be freed with WriterGroup.
+            SOPC_WriterGroup_Set_MqttTopic(group, defaultTopic);
+            // It is necessary to give the new pointer used in the WriterGroup, which will be released with the
+            // WriterGroup
+            context->mqttTopic = SOPC_WriterGroup_Get_MqttTopic(group);
             SOPC_Free(defaultTopic);
         }
     }

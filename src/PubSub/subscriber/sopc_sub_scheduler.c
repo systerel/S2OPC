@@ -44,6 +44,8 @@
 
 char* ENDPOINT_URL = NULL;
 
+typedef const char* ro_string_t;
+
 /********************************************************************************************************
  * SUBSCRIBER SECURITY CONTEXT
  * This module uses a specific context for security management.
@@ -282,28 +284,25 @@ static void set_new_state(SOPC_PubSubState new)
     schedulerCtx.state = new;
 }
 
-/*
- * /brief Get all topics from each ReaderGroup and store it in an array.
- * If the mqttTopic isn't defined in a ReaderGroup, it is filled with the defaultTopic
- * (see SOPC_Allocate_MQTT_DefaultTopic()) and stored in the array.
- * Inform number of subscription topic on parameter nbTopic.
+/**
+ * \brief Create an array of pointer storing mqttTopic.
+ *        Get all topics from each ReaderGroup (one topic by ReaderGroup) and store it in this array.
+ *        If the mqttTopic isn't defined in a ReaderGroup, it is filled with the defaultTopic
+ *        (see SOPC_Allocate_MQTT_DefaultTopic()) and stored in the array.
  *
- * /param topic : Array of pointer storing mqttTopic
- * /param nbTopic : number of subscription topic
- * /param connection : PubSubConnection information
- * /param nbReaderGroups : Number of ReaderGroups
+ * \param connection        PubSubConnection information
+ *
+ * \return Array of pointer storing mqttTopic
+ *         The return value shall be freed by caller after use
  */
-static void get_mqtt_topic_from_ReaderGroup(const char** topic,
-                                            uint16_t* nbTopic,
-                                            SOPC_PubSubConnection* connection,
-                                            uint16_t nbReaderGroups)
+static ro_string_t* create_mqtt_topics_from_ReaderGroups(const SOPC_PubSubConnection* connection)
 {
+    const uint16_t nbReaderGroups = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
+    ro_string_t* topic = SOPC_Calloc(nbReaderGroups, sizeof(*topic));
     for (uint16_t rg_i = 0; rg_i < nbReaderGroups; rg_i++)
     {
         SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, rg_i);
-        const SOPC_Conf_PublisherId* PubId = SOPC_ReaderGroup_Get_PublisherId(group);
-        SOPC_ASSERT(nbTopic != NULL);
-        (*nbTopic)++;
+        const SOPC_Conf_PublisherId* pubId = SOPC_ReaderGroup_Get_PublisherId(group);
         const char* topic_buf = SOPC_ReaderGroup_Get_MqttTopic(group);
         if (NULL != topic_buf)
         {
@@ -311,14 +310,15 @@ static void get_mqtt_topic_from_ReaderGroup(const char** topic,
         }
         else
         {
-            char* defaultTopic = SOPC_Allocate_MQTT_DefaultTopic(PubId, SOPC_ReaderGroup_Get_GroupId(group));
-            SOPC_ReaderGroup_Set_MqttTopic(group, defaultTopic); // This function copies defaultTopic to another string
-            topic[rg_i] =
-                SOPC_ReaderGroup_Get_MqttTopic(group); // We therefore need to give the new pointer used in the
-                                                       // WriterGroup, which will be freed with WriterGroup.
+            char* defaultTopic = SOPC_Allocate_MQTT_DefaultTopic(pubId, SOPC_ReaderGroup_Get_GroupId(group));
+            SOPC_ReaderGroup_Set_MqttTopic(group, defaultTopic);
+            // It is necessary to give the new pointer used in the WriterGroup, which will be released with the
+            // WriterGroup.
+            topic[rg_i] = SOPC_ReaderGroup_Get_MqttTopic(group);
             SOPC_Free(defaultTopic);
         }
     }
+    return topic;
 }
 
 /* The generic callback that decode message and call the configuration-defined callback SetVariables */
@@ -618,9 +618,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                         }
                         else
                         {
-                            const char* topic[MQTT_LIB_MAX_NB_TOPIC_NAME];
-                            uint16_t nbTopic = 0;
-                            get_mqtt_topic_from_ReaderGroup(topic, &nbTopic, connection, nbReaderGroups);
+                            SOPC_ASSERT(nbReaderGroups <= MQTT_LIB_MAX_NB_TOPIC_NAME);
+                            // nbTopic == nbReaderGroups
+                            ro_string_t* topic = create_mqtt_topics_from_ReaderGroups(connection);
 
                             status = SOPC_MQTT_Create_Client(&schedulerCtx.transport[iIter].mqttClient);
                             if (SOPC_STATUS_OK != status)
@@ -634,7 +634,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                 status = SOPC_MQTT_InitializeAndConnect_Client(
                                     schedulerCtx.transport[iIter].mqttClient, &address[strlen(MQTT_PREFIX)],
                                     SOPC_PubSubConnection_Get_MqttUsername(connection),
-                                    SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbTopic,
+                                    SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbReaderGroups,
                                     on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
 
                                 if (SOPC_STATUS_OK != status)
@@ -651,6 +651,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                     schedulerCtx.transport[iIter].sock = -1;
                                 }
                             }
+                            SOPC_Free(topic);
                         }
                     }
                     break;

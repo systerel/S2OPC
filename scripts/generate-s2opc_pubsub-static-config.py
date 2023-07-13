@@ -51,7 +51,7 @@ ATTRIBUTE_DATASET_WRITERID = "writerId"
 TAG_VARIABLE = "variable"
 ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
-ATTRIBUTE_VARIABLE_TYPE="dataType"
+ATTRIBUTE_VARIABLE_TYPE = "dataType"
 
 TYPE_IDS = {"Null": "SOPC_Null_Id",
             "Boolean": "SOPC_Boolean_Id",
@@ -77,8 +77,8 @@ TYPE_IDS = {"Null": "SOPC_Null_Id",
             "StatusCode": "SOPC_StatusCode_Id",
             "Structure": "SOPC_ExtensionObject_Id"}
 
-PUB_MODE="Pub"
-SUB_MODE="Sub"
+PUB_MODE = "Pub"
+SUB_MODE = "Sub"
 ##
 # Used to define only once C variables and functions
 ##
@@ -118,10 +118,10 @@ class MessageContext:
         self.id = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_ID, 0))
         self.version = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_VERSION, 0))
         self.interval = float(message.get(ATTRIBUTE_MESSAGE_INTERVAL))
-        self.offset = int(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_OFFSET,-1))
+        self.offset = int(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_OFFSET, -1))
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
-        self.keepAliveTime = float(getOptionalAttribute(message,ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL,-1.))
-        self.mqttTopic = str ( toCStringPtrName( getOptionalAttribute(message,ATTRIBUTE_MESSAGE_MQTT_TOPIC,None) ) )
+        self.keepAliveTime = float(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL, -1.))
+        self.mqttTopic = str(toCStringPtrName(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_MQTT_TOPIC, None)))
 
 
 def getCSecurityMode(mode):
@@ -168,7 +168,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if len(pubConnections) + len(subConnections) > 0:
         result.add("""
-    SOPC_PubSubConnection* connection = NULL;""" )
+    SOPC_PubSubConnection* connection = NULL;""")
 
     if len(pubConnections) > 0:
 
@@ -302,13 +302,13 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // Interval = %f ms
         // Offest = %d us
         // mqttTopic = %s
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f,%d, %s,%s);
-       	alloc = NULL != writerGroup;
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s);
+        alloc = NULL != writerGroup;
     }
- 	"""% (msgContext.id, msgContext.version, msgContext.interval,msgContext.offset,msgContext.mqttTopic,
+    """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
         msgIndex, msgContext.id, msgContext.version, msgContext.interval,
         msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic))
-   
+
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
         if(alloc)
@@ -396,7 +396,6 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, %d);
-
     }
 
     if (alloc)
@@ -511,12 +510,12 @@ def handleSubMessage(cnxContext : CnxContext, message, index, result):
         // GroupVersion = %d
         // PubId = %s
         // mqttTopic = %s
-        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %s, %s, %s, %s, %d,%s);
+        readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, %d, %s, %s, %s, %s, %d, %s);
         alloc = NULL != readerGroup;
     }
     """ % (len(datasets), msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, msgContext.mqttTopic,
-            index, getCSecurityMode(msgContext.securityMode),
-            msgContext.id, msgContext.version, msgContext.cnxContext.publisherId, len(datasets),msgContext.mqttTopic))
+            index, getCSecurityMode(msgContext.securityMode), msgContext.id, msgContext.version,
+            msgContext.cnxContext.publisherId, len(datasets), msgContext.mqttTopic))
 
     dsIndex = 0
     for dataset in datasets:
@@ -558,7 +557,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
-                                                           const char * mqttTopic)
+                                                           const char* mqttTopic)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
@@ -633,7 +632,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
                                                            uint32_t groupVersion,
                                                            uint32_t publisherId,
                                                            uint16_t nbDataSets,
-                                                           const char * mqttTopic)
+                                                           const char* mqttTopic)
 {
     SOPC_ReaderGroup* readerGroup = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, index);
     SOPC_ASSERT(readerGroup != NULL);
@@ -644,7 +643,7 @@ static SOPC_ReaderGroup* SOPC_PubSubConfig_SetSubMessageAt(SOPC_PubSubConnection
     SOPC_ASSERT(nbDataSets < 0x100);
     bool allocSuccess = SOPC_ReaderGroup_Allocate_DataSetReader_Array(readerGroup, (uint8_t) nbDataSets);
     SOPC_ASSERT(allocSuccess);
-    SOPC_ReaderGroup_Set_MqttTopic(readerGroup,mqttTopic);
+    SOPC_ReaderGroup_Set_MqttTopic(readerGroup, mqttTopic);
 
     return readerGroup;
 }

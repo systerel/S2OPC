@@ -739,6 +739,10 @@ const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader)
 void SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic)
 {
     SOPC_ASSERT(NULL != reader);
+    if (NULL != reader->mqttTopic)
+    {
+        SOPC_Free(reader->mqttTopic);
+    }
     if (NULL == topic)
     {
         reader->mqttTopic = NULL;
@@ -755,18 +759,19 @@ char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, 
     SOPC_ASSERT(NULL != publisherId);
     char* defaultTopic = NULL;
     int res = 0;
+    static const size_t length_max_default_topic =
+        SOPC_MAX_LENGTH_UINT64_TO_STRING + 1 + SOPC_MAX_LENGTH_UINT16_TO_STRING;
 
     if (SOPC_UInteger_PublisherId == publisherId->type)
     {
         defaultTopic =
-            SOPC_Calloc(LENGTH_MAX_DEFAULT_TOPIC + 1, sizeof(char)); // + 1 to store the terminating null character
+            SOPC_Calloc(length_max_default_topic + 1, sizeof(char)); // + 1 to store the terminating null character
         SOPC_ASSERT(NULL != defaultTopic);
-        res = snprintf(defaultTopic, LENGTH_MAX_DEFAULT_TOPIC + 1, "%" PRIu64 ".%" PRIu16, publisherId->data.uint,
+        res = snprintf(defaultTopic, length_max_default_topic + 1, "%" PRIu64 ".%" PRIu16, publisherId->data.uint,
                        groupId);
     }
     SOPC_ASSERT(SOPC_String_PublisherId != publisherId->type); // Not handled in current version
-    SOPC_ASSERT(NULL != defaultTopic);
-    SOPC_ASSERT(res > 0 && res < LENGTH_MAX_DEFAULT_TOPIC + 1);
+    SOPC_ASSERT(res > 0 && res < (int) length_max_default_topic + 1);
     return defaultTopic;
 }
 
@@ -995,6 +1000,10 @@ const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer)
 void SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic)
 {
     SOPC_ASSERT(NULL != writer);
+    if (NULL != writer->mqttTopic)
+    {
+        SOPC_Free(writer->mqttTopic);
+    }
     if (NULL == topic)
     {
         writer->mqttTopic = NULL;

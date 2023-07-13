@@ -35,9 +35,6 @@ typedef struct SOPC_DataSetMetaData SOPC_DataSetMetaData;
 typedef struct SOPC_FieldMetaData SOPC_FieldMetaData;
 typedef struct SOPC_FieldTarget SOPC_FieldTarget;
 
-#define LENGTH_DOT 1
-#define LENGTH_MAX_DEFAULT_TOPIC (SOPC_MAX_LENGTH_UINT64_TO_STRING + LENGTH_DOT + SOPC_MAX_LENGTH_UINT16_TO_STRING)
-
 typedef struct SOPC_UADP_Configuration
 {
     bool PublisherIdFlag;
@@ -105,13 +102,15 @@ typedef struct SOPC_Conf_PublisherId
     } data;
 } SOPC_Conf_PublisherId;
 
-/*
- * /brief Create the default MQTT topic described by the OPC UA standard (publisherId.groupId)
+/**
+ * \brief Create the default MQTT topic described by the OPC UA standard (publisherId.groupId)
  *
- * /param publisherId, groupId of the message concerned
+ * \param publisherId A non-NULL pointer to the Publisher ID of the connection.
+ *                    Only Integer-type publisher Id are supported currently
+ * \param groupId     A uint16_t value to the Group ID of the message
  *
- * /return the defaultTopic as a string (char*)
- * Take care to FREE this buffer when it's no longer needed
+ * \return The defaultTopic as a string (char*)
+ *         The return value shall be freed by caller after use
  */
 char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, uint16_t groupId);
 
@@ -212,10 +211,10 @@ bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
 const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
 
-/*
+/**
  * Set MqttTopic on the ReaderGroup structure
- * If topic is NULL, set mqttTopic to NULL
- * Otherwise, allocate a new pointer by copying the topic parameter
+ * If topic parameter is NULL, set mqttTopic to NULL
+ * Otherwise, topic parameter is copied internally and may be freed/modified by caller after call.
  */
 void SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
 
@@ -294,10 +293,10 @@ void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMod
 
 const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer);
 
-/*
+/**
  * Set MqttTopic on the WriterGroup structure
- * If topic is NULL, set mqttTopic to NULL
- * Otherwise, allocate a new pointer by copying the topic parameter
+ * If topic parameter is NULL, set mqttTopic to NULL
+ * Otherwise, topic parameter is copied internally and may be freed/modified by caller after call.
  */
 void SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic);
 
