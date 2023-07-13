@@ -17,16 +17,15 @@
  * under the License.
  */
 
+#include "p_sopc_sockets.h"
 #include "sopc_eth_sockets.h"
-
-#include "p_sockets.h"
-#include "sopc_assert.h"
 #include "sopc_macros.h"
 
 SOPC_ReturnStatus SOPC_ETH_Socket_CreateSendAddressInfo(const char* interfaceName,
                                                         const char* destMACaddr,
                                                         SOPC_ETH_Socket_SendAddressInfo** sendAddInfo)
 {
+    // TODO
     SOPC_UNUSED_ARG(interfaceName);
     SOPC_UNUSED_ARG(destMACaddr);
     SOPC_UNUSED_ARG(sendAddInfo);
@@ -39,6 +38,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateReceiveAddressInfo(const char* interface
                                                            const char* sourceMACaddr,
                                                            SOPC_ETH_Socket_ReceiveAddressInfo** recvAddInfo)
 {
+    // TODO
     SOPC_UNUSED_ARG(interfaceName);
     SOPC_UNUSED_ARG(recvMulticast);
     SOPC_UNUSED_ARG(destMACaddr);
@@ -51,6 +51,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
                                                   bool setNonBlocking,
                                                   Socket* sock)
 {
+    // TODO
     SOPC_UNUSED_ARG(receiveAddrInfo);
     SOPC_UNUSED_ARG(setNonBlocking);
     SOPC_UNUSED_ARG(sock);
@@ -61,6 +62,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
                                                bool setNonBlocking,
                                                Socket* sock)
 {
+    // TODO
     SOPC_UNUSED_ARG(sendAddrInfo);
     SOPC_UNUSED_ARG(setNonBlocking);
     SOPC_UNUSED_ARG(sock);
@@ -72,8 +74,9 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
                                          uint16_t etherType,
                                          SOPC_Buffer* buffer)
 {
-    SOPC_UNUSED_ARG(sendAddrInfo);
+    // TODO
     SOPC_UNUSED_ARG(sock);
+    SOPC_UNUSED_ARG(sendAddrInfo);
     SOPC_UNUSED_ARG(etherType);
     SOPC_UNUSED_ARG(buffer);
     return SOPC_STATUS_NOT_SUPPORTED;
@@ -85,8 +88,9 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
                                               uint16_t etherType,
                                               SOPC_Buffer* buffer)
 {
-    SOPC_UNUSED_ARG(receiveAddrInfo);
+    // TODO
     SOPC_UNUSED_ARG(sock);
+    SOPC_UNUSED_ARG(receiveAddrInfo);
     SOPC_UNUSED_ARG(checkEtherType);
     SOPC_UNUSED_ARG(etherType);
     SOPC_UNUSED_ARG(buffer);
@@ -95,6 +99,6 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
 
 void SOPC_ETH_Socket_Close(Socket* sock)
 {
+    // TODO
     SOPC_UNUSED_ARG(sock);
-    SOPC_ASSERT(false);
 }

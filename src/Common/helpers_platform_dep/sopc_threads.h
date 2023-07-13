@@ -28,11 +28,11 @@
 
 /**
  * The platform-specific implementation of "p_threads.h" shall provide the actual definition of
- * - \ref Condition for Condition Variables  (e.g. pthread_mutex_t for LINUX)
- * - \ref Mutex for Mutexes. (e.g. pthread_cond_t for LINUX)
- * - \ref Thread for threads (e.g. pthread_t for linux)
+ * - \ref SOPC_Condition for Condition Variables  (e.g. pthread_mutex_t for LINUX)
+ * - \ref SOPC_Mutex for Mutexes. (e.g. pthread_cond_t for LINUX)
+ * - \ref SOPC_Thread for threads (e.g. pthread_t for linux)
  */
-#include "p_threads.h"
+#include "p_sopc_threads.h"
 
 /**
  *  \brief Function to create a thread

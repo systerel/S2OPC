@@ -66,7 +66,7 @@
 #include <string.h> /* strerror */
 #include <time.h>   /* Timestamped csv */
 
-#include "p_time.h" /* SOPC_RealTime API, for now linux only */
+#include "p_sopc_time.h" /* SOPC_RealTime API, for now linux only */
 #include "sopc_assert.h"
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"

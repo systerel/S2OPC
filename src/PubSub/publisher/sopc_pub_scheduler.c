@@ -20,7 +20,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
-#include "p_time.h"
+#include "p_sopc_time.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"

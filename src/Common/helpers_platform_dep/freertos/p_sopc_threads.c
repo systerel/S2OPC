@@ -31,9 +31,9 @@
 #include "sopc_enums.h" /* s2opc includes */
 #include "sopc_mem_alloc.h"
 
-#include "p_synchronisation.h" /* synchronisation include */
-#include "p_threads.h"         /* private thread include */
-#include "p_utils.h"           /* private list include */
+#include "p_sopc_synchronisation.h" /* synchronisation include */
+#include "p_sopc_threads.h"         /* private thread include */
+#include "p_sopc_utils.h"           /* private list include */
 
 #define MAX_THREADS MAX_WAITERS
 

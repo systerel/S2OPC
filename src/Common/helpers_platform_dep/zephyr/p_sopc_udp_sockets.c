@@ -27,8 +27,8 @@
 
 #include "sopc_udp_sockets.h"
 
-#include "p_multicast.h"
-#include "p_sockets.h"
+#include "p_sopc_multicast.h"
+#include "p_sopc_sockets.h"
 
 static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo* pAddrInfo,
                                                    const char* interfaceName,

@@ -33,7 +33,7 @@
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 
-#include "p_udp_sockets_custom.h"
+#include "p_sopc_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"

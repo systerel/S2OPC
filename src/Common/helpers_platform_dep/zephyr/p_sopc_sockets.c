@@ -34,8 +34,8 @@
 
 /* platform dep includes */
 
-#include "p_multicast.h"
-#include "p_sockets.h"
+#include "p_sopc_multicast.h"
+#include "p_sopc_sockets.h"
 #include "sopc_assert.h"
 #include "sopc_raw_sockets.h"
 

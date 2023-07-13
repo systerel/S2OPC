@@ -33,7 +33,7 @@
 #include "semphr.h"
 #include "task.h"
 
-#include "p_utils.h"
+#include "p_sopc_utils.h"
 
 /*****Private condition variable api*****/
 
@@ -57,16 +57,16 @@ typedef struct tConditionVariable
     eConditionVariableStatus status;     // Status condition variable
     SemaphoreHandle_t handleLockCounter; // Critical section token
     tUtilsList taskList;                 // List of task with signal expected, calling unlock and wait
-} Condition;
+} SOPC_Condition;
 
-Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
-void P_SYNCHRO_DestroyConditionVariable(Condition** ppv);
-SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(Condition* pv, uint16_t wMaxWaiters);
-SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(Condition* pv);
-SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(Condition* pv);
-SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(Condition* pConditionVariable, // Signal to broadcaset
-                                                    bool bSignalAll);              // Signal one (false) or all (true)
-SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(Condition* pv,
+SOPC_Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
+void P_SYNCHRO_DestroyConditionVariable(SOPC_Condition** ppv);
+SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(SOPC_Condition* pv, uint16_t wMaxWaiters);
+SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(SOPC_Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(SOPC_Condition* pv);
+SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(SOPC_Condition* pConditionVariable, // Signal to broadcaset
+                                                    bool bSignalAll); // Signal one (false) or all (true)
+SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(SOPC_Condition* pv,
                                                               QueueHandle_t* pMutex,
                                                               uint32_t uwSignal,
                                                               uint32_t uwClearSignal,

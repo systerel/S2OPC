@@ -48,7 +48,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "p_time.h"
+#include "p_sopc_time.h"
 
 /**
  * \brief Possible time sources

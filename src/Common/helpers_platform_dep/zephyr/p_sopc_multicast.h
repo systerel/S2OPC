@@ -24,7 +24,7 @@
 
 #include "sopc_enums.h"
 
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 /* Multicast platform dep functions used by platform dep pub sub UDP */
 

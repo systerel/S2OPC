@@ -57,13 +57,13 @@
 
 /* s2opc includes */
 
+#include "p_sopc_time.h"
+#include "p_sopc_zephyr_time.h"
 #include "sopc_assert.h"
 #include "sopc_enums.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
-#include "zephyr/p_time.h"
-#include "zephyr/sopc_zephyr_time.h"
 
 /***************************************************
  * DECLARATION OF LOCAL MACROS

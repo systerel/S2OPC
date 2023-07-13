@@ -33,7 +33,7 @@
 #include <stdbool.h>
 
 // Platform dependent types
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 #include "sopc_buffer.h"
 #include "sopc_enums.h"

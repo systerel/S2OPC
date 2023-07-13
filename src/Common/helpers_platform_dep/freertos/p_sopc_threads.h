@@ -20,23 +20,27 @@
 #ifndef SOPC_P_THREADS_H_
 #define SOPC_P_THREADS_H_
 
-#ifdef __MINGW32__
-#include <winsock2.h>
-#endif
+#include "p_sopc_synchronisation.h"
 
-#include <windows.h>
+/*****Private thread api*****/
 
-typedef CRITICAL_SECTION Mutex;
+typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
+typedef tThreadWks* SOPC_Thread;        // Handle workspace
 
-typedef CONDITION_VARIABLE Condition;
+typedef void tPtrFct(void*);
 
-typedef void* SOPCThreadStartFct(void*);
+SOPC_ReturnStatus P_THREAD_Init(
+    SOPC_Thread* ptrWks, // Handle workspace
+    uint16_t wMaxRDV,    // Max parallel join
+    tPtrFct* fct,        // Callback
+    void* args,          // Args to pass to thread callback
+    int priority,
+    const char* taskName,       // Name of the task
+    tPtrFct* fctWatingForJoin,  // Callback debug wait for join
+    tPtrFct* fctReadyToSignal); // Callback debug joined, called before signal thread well ended
 
-typedef struct SOPC_Thread
-{
-    HANDLE thread;
-    SOPCThreadStartFct* startFct;
-    void* args;
-} SOPC_Thread;
+SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* p);
+
+void P_THREAD_Sleep(uint32_t milliseconds);
 
 #endif /* SOPC_P_THREADS_H_ */

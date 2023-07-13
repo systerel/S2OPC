@@ -38,7 +38,7 @@
  * - \ref SOPC_Socket_Address for Socket Address definition structure (e.g. struct addrinfo for LINUX)
  * - \ref SOPC_SocketSet type for socket sets (e.g. fd_set for LINUX)
  */
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 /**
  *  \brief Initialize the network communication allowing to use sockets

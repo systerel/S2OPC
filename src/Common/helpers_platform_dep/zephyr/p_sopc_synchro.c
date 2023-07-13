@@ -36,7 +36,7 @@
 
 /* platform dep includes */
 
-#include "p_synchro.h"
+#include "p_sopc_synchro.h"
 
 /* debug printk activation */
 

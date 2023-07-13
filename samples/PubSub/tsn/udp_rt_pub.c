@@ -25,7 +25,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "p_udp_sockets_custom.h"
+#include "p_sopc_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_helper_endianness_cfg.h"

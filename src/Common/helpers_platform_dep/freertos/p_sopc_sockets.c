@@ -21,7 +21,7 @@
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 bool SOPC_Socket_Network_Initialize()
 {

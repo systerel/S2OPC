@@ -50,7 +50,7 @@
  *      implementation even if the system time gets back or forth (e.g. because of ntp).
  * - all functions defined in this header except ::SOPC_RealTime_Create and ::SOPC_RealTime_Delete.
  */
-#include "p_time.h"
+#include "p_sopc_time.h"
 
 #include <stdbool.h>
 #include <stdint.h>

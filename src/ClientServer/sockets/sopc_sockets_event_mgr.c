@@ -30,7 +30,7 @@
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_Socket_AddressInfo* addr)
 {

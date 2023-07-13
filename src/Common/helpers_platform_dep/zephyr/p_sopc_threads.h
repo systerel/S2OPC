@@ -25,7 +25,7 @@
 #ifndef SOPC_ZEPHYR_P_THREADS_H_
 #define SOPC_ZEPHYR_P_THREADS_H_
 
-#include "p_synchro.h"
+#include "p_sopc_synchro.h"
 
 /*****Private threads api*****/
 
@@ -51,5 +51,5 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback,     // Callback
  */
 bool P_THREAD_Destroy(tThreadHandle** ppHandle);
 
-typedef tThreadHandle* Thread;
+typedef tThreadHandle* SOPC_Thread;
 #endif /* SOPC_ZEPHYR_P_THREADS_H_ */

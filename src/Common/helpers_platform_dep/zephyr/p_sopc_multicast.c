@@ -30,9 +30,9 @@
 #include "sopc_dict.h"
 #include "sopc_macros.h"
 
-#include "p_multicast.h"
+#include "p_sopc_multicast.h"
 
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 /* Max socket based on max connections allowed by zephyr */
 

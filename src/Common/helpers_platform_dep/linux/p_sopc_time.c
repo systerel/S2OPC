@@ -22,7 +22,7 @@
 #include <math.h>
 #include <string.h>
 
-#include "linux/p_time.h"
+#include "linux/p_sopc_time.h"
 #include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"

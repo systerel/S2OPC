@@ -20,7 +20,7 @@
 #include "sopc_common_constants.h"
 #include "sopc_eth_sockets.h"
 
-#include "p_sockets.h"
+#include "p_sopc_sockets.h"
 
 #include <errno.h>
 #include <fcntl.h>

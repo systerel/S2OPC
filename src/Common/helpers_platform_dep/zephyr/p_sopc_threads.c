@@ -56,8 +56,8 @@
 
 /* platform dep includes */
 
+#include "p_sopc_threads.h"
 #include "sopc_threads.h"
-#include "zephyr/p_threads.h"
 
 /* Stack memory definition */
 #define SOPC_UTILITY_TASK_STACK_SIZE (KILOBYTE * CONFIG_SOPC_UTILITY_TASK_STACK_SIZE) // Application & Timers

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-#include "freertos/p_time.h"
+#include "p_sopc_time.h"
 
 #include <limits.h>
 #include <stdio.h>

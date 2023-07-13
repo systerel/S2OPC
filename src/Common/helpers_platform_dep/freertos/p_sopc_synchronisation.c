@@ -27,8 +27,8 @@
 #include "sopc_enums.h" /* s2opc includes */
 #include "sopc_mem_alloc.h"
 
-#include "p_synchronisation.h" /* synchronisation include */
-#include "p_utils.h"           /* private list include */
+#include "p_sopc_synchronisation.h" /* synchronisation include */
+#include "p_sopc_utils.h"           /* private list include */
 
 /*****Private condition variable api*****/
 
@@ -84,7 +84,7 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(SOPC_Condition* pConditionVar
     vSemaphoreDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
     pConditionVariable->handleLockCounter = NULL;
     DEBUG_decrementCpt();
-    memset(pConditionVariable, 0, sizeof(Condition)); // Raz on leave memory
+    memset(pConditionVariable, 0, sizeof(SOPC_Condition)); // Raz on leave memory
 
     return result;
 }
@@ -107,7 +107,7 @@ SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(SOPC_Condition* pConditionVari
     }
 
     /* Raz allocated workspace */
-    memset(pConditionVariable, 0, sizeof(Condition));
+    memset(pConditionVariable, 0, sizeof(SOPC_Condition));
     pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
 
     /* Allocate list of waiters */
@@ -115,7 +115,7 @@ SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(SOPC_Condition* pConditionVari
     if ((NULL == pMutex) || (NULL == pConditionVariable->taskList.list))
     {
         /* Raz leaved memory*/
-        memset(pConditionVariable, 0, sizeof(Condition));
+        memset(pConditionVariable, 0, sizeof(SOPC_Condition));
         vQueueDelete(pMutex);
         pMutex = NULL;
 
@@ -135,7 +135,7 @@ void P_SYNCHRO_DestroyConditionVariable(SOPC_Condition** ppConditionVariable)
     if (NULL != ppConditionVariable && NULL != *ppConditionVariable)
     {
         P_SYNCHRO_ClearConditionVariable(*ppConditionVariable);
-        memset(*ppConditionVariable, 0, sizeof(Condition));
+        memset(*ppConditionVariable, 0, sizeof(SOPC_Condition));
         SOPC_Free(*ppConditionVariable);
         *ppConditionVariable = NULL;
         DEBUG_decrementCpt();
@@ -145,8 +145,8 @@ void P_SYNCHRO_DestroyConditionVariable(SOPC_Condition** ppConditionVariable)
 // Creation workspace.
 SOPC_Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 {
-    Condition* pConditionVariable = NULL;
-    pConditionVariable = (Condition*) SOPC_Malloc(sizeof(Condition));
+    SOPC_Condition* pConditionVariable = NULL;
+    pConditionVariable = (SOPC_Condition*) SOPC_Malloc(sizeof(SOPC_Condition));
     if (NULL == pConditionVariable)
     {
         return NULL;
@@ -154,14 +154,14 @@ SOPC_Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
 
     DEBUG_incrementCpt();
     // Raz handle
-    memset(pConditionVariable, 0, sizeof(Condition));
+    memset(pConditionVariable, 0, sizeof(SOPC_Condition));
     SOPC_ReturnStatus status = P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV);
 
     if (SOPC_STATUS_OK != status)
     {
         P_SYNCHRO_ClearConditionVariable(pConditionVariable);
         // Raz handle
-        memset(pConditionVariable, 0, sizeof(Condition));
+        memset(pConditionVariable, 0, sizeof(SOPC_Condition));
         SOPC_Free(pConditionVariable);
         pConditionVariable = NULL;
         DEBUG_decrementCpt();
@@ -425,7 +425,7 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
 }
 
 /*****Public s2opc condition variable and mutex api*****/
-SOPC_ReturnStatus SOPC_Condition_Init(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != cond)
@@ -495,7 +495,7 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
     }
     else
     {
-        *mut = (Mutex) freeRtosMutex;
+        *mut = (SOPC_Mutex) freeRtosMutex;
         return SOPC_STATUS_OK;
     }
 }

@@ -59,7 +59,7 @@ IFS=$ifs_save
 
 #### Check absence of functions / includes ####
 echo "Checking specific functions or headers not used in code" | tee -a $LOGPATH
-EXLUDE_CERT_VERIFIED_MANUALLY="*\/linux\/p_askpass.c"
+EXLUDE_CERT_VERIFIED_MANUALLY="*\/linux\/p_sopc_askpass.c"
 CHECK_CERT_RULE_ABSENCE_FAILED=false
 
 CHECK_CERT_RULE_ABSENCE="(restrict|fgets|fgetws|getc|putc|getwc|putwc|fsetpos|rand|readlink|vfork|putenv|lstat|setuid|setgid|getuid|getgid|seteuid|geteuid|fork|pthread_kill|pthread_cancel|pthread_exit)"
@@ -116,7 +116,7 @@ if [[ $? != 0 ]]; then
 fi
 
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
-EXCLUDE_STD_MEM_IMPLEM="*\/p_mem_alloc.c"
+EXCLUDE_STD_MEM_IMPLEM="*\/p_sopc_mem_alloc.c"
 EXCLUDED_DEMO="*\/client_wrapper\/*"
 
 find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
