@@ -73,9 +73,9 @@ bool SOPC_ServerInternal_IsConfiguring(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_CONFIGURING == sopc_server_helper_config.state;
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -85,9 +85,9 @@ bool SOPC_ServerInternal_IsStarted(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_STARTED == sopc_server_helper_config.state;
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -97,9 +97,9 @@ bool SOPC_ServerInternal_IsStopped(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_STOPPED == sopc_server_helper_config.state;
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -333,7 +333,7 @@ bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_CONFIGURING == sopc_server_helper_config.state;
         if (res)
         {
@@ -348,7 +348,7 @@ bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void)
             // Set state as configured in case of success
             sopc_server_helper_config.state = SOPC_SERVER_STATE_CONFIGURED;
         }
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -358,13 +358,13 @@ bool SOPC_ServerInternal_SetStartedState(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_CONFIGURED == sopc_server_helper_config.state;
         if (res)
         {
             sopc_server_helper_config.state = SOPC_SERVER_STATE_STARTED;
         }
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -375,13 +375,13 @@ bool SOPC_ServerInternal_SetStoppingState(void)
     bool res = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         res = SOPC_SERVER_STATE_STARTED == sopc_server_helper_config.state;
         if (res)
         {
             sopc_server_helper_config.state = SOPC_SERVER_STATE_STOPPING;
         }
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     return res;
 }
@@ -391,9 +391,9 @@ void SOPC_ServerInternal_SetStoppedState(void)
 {
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         sopc_server_helper_config.state = SOPC_SERVER_STATE_STOPPED;
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
 }
 
@@ -416,10 +416,10 @@ static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
     bool startedOrStopping = false;
     if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
     {
-        Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         startedOrStopping = SOPC_SERVER_STATE_STARTED == sopc_server_helper_config.state ||
                             SOPC_SERVER_STATE_STOPPING == sopc_server_helper_config.state;
-        Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
     }
     if (!startedOrStopping)
     {
@@ -486,16 +486,16 @@ SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
     pConfig->serverConfig.freeCstringsFlag = true;
 
     // Server state initialization
-    Mutex_Initialization(&sopc_server_helper_config.stateMutex);
+    SOPC_Mutex_Initialization(&sopc_server_helper_config.stateMutex);
     sopc_server_helper_config.state = SOPC_SERVER_STATE_CONFIGURING;
 
     // Data for synchronous local service call
-    Condition_Init(&sopc_server_helper_config.syncLocalServiceCond);
-    Mutex_Initialization(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Condition_Init(&sopc_server_helper_config.syncLocalServiceCond);
+    SOPC_Mutex_Initialization(&sopc_server_helper_config.syncLocalServiceMutex);
 
     // Data used only when server is running with synchronous Serve function
-    Condition_Init(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
-    Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    SOPC_Condition_Init(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
+    SOPC_Mutex_Initialization(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
 
     status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(SOPC_ServerHelper_AdressSpaceNotifCb);
     if (SOPC_STATUS_OK != status)
@@ -519,9 +519,9 @@ void SOPC_HelperConfigServer_Clear(void)
     SOPC_CommonHelper_SetServerComEvent(NULL);
 
     // Ensures event callback will not be executed after this point, or will return immediately
-    Mutex_Lock(&sopc_server_helper_config.stateMutex);
+    SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
     sopc_server_helper_config.state = SOPC_SERVER_STATE_INITIALIZING;
-    Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
 
     // Clear endpoints since not stored in S2OPC config anymore in wrapper:
     for (int i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
@@ -532,12 +532,12 @@ void SOPC_HelperConfigServer_Clear(void)
     }
     SOPC_AddressSpace_Delete(sopc_server_helper_config.addressSpace);
     sopc_server_helper_config.addressSpace = NULL;
-    Condition_Clear(&sopc_server_helper_config.syncLocalServiceCond);
-    Mutex_Clear(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Condition_Clear(&sopc_server_helper_config.syncLocalServiceCond);
+    SOPC_Mutex_Clear(&sopc_server_helper_config.syncLocalServiceMutex);
 
     // Data used only when server is running with synchronous Serve function
-    Condition_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
-    Mutex_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    SOPC_Condition_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
+    SOPC_Mutex_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
 
     SOPC_UserAuthentication_FreeManager(&sopc_server_helper_config.authenticationManager);
     SOPC_UserAuthorization_FreeManager(&sopc_server_helper_config.authorizationManager);
@@ -553,7 +553,7 @@ void SOPC_HelperConfigServer_Clear(void)
     SOPC_Free(sopc_server_helper_config.endpointClosed);
 
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
-    Mutex_Clear(&sopc_server_helper_config.stateMutex);
+    SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_SetKeyPasswordCallback(SOPC_GetServerKeyPassword_Fct* getServerKeyPassword)

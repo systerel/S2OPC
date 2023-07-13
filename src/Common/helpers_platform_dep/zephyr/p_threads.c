@@ -398,7 +398,10 @@ static bool P_THREAD_Join(tThreadHandle* pHandle)
 // *** Public SOPC threads api ***
 
 // Create a thread
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
@@ -417,7 +420,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     return result;
 }
 
-SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
@@ -446,7 +449,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
 }
 
 // Join then destroy a thread
-SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
 

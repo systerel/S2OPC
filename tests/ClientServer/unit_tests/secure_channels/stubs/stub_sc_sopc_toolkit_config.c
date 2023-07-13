@@ -47,7 +47,7 @@ static struct
 {
     uint8_t initDone;
     uint8_t locked;
-    Mutex mut;
+    SOPC_Mutex mut;
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     const char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
     uint32_t scConfigIdxMax;
@@ -88,8 +88,8 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
 
     if (SOPC_STATUS_OK == status && false == tConfig.initDone)
     {
-        Mutex_Initialization(&tConfig.mut);
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Initialization(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         tConfig.initDone = true;
 
         if (SIZE_MAX / (SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1) < sizeof(SOPC_SecureChannel_Config*) ||
@@ -111,7 +111,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
         }
 
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
 
     return status;
@@ -122,13 +122,13 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     if (tConfig.initDone != false)
     {
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         if (false == tConfig.locked)
         {
             tConfig.locked = true;
             status = SOPC_STATUS_OK;
         }
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return status;
 }
@@ -168,7 +168,7 @@ void SOPC_Toolkit_Clear(void)
         SOPC_EventTimer_Clear();
         SOPC_SecureChannels_Clear();
 
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
 
         SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
         SOPC_Logger_Clear();
@@ -178,8 +178,8 @@ void SOPC_Toolkit_Clear(void)
         tConfig.scConfigIdxMax = 0;
         tConfig.serverScLastConfigIdx = 0;
         tConfig.epConfigIdxMax = 0;
-        Mutex_Unlock(&tConfig.mut);
-        Mutex_Clear(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Clear(&tConfig.mut);
     }
     SOPC_Common_Clear();
 }
@@ -192,7 +192,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
         // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
         if (tConfig.initDone != false)
         {
-            Mutex_Lock(&tConfig.mut);
+            SOPC_Mutex_Lock(&tConfig.mut);
             if (tConfig.scConfigIdxMax < SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED)
             {
                 tConfig.scConfigIdxMax++; // Minimum used == 1 && Maximum used == MAX + 1
@@ -200,7 +200,7 @@ uint32_t SOPC_ToolkitClient_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
                 tConfig.scConfigs[tConfig.scConfigIdxMax] = scConfig;
                 result = tConfig.scConfigIdxMax;
             }
-            Mutex_Unlock(&tConfig.mut);
+            SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
     return result;
@@ -213,9 +213,9 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
     {
         if (tConfig.initDone != false)
         {
-            Mutex_Lock(&tConfig.mut);
+            SOPC_Mutex_Lock(&tConfig.mut);
             res = tConfig.scConfigs[scConfigIdx];
-            Mutex_Unlock(&tConfig.mut);
+            SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
     return res;
@@ -228,7 +228,7 @@ SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const 
 
     if (tConfig.initDone)
     {
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         if (tConfig.reverseEpConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
         {
             tConfig.reverseEpConfigIdxMax++;
@@ -236,7 +236,7 @@ SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const 
             tConfig.reverseEpConfigs[tConfig.reverseEpConfigIdxMax] = reverseEndpointURL;
             result = tConfig.reverseEpConfigIdxMax;
         }
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     if (0 != result)
     {
@@ -254,9 +254,9 @@ const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigI
     {
         if (tConfig.initDone)
         {
-            Mutex_Lock(&tConfig.mut);
+            SOPC_Mutex_Lock(&tConfig.mut);
             res = tConfig.reverseEpConfigs[reverseEpCfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
-            Mutex_Unlock(&tConfig.mut);
+            SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
     return res;
@@ -271,7 +271,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
         // TODO: check all parameters of scConfig (requested lifetime >= MIN, etc)
         if (tConfig.initDone != false)
         {
-            Mutex_Lock(&tConfig.mut);
+            SOPC_Mutex_Lock(&tConfig.mut);
             lastScIdx = tConfig.serverScLastConfigIdx;
             do
             {
@@ -291,7 +291,7 @@ uint32_t SOPC_ToolkitServer_AddSecureChannelConfig(SOPC_SecureChannel_Config* sc
                     lastScIdx = 0; // lastScIdx++ <=> lastScIdx = 1 will be tested next time
                 }
             } while (0 == idxWithServerOffset && lastScIdx != tConfig.serverScLastConfigIdx);
-            Mutex_Unlock(&tConfig.mut);
+            SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
     return idxWithServerOffset;
@@ -315,12 +315,12 @@ SOPC_SecureChannel_Config* SOPC_ToolkitServer_GetSecureChannelConfig(uint32_t se
     uint32_t idxWithoutOffset = SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(serverScConfigIdx);
     if (idxWithoutOffset != 0 && tConfig.initDone != false)
     {
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         if (tConfig.locked != false)
         {
             res = tConfig.serverScConfigs[idxWithoutOffset];
         }
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return res;
 }
@@ -331,7 +331,7 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
     uint32_t idxWithoutOffset = SOPC_ToolkitServer_TranslateSecureChannelConfigIdxOffset(serverScConfigIdx);
     if (idxWithoutOffset != 0 && tConfig.initDone != false)
     {
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         if (tConfig.locked != false)
         {
             if (tConfig.serverScConfigs[idxWithoutOffset] != NULL)
@@ -340,7 +340,7 @@ bool SOPC_ToolkitServer_RemoveSecureChannelConfig(uint32_t serverScConfigIdx)
                 SOPC_ToolkitServer_ClearScConfig_WithoutLock(idxWithoutOffset);
             }
         }
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return res;
 }
@@ -354,7 +354,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
         // w.r.t. part 6), etc.
         if (tConfig.initDone != false)
         {
-            Mutex_Lock(&tConfig.mut);
+            SOPC_Mutex_Lock(&tConfig.mut);
             if (false == tConfig.locked)
             {
                 if (tConfig.epConfigIdxMax < SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS)
@@ -365,7 +365,7 @@ uint32_t SOPC_ToolkitServer_AddEndpointConfig(SOPC_Endpoint_Config* epConfig)
                     result = tConfig.epConfigIdxMax;
                 }
             }
-            Mutex_Unlock(&tConfig.mut);
+            SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
     return result;
@@ -376,12 +376,12 @@ SOPC_Endpoint_Config* SOPC_ToolkitServer_GetEndpointConfig(uint32_t epConfigIdx)
     SOPC_Endpoint_Config* res = NULL;
     if (tConfig.initDone != false)
     {
-        Mutex_Lock(&tConfig.mut);
+        SOPC_Mutex_Lock(&tConfig.mut);
         if (tConfig.locked != false)
         {
             res = tConfig.epConfigs[epConfigIdx];
         }
-        Mutex_Unlock(&tConfig.mut);
+        SOPC_Mutex_Unlock(&tConfig.mut);
     }
     return res;
 }

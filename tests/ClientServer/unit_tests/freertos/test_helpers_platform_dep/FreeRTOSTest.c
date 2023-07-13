@@ -60,16 +60,16 @@
 #endif
 
 static char sBuffer[256];
-static Mutex m;
-static Thread p1 = NULL;
-static Thread p2 = NULL;
-static Thread p3 = NULL;
-static Thread p4 = NULL;
-static Thread pX = NULL;
+static SOPC_Mutex m;
+static SOPC_Thread p1 = NULL;
+static SOPC_Thread p2 = NULL;
+static SOPC_Thread p3 = NULL;
+static SOPC_Thread p4 = NULL;
+static SOPC_Thread pX = NULL;
 typedef struct message
 {
-    Mutex mut;
-    Condition cond;
+    SOPC_Mutex mut;
+    SOPC_Condition cond;
 } tMessage;
 
 static tChannel channel;
@@ -80,38 +80,38 @@ extern void* cbToolkit_test_client(void* arg);
 static void* cbS2OPC_Thread_p4(void* ptr)
 {
     SOPC_ReturnStatus status;
-    Condition* pv = (Condition*) ptr;
+    SOPC_Condition* pv = (SOPC_Condition*) ptr;
     unsigned short int cpt = 0;
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf((void*) sBuffer, "$$$$ %4X -  Sub task 4   signal all well started : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
-    status = Condition_SignalAll(pv);
+    status = SOPC_Condition_SignalAll(pv);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 1  signal all well started status = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
     for (cpt = 0; cpt < 10; cpt++)
     {
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 4 working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_SOPC_Mutex_Unlock(&m);
         vTaskDelay(100);
     }
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 4 joins ==> Sub task 2  : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
     status = SOPC_Thread_Join(p2);
     if (status == 0)
@@ -119,19 +119,19 @@ static void* cbS2OPC_Thread_p4(void* ptr)
         p2 = NULL;
     }
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 4  try to joins Sub task 2 result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
     for (cpt = 0; cpt < 10; cpt++)
     {
-        Mutex_Lock(&m);
+        SOPC_SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 4 - 2nd working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_SOPC_Mutex_Unlock(&m);
         vTaskDelay(100);
     }
 
@@ -146,19 +146,19 @@ static void* cbS2OPC_Thread_p3(void* ptr)
 
     for (cpt = 0; cpt < 10; cpt++)
     {
-        Mutex_Lock(&m);
+        SOPC_SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 3 working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_SOPC_Mutex_Unlock(&m);
         vTaskDelay(100);
     }
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 3 try joins ==> Sub task 1  : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
     status = SOPC_Thread_Join(p1);
     if (status == 0)
@@ -166,19 +166,19 @@ static void* cbS2OPC_Thread_p3(void* ptr)
         p1 = NULL;
     }
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 3  try to joins Sub task 1 result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
     for (cpt = 0; cpt < 10; cpt++)
     {
-        Mutex_Lock(&m);
+        SOPC_SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 3 2nd working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_SOPC_Mutex_Unlock(&m);
         vTaskDelay(100);
     }
 
@@ -198,17 +198,17 @@ static void* cbS2OPC_Thread_p2(void* ptr)
 
     SOPC_ReturnStatus status = SOPC_Thread_Create(&p3, cbS2OPC_Thread_p3, ptr, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task2 creates Sub task 3 created result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_SOPC_Mutex_Unlock(&m);
 
-    Mutex_Lock(&m);
+    SOPC_SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 2 JOIN ON --> Sub task 3 : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     status = SOPC_Thread_Join(p3);
     if (status == 0)
@@ -216,15 +216,15 @@ static void* cbS2OPC_Thread_p2(void* ptr)
         p3 = NULL;
     }
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 2 joins Sub task 3 result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     for (cpt = 0; cpt < 10; cpt++)
     {
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
 
         sprintf(sBuffer, "$$$$ %2X -  Sub task 2 2nd working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
@@ -280,7 +280,7 @@ static void* cbS2OPC_Thread_p2(void* ptr)
         fclose(fd);
 
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
         vTaskDelay(100);
     }
@@ -309,27 +309,27 @@ static void* cbS2OPC_Thread_p1(void* ptr)
         status = SOPC_Thread_Join(pX);
         pX = NULL;
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  main loop task 1 working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  main loop task 1 working : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
         status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_p2, pv, NULL);
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 creates sub task 2 result = %d : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
-        Mutex_Lock(&m); // Test condition variable
+        SOPC_Mutex_Lock(&m); // Test condition variable
         {
             status = SOPC_Thread_Create(&p4, cbS2OPC_Thread_p4, pv, NULL);
 
@@ -342,19 +342,19 @@ static void* cbS2OPC_Thread_p1(void* ptr)
                     (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
             PRINTF(sBuffer);
 
-            status = Mutex_UnlockAndWaitCond(pv, &m);
+            status = SOPC_Mutex_UnlockAndWaitCond(pv, &m);
 
             sprintf(sBuffer, "$$$$ %2X -  Sub task 1 wait signal from sub task 4 result = %d : current time = %lu\r\n",
                     (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
             PRINTF(sBuffer);
         }
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 JOIN ON --> Sub task 2 : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
         status = SOPC_Thread_Join(p2);
         if (status == 0)
@@ -362,17 +362,17 @@ static void* cbS2OPC_Thread_p1(void* ptr)
             p2 = NULL;
         }
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 joins sub task 2 result = %d : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 JOIN ON --> Sub task 4 : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
 
         status = SOPC_Thread_Join(p4);
         if (status == 0)
@@ -380,11 +380,11 @@ static void* cbS2OPC_Thread_p1(void* ptr)
             p4 = NULL;
         }
 
-        Mutex_Lock(&m);
+        SOPC_Mutex_Lock(&m);
         sprintf(sBuffer, "$$$$ %2X -  Sub task 1 joins sub task 4 result = %d : current time = %lu\r\n",
                 (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
         PRINTF(sBuffer);
-        Mutex_Unlock(&m);
+        SOPC_Mutex_Unlock(&m);
     }
 
     return NULL;
@@ -398,22 +398,22 @@ void FREE_RTOS_TEST_API_S2OPC_THREAD(void* ptr)
 
     status = SOPC_Thread_Create(&p1, cbS2OPC_Thread_p1, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 1 created result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     status = SOPC_Thread_Join(p1);
     if (status == 0)
     {
         p1 = NULL;
     }
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Sub task 0 try joined main loop result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr)
@@ -424,11 +424,11 @@ void FREE_RTOS_TEST_S2OPC_SERVER(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbToolkit_test_server, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr)
@@ -439,11 +439,11 @@ void FREE_RTOS_TEST_S2OPC_CLIENT(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbToolkit_test_client, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 /*================================CHECK_TIME======================================*/
@@ -519,11 +519,11 @@ void FREE_RTOS_TEST_S2OPC_TIME(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_TestTime, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test thread init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 /*================================CHECK_THREAD======================================*/
@@ -565,20 +565,20 @@ static void* test_thread_exec_fct(void* args)
 static void* test_thread_mutex_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
 static void* test_thread_mutex_recursive_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Lock(&gmutex);
-    Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Unlock(&gmutex);
-    Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
@@ -613,7 +613,7 @@ static void* cbS2OPC_Thread_Test_Thread_Mutex(void* ptr)
     int32_t cpt = 0;
     // Nominal behavior
     configASSERT(SOPC_STATUS_OK == Mutex_Initialization(&gmutex));
-    configASSERT(SOPC_STATUS_OK == Mutex_Lock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Mutex_Lock(&gmutex));
     configASSERT(SOPC_STATUS_OK == SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt, NULL));
 
     // Wait until the thread reaches the "lock mutex" statement
@@ -625,16 +625,16 @@ static void* cbS2OPC_Thread_Test_Thread_Mutex(void* ptr)
     configASSERT(1 == SOPC_Atomic_Int_Get(&cpt));
 
     // Unlock the mutex and check that the thread can go forward.
-    configASSERT(SOPC_STATUS_OK == Mutex_Unlock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Mutex_Unlock(&gmutex));
     configASSERT(wait_value(&cpt, 2));
 
     configASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
     configASSERT(SOPC_STATUS_OK == Mutex_Clear(&gmutex));
 
     // Degraded behavior
-    SOPC_ReturnStatus status = Mutex_Lock(NULL);
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(NULL);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_Unlock(NULL);
+    status = SOPC_Mutex_Unlock(NULL);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = Mutex_Clear(NULL);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
@@ -646,7 +646,7 @@ static void* cbS2OPC_Thread_Test_Mutex_Recursive(void* ptr)
     Thread thread = NULL; // Todo: current implem: handle must be set to NULL before called by create
     int32_t cpt = 0;
     configASSERT(SOPC_STATUS_OK == Mutex_Initialization(&gmutex));
-    configASSERT(SOPC_STATUS_OK == Mutex_Lock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Mutex_Lock(&gmutex));
     configASSERT(SOPC_STATUS_OK == SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt, NULL));
 
     // Wait until the thread reaches the "lock mutex" statement
@@ -658,7 +658,7 @@ static void* cbS2OPC_Thread_Test_Mutex_Recursive(void* ptr)
     configASSERT(1 == SOPC_Atomic_Int_Get(&cpt));
 
     // Unlock the mutex and check that the thread can go forward.
-    configASSERT(SOPC_STATUS_OK == Mutex_Unlock(&gmutex));
+    configASSERT(SOPC_STATUS_OK == SOPC_Mutex_Unlock(&gmutex));
     configASSERT(wait_value(&cpt, 2));
 
     configASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
@@ -670,12 +670,12 @@ static void* test_thread_condvar_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(SOPC_STATUS_OK == status);
     condRes->waitingThreadStarted = 1;
     while (condRes->protectedCondition == 0)
     {
-        status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
+        status = SOPC_Mutex_UnlockAndWaitCond(&gcond, &gmutex);
         configASSERT(SOPC_STATUS_OK == status);
         if (condRes->protectedCondition == 1)
         {
@@ -683,7 +683,7 @@ static void* test_thread_condvar_fct(void* args)
             condRes->successCondition = 1;
         }
     }
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
@@ -691,12 +691,12 @@ static void* test_thread_condvar_timed_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     condRes->waitingThreadStarted = 1;
     status = SOPC_STATUS_NOK;
     while (condRes->protectedCondition == 0 && SOPC_STATUS_TIMEOUT != status)
     {
-        status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
+        status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
     }
     if (SOPC_STATUS_OK == status && condRes->protectedCondition == 1)
     {
@@ -707,7 +707,7 @@ static void* test_thread_condvar_timed_fct(void* args)
     {
         condRes->timeoutCondition = 1;
     }
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
@@ -728,13 +728,13 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes, NULL);
     configASSERT(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     configASSERT(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // Signal condition has changed
     status = Condition_SignalAll(&gcond);
@@ -743,9 +743,9 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     configASSERT(status == SOPC_STATUS_OK);
     thread = NULL;
     // Check condition status after thread termination
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(condRes.successCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
@@ -765,13 +765,13 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, NULL);
     configASSERT(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     configASSERT(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // Signal condition has changed
     status = Condition_SignalAll(&gcond);
@@ -780,9 +780,9 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     thread = NULL;
     configASSERT(status == SOPC_STATUS_OK);
 
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(condRes.successCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
@@ -802,12 +802,12 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, NULL);
     configASSERT(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     configASSERT(condRes.waitingThreadStarted == 1);
     // DO NOT CHANGE CONDITION
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     configASSERT(status == SOPC_STATUS_OK);
     // DO NOT SIGNAL CONDITION CHANGE
 
@@ -816,9 +816,9 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     configASSERT(status == SOPC_STATUS_OK);
     thread = NULL;
     // Check timeout on condition occured
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     configASSERT(condRes.timeoutCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
     status = Mutex_Clear(&gmutex);
@@ -836,34 +836,34 @@ static void* cbS2OPC_Thread_Test_CondVar(void* ptr)
     // status = Condition_Init(&gcond); // Todo: Initialized to test gCond valid and other parameters invalid else valid
     // parameters with gCond not initialized returns INVALID STATE
 
-    status = Mutex_UnlockAndWaitCond(NULL, &gmutex);
+    status = SOPC_Mutex_UnlockAndWaitCond(NULL, &gmutex);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndWaitCond(&gcond, NULL);
+    status = SOPC_Mutex_UnlockAndWaitCond(&gcond, NULL);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndWaitCond(NULL, NULL);
-    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
-    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
-    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
+    status = SOPC_Mutex_UnlockAndWaitCond(NULL, NULL);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
 
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
-
-    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
-    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
-    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
 
-    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
+
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
     configASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
 
     // status = Condition_Clear(&gcond);
@@ -883,84 +883,84 @@ static void* cbS2OPC_Thread_CheckThread(void* ptr)
     pX = NULL;
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Thread, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Join(pX);
     pX = NULL;
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread joined result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
 
     pX = NULL;
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Thread_Mutex, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread mutex launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Join(pX);
     pX = NULL;
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread mutex joined result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
 
     pX = NULL;
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_Mutex_Recursive, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread mutex recursive launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Join(pX);
     pX = NULL;
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread mutex recursive joined result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
 
     pX = NULL;
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_Test_CondVar, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread cond var launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Join(pX);
     pX = NULL;
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X - Test thread cond var joined result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     printf(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     configASSERT(status == SOPC_STATUS_OK);
     return NULL;
@@ -974,11 +974,11 @@ void FREE_RTOS_TEST_S2OPC_CHECK_THREAD(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_CheckThread, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit check thread launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 static void* cbS2OPC_Thread_UDP_Socket_API(void* ptr)
@@ -1099,11 +1099,11 @@ void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_UDP_Socket_API, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test udp socket api init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr)
@@ -1114,11 +1114,11 @@ void FREE_RTOS_TEST_S2OPC_UDP_SOCKET_API_LB(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_UDP_Socket_API_LB, pv, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test udp socket api init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 static void* cbS2OPC_Thread_PubSub(void* ptr)
@@ -1228,11 +1228,11 @@ void FREE_RTOS_TEST_S2OPC_PUBSUB(void* ptr)
 
     status = SOPC_Thread_Create(&pX, cbS2OPC_Thread_PubSub, NULL, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  Toolkit test pubsub init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }
 
 static void* cbS2OPC_Thread_prod(void* ptr)
@@ -1262,7 +1262,7 @@ static void* cbS2OPC_Thread_prod(void* ptr)
         status = Condition_Init(&ctx->cond);
         configASSERT(status == SOPC_STATUS_OK);
 
-        status = Mutex_Lock(&ctx->mut);
+        status = SOPC_Mutex_Lock(&ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
 #if 1
 
@@ -1275,7 +1275,7 @@ static void* cbS2OPC_Thread_prod(void* ptr)
         resChannel = P_CHANNEL_Send(&channel, (uint8_t*) &ctx, sizeof(ctx), NULL, 0);
         configASSERT(resChannel == E_CHANNEL_RESULT_OK);
 
-        status = Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
+        status = SOPC_Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
 
 #if 1
@@ -1290,7 +1290,7 @@ static void* cbS2OPC_Thread_prod(void* ptr)
 
         status = Condition_SignalAll(&ctx->cond);
         configASSERT(status == SOPC_STATUS_OK);
-        status = Mutex_Unlock(&ctx->mut);
+        status = SOPC_Mutex_Unlock(&ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
     }
     return NULL;
@@ -1314,12 +1314,12 @@ static void* cbS2OPC_Thread_cons(void* ptr)
 
 #endif
 
-        status = Mutex_Lock(&ctx->mut);
+        status = SOPC_Mutex_Lock(&ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
         // Sinal à prod reponse arrivee
         status = Condition_SignalAll(&ctx->cond);
         configASSERT(status == SOPC_STATUS_OK);
-        status = Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
+        status = SOPC_Mutex_UnlockAndWaitCond(&ctx->cond, &ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
 #if 1
 
@@ -1328,7 +1328,7 @@ static void* cbS2OPC_Thread_cons(void* ptr)
         printf(lclBuffer);
 
 #endif
-        status = Mutex_Unlock(&ctx->mut);
+        status = SOPC_Mutex_Unlock(&ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
         status = Mutex_Clear(&ctx->mut);
         configASSERT(status == SOPC_STATUS_OK);
@@ -1349,17 +1349,17 @@ void FREE_RTOS_TEST_S2OPC_USECASE_PUBSUB_SYNCHRO(void* ptr)
 
     status = SOPC_Thread_Create(&p1, cbS2OPC_Thread_prod, NULL, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  cbS2OPC_Thread_prod init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 
     status = SOPC_Thread_Create(&p2, cbS2OPC_Thread_cons, NULL, NULL);
 
-    Mutex_Lock(&m);
+    SOPC_Mutex_Lock(&m);
     sprintf(sBuffer, "$$$$ %2X -  cbS2OPC_Thread_cons init launching result = %d : current time = %lu\r\n",
             (unsigned int) xTaskGetCurrentTaskHandle(), status, (uint32_t) xTaskGetTickCount());
     PRINTF(sBuffer);
-    Mutex_Unlock(&m);
+    SOPC_Mutex_Unlock(&m);
 }

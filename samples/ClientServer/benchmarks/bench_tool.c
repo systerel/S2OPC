@@ -68,8 +68,8 @@ static const double T_TABLE[] = {0,     12.706, 4.303, 3.182, 2.776, 2.571, 2.44
 
 struct app_ctx_t
 {
-    Mutex run_mutex;
-    Condition run_cond;
+    SOPC_Mutex run_mutex;
+    SOPC_Condition run_cond;
     size_t address_space_size;
     size_t request_size;
     size_t address_space_offset;
@@ -354,7 +354,7 @@ static void event_handler(SOPC_App_Com_Event event, uint32_t arg, void* pParam, 
     if (shutdown)
     {
         SOPC_ASSERT(ctx->status != BENCH_RUNNING);
-        status = Condition_SignalAll(&ctx->run_cond);
+        status = SOPC_Condition_SignalAll(&ctx->run_cond);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 }
@@ -610,11 +610,11 @@ int main(int argc, char** argv)
     struct app_ctx_t ctx;
     memset(&ctx, 0, sizeof(struct app_ctx_t));
 
-    SOPC_ReturnStatus mutStatus = Mutex_Initialization(&ctx.run_mutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&ctx.run_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = Mutex_Lock(&ctx.run_mutex);
+    mutStatus = SOPC_Mutex_Lock(&ctx.run_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = Condition_Init(&ctx.run_cond);
+    mutStatus = SOPC_Condition_Init(&ctx.run_cond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     ctx.address_space_size = (size_t) as_size;
@@ -674,7 +674,7 @@ int main(int argc, char** argv)
     SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(configIdx);
     SOPC_ToolkitClient_AsyncActivateSession_Anonymous(endpointConnectionCfg, NULL, (uintptr_t) &ctx, "anonymous");
 
-    mutStatus = Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
+    mutStatus = SOPC_Mutex_UnlockAndWaitCond(&ctx.run_cond, &ctx.run_mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_Toolkit_Clear();
@@ -684,8 +684,8 @@ int main(int argc, char** argv)
     SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
     SOPC_KeyManager_SerializedCertificate_Delete(ca);
 
-    Mutex_Clear(&ctx.run_mutex);
-    Condition_Clear(&ctx.run_cond);
+    SOPC_Mutex_Clear(&ctx.run_mutex);
+    SOPC_Condition_Clear(&ctx.run_cond);
 
     if (ctx.status == BENCH_FINISHED_OK)
     {

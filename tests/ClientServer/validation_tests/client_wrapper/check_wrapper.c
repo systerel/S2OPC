@@ -109,8 +109,8 @@ static void datachange_callback_none(const int32_t c_id, const char* node_id, co
     SOPC_UNUSED_ARG(value);
 }
 
-static Mutex check_counter_mutex;
-static Condition check_counter_condition;
+static SOPC_Mutex check_counter_mutex;
+static SOPC_Condition check_counter_condition;
 static int32_t check_counter_connection_id = 0;
 static int32_t check_counter_node_id_comparison_result = 1;
 static SOPC_DataValue check_counter_data_value;
@@ -124,7 +124,7 @@ static void disconnect_callback(const uint32_t c_id)
 
 static void datachange_callback_check_counter(const int32_t c_id, const char* node_id, const SOPC_DataValue* value)
 {
-    assert(SOPC_STATUS_OK == Mutex_Lock(&check_counter_mutex));
+    assert(SOPC_STATUS_OK == SOPC_Mutex_Lock(&check_counter_mutex));
 
     check_counter_connection_id = c_id;
 
@@ -133,8 +133,8 @@ static void datachange_callback_check_counter(const int32_t c_id, const char* no
 
     SOPC_DataValue_Copy(&check_counter_data_value, value);
 
-    assert(SOPC_STATUS_OK == Mutex_Unlock(&check_counter_mutex));
-    assert(SOPC_STATUS_OK == Condition_SignalAll(&check_counter_condition));
+    assert(SOPC_STATUS_OK == SOPC_Mutex_Unlock(&check_counter_mutex));
+    assert(SOPC_STATUS_OK == SOPC_Condition_SignalAll(&check_counter_condition));
 }
 
 START_TEST(test_wrapper_initialize_finalize)
@@ -502,10 +502,10 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(0, SOPC_ClientHelper_CreateSubscription(valid_con_id, datachange_callback_check_counter));
 
     /* initialize mutex and condition */
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&check_counter_mutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, Condition_Init(&check_counter_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Init(&check_counter_condition));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&check_counter_mutex));
 
     /* add one monitored item */
     ck_assert_int_eq(0, SOPC_ClientHelper_AddMonitoredItems(valid_con_id, nodeIds, 1, NULL));
@@ -513,7 +513,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     /* verify that callback is called correctly */
     /* use a mutex and a condition to wait until datachange has been received (use a 1.2 sec timeout)*/
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+                     SOPC_Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
 
     /* check connection id */
     ck_assert_int_eq(valid_con_id, check_counter_connection_id);
@@ -530,7 +530,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
 
     /* verify that callback is called correctly once again*/
     ck_assert_int_eq(SOPC_STATUS_OK,
-                     Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
+                     SOPC_Mutex_UnlockAndTimedWaitCond(&check_counter_condition, &check_counter_mutex, 1200));
     /* verify datachange callback arguments again */
     /* check connection id */
     ck_assert_int_eq(valid_con_id, check_counter_connection_id);
@@ -540,7 +540,7 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     ck_assert_int_eq(SOPC_UInt64_Id, check_counter_data_value.Value.BuiltInTypeId);
     ck_assert_uint_ne(first_value, check_counter_data_value.Value.Value.Uint64);
 
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&check_counter_mutex));
 
     /* disconnect */
     ck_assert_int_eq(0, SOPC_ClientHelper_Disconnect(valid_con_id));
@@ -549,8 +549,8 @@ START_TEST(test_wrapper_add_monitored_items_callback_called)
     SOPC_ClientHelper_Finalize();
 
     /* clear mutex and condition */
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&check_counter_mutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, Condition_Clear(&check_counter_condition));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&check_counter_mutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Condition_Clear(&check_counter_condition));
 }
 END_TEST
 

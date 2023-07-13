@@ -109,10 +109,10 @@ typedef struct MessageCtx
 /* TODO: use SOPC_Array, which already does that, and uses size_t */
 typedef struct MessageCtx_Array
 {
-    uint64_t length;    // Size of this array is SOPC_PubScheduler_Nb_Message
-    uint64_t current;   // Nb of messages already initialized. Monotonic.
-    MessageCtx* array;  // MessageCtx: array of context for each message
-    Mutex acyclicMutex; // Mutex used for acyclic send
+    uint64_t length;         // Size of this array is SOPC_PubScheduler_Nb_Message
+    uint64_t current;        // Nb of messages already initialized. Monotonic.
+    MessageCtx* array;       // MessageCtx: array of context for each message
+    SOPC_Mutex acyclicMutex; // Mutex used for acyclic send
 } MessageCtx_Array;
 
 // Total of message
@@ -167,7 +167,7 @@ static struct
     // A strictly monotonically increasing sequence number for a SecurityTokenId and PublisherId combination.
     uint32_t sequenceNumber;
 
-    Thread thPublisher;
+    SOPC_Thread thPublisher;
 
 } pubSchedulerCtx = {.isStarted = false,
                      .processingStartStop = false,
@@ -246,7 +246,7 @@ static bool MessageCtx_Array_Initialize(SOPC_PubSubConfiguration* config)
     if (result)
     {
         pubSchedulerCtx.messages.length = length;
-        result = SOPC_STATUS_OK == Mutex_Initialization(&pubSchedulerCtx.messages.acyclicMutex);
+        result = SOPC_STATUS_OK == SOPC_Mutex_Initialization(&pubSchedulerCtx.messages.acyclicMutex);
     }
     return result;
 }
@@ -276,7 +276,7 @@ static void MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.array = NULL;
     pubSchedulerCtx.messages.current = 0;
     pubSchedulerCtx.messages.length = 0;
-    Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
+    SOPC_Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
 }
 
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
@@ -615,7 +615,7 @@ static void* thread_start_publish(void* arg)
 
     bool ok = true;
 
-    status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
@@ -659,15 +659,15 @@ static void* thread_start_publish(void* arg)
         {
             ok = SOPC_RealTime_Copy(nextTimeout, context->next_timeout);
             SOPC_ASSERT(ok && "Failed Copy");
-            status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+            status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
             ok = SOPC_RealTime_SleepUntil(nextTimeout);
             SOPC_ASSERT(ok && "Failed NanoSleep");
-            status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+            status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
     }
-    status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
@@ -1010,13 +1010,13 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
     {
         return result;
     }
-    status = Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     result = SOPC_RealTime_GetTime(ctx->next_timeout);
     SOPC_ASSERT(result);
     SOPC_RealTime_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
     MessageCtx_send_publish_message(ctx);
-    status = Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
+    status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return result;
 }

@@ -40,7 +40,7 @@ static struct
 {
     int32_t initDone;
     int32_t stopFlag;
-    Thread thread;
+    SOPC_Thread thread;
     Socket sigServerListeningSock;  /* A local server used to connect a local client for signaling interruption */
     Socket sigClientSock;           /* A local client used to send signal interrupting "select" blocking call */
     Socket sigServerConnectionSock; /* Accepted local client connection used to receive signal interrupting "select"

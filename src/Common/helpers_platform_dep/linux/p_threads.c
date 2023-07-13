@@ -32,7 +32,7 @@
 // 10^6
 #define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
 
-SOPC_ReturnStatus Condition_Init(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -51,7 +51,7 @@ SOPC_ReturnStatus Condition_Init(Condition* cond)
     return status;
 }
 
-SOPC_ReturnStatus Condition_Clear(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -70,7 +70,7 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond)
     return status;
 }
 
-SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -89,7 +89,7 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 {
     SOPC_ASSERT(NULL != mut);
 
@@ -118,7 +118,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -137,7 +137,7 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -156,7 +156,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -175,7 +175,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int retCode = 0;
@@ -194,7 +194,7 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
     return status;
 }
 
-SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut, uint32_t milliSecs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     struct timespec absoluteTimeout;
@@ -237,7 +237,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
     return status;
 }
 
-static inline SOPC_ReturnStatus create_thread(Thread* thread,
+static inline SOPC_ReturnStatus create_thread(SOPC_Thread* thread,
                                               pthread_attr_t* attr,
                                               void* (*startFct)(void*),
                                               void* startArgs,
@@ -273,7 +273,10 @@ static inline SOPC_ReturnStatus create_thread(Thread* thread,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName)
 {
     if (NULL == thread || NULL == startFct)
     {
@@ -283,7 +286,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
     return create_thread(thread, NULL, startFct, startArgs, taskName);
 }
 
-SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
@@ -338,7 +341,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (pthread_join(thread, NULL) == 0)

@@ -56,7 +56,7 @@ static inline const SOPC_ReturnStatus P_SYNCHRO_kResultToSopcStatus(const int kR
  **************************************************/
 
 /***************************************************/
-SOPC_ReturnStatus Condition_Init(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
     if (NULL == cond)
     {
@@ -67,7 +67,7 @@ SOPC_ReturnStatus Condition_Init(Condition* cond)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Condition_Clear(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
 {
     if (NULL == cond)
     {
@@ -78,7 +78,7 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
+SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
 {
     if (NULL == cond)
     {
@@ -90,7 +90,7 @@ SOPC_ReturnStatus Condition_SignalAll(Condition* cond)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 {
     if (NULL == mut)
     {
@@ -101,7 +101,7 @@ SOPC_ReturnStatus Mutex_Initialization(Mutex* mut)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
 {
     if (NULL == mut)
     {
@@ -112,7 +112,7 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
 {
     if (NULL == mut)
     {
@@ -122,7 +122,7 @@ SOPC_ReturnStatus Mutex_Lock(Mutex* mut)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
 {
     if (NULL == mut)
     {
@@ -132,7 +132,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut)
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs)
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut, uint32_t milliSecs)
 {
     if (NULL == cond || NULL == mut)
     {
@@ -143,7 +143,7 @@ SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint
 }
 
 /***************************************************/
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut)
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut)
 {
     if (NULL == cond || NULL == mut)
     {

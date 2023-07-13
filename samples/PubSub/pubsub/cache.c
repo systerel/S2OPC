@@ -38,7 +38,7 @@
  * Of course, keys and elements MUST be MALLOCed.
  */
 SOPC_Dict* g_cache = NULL;
-Mutex g_lock;
+SOPC_Mutex g_lock;
 
 static void free_datavalue(uintptr_t value)
 {
@@ -216,7 +216,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
         return false;
     }
 
-    SOPC_ReturnStatus status = Mutex_Initialization(&g_lock);
+    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&g_lock);
     g_cache = SOPC_NodeId_Dict_Create(true, free_datavalue);
     bool res = SOPC_STATUS_OK == status && NULL != g_cache;
 
@@ -599,13 +599,13 @@ void Cache_Dump(void)
 
 void Cache_Lock(void)
 {
-    SOPC_ReturnStatus status = Mutex_Lock(&g_lock);
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&g_lock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
 void Cache_Unlock(void)
 {
-    SOPC_ReturnStatus status = Mutex_Unlock(&g_lock);
+    SOPC_ReturnStatus status = SOPC_Mutex_Unlock(&g_lock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 

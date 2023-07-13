@@ -23,6 +23,6 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
-typedef Mutex mbedtls_threading_mutex_t;
+typedef SOPC_Mutex mbedtls_threading_mutex_t;
 
 #endif

@@ -54,7 +54,7 @@ typedef struct
 
 typedef struct
 {
-    Mutex mutex;
+    SOPC_Mutex mutex;
     StateMachine_State state;
     SOPC_SecureChannel_Config* pscConfig;
     uint32_t iscConfig;                       /* Internal scConfig ID */

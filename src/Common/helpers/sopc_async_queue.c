@@ -32,8 +32,8 @@ struct SOPC_AsyncQueue
     const char* debugQueueName;
     SOPC_SLinkedList* queueList;
     uint32_t maxListLengthForWarning;
-    Condition queueCond;
-    Mutex queueMutex;
+    SOPC_Condition queueCond;
+    SOPC_Mutex queueMutex;
     uint32_t waitingThreads;
 };
 
@@ -63,7 +63,7 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = Condition_Init(&(*queue)->queueCond);
+                status = SOPC_Condition_Init(&(*queue)->queueCond);
                 if (SOPC_STATUS_OK != status)
                 {
                     SOPC_SLinkedList_Delete((*queue)->queueList);
@@ -72,12 +72,12 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
             }
             if (SOPC_STATUS_OK == status)
             {
-                status = Mutex_Initialization(&(*queue)->queueMutex);
+                status = SOPC_Mutex_Initialization(&(*queue)->queueMutex);
                 if (SOPC_STATUS_OK != status)
                 {
                     SOPC_SLinkedList_Delete((*queue)->queueList);
                     (*queue)->queueList = NULL;
-                    Condition_Clear(&(*queue)->queueCond);
+                    SOPC_Condition_Clear(&(*queue)->queueCond);
                 }
             }
             if (SOPC_STATUS_OK != status)
@@ -102,7 +102,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    status = Mutex_Lock(&queue->queueMutex);
+    status = SOPC_Mutex_Lock(&queue->queueMutex);
     if (SOPC_STATUS_OK == status)
     {
         if (false == firstOut)
@@ -117,7 +117,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
         {
             if (queue->waitingThreads > 0)
             {
-                Condition_SignalAll(&queue->queueCond);
+                SOPC_Condition_SignalAll(&queue->queueCond);
             }
             uint32_t queueLength = SOPC_SLinkedList_GetLength(queue->queueList);
             if (queue->maxListLengthForWarning != 0 && queueLength > queue->maxListLengthForWarning &&
@@ -133,7 +133,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQu
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Unable to Enqueue on queue %s", queue->debugQueueName);
             status = SOPC_STATUS_NOK;
         }
-        Mutex_Unlock(&queue->queueMutex);
+        SOPC_Mutex_Unlock(&queue->queueMutex);
     }
 
     return status;
@@ -154,7 +154,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != queue && NULL != element)
     {
-        Mutex_Lock(&queue->queueMutex);
+        SOPC_Mutex_Lock(&queue->queueMutex);
         *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
         if (NULL == *element)
         {
@@ -168,7 +168,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
                 *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
                 while (NULL == *element)
                 {
-                    Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
+                    SOPC_Mutex_UnlockAndWaitCond(&queue->queueCond, &queue->queueMutex);
                     *element = (void*) SOPC_SLinkedList_PopHead(queue->queueList);
                 }
                 status = SOPC_STATUS_OK;
@@ -179,7 +179,7 @@ static SOPC_ReturnStatus SOPC_AsyncQueue_Dequeue(SOPC_AsyncQueue* queue, bool is
         {
             status = SOPC_STATUS_OK;
         }
-        Mutex_Unlock(&queue->queueMutex);
+        SOPC_Mutex_Unlock(&queue->queueMutex);
     }
     return status;
 }
@@ -202,8 +202,8 @@ void SOPC_AsyncQueue_Free(SOPC_AsyncQueue** queue)
         {
             SOPC_SLinkedList_Apply((*queue)->queueList, SOPC_SLinkedList_EltGenericFree);
             SOPC_SLinkedList_Delete((*queue)->queueList);
-            Mutex_Clear(&(*queue)->queueMutex);
-            Condition_Clear(&(*queue)->queueCond);
+            SOPC_Mutex_Clear(&(*queue)->queueMutex);
+            SOPC_Condition_Clear(&(*queue)->queueCond);
         }
         SOPC_Free(*queue);
         *queue = NULL;

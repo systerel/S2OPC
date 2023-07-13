@@ -50,12 +50,12 @@ static uint32_t latestTimerId = 0;
 static SOPC_SLinkedList* timers = NULL;
 static SOPC_SLinkedList* periodicTimersToRestart = NULL;
 
-static Mutex timersMutex;
+static SOPC_Mutex timersMutex;
 static int32_t initialized = 0;
 static int32_t stop = 0;
 static bool timerCreationFailed = false;
 
-static Thread cyclicEvalThread;
+static SOPC_Thread cyclicEvalThread;
 
 static bool is_initialized(void)
 {
@@ -195,7 +195,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
     int8_t compareResult = 0;
     uint32_t timerId = 0;
 
-    Mutex_Lock(&timersMutex);
+    SOPC_Mutex_Lock(&timersMutex);
     timerIt = SOPC_SLinkedList_GetIterator(timers);
     timer = (SOPC_EventTimer*) SOPC_SLinkedList_Next(&timerIt);
     currentTimeRef = SOPC_TimeReference_GetCurrent();
@@ -275,7 +275,7 @@ static void SOPC_EventTimer_CyclicTimersEvaluation(void)
             SOPC_InternalEventTimer_RestartPeriodicTimer_WithoutLock(timer);
         }
     }
-    Mutex_Unlock(&timersMutex);
+    SOPC_Mutex_Unlock(&timersMutex);
 }
 
 static void* SOPC_Internal_ThreadLoop(void* arg)
@@ -302,7 +302,7 @@ void SOPC_EventTimer_Initialize(void)
         return;
     }
 
-    Mutex_Initialization(&timersMutex);
+    SOPC_Mutex_Initialization(&timersMutex);
     memset(usedTimerIds, false, sizeof(bool) * (SOPC_MAX_TIMERS + 1)); // 0 idx value is invalid (max idx = MAX + 1)
     timers = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
     periodicTimersToRestart = SOPC_SLinkedList_Create(SOPC_MAX_TIMERS);
@@ -339,15 +339,15 @@ void SOPC_EventTimer_Clear(void)
     // Note: set initialized to false to avoid concurrent call execution with others functions checking this flag.
     //       A concurrent call with SOPC_EventTimer_Initialize is not expected and cannot be managed properly.
     SOPC_Atomic_Int_Set(&initialized, 0);
-    Mutex_Lock(&timersMutex);
+    SOPC_Mutex_Lock(&timersMutex);
     SOPC_SLinkedList_Apply(timers, SOPC_SLinkedList_EltGenericFree);
     SOPC_SLinkedList_Delete(timers);
     timers = NULL;
     // No need to iterate to free elements, elements are temporary added only during timer evaluation
     SOPC_SLinkedList_Delete(periodicTimersToRestart);
     periodicTimersToRestart = NULL;
-    Mutex_Unlock(&timersMutex);
-    Mutex_Clear(&timersMutex);
+    SOPC_Mutex_Unlock(&timersMutex);
+    SOPC_Mutex_Clear(&timersMutex);
 }
 
 static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
@@ -393,7 +393,7 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     newTimer->periodMs = msDelay;
 
     // Set timer
-    Mutex_Lock(&timersMutex);
+    SOPC_Mutex_Lock(&timersMutex);
     result = SOPC_Internal_GetFreshTimerId_WithoutLock();
     if (result != 0)
     {
@@ -417,7 +417,7 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
         SOPC_Free(newTimer);
     }
     timerCreationFailed = (0 == result);
-    Mutex_Unlock(&timersMutex);
+    SOPC_Mutex_Unlock(&timersMutex);
 
     return result;
 }
@@ -441,7 +441,7 @@ bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod)
 
     bool result = false;
     SOPC_EventTimer* timer = NULL;
-    Mutex_Lock(&timersMutex);
+    SOPC_Mutex_Lock(&timersMutex);
     timer = (SOPC_EventTimer*) SOPC_SLinkedList_FindFromId(timers, timerId);
     if (timer != NULL && timer->isPeriodicTimer)
     {
@@ -459,7 +459,7 @@ bool SOPC_EventTimer_ModifyPeriodic(uint32_t timerId, uint64_t msPeriod)
             timer->periodMs = msPeriod;
         }
     }
-    Mutex_Unlock(&timersMutex);
+    SOPC_Mutex_Unlock(&timersMutex);
     return result;
 }
 
@@ -470,7 +470,7 @@ void SOPC_EventTimer_Cancel(uint32_t timerId)
         return;
     }
 
-    Mutex_Lock(&timersMutex);
+    SOPC_Mutex_Lock(&timersMutex);
     SOPC_Internal_EventTimer_Cancel_WithoutLock(timerId);
-    Mutex_Unlock(&timersMutex);
+    SOPC_Mutex_Unlock(&timersMutex);
 }

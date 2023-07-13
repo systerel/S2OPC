@@ -20,8 +20,8 @@
 #include "p_generic_socket_srv.h"
 
 static tLogSrvWks* gLogServer = NULL;
-static Mutex gLockLogServer = NULL;
-static Condition gSignalOneConnexion;
+static SOPC_Mutex gLockLogServer = NULL;
+static SOPC_Condition gSignalOneConnexion;
 
 // Callback used by logserv to customize hello message
 static uint16_t cbHelloCallback(uint8_t* pBufferInOut, uint16_t nbBytesToEncode, uint16_t maxSizeBufferOut)
@@ -99,13 +99,13 @@ SOPC_ReturnStatus SOPC_LogSrv_WaitClient(uint32_t timeoutMs)
 
     if (gLogServer == NULL)
     {
-        Mutex_Unlock(&gLockLogServer);
+        SOPC_Mutex_Unlock(&gLockLogServer);
         return SOPC_STATUS_NOK;
     }
 
     status = Mutex_UnlockAndTimedWaitCond(&gSignalOneConnexion, &gLockLogServer, timeoutMs);
 
-    Mutex_Unlock(&gLockLogServer);
+    SOPC_Mutex_Unlock(&gLockLogServer);
 
     return status;
 }
@@ -119,17 +119,17 @@ SOPC_ReturnStatus SOPC_LogSrv_Print(const uint8_t* buffer, uint16_t length)
         return SOPC_STATUS_NOK;
     }
 
-    Mutex_Lock(&gLockLogServer);
+    SOPC_Mutex_Lock(&gLockLogServer);
 
     if (gLogServer == NULL)
     {
-        Mutex_Unlock(&gLockLogServer);
+        SOPC_Mutex_Unlock(&gLockLogServer);
         return SOPC_STATUS_NOK;
     }
 
     P_LOG_SRV_SendToAllClient(gLogServer, (uint8_t*) buffer, length, NULL);
 
-    Mutex_Unlock(&gLockLogServer);
+    SOPC_Mutex_Unlock(&gLockLogServer);
 
     return status;
 }
@@ -143,11 +143,11 @@ SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
         return SOPC_STATUS_NOK;
     }
 
-    Mutex_Lock(&gLockLogServer);
+    SOPC_Mutex_Lock(&gLockLogServer);
 
     if (NULL == gLogServer)
     {
-        Mutex_Unlock(&gLockLogServer);
+        SOPC_Mutex_Unlock(&gLockLogServer);
         return SOPC_STATUS_NOK;
     }
 
@@ -155,7 +155,7 @@ SOPC_ReturnStatus SOPC_LogSrv_Stop(void)
 
     P_LOG_SRV_StopAndDestroy(&gLogServer);
 
-    Mutex_Unlock(&gLockLogServer);
+    SOPC_Mutex_Unlock(&gLockLogServer);
 
     return status;
 }
@@ -210,7 +210,7 @@ SOPC_ReturnStatus SOPC_LogSrv_Start(
         }
     }
 
-    Mutex_Unlock(&gLockLogServer);
+    SOPC_Mutex_Unlock(&gLockLogServer);
 
     return status;
 }

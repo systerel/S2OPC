@@ -63,7 +63,7 @@ int main(void)
 int FREE_RTOS_S2OPC_SERVER(void)
 {
     SOPC_ReturnStatus status;
-    Thread pX = NULL;
+    SOPC_Thread pX = NULL;
     status = SOPC_Thread_Create(&pX, (void*) cbToolkit_test_server, NULL, NULL);
     return status;
 }

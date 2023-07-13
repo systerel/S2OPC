@@ -32,11 +32,11 @@ typedef CONDITION_VARIABLE Condition;
 
 typedef void* SOPCThreadStartFct(void*);
 
-typedef struct Thread
+typedef struct SOPC_Thread
 {
     HANDLE thread;
     SOPCThreadStartFct* startFct;
     void* args;
-} Thread;
+} SOPC_Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

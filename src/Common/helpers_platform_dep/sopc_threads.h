@@ -49,7 +49,10 @@
  *  \warning Depending on platform, the \p taskName length might be limited (e.g.: 16 characters including terminating
  * null byte for POSIX). In this case the \p taskName will be truncated to comply with limitation.
  */
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName);
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName);
 
 /**
  * \brief Function to create a high priority thread
@@ -77,7 +80,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), v
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *                  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
@@ -89,6 +92,6 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
  *  \param thread   Thread to wait for
  *
  */
-SOPC_ReturnStatus SOPC_Thread_Join(Thread thread);
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread);
 
 #endif /* SOPC_THREADS_H_ */

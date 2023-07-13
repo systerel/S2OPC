@@ -27,7 +27,7 @@
 
 /*****Public synchro api*****/
 
-typedef struct k_condvar Condition;
-typedef struct k_mutex Mutex;
+typedef struct k_condvar SOPC_Condition;
+typedef struct k_mutex SOPC_Mutex;
 
 #endif /* SOPC_SYNCHRO_H */

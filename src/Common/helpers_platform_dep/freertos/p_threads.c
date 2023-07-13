@@ -67,7 +67,7 @@ static tUtilsList* pgTaskList = NULL;
 // Callback encapsulate user callback. Abstract start and stop synchronisation.
 static void cbInternalCallback(void* ptr)
 {
-    Thread ptrArgs = (Thread) ptr;
+    SOPC_Thread ptrArgs = (SOPC_Thread) ptr;
 
     if (NULL != ptrArgs)
     {
@@ -112,10 +112,10 @@ static void cbInternalCallback(void* ptr)
 }
 
 // Initializes created thread then launches it.
-SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
-                                uint16_t wMaxRDV, // Max join
-                                tPtrFct* pFct,    // Callback
-                                void* args,       // Args
+SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
+                                uint16_t wMaxRDV,    // Max join
+                                tPtrFct* pFct,       // Callback
+                                void* args,          // Args
                                 int priority,
                                 const char* taskName,       // Name of the task
                                 tPtrFct* fctWaitingForJoin, // Debug wait for join
@@ -123,7 +123,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
 {
     SOPC_ReturnStatus resPTHR = SOPC_STATUS_OK;
     SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
-    Thread handleWks = NULL;
+    SOPC_Thread handleWks = NULL;
 
     if (NULL == ptrWks || NULL == pFct)
     {
@@ -293,7 +293,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
 
 // Joins thread. Thread joined becomes not initilized.
 // Can be safely destroyed if just after return OK
-SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
+SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* pHandle)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_ReturnStatus resPSYNC = SOPC_STATUS_NOK;
@@ -603,12 +603,15 @@ SOPC_ReturnStatus P_THREAD_Join(Thread* pHandle)
 /*****Public s2opc thread api*****/
 
 // Create and initialize a thread
-SOPC_ReturnStatus SOPC_Thread_Create(Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName)
 {
     return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, 0, taskName, NULL, NULL);
 }
 
-SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
+SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
                                                 void* (*startFct)(void*),
                                                 void* startArgs,
                                                 int priority,
@@ -623,7 +626,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(Thread* thread,
 }
 
 // Join then destroy a thread
-SOPC_ReturnStatus SOPC_Thread_Join(Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 

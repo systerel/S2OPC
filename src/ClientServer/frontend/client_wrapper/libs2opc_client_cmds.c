@@ -86,8 +86,8 @@ typedef struct
  * (event response not received before timeout) */
 typedef struct
 {
-    Mutex mutex; /* protect this context */
-    Condition condition;
+    SOPC_Mutex mutex; /* protect this context */
+    SOPC_Condition condition;
     bool finished; /* set when treatment is done */
 
     bool canceled; /* Set if request has been canceled before response event reception */
@@ -100,8 +100,8 @@ typedef struct
 static int32_t initialized = 0;
 
 static SOPC_SLinkedList* canceledRequestContexts =
-    NULL;            /* List of canceled request contexts not received, to be freed on Clear */
-static Mutex gMutex; /* Mutex for global variables concurrent access */
+    NULL;                 /* List of canceled request contexts not received, to be freed on Clear */
+static SOPC_Mutex gMutex; /* Mutex for global variables concurrent access */
 
 static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* reqCtx, bool isGenericServiceUse)
 {
@@ -120,16 +120,16 @@ static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* req
     }
     if (SOPC_STATUS_OK == status)
     {
-        Mutex_Initialization(&result->mutex);
+        SOPC_Mutex_Initialization(&result->mutex);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Condition_Init(&result->condition);
+        status = SOPC_Condition_Init(&result->condition);
     }
     if (SOPC_STATUS_OK != status)
     {
-        Condition_Clear(&result->condition);
-        Mutex_Clear(&result->mutex);
+        SOPC_Condition_Clear(&result->condition);
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }
@@ -139,29 +139,29 @@ static SOPC_ClientHelper_GenReqCtx* SOPC_ClientHelper_GenReqCtx_Create(void* req
 static void SOPC_ClientHelper_GenReqCtx_Cancel(SOPC_ClientHelper_GenReqCtx* genReqCtx)
 {
     SOPC_ASSERT(NULL != genReqCtx);
-    SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+    SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     // Set as canceled
     genReqCtx->canceled = true;
     genReqCtx->reqCtx = NULL;
 
     // Append to canceled request contexts
-    statusMutex = Mutex_Lock(&gMutex);
+    statusMutex = SOPC_Mutex_Lock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     void* found = (void*) SOPC_SLinkedList_Append(canceledRequestContexts, 0, (uintptr_t) genReqCtx);
     SOPC_ASSERT(found != NULL);
-    statusMutex = Mutex_Unlock(&gMutex);
+    statusMutex = SOPC_Mutex_Unlock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
-    statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+    statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 }
 
 static void SOPC_ClientHelper_GenReqCtx_ClearAndFree(SOPC_ClientHelper_GenReqCtx* genReqCtx)
 {
     SOPC_ASSERT(NULL != genReqCtx);
-    Condition_Clear(&genReqCtx->condition);
-    Mutex_Clear(&genReqCtx->mutex);
+    SOPC_Condition_Clear(&genReqCtx->condition);
+    SOPC_Mutex_Clear(&genReqCtx->mutex);
     genReqCtx->reqCtx = NULL; // shall be freed by caller or previously
     SOPC_Free(genReqCtx);
 }
@@ -169,10 +169,10 @@ static void SOPC_ClientHelper_GenReqCtx_ClearAndFree(SOPC_ClientHelper_GenReqCtx
 static void SOPC_ClientHelper_Canceled_GenReqCtx_ClearAndFree(SOPC_ClientHelper_GenReqCtx* genReqCtx)
 {
     SOPC_ASSERT(NULL != genReqCtx);
-    SOPC_ReturnStatus statusMutex = Mutex_Lock(&gMutex);
+    SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     void* found = (void*) SOPC_SLinkedList_RemoveFromValuePtr(canceledRequestContexts, (uintptr_t) genReqCtx);
-    statusMutex = Mutex_Unlock(&gMutex);
+    statusMutex = SOPC_Mutex_Unlock(&gMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     SOPC_ASSERT(NULL != found);
     SOPC_ClientHelper_GenReqCtx_ClearAndFree(genReqCtx);
@@ -196,7 +196,8 @@ static SOPC_ReturnStatus SOPC_ClientHelper_GenReqCtx_WaitFinishedOrTimeout(SOPC_
     /* Wait for the response */
     while (SOPC_STATUS_OK == status && !genReqCtx->finished)
     {
-        status = Mutex_UnlockAndTimedWaitCond(&genReqCtx->condition, &genReqCtx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
+        status =
+            SOPC_Mutex_UnlockAndTimedWaitCond(&genReqCtx->condition, &genReqCtx->mutex, SYNCHRONOUS_REQUEST_TIMEOUT);
         SOPC_ASSERT(SOPC_STATUS_OK == status || SOPC_STATUS_TIMEOUT == status);
     }
     if (SOPC_STATUS_OK == status)
@@ -386,13 +387,13 @@ int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disc
             .maxBytes = 0,
             .maxFiles = 0}}; // .toolkit_logger only used by LibSub code (libs2opc_client.c), initialize to 0 values.
 
-    SOPC_ReturnStatus status = Mutex_Initialization(&gMutex);
+    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&gMutex);
     if (SOPC_STATUS_OK == status)
     {
         canceledRequestContexts = SOPC_SLinkedList_Create(0);
         if (NULL == canceledRequestContexts)
         {
-            status = Mutex_Clear(&gMutex);
+            status = SOPC_Mutex_Clear(&gMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
             return -1;
         }
@@ -406,7 +407,7 @@ int32_t SOPC_ClientHelper_Initialize(SOPC_ClientHelper_DisconnectCbk* const disc
 
     if (SOPC_STATUS_OK != status)
     {
-        status = Mutex_Clear(&gMutex);
+        status = SOPC_Mutex_Clear(&gMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_SLinkedList_Delete(canceledRequestContexts);
         canceledRequestContexts = NULL;
@@ -428,15 +429,15 @@ void SOPC_ClientHelper_Finalize(void)
     SOPC_Atomic_Int_Set(&initialized, (int32_t) false);
 
     SOPC_ClientCommon_Clear();
-    Mutex_Lock(&gMutex);
+    SOPC_Mutex_Lock(&gMutex);
     if (canceledRequestContexts != NULL)
     {
         SOPC_SLinkedList_Apply(canceledRequestContexts, SOPC_SLinkedList_GenReqCtxFree);
         SOPC_SLinkedList_Delete(canceledRequestContexts);
         canceledRequestContexts = NULL;
     }
-    Mutex_Unlock(&gMutex);
-    Mutex_Clear(&gMutex);
+    SOPC_Mutex_Unlock(&gMutex);
+    SOPC_Mutex_Clear(&gMutex);
     Helpers_Log(SOPC_LOG_LEVEL_INFO, "Toolkit closed.");
 }
 
@@ -498,7 +499,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
     {
         /* Prepare the synchronous context */
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         // Note: SOPC_Client*_EndpointConnection shall remain the same, do a minimal check on size
@@ -522,7 +523,7 @@ int32_t SOPC_ClientHelper_GetEndpoints(SOPC_ClientHelper_EndpointConnection* con
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -785,13 +786,13 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
     GetEndpointsContext* ctx = NULL;
     const OpcUa_GetEndpointsResponse* getEndpointsResp = NULL;
 
-    statusMutex = Mutex_Lock(&genCtx->mutex);
+    statusMutex = SOPC_Mutex_Lock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
     if (genCtx->canceled)
     {
         // Ignore and clear gen context, dedicated GetEndpoints context already cleared
-        statusMutex = Mutex_Unlock(&genCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         SOPC_ClientHelper_Canceled_GenReqCtx_ClearAndFree(genCtx);
         return;
@@ -906,10 +907,10 @@ static void GenericCallback_GetEndpoints(const SOPC_StatusCode requestStatus,
     genCtx->status = status;
 
     genCtx->finished = true;
-    statusMutex = Mutex_Unlock(&genCtx->mutex);
+    statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
-    statusMutex = Condition_SignalAll(&genCtx->condition);
+    statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 }
 
@@ -1128,14 +1129,14 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
     }
 
     SOPC_ClientHelper_GenReqCtx* genCtx = (SOPC_ClientHelper_GenReqCtx*) genContext;
-    SOPC_ReturnStatus statusMutex = Mutex_Lock(&genCtx->mutex);
+    SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
     // Check if request has been canceled
     if (genCtx->canceled)
     {
         // Ignore and clear gen context, dedicated service context already cleared
-        statusMutex = Mutex_Unlock(&genCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         SOPC_ClientHelper_Canceled_GenReqCtx_ClearAndFree(genCtx);
         return;
@@ -1190,10 +1191,10 @@ void SOPC_ClientHelper_GenericCallback(SOPC_LibSub_ConnectionId c_id,
     genCtx->status = status;
 
     genCtx->finished = true;
-    statusMutex = Mutex_Unlock(&genCtx->mutex);
+    statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
-    statusMutex = Condition_SignalAll(&genCtx->condition);
+    statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 }
 
@@ -1339,7 +1340,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         request->NodesToRead = nodesToRead;
         /* Prepare the synchronous context */
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
@@ -1359,7 +1360,7 @@ int32_t SOPC_ClientHelper_Read(int32_t connectionId,
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -1706,7 +1707,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         request->NodesToWrite = nodesToWrite;
         /* Prepare the synchronous context */
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
@@ -1726,7 +1727,7 @@ int32_t SOPC_ClientHelper_Write(int32_t connectionId,
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -2025,7 +2026,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
     {
         /* Prepare the synchronous context */
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
@@ -2045,7 +2046,7 @@ int32_t SOPC_ClientHelper_Browse(int32_t connectionId,
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -2203,7 +2204,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
     {
         /* Prepare the synchronous context */
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, request,
@@ -2223,7 +2224,7 @@ static SOPC_ReturnStatus BrowseNext(int32_t connectionId,
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -2369,7 +2370,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
     {
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
         /* Prepare the synchronous context */
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, (void*) callReqs,
@@ -2388,7 +2389,7 @@ int32_t SOPC_ClientHelper_CallMethod(int32_t connectionId,
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);
@@ -2447,7 +2448,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* r
     {
         SOPC_ReturnStatus operationStatus = SOPC_STATUS_NOK;
         /* Prepare the synchronous context */
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&genReqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         status = SOPC_ClientCommon_AsyncSendRequestOnSession((SOPC_LibSub_ConnectionId) connectionId, requestMsg,
@@ -2460,7 +2461,7 @@ SOPC_ReturnStatus SOPC_ClientHelper_GenericService(int32_t connectionId, void* r
         }
 
         /* Free or cancel the request context */
-        statusMutex = Mutex_Unlock(&genReqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         // Keep same output status if input status != OK
         status = SOPC_ClientHelper_GenReqCtx_FinalizeOperation(genReqCtx, status, operationStatus);

@@ -32,7 +32,7 @@ static struct
 {
     int32_t initDone;
     int32_t stopFlag;
-    Thread thread;
+    SOPC_Thread thread;
     void* sockContextArray;
     size_t sizeOfSockContextElt;
     Socket* socketArray;

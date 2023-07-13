@@ -74,6 +74,6 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(Condition* pv,
 
 /*****Public s2opc condition variable and mutex api*****/
 
-typedef QueueHandle_t Mutex;
+typedef QueueHandle_t SOPC_Mutex;
 
 #endif

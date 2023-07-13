@@ -94,7 +94,7 @@ extern SOPC_Variant SOPC_Embedded_VariableVariant[];
 /**               SERVER VARIABLES CONTENT         */
 /***************************************************/
 static int32_t gStopped = true;
-static Thread CLI_thread;
+static SOPC_Thread CLI_thread;
 
 static SOPC_Endpoint_Config* g_epConfig = NULL;
 static SOPC_ReturnStatus authentication_check(SOPC_UserAuthentication_Manager* authn,

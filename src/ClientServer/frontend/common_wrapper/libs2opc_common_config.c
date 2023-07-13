@@ -44,7 +44,7 @@ typedef struct SOPC_Helper_Config
     SOPC_S2OPC_Config config;
 
     // Guarantee no parallel use/def of callbacks
-    Mutex callbacksMutex;
+    SOPC_Mutex callbacksMutex;
 
     // The client communication events handler
     SOPC_ComEvent_Fct* clientComEventCb;
@@ -74,7 +74,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         return;
     }
 
-    Mutex_Lock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Lock(&sopc_helper_config.callbacksMutex);
     switch (event)
     {
     /* Client events */
@@ -112,7 +112,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     default:
         SOPC_ASSERT(false && "Unexpected event");
     }
-    Mutex_Unlock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Unlock(&sopc_helper_config.callbacksMutex);
 }
 
 SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogConfig)
@@ -139,7 +139,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogCon
     }
     else
     {
-        Mutex_Initialization(&sopc_helper_config.callbacksMutex);
+        SOPC_Mutex_Initialization(&sopc_helper_config.callbacksMutex);
         SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) true);
     }
 
@@ -154,14 +154,14 @@ void SOPC_CommonHelper_Clear(void)
     }
     SOPC_Atomic_Int_Set(&sopc_helper_config.initialized, (int32_t) false);
 
-    Mutex_Lock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Lock(&sopc_helper_config.callbacksMutex);
     sopc_helper_config.clientComEventCb = NULL;
     sopc_helper_config.serverComEventCb = NULL;
-    Mutex_Unlock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Unlock(&sopc_helper_config.callbacksMutex);
     SOPC_S2OPC_Config_Clear(&sopc_helper_config.config);
 
     SOPC_Toolkit_Clear();
-    Mutex_Clear(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Clear(&sopc_helper_config.callbacksMutex);
 }
 
 SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void)
@@ -175,9 +175,9 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetClientComEvent(SOPC_ComEvent_Fct* clientC
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    Mutex_Lock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Lock(&sopc_helper_config.callbacksMutex);
     sopc_helper_config.clientComEventCb = clientComEvtCb;
-    Mutex_Unlock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Unlock(&sopc_helper_config.callbacksMutex);
 
     return SOPC_STATUS_OK;
 }
@@ -189,9 +189,9 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverC
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    Mutex_Lock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Lock(&sopc_helper_config.callbacksMutex);
     sopc_helper_config.serverComEventCb = serverComEvtCb;
-    Mutex_Unlock(&sopc_helper_config.callbacksMutex);
+    SOPC_Mutex_Unlock(&sopc_helper_config.callbacksMutex);
 
     return SOPC_STATUS_OK;
 }

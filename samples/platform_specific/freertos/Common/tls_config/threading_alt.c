@@ -28,22 +28,22 @@
 
 static void mutex_init(mbedtls_threading_mutex_t* pMutex)
 {
-    SOPC_UNUSED_RESULT(Mutex_Initialization(pMutex));
+    SOPC_UNUSED_RESULT(SOPC_Mutex_Initialization(pMutex));
 }
 
 static void mutex_free(mbedtls_threading_mutex_t* pMutex)
 {
-    SOPC_UNUSED_RESULT(Mutex_Clear(pMutex));
+    SOPC_UNUSED_RESULT(SOPC_Mutex_Clear(pMutex));
 }
 
 static int mutex_lock(mbedtls_threading_mutex_t* pMutex)
 {
-    return (int) Mutex_Lock(pMutex);
+    return (int) SOPC_Mutex_Lock(pMutex);
 }
 
 static int mutex_unlock(mbedtls_threading_mutex_t* pMutex)
 {
-    return (int) Mutex_Unlock(pMutex);
+    return (int) SOPC_Mutex_Unlock(pMutex);
 }
 
 /*---------Mutex-------- --------------------------------------------------*/

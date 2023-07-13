@@ -2138,7 +2138,7 @@ static void* test_async_queue_nonblocking_dequeue_fct(void* args)
 
 START_TEST(test_async_queue_threads)
 {
-    Thread thread;
+    SOPC_Thread thread;
     AsyncQueue_Element params;
     SOPC_AsyncQueue* queue;
     uint8_t one = 1;

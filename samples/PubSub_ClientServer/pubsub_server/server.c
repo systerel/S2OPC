@@ -731,7 +731,7 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
         ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
         if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
         {
-            Mutex_Lock(&ctx->mut);
+            SOPC_Mutex_Lock(&ctx->mut);
 
             statusCopy = SOPC_STATUS_OK;
             response = (OpcUa_ReadResponse*) param;
@@ -762,9 +762,9 @@ static void Server_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, 
                 }
             }
 
-            Condition_SignalAll(&ctx->cond);
+            SOPC_Condition_SignalAll(&ctx->cond);
 
-            Mutex_Unlock(&ctx->mut);
+            SOPC_Mutex_Unlock(&ctx->mut);
         }
         else if (message_type == &OpcUa_WriteResponse_EncodeableType)
         {
@@ -1124,8 +1124,8 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
 
     requestContext->ldv = NULL;                 // Datavalue request result
     requestContext->NoOfNodesToRead = nbValues; // Use to alloc SOPC_DataValue by GetResponse
-    Condition_Init(&requestContext->cond);
-    Mutex_Initialization(&requestContext->mut);
+    SOPC_Condition_Init(&requestContext->cond);
+    SOPC_Mutex_Initialization(&requestContext->mut);
 
     /* Encapsulate the ReadValues in a ReadRequest, awaits the Response */
     request->MaxAge = 0.;
@@ -1133,18 +1133,18 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     request->NoOfNodesToRead = nbValues;
     request->NodesToRead = lrv;
 
-    Mutex_Lock(&requestContext->mut);
+    SOPC_Mutex_Lock(&requestContext->mut);
 
     SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, (uintptr_t) requestContext);
 
-    Mutex_UnlockAndWaitCond(&requestContext->cond, &requestContext->mut);
+    SOPC_Mutex_UnlockAndWaitCond(&requestContext->cond, &requestContext->mut);
 
-    Mutex_Unlock(&requestContext->mut);
+    SOPC_Mutex_Unlock(&requestContext->mut);
 
     if (NULL == requestContext->ldv)
     {
-        Mutex_Clear(&requestContext->mut);
-        Condition_Clear(&requestContext->cond);
+        SOPC_Mutex_Clear(&requestContext->mut);
+        SOPC_Condition_Clear(&requestContext->cond);
         SOPC_Free(requestContext);
         return NULL;
     }
@@ -1152,8 +1152,8 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
 
     ldv = requestContext->ldv;
 
-    Mutex_Clear(&requestContext->mut);
-    Condition_Clear(&requestContext->cond);
+    SOPC_Mutex_Clear(&requestContext->mut);
+    SOPC_Condition_Clear(&requestContext->cond);
     SOPC_Free(requestContext);
 
     return ldv;

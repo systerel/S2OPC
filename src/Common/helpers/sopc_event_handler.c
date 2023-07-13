@@ -35,7 +35,7 @@ struct _SOPC_EventHandler
 
 struct _SOPC_Looper
 {
-    Thread thread;
+    SOPC_Thread thread;
     SOPC_AsyncQueue* queue;
     SOPC_Array* handlers;
 };

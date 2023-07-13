@@ -22,10 +22,10 @@
 
 #include <pthread.h>
 
-typedef pthread_mutex_t Mutex;
+typedef pthread_mutex_t SOPC_Mutex;
 
-typedef pthread_cond_t Condition;
+typedef pthread_cond_t SOPC_Condition;
 
-typedef pthread_t Thread;
+typedef pthread_t SOPC_Thread;
 
 #endif /* SOPC_P_THREADS_H_ */

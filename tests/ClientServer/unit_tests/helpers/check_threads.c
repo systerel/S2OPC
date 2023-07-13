@@ -37,8 +37,8 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
-static Mutex gmutex;
-static Condition gcond;
+static SOPC_Mutex gmutex;
+static SOPC_Condition gcond;
 
 typedef struct CondRes
 {
@@ -57,26 +57,26 @@ static void* test_thread_exec_fct(void* args)
 static void* test_thread_mutex_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
 static void* test_thread_mutex_recursive_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Lock(&gmutex);
-    Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
+    SOPC_Mutex_Lock(&gmutex);
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
-    Mutex_Unlock(&gmutex);
-    Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
+    SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
 START_TEST(test_thread_exec)
 {
-    Thread thread;
+    SOPC_Thread thread;
     int32_t cpt = 0;
     // Nominal behavior
     SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt, "test_exec");
@@ -99,11 +99,11 @@ END_TEST
 
 START_TEST(test_thread_mutex)
 {
-    Thread thread;
+    SOPC_Thread thread;
     int32_t cpt = 0;
     // Nominal behavior
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&gmutex));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Create(&thread, test_thread_mutex_fct, &cpt, "test_mutex"));
 
     // Wait until the thread reaches the "lock mutex" statement
@@ -115,28 +115,28 @@ START_TEST(test_thread_mutex)
     ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&cpt));
 
     // Unlock the mutex and check that the thread can go forward.
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&gmutex));
     ck_assert(wait_value(&cpt, 2));
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&gmutex));
 
     // Degraded behavior
-    SOPC_ReturnStatus status = Mutex_Lock(NULL);
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_Unlock(NULL);
+    status = SOPC_Mutex_Unlock(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_Clear(NULL);
+    status = SOPC_Mutex_Clear(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST
 
 START_TEST(test_thread_mutex_recursive)
 {
-    Thread thread;
+    SOPC_Thread thread;
     int32_t cpt = 0;
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Initialization(&gmutex));
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Lock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Initialization(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Lock(&gmutex));
     ck_assert_int_eq(SOPC_STATUS_OK,
                      SOPC_Thread_Create(&thread, test_thread_mutex_recursive_fct, &cpt, "mutex_recursive"));
 
@@ -149,11 +149,11 @@ START_TEST(test_thread_mutex_recursive)
     ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&cpt));
 
     // Unlock the mutex and check that the thread can go forward.
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Unlock(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&gmutex));
     ck_assert(wait_value(&cpt, 2));
 
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
-    ck_assert_int_eq(SOPC_STATUS_OK, Mutex_Clear(&gmutex));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&gmutex));
 }
 END_TEST
 
@@ -161,12 +161,12 @@ static void* test_thread_condvar_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(SOPC_STATUS_OK == status);
     condRes->waitingThreadStarted = 1;
     while (condRes->protectedCondition == 0)
     {
-        status = Mutex_UnlockAndWaitCond(&gcond, &gmutex);
+        status = SOPC_Mutex_UnlockAndWaitCond(&gcond, &gmutex);
         ck_assert(SOPC_STATUS_OK == status);
         if (condRes->protectedCondition == 1)
         {
@@ -174,7 +174,7 @@ static void* test_thread_condvar_fct(void* args)
             condRes->successCondition = 1;
         }
     }
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
@@ -182,12 +182,12 @@ static void* test_thread_condvar_timed_fct(void* args)
 {
     CondRes* condRes = (CondRes*) args;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     condRes->waitingThreadStarted = 1;
     status = SOPC_STATUS_NOK;
     while (condRes->protectedCondition == 0 && SOPC_STATUS_TIMEOUT != status)
     {
-        status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
+        status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 1000);
     }
     if (SOPC_STATUS_OK == status && condRes->protectedCondition == 1)
     {
@@ -198,13 +198,13 @@ static void* test_thread_condvar_timed_fct(void* args)
     {
         condRes->timeoutCondition = 1;
     }
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     return NULL;
 }
 
 START_TEST(test_thread_condvar)
 {
-    Thread thread;
+    SOPC_Thread thread;
     CondRes condRes;
     condRes.protectedCondition = 0;   // FALSE
     condRes.waitingThreadStarted = 0; // FALSE
@@ -212,35 +212,35 @@ START_TEST(test_thread_condvar)
     condRes.timeoutCondition = 0;     // FALSE
 
     // Nominal behavior (non timed waiting on condition)
-    SOPC_ReturnStatus status = Mutex_Initialization(&gmutex);
+    SOPC_ReturnStatus status = SOPC_Mutex_Initialization(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Init(&gcond);
+    status = SOPC_Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // Signal condition has changed
-    status = Condition_SignalAll(&gcond);
+    status = SOPC_Condition_SignalAll(&gcond);
     // Wait thread termination
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
     // Check condition status after thread termination
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(condRes.successCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
-    status = Mutex_Clear(&gmutex);
+    status = SOPC_Mutex_Clear(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Clear(&gcond);
+    status = SOPC_Condition_Clear(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
 
     // Nominal behavior (timed waiting on condition)
@@ -248,35 +248,35 @@ START_TEST(test_thread_condvar)
     condRes.waitingThreadStarted = 0; // FALSE
     condRes.successCondition = 0;     // FALSE
     condRes.timeoutCondition = 0;     // FALSE
-    status = Mutex_Initialization(&gmutex);
+    status = SOPC_Mutex_Initialization(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Init(&gcond);
+    status = SOPC_Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // Trigger the condition now
     condRes.protectedCondition = 1;
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // Signal condition has changed
-    status = Condition_SignalAll(&gcond);
+    status = SOPC_Condition_SignalAll(&gcond);
     // Wait for thread termination
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
 
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(condRes.successCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
-    status = Mutex_Clear(&gmutex);
+    status = SOPC_Mutex_Clear(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Clear(&gcond);
+    status = SOPC_Condition_Clear(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior (timed waiting on condition)
@@ -284,19 +284,19 @@ START_TEST(test_thread_condvar)
     condRes.waitingThreadStarted = 0; // FALSE
     condRes.successCondition = 0;     // FALSE
     condRes.timeoutCondition = 0;     // FALSE
-    status = Mutex_Initialization(&gmutex);
+    status = SOPC_Mutex_Initialization(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Init(&gcond);
+    status = SOPC_Condition_Init(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
     status = SOPC_Thread_Create(&thread, test_thread_condvar_timed_fct, &condRes, "Condvar_fct");
     ck_assert(status == SOPC_STATUS_OK);
     SOPC_Sleep(10);
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // Check thread is waiting and mutex is released since we locked it !
     ck_assert(condRes.waitingThreadStarted == 1);
     // DO NOT CHANGE CONDITION
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
     // DO NOT SIGNAL CONDITION CHANGE
 
@@ -305,51 +305,51 @@ START_TEST(test_thread_condvar)
     ck_assert(status == SOPC_STATUS_OK);
 
     // Check timeout on condition occured
-    status = Mutex_Lock(&gmutex);
+    status = SOPC_Mutex_Lock(&gmutex);
     ck_assert(condRes.timeoutCondition == 1);
-    status = Mutex_Unlock(&gmutex);
+    status = SOPC_Mutex_Unlock(&gmutex);
 
     // Clear mutex and Condtion
-    status = Mutex_Clear(&gmutex);
+    status = SOPC_Mutex_Clear(&gmutex);
     ck_assert(status == SOPC_STATUS_OK);
-    status = Condition_Clear(&gcond);
+    status = SOPC_Condition_Clear(&gcond);
     ck_assert(status == SOPC_STATUS_OK);
 
     // Degraded behavior (invalid parameter)
-    status = Condition_Init(NULL);
+    status = SOPC_Condition_Init(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Condition_Clear(NULL);
+    status = SOPC_Condition_Clear(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Condition_SignalAll(NULL);
+    status = SOPC_Condition_SignalAll(NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndWaitCond(NULL, &gmutex);
+    status = SOPC_Mutex_UnlockAndWaitCond(NULL, &gmutex);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndWaitCond(&gcond, NULL);
+    status = SOPC_Mutex_UnlockAndWaitCond(&gcond, NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndWaitCond(NULL, NULL);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
+    status = SOPC_Mutex_UnlockAndWaitCond(NULL, NULL);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
-
-    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
-    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 0);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 
-    status = Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, &gmutex, 0);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 0);
+
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, NULL, 100);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(&gcond, NULL, 100);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, &gmutex, 100);
+    ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
+
+    status = SOPC_Mutex_UnlockAndTimedWaitCond(NULL, NULL, 0);
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
 }
 END_TEST

@@ -49,8 +49,8 @@
 /***************************************************/
 #define SHELL_CMD_SIZE 64
 static char* shell_command = NULL;
-static Condition shell_cond;
-static Mutex shell_mutex;
+static SOPC_Condition shell_cond;
+static SOPC_Mutex shell_mutex;
 static int shell_sopc_exec(const struct shell* shell, size_t argc, char** argv);
 static char* cstring_array_to_string(size_t argc, char** argv);
 
@@ -69,8 +69,8 @@ void SOPC_Platform_Setup(void)
     tls_threading_initialize();
 
     // Create a Thread to receive SHELL readline
-    Condition_Init(&shell_cond);
-    Mutex_Initialization(&shell_mutex);
+    SOPC_Condition_Init(&shell_cond);
+    SOPC_Mutex_Initialization(&shell_mutex);
 
     printk("+--------------------------------------------------------------\n");
     printk("| S2OPC sample CLI is integrated into ZEPHYR native SHELL     |\n");
@@ -116,12 +116,12 @@ static char* cstring_array_to_string(size_t argc, char** argv)
 /***************************************************/
 char* SOPC_Shell_ReadLine(void)
 {
-    Mutex_Lock(&shell_mutex);
-    Mutex_UnlockAndWaitCond(&shell_cond, &shell_mutex);
+    SOPC_Mutex_Lock(&shell_mutex);
+    SOPC_Mutex_UnlockAndWaitCond(&shell_cond, &shell_mutex);
     // transfer shell_command to result
     char* result = shell_command;
     shell_command = NULL;
-    Mutex_Unlock(&shell_mutex);
+    SOPC_Mutex_Unlock(&shell_mutex);
     printk("\n");
     return result;
 }
@@ -129,12 +129,12 @@ char* SOPC_Shell_ReadLine(void)
 /***************************************************/
 static int shell_sopc_exec(const struct shell* shell, size_t argc, char** argv)
 {
-    Mutex_Lock(&shell_mutex);
+    SOPC_Mutex_Lock(&shell_mutex);
     SOPC_Free(shell_command);
     shell_command = cstring_array_to_string(argc, argv);
     SOPC_ASSERT(NULL != shell_command);
-    Condition_SignalAll(&shell_cond);
-    Mutex_Unlock(&shell_mutex);
+    SOPC_Condition_SignalAll(&shell_cond);
+    SOPC_Mutex_Unlock(&shell_mutex);
     return 0;
 }
 

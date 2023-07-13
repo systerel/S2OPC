@@ -86,7 +86,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     struct LocalServiceCtx* ls = &(helperCtx->eventCtx.localService);
     // Helper internal call to internal services are always using asynchronous way
     SOPC_ASSERT(!ls->isHelperInternal);
-    Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
     // Chech synchronous response id is the one expected
     if (ls->syncId != sopc_server_helper_config.syncLocalServiceId)
     {
@@ -110,10 +110,10 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
         }
         else
         {
-            Condition_SignalAll(&sopc_server_helper_config.syncLocalServiceCond);
+            SOPC_Condition_SignalAll(&sopc_server_helper_config.syncLocalServiceCond);
         }
     }
-    Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
 }
 
 // Callback dedicated to runtime variable update treatment: check received response is correct or trace error
@@ -515,7 +515,7 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
 static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClosed)
 {
     // use condition variable and let ::SOPC_ServerHelper_Serve manage shutdown
-    SOPC_ReturnStatus status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (allEndpointsAlreadyClosed)
     {
@@ -523,9 +523,9 @@ static void SOPC_HelperInternal_SyncServerAsyncStop(bool allEndpointsAlreadyClos
         sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed = true;
     }
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.syncServeStopData.serverRequestedToStop, true);
-    status = Condition_SignalAll(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
+    status = SOPC_Condition_SignalAll(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+    status = SOPC_Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 }
 
@@ -591,17 +591,17 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
     }
     else
     {
-        status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        status = SOPC_Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
 
         // If we don't catch sig stop we only have to wait for signal on condition variable (no timeout)
         // Note: we do not need to access serverRequestedToStop in an atomic way since assignment is protected by mutex
         while (SOPC_STATUS_OK == status && !sopc_server_helper_config.syncServeStopData.serverRequestedToStop)
         {
-            status = Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
-                                             &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+            status = SOPC_Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
+                                                  &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
         }
 
-        status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        status = SOPC_Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -624,13 +624,13 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop)
         SOPC_HelperInternal_ActualShutdownServer();
 
         // Wait for all endpoints to close
-        status = Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        status = SOPC_Mutex_Lock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
         while (SOPC_STATUS_OK == status && !sopc_server_helper_config.syncServeStopData.serverAllEndpointsClosed)
         {
-            status = Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
-                                             &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+            status = SOPC_Mutex_UnlockAndWaitCond(&sopc_server_helper_config.syncServeStopData.serverStoppedCond,
+                                                  &sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
         }
-        status = Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
+        status = SOPC_Mutex_Unlock(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
     }
 
     return status;
@@ -655,7 +655,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
     SOPC_ASSERT(NULL == sopc_server_helper_config.syncResp);
     // Set helper local service context
     ctx->eventCtx.localService.isSyncCall = true;
@@ -667,9 +667,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     // Wait until response received or error status (timeout)
     while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
     {
-        status = Mutex_UnlockAndTimedWaitCond(&sopc_server_helper_config.syncLocalServiceCond,
-                                              &sopc_server_helper_config.syncLocalServiceMutex,
-                                              SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS);
+        status = SOPC_Mutex_UnlockAndTimedWaitCond(&sopc_server_helper_config.syncLocalServiceCond,
+                                                   &sopc_server_helper_config.syncLocalServiceMutex,
+                                                   SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -695,7 +695,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     }
     sopc_server_helper_config.syncResp = NULL;
     sopc_server_helper_config.syncLocalServiceId++;
-    Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
+    SOPC_Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
     return status;
 }
 

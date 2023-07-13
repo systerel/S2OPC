@@ -71,7 +71,7 @@ typedef struct SOPC_ServerHelper_Config
     // and singleton config is initialized
     int32_t initialized;
     // Server state
-    Mutex stateMutex;
+    SOPC_Mutex stateMutex;
     SOPC_HelperServer_State state;
 
     // Address space instance
@@ -92,8 +92,8 @@ typedef struct SOPC_ServerHelper_Config
                                  The callback allows to retrieve the password for decryption */
 
     // Synchronous local service response management
-    Condition syncLocalServiceCond;
-    Mutex syncLocalServiceMutex;
+    SOPC_Condition syncLocalServiceCond;
+    SOPC_Mutex syncLocalServiceMutex;
     uint32_t syncLocalServiceId;
     void* syncResp;
 
@@ -102,8 +102,8 @@ typedef struct SOPC_ServerHelper_Config
     // Manage server stopping when server is running synchronously using SOPC_ServerHelper_Serve.
     struct
     {
-        Condition serverStoppedCond;
-        Mutex serverStoppedMutex;
+        SOPC_Condition serverStoppedCond;
+        SOPC_Mutex serverStoppedMutex;
         int32_t serverRequestedToStop;
         bool serverAllEndpointsClosed;
     } syncServeStopData;

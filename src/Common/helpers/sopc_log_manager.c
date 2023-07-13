@@ -49,7 +49,7 @@ SOPC_GCC_DIAGNOSTIC_RESTORE
 
 typedef struct SOPC_Log_File
 {
-    Mutex fileMutex;
+    SOPC_Mutex fileMutex;
     char* filePath;
     uint8_t fileNumberPos;
     FILE* pFile;
@@ -251,7 +251,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
     bool result = false;
     if (NULL != pLogInst && !pLogInst->started)
     {
-        Mutex_Lock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
         if ((NULL != pLogInst->file->pFile) || (NULL != pLogInst->logCallback))
         {
             pLogInst->started = true;
@@ -264,7 +264,7 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         {
             SOPC_CONSOLE_PRINTF("Log error: impossible to write in NULL stream.\n");
         }
-        Mutex_Unlock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
 }
@@ -324,7 +324,7 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_Us
             result->callbackBuffer = SOPC_Malloc(SOPC_LOG_MAX_USER_LINE_LENGTH + 1); // + NULL
             if (NULL != result->callbackBuffer)
             {
-                Mutex_Initialization(&result->file->fileMutex);
+                SOPC_Mutex_Initialization(&result->file->fileMutex);
                 // Fill fields
                 SOPC_Log_AlignCategory(category, result);
                 result->consoleFlag = false;
@@ -422,7 +422,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
             file->pFile = hFile;
 
             bool started = false;
-            SOPC_ReturnStatus mutex_res = Mutex_Initialization(&file->fileMutex);
+            SOPC_ReturnStatus mutex_res = SOPC_Mutex_Initialization(&file->fileMutex);
             if (mutex_res == SOPC_STATUS_OK)
             {
                 result->file = file;
@@ -444,7 +444,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const char* logDirPath,
                 fclose(hFile);
                 if (mutex_res == SOPC_STATUS_OK)
                 {
-                    Mutex_Clear(&result->file->fileMutex);
+                    SOPC_Mutex_Clear(&result->file->fileMutex);
                 }
 
                 SOPC_Free(result->file->filePath);
@@ -482,7 +482,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
 
         if (result != NULL)
         {
-            Mutex_Lock(&pLogInst->file->fileMutex);
+            SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
             if (pLogInst->file->nbRefs < UINT8_MAX)
             {
                 result->file = pLogInst->file;
@@ -493,7 +493,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
                 SOPC_Free(result);
                 result = NULL;
             }
-            Mutex_Unlock(&pLogInst->file->fileMutex);
+            SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
         }
     }
 
@@ -526,7 +526,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
     {
         const char* levelName = "";
         char unknownNameLevel[20];
-        Mutex_Lock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
         result = true;
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
@@ -557,7 +557,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level)
         }
 
         SOPC_Log_PutLogLine(pLogInst, true, true, "LOG LEVEL SET TO '%s'", levelName);
-        Mutex_Unlock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
 }
@@ -578,14 +578,14 @@ bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate)
     bool result = false;
     if (NULL != pLogInst && pLogInst->started)
     {
-        Mutex_Lock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
         pLogInst->consoleFlag = activate;
         result = true;
 
         SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
 
         SOPC_Log_PutLogLine(pLogInst, true, true, "LOG CONSOLE OUTPUT SET TO '%s'", activate ? "TRUE" : "FALSE");
-        Mutex_Unlock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
     }
     return result;
 }
@@ -644,7 +644,7 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
 {
     if (NULL != pLogInst && pLogInst->started && level <= pLogInst->level)
     {
-        Mutex_Lock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
         // Check file open
         SOPC_Log_TracePrefixNoLock(pLogInst, level, true, false);
         SOPC_Log_VPutLogLine(pLogInst, true, false, format, args);
@@ -654,7 +654,7 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
             SOPC_Log_Flush(pLogInst->file);
             SOPC_Log_CheckFileChangeNoLock(pLogInst);
         }
-        Mutex_Unlock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
     }
 }
 
@@ -674,7 +674,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
     if (ppLogInst != NULL && *ppLogInst != NULL)
     {
         pLogInst = *ppLogInst;
-        Mutex_Lock(&pLogInst->file->fileMutex);
+        SOPC_Mutex_Lock(&pLogInst->file->fileMutex);
         if (pLogInst->started)
         {
             SOPC_Log_TracePrefixNoLock(pLogInst, SOPC_LOG_LEVEL_INFO, true, true);
@@ -686,8 +686,8 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         if (pLogInst->file->nbRefs <= 1)
         {
             SOPC_Log_InstanceFileClose(pLogInst->file);
-            Mutex_Unlock(&pLogInst->file->fileMutex);
-            Mutex_Clear(&pLogInst->file->fileMutex);
+            SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
+            SOPC_Mutex_Clear(&pLogInst->file->fileMutex);
             if (NULL != pLogInst->file->filePath)
             {
                 SOPC_Free(pLogInst->file->filePath);
@@ -703,7 +703,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         else
         {
             pLogInst->file->nbRefs--;
-            Mutex_Unlock(&pLogInst->file->fileMutex);
+            SOPC_Mutex_Unlock(&pLogInst->file->fileMutex);
         }
         SOPC_Free(pLogInst);
         *ppLogInst = NULL;

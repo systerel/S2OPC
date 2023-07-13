@@ -49,8 +49,8 @@ static SOPC_EventHandler* servicesEventHandler = NULL;
 // (necessary on toolkit clear)
 static struct
 {
-    Mutex mutex;
-    Condition cond;
+    SOPC_Mutex mutex;
+    SOPC_Condition cond;
     bool allDisconnectedFlag;
     bool requestedFlag;
     bool clientOnlyFlag;
@@ -63,14 +63,14 @@ SOPC_EventHandler* SOPC_Services_GetEventHandler(void)
 
 static void SOPC_Internal_AllClientSecureChannelsDisconnected(bool clientOnly)
 {
-    Mutex_Lock(&closeAllConnectionsSync.mutex);
+    SOPC_Mutex_Lock(&closeAllConnectionsSync.mutex);
     SOPC_ASSERT(closeAllConnectionsSync.clientOnlyFlag == clientOnly);
     if (closeAllConnectionsSync.requestedFlag)
     {
         closeAllConnectionsSync.allDisconnectedFlag = true;
-        Condition_SignalAll(&closeAllConnectionsSync.cond);
+        SOPC_Condition_SignalAll(&closeAllConnectionsSync.cond);
     }
-    Mutex_Unlock(&closeAllConnectionsSync.mutex);
+    SOPC_Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
 static void onSecureChannelEvent(SOPC_EventHandler* handler,
@@ -628,10 +628,10 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
     SOPC_ASSERT(secureChannelsEventHandler != NULL);
 
     // Init async close management flag
-    status = Mutex_Initialization(&closeAllConnectionsSync.mutex);
+    status = SOPC_Mutex_Initialization(&closeAllConnectionsSync.mutex);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
-    status = Condition_Init(&closeAllConnectionsSync.cond);
+    status = SOPC_Condition_Init(&closeAllConnectionsSync.cond);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     setSecureChannelsListener(secureChannelsEventHandler);
@@ -642,19 +642,19 @@ void SOPC_Services_Initialize(SOPC_SetListenerFunc* setSecureChannelsListener)
 
 void SOPC_Services_CloseAllSCs(bool clientOnly)
 {
-    Mutex_Lock(&closeAllConnectionsSync.mutex);
+    SOPC_Mutex_Lock(&closeAllConnectionsSync.mutex);
     closeAllConnectionsSync.requestedFlag = true;
     closeAllConnectionsSync.clientOnlyFlag = clientOnly;
     // Do a synchronous connections closed (effective on client only)
     SOPC_EventHandler_Post(servicesEventHandler, APP_TO_SE_CLOSE_ALL_CONNECTIONS, 0, (uintptr_t) clientOnly, 0);
     while (!closeAllConnectionsSync.allDisconnectedFlag)
     {
-        Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
+        SOPC_Mutex_UnlockAndWaitCond(&closeAllConnectionsSync.cond, &closeAllConnectionsSync.mutex);
     }
     closeAllConnectionsSync.allDisconnectedFlag = false;
     closeAllConnectionsSync.clientOnlyFlag = false;
     closeAllConnectionsSync.requestedFlag = false;
-    Mutex_Unlock(&closeAllConnectionsSync.mutex);
+    SOPC_Mutex_Unlock(&closeAllConnectionsSync.mutex);
 }
 
 void SOPC_Services_Clear(void)
@@ -670,6 +670,6 @@ void SOPC_Services_Clear(void)
     closeAllConnectionsSync.allDisconnectedFlag = false;
     closeAllConnectionsSync.clientOnlyFlag = false;
     closeAllConnectionsSync.requestedFlag = false;
-    Mutex_Clear(&closeAllConnectionsSync.mutex);
-    Condition_Clear(&closeAllConnectionsSync.cond);
+    SOPC_Mutex_Clear(&closeAllConnectionsSync.mutex);
+    SOPC_Condition_Clear(&closeAllConnectionsSync.cond);
 }

@@ -35,8 +35,8 @@ typedef struct SOPC_PubSheduler_GetVariableRequestContext
     SOPC_EventHandler* eventHandler; // Event handler where to send result
     int32_t NoOfNodesToRead;         // Size of ldv
     uintptr_t msgCtxt;               // context of request
-    Condition cond;
-    Mutex mut;
+    SOPC_Condition cond;
+    SOPC_Mutex mut;
 } SOPC_PubSheduler_GetVariableRequestContext;
 
 /**

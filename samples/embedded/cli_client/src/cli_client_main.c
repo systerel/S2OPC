@@ -64,7 +64,7 @@ static char* epURL = NULL;
 /***************************************************/
 /**          CLIENT LINE INTERFACE                 */
 /***************************************************/
-static Thread CLI_thread;
+static SOPC_Thread CLI_thread;
 typedef char* WordList; // A simple C String
 static int cmd_demo_help(WordList* pList);
 static int cmd_demo_info(WordList* pList);

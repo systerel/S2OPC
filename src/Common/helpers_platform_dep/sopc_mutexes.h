@@ -40,7 +40,7 @@
  * @param cond A non-NULL pointer to a condition to be created
  * @return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Condition_Init(Condition* cond);
+SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond);
 
 /**
  * \brief Delete a Condition variable.
@@ -48,7 +48,7 @@ SOPC_ReturnStatus Condition_Init(Condition* cond);
  * \note The related MUTEX shall be unlocked and shall be deleted after the condition variable
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Condition_Clear(Condition* cond);
+SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond);
 
 /**
  * \brief Signals the condition variable to all waiting threads.
@@ -56,21 +56,21 @@ SOPC_ReturnStatus Condition_Clear(Condition* cond);
  * \return SOPC_STATUS_OK in case of success
  * \note Must be called between lock and unlock of dedicated Mutex
  */
-SOPC_ReturnStatus Condition_SignalAll(Condition* cond);
+SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond);
 
 /**
  * \brief Create a Mutex
  * @param mut A non-NULL pointer to a Mutex to be created
  * @return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Mutex_Initialization(Mutex* mut);
+SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut);
 
 /**
  * \brief Delete a Mutex.
  * \param mut A non-NULL pointer to a Mutex to be deleted
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Mutex_Clear(Mutex* mut);
+SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut);
 
 /**
  * \brief Lock a Mutex. The function may be blocking as long as the mutex is
@@ -80,14 +80,14 @@ SOPC_ReturnStatus Mutex_Clear(Mutex* mut);
  * \param mut A non-NULL pointer to a Mutex to be locked
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Mutex_Lock(Mutex* mut);
+SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut);
 
 /**
  * \brief Release a Mutex.
  * \param mut A non-NULL pointer to a Mutex to be unlocked
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
+SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut);
 
 /**
  * \brief Wait for a condition variable notification.
@@ -96,7 +96,7 @@ SOPC_ReturnStatus Mutex_Unlock(Mutex* mut);
  * 			and unlocked after return.
  * \return SOPC_STATUS_OK in case of success
  */
-SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut);
 
 /**
  * \brief Timed wait for a condition variable notification.
@@ -107,6 +107,6 @@ SOPC_ReturnStatus Mutex_UnlockAndWaitCond(Condition* cond, Mutex* mut);
  * \return SOPC_STATUS_OK in case of success. SOPC_STATUS_TIMEOUT if the condition is not received within the
  * 		requested timeout
  */
-SOPC_ReturnStatus Mutex_UnlockAndTimedWaitCond(Condition* cond, Mutex* mut, uint32_t milliSecs);
+SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut, uint32_t milliSecs);
 
 #endif /* SOPC_MUTEXES_H_ */

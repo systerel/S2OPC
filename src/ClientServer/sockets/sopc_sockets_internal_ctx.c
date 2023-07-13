@@ -29,7 +29,7 @@
 #include "sopc_sockets_internal_ctx.h"
 
 SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
-Mutex socketsMutex;
+SOPC_Mutex socketsMutex;
 SOPC_Looper* socketsLooper = NULL;
 SOPC_AsyncQueue* socketsInputEventQueue = NULL;
 SOPC_EventHandler* socketsEventHandler = NULL;
