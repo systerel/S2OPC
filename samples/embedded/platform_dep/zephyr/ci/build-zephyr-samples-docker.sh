@@ -65,12 +65,12 @@ git config --global --add safe.directory ${S2OPCDIR}
 
 export BOARD=$1
 export APP=$2
-west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
-[ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
- 
+
+west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
+[ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
 
 echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 cd ${SAMPLESDIR}/${APP} || return 1
