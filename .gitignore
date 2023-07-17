@@ -15,6 +15,7 @@ __pycache__/
 genc/
 *.log
 build_zephyr/
+build_freertos/
 build-analyzer
 .vscode
 

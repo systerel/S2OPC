@@ -36,6 +36,11 @@
 #include "lwip/sockets.h"
 #include "lwip/tcpip.h"
 
+/****** CONFIGURATION CHECK *******/
+#if !LWIP_MULTICAST_TX_OPTIONS
+#error "LwIP 'LWIP_MULTICAST_TX_OPTIONS' is required for this sample!"
+#endif
+
 static SOPC_ReturnStatus SOPC_UDP_Socket_AddrInfo_Get(bool IPv6,
                                                       const char* node,
                                                       const char* port,
@@ -241,15 +246,13 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
 
         if (SOPC_STATUS_OK == status && NULL != interfaceName)
         {
-            // Requires 6 characters but only takes the first two
-            setOptStatus =
-                setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, interfaceName, (socklen_t) strlen(interfaceName));
-            if (EINVAL == errno)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "interfaceName length must be greater than 6");
-            }
+            struct ifreq ifreq = {};
+            strncpy(ifreq.ifr_name, interfaceName, sizeof(ifreq));
+            errno = 0;
+            setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_BINDTODEVICE, (void*) &ifreq, sizeof(ifreq));
             if (setOptStatus < 0)
             {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "setsockopt SO_BINDTODEVICE failed");
                 status = SOPC_STATUS_NOK;
             }
         }

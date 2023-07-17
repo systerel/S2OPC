@@ -4534,8 +4534,8 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
         SOPC_CONSOLE_PRINTF("Double\n  Value: %g\n", pvar->Value.Doublev);
         break;
     case SOPC_String_Id:
-        SOPC_CONSOLE_PRINTF("String\n  Value: \"%*.*s\"\n", pvar->Value.String.Length, pvar->Value.String.Length,
-                            pvar->Value.String.Data);
+        SOPC_CONSOLE_PRINTF("String\n  Value: \"%*.*s\"\n", (int) pvar->Value.String.Length,
+                            (int) pvar->Value.String.Length, pvar->Value.String.Data);
         break;
     case SOPC_ByteString_Id:
         SOPC_CONSOLE_PRINTF("ByteString\n  Length: %" PRIi32 "\n  Value: \"", pvar->Value.Bstring.Length);

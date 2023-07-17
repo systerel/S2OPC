@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -75,7 +76,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_TryList(SOPC_SKProvider* skp,
     SOPC_ASSERT(NULL != data->providers);
     for (uint32_t i = 0; i < data->nbProviders; i++)
     {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON, "Try GetKeys with provider %u", i + 1);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON, "Try GetKeys with provider %" PRIu32, i + 1);
         status = SOPC_SKProvider_GetKeys(data->providers[i], StartingTokenId, NbRequestedToken, SecurityPolicyUri,
                                          FirstTokenId, Keys, NbToken, TimeToNextKey, KeyLifetime);
         if (SOPC_STATUS_OK == status && 0 < *NbToken)

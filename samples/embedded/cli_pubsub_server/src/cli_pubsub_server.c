@@ -267,7 +267,7 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
     }
     else
     {
-        LOG_WARNING("Client write failed on server. returned code 0x%08X", writeStatus);
+        LOG_WARNING("Client write failed on server. returned code 0x%08X", (unsigned int) writeStatus);
     }
 }
 
@@ -295,7 +295,8 @@ static void localServiceAsyncRespCallback(SOPC_EncodeableType* encType, void* re
             const SOPC_StatusCode status = writeResp->Results[i];
             if (status != 0)
             {
-                LOG_WARNING("Internal data update[%d/%d] failed with code 0x%08X", i, writeResp->NoOfResults, status);
+                LOG_WARNING("Internal data update[%d/%d] failed with code 0x%08X", (int) i,
+                            (int) writeResp->NoOfResults, (unsigned int) status);
             }
         }
     }
@@ -501,7 +502,7 @@ static void setupServer(void)
     // Setup AddressSpace
     (void) sopc_embedded_is_const_addspace;
     SOPC_ASSERT(sopc_embedded_is_const_addspace && "Address space must be constant.");
-    LOG_INFO("# Loading AddressSpace (%u nodes)...\n", SOPC_Embedded_AddressSpace_nNodes);
+    LOG_INFO("# Loading AddressSpace (%" PRIu32 " nodes)...\n", SOPC_Embedded_AddressSpace_nNodes);
     SOPC_AddressSpace* addSpace =
         SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
                                               SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);

@@ -17,11 +17,23 @@
  * under the License.
  */
 
+#include "sopc_common_constants.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_raw_sockets.h"
 #include "sopc_threads.h"
 
 #include "p_sopc_sockets.h"
+
+#include "lwipopts.h"
+
+/****** CONFIGURATION CHECK *******/
+#if !LWIP_NETIF_LOOPBACK
+#error "LwIP 'LWIP_NETIF_LOOPBACK' is required for this sample!"
+#endif
+#if !SO_REUSE
+#error "LwIP 'SO_REUSE' is required for this sample!"
+#endif
 
 bool SOPC_Socket_Network_Initialize()
 {
@@ -189,12 +201,16 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
     if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
     {
+#ifdef IPPROTO_IPV6
         const int falseInt = false;
         setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
         if (0 != setOptStatus)
         {
             status = SOPC_STATUS_NOK;
         }
+#else
+        status = SOPC_STATUS_NOT_SUPPORTED;
+#endif
     }
 
     return status;
@@ -214,6 +230,11 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
     }
     if (-1 != bindListenStatus)
     {
+        SOPC_CONSOLE_PRINTF("Bind socket failed with code %d \r\n", (int) errno);
+        if (ERR_RTE == errno)
+        {
+            SOPC_CONSOLE_PRINTF("Error is : Route unreacheable\r\n");
+        }
         status = SOPC_STATUS_OK;
     }
     return status;

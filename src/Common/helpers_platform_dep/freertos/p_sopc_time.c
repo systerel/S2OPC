@@ -37,6 +37,11 @@
 #include "FreeRTOSConfig.h"
 #include "task.h"
 
+/* Check mandatory configuration */
+#if !configUSE_TICK_HOOK
+#error "FreeRTOS parameter 'configUSE_TICK_HOOK' must be equal to 1"
+#endif
+
 /* Private time api */
 
 #define SECOND_TO_100NS ((uint64_t) 10000000)
@@ -264,7 +269,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
         t1 = *t;
     }
 
-    return (((int64_t) t1.ticksMs) - ((int64_t) tRef.ticksMs)) * MS_TO_US;
+    return (((int64_t) t1.ticksMs) - ((int64_t) tRef->ticksMs)) * MS_TO_US;
 }
 
 bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)

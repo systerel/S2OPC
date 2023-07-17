@@ -38,6 +38,10 @@
 #   - build-others:
 #     - build-win32
 #     - build-win64
+#     - build-rpi
+#     - build-zephyr
+#     - build-freeertos
+#
 #########################################################
 
 # Ensures job failure whenn intermediate script line fails
@@ -260,6 +264,24 @@ build-zephyr:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
+build-freeertos:
+  stage: build-others
+  image: docker.aix.systerel.fr/c838/freertos_build:v1.0@sha256:d944e7b402432e93d94e91c5771f98e0f92cb917a425b551928b1b008f8c8724 # freertos_build:v1.1
+  script:
+    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
+    - 'test -f build_freertos/freertos-sopc.elf'
+    - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg.elf'
+  variables:
+  artifacts:
+    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    paths:
+      - 'build_freertos/'
+    when: always
+    expire_in: '1 month'
+  rules:
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always
+  
 ###
 # Test jobs
 ###
