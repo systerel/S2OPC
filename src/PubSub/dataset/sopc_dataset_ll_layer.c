@@ -139,6 +139,7 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
     {
         return;
     }
+    SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
     Dataset_LL_Delete_DataSetMessages_Array(nm);
     SOPC_Free(nm);
 }
@@ -220,6 +221,15 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(SOPC_Dataset_LL_Netwo
     }
 }
 
+void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_String(SOPC_Dataset_LL_NetworkMessage_Header* nmh, SOPC_String id)
+{
+    if (NULL != nmh)
+    {
+        nmh->publisher_id.type = DataSet_LL_PubId_String_Id;
+        SOPC_String_Copy(&nmh->publisher_id.data.string, &id);
+        nmh->flagsConfig.PublisherIdFlag = true;
+    }
+}
 const SOPC_Dataset_LL_PublisherId* SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(
     const SOPC_Dataset_LL_NetworkMessage_Header* nmh)
 {
@@ -427,6 +437,7 @@ void Dataset_LL_Delete_DataSetMessages_Array(SOPC_Dataset_LL_NetworkMessage* nm)
             SOPC_Dataset_LL_DataSetMessage* message = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
             SOPC_Dataset_LL_DataSetMsg_Delete_DataSetField_Array(message);
         }
+        SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
         nm->dataset_messages_length = 0;
         SOPC_Free(nm->dataset_messages);
         nm->dataset_messages = NULL;

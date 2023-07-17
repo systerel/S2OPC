@@ -414,6 +414,7 @@ static void SOPC_PubSubConnection_Clear(SOPC_PubSubConnection* connection)
         SOPC_Free(connection->mqttUsername);
         SOPC_Free(connection->mqttPassword);
         SOPC_Free(connection->transportProfileUri);
+        SOPC_String_Clear(&connection->publisherId.data.string);
         for (int i = 0; i < connection->writerGroups_length; i++)
         {
             SOPC_WriterGroup_Clear(&(connection->writerGroups[i]));
@@ -475,11 +476,11 @@ void SOPC_PubSubConnection_Set_PublisherId_UInteger(SOPC_PubSubConnection* conne
     connection->publisherId.data.uint = id;
 }
 
-bool SOPC_PubSubConnection_Set_PublisherId_String(SOPC_PubSubConnection* connection, const char* id)
+bool SOPC_PubSubConnection_Set_PublisherId_String(SOPC_PubSubConnection* connection, const SOPC_String* id)
 {
     SOPC_ASSERT(NULL != connection && NULL != id && SOPC_PubSubConnection_Pub == connection->type);
     connection->publisherId.type = SOPC_String_PublisherId;
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&connection->publisherId.data.string, id);
+    SOPC_ReturnStatus status = SOPC_String_Copy(&connection->publisherId.data.string, id);
     return (SOPC_STATUS_OK == status);
 }
 
@@ -726,11 +727,11 @@ void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t
     group->publisherId.data.uint = id;
 }
 
-bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char* id)
+bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC_String* id)
 {
     SOPC_ASSERT(NULL != group && NULL != id);
     group->publisherId.type = SOPC_String_PublisherId;
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&group->publisherId.data.string, id);
+    SOPC_ReturnStatus status = SOPC_String_Copy(&group->publisherId.data.string, id);
     return (SOPC_STATUS_OK == status);
 }
 
@@ -1392,6 +1393,7 @@ static void SOPC_ReaderGroup_Clear(SOPC_ReaderGroup* group)
         group->dataSetReaders_length = 0;
         SOPC_Free(group->dataSetReaders);
         SOPC_Free(group->mqttTopic);
+        SOPC_String_Clear(&group->publisherId.data.string);
     }
 }
 

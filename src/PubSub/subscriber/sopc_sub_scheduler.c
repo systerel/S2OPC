@@ -274,6 +274,43 @@ static struct
                   .securityCtx = NULL,
                   .writerCtx = NULL,
                   .dsmSnGapCallback = NULL};
+/**
+ * @brief Compare type and value of two SOPC_Conf_PublisherId. The two SOPC_Conf_PublisherId are considered as equal if
+ * they have the same type and the same value. In case both SOPC_Conf_PublisherId have type SOPC_Null_PublisherId they
+ * are considered equal and function return true.
+ *
+ * @param pubIdLeft
+ * @param pubIdRight
+ * @return true if their type and value are equal
+ * @return false otherwise
+ */
+static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SOPC_Conf_PublisherId* pubIdRight)
+{
+    SOPC_ASSERT(NULL != pubIdLeft && NULL != pubIdRight);
+    bool result = false;
+    if (pubIdLeft->type == pubIdRight->type)
+    {
+        int32_t match = -1;
+        switch (pubIdLeft->type)
+        {
+        case SOPC_UInteger_PublisherId:
+            if (pubIdLeft->data.uint == pubIdRight->data.uint)
+            {
+                result = true;
+            }
+            break;
+        case SOPC_String_PublisherId:
+            SOPC_String_Compare(&pubIdLeft->data.string, &pubIdRight->data.string, false, &match);
+            result = (0 == match);
+            break;
+        case SOPC_Null_PublisherId:
+        default:
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
 
 static void set_new_state(SOPC_PubSubState new)
 {
@@ -847,15 +884,15 @@ static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 
 static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Get_Security_Pub_Ctx(const SOPC_Conf_PublisherId pubId)
 {
-    // only Integer publisher id is managed
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
     // get keys
     size_t size = SOPC_Array_Size(schedulerCtx.securityCtx);
     for (size_t i = 0; i < size; i++)
     {
         SOPC_SubScheduler_Security_Pub_Ctx* ctx =
             SOPC_Array_Get(schedulerCtx.securityCtx, SOPC_SubScheduler_Security_Pub_Ctx*, i);
-        if (ctx->pubId.type == pubId.type && ctx->pubId.data.uint == pubId.data.uint)
+
+        bool found = compare_publisherId(&ctx->pubId, &pubId);
+        if (found)
         {
             return ctx;
         }
@@ -995,7 +1032,7 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Reader_Ctx_Creat
         return NULL;
     }
     // Init Key
-    SOPC_ASSERT(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
+    SOPC_ASSERT(NULL != pubId);
     ctx->writerGroupId = writerGroupId;
 
     // Init Security Infos
@@ -1034,7 +1071,7 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
 
 static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(const SOPC_Conf_PublisherId* pubId)
 {
-    SOPC_ASSERT(NULL != pubId && SOPC_UInteger_PublisherId == pubId->type); // String pub id not managed
+    SOPC_ASSERT(NULL != pubId);
 
     SOPC_SubScheduler_Security_Pub_Ctx* ctx = SOPC_Calloc(1, sizeof(SOPC_SubScheduler_Security_Pub_Ctx));
     if (NULL == ctx)
@@ -1074,19 +1111,15 @@ static bool Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processe
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId)
 {
     SOPC_ASSERT(NULL != pubId);
-    // only Integer publisher id is managed
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId->type);
 
     bool found = false;
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < size && !found; i++)
     {
         const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        if (ctx->pubId.type == pubId->type && ctx->pubId.data.uint == pubId->data.uint && ctx->writerId == writerId)
-        {
-            found = true;
-        }
+        found = compare_publisherId(&ctx->pubId, pubId);
     }
+
     if (!found)
     {
         SOPC_SubScheduler_Writer_Ctx ctx;
@@ -1105,36 +1138,38 @@ static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pu
                                                  const uint16_t receivedSN)
 {
     SOPC_ASSERT(NULL != pubId);
-    // only Integer publisher id is managed
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId->type);
-
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < size; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        if (ctx->pubId.type == pubId->type && ctx->pubId.data.uint == pubId->data.uint && ctx->writerId == writerId)
+        if (ctx->pubId.type == pubId->type && ctx->writerId == writerId)
         {
-            if (ctx->dataSetMessageSequenceNumberSet)
+            bool found = compare_publisherId(&ctx->pubId, pubId);
+            if (found)
             {
-                if (Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+                if (ctx->dataSetMessageSequenceNumberSet)
                 {
-                    ctx->dataSetMessageSequenceNumber = receivedSN;
-                    return true;
+                    if (Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+                    {
+                        ctx->dataSetMessageSequenceNumber = receivedSN;
+                        return true;
+                    }
+                    else
+                    {
+                        if (NULL != schedulerCtx.dsmSnGapCallback)
+                        {
+                            schedulerCtx.dsmSnGapCallback(*pubId, writerId, ctx->dataSetMessageSequenceNumber,
+                                                          receivedSN);
+                        }
+                        return false;
+                    }
                 }
                 else
                 {
-                    if (NULL != schedulerCtx.dsmSnGapCallback)
-                    {
-                        schedulerCtx.dsmSnGapCallback(*pubId, writerId, ctx->dataSetMessageSequenceNumber, receivedSN);
-                    }
-                    return false;
+                    ctx->dataSetMessageSequenceNumber = receivedSN;
+                    ctx->dataSetMessageSequenceNumberSet = true;
+                    return true;
                 }
-            }
-            else
-            {
-                ctx->dataSetMessageSequenceNumber = receivedSN;
-                ctx->dataSetMessageSequenceNumberSet = true;
-                return true;
             }
         }
     }

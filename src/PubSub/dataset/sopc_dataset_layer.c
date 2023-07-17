@@ -134,23 +134,28 @@ static void SOPC_NetworkMessage_Set_PublisherId(SOPC_Dataset_LL_NetworkMessage_H
 {
     const SOPC_PubSubConnection* conf_connection = SOPC_WriterGroup_Get_Connection(group);
     const SOPC_Conf_PublisherId* conf_pubid = SOPC_PubSubConnection_Get_PublisherId(conf_connection);
-    // String not managed
-    uint64_t conf_id = conf_pubid->data.uint;
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == conf_pubid->type);
-    if (UINT32_MAX < conf_id)
+    if (SOPC_UInteger_PublisherId == conf_pubid->type)
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nmh, conf_id);
-    }
-    else if (UINT16_MAX < conf_id)
-    {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nmh, (uint32_t) conf_id);
-    }
-    else if (UINT8_MAX < conf_id)
-    {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nmh, (uint16_t) conf_id);
+        uint64_t pubid = conf_pubid->data.uint;
+        if (UINT32_MAX < pubid)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt64(nmh, pubid);
+        }
+        else if (UINT16_MAX < pubid)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt32(nmh, (uint32_t) pubid);
+        }
+        else if (UINT8_MAX < pubid)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_UInt16(nmh, (uint16_t) pubid);
+        }
+        else
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nmh, (uint8_t) pubid);
+        }
     }
     else
     {
-        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(nmh, (uint8_t) conf_id);
+        SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_String(nmh, conf_pubid->data.string);
     }
 }

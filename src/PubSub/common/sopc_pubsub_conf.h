@@ -92,7 +92,7 @@ typedef enum
 {
     SOPC_Null_PublisherId = 0,
     SOPC_UInteger_PublisherId = 1,
-    SOPC_String_PublisherId = 2
+    SOPC_String_PublisherId = 2,
 } SOPC_Conf_PublisherId_Type;
 
 typedef struct SOPC_Conf_PublisherId
@@ -158,7 +158,7 @@ bool SOPC_PubSubConnection_Get_AcyclicPublisher(const SOPC_PubSubConnection* con
 const SOPC_Conf_PublisherId* SOPC_PubSubConnection_Get_PublisherId(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_PublisherId_UInteger(SOPC_PubSubConnection* connection, uint64_t id);
 // make a copy of id
-bool SOPC_PubSubConnection_Set_PublisherId_String(SOPC_PubSubConnection* connection, const char* id);
+bool SOPC_PubSubConnection_Set_PublisherId_String(SOPC_PubSubConnection* connection, const SOPC_String* id);
 
 const char* SOPC_PubSubConnection_Get_TransportProfileUri(const SOPC_PubSubConnection* connection);
 bool SOPC_PubSubConnection_Set_TransportProfileUri(SOPC_PubSubConnection* connection, const char* uri);
@@ -207,7 +207,7 @@ void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version
 
 const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id);
-bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char* id);
+bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC_String* id);
 /**
  * /brief Indicates if the group contains readers with WriterIds specified or not.
  * /param  group The group to check

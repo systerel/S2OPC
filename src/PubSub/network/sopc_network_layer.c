@@ -301,8 +301,6 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
 static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, const SOPC_Dataset_LL_PublisherId* pub_id)
 {
     SOPC_ASSERT(NULL != buffer && NULL != pub_id);
-    // String Publisher Id is not managed
-    SOPC_ASSERT(DataSet_LL_PubId_String_Id != pub_id->type);
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     switch (pub_id->type)
     {
@@ -319,6 +317,8 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Write(SOPC_Buffer* buffer, co
         status = SOPC_UInt64_Write(&(pub_id->data.uint64), buffer, 0);
         break;
     case DataSet_LL_PubId_String_Id:
+        status = SOPC_String_Write(&(pub_id->data.string), buffer, 0);
+        break;
     default:
         status = SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -375,8 +375,14 @@ static SOPC_ReturnStatus Network_Layer_PublisherId_Read(SOPC_Buffer* buffer,
     }
     case DataSet_LL_PubId_String_Id:
     {
-        // String Publisher Id is not managed
-        status = SOPC_STATUS_NOT_SUPPORTED;
+        SOPC_String id;
+        SOPC_String_Initialize(&id);
+        status = SOPC_String_Read(&id, buffer, 0);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_String(header, id);
+        }
+        SOPC_String_Clear(&id);
         break;
     }
     default:
@@ -1081,11 +1087,6 @@ static inline SOPC_ReturnStatus SOPC_UADP_NetworkMessageHeader_Decode(SOPC_Buffe
     if (conf->PublisherIdFlag && SOPC_STATUS_OK == status)
     {
         status = Network_Layer_PublisherId_Read(buffer, pub_id_type, header);
-        if (SOPC_STATUS_NOT_SUPPORTED == status)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                     "String PubId not supported. Message hasn't been decoded.");
-        }
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType);
     }
 

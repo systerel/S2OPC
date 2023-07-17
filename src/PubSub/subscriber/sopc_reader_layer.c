@@ -229,13 +229,18 @@ static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf
                                                const SOPC_Dataset_LL_PublisherId* nm_pubid)
 {
     SOPC_ASSERT(NULL != conf_pubid && NULL != nm_pubid);
-
+    int32_t match = -1;
     switch (conf_pubid->type)
     {
     case SOPC_String_PublisherId:
-        // Not managed
-        SOPC_ASSERT(DataSet_LL_PubId_String_Id != nm_pubid->type);
-        return false;
+        // First check if received pubId is also a string publisher Id
+        if (DataSet_LL_PubId_String_Id == nm_pubid->type)
+        {
+            SOPC_ReturnStatus status =
+                SOPC_String_Compare(&conf_pubid->data.string, &nm_pubid->data.string, false, &match);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+        return 0 == match;
     case SOPC_UInteger_PublisherId:
     {
         uint64_t nm_pubid64;
@@ -255,7 +260,6 @@ static bool SOPC_Sub_Filter_Reader_PublisherId(const SOPC_Conf_PublisherId* conf
             nm_pubid64 = nm_pubid->data.uint64;
             break;
         default:
-            // should not happen
             return false;
         }
 

@@ -153,7 +153,7 @@ struct sopc_xml_pubsub_message_t
 {
     double publishing_interval;
     int32_t publishing_offset;
-    uint64_t publisher_id;
+    SOPC_Conf_PublisherId publisher_id;
     uint32_t version;
     SOPC_SecurityMode_Type security_mode;
     uint16_t nb_datasets;
@@ -172,7 +172,7 @@ struct sopc_xml_pubsub_message_t
 struct sopc_xml_pubsub_connection_t
 {
     char* address;
-    uint64_t publisher_id;
+    SOPC_Conf_PublisherId publisher_id;
     bool is_publisher;
     bool is_mode_set;
     char* interfaceName;
@@ -350,6 +350,53 @@ static bool copy_any_string_attribute_value(char** to, const char* from)
     return result;
 }
 
+static bool parse_publisher_id(SOPC_Conf_PublisherId* publisherId, const char* from)
+{
+    SOPC_ASSERT(NULL != publisherId);
+    bool result = false;
+
+    if (0 == SOPC_strncmp_ignore_case("i=", &from[0], 2))
+    {
+        publisherId->type = SOPC_UInteger_PublisherId;
+        result = parse_unsigned_value(&from[2], strlen(&from[2]), 64, &publisherId->data.uint);
+    }
+    else if (0 == SOPC_strncmp_ignore_case("s=", &from[0], 2))
+    {
+        publisherId->type = SOPC_String_PublisherId;
+        result = (SOPC_STATUS_OK == SOPC_String_InitializeFromCString(&publisherId->data.string, &from[2]));
+    }
+    else
+    {
+        result = false;
+    }
+    return result;
+}
+
+static bool builtintype_id_from_tag(const char* typeName, SOPC_BuiltinId* type_id)
+{
+    static const struct
+    {
+        const char* name;
+        SOPC_BuiltinId id;
+    } TYPE_IDS[] = {{"Null", 0},           {"Boolean", 1},     {"SByte", 2},           {"Byte", 3},
+                    {"Int16", 4},          {"UInt16", 5},      {"Int32", 6},           {"UInt32", 7},
+                    {"Int64", 8},          {"UInt64", 9},      {"Float", 10},          {"Double", 11},
+                    {"DateTime", 13},      {"String", 12},     {"ByteString", 15},     {"Guid", 14},
+                    {"XmlElement", 16},    {"NodeId", 17},     {"ExpandedNodeId", 18}, {"QualifiedName", 20},
+                    {"LocalizedText", 21}, {"StatusCode", 19}, {"Structure", 22},      {NULL, 0}};
+
+    for (size_t i = 0; TYPE_IDS[i].name != NULL; ++i)
+    {
+        if (strcmp(typeName, TYPE_IDS[i].name) == 0)
+        {
+            *type_id = TYPE_IDS[i].id;
+            return true;
+        }
+    }
+
+    return false;
+}
+
 /**
  * /brief This callback is used to extract a given attribute (name and value)
  * /param attr_name The attribute name (non-NULL).
@@ -434,8 +481,7 @@ static bool parse_connection_attributes(const char* attr_name,
     }
     else if (TEXT_EQUALS(ATTR_CONNECTION_PUB_ID, attr_name))
     {
-        result = parse_unsigned_value(attr_val, strlen(attr_val), 64, &connection->publisher_id);
-        result &= (0 != connection->publisher_id);
+        result = parse_publisher_id(&(connection->publisher_id), attr_val);
     }
     else if (TEXT_EQUALS(ATTR_CONNECTION_MQTTUSERNAME, attr_name))
     {
@@ -475,17 +521,34 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
             LOG_XML_ERROR("Connection mode is missing");
             result = false;
         }
-        else if (connection->is_publisher && connection->publisher_id == 0)
+        else if (connection->is_publisher && SOPC_Null_PublisherId == connection->publisher_id.type)
         {
             LOG_XML_ERROR("Connection mode is 'publisher' but no 'publisherId' is defined");
             result = false;
         }
-        else if (!connection->is_publisher && connection->publisher_id != 0)
+        else if (!connection->is_publisher && (SOPC_UInteger_PublisherId == connection->publisher_id.type ||
+                                               SOPC_String_PublisherId == connection->publisher_id.type))
         {
             LOG_XML_ERROR("Connection mode is 'subscriber' and a 'publisherId' is defined");
             result = false;
         }
-        else
+        if (connection->is_publisher && SOPC_UInteger_PublisherId == connection->publisher_id.type)
+        {
+            if (0 == connection->publisher_id.data.uint)
+            {
+                LOG_XML_ERROR("Publisher Id type uinteger cannot be equal to 0");
+                result = false;
+            }
+        }
+        else if (connection->is_publisher && SOPC_String_PublisherId == connection->publisher_id.type)
+        {
+            if (connection->publisher_id.data.string.Length <= 0)
+            {
+                LOG_XML_ERROR("Publisher Id type string cannot be empty");
+                result = false;
+            }
+        }
+        if (result)
         {
             ctx->state = PARSE_CONNECTION;
         }
@@ -534,8 +597,7 @@ static bool parse_message_attributes(const char* attr_name,
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_PUBLISHER_ID, attr_name))
     {
-        result = parse_unsigned_value(attr_val, strlen(attr_val), 64, &msg->publisher_id);
-        result &= msg->publisher_id > 0;
+        result = parse_publisher_id(&msg->publisher_id, attr_val);
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_GROUP_ID, attr_name))
     {
@@ -589,24 +651,38 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
             LOG_XML_ERROR("Message groupId is missing");
             result = false;
         }
-        else if (msg->publisher_id == 0 && !ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
-        {
-            // A subscriber connection shall provide the message publisherId source
-            LOG_XML_ERROR("Message publisherId is missing in a connection in subscriber mode");
-            result = false;
-        }
-        else if (msg->publisher_id > 0 && ctx->connectionArr[ctx->nb_connections - 1].is_publisher)
-        {
-            // A publisher connection shall NOT provide a message publisherId source (itself here)
-            LOG_XML_ERROR("Message publisherId shall not be provided in a connection in publisher mode");
-            result = false;
-        }
         else if (msg->keepAliveTime <= 0.0 && ctx->connectionArr[ctx->nb_connections - 1].is_acyclic)
         {
             // An acyclic publisher shall provide a keep alive timer for all messages
             LOG_XML_ERROR("Message keepAliveTime is missing");
         }
-        else
+        else if (ctx->connectionArr[ctx->nb_connections - 1].is_publisher &&
+                 (SOPC_UInteger_PublisherId == msg->publisher_id.type ||
+                  SOPC_String_PublisherId == msg->publisher_id.type))
+        {
+            // A publisher connection shall NOT provide a message publisherId source (itself here)
+            LOG_XML_ERROR("Message publisherId shall not be provided in a connection in publisher mode");
+            result = false;
+        }
+        if (!ctx->connectionArr[ctx->nb_connections - 1].is_publisher &&
+            SOPC_UInteger_PublisherId == msg->publisher_id.type)
+        {
+            if (0 == msg->publisher_id.data.uint)
+            {
+                LOG_XML_ERROR("Publisher Id type uinteger cannot be equal to 0");
+                result = false;
+            }
+        }
+        else if (!ctx->connectionArr[ctx->nb_connections - 1].is_publisher &&
+                 SOPC_String_PublisherId == msg->publisher_id.type)
+        {
+            if (msg->publisher_id.data.string.Length <= 0)
+            {
+                LOG_XML_ERROR("Publisher Id type string cannot be empty");
+                result = false;
+            }
+        }
+        if (result)
         {
             ctx->state = PARSE_MESSAGE;
         }
@@ -653,31 +729,6 @@ static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_da
 
     ctx->state = PARSE_DATASET;
     return result;
-}
-
-static bool builtintype_id_from_tag(const char* typeName, SOPC_BuiltinId* type_id)
-{
-    static const struct
-    {
-        const char* name;
-        SOPC_BuiltinId id;
-    } TYPE_IDS[] = {{"Null", 0},           {"Boolean", 1},     {"SByte", 2},           {"Byte", 3},
-                    {"Int16", 4},          {"UInt16", 5},      {"Int32", 6},           {"UInt32", 7},
-                    {"Int64", 8},          {"UInt64", 9},      {"Float", 10},          {"Double", 11},
-                    {"DateTime", 13},      {"String", 12},     {"ByteString", 15},     {"Guid", 14},
-                    {"XmlElement", 16},    {"NodeId", 17},     {"ExpandedNodeId", 18}, {"QualifiedName", 20},
-                    {"LocalizedText", 21}, {"StatusCode", 19}, {"Structure", 22},      {NULL, 0}};
-
-    for (size_t i = 0; TYPE_IDS[i].name != NULL; ++i)
-    {
-        if (strcmp(typeName, TYPE_IDS[i].name) == 0)
-        {
-            *type_id = TYPE_IDS[i].id;
-            return true;
-        }
-    }
-
-    return false;
 }
 
 static bool parse_variable_attributes(const char* attr_name,
@@ -1159,7 +1210,14 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
             pubicon++;
 
             // Publisher connection
-            SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id);
+            if (SOPC_String_PublisherId == p_connection->publisher_id.type)
+            {
+                SOPC_PubSubConnection_Set_PublisherId_String(connection, &p_connection->publisher_id.data.string);
+            }
+            else
+            {
+                SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, p_connection->publisher_id.data.uint);
+            }
             allocSuccess = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, p_connection->nb_messages);
             SOPC_PublishedDataSetSourceType type = SOPC_PublishedDataItemsDataType;
             if (allocSuccess)
@@ -1267,9 +1325,16 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_ReaderGroup_Set_SecurityMode(readerGroup, msg->security_mode);
                 SOPC_ReaderGroup_Set_GroupVersion(readerGroup, msg->groupVersion);
                 SOPC_ReaderGroup_Set_GroupId(readerGroup, msg->groupId);
-                SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id);
                 SOPC_ReaderGroup_Set_MqttTopic(readerGroup, msg->mqttTopic);
 
+                if (SOPC_String_PublisherId == msg->publisher_id.type)
+                {
+                    SOPC_ReaderGroup_Set_PublisherId_String(readerGroup, &msg->publisher_id.data.string);
+                }
+                else
+                {
+                    SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, msg->publisher_id.data.uint);
+                }
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
 
                 allocSuccess = SOPC_ReaderGroup_Allocate_SecurityKeyServices_Array(readerGroup, msg->nb_sks);
@@ -1385,6 +1450,7 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
             msg->datasetArr = NULL;
             SOPC_Free(msg->mqttTopic);
             msg->mqttTopic = NULL;
+            SOPC_String_Clear(&msg->publisher_id.data.string);
 
             for (uint16_t isks = 0; isks < msg->nb_sks; isks++)
             {
@@ -1401,6 +1467,7 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
         p_connection->address = NULL;
         SOPC_Free(p_connection->interfaceName);
         p_connection->interfaceName = NULL;
+        SOPC_String_Clear(&p_connection->publisher_id.data.string);
         SOPC_Free(p_connection->mqttUsername);
         p_connection->mqttUsername = NULL;
         SOPC_Free(p_connection->mqttPassword);
