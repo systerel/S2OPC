@@ -18,6 +18,7 @@
  */
 
 /**
+ *  \file
  *  \brief Security Keys Scheduler: it schedules the periodic update of keys retrieved from provider
  *                                  and set in the manager using the builder.
  */

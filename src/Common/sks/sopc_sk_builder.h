@@ -18,6 +18,7 @@
  */
 
 /**
+ * \file
  * \brief Security Keys Builder: provides update function to retrieve keys from the Security Keys Provider
  *                               and fills the Security Keys Manager.
  *

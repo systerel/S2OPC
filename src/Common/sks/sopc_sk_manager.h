@@ -18,7 +18,8 @@
  */
 
 /**
- *  \brief Security Keys Manager: manages local storage of the keys retrieved from the Security Keys Provider for the
+ * \file
+ * \brief Security Keys Manager: manages local storage of the keys retrieved from the Security Keys Provider for the
  * SKS.
  *
  *  \note Keys can be set or appended to previous ones
@@ -33,10 +34,18 @@
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
 
+#ifndef SOPC_SK_MANAGER_CURRENT_TOKEN_ID
 #define SOPC_SK_MANAGER_CURRENT_TOKEN_ID 0
+#endif
+
 /* Default KeyLifetime 1 hour */
+#ifndef SOPC_SK_MANAGER_DEFAULT_KEYLIFETIME
 #define SOPC_SK_MANAGER_DEFAULT_KEYLIFETIME (60 * 60 * 1000)
+#endif
+
+#ifndef SOPC_SK_MANAGER_DEFAULT_INITIAL_SIZE
 #define SOPC_SK_MANAGER_DEFAULT_INITIAL_SIZE 10
+#endif
 
 typedef struct SOPC_SKManager SOPC_SKManager;
 

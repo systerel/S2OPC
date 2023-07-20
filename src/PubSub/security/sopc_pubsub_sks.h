@@ -17,14 +17,29 @@
  * under the License.
  */
 
+/**
+ * \file
+ * \brief PubSub Security Keys Service configuration: define the ::SOPC_SKManager to use to retrieve the keys.
+ *
+ * To define a security keys service, ::SOPC_PubSubSKS_Init and ::SOPC_PubSubSKS_SetSkManager shall be called.
+ *
+ * The Publisher and Subscriber schedulers will then automatically call ::SOPC_PubSubSKS_GetSecurityKeys.
+ */
+
 #ifndef SOPC_PUBSUB_SKS_H_
 #define SOPC_PUBSUB_SKS_H_
 
 #include "sopc_secret_buffer.h"
 #include "sopc_sk_manager.h"
 
+#ifndef SOPC_PUBSUB_SKS_DEFAULT_GROUPID
 #define SOPC_PUBSUB_SKS_DEFAULT_GROUPID 1
+#endif
+
+#ifndef SOPC_PUBSUB_SKS_DEFAULT_TOKENID
 #define SOPC_PUBSUB_SKS_DEFAULT_TOKENID 1
+#endif
+
 // To requested current token in getSecurityKey
 #define SOPC_PUBSUB_SKS_CURRENT_TOKENID SOPC_SK_MANAGER_CURRENT_TOKEN_ID
 
@@ -45,21 +60,22 @@ typedef struct SOPC_PubSubSKS_Keys
 void SOPC_PubSubSKS_Init(void);
 
 /**
- * \brief Set the Security Keys Manager
+ * \brief Set the Security Keys Manager to use to retrieve the keys for UADP secure exchanges
  * Only one SK Manager is used. Set to NULL to stop the service.
  *
- * \param skm a Security Keys Manager to use to get keys.
+ * \param skm the Security Keys Manager to use to get keys.
  *
  */
 void SOPC_PubSubSKS_SetSkManager(SOPC_SKManager* skm);
 
 /**
  * \brief Return security key from a security group id.
+ *        This function is automatically called by Publisher and Subscriber schedulers.
  *
- * Only SOPC_PUBSUB_SKS_DEFAULT_GROUPID is accepted in this version
+ * \warning Only ::SOPC_PUBSUB_SKS_DEFAULT_GROUPID is accepted in this version
  *
  * \param groupid a Security Group Id
- * \param tokenId token id of the requested keys. Current token is requested with SOPC_PUBSUB_SKS_CURRENT_TOKENID
+ * \param tokenId token id of the requested keys. Current token is requested with ::SOPC_PUBSUB_SKS_CURRENT_TOKENID
  * \return tokenid and group keys
  *
  */

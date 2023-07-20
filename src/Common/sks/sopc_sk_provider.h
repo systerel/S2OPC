@@ -18,6 +18,7 @@
  */
 
 /**
+ *  \file
  *  \brief Security Keys Provider: source providing the keys for SKS
  *
  *  \note Keys might be generated locally in case of SKS server side

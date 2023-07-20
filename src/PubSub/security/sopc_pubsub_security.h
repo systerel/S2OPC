@@ -17,6 +17,14 @@
  * under the License.
  */
 
+/** \file
+ *
+ * \privatesection
+ *
+ * \brief Internal module used to implement PubSub security features
+ *
+ */
+
 #ifndef SOPC_PUBSUB_SECURITY_H_
 #define SOPC_PUBSUB_SECURITY_H_
 
