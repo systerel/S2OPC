@@ -469,7 +469,7 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProviderNew_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
-    ck_assert(SOPC_CertificateValidationError_Untrusted == error);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, error);
     /* Update the PKI with cacert.der and  cacrl.der */
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
     SOPC_CRLList* pTrustedCrlToUpdate = NULL;
@@ -653,6 +653,59 @@ START_TEST(functional_test_pki_permissive)
 }
 END_TEST
 
+START_TEST(functional_test_verify_every_cert)
+{
+    SOPC_PKIProviderNew* pPKI = NULL;
+    SOPC_CertificateList* pTrustedCerts = NULL;
+    SOPC_CertificateList* pTrustedCertToUpdate = NULL;
+    SOPC_CRLList* pTrustedCrl = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pTrustedCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pPKI);
+    SOPC_Array* pErrors = NULL;
+    SOPC_Array* pThumbprints = NULL;
+    const SOPC_PKI_ChainProfile profile = {.curves = SOPC_PKI_CURVES_ANY,
+                                           .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+                                           .pkAlgo = SOPC_PKI_PK_ANY,
+                                           .RSAMinimumKeySize = 2048};
+    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    /* Updating without including the trusted root cacert.der */
+    status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pTrustedCertToUpdate);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProviderNew_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrl, NULL, NULL, false);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* client_2k_cert is now invalid */
+    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    size_t nbErrors = SOPC_Array_Size(pErrors);
+    size_t nbThumbprints = SOPC_Array_Size(pThumbprints);
+    ck_assert_uint_eq(1, nbErrors);
+    ck_assert_uint_eq(1, nbThumbprints);
+    char* crtThumb = SOPC_Array_Get(pThumbprints, char*, 0);
+    uint32_t crtErr = SOPC_Array_Get(pErrors, uint32_t, 0);
+    ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, crtErr);
+    int cmp = memcmp(crtThumb, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", 40);
+    ck_assert_int_eq(0, cmp);
+
+    SOPC_Array_Delete(pErrors);
+    SOPC_Array_Delete(pThumbprints);
+
+    SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+    SOPC_KeyManager_Certificate_Free(pTrustedCertToUpdate);
+    SOPC_KeyManager_CRL_Free(pTrustedCrl);
+    SOPC_PKIProviderNew_Free(pPKI);
+}
+END_TEST
+
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
@@ -685,6 +738,7 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(functional, functional_test_write_to_list);
     tcase_add_test(functional, functional_test_append_to_list);
     tcase_add_test(functional, functional_test_pki_permissive);
+    tcase_add_test(functional, functional_test_verify_every_cert);
     suite_add_tcase(s, functional);
 
     return s;

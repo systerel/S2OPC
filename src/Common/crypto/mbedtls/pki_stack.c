@@ -1465,6 +1465,67 @@ static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProf
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProviderNew* pPKI,
+                                                         mbedtls_x509_crt* mbed_cert_list,
+                                                         mbedtls_x509_crt_profile* mbed_profile,
+                                                         bool bIsTrusted,
+                                                         const char* thumbprint,
+                                                         uint32_t* error)
+{
+    SOPC_ASSERT(NULL != pPKI);
+    SOPC_ASSERT(NULL != mbed_cert_list);
+    SOPC_ASSERT(NULL == mbed_cert_list->next);
+    SOPC_ASSERT(NULL != mbed_profile);
+    SOPC_ASSERT(NULL != error);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CertificateList* trust_list = bIsTrusted ? pPKI->pAllRoots : pPKI->pTrustedRoots;
+    SOPC_CRLList* cert_crl = pPKI->pAllCrl;
+    /* Assumes that mbedtls does not modify the certificates */
+    mbedtls_x509_crt* mbed_ca_root = (mbedtls_x509_crt*) (NULL != trust_list ? &trust_list->crt : NULL);
+    mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
+    /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
+    mbedtls_x509_crt* pLinkCert = NULL;
+    if (bIsTrusted)
+    {
+        if (NULL != pPKI->pAllCerts)
+        {
+            pLinkCert = &pPKI->pAllCerts->crt;
+        }
+    }
+    else
+    {
+        if (NULL != pPKI->pTrustedCerts)
+        {
+            pLinkCert = &pPKI->pTrustedCerts->crt;
+        }
+    }
+    mbed_cert_list->next = pLinkCert;
+    /* Verify the certificate chain */
+    uint32_t failure_reasons = 0;
+    if (mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, mbed_profile,
+                                             NULL /* You can specify an expected Common Name here */, &failure_reasons,
+                                             verify_cert, &bIsTrusted) != 0)
+    {
+        *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
+        if (NULL != thumbprint)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed with error code %" PRIu32 " for certificate thumbprint %s",
+                                   *error, thumbprint);
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed with error code %" PRIu32 "",
+                                   *error);
+        }
+        status = SOPC_STATUS_NOK;
+    }
+    /* Unlink mbed_cert_list, otherwise destroying the pToValidate will also destroy trusted or untrusted links */
+    mbed_cert_list->next = NULL;
+    return status;
+}
+
 static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProviderNew* pPKI,
                                                    const SOPC_CertificateList* pToValidate,
                                                    const SOPC_PKI_Profile* pProfile,
@@ -1546,52 +1607,17 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProviderNew* pP
             }
         }
     }
-    /* Set the profile from configuration */
     mbedtls_x509_crt_profile crt_profile = {0};
-    set_profile_from_configuration(pProfile->chainProfile, &crt_profile);
-
-    SOPC_CertificateList* trust_list = bIsTrusted ? pPKI->pAllRoots : pPKI->pTrustedRoots;
-    SOPC_CRLList* cert_crl = pPKI->pAllCrl;
-    /* Assumes that mbedtls does not modify the certificates */
-    mbedtls_x509_crt* mbed_ca_root = (mbedtls_x509_crt*) (NULL != trust_list ? &trust_list->crt : NULL);
-    mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
-    mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
-    /* List length already check in SOPC_KeyManager_Certificate_GetListLength */
-    SOPC_ASSERT(NULL == mbed_cert_list->next);
-    /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
-    mbedtls_x509_crt* pLinkCert = NULL;
-    if (bIsTrusted)
-    {
-        if (NULL != pPKI->pAllCerts)
-        {
-            pLinkCert = &pPKI->pAllCerts->crt;
-        }
-    }
-    else
-    {
-        if (NULL != pPKI->pTrustedCerts)
-        {
-            pLinkCert = &pPKI->pTrustedCerts->crt;
-        }
-    }
-    mbed_cert_list->next = pLinkCert;
-    /* Verify the certificate chain */
     if (SOPC_STATUS_OK == status)
     {
-        uint32_t failure_reasons = 0;
-        if (mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, &crt_profile,
-                                                 NULL /* You can specify an expected Common Name here */,
-                                                 &failure_reasons, verify_cert, &bIsTrusted) != 0)
-        {
-            *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed with error code %u for certificate thumbprint %s", *error,
-                                   thumbprint);
-            status = SOPC_STATUS_NOK;
-        }
+        /* Set the profile from configuration */
+        status = set_profile_from_configuration(pProfile->chainProfile, &crt_profile);
     }
-    /* Unlink mbed_cert_list, otherwise destroying the pToValidateCpy will also destroy trusted or untrusted links */
-    mbed_cert_list->next = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
+        status = sopc_validate_certificate_chain(pPKI, mbed_cert_list, &crt_profile, bIsTrusted, thumbprint, error);
+    }
 
     SOPC_Free(thumbprint);
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
@@ -1624,6 +1650,145 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = pPKI->pFnValidateCert(pPKI, pToValidate, pProfile, error);
+    return status;
+}
+
+static void sopc_free_c_string_from_ptr(void* data)
+{
+    if (NULL != data)
+    {
+        SOPC_Free(*(char**) data);
+    }
+}
+
+static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPkiCerts,
+                                                       const SOPC_PKIProviderNew* pPKI,
+                                                       mbedtls_x509_crt_profile* mbed_profile,
+                                                       bool* bErrorFound,
+                                                       SOPC_Array* pErrors,
+                                                       SOPC_Array* pThumbprints)
+{
+    SOPC_ASSERT(NULL != pPkiCerts);
+    SOPC_ASSERT(NULL != mbed_profile);
+    SOPC_ASSERT(NULL != pErrors);
+    SOPC_ASSERT(NULL != pThumbprints);
+
+    SOPC_CertificateList* pCertsCpy = NULL;
+    SOPC_CertificateList crtThumbprint = {0};
+    bool bResAppend = true;
+    uint32_t error = 0;
+    char* thumbprint = NULL;
+    mbedtls_x509_crt* crt = NULL;
+    mbedtls_x509_crt* save_next = NULL;
+
+    SOPC_ReturnStatus statusChain = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_Copy(pPkiCerts, &pCertsCpy);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    crt = (mbedtls_x509_crt*) (&pCertsCpy->crt);
+    while (NULL != crt && SOPC_STATUS_OK == status)
+    {
+        /* unlink crt */
+        save_next = crt->next;
+        crt->next = NULL;
+        statusChain = sopc_validate_certificate_chain(pPKI, crt, mbed_profile, true, NULL, &error);
+        if (SOPC_STATUS_OK != statusChain)
+        {
+            *bErrorFound = true;
+            crtThumbprint.crt = *crt;
+            thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(&crtThumbprint);
+            if (NULL == thumbprint)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                /* Append the error */
+                bResAppend = SOPC_Array_Append(pErrors, error);
+                if (bResAppend)
+                {
+                    bResAppend = SOPC_Array_Append(pThumbprints, thumbprint);
+                }
+                status = bResAppend ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+        /* link crt */
+        crt->next = save_next;
+        /* iterate */
+        crt = crt->next;
+        error = 0;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(thumbprint);
+    }
+
+    SOPC_KeyManager_Certificate_Free(pCertsCpy);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProviderNew_VerifyEveryCertificate(const SOPC_PKIProviderNew* pPKI,
+                                                             const SOPC_PKI_ChainProfile* pProfile,
+                                                             SOPC_Array** ppErrors,
+                                                             SOPC_Array** ppThumbprints)
+{
+    if (NULL == pPKI || NULL == pProfile || NULL == ppErrors || NULL == ppThumbprints)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    mbedtls_x509_crt_profile crt_profile = {0};
+    bool bErrorFound = false;
+
+    SOPC_Array* pThumbprints = SOPC_Array_Create(sizeof(char*), 0, sopc_free_c_string_from_ptr);
+    if (NULL == pThumbprints)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_Array* pErrors = SOPC_Array_Create(sizeof(uint32_t), 0, NULL);
+    if (NULL == pErrors)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = set_profile_from_configuration(pProfile, &crt_profile);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL != pPKI->pAllCerts)
+        {
+            status =
+                sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, &bErrorFound, pErrors, pThumbprints);
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL != pPKI->pAllRoots)
+        {
+            status =
+                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, &bErrorFound, pErrors, pThumbprints);
+        }
+    }
+
+    if (SOPC_STATUS_OK != status || !bErrorFound)
+    {
+        SOPC_Array_Delete(pErrors);
+        SOPC_Array_Delete(pThumbprints);
+        *ppErrors = NULL;
+        *ppThumbprints = NULL;
+        return status;
+    }
+
+    *ppErrors = pErrors;
+    *ppThumbprints = pThumbprints;
+
+    status = bErrorFound ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     return status;
 }
 
