@@ -159,7 +159,7 @@ SOPC_ReturnStatus SOPC_SKManager_SetKeys(SOPC_SKManager* skm,
  *
  *  \param skm      Pointer to Security Keys Manager. Should not be NULL
  *  \param Keys     The keys data
- *  \param NbToken  The number of keys token (set of keys) added
+ *  \param NbToken  The number of keys token (set of keys) to add
  *
  *  \return         number of added elements
  */

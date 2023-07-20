@@ -119,27 +119,7 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
         skBuilder = SOPC_SKBuilder_Truncate_Create(skbAppend, SKS_NB_MAX_KEYS);
         if (NULL == skBuilder)
         {
-            SOPC_SKBuilder_Clear(skbAppend);
-            SOPC_Free(skbAppend);
-            skbAppend = NULL;
             status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        if (NULL != skProvider)
-        {
-            SOPC_SKProvider_Clear(skProvider);
-            SOPC_Free(skProvider);
-            skProvider = NULL;
-        }
-
-        if (NULL != skBuilder)
-        {
-            SOPC_SKBuilder_Clear(skBuilder);
-            SOPC_Free(skBuilder);
-            skBuilder = NULL;
         }
     }
 
@@ -147,8 +127,13 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     {
         /* Init the task with 1s */
         status = SOPC_SKscheduler_AddTask(skScheduler, skBuilder, skProvider, skManager, SKS_SCHEDULER_INIT_MSPERIOD);
+        if (SOPC_STATUS_OK == status)
+        {
+            // Ownership transfered to scheduler
+            skBuilder = NULL;
+            skProvider = NULL;
+        }
     }
-
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_SKscheduler_Start(skScheduler);
@@ -160,6 +145,32 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
     }
     else
     {
+        if (NULL != skScheduler)
+        {
+            SOPC_SKscheduler_StopAndClear(skScheduler);
+        }
+
+        if (NULL != skProvider)
+        {
+            SOPC_SKProvider_Clear(skProvider);
+            SOPC_Free(skProvider);
+            skProvider = NULL;
+        }
+
+        if (NULL == skbAppend)
+        {
+            SOPC_SKBuilder_Clear(skbAppend);
+            SOPC_Free(skbAppend);
+            skbAppend = NULL;
+        }
+
+        if (NULL != skBuilder)
+        {
+            SOPC_SKBuilder_Clear(skBuilder);
+            SOPC_Free(skBuilder);
+            skBuilder = NULL;
+        }
+
         printf("<Security Keys Service Error: Start failed\n");
     }
 

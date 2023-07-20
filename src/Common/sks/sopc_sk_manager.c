@@ -216,8 +216,15 @@ static uint32_t SOPC_SKManager_AddKeys_Default(SOPC_SKManager* skm, SOPC_ByteStr
         status = SOPC_ByteString_Copy(&byteString, &Keys[i]);
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_Array_Append(data->Keys, byteString);
-            nbAdded++;
+            bool bres = SOPC_Array_Append(data->Keys, byteString);
+            if (bres)
+            {
+                nbAdded++;
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
 

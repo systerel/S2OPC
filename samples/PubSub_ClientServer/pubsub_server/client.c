@@ -100,10 +100,6 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Client failed to load client certificate");
     }
-    else
-    {
-        g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].crt_cli = client_cert;
-    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -140,10 +136,6 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Client failed to load private key");
         }
-        else
-        {
-            g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].key_priv_cli = client_key;
-        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -159,10 +151,6 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Client failed to load server certificate");
-        }
-        else
-        {
-            g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].crt_srv = server_cert;
         }
     }
 
@@ -181,14 +169,21 @@ static SOPC_ReturnStatus CerAndKeyLoader_client(const char* client_key_path,
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to create PKI");
         }
-        else
-        {
-            g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].pki = pkiProvider;
-        }
     }
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
+        g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].crt_cli = client_cert;
+        g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].key_priv_cli = client_key;
+        g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].crt_srv = server_cert;
+        g_Client_SecureChannel_Config[g_Client_SecureChannel_Current].pki = pkiProvider;
+    }
+    else
+    {
+        SOPC_KeyManager_SerializedCertificate_Delete(client_cert);
+        SOPC_KeyManager_SerializedAsymmetricKey_Delete(client_key);
+        SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+        SOPC_PKIProvider_Free(&pkiProvider);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                                "Client failed loading certificates and key (check paths are valid)");
     }
@@ -924,13 +919,14 @@ static SOPC_ReturnStatus Fallback_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
         {
             status = SOPC_Buffer_Write(keys, keyNonce->data, keyNonce->length);
         }
-        SOPC_Buffer_Clear(signingKey);
-        SOPC_Free(signingKey);
-        SOPC_Buffer_Clear(encryptKey);
-        SOPC_Free(encryptKey);
-        SOPC_Buffer_Clear(keyNonce);
-        SOPC_Free(keyNonce);
     }
+    SOPC_Buffer_Clear(signingKey);
+    SOPC_Free(signingKey);
+    SOPC_Buffer_Clear(encryptKey);
+    SOPC_Free(encryptKey);
+    SOPC_Buffer_Clear(keyNonce);
+    SOPC_Free(keyNonce);
+
 #endif
 
     if (SOPC_STATUS_OK == status)
@@ -955,11 +951,11 @@ static SOPC_ReturnStatus Fallback_Provider_GetKeys_BySKS(SOPC_SKProvider* skp,
     else
     {
         *NbKeys = 0;
-        for (uint32_t i = 0; i < nbKeys; i++)
+        for (uint32_t i = 0; NULL != *Keys && i < nbKeys; i++)
         {
             SOPC_ByteString_Clear(&((*Keys)[i]));
-            SOPC_Free(*Keys);
         }
+        SOPC_Free(*Keys);
     }
 
     SOPC_Buffer_Clear(keys);

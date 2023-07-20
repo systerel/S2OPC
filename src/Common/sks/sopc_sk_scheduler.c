@@ -212,17 +212,17 @@ static SOPC_ReturnStatus SOPC_SKscheduler_Start_Default(SOPC_SKscheduler* sko)
 
     SOPC_SKscheduler_DefaultData* data = (SOPC_SKscheduler_DefaultData*) sko->data;
 
-    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&data->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&data->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (NULL == data->task.builder || NULL == data->task.provider || NULL == data->task.manager)
     {
-        status = SOPC_Mutex_Unlock(&data->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        mutStatus = SOPC_Mutex_Unlock(&data->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         // No task added
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    status = SOPC_SKscheduler_Initialize_Default(sko);
+    SOPC_ReturnStatus status = SOPC_SKscheduler_Initialize_Default(sko);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_Event event = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
@@ -233,8 +233,8 @@ static SOPC_ReturnStatus SOPC_SKscheduler_Start_Default(SOPC_SKscheduler* sko)
             status = SOPC_STATUS_NOK;
         }
     }
-    status = SOPC_Mutex_Unlock(&data->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    mutStatus = SOPC_Mutex_Unlock(&data->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
 }
@@ -271,14 +271,14 @@ static void SOPC_SKscheduler_StopAndClear_Default(SOPC_SKscheduler* sko)
     SOPC_Free(data->task.provider);
     data->task.provider = NULL;
 
-    SOPC_Free(sko->data);
-    sko->data = NULL;
-
     status = SOPC_Mutex_Unlock(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_Mutex_Clear(&data->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+    SOPC_Free(sko->data);
+    sko->data = NULL;
 }
 
 /*** API FUNCTIONS ***/

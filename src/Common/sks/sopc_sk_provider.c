@@ -136,10 +136,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    uint32_t keyIndex;
-    uint32_t nbKeys;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ExposedBuffer* ppBuffer;
 
     SOPC_SKProvider_RandomPubSub* data = (SOPC_SKProvider_RandomPubSub*) skp->data;
 
@@ -148,7 +145,7 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    nbKeys = (NbRequestedToken < data->nbMaxKeys) ? NbRequestedToken : data->nbMaxKeys;
+    uint32_t nbKeys = (NbRequestedToken < data->nbMaxKeys) ? NbRequestedToken : data->nbMaxKeys;
 
     SOPC_ByteString* generatedKeys = SOPC_Calloc(nbKeys, sizeof(SOPC_ByteString));
     if (NULL == generatedKeys)
@@ -157,8 +154,10 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
     }
 
     /* Generate Random Keys and copy in out parameter */
+    uint32_t keyIndex = 0;
     for (keyIndex = 0; keyIndex < nbKeys && SOPC_STATUS_OK == status; keyIndex++)
     {
+        SOPC_ExposedBuffer* ppBuffer = NULL;
         SOPC_ByteString_Initialize(&generatedKeys[keyIndex]);
         status = SOPC_CryptoProvider_GenerateRandomBytes(data->cryptoProvider,
                                                          SOPC_SK_PROVIDER_INTERNAL_PUBSUB_KEYS_SIZE, &ppBuffer);
@@ -174,10 +173,11 @@ static SOPC_ReturnStatus SOPC_SKProvider_GetKeys_RandomPubSub_Aes256(SOPC_SKProv
     {
         *NbToken = 0;
         /* Clear only initialized Keys */
-        for (uint32_t i = 0; i < keyIndex && SOPC_STATUS_OK == status; i++)
+        for (uint32_t i = 0; i < keyIndex; i++)
         {
             SOPC_ByteString_Clear(&generatedKeys[i]);
         }
+        SOPC_Free(generatedKeys);
     }
     else
     {
