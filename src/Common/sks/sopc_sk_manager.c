@@ -264,22 +264,15 @@ static void SOPC_SKManager_UpdateCurrentToken_Default(SOPC_SKManager_DefaultData
         SOPC_TimeReference finishedNextToken = timeElapsed / data->KeyLifetime;
         // Token Id are incremented by 1.
 
-        SOPC_TimeReference newCurrentTokenId = data->CurrentTokenId + finishedNextToken + 1;
-        if (newCurrentTokenId < UINT32_MAX)
-        {
-            data->CurrentTokenId = (uint32_t) newCurrentTokenId;
-            data->CurrentTokenTime = currentTime;
-            /* Substract Time consumed by finished token to time elapsed */
-            data->CurrentTokenRemainingTime =
-                (uint32_t)(data->KeyLifetime - (timeElapsed - finishedNextToken * data->KeyLifetime));
-            SOPC_ASSERT(data->CurrentTokenRemainingTime <= data->KeyLifetime);
-        }
-        else
-        {
-            data->CurrentTokenId = 0; // TODO Not managed
-            data->CurrentTokenTime = 0;
-            data->CurrentTokenRemainingTime = 0;
-        }
+        SOPC_TimeReference newCurrentTokenId = (data->CurrentTokenId + finishedNextToken + 1) % UINT32_MAX;
+        // If the CurrentTokenId increments past the maximum value of UInt32 it restarts a 1.
+        newCurrentTokenId = (0 == newCurrentTokenId ? 1 : newCurrentTokenId);
+        data->CurrentTokenId = (uint32_t) newCurrentTokenId;
+        data->CurrentTokenTime = currentTime;
+        /* Substract Time consumed by finished token to time elapsed */
+        data->CurrentTokenRemainingTime =
+            (uint32_t)(data->KeyLifetime - (timeElapsed - finishedNextToken * data->KeyLifetime));
+        SOPC_ASSERT(data->CurrentTokenRemainingTime <= data->KeyLifetime);
     }
 }
 
