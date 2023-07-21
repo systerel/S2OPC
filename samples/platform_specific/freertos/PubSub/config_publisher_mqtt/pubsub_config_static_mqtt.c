@@ -25,10 +25,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
-    if (NULL != topic)
-    {
-    	SOPC_WriterGroup_Set_MqttTopic(group, topic);
-    }
+    SOPC_WriterGroup_Set_MqttTopic(group, topic);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);

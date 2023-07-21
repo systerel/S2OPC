@@ -25,6 +25,8 @@
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pubsub_constants.h"
+#include <inttypes.h>
 
 static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
 {
@@ -464,3 +466,54 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
 }
 
 #endif
+
+SOPC_ReturnStatus SOPC_Buffer_PrintU32(const uint32_t value, SOPC_Buffer* buf)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    char buffer[SOPC_MAX_LENGTH_UINT32_TO_STRING];
+    int res = snprintf(buffer,SOPC_MAX_LENGTH_UINT32_TO_STRING, "%" PRIu32, value);
+    if (res > 0 && res < SOPC_MAX_LENGTH_UINT32_TO_STRING)
+    {
+        status = SOPC_Buffer_Write(buf,(const uint8_t*) buffer, strlen(buffer));
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    char buffer[SOPC_MAX_LENGTH_INT32_TO_STRING];
+    int res = snprintf(buffer,SOPC_MAX_LENGTH_INT32_TO_STRING, "%" PRIi32, value);
+    if (res > 0 && res < SOPC_MAX_LENGTH_INT32_TO_STRING)
+    {
+        status = SOPC_Buffer_Write(buf,(const uint8_t*) buffer, strlen(buffer));
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* buf)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    // buffer needs a minimum lentgh of 10 to store the worst case : "-infinity"
+    static const uint16_t bufferLength = (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) > 10 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) : 10;
+    char buffer[bufferLength]; // (decimal + '.e+ddd' + '\0')
+    int res = snprintf(buffer,bufferLength, "%.*g", SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
+    if (res > 0 && res < bufferLength)
+    {
+        // If value it's a special number
+        if (0 == strcmp(buffer,"inf") || 0 == strcmp(buffer,"infinity"))
+        {
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"Infinity\"", strlen(buffer));
+        }
+        if (0 == strcmp(buffer,"-inf") || 0 == strcmp(buffer,"-infinity"))
+        {
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"-Infinity\"", strlen(buffer));
+        }
+        if (0 == strcmp(buffer,"nan") || 0 == strcmp(buffer,"-nan"))
+        {
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"NaN\"", strlen(buffer));
+        }
+        status = SOPC_Buffer_Write(buf,(const uint8_t*) buffer, strlen(buffer));
+    }
+    return status;
+}

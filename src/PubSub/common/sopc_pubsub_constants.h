@@ -39,8 +39,25 @@
 #define SOPC_MAX_LENGTH_UINT64_TO_STRING                                                                              \
     21 /* 2^64 = 1.8447*10^19 maximum number you could represent that use maximum chars would be 1.8447*10^19 plus \0 \
           at the end */
+#define SOPC_MAX_LENGTH_UINT32_TO_STRING                                                                              \
+    11 /* 2^32 = 4294967296 maximum number you could represent plus \0 at the end */
 #define SOPC_MAX_LENGTH_UINT16_TO_STRING \
     6 /* 2^16 = 65536 maximum number you could represent using maximum chars would be 65536 plus \0 at the end */
+#define SOPC_MAX_LENGTH_UINT8_TO_STRING                                                                              \
+    4 /* 2^8 = 256 maximum number you could represent plus \0 at the end */
+
+#define SOPC_MAX_LENGTH_INT64_TO_STRING                                                                              \
+    21 /* 2^63 = 9.22*10^18 maximum number you could represent that use maximum chars would be 1.8447*10^19 plus \0 \
+          at the end plus '-'*/
+#define SOPC_MAX_LENGTH_INT32_TO_STRING                                                                              \
+    12 /* 2^31 = 2147483648 maximum number you could represent plus \0 at the end plus '-'*/
+#define SOPC_MAX_LENGTH_INT16_TO_STRING \
+    7 /* 2^15 = 32768 maximum number you could represent using maximum chars would be 65536 plus \0 at the end plus '-' */
+#define SOPC_MAX_LENGTH_INT8_TO_STRING                                                                              \
+    5 /* 2^7 = 128 maximum number you could represent plus \0 at the end plus '-'*/
+
+#define SOPC_PRECISION_PRINTING_FLOAT_NUMBERS 10
+
 
 // Pub Sub Security Policy
 #define SOPC_PUBSUB_SECURITY_POLICY SOPC_SecurityPolicy_PubSub_Aes256_URI

@@ -18,17 +18,14 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
-                                                           const char * topic)
+                                                           const char* mqttTopic)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
-    if (NULL != topic)
-    {
-    	SOPC_WriterGroup_Set_MqttTopic(group, topic);
-    }
+    SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
@@ -64,7 +61,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
 
 static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
-                                               char* strNodeId,
+                                               const char* strNodeId,
                                                SOPC_BuiltinId builtinType)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
@@ -90,8 +87,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     /* 1 publisher connection */
     alloc = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);
     
-    /* 1 Published Datasets */
-    alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 1);
+    /* 2 Published Datasets */
+    alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 2);
     
     /** Publisher connection 0 **/
     
@@ -101,8 +98,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_ASSERT(NULL != connection);
         SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
-        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:1883");
         alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.64:1883");
+        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:1883");
     }
     
     // Set acyclic publisher mode
@@ -110,8 +107,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     
     if (alloc)
     {
-        // Allocate 1 writer groups (messages)
-        alloc = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, 1);
+        // Allocate 2 writer groups (messages)
+        alloc = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, 2);
     }
 
     
@@ -131,12 +128,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupVersion = 1
         // Interval = 1000.000000 ms
         // Offest = -1 us
-        // topic = S2OPC
- 
-       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 1000.000000,-1, SOPC_SecurityMode_None,"S2OPC");
-       	alloc = NULL != writerGroup;
-    	}
- 	
+        // mqttTopic = "S2OPC"
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 1000.000000, -1, SOPC_SecurityMode_None, "S2OPC");
+        alloc = NULL != writerGroup;
+    }
+    
     if (alloc)
     {
        // 1 data sets for message 14
@@ -153,21 +149,49 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
         SOPC_ASSERT(NULL != writer);
         // WriterId = 0
-        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 0, 7);
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 0, writer, 0, 0, 2);
         alloc = NULL != dataset;
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubBool", SOPC_Boolean_Id); // PubBool
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubInt64", SOPC_Int64_Id); // varInt
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=1;s=PubUInt64", SOPC_UInt64_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubInt32", SOPC_Int32_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=1;s=PubUInt32", SOPC_UInt32_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, "ns=1;s=PubInt16", SOPC_Int16_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, "ns=1;s=PubUInt16", SOPC_UInt16_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, "ns=2;i=6", SOPC_Float_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 6, "ns=1;s=PubDouble", SOPC_Double_Id); // varDouble
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 7, "ns=1;s=PubString", SOPC_String_Id); // PubFloat
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubUInt", SOPC_UInt32_Id); // varUInt
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=2;i=6", SOPC_Float_Id); // PubFloat
+    }
+    
+    /*** Pub Message 15 ***/
+    
+    if (alloc)
+    {
+        // GroupId = 15
+        // GroupVersion = 1
+        // Interval = 2000.000000 ms
+        // Offest = -1 us
+        // mqttTopic = NULL
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 2000.000000, -1, SOPC_SecurityMode_None, NULL);
+        alloc = NULL != writerGroup;
+    }
+    
+    if (alloc)
+    {
+       // 1 data sets for message 15
+       alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 1);
+    }
+
+    
+    /*** DataSetMessage No 1 of message 15 ***/
+    
+    if (alloc)
+    {
+        writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
+        SOPC_ASSERT(NULL != writer);
+        // WriterId = 0
+        dataset = SOPC_PubSubConfig_InitDataSet(config, 1, writer, 0, 0, 2);
+        alloc = NULL != dataset;
+    }
+    if (alloc)
+    {
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubInt", SOPC_Int32_Id); // varInt
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubUInt", SOPC_UInt32_Id); // varUInt
     }
     
 

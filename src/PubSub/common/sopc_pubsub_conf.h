@@ -35,9 +35,6 @@ typedef struct SOPC_DataSetMetaData SOPC_DataSetMetaData;
 typedef struct SOPC_FieldMetaData SOPC_FieldMetaData;
 typedef struct SOPC_FieldTarget SOPC_FieldTarget;
 
-#define LENGTH_DOT 	2
-#define LENGTH_MAX_DEFAULT_TOPIC 	(SOPC_MAX_LENGTH_UINT64_TO_STRING + LENGTH_DOT + SOPC_MAX_LENGTH_UINT16_TO_STRING)
-
 typedef struct SOPC_UADP_Configuration
 {
     bool PublisherIdFlag;
@@ -105,9 +102,10 @@ typedef struct SOPC_Conf_PublisherId
 } SOPC_Conf_PublisherId;
 
 /*
- * create the default mqtt topic described by the OPC UA standard and put it in the defaultTopic pointer
+ * Create the default MQTT topic described by the OPC UA standard (publisherId-groupId) and put it in the defaultTopic pointer
+ * Return true if it's successful, false otherwise
  */
-bool SOPC_Compute_Default_MqttTopic(uint64_t publisherId, uint16_t groupId, char * defaultTopic, uint8_t sizeMax);
+char* SOPC_Allocate_MQTT_DefaultTopic(const SOPC_Conf_PublisherId* publisherId, uint16_t groupId);
 
 /*************************/
 /** PubSubConfiguration **/
@@ -205,7 +203,7 @@ bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const char
 bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
 const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
-bool SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
+void SOPC_ReaderGroup_Set_MqttTopic(SOPC_ReaderGroup* reader, const char* topic);
 //bool SOPC_ReaderGroup_Set_Default_MqttTopic(SOPC_ReaderGroup* reader, uint64_t publisherId, uint16_t GroupId);
 
 /*******************/
@@ -283,7 +281,7 @@ SOPC_SecurityMode_Type SOPC_WriterGroup_Get_SecurityMode(const SOPC_WriterGroup*
 void SOPC_WriterGroup_Set_SecurityMode(SOPC_WriterGroup* group, SOPC_SecurityMode_Type mode);
 
 const char* SOPC_WriterGroup_Get_MqttTopic(const SOPC_WriterGroup* writer);
-bool SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic);
+void SOPC_WriterGroup_Set_MqttTopic(SOPC_WriterGroup* writer, const char* topic);
 //bool SOPC_WriterGroup_Set_Default_MqttTopic(SOPC_WriterGroup* writer, uint64_t publisherId, uint16_t writerGroupId);
 
 bool SOPC_WriterGroup_Allocate_DataSetWriter_Array(SOPC_WriterGroup* group, uint8_t nb);

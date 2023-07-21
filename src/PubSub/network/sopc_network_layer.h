@@ -47,10 +47,14 @@ typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_Publishe
                                                         const uint16_t writerId,
                                                         const uint16_t receivedSN);
 
-void JSON_Encode_DataSetMessage (SOPC_Buffer * pPayloadJSON, uint16_t WriterId);
-void JSON_Encode_NetworkMessage (SOPC_Buffer * pPayloadJSON, char * MessageId,char * PublisherId);
-void JSON_Encode_Variant (SOPC_Buffer * pPayloadJSON,const SOPC_Variant* variant);
-SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message);
+/**
+ * \brief Encode a NetworkMessage with JSON Mapping
+ *
+ * \param message is the NetworkMessage to encode
+ *
+ * \return A buffer containing the JSON string or NULL if the operation does not succeed
+ */
+SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode        (SOPC_Dataset_LL_NetworkMessage* message);
 
 /**
  * \brief Encode a NetworkMessage with UADP Mapping
@@ -216,6 +220,12 @@ typedef enum
     SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum,
     SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp,
     SOPC_UADP_NetworkMessage_Error_Unsupported_DsmPicoseconds,
+    SOPC_JSON_NetworkMessage_Error_Generate_Unique_MessageId = 0x50000000,
+    SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName,
+    SOPC_JSON_NetworkMessage_Error_Encode,
+    SOPC_JSON_DataSetMessage_Error_Encode,
+    SOPC_JSON_Variant_Error_Encode,
+    SOPC_JSON_Error_Closing_Structure,
 } SOPC_UADP_NetworkMessage_Error_Code;
 
 /**
