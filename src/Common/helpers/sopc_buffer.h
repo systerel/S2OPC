@@ -225,4 +225,40 @@ int64_t SOPC_Buffer_ReadFrom(SOPC_Buffer* buffer, SOPC_Buffer* src, uint32_t n);
  */
 SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf);
 
+/**
+ *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
+ * position and length if necessary)
+ *
+ *  \param value       uint32_t to print into the buffer
+ *  \param buf         Pointer to the buffer to write into
+ *
+ *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
+ * content, full buffer avoiding operation)
+ */
+SOPC_ReturnStatus SOPC_Buffer_PrintU32(const uint32_t value, SOPC_Buffer* buf);
+
+/**
+ *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
+ * position and length if necessary)
+ *
+ *  \param value       int32_t to print into the buffer
+ *  \param buf         Pointer to the buffer to write into
+ *
+ *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
+ * content, full buffer avoiding operation)
+ */
+SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf);
+
+/**
+ *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
+ * position and length if necessary)
+ *
+ *  \param value       double to print into the buffer
+ *  \param buf         Pointer to the buffer to write into
+ *
+ *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
+ * content, full buffer avoiding operation)
+ */
+SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* buf);
+
 #endif /* SOPC_BUFFER_H_ */

@@ -22,11 +22,14 @@
 #include "sopc_network_layer.h"
 #include "sopc_assert.h"
 #include "sopc_encoder.h"
+#include "sopc_json_builtIntype.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pubsub_constants.h"
-#include "sopc_JSON_BuiltInType.h"
 
+#include "sopc_version.h"
+
+#define TRUE_STR "true"
+#define FALSE_STR "false"
 
 static uint32_t network_Error_Code = SOPC_UADP_NetworkMessage_Error_Code_None;
 
@@ -139,18 +142,6 @@ const uint8_t C_NETWORK_MESSAGE_COMP_BIT_5 = 255 - 32;
 const uint8_t C_NETWORK_MESSAGE_COMP_BIT_6 = 255 - 64;
 const uint8_t C_NETWORK_MESSAGE_COMP_BIT_7 = 255 - 128;
 
-/*
- * JSON carateres
- */
-const uint8_t dix = 10;
-const uint8_t quote = 34;
-const uint8_t openingHook = 123;
-const uint8_t closingHook = 125;
-const uint8_t comma = 44;
-const uint8_t colon = 58;
-const uint8_t openingSquareBracket = 91;
-const uint8_t closingSquareBracket = 93;
-
 /**
  * Set the value of a bit
  * byte is the variable to set. Type is uint8_t*
@@ -175,6 +166,19 @@ const uint8_t closingSquareBracket = 93;
  * bit is the position of the bit. Type is SOPC_Byte
  */
 #define Network_Message_Get_Bool_Bit(byte, bit) ((byte & (C_NETWORK_MESSAGE_BIT_##bit)) ? true : false)
+
+/**
+ * If status it's OK
+ * Write value into buffer(SOPC_Buffer) with SOPC_Buffer_Write function
+ */
+#define BUFFER_PRINT_STR(value, buffer, status)                                        \
+    do                                                                                 \
+    {                                                                                  \
+        if (SOPC_STATUS_OK == status)                                                  \
+        {                                                                              \
+            status = SOPC_Buffer_Write(buffer, (const uint8_t*) value, strlen(value)); \
+        }                                                                              \
+    } while (0)
 
 static inline SOPC_ReturnStatus valid_bool_to_status(const bool b)
 {
@@ -249,30 +253,6 @@ static bool Network_Layer_Is_Flags1_Enabled(SOPC_Dataset_LL_NetworkMessage_Heade
  * processed is the last processed sequence number
  */
 static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t processed);
-
-/*
- *  Encode Variant Value in JSON format and put the result in the buffer
- *
- *  Return SOPC_STATUS_NOT_SUPPORTED, if the type to encode isn't supported
- *  Return SOPC_STATUS_OK, if data is encoded successfully
- */
-static SOPC_ReturnStatus SOPC_JSON_Variant_Encode (const SOPC_Variant* variant, char * buffer,size_t size);
-
-/*
- *  Encode PublisherId in string format and put the result in the buffer
- *
- *  Return SOPC_STATUS_NOK, if encode fail
- *  Return SOPC_STATUS_OK, if PublisherId is encoded successfully
- */
-static SOPC_ReturnStatus SOPC_JSON_PublisherId_Encode (const SOPC_Dataset_LL_PublisherId* PubId, char * buffer, size_t size);
-
-/*
- * Function which generate unique MessageId with GroupeId and DatasetMessageSequenceNumber(index) (JSON format)
- *
- * Return SOPC_STATUS_NOK if there is a problem in writing the buffer,
- * Return SOPC_STATUS_OK otherwise
- */
-static SOPC_ReturnStatus SOPC_Generate_MessageId_JSON(char * buffer, uint16_t sizeBuffer,uint16_t GroupeId,uint32_t index);
 
 static SOPC_UADP_NetworkMessage* SOPC_Network_Message_Create(void)
 {
@@ -464,246 +444,307 @@ static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t p
     }
 }
 
-
-static SOPC_ReturnStatus SOPC_JSON_Variant_Encode (const SOPC_Variant* variant, char * buffer,size_t size)
+/**
+ * \brief Print Variant value in buf according to its type.
+ *
+ * \param variant   A non-NULL pointer to a SOPC_Variant.
+ * \param buf       A non-NULL pointer to a SOPC_Buffer.
+ *
+ * \return  SOPC_STATUS_NOT_SUPPORTED, if the type to print isn't supported
+ *          SOPC_STATUS_OK, if data is printed successfully
+ */
+static SOPC_ReturnStatus print_variant_into_sopc_buffer(const SOPC_Variant* variant, SOPC_Buffer* buf)
 {
+    SOPC_ASSERT(NULL != buf && NULL != variant);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+
     switch (variant->BuiltInTypeId)
     {
     case SOPC_Boolean_Id:
-    	SOPC_JSON_BuiltInType_Boolean(variant->Value.Boolean,buffer,size);
-		break;
-    case SOPC_Float_Id:
-    	SOPC_JSON_BuiltInType_Float(variant->Value.Floatv,buffer,size);
-		break;
+        if (variant->Value.Boolean)
+        {
+            status = SOPC_Buffer_Write(buf, (const uint8_t*) TRUE_STR, strlen(TRUE_STR));
+        }
+        else
+        {
+            status = SOPC_Buffer_Write(buf, (const uint8_t*) FALSE_STR, strlen(FALSE_STR));
+        }
+        break;
     case SOPC_UInt16_Id:
-    	SOPC_JSON_BuiltInType_UInt16(variant->Value.Uint16,buffer,size);
-    	break;
-    case SOPC_Int16_Id:
-    	SOPC_JSON_BuiltInType_Int16(variant->Value.Int16,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintU32(variant->Value.Uint16, buf);
+        break;
     case SOPC_UInt32_Id:
-    	SOPC_JSON_BuiltInType_UInt32(variant->Value.Uint32,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintU32(variant->Value.Uint32, buf);
+        break;
+    case SOPC_Int16_Id:
+        status = SOPC_Buffer_PrintI32(variant->Value.Int16, buf);
+        break;
     case SOPC_Int32_Id:
-    	SOPC_JSON_BuiltInType_Int32(variant->Value.Int32,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintI32(variant->Value.Int32, buf);
+        break;
     case SOPC_UInt64_Id:
-    	SOPC_JSON_BuiltInType_UInt64(variant->Value.Uint64,buffer,size);
-    	break;
+        // TODO : Understand the OPC UA specification,
+        // %llu not supported on some embedded target
+        status = SOPC_STATUS_NOT_SUPPORTED;
+        break;
     case SOPC_Int64_Id:
-    	SOPC_JSON_BuiltInType_Int64(variant->Value.Int64,buffer,size);
-    	break;
+        // TODO
+        status = SOPC_STATUS_NOT_SUPPORTED;
+        break;
+    case SOPC_Float_Id:
+        status = SOPC_Buffer_PrintFloatDouble(variant->Value.Floatv, buf);
+        break;
     case SOPC_Double_Id:
-    	SOPC_JSON_BuiltInType_Double(variant->Value.Doublev,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintFloatDouble(variant->Value.Doublev, buf);
+        break;
     case SOPC_String_Id:
-    	SOPC_JSON_BuiltInType_String( (char*) variant->Value.String.Data,buffer,size);
-    	break;
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) variant->Value.String.Data,
+                                   (uint32_t) variant->Value.String.Length);
+        break;
     default:
-    	return SOPC_STATUS_NOT_SUPPORTED;
-    	break;
+        return SOPC_STATUS_NOT_SUPPORTED;
+        break;
     }
-    return SOPC_STATUS_OK;
+    return status;
 }
 
-static SOPC_ReturnStatus SOPC_JSON_PublisherId_Encode (const SOPC_Dataset_LL_PublisherId* PubId, char * buffer, size_t size)
+/**
+ * \brief Print PublisherId in buffer according to its type.
+ *
+ * \param PubId   A non-NULL pointer to a SOPC_Dataset_LL_PublisherId to print.
+ * \param buffer  A non-NULL pointer to a SOPC_Buffer.
+ *
+ * \return  SOPC_STATUS_NOT_SUPPORTED, if the type to print isn't supported
+ *          SOPC_STATUS_OK, if data is printed successfully
+ */
+static SOPC_ReturnStatus print_publisherId_into_sopc_buffer(const SOPC_Dataset_LL_PublisherId* PubId,
+                                                            SOPC_Buffer* buffer)
 {
+    SOPC_ASSERT(NULL != PubId && NULL != buffer);
+    // String Publisher Id is not managed
+    SOPC_ASSERT(DataSet_LL_PubId_String_Id != PubId->type);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     switch (PubId->type)
     {
     case DataSet_LL_PubId_Byte_Id:
-    	SOPC_JSON_BuiltInType_Float(PubId->data.byte,buffer,size);
-		break;
+        status = SOPC_Buffer_PrintU32(PubId->data.byte, buffer);
+        break;
     case DataSet_LL_PubId_UInt16_Id:
-    	SOPC_JSON_BuiltInType_UInt16(PubId->data.uint16,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintU32(PubId->data.uint16, buffer);
+        break;
     case DataSet_LL_PubId_UInt32_Id:
-    	SOPC_JSON_BuiltInType_UInt32(PubId->data.uint32,buffer,size);
-    	break;
+        status = SOPC_Buffer_PrintU32(PubId->data.uint32, buffer);
+        break;
     case DataSet_LL_PubId_UInt64_Id:
-    	SOPC_JSON_BuiltInType_UInt64(PubId->data.uint64,buffer,size);
-    	break;
+        status = SOPC_STATUS_NOT_SUPPORTED;
+        break;
     case DataSet_LL_PubId_String_Id:
-    	SOPC_JSON_BuiltInType_String((char*) PubId->data.string.Data,buffer,size);
-    	break;
+        status = SOPC_STATUS_NOT_SUPPORTED;
     default:
-    	return SOPC_STATUS_NOT_SUPPORTED;
-    	break;
+        break;
+    }
+    return status;
+}
+
+/**
+ * \brief Encode NetworkMessage start into JSON format
+ *        Currently with 4 elements : "MessageId", "MessageType", "PublisherId", "Messages"
+ *
+ * \param pPayloadJSON       A non-NULL pointer to a SOPC_Buffer.
+ * \param MessageId          A non-NULL pointer to a string representing a unique MessageId.
+ * \param PublisherId        A non-NULL pointer to a SOPC_Dataset_LL_PublisherId.
+ *
+ * \return  A SOPC_ReturnStatus
+ */
+static SOPC_ReturnStatus SOPC_JSON_Encode_NetworkMessage_Start(SOPC_Buffer* pPayloadJSON,
+                                                               const char* MessageId,
+                                                               const SOPC_Dataset_LL_PublisherId* PublisherId)
+{
+    SOPC_ASSERT(NULL != pPayloadJSON && NULL != MessageId && NULL != PublisherId);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    BUFFER_PRINT_STR("{\"MessageId\":", pPayloadJSON, status);
+    BUFFER_PRINT_STR(MessageId, pPayloadJSON, status);
+    BUFFER_PRINT_STR(",\"MessageType\":\"ua-data\",\"PublisherId\":\"", pPayloadJSON, status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = print_publisherId_into_sopc_buffer(PublisherId, pPayloadJSON);
+    }
+    BUFFER_PRINT_STR("\",\"Messages\":[", pPayloadJSON, status);
+
+    return status;
+}
+
+/**
+ * \brief Encode DataSetMessage start into JSON format
+ *        Currently with 3 elements : "DataSetWriterId", "MessageType", "Payload"
+ *
+ * \param pPayloadJSON       A non-NULL pointer to a SOPC_Buffer.
+ * \param WriterId           A uint16_t.
+ *
+ * \return  A SOPC_ReturnStatus
+ */
+static SOPC_ReturnStatus SOPC_JSON_Encode_DataSetMessage_Start(SOPC_Buffer* pPayloadJSON, const uint16_t WriterId)
+{
+    SOPC_ASSERT(NULL != pPayloadJSON);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    BUFFER_PRINT_STR("{\"DataSetWriterId\":", pPayloadJSON, status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_PrintU32((const uint32_t) WriterId, pPayloadJSON);
+    }
+    BUFFER_PRINT_STR(",\"MessageType\":\"ua-keyframe\",\"Payload\":{", pPayloadJSON, status);
+
+    return status;
+}
+
+/**
+ * \brief Encode Variant into JSON format
+ *        Currently with 2 elements : "Type", "Body"
+ *
+ * \param pPayloadJSON       A non-NULL pointer to a SOPC_Buffer.
+ * \param variant            A non-NULL pointer to a SOPC_Variant.
+ * \param varName            A non-NULL pointer to a string representing a unique VariantName.
+ *
+ * \return  A SOPC_ReturnStatus
+ */
+static SOPC_ReturnStatus SOPC_JSON_Encode_Variant(SOPC_Buffer* pPayloadJSON,
+                                                  const SOPC_Variant* variant,
+                                                  const char* varName)
+{
+    SOPC_ASSERT(NULL != pPayloadJSON && NULL != variant && NULL != varName);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    BUFFER_PRINT_STR(varName, pPayloadJSON, status);
+    BUFFER_PRINT_STR(":{\"Type\":", pPayloadJSON, status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_PrintU32(variant->BuiltInTypeId, pPayloadJSON);
+    }
+    BUFFER_PRINT_STR(",\"Body\":", pPayloadJSON, status);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = print_variant_into_sopc_buffer(variant, pPayloadJSON);
+    }
+    BUFFER_PRINT_STR("}", pPayloadJSON, status);
+
+    return status;
+}
+
+/**
+ * Function which generate unique MessageId with GroupeId and DatasetMessageSequenceNumber(index) (JSON format)
+ *
+ * Return SOPC_STATUS_NOK if there is a problem in writing the buffer,
+ * Return SOPC_STATUS_OK otherwise
+ */
+static SOPC_ReturnStatus generate_MessageId_JSON(char* buffer,
+                                                 uint16_t sizeBuffer,
+                                                 const uint16_t GroupeId,
+                                                 const uint16_t index)
+{
+    SOPC_ASSERT(NULL != buffer);
+    int use = snprintf(buffer, sizeBuffer, "\"%" PRIu16 "-%" PRIu16 "\"", GroupeId, index);
+    if (use <= 0 || (int) sizeBuffer <= use)
+    {
+        return SOPC_STATUS_NOK;
     }
     return SOPC_STATUS_OK;
-}
-
-void JSON_Encode_NetworkMessage (SOPC_Buffer * pPayloadJSON, char * MessageId, char * PublisherId)
-{
-
-	SOPC_Buffer_Write (pPayloadJSON, &openingHook, 1);
-	//MessageId
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "MessageId",9);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)MessageId, (uint32_t) strlen(MessageId));
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-	//MessageType
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"MessageType",11);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"ua-data",7);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-	//PublisherId
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"PublisherId",11);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)PublisherId, (uint32_t) strlen(PublisherId));
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-	//Messages
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"Messages",8);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &openingSquareBracket,1);
-}
-
-void JSON_Encode_DataSetMessage (SOPC_Buffer * pPayloadJSON, uint16_t WriterId)
-{
-
-	char varWriterId [6] = "\0";
-
-	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "DataSetWriterId",15);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	int res = snprintf(varWriterId,5,"%u",WriterId);
-	SOPC_ASSERT(6 - res > 0 && res > 0);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varWriterId, (uint32_t) strlen(varWriterId));
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-
-	//MessageType
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"MessageType",11);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*)"ua-keyframe",11);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-
-	//Payload
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Payload",7);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
-}
-
-void JSON_Encode_Variant (SOPC_Buffer * pPayloadJSON, const SOPC_Variant* variant)
-{
-	char varType [3] = "\0";
-	char varBody [100] = "\0";
-
-	//VariantName
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	//variant
-	SOPC_Buffer_Write (pPayloadJSON, &openingHook,1);
-	//Type
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Type",4);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	int Type = variant->BuiltInTypeId;
-	sprintf(varType,"%d",Type);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varType, (uint32_t) strlen(varType));
-	SOPC_Buffer_Write (pPayloadJSON, &comma,1);
-	//Body
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) "Body",4);
-	SOPC_Buffer_Write (pPayloadJSON, &quote,1);
-	SOPC_Buffer_Write (pPayloadJSON, &colon,1);
-	SOPC_JSON_Variant_Encode(variant,varBody,100);
-	SOPC_Buffer_Write (pPayloadJSON, (uint8_t*) varBody, (uint32_t) strlen(varBody) );
-	SOPC_Buffer_Write (pPayloadJSON, &closingHook,1);
-}
-
-static SOPC_ReturnStatus SOPC_Generate_MessageId_JSON(char * buffer, uint16_t sizeBuffer,uint16_t GroupeId,uint32_t index)
-{
-	int use = snprintf(buffer,sizeBuffer,"%" PRIu16 "-%" PRIu32, GroupeId,index);
-	if ( use <= 0 || (int) sizeBuffer  <= use)
-	{
-		return SOPC_STATUS_NOK;
-	}
-	return SOPC_STATUS_OK;
 }
 
 SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message)
 {
-	//DatasetMessageSequenceNumber
-	const SOPC_Dataset_LL_DataSetMessage* dsm0 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
-	uint16_t DatasetMessageSequenceNumber = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm0);
-	uint16_t GroupeId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(message);
-	char MessageId[100] = "\0";
-	SOPC_Generate_MessageId_JSON(MessageId,100,GroupeId,DatasetMessageSequenceNumber);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    static const uint8_t comma = ',';
 
-	//PublisherId
-	const SOPC_Dataset_LL_NetworkMessage_Header * Header = SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(message);
-	const SOPC_Dataset_LL_PublisherId * PublisherId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(Header);
-	char bufferPubId[100];
-	SOPC_JSON_PublisherId_Encode(PublisherId, bufferPubId, 100);
+    // DatasetMessageSequenceNumber
+    const SOPC_Dataset_LL_DataSetMessage* dsm0 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);
+    const uint16_t datasetMessageSequenceNumber = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(dsm0);
+    const uint16_t GroupeId = SOPC_Dataset_LL_NetworkMessage_Get_GroupId(message);
+    char messageId[(2 * SOPC_MAX_LENGTH_UINT16_TO_STRING) + 1] = {0};
+    status = generate_MessageId_JSON(messageId, 2 * SOPC_MAX_LENGTH_UINT16_TO_STRING, GroupeId,
+                                     datasetMessageSequenceNumber);
+    check_status_and_set_default(status, SOPC_JSON_NetworkMessage_Error_Generate_Unique_MessageId);
 
-	SOPC_Buffer* buffer = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+    // PublisherId
+    const SOPC_Dataset_LL_NetworkMessage_Header* Header = SOPC_Dataset_LL_NetworkMessage_GetHeader_Const(message);
+    const SOPC_Dataset_LL_PublisherId* publisherId = SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(Header);
 
-    JSON_Encode_NetworkMessage(buffer,MessageId,bufferPubId);
-
-	size_t nDsm = (size_t) SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
-
-    for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
+    // ~200 oct for header with only 1 dataSetMessage and 1 simple Variant (without dimension parameter)
+    // NetworkMessage elements : "MessageId", "MessageType", "PublisherId", "Messages"
+    // DataSetMessage elements : "DataSetWriterId", "MessageType", "Payload"
+    // Variant elements : "Type", "Body"
+    SOPC_Buffer* buffer = SOPC_Buffer_CreateResizable(512, SOPC_PUBSUB_BUFFER_SIZE);
+    if (NULL != buffer && SOPC_STATUS_OK == status)
     {
-    	const SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
-    	uint16_t WriterId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
-
-    	JSON_Encode_DataSetMessage(buffer,WriterId);
-
-    	uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
-        for (uint16_t iField = 0; iField < nbFields; ++iField)
-        {
-        	const SOPC_Variant * var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm,iField);
-        	JSON_Encode_Variant(buffer,var);
-
-        	//add comma if it's not the last Variant
-        	if ( (iField + 1) < nbFields)
-        	{
-        	SOPC_Buffer_Write (buffer, &comma,1);
-        	}
-        }
-
-        //close Payload on JSON file
-        SOPC_Buffer_Write (buffer, &closingHook,1);
-
-        //close DataSetMessage on JSON file
-        SOPC_Buffer_Write (buffer, &closingHook,1);
-
-    	//add comma if it's not the last DatasetMessage
-    	if ( (iDsm + 1) < nDsm)
-    	{
-    	SOPC_Buffer_Write (buffer, &comma,1);
-    	}
-
+        status = SOPC_JSON_Encode_NetworkMessage_Start(buffer, messageId, publisherId);
+        check_status_and_set_default(status, SOPC_JSON_NetworkMessage_Error_Encode);
     }
-    //closing NetworkMessage on JSON file
-    SOPC_Buffer_Write (buffer, &closingSquareBracket,1);
-    SOPC_Buffer_Write (buffer, &closingHook,1);
 
-	return buffer;
+    uint8_t nDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(message);
+    for (uint8_t iDsm = 0; iDsm < nDsm && SOPC_STATUS_OK == status; iDsm++)
+    {
+        const SOPC_Dataset_LL_DataSetMessage* dsm =
+            SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
+        uint16_t WriterId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
 
+        status = SOPC_JSON_Encode_DataSetMessage_Start(buffer, WriterId);
+        check_status_and_set_default(status, SOPC_JSON_DataSetMessage_Error_Encode);
+
+        uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
+        for (uint16_t iField = 0; iField < nbFields && SOPC_STATUS_OK == status; ++iField)
+        {
+            // here, this function is used to create a unique variant name! (iDsm-iField)
+            status = generate_MessageId_JSON(messageId, 2 * SOPC_MAX_LENGTH_UINT16_TO_STRING, iDsm, iField);
+            check_status_and_set_default(status, SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName);
+            if (SOPC_STATUS_OK == status)
+            {
+                const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, iField);
+                status = SOPC_JSON_Encode_Variant(buffer, var, messageId);
+                check_status_and_set_default(status, SOPC_JSON_Variant_Error_Encode);
+            }
+            // add comma if it's not the last Variant
+            if ((iField + 1) < nbFields && SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_Write(buffer, &comma, 1);
+            }
+        }
+        // close Payload & DataSetMessage on JSON file
+        BUFFER_PRINT_STR("}}", buffer, status);
+
+        // add comma if it's not the last DatasetMessage
+        if ((iDsm + 1) < nDsm && SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Buffer_Write(buffer, &comma, 1);
+        }
+    }
+    // closing NetworkMessage on JSON file
+    BUFFER_PRINT_STR("]}", buffer, status);
+    // If this wasn't the case before, the only problem is an error closing the JSON structure.
+    if (SOPC_STATUS_OK != status && SOPC_UADP_NetworkMessage_Error_Code_None == network_Error_Code)
+    {
+        check_status_and_set_default(status, SOPC_JSON_Error_Closing_Structure);
+    }
+
+    // Set buffer position to 0 for reading
+    if (NULL != buffer)
+    {
+        SOPC_Buffer_SetPosition(buffer, 0);
+    }
+    // If a problem occurs during encoding, the buffer is deleted and NULL is returned
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Buffer_Delete(buffer);
+        buffer = NULL;
+    }
+
+    if (SOPC_UADP_NetworkMessage_Error_Code_None != network_Error_Code)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "JSON NetworkMessage encode failed with error = %" PRIu32,
+                                 (uint32_t) SOPC_UADP_NetworkMessage_Get_Last_Error());
+    }
+
+    return buffer;
 }
 
 SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm, SOPC_PubSub_SecurityType* security)
