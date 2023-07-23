@@ -157,7 +157,7 @@ extern void translate_browse_path__treat_one_translate_browse_path_1(
    const constants__t_NodeId_i translate_browse_path__source,
    const constants__t_RelativePath_i translate_browse_path__rel_path,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
-extern void translate_browse_path__treat_one_translate_browse_path_1_1(
+extern void translate_browse_path__treat_relative_path_sequence(
    const constants__t_RelativePathElt_i translate_browse_path__rel_path_elt,
    const t_entier4 translate_browse_path__index,
    const t_bool translate_browse_path__continue,

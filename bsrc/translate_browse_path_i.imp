@@ -773,7 +773,7 @@ LOCAL_OPERATIONS
     END
     ;
 
-    statusCode_operation, p_continue <-- treat_one_translate_browse_path_1_1(rel_path_elt, index, continue) =
+    statusCode_operation, p_continue <-- treat_relative_path_sequence(rel_path_elt, index, continue) =
     PRE
         IsDecoded = TRUE &
         rel_path_elt : t_RelativePathElt_i &
@@ -1522,12 +1522,11 @@ statusCode_operation <-- treat_browse_result_one_source_1(index, targetName, bro
             */
             WHILE l_continue = TRUE
             DO
-                free_BrowsePathResult;
                 l_continue, l_relativePathElt, l_index <-- continue_iter_relativePath;
 
                 l_continue_1 := l_continue;
                 statusCode_operation, l_continue <--
-                    treat_one_translate_browse_path_1_1(l_relativePathElt,
+                    treat_relative_path_sequence(l_relativePathElt,
                                                         l_index, l_continue_1)
             INVARIANT
                 elements_to_iterate : seq(t_RelativePathElt)  &
@@ -1547,11 +1546,14 @@ statusCode_operation <-- treat_browse_result_one_source_1(index, targetName, bro
     END
     ;
 
-    statusCode_operation, p_continue <-- treat_one_translate_browse_path_1_1(rel_path_elt, index, continue) =
+    statusCode_operation, p_continue <-- treat_relative_path_sequence(rel_path_elt, index, continue) =
     BEGIN
+        /* Update BrowsePathResult and BrowsePathRemaining with computed browse results */
+        free_BrowsePathResult;
         statusCode_operation <--
             treat_one_relative_path_element(rel_path_elt, index);
 
+        /* Update BrowsePathSource with BrowsePathResult */
         free_BrowsePathSource;
         p_continue := bool(continue = TRUE &
                            (statusCode_operation = e_sc_ok or
