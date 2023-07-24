@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 16/02/2023 16:13:08
+ Date                 : 24/07/2023 14:30:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,10 +147,15 @@
 #include "time_reference_bs.h"
 #include "toolkit_header.h"
 #include "translate_browse_path.h"
-#include "translate_browse_path_1.h"
 #include "translate_browse_path_element_it.h"
 #include "translate_browse_path_it.h"
+#include "translate_browse_path_result.h"
+#include "translate_browse_path_result_1.h"
+#include "translate_browse_path_result_1_it.h"
 #include "translate_browse_path_result_it.h"
+#include "translate_browse_path_source.h"
+#include "translate_browse_path_source_1.h"
+#include "translate_browse_path_source_1_it.h"
 #include "translate_browse_path_source_it.h"
 #include "unregister_nodes_it.h"
 #include "user_authentication.h"
@@ -224,13 +229,14 @@ void INITIALISATION(void) {
    service_browse_it__INITIALISATION();
    msg_browse_bs__INITIALISATION();
    msg_browse_next_bs__INITIALISATION();
-   translate_browse_path_1__INITIALISATION();
-   msg_translate_browse_path_bs__INITIALISATION();
-   translate_browse_path_element_it__INITIALISATION();
-   translate_browse_path_source_it__INITIALISATION();
+   translate_browse_path_source_1__INITIALISATION();
+   translate_browse_path_source_1_it__INITIALISATION();
+   node_id_pointer_bs__INITIALISATION();
+   translate_browse_path_source__INITIALISATION();
+   translate_browse_path_result_1__INITIALISATION();
+   translate_browse_path_result_1_it__INITIALISATION();
    translate_browse_path_result_it__INITIALISATION();
    browse_treatment_context_bs__INITIALISATION();
-   node_id_pointer_bs__INITIALISATION();
    browse_treatment_context__INITIALISATION();
    browse_treatment_continuation_points_bs__INITIALISATION();
    browse_treatment_continuation_points_session_it__INITIALISATION();
@@ -240,6 +246,10 @@ void INITIALISATION(void) {
    browse_treatment_target_it__INITIALISATION();
    browse_treatment_result_it__INITIALISATION();
    browse_treatment__INITIALISATION();
+   msg_translate_browse_path_bs__INITIALISATION();
+   translate_browse_path_result__INITIALISATION();
+   translate_browse_path_element_it__INITIALISATION();
+   translate_browse_path_source_it__INITIALISATION();
    translate_browse_path__INITIALISATION();
    translate_browse_path_it__INITIALISATION();
    service_set_view__INITIALISATION();

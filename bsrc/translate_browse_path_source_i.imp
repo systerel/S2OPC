@@ -1,0 +1,85 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_source_i
+
+REFINES
+    translate_browse_path_source
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    node_id_pointer_bs
+
+IMPORTS
+    translate_browse_path_source_1,
+    translate_browse_path_source_1_it
+
+PROMOTES
+    get_BrowsePathSourceSize,
+    get_BrowsePathSource
+
+OPERATIONS
+
+    statusCode_operation <-- update_one_browse_path_source(source) =
+    VAR
+        l_alloc,
+        l_source_copy
+    IN
+        statusCode_operation := c_StatusCode_indet;
+        l_alloc, l_source_copy <-- copy_node_id_pointer_content (source);
+        IF l_alloc = TRUE THEN
+            add_BrowsePathSource(l_source_copy);
+            statusCode_operation := e_sc_ok
+        ELSE
+            statusCode_operation := e_sc_bad_out_of_memory
+        END
+    END
+    ;
+
+    free_BrowsePathSource =
+    VAR
+        l_size,
+        l_continue,
+        l_index,
+        l_nodeId
+    IN
+        l_size <-- get_BrowsePathSourceSize;
+        l_continue <-- init_iter_browsePathSourceIdx(l_size);
+        WHILE l_continue = TRUE
+        DO
+            l_continue, l_index <-- continue_iter_browsePathSourceIdx;
+            l_nodeId <-- get_BrowsePathSource(l_index);
+            free_node_id_pointer(l_nodeId)
+        INVARIANT
+            l_index : NAT     &
+            l_index <= l_size &
+            browsePathSourceIdx_iterated = 1 .. l_index            &
+            browsePathSourceIdx_to_iterate = l_index + 1 .. l_size &
+            nextBrowsePathSourceIdx = l_index + 1                  &
+            l_continue = bool(l_index < l_size)
+        VARIANT
+            0
+        END
+        ;
+        init_BrowsePathSource
+    END
+
+END

@@ -18,33 +18,30 @@
  */
 
 MACHINE
-    translate_browse_path_1
+    translate_browse_path_result_1
 
 SEES
     constants
 
 DEFINITIONS
     d_variables ==
-    BrowsePathSource,
-    BrowsePathResult,
-    BrowsePathRemainingNodeId,
-    BrowsePathRemainingIndex
-    ;
+        BrowsePathResult,
+        BrowsePathRemainingNodeId,
+        BrowsePathRemainingIndex
+        ;
 
     d_invariant ==
-    BrowsePathSource : seq(t_NodeId_i) &
-    BrowsePathResult : seq(t_ExpandedNodeId_i) &
-    BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
-    BrowsePathRemainingIndex  : seq(NAT1) &
+        BrowsePathResult : seq(t_ExpandedNodeId_i) &
+        BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
+        BrowsePathRemainingIndex  : seq(NAT1) &
 
-    size(BrowsePathSource) <= k_n_BrowsePathResPerElt_max &
-    size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
+        size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
 
-    size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
-    size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
+        size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
+        size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
-    c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
-    ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId)
+        c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
+        ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId)
 
 ABSTRACT_VARIABLES
     d_variables
@@ -53,46 +50,11 @@ INVARIANT
     d_invariant
 
 INITIALISATION
-    BrowsePathSource := {} ||
     BrowsePathResult := {} ||
     BrowsePathRemainingNodeId := {} ||
     BrowsePathRemainingIndex  := {}
 
 OPERATIONS
-
-    init_BrowsePathSource =
-    BEGIN
-        BrowsePathSource := {}
-    END
-    ;
-
-    res <-- get_BrowsePathSourceSize =
-    BEGIN
-        res := size(BrowsePathSource)
-    END
-    ;
-
-    nodeId <-- get_BrowsePathSource (index) =
-    PRE
-        index : NAT1 &
-        index <= size(BrowsePathSource)
-    THEN
-        nodeId := BrowsePathSource (index)
-    END
-    ;
-
-    add_BrowsePathSource (nodeId) =
-    PRE
-        nodeId : t_NodeId_i &
-        nodeId : t_NodeId &
-        size(BrowsePathSource) < k_n_BrowsePathResPerElt_max
-    THEN
-        BrowsePathSource
-        :(
-        BrowsePathSource = BrowsePathSource$0 <- nodeId
-        )
-    END
-    ;
 
     init_BrowsePathResult =
     BEGIN
@@ -109,11 +71,12 @@ OPERATIONS
     res <-- get_BrowsePathResult_IsFull =
     BEGIN
         res
-        :(
-            res : BOOL &
-            (res = TRUE => size(BrowsePathResult) = k_n_BrowsePathResPerElt_max) &
-             (res = FALSE => size(BrowsePathResult) < k_n_BrowsePathResPerElt_max)
-         )
+        :(  res : BOOL &
+            (res = TRUE =>
+                size(BrowsePathResult) = k_n_BrowsePathResPerElt_max) &
+            (res = FALSE =>
+                size(BrowsePathResult) < k_n_BrowsePathResPerElt_max)
+        )
     END
     ;
 
@@ -134,9 +97,7 @@ OPERATIONS
         size(BrowsePathResult) < k_n_BrowsePathResPerElt_max
     THEN
         BrowsePathResult
-        :(
-        BrowsePathResult = BrowsePathResult$0 <- nodeId
-        )
+        :( BrowsePathResult = BrowsePathResult$0 <- nodeId )
     END
     ;
 
@@ -156,11 +117,12 @@ OPERATIONS
     res <-- get_BrowsePathRemaining_IsFull =
     BEGIN
         res
-        :(
-            res : BOOL &
-            (res = TRUE => size(BrowsePathRemainingNodeId) = k_n_BrowsePathResPerElt_max) &
-             (res = FALSE => size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max)
-         )
+        :(  res : BOOL &
+            (res = TRUE =>
+                size(BrowsePathRemainingNodeId) = k_n_BrowsePathResPerElt_max) &
+            (res = FALSE =>
+                size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max)
+        )
     END
     ;
 
@@ -183,9 +145,8 @@ OPERATIONS
     THEN
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
-        :(
-        BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 <- nodeId &
-        BrowsePathRemainingIndex  = BrowsePathRemainingIndex$0 <- path_index
+        :(  BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 <- nodeId &
+            BrowsePathRemainingIndex  = BrowsePathRemainingIndex$0 <- path_index
         )
     END
 

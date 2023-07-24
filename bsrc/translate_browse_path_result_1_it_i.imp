@@ -1,0 +1,72 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    translate_browse_path_result_1_it_i
+
+REFINES
+    translate_browse_path_result_1_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+
+    currentBrowsePathIdx_i,
+    nb_browsePathIdx_max_refs_i
+
+INVARIANT
+    currentBrowsePathIdx_i : NAT &
+    nb_browsePathIdx_max_refs_i : NAT &
+
+    nb_browsePathIdx_max_refs = nb_browsePathIdx_max_refs_i &
+    currentBrowsePathIdx_i : 0..nb_browsePathIdx_max_refs_i &
+    nextBrowsePathIdx = currentBrowsePathIdx_i + 1 &
+
+    (nb_browsePathIdx_max_refs_i = 0 =>
+        browsePathIdx_to_iterate = {} &
+        browsePathIdx_iterated = {}) &
+
+    (nb_browsePathIdx_max_refs_i /= 0 =>
+        browsePathIdx_to_iterate = currentBrowsePathIdx_i+1..nb_browsePathIdx_max_refs_i &
+        browsePathIdx_iterated = 1..currentBrowsePathIdx_i)
+
+INITIALISATION
+    currentBrowsePathIdx_i := 0;
+    nb_browsePathIdx_max_refs_i := 0
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_browsePathIdx(p_nb_browsePathIdx_max_refs) =
+    BEGIN
+        nb_browsePathIdx_max_refs_i := p_nb_browsePathIdx_max_refs;
+        currentBrowsePathIdx_i := 0;
+        p_continue := bool (0 < p_nb_browsePathIdx_max_refs)
+    END
+    ;
+
+    p_continue, p_browsePathIdx <-- continue_iter_browsePathIdx =
+    BEGIN
+        currentBrowsePathIdx_i := currentBrowsePathIdx_i + 1;
+        p_browsePathIdx := currentBrowsePathIdx_i;
+        p_continue := bool (currentBrowsePathIdx_i < nb_browsePathIdx_max_refs_i)
+    END
+
+END

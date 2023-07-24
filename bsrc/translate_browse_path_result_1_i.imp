@@ -18,17 +18,15 @@
  */
 
 IMPLEMENTATION
-    translate_browse_path_1_i
+    translate_browse_path_result_1_i
 
 REFINES
-    translate_browse_path_1
+    translate_browse_path_result_1
 
 SEES
     constants
 
 CONCRETE_VARIABLES
-    BrowsePathSource_tab_i,
-    BrowsePathSource_size_i,
     BrowsePathResult_tab_i,
     BrowsePathResult_size_i,
     BrowsePathRemainingNodeId_tab_i,
@@ -36,9 +34,6 @@ CONCRETE_VARIABLES
     BrowsePathRemainingNodeId_size_i
 
 INVARIANT
-    BrowsePathSource_tab_i  : t_BrowsePathResPerElt_i --> t_NodeId_i     &
-    BrowsePathSource_size_i : t_BrowsePathResPerElt_i &
-    BrowsePathSource      = 1..BrowsePathSource_size_i <| BrowsePathSource_tab_i &
 
     BrowsePathResult_tab_i  : t_BrowsePathResPerElt_i --> t_ExpandedNodeId_i   &
     BrowsePathResult_size_i : t_BrowsePathResPerElt_i &
@@ -53,8 +48,6 @@ INVARIANT
 
 INITIALISATION
 
-    BrowsePathSource_tab_i  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
-    BrowsePathSource_size_i := 0;
     BrowsePathResult_tab_i := t_BrowsePathResPerElt_i * {c_ExpandedNodeId_indet};
     BrowsePathResult_size_i := 0;
     BrowsePathRemainingNodeId_size_i := 0;
@@ -63,32 +56,6 @@ INITIALISATION
 
 
 OPERATIONS
-
-    init_BrowsePathSource =
-    BEGIN
-        BrowsePathSource_tab_i  := t_BrowsePathResPerElt_i * {c_NodeId_indet};
-        BrowsePathSource_size_i := 0
-    END
-    ;
-
-    res <-- get_BrowsePathSourceSize =
-    BEGIN
-        res := BrowsePathSource_size_i
-    END
-    ;
-
-    nodeId <-- get_BrowsePathSource (index) =
-    BEGIN
-        nodeId := BrowsePathSource_tab_i (index)
-    END
-    ;
-
-    add_BrowsePathSource (nodeId) =
-    BEGIN
-        BrowsePathSource_size_i := BrowsePathSource_size_i + 1;
-        BrowsePathSource_tab_i(BrowsePathSource_size_i) := nodeId
-    END
-    ;
 
     init_BrowsePathResult =
     BEGIN
@@ -155,7 +122,5 @@ OPERATIONS
         BrowsePathRemainingNodeId_tab_i(BrowsePathRemainingNodeId_size_i) := nodeId;
         BrowsePathRemainingIndex_tab_i(BrowsePathRemainingNodeId_size_i) := path_index
     END
-
-
 
 END
