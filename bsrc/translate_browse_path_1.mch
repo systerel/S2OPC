@@ -174,18 +174,18 @@ OPERATIONS
     END
     ;
 
-    add_BrowsePathResultRemaining (nodeId, index) =
+    add_BrowsePathResultRemaining (nodeId, path_index) =
     PRE
         nodeId : t_ExpandedNodeId_i &
         nodeId : t_ExpandedNodeId   &
-        index  : NAT1 &
+        path_index  : NAT1 &
         size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max
     THEN
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         :(
         BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 <- nodeId &
-        BrowsePathRemainingIndex  = BrowsePathRemainingIndex$0 <- index
+        BrowsePathRemainingIndex  = BrowsePathRemainingIndex$0 <- path_index
         )
     END
 

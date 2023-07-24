@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_1.c
 
- Date                 : 04/08/2022 14:53:23
+ Date                 : 24/07/2023 07:56:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -176,10 +176,10 @@ void translate_browse_path_1__get_BrowsePathRemaining(
 
 void translate_browse_path_1__add_BrowsePathResultRemaining(
    const constants__t_ExpandedNodeId_i translate_browse_path_1__nodeId,
-   const t_entier4 translate_browse_path_1__index) {
+   const t_entier4 translate_browse_path_1__path_index) {
    translate_browse_path_1__BrowsePathRemainingNodeId_size_i = translate_browse_path_1__BrowsePathRemainingNodeId_size_i +
       1;
    translate_browse_path_1__BrowsePathRemainingNodeId_tab_i[translate_browse_path_1__BrowsePathRemainingNodeId_size_i] = translate_browse_path_1__nodeId;
-   translate_browse_path_1__BrowsePathRemainingIndex_tab_i[translate_browse_path_1__BrowsePathRemainingNodeId_size_i] = translate_browse_path_1__index;
+   translate_browse_path_1__BrowsePathRemainingIndex_tab_i[translate_browse_path_1__BrowsePathRemainingNodeId_size_i] = translate_browse_path_1__path_index;
 }
 

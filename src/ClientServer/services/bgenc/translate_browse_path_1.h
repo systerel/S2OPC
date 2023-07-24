@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_1.h
 
- Date                 : 04/08/2022 14:53:23
+ Date                 : 24/07/2023 07:56:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,7 +63,7 @@ extern void translate_browse_path_1__add_BrowsePathResult(
    const constants__t_ExpandedNodeId_i translate_browse_path_1__nodeId);
 extern void translate_browse_path_1__add_BrowsePathResultRemaining(
    const constants__t_ExpandedNodeId_i translate_browse_path_1__nodeId,
-   const t_entier4 translate_browse_path_1__index);
+   const t_entier4 translate_browse_path_1__path_index);
 extern void translate_browse_path_1__add_BrowsePathSource(
    const constants__t_NodeId_i translate_browse_path_1__nodeId);
 extern void translate_browse_path_1__get_BrowsePathRemaining(

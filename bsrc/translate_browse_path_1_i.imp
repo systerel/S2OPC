@@ -149,11 +149,11 @@ OPERATIONS
     END
     ;
 
-    add_BrowsePathResultRemaining (nodeId, index) =
+    add_BrowsePathResultRemaining (nodeId, path_index) =
     BEGIN
         BrowsePathRemainingNodeId_size_i := BrowsePathRemainingNodeId_size_i + 1;
         BrowsePathRemainingNodeId_tab_i(BrowsePathRemainingNodeId_size_i) := nodeId;
-        BrowsePathRemainingIndex_tab_i(BrowsePathRemainingNodeId_size_i) := index
+        BrowsePathRemainingIndex_tab_i(BrowsePathRemainingNodeId_size_i) := path_index
     END
 
 

@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 23/07/2023 15:41:54
+ Date                 : 24/07/2023 07:56:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,7 +81,7 @@ extern void translate_browse_path__INITIALISATION(void);
   --------------------------*/
 extern void translate_browse_path__checkAndAdd_BrowsePathRemaining(
    const constants__t_ExpandedNodeId_i translate_browse_path__expandedNodeId,
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__checkAndAdd_BrowsePathResult(
    const constants__t_ExpandedNodeId_i translate_browse_path__expandedNodeId,
@@ -123,25 +123,25 @@ extern void translate_browse_path__get_translateStatus_from_browseStatus(
    const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__browse_statusCode,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__translate_statusCode);
 extern void translate_browse_path__treat_browse_result_one_source(
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    const constants__t_QualifiedName_i translate_browse_path__targetName,
    const t_entier4 translate_browse_path__nbReferences,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_browse_result_one_source_1(
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    const constants__t_QualifiedName_i translate_browse_path__targetName,
    const t_entier4 translate_browse_path__browseResult_index,
    const constants_statuscodes_bs__t_StatusCode_i translate_browse_path__in_statusCode,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_relative_path_element(
    const constants__t_RelativePathElt_i translate_browse_path__relativePathElt,
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_relative_path_element_1(
    const constants__t_BrowseDirection_i translate_browse_path__browseDirection,
    const constants__t_NodeId_i translate_browse_path__referenceTypeId,
    const t_bool translate_browse_path__includedSubtypes,
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    const constants__t_QualifiedName_i translate_browse_path__targetName,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_relative_path_element_2(
@@ -150,7 +150,7 @@ extern void translate_browse_path__treat_one_relative_path_element_2(
    const constants__t_BrowseDirection_i translate_browse_path__browseDirection,
    const constants__t_NodeId_i translate_browse_path__referenceTypeId,
    const t_bool translate_browse_path__includedSubtypes,
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    const constants__t_QualifiedName_i translate_browse_path__targetName,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_one_translate_browse_path_1(
@@ -159,7 +159,7 @@ extern void translate_browse_path__treat_one_translate_browse_path_1(
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation);
 extern void translate_browse_path__treat_relative_path_sequence(
    const constants__t_RelativePathElt_i translate_browse_path__rel_path_elt,
-   const t_entier4 translate_browse_path__index,
+   const t_entier4 translate_browse_path__path_index,
    const t_bool translate_browse_path__continue,
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path__statusCode_operation,
    t_bool * const translate_browse_path__p_continue);
