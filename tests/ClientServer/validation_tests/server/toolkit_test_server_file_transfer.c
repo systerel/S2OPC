@@ -34,11 +34,8 @@
 #define ITEM_1_FILE_NAME "item1File.log"
 #define ITEM_2_FILE_NAME "item2File.log"
 
-static SOPC_Boolean gbEnd = false;
 static int32_t gbStopFlag = false;
 static char* gLogDirPath = NULL;
-
-void stop_signal(int arg);
 
 static void set_stop_flag(SOPC_Boolean res)
 {
@@ -47,7 +44,7 @@ static void set_stop_flag(SOPC_Boolean res)
 
 static SOPC_Boolean get_stop_flag(void)
 {
-    return SOPC_Atomic_Int_Get(&gbStopFlag) == 1;
+    return SOPC_Atomic_Int_Get(&gbStopFlag) == true;
 }
 
 /*-----------------------
@@ -89,18 +86,13 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
     SOPC_UNUSED_ARG(status);
-    SOPC_FileTransfer_Clear();
+    set_stop_flag(true);
 }
 
-void stop_signal(int arg)
+static void stop_signal(int arg)
 {
     SOPC_UNUSED_ARG(arg);
-    bool stop_flag = get_stop_flag();
-    if (!stop_flag)
-    {
-        set_stop_flag(true);
-        gbEnd = true;
-    }
+    set_stop_flag(true);
 }
 
 /* Close file CallBack */
@@ -222,21 +214,14 @@ int main(int argc, char* argv[])
     status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
     SOPC_ASSERT("<test_server_file_transfer: Server startup failed" && status == SOPC_STATUS_OK);
 
-    while (!gbEnd)
+    while (!get_stop_flag())
     {
         SOPC_Sleep(1);
     }
 
     SOPC_Free(gLogDirPath);
 
-    status = SOPC_ServerHelper_StopServer();
-    if (status == SOPC_STATUS_OK)
-    {
-        printf("<test_server_file_transfer: Server ended to serve successfully\n");
-    }
-    else
-    {
-        printf("<test_server_file_transfer: Failed to end to serve\n");
-    }
+    SOPC_FileTransfer_Clear();
+    printf("<test_server_file_transfer: Server ended to serve\n");
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

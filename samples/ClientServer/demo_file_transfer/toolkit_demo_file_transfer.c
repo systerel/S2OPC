@@ -41,6 +41,7 @@
 #include "sopc_common_constants.h"
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
@@ -53,10 +54,24 @@
 
 static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
-static void set_file_closing_status(SOPC_Boolean res);
-static SOPC_Boolean get_file_closing_status(void);
-static SOPC_Boolean bEnd = false;
-void sigint(int arg);
+
+static int32_t gbStopFlag = false;
+
+static void set_stop_flag(SOPC_Boolean res)
+{
+    SOPC_Atomic_Int_Set(&gbStopFlag, res ? true : false);
+}
+
+static SOPC_Boolean get_stop_flag(void)
+{
+    return SOPC_Atomic_Int_Get(&gbStopFlag) == true;
+}
+
+static void stop_signal(int arg)
+{
+    SOPC_UNUSED_ARG(arg);
+    set_stop_flag(true);
+}
 
 static void set_file_closing_status(SOPC_Boolean res)
 {
@@ -121,7 +136,7 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
                                                    void* param)
 {
     /********************/
-    /* USER CODE BEGING */
+    /* USER CODE BEGINNING */
     /********************/
 
     /* avoid unused parameter compiler warning */
@@ -166,27 +181,8 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
 
 static void ServerStoppedCallback(SOPC_ReturnStatus status)
 {
-    (void) status;
-    if (NULL != gCstr_tmp_path)
-    {
-        SOPC_Free(gCstr_tmp_path);
-        gCstr_tmp_path = NULL;
-    }
-    SOPC_FileTransfer_Clear();
-    printf("******* Server stopped\n");
-}
-
-void sigint(int arg)
-{
-    (void) arg;
-    if (NULL != gCstr_tmp_path)
-    {
-        SOPC_Free(gCstr_tmp_path);
-        gCstr_tmp_path = NULL;
-    }
-    SOPC_FileTransfer_Clear();
-    printf("******* Server stopped\n");
-    bEnd = true;
+    set_stop_flag(true);
+    printf("******* Server stopped with status %d\n", status);
 }
 
 /*
@@ -197,8 +193,13 @@ void sigint(int arg)
  */
 static void UserCloseCallback(const char* tmp_file_path)
 {
+    if (get_file_closing_status())
+    {
+        // File is already closing
+        return;
+    }
     /********************/
-    /* USER CODE BEGING */
+    /* USER CODE BEGINNING */
     /********************/
     if (NULL != gCstr_tmp_path)
     {
@@ -237,8 +238,9 @@ static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr
 
 int main(int argc, char* argv[])
 {
-    printf("******* API test\n");
-    signal(SIGINT, sigint);
+    printf("******* Starting demo FileTransfer server\n");
+    signal(SIGINT, stop_signal);
+    signal(SIGTERM, stop_signal);
 
     // Note: avoid unused parameter warning from compiler
     (void) argc;
@@ -308,17 +310,10 @@ int main(int argc, char* argv[])
         status = SOPC_FileTransfer_Initialize();
         if (SOPC_STATUS_OK != status)
         {
-            printf("******* API FileTransfer intialization failed\n");
+            printf("******* API FileTransfer initialization failed\n");
             return 1; // SOPC_FileTransfer_Initialize free the memory in case of error
         }
     }
-    else
-    {
-        SOPC_FileTransfer_Clear();
-        return 1;
-    }
-
-    printf("******* Code begin ...\n");
 
     const SOPC_FileType_Config config_Item1_PreloadFile = {.file_path = "/tmp/Item1_preloadFile",
                                                            .fileType_nodeId = "ns=1;i=15478",
@@ -353,33 +348,28 @@ int main(int argc, char* argv[])
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to start server ...\n");
-            SOPC_FileTransfer_Clear();
-            return 1;
         }
     }
 
-    /********************/
-    /* USER CODE BEGING */
-    /********************/
-    bool file_is_close = false;
-
-    while (!bEnd)
+    bool file_is_closing = false;
+    bool file_is_closed = false;
+    while (SOPC_STATUS_OK == status && !get_stop_flag())
     {
-        file_is_close = get_file_closing_status();
-        if (file_is_close)
+        file_is_closing = get_file_closing_status();
+        if (file_is_closing && !file_is_closed)
         {
-            printf("<toolkit_demo_file_transfer> Tmp file path name = '%s'\n", gCstr_tmp_path);
-            if (NULL != gCstr_tmp_path)
-            {
-                SOPC_Free(gCstr_tmp_path);
-                gCstr_tmp_path = NULL;
-            }
-            set_file_closing_status(false);
+            printf("<toolkit_demo_file_transfer> file '%s' closed\n", gCstr_tmp_path);
+            file_is_closed = true;
         }
         SOPC_Sleep(500);
     }
-    /********************/
-    /* END USER CODE   */
-    /********************/
+
+    if (NULL != gCstr_tmp_path)
+    {
+        SOPC_Free(gCstr_tmp_path);
+        gCstr_tmp_path = NULL;
+    }
+    SOPC_FileTransfer_Clear();
+
     return 0;
 }
