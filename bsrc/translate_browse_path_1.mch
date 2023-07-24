@@ -74,7 +74,8 @@ OPERATIONS
 
     nodeId <-- get_BrowsePathSource (index) =
     PRE
-        index : NAT1
+        index : NAT1 &
+        index <= size(BrowsePathSource)
     THEN
         nodeId := BrowsePathSource (index)
     END
@@ -118,7 +119,8 @@ OPERATIONS
 
     nodeId <-- get_BrowsePathResult (index) =
     PRE
-        index : NAT1
+        index : NAT1 &
+        index <= size(BrowsePathResult)
     THEN
         nodeId := BrowsePathResult (index)
     END
@@ -164,7 +166,8 @@ OPERATIONS
 
     nodeId, remainingIndex <-- get_BrowsePathRemaining (index) =
     PRE
-        index : NAT1
+        index : NAT1 &
+        index <= size(BrowsePathRemainingNodeId)
     THEN
         nodeId := BrowsePathRemainingNodeId (index) ||
         remainingIndex := BrowsePathRemainingIndex(index)
