@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
     FILE* fd = fopen(xml_filename, "r");
 
-    if (fd == NULL)
+    if (NULL == fd)
     {
         fprintf(stderr, "Error while opening %s: %s\n", xml_filename, strerror(errno));
         return 1;

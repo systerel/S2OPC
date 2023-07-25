@@ -318,7 +318,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewConfigureNotificationCallback(SOPC_StaMac_Machi
  * \param userAppCtxArray  An array of user context defined with the same indexes as the monitored items in \p req.
  *                         The context will be provided in the callback defined by
  *                         when a notification occurs on a monitored item.
- * \param pAppCtx          The create monitored item application context is stored in the pointed structure and
+ * \param[out] pAppCtx     The create monitored item application context is stored in the pointed structure and
  *                         could be used to call ::SOPC_StaMac_PopMonItByAppCtx
  */
 SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
@@ -341,12 +341,12 @@ typedef struct SOPC_DeleteMonitoredItems_Ctx
 /**
  * \brief Deletes created monitored items for the state machine subscription using the request (new API)
  *
- * The \p pAppCtx shall be used to test the effective deletion of the MonitoredItem with
+ * The \p outAppCtx shall be used to test the effective deletion of the MonitoredItem with
  * ::SOPC_StaMac_PopDeleteMonItByAppCtx.
  *
  * \param pSM              The state machine with a subscription for which monitored items shall be deleted
  * \param req              The delete monitored items request
- * \param pAppCtx          The delete monitored item application context is stored in the pointed structure and
+ * \param[out] outAppCtx   The delete monitored item application context is stored in the pointed structure and
  *                         could be used to call ::SOPC_StaMac_PopDeleteMonItByAppCtx
  */
 SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,

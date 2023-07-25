@@ -42,7 +42,7 @@ static FILE* SOPC_HelperInternal_OpenFileFromPath(const char* filename)
 {
     FILE* fd = fopen(filename, "r");
 
-    if (fd == NULL)
+    if (NULL == fd)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "Configuration file %s cannot be opened. Please check path.\n", filename);

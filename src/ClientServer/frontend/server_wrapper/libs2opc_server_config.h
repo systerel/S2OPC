@@ -62,7 +62,7 @@ void SOPC_ServerConfigHelper_Clear(void);
 
 /**
  * \brief
- *   Structure reserved for future use in order to custom the configuration through XML.
+ *   Structure reserved for future use in order to customize the configuration through XML.
  *   e.g.: PKI provider alternative, etc.
  */
 typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;

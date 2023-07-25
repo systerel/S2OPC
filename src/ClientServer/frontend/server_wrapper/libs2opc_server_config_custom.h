@@ -148,9 +148,9 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* ser
  * \brief Set asymmetrical certificate and key of server from byte arrays.
  *        Certificate shall be in DER format, key file shall be in DER or PEM format.
  *
- * \param certificateNbBytes Number of elements in \p serverCertificate array
+ * \param certificateNbBytes Number of bytes in \p serverCertificate array
  * \param serverCertificate  Array of bytes containing server certificate at DER format
- * \param keyNbBytes         Number of elements in \p serverPrivateKey array
+ * \param keyNbBytes         Number of bytes in \p serverPrivateKey array
  * \param serverPrivateKey   Array of bytes containing server key file at DER or PEM format
  *
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
