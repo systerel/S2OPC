@@ -126,7 +126,7 @@ generation:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7f6f47f597d9b76fa21fc1f8fbf292abb411b9dd0bab503e41ee988e853fa3ff # digest of build_cyclone:1.1
+  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7a622c29071bdc118dfd49e2a4190add6efefb51cce0b55cf037445195e0b0ef # digest of build_cyclone:1.2
   script:
     - ./.check_signed_commit.sh
   rules:
@@ -140,12 +140,12 @@ check_commit_signature:
 .build-linux: &build_linux
   <<: *docker_job
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7f6f47f597d9b76fa21fc1f8fbf292abb411b9dd0bab503e41ee988e853fa3ff # digest of build_cyclone:1.1
+  image: registry.gitlab.com/systerel/s2opc/build_cyclone@sha256:7a622c29071bdc118dfd49e2a4190add6efefb51cce0b55cf037445195e0b0ef # digest of build_cyclone:1.2
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_IMAGE: 'sha256:40cd080b81dbfff47a595342c982153192c353964e0e3f708c41540085167f8d'
+    DOCKER_IMAGE: 'sha256:dc8fa88770c1a3971d4009112bd99b3f2a3a61ef8440ea33ae63694ae9d48d94'
     BUILD_DIR: build
     WITH_CYCLONE_CRYPTO: 1
   artifacts:
@@ -361,7 +361,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check_cyclone@sha256:e2ca3efbf6f040b8431116f7359b29b33183aa9533dbd55b71b78ec6c37defb2 # digest of check_cycone:1.1
+  image: registry.gitlab.com/systerel/s2opc/check_cyclone@sha256:e2ca3efbf6f040b8431116f7359b29b33183aa9533dbd55b71b78ec6c37defb2 # digest of check_cyclone:1.1
   script:
     - ./.check-code.sh
     # Check generated types are up to date
