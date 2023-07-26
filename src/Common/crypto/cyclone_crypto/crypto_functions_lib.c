@@ -616,7 +616,7 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
 
         if (errLib)
         {
-            return SOPC_STATUS_NOK;
+            status = SOPC_STATUS_NOK;
             break;
         }
 

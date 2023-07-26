@@ -348,62 +348,77 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_CertificateList* pCert = *ppCert;  // Retrieve the content of ppCert.
-    SOPC_CertificateList* pCertCpy = pCert; // Use a copy, otherwise we lose HEAD of pCert.
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int errLib = -1;
 
-    if (NULL == pCertCpy) // If there's no certificate in the Certificate List
+    /* Create the new cert and initialize it */
+    SOPC_CertificateList* pCertNew = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
+    if (NULL == pCertNew)
     {
-        pCertCpy = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
-        pCert =
-            pCertCpy; // We have to do that in this case because otherwise there's no link between pCert and pCertCpy.
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
+    pCertNew->next = NULL;
+    pCertNew->raw = SOPC_Buffer_Create(lenDER);
+    if (NULL == pCertNew->raw)
     {
-        while (NULL != pCertCpy->next)
-        {
-            pCertCpy = pCertCpy->next;
-        }
-
-        pCertCpy->next = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
-        if (NULL == pCertCpy->next)
-        {
-            return SOPC_STATUS_NOK;
-        }
-
-        pCertCpy = pCertCpy->next;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
     }
-
-    /* Allocate and fill the SOPC_Buffer attached to the certificate */
-    pCertCpy->raw = SOPC_Buffer_Create(lenDER);
-    SOPC_ReturnStatus status = SOPC_Buffer_Write(pCertCpy->raw, bufferDER, lenDER);
-
     if (SOPC_STATUS_OK == status)
     {
-        // Create the certificate from the attached buffer because Cyclone cert will point on it
-        int errLib = x509ParseCertificate(pCertCpy->raw->data, (size_t) lenDER, &pCertCpy->crt);
+        status = SOPC_Buffer_Write(pCertNew->raw, bufferDER, lenDER);
+    }
+
+    /* Fill the crt part of the cert */
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create the certificate from its attached buffer because Cyclone cert will point on it
+        errLib = x509ParseCertificate(pCertNew->raw->data, (size_t) lenDER, &pCertNew->crt);
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
             fprintf(stderr, "> KeyManager: certificate buffer parse failed with error code: %d\n", errLib);
         }
+    }
 
+    if (SOPC_STATUS_OK == status)
+    {
         /* Allocate and fill the public key of the cert */
-        rsaInitPublicKey(&pCertCpy->pubKey);
-        errLib = x509ImportRsaPublicKey(&pCertCpy->crt.tbsCert.subjectPublicKeyInfo, &pCertCpy->pubKey);
+        rsaInitPublicKey(&pCertNew->pubKey);
+        errLib = x509ImportRsaPublicKey(&pCertNew->crt.tbsCert.subjectPublicKeyInfo, &pCertNew->pubKey);
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
         }
     }
 
+    /* In case of error, free the new certificate and the whole list */
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_Certificate_Free(pCertCpy);
+        SOPC_KeyManager_Certificate_Free(pCertNew);
+        SOPC_KeyManager_Certificate_Free(*ppCert);
         *ppCert = NULL;
+        return status;
     }
-    else
+
+    /* Finally add the cert to the list in ppCert */
+    if (SOPC_STATUS_OK == status)
     {
-        *ppCert = pCert;
+        /* Special case when the input list is not created */
+        if (NULL == *ppCert)
+        {
+            *ppCert = pCertNew;
+            return SOPC_STATUS_OK;
+        }
+    }
+    SOPC_CertificateList* pCertLast = *ppCert;
+    if (SOPC_STATUS_OK == status)
+    {
+        while (NULL != pCertLast->next)
+        {
+            pCertLast = pCertLast->next;
+        }
+        pCertLast->next = pCertNew;
+        return SOPC_STATUS_OK;
     }
 
     return status;
@@ -706,7 +721,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
 /* Creates a new string. Later have to free the result */
 static char* get_raw_sha1(SOPC_Buffer* raw)
 {
-    assert(NULL != raw);
+    SOPC_ASSERT(NULL != raw);
 
     uint8_t pDest[20];
 
@@ -823,7 +838,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
             /* Remove the certificate from the chain and safely delete it */
             SOPC_CertificateList* next = current_cert->next;
             current_cert->next = NULL;
-            SOPC_KeyManager_Certificate_Free(current_cert);
+            // We can't call SOPC_KeyManager_Certificate_Free() because it will delete the CertificateList.
+            SOPC_Buffer_Delete(current_cert->raw);
+            rsaFreePublicKey(&current_cert->pubKey);
 
             /* Set new next certificate (if possible) */
             if (NULL == prev_cert)
@@ -851,7 +868,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
             {
                 /* We have to free the certificate if it is not the first in the list */
                 prev_cert->next = next;
-
+                SOPC_Free(current_cert);
                 /* Iterate */
                 current_cert = next;
             }
@@ -927,38 +944,31 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_CRLList* pCRL = *ppCRL;
-    SOPC_CRLList* pCRLCpy = pCRL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    int errLib = -1;
 
-    if (NULL == pCRLCpy) // If there's no certificate in the Certificate List
+    /* Create the new CRL and initialize it */
+    SOPC_CRLList* pCRLNew = SOPC_Calloc(1, sizeof(SOPC_CRLList));
+    if (NULL == pCRLNew)
     {
-        pCRLCpy = SOPC_Calloc(1, sizeof(SOPC_CRLList));
-        pCRL = pCRLCpy;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
+    pCRLNew->next = NULL;
+    pCRLNew->raw = SOPC_Buffer_Create(lenDER);
+    if (NULL == pCRLNew->raw)
     {
-        while (NULL != pCRLCpy->next)
-        {
-            pCRLCpy = pCRLCpy->next;
-        }
-
-        pCRLCpy->next = SOPC_Calloc(1, sizeof(SOPC_CRLList));
-        if (NULL == pCRLCpy->next)
-        {
-            return SOPC_STATUS_NOK;
-        }
-
-        pCRLCpy = pCRLCpy->next;
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Buffer_Write(pCRLNew->raw, bufferDER, lenDER);
     }
 
-    /* Allocate and fill the SOPC_Buffer attached to the crl */
-    pCRLCpy->raw = SOPC_Buffer_Create(lenDER);
-    SOPC_ReturnStatus status = SOPC_Buffer_Write(pCRLCpy->raw, bufferDER, lenDER);
-
+    /* Fill the CRL */
     if (SOPC_STATUS_OK == status)
     {
         // Create the certificate from the attached buffer because Cyclone cert will point on it
-        int errLib = x509ParseCrl(pCRLCpy->raw->data, (size_t) lenDER, &pCRLCpy->crl);
+        errLib = x509ParseCrl(pCRLNew->raw->data, (size_t) lenDER, &pCRLNew->crl);
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
@@ -967,14 +977,34 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         }
     }
 
+    /* In case of error, free the new certificate and the whole list */
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_CRL_Free(pCRLCpy);
+        SOPC_KeyManager_CRL_Free(pCRLNew);
+        SOPC_KeyManager_CRL_Free(*ppCRL);
         *ppCRL = NULL;
+        return status;
     }
-    else
+
+    /* Finally add the cert to the list in ppCert */
+    if (SOPC_STATUS_OK == status)
     {
-        *ppCRL = pCRL;
+        /* Special case when the input list is not created */
+        if (NULL == *ppCRL)
+        {
+            *ppCRL = pCRLNew;
+            return SOPC_STATUS_OK;
+        }
+    }
+    SOPC_CRLList* pCRLLast = *ppCRL;
+    if (SOPC_STATUS_OK == status)
+    {
+        while (NULL != pCRLLast->next)
+        {
+            pCRLLast = pCRLLast->next;
+        }
+        pCRLLast->next = pCRLNew;
+        return SOPC_STATUS_OK;
     }
 
     return status;

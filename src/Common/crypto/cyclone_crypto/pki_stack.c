@@ -97,8 +97,8 @@ static SOPC_ReturnStatus check_key_usages(const SOPC_CertificateList* cert, bool
 
         /* If the ext usage is neither server auth nor client auth, it shall be rejected */
         /* TODO: check whether the crt is for a server or a client, and only check the corresponding ext usage */
-        bool missSer = (extKeyUsage == X509_EXT_KEY_USAGE_SERVER_AUTH);
-        bool missCli = (extKeyUsage == X509_EXT_KEY_USAGE_CLIENT_AUTH);
+        bool missSer = ((extKeyUsage & X509_EXT_KEY_USAGE_SERVER_AUTH) == 0);
+        bool missCli = ((extKeyUsage & X509_EXT_KEY_USAGE_CLIENT_AUTH) == 0);
 
         if (missSer && missCli)
         {
@@ -109,7 +109,7 @@ static SOPC_ReturnStatus check_key_usages(const SOPC_CertificateList* cert, bool
     {
         /* Check the key usages for user certificate (it is not part of the OPC UA but it makes sense to keep it). */
         usages = X509_KEY_USAGE_DIGITAL_SIGNATURE;
-        err = ((keyUsage & usages) == keyUsage ? 0 : 1);
+        err = !(keyUsage & usages);
         if (!err)
         {
             /* The CA flag shall be FALSE for user certificate */
@@ -387,6 +387,9 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
             *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         }
     }
+
+    /* Unlink pToValidateCopy */
+    pToValidateCopy->next = NULL;
 
     return status;
 }
