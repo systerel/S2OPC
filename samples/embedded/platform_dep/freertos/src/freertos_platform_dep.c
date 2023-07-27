@@ -48,6 +48,7 @@
 #include "lwip/netif.h"
 #include "netif/etharp.h"
 
+#include "freertos_platform_dep.h"
 #include "samples_platform_dep.h"
 #include "sopc_mbedtls_config.h"
 
@@ -64,6 +65,9 @@
 #define MAIN_STACK_SIZE ((unsigned short) 2048)
 
 #define PRINTF SOPC_Shell_Printf
+#ifndef BOARD_TYPE
+#define BOARD_TYPE "Undefined"
+#endif
 
 /*******************************************************************************
  * Variables
@@ -72,6 +76,33 @@
 /*******************************************************************************
  * Local Functions
  ******************************************************************************/
+
+/*************************************************/
+const char* get_IP_str(void)
+{
+    static char* result = NULL;
+    if (NULL == result)
+    {
+        result = SOPC_Calloc(17, 1);
+        SOPC_ASSERT(NULL != result);
+        extern uint8_t IP_ADDRESS[4];
+        snprintf(result, 16, "%u.%u.%u.%u", IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+    }
+    return result;
+}
+
+/*************************************************/
+const char* get_EP_str(void)
+{
+    static char* result = NULL;
+    if (NULL == result)
+    {
+        result = SOPC_Calloc(17 + 15, 1);
+        SOPC_ASSERT(NULL != result);
+        snprintf(result, 17 + 15, "opc.tcp://%s:4841", get_IP_str());
+    }
+    return result;
+}
 
 /*************************************************/
 void SOPC_Platform_Setup(void)
@@ -83,7 +114,8 @@ void SOPC_Platform_Setup(void)
     PRINTF("\r\n************************************************\n");
     PRINTF("SOPC / FreeRTOS / MbedTLS / LwIP example\n");
     PRINTF("************************************************\n");
-    PRINTF(" IPv4 Address     : %u.%u.%u.%u\n", IP_ADDRESS[0], IP_ADDRESS[1], IP_ADDRESS[2], IP_ADDRESS[3]);
+    PRINTF(" Board type       : %s\n", BOARD_TYPE);
+    PRINTF(" IPv4 Address     : %s\n", get_IP_str());
     PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\n", NETMASK_ADDRESS[0], NETMASK_ADDRESS[1], NETMASK_ADDRESS[2],
            NETMASK_ADDRESS[3]);
     PRINTF("************************************************\n");
@@ -163,7 +195,13 @@ void sopc_main(void)
 /*************************************************/
 const char* SOPC_Platform_Get_Default_Net_Itf(void)
 {
-    return (netif_default == NULL ? "NULL" : netif_default->name);
+    static char netif[6] = {0};
+    if (netif[0] == 0)
+    {
+        // Note: FreeRTOS does not interpret correctly PRIu8.
+        sprintf(netif, "%c%c%d", netif_default->name[0], netif_default->name[1], (int) netif_default->num);
+    }
+    return netif;
 }
 
 /*************************************************/

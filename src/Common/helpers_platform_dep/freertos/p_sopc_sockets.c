@@ -226,11 +226,23 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
         if (-1 != bindListenStatus)
         {
             bindListenStatus = listen(sock, SOPC_MAX_PENDING_CONNECTIONS);
+
+            if (-1 == bindListenStatus)
+            {
+                SOPC_CONSOLE_PRINTF("Listen socket failed with code %d \r\n", (int) errno);
+            }
         }
+        else
+        {
+            SOPC_CONSOLE_PRINTF("Bind socket failed with code %d \r\n", (int) errno);
+        }
+    }
+    else
+    {
+        SOPC_CONSOLE_PRINTF("Null address!\r\n");
     }
     if (-1 != bindListenStatus)
     {
-        SOPC_CONSOLE_PRINTF("Bind socket failed with code %d \r\n", (int) errno);
         if (ERR_RTE == errno)
         {
             SOPC_CONSOLE_PRINTF("Error is : Route unreacheable\r\n");

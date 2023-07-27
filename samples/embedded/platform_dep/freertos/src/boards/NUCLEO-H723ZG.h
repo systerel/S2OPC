@@ -17,12 +17,21 @@
  * under the License.
  */
 
-#ifndef KSDK_MBEDTLS_THREADING_ALT_H
-#define KSDK_MBEDTLS_THREADING_ALT_H
+#include "freertos_platform_dep.h"
 
-#include "sopc_mutexes.h"
-#include "sopc_threads.h"
+#include "freertos_shell.h"
 
-typedef SOPC_Mutex mbedtls_threading_mutex_t;
+#ifndef S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
+#define S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
 
-#endif
+#define BOARD_TYPE "NUCLEO_H723ZG"
+
+#define PRINT SOPC_Shell_Printf
+
+// Here, the default values can be overridden for this specific card.
+#define CONFIG_SOPC_PUBLISHER_ADDRESS "opc.udp://232.1.2.100:4840"
+#define CONFIG_SOPC_SUBSCRIBER_ADDRESS "opc.udp://232.1.2.101:4840"
+// #define CONFIG_SOPC_PUBSUB_SECURITY_MODE SOPC_SecurityMode_SignAndEncrypt
+#define CONFIG_SOPC_PUBSUB_SECURITY_MODE SOPC_SecurityMode_None
+
+#endif /* S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_ */

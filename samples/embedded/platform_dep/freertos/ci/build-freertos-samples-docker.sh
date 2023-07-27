@@ -23,7 +23,7 @@ OPT_LAZY=false
 while [ "$#" -gt 0 ] ; do
 PARAM=$1
 shift
-[ "$PARAM" == "--lazy" ] && OPT_LAZY=true && continue
+[ "$PARAM" == "--lazy" ] && OPT_LAZY=true && OPT_INSTALL="--lazy" && continue
 echo "Unexpected parameter : $PARAM" && exit 127
 done
 
@@ -42,7 +42,7 @@ cd ${FREERTOS_CORE_DIR}
 
 $OPT_LAZY &&  echo "Lazy build => not reinstalling sources"
 $OPT_LAZY || cp -rf /stmcube_ws/* ${WS}
-$OPT_LAZY || ${SOPC_ROOT}/samples/embedded/platform_dep/freertos/install.sh ||  exit $?
+${SOPC_ROOT}/samples/embedded/platform_dep/freertos/install.sh $OPT_INSTALL ||  exit $?
 
 echo "Installation OK, starting compile step"
 
@@ -56,6 +56,7 @@ C_DEFS='-DUSE_HAL_DRIVER -DSTM32H723xx '
 C_DEFS+=' -DMBEDTLS_CONFIG_FILE="mbedtls_config.h" '
 C_DEFS+=' -DSTM32_THREAD_SAFE_STRATEGY=4 -DSOPC_PTR_SIZE=4 -DWITH_USER_ASSERT=1'
 C_DEFS+=' -D_RETARGETABLE_LOCKING=1' # Necessary since configuration differs in newlib.h
+C_DEFS+=' -DSOPC_BOARD_TARGET_INCLUDE="NUCLEO-H723ZG.h"' # Indirection to board-specific header file if required
 C_INCS='-I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include'
 C_INCS+=' -I../Drivers/CMSIS/Include -I../LWIP/App -I../LWIP/Target -I../MBEDTLS/App -I../Middlewares/Third_Party/LwIP/src/include'
 C_INCS+=' -I../Middlewares/Third_Party/LwIP/system -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2'

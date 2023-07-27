@@ -26,11 +26,15 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <sys/time.h>
+
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_platform_time.h"
+
+#include "freertos_shell.h"
 
 /*******************************************************************************
  * Options
@@ -86,6 +90,14 @@ static uint8_t SOPC_Shell_getc(void)
     return result;
 }
 
+int _gettimeofday(struct timeval* tv, void* tzvp)
+{
+    uint64_t t = 0;                        // get uptime in nanoseconds
+    tv->tv_sec = t / 1000000000;           // convert to seconds
+    tv->tv_usec = (t % 1000000000) / 1000; // get remaining microseconds
+    return 0;                              // return non-zero for error
+} // end _gettimeofday()
+
 /*******************************************************************************
  * Extern Functions
  ******************************************************************************/
@@ -126,12 +138,17 @@ void SOPC_Shell_Printf(const char* msg, ...)
 
     va_start(args, msg);
 
-    static char buf[80]; // Static is OK because this is mutex-protected
-    vsnprintf(buf, sizeof(buf), msg, args);
+    static char buf[0x100]; // Static is OK because this is mutex-protected
+    int nbWritten = vsnprintf(buf, sizeof(buf), msg, args);
 
     for (const char* ptr = buf; 0 != (*ptr); ptr++)
     {
         shell_putChar(*ptr);
+    }
+    if (nbWritten >= sizeof(buf))
+    {
+        // Force a EOL char
+        shell_putChar('\n');
     }
 
     va_end(args);

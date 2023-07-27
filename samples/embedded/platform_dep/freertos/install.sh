@@ -23,6 +23,14 @@ S2OPC_SRC=${S2OPC_BASE}/src
 S2OPC_SAMPLE=${S2OPC_BASE}/samples/embedded
 SRC_DIR=${FREERTOS_CORE_DIR}/Src/sopc
 
+OPT_LAZY=false
+while [ "$#" -gt 0 ] ; do
+PARAM=$1
+shift
+[ "$PARAM" == "--lazy" ] && OPT_LAZY=true  && continue
+echo "Unexpected parameter : $PARAM" && exit 127
+done
+
 echo "Installing S2OPC for freeRTOS samples..."
 
 # Check FreeRTOS
@@ -37,7 +45,7 @@ echo "[II] FreeRTOS found!"
 
 echo "[II] Sample ${FREERTOS_SAMPLE} found!"
 
-rm -fr  ${SRC_DIR} 2> /dev/null
+$OPT_LAZY || rm -fr  ${SRC_DIR} 2> /dev/null
 mkdir -p ${SRC_DIR}/sample_src
 mkdir -p ${SRC_DIR}/sample_inc
 

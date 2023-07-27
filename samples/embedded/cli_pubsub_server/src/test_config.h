@@ -31,6 +31,10 @@
 #ifndef TEST_CONFIG_H_
 #define TEST_CONFIG_H_
 
+#ifndef SAMPLES_PLATFORM_DEP_H_
+#error "This file lust be included AFTER 'samples_platform_dep.h'"
+#endif
+
 /***************************************************/
 /**              DEMO CONFIGURATION                */
 /***************************************************/
@@ -69,6 +73,10 @@
 
 #ifndef CONFIG_SOPC_SUBSCRIBER_PERIOD_US
 #define CONFIG_SOPC_SUBSCRIBER_PERIOD_US 10000
+#endif
+
+#ifndef PRINT
+#define PRINT printf
 #endif
 
 #endif /* TEST_CONFIG_H_ */

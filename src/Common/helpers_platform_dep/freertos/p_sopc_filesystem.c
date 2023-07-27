@@ -33,7 +33,7 @@ SOPC_FileSystem_RemoveResult SOPC_FileSystem_rmdir(const char* directoryPath)
 
 FILE* SOPC_FileSystem_fmemopen(void* buf, size_t size, const char* opentype)
 {
-    return (FILE*) fmemopen(buf, size, opentype);
+    return NULL;
 }
 
 SOPC_FileSystem_GetDirResult SOPC_FileSystem_GetDirFilePaths(const char* directoryPath, SOPC_Array** ppFilePaths)

@@ -17,15 +17,12 @@
  * under the License.
  */
 
-#include "sopc_common_build_info.h"
-#include "sopc_version.h"
+#ifndef FREE_RTOS_PLATFORM_DEP_H
+#define FREE_RTOS_PLATFORM_DEP_H
 
-const SOPC_Build_Info sopc_common_build_info = {.buildVersion = SOPC_TOOLKIT_VERSION,
-                                                .buildSrcCommit = "Unknown_Revision",
-                                                .buildDockerId = "",
-                                                .buildBuildDate = ""};
+const char* get_IP_str(void);
+const char* get_EP_str(void);
 
-SOPC_Build_Info SOPC_Common_GetBuildInfo(void)
-{
-    return sopc_common_build_info;
-}
+#define CONFIG_SOPC_ENDPOINT_ADDRESS get_EP_str()
+
+#endif //  FREE_RTOS_PLATFORM_DEP_H
