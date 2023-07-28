@@ -33,6 +33,7 @@
 #define SERVER_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 #define ENCRYPTED_SERVER_KEY true /* set to false otherwise */
 #define PASSWORD_ENV_NAME "TEST_PASSWORD_PRIVATE_KEY"
+#define USER_PASSWORD_ENV_NAME "TEST_PASSWORD_USER"
 #define CA_CERT_PATH "./trusted/cacert.der"
 #define CA_CRL_PATH "./revoked/cacrl.der"
 #define CLIENT_CERT_PATH "./client_public/client_2k_cert.der"
@@ -42,6 +43,7 @@
 #define APPLICATION_URI "urn:S2OPC:localhost"
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"
+#define CLIENT_DESCRIPTION "S2OPC Client for SKS"
 #define ADDRESS_SPACE_PATH "./pubsub_server.xml"
 #define SLEEP_TIMEOUT 100
 #define NODEID_PUBSUB_STATUS "ns=1;s=PubSubStatus"

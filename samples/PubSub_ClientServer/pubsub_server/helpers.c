@@ -19,14 +19,13 @@
 
 #include <stdint.h>
 
+#include "libs2opc_server.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_toolkit_async_api.h"
 #include "sopc_types.h"
 
 #include "helpers.h"
 
-SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
-                                          SOPC_NodeId** lpNid,
+SOPC_ReturnStatus Helpers_AsyncLocalWrite(SOPC_NodeId** lpNid,
                                           uint32_t* lAttrId,
                                           SOPC_DataValue** lpDv,
                                           size_t nItems,
@@ -84,7 +83,7 @@ SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
     if (SOPC_STATUS_OK == status)
     {
         request->NodesToWrite = lwv;
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(endpointConfigIdx, request, 0);
+        status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
     }
     else
     {

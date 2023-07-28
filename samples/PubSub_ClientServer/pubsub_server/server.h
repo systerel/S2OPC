@@ -39,18 +39,18 @@ extern int32_t serverOnline;
 /* Running the Server */
 
 /* Event management */
-void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext);
+void Server_Treat_Local_Service_Response(SOPC_EncodeableType* type, void* response, uintptr_t userContext);
 
 /* SOPC_ReturnStatus Server_SetRuntimeVariables(void); */ /* Future */
-SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfig);
+SOPC_ReturnStatus Server_CreateServerConfig(void);
 SOPC_ReturnStatus Server_LoadAddressSpace(void);
 /** Calls Toolkit_Configured(), starts the server */
-SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig);
+SOPC_ReturnStatus Server_StartServer(void);
 bool Server_IsRunning(void);
 
 SOPC_ReturnStatus Server_WritePubSubNodes(void);
 bool Server_Trigger_Publisher(uint16_t writerGroupId);
-void Server_StopAndClear(SOPC_S2OPC_Config* pConfig);
+void Server_StopAndClear(void);
 
 bool Server_PubSubStop_Requested(void);
 bool Server_PubSubStart_Requested(void);
@@ -59,7 +59,9 @@ int32_t Server_PubAcyclicSend_Requested(void);
 /* Interacting with the Sub module */
 
 SOPC_Array* Server_GetConfigurationPaths(void); /* Returns an array of char* */
-void Server_SetSubStatus(SOPC_PubSubState state);
+void Server_SetSubStatusAsync(SOPC_PubSubState state);
+void Server_SetSubStatusSync(SOPC_PubSubState state);
+
 bool Server_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValues);
 

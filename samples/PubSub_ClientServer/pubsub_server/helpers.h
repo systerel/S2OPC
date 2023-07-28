@@ -33,8 +33,7 @@ typedef void Helpers_WriteValue_Callback(OpcUa_WriteValue* pwv);
  * It is called on each WriteValue of the WriteRequest.
  * It is called *before* the WriteRequest is processed by the toolkit.
  */
-SOPC_ReturnStatus Helpers_AsyncLocalWrite(uint32_t endpointConfigIdx,
-                                          SOPC_NodeId** lNid,
+SOPC_ReturnStatus Helpers_AsyncLocalWrite(SOPC_NodeId** lNid,
                                           uint32_t* lAttrId,
                                           SOPC_DataValue** lpDv,
                                           size_t nItems,

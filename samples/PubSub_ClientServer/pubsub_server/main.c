@@ -24,24 +24,20 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_common.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
 #include "sopc_time.h"
-#include "sopc_toolkit_config.h"
+
+#include "libs2opc_common_config.h"
 
 #include "client.h"
 #include "config.h"
 #include "pubsub.h"
 #include "server.h"
 
-static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event,
-                                       uint32_t idOrStatus,
-                                       void* param,
-                                       uintptr_t appContext);
 static SOPC_ReturnStatus ClientServer_Initialize(char* logPath);
 static char* ClientServer_GetLogPath(const char* binName, const char* port);
 
@@ -60,73 +56,14 @@ static void signal_stop_server(int sig)
     }
 }
 
-static void ClientServer_Event_Toolkit(SOPC_App_Com_Event event, uint32_t idOrStatus, void* param, uintptr_t appContext)
-{
-    switch (event)
-    {
-    /* Client application events */
-    case SE_SESSION_ACTIVATION_FAILURE:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SESSION_ACTIVATION_FAILURE RECEIVED");
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "appContext: %" PRIuPTR, appContext);
-        if (0 != appContext && appContext == g_Client_SessionContext)
-        {
-            SOPC_Atomic_Int_Set((SessionConnectedState*) &g_scState, (SessionConnectedState) SESSION_CONN_FAILED);
-        }
-        else
-        {
-            SOPC_ASSERT(false && ">>Client : bad app context");
-        }
-        break;
-    case SE_ACTIVATED_SESSION:
-        SOPC_Atomic_Int_Set((int32_t*) &g_session, (int32_t) idOrStatus);
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_ACTIVATED_SESSION RECEIVED");
-        SOPC_Atomic_Int_Set((SessionConnectedState*) &g_scState, (SessionConnectedState) SESSION_CONN_CONNECTED);
-        break;
-    case SE_SESSION_REACTIVATING:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SESSION_REACTIVATING RECEIVED");
-        break;
-    case SE_RCV_SESSION_RESPONSE:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_RCV_SESSION_RESPONSE RECEIVED");
-        Client_Treat_Session_Response(param, appContext);
-        break;
-    case SE_CLOSED_SESSION:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_CLOSED_SESSION RECEIVED");
-        break;
-
-    case SE_RCV_DISCOVERY_RESPONSE:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_RCV_DISCOVERY_RESPONSE RECEIVED");
-        break;
-
-    case SE_SND_REQUEST_FAILED:
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "SE_SND_REQUEST_FAILED RECEIVED");
-        SOPC_Atomic_Int_Add(&g_sendFailures, 1);
-        break;
-
-        /* SERVER EVENT */
-    case SE_CLOSED_ENDPOINT:
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Closed endpoint event");
-        SOPC_Atomic_Int_Set(&serverOnline, 0);
-        return;
-    case SE_LOCAL_SERVICE_RESPONSE:
-        Server_Treat_Local_Service_Response(param, appContext);
-        return;
-    default:
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "Unexpected endpoint event: %d", event);
-        return;
-    }
-}
-
 static SOPC_ReturnStatus ClientServer_Initialize(char* logPath)
 {
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = logPath;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_Toolkit_Initialize(ClientServer_Event_Toolkit);
-    }
+    // Initialize the toolkit library and define the log configuration
+    SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfiguration);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -214,7 +151,7 @@ int main(int argc, char* const argv[])
         exit(1);
     }
 
-    /* Initialize S2OPC Server */
+    /* Initialize S2OPC Client / Server */
     char* logDirPath = ClientServer_GetLogPath(argv[0], &ENDPOINT_URL[portIdx]);
     SOPC_ReturnStatus status = ClientServer_Initialize(logDirPath);
     if (SOPC_STATUS_OK != status)
@@ -222,13 +159,16 @@ int main(int argc, char* const argv[])
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Could not initialize the PubSub client/server");
     }
 
-    /* Configure the Server */
-    SOPC_S2OPC_Config s2opcConfig;
-    SOPC_S2OPC_Config_Initialize(&s2opcConfig);
-
+    /* Configure the Client application for SKS server access */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_CreateServerConfig(&s2opcConfig);
+        status = Client_Initialize();
+    }
+
+    /* Configure the Server for PubSub data exposition */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = Server_CreateServerConfig();
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Could not create the server configuration");
@@ -245,7 +185,7 @@ int main(int argc, char* const argv[])
     /* Start the Server */
     if (SOPC_STATUS_OK == status)
     {
-        status = Server_ConfigureStartServer(&s2opcConfig.serverConfig.endpoints[0]);
+        status = Server_StartServer();
     }
 
     /* Write in PubSub nodes, which starts the PubSub */
@@ -319,7 +259,9 @@ int main(int argc, char* const argv[])
     /* Clean and quit */
     PubSub_StopAndClear();
     Client_Clear();
-    Server_StopAndClear(&s2opcConfig);
+    Server_StopAndClear();
+    SOPC_CommonHelper_Clear();
+
     SOPC_Free(logDirPath);
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server closed");
 }

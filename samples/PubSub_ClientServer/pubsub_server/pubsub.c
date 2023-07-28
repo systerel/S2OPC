@@ -249,13 +249,13 @@ SOPC_ReturnStatus PubSub_Configure(void)
                 SOPC_SecurityKeyServices* sksElt =
                     SOPC_Array_Get(sksConfigArray->sksArray, SOPC_SecurityKeyServices*, i);
                 SOPC_ASSERT(NULL != sksElt);
-                SOPC_SecureChannelConfigIdx SecureChannel_Id =
-                    Client_AddSecureChannelConfig(SOPC_SecurityKeyServices_Get_EndpointUrl(sksElt),
-                                                  SOPC_SecurityKeyServices_Get_ServerCertificate(sksElt));
-                if (0 < SecureChannel_Id)
+                SOPC_SecureConnection_Config* secureConnCfg =
+                    Client_AddSecureConnectionConfig(SOPC_SecurityKeyServices_Get_EndpointUrl(sksElt),
+                                                     SOPC_SecurityKeyServices_Get_ServerCertificate(sksElt));
+                if (NULL != secureConnCfg)
                 {
                     // Create a SK Provider which get Keys from a GetSecurityKeys request
-                    providers[i] = Client_Provider_BySKS_Create(SecureChannel_Id);
+                    providers[i] = Client_Provider_BySKS_Create(secureConnCfg);
                     if (NULL == providers[i])
                     {
                         status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -428,7 +428,9 @@ bool PubSub_Start(void)
 
     if (sub_nb_connections > 0)
     {
-        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatus, Server_GapInDsmSnCb, 0);
+        // Note: use SetSubStatusAsync function to avoid blocking treatment in sub scheduler
+        subOK =
+            SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatusAsync, Server_GapInDsmSnCb, 0);
     }
     if (pub_nb_connections > 0)
     {
@@ -443,7 +445,7 @@ bool PubSub_Start(void)
         if (!subOK)
         {
             // PubSubStatus NOT managed by Sub scheduler: set operational manually
-            Server_SetSubStatus(SOPC_PubSubState_Operational);
+            Server_SetSubStatusSync(SOPC_PubSubState_Operational);
         }
     }
 
@@ -468,7 +470,7 @@ void PubSub_Stop(void)
     g_skManager = NULL;
 
     // Force Disabled after stop in case Sub scheduler was not start (no management of the status)
-    Server_SetSubStatus(SOPC_PubSubState_Disabled);
+    Server_SetSubStatusSync(SOPC_PubSubState_Disabled);
 }
 
 void PubSub_StopAndClear(void)

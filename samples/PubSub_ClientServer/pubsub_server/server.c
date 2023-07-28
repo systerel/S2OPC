@@ -37,9 +37,12 @@
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_time.h"
-#include "sopc_toolkit_async_api.h"
-#include "sopc_toolkit_config.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
+
+#include "libs2opc_common_config.h"
+#include "libs2opc_server.h"
+#include "libs2opc_server_config.h"
+#include "libs2opc_server_config_custom.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
 #include "server_static_security_data.h"
@@ -53,7 +56,6 @@
 /* These variables could be stored in a struct Server_Context, which is then passed to all functions.
  * This would mimic class instances and avoid global variables.
  */
-static uint32_t epConfigIdx = 0;
 int32_t serverOnline = 0;
 static int32_t pubSubStopRequested = false;
 static int32_t pubSubStartRequested = false;
@@ -63,10 +65,6 @@ static int32_t pubAcyclicSendWriterId = 0;
 static SOPC_AddressSpace* address_space = NULL;
 static uint8_t lastPubSubCommand = 0;
 static char* lastPubSubConfigPath = NULL;
-
-static char* default_trusted_certs[] = {CA_CERT_PATH, NULL};
-static char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
-static char* empty_certs[] = {NULL};
 
 typedef enum PublisherSendStatus
 {
@@ -79,8 +77,7 @@ typedef enum PublisherSendStatus
 static SOPC_ReturnStatus Server_SetAddressSpace(void);
 
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
-                                      SOPC_App_AddSpace_Event event,
-                                      void* opParam,
+                                      OpcUa_WriteValue* writeValue,
                                       SOPC_StatusCode opStatus);
 static void Server_Event_Write(OpcUa_WriteValue* pwv);
 static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state);
@@ -106,200 +103,135 @@ static bool SOPC_TestHelper_AskPass_FromEnv(char** outPassword)
 }
 #endif
 
-SOPC_ReturnStatus Server_CreateServerConfig(SOPC_S2OPC_Config* output_s2opcConfig)
+SOPC_ReturnStatus Server_CreateServerConfig(void)
 {
-    if (NULL == output_s2opcConfig)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    SOPC_UserAuthentication_Manager* authenticationManager = NULL;
-    SOPC_UserAuthorization_Manager* authorizationManager = NULL;
-
-    /* Application description configuration */
-    OpcUa_ApplicationDescription* serverDescription = &output_s2opcConfig->serverConfig.serverDescription;
-    OpcUa_ApplicationDescription_Initialize(serverDescription);
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationUri, APPLICATION_URI);
-    SOPC_String_AttachFromCstring(&serverDescription->ProductUri, PRODUCT_URI);
-    serverDescription->ApplicationType = OpcUa_ApplicationType_Server;
-    SOPC_String_AttachFromCstring(&serverDescription->ApplicationName.defaultText, SERVER_DESCRIPTION);
-
-    /* Cryptographic configuration */
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    output_s2opcConfig->serverConfig.serverCertPath = SERVER_CERT_PATH;
-    output_s2opcConfig->serverConfig.serverKeyPath = SERVER_KEY_PATH;
-    output_s2opcConfig->serverConfig.trustedRootIssuersList = default_trusted_certs;
-    output_s2opcConfig->serverConfig.trustedIntermediateIssuersList = empty_certs;
-    output_s2opcConfig->serverConfig.issuedCertificatesList = empty_certs;
-    output_s2opcConfig->serverConfig.untrustedRootIssuersList = empty_certs;
-    output_s2opcConfig->serverConfig.untrustedIntermediateIssuersList = empty_certs;
-    output_s2opcConfig->serverConfig.certificateRevocationPathList = default_revoked_certs;
-
-#ifdef WITH_STATIC_SECURITY_DATA
-    SOPC_SerializedCertificate* static_cacert = NULL;
-    SOPC_CRLList* static_cacrl = NULL;
-
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(server_2k_cert, sizeof(server_2k_cert),
-                                                                 &output_s2opcConfig->serverConfig.serverCertificate);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(server_2k_key, sizeof(server_2k_key),
-                                                                        &output_s2opcConfig->serverConfig.serverKey);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &static_cacert);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &static_cacrl);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_PKIProviderStack_Create(static_cacert, static_cacrl, &output_s2opcConfig->serverConfig.pki);
-    }
-
-    /* Clean in all cases */
-    SOPC_KeyManager_SerializedCertificate_Delete(static_cacert);
-
+    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_Initialize();
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed loading certificates and key (check paths are valid)");
+        return status;
     }
-#else
 
-    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(output_s2opcConfig->serverConfig.serverCertPath,
-                                                                  &output_s2opcConfig->serverConfig.serverCertificate);
+    /* Load server endpoints configuration
+     * use an embedded default demo server configuration.
+     */
 
-    // Retrieve the password
-    char* password = NULL;
-    size_t lenPassword = 0;
-    bool res = false;
+    SOPC_Endpoint_Config* ep = SOPC_ServerConfigHelper_CreateEndpoint(ENDPOINT_URL, true);
+    SOPC_SecurityPolicy* spNone = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_None);
+    SOPC_SecurityPolicy* spSecu = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
-    if (SOPC_STATUS_OK == status && ENCRYPTED_SERVER_KEY)
+    if (NULL == ep || NULL == spNone || NULL == spSecu)
     {
-        res = SOPC_TestHelper_AskPass_FromEnv(&password);
-        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        SOPC_Free(ep);
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    /* 1st Security policy is None with Anonymous user */
+    status = SOPC_SecurityConfig_SetSecurityModes(spNone, SOPC_SecurityModeMask_None);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecurityConfig_AddUserTokenPolicy(spNone, &SOPC_UserTokenPolicy_Anonymous);
+    }
+
+    /* 2nd Security policy is Basic256Sha256 with anonymous user */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_SecurityConfig_SetSecurityModes(spSecu, SOPC_SecurityModeMask_SignAndEncrypt);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        lenPassword = strlen(password);
-        if (UINT32_MAX < lenPassword)
+        status = SOPC_SecurityConfig_AddUserTokenPolicy(spSecu, &SOPC_UserTokenPolicy_Anonymous);
+    }
+
+    // Server certificates configuration
+    SOPC_PKIProvider* pkiProvider = NULL;
+#ifdef WITH_STATIC_SECURITY_DATA
+    SOPC_SerializedCertificate* serializedCAcert = NULL;
+    SOPC_CRLList* serializedCAcrl = NULL;
+
+    /* Load client/server certificates and server key from C source files (no filesystem needed) */
+    status = SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(sizeof(server_2k_cert), server_2k_cert,
+                                                             sizeof(server_2k_key), server_2k_key);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(cacert, sizeof(cacert), &serializedCAcert);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(cacrl, sizeof(cacrl), &serializedCAcrl);
+    }
+
+    /* Create the PKI (Public Key Infrastructure) provider */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProviderStack_Create(serializedCAcert, serializedCAcrl, &pkiProvider);
+    }
+    SOPC_KeyManager_SerializedCertificate_Delete(serializedCAcert);
+#else // WITH_STATIC_SECURITY_DATA == false
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+
+        if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_STATUS_NOK;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to configure the server key user password callback");
         }
     }
-
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-            output_s2opcConfig->serverConfig.serverKeyPath, &output_s2opcConfig->serverConfig.serverKey, password,
-            (uint32_t) lenPassword);
+        status =
+            SOPC_ServerConfigHelper_SetKeyCertPairFromPath(SERVER_CERT_PATH, SERVER_KEY_PATH, ENCRYPTED_SERVER_KEY);
     }
 
-    if (NULL != password)
-    {
-        SOPC_Free(password);
-    }
-
+    // Set PKI configuration
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProviderStack_CreateFromPaths(
-            output_s2opcConfig->serverConfig.trustedRootIssuersList,
-            output_s2opcConfig->serverConfig.trustedIntermediateIssuersList,
-            output_s2opcConfig->serverConfig.untrustedRootIssuersList,
-            output_s2opcConfig->serverConfig.untrustedIntermediateIssuersList,
-            output_s2opcConfig->serverConfig.issuedCertificatesList,
-            output_s2opcConfig->serverConfig.certificateRevocationPathList, &output_s2opcConfig->serverConfig.pki);
-    }
+        char* default_trusted_certs[] = {CA_CERT_PATH, NULL};
+        char* default_revoked_certs[] = {CA_CRL_PATH, NULL};
+        char* empty_certs[] = {NULL};
 
+        status = SOPC_PKIProviderStack_CreateFromPaths(default_trusted_certs, empty_certs, empty_certs, empty_certs,
+                                                       empty_certs, default_revoked_certs, &pkiProvider);
+    }
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed loading certificates and key (check paths are valid)");
     }
 #endif
 
-    /* Configuration of the endpoint descriptions */
-    output_s2opcConfig->serverConfig.nbEndpoints = 1;
-
-    output_s2opcConfig->serverConfig.endpoints = SOPC_Calloc(sizeof(SOPC_Endpoint_Config), 1);
-
-    if (NULL == output_s2opcConfig->serverConfig.endpoints)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    SOPC_Endpoint_Config* pEpConfig = &output_s2opcConfig->serverConfig.endpoints[0];
-    pEpConfig->nbSecuConfigs = 3;
-
-    /* Server's listening endpoint */
-    pEpConfig->serverConfigPtr = &output_s2opcConfig->serverConfig;
-    pEpConfig->endpointURL = ENDPOINT_URL;
-
-    /* 1st Security policy is None without user (users on unsecure channel shall be forbidden) */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[0].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[0].securityPolicy,
-                                               SOPC_SecurityPolicy_None_URI);
-        pEpConfig->secuConfigurations[0].securityModes = SOPC_SECURITY_MODE_NONE_MASK;
-        pEpConfig->secuConfigurations[0].nbOfUserTokenPolicies = 1;
-        pEpConfig->secuConfigurations[0].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
+        status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
     }
 
-    /* 2nd Security policy is Basic256 with anonymous or username authentication allowed
-     * (without password encryption) */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[1].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[1].securityPolicy,
-                                               SOPC_SecurityPolicy_Basic256_URI);
-        pEpConfig->secuConfigurations[1].securityModes =
-            SOPC_SECURITY_MODE_SIGN_MASK | SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        pEpConfig->secuConfigurations[1].nbOfUserTokenPolicies = 2;
-        pEpConfig->secuConfigurations[1].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[1].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
-    }
+        // Set namespaces
+        const char* namespaces[] = {APPLICATION_URI};
+        status = SOPC_ServerConfigHelper_SetNamespaces(1, namespaces);
 
-    /* 3rd Security policy is Basic256Sha256 with anonymous or username authentication allowed
-     * (without password encryption) */
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_String_Initialize(&pEpConfig->secuConfigurations[2].securityPolicy);
-        status = SOPC_String_AttachFromCstring(&pEpConfig->secuConfigurations[2].securityPolicy,
-                                               SOPC_SecurityPolicy_Basic256Sha256_URI);
-        pEpConfig->secuConfigurations[2].securityModes = SOPC_SECURITY_MODE_SIGNANDENCRYPT_MASK;
-        pEpConfig->secuConfigurations[2].nbOfUserTokenPolicies = 2;
-        pEpConfig->secuConfigurations[2].userTokenPolicies[0] = SOPC_UserTokenPolicy_Anonymous;
-        pEpConfig->secuConfigurations[2].userTokenPolicies[1] = SOPC_UserTokenPolicy_UserName_DefaultSecurityPolicy;
-    }
-
-    /* User authentication and authorization */
-    if (SOPC_STATUS_OK == status)
-    {
-        authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-        authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-        if (NULL == authenticationManager || NULL == authorizationManager)
+        if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Failed to create user authentication and authorization managers");
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed setting namespaces");
         }
     }
+
     if (SOPC_STATUS_OK == status)
     {
-        pEpConfig->authenticationManager = authenticationManager;
-        pEpConfig->authorizationManager = authorizationManager;
+        status = SOPC_ServerConfigHelper_SetApplicationDescription(APPLICATION_URI, PRODUCT_URI, SERVER_DESCRIPTION,
+                                                                   NULL, OpcUa_ApplicationType_Server);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed setting application description");
+        }
     }
-    else
+
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_UserAuthentication_FreeManager(&authenticationManager);
-        SOPC_UserAuthorization_FreeManager(&authorizationManager);
+        status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(&Server_Treat_Local_Service_Response);
     }
 
     return status;
@@ -316,6 +248,10 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot load static address space");
         status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
     }
     return status;
 }
@@ -347,6 +283,7 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
 
     if (SOPC_STATUS_OK == status)
     {
+        status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
         SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Loaded address space from " xstr(ADDRESS_SPACE_PATH));
     }
     else
@@ -365,24 +302,17 @@ static SOPC_ReturnStatus Server_SetAddressSpace(void)
 
 SOPC_ReturnStatus Server_LoadAddressSpace(void)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    status = Server_SetAddressSpace();
+    SOPC_ReturnStatus status = Server_SetAddressSpace();
 
     /* Set address space and set its notification callback */
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK != status)
     {
-        status = SOPC_ToolkitServer_SetAddressSpaceConfig(address_space);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set the address space configuration");
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to set the address space configuration");
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ToolkitServer_SetAddressSpaceNotifCb(&Server_Event_AddressSpace);
+        status = SOPC_ServerConfigHelper_SetWriteNotifCallback(&Server_Event_AddressSpace);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
@@ -393,33 +323,18 @@ SOPC_ReturnStatus Server_LoadAddressSpace(void)
     return status;
 }
 
-SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
+static void SOPC_ServerStopped_Cbk(SOPC_ReturnStatus status)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    /* Add endpoint description configuration and set the Toolkit as configured */
-    epConfigIdx = SOPC_ToolkitServer_AddEndpointConfig(pEpConfig);
-    if (epConfigIdx != 0)
-    {
-        status = SOPC_ToolkitServer_Configured();
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to configure the endpoint");
-        status = SOPC_STATUS_NOK;
-    }
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server stopped with status %d", status);
+    SOPC_Atomic_Int_Set(&serverOnline, false);
+}
 
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Endpoint and Toolkit configured");
-    }
-
+SOPC_ReturnStatus Server_StartServer(void)
+{
     /* Starts the server */
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_ToolkitServer_AsyncOpenEndpoint(epConfigIdx);
-        SOPC_Atomic_Int_Set(&serverOnline, true);
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server started");
-    }
+    SOPC_ReturnStatus status = SOPC_ServerHelper_StartServer(&SOPC_ServerStopped_Cbk);
+    SOPC_Atomic_Int_Set(&serverOnline, true);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Server started");
 
     /* TODO: Integrate runtime variables */
 
@@ -428,7 +343,7 @@ SOPC_ReturnStatus Server_ConfigureStartServer(SOPC_Endpoint_Config* pEpConfig)
 
 bool Server_IsRunning(void)
 {
-    return SOPC_Atomic_Int_Get(&serverOnline);
+    return true == SOPC_Atomic_Int_Get(&serverOnline);
 }
 
 bool Server_PubSubStop_Requested(void)
@@ -591,7 +506,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void)
         uint32_t lAttrId[2] = {13, 13};
         SOPC_DataValue* lpDv[2] = {dvConfig, dvCommand};
 
-        status = Helpers_AsyncLocalWrite(epConfigIdx, lpNid, lAttrId, lpDv, 2, Server_Event_Write);
+        status = Helpers_AsyncLocalWrite(lpNid, lAttrId, lpDv, 2, Server_Event_Write);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -631,22 +546,13 @@ bool Server_Trigger_Publisher(uint16_t writerGroupId)
     return res;
 }
 
-void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
+void Server_StopAndClear(void)
 {
-    /* SOPC_ToolkitServer_AsyncCloseEndpoint(epConfigIdx); */
-    SOPC_Toolkit_Clear();
+    SOPC_ServerConfigHelper_Clear();
 
     if (Server_IsRunning())
     {
         SOPC_Atomic_Int_Set(&serverOnline, false);
-    }
-
-    SOPC_AddressSpace_Delete(address_space);
-
-    if (NULL != pConfig)
-    {
-        SOPC_S2OPC_Config_Clear(pConfig);
-        pConfig = NULL;
     }
 
     if (NULL != lastPubSubConfigPath)
@@ -655,20 +561,13 @@ void Server_StopAndClear(SOPC_S2OPC_Config* pConfig)
         lastPubSubConfigPath = NULL;
     }
 }
+
 static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
-                                      SOPC_App_AddSpace_Event event,
-                                      void* opParam,
+                                      OpcUa_WriteValue* writeValue,
                                       SOPC_StatusCode opStatus)
 {
     SOPC_UNUSED_ARG(callCtxPtr);
     /* Watch modifications of configuration paths and the start/stop command */
-    if (AS_WRITE_EVENT != event)
-    {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                 "Received unexpected event in address space notification handler: %d", event);
-        return;
-    }
-
     if ((opStatus & SOPC_GoodStatusOppositeMask) != 0)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
@@ -677,7 +576,7 @@ static void Server_Event_AddressSpace(const SOPC_CallContext* callCtxPtr,
         return;
     }
 
-    Server_Event_Write((OpcUa_WriteValue*) opParam);
+    Server_Event_Write((OpcUa_WriteValue*) writeValue);
 }
 
 static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
@@ -721,7 +620,7 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
 
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+            status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
         }
         else
         {
@@ -917,7 +816,7 @@ SOPC_Array* Server_GetConfigurationPaths(void)
     return array;
 }
 
-void Server_SetSubStatus(SOPC_PubSubState state)
+static void Server_SetSubStatus(bool sync, SOPC_PubSubState state)
 {
     if (!Server_IsRunning())
     {
@@ -963,7 +862,19 @@ void Server_SetSubStatus(SOPC_PubSubState state)
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+        if (sync)
+        {
+            OpcUa_WriteResponse* response = NULL;
+            status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &response);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Encodeable_Delete(response->encodeableType, (void**) &response);
+            }
+        }
+        else
+        {
+            status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
+        }
     }
     else
     {
@@ -972,6 +883,16 @@ void Server_SetSubStatus(SOPC_PubSubState state)
         SOPC_Free(request);
         request = NULL;
     }
+}
+
+void Server_SetSubStatusAsync(SOPC_PubSubState state)
+{
+    Server_SetSubStatus(false, state);
+}
+
+void Server_SetSubStatusSync(SOPC_PubSubState state)
+{
+    Server_SetSubStatus(true, state);
 }
 
 bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
@@ -993,7 +914,7 @@ bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
 
     request->NoOfNodesToWrite = nbValues;
     request->NodesToWrite = lwv;
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, 0);
+    status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
 
     return true;
 }
@@ -1038,7 +959,7 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
 
     SOPC_Mutex_Lock(&requestContext->mut);
 
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(epConfigIdx, request, (uintptr_t) requestContext);
+    status = SOPC_ServerHelper_LocalServiceAsync(request, (uintptr_t) requestContext);
 
     SOPC_Mutex_UnlockAndWaitCond(&requestContext->cond, &requestContext->mut);
 
@@ -1062,24 +983,23 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     return ldv;
 }
 
-void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
+void Server_Treat_Local_Service_Response(SOPC_EncodeableType* type, void* response, uintptr_t userContext)
 {
-    SOPC_EncodeableType* message_type = *((SOPC_EncodeableType**) param);
     OpcUa_WriteResponse* writeResponse = NULL;
-    OpcUa_ReadResponse* response = NULL;
+    OpcUa_ReadResponse* readResponse = NULL;
     SOPC_ReturnStatus statusCopy = SOPC_STATUS_NOK;
 
     /* Listen for WriteResponses, which only contain status codes */
 
-    SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) appContext;
-    if (message_type == &OpcUa_ReadResponse_EncodeableType && NULL != ctx)
+    SOPC_PubSheduler_GetVariableRequestContext* ctx = (SOPC_PubSheduler_GetVariableRequestContext*) userContext;
+    if (&OpcUa_ReadResponse_EncodeableType == type && NULL != ctx)
     {
         SOPC_Mutex_Lock(&ctx->mut);
 
         statusCopy = SOPC_STATUS_OK;
-        response = (OpcUa_ReadResponse*) param;
+        readResponse = (OpcUa_ReadResponse*) response;
 
-        if (NULL != response) // Response if deleted by scheduler !!!
+        if (NULL != readResponse) // Response if deleted by scheduler !!!
         {
             // Allocate data values
             ctx->ldv = SOPC_Calloc((size_t) ctx->NoOfNodesToRead, sizeof(SOPC_DataValue));
@@ -1089,7 +1009,7 @@ void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
             {
                 for (size_t i = 0; i < (size_t) ctx->NoOfNodesToRead && SOPC_STATUS_OK == statusCopy; ++i)
                 {
-                    statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &response->Results[i]);
+                    statusCopy = SOPC_DataValue_Copy(&ctx->ldv[i], &readResponse->Results[i]);
                 }
 
                 // Error, free allocated data values
@@ -1109,9 +1029,9 @@ void Server_Treat_Local_Service_Response(void* param, uintptr_t appContext)
 
         SOPC_Mutex_Unlock(&ctx->mut);
     }
-    else if (message_type == &OpcUa_WriteResponse_EncodeableType)
+    else if (&OpcUa_WriteResponse_EncodeableType == type)
     {
-        writeResponse = param;
+        writeResponse = response;
         // Service should have succeeded
         SOPC_ASSERT(0 == (SOPC_GoodStatusOppositeMask & writeResponse->ResponseHeader.ServiceResult));
     }
