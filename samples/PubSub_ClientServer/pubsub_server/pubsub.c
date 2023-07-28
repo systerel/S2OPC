@@ -266,7 +266,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
         }
         else
         {
-            /* 1-alternative. Add a fallback to use local keys if no SKS server defined in configuration */
+            /* 1-alternative. Add a fallback to use local keys if no SKS server is defined in configuration */
             if (SOPC_STATUS_OK == status)
             {
                 providers[0] = Fallback_Provider_Create();

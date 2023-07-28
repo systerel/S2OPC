@@ -226,7 +226,7 @@ The handler shall be built using ::SOPC_SubTargetVariableConfig_Create by provid
 
 For Publisher and Subscriber applications a Security Keys manager shall be defined using ::SOPC_PubSubSKS_SetSkManager to permit encrypted/signed communication.
 
-Publisher and Subscriber schedulers will retrieve the keys directly from the Security Keys manager which in charge to store locally the keys.
+Publisher and Subscriber schedulers will retrieve the keys directly from the Security Keys manager which is in charge of locally storing the keys.
 But in order to implement a complete SKS mechanism on Pub/Sub side, the following elements should also be configured to update the keys in the manager:
 - Security Keys Manager (see sopc_sk_manager.h): manages local storage of the keys retrieved from the Security Keys Provider, it should be created using ::SOPC_SKManager_Create.
 - Security Keys Provider (see sopc_sk_provider.h): source providing the Security Keys using Security Keys Services, it should implement a client connection calling the GetSecurityKeys method of the SKS server(s).
