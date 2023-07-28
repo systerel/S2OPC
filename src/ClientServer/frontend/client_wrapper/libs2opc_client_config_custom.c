@@ -44,7 +44,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPreferredLocaleIds(size_t nbLocales
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -66,7 +66,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPreferredLocaleIds(size_t nbLocales
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -89,7 +89,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetApplicationDescription(const char* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -115,7 +115,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetApplicationDescription(const char* 
         pConfig->clientConfig.freeCstringsFlag = true;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -133,7 +133,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -147,7 +147,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -167,7 +167,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* cli
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -209,7 +209,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* cli
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -230,7 +230,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -263,7 +263,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -288,7 +288,7 @@ SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(con
         return NULL;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -362,7 +362,7 @@ SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(con
         status = SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return secConnConfig;
@@ -382,7 +382,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (!secConnConfig->finalized && NULL == secConnConfig->scConfig.expectedEndpoints)
@@ -410,7 +410,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -429,7 +429,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -477,7 +477,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -496,7 +496,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReqLifetime(SOPC_SecureConnecti
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (!secConnConfig->finalized)
@@ -508,7 +508,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReqLifetime(SOPC_SecureConnecti
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -527,7 +527,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromPath(SOPC_
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (!secConnConfig->finalized && NULL == secConnConfig->scConfig.peerAppCert &&
@@ -548,7 +548,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromPath(SOPC_
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -568,7 +568,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (!secConnConfig->finalized && NULL == secConnConfig->scConfig.peerAppCert &&
@@ -588,7 +588,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -607,7 +607,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType ||
         (NULL != secConnConfig->sessionConfig.userPolicyId &&
@@ -632,7 +632,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
@@ -653,7 +653,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType)
     {
@@ -684,7 +684,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserName(SOPC_SecureConnection_
             secConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_UserName;
         }
     }
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
@@ -705,7 +705,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureCo
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType)
     {
@@ -742,7 +742,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromPaths(SOPC_SecureCo
             secConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Certificate;
         }
     }
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }
@@ -764,7 +764,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (OpcUa_UserTokenType_Anonymous != secConnConfig->sessionConfig.userTokenType)
     {
@@ -814,7 +814,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -835,7 +835,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_GetSecureConnectionConfigs(size_t* nbS
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
 
@@ -850,7 +850,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_GetSecureConnectionConfigs(size_t* nbS
         *scConfigArray = pConfig->clientConfig.secureConnections;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 }

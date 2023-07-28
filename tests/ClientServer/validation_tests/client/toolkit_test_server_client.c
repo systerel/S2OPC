@@ -93,8 +93,6 @@ static const uint32_t sleepTimeout = 500;
 
 #define SHUTDOWN_PHASE_IN_SECONDS 5
 
-static SOPC_AddressSpace* addressSpace = NULL;
-
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
  *---------------------------------------------------------------------------*/
@@ -440,15 +438,6 @@ static SOPC_AddressSpace* SOPC_LoadAddressSpaceConfigFromFile(const char* filena
     SOPC_AddressSpace* space = SOPC_UANodeSet_Parse(fd);
     fclose(fd);
 
-    SOPC_ReturnStatus status = SOPC_ToolkitServer_SetAddressSpaceConfig(space);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_AddressSpace_Delete(space);
-        space = NULL;
-    }
-    // Keep pointer for deallocation
-    addressSpace = space;
-
     return space;
 }
 #endif
@@ -486,8 +475,6 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     // Server certificates configuration
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-        pConfig->serverConfig.serverKeyEncrypted = true;
         status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
         if (SOPC_STATUS_OK != status)
         {
@@ -569,11 +556,11 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
             address_space = SOPC_Embedded_AddressSpace_Load();
             status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         }
+    }
 
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
-        }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
     }
 
     // Note: user manager are AllowAll by default
@@ -747,12 +734,6 @@ START_TEST(test_server_client)
 
     /* Clear the client/server toolkit library (stop all library threads) */
     SOPC_CommonHelper_Clear();
-
-    if (NULL != addressSpace)
-    {
-        SOPC_AddressSpace_Delete(addressSpace);
-        addressSpace = NULL;
-    }
 
     if (SOPC_STATUS_OK == status)
     {

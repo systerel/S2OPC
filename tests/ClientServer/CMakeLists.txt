@@ -421,21 +421,20 @@ if (NOT S2OPC_NANO_PROFILE)
   add_custom_target(make-sks-address-space DEPENDS ${TEST_SKS_ADDRESS_SPACE_C})
   add_executable(test_server_sks
     "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server/sks_demo_server_methods.c"
-    "validation_tests/server/test_sks_server.c"
+    "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server/test_sks_server.c"
     ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
     ${TEST_SKS_ADDRESS_SPACE_C})
-  target_link_libraries(test_server_sks PRIVATE s2opc_serverwrapper s2opc_clientserver-loader-embedded)
+  target_link_libraries(test_server_sks PRIVATE s2opc_clientserver-loader-embedded)
   target_include_directories(test_server_sks PRIVATE
     ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
     "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_server")
   target_compile_options(test_server_sks PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(test_server_sks PRIVATE ${S2OPC_DEFINITIONS})
   if (expat_FOUND)
-    target_link_libraries(test_server_sks PRIVATE s2opc_clientserver-xml-loaders-expat)
+    target_link_libraries(test_server_sks PRIVATE s2opc_clientserver)
     target_compile_definitions(test_server_sks PRIVATE "WITH_EXPAT")
   endif()
   if (WITH_STATIC_SECURITY_DATA)
-    target_include_directories(test_server_sks PRIVATE ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/server)
     target_compile_definitions(test_server_sks PRIVATE "WITH_STATIC_SECURITY_DATA")
   endif()
 endif()

@@ -31,7 +31,9 @@
 #include "config.h"
 
 #ifdef WITH_STATIC_SECURITY_DATA
-#include "static_security_data.h"
+#include "client_static_security_data.h"
+#include "pubsub_static_security_data.h"
+#include "server_static_security_data.h"
 #endif
 
 const char* SESSION_NAME = "S2OPC_SKS_client_session";

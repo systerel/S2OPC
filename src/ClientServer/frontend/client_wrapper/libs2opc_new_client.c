@@ -49,8 +49,8 @@ struct SOPC_ClientConnection
     SOPC_ClientConnectionEvent_Fct* connCb;
 
     // Synchronous treatment
-    Condition syncCond;
-    Mutex syncConnMutex;
+    SOPC_Condition syncCond;
+    SOPC_Mutex syncConnMutex;
     bool syncConnection;
 
     uint16_t secureConnectionIdx;
@@ -69,8 +69,8 @@ typedef struct
     SOPC_ServiceAsyncResp_Fct* asyncRespCb;
     uintptr_t userCtx;
 
-    Mutex mutex; /* protect this context */
-    Condition condition;
+    SOPC_Mutex mutex; /* protect this context */
+    SOPC_Condition condition;
     bool finished; /* set when treatment is done */
 
     bool isDiscoveryModeService; /* Set if the endpoint service API was used */
@@ -100,16 +100,16 @@ static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateSync(
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Mutex_Initialization(&result->mutex);
+        status = SOPC_Mutex_Initialization(&result->mutex);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Condition_Init(&result->condition);
+        status = SOPC_Condition_Init(&result->condition);
     }
     if (SOPC_STATUS_OK != status)
     {
-        Condition_Clear(&result->condition);
-        Mutex_Clear(&result->mutex);
+        SOPC_Condition_Clear(&result->condition);
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }
@@ -139,16 +139,16 @@ static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateAsync
     }
     if (SOPC_STATUS_OK == status)
     {
-        Mutex_Initialization(&result->mutex);
+        SOPC_Mutex_Initialization(&result->mutex);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Condition_Init(&result->condition);
+        status = SOPC_Condition_Init(&result->condition);
     }
     if (SOPC_STATUS_OK != status)
     {
-        Condition_Clear(&result->condition);
-        Mutex_Clear(&result->mutex);
+        SOPC_Condition_Clear(&result->condition);
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }
@@ -176,16 +176,16 @@ static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateNoSyn
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Mutex_Initialization(&result->mutex);
+        status = SOPC_Mutex_Initialization(&result->mutex);
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = Condition_Init(&result->condition);
+        status = SOPC_Condition_Init(&result->condition);
     }
     if (SOPC_STATUS_OK != status)
     {
-        Condition_Clear(&result->condition);
-        Mutex_Clear(&result->mutex);
+        SOPC_Condition_Clear(&result->condition);
+        SOPC_Mutex_Clear(&result->mutex);
         SOPC_Free(result);
         result = NULL;
     }
@@ -195,8 +195,8 @@ static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateNoSyn
 static void SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(SOPC_ClientHelper_ReqCtx* genReqCtx)
 {
     SOPC_ASSERT(NULL != genReqCtx);
-    Condition_Clear(&genReqCtx->condition);
-    Mutex_Clear(&genReqCtx->mutex);
+    SOPC_Condition_Clear(&genReqCtx->condition);
+    SOPC_Mutex_Clear(&genReqCtx->mutex);
     genReqCtx->responseResultCtx = NULL; // shall be freed by caller or previously
     SOPC_Free(genReqCtx);
 }
@@ -210,7 +210,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeo
     /* Wait for the response */
     while (SOPC_STATUS_OK == mutStatus && !genReqCtx->finished)
     {
-        mutStatus = Mutex_UnlockAndWaitCond(&genReqCtx->condition, &genReqCtx->mutex);
+        mutStatus = SOPC_Mutex_UnlockAndWaitCond(&genReqCtx->condition, &genReqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
     return genReqCtx->status;
@@ -263,7 +263,7 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
 
     bool isAsync = false;
     SOPC_ClientHelper_ReqCtx* genCtx = (SOPC_ClientHelper_ReqCtx*) genContext;
-    SOPC_ReturnStatus statusMutex = Mutex_Lock(&genCtx->mutex);
+    SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
     if (genCtx->isAsyncCall)
@@ -308,10 +308,10 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
     genCtx->status = status;
 
     genCtx->finished = true;
-    statusMutex = Mutex_Unlock(&genCtx->mutex);
+    statusMutex = SOPC_Mutex_Unlock(&genCtx->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
     /* Signal that the response is available */
-    statusMutex = Condition_SignalAll(&genCtx->condition);
+    statusMutex = SOPC_Condition_SignalAll(&genCtx->condition);
     SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
     if (isAsync)
@@ -330,19 +330,19 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
         SE_ACTIVATED_SESSION == event)
     {
         bool isSyncConn = false;
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&cc->syncConnMutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&cc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         isSyncConn = cc->syncConnection;
 
-        Mutex_Unlock(&cc->syncConnMutex);
+        SOPC_Mutex_Unlock(&cc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         if (isSyncConn)
         {
             /* Synchronous connection operation:
                Signal that the response is available */
-            statusMutex = Condition_SignalAll(&cc->syncCond);
+            statusMutex = SOPC_Condition_SignalAll(&cc->syncCond);
             SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
         }
         else
@@ -392,7 +392,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         return;
     }
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_StaMac_ReqCtx* staMacCtx = NULL;
@@ -426,7 +426,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                               SOPC_ToolkitClient_GetReverseEndpointURL(IdOrStatus));
         sopc_client_helper_config
             .openedReverseEndpointsFromCfgIdx[SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(IdOrStatus)] = false;
-        mutStatus = Condition_SignalAll(&sopc_client_helper_config.reverseEPsClosedCond);
+        mutStatus = SOPC_Condition_SignalAll(&sopc_client_helper_config.reverseEPsClosedCond);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         break;
     default:
@@ -481,7 +481,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 }
 
@@ -609,9 +609,9 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     if (SOPC_STATUS_OK == status)
     {
         // Data for synchronous calls
-        SOPC_ReturnStatus mutStatus = Condition_Init(&res->syncCond);
+        SOPC_ReturnStatus mutStatus = SOPC_Condition_Init(&res->syncCond);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = Mutex_Initialization(&res->syncConnMutex);
+        mutStatus = SOPC_Mutex_Initialization(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
         res->cfgId = cfgId;
@@ -643,14 +643,14 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Check connection is valid and is not already created
     if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
         (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
     {
-        Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         return SOPC_STATUS_INVALID_STATE;
     }
 
@@ -703,13 +703,13 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* send the request and wait for the result if sync operation */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&reqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         /* send the request */
@@ -732,7 +732,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             }
         }
 
-        statusMutex = Mutex_Unlock(&reqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         if (isSynchronous && NULL != reqCtx)
@@ -772,7 +772,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Check connection is valid and is not already created
@@ -817,13 +817,13 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
         res->connCb = connectEventCb;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* Starts the machine */
     if (SOPC_STATUS_OK == status)
     {
-        mutStatus = Mutex_Lock(&res->syncConnMutex);
+        mutStatus = SOPC_Mutex_Lock(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
         if (!res->syncConnection)
@@ -842,7 +842,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
                    !SOPC_StaMac_IsConnected(res->stateMachine))
             {
                 // Note: we rely on the low layer timeouts and do not need a new one
-                status = Mutex_UnlockAndWaitCond(&res->syncCond, &res->syncConnMutex);
+                status = SOPC_Mutex_UnlockAndWaitCond(&res->syncCond, &res->syncConnMutex);
                 SOPC_ASSERT(SOPC_STATUS_OK == status);
             }
 
@@ -854,7 +854,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
 
         res->syncConnection = false;
 
-        mutStatus = Mutex_Unlock(&res->syncConnMutex);
+        mutStatus = SOPC_Mutex_Unlock(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
@@ -890,7 +890,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
@@ -902,7 +902,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
         pSM = pSc->stateMachine;
     } // else: SOPC_STATUS_INVALID_STATE;
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Early return after mutex unlock
@@ -913,7 +913,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
 
     if (SOPC_StaMac_IsConnected(pSM))
     {
-        mutStatus = Mutex_Lock(&pSc->syncConnMutex);
+        mutStatus = SOPC_Mutex_Lock(&pSc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
         if (!pSc->syncConnection)
@@ -929,24 +929,24 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
         while (SOPC_STATUS_OK == status && !SOPC_StaMac_IsError(pSM) && SOPC_StaMac_IsConnected(pSM))
         {
             // Note: we use the low layer timeouts and do not need a new one
-            status = Mutex_UnlockAndWaitCond(&pSc->syncCond, &pSc->syncConnMutex);
+            status = SOPC_Mutex_UnlockAndWaitCond(&pSc->syncCond, &pSc->syncConnMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
 
         pSc->syncConnection = false;
 
-        mutStatus = Mutex_Unlock(&pSc->syncConnMutex);
+        mutStatus = SOPC_Mutex_Unlock(&pSc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+        mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        mutStatus = Condition_Clear(&(*secureConnection)->syncCond);
+        mutStatus = SOPC_Condition_Clear(&(*secureConnection)->syncCond);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-        mutStatus = Mutex_Clear(&(*secureConnection)->syncConnMutex);
+        mutStatus = SOPC_Mutex_Clear(&(*secureConnection)->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
         sopc_client_helper_config.secureConnections[(*secureConnection)->secureConnectionIdx] = NULL;
@@ -954,7 +954,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
         *secureConnection = NULL;
         SOPC_StaMac_Delete(&pSM);
 
-        mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
 
@@ -1068,7 +1068,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
@@ -1102,14 +1102,14 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* send the request and wait for the result if sync operation */
     if (SOPC_STATUS_OK == status)
     {
         /* Prepare the synchronous context */
-        SOPC_ReturnStatus statusMutex = Mutex_Lock(&reqCtx->mutex);
+        SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         /* send the request */
@@ -1131,7 +1131,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
             }
         }
 
-        statusMutex = Mutex_Unlock(&reqCtx->mutex);
+        statusMutex = SOPC_Mutex_Unlock(&reqCtx->mutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
 
         if (isSynchronous && NULL != reqCtx)
@@ -1177,10 +1177,10 @@ static void SOPC_StaMacNotification_Cbk(uintptr_t subscriptionAppCtx,
         return;
     }
     SOPC_ClientSubscriptionNotification_Fct* subNotifCb = NULL;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     subNotifCb = sopc_client_helper_config.subNotifCb;
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     if (NULL != subNotifCb)
     {
@@ -1205,7 +1205,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     {
         return NULL;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1254,11 +1254,11 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
         while (!SOPC_StaMac_IsError(pSM) && !SOPC_StaMac_HasSubscription(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
-            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
-            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
@@ -1289,7 +1289,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
         SOPC_Free(subInstance);
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Free the allocated context if the subscription creation failed, otherwise kept during subscription lifetime
@@ -1318,7 +1318,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_Clie
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1332,7 +1332,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SetAvailableTokens(SOPC_Clie
         SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
         status = SOPC_StaMac_SetSubscriptionNbTokens(pSM, nbPublishTokens);
     }
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -1351,13 +1351,13 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_GetRevisedParameters(SOPC_Cl
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_StaMac_Machine* pSM = subscription->secureConnection->stateMachine;
     SOPC_ReturnStatus status = SOPC_StaMac_GetSubscriptionRevisedParams(pSM, revisedPublishingInterval,
                                                                         revisedLifetimeCount, revisedMaxKeepAliveCount);
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -1387,7 +1387,7 @@ SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_Clien
         return NULL;
     }
     // Check connection is still valid in configuration
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1397,7 +1397,7 @@ SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_Clien
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (SOPC_STATUS_OK != status)
@@ -1424,7 +1424,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
 
     SOPC_CreateMonitoredItems_Ctx* appCtx = NULL;
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1464,12 +1464,12 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             /* Release the lock so that the event handler can work properly while waiting */
-            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
-            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
@@ -1487,7 +1487,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
     }
     SOPC_Free(appCtx);
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -1509,7 +1509,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
 
     SOPC_DeleteMonitoredItems_Ctx* appCtx = NULL;
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1549,12 +1549,12 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
             /* Release the lock so that the event handler can work properly while waiting */
-            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
-            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
@@ -1572,7 +1572,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(
     }
     SOPC_Free(appCtx);
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
@@ -1590,7 +1590,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
     }
     SOPC_ClientHelper_Subscription* subscription = *ppSubscription;
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1624,11 +1624,11 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
         while (!SOPC_StaMac_IsError(pSM) && SOPC_StaMac_HasSubscription(pSM) &&
                count * CONNECTION_TIMEOUT_MS_STEP < timeout_ms)
         {
-            mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             SOPC_Sleep(CONNECTION_TIMEOUT_MS_STEP);
 
-            mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
             ++count;
         }
@@ -1660,7 +1660,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (SOPC_STATUS_OK == status)
@@ -1729,7 +1729,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1762,7 +1762,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_SyncAndAsyncRequest(
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;

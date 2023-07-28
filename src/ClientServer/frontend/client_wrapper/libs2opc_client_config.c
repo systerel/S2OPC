@@ -95,10 +95,10 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void)
     pConfig->clientConfig.freeCstringsFlag = true;
 
     // Client state initialization
-    SOPC_ReturnStatus mutStatus = Mutex_Initialization(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    mutStatus = Condition_Init(&sopc_client_helper_config.reverseEPsClosedCond);
+    mutStatus = SOPC_Condition_Init(&sopc_client_helper_config.reverseEPsClosedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ReturnStatus status = SOPC_CommonHelper_SetClientComEvent(SOPC_ClientInternal_ToolkitEventCallback);
@@ -138,7 +138,7 @@ void SOPC_ClientConfigHelper_Clear(void)
 
     SOPC_S2OPC_Config* pConfig = NULL;
 
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     pConfig = SOPC_CommonHelper_GetConfiguration();
@@ -173,13 +173,13 @@ void SOPC_ClientConfigHelper_Clear(void)
     {
         while (!SOPC_Internal_AllReverseEPsClosed(pConfig))
         {
-            mutStatus = Mutex_UnlockAndWaitCond(&sopc_client_helper_config.reverseEPsClosedCond,
-                                                &sopc_client_helper_config.configMutex);
+            mutStatus = SOPC_Mutex_UnlockAndWaitCond(&sopc_client_helper_config.reverseEPsClosedCond,
+                                                     &sopc_client_helper_config.configMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     // Inhibition of client events (avoid possible lock attempt on config mutex by callbacks)
@@ -189,16 +189,16 @@ void SOPC_ClientConfigHelper_Clear(void)
     // Close open connections
     SOPC_ToolkitClient_ClearAllSCs();
 
-    mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     SOPC_ClientConfig_Clear(&pConfig->clientConfig);
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = Condition_Clear(&sopc_client_helper_config.reverseEPsClosedCond);
+    mutStatus = SOPC_Condition_Clear(&sopc_client_helper_config.reverseEPsClosedCond);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    mutStatus = Mutex_Clear(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Clear(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     SOPC_Atomic_Int_Set(&sopc_client_helper_config.initialized, (int32_t) false);
 
@@ -605,7 +605,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAs
         return SOPC_STATUS_INVALID_STATE;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_ReturnStatus mutStatus = Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     if (NULL == sopc_client_helper_config.asyncRespCb)
@@ -617,7 +617,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAs
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    mutStatus = Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;

@@ -105,7 +105,7 @@ if (expat_FOUND AND NOT S2OPC_NANO_PROFILE)
   add_executable(sks_demo_server
     "demo_server/sks_demo_server_methods.c"
     "demo_server/sks_demo_server.c")
-  target_link_libraries(sks_demo_server PRIVATE s2opc_serverwrapper)
+  target_link_libraries(sks_demo_server PRIVATE s2opc_clientserver)
   target_compile_options(sks_demo_server PRIVATE ${S2OPC_COMPILER_FLAGS})
   target_compile_definitions(sks_demo_server PRIVATE ${S2OPC_DEFINITIONS})
   add_custom_command(

@@ -43,8 +43,8 @@ typedef struct SOPC_ClientHelper_Config
     // Flag atomically set when the structure is initialized during call to SOPC_ClientConfigHelper_Initialize
     // and singleton config is initialized
     int32_t initialized;
-    Mutex configMutex;
-    Condition reverseEPsClosedCond;
+    SOPC_Mutex configMutex;
+    SOPC_Condition reverseEPsClosedCond;
 
     SOPC_ClientConnection* secureConnections[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG];
     SOPC_ReverseEndpointConfigIdx
