@@ -2,7 +2,7 @@
     <!-- one to many -->
     <connection address="opc.eth://01-00-00-01-04-00" mode="subscriber">
         <!-- one to many -->
-        <message groupId="14" groupVersion="1" publishingInterval="50." publisherId="123" >
+        <message groupId="14" groupVersion="1" publishingInterval="50." publisherId="i=123" >
           <dataset writerId="50">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
@@ -14,7 +14,7 @@
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>
             </dataset>
         </message>
-        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="456" securityMode="sign">
+        <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
           <dataset writerId="52">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>

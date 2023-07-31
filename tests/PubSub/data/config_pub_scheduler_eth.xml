@@ -1,6 +1,6 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
     <!-- one to many -->
-    <connection address="opc.eth://01-00-00-01-04-00" mode="publisher" interfaceName="lo" publisherId="123">
+    <connection address="opc.eth://01-00-00-01-04-00" mode="publisher" interfaceName="lo" publisherId="i=123">
         <message publishingInterval="50." groupId="14" groupVersion="1">
             <!-- one to many -->
             <dataset writerId="50">

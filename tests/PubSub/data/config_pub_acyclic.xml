@@ -1,6 +1,6 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
     <!-- one to many -->
-    <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" publisherId="123" mode="publisher">
+    <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" publisherId="i=123" mode="publisher">
         <!-- one to many -->
         <message publishingInterval="50." publishingOffset="10" groupId="14" keepAliveTime="1000." groupVersion="1">
             <!-- one to many -->

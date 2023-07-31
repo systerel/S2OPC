@@ -1,6 +1,6 @@
 <PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
     <!-- one to many -->
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="42">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=42">
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
@@ -21,7 +21,7 @@
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
-        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="42" securityMode="signAndEncrypt">
+        <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="i=42" securityMode="signAndEncrypt">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
           <dataset>
             <!-- one to many -->
@@ -30,7 +30,7 @@
             <!-- the nodeId is used to retrieve the variable in the adresse space -->
           </dataset>
         </message>
-        <message groupId="15" groupVersion="1" publishingInterval="1000." publisherId="42">
+        <message groupId="15" groupVersion="1" publishingInterval="1000." publisherId="i=42">
           <dataset>
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
