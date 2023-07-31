@@ -79,7 +79,7 @@ XML_EMPTY = """<PubSub>
 </PubSub>"""
 
 XML_PUBLISHER_ONLY = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -92,7 +92,7 @@ XML_PUBLISHER_ONLY = """<PubSub>
 
 XML_SUBSCRIBER_ONLY = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -103,7 +103,7 @@ XML_SUBSCRIBER_ONLY = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -113,7 +113,7 @@ XML_PUBSUB_LOOP = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -124,7 +124,7 @@ XML_PUBSUB_LOOP = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -135,7 +135,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -147,7 +147,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -162,13 +162,13 @@ XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC" >
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC" >
             <dataset writerId="50" >
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
             </dataset>
         </message>
-        <message groupId="2" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="Test">
+        <message groupId="2" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="Test">
             <dataset writerId="51">
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
                 <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String"/>
@@ -178,7 +178,7 @@ XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user1" mqttPassword="password">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user1" mqttPassword="password">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -189,7 +189,7 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" >
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -201,7 +201,7 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="1" mqttUsername="user" mqttPassword="passwor">
+    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user" mqttPassword="passwor">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -212,7 +212,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
         </message>
     </connection>
     <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
-        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="1" mqttTopic="S2OPC">
+        <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -224,7 +224,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
@@ -235,7 +235,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -247,7 +247,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
@@ -258,7 +258,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -270,7 +270,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
             <!-- no SK server defined => fallback mechanism use local key files -->
             <dataset writerId="50">
@@ -281,7 +281,30 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
+            <!-- no SK server defined => fallback mechanism use local key files -->
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
+XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+            <!-- no SK server defined => fallback mechanism use local key files -->
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
             <!-- no SK server defined => fallback mechanism use local key files -->
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -293,7 +316,7 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
@@ -304,7 +327,30 @@ XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
+            <dataset>
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
+
+XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
+            <dataset>
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -315,7 +361,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
@@ -326,7 +372,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -338,7 +384,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
@@ -349,7 +395,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -361,7 +407,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
@@ -373,7 +419,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -384,7 +430,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_INVALID_DSM_WRITERID = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1">
             <dataset writerId="1">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -394,7 +440,7 @@ XML_PUBSUB_INVALID_DSM_WRITERID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset writerId="1">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -410,7 +456,7 @@ XML_PUBSUB_INVALID_DSM_WRITERID = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_NULL = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1">
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Null" />
@@ -420,7 +466,7 @@ XML_PUBSUB_LOOP_NULL = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Null" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -432,7 +478,7 @@ XML_PUBSUB_LOOP_NULL = """<PubSub>
 
 # Configuration with message on Subscriber side not consistent with the one on Publisher
 XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1">
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -442,7 +488,7 @@ XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -454,7 +500,7 @@ XML_PUBSUB_LOOP_MESSAGE_NOT_COMPATIBLE = """<PubSub>
 
 # Bad formed Configuration ( variabl instead of variable )
 XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1">
             <dataset>
                 <variabl nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -464,7 +510,7 @@ XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
@@ -475,7 +521,7 @@ XML_PUBSUB_BAD_FORMED_CONFIGURATION = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="4">
@@ -486,7 +532,7 @@ XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="5">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -498,7 +544,7 @@ XML_PUBSUB_MISMATCHING_WRITERID = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_NO_SUB_WRITER_ID = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="4">
@@ -509,7 +555,7 @@ XML_PUBSUB_NO_SUB_WRITER_ID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -521,7 +567,7 @@ XML_PUBSUB_NO_SUB_WRITER_ID = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="4">
@@ -542,7 +588,7 @@ XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="2">
                 <variable nodeId="ns=2;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -562,7 +608,7 @@ XML_PUBSUB_SUB_WRITER_ID_FILTER = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_NO_GROUP_ID = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message publishingInterval="200" groupVersion="1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset>
@@ -573,7 +619,7 @@ XML_PUBSUB_NO_GROUP_ID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -585,7 +631,7 @@ XML_PUBSUB_NO_GROUP_ID = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message publishingInterval="200" groupId="1" groupVersion="1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset>
@@ -596,7 +642,7 @@ XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="sign">
             <!-- security wihtout SKS server => fallback mechanism -->
             <dataset writerId="2">
                 <variable nodeId="ns=2;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -616,7 +662,7 @@ XML_PUBSUB_DUPLICATE_WRITERID = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_ACYCLIC = """<PubSub >
-    <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" mode="publisher" publisherId="1">
+    <connection address="opc.udp://232.1.2.100:4840" acyclicPublisher="true" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" keepAliveTime="200." groupVersion="1">
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -626,11 +672,55 @@ XML_PUBSUB_LOOP_ACYCLIC = """<PubSub >
         </message>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Null" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
                 <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Null" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_LOOP_STRING_PUBID = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="s=foo">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="s=foo">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=foo">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="s=foo">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
             </dataset>
         </message>
     </connection>
@@ -1144,6 +1234,32 @@ def testPubSubDynamicConf(TapFileName):
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
         sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # TC 25 : Test String publisher Id
+        logger.begin_section("TC 25 : Test string publisher Id")
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_STRING_PUBID, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_1000)
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_STRING, "Test String pubId From Publisher", logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test String pubId Not set", logger)
+
+        sleep(DYN_CONF_PUB_INTERVAL_200)
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+
+        # TC 26 : Test malformed uinteger publisher Id
+        logger.begin_section("TC 26 : Test malformed UInteger publisher Id")
+        helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID, logger, possibleFail=True)
 
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)
