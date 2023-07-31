@@ -156,6 +156,21 @@ else()
   message(WARNING "Demo file transfer toolkit_demo_file_transfer executable will not be compiled since Expat library not available.")
 endif()
 
+if (expat_FOUND)
+  set(PUSH_SERVER_LIB_INCLUDES "${CMAKE_CURRENT_SOURCE_DIR}/demo_push_server/push_server_lib")
+  file(GLOB_RECURSE PUSH_SERVER_LIB_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/demo_push_server/*.c )
+  add_executable(toolkit_demo_push_server ${PUSH_SERVER_LIB_SOURCES})
+  target_link_libraries(toolkit_demo_push_server PRIVATE s2opc_serverwrapper s2opc_clientserver-xml-loaders-expat)
+  target_include_directories(toolkit_demo_push_server PRIVATE ${PUSH_SERVER_LIB_INCLUDES})
+  target_compile_definitions(toolkit_demo_push_server PRIVATE ${S2OPC_DEFINITIONS} "WITH_EXPAT")
+  add_custom_command(
+    TARGET ${TOOLKIT_DEMO_SERVER} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/demo_push_server/data/sopc_demo_push_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_Push_AddSpace.xml
+  )
+else()
+  message(WARNING "Demo push server toolkit_demo_push_server executable will not be compiled since Expat library not available.")
+endif()
+
 # Demo clients (S2OPC only without extension)
 set(S2OPC_DEMOCLIENT_COMMON
   "demo_client/argparse.c"
