@@ -252,7 +252,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetAnonymous(SOPC_SecureConnection
  *
  * \param secConnConfig  The secure connection configuration to set
  * \param userPolicyId   The user policy Id to be used in server for username/password
- * \param userName       The username to be used for authentication
+ * \param userName       The username to be used for authentication or NULL to be retrieved from the callback defined
+ *                       with ::SOPC_ClientConfigHelper_SetUserNamePasswordCallback.
  * \param password       The password to be used for authentication or NULL to be retrieved from the callback defined
  *                       with ::SOPC_ClientConfigHelper_SetUserNamePasswordCallback.
  *                       Note: the password should not be hardcoded string in the code.
