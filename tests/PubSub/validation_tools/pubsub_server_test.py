@@ -226,7 +226,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
 XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -236,7 +236,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -249,7 +249,7 @@ XML_PUBSUB_LOOP_SECU_ENCRYPT_SIGN_SUCCEED = """<PubSub>
 XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -259,7 +259,7 @@ XML_PUBSUB_LOOP_SECU_SIGN_SUCCEED = """<PubSub>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -295,7 +295,7 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
 XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -317,7 +317,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
 XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -327,7 +327,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="sign">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -340,7 +340,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_2 = """<PubSub>
 XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
@@ -350,7 +350,7 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
     </connection>
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
@@ -363,8 +363,8 @@ XML_PUBSUB_LOOP_SECU_FAIL_3 = """<PubSub>
 XML_PUBSUB_LOOP_SECU_SIGN_FAIL_4 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="sign">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
             <dataset>
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
                 <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />

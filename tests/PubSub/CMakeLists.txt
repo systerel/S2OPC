@@ -85,7 +85,10 @@ target_compile_definitions(xml_parser_test PRIVATE ${S2OPC_DEFINITIONS})
 add_custom_command(TARGET xml_parser_test POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_sub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_acyclic.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_pub_acyclic.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_2k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/server_public/sks_server_2k_cert.der
+  )
 
 s2opc_unit_test(xml_parser_test)
 
