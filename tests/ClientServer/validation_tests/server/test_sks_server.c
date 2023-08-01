@@ -170,13 +170,6 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
             SOPC_Free(skProvider);
             skProvider = NULL;
         }
-
-        if (NULL != skBuilder)
-        {
-            SOPC_SKBuilder_Clear(skBuilder);
-            SOPC_Free(skBuilder);
-            skBuilder = NULL;
-        }
     }
 
     if (SOPC_STATUS_OK == status)

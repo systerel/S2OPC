@@ -598,14 +598,15 @@ static SOPC_ReturnStatus get_sks_config(SOPC_PubSubConfiguration* pPubSubConfig,
                 size_t sksArraySize = SOPC_Array_Size((*sksConfigArray)->sksArray);
 
                 // add all Sks
-                for (uint16_t sksIndex = 0; sksIndex < nbSKS; sksIndex++)
+                bool bres = true;
+                for (uint16_t sksIndex = 0; bres && sksIndex < nbSKS; sksIndex++)
                 {
                     SOPC_SecurityKeyServices* desc = SOPC_ReaderGroup_Get_SecurityKeyServices_At(group, sksIndex);
                     SOPC_ASSERT(NULL != desc);
                     if (!PubSub_SearchSKSInArray((*sksConfigArray)->sksArray, desc))
                     {
-                        SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
-                        SOPC_Array_Append((*sksConfigArray)->readerGroupArray, group);
+                        bres &= SOPC_Array_Append((*sksConfigArray)->sksArray, desc);
+                        bres &= SOPC_Array_Append((*sksConfigArray)->readerGroupArray, group);
                         if (0 < sksArraySize)
                         {
                             // 2 groups have different SKS list. All list are merged

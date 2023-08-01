@@ -632,6 +632,7 @@ static SOPC_SKManager* createSKmanager(void)
     {
         SOPC_SKManager_Clear(skm);
         SOPC_Free(skm);
+        skm = NULL;
     }
     SOPC_Buffer_Delete(keysBuffer);
 
