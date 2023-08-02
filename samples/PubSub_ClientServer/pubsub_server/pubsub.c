@@ -119,10 +119,18 @@ static void PubSub_SaveConfiguration(char* configBuffer)
 
 static void Server_GapInDsmSnCb(SOPC_Conf_PublisherId pubId, uint16_t writerId, uint16_t prevSN, uint16_t receivedSN)
 {
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
-    printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu8
-           ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-           pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+    if (SOPC_UInteger_PublisherId == pubId.type)
+    {
+        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu16
+               ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+               pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+    }
+    else
+    {
+        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s DataSetWriterId=%" PRIu16
+               ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+               SOPC_String_GetRawCString(&pubId.data.string), writerId, prevSN + 1, receivedSN - 1);
+    }
 }
 
 SOPC_ReturnStatus PubSub_Configure(void)

@@ -938,11 +938,18 @@ static void cb_ReceiveGapDsmSequenceNumber(SOPC_Conf_PublisherId pubId,
                                            uint16_t prevSN,
                                            uint16_t receivedSN)
 {
-    /* Only UInterger publisher Id support*/
-    SOPC_ASSERT(SOPC_UInteger_PublisherId == pubId.type);
-    PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu16
-          ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-          pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+    if (SOPC_UInteger_PublisherId == pubId.type)
+    {
+        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu16
+              ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+              pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+    }
+    else
+    {
+        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s DataSetWriterId=%" PRIu16
+              ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+              SOPC_String_GetRawCString(&pubId.data.string), writerId, prevSN + 1, receivedSN - 1);
+    }
 }
 
 /***************************************************/
