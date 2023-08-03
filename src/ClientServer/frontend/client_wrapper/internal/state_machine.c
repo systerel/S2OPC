@@ -106,6 +106,7 @@ struct SOPC_StaMac_Machine
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
                                    SOPC_StaMac_RequestScope* pRequestScope,
+                                   SOPC_StaMac_RequestType* pRequestType,
                                    SOPC_App_Com_Event event,
                                    uint32_t arg,
                                    void* pParam,
@@ -155,7 +156,10 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
                                                          uint32_t arg,
                                                          void* pParam,
                                                          uintptr_t appCtx);
-static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx);
+static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
+                                           uint32_t arg,
+                                           void* pParam,
+                                           SOPC_StaMac_RequestType reqType);
 static void StaMac_ProcessEvent_SendRequestFailed(SOPC_StaMac_Machine* pSM,
                                                   uint32_t arg,
                                                   void* pParam,
@@ -1476,10 +1480,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
     uintptr_t appCtx = 0; /* Internal appCtx, the one wrapped in the (ReqCtx*)toolkitCtx */
     SOPC_StaMac_State oldState = stError;
     SOPC_StaMac_RequestScope requestScope = SOPC_REQUEST_SCOPE_STATE_MACHINE;
+    SOPC_StaMac_RequestType requestType = SOPC_REQUEST_TYPE_UNKNOWN;
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, event, arg, pParam, toolkitCtx);
+    bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, &requestType, event, arg, pParam, toolkitCtx);
 
     if (bProcess)
     {
@@ -1606,7 +1611,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
                     else if (&OpcUa_ServiceFault_EncodeableType == pEncType)
                     {
                         /* give appCtx, and not internal app context, to know more about the service fault */
-                        StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, toolkitCtx);
+                        StaMac_ProcessMsg_ServiceFault(pSM, arg, pParam, requestType);
                     }
                     else
                     {
@@ -1683,6 +1688,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
 static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
                                    uintptr_t* pAppCtx,
                                    SOPC_StaMac_RequestScope* pRequestScope,
+                                   SOPC_StaMac_RequestType* pRequestType,
                                    SOPC_App_Com_Event event,
                                    uint32_t arg,
                                    void* pParam,
@@ -1726,6 +1732,10 @@ static bool StaMac_IsEventTargeted(SOPC_StaMac_Machine* pSM,
             if (NULL != pRequestScope)
             {
                 *pRequestScope = reqCtx->requestScope;
+            }
+            if (NULL != pRequestType)
+            {
+                *pRequestType = reqCtx->requestType;
             }
             SOPC_Free(reqCtx);
         }
@@ -2149,38 +2159,30 @@ static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* 
     pSM->state = stActivated;
 }
 
-static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
+static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
+                                           uint32_t arg,
+                                           void* pParam,
+                                           SOPC_StaMac_RequestType reqType)
 {
     SOPC_UNUSED_ARG(arg);
     SOPC_UNUSED_ARG(pParam);
-
-    if (0 == appCtx)
+    switch (reqType)
     {
-        pSM->state = stError;
-    }
-    else
-    {
-        SOPC_StaMac_ReqCtx reqCtx = *(SOPC_StaMac_ReqCtx*) appCtx;
-        SOPC_StaMac_RequestType reqType = reqCtx.requestType;
-
-        switch (reqType)
+    case SOPC_REQUEST_TYPE_PUBLISH:
+        /* ServiceFault on PublishRequest is allowed */
+        if (pSM->nTokenUsable > 0) // Ensure we do not underflow
         {
-        case SOPC_REQUEST_TYPE_PUBLISH:
-            /* ServiceFault on PublishRequest is allowed */
-            if (pSM->nTokenUsable > 0) // Ensure we do not underflow
-            {
-                pSM->nTokenUsable -= 1;
-            }
-            else
-            {
-                Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
-            }
-            break;
-        default:
-            /* else go into error mode */
-            pSM->state = stError;
-            break;
+            pSM->nTokenUsable -= 1;
         }
+        else
+        {
+            Helpers_Log(SOPC_LOG_LEVEL_WARNING, "Unexpected number of PublishResponse received.");
+        }
+        break;
+    default:
+        /* else go into error mode */
+        pSM->state = stError;
+        break;
     }
 }
 
