@@ -123,6 +123,7 @@ static bool gSubStarted = false;
 static bool gSubOperational = false;
 // Date of last reception on Sub
 static SOPC_RealTime* gLastReceptionDateMs = NULL;
+SOPC_SKManager* g_skmanager = NULL;
 
 /***************************************************/
 /**               HELPER LOG MACROS                */
@@ -554,6 +555,13 @@ static void clearPubSub(void)
     SOPC_PubScheduler_Stop();
     gSubStarted = false;
 
+    if (NULL != g_skmanager)
+    {
+        SOPC_SKManager_Clear(g_skmanager);
+        SOPC_Free(g_skmanager);
+        g_skmanager = NULL;
+    }
+
     Cache_Clear();
 }
 
@@ -657,10 +665,10 @@ static void setupPubSub(void)
     SOPC_ASSERT(NULL != pSourceConfig && "SOPC_PubSourceVariableConfig_Create failed");
 
     /* PubSub Security Keys configuration */
-    SOPC_SKManager* skm = createSKmanager();
-    SOPC_ASSERT(NULL != skm && "SOPC_SKManager_SetKeys failed");
+    g_skmanager = createSKmanager();
+    SOPC_ASSERT(NULL != g_skmanager && "SOPC_SKManager_SetKeys failed");
     SOPC_PubSubSKS_Init();
-    SOPC_PubSubSKS_SetSkManager(skm);
+    SOPC_PubSubSKS_SetSkManager(g_skmanager);
 
     Cache_Initialize(pPubSubConfig);
 }
