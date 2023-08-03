@@ -41,7 +41,7 @@ void publish_request_queue_bs__allocate_new_publish_queue(
     t_bool* const publish_request_queue_bs__bres,
     constants__t_publishReqQueue_i* const publish_request_queue_bs__queue)
 {
-    *publish_request_queue_bs__queue = SOPC_SLinkedList_Create(0);
+    *publish_request_queue_bs__queue = SOPC_SLinkedList_Create(SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS);
     if (*publish_request_queue_bs__queue == NULL)
     {
         *publish_request_queue_bs__bres = false;

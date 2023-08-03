@@ -934,7 +934,7 @@ OPERATIONS
                 StatusCode_service := e_sc_ok;
                 async_resp_msg := TRUE
             ELSE
-                StatusCode_service := e_sc_bad_out_of_memory;
+                StatusCode_service := e_sc_bad_too_many_publish_requests;
                 async_resp_msg := FALSE
             END
         /* #5 transition */

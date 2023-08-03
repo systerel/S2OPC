@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.c
 
- Date                 : 02/05/2023 12:42:27
+ Date                 : 03/08/2023 12:54:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -666,7 +666,7 @@ void subscription_core__receive_publish_request(
             *subscription_core__async_resp_msg = true;
          }
          else {
-            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+            *subscription_core__StatusCode_service = constants_statuscodes_bs__e_sc_bad_too_many_publish_requests;
             *subscription_core__async_resp_msg = false;
          }
       }
