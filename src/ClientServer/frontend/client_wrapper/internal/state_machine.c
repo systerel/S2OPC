@@ -84,6 +84,8 @@ struct SOPC_StaMac_Machine
                                         SOPC_DeleteMonitoredItem_Ctx is the listed value */
 
     uint32_t nTokenTarget;                     /* Target number of available tokens */
+    bool tooManyTokenRcvd;                     /* Flag set when server returns a too many token service fault,
+                                                   wait for next response without fault. */
     uint32_t nTokenUsable;                     /* Tokens available to the server
                                                 * (PublishRequest_sent - PublishResponse_sent) */
     bool bAckSubscr;                           /* Indicates whether an acknowledgement should be sent
@@ -232,6 +234,7 @@ SOPC_ReturnStatus SOPC_StaMac_Create(uint32_t iscConfig,
         pSM->pListMonIt = SOPC_SLinkedList_Create(0);
         pSM->pListDelMonIt = SOPC_SLinkedList_Create(0);
         pSM->nTokenTarget = iTokenTarget;
+        pSM->tooManyTokenRcvd = false;
         pSM->nTokenUsable = 0;
         pSM->pCbkGenericEvent = pCbkGenericEvent;
         pSM->bAckSubscr = false;
@@ -1900,6 +1903,17 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
     }
 }
 
+static void StaMac_TreatTooManyPublishRequests(SOPC_StaMac_Machine* pSM)
+{
+    // Adapt the target to avoid sending too many requests
+    if (!pSM->tooManyTokenRcvd && pSM->nTokenTarget > 1)
+    {
+        pSM->nTokenTarget--;
+    }
+    // Inhibit sending until next PublishResponse is received
+    pSM->tooManyTokenRcvd = true;
+}
+
 static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t arg, void* pParam, uintptr_t appCtx)
 {
     SOPC_UNUSED_ARG(arg);
@@ -1981,6 +1995,15 @@ static void StaMac_ProcessMsg_PublishResponse(SOPC_StaMac_Machine* pSM, uint32_t
         pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult, NULL, 0, NULL, NULL);
     }
     /* TODO: verify the results[] which contains a status for each Ack */
+
+    if (OpcUa_BadTooManyPublishRequests == pPubResp->ResponseHeader.ServiceResult)
+    {
+        StaMac_TreatTooManyPublishRequests(pSM);
+    }
+    else
+    {
+        pSM->tooManyTokenRcvd = false;
+    }
 }
 
 static void StaMac_ProcessMsg_CreateSubscriptionResponse(SOPC_StaMac_Machine* pSM,
@@ -2043,6 +2066,7 @@ static void StaMac_ProcessMsg_DeleteSubscriptionResponse(SOPC_StaMac_Machine* pS
 
     // Reset values that will not be used anymore since no more subscription available
     pSM->nTokenUsable = 0;
+    pSM->tooManyTokenRcvd = false;
     pSM->bAckSubscr = false;
     pSM->iAckSeqNum = 0;
 
@@ -2165,7 +2189,7 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
                                            SOPC_StaMac_RequestType reqType)
 {
     SOPC_UNUSED_ARG(arg);
-    SOPC_UNUSED_ARG(pParam);
+    OpcUa_ServiceFault* servFault = (OpcUa_ServiceFault*) pParam;
     switch (reqType)
     {
     case SOPC_REQUEST_TYPE_PUBLISH:
@@ -2173,6 +2197,16 @@ static void StaMac_ProcessMsg_ServiceFault(SOPC_StaMac_Machine* pSM,
         if (pSM->nTokenUsable > 0) // Ensure we do not underflow
         {
             pSM->nTokenUsable -= 1;
+
+            if (OpcUa_BadTooManyPublishRequests == servFault->ResponseHeader.ServiceResult)
+            {
+                StaMac_TreatTooManyPublishRequests(pSM);
+            }
+            else
+            {
+                // Remove flag when service result is not OpcUa_BadTooManyPublishRequests (might be timeout, etc.)
+                pSM->tooManyTokenRcvd = false;
+            }
         }
         else
         {
@@ -2279,7 +2313,7 @@ static void StaMac_PostProcessActions(SOPC_StaMac_Machine* pSM, SOPC_StaMac_Stat
         /* add tokens, but wait for at least a monitored item */
         if (pSM->bSubscriptionCreated && pSM->nTokenUsable < pSM->nTokenTarget)
         {
-            while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget)
+            while (SOPC_STATUS_OK == status && pSM->nTokenUsable < pSM->nTokenTarget && !pSM->tooManyTokenRcvd)
             {
                 /* Send a PublishRequest */
                 Helpers_Log(SOPC_LOG_LEVEL_INFO, "Adding publish token.");
