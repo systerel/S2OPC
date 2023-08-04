@@ -50,6 +50,13 @@ typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
  */
 typedef SOPC_Buffer SOPC_SerializedCertificate;
 
+/**
+ * \brief A serialized representation of a CRL.
+ *
+ * This representation is safe to share across threads.
+ */
+typedef SOPC_Buffer SOPC_SerializedCRL;
+
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
  * ------------------------------------------------------------------------------------------------
@@ -595,6 +602,22 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_S
 const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_SerializedCertificate* cert);
 
 /**
+ * \brief Attach a DER certificate list to a serialized certificate array.
+ *
+ * \warning  The returned ::SOPC_SerializedCertificate must not be used after the certificate list is freed
+ *           by ::SOPC_KeyManager_Certificate_Free .
+ *
+ * \param pCerts                 The DER certificate list to attach
+ * \param[out] pSerializedArray  The serialized certificate array
+ * \param[out] pLenArray         The length of \p pSerializedArray
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const SOPC_CertificateList* pCerts,
+                                                                          SOPC_SerializedCertificate** pSerializedArray,
+                                                                          uint32_t* pLenArray);
+
+/**
  * \brief           Returns the SHA-1 thumbprint of a certificate.
  *
  * \param pCert     A pointer to a single Certificate.
@@ -724,6 +747,32 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLLis
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, size_t* pLength);
+
+/**
+ * \brief Returns the data held in a serialized CRL
+ *
+ * \param crl  the serialized CRL
+ *
+ * \return The data held in the serialized CRL. The returned memory is owned
+ *         by the serialized CRL, and should not be modified or freed.
+ */
+const SOPC_Buffer* SOPC_KeyManager_SerializedCRL_Data(const SOPC_SerializedCRL* crl);
+
+/**
+ * \brief Attach a DER CRL list to a serialized CRL array.
+ *
+ * \warning  The returned ::SOPC_SerializedCRL must not be used after the CRL list is freed
+ *           by ::SOPC_KeyManager_CRL_Free .
+ *
+ * \param pCerts                 The DER CRL list to attach
+ * \param[out] pSerializedArray  The serialized CRL array
+ * \param[out] pLenArray         The length of \p pSerializedArray
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRLList* pCRLs,
+                                                                  SOPC_SerializedCRL** pSerializedArray,
+                                                                  uint32_t* pLenArray);
 
 /**
  * \brief           Frees a Certificate created with ::SOPC_KeyManager_CRL_CreateOrAddFromFile or

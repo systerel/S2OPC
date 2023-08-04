@@ -213,3 +213,8 @@ void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* ce
 {
     SOPC_Buffer_Delete(cert);
 }
+
+const SOPC_Buffer* SOPC_KeyManager_SerializedCRL_Data(const SOPC_SerializedCRL* crl)
+{
+    return crl;
+}
