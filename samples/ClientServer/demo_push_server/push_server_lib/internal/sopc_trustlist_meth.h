@@ -22,8 +22,8 @@
  * \brief Internal API to manage methods of the TrustListType according the Push model.
  */
 
-#ifndef SOPC_TRUSTLIST_METH_INTERNAL_
-#define SOPC_TRUSTLIST_METH_INTERNAL_
+#ifndef SOPC_TRUSTLIST_METH_
+#define SOPC_TRUSTLIST_METH_
 
 #include "sopc_builtintypes.h"
 #include "sopc_service_call_context.h"
@@ -108,4 +108,4 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
                                              SOPC_Variant** outputArgs,
                                              void* param);
 
-#endif /* SOPC_TRUSTLIST_METH_INTERNAL_ */
+#endif /* SOPC_TRUSTLIST_METH_ */

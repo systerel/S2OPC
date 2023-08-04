@@ -24,8 +24,8 @@
 
 #include <stdio.h>
 
-#include "sopc_certificate_group_internal.h"
-#include "sopc_push_server_config_meth_internal.h"
+#include "sopc_certificate_group.h"
+#include "sopc_push_server_config_meth.h"
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
@@ -163,10 +163,10 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
                                "PushSrvCfg:Method_GetRejectedList: unable to create a variant");
         return OpcUa_BadUnexpectedError;
     }
-    SOPC_ByteString_Initialize(&v->Value.Bstring);
-    v->Value.Bstring.Data = NULL;
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
+    v->ArrayType = SOPC_VariantArrayType_Array;
     v->BuiltInTypeId = SOPC_ByteString_Id;
+    v->Value.Array.Content.BstringArr = NULL;
+    v->Value.Array.Length = 0;
     *nbOutputArgs = 1;
     *outputArgs = v;
 

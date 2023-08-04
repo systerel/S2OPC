@@ -20,6 +20,7 @@
 /** \file
  *
  * \brief API to manage methods, properties and variables of the ServerConfigurationType according the Push model.
+ *        Initialize the whole API (CertificateGroup and TrustList).
  */
 
 #ifndef SOPC_PUSH_SERVER_CONFIG_ITF_
@@ -42,9 +43,9 @@ typedef struct SOPC_PushServerConfig_Config
     const char* varSupportedPrivateKeyFormatsNodeId;      /*!< The nodeId of the SupportedPrivateKeyFormat variable.*/
     const char* varMaxTrustListSizeNodeId;                /*!< The nodeId of the MaxTrustListSize variable.*/
     const char* varMulticastDnsEnabledNodeId;             /*!< The nodeId of the MulticastDnsEnabled variable.*/
-    const SOPC_CertificateGroup_Config* pAppCertGroupCfg; /*!< Application certificate group configuration
-                                                               belongs the CertificateGroupeFolderType */
-    const SOPC_CertificateGroup_Config* pUsrCertGroupCfg; /*!< Users certificate group configuration belongs the
+    const SOPC_CertificateGroup_Config* pAppCertGroupCfg; /*!< Application certificate group configuration that
+                                                               belongs to the CertificateGroupeFolderType */
+    const SOPC_CertificateGroup_Config* pUsrCertGroupCfg; /*!< Users certificate group configuration that belongs to the
                                                                CertificateGroupeFolderType (NULL if not used) */
     SOPC_Certificate_Type appCertType;                    /*!< The application certificate type */
     SOPC_Certificate_Type usrCertType;                    /*!< The users certificate type */
@@ -53,7 +54,7 @@ typedef struct SOPC_PushServerConfig_Config
 /**
  * \brief Initialise the whole API (CertificateGroup and TrustList)
  *
- * \warning The function shall be called after ::SOPC_HelperConfigServer_Initialize and before the server startup.
+ * \warning The function shall be called before the server is started.
  *
  * \return SOPC_STATUS_OK if successful. If the CertificateGroup or the TrustList API are already initialized
  *         then the function returns SOPC_STATUS_INVALID_STATE.
@@ -61,7 +62,7 @@ typedef struct SOPC_PushServerConfig_Config
 SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
 
 /**
- * \brief Get the configuration with the default address space for the ServerConfigurationType object.
+ * \brief Get the default configuration for the ServerConfigurationType object.
  *
  * \param pPKIApp     A valid pointer to the PKI of the application TrustList.
  * \param appCertType The application certificate type.
@@ -78,18 +79,15 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 SOPC_PushServerConfig_Config* pCfg);
 
 /**
- * \brief Adding a ServerConfiguration object to the API from the address space information.
+ * \brief Adding a ServerConfiguration object to the API.
  *
- * \note This function shall be call after ::SOPC_PushServerConfig_Initialize , ::SOPC_CertificateGroup_Initialize and
- *       ::SOPC_TrustList_Initialize . This function shall be call before the server is started.
+ * \note This function shall be call after ::SOPC_PushServerConfig_Initialize.
+ *       This function shall be call before the server is started.
  *
  * \param pCfg        Pointer to the structure which gather the configuration data of the ServerConfiguration object.
  * \param pServerKey  A valid pointer to the server private key.
  * \param pServerCert A valid pointer to the server certificate.
  * \param pMcm        A valid pointer to a ::SOPC_MethodCallManager.
- *
- * \warning In case of error, the API is uninitialized (except for SOPC_STATUS_INVALID_PARAMETERS and
- *          SOPC_STATUS_INVALID_STATE errors). Only one ServerConfigurationType could be added to the server.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -99,7 +97,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(const SOPC_PushServerConfig_Co
                                                   SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the API
+ * \brief Uninitialized the whole API (CertificateGroup and TrustList)
  */
 void SOPC_PushServerConfig_Clear(void);
 

@@ -30,13 +30,9 @@
 #include "sopc_pki.h"
 
 /**
- * \brief Define the maximum size in byte of the trustList certificate
+ * \brief Defined the default maximum size in byte of the trustList certificate
  */
-#define SOPC_TRUSTLIST_CERT_SIZE_MAX 3000u
-/**
- * \brief Define the maximum number of certificate in the trustList.
- */
-#define SOPC_TRUSTLIST_NB_CERTS_MAX 20u
+#define SOPC_TRUSTLIST_DEFAULT_MAX_SIZE 20000u
 
 /**
  * \brief The TrustList type
@@ -54,6 +50,7 @@ typedef struct SOPC_TrustList_Config
 {
     const SOPC_TrustList_Type groupType;    /*!< Defined the certificate group type of the TrustList. */
     SOPC_PKIProvider* pPKI;                 /*!< A valid pointer to the PKI of the TrustList. */
+    size_t maxTrustListSize;                /*!< Defined the maximum size in byte for the TrustList */
     const char* trustListNodeId;            /*!< The nodeId of the FileType object. */
     const char* metOpenNodeId;              /*!< The nodeId of the Open method. */
     const char* metOpenWithMasksNodeId;     /*!< The nodeId of the OpenWithMasks method. */
@@ -82,7 +79,7 @@ typedef struct SOPC_TrustList_Config
 SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
 
 /**
- * \brief Get the TrustList configuration with the default address space.
+ * \brief Get the TrustList configuration with the default values.
  *
  * \param groupType Defined the certificate group type of the TrustList.
  * \param pPKI      A valid pointer to the PKI of the TrustList.
@@ -93,7 +90,6 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
  */
 const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
                                                                     SOPC_PKIProvider* pPKI);
-
 /**
  * \brief Adding a Trustlist object to the API from the address space information.
  *
@@ -101,9 +97,6 @@ const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_T
  *
  * \param pCfg Pointer to the structure which gather Trustlist configuration data.
  * \param pMcm A valid pointer to a ::SOPC_MethodCallManager.
- *
- * \warning In case of error, the API is uninitialized (except for SOPC_STATUS_INVALID_PARAMETERS and
- *          SOPC_STATUS_INVALID_STATE errors).
  *
  * \return SOPC_STATUS_OK if successful.
  */

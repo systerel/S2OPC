@@ -29,7 +29,7 @@
 #include "sopc_mem_alloc.h"
 
 #include "sopc_push_server_config_itf.h"
-#include "sopc_push_server_config_meth_internal.h"
+#include "sopc_push_server_config_meth.h"
 
 /*---------------------------------------------------------------------------
  *                             Constants
@@ -64,7 +64,7 @@ SOPC_PushServerConfig_Config gServerConfig_DefaultAddSpace = {
     .metUpdateCertificateNodeId = "ns=0;i=13737",
     .metApplyChangesNodeId = "ns=0;i=12740",
     .metCreateSigningRequestNodeId = "ns=0;i=12737",
-    .metGetRejectedListNodeId = "ns=0;i=12777",
+    .metGetRejectedListNodeId = "ns=0;i=12775",
     .varServerCapabilitiesNodeId = "ns=0;i=12710",
     .varSupportedPrivateKeyFormatsNodeId = "ns=0;i=12639",
     .varMaxTrustListSizeNodeId = "ns=0;i=12640",

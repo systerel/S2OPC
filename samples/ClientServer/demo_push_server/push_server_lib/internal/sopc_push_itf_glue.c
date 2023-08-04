@@ -74,15 +74,25 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_RemoveInList(const char* thumbprin
     SOPC_UNUSED_ARG(pCerts);
     return SOPC_STATUS_OK;
 }
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDerArray(const SOPC_CertificateList* pCerts, uint8_t** pDerArray)
+
+SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* pPKI,
+                                                       SOPC_CertificateList** ppTrustedCerts,
+                                                       SOPC_CRLList** ppTrustedCrl,
+                                                       SOPC_CertificateList** ppIssuerCerts,
+                                                       SOPC_CRLList** ppIssuerCrl)
 {
-    SOPC_UNUSED_ARG(pCerts);
-    SOPC_UNUSED_ARG(pDerArray);
-    return SOPC_STATUS_OK;
-}
-SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDerArray(const SOPC_CRLList* pCrls, uint8_t** pDerArray)
-{
-    SOPC_UNUSED_ARG(pCrls);
-    SOPC_UNUSED_ARG(pDerArray);
-    return SOPC_STATUS_OK;
+    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(ppTrustedCerts);
+    SOPC_UNUSED_ARG(ppTrustedCrl);
+    SOPC_UNUSED_ARG(ppIssuerCerts);
+    SOPC_UNUSED_ARG(ppIssuerCrl);
+
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(
+        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/client_public/client_2k_cert.der", ppTrustedCerts);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(
+            "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/user_public/user_2k_cert.der", ppTrustedCerts);
+    }
+    return status;
 }
