@@ -22,8 +22,8 @@
  * \brief Internal API to manage methods of the ServerConfigurationType according the Push model.
  */
 
-#ifndef SOPC_PUSH_SERVER_CONFIG_METH_INTERNAL_
-#define SOPC_PUSH_SERVER_CONFIG_METH_INTERNAL_
+#ifndef SOPC_PUSH_SERVER_CONFIG_METH_
+#define SOPC_PUSH_SERVER_CONFIG_METH_
 
 #include "sopc_builtintypes.h"
 #include "sopc_service_call_context.h"
@@ -59,4 +59,4 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
                                                   uint32_t* nbOutputArgs,
                                                   SOPC_Variant** outputArgs,
                                                   void* param);
-#endif /* SOPC_PUSH_SERVER_CONFIG_METH_INTERNAL_ */
+#endif /* SOPC_PUSH_SERVER_CONFIG_METH_ */

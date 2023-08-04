@@ -19,65 +19,38 @@
 
 /** \file
  *
- * \brief Internal API implementation to manage methods, properties and variables of the TrustListType according the
- * Push model.
+ * \brief Interface implementation to manage the TrustListType according the
+ *        Push model.
  */
 
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_service_call_context.h"
 
-#include "sopc_push_itf_glue.h"
-#include "sopc_trustlist_internal.h"
+#include "sopc_trustlist.h"
 #include "sopc_trustlist_itf.h"
-#include "sopc_trustlist_meth_internal.h"
+#include "sopc_trustlist_meth.h"
 
 /*---------------------------------------------------------------------------
  *                             Constants
  *---------------------------------------------------------------------------*/
-
-/*
-    Buffer size of th Ua Binary encoded stream containing an instance of TrustListDataType :
-
-    buffer size =  SOPC_EMPTY_TRUSTLIST_ENCODED_BYTE_SIZE + (SOPC_LENGTH_BSTRING_ENCODED_BYTE_SIZE *
-   SOPC_TRUSTLIST_NB_CERTS_MAX)
-                   + SOPC_TRUSTLIST_NB_CERTS_MAX * SOPC_TRUSTLIST_CERT_SIZE_MAX
-*/
-#define SOPC_EMPTY_TRUSTLIST_ENCODED_BYTE_SIZE 20u
-#define SOPC_LENGTH_BSTRING_ENCODED_BYTE_SIZE 4u
 /*---------------------------------------------------------------------------
  *                             Internal types
  *---------------------------------------------------------------------------*/
-
 /*---------------------------------------------------------------------------
  *                             Global variables
  *---------------------------------------------------------------------------*/
 
 static SOPC_Dict* gObjIdToTrustList = NULL;
-
-// const SOPC_TrustList_Config gTrustList_DefaultAddSpace_App = {
-//     .trustListNodeId = "ns=0;i=12642",
-//     .metOpenNodeId = "ns=0;i=12647",
-//     .metOpenWithMasksNodeId = "ns=0;i=12663",
-//     .metCloseNodeId = "ns=0;i=12650",
-//     .metCloseAndUpdateNodeId = "ns=0;i=12666",
-//     .metAddCertificateNodeId = "ns=0;i=12668",
-//     .metRemoveCertificateNodeId = "ns=0;i=12670",
-//     .metReadNodeId = "ns=0;i=12652",
-//     .metWriteNodeId = "ns=0;i=12655",
-//     .metGetPosNodeId = "ns=0;i=12657",
-//     .metSetPosNodeId = "ns=0;i=12660",
-//     .varSizeNodeId = "ns=0;i=12643",
-//     .varWritableNodeId = "ns=0;i=14157",
-//     .varUserWritableNodeId = "ns=0;i=14158",
-//     .varOpenCountNodeId = "ns=0;i=12646",
-// };
+static int32_t gTombstoneKey = -1;
 
 /* TODO : Uaexpert use the method nodId of the TrustListType but the method is call from the trustList objectId of the
-   server object We shall try an other GDS push client.
+   server object.
 */
 SOPC_TrustList_Config gTrustList_DefaultAddSpace_App = {
     .groupType = SOPC_TRUSTLIST_GROUP_APP,
@@ -100,7 +73,7 @@ SOPC_TrustList_Config gTrustList_DefaultAddSpace_App = {
 };
 
 /* TODO : Uaexpert use the method nodId of the TrustListType but the method is call from the trustList objectId of the
-   server object. We shall try another GDS push client.
+   server object.
 */
 SOPC_TrustList_Config gTrustList_DefaultAddSpace_Usr = {
     .groupType = SOPC_TRUSTLIST_GROUP_USR,
@@ -126,13 +99,17 @@ SOPC_TrustList_Config gTrustList_DefaultAddSpace_Usr = {
  *                      Prototype of static functions
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus trustlist_create(SOPC_TrustList** ppTrustList,
-                                          SOPC_TrustList_Type groupType,
-                                          SOPC_PKIProvider* pPKI);
-static void trustlist_initialize(SOPC_TrustList* pTrustList, SOPC_TrustList_Type groupType, SOPC_PKIProvider* pPKI);
-static void trustlist_clear(SOPC_TrustList* pTrustList);
-static void trustlist_delete(SOPC_TrustList** ppTrustList);
-static void trustlist_free(uintptr_t value);
+static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrustList,
+                                                  SOPC_TrustList_Type groupType,
+                                                  SOPC_PKIProvider* pPKI,
+                                                  size_t maxTrustListSize);
+static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
+                                         SOPC_TrustList_Type groupType,
+                                         SOPC_PKIProvider* pPKI,
+                                         size_t maxTrustListSize);
+static void trustlist_clear_context(SOPC_TrustListContext* pTrustList);
+static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList);
+static void trustlist_dict_free_context_value(uintptr_t value);
 static SOPC_ReturnStatus trustlist_add_method(SOPC_MethodCallManager* pMcm,
                                               const char* pCStringNodeId,
                                               SOPC_MethodCallFunc_Ptr* pTrustListMet,
@@ -142,79 +119,97 @@ static SOPC_ReturnStatus trustlist_add_method(SOPC_MethodCallManager* pMcm,
  *                       Static functions (implementation)
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus trustlist_create(SOPC_TrustList** ppTrustList,
-                                          SOPC_TrustList_Type groupType,
-                                          SOPC_PKIProvider* pPKI)
+static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrustList,
+                                                  SOPC_TrustList_Type groupType,
+                                                  SOPC_PKIProvider* pPKI,
+                                                  size_t maxTrustListSize)
 {
     if (NULL == ppTrustList || NULL == pPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_TrustList* pTrustList = NULL;
-    pTrustList = SOPC_Calloc(1, sizeof(SOPC_TrustList));
+    SOPC_TrustListContext* pTrustList = NULL;
+    pTrustList = SOPC_Calloc(1, sizeof(SOPC_TrustListContext));
     if (NULL == pTrustList)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    trustlist_initialize(pTrustList, groupType, pPKI);
+    trustlist_initialize_context(pTrustList, groupType, pPKI, maxTrustListSize);
     *ppTrustList = pTrustList;
     return SOPC_STATUS_OK;
 }
 
-static void trustlist_initialize(SOPC_TrustList* pTrustList, SOPC_TrustList_Type groupType, SOPC_PKIProvider* pPKI)
+static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
+                                         SOPC_TrustList_Type groupType,
+                                         SOPC_PKIProvider* pPKI,
+                                         size_t maxTrustListSize)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pPKI);
 
-    pTrustList->handle = INVALID_HANDLE_VALUE;
-    pTrustList->bIsOpen = false;
+    pTrustList->pObjectId = NULL;
+    pTrustList->cStrObjectId = NULL;
+    pTrustList->varIds.pOpenCountId = NULL;
+    pTrustList->varIds.pSizeId = NULL;
+    pTrustList->varIds.pUserWritableId = NULL;
+    pTrustList->varIds.pWritableId = NULL;
+    pTrustList->maxTrustListSize = maxTrustListSize;
+    pTrustList->handle = SOPC_TRUSTLIST_INVALID_HANDLE;
     pTrustList->groupType = groupType;
     pTrustList->openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
     pTrustList->openingMask = SOPC_TL_MASK_NONE;
-    pTrustList->openCount = 0u;
-    pTrustList->size = 0u;
     pTrustList->pPKI = pPKI;
     pTrustList->pTrustListEncoded = NULL;
     pTrustList->pTrustedCerts = NULL;
     pTrustList->pIssuerCerts = NULL;
     pTrustList->pTrustedCRLs = NULL;
     pTrustList->pIssuerCRLs = NULL;
-    memset(&pTrustList->varIds, 0, sizeof(SOPC_TrLst_VarCfg));
+    pTrustList->bDoNotDelete = false;
 }
 
-static void trustlist_clear(SOPC_TrustList* pTrustList)
+static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
 {
     if (NULL == pTrustList)
     {
         return;
     }
+    SOPC_Free(pTrustList->cStrObjectId);
     SOPC_Buffer_Delete(pTrustList->pTrustListEncoded);
     SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
     SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
     SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
     SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
+    SOPC_NodeId_Clear(pTrustList->pObjectId);
     SOPC_NodeId_Clear(pTrustList->varIds.pSizeId);
     SOPC_NodeId_Clear(pTrustList->varIds.pWritableId);
     SOPC_NodeId_Clear(pTrustList->varIds.pUserWritableId);
     SOPC_NodeId_Clear(pTrustList->varIds.pOpenCountId);
+    SOPC_Free(pTrustList->pObjectId);
     SOPC_Free(pTrustList->varIds.pSizeId);
     SOPC_Free(pTrustList->varIds.pWritableId);
     SOPC_Free(pTrustList->varIds.pUserWritableId);
     SOPC_Free(pTrustList->varIds.pOpenCountId);
+    pTrustList->bDoNotDelete = true;
 }
 
-static void trustlist_delete(SOPC_TrustList** ppTrustList)
+static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList)
 {
-    trustlist_clear(*ppTrustList);
-    SOPC_Free(*ppTrustList);
+    SOPC_TrustListContext* pTrustList = *ppTrustList;
+    if (pTrustList->bDoNotDelete)
+    {
+        return;
+    }
+    trustlist_clear_context(pTrustList);
+    SOPC_Free(pTrustList);
     *ppTrustList = NULL;
 }
 
-static void trustlist_free(uintptr_t value)
+static void trustlist_dict_free_context_value(uintptr_t value)
 {
     if (NULL != (void*) value)
     {
-        trustlist_delete((SOPC_TrustList**) &value);
+        SOPC_TrustListContext* pTrustList = (SOPC_TrustListContext*) value;
+        trustlist_delete_context(&pTrustList);
     }
 }
 
@@ -253,12 +248,14 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-
-    gObjIdToTrustList = SOPC_NodeId_Dict_Create(true, trustlist_free);
+    /* The key is include in the value (TrustList context) */
+    gObjIdToTrustList = SOPC_NodeId_Dict_Create(false, trustlist_dict_free_context_value);
     if (NULL == gObjIdToTrustList)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+    /* Mandatory for the use of SOPC_Dict_Remove */
+    SOPC_Dict_SetTombstoneKey(gObjIdToTrustList, (uintptr_t) &gTombstoneKey);
     return SOPC_STATUS_OK;
 }
 
@@ -270,15 +267,15 @@ const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_T
     {
     case SOPC_TRUSTLIST_GROUP_APP:
         pCfg = &gTrustList_DefaultAddSpace_App;
-        pCfg->pPKI = pPKI;
         break;
     case SOPC_TRUSTLIST_GROUP_USR:
         pCfg = &gTrustList_DefaultAddSpace_Usr;
-        pCfg->pPKI = pPKI;
         break;
     default:
         break;
     }
+    pCfg->pPKI = pPKI;
+    pCfg->maxTrustListSize = SOPC_TRUSTLIST_DEFAULT_MAX_SIZE;
     return (const SOPC_TrustList_Config*) pCfg;
 }
 
@@ -303,16 +300,25 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SO
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_TrustList* pTrustList = NULL;
-    SOPC_ReturnStatus status = trustlist_create(&pTrustList, pCfg->groupType, pCfg->pPKI);
+    SOPC_TrustListContext* pTrustList = NULL;
+    SOPC_ReturnStatus status =
+        trustlist_create_context(&pTrustList, pCfg->groupType, pCfg->pPKI, pCfg->maxTrustListSize);
     if (SOPC_STATUS_OK != status)
     {
         return status;
     }
-    SOPC_NodeId* pObjId = SOPC_NodeId_FromCString(pCfg->trustListNodeId, (int32_t) strlen(pCfg->trustListNodeId));
-    if (NULL == pObjId)
+    pTrustList->cStrObjectId = SOPC_strdup(pCfg->trustListNodeId);
+    if (NULL == pTrustList->cStrObjectId)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList->pObjectId = SOPC_NodeId_FromCString(pCfg->trustListNodeId, (int32_t) strlen(pCfg->trustListNodeId));
+        if (NULL == pTrustList->pObjectId)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
     /* Add methods ... */
     if (SOPC_STATUS_OK == status)
@@ -387,16 +393,17 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SO
 
     if (SOPC_STATUS_OK == status)
     {
-        bool res = SOPC_Dict_Insert(gObjIdToTrustList, (uintptr_t) pObjId, (uintptr_t) pTrustList);
+        bool res = TrustList_DictInsert(pTrustList->pObjectId, pTrustList);
         status = !res ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
 
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_TrustList_Clear();
-        trustlist_delete(&pTrustList);
-        SOPC_NodeId_Clear(pObjId);
-        SOPC_Free(pObjId);
+        if (NULL != pTrustList->pObjectId)
+        {
+            TrustList_DictRemove(pTrustList->pObjectId);
+        }
+        trustlist_delete_context(&pTrustList);
     }
     return status;
 }
@@ -411,31 +418,46 @@ void SOPC_TrustList_Clear(void)
  *                       Internal Functions (implementation)
  *---------------------------------------------------------------------------*/
 
-/* Get the trustList internal object from the nodeId */
-SOPC_TrustList* TrustList_DictGet(const SOPC_NodeId* objectId, bool* found)
+/* Insert a new objectId key and TrustList context value */
+bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContext)
 {
-    return (SOPC_TrustList*) SOPC_Dict_Get(gObjIdToTrustList, (const uintptr_t) objectId, found);
+    if (NULL == gObjIdToTrustList || NULL == pObjectId || NULL == pContext)
+    {
+        return false;
+    }
+    bool res = SOPC_Dict_Insert(gObjIdToTrustList, (uintptr_t) pObjectId, (uintptr_t) pContext);
+    if (!res)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: unable to insert TrustList context",
+                               pObjectId);
+    }
+    return res;
 }
-/* Generate a random handle */
-SOPC_TrLst_Handle TrustList_GenRandHandle(void)
+
+/* Get the trustList context from the nodeId */
+SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool* found)
 {
-    SOPC_TrLst_Handle handle = 38;
-    return 38;
+    if (NULL == gObjIdToTrustList || NULL == pObjectId)
+    {
+        *found = false;
+        return NULL;
+    }
+    SOPC_TrustListContext* pCtx = NULL;
+    pCtx = (SOPC_TrustListContext*) SOPC_Dict_Get(gObjIdToTrustList, (const uintptr_t) pObjectId, found);
+    if (!found || NULL == pCtx)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: unable to retrieve TrustList context",
+                               pObjectId);
+    }
+    return pCtx;
 }
-/* Read the PKI and encode the trustList in a UA Binary encoded stream containing an instance of TrustListDataType */
-SOPC_ReturnStatus TrustList_Encode(const SOPC_PKIProvider* pPKI,
-                                   const SOPC_TrLst_Mask specifiedLists,
-                                   SOPC_Buffer* pTrustListDataType)
+
+/* Removes a TrustList context from the nodeId */
+void TrustList_DictRemove(const SOPC_NodeId* pObjectId)
 {
-    SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(specifiedLists);
-    SOPC_UNUSED_ARG(pTrustListDataType);
-    return SOPC_STATUS_OK;
-}
-/* Decode the trustList UA Binary stream to a TrustListDataType */
-SOPC_ReturnStatus TrustList_Decode(const SOPC_Buffer* pTrustListDataTypeEncoded, void* pTrustListDataType)
-{
-    SOPC_UNUSED_ARG(pTrustListDataTypeEncoded);
-    SOPC_UNUSED_ARG(pTrustListDataType);
-    return SOPC_STATUS_OK;
+    if (NULL == gObjIdToTrustList || NULL == pObjectId)
+    {
+        return;
+    }
+    SOPC_Dict_Remove(gObjIdToTrustList, (const uintptr_t) pObjectId);
 }

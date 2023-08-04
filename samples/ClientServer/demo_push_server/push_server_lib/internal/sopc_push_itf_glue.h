@@ -100,6 +100,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(const SOPC_PKIProvider* p
                                                        const SOPC_PKI_Profile* pProfile,
                                                        uint32_t* error);
 
+SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* pPKI,
+                                                       SOPC_CertificateList** ppTrustedCerts,
+                                                       SOPC_CRLList** ppTrustedCrl,
+                                                       SOPC_CertificateList** ppIssuerCerts,
+                                                       SOPC_CRLList** ppIssuerCrl);
+
 SOPC_ReturnStatus SOPC_PKIProvider_GetTrustedCertificates(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCerts);
 SOPC_ReturnStatus SOPC_PKIProvider_GetTrustedCRLs(const SOPC_PKIProvider* pPKI, SOPC_CRLList** ppCrls);
 SOPC_ReturnStatus SOPC_PKIProvider_GetIssuerCertificates(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCerts);
@@ -107,7 +113,5 @@ SOPC_ReturnStatus SOPC_PKIProvider_GetIssuerCRLs(const SOPC_PKIProvider* pPKI, S
 SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(const char* thumbprint, SOPC_PKIProvider* pPKI);
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_RemoveInList(const char* thumbprint, SOPC_CertificateList* pCerts);
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDerArray(const SOPC_CertificateList* pCerts, uint8_t** pDerArray);
-SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDerArray(const SOPC_CRLList* pCrls, uint8_t** pDerArray);
 
 #endif /* SOPC_PUSH_ITF_GLUE_ */

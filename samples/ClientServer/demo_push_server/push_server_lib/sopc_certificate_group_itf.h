@@ -44,16 +44,17 @@ typedef enum
  */
 typedef struct SOPC_CertificateGroup_Config
 {
-    const char* certificateGroupNodeId;         /*!< The NodeId of the Certificate Group Object.*/
-    const char* varCertificateTypesNodeId;      /*!< The nodeId of the CertificateTypes variable.*/
-    const SOPC_TrustList_Config* pTrustListCfg; /*!< the TrustList configuration belongs the CertificateGroup object */
-    SOPC_Certificate_Type certType;             /*!< The CertificateType */
+    const char* certificateGroupNodeId;    /*!< The NodeId of the Certificate Group Object.*/
+    const char* varCertificateTypesNodeId; /*!< The nodeId of the CertificateTypes variable.*/
+    const SOPC_TrustList_Config*
+        pTrustListCfg;              /*!< the TrustList configuration that belongs to the CertificateGroup object */
+    SOPC_Certificate_Type certType; /*!< The CertificateType */
 } SOPC_CertificateGroup_Config;
 
 /**
  * \brief Initialise the API.
  *
- * \warning The function shall be called after ::SOPC_HelperConfigServer_Initialize and before server startup.
+ * \warning The function shall be called before the server is started.
  *
  * \return SOPC_STATUS_OK if successful. If the CertificateGroup API is already initialized
  *         then the function returns SOPC_STATUS_INVALID_STATE.
@@ -65,7 +66,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void);
  *
  * \param groupType  Defined the certificate group type of the TrustList (application or user).
  * \param certType   Defined the certificate type (certificate properties).
- * \param pPKI       A valid pointer to the TrustList PKI belongs the CertificateGroup object.
+ * \param pPKI       A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
  *
  * \note The function return NULL in case of error.
  *
@@ -79,15 +80,12 @@ const SOPC_CertificateGroup_Config* SOPC_CertificateGroup_GetDefaultConfiguratio
  * \brief Adding a CertificateGroup object to the API from the address space information.
  *
  * \note This function shall be call after ::SOPC_CertificateGroup_Initialize and ::SOPC_TrustList_Initialize .
- *       This function shall be call before server is started.
+ *       This function shall be call before the server is started.
  *
  * \param pCfg  Pointer to the structure which gather the configuration data of the CertificateGroup object
- * \param pKey  A valid pointer to the private key belongs the CertificateGroup object (NULL if not use)
- * \param pCert A valid pointer to the certificate belongs the CertificateGroup object (NULL if not use)
+ * \param pKey  A valid pointer to the private key that belongs to the CertificateGroup object (NULL if not use)
+ * \param pCert A valid pointer to the certificate that belongs to the CertificateGroup object (NULL if not use)
  * \param pMcm  A valid pointer to a ::SOPC_MethodCallManager.
- *
- * \warning In case of error, the API is uninitialized (except for SOPC_STATUS_INVALID_PARAMETERS and
- *          SOPC_STATUS_INVALID_STATE errors).
  *
  * \return SOPC_STATUS_OK if successful.
  */
