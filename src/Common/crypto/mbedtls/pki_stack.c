@@ -1093,6 +1093,9 @@ static SOPC_ReturnStatus cert_is_self_sign(mbedtls_x509_crt* crt, bool* pbIsSelf
 static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToValidate,
                                                const SOPC_PKI_LeafProfile* pConfig)
 {
+    SOPC_ASSERT(NULL != pToValidate);
+    SOPC_ASSERT(NULL != pConfig);
+
     SOPC_AsymmetricKey pub_key;
     size_t keyLenBits = 0;
     bool bErr = false;
@@ -1131,68 +1134,63 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
                                key_type, thumbprint);
         status = SOPC_STATUS_NOK;
     }
-    if (SOPC_STATUS_OK == status)
+    // Retrieve key length
+    keyLenBits = mbedtls_pk_get_bitlen(&pub_key.pk);
+    // Verifies key length: min-max
+    if (keyLenBits < pConfig->RSAMinimumKeySize || keyLenBits > pConfig->RSAMaximumKeySize)
     {
-        // Retrieve key length
-        keyLenBits = mbedtls_pk_get_bitlen(&pub_key.pk);
-        // Verifies key length: min-max
-        if (keyLenBits < pConfig->RSAMinimumKeySize || keyLenBits > pConfig->RSAMaximumKeySize)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : unexpected key size %" PRIu32
-                                   " for certificate thumbprint %s",
-                                   (uint32_t) keyLenBits, thumbprint);
-            status = SOPC_STATUS_NOK;
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : unexpected key size %" PRIu32
+                               " for certificate thumbprint %s",
+                               (uint32_t) keyLenBits, thumbprint);
+        status = SOPC_STATUS_NOK;
     }
-    if (SOPC_STATUS_OK == status)
+    // Verifies signing algorithm:
+    mbedtls_md_type_t md = pToValidate->crt.sig_md;
+    bErr = false;
+    switch (pConfig->mdSign)
     {
-        // Verifies signing algorithm:
-        mbedtls_md_type_t md = pToValidate->crt.sig_md;
-        switch (pConfig->mdSign)
+    case SOPC_PKI_MD_SHA1_OR_ABOVE:
+        if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA224 != md && MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md &&
+            MBEDTLS_MD_SHA512 != md)
         {
-        case SOPC_PKI_MD_SHA1_OR_ABOVE:
-            if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA224 != md && MBEDTLS_MD_SHA256 != md &&
-                MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
-            {
-                bErr = true;
-            }
-            break;
-        case SOPC_PKI_MD_SHA256_OR_ABOVE:
-            if (MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
-            {
-                bErr = true;
-            }
-            break;
-        case SOPC_PKI_MD_SHA1:
-            if (MBEDTLS_MD_SHA1 != md)
-            {
-                bErr = true;
-            }
-            break;
-        case SOPC_PKI_MD_SHA256:
-            if (MBEDTLS_MD_SHA256 != md)
-            {
-                bErr = true;
-            }
-            break;
-        case SOPC_PKI_MD_SHA1_AND_SHA256:
-            if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA256 != md)
-            {
-                bErr = true;
-            }
-            break;
-        default:
             bErr = true;
         }
-        if (bErr)
+        break;
+    case SOPC_PKI_MD_SHA256_OR_ABOVE:
+        if (MBEDTLS_MD_SHA256 != md && MBEDTLS_MD_SHA384 != md && MBEDTLS_MD_SHA512 != md)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : unexpected signing algorithm %" PRIu32
-                                   " for certificate thumbprint %s",
-                                   md, thumbprint);
-            status = SOPC_STATUS_NOK;
+            bErr = true;
         }
+        break;
+    case SOPC_PKI_MD_SHA1:
+        if (MBEDTLS_MD_SHA1 != md)
+        {
+            bErr = true;
+        }
+        break;
+    case SOPC_PKI_MD_SHA256:
+        if (MBEDTLS_MD_SHA256 != md)
+        {
+            bErr = true;
+        }
+        break;
+    case SOPC_PKI_MD_SHA1_AND_SHA256:
+        if (MBEDTLS_MD_SHA1 != md && MBEDTLS_MD_SHA256 != md)
+        {
+            bErr = true;
+        }
+        break;
+    default:
+        bErr = true;
+    }
+    if (bErr)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed : unexpected signing algorithm %" PRIu32
+                               " for certificate thumbprint %s",
+                               md, thumbprint);
+        status = SOPC_STATUS_NOK;
     }
 
     SOPC_Free(thumbprint);
@@ -1204,10 +1202,9 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     /*
         TODO : Add a domain name resolution.
     */
-    if (NULL == pToValidate || NULL == url)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_ASSERT(NULL != pToValidate);
+    SOPC_ASSERT(NULL != url);
+
     char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
     if (NULL == thumbprint)
     {
@@ -1292,10 +1289,9 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
 
 static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToValidate, const char* applicationUri)
 {
-    if (NULL == pToValidate || NULL == applicationUri)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_ASSERT(NULL != pToValidate);
+    SOPC_ASSERT(NULL != applicationUri);
+
     /* TODO: remove SOPC_KeyManager_Certificate_CheckApplicationUri from the key manager interface */
     bool ok = SOPC_KeyManager_Certificate_CheckApplicationUri(pToValidate, applicationUri);
     if (!ok)
@@ -1360,6 +1356,7 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     }
     unsigned int usages = 0;
     int err = 0;
+    bool bErrorFound = false;
     /* Check key usages */
     if (SOPC_PKI_KU_DISABLE_CHECK != pProfile->keyUsage)
     {
@@ -1370,42 +1367,41 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
                                    "> PKI validation failed : missing expected key usage for certificate thumbprint %s",
                                    thumbprint);
+            bErrorFound = true;
         }
     }
     /* Check extended key usages for client or server cert */
-    if (0 == err)
+    bool missing = false;
+    if (SOPC_PKI_EKU_SERVER_AUTH & pProfile->extendedKeyUsage)
     {
-        bool missing = false;
-        if (SOPC_PKI_EKU_SERVER_AUTH & pProfile->extendedKeyUsage)
-        {
-            missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
-                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
-        }
-        if (SOPC_PKI_EKU_CLIENT_AUTH & pProfile->extendedKeyUsage)
-        {
-            missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
-                                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
-        }
-        if (SOPC_PKI_EKU_DISABLE_CHECK & pProfile->extendedKeyUsage)
-        {
-            missing = false;
-        }
-        if (missing)
-        {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_COMMON,
-                "> PKI validation : missing expected extended key usage for certificate thumbprint %s", thumbprint);
-            err = 1;
-        }
+        missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
+                                                             MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
     }
-    SOPC_Free(thumbprint);
-    if (0 == err)
+    if (SOPC_PKI_EKU_CLIENT_AUTH & pProfile->extendedKeyUsage)
     {
-        return SOPC_STATUS_OK;
+        missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
+                                                             MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
+    }
+    if (SOPC_PKI_EKU_DISABLE_CHECK == pProfile->extendedKeyUsage)
+    {
+        missing = false;
+    }
+    if (missing)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation : missing expected extended key usage for certificate thumbprint %s",
+                               thumbprint);
+        bErrorFound = true;
+    }
+
+    SOPC_Free(thumbprint);
+    if (bErrorFound)
+    {
+        return SOPC_STATUS_NOK;
     }
     else
     {
-        return SOPC_STATUS_NOK;
+        return SOPC_STATUS_OK;
     }
 }
 
@@ -1506,9 +1502,8 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProviderN
     mbed_cert_list->next = pLinkCert;
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
-    if (mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, mbed_profile,
-                                             NULL /* You can specify an expected Common Name here */, &failure_reasons,
-                                             verify_cert, &bIsTrusted) != 0)
+    if (mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, mbed_profile, NULL,
+                                             &failure_reasons, verify_cert, &bIsTrusted) != 0)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         if (NULL != thumbprint)
@@ -1550,83 +1545,90 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProviderNew* pP
 
     SOPC_CertificateList* pToValidateCpy = NULL;
     status = SOPC_KeyManager_Certificate_Copy(pToValidate, &pToValidateCpy);
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK != status || NULL == pToValidateCpy)
     {
         return status;
     }
 
+    uint32_t firstError = *error;
+    bool bErrorFound = false;
     bool bIsTrusted = false;
     mbedtls_x509_crt crt = pToValidateCpy->crt;
     bool bIsSelfSign = false;
     char* thumbprint = NULL;
     status = cert_is_self_sign(&crt, &bIsSelfSign);
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK != status)
     {
-        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
-        if (NULL == thumbprint)
-        {
-            status = SOPC_STATUS_INVALID_STATE;
-        }
+        /* unexpected error : failed to run a self-signature */
+        SOPC_KeyManager_Certificate_Free(pToValidateCpy);
+        return status;
     }
-    if (SOPC_STATUS_OK == status)
+    /* It does not matter if thumbprint is NULL */
+    thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
+    /* If CA root and backward interoperability */
+    if (pToValidateCpy->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
     {
-        /* CA certificates that are not roots are always rejected */
-        if (pToValidateCpy->crt.ca_istrue && !bIsSelfSign)
+        /* Root is trusted? */
+        if (NULL != pPKI->pTrustedRoots)
         {
-            *error = SOPC_CertificateValidationError_UseNotAllowed;
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : certificate thumbprint %s is not a root CA root",
-                                   thumbprint);
-            status = SOPC_STATUS_NOK;
-        }
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        /* If CA root and backward interoperability */
-        if (pToValidateCpy->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
-        {
-            /* Root is trusted? */
             status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidateCpy, &bIsTrusted);
-        }
-        else if (!pToValidateCpy->crt.ca_istrue)
-        {
-            /* Cert is trusted? */
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidateCpy, &bIsTrusted);
-        }
-        else
-        {
-            *error = SOPC_CertificateValidationError_UseNotAllowed;
+            SOPC_ASSERT(SOPC_STATUS_OK == status); /* parameters OK */
         }
     }
-    if (SOPC_STATUS_OK == status)
+    else if (!pToValidateCpy->crt.ca_istrue)
     {
-        /* Apply verification on the certificate */
-        if (pProfile->bApplyLeafProfile)
+        /* Cert is trusted? */
+        if (NULL != pPKI->pTrustedCerts)
         {
-            status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, error);
-            if (SOPC_STATUS_OK != status)
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidateCpy, &bIsTrusted);
+            SOPC_ASSERT(SOPC_STATUS_OK == status); /* parameters OK */
+        }
+    }
+    else
+    {
+        /* CA certificates are always rejected (except for roots if backward interoperability is enabled) */
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed : certificate thumbprint %s is a CA",
+                               thumbprint);
+        *error = SOPC_CertificateValidationError_UseNotAllowed;
+        firstError = *error;
+        bErrorFound = true;
+    }
+    /* Apply verification on the certificate */
+    if (pProfile->bApplyLeafProfile)
+    {
+        status = SOPC_PKIProviderNew_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, error);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> PKI validation failed : bad properties of certificate thumbprint %s", thumbprint);
+            if (bErrorFound)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                       "> PKI validation failed : bad properties of certificate thumbprint %s",
-                                       thumbprint);
-                status = SOPC_STATUS_NOK;
+                *error = firstError;
             }
+            bErrorFound = true;
+            firstError = *error;
         }
     }
     mbedtls_x509_crt_profile crt_profile = {0};
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Set the profile from configuration */
-        status = set_profile_from_configuration(pProfile->chainProfile, &crt_profile);
-    }
+    /* Set the profile from configuration */
+    status = set_profile_from_configuration(pProfile->chainProfile, &crt_profile);
     if (SOPC_STATUS_OK == status)
     {
         mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
         status = sopc_validate_certificate_chain(pPKI, mbed_cert_list, &crt_profile, bIsTrusted, thumbprint, error);
+        if (SOPC_STATUS_NOK == status)
+        {
+            if (bErrorFound)
+            {
+                *error = firstError;
+            }
+            bErrorFound = true;
+        }
     }
 
     SOPC_Free(thumbprint);
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
+    status = bErrorFound ? SOPC_STATUS_NOK : status;
     return status;
 }
 
@@ -1855,6 +1857,8 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_Certificat
     }
 
     *error = SOPC_CertificateValidationError_Unkown;
+    uint32_t firstError = *error;
+    bool bErrorFound = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (pProfile->bApplySecurityPolicy)
     {
@@ -1862,33 +1866,51 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CheckLeafCertificate(const SOPC_Certificat
         if (SOPC_STATUS_OK != status)
         {
             *error = SOPC_CertificateValidationError_PolicyCheckFailed;
+            firstError = *error;
+            bErrorFound = true;
         }
     }
-    if (SOPC_STATUS_OK == status && NULL != pProfile->sanURL)
+    if (NULL != pProfile->sanURL)
     {
         status = check_host_name(pToValidate, pProfile->sanURL);
         if (SOPC_STATUS_OK != status)
         {
             *error = SOPC_CertificateValidationError_HostNameInvalid;
+            if (bErrorFound)
+            {
+                *error = firstError;
+            }
+            bErrorFound = true;
+            firstError = *error;
         }
     }
-    if (SOPC_STATUS_OK == status && NULL != pProfile->sanApplicationUri)
+    if (NULL != pProfile->sanApplicationUri)
     {
         status = check_application_uri(pToValidate, pProfile->sanApplicationUri);
         if (SOPC_STATUS_OK != status)
         {
             *error = SOPC_CertificateValidationError_UriInvalid;
+            if (bErrorFound)
+            {
+                *error = firstError;
+            }
+            bErrorFound = true;
+            firstError = *error;
         }
     }
-    if (SOPC_STATUS_OK == status)
+    status = check_certificate_usage(pToValidate, pProfile);
+    if (SOPC_STATUS_OK != status)
     {
-        status = check_certificate_usage(pToValidate, pProfile);
-        if (SOPC_STATUS_OK != status)
+        *error = SOPC_CertificateValidationError_UseNotAllowed;
+        if (bErrorFound)
         {
-            *error = SOPC_CertificateValidationError_UseNotAllowed;
+            *error = firstError;
         }
+        bErrorFound = true;
+        firstError = *error;
     }
 
+    status = bErrorFound ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     return status;
 }
 
