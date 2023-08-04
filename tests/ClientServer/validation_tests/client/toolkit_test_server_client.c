@@ -533,31 +533,30 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
     }
 
     // Address space configuration
-
-    const char* xml_address_space_config_path = getenv(TEST_SERVER_XML_ADDRESS_SPACE);
     SOPC_AddressSpace* address_space = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        const char* xml_address_space_config_path = getenv(TEST_SERVER_XML_ADDRESS_SPACE);
 
-    if (NULL != xml_address_space_config_path)
-    {
+        if (NULL != xml_address_space_config_path)
+        {
 #ifdef WITH_EXPAT
-        address_space = SOPC_LoadAddressSpaceConfigFromFile(xml_address_space_config_path);
+            address_space = SOPC_LoadAddressSpaceConfigFromFile(xml_address_space_config_path);
 #else
-        printf(
-            "Error: an XML address space configuration file path provided whereas XML library not available (Expat).\n"
-            "Do not define environment variables TEST_SERVER_XML_ADDRESS_SPACE .\n"
-            "Or compile with XML library available.\n");
-        status = SOPC_STATUS_INVALID_PARAMETERS;
+            printf(
+                "Error: an XML address space configuration file path provided whereas XML library not available "
+                "(Expat).\n"
+                "Do not define environment variables TEST_SERVER_XML_ADDRESS_SPACE .\n"
+                "Or compile with XML library available.\n");
+            status = SOPC_STATUS_INVALID_PARAMETERS;
 #endif
-    }
-    else
-    {
-        if (SOPC_STATUS_OK == status)
+        }
+        else
         {
             address_space = SOPC_Embedded_AddressSpace_Load();
             status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         }
     }
-
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
