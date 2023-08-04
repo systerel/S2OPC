@@ -487,6 +487,22 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* pCert,
                                                    SOPC_CertificateList** ppCertCopy);
 
+/**
+ * \brief Attach a DER certificate list to a serialized certificate array.
+ *
+ * \warning  The returned ::SOPC_SerializedCertificate must not be used after the certificate list is freed
+ *           by ::SOPC_KeyManager_Certificate_Free .
+ *
+ * \param pCerts                 The DER certificate list to attach
+ * \param[out] pSerializedArray  The serialized certificate array
+ * \param[out] pLenArray         The length of \p pSerializedArray
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const SOPC_CertificateList* pCerts,
+                                                                          SOPC_SerializedCertificate** pSerializedArray,
+                                                                          uint32_t* pLenArray);
+
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
@@ -570,6 +586,22 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLLis
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
  */
 SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, size_t* pLength);
+
+/**
+ * \brief Attach a DER CRL list to a serialized CRL array.
+ *
+ * \warning  The returned ::SOPC_SerializedCRL must not be used after the CRL list is freed
+ *           by ::SOPC_KeyManager_CRL_Free .
+ *
+ * \param pCRLs                  The DER CRL list to attach
+ * \param[out] pSerializedArray  The serialized CRL array
+ * \param[out] pLenArray         The length of \p pSerializedArray
+ *
+ * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRLList* pCRLs,
+                                                                  SOPC_SerializedCRL** pSerializedArray,
+                                                                  uint32_t* pLenArray);
 
 /**
  * \brief           Frees a Certificate created with ::SOPC_KeyManager_CRL_CreateOrAddFromFile or

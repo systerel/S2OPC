@@ -175,4 +175,14 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_S
  */
 const SOPC_Buffer* SOPC_KeyManager_SerializedCertificate_Data(const SOPC_SerializedCertificate* cert);
 
+/**
+ * \brief Returns the data held in a serialized CRL
+ *
+ * \param crl  the serialized CRL
+ *
+ * \return The data held in the serialized CRL. The returned memory is owned
+ *         by the serialized CRL, and should not be modified or freed.
+ */
+const SOPC_Buffer* SOPC_KeyManager_SerializedCRL_Data(const SOPC_SerializedCRL* crl);
+
 #endif /* SOPC_KEY_MANAGER_H_ */

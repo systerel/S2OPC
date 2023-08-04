@@ -293,6 +293,16 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, si
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const SOPC_CertificateList* pCerts,
+                                                                          SOPC_SerializedCertificate** pSerializedArray,
+                                                                          uint32_t* pLenArray)
+{
+    SOPC_UNUSED_ARG(pCerts);
+    SOPC_UNUSED_ARG(pSerializedArray);
+    SOPC_UNUSED_ARG(pLenArray);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
 {
     SOPC_UNUSED_ARG(pCRL);
@@ -329,6 +339,16 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
     SOPC_UNUSED_ARG(pKey);
     SOPC_UNUSED_ARG(ppDest);
     SOPC_UNUSED_ARG(pLenAllocated);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRLList* pCRLs,
+                                                                  SOPC_SerializedCRL** pSerializedArray,
+                                                                  uint32_t* pLenArray)
+{
+    SOPC_UNUSED_ARG(pCRLs);
+    SOPC_UNUSED_ARG(pSerializedArray);
+    SOPC_UNUSED_ARG(pLenArray);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 

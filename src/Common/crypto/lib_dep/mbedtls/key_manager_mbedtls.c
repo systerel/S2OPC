@@ -1966,6 +1966,76 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* p
     }
     return status;
 }
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const SOPC_CertificateList* pCerts,
+                                                                          SOPC_SerializedCertificate** pSerializedArray,
+                                                                          uint32_t* pLenArray)
+{
+    if (NULL == pCerts || NULL == pSerializedArray || NULL == pLenArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_SerializedCertificate* pArray = NULL;
+    *pLenArray = 0;
+    size_t pListLen = 0;
+    uint32_t nbCert = 0;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCerts, &pListLen);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Check before cast */
+    if (UINT32_MAX < pListLen)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    nbCert = (uint32_t) pListLen;
+    pArray = SOPC_Calloc(nbCert, sizeof(SOPC_SerializedCertificate));
+    if (NULL == pArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    uint32_t idx = 0;
+    const mbedtls_x509_crt* crt = &pCerts->crt;
+    for (idx = 0; idx < nbCert && SOPC_STATUS_OK == status && NULL != crt; idx++)
+    {
+        pBuffer = (SOPC_Buffer*) &pArray[idx];
+        /* Check length before cast */
+        if (UINT32_MAX < crt->raw.len)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pBuffer->position = 0;
+            pBuffer->length = (uint32_t) crt->raw.len;
+            pBuffer->initial_size = (uint32_t) crt->raw.len;
+            pBuffer->current_size = (uint32_t) crt->raw.len;
+            pBuffer->maximum_size = (uint32_t) crt->raw.len;
+            pBuffer->data = crt->raw.p; // Attach data
+        }
+        crt = crt->next;
+    }
+    /* Check the length */
+    if (SOPC_STATUS_OK == status)
+    {
+        if (nbCert != idx)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+    }
+    /* Clear in case of error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pArray);
+        pArray = NULL;
+        nbCert = 0;
+    }
+    *pSerializedArray = pArray;
+    *pLenArray = nbCert;
+    return status;
+}
 
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
@@ -2135,6 +2205,77 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, si
     *pLength = i;
 
     return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRLList* pCRLs,
+                                                                  SOPC_SerializedCRL** pSerializedArray,
+                                                                  uint32_t* pLenArray)
+{
+    if (NULL == pCRLs || NULL == pSerializedArray || NULL == pLenArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_SerializedCertificate* pArray = NULL;
+    *pLenArray = 0;
+    size_t pListLen = 0;
+    uint32_t nbCrl = 0;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_CRL_GetListLength(pCRLs, &pListLen);
+    if (SOPC_STATUS_OK != status)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Check before cast */
+    if (UINT32_MAX < pListLen)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    nbCrl = (uint32_t) pListLen;
+    pArray = SOPC_Calloc(nbCrl, sizeof(SOPC_SerializedCertificate));
+    if (NULL == pArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    uint32_t idx = 0;
+    const mbedtls_x509_crl* crl = &pCRLs->crl;
+    for (idx = 0; idx < nbCrl && SOPC_STATUS_OK == status && NULL != crl; idx++)
+    {
+        pBuffer = (SOPC_Buffer*) &pArray[idx];
+        /* Check length before cast */
+        if (UINT32_MAX < crl->raw.len)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pBuffer->position = 0;
+            pBuffer->length = (uint32_t) crl->raw.len;
+            pBuffer->initial_size = (uint32_t) crl->raw.len;
+            pBuffer->current_size = (uint32_t) crl->raw.len;
+            pBuffer->maximum_size = (uint32_t) crl->raw.len;
+            pBuffer->data = crl->raw.p; // Attach data
+        }
+        crl = crl->next;
+    }
+    /* Check the length */
+    if (SOPC_STATUS_OK == status)
+    {
+        if (nbCrl != idx)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+    }
+    /* Clear in case of error */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pArray);
+        pArray = NULL;
+        nbCrl = 0;
+    }
+    *pSerializedArray = pArray;
+    *pLenArray = nbCrl;
+    return status;
 }
 
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
