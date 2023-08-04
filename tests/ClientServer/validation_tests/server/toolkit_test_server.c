@@ -526,10 +526,6 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
 
         SOPC_PKI_Profile* pProfile = NULL;
         status = SOPC_PKIProvider_CreateMinimalUserProfile(&pProfile);
-        /* TODO:
-            After the peer review, start the refactor and add SOPC_PKIProvider_CheckLeafCertificate in
-            user_authentication_bs__is_valid_user_x509_authentication::is_cert_comply_with_security_policy
-        */
         if (SOPC_STATUS_OK == status)
         {
             status =

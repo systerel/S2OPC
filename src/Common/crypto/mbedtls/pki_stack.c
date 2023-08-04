@@ -45,7 +45,10 @@
 
 #include "mbedtls/oid.h"
 
-#define STR_DEFAULT_TRUSTLIST_NAME "/updatedTrustList"
+#ifndef STR_TRUSTLIST_NAME
+#define STR_TRUSTLIST_NAME "/updatedTrustList"
+#endif
+
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
@@ -685,9 +688,8 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
 
 static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate, const char* url)
 {
-    /*
-        TODO : Add a domain name resolution.
-    */
+    // TODO : Add a domain name resolution (issue #1189)
+
     SOPC_ASSERT(NULL != pToValidate);
     SOPC_ASSERT(NULL != url);
 
@@ -778,7 +780,6 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToVa
     SOPC_ASSERT(NULL != pToValidate);
     SOPC_ASSERT(NULL != applicationUri);
 
-    /* TODO: remove SOPC_KeyManager_Certificate_CheckApplicationUri from the key manager interface */
     bool ok = SOPC_KeyManager_Certificate_CheckApplicationUri(pToValidate, applicationUri);
     if (!ok)
     {
@@ -2372,7 +2373,7 @@ static SOPC_ReturnStatus check_security_level_of_the_update(const SOPC_Certifica
     TODO :
 
     -1 Add a way to configure the security level for each security policy uri (give them a weight)
-    -2 For each certificate, retrieve their security policies in which their are attached to from their properties.
+    -2 For each certificate, retrieve their security policies from their properties.
        How to do it? The following issue has been SUBMITTED : https://mantis.opcfoundation.org/view.php?id=8976
     */
 
