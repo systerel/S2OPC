@@ -30,6 +30,7 @@
 
 #include "check_helpers.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 
 #define S2OPC_DEFAULT_ENDPOINT_URL "opc.tcp://LOCALhost:4841"
@@ -668,14 +669,18 @@ START_TEST(functional_test_verify_every_cert)
     status = SOPC_PKIProviderNew_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pPKI);
-    SOPC_Array* pErrors = NULL;
-    SOPC_Array* pThumbprints = NULL;
+    uint32_t* pErrors = NULL;
+    char** pThumbprints = NULL;
+    uint32_t nbError = 0;
     const SOPC_PKI_ChainProfile profile = {.curves = SOPC_PKI_CURVES_ANY,
                                            .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                            .pkAlgo = SOPC_PKI_PK_ANY,
                                            .RSAMinimumKeySize = 2048};
-    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints);
+    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints, &nbError);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(0, nbError);
+    ck_assert_ptr_null(pErrors);
+    ck_assert_ptr_null(pThumbprints);
 
     /* Updating without including the trusted root cacert.der */
     status =
@@ -684,20 +689,24 @@ START_TEST(functional_test_verify_every_cert)
     status = SOPC_PKIProviderNew_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrl, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* client_2k_cert is now invalid */
-    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints);
+    status = SOPC_PKIProviderNew_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints, &nbError);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
-    size_t nbErrors = SOPC_Array_Size(pErrors);
-    size_t nbThumbprints = SOPC_Array_Size(pThumbprints);
-    ck_assert_uint_eq(1, nbErrors);
-    ck_assert_uint_eq(1, nbThumbprints);
-    char* crtThumb = SOPC_Array_Get(pThumbprints, char*, 0);
-    uint32_t crtErr = SOPC_Array_Get(pErrors, uint32_t, 0);
+    ck_assert_uint_eq(1, nbError);
+    ck_assert_ptr_nonnull(pErrors);
+    ck_assert_ptr_nonnull(pThumbprints);
+
+    char* crtThumb = pThumbprints[0];
+    uint32_t crtErr = pErrors[0];
     ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, crtErr);
     int cmp = memcmp(crtThumb, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", 40);
     ck_assert_int_eq(0, cmp);
 
-    SOPC_Array_Delete(pErrors);
-    SOPC_Array_Delete(pThumbprints);
+    for (uint32_t i = 0; i < nbError; i++)
+    {
+        SOPC_Free(pThumbprints[i]);
+    }
+    SOPC_Free(pThumbprints);
+    SOPC_Free(pErrors);
 
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
     SOPC_KeyManager_Certificate_Free(pTrustedCertToUpdate);

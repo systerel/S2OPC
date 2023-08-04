@@ -522,7 +522,7 @@ char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pC
  *
  * \note            Only the first certificate of \p pCert is processed.
  *
- * \return          SOPC_STATUS_OK if error otherwise SOPC_STATUS_NOK.
+ * \return          SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  *
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_CertificateList* pCert, bool* pbIsSelfSigned);

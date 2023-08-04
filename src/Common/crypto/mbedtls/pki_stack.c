@@ -708,7 +708,10 @@ SOPC_ReturnStatus SOPC_PKIProviderStack_CreateFromPaths(char** lPathTrustedIssue
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 
-#define STR_DEFAULT_TRUSTLIST_NAME "/updatedTrustList"
+#ifndef STR_TRUSTLIST_NAME
+#define STR_TRUSTLIST_NAME "/updatedTrustList"
+#endif
+
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
@@ -726,19 +729,19 @@ typedef SOPC_ReturnStatus SOPC_FnValidateCert(const SOPC_PKIProviderNew* pPKI,
  */
 struct SOPC_PKIProviderNew
 {
-    char* directoryStorePath;
-    SOPC_CertificateList* pTrustedCerts;
-    SOPC_CertificateList* pTrustedRoots;
-    SOPC_CRLList* pTrustedCrl;
-    SOPC_CertificateList* pIssuerCerts;
-    SOPC_CertificateList* pIssuerRoots;
-    SOPC_CRLList* pIssuerCrl;
+    char* directoryStorePath;            /*!< The directory store path of the PKI*/
+    SOPC_CertificateList* pTrustedCerts; /*!< Trusted intermediate CA + trusted certificates*/
+    SOPC_CertificateList* pTrustedRoots; /*!< Trusted root CA*/
+    SOPC_CRLList* pTrustedCrl;           /*!< CRLs of trusted intermediate CA and trusted root CA*/
+    SOPC_CertificateList* pIssuerCerts;  /*!< Issuer intermediate CA*/
+    SOPC_CertificateList* pIssuerRoots;  /*!< Issuer root CA*/
+    SOPC_CRLList* pIssuerCrl;            /*!< CRLs of issuer intermediate CA and issuer root CA*/
 
-    SOPC_CertificateList* pAllCerts; /* Use to validate trusted certificate */
-    SOPC_CertificateList* pAllRoots; /* Use to validate trusted certificate*/
-    SOPC_CRLList* pAllCrl;
-    SOPC_FnValidateCert* pFnValidateCert;
-    bool isPermissive;
+    SOPC_CertificateList* pAllCerts;      /*!< Issuer certs + trusted certs (root not included)*/
+    SOPC_CertificateList* pAllRoots;      /*!< Issuer roots + trusted roots*/
+    SOPC_CRLList* pAllCrl;                /*!< Issuer CRLs + trusted CRLs */
+    SOPC_FnValidateCert* pFnValidateCert; /*!< Pointer to validation function*/
+    bool isPermissive;                    /*!< Define whatever the PKI is permissive (without security)*/
 };
 
 static const SOPC_PKI_KeyUsage_Mask g_appKU = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
@@ -1585,11 +1588,14 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProviderNew* pP
             /* Root is trusted? */
             status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedRoots, pToValidateCpy, &bIsTrusted);
         }
-
-        if (!pToValidateCpy->crt.ca_istrue)
+        else if (!pToValidateCpy->crt.ca_istrue)
         {
             /* Cert is trusted? */
             status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pTrustedCerts, pToValidateCpy, &bIsTrusted);
+        }
+        else
+        {
+            *error = SOPC_CertificateValidationError_UseNotAllowed;
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -1733,10 +1739,11 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
 
 SOPC_ReturnStatus SOPC_PKIProviderNew_VerifyEveryCertificate(const SOPC_PKIProviderNew* pPKI,
                                                              const SOPC_PKI_ChainProfile* pProfile,
-                                                             SOPC_Array** ppErrors,
-                                                             SOPC_Array** ppThumbprints)
+                                                             uint32_t** pErrors,
+                                                             char*** ppThumbprints,
+                                                             uint32_t* pLength)
 {
-    if (NULL == pPKI || NULL == pProfile || NULL == ppErrors || NULL == ppThumbprints)
+    if (NULL == pPKI || NULL == pProfile || NULL == pErrors || NULL == ppThumbprints || NULL == pLength)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1745,13 +1752,13 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_VerifyEveryCertificate(const SOPC_PKIProvi
     mbedtls_x509_crt_profile crt_profile = {0};
     bool bErrorFound = false;
 
-    SOPC_Array* pThumbprints = SOPC_Array_Create(sizeof(char*), 0, sopc_free_c_string_from_ptr);
-    if (NULL == pThumbprints)
+    SOPC_Array* pThumbArray = SOPC_Array_Create(sizeof(char*), 0, sopc_free_c_string_from_ptr);
+    if (NULL == pThumbArray)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    SOPC_Array* pErrors = SOPC_Array_Create(sizeof(uint32_t), 0, NULL);
-    if (NULL == pErrors)
+    SOPC_Array* pErrArray = SOPC_Array_Create(sizeof(uint32_t), 0, NULL);
+    if (NULL == pErrArray)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
@@ -1763,30 +1770,76 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_VerifyEveryCertificate(const SOPC_PKIProvi
     {
         if (NULL != pPKI->pAllCerts)
         {
-            status =
-                sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, &bErrorFound, pErrors, pThumbprints);
+            status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, &bErrorFound, pErrArray,
+                                                   pThumbArray);
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         if (NULL != pPKI->pAllRoots)
         {
-            status =
-                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, &bErrorFound, pErrors, pThumbprints);
+            status = sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, &bErrorFound, pErrArray,
+                                                   pThumbArray);
         }
     }
+    /* Verify lengths */
+    if (SOPC_STATUS_OK == status && bErrorFound)
+    {
+        size_t lenError = SOPC_Array_Size(pErrArray);
+        size_t lenThumb = SOPC_Array_Size(pThumbArray);
+        if (lenError != lenThumb)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        else if (0 == lenError)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        else
+        {
+            *pLength = (uint32_t) lenError;
+        }
+    }
+    /* retrieve C arrays */
+    if (SOPC_STATUS_OK == status && bErrorFound)
+    {
+        *pErrors = SOPC_Array_Into_Raw(pErrArray);
+        *ppThumbprints = SOPC_Array_Into_Raw(pThumbArray);
+        if (NULL == *pErrors || NULL == *ppThumbprints)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        /* We shall free all te C array if error */
+        if (SOPC_STATUS_OK != status)
+        {
+            if (NULL != *ppThumbprints)
+            {
+                for (uint32_t i = 0; i < *pLength; i++)
+                {
+                    SOPC_Free(*ppThumbprints[i]);
+                }
+                SOPC_Free(*ppThumbprints);
+            }
+            if (NULL != *pErrors)
+            {
+                SOPC_Free(*pErrors);
+            }
+        }
+        pErrArray = NULL;
+        pThumbArray = NULL;
+    }
+
+    /* Clear */
+    SOPC_Array_Delete(pErrArray);
+    SOPC_Array_Delete(pThumbArray);
 
     if (SOPC_STATUS_OK != status || !bErrorFound)
     {
-        SOPC_Array_Delete(pErrors);
-        SOPC_Array_Delete(pThumbprints);
-        *ppErrors = NULL;
+        *pErrors = NULL;
         *ppThumbprints = NULL;
+        *pLength = 0;
         return status;
     }
-
-    *ppErrors = pErrors;
-    *ppThumbprints = pThumbprints;
 
     status = bErrorFound ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     return status;
@@ -2394,23 +2447,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_CreateFromList(SOPC_CertificateList* pTrus
     return status;
 }
 
-/** \brief Return the default directory name for the updated trustList (STR_DEFAULT_TRUSTLIST_NAME)
- *         or the user's one through WITH_USER_TRUST_LIST_NAME if defined.
- *         Return NULL in case of error
- */
-static char* get_dir_updated_trustlist_name(void)
-{
-    char* trust_list_name = NULL;
-
-#ifndef WITH_USER_TRUST_LIST_NAME
-    trust_list_name = SOPC_strdup(STR_DEFAULT_TRUSTLIST_NAME);
-#else
-    status = SOPC_StrConcat("/", WITH_USER_TRUST_LIST_NAME, &trust_list_name);
-#endif /* WITH_USER_TRUST_LIST_NAME */
-
-    return trust_list_name;
-}
-
 static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
                                                bool bDefaultBuild,
                                                SOPC_PKIProviderNew** ppPKI)
@@ -2430,12 +2466,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     /* Select the right folder*/
     if (!bDefaultBuild)
     {
-        trust_list_name = get_dir_updated_trustlist_name();
-        if (NULL == trust_list_name)
-        {
-            return SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        status = SOPC_StrConcat(directoryStorePath, trust_list_name, &path);
+        status = SOPC_StrConcat(directoryStorePath, STR_TRUSTLIST_NAME, &path);
         if (SOPC_STATUS_OK != status)
         {
             return status;
@@ -2764,12 +2795,7 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
     }
     char* basePath = NULL;
     char* path = NULL;
-    char* trustListName = get_dir_updated_trustlist_name();
-    if (NULL == trustListName)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, trustListName, &basePath);
+    SOPC_ReturnStatus status = may_create_pki_folder(pPKI->directoryStorePath, STR_TRUSTLIST_NAME, &basePath);
     if (SOPC_STATUS_OK != status)
     {
         return status;
@@ -2817,7 +2843,6 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_WriteToStore(const SOPC_PKIProviderNew* pP
         }
     }
 
-    SOPC_Free(trustListName);
     SOPC_Free(basePath);
     SOPC_Free(path);
 

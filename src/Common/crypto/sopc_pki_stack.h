@@ -28,7 +28,6 @@
 #ifndef SOPC_PKI_STACK_H_
 #define SOPC_PKI_STACK_H_
 
-#include "sopc_array.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_key_manager.h"
 #include "sopc_pki.h"
@@ -623,21 +622,22 @@ SOPC_ReturnStatus SOPC_PKIProviderNew_ValidateCertificate(const SOPC_PKIProvider
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param pProfile A valid pointer to the PKI chain profile.
- * \param[out] ppErrors Array to store the OpcUa error code when a certificate is invalid.
+ * \param[out] pErrors Array to store the OpcUa error code when a certificate is invalid.
  * \param[out] ppThumbprints Array to store the certificate thumbprint when a certificate is invalid.
+ * \param[out] pLength The length of \p pErrors and \p ppThumbprints .
  *
- * \note \p ppErrors and \p ppThumbprints are only created and set if the returned status is SOPC_STATUS_NOK.
- *
- * \warning In case of invalid certificate (SOPC_STATUS_NOK) \p ppErrors and \p ppThumbprints has the same size.
- *          The thumbprint is associated to the error at the same index.
+ * \note \p pErrors and \p ppThumbprints are only created and set if the returned status is SOPC_STATUS_NOK.
+ *       In case of invalid certificate (SOPC_STATUS_NOK) the thumbprint is associated to the error
+ *       at the same index.
  *
  * \return SOPC_STATUS_OK when every certificate is successfully validated, and
  *         SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE, SOPC_STATUS_OUT_OF_MEMORY or SOPC_STATUS_NOK.
  */
 SOPC_ReturnStatus SOPC_PKIProviderNew_VerifyEveryCertificate(const SOPC_PKIProviderNew* pPKI,
                                                              const SOPC_PKI_ChainProfile* pProfile,
-                                                             SOPC_Array** ppErrors,
-                                                             SOPC_Array** ppThumbprints);
+                                                             uint32_t** pErrors,
+                                                             char*** ppThumbprints,
+                                                             uint32_t* pLength);
 
 /** \brief Check leaf certificate properties
  *
