@@ -76,4 +76,11 @@ typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
  */
 typedef SOPC_Buffer SOPC_SerializedCertificate;
 
+/**
+ * \brief A serialized representation of a CRL.
+ *
+ * This representation is safe to share across threads.
+ */
+typedef SOPC_Buffer SOPC_SerializedCRL;
+
 #endif /* SOPC_CRYPTO_DECL_H_ */

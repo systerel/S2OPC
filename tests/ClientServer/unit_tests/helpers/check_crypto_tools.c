@@ -253,6 +253,80 @@ START_TEST(test_gen_csr)
     SOPC_Free(subjectName);
     SOPC_Free(pDER);
 }
+
+START_TEST(test_crypto_check_cert_list_to_array)
+{
+    uint32_t lenArray = 0;
+    SOPC_SerializedCertificate* pCertArray = NULL;
+    SOPC_SerializedCertificate* pCertRef[2];
+    SOPC_CertificateList* pCerts = NULL;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_Buffer* pBufferRef = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status =
+        SOPC_KeyManager_SerializedCertificate_CreateFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCertRef[0]);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/certs/user_cacert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_SerializedCertificate_CreateFromFile("./S2OPC_Users_PKI/trusted/certs/user_cacert.der",
+                                                                  &pCertRef[1]);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pCerts, &pCertArray, &lenArray);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pCertArray);
+    ck_assert_uint_eq(2, lenArray);
+    for (uint32_t idx = 0; idx < lenArray; idx++)
+    {
+        pBufferRef = pCertRef[idx];
+        pBuffer = &pCertArray[idx];
+        ck_assert_uint_eq(pBufferRef->length, pBuffer->length);
+        int cmp = memcmp(pBufferRef->data, pBuffer->data, pBufferRef->length);
+        ck_assert_int_eq(0, cmp);
+
+        SOPC_Buffer_Delete(pBufferRef);
+    }
+    SOPC_KeyManager_Certificate_Free(pCerts);
+    SOPC_Free(pCertArray);
+}
+END_TEST
+
+START_TEST(test_crypto_check_crl_list_to_array)
+{
+    uint32_t lenArray = 0;
+    SOPC_SerializedCRL* pCrlArray = NULL;
+    SOPC_SerializedCRL* pCrlRef[2];
+    SOPC_CRLList* pCRLs = NULL;
+    SOPC_Buffer* pBuffer = NULL;
+    SOPC_Buffer* pBufferRef = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_Buffer_ReadFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pCrlRef[0]);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/crl/user_cacrl.der", &pCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_Buffer_ReadFile("./S2OPC_Users_PKI/trusted/crl/user_cacrl.der", &pCrlRef[1]);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRLList_AttachToSerializedArray(pCRLs, &pCrlArray, &lenArray);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pCrlArray);
+    ck_assert_uint_eq(2, lenArray);
+    for (uint32_t idx = 0; idx < lenArray; idx++)
+    {
+        pBufferRef = pCrlRef[idx];
+        pBuffer = &pCrlArray[idx];
+        ck_assert_uint_eq(pBufferRef->length, pBuffer->length);
+        int cmp = memcmp(pBufferRef->data, pBuffer->data, pBufferRef->length);
+        ck_assert_int_eq(0, cmp);
+
+        SOPC_Buffer_Delete(pBufferRef);
+    }
+    SOPC_KeyManager_CRL_Free(pCRLs);
+    SOPC_Free(pCrlArray);
+}
 END_TEST
 #endif
 
@@ -384,9 +458,11 @@ Suite* tests_make_suite_crypto_tools(void)
     Suite* s = suite_create("Crypto tools test");
 
 #ifndef S2OPC_CRYPTO_CYCLONE
-    TCase *tc_gen_rsa = NULL, *tc_gen_csr = NULL;
+    TCase *tc_gen_rsa = NULL, *tc_gen_csr = NULL, *tc_check_crypto_list_to_array = NULL;
     tc_gen_rsa = tcase_create("Generate RSA keys");
     tc_gen_csr = tcase_create("Generate CSR");
+    tc_check_crypto_list_to_array = tcase_create("Check crypto list to serialized array");
+
     suite_add_tcase(s, tc_gen_rsa);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
@@ -394,6 +470,9 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_set_timeout(tc_gen_rsa, 10);
     suite_add_tcase(s, tc_gen_csr);
     tcase_add_test(tc_gen_csr, test_gen_csr);
+    suite_add_tcase(s, tc_check_crypto_list_to_array);
+    tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_cert_list_to_array);
+    tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_crl_list_to_array);
 #endif
 
     TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL;

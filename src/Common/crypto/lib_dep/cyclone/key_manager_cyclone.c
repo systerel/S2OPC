@@ -1369,6 +1369,19 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* p
     return status;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_AttachToSerializedArray(const SOPC_CertificateList* pCerts,
+                                                                          SOPC_SerializedCertificate** pSerializedArray,
+                                                                          uint32_t* pLenArray)
+{
+    SOPC_UNUSED_ARG(pCerts);
+    SOPC_UNUSED_ARG(pSerializedArray);
+    SOPC_UNUSED_ARG(pLenArray);
+
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+
+    return SOPC_STATUS_NOK;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Certificate Revocation List API
  * ------------------------------------------------------------------------------------------------
@@ -1598,6 +1611,19 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
     SOPC_Buffer_Delete(pCRL->raw);
     SOPC_KeyManager_CRL_Free(pCRL->next);
     SOPC_Free(pCRL);
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CRLList_AttachToSerializedArray(const SOPC_CRLList* pCRLs,
+                                                                  SOPC_SerializedCRL** pSerializedArray,
+                                                                  uint32_t* pLenArray)
+{
+    SOPC_UNUSED_ARG(pCRLs);
+    SOPC_UNUSED_ARG(pSerializedArray);
+    SOPC_UNUSED_ARG(pLenArray);
+
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
+
+    return SOPC_STATUS_NOK;
 }
 
 /* ------------------------------------------------------------------------------------------------
