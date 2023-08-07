@@ -72,9 +72,10 @@ function build() {
 build stm32h735g_disco cli_client
 build mimxrt1064_evk cli_pubsub_server
 build native_posix_64 cli_pubsub_server
+build native_posix_64 cli_client
 
 # Check results
-EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin"
+EXPECTED_FILES="cli_client_stm32h735g_disco.bin cli_pubsub_server_mimxrt1064_evk.bin  cli_pubsub_server_native_posix_64.bin cli_client_native_posix_64.bin"
 RESULT=true
 for f in ${EXPECTED_FILES} ; do
 	[ ! -f build_zephyr/${f} ] && echo "File not build : ${f}" && RESULT=false
