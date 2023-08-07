@@ -75,6 +75,7 @@ stages:
   - build
   - test
   - build-others
+  - test-others
   - analyses
   - doc
 
@@ -254,6 +255,7 @@ build-zephyr:
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh stm32h735g_disco cli_client'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_pubsub_server'
+    - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_client'
   variables:
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -433,6 +435,22 @@ test-uactt:
            $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
            # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
       when: on_success
+
+
+###
+# Test others jobs
+###
+test-zephyr:
+  <<: *zephyr_job
+  stage: test-others
+  image: docker.aix.systerel.fr/c838/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
+  script:
+    - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
+  variables:
+    <<: *nominal_test_variables
+  rules: # run the task only if Zephyr samples have been compiled
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always
 
 ###
 # Analysis jobs
