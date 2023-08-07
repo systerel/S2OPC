@@ -71,7 +71,7 @@ SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC
  * \param array  The array.
  *
  * \return The copied array in case of success, or \c NULL on memory allocation
- *         failure.
+ *         failure or if \p array is NULL.
  */
 SOPC_Array* SOPC_Array_Copy(const SOPC_Array* array);
 
@@ -91,7 +91,7 @@ void SOPC_Array_Delete(SOPC_Array* array);
  * \param array  The array.
  * \param val    The value to append.
  *
- * \return \c TRUE on success, \c FALSE on memory allocation failure.
+ * \return \c TRUE on success, \c FALSE on memory allocation failure or if \p array is NULL.
  */
 #define SOPC_Array_Append(array, val) SOPC_Array_Append_Values((array), &(val), 1)
 
@@ -103,7 +103,7 @@ void SOPC_Array_Delete(SOPC_Array* array);
  *                    grows by \p n_elements items, but does not initialize them.
  * \param n_elements  The number of values present in memory.
  *
- * \return \c TRUE on success, \c FALSE on memory allocation failure.
+ * \return \c TRUE on success, \c FALSE on memory allocation failure or if \p array is NULL.
  */
 bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elements);
 
@@ -114,7 +114,7 @@ bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elem
  * \param ty     The type of the value stored in the array.
  * \param index  The index of the value in the array.
  *
- * \return The value.
+ * \return The value or \c NULL if \p array is NULL.
  */
 #define SOPC_Array_Get(array, ty, index) (*((ty*) SOPC_Array_Get_Ptr((array), (index))))
 
@@ -133,7 +133,7 @@ void* SOPC_Array_Get_Ptr(const SOPC_Array* array, size_t index);
  *
  * \param array  The array.
  *
- * \return The number of elements in the array.
+ * \return The number of elements in the array or 0 if \p array is NULL.
  */
 size_t SOPC_Array_Size(const SOPC_Array* array);
 
@@ -167,7 +167,7 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array);
  * \param array  The array.
  *
  * \return  The function used to clear the elements when the array is deleted,
- *          or \c NULL if no such function is defined.
+ *          or \c NULL if no such function is defined or if \p array is NULL.
  */
 SOPC_Array_Free_Func* SOPC_Array_Get_Free_Func(SOPC_Array* array);
 

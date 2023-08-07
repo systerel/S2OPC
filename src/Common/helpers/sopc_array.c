@@ -89,7 +89,10 @@ SOPC_Array* SOPC_Array_Create(size_t element_size, size_t initial_capacity, SOPC
 
 SOPC_Array* SOPC_Array_Copy(const SOPC_Array* array)
 {
-    SOPC_ASSERT(array != NULL);
+    if (NULL == array)
+    {
+        return NULL;
+    }
 
     SOPC_Array* copy = SOPC_Array_Create(array->element_size, array->sz, array->free_func);
 
@@ -129,7 +132,10 @@ void SOPC_Array_Delete(SOPC_Array* array)
 
 bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elements)
 {
-    SOPC_ASSERT(array != NULL);
+    if (NULL == array)
+    {
+        return false;
+    }
 
     if (n_elements == 0)
     {
@@ -157,7 +163,10 @@ bool SOPC_Array_Append_Values(SOPC_Array* array, const void* data, size_t n_elem
 
 void* SOPC_Array_Get_Ptr(const SOPC_Array* array, size_t index)
 {
-    SOPC_ASSERT(array != NULL);
+    if (NULL == array)
+    {
+        return NULL;
+    }
     SOPC_ASSERT(index < array->sz);
 
     return ARRAY_ELT(array, index);
@@ -165,8 +174,11 @@ void* SOPC_Array_Get_Ptr(const SOPC_Array* array, size_t index)
 
 size_t SOPC_Array_Size(const SOPC_Array* array)
 {
-    SOPC_ASSERT(array != NULL);
-    return array->sz;
+    if (array != NULL)
+    {
+        return array->sz;
+    }
+    return 0;
 }
 
 void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func* compare_func)
@@ -177,7 +189,10 @@ void SOPC_Array_Sort(SOPC_Array* array, SOPC_Array_Compare_Func* compare_func)
 
 void* SOPC_Array_Into_Raw(SOPC_Array* array)
 {
-    SOPC_ASSERT(array != NULL);
+    if (NULL == array)
+    {
+        return NULL;
+    }
 
     void* data = array->data;
 
@@ -193,7 +208,10 @@ void* SOPC_Array_Into_Raw(SOPC_Array* array)
 
 SOPC_Array_Free_Func* SOPC_Array_Get_Free_Func(SOPC_Array* array)
 {
-    SOPC_ASSERT(array != NULL);
+    if (NULL == array)
+    {
+        return NULL;
+    }
     return array->free_func;
 }
 
