@@ -1404,7 +1404,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
 static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
                                                       SOPC_CertificateList** ppCerts,
                                                       SOPC_CRLList** ppCrl,
-                                                      bool bIscrl)
+                                                      bool bIscrl,
+                                                      bool bDefaultBuild)
 {
     SOPC_ASSERT(NULL != basePath);
     if (bIscrl)
@@ -1424,8 +1425,16 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
     SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(basePath, &pFilePaths);
     if (SOPC_FileSystem_GetDir_OK != dirRes)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: failed to open directory <%s>.",
-                               basePath);
+        if (!bDefaultBuild)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "> PKI creation warning: failed to open directory <%s>.",
+                                     basePath);
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: failed to open directory <%s>.",
+                                   basePath);
+        }
         return SOPC_STATUS_NOK;
     }
     /* Get the size and iterate for each item */
@@ -1468,7 +1477,8 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
                                                                   SOPC_CertificateList** ppTrustedCerts,
                                                                   SOPC_CRLList** ppTrustedCrl,
                                                                   SOPC_CertificateList** ppIssuerCerts,
-                                                                  SOPC_CRLList** ppIssuerCrl)
+                                                                  SOPC_CRLList** ppIssuerCrl,
+                                                                  bool bDefaultBuild)
 {
     SOPC_ASSERT(NULL != basePath);
     SOPC_ASSERT(NULL != ppTrustedCerts);
@@ -1480,7 +1490,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
     SOPC_ReturnStatus status = SOPC_StrConcat(basePath, STR_TRUSTED_CERTS, &trustedCertsPath);
     if (SOPC_STATUS_OK == status)
     {
-        status = load_certificate_or_crl_list(trustedCertsPath, ppTrustedCerts, NULL, false);
+        status = load_certificate_or_crl_list(trustedCertsPath, ppTrustedCerts, NULL, false, bDefaultBuild);
     }
     SOPC_Free(trustedCertsPath);
     /* Trusted Crl */
@@ -1490,7 +1500,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
         status = SOPC_StrConcat(basePath, STR_TRUSTED_CRL, &trustedCrlPath);
         if (SOPC_STATUS_OK == status)
         {
-            status = load_certificate_or_crl_list(trustedCrlPath, NULL, ppTrustedCrl, true);
+            status = load_certificate_or_crl_list(trustedCrlPath, NULL, ppTrustedCrl, true, bDefaultBuild);
         }
         SOPC_Free(trustedCrlPath);
     }
@@ -1501,7 +1511,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
         status = SOPC_StrConcat(basePath, STR_ISSUERS_CERTS, &issuerCertsPath);
         if (SOPC_STATUS_OK == status)
         {
-            status = load_certificate_or_crl_list(issuerCertsPath, ppIssuerCerts, NULL, false);
+            status = load_certificate_or_crl_list(issuerCertsPath, ppIssuerCerts, NULL, false, bDefaultBuild);
         }
         SOPC_Free(issuerCertsPath);
     }
@@ -1512,7 +1522,7 @@ static SOPC_ReturnStatus load_certificate_and_crl_list_from_store(const char* ba
         status = SOPC_StrConcat(basePath, STR_ISSUERS_CRL, &issuerCrlPath);
         if (SOPC_STATUS_OK == status)
         {
-            status = load_certificate_or_crl_list(issuerCrlPath, NULL, ppIssuerCrl, true);
+            status = load_certificate_or_crl_list(issuerCrlPath, NULL, ppIssuerCrl, true, bDefaultBuild);
         }
         SOPC_Free(issuerCrlPath);
     }
@@ -1987,14 +1997,23 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         basePath = directoryStorePath;
     }
     /* Load the files from the directory Store path */
-    status =
-        load_certificate_and_crl_list_from_store(basePath, &pTrustedCerts, &pTrustedCrl, &pIssuerCerts, &pIssuerCrl);
+    status = load_certificate_and_crl_list_from_store(basePath, &pTrustedCerts, &pTrustedCrl, &pIssuerCerts,
+                                                      &pIssuerCrl, bDefaultBuild);
     /* Check if the trustList is empty */
     if (SOPC_STATUS_OK == status && NULL == pTrustedCerts && NULL == pTrustedCrl && NULL == pIssuerCerts &&
         NULL == pIssuerCrl)
     {
         status = SOPC_STATUS_NOK;
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: certificate store is empty (%s).", path);
+        if (!bDefaultBuild)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "> PKI creation warning: certificate store is empty (%s).",
+                                     path);
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: certificate store is empty (%s).",
+                                   path);
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
