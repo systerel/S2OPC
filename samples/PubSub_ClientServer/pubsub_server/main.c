@@ -219,7 +219,7 @@ int main(int argc, char* const argv[])
             if (SOPC_STATUS_OK == status)
             {
                 status = PubSub_Start() ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-                if (SOPC_STATUS_NOK == status)
+                if (SOPC_STATUS_OK != status)
                 {
                     PubSub_Stop(); // Ensure Pub & Sub are stopped in this case
                 }

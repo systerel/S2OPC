@@ -463,15 +463,18 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.receptionBufferSockets = NULL;
     schedulerCtx.receptionBufferMQTT = NULL;
 
-    size_t size = SOPC_Array_Size(schedulerCtx.securityCtx);
-    for (size_t i = 0; i < size; i++)
+    if (NULL != schedulerCtx.securityCtx)
     {
-        SOPC_SubScheduler_Security_Pub_Ctx* ctx =
-            SOPC_Array_Get(schedulerCtx.securityCtx, SOPC_SubScheduler_Security_Pub_Ctx*, i);
-        SOPC_SubScheduler_Pub_Ctx_Clear(ctx);
-        SOPC_Free(ctx);
+        size_t size = SOPC_Array_Size(schedulerCtx.securityCtx);
+        for (size_t i = 0; i < size; i++)
+        {
+            SOPC_SubScheduler_Security_Pub_Ctx* ctx =
+                SOPC_Array_Get(schedulerCtx.securityCtx, SOPC_SubScheduler_Security_Pub_Ctx*, i);
+            SOPC_SubScheduler_Pub_Ctx_Clear(ctx);
+            SOPC_Free(ctx);
+        }
+        SOPC_Array_Delete(schedulerCtx.securityCtx);
     }
-    SOPC_Array_Delete(schedulerCtx.securityCtx);
 
     schedulerCtx.securityCtx = NULL;
     SOPC_Array_Delete(schedulerCtx.writerCtx);
@@ -487,7 +490,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
     SOPC_ASSERT(nb_connections > 0);
 
-    bool result = true;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     schedulerCtx.config = config;
@@ -496,51 +498,39 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     schedulerCtx.dsmSnGapCallback = dsmSnGapCb;
 
     schedulerCtx.receptionBufferSockets = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
-    result = (NULL != schedulerCtx.receptionBufferSockets);
+    status = (NULL != schedulerCtx.receptionBufferSockets ? status : SOPC_STATUS_OUT_OF_MEMORY);
 
-    schedulerCtx.receptionBufferMQTT = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
-    result = (NULL != schedulerCtx.receptionBufferMQTT);
+    if (SOPC_STATUS_OK == status)
+    {
+        schedulerCtx.receptionBufferMQTT = SOPC_Buffer_Create(SOPC_PUBSUB_BUFFER_SIZE);
+        status = (NULL != schedulerCtx.receptionBufferMQTT ? status : SOPC_STATUS_OUT_OF_MEMORY);
+    }
 
-    if (result)
+    if (SOPC_STATUS_OK == status)
     {
         // Allocate the subscriber scheduler context
         schedulerCtx.nbConnections = nb_connections;
         schedulerCtx.nbSockets = 0;
         schedulerCtx.transport = SOPC_Calloc(schedulerCtx.nbConnections, sizeof(SOPC_SubScheduler_TransportCtx));
-        result = (NULL != schedulerCtx.transport);
+        status = (NULL != schedulerCtx.transport ? status : SOPC_STATUS_OUT_OF_MEMORY);
     }
 
-    if (!result)
-    {
-        status = SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    if (result)
+    if (SOPC_STATUS_OK == status)
     {
         schedulerCtx.securityCtx = SOPC_Array_Create(sizeof(SOPC_SubScheduler_Security_Pub_Ctx*),
                                                      SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER, NULL);
-
-        result = (NULL != schedulerCtx.securityCtx);
-        if (!result)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        status = (NULL != schedulerCtx.securityCtx ? status : SOPC_STATUS_OUT_OF_MEMORY);
     }
 
-    if (result)
+    if (SOPC_STATUS_OK == status)
     {
         schedulerCtx.writerCtx =
             SOPC_Array_Create(sizeof(SOPC_SubScheduler_Writer_Ctx), SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER, NULL);
-
-        result = (NULL != schedulerCtx.writerCtx);
-        if (!result)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        status = (NULL != schedulerCtx.writerCtx ? status : SOPC_STATUS_OUT_OF_MEMORY);
     }
 
     // Initialize the subscriber scheduler context: create socket + associated Sub connection config
-    for (uint32_t iIter = 0; iIter < nb_connections && result; iIter++)
+    for (uint32_t iIter = 0; iIter < nb_connections && SOPC_STATUS_OK == status; iIter++)
     {
         SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, iIter);
         const SOPC_Conf_PublisherId* pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
@@ -555,7 +545,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             {
                 schedulerCtx.transport[iIter].connection = connection;
 
-                if (result)
+                if (SOPC_STATUS_OK == status)
                 {
                     // Parse connection multicast address
                     const char* address = SOPC_PubSubConnection_Get_Address(connection);
@@ -567,15 +557,17 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     size_t hostnameLength = 0;
                     size_t portIdx = 0;
                     size_t portLength = 0;
+                    bool result = false;
 
                     switch (protocol)
                     {
                     case SOPC_PubSubProtocol_UDP:
                         result =
                             SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(address, &multicastAddr, &localAddr);
+                        status = (result ? status : SOPC_STATUS_INVALID_PARAMETERS);
 
                         // Create reception socket
-                        if (result)
+                        if (SOPC_STATUS_OK == status)
                         {
                             schedulerCtx.transport[iIter].fctClear = &SOPC_SubScheduler_CtxUdp_Clear;
                             schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_UDP;
@@ -601,23 +593,15 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             status = SOPC_STATUS_INVALID_PARAMETERS;
                         }
 
-                        if (SOPC_STATUS_OK != status)
-                        {
-                            /* Call uninit because at least one error */
-                            result = false;
-                        }
-
                         SOPC_Socket_AddrInfoDelete(&multicastAddr);
                         SOPC_Socket_AddrInfoDelete(&localAddr);
                         break;
                     case SOPC_PubSubProtocol_MQTT:
-                    {
-                        if (SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
-                                                                &portLength) == false)
-                        {
-                            status = SOPC_STATUS_NOK;
-                        }
-                        else
+                        result = SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
+                                                                     &portLength);
+                        status = (result ? status : SOPC_STATUS_INVALID_PARAMETERS);
+
+                        if (SOPC_STATUS_OK == status)
                         {
                             SOPC_ASSERT(nbReaderGroups <= MQTT_LIB_MAX_NB_TOPIC_NAME);
                             // nbTopic == nbReaderGroups
@@ -627,8 +611,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             if (SOPC_STATUS_OK != status)
                             {
                                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                                       "Not enougth space to allocate mqttClient");
-                                result = false;
+                                                       "Not enough space to allocate mqttClient");
                             }
                             else
                             {
@@ -643,7 +626,6 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                     SOPC_Logger_TraceError(
                                         SOPC_LOG_MODULE_PUBSUB,
                                         "Subscriber MQTT configuration failed: check if topic is set");
-                                    status = SOPC_STATUS_NOK;
                                 }
                                 else
                                 {
@@ -654,8 +636,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             }
                             SOPC_Free(topic);
                         }
-                    }
-                    break;
+                        break;
                     case SOPC_PubSubProtocol_ETH:
                         // Note: configured as multicast and without source address check
                         status = SOPC_ETH_Socket_CreateReceiveAddressInfo(
@@ -683,19 +664,16 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                 "check address format is only with hyphens and zero-terminated.");
                             /* Call uninit because at least one error */
                             SOPC_SubScheduler_CtxEth_Clear(&schedulerCtx.transport[iIter]);
-                            result = false;
                         }
                         break;
                     case SOPC_PubSubProtocol_UNKOWN:
-
                     default:
                         status = SOPC_STATUS_INVALID_PARAMETERS;
-                        result = false;
                     }
                 }
             }
 
-            if (result)
+            if (SOPC_STATUS_OK == status)
             {
                 // add security context
                 uint16_t nbGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
@@ -715,10 +693,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
         }
     }
 
-    if (false == result)
+    if (SOPC_STATUS_OK != status)
     {
         uninit_sub_scheduler_ctx();
-        SOPC_ASSERT(SOPC_STATUS_OK != status);
     }
 
     return status;
@@ -747,9 +724,8 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
         SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, true);
     }
 
-    bool result = true;
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
-    result = nb_connections > 0;
+    bool result = nb_connections > 0;
 
     if (result)
     {
@@ -762,6 +738,10 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
             if (0 < schedulerCtx.nbSockets)
             {
                 result = SOPC_SubScheduler_Start_Sockets(threadPriority);
+            }
+            if (!result)
+            {
+                uninit_sub_scheduler_ctx();
             }
         }
         else
