@@ -44,6 +44,11 @@
 #     - build-win64
 #########################################################
 
+# Ensures job failure whenn intermediate script line fails
+# (see gitlab issues #25394 and #383355)
+variables:
+  FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
+
 .variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
 
