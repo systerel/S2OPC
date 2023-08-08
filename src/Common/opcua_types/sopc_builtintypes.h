@@ -1104,6 +1104,7 @@ void SOPC_Variant_Delete(SOPC_Variant* variant);
 
 // Raw function to print a variant on standard output. Do not display array or matrix.
 void SOPC_Variant_Print(SOPC_Variant* variant);
+void SOPC_Variant_Print_U5(SOPC_Variant* variant);
 
 const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId);
 const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index);

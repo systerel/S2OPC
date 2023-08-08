@@ -1,0 +1,16 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="mqtts://a23slny5qs4w87-ats.iot.eu-west-3.amazonaws.com:8883" publisherId="42" mode="publisher" mqttUsername="user1" mqttPassword="password" >
+        <message groupId="14" groupVersion="1" publishingInterval="1000." mqttTopic="S2OPC" >
+          <dataset>
+            <variable nodeId="ns=2;i=0" displayName="Temperature0" dataType="Float"/>
+            <variable nodeId="ns=2;i=1" displayName="Temperature1" dataType="Float"/>
+            <variable nodeId="ns=2;i=2" displayName="Humidity" dataType="Float"/>
+            <variable nodeId="ns=2;i=3" displayName="Pressure" dataType="Float"/>
+            <variable nodeId="ns=2;i=4" displayName="AcceleroX" dataType="Int32"/>
+            <variable nodeId="ns=2;i=5" displayName="AcceleroY" dataType="Int32"/>
+            <variable nodeId="ns=2;i=6" displayName="AcceleroZ" dataType="Int32"/>
+          </dataset>
+        </message>
+    </connection>
+</PubSub>
+

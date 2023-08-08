@@ -493,9 +493,13 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf)
 
 SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* buf)
 {
+    static const char* infinity_str_json_format = "\"Infinity\"";
+    static const char* infinity_str_minus_json_format = "\"-Infinity\"";
+    static const char* nan_str_json_format = "\"NaN\"";
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    // buffer needs a minimum lentgh of 10 to store the worst case : "-infinity"
-    static const uint16_t bufferLength = (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) > 10 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) : 10;
+    // buffer needs a minimum length of 12 to store the worst case : "\"-Infinity\"" + '\0'
+    // Or a length of SOPC_PRECISION_PRINTING_FLOAT_NUMBERS (decimal storage) + 7 ('.e+ddd' + '\0' storage)
+    static const uint16_t bufferLength = (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) > 12 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) : 12;
     char buffer[bufferLength]; // (decimal + '.e+ddd' + '\0')
     int res = snprintf(buffer,bufferLength, "%.*g", SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
     if (res > 0 && res < bufferLength)
@@ -503,17 +507,20 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* 
         // If value it's a special number
         if (0 == strcmp(buffer,"inf") || 0 == strcmp(buffer,"infinity"))
         {
-            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"Infinity\"", strlen(buffer));
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) infinity_str_json_format, strlen(infinity_str_json_format));
         }
-        if (0 == strcmp(buffer,"-inf") || 0 == strcmp(buffer,"-infinity"))
+        else if (0 == strcmp(buffer,"-inf") || 0 == strcmp(buffer,"-infinity"))
         {
-            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"-Infinity\"", strlen(buffer));
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) infinity_str_minus_json_format, strlen(infinity_str_minus_json_format));
         }
-        if (0 == strcmp(buffer,"nan") || 0 == strcmp(buffer,"-nan"))
+        else if (0 == strcmp(buffer,"nan") || 0 == strcmp(buffer,"-nan"))
         {
-            status = SOPC_Buffer_Write(buf,(const uint8_t*) "\"NaN\"", strlen(buffer));
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) nan_str_json_format, strlen(nan_str_json_format));
         }
-        status = SOPC_Buffer_Write(buf,(const uint8_t*) buffer, strlen(buffer));
+        else
+        {
+            status = SOPC_Buffer_Write(buf,(const uint8_t*) buffer, strlen(buffer));
+        }
     }
     return status;
 }

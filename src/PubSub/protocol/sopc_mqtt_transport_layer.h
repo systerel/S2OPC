@@ -33,6 +33,19 @@
 #include "sopc_time.h"
 #include "sopc_types.h"
 #include "p_sockets.h"
+#include "sopc_helper_uri.h"
+#include "sopc_reader_layer.h"
+#include "sopc_builtintypes.h"
+#include "mbedtls/build_info.h"
+#include "mbedtls/platform.h"
+#include "core_mqtt.h"
+#include <string.h>
+#include "mbedtls/net_sockets.h"
+#include "mbedtls/ssl.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/debug.h"
+#include "static_security_data_mqtt_tls.h"
 
 /* MQTT connection hard coded configuration */
 
@@ -42,8 +55,43 @@
 #define MQTT_LIB_CONNECTION_TIMEOUT (4)    /* Connection lib timeout = 4 s*/
 #define MQTT_LIB_KEEPALIVE (4)             /* Connection lost detection set to 4 s*/
 
+enum status_tls_codes {
+    status_tls_ok = 0,
+    ctr_drbg_seed_failed,
+    ssl_config_defaults_failed,
+    ssl_setup_failed,
+    hostname_failed,
+    socket_failed,
+    connect_failed,
+    x509_key_parse_failed,
+    x509_crt_parse_failed,
+    ssl_handshake_failed,
+    ssl_write_failed,
+    ssl_alloc_failed,
+};
+
 #if USE_CORE_MQTT
 typedef struct MQTTContext	 MqttContextClient; /* Mqtt context client */
+
+struct NetworkContext
+{
+    Socket sock;
+    SOPC_PubSubConnection * Connection_interface;
+
+    /* TLS connection */
+    //mbedtls_ssl_config* xSslConfig;
+    mbedtls_ssl_context* xSslCtx;
+
+
+//    // NEEDED ??? -> NO
+//    /* Certificates */
+//    mbedtls_x509_crt xRootCaChain;
+//    mbedtls_x509_crt xClientCert;
+//
+//    /* Private Key */
+//    mbedtls_pk_context xPkCtx;
+};
+
 //
 //typedef void (* MQTTEventCallback_t )( struct MQTTContext * pContext,
 //                                       struct MQTTPacketInfo * pPacketInfo,

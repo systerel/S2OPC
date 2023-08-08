@@ -18,17 +18,14 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
-                                                           const char * topic)
+                                                           const char* mqttTopic)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
     SOPC_WriterGroup_Set_Version(group, groupVersion);
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
-    if (NULL != topic)
-    {
-    	SOPC_WriterGroup_Set_MqttTopic(group, topic);
-    }
+    SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
@@ -64,7 +61,7 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
 
 static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
-                                               char* strNodeId,
+                                               const char* strNodeId,
                                                SOPC_BuiltinId builtinType)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
@@ -101,9 +98,6 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         connection = SOPC_PubSubConfiguration_Get_PubConnection_At(config, 0);
         SOPC_ASSERT(NULL != connection);
         SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
-        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:8883");
-        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.64:1883");
-        // Paris
         alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://a23slny5qs4w87-ats.iot.eu-west-3.amazonaws.com:8883");
     }
     
@@ -133,12 +127,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // GroupVersion = 1
         // Interval = 1000.000000 ms
         // Offest = -1 us
-        // topic = S2OPC
- 
-       	writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 1000.000000,-1, SOPC_SecurityMode_None,"S2OPC");
-       	alloc = NULL != writerGroup;
-    	}
- 	
+        // mqttTopic = "S2OPC"
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 1000.000000, -1, SOPC_SecurityMode_None, "S2OPC");
+        alloc = NULL != writerGroup;
+    }
+    
     if (alloc)
     {
        // 1 data sets for message 14
@@ -160,16 +153,13 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;s=PubBool", SOPC_Boolean_Id); // PubBool
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubInt64", SOPC_Int64_Id); // varInt
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=1;s=PubUInt64", SOPC_UInt64_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;s=PubInt32", SOPC_Int32_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=1;s=PubUInt32", SOPC_UInt32_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, "ns=1;s=PubInt16", SOPC_Int16_Id); // varInt
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, "ns=1;s=PubUInt16", SOPC_UInt16_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, "ns=2;i=6", SOPC_Float_Id); // PubFloat
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 6, "ns=1;s=PubDouble", SOPC_Double_Id); // varDouble
-        //SOPC_PubSubConfig_SetPubVariableAt(dataset, 7, "ns=1;s=PubString", SOPC_String_Id); // PubFloat
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=2;i=0", SOPC_Float_Id); // Temperature0
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=2;i=1", SOPC_Float_Id); // Temperature1
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 2, "ns=2;i=2", SOPC_Float_Id); // Humidity
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 3, "ns=2;i=3", SOPC_Float_Id); // Pressure
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 4, "ns=2;i=4", SOPC_Int32_Id); // AcceleroX
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 5, "ns=2;i=5", SOPC_Int32_Id); // AcceleroY
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 6, "ns=2;i=6", SOPC_Int32_Id); // AcceleroZ
     }
     
 

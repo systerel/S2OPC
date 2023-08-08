@@ -20,6 +20,8 @@
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_macros.h"
 
+//#include "S2OPC_TLS_Task.h" // for cert,key&ca
+
 #ifndef USE_MQTT_PAHO
 #define USE_MQTT_PAHO 0
 #endif
@@ -271,48 +273,81 @@ uint64_t get_unique_client_id(void)
 #endif
 #if USE_CORE_MQTT == 1
 
-/* include */
-
 #include "S2OPC_mqtt_agent_task.h"
 #include "core_mqtt.h"
 #include "lwip/sockets.h"
 #include "cache.h"
 #include "sopc_sub_scheduler.h"
 
-/* Functions */
+struct sopc_mbedtls_mqtt
+{
+    mbedtls_net_context server_fd;
 
-int sopc_createsock (int domain, int type, int protocol, Socket* sock)
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    mbedtls_x509_crt ca;
+    mbedtls_x509_crt cert_cli;
+    mbedtls_pk_context pk_key;
+#endif
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+    mbedtls_ssl_config conf;
+    mbedtls_ssl_context ssl;
+} ssl_ctx;
+
+static int sopc_createsock (int domain, int type, int protocol, Socket* sock)
 {
 	*sock = socket(domain, type, protocol);
 	return 0;
 }
 
-int32_t sopc_sendsock (NetworkContext_t * pNetworkContext, const void * pdata, size_t bytesToSend )
+static int sopc_connectsock (Socket sock, SOPC_Socket_AddressInfo* SA)
+{
+    int connectStatus = -1;
+    connectStatus = connect(sock, SA->ai_addr, SA->ai_addrlen);
+    return connectStatus;
+}
+
+static int32_t sopc_sendsock (NetworkContext_t * pNetworkContext, const void * pdata, size_t bytesToSend )
 {
 	ssize_t res = 0;
     res = send(pNetworkContext->sock, pdata, bytesToSend, 0);
     return res;
 }
 
-int32_t sopc_recvsock (NetworkContext_t * pNetworkContext, void * pdata, size_t dataSize )
+static int32_t sopc_recvsock (NetworkContext_t * pNetworkContext, void * pdata, size_t dataSize )
 {
 	ssize_t sReadCount = 0;
 	sReadCount = recv(pNetworkContext->sock, pdata, dataSize, 0);
     return sReadCount;
 }
 
-int sopc_connectsock (Socket sock, SOPC_Socket_AddressInfo* SA)
+static int32_t mbedtls_net_send_tls (NetworkContext_t* pSsl, const void * pdata, size_t bytesToSend )
 {
-	int connectStatus = -1;
-    connectStatus = connect(sock, SA->ai_addr, SA->ai_addrlen);
-    return connectStatus;
+    int32_t res = mbedtls_ssl_write(pSsl->xSslCtx, pdata, bytesToSend);
+    return res;
 }
 
-static void sopc_MqttEventCallback ()
+static int32_t mbedtls_net_recv_tls (NetworkContext_t* pSsl, void * pdata, size_t bytesToSend )
 {
-	LogInfo("mqtt event callback");//TODO
+    int32_t res = mbedtls_ssl_read((pSsl->xSslCtx), pdata, bytesToSend);
+    return res;
 }
 
+static int mbedtls_ssl_send(void *pNetworkContext, const unsigned char *pdata, size_t dataSize)
+{
+    mbedtls_net_context* pctx;
+    pctx = (mbedtls_net_context*) pNetworkContext;
+    int sReadCount = send(pctx->fd, pdata, dataSize, 0);
+    return sReadCount;
+}
+
+static int mbedtls_ssl_recv(void *pNetworkContext, unsigned char *pdata, size_t dataSize)
+{
+    mbedtls_net_context* pctx;
+    pctx = (mbedtls_net_context*) pNetworkContext;
+    int sReadCount = recv(pctx->fd, pdata, dataSize, 0);
+    return sReadCount;
+}
 
 /* Target callback */
 bool set_target_variable2(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
@@ -370,10 +405,11 @@ bool set_target_variable2(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
 }
 
 /* callback used by core_mqtt library */
-MQTTEventCallback_t cb_msg_arrived_core_mqtt ( struct MQTTContext * pContext,
+static void cb_msg_arrived_core_mqtt ( struct MQTTContext * pContext,
         							struct MQTTPacketInfo * pPacketInfo,
 									struct MQTTDeserializedInfo * pDeserializedInfo )
 {
+    SOPC_ReturnStatus result = SOPC_STATUS_NOK;
 	LogInfo("MQTT CB !!");
 	if (MQTT_PACKET_TYPE_PUBLISH == pPacketInfo->type || 0x32 == pPacketInfo->type || 0x34 == pPacketInfo->type) //32 -> QoS = 1 | 34 -> QoS = 2
 	{
@@ -393,7 +429,6 @@ MQTTEventCallback_t cb_msg_arrived_core_mqtt ( struct MQTTContext * pContext,
 		SOPC_Buffer * buffer = SOPC_Buffer_Create(pDeserializedInfo->pPublishInfo->payloadLength);
 		memcpy(buffer->data,pDeserializedInfo->pPublishInfo->pPayload,pDeserializedInfo->pPublishInfo->payloadLength);
 		buffer->length = (uint32_t) pDeserializedInfo->pPublishInfo->payloadLength;
-		SOPC_ReturnStatus result = SOPC_STATUS_NOK;
 	    SOPC_SubTargetVariableConfig* targetConfig = NULL;
 	    targetConfig = SOPC_SubTargetVariableConfig_Create(&set_target_variable2); //&Cache_SetTargetVariables (put in cache) //&set_target_variable2 (print)
 		//on_mqtt_message_received(buffer->data, buffer->length,pContext->transportInterface.pNetworkContext->Connection_interface);
@@ -401,6 +436,10 @@ MQTTEventCallback_t cb_msg_arrived_core_mqtt ( struct MQTTContext * pContext,
         							   targetConfig,
 									   SOPC_SubScheduler_Get_Security_Infos,
 									   SOPC_SubScheduler_Is_Writer_SN_Newer);
+	    if (SOPC_STATUS_OK != result)
+	    {
+	        LogWarn("Decryption failed with the SOPC return status : %d", result);
+	    }
         //Delete
 		SOPC_Buffer_Delete(buffer);
 		buffer = NULL;
@@ -425,7 +464,7 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 	uint16_t packetId = 1; //needed for QoS > 0 but can be static (just != 0)
 							// Be careful with packetId collision
 
-	publishInfo.qos = MQTTQoS1;
+	publishInfo.qos = MQTTQoS0;
 	if (MQTTQoS0 == publishInfo.qos)
 	{
 		publishInfo.dup = false;
@@ -443,16 +482,16 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 
 	if ( (MQTTSuccess == statusM) & (publishInfo.qos > MQTTQoS0) )
 	{
-		MQTT_ReceiveLoop(contextClient, 1);
+		statusM = MQTT_ReceiveLoop(contextClient, 100);
 		LogDebug("ACK !");
 	}
 
 	if (MQTTSuccess != statusM)
 	{
-		LogDebug("Status Mqtt Error : %d",statusM);
+	    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Status Mqtt Error : %d", statusM);
 		return SOPC_STATUS_NOK;
 	}
-	LogInfo("publish message send !");
+	SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "publish message send !");
  /*
 	if (packetId > 10)
 	{
@@ -461,6 +500,130 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 */
     return SOPC_STATUS_OK;
 }
+
+static void mbedtls_deinit()
+{
+    mbedtls_ssl_free(&ssl_ctx.ssl);
+    mbedtls_ssl_config_free(&ssl_ctx.conf);
+    mbedtls_ctr_drbg_free(&ssl_ctx.ctr_drbg);
+    mbedtls_entropy_free(&ssl_ctx.entropy);
+    // TODO : check that the socket is closed by Lwip
+    ssl_ctx.server_fd.fd = -1;
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    mbedtls_x509_crt_free(&ssl_ctx.ca);
+    mbedtls_x509_crt_free(&ssl_ctx.cert_cli);
+    mbedtls_pk_free(&ssl_ctx.pk_key);
+#endif
+}
+
+static int mbedtls_init(const char* hostname, SOPC_Socket_AddressInfo* addrs, NetworkContext_t* pNetctx)
+{
+    int status = status_tls_ok;
+    int ret = -1;
+
+    // --- 0. Initialize and setup stuff ---
+    mbedtls_ssl_init(&ssl_ctx.ssl);
+    mbedtls_ssl_config_init(&ssl_ctx.conf);
+    mbedtls_ctr_drbg_init(&ssl_ctx.ctr_drbg);
+    mbedtls_entropy_init(&ssl_ctx.entropy);
+    ssl_ctx.server_fd.fd = -1;
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    mbedtls_pk_init(&ssl_ctx.pk_key);
+    mbedtls_x509_crt_init(&ssl_ctx.ca);
+    mbedtls_x509_crt_init(&ssl_ctx.cert_cli);
+#endif
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ctr_drbg_seed(&ssl_ctx.ctr_drbg, mbedtls_entropy_func, &ssl_ctx.entropy, NULL, 0);
+        status = (ret != 0 ? ctr_drbg_seed_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ssl_config_defaults(&ssl_ctx.conf, MBEDTLS_SSL_IS_CLIENT, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+        status = (ret != 0 ? ssl_config_defaults_failed : status_tls_ok);
+    }
+
+#if defined(MBEDTLS_X509_CRT_PARSE_C)
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_pk_parse_key(&ssl_ctx.pk_key, key_cloud, sizeof(key_cloud), NULL, 0, mbedtls_ctr_drbg_random, &ssl_ctx.ctr_drbg);
+        status = (ret != 0 ? x509_key_parse_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_x509_crt_parse(&ssl_ctx.cert_cli, client_cert_cloud, sizeof(client_cert_cloud));
+        status = (ret != 0 ? x509_crt_parse_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ssl_conf_own_cert(&ssl_ctx.conf, &ssl_ctx.cert_cli, &ssl_ctx.pk_key);
+        status = (ret != 0 ? ssl_alloc_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_x509_crt_parse(&ssl_ctx.ca, ca_cloud, sizeof(ca_cloud));
+        status = (ret != 0 ? x509_crt_parse_failed : status_tls_ok);
+    }
+    mbedtls_ssl_conf_ca_chain(&ssl_ctx.conf, &ssl_ctx.ca, NULL);
+    // set to check the peer certificat during handshake
+    mbedtls_ssl_conf_authmode(&ssl_ctx.conf, MBEDTLS_SSL_VERIFY_REQUIRED);
+    mbedtls_ssl_conf_rng(&ssl_ctx.conf, mbedtls_ctr_drbg_random, &ssl_ctx.ctr_drbg);
+#endif
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ssl_setup(&ssl_ctx.ssl, &ssl_ctx.conf);
+        status = (ret != 0 ? ssl_setup_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ssl_set_hostname(&ssl_ctx.ssl, hostname);
+        status = (ret != 0 ? hostname_failed : status_tls_ok);
+    }
+
+    // ---- 1. Start the connection ----
+    if (status_tls_ok == status)
+    {
+        ret = ssl_ctx.server_fd.fd = socket(AF_INET, SOCK_STREAM, 0);
+        status = (ret < 0 ? socket_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok == status)
+    {
+        ret = connect(ssl_ctx.server_fd.fd, (const struct sockaddr *) addrs->ai_addr, addrs->ai_addrlen);
+        status = (ret < 0 ? connect_failed : status_tls_ok);
+    }
+
+    mbedtls_ssl_set_bio(&ssl_ctx.ssl, &ssl_ctx.server_fd, mbedtls_ssl_send, mbedtls_ssl_recv, NULL);
+
+    if (status_tls_ok == status)
+    {
+        ret = mbedtls_ssl_handshake(&ssl_ctx.ssl);
+        status = (ret != 0 ? ssl_handshake_failed : status_tls_ok);
+    }
+
+    if (status_tls_ok != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Init Mbed TLS fail with error code : %d", ret);
+        mbedtls_deinit();
+    }
+    else
+    {
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Init Mbed TLS Done");
+    }
+
+    pNetctx->sock = ssl_ctx.server_fd.fd;
+    pNetctx->xSslCtx = &ssl_ctx.ssl;
+
+    return status;
+}
+
 
 SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
                                               const char* uri,
@@ -472,56 +635,79 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
                                               void* userContext)
 {
 	SOPC_UNUSED_ARG(cbMessageReceived);
-    //SOPC_UNUSED_ARG(userContext);
 
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+	int ret = -1;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 	MQTTStatus_t statusM = MQTTIllegalState;
-    NetworkContext_t * xNetworkContext = SOPC_Calloc(1, sizeof(NetworkContext_t));
+    NetworkContext_t* xNetworkContext = SOPC_Calloc(1, sizeof(NetworkContext_t));
 	TransportInterface_t xTransport = {0}; // not to make an alloc because MQTT_Init just copies the content of the pointer and does not put this structure at the end of its own
 	MQTTFixedBuffer_t fixedBuffer = {0}; // same
+	uint8_t TLS_flag = 0;
 
-	// Set buffer
+	// -- Set buffer -- //
 	uint8_t * pbuffer = SOPC_Calloc(4096, sizeof(uint8_t));
 	fixedBuffer.pBuffer = pbuffer;
 	fixedBuffer.size = 4096;
 
-	char * addrUri = SOPC_Malloc((strlen(uri)) * sizeof(char));;
-	strcpy(addrUri,uri);
+	// -- Parse URI -- //
+	char* addrUri = SOPC_Malloc(strlen(uri) * sizeof(char));;
+	addrUri = strncpy(addrUri,uri,strlen(uri));
+	uint16_t len = 0;
+	bool separator_bool = true;
+	while(separator_bool)
+	{
+	    separator_bool = (addrUri[len] != ':');
+	    len++;
+	}
+	char* pIP = SOPC_Calloc(len, sizeof(char));
+	pIP = strncpy(pIP,uri,len-1);
+	const char* pPort = uri+len;
 
-	char * pIP = strtok(addrUri, ":");
-	char * pPort = strtok(NULL, ":");
 	SOPC_Free(addrUri);
 	addrUri = NULL;
+
 	SOPC_Socket_AddressInfo* addrs = NULL;
 	status = SOPC_Socket_AddrInfo_Get(pIP, pPort, &addrs);
 
-	if (SOPC_STATUS_OK != status)
+	// -- socket connection and setup TLS (if secured port) -- //
+	if (0 == strcmp(pPort,"8883")) // It's a TLS connection
 	{
-		return status;
+	    TLS_flag = 1;
+	    ret = mbedtls_init(pIP, addrs, xNetworkContext); // Check
+	    status = (ret != 0 ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+	}
+	else
+	{
+	    Socket sock1 = -1;
+	    xNetworkContext->sock = sock1;
+	    sopc_createsock(2, SOCK_STREAM, 0, &xNetworkContext->sock); //@parameter SOCK_STREAM involves tcp on lwip (@param 1 and 3 unused)
+	    sopc_connectsock(xNetworkContext->sock, addrs);
 	}
 
-	Socket sock1 = -1;
-	xNetworkContext->sock = sock1;
-	xNetworkContext->Connection_interface = userContext;
 
-	sopc_createsock(2, SOCK_STREAM, 0, &xNetworkContext->sock); //@parameter SOCK_STREAM involves tcp on lwip (@param 1 and 3 unused)
-	sopc_connectsock(xNetworkContext->sock, addrs);
-
-	// - Init Mqtt context - //
+	// -- Init Mqtt context -- //
+    xNetworkContext->Connection_interface = userContext;
 	xTransport.pNetworkContext = xNetworkContext;
-	xTransport.recv = sopc_recvsock;
-	xTransport.send = sopc_sendsock;
+
+	if (1 == TLS_flag)
+	{
+	    xTransport.recv = mbedtls_net_recv_tls;
+	    xTransport.send = mbedtls_net_send_tls;
+	}
+	else
+	{
+	    xTransport.recv = sopc_recvsock;
+	    xTransport.send = sopc_sendsock;
+	}
 
 	statusM = MQTT_Init(contextClient, &xTransport, sopc_prvGetTimeMs, cb_msg_arrived_core_mqtt, &fixedBuffer);
-
 	if (MQTTSuccess != statusM)
 	{
 		LogDebug("Status Mqtt Error : %d",statusM);
 		return SOPC_STATUS_NOK;
 	}
 
-
-	// - Connect to the borker - //
+	// -- Connect to the borker -- //
 
 	MQTTConnectInfo_t connectInfo = { 0 };
 	connectInfo.cleanSession = true;
@@ -549,18 +735,14 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 		LogDebug("Status Mqtt Error : %d",statusM);
 		return SOPC_STATUS_NOK;
 	}
+	vTaskDelay(2000); // to receiv CONNACK
+	LogInfo("Initialisation Done");
 
 	if (nbSubTopic > 0)
 	{
 		//SUB
 		MQTTSubscribeInfo_t subscriptionList[20] = { 0 };
 		uint16_t packetId = 0;
-
-		// This is assumed to be a list of filters we want to subscribe to.
-//		const char * filters[nbSubTopic];
-//		filters[0] = "S2OPC";
-//		filters[1] = "test";
-
 
 		// Set each subscription.
 		for( int i = 0; i < nbSubTopic; i++ )
@@ -569,26 +751,24 @@ SOPC_ReturnStatus SOPC_MQTT_Initialize_Client(MqttContextClient* contextClient,
 		     // Each subscription needs a topic filter.
 		     subscriptionList[i].pTopicFilter = subTopic[i];
 		     subscriptionList[i].topicFilterLength = (uint16_t) strlen(subTopic[i]);
-		     // Mettre un print de tous les subs
+		     // TODO :Print all subs
 		}
 
 		packetId = MQTT_GetPacketId( contextClient );
-
 		statusM = MQTT_Subscribe( contextClient, &subscriptionList[0], nbSubTopic, packetId );
 
 		if( MQTTSuccess == statusM )
 		{
 			LogInfo("SUB");
-			vTaskDelay(2000);
 			for (int i = 0; i < 1000; i++)
 			{
-				MQTT_ReceiveLoop(contextClient, 10000000); //Il faut rester dans la boucle et attendre les messages.
+				MQTT_ReceiveLoop(contextClient, 10000000); // Need to stay in the loop and wait for the messages.
+				// TODO : Analyze a better way to get out of this loop
 				//vTaskDelay(500);
 			}
 		}
-
 	}
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_MQTT_Create_Client(MqttContextClient** contextClient)
@@ -608,6 +788,7 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
 {
 	MQTT_Disconnect(contextClient);
 
+	mbedtls_deinit();
 	//Delete
 	SOPC_Free(contextClient->transportInterface.pNetworkContext);
 	contextClient->transportInterface.pNetworkContext = NULL;

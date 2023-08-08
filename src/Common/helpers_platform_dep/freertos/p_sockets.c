@@ -33,7 +33,7 @@ bool SOPC_Socket_Network_Clear()
     return true;
 }
 
-SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(char* hostname, char* port, SOPC_Socket_AddressInfo** addrs)
+SOPC_ReturnStatus SOPC_Socket_AddrInfo_Get(const char* hostname, const char* port, SOPC_Socket_AddressInfo** addrs)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo hints;

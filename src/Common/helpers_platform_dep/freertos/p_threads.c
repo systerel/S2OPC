@@ -224,7 +224,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
     if (SOPC_STATUS_OK == resPTHR)
     {
         BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
-                                               configMINIMAL_STACK_SIZE, handleWks, priority, &handleWks->handleTask);
+                                               2048, handleWks, priority, &handleWks->handleTask);//configMINIMAL_STACK_SIZE
 
         if (pdPASS != resTaskCreate)
         {
