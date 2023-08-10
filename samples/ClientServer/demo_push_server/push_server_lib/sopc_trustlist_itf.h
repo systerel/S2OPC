@@ -20,6 +20,7 @@
 /** \file
  *
  * \brief API to manage methods, properties and variables of the TrustListType according the Push model.
+ *        S2OPC shall be build with S2OPC_DYNAMIC_TYPE_RESOLUTION option.
  */
 
 #ifndef SOPC_TRUSTLIST_ITF_
