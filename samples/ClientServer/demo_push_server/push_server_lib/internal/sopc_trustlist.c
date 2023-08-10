@@ -36,63 +36,268 @@
 #include "sopc_trustlist_itf.h"
 #include "sopc_trustlist_meth.h"
 
+#include "opcua_identifiers.h"
+
 /*---------------------------------------------------------------------------
  *                             Constants
  *---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------
  *                             Internal types
  *---------------------------------------------------------------------------*/
+
+/**
+ * \brief Internal structure to gather nodeIds.
+ */
+typedef struct TrustList_NodeIds
+{
+    SOPC_NodeId* pTrustListId;         /*!< The nodeId of the FileType object. */
+    SOPC_NodeId* pOpenId;              /*!< The nodeId of the Open method. */
+    SOPC_NodeId* pOpenWithMasksId;     /*!< The nodeId of the OpenWithMasks method. */
+    SOPC_NodeId* pCloseAndUpdateId;    /*!< The nodeId of the CloseAndUpdate method. */
+    SOPC_NodeId* pAddCertificateId;    /*!< The nodeId of the AddCertificate method. */
+    SOPC_NodeId* pRemoveCertificateId; /*!< The nodeId of the RemoveCertificate method. */
+    SOPC_NodeId* pCloseId;             /*!< The nodeId of the Close method. */
+    SOPC_NodeId* pReadId;              /*!< The nodeId of the Read method. */
+    SOPC_NodeId* pWriteId;             /*!< The nodeId of the Write method. */
+    SOPC_NodeId* pGetPosId;            /*!< The nodeId of the GetPosition method. */
+    SOPC_NodeId* pSetPosId;            /*!< The nodeId of the SetPosition method. */
+    SOPC_NodeId* pSizeId;              /*!< The nodeId of the Size variable. */
+    SOPC_NodeId* pOpenCountId;         /*!< The nodeId of the OpenCount variable. */
+    SOPC_NodeId* pUserWritableId;      /*!< The nodeId of the UserWritable variable. */
+    SOPC_NodeId* pWritableId;          /*!< The nodeId of the Writable variable. */
+} TrustList_NodeIds;
+
+/**
+ * \brief Structure to gather TrustList configuration data.
+ */
+struct SOPC_TrustList_Config
+{
+    TrustList_NodeIds* pIds;       /*!< Defined all the nodeId of the TrustList. */
+    bool bDoNotClearIds;           /*!< Defined if the method nodeIds shall be clear */
+    SOPC_TrustList_Type groupType; /*!< Defined the certificate group type of the TrustList. */
+    SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI of the TrustList. */
+    size_t maxTrustListSize;       /*!< Defined the maximum size in byte for the TrustList. */
+};
+
 /*---------------------------------------------------------------------------
  *                             Global variables
  *---------------------------------------------------------------------------*/
 
 static SOPC_Dict* gObjIdToTrustList = NULL;
+static bool gbTypeMetIsConfigure = false;
+static bool gbGroupAppIsSet = false;
+static bool gbGroupUsrIsSet = false;
+
 static int32_t gTombstoneKey = -1;
 
-/* TODO : Uaexpert use the method nodId of the TrustListType but the method is call from the trustList objectId of the
-   server object.
-*/
-SOPC_TrustList_Config gTrustList_DefaultAddSpace_App = {
-    .groupType = SOPC_TRUSTLIST_GROUP_APP,
-    .pPKI = NULL,
-    .trustListNodeId = "ns=0;i=12642",
-    .metOpenNodeId = "ns=0;i=11580",
-    .metOpenWithMasksNodeId = "ns=0;i=12543",
-    .metCloseNodeId = "ns=0;i=11583",
-    .metCloseAndUpdateNodeId = "ns=0;i=12546",
-    .metAddCertificateNodeId = "ns=0;i=12548",
-    .metRemoveCertificateNodeId = "ns=0;i=12550",
-    .metReadNodeId = "ns=0;i=11585",
-    .metWriteNodeId = "ns=0;i=11588",
-    .metGetPosNodeId = "ns=0;i=11590",
-    .metSetPosNodeId = "ns=0;i=11593",
-    .varSizeNodeId = "ns=0;i=11576",
-    .varWritableNodeId = "ns=0;i=12686",
-    .varUserWritableNodeId = "ns=0;i=12687",
-    .varOpenCountNodeId = "ns=0;i=11579",
+/* NodeIds of the TrustList instance of the DefaultApplicationGroup */
+static SOPC_NodeId gAppTrustListId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList};
+static SOPC_NodeId gAppOpenId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Open};
+static SOPC_NodeId gAppCloseId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Close};
+static SOPC_NodeId gAppReadId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Read};
+static SOPC_NodeId gAppWriteId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Write};
+static SOPC_NodeId gAppGetPositionId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_GetPosition};
+static SOPC_NodeId gAppSetPositionId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_SetPosition};
+static SOPC_NodeId gAppOpenWithMasksId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenWithMasks};
+static SOPC_NodeId gAppCloseAndUpdateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_CloseAndUpdate};
+static SOPC_NodeId gAppAddCertificateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_AddCertificate};
+static SOPC_NodeId gAppRemoveCertificateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_RemoveCertificate};
+static SOPC_NodeId gAppOpenCountId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_OpenCount};
+static SOPC_NodeId gAppSizeId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Size};
+static SOPC_NodeId gAppWritableId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_Writable};
+static SOPC_NodeId gAppUserWritableId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_UserWritable};
+
+/* NodeIds of the TrustList instance of the DefaultUserTokenGroup */
+static SOPC_NodeId gUsrTrustListId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList};
+static SOPC_NodeId gUsrOpenId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Open};
+static SOPC_NodeId gUsrCloseId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Close};
+static SOPC_NodeId gUsrReadId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Read};
+static SOPC_NodeId gUsrWriteId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Write};
+static SOPC_NodeId gUsrGetPositionId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_GetPosition};
+static SOPC_NodeId gUsrSetPositionId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_SetPosition};
+static SOPC_NodeId gUsrOpenWithMasksId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenWithMasks};
+static SOPC_NodeId gUsrCloseAndUpdateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_CloseAndUpdate};
+static SOPC_NodeId gUsrAddCertificateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_AddCertificate};
+static SOPC_NodeId gUsrRemoveCertificateId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_RemoveCertificate};
+static SOPC_NodeId gUsrOpenCountId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_OpenCount};
+static SOPC_NodeId gUsrSizeId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Size};
+static SOPC_NodeId gUsrWritableId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_Writable};
+static SOPC_NodeId gUsrUserWritableId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_UserWritable};
+
+/* NodeIds of the TrustListType */
+static SOPC_NodeId gTypeOpenId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                  .Namespace = 0,
+                                  .Data.Numeric = OpcUaId_FileType_Open};
+static SOPC_NodeId gTypeCloseId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                   .Namespace = 0,
+                                   .Data.Numeric = OpcUaId_FileType_Close};
+static SOPC_NodeId gTypeReadId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                  .Namespace = 0,
+                                  .Data.Numeric = OpcUaId_FileType_Read};
+static SOPC_NodeId gTypeWriteId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                   .Namespace = 0,
+                                   .Data.Numeric = OpcUaId_FileType_Write};
+static SOPC_NodeId gTypeGetPositionId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                         .Namespace = 0,
+                                         .Data.Numeric = OpcUaId_FileType_GetPosition};
+static SOPC_NodeId gTypeSetPositionId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                         .Namespace = 0,
+                                         .Data.Numeric = OpcUaId_FileType_SetPosition};
+static SOPC_NodeId gTypeOpenWithMasksId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                           .Namespace = 0,
+                                           .Data.Numeric = OpcUaId_TrustListType_OpenWithMasks};
+static SOPC_NodeId gTypeCloseAndUpdateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                            .Namespace = 0,
+                                            .Data.Numeric = OpcUaId_TrustListType_CloseAndUpdate};
+static SOPC_NodeId gTypeAddCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                            .Namespace = 0,
+                                            .Data.Numeric = OpcUaId_TrustListType_AddCertificate};
+static SOPC_NodeId gTypeRemoveCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                               .Namespace = 0,
+                                               .Data.Numeric = OpcUaId_TrustListType_RemoveCertificate};
+
+static TrustList_NodeIds gAppNodeIds = {
+    .pTrustListId = &gAppTrustListId,
+    .pOpenId = &gAppOpenId,
+    .pOpenWithMasksId = &gAppOpenWithMasksId,
+    .pCloseAndUpdateId = &gAppCloseAndUpdateId,
+    .pAddCertificateId = &gAppAddCertificateId,
+    .pRemoveCertificateId = &gAppRemoveCertificateId,
+    .pCloseId = &gAppCloseId,
+    .pReadId = &gAppReadId,
+    .pWriteId = &gAppWriteId,
+    .pGetPosId = &gAppGetPositionId,
+    .pSetPosId = &gAppSetPositionId,
+    .pSizeId = &gAppSizeId,
+    .pOpenCountId = &gAppOpenCountId,
+    .pUserWritableId = &gAppUserWritableId,
+    .pWritableId = &gAppWritableId,
 };
 
-/* TODO : Uaexpert use the method nodId of the TrustListType but the method is call from the trustList objectId of the
-   server object.
-*/
-SOPC_TrustList_Config gTrustList_DefaultAddSpace_Usr = {
-    .groupType = SOPC_TRUSTLIST_GROUP_USR,
-    .pPKI = NULL,
-    .trustListNodeId = "ns=0;i=14123",
-    .metOpenNodeId = "ns=0;i=11580",
-    .metOpenWithMasksNodeId = "ns=0;i=12543",
-    .metCloseNodeId = "ns=0;i=11583",
-    .metCloseAndUpdateNodeId = "ns=0;i=12546",
-    .metAddCertificateNodeId = "ns=0;i=12548",
-    .metRemoveCertificateNodeId = "ns=0;i=12550",
-    .metReadNodeId = "ns=0;i=11585",
-    .metWriteNodeId = "ns=0;i=11588",
-    .metGetPosNodeId = "ns=0;i=11590",
-    .metSetPosNodeId = "ns=0;i=11593",
-    .varSizeNodeId = "ns=0;i=11576",
-    .varWritableNodeId = "ns=0;i=12686",
-    .varUserWritableNodeId = "ns=0;i=12687",
-    .varOpenCountNodeId = "ns=0;i=11579",
+static TrustList_NodeIds gUsrNodeIds = {
+    .pTrustListId = &gUsrTrustListId,
+    .pOpenId = &gUsrOpenId,
+    .pOpenWithMasksId = &gUsrOpenWithMasksId,
+    .pCloseAndUpdateId = &gUsrCloseAndUpdateId,
+    .pAddCertificateId = &gUsrAddCertificateId,
+    .pRemoveCertificateId = &gUsrRemoveCertificateId,
+    .pCloseId = &gUsrCloseId,
+    .pReadId = &gUsrReadId,
+    .pWriteId = &gUsrWriteId,
+    .pGetPosId = &gUsrGetPositionId,
+    .pSetPosId = &gUsrSetPositionId,
+    .pSizeId = &gUsrSizeId,
+    .pOpenCountId = &gUsrOpenCountId,
+    .pUserWritableId = &gUsrUserWritableId,
+    .pWritableId = &gUsrWritableId,
+};
+
+static TrustList_NodeIds gTypeNodeIds = {
+    .pTrustListId = NULL,
+    .pOpenId = &gTypeOpenId,
+    .pOpenWithMasksId = &gTypeOpenWithMasksId,
+    .pCloseAndUpdateId = &gTypeCloseAndUpdateId,
+    .pAddCertificateId = &gTypeAddCertificateId,
+    .pRemoveCertificateId = &gTypeRemoveCertificateId,
+    .pCloseId = &gTypeCloseId,
+    .pReadId = &gTypeReadId,
+    .pWriteId = &gTypeWriteId,
+    .pGetPosId = &gTypeGetPositionId,
+    .pSetPosId = &gTypeSetPositionId,
+    .pSizeId = NULL,
+    .pOpenCountId = NULL,
+    .pUserWritableId = NULL,
+    .pWritableId = NULL,
 };
 
 /*---------------------------------------------------------------------------
@@ -110,10 +315,13 @@ static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
 static void trustlist_clear_context(SOPC_TrustListContext* pTrustList);
 static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList);
 static void trustlist_dict_free_context_value(uintptr_t value);
-static SOPC_ReturnStatus trustlist_add_method(SOPC_MethodCallManager* pMcm,
-                                              const char* pCStringNodeId,
-                                              SOPC_MethodCallFunc_Ptr* pTrustListMet,
-                                              char* name);
+
+static void trustlist_delete_single_node_id(SOPC_NodeId** ppNodeId);
+static void trustlist_delete_node_ids(TrustList_NodeIds** ppNodeIds, bool bDoNotClear);
+static SOPC_ReturnStatus trustlist_copy_meth_node_ids(TrustList_NodeIds* pSrc, TrustList_NodeIds** ppDest);
+static SOPC_ReturnStatus trustlist_copy_node_ids(TrustList_NodeIds* pSrc, TrustList_NodeIds** ppDest);
+
+static SOPC_ReturnStatus trustlist_add_method_type_nodeId(SOPC_MethodCallManager* pMcm);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
@@ -179,16 +387,11 @@ static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
     SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
     SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
     SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
-    SOPC_NodeId_Clear(pTrustList->pObjectId);
-    SOPC_NodeId_Clear(pTrustList->varIds.pSizeId);
-    SOPC_NodeId_Clear(pTrustList->varIds.pWritableId);
-    SOPC_NodeId_Clear(pTrustList->varIds.pUserWritableId);
-    SOPC_NodeId_Clear(pTrustList->varIds.pOpenCountId);
-    SOPC_Free(pTrustList->pObjectId);
-    SOPC_Free(pTrustList->varIds.pSizeId);
-    SOPC_Free(pTrustList->varIds.pWritableId);
-    SOPC_Free(pTrustList->varIds.pUserWritableId);
-    SOPC_Free(pTrustList->varIds.pOpenCountId);
+    trustlist_delete_single_node_id(&pTrustList->pObjectId);
+    trustlist_delete_single_node_id(&pTrustList->varIds.pSizeId);
+    trustlist_delete_single_node_id(&pTrustList->varIds.pWritableId);
+    trustlist_delete_single_node_id(&pTrustList->varIds.pUserWritableId);
+    trustlist_delete_single_node_id(&pTrustList->varIds.pOpenCountId);
     pTrustList->bDoNotDelete = true;
 }
 
@@ -213,28 +416,280 @@ static void trustlist_dict_free_context_value(uintptr_t value)
     }
 }
 
-static SOPC_ReturnStatus trustlist_add_method(SOPC_MethodCallManager* pMcm,
-                                              const char* pCStringNodeId,
-                                              SOPC_MethodCallFunc_Ptr* pTrustListMet,
-                                              char* name)
+static void trustlist_delete_single_node_id(SOPC_NodeId** ppNodeId)
 {
-    SOPC_ASSERT(NULL != pMcm);
-    SOPC_ASSERT(NULL != pCStringNodeId);
-    SOPC_ASSERT(NULL != pTrustListMet);
-    SOPC_ASSERT(NULL != name);
+    if (NULL == ppNodeId)
+    {
+        return;
+    }
+    SOPC_NodeId* pNodeId = *ppNodeId;
+    if (NULL == pNodeId)
+    {
+        return;
+    }
+    SOPC_NodeId_Clear(pNodeId);
+    SOPC_Free(pNodeId);
+    pNodeId = NULL;
+    *ppNodeId = pNodeId;
+}
 
-    SOPC_NodeId* pNodeId = NULL;
-    pNodeId = SOPC_NodeId_FromCString(pCStringNodeId, (int32_t) strlen(pCStringNodeId));
-    SOPC_ReturnStatus status = NULL == pNodeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+static void trustlist_delete_node_ids(TrustList_NodeIds** ppNodeIds, bool bDoNotClear)
+{
+    if (NULL == ppNodeIds)
+    {
+        return;
+    }
+    TrustList_NodeIds* pNodeIds = *ppNodeIds;
+    if (NULL == pNodeIds)
+    {
+        return;
+    }
+    if (!bDoNotClear)
+    {
+        /* Deleted by the MethodCall manager */
+        trustlist_delete_single_node_id(&pNodeIds->pOpenId);
+        trustlist_delete_single_node_id(&pNodeIds->pOpenWithMasksId);
+        trustlist_delete_single_node_id(&pNodeIds->pCloseAndUpdateId);
+        trustlist_delete_single_node_id(&pNodeIds->pAddCertificateId);
+        trustlist_delete_single_node_id(&pNodeIds->pRemoveCertificateId);
+        trustlist_delete_single_node_id(&pNodeIds->pCloseId);
+        trustlist_delete_single_node_id(&pNodeIds->pReadId);
+        trustlist_delete_single_node_id(&pNodeIds->pWriteId);
+        trustlist_delete_single_node_id(&pNodeIds->pGetPosId);
+        trustlist_delete_single_node_id(&pNodeIds->pSetPosId);
+    }
+    trustlist_delete_single_node_id(&pNodeIds->pTrustListId);
+    trustlist_delete_single_node_id(&pNodeIds->pSizeId);
+    trustlist_delete_single_node_id(&pNodeIds->pOpenCountId);
+    trustlist_delete_single_node_id(&pNodeIds->pUserWritableId);
+    trustlist_delete_single_node_id(&pNodeIds->pWritableId);
+    SOPC_Free(pNodeIds);
+    pNodeIds = NULL;
+    *ppNodeIds = pNodeIds;
+}
+
+static SOPC_ReturnStatus trustlist_copy_meth_node_ids(TrustList_NodeIds* pSrc, TrustList_NodeIds** ppDest)
+{
+    if (NULL == pSrc || NULL == ppDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (NULL == pSrc->pOpenId || NULL == pSrc->pOpenWithMasksId || NULL == pSrc->pCloseAndUpdateId ||
+        NULL == pSrc->pAddCertificateId || NULL == pSrc->pRemoveCertificateId || NULL == pSrc->pCloseId ||
+        NULL == pSrc->pReadId || NULL == pSrc->pWriteId || NULL == pSrc->pGetPosId || NULL == pSrc->pSetPosId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *ppDest = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    TrustList_NodeIds* pDest = NULL;
+    pDest = SOPC_Calloc(1, sizeof(TrustList_NodeIds));
+    if (NULL == pDest)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    pDest->pOpenId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    status = SOPC_NodeId_Copy(pDest->pOpenId, pSrc->pOpenId);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_MethodCallManager_AddMethod(pMcm, pNodeId, pTrustListMet, name, NULL);
+        pDest->pOpenWithMasksId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pOpenWithMasksId, pSrc->pOpenWithMasksId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pCloseAndUpdateId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pCloseAndUpdateId, pSrc->pCloseAndUpdateId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pAddCertificateId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pAddCertificateId, pSrc->pAddCertificateId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pRemoveCertificateId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pRemoveCertificateId, pSrc->pRemoveCertificateId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pCloseId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pCloseId, pSrc->pCloseId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pReadId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pReadId, pSrc->pReadId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pWriteId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pWriteId, pSrc->pWriteId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pGetPosId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pGetPosId, pSrc->pGetPosId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pSetPosId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pSetPosId, pSrc->pSetPosId);
+    }
+    /* Clear */
+    if (SOPC_STATUS_OK != status)
+    {
+        trustlist_delete_node_ids(&pDest, false);
+    }
+    *ppDest = pDest;
+    return status;
+}
+
+static SOPC_ReturnStatus trustlist_copy_node_ids(TrustList_NodeIds* pSrc, TrustList_NodeIds** ppDest)
+{
+    if (NULL == pSrc || NULL == ppDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (NULL == pSrc->pTrustListId || NULL == pSrc->pOpenId || NULL == pSrc->pOpenWithMasksId ||
+        NULL == pSrc->pCloseAndUpdateId || NULL == pSrc->pAddCertificateId || NULL == pSrc->pRemoveCertificateId ||
+        NULL == pSrc->pCloseId || NULL == pSrc->pReadId || NULL == pSrc->pWriteId || NULL == pSrc->pGetPosId ||
+        NULL == pSrc->pSetPosId || NULL == pSrc->pSizeId || NULL == pSrc->pOpenCountId ||
+        NULL == pSrc->pUserWritableId || NULL == pSrc->pWritableId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *ppDest = NULL;
+    TrustList_NodeIds* pDest = NULL;
+    SOPC_ReturnStatus status = trustlist_copy_meth_node_ids(pSrc, &pDest);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    pDest->pTrustListId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    status = SOPC_NodeId_Copy(pDest->pTrustListId, pSrc->pTrustListId);
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pSizeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pSizeId, pSrc->pSizeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pOpenCountId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pOpenCountId, pSrc->pOpenCountId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pUserWritableId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pUserWritableId, pSrc->pUserWritableId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pWritableId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pWritableId, pSrc->pWritableId);
     }
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_NodeId_Clear(pNodeId);
-        SOPC_Free(pNodeId);
+        trustlist_delete_node_ids(&pDest, false);
     }
+    *ppDest = pDest;
+    return status;
+}
+
+static SOPC_ReturnStatus trustlist_add_method_type_nodeId(SOPC_MethodCallManager* pMcm)
+{
+    if (NULL == pMcm)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    TrustList_NodeIds* pIds = NULL;
+    SOPC_ReturnStatus status = trustlist_copy_meth_node_ids(&gTypeNodeIds, &pIds);
+    if (NULL == pIds)
+    {
+        return status;
+    }
+    SOPC_ReturnStatus statusMcm = SOPC_MethodCallManager_AddMethod(
+        pMcm, pIds->pOpenWithMasksId, &TrustList_Method_OpenWithMasks, "TypeOpenWithMasks", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pOpenWithMasksId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pOpenId, &TrustList_Method_Open, "TypeOpen", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pOpenId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pCloseId, &TrustList_Method_Close, "TypeClose", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pCloseId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pCloseAndUpdateId, &TrustList_Method_CloseAndUpdate,
+                                                 "TypeCloseAndUpdate", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pCloseAndUpdateId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pAddCertificateId, &TrustList_Method_AddCertificate,
+                                                 "TypeAddCertificate", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pAddCertificateId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pRemoveCertificateId, &TrustList_Method_RemoveCertificate,
+                                                 "TypeRemoveCertificate", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pRemoveCertificateId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pReadId, &TrustList_Method_Read, "TypeRead", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pReadId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pWriteId, &TrustList_Method_Write, "TypeWrite", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pWriteId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm =
+        SOPC_MethodCallManager_AddMethod(pMcm, pIds->pGetPosId, &TrustList_Method_GetPosition, "TypeGetPosition", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pGetPosId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    statusMcm =
+        SOPC_MethodCallManager_AddMethod(pMcm, pIds->pSetPosId, &TrustList_Method_SetPosition, "TypeSetPosition", NULL);
+    if (SOPC_STATUS_OK != statusMcm)
+    {
+        /* But if AddMethod failed, the manager do not clear the nodeId */
+        trustlist_delete_single_node_id(&pIds->pSetPosId);
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    /* Clear */
+    SOPC_Free(pIds);
     return status;
 }
 
@@ -259,27 +714,70 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void)
     return SOPC_STATUS_OK;
 }
 
-const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
-                                                                    SOPC_PKIProvider* pPKI)
+SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
+                                                         SOPC_PKIProvider* pPKI,
+                                                         const size_t maxTrustListSize,
+                                                         SOPC_TrustList_Config** ppConfig)
 {
-    SOPC_TrustList_Config* pCfg = NULL;
-    switch (groupType)
+    if (NULL == pPKI || 0 == maxTrustListSize || NULL == ppConfig)
     {
-    case SOPC_TRUSTLIST_GROUP_APP:
-        pCfg = &gTrustList_DefaultAddSpace_App;
-        break;
-    case SOPC_TRUSTLIST_GROUP_USR:
-        pCfg = &gTrustList_DefaultAddSpace_Usr;
-        break;
-    default:
-        break;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    pCfg->pPKI = pPKI;
-    pCfg->maxTrustListSize = SOPC_TRUSTLIST_DEFAULT_MAX_SIZE;
-    return (const SOPC_TrustList_Config*) pCfg;
+    TrustList_NodeIds* pNodeIds = NULL;
+    if (SOPC_TRUSTLIST_GROUP_APP == groupType)
+    {
+        pNodeIds = &gAppNodeIds;
+    }
+    else if (SOPC_TRUSTLIST_GROUP_USR == groupType)
+    {
+        pNodeIds = &gUsrNodeIds;
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    *ppConfig = NULL;
+    SOPC_TrustList_Config* pCfg = SOPC_Calloc(1, sizeof(SOPC_TrustList_Config));
+    if (NULL == pCfg)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = trustlist_copy_node_ids(pNodeIds, &pCfg->pIds);
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg->groupType = groupType;
+        pCfg->pPKI = pPKI;
+        pCfg->maxTrustListSize = maxTrustListSize;
+        pCfg->bDoNotClearIds = false;
+    }
+    else
+    {
+        SOPC_Free(pCfg);
+        pCfg = NULL;
+    }
+    *ppConfig = pCfg;
+    return status;
 }
 
-SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SOPC_MethodCallManager* pMcm)
+void SOPC_TrustList_DeleteConfiguration(SOPC_TrustList_Config** ppConfig)
+{
+    if (NULL == ppConfig)
+    {
+        return;
+    }
+    SOPC_TrustList_Config* pConfig = *ppConfig;
+    if (NULL == pConfig)
+    {
+        return;
+    }
+    trustlist_delete_node_ids(&pConfig->pIds, pConfig->bDoNotClearIds);
+    memset(pConfig, 0, sizeof(SOPC_TrustList_Config));
+    SOPC_Free(pConfig);
+    pConfig = NULL;
+    *ppConfig = pConfig;
+}
+
+SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_MethodCallManager* pMcm)
 {
     /* The API is not initialized. */
     if (NULL == gObjIdToTrustList)
@@ -290,13 +788,25 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SO
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    if (NULL == pCfg->trustListNodeId || NULL == pCfg->metOpenNodeId || NULL == pCfg->metOpenWithMasksNodeId ||
-        NULL == pCfg->metCloseAndUpdateNodeId || NULL == pCfg->metAddCertificateNodeId ||
-        NULL == pCfg->metRemoveCertificateNodeId || NULL == pCfg->metCloseNodeId || NULL == pCfg->metReadNodeId ||
-        NULL == pCfg->metWriteNodeId || NULL == pCfg->metGetPosNodeId || NULL == pCfg->metSetPosNodeId ||
-        NULL == pCfg->varSizeNodeId || NULL == pCfg->varOpenCountNodeId || NULL == pCfg->varUserWritableNodeId ||
-        NULL == pCfg->varWritableNodeId || NULL == pCfg->pPKI)
+    /* Protection in case default groups are already recorded */
+    if (SOPC_TRUSTLIST_GROUP_APP == pCfg->groupType && gbGroupAppIsSet)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_TRUSTLIST_GROUP_USR == pCfg->groupType && gbGroupUsrIsSet)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pCfg->pIds || NULL == pCfg->pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    TrustList_NodeIds* pIds = pCfg->pIds;
+    if (NULL == pIds->pTrustListId || NULL == pIds->pOpenId || NULL == pIds->pOpenWithMasksId ||
+        NULL == pIds->pCloseAndUpdateId || NULL == pIds->pAddCertificateId || NULL == pIds->pRemoveCertificateId ||
+        NULL == pIds->pCloseId || NULL == pIds->pReadId || NULL == pIds->pWriteId || NULL == pIds->pGetPosId ||
+        NULL == pIds->pSetPosId || NULL == pIds->pSizeId || NULL == pIds->pOpenCountId ||
+        NULL == pIds->pUserWritableId || NULL == pIds->pWritableId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -307,88 +817,124 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SO
     {
         return status;
     }
-    pTrustList->cStrObjectId = SOPC_strdup(pCfg->trustListNodeId);
+    pTrustList->cStrObjectId = SOPC_NodeId_ToCString(pIds->pTrustListId);
     if (NULL == pTrustList->cStrObjectId)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->pObjectId = SOPC_NodeId_FromCString(pCfg->trustListNodeId, (int32_t) strlen(pCfg->trustListNodeId));
-        if (NULL == pTrustList->pObjectId)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        pTrustList->pObjectId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->pObjectId, pIds->pTrustListId);
+    }
+    /* Add methods that belongs to the FileType baseObject */
+    if (SOPC_STATUS_OK == status && !gbTypeMetIsConfigure)
+    {
+        status = trustlist_add_method_type_nodeId(pMcm);
+        gbTypeMetIsConfigure = true;
     }
     /* Add methods ... */
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            trustlist_add_method(pMcm, pCfg->metOpenWithMasksNodeId, &TrustList_Method_OpenWithMasks, "OpenWithMasks");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metOpenNodeId, &TrustList_Method_Open, "Open");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metCloseNodeId, &TrustList_Method_Close, "Close");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metCloseAndUpdateNodeId, &TrustList_Method_CloseAndUpdate,
-                                      "CloseAndUpdate");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metAddCertificateNodeId, &TrustList_Method_AddCertificate,
-                                      "AddCertificate");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metRemoveCertificateNodeId, &TrustList_Method_RemoveCertificate,
-                                      "RemoveCertificate");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metReadNodeId, &TrustList_Method_Read, "Read");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metWriteNodeId, &TrustList_Method_Write, "Write");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metGetPosNodeId, &TrustList_Method_GetPosition, "GetPosition");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = trustlist_add_method(pMcm, pCfg->metSetPosNodeId, &TrustList_Method_SetPosition, "SetPosition");
+        /* Method nodeIds are clear by the methodCall manager */
+        pCfg->bDoNotClearIds = true;
+        SOPC_ReturnStatus statusMcm = SOPC_MethodCallManager_AddMethod(
+            pMcm, pIds->pOpenWithMasksId, &TrustList_Method_OpenWithMasks, "OpenWithMasks", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pOpenWithMasksId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pOpenId, &TrustList_Method_Open, "Open", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pOpenId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pCloseId, &TrustList_Method_Close, "Close", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pCloseId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pCloseAndUpdateId, &TrustList_Method_CloseAndUpdate,
+                                                     "CloseAndUpdate", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pCloseAndUpdateId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pAddCertificateId, &TrustList_Method_AddCertificate,
+                                                     "AddCertificate", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pAddCertificateId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pRemoveCertificateId,
+                                                     &TrustList_Method_RemoveCertificate, "RemoveCertificate", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pRemoveCertificateId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pReadId, &TrustList_Method_Read, "Read", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pReadId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pWriteId, &TrustList_Method_Write, "Write", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pWriteId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm =
+            SOPC_MethodCallManager_AddMethod(pMcm, pIds->pGetPosId, &TrustList_Method_GetPosition, "GetPosition", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pGetPosId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm =
+            SOPC_MethodCallManager_AddMethod(pMcm, pIds->pSetPosId, &TrustList_Method_SetPosition, "SetPosition", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            trustlist_delete_single_node_id(&pIds->pSetPosId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
     }
     /* Add variables ... */
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->varIds.pSizeId =
-            SOPC_NodeId_FromCString(pCfg->varSizeNodeId, (int32_t) strlen(pCfg->varSizeNodeId));
-        status = NULL == pTrustList->varIds.pSizeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pTrustList->varIds.pSizeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->varIds.pSizeId, pIds->pSizeId);
     }
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->varIds.pWritableId =
-            SOPC_NodeId_FromCString(pCfg->varWritableNodeId, (int32_t) strlen(pCfg->varWritableNodeId));
-        status = NULL == pTrustList->varIds.pWritableId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pTrustList->varIds.pWritableId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->varIds.pWritableId, pIds->pWritableId);
     }
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->varIds.pUserWritableId =
-            SOPC_NodeId_FromCString(pCfg->varUserWritableNodeId, (int32_t) strlen(pCfg->varUserWritableNodeId));
-        status = NULL == pTrustList->varIds.pUserWritableId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pTrustList->varIds.pUserWritableId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->varIds.pUserWritableId, pIds->pUserWritableId);
     }
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->varIds.pOpenCountId =
-            SOPC_NodeId_FromCString(pCfg->varOpenCountNodeId, (int32_t) strlen(pCfg->varOpenCountNodeId));
-        status = NULL == pTrustList->varIds.pOpenCountId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pTrustList->varIds.pOpenCountId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->varIds.pOpenCountId, pIds->pOpenCountId);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -405,6 +951,17 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SO
         }
         trustlist_delete_context(&pTrustList);
     }
+    else
+    {
+        if (SOPC_TRUSTLIST_GROUP_APP == pCfg->groupType)
+        {
+            gbGroupAppIsSet = true;
+        }
+        if (SOPC_TRUSTLIST_GROUP_USR == pCfg->groupType)
+        {
+            gbGroupUsrIsSet = true;
+        }
+    }
     return status;
 }
 
@@ -412,6 +969,9 @@ void SOPC_TrustList_Clear(void)
 {
     SOPC_Dict_Delete(gObjIdToTrustList);
     gObjIdToTrustList = NULL;
+    gbTypeMetIsConfigure = false;
+    gbGroupAppIsSet = false;
+    gbGroupUsrIsSet = false;
 }
 
 /*---------------------------------------------------------------------------

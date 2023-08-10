@@ -46,27 +46,7 @@ typedef enum
 /**
  * \brief Structure to gather TrustList configuration data
  */
-typedef struct SOPC_TrustList_Config
-{
-    const SOPC_TrustList_Type groupType;    /*!< Defined the certificate group type of the TrustList. */
-    SOPC_PKIProvider* pPKI;                 /*!< A valid pointer to the PKI of the TrustList. */
-    size_t maxTrustListSize;                /*!< Defined the maximum size in byte for the TrustList */
-    const char* trustListNodeId;            /*!< The nodeId of the FileType object. */
-    const char* metOpenNodeId;              /*!< The nodeId of the Open method. */
-    const char* metOpenWithMasksNodeId;     /*!< The nodeId of the OpenWithMasks method. */
-    const char* metCloseAndUpdateNodeId;    /*!< The nodeId of the CloseAndUpdate method. */
-    const char* metAddCertificateNodeId;    /*!< The nodeId of the AddCertificate method. */
-    const char* metRemoveCertificateNodeId; /*!< The nodeId of the RemoveCertificate method. */
-    const char* metCloseNodeId;             /*!< The nodeId of the Close method. */
-    const char* metReadNodeId;              /*!< The nodeId of the Read method. */
-    const char* metWriteNodeId;             /*!< The nodeId of the Write method. */
-    const char* metGetPosNodeId;            /*!< The nodeId of the GetPosition method. */
-    const char* metSetPosNodeId;            /*!< The nodeId of the SetPosition method. */
-    const char* varSizeNodeId;              /*!< The nodeId of the Size variable. */
-    const char* varOpenCountNodeId;         /*!< The nodeId of the OpenCount variable. */
-    const char* varUserWritableNodeId;      /*!< The nodeId of the UserWritable variable. */
-    const char* varWritableNodeId;          /*!< The nodeId of the Writable variable. */
-} SOPC_TrustList_Config;
+typedef struct SOPC_TrustList_Config SOPC_TrustList_Config;
 
 /**
  * \brief Initialise the API.
@@ -81,15 +61,26 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
 /**
  * \brief Get the TrustList configuration with the default values.
  *
- * \param groupType Defined the certificate group type of the TrustList.
- * \param pPKI      A valid pointer to the PKI of the TrustList.
+ * \param groupType        Defined the certificate group type of the TrustList.
+ * \param pPKI             A valid pointer to the PKI of the TrustList.
+ * \param maxTrustListSize Defined the maximum size in byte of the TrustList.
+ * \param[out] ppConfig    A newly created configuration. You should delete it with
+ *                         ::SOPC_TrustList_DeleteConfiguration .
  *
- * \note The function return NULL in case of error.
- *
- * \return Return the structure ::SOPC_TrustList_Config filed with default values.
+ * \return SOPC_STATUS_OK if successful.
  */
-const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
-                                                                    SOPC_PKIProvider* pPKI);
+SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
+                                                         SOPC_PKIProvider* pPKI,
+                                                         const size_t maxTrustListSize,
+                                                         SOPC_TrustList_Config** ppConfig);
+
+/**
+ * \brief Delete TrustList configuration.
+ *
+ * \param ppConfig The configuration.
+ */
+void SOPC_TrustList_DeleteConfiguration(SOPC_TrustList_Config** ppConfig);
+
 /**
  * \brief Adding a Trustlist object to the API from the address space information.
  *
@@ -100,10 +91,10 @@ const SOPC_TrustList_Config* SOPC_TrustList_GetDefaultConfiguration(const SOPC_T
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus SOPC_TrustList_Configure(const SOPC_TrustList_Config* pCfg, SOPC_MethodCallManager* pMcm);
+SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the API
+ * \brief Uninitialized the TrustList API
  */
 void SOPC_TrustList_Clear(void);
 

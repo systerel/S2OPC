@@ -31,6 +31,8 @@
 #include "sopc_push_server_config_itf.h"
 #include "sopc_push_server_config_meth.h"
 
+#include "opcua_identifiers.h"
+
 /*---------------------------------------------------------------------------
  *                             Constants
  *---------------------------------------------------------------------------*/
@@ -38,80 +40,244 @@
 /*---------------------------------------------------------------------------
  *                             Internal types
  *---------------------------------------------------------------------------*/
-
-typedef struct PushServerConfig_Vars
+/**
+ * \brief Internal structure to share context through method call.
+ */
+typedef struct PushServerContext
 {
-    SOPC_NodeId* pServerCapabilitiesId;
-    SOPC_NodeId* pSupportedPrivateKeyFormatsId;
-    SOPC_NodeId* pMaxTrustListSizeId;
-    SOPC_NodeId* pMulticastDnsEnabledId;
+    bool bIsInit;                        /*!< Defined if the API is configured */
+    bool bIsConfigure;                   /*!< Defined if the API is initialized. */
+    SOPC_NodeId* pServerConfigurationId; /*!< The nodeId of the ServerConfiguration object. */
+} PushServerContext;
 
-} PushServerConfig_Vars;
-
-typedef struct PushServerConfig
+/**
+ * \brief Internal structure to gather nodeIds.
+ */
+typedef struct PushServerConfig_NodeIds
 {
-    SOPC_NodeId* pId;
-    PushServerConfig_Vars varIds;
+    SOPC_NodeId* pServerConfigurationId;  /*!< The nodeId of the ServerConfiguration object. */
+    SOPC_NodeId* pUpdateCertificateId;    /*!< The nodeId of the UpdateCertificate method. */
+    SOPC_NodeId* pApplyChangesId;         /*!< The nodeId of the ApplyChanges method.*/
+    SOPC_NodeId* pCreateSigningRequestId; /*!< The nodeId of the CreateSigningRequest method. */
+    SOPC_NodeId* pGetRejectedListId;      /*!< The nodeId of the CreateSigningRequest method. */
+} PushServerConfig_NodeIds;
 
-} PushServerConfig;
+/**
+ * \brief Structure to gather the ServerConfiguration object data
+ */
+struct SOPC_PushServerConfig_Config
+{
+    PushServerConfig_NodeIds* pIds;                 /*!< Defined all the nodeId of the ServerConfiguration. */
+    bool bDoNotClearIds;                            /*!< Defined if the method nodeIds shall be clear */
+    SOPC_CertificateGroup_Config* pAppCertGroupCfg; /*!< Application certificate group configuration that
+                                                         belongs to the CertificateGroupeFolderType */
+    SOPC_CertificateGroup_Config* pUsrCertGroupCfg; /*!< Users certificate group configuration that belongs to the
+                                                         CertificateGroupeFolderType (NULL if not used) */
+};
 
 /*---------------------------------------------------------------------------
  *                             Global variables
  *---------------------------------------------------------------------------*/
 
-SOPC_PushServerConfig_Config gServerConfig_DefaultAddSpace = {
-    .serverConfigurationNodeId = "ns=0;i=12637",
-    .metUpdateCertificateNodeId = "ns=0;i=13737",
-    .metApplyChangesNodeId = "ns=0;i=12740",
-    .metCreateSigningRequestNodeId = "ns=0;i=12737",
-    .metGetRejectedListNodeId = "ns=0;i=12775",
-    .varServerCapabilitiesNodeId = "ns=0;i=12710",
-    .varSupportedPrivateKeyFormatsNodeId = "ns=0;i=12639",
-    .varMaxTrustListSizeNodeId = "ns=0;i=12640",
-    .varMulticastDnsEnabledNodeId = "ns=0;i=12641",
-    .pAppCertGroupCfg = NULL,
-    .pUsrCertGroupCfg = NULL,
-    .appCertType = SOPC_CERT_TYPE_UNKNOW,
-    .usrCertType = SOPC_CERT_TYPE_UNKNOW,
+/* NodeIds of the ServerConfiguration instance  */
+static SOPC_NodeId gServerConfigurationId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                             .Namespace = 0,
+                                             .Data.Numeric = OpcUaId_ServerConfiguration};
+static SOPC_NodeId gUpdateCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                           .Namespace = 0,
+                                           .Data.Numeric = OpcUaId_ServerConfiguration_UpdateCertificate};
+static SOPC_NodeId gApplyChangesId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                      .Namespace = 0,
+                                      .Data.Numeric = OpcUaId_ServerConfiguration_ApplyChanges};
+static SOPC_NodeId gCreateSigningRequestId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                              .Namespace = 0,
+                                              .Data.Numeric = OpcUaId_ServerConfiguration_CreateSigningRequest};
+static SOPC_NodeId gGetRejectedListId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                         .Namespace = 0,
+                                         .Data.Numeric = OpcUaId_ServerConfiguration_GetRejectedList};
+/* Methods NodeId of the ServerConfigurationType*/
+static SOPC_NodeId gTypeUpdateCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                               .Namespace = 0,
+                                               .Data.Numeric = OpcUaId_ServerConfigurationType_UpdateCertificate};
+static SOPC_NodeId gTypeApplyChangesId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                          .Namespace = 0,
+                                          .Data.Numeric = OpcUaId_ServerConfigurationType_ApplyChanges};
+static SOPC_NodeId gTypeCreateSigningRequestId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                                  .Namespace = 0,
+                                                  .Data.Numeric = OpcUaId_ServerConfigurationType_CreateSigningRequest};
+static SOPC_NodeId gTypeGetRejectedListId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                             .Namespace = 0,
+                                             .Data.Numeric = OpcUaId_ServerConfigurationType_GetRejectedList};
+
+static PushServerConfig_NodeIds gNodeIds = {
+    .pServerConfigurationId = &gServerConfigurationId,
+    .pApplyChangesId = &gApplyChangesId,
+    .pCreateSigningRequestId = &gCreateSigningRequestId,
+    .pGetRejectedListId = &gGetRejectedListId,
+    .pUpdateCertificateId = &gUpdateCertificateId,
+};
+static PushServerConfig_NodeIds gTypeNodeIds = {
+    .pServerConfigurationId = NULL,
+    .pApplyChangesId = &gTypeApplyChangesId,
+    .pCreateSigningRequestId = &gTypeCreateSigningRequestId,
+    .pGetRejectedListId = &gTypeGetRejectedListId,
+    .pUpdateCertificateId = &gTypeUpdateCertificateId,
 };
 
-PushServerConfig* gpServerConfig = NULL;
+static PushServerContext gServerContext = {0};
 
 /*---------------------------------------------------------------------------
  *                      Prototype of static functions
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus push_server_config_add_method(SOPC_MethodCallManager* pMcm,
-                                                       const char* pCStringNodeId,
-                                                       SOPC_MethodCallFunc_Ptr* pTrustListMet,
-                                                       char* name);
+static void push_server_config_clear_context(PushServerContext* pContext);
+static void push_server_config_initialize_context(PushServerContext* pContext);
+
+static void push_server_config_delete_single_node_id(SOPC_NodeId** ppNodeId);
+static void push_server_config_delete_node_ids(PushServerConfig_NodeIds** ppNodeIds, bool bDoNotClear);
+static SOPC_ReturnStatus push_server_config_copy_meth_node_ids(PushServerConfig_NodeIds* pSrc,
+                                                               PushServerConfig_NodeIds** ppDest);
+static SOPC_ReturnStatus push_server_config_copy_node_ids(PushServerConfig_NodeIds* pSrc,
+                                                          PushServerConfig_NodeIds** ppDest);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
  *---------------------------------------------------------------------------*/
 
-static SOPC_ReturnStatus push_server_config_add_method(SOPC_MethodCallManager* pMcm,
-                                                       const char* pCStringNodeId,
-                                                       SOPC_MethodCallFunc_Ptr* pPushSvrCfgMet,
-                                                       char* name)
+static void push_server_config_clear_context(PushServerContext* pContext)
 {
-    SOPC_ASSERT(NULL != pMcm);
-    SOPC_ASSERT(NULL != pCStringNodeId);
-    SOPC_ASSERT(NULL != pPushSvrCfgMet);
-    SOPC_ASSERT(NULL != name);
+    if (NULL == pContext)
+    {
+        return;
+    }
+    push_server_config_delete_single_node_id(&pContext->pServerConfigurationId);
+}
 
-    SOPC_NodeId* pNodeId = NULL;
-    pNodeId = SOPC_NodeId_FromCString(pCStringNodeId, (int32_t) strlen(pCStringNodeId));
-    SOPC_ReturnStatus status = NULL == pNodeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+static void push_server_config_initialize_context(PushServerContext* pContext)
+{
+    if (NULL == pContext)
+    {
+        return;
+    }
+    pContext->bIsInit = false;
+    pContext->bIsConfigure = false;
+    pContext->pServerConfigurationId = NULL;
+}
+
+static void push_server_config_delete_single_node_id(SOPC_NodeId** ppNodeId)
+{
+    if (NULL == ppNodeId)
+    {
+        return;
+    }
+    SOPC_NodeId* pNodeId = *ppNodeId;
+    if (NULL == pNodeId)
+    {
+        return;
+    }
+    SOPC_NodeId_Clear(pNodeId);
+    SOPC_Free(pNodeId);
+    pNodeId = NULL;
+    *ppNodeId = pNodeId;
+}
+
+static void push_server_config_delete_node_ids(PushServerConfig_NodeIds** ppNodeIds, bool bDoNotClear)
+{
+    if (NULL == ppNodeIds)
+    {
+        return;
+    }
+    PushServerConfig_NodeIds* pNodeIds = *ppNodeIds;
+    if (NULL == pNodeIds)
+    {
+        return;
+    }
+    if (!bDoNotClear)
+    {
+        /* Deleted by the MethodCall manager */
+        push_server_config_delete_single_node_id(&pNodeIds->pApplyChangesId);
+        push_server_config_delete_single_node_id(&pNodeIds->pCreateSigningRequestId);
+        push_server_config_delete_single_node_id(&pNodeIds->pGetRejectedListId);
+        push_server_config_delete_single_node_id(&pNodeIds->pUpdateCertificateId);
+    }
+    push_server_config_delete_single_node_id(&pNodeIds->pServerConfigurationId);
+    SOPC_Free(pNodeIds);
+    pNodeIds = NULL;
+    *ppNodeIds = pNodeIds;
+}
+
+static SOPC_ReturnStatus push_server_config_copy_meth_node_ids(PushServerConfig_NodeIds* pSrc,
+                                                               PushServerConfig_NodeIds** ppDest)
+{
+    if (NULL == pSrc || NULL == ppDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pSrc->pApplyChangesId || NULL == pSrc->pCreateSigningRequestId || NULL == pSrc->pGetRejectedListId ||
+        NULL == pSrc->pUpdateCertificateId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *ppDest = NULL;
+    PushServerConfig_NodeIds* pDest = NULL;
+    pDest = SOPC_Calloc(1, sizeof(PushServerConfig_NodeIds));
+    if (NULL == pDest)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    pDest->pApplyChangesId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(pDest->pApplyChangesId, pSrc->pApplyChangesId);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_MethodCallManager_AddMethod(pMcm, pNodeId, pPushSvrCfgMet, name, NULL);
+        pDest->pCreateSigningRequestId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pCreateSigningRequestId, pSrc->pCreateSigningRequestId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pGetRejectedListId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pGetRejectedListId, pSrc->pGetRejectedListId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pUpdateCertificateId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pUpdateCertificateId, pSrc->pUpdateCertificateId);
     }
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_NodeId_Clear(pNodeId);
-        SOPC_Free(pNodeId);
+        push_server_config_delete_node_ids(&pDest, false);
     }
+    *ppDest = pDest;
+    return status;
+}
+
+static SOPC_ReturnStatus push_server_config_copy_node_ids(PushServerConfig_NodeIds* pSrc,
+                                                          PushServerConfig_NodeIds** ppDest)
+{
+    if (NULL == pSrc || NULL == ppDest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pSrc->pServerConfigurationId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    *ppDest = NULL;
+    PushServerConfig_NodeIds* pDest = NULL;
+    SOPC_ReturnStatus status = push_server_config_copy_meth_node_ids(pSrc, &pDest);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
+    pDest->pServerConfigurationId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    status = SOPC_NodeId_Copy(pDest->pServerConfigurationId, pSrc->pServerConfigurationId);
+    if (SOPC_STATUS_OK != status)
+    {
+        push_server_config_delete_node_ids(&pDest, false);
+    }
+    *ppDest = pDest;
     return status;
 }
 
@@ -121,20 +287,11 @@ static SOPC_ReturnStatus push_server_config_add_method(SOPC_MethodCallManager* p
 
 SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void)
 {
-    if (NULL != gpServerConfig)
+    if (gServerContext.bIsInit)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    gpServerConfig = SOPC_Calloc(1, sizeof(PushServerConfig));
-    if (NULL == gpServerConfig)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    gpServerConfig->pId = NULL;
-    gpServerConfig->varIds.pMaxTrustListSizeId = NULL;
-    gpServerConfig->varIds.pMulticastDnsEnabledId = NULL;
-    gpServerConfig->varIds.pServerCapabilitiesId = NULL;
-    gpServerConfig->varIds.pSupportedPrivateKeyFormatsId = NULL;
+    push_server_config_initialize_context(&gServerContext);
 
     SOPC_ReturnStatus status = SOPC_CertificateGroup_Initialize();
     if (SOPC_STATUS_OK == status)
@@ -146,17 +303,24 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void)
     {
         SOPC_PushServerConfig_Clear();
     }
+    else
+    {
+        gServerContext.bIsInit = true;
+    }
 
     return status;
 }
 
 SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider* pPKIApp,
                                                                 const SOPC_Certificate_Type appCertType,
-                                                                SOPC_PKIProvider* pPKIUsers,
+                                                                SOPC_SerializedAsymmetricKey* pServerKey,
+                                                                SOPC_SerializedCertificate* pServerCert,
+                                                                SOPC_PKIProvider* pPKIUsr,
                                                                 const SOPC_Certificate_Type usrCertType,
-                                                                SOPC_PushServerConfig_Config* pCfg)
+                                                                const size_t maxTrustListSize,
+                                                                SOPC_PushServerConfig_Config** ppConfig)
 {
-    if (NULL == pPKIApp || NULL == pCfg)
+    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == pServerKey || NULL == pServerCert || NULL == ppConfig)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -164,124 +328,195 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    const SOPC_CertificateGroup_Config* pUsrCertGroupCfg = NULL;
-    const SOPC_CertificateGroup_Config* pAppCertGroupCfg =
-        SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_APP, appCertType, pPKIApp);
-    if (NULL == pAppCertGroupCfg)
+    SOPC_CertificateGroup_Config* pUsrCertGroupCfg = NULL;
+    SOPC_CertificateGroup_Config* pAppCertGroupCfg = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    *ppConfig = NULL;
+    SOPC_PushServerConfig_Config* pCfg = SOPC_Calloc(1, sizeof(SOPC_PushServerConfig_Config));
+    if (NULL == pCfg)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    if (NULL != pPKIUsers)
+    if (SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_APP, appCertType, pPKIApp,
+                                                          maxTrustListSize, pServerKey, pServerCert, &pAppCertGroupCfg);
+    }
+    if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
         if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != usrCertType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != usrCertType)
         {
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
-        pUsrCertGroupCfg =
-            SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsers);
-        if (NULL == pUsrCertGroupCfg)
-        {
-            return SOPC_STATUS_INVALID_PARAMETERS;
+            status = SOPC_STATUS_INVALID_PARAMETERS;
         }
     }
-    *pCfg = gServerConfig_DefaultAddSpace;
-    pCfg->pAppCertGroupCfg = (const SOPC_CertificateGroup_Config*) pAppCertGroupCfg;
-    pCfg->pUsrCertGroupCfg = (const SOPC_CertificateGroup_Config*) pUsrCertGroupCfg;
-    pCfg->appCertType = (const SOPC_Certificate_Type) appCertType;
-    pCfg->usrCertType = usrCertType;
-    return SOPC_STATUS_OK;
+    if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
+                                                               maxTrustListSize, NULL, NULL, &pUsrCertGroupCfg);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = push_server_config_copy_node_ids(&gNodeIds, &pCfg->pIds);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg->pAppCertGroupCfg = pAppCertGroupCfg;
+        pCfg->pUsrCertGroupCfg = pUsrCertGroupCfg;
+        pCfg->bDoNotClearIds = false;
+    }
+    else
+    {
+        SOPC_CertificateGroup_DeleteConfiguration(&pAppCertGroupCfg);
+        SOPC_CertificateGroup_DeleteConfiguration(&pUsrCertGroupCfg);
+        SOPC_Free(pCfg);
+        pCfg = NULL;
+    }
+    *ppConfig = pCfg;
+    return status;
 }
 
-SOPC_ReturnStatus SOPC_PushServerConfig_Configure(const SOPC_PushServerConfig_Config* pCfg,
-                                                  SOPC_SerializedAsymmetricKey* pServerKey,
-                                                  SOPC_SerializedCertificate* pServerCert,
-                                                  SOPC_MethodCallManager* pMcm)
+void SOPC_PushServerConfig_DeleteConfiguration(SOPC_PushServerConfig_Config** ppConfig)
 {
-    /* The API is not initialized. */
-    if (NULL == gpServerConfig)
+    if (NULL == ppConfig)
+    {
+        return;
+    }
+    SOPC_PushServerConfig_Config* pConfig = *ppConfig;
+    if (NULL == pConfig)
+    {
+        return;
+    }
+    push_server_config_delete_node_ids(&pConfig->pIds, pConfig->bDoNotClearIds);
+    SOPC_CertificateGroup_DeleteConfiguration(&pConfig->pAppCertGroupCfg);
+    SOPC_CertificateGroup_DeleteConfiguration(&pConfig->pUsrCertGroupCfg);
+    memset(pConfig, 0, sizeof(SOPC_PushServerConfig_Config));
+    SOPC_Free(pConfig);
+    *ppConfig = NULL;
+}
+
+SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* pCfg, SOPC_MethodCallManager* pMcm)
+{
+    /* The API is not initialized or already configured */
+    if (!gServerContext.bIsInit || gServerContext.bIsConfigure)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == pCfg || NULL == pServerKey || NULL == pServerCert || NULL == pMcm)
+    if (NULL == pCfg || NULL == pMcm)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    if (NULL == pCfg->metApplyChangesNodeId || NULL == pCfg->metCreateSigningRequestNodeId ||
-        NULL == pCfg->metGetRejectedListNodeId || NULL == pCfg->metUpdateCertificateNodeId ||
-        NULL == pCfg->pAppCertGroupCfg || NULL == pCfg->serverConfigurationNodeId ||
-        NULL == pCfg->varMaxTrustListSizeNodeId || NULL == pCfg->varMulticastDnsEnabledNodeId ||
-        NULL == pCfg->varServerCapabilitiesNodeId || NULL == pCfg->varSupportedPrivateKeyFormatsNodeId)
+    if (NULL == pCfg->pIds)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    SOPC_ReturnStatus status = SOPC_CertificateGroup_Configure(pCfg->pAppCertGroupCfg, pServerKey, pServerCert, pMcm);
+    PushServerConfig_NodeIds* pIds = pCfg->pIds;
+    if (NULL == pIds->pServerConfigurationId || NULL == pIds->pApplyChangesId ||
+        NULL == pIds->pCreateSigningRequestId || NULL == pIds->pGetRejectedListId || NULL == pIds->pUpdateCertificateId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_CertificateGroup_Configure(pCfg->pAppCertGroupCfg, pMcm);
     if (SOPC_STATUS_OK != status)
     {
         return status;
     }
     if (NULL != pCfg->pUsrCertGroupCfg)
     {
-        status = SOPC_CertificateGroup_Configure(pCfg->pUsrCertGroupCfg, NULL, NULL, pMcm);
+        status = SOPC_CertificateGroup_Configure(pCfg->pUsrCertGroupCfg, pMcm);
     }
     if (SOPC_STATUS_OK == status)
     {
-        gpServerConfig->pId =
-            SOPC_NodeId_FromCString(pCfg->serverConfigurationNodeId, (int32_t) strlen(pCfg->serverConfigurationNodeId));
-        status = NULL == gpServerConfig->pId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        gServerContext.pServerConfigurationId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(gServerContext.pServerConfigurationId, pIds->pServerConfigurationId);
+    }
+    PushServerConfig_NodeIds* pTypeIds = NULL;
+    if (SOPC_STATUS_OK == status)
+    {
+        status = push_server_config_copy_meth_node_ids(&gTypeNodeIds, &pTypeIds);
+        status = NULL == pTypeIds ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
     /* Add methods ... */
     if (SOPC_STATUS_OK == status)
     {
-        status = push_server_config_add_method(pMcm, pCfg->metUpdateCertificateNodeId,
-                                               &PushSrvCfg_Method_UpdateCertificate, "UpdateCertificate");
+        /* Method nodeIds are clear by the methodCall manager */
+        pCfg->bDoNotClearIds = true;
+        SOPC_ReturnStatus statusMcm = SOPC_MethodCallManager_AddMethod(
+            pMcm, pIds->pUpdateCertificateId, &PushSrvCfg_Method_UpdateCertificate, "UpdateCertificate", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pIds->pUpdateCertificateId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(
+            pMcm, pTypeIds->pUpdateCertificateId, &PushSrvCfg_Method_UpdateCertificate, "TypeUpdateCertificate", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pTypeIds->pUpdateCertificateId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pApplyChangesId, &PushSrvCfg_Method_ApplyChanges,
+                                                     "ApplyChanges", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pIds->pApplyChangesId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pApplyChangesId, &PushSrvCfg_Method_ApplyChanges,
+                                                     "TypeApplyChanges", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pTypeIds->pApplyChangesId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(
+            pMcm, pIds->pCreateSigningRequestId, &PushSrvCfg_Method_CreateSigningRequest, "CreateSigningRequest", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pIds->pCreateSigningRequestId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm =
+            SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pCreateSigningRequestId,
+                                             &PushSrvCfg_Method_CreateSigningRequest, "TypeCreateSigningRequest", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pTypeIds->pCreateSigningRequestId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pGetRejectedListId, &PushSrvCfg_Method_GetRejectedList,
+                                                     "GetRejectedList", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pIds->pGetRejectedListId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pGetRejectedListId,
+                                                     &PushSrvCfg_Method_GetRejectedList, "TypeGetRejectedList", NULL);
+        if (SOPC_STATUS_OK != statusMcm)
+        {
+            /* But if AddMethod failed, the manager do not clear the nodeId */
+            push_server_config_delete_single_node_id(&pTypeIds->pGetRejectedListId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
     }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = push_server_config_add_method(pMcm, pCfg->metApplyChangesNodeId, &PushSrvCfg_Method_ApplyChanges,
-                                               "ApplyChanges");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = push_server_config_add_method(pMcm, pCfg->metCreateSigningRequestNodeId,
-                                               &PushSrvCfg_Method_CreateSigningRequest, "CreateSigningRequest");
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        status = push_server_config_add_method(pMcm, pCfg->metGetRejectedListNodeId, &PushSrvCfg_Method_GetRejectedList,
-                                               "GetRejectedList");
-    }
-    /* Add variables ... */
-    if (SOPC_STATUS_OK == status)
-    {
-        gpServerConfig->varIds.pMaxTrustListSizeId =
-            SOPC_NodeId_FromCString(pCfg->varMaxTrustListSizeNodeId, (int32_t) strlen(pCfg->varMaxTrustListSizeNodeId));
-        status = NULL == gpServerConfig->varIds.pMaxTrustListSizeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        gpServerConfig->varIds.pMulticastDnsEnabledId = SOPC_NodeId_FromCString(
-            pCfg->varMulticastDnsEnabledNodeId, (int32_t) strlen(pCfg->varMulticastDnsEnabledNodeId));
-        status = NULL == gpServerConfig->varIds.pMulticastDnsEnabledId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        gpServerConfig->varIds.pServerCapabilitiesId = SOPC_NodeId_FromCString(
-            pCfg->varServerCapabilitiesNodeId, (int32_t) strlen(pCfg->varServerCapabilitiesNodeId));
-        status = NULL == gpServerConfig->varIds.pServerCapabilitiesId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        gpServerConfig->varIds.pSupportedPrivateKeyFormatsId = SOPC_NodeId_FromCString(
-            pCfg->varSupportedPrivateKeyFormatsNodeId, (int32_t) strlen(pCfg->varSupportedPrivateKeyFormatsNodeId));
-        status =
-            NULL == gpServerConfig->varIds.pSupportedPrivateKeyFormatsId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
-    }
+
+    SOPC_Free(pTypeIds);
 
     if (SOPC_STATUS_OK != status)
     {
         SOPC_PushServerConfig_Clear();
+    }
+    else
+    {
+        gServerContext.bIsConfigure = true;
     }
     return status;
 }
@@ -290,15 +525,6 @@ void SOPC_PushServerConfig_Clear(void)
 {
     SOPC_CertificateGroup_Clear();
     SOPC_TrustList_Clear();
-    SOPC_NodeId_Clear(gpServerConfig->pId);
-    SOPC_NodeId_Clear(gpServerConfig->varIds.pMaxTrustListSizeId);
-    SOPC_NodeId_Clear(gpServerConfig->varIds.pMulticastDnsEnabledId);
-    SOPC_NodeId_Clear(gpServerConfig->varIds.pServerCapabilitiesId);
-    SOPC_NodeId_Clear(gpServerConfig->varIds.pSupportedPrivateKeyFormatsId);
-    SOPC_Free(gpServerConfig->pId);
-    SOPC_Free(gpServerConfig->varIds.pMaxTrustListSizeId);
-    SOPC_Free(gpServerConfig->varIds.pMulticastDnsEnabledId);
-    SOPC_Free(gpServerConfig->varIds.pServerCapabilitiesId);
-    SOPC_Free(gpServerConfig->varIds.pSupportedPrivateKeyFormatsId);
-    SOPC_Free(gpServerConfig);
+    push_server_config_clear_context(&gServerContext);
+    push_server_config_initialize_context(&gServerContext);
 }

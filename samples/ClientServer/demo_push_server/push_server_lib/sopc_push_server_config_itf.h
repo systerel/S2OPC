@@ -32,24 +32,7 @@
 /**
  * \brief Structure to gather the ServerConfiguration object configuration data
  */
-typedef struct SOPC_PushServerConfig_Config
-{
-    const char* serverConfigurationNodeId;                /*!< The nodeId of the FileType object. */
-    const char* metUpdateCertificateNodeId;               /*!< The nodeId of the UpdateCertificate method. */
-    const char* metApplyChangesNodeId;                    /*!< The nodeId of the ApplyChanges method.*/
-    const char* metCreateSigningRequestNodeId;            /*!< The nodeId of the CreateSigningRequest method.*/
-    const char* metGetRejectedListNodeId;                 /*!< The nodeId of the CreateSigningRequest method.*/
-    const char* varServerCapabilitiesNodeId;              /*!< The nodeId of the ServerCapabilities variable.*/
-    const char* varSupportedPrivateKeyFormatsNodeId;      /*!< The nodeId of the SupportedPrivateKeyFormat variable.*/
-    const char* varMaxTrustListSizeNodeId;                /*!< The nodeId of the MaxTrustListSize variable.*/
-    const char* varMulticastDnsEnabledNodeId;             /*!< The nodeId of the MulticastDnsEnabled variable.*/
-    const SOPC_CertificateGroup_Config* pAppCertGroupCfg; /*!< Application certificate group configuration that
-                                                               belongs to the CertificateGroupeFolderType */
-    const SOPC_CertificateGroup_Config* pUsrCertGroupCfg; /*!< Users certificate group configuration that belongs to the
-                                                               CertificateGroupeFolderType (NULL if not used) */
-    SOPC_Certificate_Type appCertType;                    /*!< The application certificate type */
-    SOPC_Certificate_Type usrCertType;                    /*!< The users certificate type */
-} SOPC_PushServerConfig_Config;
+typedef struct SOPC_PushServerConfig_Config SOPC_PushServerConfig_Config;
 
 /**
  * \brief Initialise the whole API (CertificateGroup and TrustList)
@@ -64,19 +47,33 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
 /**
  * \brief Get the default configuration for the ServerConfigurationType object.
  *
- * \param pPKIApp     A valid pointer to the PKI of the application TrustList.
- * \param appCertType The application certificate type.
- * \param pPKIUser    A valid pointer to the PKI of the users TrustList (NULL if not used).
- * \param usrCertType The users certificate type (ignored if \p pPKIUser is NULL).
- * \param[out] pCfg   A valid pointer to set the configuration structure.
+ * \param pPKIApp             A valid pointer to the PKI of the application TrustList.
+ * \param appCertType         The application certificate type.
+ * \param pServerKey          A valid pointer to server the private key.
+ * \param pServerCert         A valid pointer to the server certificate.
+ * \param pPKIUsr             A valid pointer to the PKI of the users TrustList (NULL if not used).
+ * \param usrCertType         The users certificate type (ignored if \p pPKIUsr is NULL).
+ * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
+ * \param[out] ppConfig       A newly created configuration. You should delete it with
+ *                            ::SOPC_PushServerConfig_DeleteConfiguration .
  *
- * \return SOPC_STATUS_OK if successful otherwise SOPC_STATUS_INVALID_PARAMETERS.
+ * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider* pPKIApp,
                                                                 const SOPC_Certificate_Type appCertType,
-                                                                SOPC_PKIProvider* pPKIUsers,
+                                                                SOPC_SerializedAsymmetricKey* pServerKey,
+                                                                SOPC_SerializedCertificate* pServerCert,
+                                                                SOPC_PKIProvider* pPKIUsr,
                                                                 const SOPC_Certificate_Type usrCertType,
-                                                                SOPC_PushServerConfig_Config* pCfg);
+                                                                const size_t maxTrustListSize,
+                                                                SOPC_PushServerConfig_Config** ppConfig);
+
+/**
+ * \brief Delete configuration.
+ *
+ * \param ppConfig The configuration.
+ */
+void SOPC_PushServerConfig_DeleteConfiguration(SOPC_PushServerConfig_Config** ppConfig);
 
 /**
  * \brief Adding a ServerConfiguration object to the API.
@@ -85,16 +82,11 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
  *       This function shall be call before the server is started.
  *
  * \param pCfg        Pointer to the structure which gather the configuration data of the ServerConfiguration object.
- * \param pServerKey  A valid pointer to the server private key.
- * \param pServerCert A valid pointer to the server certificate.
  * \param pMcm        A valid pointer to a ::SOPC_MethodCallManager.
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus SOPC_PushServerConfig_Configure(const SOPC_PushServerConfig_Config* pCfg,
-                                                  SOPC_SerializedAsymmetricKey* pServerKey,
-                                                  SOPC_SerializedCertificate* pServerCert,
-                                                  SOPC_MethodCallManager* pMcm);
+SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* pCfg, SOPC_MethodCallManager* pMcm);
 
 /**
  * \brief Uninitialized the whole API (CertificateGroup and TrustList)
