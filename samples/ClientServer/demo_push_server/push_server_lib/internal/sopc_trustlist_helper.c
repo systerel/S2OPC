@@ -83,6 +83,18 @@ static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
     SOPC_ByteString** pBsIssuerCrlArray,
     size_t* pByteLenTot);
 
+static SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
+                                                               size_t length,
+                                                               SOPC_CertificateList** ppCert);
+static SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray,
+                                                              size_t length,
+                                                              SOPC_CRLList** ppCrl);
+static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataType* pDecode,
+                                                      SOPC_CertificateList** ppTrustedCerts,
+                                                      SOPC_CRLList** ppTrustedCrls,
+                                                      SOPC_CertificateList** ppIssuerCerts,
+                                                      SOPC_CRLList** ppIssuerCrls);
+
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
  *---------------------------------------------------------------------------*/
@@ -283,6 +295,151 @@ static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
         *pByteLenTot = 0;
     }
 
+    return status;
+}
+
+static SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* pArray,
+                                                               size_t length,
+                                                               SOPC_CertificateList** ppCert)
+{
+    if (NULL == pArray || 0 == length || NULL == ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ByteString* pBsCert = NULL;
+    size_t idx = 0;
+
+    for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
+    {
+        pBsCert = &pArray[idx];
+        if (NULL == pBsCert)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pCert);
+        pCert = NULL;
+    }
+    *ppCert = pCert;
+    return status;
+}
+
+static SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* pArray,
+                                                              size_t length,
+                                                              SOPC_CRLList** ppCrl)
+{
+    if (NULL == pArray || 0 == length || NULL == ppCrl)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CRLList* pCrl = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ByteString* pBsCert = NULL;
+    size_t idx = 0;
+
+    for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
+    {
+        pBsCert = &pArray[idx];
+        if (NULL == pBsCert)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCrl);
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_CRL_Free(pCrl);
+        pCrl = NULL;
+    }
+    *ppCrl = pCrl;
+    return status;
+}
+
+static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataType* pDecode,
+                                                      SOPC_CertificateList** ppTrustedCerts,
+                                                      SOPC_CRLList** ppTrustedCrls,
+                                                      SOPC_CertificateList** ppIssuerCerts,
+                                                      SOPC_CRLList** ppIssuerCrls)
+{
+    if (NULL == pDecode || NULL == ppTrustedCerts || NULL == ppTrustedCrls || NULL == ppIssuerCerts ||
+        NULL == ppIssuerCrls)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateList* pTrustedCerts = NULL;
+    SOPC_CRLList* pTrustedCrls = NULL;
+    SOPC_CertificateList* pIssuerCerts = NULL;
+    SOPC_CRLList* pIssuerCrls = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ByteString* pBsCert = NULL;
+    size_t idx = 0;
+
+    /* Trusted Certificates  */
+    if (SOPC_TL_MASK_TRUSTED_CERTS & pDecode->SpecifiedLists)
+    {
+        if (NULL == pDecode->TrustedCertificates || 0 == pDecode->NoOfTrustedCertificates)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        status = trustList_write_bs_array_to_cert_list(pDecode->TrustedCertificates, pDecode->NoOfTrustedCertificates,
+                                                       &pTrustedCerts);
+    }
+    /* Trusted CRLs */
+    if (SOPC_TL_MASK_TRUSTED_CRLS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
+    {
+        if (NULL == pDecode->TrustedCrls || 0 == pDecode->NoOfTrustedCrls)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        status = trustList_write_bs_array_to_crl_list(pDecode->TrustedCrls, pDecode->NoOfTrustedCrls, &pTrustedCrls);
+    }
+    /* Issuer Certificates  */
+    if (SOPC_TL_MASK_ISSUER_CERTS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
+    {
+        if (NULL == pDecode->IssuerCertificates || 0 == pDecode->NoOfIssuerCertificates)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        status = trustList_write_bs_array_to_cert_list(pDecode->IssuerCertificates, pDecode->NoOfIssuerCertificates,
+                                                       &pIssuerCerts);
+    }
+    /* Issuer CRLs */
+    if (SOPC_TL_MASK_ISSUER_CRLS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
+    {
+        if (NULL == pDecode->IssuerCrls || 0 == pDecode->NoOfIssuerCrls)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        status = trustList_write_bs_array_to_crl_list(pDecode->IssuerCrls, pDecode->NoOfIssuerCrls, &pIssuerCrls);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pTrustedCerts);
+        SOPC_KeyManager_CRL_Free(pTrustedCrls);
+        SOPC_KeyManager_Certificate_Free(pIssuerCerts);
+        SOPC_KeyManager_CRL_Free(pIssuerCrls);
+        pTrustedCerts = NULL;
+        pTrustedCrls = NULL;
+        pIssuerCerts = NULL;
+        pIssuerCrls = NULL;
+    }
+    *ppTrustedCerts = pTrustedCerts;
+    *ppTrustedCrls = pTrustedCrls;
+    *ppIssuerCerts = pIssuerCerts;
+    *ppIssuerCrls = pIssuerCrls;
     return status;
 }
 
@@ -562,9 +719,69 @@ SOPC_ReturnStatus TrustList_Read(const SOPC_TrustListContext* pTrustList, int32_
 /* Decode the trustList UA Binary stream to a TrustListDataType */
 SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC_ByteString* pEncodedTrustListDataType)
 {
-    SOPC_UNUSED_ARG(pTrustList);
-    SOPC_UNUSED_ARG(pEncodedTrustListDataType);
-    return SOPC_STATUS_OK;
+    if (NULL == pTrustList || NULL == pEncodedTrustListDataType)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* Writing an empty or null ByteString returns a Good result code without any affect on the TrustList. */
+    if (NULL == pEncodedTrustListDataType->Data || 0 == pEncodedTrustListDataType->Length)
+    {
+        return SOPC_STATUS_OK;
+    }
+    /* Check before casting */
+    if (INT32_MAX < pEncodedTrustListDataType->Length)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_Buffer* pToDecode = SOPC_Buffer_Attach(pEncodedTrustListDataType->Data, pEncodedTrustListDataType->Length);
+    if (NULL == pToDecode)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    OpcUa_TrustListDataType* pTrustListDataType = NULL;
+    SOPC_EncodeableType* type = &OpcUa_TrustListDataType_EncodeableType;
+    void* pValue = NULL;
+    size_t idx = 0;
+    SOPC_ByteString* pBsCert = NULL;
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
+    if (SOPC_STATUS_OK == status)
+    {
+        pValue = SOPC_Calloc(1, type->AllocationSize);
+        if (NULL == pValue)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_EncodeableObject_Initialize(type, pValue);
+        status = SOPC_EncodeableObject_Decode(type, pValue, pToDecode, 1);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* TrustList support only the write mode with the EraseExisting option */
+        SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
+        SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
+        SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
+        pTrustListDataType = (OpcUa_TrustListDataType*) pValue;
+        if (NULL == pTrustListDataType)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = trustlist_write_decoded_data(pTrustListDataType, &pTrustList->pTrustedCerts, &pTrustList->pTrustedCRLs,
+                                              &pTrustList->pIssuerCerts, &pTrustList->pIssuerCRLs);
+    }
+
+    /* Clear */
+    SOPC_EncodeableObject_Clear(type, pValue);
+    SOPC_Free(pValue);
+    SOPC_Free(pToDecode);
+
+    return status;
 }
 
 /* Reset the TrustList context when close method is call */
