@@ -341,7 +341,8 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
 
         if (SOPC_STATUS_OK == status && setNonBlocking)
         {
-            setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+            S2OPC_TEMP_FAILURE_RETRY(setOptStatus, fcntl(*sock, F_SETFL, O_NONBLOCK));
+
             if (setOptStatus < 0)
             {
                 status = SOPC_STATUS_NOK;
@@ -416,7 +417,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
     struct sockaddr_in si_client;
     socklen_t slen = sizeof(si_client);
 
-    ssize_t recv_len = recvfrom(sock, buffer->data, buffer->current_size, 0, (struct sockaddr*) &si_client, &slen);
+    ssize_t recv_len = 0;
+    S2OPC_TEMP_FAILURE_RETRY(
+        recv_len, recvfrom(sock, buffer->data, buffer->current_size, 0, (struct sockaddr*) &si_client, &slen));
+
     if (recv_len == -1)
     {
         return SOPC_STATUS_NOK;

@@ -53,4 +53,21 @@
 // This macro is used to avoid warning about unused return function :
 #define SOPC_UNUSED_RESULT(arg) (void) (arg)
 
+/*
+ * This macro is used to mimic the GNU TEMP_FAILURE_RETRY macro for environments
+ * that don't have the GNU C library.
+ *
+ * See https://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html for details.
+ *
+ * See also https://man7.org/linux/man-pages/man7/signal.7.html for the expected behaviour under Linux.
+ */
+#define S2OPC_TEMP_FAILURE_RETRY(result, exp)         \
+    do                                                \
+    {                                                 \
+        do                                            \
+        {                                             \
+            result = (int) (exp);                     \
+        } while ((result == -1) && (errno == EINTR)); \
+    } while (false);
+
 #endif // SOPC_MACROS_H_

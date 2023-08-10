@@ -104,7 +104,7 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     // Configure network devices to use socket FD
     memset(&nwInterface, 0, sizeof(nwInterface));
     strncpy(nwInterface.ifr_name, interface, sizeof(nwInterface.ifr_name) - 1);
-    res = ioctl(*sock, SIOCGIFINDEX, &nwInterface);
+    S2OPC_TEMP_FAILURE_RETRY(res, ioctl(*sock, SIOCGIFINDEX, &nwInterface));
     if (res < 0)
     {
         return SOPC_STATUS_NOK;
@@ -188,7 +188,8 @@ SOPC_ReturnStatus SOPC_TX_UDP_send(int sockAddress,
     controlMessage->cmsg_len = CMSG_LEN(sizeof(uint64_t));
     memcpy(CMSG_DATA(controlMessage), &txtime, sizeof(uint64_t));
     // Send message on socket
-    res = sendmsg(sockAddress, &message, 0);
+    S2OPC_TEMP_FAILURE_RETRY(res, sendmsg(sockAddress, &message, 0));
+
     if ((uint32_t) res != txBuffLen || res < 1)
     {
         return SOPC_STATUS_NOK;
@@ -212,7 +213,10 @@ SOPC_ReturnStatus SOPC_TX_UDP_Socket_Error_Queue(int sockFd)
                              .msg_control = messageControl,
                              .msg_controllen = sizeof(messageControl)};
 
-    if (recvmsg(sockFd, &message, MSG_ERRQUEUE) == -1)
+    int res = 0;
+    S2OPC_TEMP_FAILURE_RETRY(res, recvmsg(sockFd, &message, MSG_ERRQUEUE));
+
+    if (res == -1)
     {
         SOPC_CONSOLE_PRINTF("Receive message failed from error queue\n");
         return SOPC_STATUS_NOK;

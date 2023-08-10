@@ -38,6 +38,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_helper_string.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 struct SOPC_ETH_Socket_ReceiveAddressInfo
@@ -194,7 +195,8 @@ static bool set_itfindex_from_string(struct sockaddr_ll* addr, const char* inter
     struct ifreq req;
     memset(&req, 0, sizeof(req));
     strncpy(req.ifr_name, interfaceName, IFNAMSIZ - 1);
-    int res = ioctl(tmpSock, SIOCGIFINDEX, &req);
+    int res;
+    S2OPC_TEMP_FAILURE_RETRY(res, ioctl(tmpSock, SIOCGIFINDEX, &req));
     close(tmpSock);
     if (res < 0)
     {
@@ -216,8 +218,10 @@ static bool set_mac_addr_from_interface(struct ifreq* ifreq, const char* interfa
         return false;
     }
     strncpy(ifreq->ifr_name, interfaceName, IFNAMSIZ - 1);
-    int res = ioctl(tmpSock, SIOCGIFHWADDR, ifreq);
-    close(tmpSock);
+    int res = 0;
+    S2OPC_TEMP_FAILURE_RETRY(res, ioctl(tmpSock, SIOCGIFHWADDR, ifreq));
+
+    S2OPC_TEMP_FAILURE_RETRY(res, close(tmpSock));
     if (res < 0)
     {
         return false;
@@ -350,7 +354,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
     int res = 0;
     if (setNonBlocking)
     {
-        res = fcntl(*sock, F_SETFL, O_NONBLOCK);
+        S2OPC_TEMP_FAILURE_RETRY(res, fcntl(*sock, F_SETFL, O_NONBLOCK));
     }
     SOPC_ReturnStatus status = (res == 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 
@@ -367,7 +371,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToReceive(SOPC_ETH_Socket_ReceiveAddress
 
     if (SOPC_STATUS_OK != status)
     {
-        close(*sock);
+        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
         *sock = SOPC_INVALID_SOCKET;
 
         return status;
@@ -393,7 +397,7 @@ SOPC_ReturnStatus SOPC_ETH_Socket_CreateToSend(SOPC_ETH_Socket_SendAddressInfo* 
     int setOptStatus = 0;
     if (setNonBlocking)
     {
-        setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
+        S2OPC_TEMP_FAILURE_RETRY(setOptStatus, fcntl(*sock, F_SETFL, O_NONBLOCK));
     }
 
     if (setOptStatus < 0)
@@ -446,8 +450,10 @@ SOPC_ReturnStatus SOPC_ETH_Socket_SendTo(Socket sock,
         memcpy(sendBuffer->data + ETHERNET_HEADER_SIZE, buffer->data, buffer->length);
         sendBuffer->length = ETHERNET_HEADER_SIZE + buffer->length;
 
-        ssize_t sent = sendto(sock, sendBuffer->data, sendBuffer->length, 0,
-                              (const struct sockaddr*) &sendAddrInfo->addr, (socklen_t) sizeof(sendAddrInfo->addr));
+        ssize_t sent = 0;
+        S2OPC_TEMP_FAILURE_RETRY(
+            sent, sendto(sock, sendBuffer->data, sendBuffer->length, 0, (const struct sockaddr*) &sendAddrInfo->addr,
+                         (socklen_t) sizeof(sendAddrInfo->addr)));
 
         if (sent < 0)
         {
@@ -480,7 +486,9 @@ SOPC_ReturnStatus SOPC_ETH_Socket_ReceiveFrom(Socket sock,
     bool bres = false;
     while (!bres)
     {
-        ssize_t recv_len = recv(sock, buffer->data, buffer->current_size, 0);
+        ssize_t recv_len = 0;
+        S2OPC_TEMP_FAILURE_RETRY(recv_len, recv(sock, buffer->data, buffer->current_size, 0));
+
         if (recv_len < 0)
         {
             return SOPC_STATUS_NOK;
@@ -534,7 +542,8 @@ void SOPC_ETH_Socket_Close(Socket* sock)
 {
     if (NULL != sock)
     {
-        close(*sock);
+        int res = 0;
+        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
         *sock = SOPC_INVALID_SOCKET;
     }
 }

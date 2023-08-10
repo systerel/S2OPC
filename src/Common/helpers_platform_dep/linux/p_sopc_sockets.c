@@ -31,6 +31,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
@@ -243,7 +244,7 @@ static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 
         if (setOptStatus != -1 && setNonBlocking != false)
         {
-            setOptStatus = fcntl(sock, F_SETFL, O_NONBLOCK);
+            S2OPC_TEMP_FAILURE_RETRY(setOptStatus, fcntl(sock, F_SETFL, O_NONBLOCK));
         }
 
         if (setOptStatus < 0)
@@ -327,7 +328,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     socklen_t addrLen = sizeof(remoteAddr);
     if (listeningSock != -1 && acceptedSock != NULL)
     {
-        *acceptedSock = accept(listeningSock, &remoteAddr, &addrLen);
+        S2OPC_TEMP_FAILURE_RETRY(*acceptedSock, accept(listeningSock, &remoteAddr, &addrLen));
         //        SOPC_CONSOLE_PRINTF("selectserver: new connection from %s on socket %d\n",
         //                inet_ntop(remoteaddr.sa_family,
         //                    get_in_addr((struct sockaddr*)&remoteaddr),
@@ -347,7 +348,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     int connectStatus = -1;
     if (addr != NULL && sock != -1)
     {
-        connectStatus = connect(sock, addr->ai_addr, addr->ai_addrlen);
+        S2OPC_TEMP_FAILURE_RETRY(connectStatus, connect(sock, addr->ai_addr, addr->ai_addrlen));
         if (connectStatus < 0)
         {
             if (errno == EINPROGRESS)
@@ -470,7 +471,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
         timeout.tv_usec = (suseconds_t)(1000 * (waitMs % 1000));
         val = &timeout;
     }
-    nbReady = select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val);
+    S2OPC_TEMP_FAILURE_RETRY(nbReady, select(fdmax + 1, &readSet->set, &writeSet->set, &exceptSet->set, val));
     return (int32_t) nbReady;
 }
 
@@ -483,7 +484,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
         status = SOPC_STATUS_NOK;
         /* Don't generate a SIGPIPE signal if the peer on a stream-
               oriented socket has closed the connection. */
-        res = send(sock, data, count, MSG_NOSIGNAL);
+        S2OPC_TEMP_FAILURE_RETRY(res, send(sock, data, count, MSG_NOSIGNAL));
 
         if (res >= 0)
         {
@@ -515,7 +516,7 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     ssize_t sReadCount = 0;
     if (sock != SOPC_INVALID_SOCKET && data != NULL && dataSize > 0 && NULL != readCount)
     {
-        sReadCount = recv(sock, data, dataSize, 0);
+        S2OPC_TEMP_FAILURE_RETRY(sReadCount, recv(sock, data, dataSize, 0));
 
         /* Extract of man recv (release 3.54 of the Linux man-pages project):
          * RETURN VALUE
@@ -566,7 +567,8 @@ SOPC_ReturnStatus SOPC_Socket_BytesToRead(Socket sock, uint32_t* bytesToRead)
     int nbBytes = 0;
     if (sock != SOPC_INVALID_SOCKET && bytesToRead != NULL)
     {
-        int res = ioctl(sock, FIONREAD, &nbBytes);
+        int res = 0;
+        S2OPC_TEMP_FAILURE_RETRY(res, ioctl(sock, FIONREAD, &nbBytes));
         if (res == 0 && nbBytes >= 0)
         {
             if ((uint64_t) nbBytes < UINT32_MAX)
@@ -592,7 +594,9 @@ void SOPC_Socket_Close(Socket* sock)
 {
     if (sock != NULL && *sock != SOPC_INVALID_SOCKET)
     {
-        if (close(*sock) != -1)
+        int res = 0;
+        S2OPC_TEMP_FAILURE_RETRY(res, close(*sock));
+        if (res != -1)
         {
             *sock = SOPC_INVALID_SOCKET;
         }

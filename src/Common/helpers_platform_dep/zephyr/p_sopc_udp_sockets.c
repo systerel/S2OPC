@@ -29,6 +29,7 @@
 
 #include "p_sopc_multicast.h"
 #include "p_sopc_sockets.h"
+#include "sopc_macros.h"
 
 static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo* pAddrInfo,
                                                    const char* interfaceName,
@@ -63,7 +64,7 @@ static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo
 
         if (SOPC_STATUS_OK == status && setNonBlocking)
         {
-            setOptStatus = zsock_fcntl(sock, F_SETFL, O_NONBLOCK);
+            S2OPC_TEMP_FAILURE_RETRY(setOptStatus, zsock_fcntl(sock, F_SETFL, O_NONBLOCK));
             if (0 != setOptStatus)
             {
                 status = SOPC_STATUS_NOK;
@@ -223,12 +224,10 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    ssize_t sent_lenght = 0;
 
-    ssize_t sent_lenght = zsock_sendto(sock, buffer->data,    //
-                                       buffer->length,        //
-                                       0,                     //
-                                       &destAddr->_ai_addr,   //
-                                       destAddr->ai_addrlen); //
+    S2OPC_TEMP_FAILURE_RETRY(
+        sent_lenght, zsock_sendto(sock, buffer->data, buffer->length, 0, &destAddr->_ai_addr, destAddr->ai_addrlen));
 
     if (sent_lenght < 0 || (uint32_t) sent_lenght != buffer->length)
     {
@@ -254,12 +253,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 
     SOPC_Buffer_Reset(buffer);
 
-    recv_len = recvfrom(sock,                      //
-                        buffer->data,              //
-                        buffer->maximum_size,      //
-                        0,                         //
-                        (struct sockaddr*) &saddr, //
-                        &slen);                    //
+    S2OPC_TEMP_FAILURE_RETRY(recv_len, recvfrom(sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &saddr, &slen);                    //)
+    
     if (recv_len >= 0)
     {
         buffer->length = (uint32_t) recv_len;
@@ -284,7 +279,11 @@ void SOPC_UDP_Socket_Close(Socket* pSock)
     {
         Socket sock = *pSock;
         zsock_shutdown(sock, ZSOCK_SHUT_RDWR);
-        if (zsock_close(sock) == 0)
+        int res = 0;
+
+        S2OPC_TEMP_FAILURE_RETRY(res, zsock_close(sock));
+
+        if (res == 0)
         {
             P_MULTICAST_DropIpV4Membership(sock, NULL);
             *pSock = SOPC_INVALID_SOCKET;

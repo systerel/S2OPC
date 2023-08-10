@@ -389,7 +389,8 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     socklen_t addrLen = 0;
     if (SOPC_INVALID_SOCKET != listeningSock && NULL != acceptedSock)
     {
-        *acceptedSock = zsock_accept(listeningSock, &remoteAddr, &addrLen);
+        S2OPC_TEMP_FAILURE_RETRY(*acceptedSock, zsock_accept(listeningSock, &remoteAddr, &addrLen));
+
         if (SOPC_INVALID_SOCKET != *acceptedSock)
         {
             SOCKETS_DEBUG(" ** SOPC_Socket_Accept %d => %d, blocking = %d\n", listeningSock, *acceptedSock,
@@ -410,7 +411,8 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
     int connectStatus = -1;
     if (addr != NULL && sock != -1)
     {
-        connectStatus = zsock_connect(sock, addr->ai_addr, addr->ai_addrlen);
+        S2OPC_TEMP_FAILURE_RETRY(connectStatus, zsock_connect(sock, addr->ai_addr, addr->ai_addrlen));
+
         if (connectStatus < 0)
         {
             if (errno == EINPROGRESS)
@@ -560,8 +562,9 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
         timeout.tv_usec = (suseconds_t)(1000 * (waitMs % 1000));
         val = &timeout;
     }
-    nbReady = zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL, writeSet != NULL ? &writeSet->set : NULL,
-                           exceptSet != NULL ? &exceptSet->set : NULL, val);
+    S2OPC_TEMP_FAILURE_RETRY(nbReady, zsock_select(fdmax + 1, readSet != NULL ? &readSet->set : NULL,
+                                                   writeSet != NULL ? &writeSet->set : NULL,
+                                                   exceptSet != NULL ? &exceptSet->set : NULL, val));
 
     if (nbReady < 0)
     {
@@ -581,7 +584,8 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 
     ssize_t res = 0;
     errno = 0;
-    res = send(sock, data, count, 0);
+    S2OPC_TEMP_FAILURE_RETRY(res, send(sock, data, count, 0));
+
     SOCKETS_DEBUG(" ** send Sock %d \n", sock);
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
 
@@ -612,7 +616,8 @@ SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize
     SOPC_ReturnStatus result = SOPC_STATUS_NOK;
     errno = 0;
     ssize_t sReadCount = 0;
-    sReadCount = zsock_recv(sock, data, dataSize, 0);
+    S2OPC_TEMP_FAILURE_RETRY(sReadCount, zsock_recv(sock, data, dataSize, 0));
+
     const int errId = errno;
 
     if (sReadCount > 0)
@@ -656,7 +661,9 @@ void SOPC_Socket_Close(Socket* sock)
     {
         SOCKETS_DEBUG(" ** zsock_shutdown Sock %d \n", *sock);
         zsock_shutdown(*sock, ZSOCK_SHUT_RDWR);
-        if (0 != zsock_close(*sock))
+        int res = 0;
+        S2OPC_TEMP_FAILURE_RETRY(res, zsock_close(*sock));
+        if (0 != res)
         {
             // Failed to close socket. This is unrecoverable
             SOPC_ASSERT(false);
