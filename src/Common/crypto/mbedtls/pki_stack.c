@@ -1037,7 +1037,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         return status;
     }
 
-    uint32_t firstError = *error;
+    uint32_t firstError = SOPC_CertificateValidationError_Unkown;
+    uint32_t currentError = SOPC_CertificateValidationError_Unkown;
     bool bErrorFound = false;
     bool bIsTrusted = false;
     mbedtls_x509_crt crt = pToValidateCpy->crt;
@@ -1076,24 +1077,22 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         /* CA certificates are always rejected (except for roots if backward interoperability is enabled) */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed : certificate thumbprint %s is a CA",
                                thumbprint);
-        *error = SOPC_CertificateValidationError_UseNotAllowed;
-        firstError = *error;
+        firstError = SOPC_CertificateValidationError_UseNotAllowed;
         bErrorFound = true;
     }
     /* Apply verification on the certificate */
     if (pProfile->bApplyLeafProfile)
     {
-        status = SOPC_PKIProvider_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, error);
+        status = SOPC_PKIProvider_CheckLeafCertificate(pToValidateCpy, pProfile->leafProfile, &currentError);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
                                    "> PKI validation failed : bad properties of certificate thumbprint %s", thumbprint);
-            if (bErrorFound)
+            if (!bErrorFound)
             {
-                *error = firstError;
+                firstError = currentError;
+                bErrorFound = true;
             }
-            bErrorFound = true;
-            firstError = *error;
         }
     }
     mbedtls_x509_crt_profile crt_profile = {0};
@@ -1102,20 +1101,26 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     if (SOPC_STATUS_OK == status)
     {
         mbedtls_x509_crt* mbed_cert_list = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
-        status = sopc_validate_certificate_chain(pPKI, mbed_cert_list, &crt_profile, bIsTrusted, thumbprint, error);
-        if (SOPC_STATUS_NOK == status)
+        status =
+            sopc_validate_certificate_chain(pPKI, mbed_cert_list, &crt_profile, bIsTrusted, thumbprint, &currentError);
+        if (SOPC_STATUS_OK != status)
         {
-            if (bErrorFound)
+            if (!bErrorFound)
             {
-                *error = firstError;
+                firstError = currentError;
+                bErrorFound = true;
             }
-            bErrorFound = true;
         }
+    }
+
+    if (bErrorFound)
+    {
+        *error = firstError;
+        status = SOPC_STATUS_NOK;
     }
 
     SOPC_Free(thumbprint);
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
-    status = bErrorFound ? SOPC_STATUS_NOK : status;
     return status;
 }
 
@@ -1344,7 +1349,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     }
 
     *error = SOPC_CertificateValidationError_Unkown;
-    uint32_t firstError = *error;
+    uint32_t firstError = SOPC_CertificateValidationError_Unkown;
+    uint32_t currentError = SOPC_CertificateValidationError_Unkown;
     bool bErrorFound = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (pProfile->bApplySecurityPolicy)
@@ -1352,8 +1358,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
         status = check_security_policy(pToValidate, pProfile);
         if (SOPC_STATUS_OK != status)
         {
-            *error = SOPC_CertificateValidationError_PolicyCheckFailed;
-            firstError = *error;
+            firstError = SOPC_CertificateValidationError_PolicyCheckFailed;
             bErrorFound = true;
         }
     }
@@ -1362,13 +1367,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
         status = check_host_name(pToValidate, pProfile->sanURL);
         if (SOPC_STATUS_OK != status)
         {
-            *error = SOPC_CertificateValidationError_HostNameInvalid;
-            if (bErrorFound)
+            currentError = SOPC_CertificateValidationError_HostNameInvalid;
+            if (!bErrorFound)
             {
-                *error = firstError;
+                firstError = currentError;
+                bErrorFound = true;
             }
-            bErrorFound = true;
-            firstError = *error;
         }
     }
     if (NULL != pProfile->sanApplicationUri)
@@ -1376,28 +1380,31 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
         status = check_application_uri(pToValidate, pProfile->sanApplicationUri);
         if (SOPC_STATUS_OK != status)
         {
-            *error = SOPC_CertificateValidationError_UriInvalid;
-            if (bErrorFound)
+            currentError = SOPC_CertificateValidationError_UriInvalid;
+            if (!bErrorFound)
             {
-                *error = firstError;
+                firstError = currentError;
+                bErrorFound = true;
             }
-            bErrorFound = true;
-            firstError = *error;
         }
     }
     status = check_certificate_usage(pToValidate, pProfile);
     if (SOPC_STATUS_OK != status)
     {
-        *error = SOPC_CertificateValidationError_UseNotAllowed;
-        if (bErrorFound)
+        currentError = SOPC_CertificateValidationError_UseNotAllowed;
+        if (!bErrorFound)
         {
-            *error = firstError;
+            firstError = currentError;
+            bErrorFound = true;
         }
-        bErrorFound = true;
-        firstError = *error;
     }
 
-    status = bErrorFound ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    if (bErrorFound)
+    {
+        *error = firstError;
+        status = SOPC_STATUS_NOK;
+    }
+
     return status;
 }
 
