@@ -99,6 +99,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         SOPC_ASSERT(NULL != connection);
         SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 42);
         alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://a23slny5qs4w87-ats.iot.eu-west-3.amazonaws.com:8883");
+        //alloc = SOPC_PubSubConnection_Set_Address(connection, "mqtts://192.168.1.108:8883");
     }
     
     // Set acyclic publisher mode

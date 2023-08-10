@@ -111,6 +111,7 @@ static void cbInternalCallback(void* ptr)
     vTaskDelete(NULL);
 }
 
+
 // Initializes created thread then launches it.
 SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
                                 uint16_t wMaxRDV, // Max join
@@ -124,6 +125,7 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
     SOPC_ReturnStatus resPTHR = SOPC_STATUS_OK;
     SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
     Thread handleWks = NULL;
+    extern TaskHandle_t vPublisher_handle;
 
     if (NULL == ptrWks || NULL == pFct)
     {
@@ -224,7 +226,12 @@ SOPC_ReturnStatus P_THREAD_Init(Thread* ptrWks,   // Workspace
     if (SOPC_STATUS_OK == resPTHR)
     {
         BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
-                                               2048, handleWks, priority, &handleWks->handleTask);//configMINIMAL_STACK_SIZE
+                configMINIMAL_STACK_SIZE, handleWks, priority, &handleWks->handleTask);//2048;
+
+        if (taskName != NULL && strncmp(taskName, "Publisher", strlen("Publisher")) == 0)
+        {
+            vPublisher_handle = handleWks->handleTask;
+        }
 
         if (pdPASS != resTaskCreate)
         {

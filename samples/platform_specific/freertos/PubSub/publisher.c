@@ -43,8 +43,11 @@
 
 #include "sopc_macros.h"
 
+#include "b_u585i_iot02a.h"
+
 #define PUBLISHER_THREAD_PRIORITY 30
 #define SLEEP_TIMEOUT 100
+extern SemaphoreHandle_t xSemaphoreSTOP;
 
 static void log_userCallback(const char* context, const char* text)
 {
@@ -68,6 +71,8 @@ void cbToolkit_publisher(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
+    BSP_LED_Init(LED_RED); // Lights up when Publisher is finished
+
     /* Block until the network interface is connected */
     ( void ) xEventGroupWaitBits( xSystemEvents,
                                   EVT_MASK_NET_CONNECTED,
@@ -84,7 +89,7 @@ void cbToolkit_publisher(void)
     SOPC_Assert_Set_UserCallback(&assert_userCallback);
 
     /* Initialize toolkit and configure logs */
-    const SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
+    const SOPC_Log_Configuration logConfig = {.logLevel = SOPC_LOG_LEVEL_INFO,
                                               .logSystem = SOPC_LOG_SYSTEM_USER,
                                               .logSysConfig = {.userSystemLogConfig = {.doLog = &log_userCallback}}};
     status = SOPC_Common_Initialize(logConfig);
@@ -131,7 +136,7 @@ void cbToolkit_publisher(void)
         }
     }
     /* Wait until program stop */
-    while (SOPC_STATUS_OK == status)
+    while (SOPC_STATUS_OK == status && xSemaphoreTake( xSemaphoreSTOP, ( TickType_t ) 10 ) != pdTRUE)
     {
         SOPC_Sleep(SLEEP_TIMEOUT);
     }
@@ -142,4 +147,7 @@ void cbToolkit_publisher(void)
     SOPC_PubSubConfiguration_Delete(config);
     SOPC_Common_Clear();
     Cache_Clear();
+
+    // Red light
+    BSP_LED_On(LED_RED);
 }

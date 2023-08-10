@@ -476,7 +476,7 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
 	publishInfo.payloadLength = message.length;
 
 	packetId = MQTT_GetPacketId(contextClient);
-	LogDebug("PacketId = %d",packetId);
+	SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "PacketId = %d",packetId);
 
 	statusM = MQTT_Publish(contextClient, &publishInfo, packetId);
 
@@ -588,6 +588,7 @@ static int mbedtls_init(const char* hostname, SOPC_Socket_AddressInfo* addrs, Ne
     }
 
     // ---- 1. Start the connection ----
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Trying to establish a TLS connection with the address : %s \r\n ...", hostname);
     if (status_tls_ok == status)
     {
         ret = ssl_ctx.server_fd.fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -610,12 +611,12 @@ static int mbedtls_init(const char* hostname, SOPC_Socket_AddressInfo* addrs, Ne
 
     if (status_tls_ok != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Init Mbed TLS fail with error code : %d", ret);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Init TLS fail with error code : %d", ret);
         mbedtls_deinit();
     }
     else
     {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Init Mbed TLS Done");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Init TLS Done");
     }
 
     pNetctx->sock = ssl_ctx.server_fd.fd;
