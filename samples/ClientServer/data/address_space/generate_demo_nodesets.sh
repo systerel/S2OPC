@@ -40,6 +40,13 @@ sed '1d' s2opc_sks.xml.tmp >> s2opc_sks.xml
 echo '' >> s2opc_sks.xml
 rm s2opc_sks.xml.tmp
 
+# Generate demo NodeSet for Micro profile + PUSH
+../../../../scripts/nodeset-address-space-utils.py --output s2opc_push.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+cat licence.xml > s2opc_push.xml
+sed '1d' s2opc_push.xml.tmp >> s2opc_push.xml
+echo '' >> s2opc_push.xml
+rm s2opc_push.xml.tmp
+
 # Generate demo NodeSet for Nano profile
 ../../../../scripts/nodeset-address-space-utils.py --output s2opc_nano.xml.tmp --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 cat licence.xml > s2opc_nano.xml
