@@ -42,14 +42,7 @@ typedef enum
 /**
  * \brief Structure to gather the CertificateGroup object configuration data
  */
-typedef struct SOPC_CertificateGroup_Config
-{
-    const char* certificateGroupNodeId;    /*!< The NodeId of the Certificate Group Object.*/
-    const char* varCertificateTypesNodeId; /*!< The nodeId of the CertificateTypes variable.*/
-    const SOPC_TrustList_Config*
-        pTrustListCfg;              /*!< the TrustList configuration that belongs to the CertificateGroup object */
-    SOPC_Certificate_Type certType; /*!< The CertificateType */
-} SOPC_CertificateGroup_Config;
+typedef struct SOPC_CertificateGroup_Config SOPC_CertificateGroup_Config;
 
 /**
  * \brief Initialise the API.
@@ -64,17 +57,34 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void);
 /**
  * \brief Get the CertificateGroup object configuration with the default address space.
  *
- * \param groupType  Defined the certificate group type of the TrustList (application or user).
- * \param certType   Defined the certificate type (certificate properties).
- * \param pPKI       A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
+ * \param groupType        Defined the certificate group type of the TrustList (application or user).
+ * \param certType         Defined the certificate type (certificate properties).
+ * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
+ * \param maxTrustListSize Defined the maximum size in byte of the TrustList that belongs to the
+ *                         CertificateGroup object.
+ * \param pKey  A valid pointer to the private key that belongs to the CertificateGroup object
+ *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
+ * \param pCert A valid pointer to the certificate that belongs to the CertificateGroup object
+ *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
+ * \param[out] ppConfig A newly created configuration. You should delete it with
+ *                      ::SOPC_CertificateGroup_DeleteConfiguration .
  *
- * \note The function return NULL in case of error.
- *
- * \return Return the structure ::SOPC_CertificateGroup_Config filed with default values.
+ * \return SOPC_STATUS_OK if successful.
  */
-const SOPC_CertificateGroup_Config* SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
-                                                                                  const SOPC_Certificate_Type certType,
-                                                                                  SOPC_PKIProvider* pPKI);
+SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
+                                                                const SOPC_Certificate_Type certType,
+                                                                SOPC_PKIProvider* pPKI,
+                                                                const size_t maxTrustListSize,
+                                                                SOPC_SerializedAsymmetricKey* pKey,
+                                                                SOPC_SerializedCertificate* pCert,
+                                                                SOPC_CertificateGroup_Config** ppConfig);
+
+/**
+ * \brief Delete CertificateGroup configuration.
+ *
+ * \param ppConfig The configuration.
+ */
+void SOPC_CertificateGroup_DeleteConfiguration(SOPC_CertificateGroup_Config** ppConfig);
 
 /**
  * \brief Adding a CertificateGroup object to the API from the address space information.
@@ -83,19 +93,15 @@ const SOPC_CertificateGroup_Config* SOPC_CertificateGroup_GetDefaultConfiguratio
  *       This function shall be call before the server is started.
  *
  * \param pCfg  Pointer to the structure which gather the configuration data of the CertificateGroup object
- * \param pKey  A valid pointer to the private key that belongs to the CertificateGroup object (NULL if not use)
- * \param pCert A valid pointer to the certificate that belongs to the CertificateGroup object (NULL if not use)
  * \param pMcm  A valid pointer to a ::SOPC_MethodCallManager.
  *
  * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Config* pCfg,
-                                                  SOPC_SerializedAsymmetricKey* pKey,
-                                                  SOPC_SerializedCertificate* pCert,
                                                   SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the API
+ * \brief Uninitialized the Certificate Group API
  */
 void SOPC_CertificateGroup_Clear(void);
 

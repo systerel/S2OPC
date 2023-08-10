@@ -21,6 +21,7 @@
  *
  * \brief  Demo server implementing the Push Model of the certificate management.
  *         The server shall not be Nano compliant since CallMethod service is not available.
+ *         S2OPC shall be build with S2OPC_DYNAMIC_TYPE_RESOLUTION option.
  */
 
 #include <stdio.h>
@@ -95,7 +96,7 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     SOPC_MethodCallManager* pMcm = NULL;
     SOPC_S2OPC_Config* s2opcConfig = NULL;
     SOPC_Server_Config* serverConfig = NULL;
-    SOPC_PushServerConfig_Config config = {0};
+    SOPC_PushServerConfig_Config* pPushConfig = NULL;
 
     SOPC_ReturnStatus status = SOPC_PushServerConfig_Initialize();
     if (SOPC_STATUS_OK != status)
@@ -104,8 +105,9 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     }
     s2opcConfig = SOPC_CommonHelper_GetConfiguration();
     serverConfig = &s2opcConfig->serverConfig;
-    status = SOPC_PushServerConfig_GetDefaultConfiguration(serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION,
-                                                           NULL, SOPC_CERT_TYPE_UNKNOW, &config);
+    status = SOPC_PushServerConfig_GetDefaultConfiguration(
+        serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, serverConfig->serverKey,
+        serverConfig->serverCertificate, NULL, SOPC_CERT_TYPE_UNKNOW, SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -118,10 +120,10 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_PushServerConfig_Configure(&config, serverConfig->serverKey, serverConfig->serverCertificate, pMcm);
+        status = SOPC_PushServerConfig_Configure(pPushConfig, pMcm);
     }
 
+    SOPC_PushServerConfig_DeleteConfiguration(&pPushConfig);
     return status;
 }
 

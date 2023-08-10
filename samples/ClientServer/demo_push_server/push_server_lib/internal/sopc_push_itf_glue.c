@@ -94,5 +94,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* p
         status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(
             "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/user_public/user_2k_cert.der", ppTrustedCerts);
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_CreateOrAddFromFile(
+            "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/revoked/cacrl.der", ppTrustedCrl);
+    }
     return status;
 }

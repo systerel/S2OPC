@@ -28,6 +28,7 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_certificate_group.h"
 #include "sopc_certificate_group_itf.h"
 
@@ -39,6 +40,30 @@
  *                             Internal types
  *---------------------------------------------------------------------------*/
 
+/**
+ * \brief Internal structure to gather nodeIds.
+ */
+typedef struct CertificateGroup_NodeIds
+{
+    SOPC_NodeId* pCertificateGroupId; /*!< The NodeId of the Certificate Group Object. */
+    SOPC_NodeId* pCertificateTypesId; /*!< The nodeId of the CertificateTypes variable. */
+    SOPC_NodeId* pTrustListId;        /*!< The nodeId of the TrustList that belongs to the group */
+} CertificateGroup_NodeIds;
+
+/**
+ * \brief Structure to gather CertificateGroup configuration data.
+ */
+struct SOPC_CertificateGroup_Config
+{
+    const CertificateGroup_NodeIds* pIds; /*!< Defined all the nodeId of the CertificateGroup. */
+    SOPC_TrustList_Config* pTrustListCfg; /*!< the TrustList configuration that belongs to the CertificateGroup. */
+    SOPC_Certificate_Type certType;       /*!< The CertificateType. */
+    const SOPC_PKIProvider* pPKI;         /*!< The PKI that belongs to the group. */
+    SOPC_TrustList_Type groupType;        /*!< Define the group type (user or app) */
+    SOPC_SerializedAsymmetricKey* pKey;   /*!< The private key that belongs to the group.*/
+    SOPC_SerializedCertificate* pCert;    /*!< The certificate that belongs to the group.*/
+};
+
 /*---------------------------------------------------------------------------
  *                             Global variables
  *---------------------------------------------------------------------------*/
@@ -46,18 +71,44 @@
 static SOPC_Dict* gObjIdToCertGroup = NULL;
 static int32_t gTombstoneKey = -1;
 
-SOPC_CertificateGroup_Config gCertGroup_DefaultAddSpace_App = {
-    .certificateGroupNodeId = "ns=0;i=14156",
-    .varCertificateTypesNodeId = "ns=0;i=14161",
-    .pTrustListCfg = NULL,
-    .certType = SOPC_CERT_TYPE_UNKNOW,
+/* NodeIds of the CertificateGroup instance of the DefaultApplicationGroup */
+static SOPC_NodeId appCertificateGroupId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup};
+static SOPC_NodeId appCertificateTypesId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_CertificateTypes};
+static SOPC_NodeId appTrustListId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList};
+
+static const CertificateGroup_NodeIds appNodeIds = {
+    .pCertificateGroupId = &appCertificateGroupId,
+    .pCertificateTypesId = &appCertificateTypesId,
+    .pTrustListId = &appTrustListId,
 };
 
-SOPC_CertificateGroup_Config gCertGroup_DefaultAddSpace_Usr = {
-    .certificateGroupNodeId = "ns=0;i=14122",
-    .varCertificateTypesNodeId = "ns=0;i=14155",
-    .pTrustListCfg = NULL,
-    .certType = SOPC_CERT_TYPE_UNKNOW,
+/* NodeIds of the CertificateGroup instance of the DefaultUserTokenGroup */
+static SOPC_NodeId usrCertificateGroupId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup};
+static SOPC_NodeId usrCertificateTypesId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_CertificateTypes};
+static SOPC_NodeId usrTrustListId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList};
+
+static const CertificateGroup_NodeIds usrNodeIds = {
+    .pCertificateGroupId = &usrCertificateGroupId,
+    .pCertificateTypesId = &usrCertificateTypesId,
+    .pTrustListId = &usrTrustListId,
 };
 
 /*---------------------------------------------------------------------------
@@ -148,20 +199,27 @@ static void cert_group_dict_free_context_value(uintptr_t value)
 static SOPC_ReturnStatus cert_group_set_cert_type(SOPC_CertGroupContext* pCertGroup, SOPC_Certificate_Type certType)
 {
     SOPC_ASSERT(NULL != pCertGroup);
+    SOPC_ASSERT(NULL == pCertGroup->pCertificateTypeValueId);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    pCertGroup->pCertificateTypeValueId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    if (NULL == pCertGroup->pCertificateTypeValueId)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
 
     switch (certType)
     {
     case SOPC_CERT_TYPE_RSA_MIN_APPLICATION:
-        pCertGroup->pCertificateTypeValueId = SOPC_NodeId_FromCString(
-            SOPC_RsaMinApplicationCertificateTypeId, (int32_t) strlen(SOPC_RsaMinApplicationCertificateTypeId));
-        status = NULL == pCertGroup->pCertificateTypeValueId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pCertGroup->pCertificateTypeValueId->IdentifierType = SOPC_IdentifierType_Numeric;
+        pCertGroup->pCertificateTypeValueId->Namespace = 0;
+        pCertGroup->pCertificateTypeValueId->Data.Numeric = OpcUaId_RsaMinApplicationCertificateType;
         break;
     case SOPC_CERT_TYPE_RSA_SHA256_APPLICATION:
-        pCertGroup->pCertificateTypeValueId = SOPC_NodeId_FromCString(
-            SOPC_RsaSha256ApplicationCertificateTypeId, (int32_t) strlen(SOPC_RsaSha256ApplicationCertificateTypeId));
-        status = NULL == pCertGroup->pCertificateTypeValueId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pCertGroup->pCertificateTypeValueId->IdentifierType = SOPC_IdentifierType_Numeric;
+        pCertGroup->pCertificateTypeValueId->Namespace = 0;
+        pCertGroup->pCertificateTypeValueId->Data.Numeric = OpcUaId_RsaSha256ApplicationCertificateType;
         break;
     default:
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -191,41 +249,94 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void)
     return SOPC_STATUS_OK;
 }
 
-const SOPC_CertificateGroup_Config* SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
-                                                                                  const SOPC_Certificate_Type certType,
-                                                                                  SOPC_PKIProvider* pPKI)
+SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
+                                                                const SOPC_Certificate_Type certType,
+                                                                SOPC_PKIProvider* pPKI,
+                                                                const size_t maxTrustListSize,
+                                                                SOPC_SerializedAsymmetricKey* pKey,
+                                                                SOPC_SerializedCertificate* pCert,
+                                                                SOPC_CertificateGroup_Config** ppConfig)
 {
-    bool bFound = false;
-    SOPC_CertificateGroup_Config* pCfg = NULL;
-    const SOPC_TrustList_Config* pTrustListCfg = SOPC_TrustList_GetDefaultConfiguration(groupType, pPKI);
-    if (NULL == pTrustListCfg)
+    if (NULL == pPKI || 0 == maxTrustListSize || NULL == ppConfig)
     {
-        return NULL;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    switch (groupType)
+    if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != certType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != certType)
     {
-    case SOPC_TRUSTLIST_GROUP_APP:
-        pCfg = &gCertGroup_DefaultAddSpace_App;
-        bFound = true;
-        break;
-    case SOPC_TRUSTLIST_GROUP_USR:
-        pCfg = &gCertGroup_DefaultAddSpace_Usr;
-        bFound = true;
-        break;
-    default:
-        break;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (bFound)
+    const CertificateGroup_NodeIds* pNodeIds = NULL;
+    if (SOPC_TRUSTLIST_GROUP_APP == groupType)
     {
-        pCfg->certType = certType;
+        pNodeIds = &appNodeIds;
+    }
+    else if (SOPC_TRUSTLIST_GROUP_USR == groupType)
+    {
+        pNodeIds = &usrNodeIds;
+    }
+    else
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* key <=> cert */
+    if ((NULL == pKey && NULL != pCert) || (NULL != pKey && NULL == pCert))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* key and cert has no meaning for user group */
+    if (SOPC_TRUSTLIST_GROUP_USR == groupType && NULL != pKey && NULL != pCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_TRUSTLIST_GROUP_USR != groupType && (NULL == pKey || NULL == pCert))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateGroup_Config* pCfg = SOPC_Calloc(1, sizeof(SOPC_CertificateGroup_Config));
+    if (NULL == pCfg)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_TrustList_Config* pTrustListCfg = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_TrustList_GetDefaultConfiguration(groupType, pPKI, maxTrustListSize, &pTrustListCfg);
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg->pIds = pNodeIds;
         pCfg->pTrustListCfg = pTrustListCfg;
+        pCfg->pPKI = pPKI;
+        pCfg->groupType = groupType;
+        pCfg->certType = certType;
+        pCfg->pKey = pKey;
+        pCfg->pCert = pCert;
     }
-    return (const SOPC_CertificateGroup_Config*) pCfg;
+    else
+    {
+        SOPC_Free(pCfg);
+        pCfg = NULL;
+    }
+    *ppConfig = pCfg;
+    return status;
+}
+
+void SOPC_CertificateGroup_DeleteConfiguration(SOPC_CertificateGroup_Config** ppConfig)
+{
+    if (NULL == ppConfig)
+    {
+        return;
+    }
+    SOPC_CertificateGroup_Config* pConfig = *ppConfig;
+    if (NULL == pConfig)
+    {
+        return;
+    }
+    SOPC_TrustList_DeleteConfiguration(&pConfig->pTrustListCfg);
+    memset(pConfig, 0, sizeof(SOPC_CertificateGroup_Config));
+    SOPC_Free(pConfig);
+    *ppConfig = NULL;
 }
 
 SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Config* pCfg,
-                                                  SOPC_SerializedAsymmetricKey* pKey,
-                                                  SOPC_SerializedCertificate* pCert,
                                                   SOPC_MethodCallManager* pMcm)
 {
     /* The API is not initialized. */
@@ -238,21 +349,26 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (NULL == pCfg->pTrustListCfg || NULL == pCfg->certificateGroupNodeId || NULL == pCfg->varCertificateTypesNodeId)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (NULL == pCfg->pTrustListCfg->pPKI)
+    if (NULL == pCfg->pIds || NULL == pCfg->pPKI || NULL == pCfg->pTrustListCfg)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* key <=> cert */
-    if ((NULL == pKey && NULL != pCert) || (NULL != pKey && NULL == pCert))
+    if ((NULL == pCfg->pKey && NULL != pCfg->pCert) || (NULL != pCfg->pKey && NULL == pCfg->pCert))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* key and cert has no meaning for user group */
-    if (SOPC_TRUSTLIST_GROUP_USR == pCfg->pTrustListCfg->groupType && NULL != pKey && NULL != pCert)
+    if (SOPC_TRUSTLIST_GROUP_USR == pCfg->groupType && NULL != pCfg->pKey && NULL != pCfg->pCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType && (NULL == pCfg->pKey || NULL == pCfg->pCert))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    const CertificateGroup_NodeIds* pIds = pCfg->pIds;
+    if (NULL == pIds->pCertificateGroupId || NULL == pIds->pCertificateTypesId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -270,22 +386,19 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     }
     if (SOPC_STATUS_OK == status)
     {
-        pCertGroup->pObjectId =
-            SOPC_NodeId_FromCString(pCfg->certificateGroupNodeId, (int32_t) strlen(pCfg->certificateGroupNodeId));
-        status = NULL == pCertGroup->pObjectId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pCertGroup->pObjectId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pCertGroup->pObjectId, pIds->pCertificateGroupId);
     }
     if (SOPC_STATUS_OK == status)
     {
-        pCertGroup->pTrustListId = SOPC_NodeId_FromCString(pCfg->pTrustListCfg->trustListNodeId,
-                                                           (int32_t) strlen(pCfg->pTrustListCfg->trustListNodeId));
-        status = NULL == pCertGroup->pTrustListId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pCertGroup->pTrustListId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pCertGroup->pTrustListId, pIds->pTrustListId);
     }
     /* Add certificate type */
     if (SOPC_STATUS_OK == status)
     {
-        pCertGroup->pCertificateTypeId =
-            SOPC_NodeId_FromCString(pCfg->varCertificateTypesNodeId, (int32_t) strlen(pCfg->varCertificateTypesNodeId));
-        status = NULL == pCertGroup->pCertificateTypeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+        pCertGroup->pCertificateTypeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pCertGroup->pCertificateTypeId, pIds->pCertificateTypesId);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -294,8 +407,8 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     /* Finally add the certificateGroup to the dictionary */
     if (SOPC_STATUS_OK == status)
     {
-        pCertGroup->pKey = pKey;
-        pCertGroup->pCert = pCert;
+        pCertGroup->pKey = pCfg->pKey;
+        pCertGroup->pCert = pCfg->pCert;
         bool res = CertificateGroup_DictInsert(pCertGroup->pObjectId, pCertGroup);
         status = !res ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }

@@ -28,9 +28,6 @@
 #include "sopc_certificate_group_itf.h"
 #include "sopc_trustlist.h"
 
-#define SOPC_RsaMinApplicationCertificateTypeId "ns=0;i=12559"
-#define SOPC_RsaSha256ApplicationCertificateTypeId "ns=0;i=12560"
-
 /**
  * \brief Internal context for the CertificateGroup
  */
