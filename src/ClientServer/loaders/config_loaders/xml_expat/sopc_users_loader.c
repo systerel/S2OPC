@@ -54,7 +54,7 @@ typedef enum
     PARSE_USERAUTHORIZATION,          // ......In a UserAuthorization tag
     PARSE_USERCERTIFICATES,           // ..In userCertificates
     PARSE_USER_PKI,                   // ....In a PublicKeyInfrastructure tag
-    PARSE_ISSUED_CERT,                // ....In a IssuedCertificate tag
+    PARSE_USER_CERT_RIGHTS,           // ....In a UserCertificateRights tag
 
 } parse_state_t;
 
@@ -471,7 +471,8 @@ static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char**
     SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(path, &pCert);
     if (SOPC_STATUS_OK != status)
     {
-        LOG_XML_ERRORF(ctx->helper_ctx.parser, "IssuedCertificate: Enable to load user certificate from path %s", path);
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "UserCertificateRights: Enable to load user certificate from path %s",
+                       path);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -485,7 +486,7 @@ static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char**
         if (NULL == thumbprint || SOPC_STATUS_OK != status)
         {
             LOG_XML_ERRORF(ctx->helper_ctx.parser,
-                           "IssuedCertificate: Enable to get certificate thumbprint from path %s", path);
+                           "UserCertificateRights: Enable to get certificate thumbprint from path %s", path);
             SOPC_String_Clear(&ctx->currentCert->certThumb);
             status = SOPC_STATUS_NOK;
         }
@@ -503,7 +504,7 @@ static bool set_cert_authorization(struct parse_context_t* ctx, const XML_Char**
     return ret;
 }
 
-static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attrs)
+static bool start_user_cert_rights(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     const char* attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "path", attrs);
 
@@ -511,7 +512,7 @@ static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attr
 
     if (path == NULL)
     {
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "IssuedCertificate: no path defined");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "UserCertificateRights: no path defined");
         LOG_MEMORY_ALLOCATION_FAILURE;
         return false;
     }
@@ -519,7 +520,7 @@ static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attr
     if (0 == strlen(path))
     {
         SOPC_Free(path);
-        LOG_XML_ERROR(ctx->helper_ctx.parser, "IssuedCertificate: empty path is forbidden");
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "UserCertificateRights: empty path is forbidden");
         return false;
     }
 
@@ -532,7 +533,7 @@ static bool start_issued_cert(struct parse_context_t* ctx, const XML_Char** attr
 
     bool res = set_cert_authorization(ctx, attrs, path);
 
-    ctx->state = PARSE_ISSUED_CERT;
+    ctx->state = PARSE_USER_CERT_RIGHTS;
     ctx->issuedCertificateSet = true;
 
     return res;
@@ -658,9 +659,9 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
                 return;
             }
         }
-        else if (0 == strcmp(name, "IssuedCertificate"))
+        else if (0 == strcmp(name, "UserCertificateRights"))
         {
-            if (!start_issued_cert(ctx, attrs))
+            if (!start_user_cert_rights(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -767,7 +768,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_USERPASSWORD_CONFIGURATION:
         ctx->state = PARSE_S2OPC_USERS;
         break;
-    case PARSE_ISSUED_CERT:
+    case PARSE_USER_CERT_RIGHTS:
         if (!end_issued_cert(ctx))
         {
             XML_StopParser(ctx->helper_ctx.parser, 0);

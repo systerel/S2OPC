@@ -46,7 +46,7 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-  <xs:complexType name="IssuedCertificateType">
+  <xs:complexType name="UserCertificateRightsType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute type="xs:string" name="path" use="required"/>
@@ -64,7 +64,7 @@
   <xs:complexType name="UserCertificatesType">
     <xs:sequence>
       <xs:element type="PublicKeyInfrastructureType" name="PublicKeyInfrastructure" minOccurs="1" maxOccurs="1"/>
-      <xs:element type="IssuedCertificateType" name="IssuedCertificate" maxOccurs="unbounded"/>
+      <xs:element type="UserCertificateRightsType" name="UserCertificateRights" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S2OPC_UsersType">
