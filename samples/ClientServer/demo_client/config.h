@@ -62,8 +62,7 @@ extern char* APPLICATION_URI;
 extern char* PATH_CLIENT_PUBL;
 extern char* PATH_CLIENT_PRIV;
 extern char* PATH_SERVER_PUBL;
-extern char* PATH_CACERT_PUBL;
-extern char* PATH_CACRL;
+extern char* PATH_PKI_STORE;
 extern char* PATH_ISSUED;
 
 extern char* USER_POLICY_ID;
@@ -74,7 +73,7 @@ extern char* PATH_USER_PRIV;
 extern char* SESSION_NAME;
 
 /* Options to include in command line tool for connection management */
-extern struct argparse_option CONN_OPTIONS[17];
+extern struct argparse_option CONN_OPTIONS[16];
 
 /* Active wait sleep, in ms */
 #define SLEEP_LENGTH 200

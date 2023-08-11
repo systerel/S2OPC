@@ -39,8 +39,7 @@ char* APPLICATION_URI = "urn:S2OPC:localhost";
 char* PATH_CLIENT_PUBL = "./client_public/client_4k_cert.der";
 char* PATH_CLIENT_PRIV = "./client_private/encrypted_client_4k_key.pem";
 char* PATH_SERVER_PUBL = "./server_public/server_4k_cert.der";
-char* PATH_CACERT_PUBL = "./trusted/cacert.der";
-char* PATH_CACRL = "./revoked/cacrl.der";
+char* PATH_PKI_STORE = "./S2OPC_Demo_PKI";
 char* PATH_ISSUED = NULL;
 char* PATH_USER_PUBL = NULL; // "./user_public/user_4k_cert.der";
 char* PATH_USER_PRIV = NULL; // "./user_private/encrypted_user_4k_key.pem";
@@ -65,7 +64,7 @@ char* USER_NAME = NULL;
 
 char* SESSION_NAME = "S2OPC_client_session";
 
-struct argparse_option CONN_OPTIONS[17] = {
+struct argparse_option CONN_OPTIONS[16] = {
     OPT_GROUP("Connection options"),
     OPT_STRING('e',
                "endpointURL",
@@ -120,16 +119,9 @@ struct argparse_option CONN_OPTIONS[17] = {
                0,
                0),
     OPT_STRING(0,
-               "ca",
-               &PATH_CACERT_PUBL,
-               "(default: ./trusted/cacert.der) path to the certificate authority (CA)",
-               NULL,
-               0,
-               0),
-    OPT_STRING(0,
-               "crl",
-               &PATH_CACRL,
-               "(default: ./revoked/cacrl.der) path to the certificate authority revocation list (CRL)",
+               "pki_store",
+               &PATH_PKI_STORE,
+               "(default: ./S2OPC_Demo_PKI) path to the PKI directory where certificates are stored",
                NULL,
                0,
                0),
@@ -379,28 +371,22 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
     if (0 == nCfgCreated && SOPC_STATUS_OK == status)
     {
         SOPC_CertificateList* pTrustedCerts = NULL;
-        SOPC_CRLList* pTrustedCrl = NULL;
 
-        /* Load  trusted certificates */
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(PATH_CACERT_PUBL, &pTrustedCerts);
-        }
+        /* Load issued certificates */
         if (SOPC_STATUS_OK == status && NULL != PATH_ISSUED)
         {
             status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(PATH_ISSUED, &pTrustedCerts);
         }
 
-        /* Load trusted CRL */
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_CRL_CreateOrAddFromFile(PATH_CACRL, &pTrustedCrl);
-        }
-
         /* Create the PKI (Public Key Infrastructure) provider */
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPki);
+            status = SOPC_PKIProvider_CreateFromStore(PATH_PKI_STORE, &pPki);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PKIProvider_UpdateFromList(&pPki, NULL, pTrustedCerts, NULL, NULL, NULL, true);
         }
 
         if (SOPC_STATUS_OK != status)
@@ -409,7 +395,6 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
         }
         /* Clear */
         SOPC_KeyManager_Certificate_Free(pTrustedCerts);
-        SOPC_KeyManager_CRL_Free(pTrustedCrl);
     }
 
     nCfgCreated += 1; /* If it failed once, do not try again */
