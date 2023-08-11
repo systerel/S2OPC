@@ -32,7 +32,6 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_push_itf_glue.h"
 
 SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* callContextPtr,
                                                     const SOPC_NodeId* objectId,
