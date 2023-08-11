@@ -449,6 +449,7 @@ bool CertificateGroup_DictInsert(SOPC_NodeId* pObjectId, SOPC_CertGroupContext* 
         return false;
     }
     bool res = SOPC_Dict_Insert(gObjIdToCertGroup, (uintptr_t) pObjectId, (uintptr_t) pContext);
+    return res;
 }
 
 /* Get the CertificateGroup context from the nodeId */

@@ -28,7 +28,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_call_method_manager.h"
-#include "sopc_pki.h"
+#include "sopc_pki_stack.h"
 
 /**
  * \brief Defined the default maximum size in byte of the trustList certificate

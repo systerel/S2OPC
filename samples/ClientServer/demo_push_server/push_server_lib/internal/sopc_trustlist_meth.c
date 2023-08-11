@@ -33,7 +33,6 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_push_itf_glue.h"
 
 SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callContextPtr,
                                                const SOPC_NodeId* objectId,
@@ -91,7 +90,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     bool isValid = TrustList_SetOpenMasks(pTrustList, inputArgs[0].Value.Uint32);
     if (!isValid)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMask: invalid rcv masks" PRIu32,
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMask: invalid rcv masks %" PRIu32,
                                cStrId, inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
@@ -606,7 +605,6 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     *outputArgs = NULL;
 
     /* Variable initialization */
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool match = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;

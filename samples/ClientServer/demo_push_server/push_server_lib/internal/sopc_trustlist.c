@@ -980,8 +980,10 @@ bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContex
     bool res = SOPC_Dict_Insert(gObjIdToTrustList, (uintptr_t) pObjectId, (uintptr_t) pContext);
     if (!res)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: unable to insert TrustList context",
-                               pObjectId);
+        char* cStrId = SOPC_NodeId_ToCString(pObjectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList: unable to insert TrustList context to %s",
+                               cStrId);
+        SOPC_Free(cStrId);
     }
     return res;
 }
@@ -998,8 +1000,10 @@ SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool* fou
     pCtx = (SOPC_TrustListContext*) SOPC_Dict_Get(gObjIdToTrustList, (const uintptr_t) pObjectId, found);
     if (!found || NULL == pCtx)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: unable to retrieve TrustList context",
-                               pObjectId);
+        char* cStrId = SOPC_NodeId_ToCString(pObjectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList: unable to retrieve TrustList context from %s",
+                               cStrId);
+        SOPC_Free(cStrId);
     }
     return pCtx;
 }
