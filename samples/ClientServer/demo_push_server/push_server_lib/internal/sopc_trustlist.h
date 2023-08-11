@@ -76,9 +76,9 @@ typedef struct SOPC_TrustListContext
 {
     size_t maxTrustListSize;             /*!< Defined the maximum size in byte for the TrustList */
     SOPC_NodeId* pObjectId;              /*!< The nodeId of the the TrustList */
-    char* cStrObjectId;                  /*!< The C string nodeId of the the TrustList (it is used for logs)*/
+    char* cStrObjectId;                  /*!< The C string nodeId of the the TrustList (it is used for logs) */
     SOPC_TrLst_Handle handle;            /*!< Defined the TrustList handle */
-    SOPC_TrLst_OpenMode openingMode;     /*!< Defined the opening mode (read or write + erase if existing)*/
+    SOPC_TrLst_OpenMode openingMode;     /*!< Defined the opening mode (read or write + erase if existing) */
     SOPC_TrLst_Mask openingMask;         /*!< Defined the opening mask to read only part of the TrustList */
     SOPC_TrustList_Type groupType;       /*!< Defined the TrustList type (associated to user or application) */
     SOPC_TrLst_VarCfg varIds;            /*!< The structure which gather all the variable nodIds
@@ -154,6 +154,18 @@ bool TrustList_SetOpenMode(SOPC_TrustListContext* pTrustList, SOPC_TrLst_OpenMod
 bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask masks);
 
 /**
+ * \brief Set the TrustList position.
+ *
+ * \param pTrustList The TrustList context.
+ * \param[out] pos  The TrustList position.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint64_t pos);
+
+/**
  * \brief Get the TrustList handle.
  *
  * \param pTrustList The TrustList context.
@@ -163,6 +175,17 @@ bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask m
  * \return The TrustList handle
  */
 uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList);
+
+/**
+ * \brief Get the TrustList position.
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ *
+ * \return The TrustList position.
+ */
+uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Check the TrustList handle.
@@ -219,7 +242,6 @@ const char* TrustList_GetStrNodeId(const SOPC_TrustListContext* pTrustList);
  * \param pTrustList The TrustList context.
  *
  * \warning The \p pTrustList shall be opened for reading.
- *          This function do nothing if the TrustList is already encode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -239,7 +261,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList);
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus TrustList_Read(const SOPC_TrustListContext* pTrustList, int32_t reqLength, SOPC_ByteString* pDest);
+SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqLength, SOPC_ByteString* pDest);
 
 /**
  * \brief Read and decode the buffer containing the TrustListDataType.

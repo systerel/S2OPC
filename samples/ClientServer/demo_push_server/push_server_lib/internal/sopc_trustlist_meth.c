@@ -81,7 +81,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
         return OpcUa_BadInvalidState;
     }
     /* Check type of input arguments */
-    if (SOPC_UInt32_Id != inputArgs->BuiltInTypeId)
+    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: bad BuiltInTypeId arguments",
                                cStrId);
@@ -97,14 +97,24 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     }
     isValid = TrustList_SetOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ);
     SOPC_ASSERT(isValid);
-
-    /* Create the output variant */
-    pVariant = SOPC_Variant_Create();
-    if (NULL == pVariant)
+    /* Encode the TrustList */
+    status = TrustList_Encode(pTrustList);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMask: unable to create a variant",
-                               cStrId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:OpenWithMask: failed to encode the trustList", cStrId);
         statusCode = OpcUa_BadUnexpectedError;
+    }
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        /* Create the output variant */
+        pVariant = SOPC_Variant_Create();
+        if (NULL == pVariant)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:OpenWithMask: unable to create a variant", cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
     }
     /* Generate and set the handle */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
@@ -124,6 +134,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     else
     {
         TrustList_Reset(pTrustList);
+        SOPC_Variant_Delete(pVariant);
     }
 
     return SOPC_GoodGenericStatus;
@@ -157,7 +168,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:Open: bad inputs arguments");
-        statusCode = OpcUa_BadInvalidArgument;
+        return OpcUa_BadInvalidArgument;
     }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
@@ -175,7 +186,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidState;
     }
     /* Check type of input arguments */
-    if (SOPC_Byte_Id != inputArgs->BuiltInTypeId)
+    if (SOPC_Byte_Id != inputArgs[0].BuiltInTypeId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: bad BuiltInTypeId arguments", cStrId);
         return OpcUa_BadInvalidArgument;
@@ -190,13 +201,24 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     }
     isValid = TrustList_SetOpenMasks(pTrustList, SOPC_TL_MASK_ALL);
     SOPC_ASSERT(isValid);
-
-    /* Create the output variant */
-    pVariant = SOPC_Variant_Create();
-    if (NULL == pVariant)
+    /* Encode the TrustList */
+    status = TrustList_Encode(pTrustList);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: unable to create a variant", cStrId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: failed to encode the trustList",
+                               cStrId);
         statusCode = OpcUa_BadUnexpectedError;
+    }
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        /* Create the output variant */
+        pVariant = SOPC_Variant_Create();
+        if (NULL == pVariant)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: unable to create a variant",
+                                   cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
     }
     /* Generate and set the random handle */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
@@ -216,6 +238,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     else
     {
         TrustList_Reset(pTrustList);
+        SOPC_Variant_Delete(pVariant);
     }
     return statusCode;
 }
@@ -231,9 +254,11 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     printf("Method Close Call\n");
 
     SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(nbOutputArgs);
-    SOPC_UNUSED_ARG(outputArgs);
     SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
 
     const char* cStrId = NULL;
     bool found = false;
@@ -253,7 +278,7 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* Check type of input arguments */
-    if (SOPC_UInt32_Id != inputArgs->BuiltInTypeId)
+    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Close: bad BuiltInTypeId arguments", cStrId);
         return OpcUa_BadInvalidArgument;
@@ -435,12 +460,6 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: bad BuiltInTypeId arguments", cStrId);
         return OpcUa_BadInvalidArgument;
     }
-    /* Check mode */
-    match = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "Read: File was not opened for read access");
-    if (!match)
-    {
-        return OpcUa_BadInvalidState;
-    }
     /* Check handle */
     match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
     if (!match)
@@ -449,6 +468,12 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
                                inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
+    /* Check mode */
+    match = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "Read: File was not opened for read access");
+    if (!match)
+    {
+        return OpcUa_BadInvalidState;
+    }
     /* Check length (only positive values are allowed) */
     reqLen = inputArgs[1].Value.Int32;
     if (0 >= reqLen)
@@ -456,14 +481,6 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: Invalid rcv length: %" PRId32, cStrId,
                                reqLen);
         return OpcUa_BadInvalidArgument;
-    }
-    /* Encode the TrustList */
-    status = TrustList_Encode(pTrustList);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: failed to encode the trustList",
-                               cStrId);
-        return OpcUa_BadUnexpectedError;
     }
     /* Create the output variant */
     pVariant = SOPC_Variant_Create();
@@ -519,14 +536,11 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     *outputArgs = NULL;
 
     /* Variable initialization */
-    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool match = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
     bool foundTrustList = false;
-    int32_t reqLen = -1;
-    SOPC_Variant* pVariant = NULL;
 
     /* Check input arguments */
     if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
@@ -544,7 +558,15 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     /* Check type of input arguments */
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: bad BuiltInTypeId arguments", cStrId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: bad BuiltInTypeId arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check handle */
+    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!match)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: rcv handle: %" PRIu32, cStrId,
+                               inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
     /* Check mode */
@@ -554,18 +576,16 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     {
         return OpcUa_BadInvalidState;
     }
-    /* Check handle */
-    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    /* Finally decode the TrustList */
+    status = TrustList_Decode(pTrustList, (const SOPC_ByteString*) &inputArgs[1].Value.Bstring);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:write: rcv handle: %" PRIu32, cStrId,
-                               inputArgs[0].Value.Uint32);
-        return OpcUa_BadInvalidArgument;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: failed to decode the trustList",
+                               cStrId);
+        return OpcUa_BadUnexpectedError;
     }
 
-    status = TrustList_Decode(pTrustList, (const SOPC_ByteString*) &inputArgs[1].Value.Bstring);
-
-    return statusCode;
+    return SOPC_GoodGenericStatus;
 }
 
 SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContextPtr,
@@ -576,33 +596,72 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
                                              SOPC_Variant** outputArgs,
                                              void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-
     printf("Method GetPosition Call\n");
 
-    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
-     * / spec V1.05)*/
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    /* Variable initialization */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool match = false;
+    const char* cStrId = NULL;
+    SOPC_TrustListContext* pTrustList = NULL;
+    bool foundTrustList = false;
+    SOPC_Variant* pVariant = NULL;
+
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:Method_GetPosition: unable to create a variant");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:GetPosition: bad inputs arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Retrieve the TrustList */
+    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
+    if (!foundTrustList || NULL == pTrustList)
+    {
         return OpcUa_BadUnexpectedError;
     }
-
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
-    v->BuiltInTypeId = SOPC_UInt64_Id;
-    SOPC_UInt64_Initialize(&v->Value.Uint64);
-    v->Value.Uint64 = 0;
+    cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check type of input arguments */
+    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:GetPosition: bad BuiltInTypeId arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check handle */
+    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!match)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:GetPosition: rcv handle: %" PRIu32, cStrId,
+                               inputArgs[0].Value.Uint32);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check mode (GetPosition for write mode with erase if existing option has no meaning) */
+    match =
+        TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "GetPosition: File was not opened for read access");
+    if (!match)
+    {
+        return OpcUa_BadInvalidState;
+    }
+    /* Create the variant */
+    pVariant = SOPC_Variant_Create();
+    if (NULL == pVariant)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:GetPosition: unable to create a variant");
+        return OpcUa_BadUnexpectedError;
+    }
+    /* Finally get the position */
+    pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pVariant->BuiltInTypeId = SOPC_UInt64_Id;
+    SOPC_UInt64_Initialize(&pVariant->Value.Uint64);
+    pVariant->Value.Uint64 = TrustList_GetPosition(pTrustList);
     *nbOutputArgs = 1;
-    *outputArgs = v;
+    *outputArgs = pVariant;
 
     return SOPC_GoodGenericStatus;
 }
@@ -615,15 +674,65 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
                                              SOPC_Variant** outputArgs,
                                              void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(nbOutputArgs);
-    SOPC_UNUSED_ARG(outputArgs);
-    SOPC_UNUSED_ARG(param);
-
     printf("Method SetPosition Call\n");
+
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    /* Variable initialization */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool match = false;
+    const char* cStrId = NULL;
+    SOPC_TrustListContext* pTrustList = NULL;
+    bool foundTrustList = false;
+
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:SetPosition: bad inputs arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Retrieve the TrustList */
+    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
+    if (!foundTrustList || NULL == pTrustList)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check type of input arguments */
+    if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_UInt64_Id != inputArgs[1].BuiltInTypeId))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SetPosition: bad BuiltInTypeId arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check handle */
+    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!match)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SetPosition: rcv handle: %" PRIu32, cStrId,
+                               inputArgs[0].Value.Uint32);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check mode (SetPosition for write mode with erase if existing option has no meaning) */
+    match =
+        TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "SetPosition: File was not opened for read access");
+    if (!match)
+    {
+        return OpcUa_BadInvalidState;
+    }
+    /* Finally set the position */
+    status = TrustList_SetPosition(pTrustList, inputArgs[1].Value.Uint64);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SetPosition: failed to set position",
+                               cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
 
     return SOPC_GoodGenericStatus;
 }

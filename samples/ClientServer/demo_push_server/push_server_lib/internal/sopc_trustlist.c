@@ -362,17 +362,9 @@ static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
     pTrustList->varIds.pUserWritableId = NULL;
     pTrustList->varIds.pWritableId = NULL;
     pTrustList->maxTrustListSize = maxTrustListSize;
-    pTrustList->handle = SOPC_TRUSTLIST_INVALID_HANDLE;
     pTrustList->groupType = groupType;
-    pTrustList->openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
-    pTrustList->openingMask = SOPC_TL_MASK_NONE;
     pTrustList->pPKI = pPKI;
-    pTrustList->pTrustListEncoded = NULL;
-    pTrustList->pTrustedCerts = NULL;
-    pTrustList->pIssuerCerts = NULL;
-    pTrustList->pTrustedCRLs = NULL;
-    pTrustList->pIssuerCRLs = NULL;
-    pTrustList->bDoNotDelete = false;
+    TrustList_Reset(pTrustList);
 }
 
 static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
