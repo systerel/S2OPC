@@ -775,11 +775,15 @@ static void check_parsed_users_config(SOPC_UserAuthentication_Manager* authentic
     SOPC_ExtensionObject* readWriteAddToken = build_user_name_token("user3", "42");
     SOPC_ExtensionObject* readWriteExecToken = build_user_name_token("user4", "user4");
     SOPC_ExtensionObject* x509_untrustedIssued_defaultAccessToken = build_x509_token("user_public/user_2k_cert.der");
-    SOPC_ExtensionObject* x509_defaultAccessToken = build_x509_token("issued_usr/ctt_usrT.der");
-    SOPC_ExtensionObject* x509_readExecAddToken = build_x509_token("issued_usr/ctt_usrTE.der");
-    SOPC_ExtensionObject* x509_writeExecAddToken = build_x509_token("issued_usr/ctt_usrTSincorrect.der");
-    SOPC_ExtensionObject* x509_readWriteAddToken = build_x509_token("issued_usr/ctt_usrTV.der");
-    SOPC_ExtensionObject* x509_readWriteExecToken = build_x509_token("issued_usr/ctt_ca1I_usrT.der");
+    SOPC_ExtensionObject* x509_defaultAccessToken =
+        build_x509_token("S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrT.der");
+    SOPC_ExtensionObject* x509_readExecAddToken = build_x509_token("S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTE.der");
+    SOPC_ExtensionObject* x509_writeExecAddToken =
+        build_x509_token("S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTSincorrect.der");
+    SOPC_ExtensionObject* x509_readWriteAddToken =
+        build_x509_token("S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTV.der");
+    SOPC_ExtensionObject* x509_readWriteExecToken =
+        build_x509_token("S2OPC_UACTT_Users_PKI/trusted/certs/ctt_ca1I_usrT.der");
     SOPC_UserAuthentication_Status authenticationRes;
     SOPC_ReturnStatus status =
         SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager, invalidUserNameToken, &authenticationRes);

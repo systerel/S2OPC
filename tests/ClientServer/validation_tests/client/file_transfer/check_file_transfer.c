@@ -112,8 +112,8 @@ static int32_t client_create_configuration(void)
 
     SOPC_ClientHelper_Security security = {.security_policy = SOPC_SecurityPolicy_None_URI,
                                            .security_mode = OpcUa_MessageSecurityMode_None,
-                                           .path_cert_auth = "./trusted/cacert.der",
-                                           .path_crl = "./revoked/cacrl.der",
+                                           .path_cert_auth = "./S2OPC_Demo_PKI/trusted/certs/cacert.der",
+                                           .path_crl = "./S2OPC_Demo_PKI/trusted/crl/cacrl.der",
                                            .path_cert_srv = NULL,
                                            .path_cert_cli = NULL,
                                            .path_key_cli = NULL,

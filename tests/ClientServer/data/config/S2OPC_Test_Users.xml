@@ -27,11 +27,11 @@
   </UserPasswordConfiguration>
   <UserCertificates>
     <!-- default right is read only (accepted issued, not configured but evaluated as trustworthy according to trust chain)-->
-    <PublicKeyInfrastructure path="./S2OPC_Users_PKI" write="false" read="true" execute="false" addnode="false"/>
-    <UserCertificateRights path="issued_usr/ctt_usrT.der" write="true"/>  <!-- Read, execute and addnode rights are set to the default value False because rights are partialy defined -->
-    <UserCertificateRights path="issued_usr/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
-    <UserCertificateRights path="issued_usr/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
-    <UserCertificateRights path="issued_usr/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
-    <UserCertificateRights path="issued_usr/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
+    <PublicKeyInfrastructure path="./S2OPC_UACTT_Users_PKI" write="false" read="true" execute="false" addnode="false"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrT.der" write="true"/>  <!-- Read, execute and addnode rights are set to the default value False because rights are partialy defined -->
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTE.der" write="false" read="true" execute="true" addnode="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTSincorrect.der" write="true" read="false" execute="true" addnode="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_usrTV.der" write="true" read="true" execute="false" addnode="true"/>
+    <UserCertificateRights path="./S2OPC_UACTT_Users_PKI/trusted/certs/ctt_ca1I_usrT.der" write="true" read="true" execute="true" addnode="false"/>
   </UserCertificates>
 </S2OPC_Users>

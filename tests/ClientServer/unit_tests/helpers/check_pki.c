@@ -43,15 +43,16 @@ START_TEST(invalid_create)
     SOPC_CertificateList* pIssuersCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
     SOPC_CRLList* pIssuersCrl = NULL;
-    SOPC_ReturnStatus status =
-        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/ctt_ca1I_ca2T.der", &pTrustedCerts);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(
+        "./S2OPC_UACTT_PKI/trusted/certs/ctt_ca1I_ca2T.der", &pTrustedCerts);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/crl/cacrl.der", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/ctt_ca1I_ca2T.crl", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/crl/ctt_ca1I_ca2T.crl", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted_usr/user_cacert.der", &pIssuersCerts);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/certs/user_cacert.der",
+                                                             &pIssuersCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked_usr/user_cacrl.der", &pIssuersCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/crl/user_cacrl.der", &pIssuersCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* No trusted certificate is provided */
@@ -63,7 +64,8 @@ START_TEST(invalid_create)
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(pPKI);
     /* Trusted CA certificates is provided but no CRL */
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/certs/cacert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, NULL, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
@@ -102,9 +104,10 @@ START_TEST(invalid_write)
     SOPC_PKIProvider* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -452,9 +455,9 @@ START_TEST(functional_test_from_list)
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
     SOPC_ReturnStatus status =
-        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/ctt_ca1T.der", &pTrustedCerts);
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/certs/ctt_ca1T.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/ctt_ca1T.crl", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/crl/ctt_ca1T.crl", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -474,9 +477,10 @@ START_TEST(functional_test_from_list)
     /* Update the PKI with cacert.der and  cacrl.der */
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
     SOPC_CRLList* pTrustedCrlToUpdate = NULL;
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCertToUpdate);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der",
+                                                             &pTrustedCertToUpdate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrlToUpdate);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrlToUpdate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -528,9 +532,10 @@ START_TEST(functional_test_write_to_list)
     SOPC_PKIProvider* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -570,9 +575,10 @@ START_TEST(functional_test_append_to_list)
     SOPC_PKIProvider* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -640,9 +646,9 @@ START_TEST(functional_test_pki_permissive)
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &tCrt, &tCrl, &iCrt, &iCrl);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     /* Disable UpdateFromList */
-    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &tCrt);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &tCrt);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &tCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &tCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_UpdateFromList(&pPKI, NULL, tCrt, tCrl, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
@@ -659,11 +665,12 @@ START_TEST(functional_test_verify_every_cert)
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./trusted/cacert.der", &pTrustedCerts);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pTrustedCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./revoked/cacrl.der", &pTrustedCrl);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

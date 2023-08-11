@@ -47,8 +47,8 @@
 static SOPC_ClientHelper_Security valid_security_signAndEncrypt_b256sha256 = {
     .security_policy = SOPC_SecurityPolicy_Basic256Sha256_URI,
     .security_mode = OpcUa_MessageSecurityMode_SignAndEncrypt,
-    .path_cert_auth = "./trusted/cacert.der",
-    .path_crl = "./revoked/cacrl.der",
+    .path_cert_auth = "./S2OPC_Demo_PKI/trusted/certs/cacert.der",
+    .path_crl = "./S2OPC_Demo_PKI/trusted/crl/cacrl.der",
     .path_cert_srv = "./server_public/server_2k_cert.der",
     .path_cert_cli = "./client_public/client_4k_cert.der",
     .path_key_cli = "./client_private/encrypted_client_4k_key.pem",

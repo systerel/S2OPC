@@ -392,8 +392,8 @@ static struct
 static const char* DEFAULT_KEY_PATH = "client_private/encrypted_client_2k_key.pem";
 static const char* DEFAULT_CERT_PATH = "client_public/client_2k_cert.der";
 static const char* DEFAULT_SERVER_CERT_PATH = "server_public/server_2k_cert.der";
-static const char* DEFAULT_CA_PATH = "trusted/cacert.der";
-static const char* DEFAULT_CRL_PATH = "revoked/cacrl.der";
+static const char* DEFAULT_CA_PATH = "./S2OPC_Demo_PKI/trusted/certs/cacert.der";
+static const char* DEFAULT_CRL_PATH = "./S2OPC_Demo_PKI/trusted/crl/cacrl.der";
 
 static void usage(char** argv)
 {

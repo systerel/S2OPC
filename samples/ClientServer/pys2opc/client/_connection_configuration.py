@@ -28,7 +28,8 @@ import os
 from utils import PyS2OPC_Client_Test
 
 SERVER_URL = 'opc.tcp://localhost:4841'
-CERT_BASE_PATH = './'
+PKI_BASE_PATH = './S2OPC_Demo_PKI/trusted/'
+CERT_BASE_PATH = "./"
 
 # See the documentation of pys2opc.PyS2OPC.add_configuration_unsecured for more parameters.
 configuration_parameters_no_subscription = {'server_url': SERVER_URL,
@@ -38,8 +39,8 @@ configuration_parameters_subscription = {'server_url': SERVER_URL,
                                          'n_max_keepalive' : 3,
                                          'token_target': 3}
 
-configuration_parameters_security = {'path_cert_auth': os.path.join(CERT_BASE_PATH, 'trusted', 'cacert.der'),
-                                     'path_crl': os.path.join(CERT_BASE_PATH, 'revoked', 'cacrl.der'),
+configuration_parameters_security = {'path_cert_auth': os.path.join(PKI_BASE_PATH, 'certs', 'cacert.der'),
+                                     'path_crl': os.path.join(PKI_BASE_PATH, 'crl', 'cacrl.der'),
                                      'path_cert_srv': os.path.join(CERT_BASE_PATH, 'server_public', 'server_2k_cert.der'),
                                      'path_cert_cli': os.path.join(CERT_BASE_PATH, 'client_public', 'client_2k_cert.der'),
                                      'path_key_cli': os.path.join(CERT_BASE_PATH, 'client_private', 'encrypted_client_2k_key.pem'),
