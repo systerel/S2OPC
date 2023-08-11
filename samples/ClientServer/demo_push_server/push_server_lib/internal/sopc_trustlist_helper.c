@@ -215,12 +215,27 @@ static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGen
         {
             pRawBuffer = SOPC_KeyManager_SerializedCertificate_Data(&pRawCertArray[i]);
         }
-        pByteString = &pBsArray[i];
-        SOPC_ByteString_Initialize(pByteString);
-        pByteString->Data = pRawBuffer->data; // Attach data
-        pByteString->Length = pRawBuffer->length;
-        pByteString->DoNotClear = true;
-        *pByteLenTot = *pByteLenTot + pRawBuffer->length;
+        if (NULL == pRawBuffer)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        /* Check before casting */
+        if (SOPC_STATUS_OK == status)
+        {
+            if (INT32_MAX < pRawBuffer->length)
+            {
+                status = SOPC_STATUS_INVALID_STATE;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            pByteString = &pBsArray[i];
+            SOPC_ByteString_Initialize(pByteString);
+            pByteString->Data = pRawBuffer->data; // Attach data
+            pByteString->Length = (int32_t) pRawBuffer->length;
+            pByteString->DoNotClear = true;
+            *pByteLenTot = *pByteLenTot + pRawBuffer->length;
+        }
     }
 
     if (SOPC_STATUS_OK != status)
@@ -488,11 +503,51 @@ bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask m
     return true;
 }
 
+/* Set the TrustList position */
+SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint64_t pos)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+
+    /* TrustList is not yet encode */
+    if (NULL == pTrustList->pTrustListEncoded)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    uint64_t position = pos;
+    uint32_t bufLength = 0;
+    uint32_t bufPos = 0;
+    uint32_t bufRemaining = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
+    SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, &bufPos);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    bufLength = bufPos + bufRemaining;
+    /* if the position is higher than the file size the position is set to the end of the file*/
+    if (position > bufLength)
+    {
+        position = bufLength;
+    }
+    status = SOPC_Buffer_SetPosition(pTrustList->pTrustListEncoded, position);
+    return status;
+}
+
 /* Get the TrustList handle */
 uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
     return (uint32_t) pTrustList->handle;
+}
+
+/* Get the TrustList position */
+uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+
+    uint64_t pos = 0;
+    if (NULL != pTrustList->pTrustListEncoded)
+    {
+        SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, (uint32_t*) &pos);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+    return pos;
 }
 
 /* Check the TrustList handle */
@@ -514,7 +569,7 @@ bool TrustList_CheckOpenMode(const SOPC_TrustListContext* pTrustList, SOPC_TrLst
     bool match = expected == pTrustList->openingMode;
     if (!match && NULL != msg)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: %s", pTrustList->cStrObjectId, msg);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:%s", pTrustList->cStrObjectId, msg);
     }
     return match;
 }
@@ -539,16 +594,8 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
 {
     /* Check parameters.
        The PKI, the encoded result buffer and the opening mask are consider valid here. */
-    if (NULL == pTrustList)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if (NULL != pTrustList->pTrustListEncoded)
-    {
-        /* Do nothing the TrustList is already encode */
-        return SOPC_STATUS_OK;
-    }
-
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL == pTrustList->pTrustListEncoded);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -625,7 +672,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     /* Fill the instance of the TrustListDataType */
     if (SOPC_STATUS_OK == status)
     {
-        pTrustListDataType.SpecifiedLists = 1u;
+        pTrustListDataType.SpecifiedLists = pTrustList->openingMask;
         pTrustListDataType.TrustedCertificates = pBsTrustedCertArray;
         pTrustListDataType.NoOfTrustedCertificates = nbTrustedCerts;
         pTrustListDataType.TrustedCrls = pBsTrustedCrlArray;
@@ -678,7 +725,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
 }
 
 /* Read bytes from the current position of the encoded TrustListDataType */
-SOPC_ReturnStatus TrustList_Read(const SOPC_TrustListContext* pTrustList, int32_t reqLength, SOPC_ByteString* pDest)
+SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqLength, SOPC_ByteString* pDest)
 {
     if (NULL == pTrustList || NULL == pDest || 0 == reqLength)
     {
@@ -692,7 +739,7 @@ SOPC_ReturnStatus TrustList_Read(const SOPC_TrustListContext* pTrustList, int32_
     uint32_t sizeAvailable = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     /* Get the remaining length */
-    sizeAvailable = pTrustList->pTrustListEncoded->length - pTrustList->pTrustListEncoded->position;
+    sizeAvailable = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
     /* Check before casting */
     if (INT32_MAX < sizeAvailable)
     {

@@ -415,15 +415,18 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
 
     if (SOPC_STATUS_OK != status)
     {
-        if (NULL != pCertGroup->pTrustListId)
+        if (NULL != pCertGroup)
         {
-            TrustList_DictRemove(pCertGroup->pTrustListId);
+            if (NULL != pCertGroup->pTrustListId)
+            {
+                TrustList_DictRemove(pCertGroup->pTrustListId);
+            }
+            if (NULL != pCertGroup->pObjectId)
+            {
+                CertificateGroup_DictRemove(pCertGroup->pObjectId);
+            }
+            cert_group_delete_context(&pCertGroup);
         }
-        if (NULL != pCertGroup->pObjectId)
-        {
-            CertificateGroup_DictRemove(pCertGroup->pObjectId);
-        }
-        cert_group_delete_context(&pCertGroup);
     }
     return status;
 }
