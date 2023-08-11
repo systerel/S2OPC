@@ -49,7 +49,6 @@
 
 #include "embedded/sopc_addspace_loader.h"
 
-#define SOPC_PKI_PATH "./S2OPC_Demo_PKI"
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
 #define REVERSE_ENDPOINT_URL "opc.tcp://localhost:4844"
 #define APPLICATION_URI "urn:S2OPC:localhost"

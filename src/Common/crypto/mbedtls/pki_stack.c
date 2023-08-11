@@ -2072,7 +2072,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePat
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIPermissiveNew_Create(SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
 {
     SOPC_PKIProvider* pPKI = NULL;
 

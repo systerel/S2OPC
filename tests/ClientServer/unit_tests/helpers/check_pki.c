@@ -621,7 +621,7 @@ END_TEST
 START_TEST(functional_test_pki_permissive)
 {
     SOPC_PKIProvider* pPKI = NULL;
-    SOPC_ReturnStatus status = SOPC_PKIPermissiveNew_Create(&pPKI);
+    SOPC_ReturnStatus status = SOPC_PKIPermissive_Create(&pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* Validate anything */
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, NULL, NULL, NULL);

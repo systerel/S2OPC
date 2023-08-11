@@ -144,7 +144,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         else
         {
             Helpers_Log(SOPC_LOG_LEVEL_WARNING, "DISABLED CERTIFICATE VERIFICATION.");
-            status = SOPC_PKIPermissiveNew_Create(&pPki);
+            status = SOPC_PKIPermissive_Create(&pPki);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to create PKI.");

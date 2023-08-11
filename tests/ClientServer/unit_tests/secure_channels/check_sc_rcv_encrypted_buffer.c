@@ -181,11 +181,10 @@ static void establishSC(void)
         }
     }
 
-    // Init a stub PKI only to check validate certificate function is called
-    // (we do not want to validate the loaded certificates since they may have expired)
+    // We do not want to validate the loaded certificates since they may have expired
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIPermissiveNew_Create(&pki);
+        status = SOPC_PKIPermissive_Create(&pki);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to create PKI permissive\n");

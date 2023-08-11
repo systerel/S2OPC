@@ -75,7 +75,7 @@
 
 /*
 TODO :
-    - Add mutex in the new API.
+    - Add mutex and do not direct access to the PKI until it is there (update, write, set operations)
     - Handle that the security level of the update is not higher than the security level of the endpoint
       (The following issue has been SUBMITTED : https://mantis.opcfoundation.org/view.php?id=8976)
 */
@@ -319,11 +319,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
  * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *                   ::SOPC_PKIProvider_Free().
  * \warning  Using this PKI is considered harmful for the security of the connection.
- *           You can't export and update this PKI.
+ *           You can't export and update this PKI, it shall be used only for test.
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIPermissiveNew_Create(SOPC_PKIProvider** ppPKI);
+SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
 
 /**
  * \brief Create a leaf certificate profile from security policy to check certificate properties.
