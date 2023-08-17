@@ -343,35 +343,69 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
                                                 SOPC_Variant** outputArgs,
                                                 void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-
     printf("Method AddCertificate Call\n");
 
-    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
-     * / spec V1.05)*/
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    const char* cStrId = NULL;
+    bool found = false;
+    SOPC_TrustListContext* pTrustList = NULL;
+
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId) || (NULL == callContextPtr))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:Method_AddCertificate: unable to create a variant");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:AddCertificate: bad inputs arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Retrieve the TrustList */
+    pTrustList = TrustList_DictGet(objectId, &found);
+    if (!found || NULL == pTrustList)
+    {
         return OpcUa_BadUnexpectedError;
     }
+    cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* This Method returns Bad_NotWritable if the TrustList Object is read only */
+    bool isReadMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
+    if (isReadMode)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: is open in read mode",
+                               cStrId);
+        return OpcUa_BadNotWritable;
+    }
+    /* The Open Method was called with write access and the CloseAndUpdate Method has not been called */
+    bool isWriteMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_WRITE_ERASE_EXISTING, NULL);
+    if (isWriteMode)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "TrustList:%s:AddCertificate: is open in write mode and the CloseAndUpdate has not been called", cStrId);
+        return OpcUa_BadInvalidState;
+    }
+    /* Check type of input arguments */
+    if (SOPC_ByteString_Id != inputArgs[0].BuiltInTypeId || SOPC_Boolean_Id != inputArgs[1].BuiltInTypeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: bad BuiltInTypeId arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* This Method cannot provide CRLs so issuer Certificates cannot be added with this Method */
+    if (false == inputArgs[1].Value.Boolean)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:AddCertificate: issuer certificates cannot be added", cStrId);
+        return OpcUa_BadCertificateInvalid;
+    }
+    /* Validate the certificate and update the PKI that belongs to the TrustList */
+    const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
+    statusCode = TrustList_AddUpdate(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
 
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
-    v->BuiltInTypeId = SOPC_Boolean_Id;
-    SOPC_Boolean_Initialize(&v->Value.Boolean);
-    v->Value.Boolean = true;
-    *nbOutputArgs = 1;
-    *outputArgs = v;
-
-    return SOPC_GoodGenericStatus;
+    return statusCode;
 }
 
 SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callContextPtr,
