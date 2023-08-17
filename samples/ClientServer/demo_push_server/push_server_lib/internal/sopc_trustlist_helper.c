@@ -21,11 +21,14 @@
  *
  * \brief Interface implementation to manage the TrustListType.
  */
+#include <inttypes.h>
 
+#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_trustlist.h"
 
 /*---------------------------------------------------------------------------
@@ -832,6 +835,74 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     SOPC_Free(pToDecode);
 
     return status;
+}
+
+/* Validate the certificate and update the PKI that belongs to the TrustList */
+SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
+                                    const SOPC_ByteString* pBsCert,
+                                    const char* secPolUri)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->pPKI);
+    if (NULL == pBsCert)
+    {
+        return OpcUa_BadCertificateInvalid;
+    }
+    if (NULL == pBsCert->Data || -1 == pBsCert->Length)
+    {
+        return OpcUa_BadCertificateInvalid;
+    }
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    SOPC_StatusCode validationError = SOPC_GoodGenericStatus;
+    SOPC_CertificateList* pCert = NULL;
+    /* Create the PKI profile */
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(secPolUri, &pProfile);
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    /* Create the certificate */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:AddCertificate: certificate parse failed", pTrustList->cStrObjectId);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Validate the certificate */
+    if (SOPC_STATUS_OK != status)
+    {
+        status = SOPC_PKIProvider_ValidateCertificate(pTrustList->pPKI, pCert, pProfile, &validationError);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "TrustList:%s:AddCertificate: certificate validation failed with error code %" PRIX32,
+                pTrustList->cStrObjectId, validationError);
+            statusCode = validationError;
+        }
+    }
+    /* Update the PKI */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_UpdateFromList(&pTrustList->pPKI, secPolUri, pCert, NULL, NULL, NULL, true);
+        if (SOPC_STATUS_OK != status)
+        {
+            /* The security level of the update is probably higher than the security level of the secure channel */
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: trustList update failed",
+                                   pTrustList->cStrObjectId);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Clear */
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_KeyManager_Certificate_Free(pCert);
+    return statusCode;
 }
 
 /* Reset the TrustList context when close method is call */

@@ -241,7 +241,7 @@ const char* TrustList_GetStrNodeId(const SOPC_TrustListContext* pTrustList);
  *
  * \param pTrustList The TrustList context.
  *
- * \warning The \p pTrustList shall be opened for reading.
+ * \warning \p pTrustList shall be valid (!= NULL) and open in read mode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -257,7 +257,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList);
  * \param length     The length byte to read (!= 0)
  * \param[out] pDest A valid byte string to store the result.
  *
- * \warning \p pTrustList shall be opened for reading.
+ * \warning \p pTrustList shall be valid (!= NULL) and open in read mode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -270,11 +270,27 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
  * \param pTrustList The TrustList context.
  * \param pSrc       The TrustListDataType to decode.
  *
- * \warning \p pTrustList shall be opened for writing.
+ * \warning \p pTrustList shall be valid (!= NULL) and open in write mode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC_ByteString* pSrc);
+
+/**
+ * \brief Validate the certificate and update the PKI that belongs to the TrustList.
+ *        (AddCertificate method)
+ *
+ * \param pTrustList The TrustList context.
+ * \param pBsCert    The ByteString certificate to update.
+ * \param secPolUri  The security policy.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL) and not open.
+ *
+ * \return SOPC_GoodGenericStatus if successful or a validation error.
+ */
+SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
+                                    const SOPC_ByteString* pBsCert,
+                                    const char* secPolUri);
 
 /**
  * \brief Reset the context of the TrustList but keep the user configuration.
