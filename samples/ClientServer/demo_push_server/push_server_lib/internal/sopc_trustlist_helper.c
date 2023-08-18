@@ -526,6 +526,9 @@ SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint6
     uint64_t position = pos;
     if (UINT32_MAX < position)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:SetPosition: position (%" PRIu64 ") is too large for buffer",
+                               pTrustList->cStrObjectId, position);
         return SOPC_STATUS_INVALID_STATE;
     }
     uint32_t bufLength = 0;
@@ -652,6 +655,12 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
             */
     status = SOPC_PKIProvider_WriteOrAppendToList(pTrustList->pPKI, &pTrustedCerts, &pTrustedCrls, &pIssuerCerts,
                                                   &pIssuerCrls);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:Encode: PKI WriteOrAppendToList function failed",
+                               pTrustList->cStrObjectId);
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -681,12 +690,45 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     }
     if (pTrustList->maxTrustListSize < lenBuffer)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:Encode: buffer size which holding the TrustList is too large",
+                               pTrustList->cStrObjectId);
         status = SOPC_STATUS_INVALID_STATE;
     }
     /* Check before casting */
-    if (UINT32_MAX < lenBuffer)
+    if (SOPC_STATUS_OK == status)
     {
-        return SOPC_STATUS_INVALID_STATE;
+        if (UINT32_MAX < lenBuffer)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:Encode: buffer size which holding the TrustList is too large",
+                                   pTrustList->cStrObjectId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (INT32_MAX < nbTrustedCerts)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:Encode: trusted certificates are too many", pTrustList->cStrObjectId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (INT32_MAX < nbTrustedCrls)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Encode: trusted CRLs are too many",
+                                   pTrustList->cStrObjectId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (INT32_MAX < nbIssuerCerts)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:Encode: issuer certificates are too many", pTrustList->cStrObjectId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (INT32_MAX < nbIssuerCrls)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Encode: issuer CRLs are too many",
+                                   pTrustList->cStrObjectId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
     }
     /* Fill the instance of the TrustListDataType */
     if (SOPC_STATUS_OK == status)
@@ -713,6 +755,11 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     {
         status = SOPC_EncodeableObject_Encode(&OpcUa_TrustListDataType_EncodeableType,
                                               (const void*) &pTrustListDataType, pBufferTrustListDataType, 1);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:Encode: EncodeableObject function failed", pTrustList->cStrObjectId);
+        }
     }
     /* Reset the position of the buffer */
     if (SOPC_STATUS_OK == status)
@@ -762,6 +809,9 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
     /* Check before casting */
     if (INT32_MAX < sizeAvailable)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:Read: data size (%" PRIu32 ") is too large for byteString",
+                               pTrustList->cStrObjectId, sizeAvailable);
         return SOPC_STATUS_INVALID_STATE;
     }
     if (lengthToWrite > sizeAvailable)
@@ -812,10 +862,16 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
             status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
+    /* Decode the byteString */
     if (SOPC_STATUS_OK == status)
     {
         SOPC_EncodeableObject_Initialize(type, pValue);
         status = SOPC_EncodeableObject_Decode(type, pValue, pToDecode, 1);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:Decode: EncodeableObject function failed", pTrustList->cStrObjectId);
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -825,6 +881,7 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
             status = SOPC_STATUS_INVALID_STATE;
         }
     }
+    /* check the mask (SpecifiedLists) */
     if (SOPC_STATUS_OK == status)
     {
         bool isValid = trustlist_is_valid_masks(pTrustListDataType->SpecifiedLists);
@@ -846,6 +903,7 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
         status = trustlist_write_decoded_data(pTrustListDataType, &pTrustList->pTrustedCerts, &pTrustList->pTrustedCRLs,
                                               &pTrustList->pIssuerCerts, &pTrustList->pIssuerCRLs);
     }
+    /* Register the part of the TrustList to update with CloseAndUpdate */
     if (SOPC_STATUS_OK == status)
     {
         pTrustList->specifiedLists = pTrustListDataType->SpecifiedLists;
@@ -984,9 +1042,16 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
         status = SOPC_KeyManager_CRL_Copy(pTrustList->pIssuerCRLs, &pToUpdateIssuerCRLs);
     }
 
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: certificate(s) copy failed",
+                               pTrustList->cStrObjectId);
+        statusCode = OpcUa_BadCertificateInvalid;
+    }
+
     /* If only part of the TrustList is being updated the Server creates a new TrustList that includes
        the existing TrustList plus any updates and validates the new TrustList. */
-    if (SOPC_TL_MASK_ALL != pTrustList->specifiedLists)
+    if (SOPC_TL_MASK_ALL != pTrustList->specifiedLists && SOPC_STATUS_OK == status)
     {
         bIncludeExistingList = true;
 
@@ -996,7 +1061,8 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:CloseAndUpdate: certificate(s) copy failed", pTrustList->cStrObjectId);
+                                   "TrustList:%s:CloseAndUpdate: PKI WriteOrAppendToList function failed",
+                                   pTrustList->cStrObjectId);
             statusCode = OpcUa_BadCertificateInvalid;
         }
     }
@@ -1061,8 +1127,8 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
     return statusCode;
 }
 
-/* Write the certificate files in the updatedTrustList folder of the PKI storage */
-SOPC_ReturnStatus TrustList_WriteToStore(SOPC_TrustListContext* pTrustList)
+/* Export the update (certificate files) */
+SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
@@ -1074,6 +1140,12 @@ SOPC_ReturnStatus TrustList_WriteToStore(SOPC_TrustListContext* pTrustList)
     }
     bool bEraseExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists;
     SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bEraseExitingFile);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:CloseAndUpdate: PKI WriteToStore function failed",
+                               pTrustList->cStrObjectId);
+    }
     return status;
 }
 

@@ -307,7 +307,7 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
 SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri);
 
 /**
- * \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
+ * \brief Export the update (certificate files)
  *
  * \param pTrustList The TrustList context.
  *
@@ -315,7 +315,7 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus TrustList_WriteToStore(SOPC_TrustListContext* pTrustList);
+SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Raise an event to re-evaluate the certificate.

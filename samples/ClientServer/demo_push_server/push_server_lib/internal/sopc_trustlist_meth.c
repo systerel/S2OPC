@@ -366,14 +366,14 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     /* Verify and Update the TrustList */
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_WriteUpdate(pTrustList, secPolUri);
-    /* Write the certificate files in the updatedTrustList folder of the PKI storage */
+    /* Export the update (certificate files) */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
-        status = TrustList_WriteToStore(pTrustList);
+        status = TrustList_Export(pTrustList);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: creation event failed",
-                                   cStrId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:CloseAndUpdate: failed to export the TrustList", cStrId);
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
