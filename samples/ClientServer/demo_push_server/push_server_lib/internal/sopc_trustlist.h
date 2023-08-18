@@ -86,6 +86,7 @@ typedef struct SOPC_TrustListContext
     SOPC_Buffer* pTrustListEncoded;      /*!< The buffer holding the instance of the TrustListDataType
                                               encoded in a UA Binary stream */
     SOPC_PKIProvider* pPKI;              /*!< A valid pointer to the PKI that belongs to the TrustList */
+    SOPC_TrLst_Mask specifiedLists;      /*!< The parts of the TrustList to update with CloseAndUpdate */
     SOPC_CertificateList* pTrustedCerts; /*!< The trusted certificate list to be updated */
     SOPC_CertificateList* pIssuerCerts;  /*!< The issuer certificate list to be updated */
     SOPC_CRLList* pTrustedCRLs;          /*!< The trusted CRL list to be updated */
@@ -291,6 +292,44 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
 SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
                                     const SOPC_ByteString* pBsCert,
                                     const char* secPolUri);
+
+/**
+ * \brief Validate the written TrustList and update the PKI.
+ *        (CLoseAndUpdate method)
+ *
+ * \param pTrustList The TrustList context.
+ * \param secPolUri  The security policy.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ * \return SOPC_GoodGenericStatus if successful.
+ */
+SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri);
+
+/**
+ * \brief Write the certificate files in the updatedTrustList folder of the PKI storage.
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus TrustList_WriteToStore(SOPC_TrustListContext* pTrustList);
+
+/**
+ * \brief Raise an event to re-evaluate the certificate.
+ *        The event depends on the certificate Group.
+ *        Close all the secure channels for application group (SC layer).
+ *        Make sessions orphaned for user group (Services layer).
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus TrustList_RaiseEvent(SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Reset the context of the TrustList but keep the user configuration.
