@@ -97,6 +97,8 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
                                                       SOPC_CertificateList** ppIssuerCerts,
                                                       SOPC_CRLList** ppIssuerCrls);
 
+static bool trustlist_is_valid_masks(SOPC_TrLst_Mask mask);
+
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
  *---------------------------------------------------------------------------*/
@@ -405,42 +407,38 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
     /* Trusted Certificates  */
     if (SOPC_TL_MASK_TRUSTED_CERTS & pDecode->SpecifiedLists)
     {
-        if (NULL == pDecode->TrustedCertificates || 0 == pDecode->NoOfTrustedCertificates)
+        if (0 != pDecode->NoOfTrustedCertificates)
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            status = trustList_write_bs_array_to_cert_list(pDecode->TrustedCertificates,
+                                                           (size_t) pDecode->NoOfTrustedCertificates, &pTrustedCerts);
         }
-        status = trustList_write_bs_array_to_cert_list(pDecode->TrustedCertificates,
-                                                       (size_t) pDecode->NoOfTrustedCertificates, &pTrustedCerts);
     }
     /* Trusted CRLs */
     if (SOPC_TL_MASK_TRUSTED_CRLS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
     {
-        if (NULL == pDecode->TrustedCrls || 0 == pDecode->NoOfTrustedCrls)
+        if (0 != pDecode->NoOfTrustedCrls)
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            status = trustList_write_bs_array_to_crl_list(pDecode->TrustedCrls, (size_t) pDecode->NoOfTrustedCrls,
+                                                          &pTrustedCrls);
         }
-        status = trustList_write_bs_array_to_crl_list(pDecode->TrustedCrls, (size_t) pDecode->NoOfTrustedCrls,
-                                                      &pTrustedCrls);
     }
     /* Issuer Certificates  */
     if (SOPC_TL_MASK_ISSUER_CERTS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
     {
-        if (NULL == pDecode->IssuerCertificates || 0 == pDecode->NoOfIssuerCertificates)
+        if (0 != pDecode->NoOfIssuerCertificates)
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            status = trustList_write_bs_array_to_cert_list(pDecode->IssuerCertificates,
+                                                           (size_t) pDecode->NoOfIssuerCertificates, &pIssuerCerts);
         }
-        status = trustList_write_bs_array_to_cert_list(pDecode->IssuerCertificates,
-                                                       (size_t) pDecode->NoOfIssuerCertificates, &pIssuerCerts);
     }
     /* Issuer CRLs */
     if (SOPC_TL_MASK_ISSUER_CRLS & pDecode->SpecifiedLists && SOPC_STATUS_OK == status)
     {
-        if (NULL == pDecode->IssuerCrls || 0 == pDecode->NoOfIssuerCrls)
+        if (0 != pDecode->NoOfIssuerCrls)
         {
-            status = SOPC_STATUS_INVALID_STATE;
+            status = trustList_write_bs_array_to_crl_list(pDecode->IssuerCrls, (size_t) pDecode->NoOfIssuerCrls,
+                                                          &pIssuerCrls);
         }
-        status =
-            trustList_write_bs_array_to_crl_list(pDecode->IssuerCrls, (size_t) pDecode->NoOfIssuerCrls, &pIssuerCrls);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -458,6 +456,15 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
     *ppIssuerCerts = pIssuerCerts;
     *ppIssuerCrls = pIssuerCrls;
     return status;
+}
+
+static bool trustlist_is_valid_masks(SOPC_TrLst_Mask masks)
+{
+    if (masks & ~SOPC_TL_MASK_ALL)
+    {
+        return false;
+    }
+    return true;
 }
 
 /* Generate a random handle */
@@ -496,13 +503,13 @@ bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask m
 {
     SOPC_ASSERT(NULL != pTrustList);
 
-    if (masks & ~SOPC_TL_MASK_ALL)
+    pTrustList->openingMask = SOPC_TL_MASK_NONE;
+    bool isValid = trustlist_is_valid_masks(masks);
+    if (isValid)
     {
-        pTrustList->openingMask = SOPC_TL_MASK_NONE;
-        return false;
+        pTrustList->openingMask = masks;
     }
-    pTrustList->openingMask = masks;
-    return true;
+    return isValid;
 }
 
 /* Set the TrustList position */
@@ -812,11 +819,6 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     }
     if (SOPC_STATUS_OK == status)
     {
-        /* TrustList support only the write mode with the EraseExisting option */
-        SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
-        SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
-        SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
-        SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
         pTrustListDataType = (OpcUa_TrustListDataType*) pValue;
         if (NULL == pTrustListDataType)
         {
@@ -825,8 +827,28 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     }
     if (SOPC_STATUS_OK == status)
     {
+        bool isValid = trustlist_is_valid_masks(pTrustListDataType->SpecifiedLists);
+        if (!isValid)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Decode: invalid SpecifiedLists:%" PRIX32,
+                                   pTrustList->cStrObjectId, pTrustListDataType->SpecifiedLists);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* TrustList support only the write mode with the EraseExisting option */
+        SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
+        SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
+        SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
+
         status = trustlist_write_decoded_data(pTrustListDataType, &pTrustList->pTrustedCerts, &pTrustList->pTrustedCRLs,
                                               &pTrustList->pIssuerCerts, &pTrustList->pIssuerCRLs);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList->specifiedLists = pTrustListDataType->SpecifiedLists;
     }
 
     /* Clear */
@@ -852,6 +874,10 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
     {
         return OpcUa_BadCertificateInvalid;
     }
+    if (NULL == secPolUri)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_StatusCode validationError = SOPC_GoodGenericStatus;
     SOPC_CertificateList* pCert = NULL;
@@ -874,8 +900,12 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
             statusCode = OpcUa_BadCertificateInvalid;
         }
     }
+    else
+    {
+        statusCode = OpcUa_BadUnexpectedError;
+    }
     /* Validate the certificate */
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK == status)
     {
         status = SOPC_PKIProvider_ValidateCertificate(pTrustList->pPKI, pCert, pProfile, &validationError);
         if (SOPC_STATUS_OK != status)
@@ -905,6 +935,161 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
     return statusCode;
 }
 
+/* Validate the written TrustList and update the PKI.*/
+SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->pPKI);
+    if (NULL == secPolUri)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    /* No fields are provided or the write method has not yet been called */
+    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists ||
+        (NULL == pTrustList->pTrustedCerts && NULL == pTrustList->pTrustedCRLs && NULL == pTrustList->pIssuerCerts &&
+         NULL == pTrustList->pIssuerCRLs))
+    {
+        return SOPC_GoodGenericStatus;
+    }
+    uint32_t* pErrors = NULL;
+    char** pThumbprints = NULL;
+    uint32_t length = 0;
+    SOPC_PKIProvider* pTmpPKI = NULL;
+    SOPC_ReturnStatus statusCode = SOPC_GoodGenericStatus;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bIncludeExistingList = false;
+
+    SOPC_CertificateList* pToUpdateTrustedCerts = NULL;
+    SOPC_CRLList* pToUpdateTrustedCRLs = NULL;
+    SOPC_CertificateList* pToUpdateIssuerCerts = NULL;
+    SOPC_CRLList* pToUpdateIssuerCRLs = NULL;
+
+    // TODO: we should optimize by adding VerifyEveryCertificate inside the UpdateFromList (avoid copies and tmp PKI)
+    // TODO: we should add an argument to CreateFromList to raise an error code if not all CAs in given list have a
+    // single CRL.
+    if (NULL != pTrustList->pTrustedCerts)
+    {
+        status = SOPC_KeyManager_Certificate_Copy(pTrustList->pTrustedCerts, &pToUpdateTrustedCerts);
+    }
+    if (NULL != pTrustList->pTrustedCRLs && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_Copy(pTrustList->pTrustedCRLs, &pToUpdateTrustedCRLs);
+    }
+    if (NULL != pTrustList->pIssuerCerts && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_Copy(pTrustList->pIssuerCerts, &pToUpdateIssuerCerts);
+    }
+    if (NULL != pTrustList->pIssuerCRLs && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_Copy(pTrustList->pIssuerCRLs, &pToUpdateIssuerCRLs);
+    }
+
+    /* If only part of the TrustList is being updated the Server creates a new TrustList that includes
+       the existing TrustList plus any updates and validates the new TrustList. */
+    if (SOPC_TL_MASK_ALL != pTrustList->specifiedLists)
+    {
+        bIncludeExistingList = true;
+
+        status = SOPC_PKIProvider_WriteOrAppendToList(pTrustList->pPKI, &pTrustList->pTrustedCerts,
+                                                      &pTrustList->pTrustedCRLs, &pTrustList->pIssuerCerts,
+                                                      &pTrustList->pIssuerCRLs);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:CloseAndUpdate: certificate(s) copy failed", pTrustList->cStrObjectId);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Create a temporary PKI to verify every certificate */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_CreateFromList(pTrustList->pTrustedCerts, pTrustList->pTrustedCRLs,
+                                                 pTrustList->pIssuerCerts, pTrustList->pIssuerCRLs, &pTmpPKI);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: PKI creation failed",
+                                   pTrustList->cStrObjectId);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Set a "permissive" profile, indeed the certificate properties are verified by UpdateFromList function.
+       UpdateFromList handles that the security level of the update isn't higher than the security level of the secure
+       channel.*/
+    const SOPC_PKI_ChainProfile profile = {.curves = SOPC_PKI_CURVES_ANY,
+                                           .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+                                           .pkAlgo = SOPC_PKI_PK_RSA,
+                                           .RSAMinimumKeySize = 1024};
+    /* Verify every certificate with a "permissive" profile => check only include signature and validity */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_PKIProvider_VerifyEveryCertificate(pTmpPKI, &profile, &pErrors, &pThumbprints, &length);
+        if (SOPC_STATUS_OK != status)
+        {
+            for (uint32_t i = 0; i < length; i++)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "TrustList:%s:CloseAndUpdate: certificate thumbprint %s is invalid with error %" PRIX32,
+                    pTrustList->cStrObjectId, pThumbprints[i], pErrors[i]);
+                SOPC_Free(pThumbprints[i]);
+            }
+            SOPC_Free(pThumbprints);
+            SOPC_Free(pErrors);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Verify the security level of the new certificates and update the PKI.
+       If errors occur, the new PKI is discarded. */
+    if (SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_PKIProvider_UpdateFromList(&pTrustList->pPKI, secPolUri, pToUpdateTrustedCerts, pToUpdateTrustedCRLs,
+                                            pToUpdateIssuerCerts, pToUpdateIssuerCRLs, bIncludeExistingList);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: PKI update failed",
+                                   pTrustList->cStrObjectId);
+            statusCode = OpcUa_BadCertificateInvalid;
+        }
+    }
+    /* Clear */
+    SOPC_PKIProvider_Free(&pTmpPKI);
+    SOPC_KeyManager_Certificate_Free(pToUpdateTrustedCerts);
+    SOPC_KeyManager_CRL_Free(pToUpdateTrustedCRLs);
+    SOPC_KeyManager_Certificate_Free(pToUpdateIssuerCerts);
+    SOPC_KeyManager_CRL_Free(pToUpdateIssuerCRLs);
+    return statusCode;
+}
+
+/* Write the certificate files in the updatedTrustList folder of the PKI storage */
+SOPC_ReturnStatus TrustList_WriteToStore(SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->pPKI);
+
+    /* No fields are provided => Do nothing */
+    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
+    {
+        return SOPC_STATUS_OK;
+    }
+    bool bEraseExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bEraseExitingFile);
+    return status;
+}
+
+/* Raise an event to re-evaluate the certificate. */
+SOPC_ReturnStatus TrustList_RaiseEvent(SOPC_TrustListContext* pTrustList)
+{
+    /* No fields are provided => Do nothing */
+    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
+    {
+        return SOPC_STATUS_OK;
+    }
+    // TODO : Create the event and record it !
+    SOPC_UNUSED_ARG(pTrustList);
+    return SOPC_STATUS_OK;
+}
+
 /* Reset the TrustList context when close method is call */
 void TrustList_Reset(SOPC_TrustListContext* pTrustList)
 {
@@ -920,6 +1105,7 @@ void TrustList_Reset(SOPC_TrustListContext* pTrustList)
     pTrustList->openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
     pTrustList->openingMask = SOPC_TL_MASK_NONE;
     pTrustList->pTrustListEncoded = NULL;
+    pTrustList->specifiedLists = SOPC_TL_MASK_NONE;
     pTrustList->pTrustedCerts = NULL;
     pTrustList->pIssuerCerts = NULL;
     pTrustList->pTrustedCRLs = NULL;

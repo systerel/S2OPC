@@ -304,35 +304,104 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
                                                 SOPC_Variant** outputArgs,
                                                 void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-
     printf("Method CloseAndUpdate Call\n");
 
-    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
-     * / spec V1.05)*/
+    SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    const char* cStrId = NULL;
+    bool found = false;
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_TrustListContext* pTrustList = NULL;
+    SOPC_Variant* pVariant = NULL;
+
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId) || (NULL == callContextPtr))
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:Method_CloseAndUpdate: unable to create a variant");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:CloseAndUpdate: bad inputs arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Retrieve the TrustList */
+    pTrustList = TrustList_DictGet(objectId, &found);
+    if (NULL == pTrustList && !found)
+    {
         return OpcUa_BadUnexpectedError;
     }
+    cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check type of input arguments */
+    if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: bad BuiltInTypeId arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check handle */
+    bool match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!match)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:CloseAndUpdate: invalid rcv handle: %" PRIu32, cStrId,
+                               inputArgs[0].Value.Uint32);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Create the output variant */
+    pVariant = SOPC_Variant_Create();
+    if (NULL == pVariant)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: unable to create a variant",
+                               cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+    /* The Server does not support transactions it applies the changes immediately and sets
+       applyChangesRequired to FALSE.*/
+    pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pVariant->BuiltInTypeId = SOPC_Boolean_Id;
+    SOPC_Boolean_Initialize(&pVariant->Value.Boolean);
+    pVariant->Value.Boolean = false;
 
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
-    v->BuiltInTypeId = SOPC_Boolean_Id;
-    SOPC_Boolean_Initialize(&v->Value.Boolean);
-    v->Value.Boolean = false;
-    *nbOutputArgs = 1;
-    *outputArgs = v;
+    /* Verify and Update the TrustList */
+    const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
+    statusCode = TrustList_WriteUpdate(pTrustList, secPolUri);
+    /* Write the certificate files in the updatedTrustList folder of the PKI storage */
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        status = TrustList_WriteToStore(pTrustList);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: creation event failed",
+                                   cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
+    /* Raise an event to re-evaluate the certificate  */
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        status = TrustList_RaiseEvent(pTrustList);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: creation event failed",
+                                   cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    {
+        /* The variant is deleted by the method call manager */
+        *nbOutputArgs = 1;
+        *outputArgs = pVariant;
+    }
+    else
+    {
+        SOPC_Variant_Delete(pVariant);
+    }
+    /* Close => Reset the context */
+    TrustList_Reset(pTrustList);
 
-    return SOPC_GoodGenericStatus;
+    return statusCode;
 }
 
 SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callContextPtr,
@@ -684,7 +753,8 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     pVariant = SOPC_Variant_Create();
     if (NULL == pVariant)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:GetPosition: unable to create a variant");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:GetPosition: unable to create a variant",
+                               cStrId);
         return OpcUa_BadUnexpectedError;
     }
     /* Finally get the position */
