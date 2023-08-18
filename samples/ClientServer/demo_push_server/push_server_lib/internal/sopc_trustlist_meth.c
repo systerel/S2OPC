@@ -42,6 +42,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
                                                SOPC_Variant** outputArgs,
                                                void* param)
 {
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
 
@@ -59,12 +60,6 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
-    /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:OpenWithMasks: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
     if (NULL == pTrustList && !found)
@@ -78,6 +73,13 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: already open", cStrId);
         return OpcUa_BadInvalidState;
+    }
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: bad inputs arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
     }
     /* Check type of input arguments */
     if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
@@ -149,6 +151,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
 {
     printf("Method Open Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -163,12 +166,6 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
-    /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:Open: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
     if (!found || NULL == pTrustList)
@@ -183,6 +180,12 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: already open", cStrId);
         /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted.*/
         return OpcUa_BadInvalidState;
+    }
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
     }
     /* Check type of input arguments */
     if (SOPC_Byte_Id != inputArgs[0].BuiltInTypeId)
@@ -252,6 +255,7 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
 {
     printf("Method Close Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -263,12 +267,6 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     bool found = false;
     SOPC_TrustListContext* pTrustList = NULL;
 
-    /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:Close: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
     if (NULL == pTrustList && !found)
@@ -276,6 +274,12 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Close: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
     {
@@ -306,6 +310,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
 {
     printf("Method CloseAndUpdate Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
        (Table 65 – Call Service Parameters spec V1.05) */
@@ -319,12 +324,6 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
-    /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId) || (NULL == callContextPtr))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:CloseAndUpdate: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
     if (NULL == pTrustList && !found)
@@ -332,6 +331,13 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: bad inputs arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
     {
@@ -414,6 +420,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
 {
     printf("Method AddCertificate Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -426,12 +433,6 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     bool found = false;
     SOPC_TrustListContext* pTrustList = NULL;
 
-    /* Check input arguments */
-    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId) || (NULL == callContextPtr))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:AddCertificate: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &found);
     if (!found || NULL == pTrustList)
@@ -439,6 +440,13 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: bad inputs arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* This Method returns Bad_NotWritable if the TrustList Object is read only */
     bool isReadMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
     if (isReadMode)
@@ -485,35 +493,65 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
                                                    SOPC_Variant** outputArgs,
                                                    void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
-    SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
-    SOPC_UNUSED_ARG(param);
-
     printf("Method RemoveCertificate Call\n");
 
-    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
-     * / spec V1.05)*/
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(param);
+    /* The list of output argument shall be empty if the statusCode Severity is Bad
+       (Table 65 – Call Service Parameters spec V1.05) */
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    /* Variable initialization */
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    const char* cStrId = NULL;
+    SOPC_TrustListContext* pTrustList = NULL;
+    bool foundTrustList = false;
+
+    /* Retrieve the TrustList */
+    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
+    if (!foundTrustList || NULL == pTrustList)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:Method_RemoveCertificate: unable to create a variant");
         return OpcUa_BadUnexpectedError;
     }
+    cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: bad inputs arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check type of input arguments */
+    if ((SOPC_String_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:RemoveCertificate: bad BuiltInTypeId arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* This Method returns Bad_NotWritable if the TrustList Object is read only */
+    bool isReadMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
+    if (isReadMode)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: is open in read mode",
+                               cStrId);
+        return OpcUa_BadNotWritable;
+    }
+    /* The Open Method was called with write access and the CloseAndUpdate Method has not been called */
+    bool isWriteMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_WRITE_ERASE_EXISTING, NULL);
+    if (isWriteMode)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "TrustList:%s:RemoveCertificate: is open in write mode and the CloseAndUpdate has not been called", cStrId);
+        return OpcUa_BadInvalidState;
+    }
+    /* Finally decode the TrustList */
+    statusCode =
+        TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring, &inputArgs[1].Value.Boolean);
 
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
-    v->BuiltInTypeId = SOPC_Boolean_Id;
-    SOPC_Boolean_Initialize(&v->Value.Boolean);
-    v->Value.Boolean = false;
-    *nbOutputArgs = 1;
-    *outputArgs = v;
-
-    return SOPC_GoodGenericStatus;
+    return statusCode;
 }
 
 SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
@@ -526,6 +564,7 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
 {
     printf("Method Read Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -543,12 +582,6 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     int32_t reqLen = -1;
     SOPC_Variant* pVariant = NULL;
 
-    /* Check input arguments */
-    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:Read: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &foundTrustList);
     if (!foundTrustList || NULL == pTrustList)
@@ -556,6 +589,12 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_Int32_Id != inputArgs[1].BuiltInTypeId))
     {
@@ -630,6 +669,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
 {
     printf("Method Write Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -644,12 +684,6 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     SOPC_TrustListContext* pTrustList = NULL;
     bool foundTrustList = false;
 
-    /* Check input arguments */
-    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:Write: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &foundTrustList);
     if (!foundTrustList || NULL == pTrustList)
@@ -657,6 +691,12 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
     {
@@ -700,6 +740,7 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
 {
     printf("Method GetPosition Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -714,12 +755,6 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     bool foundTrustList = false;
     SOPC_Variant* pVariant = NULL;
 
-    /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:GetPosition: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &foundTrustList);
     if (!foundTrustList || NULL == pTrustList)
@@ -727,6 +762,12 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:GetPosition: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if (SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId)
     {
@@ -778,6 +819,7 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
 {
     printf("Method SetPosition Call\n");
 
+    SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -792,12 +834,6 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
     SOPC_TrustListContext* pTrustList = NULL;
     bool foundTrustList = false;
 
-    /* Check input arguments */
-    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == objectId))
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:SetPosition: bad inputs arguments");
-        return OpcUa_BadInvalidArgument;
-    }
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &foundTrustList);
     if (!foundTrustList || NULL == pTrustList)
@@ -805,6 +841,12 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
+    /* Check input arguments */
+    if ((2 != nbInputArgs) || (NULL == inputArgs))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SetPosition: bad inputs arguments", cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Check type of input arguments */
     if ((SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId) || (SOPC_UInt64_Id != inputArgs[1].BuiltInTypeId))
     {
