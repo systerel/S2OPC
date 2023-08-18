@@ -278,6 +278,23 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
 SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC_ByteString* pSrc);
 
 /**
+ * \brief Remove a single Certificate from the TrustList.
+ *        If the Certificate is a CA Certificate that has CRLs then all CRLs for that CA are removed as well.
+ *
+ * \param pTrustList            The TrustList context.
+ * \param thumbprint            The thumbprint of the certificate to remove.
+ * \param bIsTrustedCertificate If TRUE the certificate is removed from the trusted certificates list otherwise
+ *                              the certificate is removed from the issuer certificates list.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL) and not open.
+ *
+ * \return SOPC_GoodGenericStatus if successful.
+ */
+SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
+                                     const SOPC_String* thumbprint,
+                                     bool bIsTrustedCertificate);
+
+/**
  * \brief Validate the certificate and update the PKI that belongs to the TrustList.
  *        (AddCertificate method)
  *
@@ -315,7 +332,7 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList);
+SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Raise an event to re-evaluate the certificate.
@@ -329,7 +346,7 @@ SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList);
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus TrustList_RaiseEvent(SOPC_TrustListContext* pTrustList);
+SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Reset the context of the TrustList but keep the user configuration.

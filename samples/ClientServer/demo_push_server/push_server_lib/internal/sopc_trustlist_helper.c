@@ -838,7 +838,7 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* Writing an empty or null ByteString returns a Good result code without any affect on the TrustList. */
-    if (NULL == pEncodedTrustListDataType->Data || 0 == pEncodedTrustListDataType->Length)
+    if (NULL == pEncodedTrustListDataType->Data || pEncodedTrustListDataType->Length <= 0)
     {
         return SOPC_STATUS_OK;
     }
@@ -915,6 +915,29 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     return status;
 }
 
+/* Remove a single Certificate from the TrustList. */
+SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
+                                     const SOPC_String* thumbprint,
+                                     bool bIsTrustedCertificate)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    if (NULL == thumbprint)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    if (NULL == thumbprint->Data || thumbprint->Length <= 0)
+    {
+        /* The certificate to remove will not be found */
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Remove by thumbprint from SOPC_CertificateList, if issuer then return the issuerName, lenIssuerName*/
+    /* If issuer then remove all the CRL associated from the SOPC_CRLList */
+
+    SOPC_UNUSED_ARG(bIsTrustedCertificate);
+
+    return SOPC_GoodGenericStatus;
+}
+
 /* Validate the certificate and update the PKI that belongs to the TrustList */
 SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
                                     const SOPC_ByteString* pBsCert,
@@ -945,6 +968,8 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
         return OpcUa_BadUnexpectedError;
     }
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    /* Do not accept CA root as update (cannot provide CRLs) */
+    pProfile->bBackwardInteroperability = false;
     /* Create the certificate */
     if (SOPC_STATUS_OK == status)
     {
@@ -1126,7 +1151,7 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
 }
 
 /* Export the update (certificate files) */
-SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList)
+SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
@@ -1148,7 +1173,7 @@ SOPC_ReturnStatus TrustList_Export(SOPC_TrustListContext* pTrustList)
 }
 
 /* Raise an event to re-evaluate the certificate. */
-SOPC_ReturnStatus TrustList_RaiseEvent(SOPC_TrustListContext* pTrustList)
+SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
 {
     /* No fields are provided => Do nothing */
     if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
