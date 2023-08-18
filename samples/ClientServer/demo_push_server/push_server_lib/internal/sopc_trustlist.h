@@ -74,7 +74,7 @@ typedef struct SOPC_TrLst_VarCfg
  */
 typedef struct SOPC_TrustListContext
 {
-    size_t maxTrustListSize;             /*!< Defined the maximum size in byte for the TrustList */
+    uint32_t maxTrustListSize;           /*!< Defined the maximum size in byte for the TrustList */
     SOPC_NodeId* pObjectId;              /*!< The nodeId of the the TrustList */
     char* cStrObjectId;                  /*!< The C string nodeId of the the TrustList (it is used for logs) */
     SOPC_TrLst_Handle handle;            /*!< Defined the TrustList handle */

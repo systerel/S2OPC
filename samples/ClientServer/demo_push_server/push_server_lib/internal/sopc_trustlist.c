@@ -76,7 +76,7 @@ struct SOPC_TrustList_Config
     bool bDoNotClearIds;           /*!< Defined if the method nodeIds shall be clear */
     SOPC_TrustList_Type groupType; /*!< Defined the certificate group type of the TrustList. */
     SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI of the TrustList. */
-    size_t maxTrustListSize;       /*!< Defined the maximum size in byte for the TrustList. */
+    uint32_t maxTrustListSize;     /*!< Defined the maximum size in byte for the TrustList. */
 };
 
 /*---------------------------------------------------------------------------
@@ -307,11 +307,11 @@ static TrustList_NodeIds gTypeNodeIds = {
 static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrustList,
                                                   SOPC_TrustList_Type groupType,
                                                   SOPC_PKIProvider* pPKI,
-                                                  size_t maxTrustListSize);
+                                                  uint32_t maxTrustListSize);
 static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
                                          SOPC_TrustList_Type groupType,
                                          SOPC_PKIProvider* pPKI,
-                                         size_t maxTrustListSize);
+                                         uint32_t maxTrustListSize);
 static void trustlist_clear_context(SOPC_TrustListContext* pTrustList);
 static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList);
 static void trustlist_dict_free_context_value(uintptr_t value);
@@ -330,7 +330,7 @@ static SOPC_ReturnStatus trustlist_add_method_type_nodeId(SOPC_MethodCallManager
 static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrustList,
                                                   SOPC_TrustList_Type groupType,
                                                   SOPC_PKIProvider* pPKI,
-                                                  size_t maxTrustListSize)
+                                                  uint32_t maxTrustListSize)
 {
     if (NULL == ppTrustList || NULL == pPKI)
     {
@@ -350,7 +350,7 @@ static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrus
 static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
                                          SOPC_TrustList_Type groupType,
                                          SOPC_PKIProvider* pPKI,
-                                         size_t maxTrustListSize)
+                                         uint32_t maxTrustListSize)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pPKI);
@@ -708,7 +708,7 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void)
 
 SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
                                                          SOPC_PKIProvider* pPKI,
-                                                         const size_t maxTrustListSize,
+                                                         const uint32_t maxTrustListSize,
                                                          SOPC_TrustList_Config** ppConfig)
 {
     if (NULL == pPKI || 0 == maxTrustListSize || NULL == ppConfig)

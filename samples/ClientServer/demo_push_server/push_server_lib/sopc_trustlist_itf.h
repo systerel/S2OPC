@@ -72,7 +72,7 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
  */
 SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
                                                          SOPC_PKIProvider* pPKI,
-                                                         const size_t maxTrustListSize,
+                                                         const uint32_t maxTrustListSize,
                                                          SOPC_TrustList_Config** ppConfig);
 
 /**

@@ -252,7 +252,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void)
 SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_TrustList_Type groupType,
                                                                 const SOPC_Certificate_Type certType,
                                                                 SOPC_PKIProvider* pPKI,
-                                                                const size_t maxTrustListSize,
+                                                                const uint32_t maxTrustListSize,
                                                                 SOPC_SerializedAsymmetricKey* pKey,
                                                                 SOPC_SerializedCertificate* pCert,
                                                                 SOPC_CertificateGroup_Config** ppConfig)

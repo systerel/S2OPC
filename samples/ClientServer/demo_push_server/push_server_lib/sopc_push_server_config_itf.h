@@ -65,7 +65,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 SOPC_SerializedCertificate* pServerCert,
                                                                 SOPC_PKIProvider* pPKIUsr,
                                                                 const SOPC_Certificate_Type usrCertType,
-                                                                const size_t maxTrustListSize,
+                                                                const uint32_t maxTrustListSize,
                                                                 SOPC_PushServerConfig_Config** ppConfig);
 
 /**
