@@ -24,6 +24,7 @@
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_string.h"
 #include "sopc_key_manager.h"
 #include "sopc_macros.h"
@@ -1505,6 +1506,227 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_Cert
     }
 
     return SOPC_STATUS_OK;
+}
+
+static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLList** ppCRLList, mbedtls_x509_crt* ca)
+{
+    SOPC_ASSERT(NULL != ppCRLList);
+    SOPC_ASSERT(NULL != ca);
+
+    SOPC_CRLList* pHeadCRLList = *ppCRLList;
+    if (NULL == pHeadCRLList)
+    {
+        /* the CRL list is empty, do nothing */
+        return SOPC_STATUS_OK;
+    }
+    mbedtls_x509_crl* cur = &pHeadCRLList->crl; /* Current crl */
+    mbedtls_x509_crl* prev = NULL;              /* Parent of current crl */
+    mbedtls_x509_crl* next = NULL;              /* Next crl */
+    const mbedtls_md_info_t* hashInfo = NULL;
+    uint8_t* pHash = NULL;
+    unsigned char hashLen = 0;
+    bool bFound = true;
+    int res = -1;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Search the crl */
+    while (NULL != cur && SOPC_STATUS_OK == status)
+    {
+        /* Compare the subject name */
+        if (cur->issuer_raw.len == ca->subject_raw.len)
+        {
+            res = memcmp(cur->issuer_raw.p, ca->subject_raw.p, cur->issuer_raw.len);
+            bFound = res == 0;
+        }
+        /* Check if the CRL is correctly signed by the CA */
+        if (bFound)
+        {
+            hashInfo = mbedtls_md_info_from_type(cur->sig_md);
+            status = NULL != hashInfo ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status && bFound)
+        {
+            hashLen = mbedtls_md_get_size(hashInfo);
+            pHash = SOPC_Calloc(hashLen, sizeof(uint8_t));
+            status = NULL != pHash ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status && bFound)
+        {
+            res = mbedtls_md(hashInfo, cur->tbs.p, cur->tbs.len, pHash);
+            status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status && bFound)
+        {
+            res = mbedtls_pk_verify_ext(cur->sig_pk, cur->sig_opts, &ca->pk, cur->sig_md, pHash, hashLen, cur->sig.p,
+                                        cur->sig.len);
+            bFound = res == 0;
+        }
+        /* Remove the current crl if found */
+        if (SOPC_STATUS_OK == status && bFound)
+        {
+            next = cur->next;
+            cur->next = NULL;
+            mbedtls_x509_crl_free(cur);
+            if (NULL == prev)
+            {
+                if (NULL == next)
+                {
+                    /* The list is empty, Free it and stop the iteration  */
+                    SOPC_Free(pHeadCRLList);
+                    pHeadCRLList = NULL;
+                    cur = NULL;
+                }
+                else
+                {
+                    /* Head of the list is a special case */
+                    pHeadCRLList->crl = *next; /* Use an assignment operator to do the copy */
+                    /* We have to free the new next crl */
+                    SOPC_Free(next);
+                    /* Do not iterate: current crl has changed with the new head (cur = &pHeadCRLList->crl) */
+                }
+            }
+            else
+            {
+                /* We have to free the crl if it is not the first in the list */
+                SOPC_Free(cur);
+                prev->next = next;
+                /* Iterate */
+                cur = next;
+            }
+        }
+        else
+        {
+            /* iterate */
+            prev = cur;
+            cur = cur->next;
+        }
+        /* Clear */
+        SOPC_Free(pHash);
+        bFound = false;
+        res = -1;
+    }
+    *ppCRLList = pHeadCRLList;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_CertificateList** ppCertList,
+                                                                     SOPC_CRLList** ppCRLList,
+                                                                     const char* pThumbprint,
+                                                                     bool* pbMatch,
+                                                                     bool* pbIsIssuer)
+{
+    /* Initial return value */
+    *pbMatch = false;
+    *pbIsIssuer = false;
+
+    if (NULL == ppCertList || NULL == ppCRLList || NULL == pThumbprint || NULL == pbMatch)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t lenThumbprint = strlen(pThumbprint);
+    if (40 != lenThumbprint)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CertificateList* pHeadCertList = *ppCertList; /* Head of list */
+    if (NULL == pHeadCertList)
+    {
+        /* the certificate list is empty, do nothing*/
+        return SOPC_STATUS_OK;
+    }
+    mbedtls_x509_crt* cur = &pHeadCertList->crt; /* Current cert */
+    mbedtls_x509_crt* prev = NULL;               /* Parent of current cert */
+    mbedtls_x509_crt* next = NULL;               /* Next certificate */
+    int res = -1;
+    bool bFound = false;
+    bool bIsIssuer = false;
+    uint8_t* pHash = NULL;
+    const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
+
+    uint8_t* pThumb = SOPC_Calloc(20, sizeof(uint8_t));
+    if (NULL == pThumb)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(pThumbprint, pThumb, 20);
+
+    /* Search the certificate */
+    while (NULL != cur && !bFound && SOPC_STATUS_OK == status)
+    {
+        /* Get the current hash */
+        pHash = SOPC_Calloc(20, sizeof(uint8_t));
+        status = NULL != pHash ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+        if (SOPC_STATUS_OK == status)
+        {
+            res = mbedtls_md(pmd, cur->raw.p, cur->raw.len, pHash);
+            status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+        }
+        /* Compare with the hash ref */
+        if (SOPC_STATUS_OK == status)
+        {
+            res = memcmp(pThumb, pHash, 20);
+            /* Check match*/
+            if (0 == res)
+            {
+                bFound = true;
+                bIsIssuer = cur->ca_istrue;
+            }
+        }
+        /* If the current cert is a CA then remove all the CRLs for that CA */
+        if (SOPC_STATUS_OK == status && bFound && bIsIssuer)
+        {
+            status = sopc_key_manager_crl_list_remove_crl_from_ca(ppCRLList, cur);
+        }
+        /* Remove the certificate if found */
+        if (SOPC_STATUS_OK == status && bFound)
+        {
+            next = cur->next;
+            cur->next = NULL;
+            mbedtls_x509_crt_free(cur);
+            if (NULL == prev)
+            {
+                if (NULL == next)
+                {
+                    /* The list is empty, Free it and stop the iteration  */
+                    SOPC_Free(pHeadCertList);
+                    pHeadCertList = NULL;
+                    cur = NULL;
+                }
+                else
+                {
+                    /* Head of the list is a special case */
+                    pHeadCertList->crt = *next; /* Use an assignment operator to do the copy */
+                    /* We have to free the new next certificate */
+                    SOPC_Free(next);
+
+                    /* Do not iterate: current certificate has changed with the new head (cur = &pHeadCerts->crt) */
+                }
+            }
+            else
+            {
+                /* We have to free the certificate if it is not the first in the list */
+                SOPC_Free(cur);
+                prev->next = next;
+                /* Iterate */
+                cur = next;
+            }
+        }
+        else
+        {
+            /* iterate */
+            prev = cur;
+            cur = cur->next;
+        }
+        /* Clear */
+        SOPC_Free(pHash);
+    }
+    SOPC_Free(pThumb);
+    *ppCertList = pHeadCertList;
+    *pbMatch = bFound;
+    *pbIsIssuer = bIsIssuer;
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_CertificateList* pCert, bool* pbIsSelfSigned)

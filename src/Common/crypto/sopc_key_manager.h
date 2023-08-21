@@ -488,6 +488,29 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_FindCertInList(const SOPC_Cert
                                                                  bool* pbMatch);
 
 /**
+ * \brief                   Remove a single Certificate from its thumbprint.
+ *                          If the Certificate is a CA Certificate then all the CRLs for that CA are removed.
+ *
+ * \warning                 This function will fail if \p pThumbprint does not match the SHA1 length.
+ *                          If \p ppCertList becomes empty, the list is freed and its content is set to NULL.
+ *                          If \p ppCRLList becomes empty, the list is freed and its content is set to NULL.
+ *
+ * \param ppCertList        A valid pointer to the Certificate list.
+ * \param ppCRLList         A valid pointer to the CRL list.
+ * \param pThumbprint       The SHA1 of the certificate formatted as a hexadecimal C string (NULL terminated)
+ *                          40 bytes shall be allocated in \p pThumbprint (+ 1 byte for the NULL character)
+ * \param[out] pbMatch      A valid pointer indicating whether the certificate has been found and deleted.
+ * \param[out] pbIsIssuer   A valid pointer indicating whether the deleted certificate is an issuer.
+ *
+ * \return                  SOPC_STATUS_OK when successful
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_CertificateList** ppCertList,
+                                                                     SOPC_CRLList** ppCRLList,
+                                                                     const char* pThumbprint,
+                                                                     bool* pbMatch,
+                                                                     bool* pbIsIssuer);
+
+/**
  * \brief Creates a serialized certificate from a DER payload.
  *
  * \param der   the certificate data in DER format
