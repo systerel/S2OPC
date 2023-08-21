@@ -284,6 +284,7 @@ class NodesetMerger(NSFinder):
                     if self.verbose:
                         print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
                     refs.remove(ref)
+                    close_node_indent(refs, 2)
 
     def _remove_nids_and_refs(self, nids):
         self._remove_nids(nids)
@@ -574,6 +575,7 @@ class NodesetMerger(NSFinder):
         # even with a Breadth-First Search; so we start with the entire subtree, then
         # retain only the nodes with no outer parent
         self._rec_bf_remove_subtree({remove_root_nid}, subtree, is_root=True)
+        close_node_indent(self.tree.getroot(), 0)
 
     def __get_aliases(self):
         tree_aliases = self._find('uanodeset:Aliases')
