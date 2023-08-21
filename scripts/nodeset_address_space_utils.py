@@ -914,9 +914,9 @@ def make_argparser():
     rm_unused = parser.add_argument_group('Remove unused nodes')
     rm_unused.add_argument('--remove-unused', action='store_true', dest='remove_unused',
                         help='''
-                        Remove all of the type definitions which are not used by the model 
-                        (except for basic/standard datatypes which are mandatory).
+                        Remove all of the type definitions which are not used by the model. 
                         This  option forces the creation of reciprocal references (sanitize).
+                        To retain some of the type definitions, see options --retain-ns0 and --retain-types.
                         ''')
     rm_unused.add_argument('--retain-ns0', action='store_true', dest='retain_ns0',
                         help='''
