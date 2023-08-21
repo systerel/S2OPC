@@ -114,7 +114,7 @@ def _is_hierarchical_ref(ref: ET.Element):
 
 
 def _is_ns0(nid):
-    return not nid.startswith('ns=')
+    return not nid.startswith('ns=') or nid.startswith('ns=0;')
 
 
 def append_strings(parent_l_str: ET.Element, str_values):
