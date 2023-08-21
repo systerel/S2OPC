@@ -136,6 +136,11 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_remove_subtree.xml', ['--remove-subtree', 'ns=1;i=15009'],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
 
+    def test_remove_subtree_no_child(self):
+        # 15021 has no hierarchical child: check that it is removed nonetheless
+        self.run_test('test_remove_subtree_no_child.xml', ['--remove-subtree', 'ns=1;i=15021'],
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+
     def test_remove_unused(self):
         self.run_test('test_remove_unused.xml', ['--remove-unused'],
                       'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
