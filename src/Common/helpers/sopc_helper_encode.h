@@ -56,13 +56,13 @@ SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* input, unsigned char* out
  *
  * \param input     A valid pointer to the input.
  *
- * \param out       A valid pointer to the output (you should allocate strlen( \p input )/2 in \p out . \p inputLen is
- *                  strlen( \p input ))
+ * \param out       A valid pointer to the output (you should allocate strlen( \p input )/2 in \p out . \p outputLen is
+ *                  strlen( \p input ) / 2 )
  *
- * \param inputLen    The size of the \p input .
+ * \param outputLen    The size of the \p input divided by two.
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* input, unsigned char* out, size_t inputLen);
+SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* input, unsigned char* out, size_t outputLen);
 
 #endif /* SOPC_HELPER_ENCODE_H_ */

@@ -37,6 +37,10 @@ static uint8_t char_to_decimal(char c, bool* error)
     {
         return (uint8_t)(c - 'a' + 10);
     }
+    if (('A' <= c) && ('F' >= c))
+    {
+        return (uint8_t)(c - 'A' + 10);
+    }
 
     *error = true;
     return 0;
