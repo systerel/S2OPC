@@ -828,7 +828,10 @@ class NodesetMerger(NSFinder):
 
 
 def run_merge(args):
-    # Load and merge all address spaces
+    # check option compatibility and raise error
+    if not args.sanitize and (args.remove_subtree is not None or args.remove_unused or args.remove_backward_refs):
+        raise Exception("sanitization is required when removing a subtree, unused types or backward references")
+
     merger = NodesetMerger(args.verbose)
     for fname in args.fns_adds:
         source = fname if fname != '-' else sys.stdin
