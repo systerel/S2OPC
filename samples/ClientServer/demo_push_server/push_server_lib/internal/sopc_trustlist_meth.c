@@ -375,11 +375,11 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     /* Export the update (certificate files) */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
-        status = TrustList_Export(pTrustList);
+        status = TrustList_Export(pTrustList, false, false);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:CloseAndUpdate: failed to export the TrustList", cStrId);
+                                   "TrustList:%s:CloseAndUpdate: failed to export the new TrustList", cStrId);
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
@@ -389,8 +389,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         status = TrustList_RaiseEvent(pTrustList);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: creation event failed",
-                                   cStrId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: event failed", cStrId);
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
@@ -481,6 +480,17 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     /* Validate the certificate and update the PKI that belongs to the TrustList */
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_AddUpdate(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
+    /* Export the update (certificate files) */
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        SOPC_ReturnStatus status = TrustList_Export(pTrustList, false, true);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:AddCertificate: failed to export the new TrustList", cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
 
     return statusCode;
 }
@@ -496,7 +506,6 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     printf("Method RemoveCertificate Call\n");
 
     SOPC_ASSERT(NULL != objectId);
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
        (Table 65 – Call Service Parameters spec V1.05) */
@@ -504,10 +513,13 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     *outputArgs = NULL;
 
     /* Variable initialization */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
     bool foundTrustList = false;
+    bool bIsRemove = false;
+    bool bIsIssuer = false;
 
     /* Retrieve the TrustList */
     pTrustList = TrustList_DictGet(objectId, &foundTrustList);
@@ -517,14 +529,14 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* Check input arguments */
-    if ((2 != nbInputArgs) || (NULL == inputArgs))
+    if ((2 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: bad inputs arguments",
                                cStrId);
         return OpcUa_BadInvalidArgument;
     }
     /* Check type of input arguments */
-    if ((SOPC_String_Id != inputArgs[0].BuiltInTypeId) || (SOPC_ByteString_Id != inputArgs[1].BuiltInTypeId))
+    if ((SOPC_String_Id != inputArgs[0].BuiltInTypeId) || (SOPC_Boolean_Id != inputArgs[1].BuiltInTypeId))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "TrustList:%s:RemoveCertificate: bad BuiltInTypeId arguments", cStrId);
@@ -547,10 +559,39 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
             "TrustList:%s:RemoveCertificate: is open in write mode and the CloseAndUpdate has not been called", cStrId);
         return OpcUa_BadInvalidState;
     }
-    /* Finally decode the TrustList */
-    statusCode =
-        TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring, &inputArgs[1].Value.Boolean);
-
+    /* Finally remove the certificate with its thumbprint */
+    const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
+    statusCode = TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring,
+                                      inputArgs[1].Value.Boolean, secPolUri, &bIsRemove, &bIsIssuer);
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        if (!bIsRemove)
+        {
+            statusCode = OpcUa_BadInvalidArgument;
+        }
+    }
+    /* Export the update (certificate files) */
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        status = TrustList_Export(pTrustList, true, true);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:RemoveCertificate: failed to export the new TrustList", cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
+    if (bIsIssuer && 0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    {
+        /* Raise an event to re-evaluate the certificate  */
+        status = TrustList_RaiseEvent(pTrustList);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: event failed",
+                                   cStrId);
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
     return statusCode;
 }
 
