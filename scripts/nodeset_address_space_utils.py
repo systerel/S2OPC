@@ -482,17 +482,11 @@ class NodesetMerger(NSFinder):
     def remove_max_monit(self):
         # Delete MaxMonitoredItemsPerCall
         self._remove_nids_and_refs(['i=11714'])
-    
-        # We have to remove references to MaxMonitoredItemsPerCall manually,
-        # as there may exist references to unknown nodes in an address space.
-    
+
     def remove_max_node_mgt(self):
         # Delete MaxNodesPerNodeManagemeent
         self._remove_nids_and_refs(['i=11713'])
-    
-        # We have to remove references to MaxNodesPerNodeManagemeent manually,
-        #  as there may exist references to unknown nodes in an address space.
-    
+
     def remove_methods(self):
         # Delete methods that are instances of other methods.
         # For now, this difference between instantiated methods or not is solely based on the MethodDeclarationId.
