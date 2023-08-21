@@ -25,6 +25,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_helper_encode.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -915,27 +916,80 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     return status;
 }
 
-/* Remove a single Certificate from the TrustList. */
+/* Remove a single Certificate */
 SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
-                                     const SOPC_String* thumbprint,
-                                     bool bIsTrustedCertificate)
+                                     const SOPC_String* pThumbprint,
+                                     const bool bIsTrustedCert,
+                                     const char* secPolUri,
+                                     bool* pbIsRemove,
+                                     bool* pbIsIssuer)
 {
+    *pbIsRemove = false;
+    *pbIsIssuer = false;
+
     SOPC_ASSERT(NULL != pTrustList);
-    if (NULL == thumbprint)
+    SOPC_ASSERT(NULL != pTrustList->pPKI);
+    SOPC_ASSERT(NULL != pbIsRemove);
+    SOPC_ASSERT(NULL != pbIsIssuer);
+
+    if (NULL == pThumbprint || NULL == secPolUri)
     {
         return OpcUa_BadUnexpectedError;
     }
-    if (NULL == thumbprint->Data || thumbprint->Length <= 0)
+    if (NULL == pThumbprint->Data || pThumbprint->Length <= 0)
     {
         /* The certificate to remove will not be found */
         return OpcUa_BadInvalidArgument;
     }
-    /* Remove by thumbprint from SOPC_CertificateList, if issuer then return the issuerName, lenIssuerName*/
-    /* If issuer then remove all the CRL associated from the SOPC_CRLList */
 
-    SOPC_UNUSED_ARG(bIsTrustedCertificate);
+    uint32_t lenThumb = (uint32_t) pThumbprint->Length;
 
-    return SOPC_GoodGenericStatus;
+    if (40 != lenThumb)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:RemoveCertificate: rcv invalid thumbprint length : %" PRId32
+                               "(expected 40 bytes for hexadecimal SHA1) ",
+                               pTrustList->cStrObjectId, pThumbprint->Length);
+        return OpcUa_BadInvalidArgument;
+    }
+
+    const char* cStrThumb = SOPC_String_GetRawCString(pThumbprint);
+    if (NULL == cStrThumb)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+
+    bool bIsRemove = false;
+    bool bIsIssuer = false;
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    SOPC_ReturnStatus status =
+        SOPC_PKIProvider_RemoveCertificate(&pTrustList->pPKI, cStrThumb, bIsTrustedCert, &bIsRemove, &bIsIssuer);
+
+    if (bIsRemove && SOPC_STATUS_OK == status)
+    {
+        if (!bIsTrustedCert && !bIsIssuer)
+        {
+            statusCode = OpcUa_BadUnexpectedError;
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:RemoveCertificate: failed to remove certificate thumbprint <%s>",
+                               pTrustList->cStrObjectId, cStrThumb);
+        statusCode = OpcUa_BadUnexpectedError;
+    }
+    else
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:RemoveCertificate: certificate thumbprint <%s> has been removed",
+                               pTrustList->cStrObjectId, cStrThumb);
+    }
+
+    *pbIsRemove = bIsRemove;
+    *pbIsIssuer = bIsIssuer;
+    return statusCode;
 }
 
 /* Validate the certificate and update the PKI that belongs to the TrustList */
@@ -960,6 +1014,7 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_StatusCode validationError = SOPC_GoodGenericStatus;
     SOPC_CertificateList* pCert = NULL;
+    char* thumb = NULL;
     /* Create the PKI profile */
     SOPC_PKI_Profile* pProfile = NULL;
     SOPC_ReturnStatus status = SOPC_PKIProvider_CreateProfile(secPolUri, &pProfile);
@@ -985,16 +1040,20 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
     {
         statusCode = OpcUa_BadUnexpectedError;
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        thumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCert);
+    }
     /* Validate the certificate */
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_PKIProvider_ValidateCertificate(pTrustList->pPKI, pCert, pProfile, &validationError);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "TrustList:%s:AddCertificate: certificate validation failed with error code %" PRIX32,
-                pTrustList->cStrObjectId, validationError);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:AddCertificate: certificate validation failed with error code %" PRIX32
+                                   " for thumbprint <%s>",
+                                   pTrustList->cStrObjectId, validationError, thumb);
             statusCode = validationError;
         }
     }
@@ -1005,12 +1064,21 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
         if (SOPC_STATUS_OK != status)
         {
             /* The security level of the update is probably higher than the security level of the secure channel */
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: trustList update failed",
-                                   pTrustList->cStrObjectId);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "TrustList:%s:AddCertificate: trustList update failed for certificate thumbprint <%s>",
+                pTrustList->cStrObjectId, thumb);
             statusCode = OpcUa_BadCertificateInvalid;
         }
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:AddCertificate: certificate thumbprint <%s> has been added",
+                               pTrustList->cStrObjectId, thumb);
+    }
     /* Clear */
+    SOPC_Free(thumb);
     SOPC_PKIProvider_DeleteProfile(&pProfile);
     SOPC_KeyManager_Certificate_Free(pCert);
     return statusCode;
@@ -1151,18 +1219,23 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
 }
 
 /* Export the update (certificate files) */
-SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList)
+SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
+                                   const bool bEraseExitingFile,
+                                   const bool bForcePush)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
 
-    /* No fields are provided => Do nothing */
-    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
+    if (!bForcePush)
     {
-        return SOPC_STATUS_OK;
+        /* No fields are provided => Do nothing */
+        if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
+        {
+            return SOPC_STATUS_OK;
+        }
     }
-    bool bEraseExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists;
-    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bEraseExitingFile);
+    bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists || bEraseExitingFile;
+    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bNotIncludeExitingFile);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

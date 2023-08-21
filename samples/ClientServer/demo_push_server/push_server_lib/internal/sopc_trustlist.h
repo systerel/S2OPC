@@ -281,18 +281,24 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
  * \brief Remove a single Certificate from the TrustList.
  *        If the Certificate is a CA Certificate that has CRLs then all CRLs for that CA are removed as well.
  *
- * \param pTrustList            The TrustList context.
- * \param thumbprint            The thumbprint of the certificate to remove.
- * \param bIsTrustedCertificate If TRUE the certificate is removed from the trusted certificates list otherwise
- *                              the certificate is removed from the issuer certificates list.
+ * \param pTrustList      The TrustList context.
+ * \param pThumbprint     The thumbprint of the certificate to remove formatted as a hexadecimal string.
+ * \param bIsTrustedCert  If TRUE the certificate is removed from the trusted certificates list otherwise
+ *                        the certificate is removed from the issuer certificates list.
+ * \param secPolUri       The security policy.
+ * \param[out] pbIsRemove A valid pointer indicating whether the certificate has been found and deleted.
+ * \param[out] pbIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
  *
  * \warning \p pTrustList shall be valid (!= NULL) and not open.
  *
  * \return SOPC_GoodGenericStatus if successful.
  */
 SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
-                                     const SOPC_String* thumbprint,
-                                     bool bIsTrustedCertificate);
+                                     const SOPC_String* pThumbprint,
+                                     const bool bIsTrustedCert,
+                                     const char* secPolUri,
+                                     bool* pbIsRemove,
+                                     bool* pbIsIssuer);
 
 /**
  * \brief Validate the certificate and update the PKI that belongs to the TrustList.
@@ -327,12 +333,17 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
  * \brief Export the update (certificate files)
  *
  * \param pTrustList The TrustList context.
+ * \param bEraseExitingFile Define if the existing files shall be deleted or include with the update.
+ * \param bForcePush Force the export in case \p pTrustList is not open.
+ *                   (cases of AddCertificate and RemoveCertificate)
  *
  * \warning \p pTrustList shall be valid (!= NULL).
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList);
+SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
+                                   const bool bEraseExitingFile,
+                                   const bool bForcePush);
 
 /**
  * \brief Raise an event to re-evaluate the certificate.
