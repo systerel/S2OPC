@@ -608,6 +608,26 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
                                                   SOPC_CertificateList* pIssuerCerts,
                                                   SOPC_CRLList* pIssuerCrl,
                                                   const bool bIncludeExistingList);
+
+/** \brief  Remove All the certificate which match with the given thumbprint.
+ *          If the Certificate is a CA Certificate then all the CRLs for that CA are removed.
+ *
+ * \warning This function will fail if \p pThumbprint does not match the SHA1 hex digest size.
+ *
+ * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pThumbprint The SHA1 of the certificate formatted as an hexadecimal C string (NULL terminated)
+ *                    40 bytes shall be allocated in \p pThumbprint (+ 1 byte for the NULL character)
+ * \param bIsTrusted whether the certificate to remove is a trusted certificate.
+ * \param[out] pbIsRemove A valid pointer indicating whether the certificate has been found and deleted.
+ * \param[out] pbIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
+                                                     const char* pThumbprint,
+                                                     const bool bIsTrusted,
+                                                     bool* pbIsRemove,
+                                                     bool* pbIsIssuer);
 /**
  * \brief Free a PKI provider.
  *

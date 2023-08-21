@@ -29,6 +29,7 @@
 #include <stdio.h>
 
 #include "check_helpers.h"
+#include "hexlify.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -721,6 +722,126 @@ START_TEST(functional_test_verify_every_cert)
 }
 END_TEST
 
+static void check_free_list(SOPC_CertificateList** pTrustedCert,
+                            SOPC_CRLList** pTrustedCrl,
+                            SOPC_CertificateList** pIssuerCert,
+                            SOPC_CRLList** pIssuerCrl)
+{
+    SOPC_KeyManager_Certificate_Free(*pTrustedCert);
+    SOPC_KeyManager_CRL_Free(*pTrustedCrl);
+    SOPC_KeyManager_Certificate_Free(*pIssuerCert);
+    SOPC_KeyManager_CRL_Free(*pIssuerCrl);
+    *pTrustedCert = NULL;
+    *pTrustedCrl = NULL;
+    *pIssuerCert = NULL;
+    *pIssuerCrl = NULL;
+}
+
+START_TEST(functional_test_remove_cert)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_CertificateList* pCerts = NULL;
+    SOPC_CRLList* pCRLs = NULL;
+    SOPC_CertificateList* pPKI_TrustedCerts = NULL;
+    SOPC_CRLList* pPKI_TrustedCRLs = NULL;
+    SOPC_CertificateList* pPKI_IssuerCerts = NULL;
+    SOPC_CRLList* pPKI_IssuerCRLs = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bIsRemove = false;
+    bool bIsIssuer = false;
+    size_t listLength = 0;
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/certs/user_cacert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCerts);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Users_PKI/trusted/crl/user_cacrl.der", &pCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_GetListLength(pCerts, &listLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(3, listLength);
+    status = SOPC_PKIProvider_CreateFromList(pCerts, pCRLs, NULL, NULL, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    /* Test with an invalid thumbprint */
+    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", true, &bIsRemove,
+                                                &bIsIssuer);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(!bIsRemove);
+    ck_assert(!bIsIssuer);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
+                                                  &pPKI_IssuerCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pPKI_TrustedCerts);
+    ck_assert_ptr_nonnull(pPKI_TrustedCRLs);
+    ck_assert_ptr_null(pPKI_IssuerCerts);
+    ck_assert_ptr_null(pPKI_IssuerCRLs);
+    status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(3, listLength);
+    check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
+
+    /* Remove client_2k_cert.der */
+    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", true, &bIsRemove,
+                                                &bIsIssuer);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(bIsRemove);
+    ck_assert(!bIsIssuer);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
+                                                  &pPKI_IssuerCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pPKI_TrustedCerts);
+    ck_assert_ptr_nonnull(pPKI_TrustedCRLs);
+    ck_assert_ptr_null(pPKI_IssuerCerts);
+    ck_assert_ptr_null(pPKI_IssuerCRLs);
+    status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, listLength);
+    check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
+
+    /* Remove user_cacert.der */
+    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "C1D7F2035F7E5CF84A0A9CFB37BACB9289D02898", true, &bIsRemove,
+                                                &bIsIssuer);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(bIsRemove);
+    ck_assert(bIsIssuer);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
+                                                  &pPKI_IssuerCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pPKI_TrustedCerts);
+    ck_assert_ptr_nonnull(pPKI_TrustedCRLs);
+    ck_assert_ptr_null(pPKI_IssuerCerts);
+    ck_assert_ptr_null(pPKI_IssuerCRLs);
+    status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(1, listLength);
+    check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
+
+    /* Remove cacert.der */
+    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "8B3615C23983024A9D1E42C404481CB640B5A793", true, &bIsRemove,
+                                                &bIsIssuer);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(bIsRemove);
+    ck_assert(bIsIssuer);
+    status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
+                                                  &pPKI_IssuerCRLs);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(pPKI_TrustedCerts);
+    ck_assert_ptr_null(pPKI_TrustedCRLs);
+    ck_assert_ptr_null(pPKI_IssuerCerts);
+    ck_assert_ptr_null(pPKI_IssuerCRLs);
+
+    SOPC_KeyManager_Certificate_Free(pCerts);
+    SOPC_KeyManager_CRL_Free(pCRLs);
+    check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
@@ -754,6 +875,7 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(functional, functional_test_append_to_list);
     tcase_add_test(functional, functional_test_pki_permissive);
     tcase_add_test(functional, functional_test_verify_every_cert);
+    tcase_add_test(functional, functional_test_remove_cert);
     suite_add_tcase(s, functional);
 
     return s;

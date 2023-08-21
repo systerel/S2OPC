@@ -31,6 +31,7 @@
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
@@ -2519,5 +2520,207 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
     SOPC_KeyManager_CRL_Free(tmp_pTrustedCrl);
     SOPC_KeyManager_CRL_Free(tmp_pIssuerCrl);
 
+    return status;
+}
+
+static SOPC_ReturnStatus sopc_pki_remove_cert_by_thumbprint(SOPC_CertificateList** ppList,
+                                                            SOPC_CRLList** ppCRLLit,
+                                                            const char* pThumbprint,
+                                                            const char* listName,
+                                                            bool* pbIsRemove,
+                                                            bool* pbIsIssuer)
+{
+    SOPC_ASSERT(NULL != ppList);
+    SOPC_ASSERT(NULL != ppCRLLit);
+    SOPC_ASSERT(NULL != pThumbprint);
+    SOPC_ASSERT(NULL != pbIsRemove);
+    SOPC_ASSERT(NULL != pbIsIssuer);
+
+    size_t lenThumb = strlen(pThumbprint);
+    SOPC_ASSERT(40 == lenThumb);
+
+    /* Initialized the value to return */
+    *pbIsRemove = false;
+    *pbIsIssuer = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == *ppList)
+    {
+        /* the certificate list is empty, do nothing*/
+        return SOPC_STATUS_OK;
+    }
+
+    uint32_t count = 0;
+    bool bIsIssuer = false;
+    bool bAtLeastOneIssuer = false;
+    bool bAtLeastOne = false;
+
+    bool bCertRemove = true;
+    while (bCertRemove && SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(ppList, ppCRLLit, pThumbprint, &bCertRemove, &bIsIssuer);
+        if (bCertRemove)
+        {
+            if (bIsIssuer)
+            {
+                bAtLeastOneIssuer = true;
+            }
+            if (bAtLeastOneIssuer && !bIsIssuer)
+            {
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                         "> PKI remove: certificate thumbprint <%s> has been found both as CA and as "
+                                         "leaf certificate from %s",
+                                         pThumbprint, listName);
+            }
+            bAtLeastOne = true;
+            count = count + 1;
+        }
+    }
+
+    if (bAtLeastOne && NULL != listName)
+    {
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON,
+                               "> PKI remove: certificate thumbprint <%s> has been removed (%" PRIu32 " times) from %s",
+                               pThumbprint, count, listName);
+    }
+
+    *pbIsIssuer = bAtLeastOneIssuer;
+    *pbIsRemove = bAtLeastOne;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
+                                                     const char* pThumbprint,
+                                                     const bool bIsTrusted,
+                                                     bool* pbIsRemove,
+                                                     bool* pbIsIssuer)
+{
+    /* Initialized the value to return */
+    *pbIsRemove = false;
+    *pbIsIssuer = false;
+    if (NULL == ppPKI || NULL == pThumbprint)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_PKIProvider* pPKI = *ppPKI;
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (pPKI->isPermissive)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t lenThumbprint = strlen(pThumbprint);
+    if (40 != lenThumbprint)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool bRootIsRemove = false;
+    bool bCertIsRemove = false;
+    bool bCertIsCA = false;
+    bool bRootIsCA = false;
+
+    bool bIsIssuer = false;
+    bool bIsRemove = false;
+    /* Remove from trusted certificates */
+    if (bIsTrusted)
+    {
+        if (NULL != pPKI->pTrustedCerts)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedCerts, &pPKI->pTrustedCrl, pThumbprint,
+                                                        "trusted list", &bCertIsRemove, &bCertIsCA);
+        }
+        if (NULL != pPKI->pTrustedRoots && SOPC_STATUS_OK == status)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedRoots, &pPKI->pTrustedCrl, pThumbprint,
+                                                        "trusted root list", &bRootIsRemove, &bRootIsCA);
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_ASSERT(bRootIsCA == bRootIsRemove);
+            }
+        }
+        if (bCertIsRemove && bRootIsRemove && !bCertIsCA && SOPC_STATUS_OK == status)
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_COMMON,
+                "> PKI remove: certificate thumbprint <%s> has been found both as CA and as leaf certificate",
+                pThumbprint);
+        }
+        if ((bCertIsRemove || bRootIsRemove) && SOPC_STATUS_OK == status)
+        {
+            bIsIssuer = bCertIsCA || bRootIsCA;
+            bIsRemove = true;
+        }
+    }
+    else
+    {
+        /* Remove from issuer certificates */
+        if (NULL != pPKI->pIssuerCerts)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerCerts, &pPKI->pIssuerCrl, pThumbprint,
+                                                        "issuer list", &bCertIsRemove, &bCertIsCA);
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_ASSERT(bCertIsCA == bCertIsRemove);
+            }
+        }
+        if (NULL != pPKI->pIssuerRoots && SOPC_STATUS_OK == status)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerRoots, &pPKI->pIssuerCrl, pThumbprint,
+                                                        "issuer root list", &bRootIsRemove, &bRootIsCA);
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_ASSERT(bRootIsCA == bRootIsRemove);
+            }
+        }
+        if ((bCertIsRemove || bRootIsRemove) && SOPC_STATUS_OK == status)
+        {
+            bIsIssuer = true;
+            bIsRemove = true;
+        }
+    }
+    if (!bCertIsRemove && !bRootIsRemove)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON, "> PKI remove: certificate thumbprint <%s> has not been found",
+                                 pThumbprint);
+    }
+    else
+    {
+        bool bAllCertIsRemove = false;
+        bool bAllRootIsRemove = false;
+        bool bAllCertIsCA = false;
+        bool bAllRootIsCA = false;
+        /* Remove from all list */
+        if (NULL != pPKI->pAllCerts)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pAllCerts, &pPKI->pAllCrl, pThumbprint, NULL,
+                                                        &bAllCertIsRemove, &bAllCertIsCA);
+        }
+        if (NULL != pPKI->pAllRoots && SOPC_STATUS_OK == status)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pAllRoots, &pPKI->pAllCrl, pThumbprint, NULL,
+                                                        &bAllRootIsRemove, &bAllRootIsCA);
+            if (SOPC_STATUS_OK == status)
+            {
+                SOPC_ASSERT(bAllRootIsCA == bAllRootIsRemove);
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ASSERT(bCertIsRemove == bAllCertIsRemove && bCertIsCA == bAllCertIsCA);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ASSERT(bRootIsRemove == bAllRootIsRemove && bRootIsCA == bAllRootIsCA);
+        }
+    }
+
+    *pbIsIssuer = bIsIssuer;
+    *pbIsRemove = bIsRemove;
     return status;
 }

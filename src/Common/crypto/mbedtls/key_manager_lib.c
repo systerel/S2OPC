@@ -1602,6 +1602,7 @@ static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLLi
         }
         /* Clear */
         SOPC_Free(pHash);
+        pHash = NULL;
         bFound = false;
         res = -1;
     }
@@ -1721,6 +1722,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
         }
         /* Clear */
         SOPC_Free(pHash);
+        pHash = NULL;
     }
     SOPC_Free(pThumb);
     *ppCertList = pHeadCertList;
