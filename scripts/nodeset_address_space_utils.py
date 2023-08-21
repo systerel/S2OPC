@@ -534,14 +534,14 @@ class NodesetMerger(NSFinder):
         n = self._find_node_with_nid(root_nid)
         if n is None:
             return
+        if root_nid not in subtree:
+            subtree[root_nid] = set()
         for child_nid in self._iter_hierarchical(n):
-            if root_nid not in subtree:
-                subtree[root_nid] = set()
             subtree[root_nid].add(child_nid)
             if child_nid not in subtree:
                 subtree[child_nid] = set()
                 self._rec_compute_subtree(child_nid, subtree)
-    
+
     def _rec_bf_remove_subtree(self, remove_siblings: set, subtree: dict, is_root=False):
         # Breadth-First Removal of children with no parents outside the removed subtree
         children = set()
