@@ -224,6 +224,7 @@ class NodesetMerger(NSFinder):
     def __init__(self, verbose):
         super(NodesetMerger, self).__init__(dict())
         self.verbose = verbose
+        self.__source = None
         self.tree = None
         self.ns_idx_reassigner = NSIndexReassigner(self.namespaces)
 
@@ -318,7 +319,7 @@ class NodesetMerger(NSFinder):
         self._check_all_namespaces_declared(new)
         new_ns_uris = self._find_in(new, 'uanodeset:NamespaceUris')
         if new_ns_uris is None:
-            print("NamespaceUris is missing in a non-NS0 address space")
+            print(f"NamespaceUris is missing in a non-NS0 address space for {self.__source}")
             return False
     
         tree_ns_uris = self._find('uanodeset:NamespaceUris')
@@ -332,6 +333,7 @@ class NodesetMerger(NSFinder):
         for ns in new_ns_uri_nodes:
             tree_ns_uris.append(ns)
         tree_ns_uris[-1].tail = indent(1)
+        return True
 
     def __merge_models(self, new: ET.ElementTree):
         tree_models = self._find('uanodeset:Models')
@@ -444,6 +446,7 @@ class NodesetMerger(NSFinder):
         # Merge new tree into tree
         # The merge is restricted to tags for which we know the semantics
         # There are also some (maybe redundant) informations that are ignored by the S2OPC parser.
+        self.__source = source
         new_ns = parse_xmlns(source)
         for k,v in new_ns.items():
             if k not in self.namespaces:
@@ -459,10 +462,11 @@ class NodesetMerger(NSFinder):
                 self.namespaces['uanodeset'] = self.namespaces['']
             self.__fill_namespace_array()
             self._check_all_namespaces_declared(self.tree)
-            return
+            return True
 
         # Merge NamespaceURIs
-        self.__merge_ns_uris(new)
+        if not self.__merge_ns_uris(new):
+            return False
 
         # Merge Models
         self.__merge_models(new)
@@ -839,7 +843,10 @@ def run_merge(args):
     merger = NodesetMerger(args.verbose)
     for fname in args.fns_adds:
         source = fname if fname != '-' else sys.stdin
-        merger.merge(source)
+        res = merger.merge(source)
+        if not res:
+            print(f'Merge abandoned due to error with {source}')
+            return
 
     # Apply options afterwards
     if args.remove_max_monit:
