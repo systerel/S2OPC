@@ -25,6 +25,8 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_crypto_provider.h"
 #include "sopc_helper_encode.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -99,6 +101,7 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
                                                       SOPC_CRLList** ppIssuerCrls);
 
 static bool trustlist_is_valid_masks(SOPC_TrLst_Mask mask);
+static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t* deep);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
@@ -468,15 +471,53 @@ static bool trustlist_is_valid_masks(SOPC_TrLst_Mask masks)
     return true;
 }
 
+static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t* deep)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+
+    if (0 == *deep)
+    {
+        return SOPC_STATUS_NOK;
+    }
+    else
+    {
+        *deep = *deep - 1;
+    }
+    SOPC_TrLst_Handle genHandle = SOPC_TRUSTLIST_INVALID_HANDLE;
+    SOPC_ExposedBuffer* pBuff = NULL;
+    SOPC_CryptoProvider* pCrypto = SOPC_CryptoProvider_Create(SOPC_SecurityPolicy_None_URI);
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_GenerateRandomBytes(pCrypto, 2, &pBuff);
+    if (SOPC_STATUS_OK == status)
+    {
+        genHandle = (uint32_t) pBuff[0] + (((uint32_t) pBuff[1]) << 8);
+        if (SOPC_TRUSTLIST_INVALID_HANDLE == genHandle)
+        {
+            status = gen_handle_with_retries(pTrustList, deep);
+        }
+        else
+        {
+            pTrustList->handle = genHandle;
+        }
+    }
+    SOPC_Free(pBuff);
+    SOPC_CryptoProvider_Free(pCrypto);
+    return status;
+}
+
 /* Generate a random handle */
 SOPC_ReturnStatus TrustList_GenRandHandle(SOPC_TrustListContext* pTrustList)
 {
-    if (NULL == pTrustList)
+    SOPC_ASSERT(NULL != pTrustList);
+
+    uint8_t retry = 2;
+    SOPC_ReturnStatus status = gen_handle_with_retries(pTrustList, &retry);
+    if (SOPC_STATUS_OK != status)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s: Internal error, failed to generate a random handle",
+                               pTrustList->cStrObjectId);
     }
-    pTrustList->handle = 38;
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 /* Set the opening mode of the TrustList */
