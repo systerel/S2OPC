@@ -1263,6 +1263,9 @@ void TrustList_Reset(SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
 
+    SOPC_EventTimer_Cancel(pTrustList->event.activityTimeoutTimId);
+    pTrustList->event.activityTimeoutTimId = 0;
+    SOPC_Atomic_Int_Set(&pTrustList->event.timeoutElapsed, 0);
     SOPC_Buffer_Delete(pTrustList->pTrustListEncoded);
     SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
     SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
