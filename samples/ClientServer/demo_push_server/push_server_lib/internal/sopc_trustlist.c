@@ -323,6 +323,12 @@ static SOPC_ReturnStatus trustlist_copy_node_ids(TrustList_NodeIds* pSrc, TrustL
 
 static SOPC_ReturnStatus trustlist_add_method_type_nodeId(SOPC_MethodCallManager* pMcm);
 
+static void sopc_trustlist_activity_timeout_cb(SOPC_EventHandler* pHandler,
+                                               int32_t event,
+                                               uint32_t eltId,
+                                               uintptr_t pParams,
+                                               uintptr_t pAuxParam);
+
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
  *---------------------------------------------------------------------------*/
@@ -364,6 +370,9 @@ static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
     pTrustList->maxTrustListSize = maxTrustListSize;
     pTrustList->groupType = groupType;
     pTrustList->pPKI = pPKI;
+    pTrustList->event.pLooper = NULL;
+    pTrustList->event.pHandler = NULL;
+    pTrustList->event.activityTimeoutTimId = 0;
     TrustList_Reset(pTrustList);
 }
 
@@ -384,6 +393,7 @@ static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
     trustlist_delete_single_node_id(&pTrustList->varIds.pWritableId);
     trustlist_delete_single_node_id(&pTrustList->varIds.pUserWritableId);
     trustlist_delete_single_node_id(&pTrustList->varIds.pOpenCountId);
+    SOPC_Looper_Delete(pTrustList->event.pLooper);
     pTrustList->bDoNotDelete = true;
 }
 
@@ -685,6 +695,23 @@ static SOPC_ReturnStatus trustlist_add_method_type_nodeId(SOPC_MethodCallManager
     return status;
 }
 
+static void sopc_trustlist_activity_timeout_cb(SOPC_EventHandler* pHandler,
+                                               int32_t event,
+                                               uint32_t eltId,
+                                               uintptr_t pParams,
+                                               uintptr_t pAuxParam)
+{
+    SOPC_UNUSED_ARG(pHandler);
+    SOPC_UNUSED_ARG(event);
+    SOPC_UNUSED_ARG(eltId);
+    SOPC_UNUSED_ARG(pAuxParam);
+    SOPC_TrustListContext* pCtx = (void*) pParams;
+    if (NULL != pCtx)
+    {
+        SOPC_Atomic_Int_Set(&pCtx->event.timeoutElapsed, 1);
+    }
+}
+
 /*---------------------------------------------------------------------------
  *                             ITF Functions (implementation)
  *---------------------------------------------------------------------------*/
@@ -813,6 +840,24 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_Met
     if (NULL == pTrustList->cStrObjectId)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    /* Configure the event for the activity timeout */
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList->event.pLooper = SOPC_Looper_Create(pTrustList->cStrObjectId);
+        if (NULL == pTrustList->event.pLooper)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList->event.pHandler =
+            SOPC_EventHandler_Create(pTrustList->event.pLooper, sopc_trustlist_activity_timeout_cb);
+        if (NULL == pTrustList->event.pHandler)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -989,21 +1034,52 @@ bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContex
 }
 
 /* Get the trustList context from the nodeId */
-SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool* found)
+SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool bCheckActivityTimeout, bool* bFound)
 {
     if (NULL == gObjIdToTrustList || NULL == pObjectId)
     {
-        *found = false;
+        *bFound = false;
         return NULL;
     }
     SOPC_TrustListContext* pCtx = NULL;
-    pCtx = (SOPC_TrustListContext*) SOPC_Dict_Get(gObjIdToTrustList, (const uintptr_t) pObjectId, found);
-    if (!found || NULL == pCtx)
+    pCtx = (SOPC_TrustListContext*) SOPC_Dict_Get(gObjIdToTrustList, (const uintptr_t) pObjectId, bFound);
+    if (!bFound || NULL == pCtx)
     {
         char* cStrId = SOPC_NodeId_ToCString(pObjectId);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList: unable to retrieve TrustList context from %s",
                                cStrId);
         SOPC_Free(cStrId);
+    }
+    else
+    {
+        if (bCheckActivityTimeout)
+        {
+            /* Reset the timer */
+            SOPC_EventTimer_Cancel(pCtx->event.activityTimeoutTimId);
+
+            /* Check period elapsed */
+            SOPC_Event activityTimeoutEvent = {0};
+            activityTimeoutEvent.params = (uintptr_t) pCtx;
+            if (SOPC_Atomic_Int_Get(&pCtx->event.timeoutElapsed))
+            {
+                TrustList_Reset(pCtx);
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "TrustList:%s: activity timeout period elapsed (TrustList has been closed)",
+                                         pCtx->cStrObjectId);
+            }
+            else
+            {
+                /* Start the timer */
+                pCtx->event.activityTimeoutTimId = SOPC_EventTimer_Create(pCtx->event.pHandler, activityTimeoutEvent,
+                                                                          SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS);
+                if (0 == pCtx->event.activityTimeoutTimId)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "TrustList:%s: failed to start the activity timeout", pCtx->cStrObjectId);
+                    return NULL;
+                }
+            }
+        }
     }
     return pCtx;
 }

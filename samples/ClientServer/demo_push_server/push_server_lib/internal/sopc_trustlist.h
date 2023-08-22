@@ -25,8 +25,12 @@
 #ifndef SOPC_TRUSTLIST_
 #define SOPC_TRUSTLIST_
 
+#include "sopc_atomic.h"
 #include "sopc_buffer.h"
+#include "sopc_event_timer_manager.h"
 #include "sopc_trustlist_itf.h"
+
+#define SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS 60000u // 1 minute
 
 #define SOPC_TRUSTLIST_INVALID_HANDLE 0u
 
@@ -69,6 +73,14 @@ typedef struct SOPC_TrLst_VarCfg
     SOPC_NodeId* pOpenCountId;
 } SOPC_TrLst_VarCfg;
 
+typedef struct SOPC_TrLst_TimeEvent
+{
+    SOPC_Looper* pLooper;
+    SOPC_EventHandler* pHandler;
+    uint32_t activityTimeoutTimId;
+    int32_t timeoutElapsed;
+} SOPC_TrLst_TimeEvent;
+
 /**
  * \brief Internal context for the TrustList
  */
@@ -91,7 +103,8 @@ typedef struct SOPC_TrustListContext
     SOPC_CertificateList* pIssuerCerts;  /*!< The issuer certificate list to be updated */
     SOPC_CRLList* pTrustedCRLs;          /*!< The trusted CRL list to be updated */
     SOPC_CRLList* pIssuerCRLs;           /*!< The issuer CRL list to be updated */
-    bool bDoNotDelete;                   /*!< Defined whatever the TrustList context shall be deleted */
+    SOPC_TrLst_TimeEvent event;
+    bool bDoNotDelete; /*!< Defined whatever the TrustList context shall be deleted */
 } SOPC_TrustListContext;
 
 /**
@@ -108,11 +121,12 @@ bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContex
  * \brief Get the TrustList context from the nodeId.
  *
  * \param pObjectId  The objectId of the TrustList.
- * \param[out] found Defined whatever the TrustList is found that belongs to \p objectId .
+ * \param bCheckActivityTimeout Defined whatever the activity timeout shall be check.
+ * \param[out] bFound Defined whatever the TrustList is found that belongs to \p objectId .
  *
  * \return Return a valid ::SOPC_TrustListContext or NULL if error.
  */
-SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool* found);
+SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool bCheckActivityTimeout, bool* bFound);
 
 /**
  * \brief Removes a TrustList context from the nodeId.

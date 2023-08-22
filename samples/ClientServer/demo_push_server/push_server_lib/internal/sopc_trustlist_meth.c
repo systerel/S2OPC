@@ -56,20 +56,20 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const char* cStrId = NULL;
-    bool found = false;
+    bool bFound = false;
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &found);
-    if (NULL == pTrustList && !found)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadNotFound;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* TrustList already open ? */
-    bool isOpen = TrustList_CheckIsOpen(pTrustList);
-    if (isOpen)
+    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
+    if (bIsOpen)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: already open", cStrId);
         return OpcUa_BadInvalidState;
@@ -89,15 +89,15 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
         return OpcUa_BadInvalidArgument;
     }
     /* Set mode */
-    bool isValid = TrustList_SetOpenMasks(pTrustList, inputArgs[0].Value.Uint32);
-    if (!isValid)
+    bool bIsValid = TrustList_SetOpenMasks(pTrustList, inputArgs[0].Value.Uint32);
+    if (!bIsValid)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMask: invalid rcv masks %" PRIu32,
                                cStrId, inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
-    isValid = TrustList_SetOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ);
-    SOPC_ASSERT(isValid);
+    bIsValid = TrustList_SetOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ);
+    SOPC_ASSERT(bIsValid);
     /* Encode the TrustList */
     status = TrustList_Encode(pTrustList);
     if (SOPC_STATUS_OK != status)
@@ -162,20 +162,20 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const char* cStrId = NULL;
-    bool found = false;
+    bool bFound = false;
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &found);
-    if (!found || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadNotFound;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* TrustList already open ? */
-    bool isOpen = TrustList_CheckIsOpen(pTrustList);
-    if (isOpen)
+    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
+    if (bIsOpen)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: already open", cStrId);
         /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted.*/
@@ -194,15 +194,15 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidArgument;
     }
     /* Set mode */
-    bool isValid = TrustList_SetOpenMode(pTrustList, inputArgs[0].Value.Byte);
-    if (!isValid)
+    bool bIsValid = TrustList_SetOpenMode(pTrustList, inputArgs[0].Value.Byte);
+    if (!bIsValid)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: invalid rcv masks %" PRIu8, cStrId,
                                inputArgs[0].Value.Byte);
         return OpcUa_BadInvalidArgument;
     }
-    isValid = TrustList_SetOpenMasks(pTrustList, SOPC_TL_MASK_ALL);
-    SOPC_ASSERT(isValid);
+    bIsValid = TrustList_SetOpenMasks(pTrustList, SOPC_TL_MASK_ALL);
+    SOPC_ASSERT(bIsValid);
     /* Encode the TrustList */
     status = TrustList_Encode(pTrustList);
     if (SOPC_STATUS_OK != status)
@@ -264,12 +264,12 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     *outputArgs = NULL;
 
     const char* cStrId = NULL;
-    bool found = false;
+    bool bFound = false;
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &found);
-    if (NULL == pTrustList && !found)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -287,8 +287,8 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    bool match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bool bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Close: invalid rcv handle: %" PRIu32, cStrId,
                                inputArgs[0].Value.Uint32);
@@ -318,15 +318,15 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     *outputArgs = NULL;
 
     const char* cStrId = NULL;
-    bool found = false;
+    bool bFound = false;
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_TrustListContext* pTrustList = NULL;
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &found);
-    if (NULL == pTrustList && !found)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -346,8 +346,8 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    bool match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bool bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "TrustList:%s:CloseAndUpdate: invalid rcv handle: %" PRIu32, cStrId,
@@ -429,12 +429,12 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
 
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     const char* cStrId = NULL;
-    bool found = false;
+    bool bFound = false;
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &found);
-    if (!found || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -517,13 +517,13 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
-    bool foundTrustList = false;
+    bool bFound = false;
     bool bIsRemove = false;
     bool bIsIssuer = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
-    if (!foundTrustList || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -616,16 +616,16 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     /* Variable initialization */
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bool match = false;
+    bool bMatch = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
-    bool foundTrustList = false;
+    bool bFound = false;
     int32_t reqLen = -1;
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
-    if (!foundTrustList || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -643,16 +643,16 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Read: rcv handle: %" PRIu32, cStrId,
                                inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
     /* Check mode */
-    match = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "Read: File was not opened for read access");
-    if (!match)
+    bMatch = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "Read: File was not opened for read access");
+    if (!bMatch)
     {
         return OpcUa_BadInvalidState;
     }
@@ -720,14 +720,14 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
 
     /* Variable initialization */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bool match = false;
+    bool bMatch = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
-    bool foundTrustList = false;
+    bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
-    if (!foundTrustList || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -745,17 +745,17 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: rcv handle: %" PRIu32, cStrId,
                                inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
     /* Check mode */
-    match = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_WRITE_ERASE_EXISTING,
-                                    "Write: File was not opened for write access");
-    if (!match)
+    bMatch = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_WRITE_ERASE_EXISTING,
+                                     "Write: File was not opened for write access");
+    if (!bMatch)
     {
         return OpcUa_BadInvalidState;
     }
@@ -790,15 +790,15 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     *outputArgs = NULL;
 
     /* Variable initialization */
-    bool match = false;
+    bool bMatch = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
-    bool foundTrustList = false;
+    bool bFound = false;
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
-    if (!foundTrustList || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -817,17 +817,17 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:GetPosition: rcv handle: %" PRIu32, cStrId,
                                inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
     /* Check mode (GetPosition for write mode with erase if existing option has no meaning) */
-    match =
+    bMatch =
         TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "GetPosition: File was not opened for read access");
-    if (!match)
+    if (!bMatch)
     {
         return OpcUa_BadInvalidState;
     }
@@ -870,14 +870,14 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
 
     /* Variable initialization */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bool match = false;
+    bool bMatch = false;
     const char* cStrId = NULL;
     SOPC_TrustListContext* pTrustList = NULL;
-    bool foundTrustList = false;
+    bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, &foundTrustList);
-    if (!foundTrustList || NULL == pTrustList)
+    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -896,17 +896,17 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
         return OpcUa_BadInvalidArgument;
     }
     /* Check handle */
-    match = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
-    if (!match)
+    bMatch = TrustList_CheckHandle(pTrustList, inputArgs[0].Value.Uint32, NULL);
+    if (!bMatch)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SetPosition: rcv handle: %" PRIu32, cStrId,
                                inputArgs[0].Value.Uint32);
         return OpcUa_BadInvalidArgument;
     }
     /* Check mode (SetPosition for write mode with erase if existing option has no meaning) */
-    match =
+    bMatch =
         TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, "SetPosition: File was not opened for read access");
-    if (!match)
+    if (!bMatch)
     {
         return OpcUa_BadInvalidState;
     }
