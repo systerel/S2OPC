@@ -319,9 +319,10 @@ class NodesetMerger(NSFinder):
         self._check_all_namespaces_declared(new)
         new_ns_uris = self._find_in(new, 'uanodeset:NamespaceUris')
         if new_ns_uris is None:
-            print(f"NamespaceUris is missing in a non-NS0 address space for {self.__source}")
-            return False
-    
+            print(f"NamespaceUris is missing in {self.__source}, considering it as a NS0 address space extension")
+            # TODO: check that the file does not contain any reference to ns=1 or more
+            return True
+
         tree_ns_uris = self._find('uanodeset:NamespaceUris')
         if tree_ns_uris is None:
             tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
