@@ -757,10 +757,6 @@ class NodesetMerger(NSFinder):
     
         return True
 
-    def __fill_namespace_and_server_arrays(self):
-        self.__fill_namespace_array()
-        self.__merge_server_array()
-
     def __fetch_subelement(self, elem, subtag, indentation=-1) -> ET.Element:
         subelem = self._find_in(elem, subtag)
         if subelem is None:
