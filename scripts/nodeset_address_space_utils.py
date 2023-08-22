@@ -498,7 +498,7 @@ class NodesetMerger(NSFinder):
         methods_properties = []
         for method_node in self._iterfind(self.tree, '*[@MethodDeclarationId]'):
             methods.append(method_node.get('NodeId'))
-            refs = self._find(method_node, 'uanodeset:References')
+            refs = self._find_in(method_node, 'uanodeset:References')
             if refs is None:
                 continue
             for ref in refs:
