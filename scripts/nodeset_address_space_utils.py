@@ -780,6 +780,9 @@ class NodesetMerger(NSFinder):
         tree_uris = [uri.text for uri in self._findall(tree_l_str, f'{{{UA_TYPES_URI}}}String')]
         new_uris = [uri.text for uri in self._findall(new, f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String")]
         ns1_uri = self._find('uanodeset:NamespaceUris/uanodeset:Uri')
+        if ns1_uri is None:
+            # Nothing to merge, ns0 extension
+            return
         if len(tree_uris) > 0 and tree_uris[0] != ns1_uri.text:
             raise Exception(f"Invalid local server URI in node id 2254: {tree_uris[0]}, expecting {ns1_uri} instead")
         new_uris.insert(0, ns1_uri.text)
