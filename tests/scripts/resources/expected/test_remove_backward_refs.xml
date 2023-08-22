@@ -42,6 +42,7 @@
     <DisplayName>Number</DisplayName>
     <Description>Describes a value that can have any numeric DataType.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
       <Reference ReferenceType="HasSubtype">i=27</Reference>
       <Reference ReferenceType="HasSubtype">i=28</Reference>
     </References>
@@ -50,6 +51,7 @@
     <DisplayName>Integer</DisplayName>
     <Description>Describes a value that can have any integer DataType.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=26</Reference>
       <Reference ReferenceType="HasSubtype">i=6</Reference>
     </References>
   </UADataType>
@@ -57,6 +59,7 @@
     <DisplayName>UInteger</DisplayName>
     <Description>Describes a value that can have any unsigned integer DataType.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=26</Reference>
       <Reference ReferenceType="HasSubtype">i=7</Reference>
     </References>
   </UADataType>
@@ -64,42 +67,49 @@
     <DisplayName>Boolean</DisplayName>
     <Description>Describes a value that is either TRUE or FALSE.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="Int32" NodeId="i=6">
     <DisplayName>Int32</DisplayName>
     <Description>Describes a value that is an integer between −2,147,483,648  and 2,147,483,647.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=27</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="UInt32" NodeId="i=7">
     <DisplayName>UInt32</DisplayName>
     <Description>Describes a value that is an integer between 0 and 4,294,967,295.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=28</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="String" NodeId="i=12">
     <DisplayName>String</DisplayName>
     <Description>Describes a value that is a sequence of printable Unicode characters.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="XmlElement" NodeId="i=16">
     <DisplayName>XmlElement</DisplayName>
     <Description>Describes a value that is an XML element.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="NodeId" NodeId="i=17">
     <DisplayName>NodeId</DisplayName>
     <Description>Describes a value that is an identifier for a node within a Server address space.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="ExpandedNodeId" NodeId="i=18">
     <DisplayName>ExpandedNodeId</DisplayName>
     <Description>Describes a value that is an absolute identifier for a node.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
     </References>
   </UADataType>
   <UAReferenceType BrowseName="References" IsAbstract="true" NodeId="i=31" Symmetric="true">
@@ -113,6 +123,7 @@
     <DisplayName>NonHierarchicalReferences</DisplayName>
     <Description>The abstract base type for all non-hierarchical references.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=31</Reference>
       <Reference ReferenceType="HasSubtype">i=40</Reference>
     </References>
     <InverseName>NonHierarchicalReferences</InverseName>
@@ -121,6 +132,7 @@
     <DisplayName>HasTypeDefinition</DisplayName>
     <Description>The type for references from a instance node its type definition node.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=32</Reference>
     </References>
     <InverseName>TypeDefinitionOf</InverseName>
   </UAReferenceType>
@@ -130,6 +142,7 @@
     <DisplayName>PropertyType</DisplayName>
     <Description>The type for variable that represents a property of another node.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=62</Reference>
     </References>
   </UAVariableType>
   
@@ -146,6 +159,7 @@
     <DisplayName>FolderType</DisplayName>
     <Description>The type for objects that organize other nodes.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=58</Reference>
     </References>
   </UAObjectType>
   <UAVariableType BrowseName="BaseVariableType" IsAbstract="true" NodeId="i=62" ValueRank="-2">
@@ -160,12 +174,14 @@
     <DisplayName>BaseDataVariableType</DisplayName>
     <Description>The type for variable that represents a process value.</Description>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=62</Reference>
       <Reference ReferenceType="HasSubtype">i=2365</Reference>
     </References>
   </UAVariableType>
   <UAObjectType BrowseName="ModellingRuleType" NodeId="i=77">
     <DisplayName>ModellingRuleType</DisplayName>
     <References>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=58</Reference>
     </References>
   </UAObjectType>
   <UAObject BrowseName="Mandatory" NodeId="i=78" SymbolicName="ModellingRule_Mandatory">
@@ -255,6 +271,7 @@
     <References>
       <Reference ReferenceType="HasProperty">i=2366</Reference>
       <Reference ReferenceType="HasProperty">i=2367</Reference>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=63</Reference>
       <Reference ReferenceType="HasSubtype">i=15318</Reference>
     </References>
   </UAVariableType>
@@ -278,6 +295,7 @@
       <Reference ReferenceType="HasProperty">i=17567</Reference>
       <Reference ReferenceType="HasProperty">i=17568</Reference>
       <Reference ReferenceType="HasProperty">i=17569</Reference>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=2365</Reference>
       <Reference ReferenceType="HasSubtype">i=2368</Reference>
     </References>
   </UAVariableType>
@@ -306,6 +324,7 @@
     <DisplayName>AnalogItemType</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">i=2369</Reference>
+      <Reference IsForward="false" ReferenceType="HasSubtype">i=15318</Reference>
     </References>
   </UAVariableType>
   <UAVariable BrowseName="EURange" DataType="i=884" NodeId="i=2369" ParentNodeId="i=2368">

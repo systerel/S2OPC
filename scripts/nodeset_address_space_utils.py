@@ -814,6 +814,8 @@ class NodesetMerger(NSFinder):
         return retain | corresp
 
     def remove_backward_refs(self, retain: set):
+        # HasSubtype backward refs should be kept since it might be necessary for type resolution. 
+        retain |= {'HasSubtype'}
         all_retain = self.__get_all_retain_values(retain)
         for node, _ in self._iter_nid_nodes():
             for refs in self._iterfind(node, 'uanodeset:References'):
@@ -930,6 +932,7 @@ def make_argparser():
     rm_back_refs.add_argument('--remove-backward-refs', action='store_true', dest='remove_backward_refs',
                         help='''
                         Remove the backward references, i.e. reference elements with @IsForward="false".
+                        Retain only the "HasSubtype" backward references, necessary for type resolution.
                         This option requires a sanitized model, else information would be lost.
                         Thus, it is not compatible with --no-sanitize.
                         ''')

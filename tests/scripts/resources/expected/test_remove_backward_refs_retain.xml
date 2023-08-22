@@ -144,6 +144,14 @@
     <Description>The type for variable that represents a property of another node.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=62</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2254</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2255</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2366</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2367</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=17567</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=17568</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=17569</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2369</Reference>
     </References>
   </UAVariableType>
   
@@ -162,6 +170,12 @@
     <Description>The type for objects that organize other nodes.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=58</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=84</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=85</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=86</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=88</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=89</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2253</Reference>
     </References>
   </UAObjectType>
   <UAVariableType BrowseName="BaseVariableType" IsAbstract="true" NodeId="i=62" ValueRank="-2">
@@ -179,12 +193,16 @@
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=62</Reference>
       <Reference ReferenceType="HasSubtype">i=2365</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2261</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2294</Reference>
     </References>
   </UAVariableType>
   <UAObjectType BrowseName="ModellingRuleType" NodeId="i=77">
     <DisplayName>ModellingRuleType</DisplayName>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=58</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=78</Reference>
+      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=80</Reference>
     </References>
   </UAObjectType>
   <UAObject BrowseName="Mandatory" NodeId="i=78" SymbolicName="ModellingRule_Mandatory">
