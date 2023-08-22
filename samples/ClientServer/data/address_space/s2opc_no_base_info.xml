@@ -3755,7 +3755,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
       <Reference ReferenceType="Organizes">i=78</Reference>
       <Reference ReferenceType="Organizes">i=80</Reference>
-      </References>
+    </References>
   </UAObject>
   <UAObject NodeId="i=2997" BrowseName="AggregateFunctions" ParentNodeId="i=2268">
     <DisplayName>AggregateFunctions</DisplayName>
@@ -5414,7 +5414,7 @@
     <DisplayName>EnumField</DisplayName>
     <Category>Address Space DataTypeDefinition Attribute</Category>
     <References>
-      </References>
+    </References>
     <Definition Name="EnumField">
       <Field Name="Name" DataType="i=12" />
     </Definition>
