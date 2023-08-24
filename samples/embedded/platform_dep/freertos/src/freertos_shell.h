@@ -30,6 +30,11 @@
 char* SOPC_Shell_ReadLine(void);
 
 /**
+ * Non safe-protected function that prints out a string on the debug serial line
+ */
+void shell_putString(const char* str);
+
+/**
  *   Printf-like function that outputs the result on the default serial line.
  *   Each line is limited to 80 chars. The function is thread-safe, implying that multiple calls in
  *   different threads may be blocking.

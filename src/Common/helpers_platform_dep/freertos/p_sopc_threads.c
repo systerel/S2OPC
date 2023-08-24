@@ -35,6 +35,11 @@
 #include "p_sopc_threads.h"         /* private thread include */
 #include "p_sopc_utils.h"           /* private list include */
 
+#include "cmsis_os.h"
+#include "freertos_platform_dep.h"
+#include "freertos_shell.h"
+#include "samples_platform_dep.h"
+
 #define MAX_THREADS MAX_WAITERS
 
 /* Private structure definition */
@@ -63,6 +68,32 @@ typedef struct T_THREAD_WKS
 static tUtilsList* pgTaskList = NULL;
 
 /*****Private thread api*****/
+
+static configSTACK_DEPTH_TYPE getStckSizeByName(const char* name)
+{
+    static const uint32_t oneKb = 1024;
+    uint32_t nbBytes = oneKb;
+    if (name != NULL)
+    {
+        if (0 == strcmp(name, "Services") ||
+                0 == strcmp(name, "Secure_Channels"))
+        {
+            nbBytes = oneKb * 6;
+        }
+        else if(0 == strcmp(name, "Publisher") ||
+                0 == strcmp(name, "Sockets") ||
+                0 == strcmp(name, "SubSocketMgr") ||
+                0 == strcmp(name, "Application"))
+        {
+            nbBytes = oneKb * 3;
+        }
+    }
+
+    SOPC_Shell_Printf("Allocating %d bytes for thread %s\n",
+            nbBytes, name ? name : "<NULL>"
+            );
+    return nbBytes / sizeof(configSTACK_DEPTH_TYPE);
+}
 
 // Callback encapsulate user callback. Abstract start and stop synchronisation.
 static void cbInternalCallback(void* ptr)
@@ -223,8 +254,9 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
     }
     if (SOPC_STATUS_OK == resPTHR)
     {
+
         BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
-                                               configMINIMAL_STACK_SIZE, handleWks, priority, &handleWks->handleTask);
+                getStckSizeByName(taskName), handleWks, priority, &handleWks->handleTask);
 
         if (pdPASS != resTaskCreate)
         {
@@ -642,4 +674,15 @@ SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 void SOPC_Sleep(unsigned int milliseconds)
 {
     vTaskDelay(pdMS_TO_TICKS(milliseconds));
+}
+
+// Hook used to show stack overflows
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+{
+  char* name = (pcTaskName ? (char*)pcTaskName : "NULL");
+  shell_putString("\n\n!!!\nStack overflow in thread");
+  shell_putString(name);
+  shell_putString("\n");
+  osDelay(500);
+   __BKPT(0);
 }

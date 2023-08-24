@@ -53,7 +53,7 @@ C_OPT_CSTD='-std=gnu11 '
 C_OPT_SPECS='--specs=nano.specs '
 C_OPT_F='-ffunction-sections -fdata-sections  -fstack-usage'
 C_DEFS='-DUSE_HAL_DRIVER -DSTM32H723xx '
-C_DEFS+=' -DMBEDTLS_CONFIG_FILE="mbedtls_config.h" '
+C_DEFS+=' -DMBEDTLS_CONFIG_FILE="sopc_mbedtls_config.h" '
 C_DEFS+=' -DSTM32_THREAD_SAFE_STRATEGY=4 -DSOPC_PTR_SIZE=4 -DWITH_USER_ASSERT=1'
 C_DEFS+=' -D_RETARGETABLE_LOCKING=1' # Necessary since configuration differs in newlib.h
 C_DEFS+=' -DSOPC_BOARD_TARGET_INCLUDE="NUCLEO-H723ZG.h"' # Indirection to board-specific header file if required

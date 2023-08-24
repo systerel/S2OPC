@@ -71,20 +71,33 @@ cp -ur ${S2OPC_SAMPLE}/platform_dep/include/*.h ${SRC_DIR}/sample_inc || exit 14
 echo "[II] Headers copied to ${SRC_DIR}/sample_inc"
 
 # Patch main entry
-sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main\(void\); sopc_main\(\);/g' ${FREERTOS_CORE_DIR}/Src/main.c || exit 3
+sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main_entry\(void *\); sopc_main_entry\(NULL\);/g' ${FREERTOS_CORE_DIR}/Src/main.c || exit 3
+unix2dos.exe ${FREERTOS_CORE_DIR}/Src/main.c  >/dev/null 2>/dev/null
 echo "[II] Main entry patched to call S2OPC code"
 
 # Patch freertos hooks
-sed -i 's/\bvApplicationTickHook\b/__bvApplicationTickHook__/g' ${FREERTOS_CORE_DIR}/Src/freertos.c 
+sed -i 's/\bvApplicationTickHook\b/__vApplicationTickHook__/g' ${FREERTOS_CORE_DIR}/Src/freertos.c 
 echo "[II] FreeRTOS hooks patched for 'vApplicationTickHook'"
+sed -i 's/\bvApplicationStackOverflowHook\b/__vApplicationStackOverflowHook__/g' ${FREERTOS_CORE_DIR}/Src/freertos.c 
+unix2dos.exe ${FREERTOS_CORE_DIR}/Src/freertos.c  >/dev/null 2>/dev/null
+echo "[II] FreeRTOS hooks patched for 'vApplicationStackOverflowHook'"
 
-sed -i 's/configUSE_TICK_HOOK *0/configUSE_TICK_HOOK 1/g' ${FREERTOS_CORE_DIR}/Inc/FreeRTOSConfig.h 
-echo "[II] Patched configUSE_TICK_HOOK for FreeRTOS options"
+# Patch mbedtls_hardware_poll
+# Patch:
+# -      memset(&(Output[index * 4]), (int)randomValue, 4);
+# +      memcpy(&(Output[index * 4]), &(int)randomValue, 4);
+sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FREERTOS_CORE_DIR}/../MBEDTLS/Target/hardware_rng.c
+unix2dos.exe ${FREERTOS_CORE_DIR}/../MBEDTLS/Target/hardware_rng.c >/dev/null 2>/dev/null
+echo "[II] hardware_rng.c bug patched for 'mbedtls_hardware_poll'"
+
+#sed -i 's/configUSE_TICK_HOOK *0/configUSE_TICK_HOOK 1/g' ${FREERTOS_CORE_DIR}/Inc/FreeRTOSConfig.h 
+#echo "[II] Patched configUSE_TICK_HOOK for FreeRTOS options"
 
 # Patch LWIP_RAM_HEAP_POINTER for LwIP opts (https://github.com/STMicroelectronics/STM32CubeF4/issues/123)
-f=$(find $(dirname ${FREERTOS_CORE_DIR}) -name 'lwipopts.h')
-! [ -f "$f" ] && echo "could not find 'lwipopts.h'" && exit 20
-sed -i 's/^\( *#define LWIP_RAM_HEAP_POINTER\)/\/\/\1/g' "$f"
-echo "[II] LWIP_RAM_HEAP_POINTER patched in LwIP_opts"
+# now useless since MEM_LIBC_MALLOC is used and no more LWIP specific Malloc exists
+# f=$(find $(dirname ${FREERTOS_CORE_DIR}) -name 'lwipopts.h')
+#! [ -f "$f" ] && echo "could not find 'lwipopts.h'" && exit 20
+#sed -i 's/^\( *#define LWIP_RAM_HEAP_POINTER\)/\/\/\1/g' "$f"
+#echo "[II] LWIP_RAM_HEAP_POINTER patched in LwIP_opts"
 
 

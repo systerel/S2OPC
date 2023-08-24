@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include "stm32h7xx_hal.h"
+
 #include "freertos_platform_dep.h"
 
 #include "freertos_shell.h"

@@ -53,6 +53,8 @@
 #include "sopc_mbedtls_config.h"
 
 #include "mbedtls.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/entropy_poll.h"
 
 #include "freertos_shell.h"
 #include "sopc_assert.h"
@@ -72,10 +74,41 @@
 /*******************************************************************************
  * Variables
  ******************************************************************************/
+#if defined(USE_FreeRTOS_HEAP_5)
+#ifdef STM32H723xx
+#define HEAP_REGION2_SIZE (128 * 1024)
+#define HEAP_REGION2_BASE 0x20000000
+#else
+#error "Sorry, Memory mapping is not define for this board. It has to be added"
+#endif  // STM32H723xx
 
+static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
+HeapRegion_t board_heap5_regions[] = {
+        { (void*)HEAP_REGION2_BASE, HEAP_REGION2_SIZE }, // DTCM RAM
+        { ucHeap, configTOTAL_HEAP_SIZE },
+        { NULL,   0}
+};
+
+#endif  // USE_FreeRTOS_HEAP_5
 /*******************************************************************************
  * Local Functions
  ******************************************************************************/
+
+/*************************************************/
+static void rng_self_test(void)
+{
+    unsigned char buff[32];
+    size_t oLen = 0;
+    int res = mbedtls_hardware_poll(NULL, buff, sizeof(buff), &oLen);
+    SOPC_ASSERT(res == 0);
+
+    SOPC_Shell_Printf("res=[");
+    for (size_t i = 0; i < oLen; i++)
+    {
+        SOPC_Shell_Printf("%02X ", buff[i]);
+    }
+    SOPC_Shell_Printf("]\n");
+}
 
 /*************************************************/
 const char* get_IP_str(void)
@@ -144,12 +177,11 @@ void SOPC_Platform_Shutdown(const bool reboot)
 }
 
 /*************************************************/
-void cb_main_wrapper(void* param)
+void sopc_main_entry(void* param)
 {
-    SOPC_Shell_Printf("cb_main_wrapper(%p)\r\n", param);
     SOPC_UNUSED_ARG(param);
 
-    SOPC_Platform_Target_Debug();
+    SOPC_Platform_Target_Debug(NULL);
     SOPC_Platform_Main();
 }
 
@@ -189,7 +221,7 @@ void sopc_main(void)
     static const int priority = 0;
     TaskHandle_t tHandle;
 
-    xTaskCreate(cb_main_wrapper, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
+    xTaskCreate(sopc_main_entry, "Main", MAIN_STACK_SIZE, NULL, priority, &tHandle);
 }
 
 /*************************************************/
@@ -205,15 +237,34 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void)
 }
 
 /*************************************************/
-void SOPC_Platform_Target_Debug(void)
+void SOPC_Platform_Target_Debug(const char* param)
 {
-    PRINTF(
-        "\r\n"
-        "************************************\r\n");
-    PRINTF("** BOOTING FreeRTOS S2OPC SAMPLE  **\r\n");
-    PRINTF("** BUILD ON " __DATE__ " " __TIME__ "  **\r\n");
+    if (NULL == param || *param == 0)
+    {
+        PRINTF(
+                "\r\n"
+                "************************************\r\n");
+        PRINTF("** BOOTING FreeRTOS S2OPC SAMPLE  **\r\n");
+        PRINTF("** BUILD ON " __DATE__ " " __TIME__ "  **\r\n");
 
-    const unsigned remHeap = xPortGetFreeHeapSize();
-    const unsigned minHeap = xPortGetMinimumEverFreeHeapSize();
-    PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \r\n", configTOTAL_HEAP_SIZE, remHeap, minHeap);
+        const unsigned remHeap = xPortGetFreeHeapSize();
+        const unsigned minHeap = xPortGetMinimumEverFreeHeapSize();
+        PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \r\n",
+                configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE,
+                remHeap, minHeap);
+    }
+    else if (0 == strcmp(param, "help"))
+    {
+        PRINTF("\nDebug sub commands: arp, rng");
+    }
+    else if (0 == strcmp(param, "arp"))
+    {
+        PRINTF("\nSending a gratuitous ERP packet...\n");
+        etharp_gratuitous(netif_default);
+    }
+    else if (0 == strcmp(param, "rng"))
+    {
+        PRINTF("\nRNG self-test...\n");
+        rng_self_test();
+    }
 }

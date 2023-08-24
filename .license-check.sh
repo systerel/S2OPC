@@ -143,28 +143,6 @@ read -d '' exclusions <<-EOF
     src/Common/opcua_types/sopc_types.h
     src/Common/opcua_types/sopc_enum_types.h
     src/Common/opcua_types/sopc_types.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/FreeRTOSConfig.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/lwipopts.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/semihost_hardfault.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/MIMXRT1064_features.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/peripherals.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/pin_mux.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/peripherals.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/fsl_phy.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/board.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.h
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/clock_config.c
-    tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/src/board.c
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.c
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/des_alt.h
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls_config.h
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.h
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/ksdk_mbedtls.c
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha1_alt.h
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/sha256_alt.h
-	tests/ClientServer/unit_tests/freertos/test_helpers_platform_dep/board_specific/mbedtls_port/ksdk/threading_alt.h
 EOF
 for f in $exclusions; do
     mv $f $f"_"

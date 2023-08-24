@@ -176,14 +176,19 @@ static void serverStopped_cb(SOPC_ReturnStatus status)
 
     LOG_DEBUG("serverStopped_cb");
     SOPC_Atomic_Int_Set(&gStopped, 1);
-    LOG_WARNING("Server stopped!\n");
+    PRINT("Server stopped!\n");
 }
+
+static bool logEnabled = false;
 
 /***************************************************/
 static void log_UserCallback(const char* context, const char* text)
 {
     SOPC_UNUSED_ARG(context);
-    PRINT("%s\n", text);
+    if (logEnabled)
+    {
+        PRINT("%s\n", text);
+    }
 }
 
 /***************************************************/
@@ -210,17 +215,17 @@ static SOPC_ReturnStatus authentication_check(SOPC_UserAuthentication_Manager* a
         {
             if (pwd->Length == 4 && memcmp(pwd->Data, "pass", 4) == 0)
             {
-                LOG_INFO("User <%s> has successfully authenticated", username);
+                PRINT("User <%s> has successfully authenticated", username);
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
             }
             else
             {
-                LOG_WARNING("User <%s> entered an invalid password", username);
+                PRINT("User <%s> entered an invalid password", username);
             }
         }
         else
         {
-            LOG_WARNING("Unknown user <%s>", username);
+            PRINT("Unknown user <%s>", username);
         }
     }
 
@@ -258,7 +263,7 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
     if (SOPC_STATUS_OK == writeStatus)
     {
         char* nodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
-        LOG_INFO("A client updated the content of node <%s> with a value of type %d", nodeId,
+        PRINT("A client updated the content of node <%s> with a value of type %d\n", nodeId,
                  writeValue->Value.Value.BuiltInTypeId);
         SOPC_Free(nodeId);
         // Synchronize cache for PubSub
@@ -861,10 +866,10 @@ static int cmd_demo_info(WordList* pList)
 /***************************************************/
 static int cmd_demo_dbg(WordList* pList)
 {
-    SOPC_UNUSED_ARG(pList);
+    const char* word = CLI_GetNextWord(pList);
 
     PRINT("S2OPC PubSub+Server target debug informations:\n");
-    SOPC_Platform_Target_Debug();
+    SOPC_Platform_Target_Debug(word);
     return 0;
 }
 
@@ -872,6 +877,7 @@ static int cmd_demo_dbg(WordList* pList)
 static int cmd_demo_log(WordList* pList)
 {
     const char* word = CLI_GetNextWord(pList);
+    logEnabled = true;
     switch (word[0])
     {
     case 'E':
@@ -886,8 +892,11 @@ static int cmd_demo_log(WordList* pList)
     case 'D':
         SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
         break;
+    case '0':
+        logEnabled = false;
+        break;
     default:
-        PRINT("usage: log <D|I|W|E>\n");
+        PRINT("usage: log <0|D|I|W|E>\n");
         break;
     }
     return 0;

@@ -391,10 +391,10 @@ static int cmd_demo_connect(WordList* pList)
 /***************************************************/
 static int cmd_demo_dbg(WordList* pList)
 {
-    SOPC_UNUSED_ARG(pList);
+    const char* word = CLI_GetNextWord(pList);
 
     PRINT("S2OPC Client target debug informations:\n");
-    SOPC_Platform_Target_Debug();
+    SOPC_Platform_Target_Debug(word);
     return 0;
 }
 

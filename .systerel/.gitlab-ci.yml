@@ -266,7 +266,7 @@ build-zephyr:
 
 build-freeertos:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/freertos_build:v1.0@sha256:d944e7b402432e93d94e91c5771f98e0f92cb917a425b551928b1b008f8c8724 # freertos_build:v1.1
+  image: docker.aix.systerel.fr/c838/freertos_build:v1.0@sha256:739d99a7fd7a27212000a7d0ad641cca0e6ac06e560cdc15b3b6fb618bfeb9c5 # freertos_build:v1.1
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
     - 'test -f build_freertos/freertos-sopc.elf'

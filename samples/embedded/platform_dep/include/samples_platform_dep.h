@@ -73,7 +73,8 @@ char* SOPC_Shell_ReadLine(void);
  * There are no expectations in this implementation which can be empty.
  * It is intended to allow the host application to display some OS-internal
  * informations.
+ * \param param An optional parameter passed (specific to each implementation)
  */
-void SOPC_Platform_Target_Debug(void);
+void SOPC_Platform_Target_Debug(const char* param);
 
 #endif /* SAMPLES_PLATFORM_DEP_H_ */
