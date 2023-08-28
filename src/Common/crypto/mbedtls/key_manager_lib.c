@@ -969,7 +969,11 @@ static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* 
         size_t nb_written = fwrite(buf->p, 1, buf->len, fp);
         if (buf->len != nb_written)
         {
-            remove(filePath);
+            int err = remove(filePath);
+            if (0 != err)
+            {
+                fprintf(stderr, "> KeyManager: removing partially written DER file '%s' failed.\n", filePath);
+            }
             status = SOPC_STATUS_NOK;
         }
     }
