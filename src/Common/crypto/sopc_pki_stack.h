@@ -114,7 +114,7 @@ typedef enum
  */
 typedef enum
 {
-    SOPC_PKI_KU_DISABLE_CHECK = 0x0000,
+    SOPC_PKI_KU_NONE = 0x0000,
     SOPC_PKI_KU_NON_REPUDIATION = 0x0001,
     SOPC_PKI_KU_DIGITAL_SIGNATURE = 0x0002,
     SOPC_PKI_KU_KEY_ENCIPHERMENT = 0x0004,
@@ -128,9 +128,9 @@ typedef enum
  */
 typedef enum
 {
-    SOPC_PKI_EKU_DISABLE_CHECK,
-    SOPC_PKI_EKU_CLIENT_AUTH,
-    SOPC_PKI_EKU_SERVER_AUTH,
+    SOPC_PKI_EKU_NONE = 0x0000,
+    SOPC_PKI_EKU_CLIENT_AUTH = 0x0001,
+    SOPC_PKI_EKU_SERVER_AUTH = 0x0002,
 } SOPC_PKI_ExtendedKeyUsage_Mask;
 
 /**
@@ -161,10 +161,8 @@ typedef enum
  *   Defines if mdSign, pkAlgo, RSAMinimumKeySize and RSAMaximumKeySize should be checked.
  * @var SOPC_PKI_LeafProfile::keyUsage
  *   Defines the key usages mask of the certificates to validate.
- *   If SOPC_PKI_KU_DISABLE_CHECK is set then the key usages are not checked.
  * @var SOPC_PKI_LeafProfile::extendedKeyUsage
  *   Defines the extended key usages mask of the certificates to validate.
- *   If SOPC_PKI_EKU_DISABLE_CHECK is set then the extended key usages are not checked.
  * @var SOPC_PKI_LeafProfile::sanApplicationUri
  *   The application URI to check in the subjectAltName field.
  *   If NULL is set then the URI is not checked.

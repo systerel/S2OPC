@@ -239,15 +239,15 @@ static const SOPC_PKI_KeyUsage_Mask g_usrKU =
     SOPC_PKI_KU_DIGITAL_SIGNATURE; // it is not part of the OPC UA but it makes sense to keep it
 static const SOPC_PKI_ExtendedKeyUsage_Mask g_clientEKU = SOPC_PKI_EKU_SERVER_AUTH;
 static const SOPC_PKI_ExtendedKeyUsage_Mask g_serverEKU = SOPC_PKI_EKU_CLIENT_AUTH;
-static const SOPC_PKI_ExtendedKeyUsage_Mask g_userEKU = SOPC_PKI_EKU_DISABLE_CHECK;
+static const SOPC_PKI_ExtendedKeyUsage_Mask g_userEKU = SOPC_PKI_EKU_NONE;
 
 static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha256_2048_4096 = {.mdSign = SOPC_PKI_MD_SHA256,
                                                                          .pkAlgo = SOPC_PKI_PK_RSA,
                                                                          .RSAMinimumKeySize = 2048,
                                                                          .RSAMaximumKeySize = 4096,
                                                                          .bApplySecurityPolicy = true,
-                                                                         .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
-                                                                         .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                                                         .keyUsage = SOPC_PKI_KU_NONE,
+                                                                         .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                                                          .sanApplicationUri = NULL,
                                                                          .sanURL = NULL};
 
@@ -256,8 +256,8 @@ static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha1_1024_2048 = {.mdSign =
                                                                        .RSAMinimumKeySize = 1024,
                                                                        .RSAMaximumKeySize = 2048,
                                                                        .bApplySecurityPolicy = true,
-                                                                       .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
-                                                                       .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                                                       .keyUsage = SOPC_PKI_KU_NONE,
+                                                                       .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                                                        .sanApplicationUri = NULL,
                                                                        .sanURL = NULL};
 
@@ -797,11 +797,6 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_CertificateList* pToVa
 static unsigned int get_lib_ku_from_sopc_ku(const SOPC_PKI_KeyUsage_Mask sopc_pki_ku)
 {
     unsigned int usages = 0;
-    if (SOPC_PKI_KU_DISABLE_CHECK & sopc_pki_ku)
-    {
-        usages = UINT32_MAX; // All allowed
-        return usages;
-    }
     if (SOPC_PKI_KU_DIGITAL_SIGNATURE & sopc_pki_ku)
     {
         usages |= MBEDTLS_X509_KU_DIGITAL_SIGNATURE;
@@ -845,39 +840,33 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     int err = 0;
     bool bErrorFound = false;
     /* Check key usages */
-    if (SOPC_PKI_KU_DISABLE_CHECK != pProfile->keyUsage)
+    usages = get_lib_ku_from_sopc_ku(pProfile->keyUsage);
+    err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
+    if (0 != err)
     {
-        usages = get_lib_ku_from_sopc_ku(pProfile->keyUsage);
-        err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
-        if (err)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed : missing expected key usage for certificate thumbprint %s",
-                                   thumbprint);
-            bErrorFound = true;
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation error '%d': missing expected key usage for certificate thumbprint %s",
+                               err, thumbprint);
+        bErrorFound = true;
     }
     /* Check extended key usages for client or server cert */
-    bool missing = false;
+    err = 0;
     if (SOPC_PKI_EKU_SERVER_AUTH & pProfile->extendedKeyUsage)
     {
-        missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
-                                                             MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
+        err |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_SERVER_AUTH,
+                                                         MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
     }
     if (SOPC_PKI_EKU_CLIENT_AUTH & pProfile->extendedKeyUsage)
     {
-        missing |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
-                                                             MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
+        err |= mbedtls_x509_crt_check_extended_key_usage(&pToValidate->crt, MBEDTLS_OID_CLIENT_AUTH,
+                                                         MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
     }
-    if (SOPC_PKI_EKU_DISABLE_CHECK == pProfile->extendedKeyUsage)
+    if (0 != err)
     {
-        missing = false;
-    }
-    if (missing)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation : missing expected extended key usage for certificate thumbprint %s",
-                               thumbprint);
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI validation error '%d': missing expected extended key usage for certificate thumbprint %s", err,
+            thumbprint);
         bErrorFound = true;
     }
 

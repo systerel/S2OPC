@@ -140,14 +140,14 @@ START_TEST(cert_invalid_application_uri)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetURI(pLeafProfile, "invalid_uri");
     ck_assert_ptr_nonnull(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UriInvalid, err);
@@ -169,14 +169,14 @@ START_TEST(cert_valid_application_uri)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetURI(pLeafProfile, S2OPC_DEFAULT_APPLICATION_URI);
     ck_assert_ptr_nonnull(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -197,14 +197,14 @@ START_TEST(cert_invalid_hostName)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetURL(pLeafProfile, "invalid_hostName");
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_nonnull(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_HostNameInvalid, err);
@@ -226,14 +226,14 @@ START_TEST(cert_valid_hostName)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetURL(pLeafProfile, S2OPC_DEFAULT_ENDPOINT_URL);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_nonnull(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -258,15 +258,15 @@ START_TEST(cert_invalid_keyUsage)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pLeafProfile, SOPC_PKI_TYPE_CLIENT_APP);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert((SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
                SOPC_PKI_KU_NON_REPUDIATION) == pLeafProfile->keyUsage);
-    pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK;
+    pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_NONE;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, err);
@@ -292,8 +292,8 @@ START_TEST(cert_valid_keyUsage)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pLeafProfile, SOPC_PKI_TYPE_CLIENT_APP);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
@@ -301,7 +301,7 @@ START_TEST(cert_valid_keyUsage)
     ck_assert_int_eq((SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT | SOPC_PKI_KU_DIGITAL_SIGNATURE |
                       SOPC_PKI_KU_NON_REPUDIATION),
                      pLeafProfile->keyUsage);
-    pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK;
+    pLeafProfile->extendedKeyUsage = SOPC_PKI_EKU_NONE;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -323,14 +323,14 @@ START_TEST(cert_invalid_extendedKeyUsage)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pLeafProfile, SOPC_PKI_TYPE_SERVER_APP);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_EKU_CLIENT_AUTH, pLeafProfile->extendedKeyUsage);
-    pLeafProfile->keyUsage = SOPC_PKI_KU_DISABLE_CHECK;
+    pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_UseNotAllowed, err);
@@ -353,14 +353,14 @@ START_TEST(cert_valid_extendedKeyUsage)
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pLeafProfile, SOPC_PKI_TYPE_CLIENT_APP);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
     ck_assert(!pLeafProfile->bApplySecurityPolicy);
     ck_assert_int_eq(SOPC_PKI_EKU_SERVER_AUTH, pLeafProfile->extendedKeyUsage);
-    pLeafProfile->keyUsage = SOPC_PKI_KU_DISABLE_CHECK;
+    pLeafProfile->keyUsage = SOPC_PKI_KU_NONE;
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -381,8 +381,8 @@ START_TEST(cert_invalid_security_policy_mdsig)
                                         .RSAMinimumKeySize = 2048,
                                         .RSAMaximumKeySize = 4096,
                                         .bApplySecurityPolicy = true,
-                                        .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
-                                        .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                        .keyUsage = SOPC_PKI_KU_NONE,
+                                        .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                         .sanApplicationUri = NULL,
                                         .sanURL = NULL};
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err);
@@ -405,8 +405,8 @@ START_TEST(cert_invalid_security_policy_keySize)
                                         .RSAMinimumKeySize = 4000,
                                         .RSAMaximumKeySize = SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits,
                                         .bApplySecurityPolicy = true,
-                                        .keyUsage = SOPC_PKI_KU_DISABLE_CHECK,
-                                        .extendedKeyUsage = SOPC_PKI_EKU_DISABLE_CHECK,
+                                        .keyUsage = SOPC_PKI_KU_NONE,
+                                        .extendedKeyUsage = SOPC_PKI_EKU_NONE,
                                         .sanApplicationUri = NULL,
                                         .sanURL = NULL};
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, &leafProfile, &err);
@@ -440,8 +440,8 @@ START_TEST(cert_valid_security_policy)
     ck_assert(pLeafProfile->bApplySecurityPolicy);
     ck_assert_ptr_null(pLeafProfile->sanApplicationUri);
     ck_assert_ptr_null(pLeafProfile->sanURL);
-    ck_assert_int_eq(SOPC_PKI_KU_DISABLE_CHECK, pLeafProfile->keyUsage);
-    ck_assert_int_eq(SOPC_PKI_EKU_DISABLE_CHECK, pLeafProfile->extendedKeyUsage);
+    ck_assert_int_eq(SOPC_PKI_KU_NONE, pLeafProfile->keyUsage);
+    ck_assert_int_eq(SOPC_PKI_EKU_NONE, pLeafProfile->extendedKeyUsage);
     status = SOPC_PKIProvider_CheckLeafCertificate(pCertToValidate, pLeafProfile, &err);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
