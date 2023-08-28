@@ -60,6 +60,7 @@
        |     |
        |     ---- certs
        |     ---- crl
+       |---- rejected
        |
        ---- updatedTrustList
        |    |
@@ -475,6 +476,7 @@ void SOPC_PKIProvider_DeleteProfile(SOPC_PKI_Profile** ppProfile);
  * \param[out] error Pointer to store the OpcUa error code when certificate validation failed.
  *
  * \note \p error is only set if returned status is different from SOPC_STATUS_OK.
+ *       The certificate is internally stored if it is rejected.
  *
  * \warning In case of user PKI, the leaf profile part of \p pProfile is not applied to the certificate.
  *          The user leaf properties should be checked separately with ::SOPC_PKIProvider_CheckLeafCertificate .
@@ -548,7 +550,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
  *         - updatedTrustList/issuers/crl
  *
  * \param pPKI A valid pointer to the PKIProvider.
- * \param bEraseExistingFiles whether the existing files of the the trustList folder shall be deleted.
+ * \param bEraseExistingFiles whether the existing files of the updatedTrustList folder shall be deleted.
  *
  * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProvider_CreateFromList ) then
  *          you shall define the directory store path with ::SOPC_PKIProvider_SetStorePath .
@@ -585,6 +587,38 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* p
                                                        SOPC_CRLList** ppTrustedCrl,
                                                        SOPC_CertificateList** ppIssuerCerts,
                                                        SOPC_CRLList** ppIssuerCrl);
+
+/** \brief Get the list of certificate that have been rejected.
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param[out] ppCert A copy of the PKI rejected list.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
+
+/** \brief Write the rejected certificates files in the rejected folder of the PKI storage.
+ *         The format of the written files is DER.
+ *
+ * \param pPKI A valid pointer to the PKIProvider.
+ * \param bEraseExistingFiles whether the existing files of the rejected folder shall be deleted.
+ *
+ * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProvider_CreateFromList ) then
+ *          you shall define the directory store path with ::SOPC_PKIProvider_SetStorePath .
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvider* pPKI,
+                                                            const bool bEraseExistingFiles);
+
+/** \brief Add a certificate tp the PKI rejected list.
+ *
+ * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pCert A valid pointer to the certificate to be added.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider** ppPKI, const SOPC_CertificateList* pCert);
 
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
@@ -628,6 +662,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
                                                      const bool bIsTrusted,
                                                      bool* pbIsRemove,
                                                      bool* pbIsIssuer);
+
 /**
  * \brief Free a PKI provider.
  *

@@ -526,7 +526,10 @@ void session_core_bs__get_session_user_secu_client(const constants__t_session_i 
  * Returns SOPC_STATUS_OK if the appUri is empty.
  * Otherwise, returns an error code when the certData is empty or the creation of the certificate fails.
  */
-static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, const SOPC_String* appUri, bool* ok)
+static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData,
+                                               const SOPC_String* appUri,
+                                               SOPC_PKIProvider** ppPKI,
+                                               bool* ok)
 {
     SOPC_CertificateList* certificate = NULL;
 
@@ -561,7 +564,14 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData, 
     {
         uint32_t error = 0;
         status = SOPC_PKIProvider_CheckLeafCertificate(certificate, pLeafProfile, &error);
-        *ok = SOPC_STATUS_OK == status;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        status = SOPC_PKIProvider_AddCertToRejectedList(ppPKI, certificate);
+    }
+    else
+    {
+        *ok = true;
     }
     SOPC_KeyManager_Certificate_Free(certificate);
     SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
@@ -703,7 +713,7 @@ void session_core_bs__server_create_session_req_do_crypto(
         if (SOPC_STATUS_OK == status)
         {
             status = check_application_uri(&pReq->ClientCertificate, &pReq->ClientDescription.ApplicationUri,
-                                           &application_uri_ok);
+                                           &pECfg->serverConfigPtr->pki, &application_uri_ok);
         }
 
         if (SOPC_STATUS_OK == status)

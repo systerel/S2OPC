@@ -51,12 +51,17 @@
 #define STR_TRUSTLIST_NAME "/updatedTrustList"
 #endif
 
+#ifndef SOPC_PKI_REJECTED_LIST_SIZE
+#define SOPC_PKI_REJECTED_LIST_SIZE 10
+#endif
+
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
 #define STR_ISSUERS "/issuers"
 #define STR_ISSUERS_CERTS "/issuers/certs"
 #define STR_ISSUERS_CRL "/issuers/crl"
+#define STR_REJECTED "/rejected"
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
@@ -227,6 +232,7 @@ struct SOPC_PKIProvider
     SOPC_CertificateList* pIssuerCerts;  /*!< Issuer intermediate CA*/
     SOPC_CertificateList* pIssuerRoots;  /*!< Issuer root CA*/
     SOPC_CRLList* pIssuerCrl;            /*!< CRLs of issuer intermediate CA and issuer root CA*/
+    SOPC_CertificateList* pRejectedList; /*!< The list of Certificates that have been rejected */
 
     SOPC_CertificateList* pAllCerts;      /*!< Issuer certs + trusted certs (root not included)*/
     SOPC_CertificateList* pAllRoots;      /*!< Issuer roots + trusted roots*/
@@ -1016,6 +1022,70 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     return status;
 }
 
+SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider** ppPKI, const SOPC_CertificateList* pCert)
+{
+    if (NULL == ppPKI || NULL == pCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == *ppPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t listLength = 0;
+    SOPC_PKIProvider* pPKI = *ppPKI;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != pPKI->pRejectedList)
+    {
+        status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &listLength);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Remove the oldest certificate (HEAD of the chain) if the rejected list is too large */
+        if (SOPC_PKI_REJECTED_LIST_SIZE == listLength && NULL != pPKI->pRejectedList)
+        {
+            /* Change the HEAD */
+            mbedtls_x509_crt* cur = &pPKI->pRejectedList->crt;
+            mbedtls_x509_crt* next = cur->next;
+            cur->next = NULL;
+            if (NULL == next)
+            {
+                /* case where SOPC_PKI_MAX_NB_CERT_REJECTED == 1 */
+                SOPC_KeyManager_Certificate_Free(pPKI->pRejectedList);
+                pPKI->pRejectedList = NULL;
+            }
+            else
+            {
+                mbedtls_x509_crt_free(cur);
+                pPKI->pRejectedList->crt = *next; /* Copy with an assignment operator */
+                SOPC_Free(next);
+            }
+        }
+        if (UINT32_MAX < pCert->crt.raw.len)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Create the rejected list if empty or append at the end */
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pCert->crt.raw.p, (uint32_t) pCert->crt.raw.len,
+                                                                    &pPKI->pRejectedList);
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCert);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI : cannot append the certificate thumbprint %s to the rejected list",
+                                 thumbprint);
+        SOPC_Free(thumbprint);
+    }
+
+    return status;
+}
+
 static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
                                                    const SOPC_CertificateList* pToValidate,
                                                    const SOPC_PKI_Profile* pProfile,
@@ -1119,12 +1189,19 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
 
     if (bErrorFound)
     {
+        /* To avoid the pragma : add a way to retrieve the rejected list statically from the PKI pointer as a key.
+           Delete the value (the rejected list) when calling SOPC_PKIProvider_Free() .
+           It is seems that this solution is not safe without a global init and deinit API.
+        */
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        status = SOPC_PKIProvider_AddCertToRejectedList((SOPC_PKIProvider**) &pPKI, pToValidateCpy);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
         *error = firstError;
         status = SOPC_STATUS_NOK;
     }
 
-    SOPC_Free(thumbprint);
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
+    SOPC_Free(thumbprint);
     return status;
 }
 
@@ -1959,6 +2036,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->pAllCerts = tmp_pAllCerts;
         pPKI->pAllRoots = tmp_pAllRoots;
         pPKI->pAllCrl = tmp_pAllCrl;
+        pPKI->pRejectedList = NULL;
         pPKI->directoryStorePath = NULL;
         pPKI->pFnValidateCert = &sopc_validate_certificate;
         pPKI->isPermissive = false;
@@ -2105,6 +2183,7 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     pPKI->pAllCerts = NULL;
     pPKI->pAllRoots = NULL;
     pPKI->pAllCrl = NULL;
+    pPKI->pRejectedList = NULL;
     pPKI->directoryStorePath = NULL;
     pPKI->pFnValidateCert = &sopc_validate_anything;
     pPKI->isPermissive = true;
@@ -2127,6 +2206,7 @@ static void sopc_pki_clear(SOPC_PKIProvider* pPKI)
     SOPC_KeyManager_CRL_Free(pPKI->pTrustedCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pIssuerCrl);
     SOPC_KeyManager_CRL_Free(pPKI->pAllCrl);
+    SOPC_KeyManager_Certificate_Free(pPKI->pRejectedList);
     SOPC_Free(pPKI->directoryStorePath);
 }
 
@@ -2397,6 +2477,65 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(const SOPC_PKIProvider* pPKI, co
     return status;
 }
 
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert)
+
+{
+    if (NULL == pPKI || NULL == ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (pPKI->isPermissive)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateList* pRejected = *ppCert;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != pPKI->pRejectedList)
+    {
+        status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pRejected);
+    }
+    /* Clear */
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_Certificate_Free(pRejected);
+        pRejected = NULL;
+    }
+    *ppCert = pRejected;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvider* pPKI,
+                                                            const bool bEraseExistingFiles)
+
+{
+    if (NULL == pPKI)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (pPKI->isPermissive)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    /* The case of the PKI is built from buffer (there is no store) */
+    if (NULL == pPKI->directoryStorePath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* path = NULL;
+    if (NULL != pPKI->pRejectedList)
+    {
+        status = may_create_pki_folder(pPKI->directoryStorePath, STR_REJECTED, &path);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = write_cert_to_der_files(pPKI->pRejectedList, NULL, path, bEraseExistingFiles);
+        }
+    }
+    SOPC_Free(path);
+    return status;
+}
+
 static SOPC_ReturnStatus check_security_level_of_the_update(const SOPC_CertificateList* pTrustedCerts,
                                                             const SOPC_CRLList* pTrustedCrl,
                                                             const SOPC_CertificateList* pIssuerCerts,
@@ -2495,6 +2634,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
     {
         /* Create a new tmp PKI without the existing TrustList */
         status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &pTmpPKI);
+    }
+    /* Copy the rejected list before exchange the data */
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    {
+        status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pTmpPKI->pRejectedList);
     }
     /* Copy the directory store path before exchange the data */
     if (SOPC_STATUS_OK == status && NULL != pPKI->directoryStorePath)

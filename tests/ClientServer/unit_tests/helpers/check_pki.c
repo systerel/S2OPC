@@ -475,6 +475,18 @@ START_TEST(functional_test_from_list)
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
     ck_assert_int_eq(SOPC_CertificateValidationError_Untrusted, error);
+    SOPC_CertificateList* pRejectedList = NULL;
+    size_t rejectedLen = 0;
+    char* cStrThumbprint = NULL;
+    status = SOPC_PKIProvider_WriteRejectedCertToList(pPKI, &pRejectedList);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pRejectedList);
+    status = SOPC_KeyManager_Certificate_GetListLength(pRejectedList, &rejectedLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(1, rejectedLen);
+    cStrThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pRejectedList);
+    int cmp = memcmp(cStrThumbprint, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", 40);
+    ck_assert_int_eq(0, cmp);
     /* Update the PKI with cacert.der and  cacrl.der */
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
     SOPC_CRLList* pTrustedCrlToUpdate = NULL;
@@ -500,6 +512,8 @@ START_TEST(functional_test_from_list)
     SOPC_KeyManager_CRL_Free(pTrustedCrlToUpdate);
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
     SOPC_KeyManager_CRL_Free(pTrustedCrl);
+    SOPC_KeyManager_Certificate_Free(pRejectedList);
+    SOPC_Free(cStrThumbprint);
     SOPC_PKIProvider_Free(&pPKI);
 }
 END_TEST
@@ -710,7 +724,10 @@ START_TEST(functional_test_verify_every_cert)
 
     for (uint32_t i = 0; i < nbError; i++)
     {
-        SOPC_Free(pThumbprints[i]);
+        if (NULL != pThumbprints[i])
+        {
+            SOPC_Free(pThumbprints[i]);
+        }
     }
     SOPC_Free(pThumbprints);
     SOPC_Free(pErrors);
@@ -834,7 +851,6 @@ START_TEST(functional_test_remove_cert)
     ck_assert_ptr_null(pPKI_TrustedCRLs);
     ck_assert_ptr_null(pPKI_IssuerCerts);
     ck_assert_ptr_null(pPKI_IssuerCRLs);
-
     SOPC_KeyManager_Certificate_Free(pCerts);
     SOPC_KeyManager_CRL_Free(pCRLs);
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
