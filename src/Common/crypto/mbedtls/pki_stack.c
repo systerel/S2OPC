@@ -160,7 +160,7 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
         return SOPC_CertificateValidationError_Untrusted;
     }
 
-    return SOPC_CertificateValidationError_Unkown;
+    return SOPC_CertificateValidationError_Unknown;
 }
 
 static int verify_cert(void* is_issued, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
@@ -1016,12 +1016,11 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
                                                    const SOPC_PKI_Profile* pProfile,
                                                    uint32_t* error)
 {
-    *error = SOPC_CertificateValidationError_Unkown;
-
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    *error = SOPC_CertificateValidationError_Unknown;
 
     size_t listLength = 0;
     SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pToValidate, &listLength);
@@ -1037,8 +1036,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         return status;
     }
 
-    uint32_t firstError = SOPC_CertificateValidationError_Unkown;
-    uint32_t currentError = SOPC_CertificateValidationError_Unkown;
+    uint32_t firstError = SOPC_CertificateValidationError_Unknown;
+    uint32_t currentError = SOPC_CertificateValidationError_Unknown;
     bool bErrorFound = false;
     bool bIsTrusted = false;
     mbedtls_x509_crt crt = pToValidateCpy->crt;
@@ -1332,10 +1331,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(const SOPC_PKIProvider
         *pErrors = NULL;
         *ppThumbprints = NULL;
         *pLength = 0;
-        return status;
     }
-
-    status = bErrorFound ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    else if (bErrorFound)
+    {
+        status = SOPC_STATUS_NOK;
+    }
     return status;
 }
 
@@ -1348,9 +1348,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    *error = SOPC_CertificateValidationError_Unkown;
-    uint32_t firstError = SOPC_CertificateValidationError_Unkown;
-    uint32_t currentError = SOPC_CertificateValidationError_Unkown;
+    *error = SOPC_CertificateValidationError_Unknown;
+    uint32_t firstError = SOPC_CertificateValidationError_Unknown;
+    uint32_t currentError = SOPC_CertificateValidationError_Unknown;
     bool bErrorFound = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (pProfile->bApplySecurityPolicy)
@@ -1467,13 +1467,16 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
         SOPC_KeyManager_Certificate_Free(pCerts);
         SOPC_KeyManager_CRL_Free(pCrl);
     }
-    if (bIscrl)
-    {
-        *ppCrl = pCrl;
-    }
     else
     {
-        *ppCerts = pCerts;
+        if (bIscrl)
+        {
+            *ppCrl = pCrl;
+        }
+        else
+        {
+            *ppCerts = pCerts;
+        }
     }
     /* Always clear */
     SOPC_Array_Delete(pFilePaths);
@@ -1954,6 +1957,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->directoryStorePath = NULL;
         pPKI->pFnValidateCert = &sopc_validate_certificate;
         pPKI->isPermissive = false;
+        *ppPKI = pPKI;
     }
     else
     {
@@ -1966,10 +1970,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         SOPC_KeyManager_CRL_Free(tmp_pTrustedCrl);
         SOPC_KeyManager_CRL_Free(tmp_pIssuerCrl);
         SOPC_KeyManager_CRL_Free(tmp_pAllCrl);
-        SOPC_Free(pPKI);
     }
 
-    *ppPKI = pPKI;
     return status;
 }
 
@@ -2044,6 +2046,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
             if (NULL == (*ppPKI)->directoryStorePath)
             {
                 SOPC_PKIProvider_Free(ppPKI);
+                *ppPKI = NULL;
                 status = SOPC_STATUS_OUT_OF_MEMORY;
             }
         }

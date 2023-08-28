@@ -168,6 +168,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
         {
             /* Next iteration */
             SOPC_Free(pFilePath);
+            pFilePath = NULL;
             dir = readdir(d);
             continue;
         }

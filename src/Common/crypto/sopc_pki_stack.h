@@ -44,7 +44,7 @@
 #define SOPC_CertificateValidationError_Revoked 0x801D0000
 #define SOPC_CertificateValidationError_IssuerRevoked 0x801E0000
 #define SOPC_CertificateValidationError_ChainIncomplete 0x810D0000
-#define SOPC_CertificateValidationError_Unkown 0x80000000
+#define SOPC_CertificateValidationError_Unknown 0x80000000
 
 /*
  The directory store shall be organized as follows:
