@@ -972,6 +972,7 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     SOPC_ASSERT(NULL != mbed_cert_list);
     SOPC_ASSERT(NULL == mbed_cert_list->next);
     SOPC_ASSERT(NULL != mbed_profile);
+    SOPC_ASSERT(NULL != thumbprint);
     SOPC_ASSERT(NULL != error);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1003,18 +1004,9 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
                                              &failure_reasons, verify_cert, &bIsTrusted) != 0)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
-        if (NULL != thumbprint)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed with error code 0x%08" PRIx32
-                                   " for certificate thumbprint %s",
-                                   *error, thumbprint);
-        }
-        else
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed with error code 0x%08" PRIx32 "",
-                                   *error);
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI validation failed with error code %" PRIX32 " for certificate thumbprint %s",
+                               *error, thumbprint);
         status = SOPC_STATUS_NOK;
     }
     /* Unlink mbed_cert_list, otherwise destroying the pToValidate will also destroy trusted or untrusted links */
@@ -1274,18 +1266,19 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         /* unlink crt */
         save_next = crt->next;
         crt->next = NULL;
-        statusChain = sopc_validate_certificate_chain(pPKI, crt, mbed_profile, true, NULL, &error);
-        if (SOPC_STATUS_OK != statusChain)
+        /* Get thumbprint */
+        crtThumbprint.crt = *crt;
+        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(&crtThumbprint);
+        if (NULL == thumbprint)
         {
-            *bErrorFound = true;
-            crtThumbprint.crt = *crt;
-            thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(&crtThumbprint);
-            if (NULL == thumbprint)
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            statusChain = sopc_validate_certificate_chain(pPKI, crt, mbed_profile, true, thumbprint, &error);
+            if (SOPC_STATUS_OK != statusChain)
             {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            if (SOPC_STATUS_OK == status)
-            {
+                *bErrorFound = true;
                 /* Append the error */
                 bResAppend = SOPC_Array_Append(pErrors, error);
                 if (bResAppend)
@@ -1293,6 +1286,10 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
                     bResAppend = SOPC_Array_Append(pThumbprints, thumbprint);
                 }
                 status = bResAppend ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                SOPC_Free(thumbprint);
             }
         }
         /* link crt */
@@ -1874,9 +1871,11 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     if ((0 != issuer_ca_count) && (0 == issued_cert_count))
     {
         /* In this case, only trusted root CA will be accepted (if Backward interoperability is enabled). */
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                 "> PKI creation warning: issuer certificates are given but no trusted certificates: "
-                                 "only trusted root CA will be accepted (if backward interoperability is enabled)");
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI creation warning: issuer certificates are given but no trusted leaf certificates: "
+            "only certificates issued by the trusted Root CA will be accepted and the root itself if backward "
+            "interoperability is enabled");
     }
     /* check and warn in case no root defined and trusted certificates defined. */
     if ((0 == issuer_root_count) && (0 == trusted_root_count) && (0 != issued_cert_count))

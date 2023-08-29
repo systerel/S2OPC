@@ -140,7 +140,7 @@ typedef enum
 typedef enum
 {
     SOPC_PKI_TYPE_CLIENT_APP, /**< Application client to validate server certificates */
-    SOPC_PKI_TYPE_SERVER_APP, /**< Application server to validate server certificates */
+    SOPC_PKI_TYPE_SERVER_APP, /**< Application server to validate client certificates */
     SOPC_PKI_TYPE_USER        /**< Application server to validate user certificates*/
 } SOPC_PKI_Type;
 
@@ -611,7 +611,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvide
 SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvider* pPKI,
                                                             const bool bEraseExistingFiles);
 
-/** \brief Add a certificate tp the PKI rejected list.
+/** \brief Add a certificate to the PKI rejected list.
  *
  * \param ppPKI A valid pointer to the PKIProvider.
  * \param pCert A valid pointer to the certificate to be added.
