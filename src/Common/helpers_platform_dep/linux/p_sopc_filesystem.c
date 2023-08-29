@@ -180,6 +180,7 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
                 pFileName = SOPC_strdup(dir->d_name);
                 bResAppend = SOPC_Array_Append(pFileInfos, pFileName);
                 SOPC_Free(pFilePath); // We do not need filePath anymore and have to free it.
+                pFilePath = NULL;
             }
             else
             {
@@ -196,8 +197,8 @@ static SOPC_FileSystem_GetDirResult get_dir_files_infos(const char* directoryPat
     if (SOPC_STATUS_OK != status)
     {
         /* Clear */
-        SOPC_Free(pFilePath); // in case of append error
-        SOPC_Free(pFileName); // in case of append error
+        SOPC_Free(pFilePath);
+        SOPC_Free(pFileName);
         SOPC_Array_Delete(pFileInfos);
         *ppFileInfos = NULL;
         return SOPC_FileSystem_GetDir_Error_UnknownIssue;
