@@ -264,7 +264,7 @@ static void serverWriteEvent(const SOPC_CallContext* callCtxPtr,
     {
         char* nodeId = SOPC_NodeId_ToCString(&writeValue->NodeId);
         PRINT("A client updated the content of node <%s> with a value of type %d\n", nodeId,
-                 writeValue->Value.Value.BuiltInTypeId);
+              writeValue->Value.Value.BuiltInTypeId);
         SOPC_Free(nodeId);
         // Synchronize cache for PubSub
         cacheSync_WriteToCache(&writeValue->NodeId, &writeValue->Value);

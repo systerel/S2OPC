@@ -75,23 +75,18 @@ static configSTACK_DEPTH_TYPE getStckSizeByName(const char* name)
     uint32_t nbBytes = oneKb;
     if (name != NULL)
     {
-        if (0 == strcmp(name, "Services") ||
-                0 == strcmp(name, "Secure_Channels"))
+        if (0 == strcmp(name, "Services") || 0 == strcmp(name, "Secure_Channels"))
         {
             nbBytes = oneKb * 6;
         }
-        else if(0 == strcmp(name, "Publisher") ||
-                0 == strcmp(name, "Sockets") ||
-                0 == strcmp(name, "SubSocketMgr") ||
-                0 == strcmp(name, "Application"))
+        else if (0 == strcmp(name, "Publisher") || 0 == strcmp(name, "Sockets") || 0 == strcmp(name, "SubSocketMgr") ||
+                 0 == strcmp(name, "Application"))
         {
             nbBytes = oneKb * 3;
         }
     }
 
-    SOPC_Shell_Printf("Allocating %d bytes for thread %s\n",
-            nbBytes, name ? name : "<NULL>"
-            );
+    SOPC_Shell_Printf("Allocating %d bytes for thread %s\n", nbBytes, name ? name : "<NULL>");
     return nbBytes / sizeof(configSTACK_DEPTH_TYPE);
 }
 
@@ -254,9 +249,9 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
     }
     if (SOPC_STATUS_OK == resPTHR)
     {
-
-        BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
-                getStckSizeByName(taskName), handleWks, priority, &handleWks->handleTask);
+        BaseType_t resTaskCreate =
+            xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName, getStckSizeByName(taskName),
+                        handleWks, priority, &handleWks->handleTask);
 
         if (pdPASS != resTaskCreate)
         {
@@ -677,12 +672,12 @@ void SOPC_Sleep(unsigned int milliseconds)
 }
 
 // Hook used to show stack overflows
-void vApplicationStackOverflowHook(xTaskHandle xTask, signed char *pcTaskName)
+void vApplicationStackOverflowHook(xTaskHandle xTask, signed char* pcTaskName)
 {
-  char* name = (pcTaskName ? (char*)pcTaskName : "NULL");
-  shell_putString("\n\n!!!\nStack overflow in thread");
-  shell_putString(name);
-  shell_putString("\n");
-  osDelay(500);
-   __BKPT(0);
+    char* name = (pcTaskName ? (char*) pcTaskName : "NULL");
+    shell_putString("\n\n!!!\nStack overflow in thread");
+    shell_putString(name);
+    shell_putString("\n");
+    osDelay(500);
+    __BKPT(0);
 }

@@ -80,16 +80,14 @@
 #define HEAP_REGION2_BASE 0x20000000
 #else
 #error "Sorry, Memory mapping is not define for this board. It has to be added"
-#endif  // STM32H723xx
+#endif // STM32H723xx
 
 static uint8_t ucHeap[configTOTAL_HEAP_SIZE];
-HeapRegion_t board_heap5_regions[] = {
-        { (void*)HEAP_REGION2_BASE, HEAP_REGION2_SIZE }, // DTCM RAM
-        { ucHeap, configTOTAL_HEAP_SIZE },
-        { NULL,   0}
-};
+HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_SIZE}, // DTCM RAM
+                                      {ucHeap, configTOTAL_HEAP_SIZE},
+                                      {NULL, 0}};
 
-#endif  // USE_FreeRTOS_HEAP_5
+#endif // USE_FreeRTOS_HEAP_5
 /*******************************************************************************
  * Local Functions
  ******************************************************************************/
@@ -242,16 +240,15 @@ void SOPC_Platform_Target_Debug(const char* param)
     if (NULL == param || *param == 0)
     {
         PRINTF(
-                "\r\n"
-                "************************************\r\n");
+            "\r\n"
+            "************************************\r\n");
         PRINTF("** BOOTING FreeRTOS S2OPC SAMPLE  **\r\n");
         PRINTF("** BUILD ON " __DATE__ " " __TIME__ "  **\r\n");
 
         const unsigned remHeap = xPortGetFreeHeapSize();
         const unsigned minHeap = xPortGetMinimumEverFreeHeapSize();
-        PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \r\n",
-                configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE,
-                remHeap, minHeap);
+        PRINTF("** HEAP : Size : %u, Free: %u, MinFree : %u \r\n", configTOTAL_HEAP_SIZE + HEAP_REGION2_SIZE, remHeap,
+               minHeap);
     }
     else if (0 == strcmp(param, "help"))
     {

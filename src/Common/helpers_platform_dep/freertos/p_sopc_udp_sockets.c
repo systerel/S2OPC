@@ -300,7 +300,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
     }
 
 #ifdef SOPC_FREERTOS_UDP_RAM_BASE
-    static uint8_t* DTCMR_Buffer = (void*)0x30007000; // DTCM + 28K (=32 - 4 K)
+    static uint8_t* DTCMR_Buffer = (void*) 0x30007000; // DTCM + 28K (=32 - 4 K)
     static SOPC_Mutex* mutex = NULL;
 
     if (NULL == mutex)
@@ -315,7 +315,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
 
     SOPC_Mutex_Unlock(mutex);
 #else
-#warning "SOPC_FREERTOS_UDP_RAM_BASE is not defined and UDP sending may probably fail if RAM section is not properly set with DMA!"
+#warning \
+    "SOPC_FREERTOS_UDP_RAM_BASE is not defined and UDP sending may probably fail if RAM section is not properly set with DMA!"
     ssize_t res = sendto(sock, buffer->data, buffer->length, 0, destAddr->ai_addr, destAddr->ai_addrlen);
 #endif
 

@@ -124,10 +124,12 @@ int __io_putchar(int ch)
 }
 #endif
 
-
 void shell_putString(const char* str)
 {
-    if (NULL == str) return;
+    if (NULL == str)
+    {
+        return;
+    }
 
     for (; 0 != (*str); str++)
     {

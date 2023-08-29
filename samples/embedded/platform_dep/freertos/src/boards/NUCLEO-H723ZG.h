@@ -30,7 +30,7 @@
 
 #define PRINT SOPC_Shell_Printf
 
-#define SOPC_FREERTOS_UDP_RAM_BASE ((void*)0x30007000)  // DTCM + 28K (=32 - 4 K)
+#define SOPC_FREERTOS_UDP_RAM_BASE ((void*) 0x30007000) // DTCM + 28K (=32 - 4 K)
 
 // Here, the default values can be overridden for this specific card.
 #define CONFIG_SOPC_PUBLISHER_ADDRESS "opc.udp://232.1.2.100:4840"
