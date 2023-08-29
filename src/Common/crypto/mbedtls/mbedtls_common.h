@@ -28,6 +28,12 @@
 #include "mbedtls/version.h"
 
 #if MBEDTLS_VERSION_MAJOR == 2
+#if MBEDTLS_VERSION_MINOR >= 28
+#define MBEDTLS_CAN_RESOLVE_HOSTNAME 1
+#else
+#define MBEDTLS_CAN_RESOLVE_HOSTNAME 0
+#endif // MBEDTLS_VERSION_MINOR >= 28
+
 /* MBEDTLS V2 */
 #define MBEDTLS_RSA_RSAES_OAEP_ENCRYPT(ctx, f_rng, p_rng, label, label_len, ilen, input, output) \
     mbedtls_rsa_rsaes_oaep_encrypt(ctx, f_rng, p_rng, MBEDTLS_RSA_PUBLIC, label, label_len, ilen, input, output)
@@ -47,6 +53,7 @@
 
 #elif MBEDTLS_VERSION_MAJOR == 3
 /* MBEDTLS V3 */
+#define MBEDTLS_CAN_RESOLVE_HOSTNAME 1
 #define MBEDTLS_RSA_RSAES_OAEP_ENCRYPT mbedtls_rsa_rsaes_oaep_encrypt
 #define MBEDTLS_RSA_RSAES_OAEP_DECRYPT mbedtls_rsa_rsaes_oaep_decrypt
 #define MBEDTLS_RSA_RSASSA_PKCS1_V15_SIGN mbedtls_rsa_rsassa_pkcs1_v15_sign

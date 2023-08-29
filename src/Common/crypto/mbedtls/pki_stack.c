@@ -44,6 +44,7 @@
 #include "mbedtls_common.h"
 
 #include "mbedtls/oid.h"
+#include "mbedtls/version.h"
 
 #ifndef STR_TRUSTLIST_NAME
 #define STR_TRUSTLIST_NAME "/updatedTrustList"
@@ -618,9 +619,9 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     if (bErr)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : unexpected key type %" PRIu32
+                               "> PKI validation failed : unexpected key type %d"
                                " for certificate thumbprint %s",
-                               key_type, thumbprint);
+                               (const int) key_type, thumbprint);
         status = SOPC_STATUS_NOK;
     }
     // Retrieve key length
@@ -676,9 +677,9 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     if (bErr)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed : unexpected signing algorithm %" PRIu32
+                               "> PKI validation failed : unexpected signing algorithm %d"
                                " for certificate thumbprint %s",
-                               md, thumbprint);
+                               (int) md, thumbprint);
         status = SOPC_STATUS_NOK;
     }
 
@@ -690,9 +691,13 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
 {
     // TODO : Add a domain name resolution (issue #1189)
 
-    SOPC_ASSERT(NULL != pToValidate);
-    SOPC_ASSERT(NULL != url);
+    if (NULL == pToValidate || NULL == url)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
 
+#if MBEDTLS_CAN_RESOLVE_HOSTNAME
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
     if (NULL == thumbprint)
     {
@@ -701,7 +706,7 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     SOPC_UriType type = SOPC_URI_UNDETERMINED;
     char* pHostName = NULL;
     char* pPort = NULL;
-    SOPC_ReturnStatus status = SOPC_Helper_URI_SplitUri(url, &type, &pHostName, &pPort);
+    status = SOPC_Helper_URI_SplitUri(url, &type, &pHostName, &pPort);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -710,14 +715,16 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
         SOPC_Free(thumbprint);
         return SOPC_STATUS_NOK;
     }
+    SOPC_ASSERT(NULL != pHostName);
+    const size_t hostnameLen = strlen(pHostName);
     const mbedtls_x509_sequence* asn1_seq = &pToValidate->crt.subject_alt_names;
     mbedtls_x509_subject_alternative_name san_out = {0};
     int err = 0;
     bool found = false;
-    char* pCertDns = NULL;
     int match = -1;
     while (NULL != asn1_seq && !found && 0 == err)
     {
+        const mbedtls_x509_buf* pBuf = &san_out.san.unstructured_name;
         err = mbedtls_x509_parse_subject_alt_name(&asn1_seq->buf, &san_out);
         if (MBEDTLS_ERR_X509_FEATURE_UNAVAILABLE == err)
         {
@@ -733,23 +740,22 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
         }
         if (MBEDTLS_X509_SAN_DNS_NAME == san_out.type)
         {
-            pCertDns = SOPC_Malloc((san_out.san.unstructured_name.len + 1) * sizeof(char));
-            memcpy(pCertDns, san_out.san.unstructured_name.p, san_out.san.unstructured_name.len);
-            pCertDns[san_out.san.unstructured_name.len] = '\0';
-            match = SOPC_strcmp_ignore_case(pHostName, pCertDns);
-            if (0 == match)
+            if (pBuf->len == hostnameLen)
             {
-                /* stop research */
-                found = true;
+                match = SOPC_strncmp_ignore_case(pHostName, (const char*) pBuf->p, pBuf->len);
+                if (0 == match)
+                {
+                    /* stop research */
+                    found = true;
+                }
             }
-            else
+            if (!found)
             {
                 SOPC_Logger_TraceWarning(
                     SOPC_LOG_MODULE_COMMON,
-                    "> PKI validation : dnsName %s of certificate thumbprint %s is not the expected one (%s)", pCertDns,
-                    thumbprint, pHostName);
+                    "> PKI validation : dnsName %.*s of certificate thumbprint %s is not the expected one (%s)",
+                    (int) pBuf->len, (const char*) pBuf->p, thumbprint, pHostName);
             }
-            SOPC_Free(pCertDns);
         }
         /* next iteration */
         memset(&san_out, 0, sizeof(mbedtls_x509_subject_alternative_name));
@@ -771,7 +777,14 @@ static SOPC_ReturnStatus check_host_name(const SOPC_CertificateList* pToValidate
     SOPC_Free(pHostName);
     SOPC_Free(pPort);
     SOPC_Free(thumbprint);
-
+#else
+    /* Not implemented in version prior to 2.28.0 */
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                             "> PKI validation skipped as mbedtls_x509_parse_subject_alt_name is not implemented in "
+                             "version %d.%d.%d of MbedTLS",
+                             MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
+#endif
     return status;
 }
 
@@ -844,9 +857,10 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     err = mbedtls_x509_crt_check_key_usage(&pToValidate->crt, usages);
     if (0 != err)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation error '%d': missing expected key usage for certificate thumbprint %s",
-                               err, thumbprint);
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI validation error '0x%04X': missing expected key usage for certificate thumbprint %s", err,
+            thumbprint);
         bErrorFound = true;
     }
     /* Check extended key usages for client or server cert */
@@ -865,7 +879,7 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     {
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_COMMON,
-            "> PKI validation error '%d': missing expected extended key usage for certificate thumbprint %s", err,
+            "> PKI validation error '-0x%04X': missing expected extended key usage for certificate thumbprint %s", -err,
             thumbprint);
         bErrorFound = true;
     }
@@ -985,12 +999,13 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
         if (NULL != thumbprint)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> PKI validation failed with error code %" PRIu32 " for certificate thumbprint %s",
+                                   "> PKI validation failed with error code 0x%08" PRIx32
+                                   " for certificate thumbprint %s",
                                    *error, thumbprint);
         }
         else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed with error code %" PRIu32 "",
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI validation failed with error code 0x%08" PRIx32 "",
                                    *error);
         }
         status = SOPC_STATUS_NOK;
