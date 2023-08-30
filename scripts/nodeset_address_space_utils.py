@@ -396,7 +396,7 @@ class NodesetMerger(NSFinder):
             tree_aliases[-1].tail = indent(1)
         return True
 
-    def __merge_nodes(self, new: ET.ElementTree):
+    def __split_merged_nodes(self, new: ET.ElementTree):
         duplicates = set()
         tree_nodes = dict()
         for node, node_id in self._iter_nid_nodes():
@@ -419,7 +419,10 @@ class NodesetMerger(NSFinder):
         user_duplicates = duplicates - set(ns0_duplicates)
         if len(user_duplicates) > 0:
             raise Exception(f"There are duplicate Node IDs: {sorted(duplicates)}")
+        return tree_nodes, new_nodes, ns0_duplicates
 
+    def __merge_nodes(self, new: ET.ElementTree):
+        tree_nodes, new_nodes, ns0_duplicate_nids = self.__split_merged_nodes(new)
         tree_root = self.tree.getroot()
         # New unique nids
         new_nids = set(new_nodes)
@@ -431,7 +434,7 @@ class NodesetMerger(NSFinder):
                 print('Merge: add node {}'.format(nid), file=sys.stderr)
             tree_root.append(new_nodes[nid])
         # References of common nodes are merged
-        for nid in sorted(ns0_duplicates):
+        for nid in sorted(ns0_duplicate_nids):
             nodeb = new_nodes[nid]
             refsb = self._find_in(nodeb, './uanodeset:References')
             if refsb is None:
