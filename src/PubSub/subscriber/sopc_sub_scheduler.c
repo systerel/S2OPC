@@ -455,8 +455,11 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
 
         if (SOPC_STATUS_ENCODING_ERROR == result)
         {
-            /* TODO: we can't log systematic decoding errors,
-             *  because the volume of these errors is not known */
+            const char* name = SOPC_PubSubConnection_Get_Name(pDecoderContext);
+            const SOPC_UADP_NetworkMessage_Error_Code err = SOPC_UADP_NetworkMessage_Get_Last_Error();
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
+                                   "Failed to decode SUB message %s, SOPC_UADP_NetworkMessage_Error_Code is : 0x%08X",
+                                   name ? name : "<NULL>", (unsigned) err);
             result = SOPC_STATUS_OK;
         }
         else if (SOPC_STATUS_OK != result)

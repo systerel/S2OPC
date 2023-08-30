@@ -29,10 +29,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifdef SOPC_BOARD_TARGET_INCLUDE
-#include SOPC_BOARD_TARGET_INCLUDE
-#endif
-
 /**
  * Specific platform must provide the software entry point
  * that will call the applicative ::SOPC_Platform_Main function.

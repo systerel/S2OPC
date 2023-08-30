@@ -71,24 +71,45 @@ cp -ur ${S2OPC_SAMPLE}/platform_dep/include/*.h ${SRC_DIR}/sample_inc || exit 14
 echo "[II] Headers copied to ${SRC_DIR}/sample_inc"
 
 # Patch main entry
-sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main_entry\(void *\); sopc_main_entry\(NULL\);/g' ${FREERTOS_CORE_DIR}/Src/main.c || exit 3
-unix2dos.exe ${FREERTOS_CORE_DIR}/Src/main.c  >/dev/null 2>/dev/null
+FILE=${FREERTOS_CORE_DIR}/Src/main.c 
+sed -i 's/^.*USER CODE BEGIN 5.*$/  extern void sopc_main_entry\(void *\); sopc_main_entry\(NULL\);/g' ${FILE} || exit 3
+unix2dos.exe ${FILE} >/dev/null 2>/dev/null
 echo "[II] Main entry patched to call S2OPC code"
 
 # Patch freertos hooks
-sed -i 's/\bvApplicationTickHook\b/__vApplicationTickHook__/g' ${FREERTOS_CORE_DIR}/Src/freertos.c 
+FILE=${FREERTOS_CORE_DIR}/Src/freertos.c 
+sed -i 's/\bvApplicationTickHook\b/__vApplicationTickHook__/g' ${FILE}
 echo "[II] FreeRTOS hooks patched for 'vApplicationTickHook'"
-sed -i 's/\bvApplicationStackOverflowHook\b/__vApplicationStackOverflowHook__/g' ${FREERTOS_CORE_DIR}/Src/freertos.c 
-unix2dos.exe ${FREERTOS_CORE_DIR}/Src/freertos.c  >/dev/null 2>/dev/null
+sed -i 's/\bvApplicationStackOverflowHook\b/__vApplicationStackOverflowHook__/g'  ${FILE}
+unix2dos.exe  ${FILE}  >/dev/null 2>/dev/null
 echo "[II] FreeRTOS hooks patched for 'vApplicationStackOverflowHook'"
 
 # Patch mbedtls_hardware_poll
 # Patch:
 # -      memset(&(Output[index * 4]), (int)randomValue, 4);
 # +      memcpy(&(Output[index * 4]), &(int)randomValue, 4);
-sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FREERTOS_CORE_DIR}/../MBEDTLS/Target/hardware_rng.c
-unix2dos.exe ${FREERTOS_CORE_DIR}/../MBEDTLS/Target/hardware_rng.c >/dev/null 2>/dev/null
-echo "[II] hardware_rng.c bug patched for 'mbedtls_hardware_poll'"
+FILE=${FREERTOS_CORE_DIR}/../MBEDTLS/Target/hardware_rng.c
+sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FILE}
+unix2dos.exe ${FILE} >/dev/null 2>/dev/null
+echo "[II] '`basename $FILE`' bug patched for 'mbedtls_hardware_poll'"
+
+# Patch ETH MAC filter
+# Replace 
+# ETH_MACDMAConfig(heth); 
+#  by
+# ETH_MACDMAConfig(heth); extern SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef*); SOPC_ETH_MAC_Filter_Config(heth);
+FILE=${FREERTOS_CORE_DIR}/../Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_eth.c
+mv ${FILE} ${FILE}.crlf
+tr -d '\r' <${FILE}.crlf >${FILE}
+res=false
+sed -i 's/^\( *ETH_MACDMAConfig(heth); *\)$/\1 extern void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef*); SOPC_ETH_MAC_Filter_Config(heth);/g' ${FILE} 
+! grep -q '^ *ETH_MACDMAConfig(heth); *extern void' ${FILE} && echo "[II] '`basename $FILE`' patched failed for 'ETH MAC filter'"  && exit 1
+unix2dos.exe ${FILE} >/dev/null 2>/dev/null
+echo "[II] '`basename $FILE`' patched for 'ETH MAC filter'"
+
+
+# Patches below are not used anymore since this in in USER BEGIN/END tags (not lost when regenerating code from STMCube Ide)
+# This is kept for traceability of updates in environments
 
 #sed -i 's/configUSE_TICK_HOOK *0/configUSE_TICK_HOOK 1/g' ${FREERTOS_CORE_DIR}/Inc/FreeRTOSConfig.h 
 #echo "[II] Patched configUSE_TICK_HOOK for FreeRTOS options"

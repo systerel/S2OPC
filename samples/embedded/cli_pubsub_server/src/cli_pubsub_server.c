@@ -21,7 +21,10 @@
  * @brief
  *  This demo application configures a OPCUA server and a PubSub
  *  - The server endpoint is provided by CONFIG_SOPC_ENDPOINT_ADDRESS
- *  - The PubSub configuration is staticly defined (see pubsub_config_static.h)
+ *  - The Command-Line interface (CLI) provides various interactions with the demo
+ *      Type "help" to get more details. Moreover, the "dbg" command might provide
+ *      target-related features. Try "dbg help" to see if additional features are available.
+ *  - The PubSub configuration is statically defined (see pubsub_config_static.h)
  *  - The server provides nodes to control the PubSub:
  *    - Start
  *    - Stop
@@ -145,6 +148,7 @@ static int cmd_demo_log(WordList* pList);
 static int cmd_demo_pub(WordList* pList);
 static int cmd_demo_sub(WordList* pList);
 static int cmd_demo_write(WordList* pList);
+static int cmd_demo_date(WordList* pList);
 static int cmd_demo_read(WordList* pList);
 static int cmd_demo_cache(WordList* pList);
 static int cmd_demo_quit(WordList* pList);
@@ -163,6 +167,7 @@ static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"
                                           {"dbg", cmd_demo_dbg, "Show target debug info"},
                                           {"log", cmd_demo_log, "Set log level"},
                                           {"read", cmd_demo_read, "Print content of  <NodeId>"},
+                                          {"date", cmd_demo_date, "Print date"},
                                           {"write", cmd_demo_write, "Write value to server"},
                                           {"pub", cmd_demo_pub, "Manage Publisher"},
                                           {"sub", cmd_demo_sub, "Manage Subscriber"},
@@ -179,13 +184,13 @@ static void serverStopped_cb(SOPC_ReturnStatus status)
     PRINT("Server stopped!\n");
 }
 
-static bool logEnabled = false;
+static char logCategory[10];
 
 /***************************************************/
 static void log_UserCallback(const char* context, const char* text)
 {
     SOPC_UNUSED_ARG(context);
-    if (logEnabled)
+    if (context == NULL || logCategory[0] == 0 || strcmp(logCategory, context) == 0)
     {
         PRINT("%s\n", text);
     }
@@ -877,7 +882,6 @@ static int cmd_demo_dbg(WordList* pList)
 static int cmd_demo_log(WordList* pList)
 {
     const char* word = CLI_GetNextWord(pList);
-    logEnabled = true;
     switch (word[0])
     {
     case 'E':
@@ -893,10 +897,17 @@ static int cmd_demo_log(WordList* pList)
         SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
         break;
     case '0':
-        logEnabled = false;
+        logCategory[0] = 0;
         break;
+    case 'c':
+    {
+        memset(logCategory, 0, sizeof(logCategory));
+        const char* category = CLI_GetNextWord(pList);
+        strncpy(logCategory, category, sizeof(logCategory) - 1);
+    }
+    break;
     default:
-        PRINT("usage: log <0|D|I|W|E>\n");
+        PRINT("usage: log <c <category>|D|I|W|E>\n");
         break;
     }
     return 0;
@@ -1057,6 +1068,17 @@ static int cmd_demo_write(WordList* pList)
 
     SOPC_NodeId_Clear(&nid);
     SOPC_DataValue_Clear(&dv);
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_date(WordList* pList)
+{
+    SOPC_UNUSED_ARG(pList);
+
+    char* date = SOPC_Time_GetStringOfCurrentLocalTime(false);
+    PRINT("%s\n", date);
+    SOPC_Free(date);
     return 0;
 }
 

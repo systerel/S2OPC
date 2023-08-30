@@ -39,4 +39,9 @@ typedef struct
 
 void P_TIME_SetInitialDateToBuildTime(void);
 
+/**
+ * Add an offset to internal time
+ */
+void P_TIME_SetDateOffset(int nbSecOffset);
+
 #endif /* FREERTOS_P_TIME_H_ */

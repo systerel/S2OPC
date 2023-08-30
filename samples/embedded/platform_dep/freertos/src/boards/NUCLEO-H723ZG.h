@@ -17,14 +17,27 @@
  * under the License.
  */
 
+#ifndef S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
+#define S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
+
+// SOPC configuration this is actually not depending of the board
+// This must be done before other includes
+#define SOPC_PTR_SIZE 4
+#define WITH_USER_ASSERT 1
+
+// Override MBEDTLS_CONFIG_FILE
+#ifdef MBEDTLS_CONFIG_FILE
+#undef MBEDTLS_CONFIG_FILE
+#endif
+#define MBEDTLS_CONFIG_FILE "sopc_mbedtls_config.h"
+
 #include "stm32h7xx_hal.h"
 
 #include "freertos_platform_dep.h"
 
 #include "freertos_shell.h"
 
-#ifndef S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
-#define S2OPC_SAMPLES_EMBEDDED_CLI_PUBSUB_SERVER_SRC_BOARDS_NUCLEO_H723ZG_H_
+// Board-Specific configuration
 
 #define BOARD_TYPE "NUCLEO_H723ZG"
 

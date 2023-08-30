@@ -32,6 +32,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
+/* mbedtls includes */
+#include "mbedtls/platform_util.h"
+
 /* freertos includes */
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"
@@ -146,6 +149,11 @@ void P_TIME_SetInitialDateToBuildTime(void)
     }
 }
 
+void P_TIME_SetDateOffset(int nbSecOffset)
+{
+    gGlobalTimeReference += ((int64_t) nbSecOffset) * configTICK_RATE_HZ;
+    return;
+}
 // Hook added in order to use 64 bit tick counter. Used by FreeRTOS
 // Called from ISR
 void vApplicationTickHook(void)
@@ -313,6 +321,12 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
         vTaskDelayUntil(&nowInternalTick, timeToWait);
     }
     return true;
+}
+
+/* Return the POSIX time (number of seconds since since 00:00, Jan 1 1970 UTC) */
+time_t sopc_time_alt(time_t* timer)
+{
+    return (time_t)(gGlobalTimeReference / configTICK_RATE_HZ);
 }
 
 /* TODO: assert that mktime works correctly on the targeted platform

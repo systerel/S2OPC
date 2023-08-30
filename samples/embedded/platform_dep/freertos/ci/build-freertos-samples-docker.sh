@@ -53,10 +53,7 @@ C_OPT_CSTD='-std=gnu11 '
 C_OPT_SPECS='--specs=nano.specs '
 C_OPT_F='-ffunction-sections -fdata-sections  -fstack-usage'
 C_DEFS='-DUSE_HAL_DRIVER -DSTM32H723xx '
-C_DEFS+=' -DMBEDTLS_CONFIG_FILE="sopc_mbedtls_config.h" '
-C_DEFS+=' -DSTM32_THREAD_SAFE_STRATEGY=4 -DSOPC_PTR_SIZE=4 -DWITH_USER_ASSERT=1'
 C_DEFS+=' -D_RETARGETABLE_LOCKING=1' # Necessary since configuration differs in newlib.h
-C_DEFS+=' -DSOPC_BOARD_TARGET_INCLUDE="NUCLEO-H723ZG.h"' # Indirection to board-specific header file if required
 C_INCS='-I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include'
 C_INCS+=' -I../Drivers/CMSIS/Include -I../LWIP/App -I../LWIP/Target -I../MBEDTLS/App -I../Middlewares/Third_Party/LwIP/src/include'
 C_INCS+=' -I../Middlewares/Third_Party/LwIP/system -I../Middlewares/Third_Party/FreeRTOS/Source/include -I../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2'
@@ -68,6 +65,7 @@ C_INCS+=' -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../Mi
 C_INCS+=' -I../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../Middlewares/Third_Party/LwIP/system/arch -I../Middlewares/Third_Party/mbedTLS/include'
 C_INCS+=' -I../Core/ThreadSafe '
 C_INCS+=" -I${FREERTOS_CORE_DIR}/Src/sopc/sample_inc"
+C_DEFS+=" -include ${FREERTOS_CORE_DIR}/Src/sopc/sample_inc/NUCLEO-H723ZG.h "
 
 
 function build_c_file() {

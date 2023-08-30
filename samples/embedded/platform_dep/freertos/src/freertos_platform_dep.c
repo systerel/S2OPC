@@ -252,7 +252,7 @@ void SOPC_Platform_Target_Debug(const char* param)
     }
     else if (0 == strcmp(param, "help"))
     {
-        PRINTF("\nDebug sub commands: arp, rng");
+        PRINTF("\nDebug sub commands: arp, rng\n");
     }
     else if (0 == strcmp(param, "arp"))
     {
@@ -263,5 +263,9 @@ void SOPC_Platform_Target_Debug(const char* param)
     {
         PRINTF("\nRNG self-test...\n");
         rng_self_test();
+    }
+    else if (0 == strncmp(param, "date", 4))
+    {
+        P_TIME_SetDateOffset(atoi(param + 4));
     }
 }

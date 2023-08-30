@@ -54,6 +54,19 @@
 
 #ifdef STM32H723xx
 #include <stm32h7xx_hal.h>
+
+void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
+{
+    ETH_MACFilterConfigTypeDef macFilterConfig;
+
+    HAL_ETH_GetMACFilterConfig(heth, &macFilterConfig);
+    // macFilterConfig.PromiscuousMode = ENABLE;
+    macFilterConfig.PassAllMulticast = ENABLE;
+    HAL_ETH_SetMACFilterConfig(heth, &macFilterConfig);
+}
+
+#else
+#error
 #endif
 
 typedef enum _fun_key_status

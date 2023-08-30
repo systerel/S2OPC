@@ -21,6 +21,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "samples_platform_dep.h"
+
 #include "sopc_assert.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -28,7 +30,9 @@
 #include "sopc_mutexes.h"
 #include "sopc_time.h"
 
+// project includes
 #include "cache.h"
+#include "test_config.h"
 
 #define SAFE_STRING(s) ((NULL == (s)) ? "<NULL>" : (s))
 /**
@@ -452,7 +456,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
     char* nidStr = SOPC_NodeId_ToCString(nid);
     SOPC_ASSERT(NULL != nid && NULL != nidStr);
 
-    printf("- %.25s", nidStr);
+    PRINT("- %.25s", nidStr);
 
     if (NULL != dv)
     {
@@ -485,7 +489,7 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
         default:
             break;
         }
-        printf(" ; Status = %s%s", status, type);
+        PRINT(" ; Status = %s%s", status, type);
         if (type[0] == 0)
         {
             static const char* typeName[] = {
@@ -498,65 +502,65 @@ void Cache_Dump_VarValue(const SOPC_NodeId* nid, const SOPC_DataValue* dv)
             const SOPC_BuiltinId typeId = dv->Value.BuiltInTypeId;
             if (typeId <= sizeof(typeName) / sizeof(*typeName) - 1)
             {
-                printf(" ; Type=%.12s ; Val = ", typeName[typeId]);
+                PRINT(" ; Type=%.12s ; Val = ", typeName[typeId]);
             }
             else
             {
-                printf(" ; Type=%.12s ; Val = ", "<Invalid>");
+                PRINT(" ; Type=%.12s ; Val = ", "<Invalid>");
             }
 
             switch (typeId)
             {
             case SOPC_Boolean_Id:
-                printf("%" PRId32, (int32_t) dv->Value.Value.Boolean);
+                PRINT("%" PRId32, (int32_t) dv->Value.Value.Boolean);
                 break;
             case SOPC_SByte_Id:
-                printf("%" PRId32, (uint32_t) dv->Value.Value.Sbyte);
+                PRINT("%" PRId32, (uint32_t) dv->Value.Value.Sbyte);
                 break;
             case SOPC_Byte_Id:
-                printf("%" PRId32, (int32_t) dv->Value.Value.Byte);
+                PRINT("%" PRId32, (int32_t) dv->Value.Value.Byte);
                 break;
             case SOPC_UInt16_Id:
-                printf("%" PRIu16, dv->Value.Value.Uint16);
+                PRINT("%" PRIu16, dv->Value.Value.Uint16);
                 break;
             case SOPC_Int16_Id:
-                printf("%" PRId16, dv->Value.Value.Int16);
+                PRINT("%" PRId16, dv->Value.Value.Int16);
                 break;
             case SOPC_Int32_Id:
-                printf("%" PRId32, dv->Value.Value.Int32);
+                PRINT("%" PRId32, dv->Value.Value.Int32);
                 break;
             case SOPC_UInt32_Id:
-                printf("%" PRIu32, dv->Value.Value.Uint32);
+                PRINT("%" PRIu32, dv->Value.Value.Uint32);
                 break;
             case SOPC_Int64_Id:
-                printf("%" PRId64, dv->Value.Value.Int64);
+                PRINT("%" PRId64, dv->Value.Value.Int64);
                 break;
             case SOPC_UInt64_Id:
-                printf("%" PRIu64, dv->Value.Value.Uint64);
+                PRINT("%" PRIu64, dv->Value.Value.Uint64);
                 break;
             case SOPC_Float_Id:
-                printf("%f", dv->Value.Value.Floatv);
+                PRINT("%f", dv->Value.Value.Floatv);
                 break;
             case SOPC_Double_Id:
-                printf("%f", (float) dv->Value.Value.Doublev);
+                PRINT("%f", (float) dv->Value.Value.Doublev);
                 break;
             case SOPC_String_Id:
-                printf("<%s>", SAFE_STRING(SOPC_String_GetRawCString(&dv->Value.Value.String)));
+                PRINT("<%s>", SAFE_STRING(SOPC_String_GetRawCString(&dv->Value.Value.String)));
                 break;
             case SOPC_StatusCode_Id:
-                printf("0x%08" PRIX32, dv->Value.Value.Status);
+                PRINT("0x%08" PRIX32, dv->Value.Value.Status);
                 break;
             default:
-                printf("(...)");
+                PRINT("(...)");
                 break;
             }
         }
     }
     else
     {
-        printf("<no value>");
+        PRINT("<no value>");
     }
-    printf("\n");
+    PRINT("\n");
 
     SOPC_Free(nidStr);
 }
@@ -592,6 +596,7 @@ void Cache_ForEach(Cache_ForEach_Exec* exec)
 void Cache_Dump(void)
 {
     SOPC_ASSERT(NULL != g_cache);
+    PRINT("Warning: Dumping the cache may break real-time operations!\n");
     Cache_Lock();
     SOPC_Dict_ForEach(g_cache, &Cache_ForEach_Dump, (uintptr_t) NULL);
     Cache_Unlock();

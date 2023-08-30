@@ -27,6 +27,9 @@
 #include "samples_platform_dep.h"
 #include "test_config.h"
 
+#define PUB_CNX_NAME "PubCnx#1"
+#define SUB_CNX_NAME "SubCnx#1"
+
 // These nodeIds must exist in AddressSpace!
 #define PUB_VAR_STRING "ns=1;s=PubString"
 #define PUB_VAR_BYTE "ns=1;s=PubByte"
@@ -170,6 +173,12 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
+        // Set connection name
+        alloc = SOPC_PubSubConnection_Set_Name(connection, PUB_CNX_NAME);
+    }
+
+    if (alloc)
+    {
         const char* itf_name = CONFIG_SOPC_PUBLISHER_ITF_NAME;
         if (CONFIG_SOPC_PUBLISHER_ITF_NAME[0] == '\0')
         {
@@ -231,6 +240,26 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Set subscriber id and address
         connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
         alloc = SOPC_PubSubConnection_Set_Address(connection, CONFIG_SOPC_SUBSCRIBER_ADDRESS);
+    }
+
+    if (alloc)
+    {
+        // Set connection name
+        alloc = SOPC_PubSubConnection_Set_Name(connection, SUB_CNX_NAME);
+    }
+
+    if (alloc)
+    {
+        const char* itf_name = CONFIG_SOPC_PUBLISHER_ITF_NAME;
+        if (CONFIG_SOPC_PUBLISHER_ITF_NAME[0] == '\0')
+        {
+            // Force default interface if not specified
+            itf_name = SOPC_Platform_Get_Default_Net_Itf();
+        }
+        if (itf_name[0] != '\0')
+        {
+            alloc = SOPC_PubSubConnection_Set_InterfaceName(connection, itf_name);
+        }
     }
 
     if (alloc)

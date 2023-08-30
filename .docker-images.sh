@@ -26,7 +26,7 @@ RPI_IMAGE=sha256:464cfa4e22af6d1933a17b14db182632dfd28febc3495adbd286aa1e5d8265e
 CHECK_IMAGE=sha256:d66ce82fe01794b918387be9f331f82cc768ef8acf58f16ff6f8840c3f6b67 # check 1.17
 TEST_IMAGE=sha256:6727e7354990d8cae3700093066e218b4360aeed84cbbd9f350d576c3c6033 # test:2.15
 ZEPHYR_IMAGE=sha256:f7c2b2759954d9b876adfc933978b2974cba027f591878a876b27ebee1c0d54d # zephyr_build:v3.2.0-b
-FREERTOS_IMAGE=sha256:51e61fd5fb1e17bb0bf645ed4d33da05d199962a1de4715c4a0ba7371e35a040 # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
+FREERTOS_IMAGE=sha256:93bc81ad9e4d8d6eda5566ea763987d87dfbfb3f202497bab9fecbb0b1e5c8b5 # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
 
 # Private images
 GEN_IMAGE=sha256:0772db3b0f8466def7656b952f1121ca8db70a521bf0b8fd0684e6e2beecc81d # docker.aix.systerel.fr/c838/gen:1.4
