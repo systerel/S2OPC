@@ -127,11 +127,11 @@ generation:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:2e26e8248eeadde506ae949bb7ea37822b8a86cb2de2ce775d8004ce920bef76 # digest of build:1.35
+  image: docker.aix.systerel.fr/c838/build@sha256:af66ce2bbd3102b18136c7a5193110bfd895f6cac4d51c8075aeb25fff5ee645 # digest of build:1.36
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_IMAGE: 'sha256:e315999939e864cabfc651c49f0d781ae956f137623899a1c1da0ec09f2cbaa7'
+    DOCKER_IMAGE: 'sha256:346ec7469f7dfedc8d5078c51c0d485915667647a2816b8ac36e1e35d0419060'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
@@ -303,7 +303,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check@sha256:96d88c653da1256530126d7f268e9eb6701fed8fb1d3773e0e095e4f070fbae6 # digest of check:1.16
+  image: docker.aix.systerel.fr/c838/check@sha256:703cb46fcbd6ae53db6cf7fa485f2ca553a68d21067c8546a7d950034b05af70 # digest of check:1.17
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -334,7 +334,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
+  image: docker.aix.systerel.fr/c838/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5 # digest of test:2.15
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -418,7 +418,7 @@ test-uactt:
 
 coverage-analysis:
   stage: analyses
-  image: docker.aix.systerel.fr/c838/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
+  image: docker.aix.systerel.fr/c838/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5 # digest of test:2.15
   script:
     - ./.gen_coverage.sh
   artifacts:
