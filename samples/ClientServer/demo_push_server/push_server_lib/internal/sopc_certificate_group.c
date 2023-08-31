@@ -29,8 +29,13 @@
 #include "sopc_mem_alloc.h"
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 #include "sopc_certificate_group.h"
 #include "sopc_certificate_group_itf.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
+#include "sopc_trustlist.h"
+#include "sopc_trustlist_itf.h"
 
 /*---------------------------------------------------------------------------
  *                             Constants
@@ -148,6 +153,7 @@ static void cert_group_initialize_context(SOPC_CertGroupContext* pCertGroup)
     SOPC_ASSERT(NULL != pCertGroup);
 
     pCertGroup->pObjectId = NULL;
+    pCertGroup->cStrId = NULL;
     pCertGroup->pCertificateTypeId = NULL;
     pCertGroup->pCertificateTypeValueId = NULL;
     pCertGroup->pTrustListId = NULL;
@@ -167,6 +173,7 @@ static void cert_group_clear_context(SOPC_CertGroupContext* pCertGroup)
     SOPC_NodeId_Clear(pCertGroup->pCertificateTypeValueId);
     SOPC_NodeId_Clear(pCertGroup->pTrustListId);
     SOPC_Free(pCertGroup->pObjectId);
+    SOPC_Free(pCertGroup->cStrId);
     SOPC_Free(pCertGroup->pCertificateTypeId);
     SOPC_Free(pCertGroup->pCertificateTypeValueId);
     SOPC_Free(pCertGroup->pTrustListId);
@@ -394,6 +401,14 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
         pCertGroup->pTrustListId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(pCertGroup->pTrustListId, pIds->pTrustListId);
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        pCertGroup->cStrId = SOPC_NodeId_ToCString(pIds->pTrustListId);
+        if (NULL == pCertGroup->cStrId)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
     /* Add certificate type */
     if (SOPC_STATUS_OK == status)
     {
@@ -453,15 +468,22 @@ bool CertificateGroup_DictInsert(SOPC_NodeId* pObjectId, SOPC_CertGroupContext* 
 }
 
 /* Get the CertificateGroup context from the nodeId */
-SOPC_CertGroupContext* CertificateGroup_DictGet(const SOPC_NodeId* pObjectId, bool* found)
+SOPC_CertGroupContext* CertificateGroup_DictGet(const SOPC_NodeId* pObjectId, bool* bFound)
 {
     if (NULL == gObjIdToCertGroup || NULL == pObjectId)
     {
-        *found = false;
+        *bFound = false;
         return NULL;
     }
     SOPC_CertGroupContext* pCtx = NULL;
-    pCtx = (SOPC_CertGroupContext*) SOPC_Dict_Get(gObjIdToCertGroup, (const uintptr_t) pObjectId, found);
+    pCtx = (SOPC_CertGroupContext*) SOPC_Dict_Get(gObjIdToCertGroup, (const uintptr_t) pObjectId, bFound);
+    if (!bFound || NULL == pCtx)
+    {
+        char* cStrId = SOPC_NodeId_ToCString(pObjectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "CertificateGroup: unable to retrieve the CertificateGroup context from %s", cStrId);
+        SOPC_Free(cStrId);
+    }
     return pCtx;
 }
 
@@ -473,4 +495,157 @@ void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId)
         return;
     }
     SOPC_Dict_Remove(gObjIdToCertGroup, (const uintptr_t) pObjectId);
+}
+
+SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pGroupCtx,
+                                                 SOPC_ByteString** ppBsCertArray,
+                                                 uint32_t* pLength)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_ASSERT(NULL != ppBsCertArray);
+    SOPC_ASSERT(NULL != pLength);
+
+    *ppBsCertArray = NULL;
+    *pLength = 0;
+
+    if (NULL == pGroupCtx->pTrustListId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: no TrustList is configured",
+                               pGroupCtx->cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+
+    bool bFound = false;
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, &bFound);
+    if (NULL == pCtx || !bFound)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    /* Get the rejected list */
+    uint32_t lenArray = 0;
+    SOPC_SerializedCertificate* pRawCertArray = NULL;
+    SOPC_ByteString* pBsCertArray = NULL;
+    SOPC_CertificateList* pCerts = NULL;
+    SOPC_ByteString* pByteStr = NULL;
+    const SOPC_Buffer* pRawBuffer = NULL;
+    uint32_t bufLength = 0;
+
+    SOPC_ASSERT(NULL != pCtx->pPKI);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteRejectedCertToList(pCtx->pPKI, &pCerts);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "CertificateGroup:%s: unable to retrieve the rejected list from the PKI that belongs to the TrustList %s",
+            pGroupCtx->cStrId, pCtx->cStrObjectId);
+        return OpcUa_BadUnexpectedError;
+    }
+    if (NULL == pCerts)
+    {
+        /* Nothing to do, the rejected list is empty */
+        return SOPC_GoodGenericStatus;
+    }
+    status = SOPC_KeyManager_CertificateList_AttachToSerializedArray(pCerts, &pRawCertArray, &lenArray);
+    stCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
+    if (SOPC_STATUS_OK == status)
+    {
+        pBsCertArray = SOPC_Calloc((size_t) lenArray, sizeof(SOPC_ByteString));
+        if (NULL == pBsCertArray)
+        {
+            stCode = OpcUa_BadOutOfMemory;
+        }
+    }
+
+    for (uint32_t i = 0; i < lenArray && SOPC_IsGoodStatus(stCode); i++)
+    {
+        pRawBuffer = SOPC_KeyManager_SerializedCertificate_Data(&pRawCertArray[i]);
+        if (NULL == pRawBuffer)
+        {
+            stCode = OpcUa_BadOutOfMemory;
+        }
+        /* Check before casting */
+        if (SOPC_IsGoodStatus(stCode) && NULL != pRawBuffer)
+        {
+            bufLength = pRawBuffer->length;
+            if (INT32_MAX < bufLength)
+            {
+                stCode = OpcUa_BadOutOfMemory;
+            }
+        }
+        pByteStr = &pBsCertArray[i];
+        if (SOPC_IsGoodStatus(stCode) && NULL != pByteStr)
+        {
+            SOPC_ByteString_Initialize(pByteStr);
+            pByteStr->Data = SOPC_Calloc((size_t) bufLength, sizeof(SOPC_Byte));
+            if (NULL == pByteStr->Data)
+            {
+                stCode = OpcUa_BadOutOfMemory;
+            }
+        }
+        if (SOPC_IsGoodStatus(stCode) && NULL != pByteStr && NULL != pRawBuffer)
+        {
+            if (NULL != pByteStr->Data && NULL != pRawBuffer->data)
+            {
+                memcpy(pByteStr->Data, pRawBuffer->data, bufLength);
+                pByteStr->Length = (int32_t) bufLength;
+            }
+            else
+            {
+                stCode = OpcUa_BadInvalidState;
+            }
+        }
+    }
+
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: unable to get the rejected list",
+                               pGroupCtx->cStrId);
+        uint32_t idx = 0;
+        for (idx = 0; idx < lenArray && NULL != pBsCertArray; idx++)
+        {
+            SOPC_ByteString_Clear(&pBsCertArray[idx]);
+        }
+        SOPC_Free(pBsCertArray);
+        pBsCertArray = NULL;
+        lenArray = 0;
+    }
+
+    SOPC_KeyManager_Certificate_Free(pCerts);
+    SOPC_Free(pRawCertArray);
+
+    *ppBsCertArray = pBsCertArray;
+    *pLength = lenArray;
+
+    return stCode;
+}
+
+SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext* pGroupCtx, const bool bEraseExisting)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+
+    if (NULL == pGroupCtx->pTrustListId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: no TrustList is configured",
+                               pGroupCtx->cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+    bool bFound = false;
+    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, &bFound);
+    if (NULL == pCtx || !bFound)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    SOPC_ASSERT(NULL != pCtx->pPKI);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteRejectedCertToStore(pCtx->pPKI, bEraseExisting);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: export of rejected list failed",
+                               pGroupCtx->cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+    else
+    {
+        return SOPC_GoodGenericStatus;
+    }
 }

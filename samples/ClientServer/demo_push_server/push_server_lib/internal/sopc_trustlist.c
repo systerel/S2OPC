@@ -33,7 +33,6 @@
 #include "sopc_service_call_context.h"
 
 #include "sopc_trustlist.h"
-#include "sopc_trustlist_itf.h"
 #include "sopc_trustlist_meth.h"
 
 #include "opcua_identifiers.h"

@@ -26,12 +26,16 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 
+#include "sopc_certificate_group.h"
+#include "sopc_push_server_config.h"
 #include "sopc_push_server_config_itf.h"
 #include "sopc_push_server_config_meth.h"
 
 #include "opcua_identifiers.h"
+#include "opcua_statuscodes.h"
 
 /*---------------------------------------------------------------------------
  *                             Constants
@@ -48,6 +52,8 @@ typedef struct PushServerContext
     bool bIsInit;                        /*!< Defined if the API is configured */
     bool bIsConfigure;                   /*!< Defined if the API is initialized. */
     SOPC_NodeId* pServerConfigurationId; /*!< The nodeId of the ServerConfiguration object. */
+    SOPC_NodeId* pAppGroupId;            /*!< The nodeId of the application Group. */
+    SOPC_NodeId* pUsrGroupId;            /*!< The nodeId of the userToken group. */
 } PushServerContext;
 
 /**
@@ -60,6 +66,8 @@ typedef struct PushServerConfig_NodeIds
     SOPC_NodeId* pApplyChangesId;         /*!< The nodeId of the ApplyChanges method.*/
     SOPC_NodeId* pCreateSigningRequestId; /*!< The nodeId of the CreateSigningRequest method. */
     SOPC_NodeId* pGetRejectedListId;      /*!< The nodeId of the CreateSigningRequest method. */
+    SOPC_NodeId* pAppGroupId;             /*!< The nodeId of the application group. */
+    SOPC_NodeId* pUsrGroupId;             /*!< The nodeId of the userToken group. */
 } PushServerConfig_NodeIds;
 
 /**
@@ -95,6 +103,13 @@ static SOPC_NodeId gCreateSigningRequestId = {.IdentifierType = SOPC_IdentifierT
 static SOPC_NodeId gGetRejectedListId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                          .Namespace = 0,
                                          .Data.Numeric = OpcUaId_ServerConfiguration_GetRejectedList};
+static SOPC_NodeId gAppGroupId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup};
+static SOPC_NodeId gUsrGroupId = {.IdentifierType = SOPC_IdentifierType_Numeric,
+                                  .Namespace = 0,
+                                  .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup};
 /* Methods NodeId of the ServerConfigurationType*/
 static SOPC_NodeId gTypeUpdateCertificateId = {.IdentifierType = SOPC_IdentifierType_Numeric,
                                                .Namespace = 0,
@@ -115,6 +130,8 @@ static PushServerConfig_NodeIds gNodeIds = {
     .pCreateSigningRequestId = &gCreateSigningRequestId,
     .pGetRejectedListId = &gGetRejectedListId,
     .pUpdateCertificateId = &gUpdateCertificateId,
+    .pAppGroupId = &gAppGroupId,
+    .pUsrGroupId = &gUsrGroupId,
 };
 static PushServerConfig_NodeIds gTypeNodeIds = {
     .pServerConfigurationId = NULL,
@@ -122,6 +139,8 @@ static PushServerConfig_NodeIds gTypeNodeIds = {
     .pCreateSigningRequestId = &gTypeCreateSigningRequestId,
     .pGetRejectedListId = &gTypeGetRejectedListId,
     .pUpdateCertificateId = &gTypeUpdateCertificateId,
+    .pAppGroupId = NULL,
+    .pUsrGroupId = NULL,
 };
 
 static PushServerContext gServerContext = {0};
@@ -138,7 +157,8 @@ static void push_server_config_delete_node_ids(PushServerConfig_NodeIds** ppNode
 static SOPC_ReturnStatus push_server_config_copy_meth_node_ids(PushServerConfig_NodeIds* pSrc,
                                                                PushServerConfig_NodeIds** ppDest);
 static SOPC_ReturnStatus push_server_config_copy_node_ids(PushServerConfig_NodeIds* pSrc,
-                                                          PushServerConfig_NodeIds** ppDest);
+                                                          PushServerConfig_NodeIds** ppDest,
+                                                          const bool bIncludeUser);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
@@ -151,6 +171,8 @@ static void push_server_config_clear_context(PushServerContext* pContext)
         return;
     }
     push_server_config_delete_single_node_id(&pContext->pServerConfigurationId);
+    push_server_config_delete_single_node_id(&pContext->pAppGroupId);
+    push_server_config_delete_single_node_id(&pContext->pUsrGroupId);
 }
 
 static void push_server_config_initialize_context(PushServerContext* pContext)
@@ -162,6 +184,8 @@ static void push_server_config_initialize_context(PushServerContext* pContext)
     pContext->bIsInit = false;
     pContext->bIsConfigure = false;
     pContext->pServerConfigurationId = NULL;
+    pContext->pAppGroupId = NULL;
+    pContext->pUsrGroupId = NULL;
 }
 
 static void push_server_config_delete_single_node_id(SOPC_NodeId** ppNodeId)
@@ -201,6 +225,8 @@ static void push_server_config_delete_node_ids(PushServerConfig_NodeIds** ppNode
         push_server_config_delete_single_node_id(&pNodeIds->pUpdateCertificateId);
     }
     push_server_config_delete_single_node_id(&pNodeIds->pServerConfigurationId);
+    push_server_config_delete_single_node_id(&pNodeIds->pAppGroupId);
+    push_server_config_delete_single_node_id(&pNodeIds->pUsrGroupId);
     SOPC_Free(pNodeIds);
     pNodeIds = NULL;
     *ppNodeIds = pNodeIds;
@@ -252,7 +278,8 @@ static SOPC_ReturnStatus push_server_config_copy_meth_node_ids(PushServerConfig_
 }
 
 static SOPC_ReturnStatus push_server_config_copy_node_ids(PushServerConfig_NodeIds* pSrc,
-                                                          PushServerConfig_NodeIds** ppDest)
+                                                          PushServerConfig_NodeIds** ppDest,
+                                                          const bool bIncludeUser)
 {
     if (NULL == pSrc || NULL == ppDest)
     {
@@ -273,6 +300,23 @@ static SOPC_ReturnStatus push_server_config_copy_node_ids(PushServerConfig_NodeI
 
     pDest->pServerConfigurationId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
     status = SOPC_NodeId_Copy(pDest->pServerConfigurationId, pSrc->pServerConfigurationId);
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pAppGroupId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pAppGroupId, pSrc->pAppGroupId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (bIncludeUser)
+        {
+            pDest->pUsrGroupId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+            status = SOPC_NodeId_Copy(pDest->pUsrGroupId, pSrc->pUsrGroupId);
+        }
+        else
+        {
+            pDest->pUsrGroupId = NULL;
+        }
+    }
     if (SOPC_STATUS_OK != status)
     {
         push_server_config_delete_node_ids(&pDest, false);
@@ -357,7 +401,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = push_server_config_copy_node_ids(&gNodeIds, &pCfg->pIds);
+        status = push_server_config_copy_node_ids(&gNodeIds, &pCfg->pIds, NULL != pPKIUsr);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -412,7 +456,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
     }
     PushServerConfig_NodeIds* pIds = pCfg->pIds;
     if (NULL == pIds->pServerConfigurationId || NULL == pIds->pApplyChangesId ||
-        NULL == pIds->pCreateSigningRequestId || NULL == pIds->pGetRejectedListId || NULL == pIds->pUpdateCertificateId)
+        NULL == pIds->pCreateSigningRequestId || NULL == pIds->pGetRejectedListId ||
+        NULL == pIds->pUpdateCertificateId || NULL == pIds->pAppGroupId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -429,6 +474,16 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
     {
         gServerContext.pServerConfigurationId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(gServerContext.pServerConfigurationId, pIds->pServerConfigurationId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        gServerContext.pAppGroupId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(gServerContext.pAppGroupId, pIds->pAppGroupId);
+    }
+    if (SOPC_STATUS_OK == status && NULL != pIds->pUsrGroupId)
+    {
+        gServerContext.pUsrGroupId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(gServerContext.pUsrGroupId, pIds->pUsrGroupId);
     }
     PushServerConfig_NodeIds* pTypeIds = NULL;
     if (SOPC_STATUS_OK == status)
@@ -527,4 +582,138 @@ void SOPC_PushServerConfig_Clear(void)
     SOPC_TrustList_Clear();
     push_server_config_clear_context(&gServerContext);
     push_server_config_initialize_context(&gServerContext);
+}
+
+SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint32_t* pLengthArray)
+{
+    SOPC_ASSERT(gServerContext.bIsInit && gServerContext.bIsConfigure);
+    SOPC_ASSERT(NULL != gServerContext.pAppGroupId); // Application group is mandatory
+
+    if (NULL == ppBsCertArray || NULL == pLengthArray)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+
+    *ppBsCertArray = NULL;
+    *pLengthArray = 0;
+
+    SOPC_ByteString* pBsAppCertArray = NULL;
+    SOPC_ByteString* pBsUsrCertArray = NULL;
+    SOPC_ByteString* pCertArray = NULL;
+    uint32_t lenApp = 0;
+    uint32_t lenUsr = 0;
+    uint32_t idx = 0;
+    SOPC_CertGroupContext* pGroupCtx = NULL;
+    bool bFound = false;
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    /* Retrieve the application group */
+    pGroupCtx = CertificateGroup_DictGet(gServerContext.pAppGroupId, &bFound);
+    if (pGroupCtx == NULL || !bFound)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    stCode = CertificateGroup_GetRejectedList(pGroupCtx, &pBsAppCertArray, &lenApp);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    /* Retrieve the user group */
+    if (NULL != gServerContext.pUsrGroupId && SOPC_IsGoodStatus(stCode))
+    {
+        pGroupCtx = CertificateGroup_DictGet(gServerContext.pUsrGroupId, &bFound);
+        if (pGroupCtx == NULL || !bFound)
+        {
+            stCode = OpcUa_BadUnexpectedError;
+        }
+        if (SOPC_IsGoodStatus(stCode))
+        {
+            stCode = CertificateGroup_GetRejectedList(pGroupCtx, &pBsUsrCertArray, &lenUsr);
+        }
+    }
+    /* Create the output array */
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        pCertArray = SOPC_Calloc((size_t)(lenApp + lenUsr), sizeof(SOPC_ByteString));
+        if (NULL == pCertArray)
+        {
+            stCode = OpcUa_BadOutOfMemory;
+        }
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (idx = 0; idx < lenApp && NULL != pBsAppCertArray && SOPC_IsGoodStatus(stCode); idx++)
+    {
+        status = SOPC_ByteString_Copy(&pCertArray[idx], &pBsAppCertArray[idx]);
+        stCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
+    }
+    for (idx = lenUsr; idx < lenApp + lenUsr && NULL != pBsUsrCertArray && SOPC_IsGoodStatus(stCode); idx++)
+    {
+        status = SOPC_ByteString_Copy(&pCertArray[idx], &pBsUsrCertArray[idx - lenUsr]);
+        stCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
+    }
+    /* Clear */
+    if (NULL != pBsAppCertArray)
+    {
+        for (idx = 0; idx < lenApp; idx++)
+        {
+            SOPC_ByteString_Clear(&pBsAppCertArray[idx]);
+        }
+        SOPC_Free(pBsAppCertArray);
+    }
+    if (NULL != pBsUsrCertArray)
+    {
+        for (idx = 0; idx < lenApp; idx++)
+        {
+            SOPC_ByteString_Clear(&pBsUsrCertArray[idx]);
+        }
+        SOPC_Free(pBsUsrCertArray);
+    }
+    pBsAppCertArray = NULL;
+    pBsUsrCertArray = NULL;
+    if (!SOPC_IsGoodStatus(stCode) && NULL != pCertArray)
+    {
+        for (idx = 0; idx < lenApp + lenUsr; idx++)
+        {
+            SOPC_ByteString_Clear(&pCertArray[idx]);
+        }
+        SOPC_Free(pCertArray);
+        pCertArray = NULL;
+        lenApp = 0;
+        lenUsr = 0;
+    }
+
+    *ppBsCertArray = pCertArray;
+    *pLengthArray = lenApp + lenUsr;
+    return stCode;
+}
+
+SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
+{
+    SOPC_ASSERT(gServerContext.bIsInit && gServerContext.bIsConfigure);
+    SOPC_ASSERT(NULL != gServerContext.pAppGroupId); // Application group is mandatory
+
+    SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
+    SOPC_CertGroupContext* pGroupCtx = NULL;
+    bool bFound = false;
+    /* Retrieve the application group */
+    pGroupCtx = CertificateGroup_DictGet(gServerContext.pAppGroupId, &bFound);
+    if (pGroupCtx == NULL || !bFound)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+    /* Retrieve the user group */
+    if (NULL != gServerContext.pUsrGroupId && SOPC_IsGoodStatus(stCode))
+    {
+        pGroupCtx = CertificateGroup_DictGet(gServerContext.pUsrGroupId, &bFound);
+        if (pGroupCtx == NULL || !bFound)
+        {
+            stCode = OpcUa_BadUnexpectedError;
+        }
+        if (SOPC_IsGoodStatus(stCode))
+        {
+            stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+        }
+    }
+    return stCode;
 }

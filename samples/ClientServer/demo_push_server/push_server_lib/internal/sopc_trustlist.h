@@ -344,10 +344,10 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
 SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri);
 
 /**
- * \brief Export the update (certificate files)
+ * \brief Export the update
  *
  * \param pTrustList The TrustList context.
- * \param bEraseExitingFile Define if the existing files shall be deleted or include with the update.
+ * \param bEraseExiting Define if the existing certificate shall be deleted or include with the update.
  * \param bForcePush Force the export in case \p pTrustList is not open.
  *                   (cases of AddCertificate and RemoveCertificate)
  *
@@ -356,7 +356,7 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
  * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
-                                   const bool bEraseExitingFile,
+                                   const bool bEraseExiting,
                                    const bool bForcePush);
 
 /**
