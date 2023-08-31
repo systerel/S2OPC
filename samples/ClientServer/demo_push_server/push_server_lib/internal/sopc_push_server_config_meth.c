@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 
-#include "sopc_certificate_group.h"
+#include "sopc_push_server_config.h"
 #include "sopc_push_server_config_meth.h"
 
 #include "opcua_statuscodes.h"
@@ -155,19 +155,56 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    uint32_t lenArray = 0;
+    SOPC_ByteString* pBsCertArray = NULL;
+    SOPC_Variant* pVariant = SOPC_Variant_Create();
+    if (NULL == pVariant)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_GetRejectedList: unable to create a variant");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "PushSrvCfg:GetRejectedList: unable to create a variant");
         return OpcUa_BadUnexpectedError;
     }
-    v->ArrayType = SOPC_VariantArrayType_Array;
-    v->BuiltInTypeId = SOPC_ByteString_Id;
-    v->Value.Array.Content.BstringArr = NULL;
-    v->Value.Array.Length = 0;
-    *nbOutputArgs = 1;
-    *outputArgs = v;
+    /* Get the rejected list */
+    SOPC_StatusCode stCode = PushServer_GetRejectedList(&pBsCertArray, &lenArray);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:GetRejectedList: unable to get the rejected list");
+        stCode = OpcUa_BadUnexpectedError;
+    }
+    else if (INT32_MAX < lenArray)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "PushSrvCfg:GetRejectedList: rejected list si too large");
+        stCode = OpcUa_BadUnexpectedError;
+    }
+    else
+    {
+        /* Export */
+        stCode = PushServer_ExportRejectedList(false);
+        if (!SOPC_IsGoodStatus(stCode))
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "PushSrvCfg:GetRejectedList: unable to export the rejected list");
+        }
+    }
+    /* Set the output */
+    if (SOPC_IsGoodStatus(stCode))
+    {
+        pVariant->ArrayType = SOPC_VariantArrayType_Array;
+        pVariant->BuiltInTypeId = SOPC_ByteString_Id;
+        pVariant->Value.Array.Content.BstringArr = pBsCertArray;
+        pVariant->Value.Array.Length = (int32_t) lenArray;
+        *nbOutputArgs = 1;
+        *outputArgs = pVariant;
+    }
+    else
+    {
+        for (uint32_t idx = 0; idx < lenArray && NULL != pBsCertArray; idx++)
+        {
+            SOPC_ByteString_Clear(&pBsCertArray[idx]);
+        }
+        SOPC_Free(pBsCertArray);
+        SOPC_Variant_Delete(pVariant);
+    }
 
-    return SOPC_GoodGenericStatus;
+    return stCode;
 }

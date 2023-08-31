@@ -172,6 +172,10 @@ static SOPC_ReturnStatus trustlist_attach_certs_to_raw_arrays(const SOPC_TrLst_M
         SOPC_Free(*pRawTrustedCrlArray);
         SOPC_Free(*pRawIssuerCertArray);
         SOPC_Free(*pRawIssuerCrlArray);
+        *pRawTrustedCertArray = NULL;
+        *pRawTrustedCrlArray = NULL;
+        *pRawIssuerCertArray = NULL;
+        *pRawIssuerCrlArray = NULL;
         *pLenTrustedCertArray = 0;
         *pLenTrustedCrlArray = 0;
         *pLenIssuerCertArray = 0;
@@ -249,6 +253,7 @@ static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGen
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(pBsArray);
+        pBsArray = NULL;
         *pByteLenTot = 0;
     }
 
@@ -315,6 +320,10 @@ static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
         SOPC_Free(*pBsTrustedCrlArray);
         SOPC_Free(*pBsIssuerCertArray);
         SOPC_Free(*pBsIssuerCrlArray);
+        *pBsTrustedCertArray = NULL;
+        *pBsTrustedCrlArray = NULL;
+        *pBsIssuerCertArray = NULL;
+        *pBsIssuerCrlArray = NULL;
         *pByteLenTot = 0;
     }
 
@@ -1261,7 +1270,7 @@ SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const c
 
 /* Export the update (certificate files) */
 SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
-                                   const bool bEraseExitingFile,
+                                   const bool bEraseExiting,
                                    const bool bForcePush)
 {
     SOPC_ASSERT(NULL != pTrustList);
@@ -1275,7 +1284,7 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
             return SOPC_STATUS_OK;
         }
     }
-    bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists || bEraseExitingFile;
+    bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists || bEraseExiting;
     SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bNotIncludeExitingFile);
     if (SOPC_STATUS_OK != status)
     {
