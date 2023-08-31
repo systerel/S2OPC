@@ -43,7 +43,6 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
                                                void* param)
 {
     SOPC_ASSERT(NULL != objectId);
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
 
     printf("Method OpenWithMasks Call\n");
@@ -61,7 +60,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadNotFound;
@@ -75,7 +74,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
         return OpcUa_BadInvalidState;
     }
     /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: bad inputs arguments",
                                cStrId);
@@ -125,6 +124,9 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     }
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
+        SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+        Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
+        Trustlist_WriteVarOpenCount(pTrustList, pAddSpAccess);
         pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
         pVariant->BuiltInTypeId = SOPC_UInt32_Id;
         SOPC_UInt32_Initialize(&pVariant->Value.Uint32);
@@ -134,7 +136,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     }
     else
     {
-        TrustList_Reset(pTrustList);
+        TrustList_Reset(pTrustList, NULL);
         SOPC_Variant_Delete(pVariant);
     }
 
@@ -152,7 +154,6 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     printf("Method Open Call\n");
 
     SOPC_ASSERT(NULL != objectId);
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
        (Table 65 – Call Service Parameters spec V1.05) */
@@ -167,7 +168,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadNotFound;
@@ -182,7 +183,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidState;
     }
     /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: bad inputs arguments", cStrId);
         return OpcUa_BadInvalidArgument;
@@ -197,7 +198,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     bool bIsValid = TrustList_SetOpenMode(pTrustList, inputArgs[0].Value.Byte);
     if (!bIsValid)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: invalid rcv masks %" PRIu8, cStrId,
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: invalid rcv mode %" PRIu8, cStrId,
                                inputArgs[0].Value.Byte);
         return OpcUa_BadInvalidArgument;
     }
@@ -230,6 +231,9 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     }
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
+        SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+        Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
+        Trustlist_WriteVarOpenCount(pTrustList, pAddSpAccess);
         pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
         pVariant->BuiltInTypeId = SOPC_UInt32_Id;
         SOPC_UInt32_Initialize(&pVariant->Value.Uint32);
@@ -239,7 +243,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     }
     else
     {
-        TrustList_Reset(pTrustList);
+        TrustList_Reset(pTrustList, NULL);
         SOPC_Variant_Delete(pVariant);
     }
     return statusCode;
@@ -268,14 +272,14 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadUnexpectedError;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* Check input arguments */
-    if ((1 != nbInputArgs) || (NULL == inputArgs))
+    if ((1 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Close: bad inputs arguments", cStrId);
         return OpcUa_BadInvalidArgument;
@@ -295,7 +299,8 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadInvalidArgument;
     }
     /* Close => Reset the context */
-    TrustList_Reset(pTrustList);
+    SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    TrustList_Reset(pTrustList, pAddSpAccess);
 
     return SOPC_GoodGenericStatus;
 }
@@ -325,7 +330,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (NULL == pTrustList && !bFound)
     {
         return OpcUa_BadUnexpectedError;
@@ -404,7 +409,8 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         SOPC_Variant_Delete(pVariant);
     }
     /* Close => Reset the context */
-    TrustList_Reset(pTrustList);
+    SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+    TrustList_Reset(pTrustList, pAddSpAccess);
 
     return statusCode;
 }
@@ -433,7 +439,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -522,7 +528,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     bool bIsIssuer = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -624,7 +630,7 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -726,7 +732,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -797,7 +803,7 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -876,7 +882,7 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
     bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, &bFound);
+    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;

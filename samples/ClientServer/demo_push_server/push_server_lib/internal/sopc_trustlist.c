@@ -372,7 +372,7 @@ static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
     pTrustList->event.pLooper = NULL;
     pTrustList->event.pHandler = NULL;
     pTrustList->event.activityTimeoutTimId = 0;
-    TrustList_Reset(pTrustList);
+    TrustList_Reset(pTrustList, NULL);
 }
 
 static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
@@ -1033,7 +1033,10 @@ bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContex
 }
 
 /* Get the trustList context from the nodeId */
-SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool bCheckActivityTimeout, bool* bFound)
+SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
+                                         bool bCheckActivityTimeout,
+                                         const SOPC_CallContext* callContextPtr,
+                                         bool* bFound)
 {
     if (NULL == gObjIdToTrustList || NULL == pObjectId)
     {
@@ -1061,7 +1064,12 @@ SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool bChe
             activityTimeoutEvent.params = (uintptr_t) pCtx;
             if (SOPC_Atomic_Int_Get(&pCtx->event.timeoutElapsed))
             {
-                TrustList_Reset(pCtx);
+                SOPC_AddressSpaceAccess* pAddSpAccess = NULL;
+                if (NULL != callContextPtr)
+                {
+                    pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+                }
+                TrustList_Reset(pCtx, pAddSpAccess);
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                          "TrustList:%s: activity timeout period elapsed (TrustList has been closed)",
                                          pCtx->cStrObjectId);

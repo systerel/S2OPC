@@ -122,11 +122,15 @@ bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContex
  *
  * \param pObjectId  The objectId of the TrustList.
  * \param bCheckActivityTimeout Defined whatever the activity timeout shall be check.
+ * \param callContextPtr The method call context to set if \p bCheckActivityTimeout is TRUE (NULL if not used)
  * \param[out] bFound Defined whatever the TrustList is found that belongs to \p objectId .
  *
  * \return Return a valid ::SOPC_TrustListContext or NULL if error.
  */
-SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId, bool bCheckActivityTimeout, bool* bFound);
+SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
+                                         bool bCheckActivityTimeout,
+                                         const SOPC_CallContext* callContextPtr,
+                                         bool* bFound);
 
 /**
  * \brief Removes a TrustList context from the nodeId.
@@ -203,6 +207,17 @@ uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList);
 uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList);
 
 /**
+ * \brief Get the TrustList length.
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ *
+ * \return The TrustList length.
+ */
+uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList);
+
+/**
  * \brief Check the TrustList handle.
  *
  * \param pTrustList The TrustList context.
@@ -256,7 +271,9 @@ const char* TrustList_GetStrNodeId(const SOPC_TrustListContext* pTrustList);
  *
  * \param pTrustList The TrustList context.
  *
- * \warning \p pTrustList shall be valid (!= NULL) and open in read mode.
+ * \note \p pTrustList is not encoded if it is opened in write mode.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -374,12 +391,37 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
 SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList);
 
 /**
+ * \brief Write the value of the TrustList Size variable.
+ *
+ * \param pTrustList The TrustList context.
+ * \param pAddSpAccess The address space access.
+ *
+ * \note If \p pTrustList is open in write mode then StatusCode of Bad_NotSupported is written.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ */
+void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess);
+
+/**
+ * \brief Write the value of the TrustList OpenCount variable.
+ *
+ * \param pTrustList The TrustList context.
+ * \param pAddSpAccess The address space access.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ */
+void Trustlist_WriteVarOpenCount(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess);
+
+/**
  * \brief Reset the context of the TrustList but keep the user configuration.
  *
  * \param pTrustList The TrustList context.
+ * \param pAddSpAccess The address space access to reset the value of variables (NULL if not used).
  *
  * \warning \p pTrustList shall be valid (!= NULL)
  */
-void TrustList_Reset(SOPC_TrustListContext* pTrustList);
+void TrustList_Reset(SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess);
 
 #endif /* SOPC_TRUSTLIST_ */
