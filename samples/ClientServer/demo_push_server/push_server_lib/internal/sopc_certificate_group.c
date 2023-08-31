@@ -517,7 +517,7 @@ SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pG
 
     bool bFound = false;
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
-    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, &bFound);
+    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, NULL, &bFound);
     if (NULL == pCtx || !bFound)
     {
         return OpcUa_BadUnexpectedError;
@@ -631,7 +631,7 @@ SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext*
         return OpcUa_BadUnexpectedError;
     }
     bool bFound = false;
-    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, &bFound);
+    SOPC_TrustListContext* pCtx = TrustList_DictGet(pGroupCtx->pTrustListId, false, NULL, &bFound);
     if (NULL == pCtx || !bFound)
     {
         return OpcUa_BadUnexpectedError;

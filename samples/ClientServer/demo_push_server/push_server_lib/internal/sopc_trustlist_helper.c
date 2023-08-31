@@ -582,18 +582,13 @@ SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint6
                                pTrustList->cStrObjectId, position);
         return SOPC_STATUS_INVALID_STATE;
     }
-    uint32_t bufLength = 0;
-    uint32_t bufPos = 0;
-    uint32_t bufRemaining = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
-    SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, &bufPos);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-    bufLength = bufPos + bufRemaining;
+    uint32_t bufLength = TrustList_GetLength(pTrustList);
     /* if the position is higher than the file size the position is set to the end of the file*/
     if (position > bufLength)
     {
         position = bufLength;
     }
-    status = SOPC_Buffer_SetPosition(pTrustList->pTrustListEncoded, (uint32_t) position);
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pTrustList->pTrustListEncoded, (uint32_t) position);
     return status;
 }
 
@@ -616,6 +611,23 @@ uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList)
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     return pos;
+}
+
+/* Get the TrustList length  */
+uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    uint32_t bufLength = 0;
+    uint32_t bufRemaining = 0;
+    uint32_t bufPos = 0;
+    if (NULL != pTrustList->pTrustListEncoded)
+    {
+        bufRemaining = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
+        SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, &bufPos);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        bufLength = bufPos + bufRemaining;
+    }
+    return bufLength;
 }
 
 /* Check the TrustList handle */
@@ -665,6 +677,13 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL == pTrustList->pTrustListEncoded);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
+
+    bool bIsRead = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
+    if (!bIsRead)
+    {
+        /* Do not encode the TrustList in write mode */
+        return SOPC_STATUS_OK;
+    }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     /* Extracted data from the PKI */
@@ -1308,8 +1327,95 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
     return SOPC_STATUS_OK;
 }
 
+/* Write the value of the Size variable */
+void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->varIds.pSizeId);
+    if (NULL == pAddSpAccess)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:SizeVariable: bad address space access",
+                                 pTrustList->cStrObjectId);
+        return;
+    }
+
+    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
+    if (NULL == dv)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:SizeVariable: unable to create the dataValue", pTrustList->cStrObjectId);
+        return;
+    }
+    SOPC_StatusCode varSizeStCode = SOPC_GoodGenericStatus;
+    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
+    if (bIsOpen)
+    {
+        bool bIsRead = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
+        if (!bIsRead)
+        {
+            varSizeStCode = OpcUa_BadNotSupported;
+        }
+    }
+    dv->Value.BuiltInTypeId = SOPC_UInt64_Id;
+    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv->Value.Value.Uint64 = TrustList_GetLength(pTrustList);
+    SOPC_DateTime ts = 0; // will set current time as source TS
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pSizeId, NULL,
+                                                                &dv->Value, &varSizeStCode, &ts, NULL);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:SizeVariable: unable to write the size %" PRId64,
+                                 pTrustList->cStrObjectId, dv->Value.Value.Uint64);
+    }
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+}
+
+/* Write the value of the OpenCount variable */
+void Trustlist_WriteVarOpenCount(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->varIds.pOpenCountId);
+    if (NULL == pAddSpAccess)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:OpenCountVariable: bad address space access", pTrustList->cStrObjectId);
+        return;
+    }
+
+    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
+    if (NULL == dv)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:OpenCountVariable: unable to create the dataValue",
+                                 pTrustList->cStrObjectId);
+        return;
+    }
+    uint16_t openCount = 0;
+    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
+    if (bIsOpen)
+    {
+        openCount = 1;
+    }
+    dv->Value.BuiltInTypeId = SOPC_UInt16_Id;
+    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv->Value.Value.Uint16 = openCount;
+    SOPC_DateTime ts = 0; // will set current time as source TS
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pOpenCountId, NULL,
+                                                                &dv->Value, NULL, &ts, NULL);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:OpenCountVariable: unable to write the opencount %" PRId16,
+                                 pTrustList->cStrObjectId, dv->Value.Value.Uint16);
+    }
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+}
+
 /* Reset the TrustList context when close method is call */
-void TrustList_Reset(SOPC_TrustListContext* pTrustList)
+void TrustList_Reset(SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess)
 {
     SOPC_ASSERT(NULL != pTrustList);
 
@@ -1332,4 +1438,10 @@ void TrustList_Reset(SOPC_TrustListContext* pTrustList)
     pTrustList->pTrustedCRLs = NULL;
     pTrustList->pIssuerCRLs = NULL;
     pTrustList->bDoNotDelete = false;
+
+    if (NULL != pAddSpAccess)
+    {
+        Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
+        Trustlist_WriteVarOpenCount(pTrustList, pAddSpAccess);
+    }
 }
