@@ -24,7 +24,7 @@ import os
 
 ffibuilder = FFI()
 # TODO: generate this file instead of concatenating manual copies of selected headers
-header = open('./pys2opc/s2opc_expanded.h').read()
+header = open('./s2opc_expanded.h').read()
 ffibuilder.cdef(header + r'''
     # 1 "cffi-cdef"
     /* Python callbacks that are callable from C */
@@ -84,7 +84,7 @@ if os.name == 'nt':
     ffibuilder.set_source('_pys2opc',
                       source,
                       extra_link_args=['Advapi32.lib', 'ws2_32.lib', 's2opc_clientserver.lib', 's2opc_common.lib', 'mbedcrypto.lib', 'mbedtls.lib', 'mbedx509.lib', 'libexpat.lib'],
-                      include_dirs=['./pys2opc'],
+                      include_dirs=['.'],
                       library_dirs=['../lib', # working dir should be located in build dir
                                     '.'],  # Ease compilation outside of the S2OPC project
                      )
@@ -93,7 +93,7 @@ else:
     ffibuilder.set_source('_pys2opc',
                       source,
                       extra_link_args=['-ls2opc_clientserver', '-ls2opc_common', '-lmbedcrypto', '-lmbedtls', '-lmbedx509', '-lexpat'],
-                      include_dirs=['./pys2opc'],
+                      include_dirs=['.'],
                       library_dirs=['../lib', # working dir should be located in build dir
                                     '.'],  # Ease compilation outside of the S2OPC project
                      )
