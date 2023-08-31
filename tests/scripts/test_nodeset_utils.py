@@ -123,13 +123,13 @@ class MergeTests(unittest.TestCase):
 
     def test_merge_error_same_node_id_in_one_file(self):
         # file1: temperature as NS1 with duplicate node ID
-        self.run_error("There are duplicate Node IDs: ['ns=1;i=15001', 'ns=1;i=15006']", [],
+        self.run_error("There are duplicate node IDs within the merged file: ['ns=1;i=15001', 'ns=1;i=15006']", [],
                       'ns0.xml', 'TestTemperatureNS_duplicate_nodeID.NodeSet2.xml')
 
     def test_merge_error_same_node_id_in_two_files(self):
         # file1: temperature as NS1, pressure as NS2
         # file2: pressure as NS2 with duplicate node ID for pressure NS
-        self.run_error("There are duplicate Node IDs: ['ns=2;i=15014']", [],
+        self.run_error("There are duplicate Node IDs across merged files: ['ns=2;i=15014']", [],
                       'ns0.xml', 'TestTemperatureNS_PressureNS_split1.NodeSet2.xml', 'TestPressureNS_split2_duplicate_nodeID.NodeSet2.xml')
 
     def test_remove_subtree(self):
