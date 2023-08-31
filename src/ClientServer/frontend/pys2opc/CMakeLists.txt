@@ -54,16 +54,15 @@ if(WITH_PYS2OPC)
                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/server_callbacks.py"
                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/types.py"
                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/version.json"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc_build.py"
                       )
   set(PYS2OPC_BUILDERS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
                        "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
                        "${CMAKE_CURRENT_SOURCE_DIR}/NOTICE"
-                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc_build.py"
                        "${CMAKE_CURRENT_SOURCE_DIR}/setup.py"
                        )
   set(PYS2OPC_FILES ${PYS2OPC_SOURCES} ${PYS2OPC_BUILDERS})
-  #set(PYS2OPC_PLACEHOLDER ${CMAKE_BINARY_DIR}/pys2opc_touch)
-  set(PYS2OPC_INCLUDE "${PYS2OPC_BUILD_PATH}/s2opc_expanded.h")
+  set(PYS2OPC_INCLUDE "${PYS2OPC_BUILD_PATH}/pys2opc/s2opc_expanded.h")
   set(PYS2OPC_WHEEL_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PYS2OPC_WHEEL_NAME}")
   set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
 
@@ -79,9 +78,8 @@ if(WITH_PYS2OPC)
                      # Note: sources copied to build dir to avoid relative path issues in pys2opc_build.py
                      COMMAND ${CMAKE_COMMAND} -E copy ${PYS2OPC_BUILDERS} ${PYS2OPC_BUILD_PATH}
                      COMMAND ${CMAKE_COMMAND} -E copy ${PYS2OPC_SOURCES} ${PYS2OPC_BUILD_PATH}/pys2opc
-                     COMMAND ${PYTHON_EXECUTABLE} ${PYS2OPC_BUILD_PATH}/setup.py -q bdist_wheel
-                             -d ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-                     #COMMAND ${CMAKE_COMMAND} -E touch ${PYS2OPC_PLACEHOLDER}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${PYS2OPC_INCLUDE} ${PYS2OPC_BUILD_PATH}/pys2opc
+                     COMMAND ${PYTHON_EXECUTABLE} -m build --outdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} --wheel --no-isolation
                      WORKING_DIRECTORY ${PYS2OPC_BUILD_PATH}
                      COMMENT "Build PyS2OPC Wheel"
                      )
