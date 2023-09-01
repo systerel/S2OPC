@@ -46,6 +46,16 @@
 #define SOPC_CertificateValidationError_ChainIncomplete 0x810D0000
 #define SOPC_CertificateValidationError_Unknown 0x80000000
 
+/* The maximum number of rejected certificate stored by the PKI */
+#ifndef SOPC_PKI_MAX_NB_CERT_REJECTED
+#define SOPC_PKI_MAX_NB_CERT_REJECTED 10
+#endif
+
+/* The maximum number of trusted/issuer certificate/CRL stored by the PKI */
+#ifndef SOPC_PKI_MAX_NB_CERT_AND_CRL
+#define SOPC_PKI_MAX_NB_CERT_AND_CRL 50
+#endif
+
 /*
  The directory store shall be organized as follows:
   .
@@ -262,6 +272,7 @@ typedef struct SOPC_PKI_Profile
  * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
  *
  * This function checks that :
+ * - the number of certificates plus CRLs does not exceed \c SOPC_PKI_MAX_NB_CERT_AND_CRL .
  * - the certificate store is not empty.
  * - at least one trusted certificate is provided.
  * - each certificate from subfolder issuer/certs is CA.
@@ -292,6 +303,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePat
  * - CAs from trusted/certs allow to verify the signing chain of a cert which is not included into trusted/certs.
  *
  * This function checks that :
+ * - the number of certificates plus CRLs does not exceed \c SOPC_PKI_MAX_NB_CERT_AND_CRL .
  * - at least one cert from \p pTrustedCerts is provided.
  * - each certificate from \p pIssuerCerts is CA.
  * - each CA has exactly one Certificate Revocation List (CRL).
@@ -593,6 +605,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* p
  * \param pPKI A valid pointer to the PKIProvider.
  * \param[out] ppCert A copy of the PKI rejected list.
  *
+ * \note The maximum number of certificates returned is \c SOPC_PKI_MAX_NB_CERT_REJECTED.
+ *
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
@@ -602,6 +616,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvide
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the rejected folder shall be deleted.
+ *
+ * \note At the maximum, we could have 2 * \c SOPC_PKI_MAX_NB_CERT_REJECTED in the rejected folder.
+ *       This function removes older files, if the maximum is reach.
  *
  * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProvider_CreateFromList ) then
  *          you shall define the directory store path with ::SOPC_PKIProvider_SetStorePath .
@@ -615,6 +632,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvid
  *
  * \param ppPKI A valid pointer to the PKIProvider.
  * \param pCert A valid pointer to the certificate to be added.
+ *
+ * \note The function removes the oldest certificate if the list size reaches \c SOPC_PKI_MAX_NB_CERT_REJECTED.
+ *
+ * \warning \p pCert shall contains a single certificate.
  *
  * \return SOPC_STATUS_OK when successful.
  */

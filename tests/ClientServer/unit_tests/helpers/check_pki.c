@@ -767,6 +767,7 @@ START_TEST(functional_test_remove_cert)
     bool bIsRemove = false;
     bool bIsIssuer = false;
     size_t listLength = 0;
+    size_t crlLength = 0;
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status =
@@ -781,6 +782,9 @@ START_TEST(functional_test_remove_cert)
     status = SOPC_KeyManager_Certificate_GetListLength(pCerts, &listLength);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(3, listLength);
+    status = SOPC_KeyManager_CRL_GetListLength(pCRLs, &crlLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, crlLength);
     status = SOPC_PKIProvider_CreateFromList(pCerts, pCRLs, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -800,6 +804,9 @@ START_TEST(functional_test_remove_cert)
     status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(3, listLength);
+    status = SOPC_KeyManager_CRL_GetListLength(pPKI_TrustedCRLs, &crlLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, crlLength);
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove client_2k_cert.der */
@@ -818,6 +825,9 @@ START_TEST(functional_test_remove_cert)
     status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(2, listLength);
+    status = SOPC_KeyManager_CRL_GetListLength(pPKI_TrustedCRLs, &crlLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(2, crlLength);
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove user_cacert.der */
@@ -836,6 +846,9 @@ START_TEST(functional_test_remove_cert)
     status = SOPC_KeyManager_Certificate_GetListLength(pPKI_TrustedCerts, &listLength);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(1, listLength);
+    status = SOPC_KeyManager_CRL_GetListLength(pPKI_TrustedCRLs, &crlLength);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(1, crlLength);
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove cacert.der */

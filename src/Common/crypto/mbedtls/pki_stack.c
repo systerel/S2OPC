@@ -51,10 +51,6 @@
 #define STR_TRUSTLIST_NAME "/updatedTrustList"
 #endif
 
-#ifndef SOPC_PKI_REJECTED_LIST_SIZE
-#define SOPC_PKI_REJECTED_LIST_SIZE 10
-#endif
-
 #define STR_TRUSTED "/trusted"
 #define STR_TRUSTED_CERTS "/trusted/certs"
 #define STR_TRUSTED_CRL "/trusted/crl"
@@ -1026,8 +1022,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider** ppPK
     }
 
     size_t listLength = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &listLength);
+    if (SOPC_STATUS_OK != status || 1 != listLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    listLength = 0;
     SOPC_PKIProvider* pPKI = *ppPKI;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL != pPKI->pRejectedList)
     {
         status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &listLength);
@@ -1035,7 +1036,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider** ppPK
     if (SOPC_STATUS_OK == status)
     {
         /* Remove the oldest certificate (HEAD of the chain) if the rejected list is too large */
-        if (SOPC_PKI_REJECTED_LIST_SIZE == listLength && NULL != pPKI->pRejectedList)
+        if (SOPC_PKI_MAX_NB_CERT_REJECTED == listLength && NULL != pPKI->pRejectedList)
         {
             /* Change the HEAD */
             mbedtls_x509_crt* cur = &pPKI->pRejectedList->crt;
@@ -1890,6 +1891,50 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     return status;
 }
 
+static SOPC_ReturnStatus get_list_length(const SOPC_CertificateList* pTrustedCerts,
+                                         const SOPC_CRLList* pTrustedCrl,
+                                         const SOPC_CertificateList* pIssuerCerts,
+                                         const SOPC_CRLList* pIssuerCrl,
+                                         uint32_t* listLength)
+{
+    *listLength = 0;
+    size_t lenTrustedCerts = 0;
+    size_t lenTrustedCrl = 0;
+    size_t lenIssuerCerts = 0;
+    size_t lenIssuerCrl = 0;
+    size_t lenTot = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != pTrustedCerts)
+    {
+        status = SOPC_KeyManager_Certificate_GetListLength(pTrustedCerts, &lenTrustedCerts);
+    }
+    if (NULL != pTrustedCrl && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_GetListLength(pTrustedCrl, &lenTrustedCrl);
+    }
+    if (NULL != pIssuerCerts && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_GetListLength(pIssuerCerts, &lenIssuerCerts);
+    }
+    if (NULL != pIssuerCrl && SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CRL_GetListLength(pIssuerCrl, &lenIssuerCrl);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        lenTot = lenTrustedCerts + lenTrustedCrl + lenIssuerCerts + lenIssuerCrl;
+        if (UINT32_MAX < lenTot)
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        else
+        {
+            *listLength = (uint32_t) lenTot;
+        }
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                   SOPC_CRLList* pTrustedCrl,
                                                   SOPC_CertificateList* pIssuerCerts,
@@ -1910,11 +1955,29 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     SOPC_CRLList* tmp_pIssuerCrl = NULL;            /* CRLs of issuer intermediate CA and issuer root CA */
     bool bTrustedCaFound = false;
     bool bIssuerCaFound = false;
+    uint32_t listLength = 0;
 
     if (NULL == ppPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    /* Check the number of certificates plus CRLs of the PKI */
+    status = get_list_length(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &listLength);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    if (SOPC_PKI_MAX_NB_CERT_AND_CRL < listLength)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI creation error: too many (%" PRIu32
+                               ") certificates and CRLs. The maximum configured is %" PRIu32
+                               ", please change SOPC_PKI_MAX_NB_CERT_AND_CRL",
+                               listLength, SOPC_PKI_MAX_NB_CERT_AND_CRL);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     /*
        - Check that pTrustedCerts is not empty.
        - Check if there are CAs but no CRLs.
@@ -2226,7 +2289,7 @@ void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
 }
 
 #if SOPC_HAS_FILESYSTEM
-static SOPC_ReturnStatus remove_files(const char* directoryPath)
+static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts)
 {
     SOPC_ASSERT(NULL != directoryPath);
 
@@ -2243,6 +2306,14 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath)
         return SOPC_STATUS_NOK;
     }
     size_t nbFiles = SOPC_Array_Size(pFilePaths);
+    if (bIsRejectedCerts)
+    {
+        if (nbFiles <= SOPC_PKI_MAX_NB_CERT_REJECTED)
+        {
+            /* Do nothing (at the maximum, we should have 2 * SOPC_PKI_MAX_NB_CERT_REJECTED in the file system) */
+            return SOPC_STATUS_OK;
+        }
+    }
     for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
         pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
@@ -2256,9 +2327,10 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath)
     return status;
 }
 #else
-static SOPC_ReturnStatus remove_files(const char* directoryPath)
+static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts)
 {
     SOPC_UNUSED_ARG(directoryPath);
+    SOPC_UNUSED_ARG(bIsRejectedCerts);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 #endif /* SOPC_HAS_FILESYSTEM */
@@ -2272,7 +2344,7 @@ static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath);
+        status = remove_files(directoryPath, false);
     }
     if (SOPC_STATUS_OK == status && NULL != pRoots)
     {
@@ -2293,7 +2365,7 @@ static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath);
+        status = remove_files(directoryPath, false);
     }
     if (SOPC_STATUS_OK == status && NULL != pCrl)
     {
@@ -2528,7 +2600,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvid
         status = may_create_pki_folder(pPKI->directoryStorePath, STR_REJECTED, &path);
         if (SOPC_STATUS_OK == status)
         {
-            status = write_cert_to_der_files(pPKI->pRejectedList, NULL, path, bEraseExistingFiles);
+            status = remove_files(path, !bEraseExistingFiles);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_KeyManager_Certificate_ToDER_Files(pPKI->pRejectedList, path);
+            }
         }
     }
     SOPC_Free(path);
@@ -2558,6 +2634,40 @@ static SOPC_ReturnStatus check_security_level_of_the_update(const SOPC_Certifica
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus check_list_length(SOPC_PKIProvider* pPKI,
+                                           SOPC_CertificateList* pTrustedCerts,
+                                           SOPC_CRLList* pTrustedCrl,
+                                           SOPC_CertificateList* pIssuerCerts,
+                                           SOPC_CRLList* pIssuerCrl,
+                                           const bool bIncludeExistingList)
+{
+    SOPC_ASSERT(NULL != pPKI);
+    uint32_t PKILen = 0;
+    uint32_t updateLen = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (bIncludeExistingList)
+    {
+        status = get_list_length(pPKI->pTrustedCerts, pPKI->pTrustedCrl, pPKI->pIssuerCerts, pPKI->pIssuerCrl, &PKILen);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = get_list_length(pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, &updateLen);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    if (SOPC_PKI_MAX_NB_CERT_AND_CRL < PKILen + updateLen)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "> PKI creation error: too many (%" PRIu32
+                               ") certificates and CRLs. The maximum configured is %" PRIu32
+                               ", please change SOPC_PKI_MAX_NB_CERT_AND_CRL",
+                               PKILen + updateLen, SOPC_PKI_MAX_NB_CERT_AND_CRL);
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
                                                   const char* securityPolicyUri,
                                                   SOPC_CertificateList* pTrustedCerts,
@@ -2577,6 +2687,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
     {
         return status;
     }
+    /* Check the number of certificates plus CRLs */
+    status = check_list_length(pPKI, pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, bIncludeExistingList);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+
     /* Handle that the security level of the update isn't higher than the
        security level of the secure channel. (§7.3.4 part 2 v1.05) */
     status =
