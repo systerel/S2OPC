@@ -1940,6 +1940,25 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLLis
     return status;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, size_t* pLength)
+{
+    if (NULL == pCrl || NULL == pLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    const mbedtls_x509_crl* crl = &pCrl->crl;
+    size_t i = 0;
+    for (; NULL != crl; ++i)
+    {
+        crl = crl->next;
+    }
+
+    *pLength = i;
+
+    return SOPC_STATUS_OK;
+}
+
 void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
 {
     if (NULL == pCRL)

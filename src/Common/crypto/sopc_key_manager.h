@@ -674,6 +674,18 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
 SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
 
 /**
+ * \brief           Return the number of chained CRL in \p pCrl list.
+ *
+ * \param pCrl      A valid pointer to the CRL list.
+ * \param pLength   A valid pointer to the computed length of the list.
+ *
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_CRL_GetListLength(const SOPC_CRLList* pCrl, size_t* pLength);
+
+/**
  * \brief           Frees a Certificate created with ::SOPC_KeyManager_CRL_CreateOrAddFromFile or
  *                  ::SOPC_KeyManager_CRL_CreateOrAddFromDER .
  *
