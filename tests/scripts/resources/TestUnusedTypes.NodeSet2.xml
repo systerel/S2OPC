@@ -74,6 +74,20 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">ns=1;i=15061</Reference>
     </References>
   </UAObjectType>
+  <UAObjectType NodeId="ns=1;i=15070" BrowseName="1:UnusedExceptInPlaceHolder">
+    <DisplayName>Unused Except in PlaceHolder</DisplayName>
+    <References>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="ns=1;i=15071" BrowseName="1:PlaceHolderOf15070">
+    <DisplayName>PlaceHolder for 15070</DisplayName>
+    <!-- Has 1:15070 as type definition, but also has a modelling rule so this is only a placeholder -->
+	<!-- This object is deemed to disappear along with its type definition as unused type -->
+    <References>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+      <Reference ReferenceType="HasTypeDefinition">ns=1;i=15070</Reference>
+    </References>
+  </UAObject>
   <UADataType NodeId="ns=1;i=15032" BrowseName="1:AbstractDataType" IsAbstract="true">
     <DisplayName>Abstract Data Type</DisplayName>
     <References>

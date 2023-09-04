@@ -605,23 +605,48 @@ class NodesetMerger(NSFinder):
             return {}
         return {alias.text: alias.get('Alias') for alias in tree_aliases}
 
-    def __exists_ref(self, search, nids_or_aliases: set):
+    def __exists_ref(self, search: str, nids_or_aliases: set):
         for ref_node in self._iterfind(self.tree, search):
             ref_nid = ref_node.text.strip()
             if ref_nid in nids_or_aliases:
                 return True
         return False
 
+    def __exists_typedef_ref(self, search: str, nids_or_aliases: set, placeholder_nids: set):
+        placeholder_refs = list()
+        # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
+        for node in self._iterfind(self.tree, search):
+            nid = node.get('NodeId')
+            for type_ref in self._iterfind(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasTypeDefinition']"):
+                if type_ref.text.strip() in nids_or_aliases:
+                    # this is a reference
+                    if nid in placeholder_nids:
+                        # but a placeholder instance declaration to be removed if the type is removed
+                        placeholder_refs.append(node)
+                    else:
+                        return True, []
+        # no reference found, potentially placeholder nodes only
+        return False, placeholder_refs
+
     def remove_unused(self, retain_ns0: bool, retain_types: set):
         # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
         aliases = self.__get_aliases()
-        for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject/uanodeset:References/uanodeset:Reference", False),
-                   ('UAVariableType', ".//uanodeset:UAVariable/uanodeset:References/uanodeset:Reference", False),
+        for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject", False),
+                   ('UAVariableType', ".//uanodeset:UAVariable", False),
                    ('UADataType', ".//uanodeset:UAVariable[@DataType='{}']", True),
                    ('UAReferenceType', ".//*/uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
             while True:
                 # loop while the removed types produce unused types
                 removed_nids = set()
+
+                # identify the 'placeholder' nodes, which are not considered as references
+                placeholder_nids = set()
+                if not is_full_request:
+                    # these placeholder nodes are intended to be removed in case the corresponding type is removed
+                    for node in self._iterfind(self.tree, search):
+                        if self._find_in(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasModellingRule']") is not None:
+                            placeholder_nids.add(node.get('NodeId'))
+
                 for ty_node in self._iterfind(self.tree, f"uanodeset:{ty}"):
                     nid = ty_node.get('NodeId')
                     if (retain_ns0 and _is_ns0(nid)) or nid in retain_types:
@@ -646,10 +671,15 @@ class NodesetMerger(NSFinder):
                         if found:
                             continue
                     else:
-                        # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
-                        if self.__exists_ref(search, refs):
+                        found, placeholders_to_remove = self.__exists_typedef_ref(search, refs, placeholder_nids)
+                        if found:
                             # this type is used by data
                             continue
+                        else:
+                            # remove placeholder nodes
+                            for p in placeholders_to_remove:
+                                self.tree.getroot().remove(p)
+                                removed_nids.add(p.get('NodeId'))
                     self.tree.getroot().remove(ty_node)
                     removed_nids.add(nid)
                 if len(removed_nids) == 0:
