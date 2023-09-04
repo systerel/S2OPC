@@ -38,85 +38,81 @@
 typedef enum SOPC_Services_Event
 {
     /* Services to services events */
-    SE_TO_SE_SC_ALL_DISCONNECTED = 0x600,   /* Special event sent by B code to indicate all SC are closed.
-                                               It might concerns only SC established as client or both client/server.
-  
-                                               params = true if for SCs as client only, 0 if both client and server SCs.
-                                             */
-    SE_TO_SE_CLIENT_SC_ALL_SC_DISCONNECTED, /* Special event sent by B code to indicate
-                                                all SC established as client are closed */
-    SE_TO_SE_ACTIVATE_ORPHANED_SESSION,     /* Client side only:
-                                               id = session id
-                                               auxParam = (uint32_t) secure channel config index
-                                            */
-    SE_TO_SE_CREATE_SESSION,                /* Client side only:
-                                               id = session id
-                                               auxParam = (uint32_t) secure channel config index
-                                            */
-    SE_TO_SE_ACTIVATE_SESSION,              /* Client side only:
-                                             * id = session id
-                                             * params = (user token structure)
-                                             */
+    SE_TO_SE_SC_ALL_DISCONNECTED =
+        0x600,                          /**< Special event sent by B code to indicate all SC are closed.<BR>
+                                           It might concerns only SC established as client or both client/server.<BR>
+                                           params = true if for SCs as client only, false if both client and server SCs.
+                                         */
+    SE_TO_SE_ACTIVATE_ORPHANED_SESSION, /**< Client side only:<BR>
+                                           id = session id<BR>
+                                           auxParam = (uint32_t) secure channel config index
+                                        */
+    SE_TO_SE_CREATE_SESSION,            /**< Client side only:<BR>
+                                           id = session id<BR>
+                                           auxParam = (uint32_t) secure channel config index
+                                        */
+    SE_TO_SE_ACTIVATE_SESSION,          /**< Client side only:<BR>
+                                         * id = session id<BR>
+                                         * params = (user token structure)
+                                         */
 
-    SE_TO_SE_SERVER_DATA_CHANGED, /* Server side only:
-                                    params = (OpcUa_WriteValue*) old data value
+    SE_TO_SE_SERVER_DATA_CHANGED, /**< Server side only:<BR>
+                                    params = (OpcUa_WriteValue*) old data value<BR>
                                     auxParam = (OpcUa_WriteValue*) new data value
                                   */
 
-    SE_TO_SE_SERVER_NODE_CHANGED, /* Server side only:
-                                     params = (bool) true if node added, false if node deleted
+    SE_TO_SE_SERVER_NODE_CHANGED, /**< Server side only:<BR>
+                                     params = (bool) true if node added, false if node deleted<BR>
                                      auxParam = (SOPC_NodeId*) NodeId of the node added/deleted
                                    */
 
-    SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /* Server side only:
-                                                 id = session id
+    SE_TO_SE_SERVER_INACTIVATED_SESSION_PRIO, /**< Server side only:<BR>
+                                                 id = session id<BR>
                                                  auxParam = (int32_t) session state
                                                */
-    SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO, /* Server side only:
-                                                 id = session id
-                                                 params = (SOPC_Internal_AsyncSendMsgData*)
+    SE_TO_SE_SERVER_SEND_ASYNC_PUB_RESP_PRIO, /**< Server side only:<BR>
+                                                 id = session id<BR>
+                                                 params = (SOPC_Internal_AsyncSendMsgData*)<BR>
                                                  auxParams = (constants_statuscodes_bs__t_StatusCode_i) service result
                                                  code
                                                */
 
     /* Timer to services events */
-    TIMER_SE_EVAL_SESSION_TIMEOUT,  /* Server side only: id = session id */
-    TIMER_SE_PUBLISH_CYCLE_TIMEOUT, /* Server side only: id = subscription id */
+    TIMER_SE_EVAL_SESSION_TIMEOUT,  /**< Server side only: id = session id */
+    TIMER_SE_PUBLISH_CYCLE_TIMEOUT, /**< Server side only: id = subscription id */
 
     /* App to Services events : server side */
-    APP_TO_SE_OPEN_ENDPOINT,         /* id = endpoint description config index
+    APP_TO_SE_OPEN_ENDPOINT,         /**< id = endpoint description config index
                                       */
-    APP_TO_SE_CLOSE_ENDPOINT,        /* id = endpoint description config index
+    APP_TO_SE_CLOSE_ENDPOINT,        /**< id = endpoint description config index
                                       */
-    APP_TO_SE_LOCAL_SERVICE_REQUEST, /* id = secure channel config index,
+    APP_TO_SE_LOCAL_SERVICE_REQUEST, /**< id = endpoint description config index<BR>
                                         params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
-                                         ignored)
+                                         ignored)<BR>
                                         auxParam = user application session context
                                       */
     /* App to Services events : client side */
-    APP_TO_SE_OPEN_REVERSE_ENDPOINT,  /* id = reverse endpoint description config index */
-    APP_TO_SE_CLOSE_REVERSE_ENDPOINT, /* id = reverse endpoint description config index
-                                       */
-    APP_TO_SE_ACTIVATE_SESSION,       /* Connect SC + Create Session + Activate session */
-                                      /* id = secure channel config index,
-                                         params = reverse endpoint connection index or 0 if not a reverse connection
+    APP_TO_SE_OPEN_REVERSE_ENDPOINT,  /**< id = reverse endpoint description config index */
+    APP_TO_SE_CLOSE_REVERSE_ENDPOINT, /**< id = reverse endpoint description config index */
+    APP_TO_SE_ACTIVATE_SESSION,       /**< Connect SC + Create Session + Activate session <BR>
+                                         id = secure channel config index<BR>
+                                         params = reverse endpoint connection index or 0 if not a reverse connection<BR>
                                          auxParam = (SOPC_Internal_SessionAppContext*)
                                        */
-    APP_TO_SE_SEND_SESSION_REQUEST,   /* id = session id,
+    APP_TO_SE_SEND_SESSION_REQUEST,   /**< id = session id<BR>
                                          params = (OpcUa_<MessageStruct>*) OPC UA message payload structure (header
-                                         ignored)
+                                         ignored)<BR>
                                          auxParam = user application request context
                                       */
-    APP_TO_SE_SEND_DISCOVERY_REQUEST, /* id = secure channel config index,
-                                         params = reverse endpoint connection index or 0 if not a reverse connection
+    APP_TO_SE_SEND_DISCOVERY_REQUEST, /**< id = secure channel config index<BR>
+                                         params = reverse endpoint connection index or 0 if not a reverse connection<BR>
                                          auxParam = (SOPC_Internal_DiscoveryContext*)
                                        */
-    APP_TO_SE_CLOSE_SESSION,          // id = session id
-    APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /* Request to close all established SC connections.
+    APP_TO_SE_CLOSE_SESSION,          /**< id = session id */
+    APP_TO_SE_CLOSE_ALL_CONNECTIONS,  /**< Request to close all established SC connections<BR>
                                          It might be used to close only SC established as client or both client/server.
-                                         Automatically called by ::SOPC_Toolkit_Clear for both client and server.
- 
-                                         params = true if for SCs as client only, 0 if both client and server SCs.
+                                         Automatically called by ::SOPC_Toolkit_Clear for both client and server.<BR>
+                                         params = true if for SCs as client only, false if both client and server SCs.
                                        */
 } SOPC_Services_Event;
 

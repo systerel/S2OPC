@@ -37,28 +37,29 @@
  */
 typedef enum
 {
-    EP_OPEN = 0x200,     /* id = endpoint description configuration index */
-    EP_CLOSE,            /* id = endpoint description configuration index */
-    REVERSE_EP_OPEN,     /* Client: open a reverse endpoint
+    EP_OPEN = 0x200,     /**< id = endpoint description configuration index */
+    EP_CLOSE,            /**< id = endpoint description configuration index */
+    REVERSE_EP_OPEN,     /**< Client: open a reverse endpoint<BR>
                             id = reverse endpoint configuration index */
-    REVERSE_EP_CLOSE,    /* Client: close a reverse endpoint
+    REVERSE_EP_CLOSE,    /**< Client: close a reverse endpoint<BR>
                             id = reverse endpoint configuration index */
-    SC_CONNECT,          /* id = secure channel configuration index */
-    SC_REVERSE_CONNECT,  /* Client: Activate the connection on next available server reverse connection
-                            id = reverse endpoint configuration index
+    SC_CONNECT,          /**< id = secure channel configuration index */
+    SC_REVERSE_CONNECT,  /**< Client: Activate the connection on next available server reverse connection<BR>
+                            id = reverse endpoint configuration index<BR>
                             params = (uint32_t) secure channel configuration index */
-    SC_DISCONNECT,       /* id = secure channel connection index */
-    SC_SERVICE_SND_MSG,  /* id = secure channel connection index,
+    SC_DISCONNECT,       /**< id = secure channel connection index */
+    SC_SERVICE_SND_MSG,  /**< id = secure channel connection index<BR>
                            params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
-                           followed by encoded OpcUa message,
+                           followed by encoded OpcUa message<BR>
                            auxParam = (uint32_t) request Id context if response (server) / request Handle context if
                            request (client) */
-    SC_SERVICE_SND_ERR,  /* id = secure channel connection index,
-                            params = (SOPC_StatusCode) encoding failure status code or security check failed (user auth)
+    SC_SERVICE_SND_ERR,  /**< id = secure channel connection index<BR>
+                            params = (SOPC_StatusCode) encoding failure status code or security check failed (user
+                            auth)<BR>
                             auxParam = (uint32_t) request Id context of response (Debug info only)
                           */
-    SC_DISCONNECTED_ACK, /* Notify secure channel disconnected state was received
-                            id = secure channel connection index
+    SC_DISCONNECTED_ACK, /**< Notify secure channel disconnected state was received<BR>
+                            id = secure channel connection index<BR>
                             params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)
                           */
 } SOPC_SecureChannels_InputEvent;
@@ -68,34 +69,34 @@ typedef enum
  */
 typedef enum
 {
-    EP_CONNECTED = 0x300,  /* id = endpoint description config index,
-                              params = (uint32_t) secure channel config index,
+    EP_CONNECTED = 0x300,  /**< id = endpoint description config index<BR>
+                              params = (uint32_t) secure channel config index<BR>
                               auxParams = (uint32_t) secure channel connection index */
-    EP_CLOSED,             /* id = endpoint description config index,
+    EP_CLOSED,             /**< id = endpoint description config index<BR>
                               auxParams = SOPC_ReturnStatus */
-    EP_REVERSE_CLOSED,     /* id = reverse endpoint config index,
+    EP_REVERSE_CLOSED,     /**< id = reverse endpoint config index<BR>
                               auxParams = SOPC_ReturnStatus */
-    SC_CONNECTED,          /* Notify secure channel in connected state
-                              id = secure channel connection index,
+    SC_CONNECTED,          /**< Notify secure channel in connected state<BR>
+                              id = secure channel connection index<BR>
                               auxParams = (uint32_t) secure channel configuration index */
-    SC_REVERSE_CONNECTED,  /* id = secure channel connection index,
-                              params = (uint32_t) secure channel configuration index,
+    SC_REVERSE_CONNECTED,  /**< id = secure channel connection index<BR>
+                              params = (uint32_t) secure channel configuration index<BR>
                               auxParams = (uint32_t) reverse endpoint configuration index
                             */
-    SC_CONNECTION_TIMEOUT, /* id = secure channel config index */
-    SC_DISCONNECTED,       /* Notify secure channel previously in connected state is now disconnected
+    SC_CONNECTION_TIMEOUT, /**< id = secure channel config index */
+    SC_DISCONNECTED,       /**< Notify secure channel previously in connected state is now disconnected
                               It shall be acknowledged by raising back a SC_DISCONNECTED_ACK event.
-                              id = secure channel connection index
-                              params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)
+                              id = secure channel connection index<BR>
+                              params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)<BR>
                               auxParam = SOPC_StatusCode
                             */
-    SC_SERVICE_RCV_MSG,    /* id = secure channel connection index,
-                              params = (SOPC_Buffer*) OPC UA message payload buffer,
+    SC_SERVICE_RCV_MSG,    /**< id = secure channel connection index<BR>
+                              params = (SOPC_Buffer*) OPC UA message payload buffer<BR>
                               auxParam = (uint32_t) request Id context (server side only, 0 if client) */
-    SC_SND_FAILURE,        /* id = secure channel connection index,
-                              params = (uint32_t) requestHandle for client / requestId for server (unused)
+    SC_SND_FAILURE,        /**< id = secure channel connection index<BR>
+                              params = (uint32_t) requestHandle for client / requestId for server (unused)<BR>
                               auxParam = SOPC_StatusCode */
-    SC_REQUEST_TIMEOUT,    /* id = secure channel connection index,
+    SC_REQUEST_TIMEOUT,    /**< id = secure channel connection index<BR>
                               auxParam = (uint32_t) request handle */
 } SOPC_SecureChannels_OutputEvent;
 

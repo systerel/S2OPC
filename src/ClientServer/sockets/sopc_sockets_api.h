@@ -32,43 +32,43 @@
 
 #include "sopc_event_handler.h"
 
-/* Sockets input events from Secure Channel layer */
+/** Sockets input events from Secure Channel layer */
 typedef enum
 {
     /* External events */
-    SOCKET_CREATE_LISTENER = 0x0, /* id = endpoint description config index,
-                                   params = (const char*) URI,
+    SOCKET_CREATE_LISTENER = 0x0, /**< id = endpoint description config index <br>
+                                   params = (const char*) URI <br>
                                    auxParam = (bool) listenAllInterfaces
                                  */
-    SOCKET_ACCEPTED_CONNECTION,   /* id = socket index,
+    SOCKET_ACCEPTED_CONNECTION,   /**< id = socket index <br>
                                      auxParam = secure channel connection index */
 
-    SOCKET_CREATE_CONNECTION, /* id = secure channel connection index,
+    SOCKET_CREATE_CONNECTION, /**< id = secure channel connection index <br>
                                  params = (const char*) URI
                                */
-    SOCKET_CLOSE,             /* id = socket index, auxParam = secure channel connection index  */
-    SOCKET_CLOSE_LISTENER,    /* id = socket index, auxParam = endpoint description config index */
-    SOCKET_WRITE              /* id = socket index,
+    SOCKET_CLOSE,             /**< id = socket index, auxParam = secure channel connection index  */
+    SOCKET_CLOSE_LISTENER,    /**< id = socket index, auxParam = endpoint description config index */
+    SOCKET_WRITE              /**< id = socket index <br>
                                  params = (SOPC_Buffer*) message buffer */
 } SOPC_Sockets_InputEvent;
 
-/* Sockets output events to Secure Channel layer */
+/** Sockets output events to Secure Channel layer */
 typedef enum
 {
-    SOCKET_LISTENER_OPENED = 0x100, /* id = endpoint description config index,
+    SOCKET_LISTENER_OPENED = 0x100, /**< id = endpoint description config index <br>
                                        auxParam = (uint32_t) socket index
                                     */
-    SOCKET_LISTENER_CONNECTION,     /* id = endpoint description config index,
+    SOCKET_LISTENER_CONNECTION,     /**< id = endpoint description config index <br>
                                        auxParam = (uint32_t) new connection socket index
                                    */
-    SOCKET_LISTENER_FAILURE,        /* id = endpoint description config index */
+    SOCKET_LISTENER_FAILURE,        /**< id = endpoint description config index */
 
-    SOCKET_CONNECTION, /* id = secure channel connection index,
+    SOCKET_CONNECTION, /**< id = secure channel connection index <br>
                           auxParam = (uint32_t) socket index */
 
-    SOCKET_FAILURE,   /* id = secure channel connection index,
+    SOCKET_FAILURE,   /**< id = secure channel connection index <br>
                          auxParam = (uint32_t) socket index */
-    SOCKET_RCV_BYTES, /* id = secure channel connection index,
+    SOCKET_RCV_BYTES, /**< id = secure channel connection index <br>
                          params = (SOPC_Buffer*) received buffer containing complete TCP UA chunk
                        */
 } SOPC_Sockets_OutputEvent;

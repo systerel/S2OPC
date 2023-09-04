@@ -26,86 +26,85 @@
 typedef enum
 {
     /* SC listener manager -> SC connection manager */
-    INT_EP_SC_CREATE = 0x400,  /* id = endpoint description configuration index,
+    INT_EP_SC_CREATE = 0x400,  /**< id = endpoint description configuration index<BR>
                                   auxParam = socket index */
-    INT_EP_SC_CLOSE,           /* id = secure channel connection index,
+    INT_EP_SC_CLOSE,           /**< id = secure channel connection index<BR>
                                   (auxParam = (reverse) endpoint configuration index) */
-    INT_EP_SC_REVERSE_CONNECT, /* Server: start reverse connection to a client reverse endpoint
-                                  id = endpoint description configuration index,
+    INT_EP_SC_REVERSE_CONNECT, /**< Server: start reverse connection to a client reverse endpoint<BR>
+                                  id = endpoint description configuration index<BR>
                                   auxParam = (uint16_t) client to connect configuration index in endpoint config */
-    INT_SC_RCV_RHE_TRANSITION, /* Client: RHE associated to a waiting SC connection => transition validated for SC
+    INT_SC_RCV_RHE_TRANSITION, /**< Client: RHE associated to a waiting SC connection => transition validated for SC<BR>
                                   id = secure channel connection index
                                 */
 
     /* SC connection manager -> SC listener manager */
-    INT_EP_SC_CREATED,             /* id = endpoint description configuration index,
-                                      auxParam = (uint32_t) secure channel connection index */
-    INT_EP_SC_RHE_DECODED,         /* id = secure channel connection index,
-                                      param = (char*) serverURI,
-                                      auxParam = (char*) serverEndpointURL */
-    INT_EP_SC_DISCONNECTED,        /* id = (reverse) endpoint description configuration index,
-                                      auxParam = (uint32_t) secure channel connection index */
-    INT_REVERSE_EP_REQ_CONNECTION, /* Client: a connection is requested through the opened reverse endpoint
-                                      id = reverse endpoint configuration index,
+    INT_EP_SC_CREATED,             /**< id = endpoint description configuration index<BR>
+                                          auxParam = (uint32_t) secure channel connection index */
+    INT_EP_SC_RHE_DECODED,         /**< id = secure channel connection index<BR>
+                                          param = (char*) serverURI<BR>
+                                          auxParam = (char*) serverEndpointURL */
+    INT_EP_SC_DISCONNECTED,        /**< id = (reverse) endpoint description configuration index<BR>
+                                          auxParam = (uint32_t) secure channel connection index */
+    INT_REVERSE_EP_REQ_CONNECTION, /**< Client: a connection is requested through the opened reverse endpoint<BR>
+                                      id = reverse endpoint configuration index<BR>
                                       auxParam = (uint32_t) secure channel connection index
                                     */
 
     /* OPC UA chunks message manager -> SC connection manager */
-    INT_SC_RCV_HEL, /* >------------------------- */
-    INT_SC_RCV_ACK, // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_ERR, /* -------------------------< */
+    INT_SC_RCV_HEL,             /**< id = secure channel connection index<BR>*/
+    INT_SC_RCV_ACK,             /**< id = secure channel connection index<BR>
+                                   params = (SOPC_Buffer*) buffer positioned to message payload */
+    INT_SC_RCV_ERR,             /**< id = secure channel connection index<BR>
+                                   params = (SOPC_Buffer*) buffer positioned to message payload */
+    INT_SC_RCV_OPN,             /**< id = secure channel connection index<BR>
+                                   params = (SOPC_Buffer*) buffer positioned to message payload<BR>
+                                   auxParam = (uint32_t) requestId context if request (server side
+                                   / requestHandle if response (client side) */
+    INT_SC_RCV_CLO,             /**< Same as INT_SC_RCV_OPN */
+    INT_SC_RCV_RHE,             /**< id = secure channel connection index<BR>
+                                   params = (SOPC_Buffer*) buffer positioned to message payload<BR>
+                                   INT_SC_RCV_RHE_TRANSITION is the final step in listener => connection manager */
+    INT_SC_RCV_MSG_CHUNKS,      /**< Same as INT_SC_RCV_OPN */
+    INT_SC_RCV_MSG_CHUNK_ABORT, /**< Same as INT_SC_RCV_OPN */
 
-    INT_SC_RCV_OPN, /* >------------------------- */
-                    // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_RCV_CLO, // auxParam = (uint32_t) requestId context if request (server side)
-                    //                       / requestHandle if response (client side)
-    INT_SC_RCV_RHE, // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload,
-                    // INT_SC_RCV_RHE_TRANSITION is the final step in listener => connection manager
-    INT_SC_RCV_MSG_CHUNKS,
-    INT_SC_RCV_MSG_CHUNK_ABORT, /* -------------------------< */
-
-    INT_SC_RCV_FAILURE,        /* id = secure channel connection index,
-                                  auxParam = error status */
-    INT_SC_SND_FATAL_FAILURE,  /* >------------------------- */
-                               // id = secure channel connection index,
-                               // params = requestId (server) / requestHandle (client)
-                               // auxParam = (SOPC_StatusCode) error status in case of client */
-    INT_SC_SENT_ABORT_FAILURE, /* -------------------------< */
+    INT_SC_RCV_FAILURE,        /**< id = secure channel connection index<BR>
+                                      auxParam = error status */
+    INT_SC_SND_FATAL_FAILURE,  /**< id = secure channel connection index<BR>
+                                  params = requestId (server) / requestHandle (client)<BR>
+                                  auxParam = (SOPC_StatusCode) error status in case of client */
+    INT_SC_SENT_ABORT_FAILURE, /**< Same as INT_SC_SND_FATAL_FAILURE */
     /* SC connection manager -> OPC UA chunks message manager */
-    INT_SC_SND_HEL, /* >------------------------- */
-    INT_SC_SND_ACK, // id = secure channel connection index,
-                    // params = (SOPC_Buffer*) buffer positioned to message payload
-                    /* -------------------------< */
-    INT_SC_SND_ERR,
-    INT_SC_SND_RHE,
-    INT_SC_SND_OPN,        /* >------------------------- */
-                           // id = secure channel connection index,
-                           // params = (SOPC_Buffer*) buffer positioned to message payload,
-    INT_SC_SND_CLO,        // auxParam = (uint32_t) request Id context if response / request Handle if request when MSG
-    INT_SC_SND_MSG_CHUNKS, /* -------------------------< */
+    INT_SC_SND_HEL,        /**< id = secure channel connection index<BR>
+                              params = (SOPC_Buffer*) buffer positioned to message payload */
+    INT_SC_SND_ACK,        /**< Same as INT_SC_SND_HEL */
+    INT_SC_SND_ERR,        /**< Same as INT_SC_SND_HEL */
+    INT_SC_SND_RHE,        /**< Same as INT_SC_SND_HEL */
+    INT_SC_SND_OPN,        /**< id = secure channel connection index<BR>
+                              params = (SOPC_Buffer*) buffer positioned to message payload<BR>
+                              auxParam = (uint32_t) request Id context if response / request Handle if request when MSG */
+    INT_SC_SND_CLO,        /**< id = secure channel connection index<BR>
+                             params = (SOPC_Buffer*) buffer positioned to message payload */
+    INT_SC_SND_MSG_CHUNKS, /**< Same as INT_SC_SND_OPN */
 
     /* SC connection manager -> SC connection manager */
-    INT_SC_CLOSE // id = secure channel connection index,
-                 // params = (char*) reason,
-                 // auxParam = (SOPC_StatusCode) errorStatus
+    INT_SC_CLOSE /**< id = secure channel connection index<BR>
+                    params = (char*) reason<BR>
+                    auxParam = (SOPC_StatusCode) errorStatus */
 } SOPC_SecureChannels_InternalEvent;
 
 typedef enum
 {
     /* SC connection manager */
-    TIMER_SC_CONNECTION_TIMEOUT = 0x500, /* id = secure channel connection index */
-    TIMER_SC_SERVER_REVERSE_CONN_RETRY,  /* id = endpoint configuration index
+    TIMER_SC_CONNECTION_TIMEOUT = 0x500, /**< id = secure channel connection index */
+    TIMER_SC_SERVER_REVERSE_CONN_RETRY,  /**< id = endpoint configuration index<BR>
                                           * params = reverse connection index in endpoint
                                           */
-    TIMER_SC_CLIENT_OPN_RENEW,           /* id = secure channel connection index */
-    TIMER_SC_REQUEST_TIMEOUT,            /* id = secure channel connection index
-                                            params = (uint32_t) requestHandle // Debug purpose only
+    TIMER_SC_CLIENT_OPN_RENEW,           /**< id = secure channel connection index */
+    TIMER_SC_REQUEST_TIMEOUT,            /**< id = secure channel connection index<BR>
+                                            params = (uint32_t) requestHandle (Debug purpose only)<BR>
                                             auxParam = (uint32_t) requestId */
     /* SC listener manager */
-    TIMER_SC_RHE_RECEPTION_TIMEOUT, /* Timeout for reception of RHE message after socket connection from server
+    TIMER_SC_RHE_RECEPTION_TIMEOUT, /**< Timeout for reception of RHE message after socket connection from server<BR>
                                        id = secure channel connection index */
 } SOPC_SecureChannels_TimerEvent;
 
