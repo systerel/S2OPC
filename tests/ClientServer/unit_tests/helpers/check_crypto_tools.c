@@ -69,6 +69,91 @@ START_TEST(test_crypto_gen_rsa_export_import)
     ck_assert(SOPC_STATUS_OK == status);
     status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pGenKey, false, &pSerGenKey);
     ck_assert(SOPC_STATUS_OK == status);
+    /* Export the new key */
+    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGenKey, false, "./crypto_tools_gen_key.pem", NULL, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Import the new key */
+    SOPC_SerializedAsymmetricKey* pSerImpKey = NULL;
+    SOPC_AsymmetricKey* pImpKey = NULL;
+    status = SOPC_KeyManager_AsymmetricKey_CreateFromFile("./crypto_tools_gen_key.pem", &pImpKey, NULL, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pImpKey, false, &pSerImpKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Compare the generated key with the imported one */
+    uint32_t genKeyLen = SOPC_SecretBuffer_GetLength(pSerGenKey);
+    uint32_t impKeyLen = SOPC_SecretBuffer_GetLength(pSerImpKey);
+    ck_assert(genKeyLen == impKeyLen);
+    SOPC_ExposedBuffer* pRawGenKey = SOPC_SecretBuffer_ExposeModify(pSerGenKey);
+    SOPC_ExposedBuffer* pRawImpKey = SOPC_SecretBuffer_ExposeModify(pSerImpKey);
+    ck_assert_ptr_nonnull(pRawGenKey);
+    ck_assert_ptr_nonnull(pRawImpKey);
+    int match = memcmp(pRawGenKey, pRawImpKey, genKeyLen);
+    ck_assert(0 == match);
+    /* Clear */
+    SOPC_KeyManager_AsymmetricKey_Free(pGenKey);
+    SOPC_KeyManager_AsymmetricKey_Free(pImpKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGenKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerImpKey);
+}
+END_TEST
+
+START_TEST(test_crypto_gen_rsa_export_import_public)
+{
+    /* Generate a new RSA key */
+    SOPC_AsymmetricKey* pGenKey = NULL;
+    SOPC_SerializedAsymmetricKey* pSerGenPubKey = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_GenRSA(4096, &pGenKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pGenKey, true, &pSerGenPubKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Export the new public key */
+    status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGenKey, true, "./crypto_tools_gen_public_key.pem", NULL, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Import the new public key */
+    SOPC_SerializedAsymmetricKey* pSerImpPubKey = NULL;
+    SOPC_SerializedAsymmetricKey* pSerImpPubKeyWithHeader = NULL;
+    SOPC_ExposedBuffer* pRawImpPubKeyWithHeader = NULL;
+    uint32_t impKeyPubWithHeaderLen = 0;
+    SOPC_AsymmetricKey* pImpPubKey = NULL;
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd("./crypto_tools_gen_public_key.pem",
+                                                                            &pSerImpPubKeyWithHeader, NULL, 0);
+    ck_assert(SOPC_STATUS_OK == status);
+    impKeyPubWithHeaderLen = SOPC_SecretBuffer_GetLength(pSerImpPubKeyWithHeader);
+    pRawImpPubKeyWithHeader = SOPC_SecretBuffer_ExposeModify(pSerImpPubKeyWithHeader);
+    ck_assert_ptr_nonnull(pRawImpPubKeyWithHeader);
+    status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(pRawImpPubKeyWithHeader, impKeyPubWithHeaderLen, true,
+                                                            &pImpPubKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pImpPubKey, true, &pSerImpPubKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    /* Compare the generated public key with the imported one */
+    uint32_t genKeyPubLen = SOPC_SecretBuffer_GetLength(pSerGenPubKey);
+    uint32_t impKeyPubLen = SOPC_SecretBuffer_GetLength(pSerImpPubKey);
+    ck_assert(genKeyPubLen == impKeyPubLen);
+    SOPC_ExposedBuffer* pRawGenPubKey = SOPC_SecretBuffer_ExposeModify(pSerGenPubKey);
+    SOPC_ExposedBuffer* pRawImpPubKey = SOPC_SecretBuffer_ExposeModify(pSerImpPubKey);
+    ck_assert_ptr_nonnull(pRawGenPubKey);
+    ck_assert_ptr_nonnull(pRawImpPubKey);
+    int match = memcmp(pRawGenPubKey, pRawImpPubKey, genKeyPubLen);
+    ck_assert(0 == match);
+    /* Clear */
+    SOPC_KeyManager_AsymmetricKey_Free(pGenKey);
+    SOPC_KeyManager_AsymmetricKey_Free(pImpPubKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGenPubKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerImpPubKeyWithHeader);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerImpPubKey);
+}
+END_TEST
+
+START_TEST(test_crypto_gen_rsa_export_import_encrypted)
+{
+    /* Generate a new RSA key*/
+    SOPC_AsymmetricKey* pGenKey = NULL;
+    SOPC_SerializedAsymmetricKey* pSerGenKey = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_GenRSA(4096, &pGenKey);
+    ck_assert(SOPC_STATUS_OK == status);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pGenKey, false, &pSerGenKey);
+    ck_assert(SOPC_STATUS_OK == status);
     /* Export and encrypt the new key */
     size_t pwdLen = strlen(PASSWORD);
     ck_assert(pwdLen < UINT32_MAX);
@@ -110,6 +195,8 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_check_app_uri, test_crypto_get_app_uri);
     suite_add_tcase(s, tc_gen_rsa);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
+    tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
+    tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_encrypted);
 
     return s;
 }

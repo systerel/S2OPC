@@ -61,13 +61,13 @@ typedef SOPC_Buffer SOPC_SerializedCertificate;
  *   \p buffer is \p lenBuf long, and describes the key in the DER of PEM format.
  *
  *   Public keys are usually extracted from Certificate, see
- *   SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
+ *   ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate or ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate .
  *
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
  * \param lenBuf    The length in bytes of the DER/PEM description of the key.
  * \param is_public Whether the buffer holds a public or a private key.
  * \param ppKey     A handle to the created key.
- *                  This object must be freed with a call to SOPC_KeyManager_AsymmetricKey_Free().
+ *                  This object must be freed with a call to ::SOPC_KeyManager_AsymmetricKey_Free .
  *
  * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -85,12 +85,12 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
  *   \p szPath is the path to the file containing the key. It should be zero-terminated.
  *   The key may be described in the DER of PEM format.
  *
- *   Public keys are usually extracted from Certificate, see SOPC_KeyManager_AsymmetricKey_CreateFromCertificate() or
- *   SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
+ *   Public keys are usually extracted from Certificate, see ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate or
+ *   ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate .
  *
  * \param szPath    The path to the DER/PEM file.
  * \param ppKey     A handle to the created key. This object must be freed with a call to
- *                  SOPC_KeyManager_AsymmetricKey_Free().
+ *                  ::SOPC_KeyManager_AsymmetricKey_Free .
  * \param password  An optional password. The password must be a zero-terminated string with at most \p lenPassword
  *                  non null chars, and at least \p lenPassword + 1 allocated chars.
  * \param lenPassword  The length of the password.
@@ -111,7 +111,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
  *
  * \param RSAKeySize The RSA key length to generate.
  * \param ppKey      A handle to the generated key. This object must be freed with a call to
- *                   SOPC_KeyManager_AsymmetricKey_Free().
+ *                   ::SOPC_KeyManager_AsymmetricKey_Free
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -121,12 +121,12 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
  * \brief           Returns the public key of the signed public key.
  *
  * \warning         The returned SOPC_AsymmetricKey must not be used after the Certificate is freed
- *                  by SOPC_KeyManager_Certificate_Free().
+ *                  by ::SOPC_KeyManager_Certificate_Free .
  *
  * \param pCert     A valid pointer to the signed public key.
  * \param pKey      A handle to the created key structure, the SOPC_AsymmetricKey will then be rewritten to contain the
  *                  public key. This is not a deep copy, and the key is not valid anymore when the certificate is not
- *                  valid. This object must be freed with a call to SOPC_KeyManager_AsymmetricKey_Free() which will
+ *                  valid. This object must be freed with a call to ::SOPC_KeyManager_AsymmetricKey_Free which will
  *                  only deallocate the structure.
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
@@ -139,10 +139,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC
 
 /**
  * \brief           Frees a previously created asymmetric key created with
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromBuffer() or
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromFile().
- *
- * \note            Do not use this function on a key obtained from SOPC_KeyManager_Certificate_GetPublicKey().
+ *                  ::SOPC_KeyManager_AsymmetricKey_CreateFromBuffer or
+ *                  ::SOPC_KeyManager_AsymmetricKey_CreateFromFile .
  *
  * \param pKey      A valid pointer to the key to free.
  */
@@ -153,7 +151,7 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
  *
  *   The encoding process is not predictable, and a buffer of sufficient length
  *   must be provided. A rule of thumb is to provide a buffer which is at least
- *   8 times longer than the key (8*SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes()).
+ *   8 times longer than the key (8 * ::SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes ).
  *
  *   When SOPC_STATUS_NOK is returned, the function may be called again with a larger buffer.
  *
@@ -290,7 +288,7 @@ void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey
  * \param lenDER    The length in bytes of the DER description of the certificate.
  * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
  *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
- *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
+ *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free .
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole certificate list is freed,
@@ -313,7 +311,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
  * \param szPath    The path to the DER/PEM file.
  * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
  *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
- *                  In either cases, this object must be freed with a call to SOPC_KeyManager_Certificate_Free().
+ *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole certificate list is freed,
@@ -325,12 +323,11 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* szPath, SOPC_CertificateList** ppCert);
 
 /**
- * \brief           Frees a Certificate created with SOPC_KeyManager_Certificate_CreateOrAddFromFile() or
- *                  SOPC_KeyManager_Certificate_CreateOrAddFromDER()
+ * \brief           Frees a Certificate created with ::SOPC_KeyManager_Certificate_CreateOrAddFromFile or
+ *                  ::SOPC_KeyManager_Certificate_CreateOrAddFromDER
  *
  * \warning         You must not free a Certificate for which a key is still being used.
- *                  See SOPC_KeyManager_Certificate_GetPublicKey() and
- *                  SOPC_KeyManager_AsymmetricKey_CreateFromCertificate().
+ *                  ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate .
  *
  * \param pCert     The Certificate to free.
  */
@@ -373,7 +370,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
  *   The computation of the thumbprint and its size depends on the current security policy.
  *   The thumbprint is usually a SHA digest of the DER representation of the certificate.
  *
- *   The size of the thumbprint is provided by SOPC_CryptoProvider_CertificateGetLength_Thumbprint().
+ *   The size of the thumbprint is provided by ::SOPC_CryptoProvider_CertificateGetLength_Thumbprint .
  *
  * \param pProvider An initialized cryptographic context.
  * \param pCert     A valid pointer to the signed public key to thumbprint.
@@ -596,7 +593,7 @@ void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* ce
  * \param lenDER    The length in bytes of the DER description of the certificate.
  * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
  *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
- *                  In either cases, this object must be freed with a call to SOPC_KeyManager_CRL_Free().
+ *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
  *
  * \note            Content of the CRL is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
@@ -619,7 +616,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  * \param szPath    The path to the DER/PEM file.
  * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
  *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
- *                  In either cases, this object must be freed with a call to SOPC_KeyManager_CRL_Free().
+ *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
@@ -654,8 +651,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
 SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
 
 /**
- * \brief           Frees a Certificate created with SOPC_KeyManager_CRL_CreateOrAddFromFile() or
- *                  SOPC_KeyManager_CRL_CreateOrAddFromDER()
+ * \brief           Frees a Certificate created with ::SOPC_KeyManager_CRL_CreateOrAddFromFile or
+ *                  ::SOPC_KeyManager_CRL_CreateOrAddFromDER .
  *
  * \param pCRL      The CRL to free.
  */

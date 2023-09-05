@@ -55,7 +55,8 @@
 #define SOPC_RSA_PEM_ENC_HEADER "-----BEGIN RSA PRIVATE KEY-----\nProc-Type: 4,ENCRYPTED\nDEK-Info: AES-256-CBC,"
 #define SOPC_RSA_PEM_HEADER "-----BEGIN RSA PRIVATE KEY-----\n"
 #define SOPC_RSA_PEM_FOOTER "-----END RSA PRIVATE KEY-----\n"
-#define SOPC_RSA_PEM_ENC_HEADER_SIZE 114 // strlen(SOPC_RSA_PEM_ENC_HEADER) + 16 hex IV bytes + \n\n + \0
+#define SOPC_RSA_PEM_HEADER_SIZE 33      // strlen(SOPC_RSA_PEM_HEADER) + \n + \0
+#define SOPC_RSA_PEM_ENC_HEADER_SIZE 112 // strlen(SOPC_RSA_PEM_ENC_HEADER) + 16 hex IV bytes + \n\n + \0
 
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
@@ -163,7 +164,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
 
     mbedtls_entropy_context ctxEnt = {0};
     mbedtls_ctr_drbg_context ctxDrbg = {0};
-    SOPC_AsymmetricKey* pKey = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
+    SOPC_AsymmetricKey* pKey = SOPC_Calloc(1, sizeof(SOPC_AsymmetricKey));
     if (NULL == pKey)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
@@ -175,18 +176,18 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
     mbedtls_ctr_drbg_init(&ctxDrbg);
     mbedtls_pk_init(&pKey->pk);
     int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, &mbedtls_entropy_func, &ctxEnt, NULL, 0);
-    if (!errLib)
+    if (0 == errLib)
     {
         /* Generate the key */
         const mbedtls_pk_info_t* pPkInfo = mbedtls_pk_info_from_type(MBEDTLS_PK_RSA);
         errLib = mbedtls_pk_setup(&pKey->pk, pPkInfo);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         mbedtls_rsa_context* pCtxRSA = mbedtls_pk_rsa(pKey->pk);
-        errLib = mbedtls_rsa_gen_key(pCtxRSA, mbedtls_ctr_drbg_random, &ctxDrbg, RSAKeySize, SOPC_RSA_EXPONENT);
+        errLib = mbedtls_rsa_gen_key(pCtxRSA, &mbedtls_ctr_drbg_random, &ctxDrbg, RSAKeySize, SOPC_RSA_EXPONENT);
     }
-    if (errLib)
+    if (0 != errLib)
     {
         SOPC_KeyManager_AsymmetricKey_Free(pKey);
         pKey = NULL;
@@ -283,7 +284,11 @@ static int sopc_write_key_pem_file(unsigned char* PEMToWrite, size_t PEMLen, con
         fclose(fp);
         if (PEMLen != nb_written)
         {
-            remove(filePath);
+            int err = remove(filePath);
+            if (0 != err)
+            {
+                fprintf(stderr, "> KeyManager: removing written PEM file '%s' failed.\n", filePath);
+            }
             return -2;
         }
         else
@@ -297,83 +302,25 @@ static int sopc_write_key_pem_file(unsigned char* PEMToWrite, size_t PEMLen, con
     }
 }
 
-static int sopc_export_private_key(SOPC_AsymmetricKey* pKey, const bool bIsPublic, const char* filePath)
-{
-    SOPC_ASSERT(NULL != pKey);
-    SOPC_ASSERT(NULL != filePath);
-
-    int errLib = -1;
-    size_t DERLenWritten = 0;
-    size_t PEMSize = 0;
-    size_t DERSize = mbedtls_pk_get_bitlen(&pKey->pk);
-    unsigned char* pDER = SOPC_Malloc(DERSize * sizeof(unsigned char));
-    unsigned char* pPEM = NULL;
-    if (NULL == pDER)
-    {
-        return errLib;
-    }
-    SOPC_ReturnStatus status =
-        SOPC_KeyManager_AsymmetricKey_ToDER(pKey, bIsPublic, pDER, (uint32_t) DERSize, (uint32_t*) &DERLenWritten);
-    errLib = SOPC_STATUS_OK == status ? 0 : -2;
-    /* Requested the PEM length in bytes */
-    if (!errLib)
-    {
-        errLib =
-            mbedtls_pem_write_buffer(SOPC_RSA_PEM_HEADER, SOPC_RSA_PEM_FOOTER, pDER, DERLenWritten, NULL, 0, &PEMSize);
-        errLib = MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL == errLib ? 0 : -3;
-    }
-    if (!errLib)
-    {
-        pPEM = SOPC_Malloc(PEMSize * sizeof(unsigned char));
-        errLib = NULL != pPEM ? 0 : -4;
-    }
-    if (!errLib)
-    {
-        if (bIsPublic)
-        {
-            /* PEMSize is enough as private key is larger than public part */
-            errLib = mbedtls_pk_write_pubkey_pem(&pKey->pk, pPEM, PEMSize);
-        }
-        else
-        {
-            errLib = mbedtls_pk_write_key_pem(&pKey->pk, pPEM, PEMSize);
-        }
-    }
-    if (!errLib)
-    {
-        size_t PEMLen = strlen((const char*) pPEM);
-        errLib = sopc_write_key_pem_file(pPEM, PEMLen, filePath);
-    }
-    /* Clear */
-    if (NULL != pPEM)
-    {
-        memset(pPEM, 0, PEMSize);
-        SOPC_Free(pPEM);
-    }
-    memset(pDER, 0, DERSize);
-    SOPC_Free(pDER);
-    return errLib;
-}
-
-static int sopc_set_pem_header(unsigned char* pIv, char* pPEMHeader)
+static int sopc_set_pem_header(const unsigned char* pIv, char* pPEMHeader)
 {
     SOPC_ASSERT(NULL != pIv);
     SOPC_ASSERT(NULL != pPEMHeader);
 
     /* Convert the IV to an hex string */
     char pIvHex[SOPC_CBC_BLOCK_SIZE_BYTES * 2 + 1]; // +1 for the \0 (necessary for snprintf)
-    int res = 0;
-    for (size_t i = 0; i < SOPC_CBC_BLOCK_SIZE_BYTES && 0 <= res; ++i)
+    int res = 2;
+    for (size_t i = 0; i < SOPC_CBC_BLOCK_SIZE_BYTES && 2 == res; ++i)
     {
         res = snprintf(pIvHex + 2 * i, 3, "%02X", pIv[i]);
     }
-    if (0 > res)
+    if (2 != res)
     {
         return -1;
     }
     pIvHex[SOPC_CBC_BLOCK_SIZE_BYTES * 2] = '\0';
     res = snprintf(pPEMHeader, SOPC_RSA_PEM_ENC_HEADER_SIZE, "%s%s\n\n", SOPC_RSA_PEM_ENC_HEADER, pIvHex);
-    if (0 > res)
+    if (SOPC_RSA_PEM_ENC_HEADER_SIZE - 1 != res)
     {
         return -2;
     }
@@ -381,7 +328,7 @@ static int sopc_set_pem_header(unsigned char* pIv, char* pPEMHeader)
 }
 
 static int sopc_md5_update_pwd_iv(mbedtls_md5_context* ctx,
-                                  unsigned char* pIv,
+                                  const unsigned char* pIv,
                                   const unsigned char* pwd,
                                   size_t pwdLen,
                                   unsigned char* pSum)
@@ -397,11 +344,11 @@ static int sopc_md5_update_pwd_iv(mbedtls_md5_context* ctx,
         pSum[0..15]  = MD5(pwd || S)
     */
     int errLib = mbedtls_md5_update_ret(ctx, pwd, pwdLen);
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_md5_update_ret(ctx, pIv, 8);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_md5_finish_ret(ctx, pSum);
     }
@@ -417,7 +364,7 @@ static int sopc_md5_update_pwd_iv(mbedtls_md5_context* ctx,
  *
  */
 static int sopc_create_aes256_key_with_pbkdf1_md5(unsigned char* pKey,
-                                                  unsigned char* pIv,
+                                                  const unsigned char* pIv,
                                                   const unsigned char* pwd,
                                                   size_t pwdLen)
 {
@@ -430,24 +377,24 @@ static int sopc_create_aes256_key_with_pbkdf1_md5(unsigned char* pKey,
     mbedtls_md5_context ctx = {0};
     unsigned char sum[16];
     int errLib = mbedtls_md5_starts_ret(&ctx);
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = sopc_md5_update_pwd_iv(&ctx, pIv, pwd, pwdLen, sum);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         memcpy(pKey, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
         errLib = mbedtls_md5_starts_ret(&ctx);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_md5_update_ret(&ctx, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = sopc_md5_update_pwd_iv(&ctx, pIv, pwd, pwdLen, sum);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         memcpy(pKey + SOPC_CBC_BLOCK_SIZE_BYTES, sum, SOPC_CBC_BLOCK_SIZE_BYTES);
     }
@@ -457,7 +404,7 @@ static int sopc_create_aes256_key_with_pbkdf1_md5(unsigned char* pKey,
     return errLib;
 }
 
-static int sopc_rsa_pem_aes256_cbc_encrypt(unsigned char* pIv,
+static int sopc_rsa_pem_aes256_cbc_encrypt(const unsigned char* pIv,
                                            unsigned char* pRsaKeyDER,
                                            size_t rsaKeyDERLen,
                                            const char* pwd,
@@ -476,11 +423,11 @@ static int sopc_rsa_pem_aes256_cbc_encrypt(unsigned char* pIv,
     unsigned char aesKey[SOPC_AES_256_KEY_SIZE_BYTES];
     mbedtls_aes_init(&ctx);
     int errLib = sopc_create_aes256_key_with_pbkdf1_md5(aesKey, pIv, (const unsigned char*) pwd, pwdLen);
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_aes_setkey_enc(&ctx, aesKey, SOPC_AES_256_KEY_SIZE_BITS);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_aes_crypt_cbc(&ctx, MBEDTLS_AES_ENCRYPT, rsaKeyDERLen, pIvCopy, pRsaKeyDER, pRsaKeyDER);
     }
@@ -501,7 +448,7 @@ static int sopc_gen_aes_iv(unsigned char pIv[SOPC_CBC_BLOCK_SIZE_BYTES])
     mbedtls_entropy_init(&ctxEnt);
     mbedtls_ctr_drbg_init(&ctxDrbg);
     int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, &mbedtls_entropy_func, &ctxEnt, NULL, 0);
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = mbedtls_ctr_drbg_random(&ctxDrbg, pIv, SOPC_CBC_BLOCK_SIZE_BYTES);
     }
@@ -511,15 +458,15 @@ static int sopc_gen_aes_iv(unsigned char pIv[SOPC_CBC_BLOCK_SIZE_BYTES])
     return errLib;
 }
 
-static size_t sopc_set_pkcs5_padding(unsigned char* bufDERtoEnc, size_t bufDERSize, size_t DERLen)
+static uint8_t sopc_set_pkcs5_padding(unsigned char* bufDERtoEnc, size_t bufDERSize, uint32_t DERLen)
 {
     SOPC_ASSERT(NULL != bufDERtoEnc);
-    size_t padLen = DERLen % SOPC_CBC_BLOCK_SIZE_BYTES;
-    if (padLen)
+    uint8_t padLen = DERLen % SOPC_CBC_BLOCK_SIZE_BYTES;
+    if (0 != padLen)
     {
-        padLen = SOPC_CBC_BLOCK_SIZE_BYTES - padLen;
+        padLen = (uint8_t)(SOPC_CBC_BLOCK_SIZE_BYTES - padLen);
         SOPC_ASSERT(DERLen + padLen <= bufDERSize && "Buffer is too small for padding");
-        for (size_t i = 0; i < padLen; i++)
+        for (uint8_t i = 0; i < padLen; i++)
         {
             bufDERtoEnc[DERLen + i] = (unsigned char) padLen;
         }
@@ -527,80 +474,134 @@ static size_t sopc_set_pkcs5_padding(unsigned char* bufDERtoEnc, size_t bufDERSi
     return padLen;
 }
 
-static int sopc_encrypt_and_export_private_key(SOPC_AsymmetricKey* pKey,
-                                               const char* filePath,
+static int sopc_set_data_encrypted_private_key(unsigned char* pDERToEncrypt,
+                                               size_t DERSize,
+                                               uint32_t* pDERLenWritten,
+                                               char* pPEMHeader,
                                                const char* pwd,
                                                size_t pwdLen)
 {
-    SOPC_ASSERT(NULL != pKey);
-    SOPC_ASSERT(NULL != filePath);
+    SOPC_ASSERT(NULL != pDERToEncrypt);
+    SOPC_ASSERT(NULL != pDERLenWritten);
+    SOPC_ASSERT(NULL != pPEMHeader);
     SOPC_ASSERT(NULL != pwd);
     SOPC_ASSERT(0 != pwdLen);
     SOPC_ASSERT('\0' == pwd[pwdLen]);
 
-    int errLib = -1;
+    int errLib = 0;
     unsigned char pIv[SOPC_CBC_BLOCK_SIZE_BYTES];
-    unsigned char* pPEMToWrite = NULL;
+    uint8_t padLen = 0;
+    uint32_t DERLenWritten = *pDERLenWritten;
+
+    /* PKCS5 Padding */
+    padLen = sopc_set_pkcs5_padding(pDERToEncrypt, DERSize, DERLenWritten);
+    /* Generate the IV */
+    errLib = sopc_gen_aes_iv(pIv);
+    /* Encrypt the key */
+    if (0 == errLib)
+    {
+        errLib = sopc_rsa_pem_aes256_cbc_encrypt(pIv, pDERToEncrypt, DERSize, pwd, pwdLen);
+    }
+    /* Set the IV in the header */
+    if (0 == errLib)
+    {
+        errLib = sopc_set_pem_header(pIv, pPEMHeader);
+    }
+
+    *pDERLenWritten = DERLenWritten + padLen;
+    return errLib;
+}
+
+static int sopc_export_rsa_key(SOPC_AsymmetricKey* pKey,
+                               const char* filePath,
+                               const bool bIsPublic,
+                               const bool bIsEncrypt,
+                               const char* pwd,
+                               size_t pwdLen)
+{
+    SOPC_ASSERT(NULL != pKey);
+    SOPC_ASSERT(NULL != filePath);
+
+    int errLib = -1;
     char pPEMHeader[SOPC_RSA_PEM_ENC_HEADER_SIZE];
-    size_t PEMLenWritten = 0;
-    size_t padLen = 0;
-    /* Extract the DER part */
-    size_t DERLenWritten = 0;
-    size_t lenBits = mbedtls_pk_get_bitlen(&pKey->pk);
-    size_t DERSize = lenBits + SOPC_CBC_BLOCK_SIZE_BYTES; // + cbc block size for padding
-    unsigned char* pDER = SOPC_Malloc(DERSize * sizeof(unsigned char));
+    size_t PEMBufferSize = 0;
+    size_t PEMSize = 0;
+    uint32_t DERLenWritten = 0;
+    size_t DERSize = mbedtls_pk_get_bitlen(&pKey->pk);
+    if (bIsEncrypt)
+    {
+        SOPC_ASSERT(!bIsPublic);
+        DERSize = DERSize + SOPC_CBC_BLOCK_SIZE_BYTES; // + cbc block size for padding
+    }
+    if (UINT32_MAX < DERSize)
+    {
+        fprintf(stderr, "> KeyManager: the size in bits of the key '%s' is too large.\n", filePath);
+        return -1;
+    }
+    unsigned char* pDER = SOPC_Calloc(DERSize, sizeof(unsigned char));
+    unsigned char* pPEM = NULL;
     if (NULL == pDER)
     {
         return errLib;
     }
     SOPC_ReturnStatus status =
-        SOPC_KeyManager_AsymmetricKey_ToDER(pKey, false, pDER, (uint32_t) DERSize, (uint32_t*) &DERLenWritten);
+        SOPC_KeyManager_AsymmetricKey_ToDER(pKey, bIsPublic, pDER, (uint32_t) DERSize, &DERLenWritten);
     errLib = SOPC_STATUS_OK == status ? 0 : -2;
-    /* PKCS5 Padding */
-    if (!errLib)
+    if (0 == errLib)
     {
-        padLen = sopc_set_pkcs5_padding(pDER, DERSize, DERLenWritten);
-        /* Generate the IV */
-        errLib = sopc_gen_aes_iv(pIv);
-    }
-    /* Encrypt the key */
-    if (!errLib)
-    {
-        errLib = sopc_rsa_pem_aes256_cbc_encrypt(pIv, pDER, DERLenWritten + padLen, pwd, pwdLen);
-    }
-    /* Set the IV in the header */
-    if (!errLib)
-    {
-        errLib = sopc_set_pem_header(pIv, pPEMHeader);
+        if (bIsEncrypt)
+        {
+            errLib = sopc_set_data_encrypted_private_key(pDER, DERSize, &DERLenWritten, pPEMHeader, pwd, pwdLen);
+        }
+        else
+        {
+            errLib = snprintf(pPEMHeader, SOPC_RSA_PEM_HEADER_SIZE, "%s", SOPC_RSA_PEM_HEADER);
+            errLib = SOPC_RSA_PEM_HEADER_SIZE - 1 == errLib ? 0 : -3;
+        }
     }
     /* Requested the PEM length in bytes */
-    if (!errLib)
+    if (0 == errLib)
     {
-        errLib = mbedtls_pem_write_buffer(pPEMHeader, SOPC_RSA_PEM_FOOTER, pDER, DERLenWritten + padLen, NULL, 0,
-                                          &PEMLenWritten);
-        errLib = MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL == errLib ? 0 : -3;
+        errLib = mbedtls_pem_write_buffer(pPEMHeader, SOPC_RSA_PEM_FOOTER, pDER, (size_t) DERLenWritten, NULL, 0,
+                                          &PEMBufferSize);
+        errLib = MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL == errLib ? 0 : -4;
     }
-    if (!errLib)
+    if (0 == errLib)
     {
-        pPEMToWrite = SOPC_Malloc(PEMLenWritten * sizeof(unsigned char));
-        errLib = NULL != pPEMToWrite ? 0 : -4;
+        pPEM = SOPC_Calloc(PEMBufferSize, sizeof(unsigned char));
+        errLib = NULL != pPEM ? 0 : -4;
     }
     /* Write the key in a PEM buffer */
-    if (!errLib)
+    if (0 == errLib)
     {
-        errLib = mbedtls_pem_write_buffer(pPEMHeader, SOPC_RSA_PEM_FOOTER, pDER, DERLenWritten + padLen, pPEMToWrite,
-                                          PEMLenWritten, &PEMLenWritten);
+        if (bIsPublic)
+        {
+            /* PEMBufferSize is enough as private key is larger than public part */
+            errLib = mbedtls_pk_write_pubkey_pem(&pKey->pk, pPEM, PEMBufferSize);
+            PEMSize = strlen((const char*) pPEM);
+        }
+        else if (bIsEncrypt)
+        {
+            errLib = mbedtls_pem_write_buffer(pPEMHeader, SOPC_RSA_PEM_FOOTER, pDER, (size_t) DERLenWritten, pPEM,
+                                              PEMBufferSize, &PEMBufferSize);
+            PEMSize = PEMBufferSize - 1; // -1 to exclude the \0
+        }
+        else
+        {
+            errLib = mbedtls_pk_write_key_pem(&pKey->pk, pPEM, PEMBufferSize);
+            PEMSize = PEMBufferSize;
+        }
     }
     /* Export the key in a PEM file */
-    if (!errLib)
+    if (0 == errLib)
     {
-        errLib = sopc_write_key_pem_file(pPEMToWrite, PEMLenWritten - 1, filePath); // -1 to exclude the \0
+        errLib = sopc_write_key_pem_file(pPEM, PEMSize, filePath);
     }
     /* Clear */
-    if (NULL != pPEMToWrite)
+    if (NULL != pPEM)
     {
-        memset(pPEMToWrite, 0, PEMLenWritten);
-        SOPC_Free(pPEMToWrite);
+        memset(pPEM, 0, PEMBufferSize);
+        SOPC_Free(pPEM);
     }
     memset(pDER, 0, DERSize);
     SOPC_Free(pDER);
@@ -628,13 +629,13 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
     int errLib = -1;
     if (NULL == pwd)
     {
-        errLib = sopc_export_private_key(pKey, bIsPublic, filePath);
+        errLib = sopc_export_rsa_key(pKey, filePath, bIsPublic, false, pwd, pwdLen);
     }
     else
     {
-        errLib = sopc_encrypt_and_export_private_key(pKey, filePath, pwd, pwdLen);
+        errLib = sopc_export_rsa_key(pKey, filePath, false, true, pwd, pwdLen);
     }
-    return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    return 0 != errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 #else
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pKey,

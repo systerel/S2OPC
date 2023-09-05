@@ -916,8 +916,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveKeySetsServer(const SOPC_CryptoProvi
  *   If the payload is larger than the maximum message size for a single encryption pass,
  *   it is split in several smaller messages of at most that maximum length.
  *
- *   The key is usually taken from a signed public key (Certificate,
- *   SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the receiver.
+ *   The key is usually taken from a signed public key (Certificate) and is the public key of the receiver.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pInput    A valid pointer to the payload to cipher. The payload may be padded by the function, if necessary.
@@ -1039,8 +1038,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
  *   the hash of \p pInput.
  *   Usually, the unpadded plain text message is signed.
  *
- *   The key is usually taken from a public key (Certificate,
- *   SOPC_KeyManager_Certificate_GetPublicKey()) and is the public key of the sender,
+ *   The key is usually taken from a public key (Certificate) and is the public key of the sender,
  *   which authenticates the sender as the signer.
  *
  * \param pProvider An initialized cryptographic context.
