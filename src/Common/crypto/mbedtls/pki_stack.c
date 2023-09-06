@@ -480,6 +480,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
         pProfile->chainProfile = pChainProfile;
         pProfile->bBackwardInteroperability = true;
         pProfile->bApplyLeafProfile = true;
+        pProfile->bAppendRejectCert = true;
     }
     else
     {
@@ -506,14 +507,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pPr
     case SOPC_PKI_TYPE_CLIENT_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
+        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_SERVER_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
+        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_USER:
         pProfile->bApplyLeafProfile = false;
         pProfile->bBackwardInteroperability = false;
+        pProfile->bAppendRejectCert = true;
         break;
     default:
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1182,13 +1186,16 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
 
     if (bErrorFound)
     {
-        /* To avoid the pragma : add a way to retrieve the rejected list statically from the PKI pointer as a key.
-           Delete the value (the rejected list) when calling SOPC_PKIProvider_Free() .
-           It is seems that this solution is not safe without a global init and deinit API.
-        */
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        status = SOPC_PKIProvider_AddCertToRejectedList((SOPC_PKIProvider**) &pPKI, pToValidateCpy);
-        SOPC_GCC_DIAGNOSTIC_RESTORE
+        if (pProfile->bAppendRejectCert)
+        {
+            /* To avoid the pragma : add a way to retrieve the rejected list statically from the PKI pointer as a key.
+            Delete the value (the rejected list) when calling SOPC_PKIProvider_Free() .
+            It is seems that this solution is not safe without a global init and deinit API.
+            */
+            SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+            status = SOPC_PKIProvider_AddCertToRejectedList((SOPC_PKIProvider**) &pPKI, pToValidateCpy);
+            SOPC_GCC_DIAGNOSTIC_RESTORE
+        }
         *error = firstError;
         status = SOPC_STATUS_NOK;
     }
