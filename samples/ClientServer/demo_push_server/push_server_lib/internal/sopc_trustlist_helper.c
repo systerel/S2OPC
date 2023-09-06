@@ -1094,6 +1094,8 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
     status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
     /* Do not accept CA root as update (cannot provide CRLs) */
     pProfile->bBackwardInteroperability = false;
+    /* Do no store the certificate if the validation failed */
+    pProfile->bAppendRejectCert = false;
     /* Create the certificate */
     if (SOPC_STATUS_OK == status)
     {
