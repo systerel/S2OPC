@@ -27,7 +27,10 @@ Build outputs are located in `build/bin` folder.
 Note that for Zephyr samples, the CLI is included within Zephyr SHELL under the SHELL subcommand `sopc`. Type `sopc help` to get the command list.
 
 ## FreeRTOS
-Not supported yet.
+Based on STMCube Ide. It only supports STM32H723ZG currently and acts as a proof of concept.
+- To build the sample natively, follow instructions on [WIKI](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/FreeRTOS-compilation)
+- To build the sample with the docker, simply run the script `platform_dep/freertos/ci/build-freertos-samples.sh`
+In all cases, refer to the wiki for limitations and other target ports.
 
 # To add new supported targets
 - Create a folder `platform_dep/<os>/`

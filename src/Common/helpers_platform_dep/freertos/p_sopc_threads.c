@@ -675,7 +675,7 @@ void SOPC_Sleep(unsigned int milliseconds)
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char* pcTaskName)
 {
     char* name = (pcTaskName ? (char*) pcTaskName : "NULL");
-    shell_putString("\n\n!!!\nStack overflow in thread");
+    shell_putString("\n\n!!!\nStack overflow in thread ");
     shell_putString(name);
     shell_putString("\n");
     osDelay(500);

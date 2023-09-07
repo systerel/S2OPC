@@ -17,28 +17,36 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Options: -it : Enter the docker but do not nuild (interactif)
+# set -o errexit  # Cannot be used here since scirpt wont work
+set -o nounset
+set -o pipefail
+
+function _help() {
+    echo "$1 setup the environment required to build the FreeRTOS sample in the dedicated docker. This scirpt mainly calls build-freertos-samples-docker.sh"
+    echo "Usage: $1 [--help] [-it]"
+    echo "    -it : Start the docker in interactive mode rather than building the sample"
+}
 
 OPT_EXEC=/sopc/samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh
-while [ "$#" -gt 0 ] ; do
+while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
-[ "$PARAM" == "-it" ] && OPT_EXEC= && continue
-echo "Unexpected parameter : $PARAM" && exit 127
+[[ "${PARAM-}" =~ --h(elp)? ]] && _help $0 && exit 0
+[[ "${PARAM-}" =~ --?it ]] && OPT_EXEC= && continue
+echo "Unexpected parameter : ${PARAM-}" && exit 127
 done
 
 cd `dirname $0`/..
 SAMPLE_PTF_DIR=`pwd`
-echo $SAMPLE_PTF_DIR
 cd ../../../..
 SOPC_DIR=`pwd`
 
-echo $SOPC_DIR
-[[ -z "$SOPC_DIR" ]] && echo 'SOPC_DIR must be set!' && exit 1
-! [[ -d  "$SOPC_DIR/src/Common" ]] && echo 'SOPC_DIR is invalid!' && exit 1
+echo ${SOPC_DIR-}
+[[ -z "${SOPC_DIR-}" ]] && echo 'SOPC_DIR must be set!' && exit 1
+! [[ -d  "${SOPC_DIR-}/src/Common" ]] && echo 'SOPC_DIR is invalid!' && exit 1
 
 . ${SOPC_DIR}/.docker-images.sh
-echo "Using image FREERTOS_IMAGE=$FREERTOS_IMAGE"
+echo "Using image FREERTOS_IMAGE=${FREERTOS_IMAGE-}"
 
 rm -rf ${SOPC_DIR}/build_freertos/* 2> /dev/null
 mkdir -p ${SOPC_DIR}/build_freertos && chmod 777 ${SOPC_DIR}/build_freertos || exit 2

@@ -17,14 +17,24 @@
 # specific language governing permissions and limitations
 # under the License.
 
-# Options: --lazy : do not reinstall sources
+# set -o errexit  # Cannot be used here since scirpt wont work
+set -o nounset
+set -o pipefail
+
+function _help() {
+    echo "$1 build the FreeRTOS sample. This script must be called from within the docker."
+    echo "This script reproduces the options used by STMCubeIde for a specific build on STM23H723. It may not be adapted to any other target."
+    echo "Usage: $1 [--help] [--lazy]"
+    echo "    --lazy : do not reinstall S2OPC sources (avoids full rebuild)"
+}
 
 OPT_LAZY=false
-while [ "$#" -gt 0 ] ; do
+while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
-[ "$PARAM" == "--lazy" ] && OPT_LAZY=true && OPT_INSTALL="--lazy" && continue
-echo "Unexpected parameter : $PARAM" && exit 127
+[[ "${PARAM-}" =~ --h(elp)? ]] && _help $0 && exit 0
+[[ "${PARAM-}" =~ --lazy ]] && OPT_LAZY=true && OPT_INSTALL="--lazy" && continue
+echo "Unexpected parameter : ${PARAM-}" && exit 127
 done
 
 export GCC=arm-none-eabi-gcc 
@@ -33,16 +43,16 @@ cd `dirname $0`/../../../../..
 export SOPC_ROOT=`pwd`
 echo "SOPC_ROOT=$SOPC_ROOT"
 export WS=/tmp/ws_freertos
-export OUT_DIR=${SOPC_ROOT}/build_freertos
-export OUT_ELF=${OUT_DIR}/freertos-sopc.elf
-export BUILD_DIR=${WS}/build
-export FREERTOS_CORE_DIR=${WS}/Core
-mkdir -p ${FREERTOS_CORE_DIR}/Src ${BUILD_DIR} ${OUT_DIR}
-cd ${FREERTOS_CORE_DIR}
+export OUT_DIR=${SOPC_ROOT-}/build_freertos
+export OUT_ELF=${OUT_DIR-}/freertos-sopc.elf
+export BUILD_DIR=${WS-}/build
+export FREERTOS_CORE_DIR=${WS-}/Core
+mkdir -p ${FREERTOS_CORE_DIR-}/Src ${BUILD_DIR-} ${OUT_DIR-}
+cd ${FREERTOS_CORE_DIR-}
 
-$OPT_LAZY &&  echo "Lazy build => not reinstalling sources"
-$OPT_LAZY || cp -rf /stmcube_ws/* ${WS}
-${SOPC_ROOT}/samples/embedded/platform_dep/freertos/install.sh $OPT_INSTALL ||  exit $?
+${OPT_LAZY-} &&  echo "Lazy build => not reinstalling sources"
+${OPT_LAZY-} || cp -rf /stmcube_ws/* ${WS-}
+${SOPC_ROOT-}/samples/embedded/platform_dep/freertos/install.sh ${OPT_INSTALL-} ||  exit $?
 
 echo "Installation OK, starting compile step"
 
@@ -64,78 +74,77 @@ C_INCS+=' -I../Middlewares/Third_Party/LwIP/src/include/compat/posix -I../Middle
 C_INCS+=' -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/net -I../Middlewares/Third_Party/LwIP/src/include/compat/posix/sys'
 C_INCS+=' -I../Middlewares/Third_Party/LwIP/src/include/compat/stdc -I../Middlewares/Third_Party/LwIP/system/arch -I../Middlewares/Third_Party/mbedTLS/include'
 C_INCS+=' -I../Core/ThreadSafe '
-C_INCS+=" -I${FREERTOS_CORE_DIR}/Src/sopc/sample_inc"
-C_DEFS+=" -include ${FREERTOS_CORE_DIR}/Src/sopc/sample_inc/NUCLEO-H723ZG.h "
-
+C_INCS+=" -I${FREERTOS_CORE_DIR-}/Src/sopc/sample_inc"
+C_DEFS+=" -include ${FREERTOS_CORE_DIR-}/Src/sopc/sample_inc/NUCLEO-H723ZG.h "
 
 function build_c_file() {
     FILE=$1
-    FILENAME=`basename ${f}`
-    O_FILE=${BUILD_DIR}/${FILENAME}.o
-    [ "${O_FILE}" -nt "${FILE}" ] && echo "Not rebuilding $O_FILE (up to date)" && return 0
-    echo "# Build file $FILE"
-    DEPENDANCIES= # '-MMD -MP -MF"'${BUILD_DIR}/${FILENAME}.d'" -MT"'${BUILD_DIR}/${FILENAME}.o'"'
-    echo ${GCC} "${FILE}" ${C_OPT_DBG}  ${C_OPT_CPU} ${C_OPT_CSTD} ${C_OPT_SPECS} ${C_DEFS} -c ${C_INCS} -O1 ${C_OPT_F} ${C_OPT_ERR} ${DEPENDANCIES} -o ${O_FILE}
-    ${GCC} "${FILE}" ${C_OPT_DBG}  ${C_OPT_CPU} ${C_OPT_CSTD} ${C_OPT_SPECS} ${C_DEFS} -c ${C_INCS} -O1 ${C_OPT_F} ${C_OPT_ERR} ${DEPENDANCIES} -o ${O_FILE} 2>> ${OUT_DIR}/build.err
+    FILENAME=`basename ${f-}`
+    O_FILE=${BUILD_DIR-}/${FILENAME-}.o
+    [[ "${O_FILE-}" -nt "${FILE-}" ]] && echo "Not rebuilding ${O_FILE-} (up to date)" && return 0
+    echo "# Build file ${FILE-}"
+    DEPENDANCIES= # '-MMD -MP -MF"'${BUILD_DIR-}/${FILENAME-}.d'" -MT"'${BUILD_DIR-}/${FILENAME-}.o'"'
+    echo ${GCC-} "${FILE-}" ${C_OPT_DBG-}  ${C_OPT_CPU-} ${C_OPT_CSTD-} ${C_OPT_SPECS-} ${C_DEFS-} -c ${C_INCS-} -O1 ${C_OPT_F-} ${C_OPT_ERR-} ${DEPENDANCIES-} -o ${O_FILE-}
+    ${GCC-} "${FILE-}" ${C_OPT_DBG-}  ${C_OPT_CPU-} ${C_OPT_CSTD-} ${C_OPT_SPECS-} ${C_DEFS-} -c ${C_INCS-} -O1 ${C_OPT_F-} ${C_OPT_ERR-} ${DEPENDANCIES-} -o ${O_FILE-} 2>> ${OUT_DIR-}/build.err
 }
 
 function build_asm_file() {
     FILE=$1
-    FILENAME=`basename ${f}`
-    O_FILE=${BUILD_DIR}/${FILENAME}.o
-    [ "${O_FILE}" -nt "${FILE}" ] && echo "Not rebuilding $O_FILE (up to date)" && return 0
-    echo "# Build file $FILE"
-    DEPENDANCIES= # '-MMD -MP -MF"'${BUILD_DIR}/${FILENAME}.d'" -MT"'${BUILD_DIR}/${FILENAME}.o'"'
-    echo ${GCC} ${C_OPT_CPU} ${C_OPT_DBG} -c -x assembler-with-cpp ${DEPENDANCIES} ${C_OPT_SPECS} -o ${O_FILE} "${FILE}"
-    ${GCC} ${C_OPT_CPU} ${C_OPT_DBG} -c -x assembler-with-cpp ${DEPENDANCIES} ${C_OPT_SPECS} -o ${O_FILE} "${FILE}" 2>> ${OUT_DIR}/build.err
+    FILENAME=`basename ${f-}`
+    O_FILE=${BUILD_DIR-}/${FILENAME-}.o
+    [[ "${O_FILE-}" -nt "${FILE-}" ]] && echo "Not rebuilding ${O_FILE-} (up to date)" && return 0
+    echo "# Build file ${FILE-}"
+    DEPENDANCIES= # '-MMD -MP -MF"'${BUILD_DIR-}/${FILENAME-}.d'" -MT"'${BUILD_DIR-}/${FILENAME-}.o'"'
+    echo ${GCC-} ${C_OPT_CPU-} ${C_OPT_DBG-} -c -x assembler-with-cpp ${DEPENDANCIES-} ${C_OPT_SPECS-} -o ${O_FILE-} "${FILE-}"
+    ${GCC-} ${C_OPT_CPU-} ${C_OPT_DBG-} -c -x assembler-with-cpp ${DEPENDANCIES-} ${C_OPT_SPECS-} -o ${O_FILE-} "${FILE-}" 2>> ${OUT_DIR-}/build.err
 }
 
 function build_link() {
     L_OPT_CPU='-mcpu=cortex-m7 --specs=nosys.specs  --specs=nano.specs  -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb' 
-    L_LINK_SCRIPT=-T"${WS}/STM32H723ZGTX_FLASH.ld"
+    L_LINK_SCRIPT=-T"${WS-}/STM32H723ZGTX_FLASH.ld"
     L_LINK_MAP='-Wl,-Map="freertos-sopc.map"'
     
     # Create list of .o files
-    O_LIST=${OUT_DIR}/objects.list
-    find ${WS}/build/ -name '*.o' |sed 's/^\(.*\)$/"\1"/g' | sort > ${O_LIST}
-    NB_O_FOUND=$(cat ${O_LIST} |wc -l)
-    echo "Found ${NB_O_FOUND} object files..."
-    [ "${NB_O_FOUND}" != "${NB_O_FILES}" ] && echo "Mismatching number of 'obj' files: ${NB_O_FOUND} (but ${NB_O_FILES} were built)" && exit 4
+    O_LIST=${OUT_DIR-}/objects.list
+    find ${WS-}/build/ -name '*.o' | sed 's/^\(.*\)$/"\1"/g' | sort > ${O_LIST-}
+    NB_O_FOUND=$(cat ${O_LIST-} | wc -l)
+    echo "Found ${NB_O_FOUND-} object files..."
+    [[ "${NB_O_FOUND-}" != "${NB_O_FILES-}" ]] && echo "Mismatching number of 'obj' files: ${NB_O_FOUND-} (but ${NB_O_FILES-} were built)" && exit 4
     
     # Link
     # Original line from StmCubeIde:
     #   arm-none-eabi-gcc -o "H723-SOPC2.elf" @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\jeremie\STM32CubeIDE\workspace_1.8.0\H723-SOPC2\STM32H723ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723-SOPC2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
     # Adapted with no changes, except names
-    # ${GCC} -o ${OUT_ELF} @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\jeremie\STM32CubeIDE\workspace_1.8.0\H723-SOPC2\STM32H723ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723-SOPC2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-    echo ${GCC} -o ${OUT_ELF} @"${O_LIST}" ${L_OPT_CPU} ${L_LINK_SCRIPT} ${L_LINK_MAP} -Wl,--gc-sections -static -Wl,--start-group -lc -lm -Wl,--end-group
-    ${GCC} -o ${OUT_ELF} @"${O_LIST}" ${L_OPT_CPU} ${L_LINK_SCRIPT} ${L_LINK_MAP} -Wl,--gc-sections -static -Wl,--start-group -lc -lm -Wl,--end-group 2>> ${OUT_DIR}/build.err
+    # ${GCC-} -o ${OUT_ELF-} @"objects.list"   -mcpu=cortex-m7 -T"C:\Users\jeremie\STM32CubeIDE\workspace_1.8.0\H723-SOPC2\STM32H723ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H723-SOPC2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+    echo ${GCC-} -o ${OUT_ELF-} @"${O_LIST-}" ${L_OPT_CPU-} ${L_LINK_SCRIPT-} ${L_LINK_MAP-} -Wl,--gc-sections -static -Wl,--start-group -lc -lm -Wl,--end-group
+    ${GCC-} -o ${OUT_ELF-} @"${O_LIST-}" ${L_OPT_CPU-} ${L_LINK_SCRIPT-} ${L_LINK_MAP-} -Wl,--gc-sections -static -Wl,--start-group -lc -lm -Wl,--end-group 2>> ${OUT_DIR-}/build.err
 
-    ! ls -gh "${OUT_ELF}" 2>/dev/null && echo "Output file '${OUT_ELF}' not found!" &&  exit 99
+    ! ls -gh "${OUT_ELF-}" 2>/dev/null && echo "Output file '${OUT_ELF-}' not found!" &&  exit 99
 }
 
-rm -f ${OUT_DIR}/build.log ${OUT_DIR}/build.err
-cd ${BUILD_DIR} || exit 3
+rm -f ${OUT_DIR-}/build.log ${OUT_DIR-}/build.err
+cd ${BUILD_DIR-} || exit 3
 
 NB_O_FILES=0
 
 # Note : could use a Makefile to handle "newer" and parallelize build automatically instead of this...
-C_FILES=`find ${WS} -name "*.c"`
-echo $C_FILES >  ${OUT_DIR}/c_sources.list
-for f in $C_FILES ; do
+C_FILES=`find ${WS-} -name "*.c"`
+echo ${C_FILES-} >  ${OUT_DIR-}/c_sources.list
+for f in ${C_FILES-} ; do
     NB_O_FILES=$((NB_O_FILES + 1))
-    build_c_file $f 2>&1  |tee -a ${OUT_DIR}/build.log || exit $?
+    build_c_file $f 2>&1  |tee -a ${OUT_DIR-}/build.log || exit $?
 done
 
-S_FILES=`find ${WS} -name "*.s"`
-for f in $S_FILES ; do
-    echo $f >>  ${OUT_DIR}/c_sources.list
+S_FILES=`find ${WS-} -name "*.s"`
+for f in ${S_FILES-} ; do
+    echo ${f-} >>  ${OUT_DIR-}/c_sources.list
     NB_O_FILES=$((NB_O_FILES + 1))
-    build_asm_file $f 2>&1  |tee -a ${OUT_DIR}/build.log || exit $?
+    build_asm_file $f 2>&1  |tee -a ${OUT_DIR-}/build.log || exit $?
 done
 
-echo "Finished compiling ${NB_O_FILES} object files..."
+echo "Finished compiling ${NB_O_FILES-} object files..."
 
-build_link 2>&1 |tee -a ${OUT_DIR}/build.log
+build_link 2>&1 |tee -a ${OUT_DIR-}/build.log
 
 echo
-cat ${OUT_DIR}/build.err
+cat ${OUT_DIR-}/build.err

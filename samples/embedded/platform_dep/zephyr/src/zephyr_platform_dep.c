@@ -163,6 +163,7 @@ const char* SOPC_Platform_Get_Default_Net_Itf(void)
 /***************************************************/
 void SOPC_Platform_Target_Debug(const char* param)
 {
+    SOPC_UNUSED_ARG(param);
     // Display stack instrumentation status
     const uint32_t nbSec = k_uptime_get_32() / 1000;
     printk("\n=======\nUptime: t=%d m %d s\n", nbSec / 60, nbSec % 60);
