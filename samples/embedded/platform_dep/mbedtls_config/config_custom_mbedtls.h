@@ -20,6 +20,8 @@
 #ifndef __CONFIG_CUSTOM_MBEDTLS_H__
 #define __CONFIG_CUSTOM_MBEDTLS_H__
 
+#include "sopc_common_constants.h"
+
 #define MBEDTLS_PLATFORM_MEMORY
 #define MBEDTLS_THREADING_C
 #define MBEDTLS_THREADING_ALT
@@ -52,5 +54,12 @@
 
 #define MBEDTLS_MEMORY_BUFFER_ALLOC_C
 #define MBEDTLS_HEAP_SIZE (64 * 1024)
+
+#ifdef MBEDTLS_FS_IO
+#undef MBEDTLS_FS_IO
+#endif
+#if SOPC_HAS_FILESYSTEM
+#define MBEDTLS_FS_IO
+#endif
 
 #endif /* __CONFIG_CUSTOM_MBEDTLS_H__ */

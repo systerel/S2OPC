@@ -179,7 +179,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     pKey->isBorrowedFromCert = false;
-    /* Let mbedtls looks in the host system to get the entropy sources
+    /* Let mbedtls look in the host system to get the entropy sources
       (standards like the /dev/urandom or Windows CryptoAPI.) */
     mbedtls_entropy_init(&ctxEnt);
     mbedtls_ctr_drbg_init(&ctxDrbg);
@@ -452,7 +452,7 @@ static int sopc_gen_aes_iv(unsigned char pIv[SOPC_CBC_BLOCK_SIZE_BYTES])
     SOPC_ASSERT(NULL != pIv);
     mbedtls_entropy_context ctxEnt = {0};
     mbedtls_ctr_drbg_context ctxDrbg = {0};
-    /* Let mbedtls looks in the host system to get the entropy sources
+    /* Let mbedtls look in the host system to get the entropy sources
       (standards like the /dev/urandom or Windows CryptoAPI.) */
     mbedtls_entropy_init(&ctxEnt);
     mbedtls_ctr_drbg_init(&ctxDrbg);
@@ -1733,11 +1733,11 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL)
 
 typedef struct c_string_to_md_type_t
 {
-    char* name;
+    const char* name;
     mbedtls_md_type_t md;
 } c_string_to_md_type_t;
 
-static c_string_to_md_type_t tab_c_string_to_md_type[SOPC_SIZE_STR_TO_MD_TABLE] = {
+static const c_string_to_md_type_t tab_c_string_to_md_type[SOPC_SIZE_STR_TO_MD_TABLE] = {
     {"sha1", MBEDTLS_MD_SHA1},     {"sha224", MBEDTLS_MD_SHA224}, {"sha256", MBEDTLS_MD_SHA256},
     {"sha384", MBEDTLS_MD_SHA384}, {"sha512", MBEDTLS_MD_SHA512},
 };
@@ -1749,10 +1749,10 @@ static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const cha
 
     /* based on tag/length/value */
     unsigned char tlv[SOPC_EXT_EXTENDED_KU_BYTE_SIZE] = {0};
-    unsigned char* val = tlv + sizeof(tlv); // mbedtls_asn1_write_XXX write data at the end of the buffer
+    unsigned char* val =
+        tlv + SOPC_EXT_EXTENDED_KU_BYTE_SIZE; // mbedtls_asn1_write_XXX write data backward from the end of the buffer
     int valLen = 0;
     size_t valLenTot = 0;
-    size_t extKuOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_EXTENDED_KEY_USAGE);
     valLen = mbedtls_asn1_write_oid(&val, tlv, oid,
                                     oidLen); /* +10 bytes (1 byte for OID tag
                                                            + 1 byte for OID length
@@ -1774,7 +1774,8 @@ static int sopc_csr_set_extended_key_usage(mbedtls_x509write_csr* ctx, const cha
         return valLen;
     }
     valLenTot = valLenTot + (size_t) valLen;
-    valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_EXTENDED_KEY_USAGE, extKuOidLen, val, valLenTot);
+    valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_EXTENDED_KEY_USAGE,
+                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_EXTENDED_KEY_USAGE), val, valLenTot);
 
     return valLen;
 }
@@ -1786,8 +1787,9 @@ static int sopc_csr_set_basic_constraints(mbedtls_x509write_csr* ctx)
     int valLen = 0;
     size_t valLenTot = 0;
     unsigned char tlv[SOPC_EXT_BASIC_CONSTRAINT_BYTE_SIZE] = {0};
-    unsigned char* val = tlv + sizeof(tlv); // mbedtls_asn1_write_XXX write data at the end of the buffer
-    size_t basicConstraintOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_BASIC_CONSTRAINTS);
+    unsigned char* val =
+        tlv +
+        SOPC_EXT_BASIC_CONSTRAINT_BYTE_SIZE; // mbedtls_asn1_write_XXX write data backward from the end of the buffer
     valLen = mbedtls_asn1_write_bool(&val, tlv, false); // +3 bytes
     if (valLen < 0)
     {
@@ -1806,8 +1808,8 @@ static int sopc_csr_set_basic_constraints(mbedtls_x509write_csr* ctx)
         return valLen;
     }
     valLenTot = valLenTot + (size_t) valLen;
-    valLen =
-        MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_BASIC_CONSTRAINTS, basicConstraintOidLen, val, valLenTot);
+    valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_BASIC_CONSTRAINTS,
+                                                 MBEDTLS_OID_SIZE(MBEDTLS_OID_BASIC_CONSTRAINTS), val, valLenTot);
     return valLen;
 }
 
@@ -1858,7 +1860,6 @@ static int sopc_csr_set_subject_alt_name(mbedtls_x509write_csr* ctx,
     unsigned char* val = tlv + bufLen;
     int valLen = 0;
     size_t valLenTot = 0;
-    size_t subjectAltNameOidLen = MBEDTLS_OID_SIZE(MBEDTLS_OID_SUBJECT_ALT_NAME);
 
     if (NULL != dns)
     {
@@ -1884,8 +1885,8 @@ static int sopc_csr_set_subject_alt_name(mbedtls_x509write_csr* ctx,
     if (0 <= valLen)
     {
         valLenTot = valLenTot + (size_t) valLen;
-        valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_SUBJECT_ALT_NAME, subjectAltNameOidLen, val,
-                                                     valLenTot);
+        valLen = MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, MBEDTLS_OID_SUBJECT_ALT_NAME,
+                                                     MBEDTLS_OID_SIZE(MBEDTLS_OID_SUBJECT_ALT_NAME), val, valLenTot);
     }
     SOPC_Free(tlv);
     return valLen;
@@ -1922,7 +1923,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (NULL == uri)
+    if (NULL == uri || NULL == dns)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1933,38 +1934,38 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     }
     mbedtls_x509write_csr_init(&pCSR->csr);
     int errLib = mbedtls_x509write_csr_set_subject_name(&pCSR->csr, subjectName);
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = sopc_csr_set_md_alg(&pCSR->csr, mdType);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         unsigned char usages = MBEDTLS_X509_KU_DIGITAL_SIGNATURE | MBEDTLS_X509_KU_NON_REPUDIATION |
                                MBEDTLS_X509_KU_KEY_ENCIPHERMENT | MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
         errLib = mbedtls_x509write_csr_set_key_usage(&pCSR->csr, usages);
     }
-    if (!errLib && bIsServer)
+    if (0 == errLib && bIsServer)
     {
         errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_SERVER_AUTH,
                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH));
     }
-    if (!errLib && !bIsServer)
+    if (0 == errLib && !bIsServer)
     {
         errLib = sopc_csr_set_extended_key_usage(&pCSR->csr, MBEDTLS_OID_CLIENT_AUTH,
                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_CLIENT_AUTH));
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         errLib = sopc_csr_set_basic_constraints(&pCSR->csr);
     }
-    if (!errLib)
+    if (0 == errLib)
     {
-        size_t uriLen = NULL != uri ? strlen(uri) : 0;
-        size_t dnsLen = NULL != dns ? strlen(dns) : 0;
+        size_t uriLen = strlen(uri);
+        size_t dnsLen = strlen(dns);
         errLib = sopc_csr_set_subject_alt_name(&pCSR->csr, (const unsigned char*) uri, uriLen,
                                                (const unsigned char*) dns, dnsLen);
     }
-    if (errLib)
+    if (0 != errLib)
     {
         SOPC_KeyManager_CSR_Free(pCSR);
         pCSR = NULL;
@@ -1994,25 +1995,26 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
     }
     /* Attach key to the CSR before to sign the CSR during the writing to DER buffer */
     mbedtls_x509write_csr_set_key(&pCSR->csr, &pKey->pk);
-    /* Let mbedtls looks in the host system to get the entropy sources
+    /* Let mbedtls look in the host system to get the entropy sources
       (standards like the /dev/urandom or Windows CryptoAPI.) */
     mbedtls_entropy_init(&ctxEnt);
     mbedtls_ctr_drbg_init(&ctxDrbg);
-    int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, mbedtls_entropy_func, &ctxEnt, NULL, 0);
-    if (!errLib)
+    int errLib = mbedtls_ctr_drbg_seed(&ctxDrbg, &mbedtls_entropy_func, &ctxEnt, NULL, 0);
+    if (0 == errLib)
     {
-        /* Let mbedtls failed if the buffer size is too small */
+        /* Let mbedtls fail if the buffer size is too small */
         lenWritten = mbedtls_x509write_csr_der(&pCSR->csr, buf, sizeof(buf), mbedtls_ctr_drbg_random, &ctxDrbg);
         errLib = 0 < lenWritten ? 0 : -1;
     }
-    if (!errLib)
+    if (0 == errLib)
     {
         *pLenAllocated = (uint32_t) lenWritten;
         pDest = SOPC_Malloc(*pLenAllocated * sizeof(uint8_t));
         errLib = NULL != pDest ? 0 : -2;
     }
-    if (!errLib)
+    if (0 == errLib)
     {
+        /* mbedtls_x509write_csr_der writes data backward from the end of the buffer */
         memcpy(pDest, buf + sizeof(buf) - *pLenAllocated, *pLenAllocated);
     }
     else

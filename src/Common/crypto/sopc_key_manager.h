@@ -671,11 +671,11 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
  * \param bIsServer    Whether this CSR is to request a server or a client certificate.
  * \param mdType       The MD algorithm (terminated by '\0') use for the signature eg SHA1, SHA256...
  * \param uri          The application URI (terminated by '\0'). Shall not be NULL.
- * \param dns          The DSN name of the server (terminated by '\0'). set to NULL if not used.
+ * \param dns          The DSN name of the server (terminated by '\0'). Shall not be NULL.
  * \param ppCSR        A handle to the created CSR. This object must be freed
- *                     with a call to SOPC_KeyManager_CSR_Free().
+ *                     with a call to ::SOPC_KeyManager_CSR_Free .
  *
- * \note  The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment.
+ * \note  The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment and dataEncipherment.
  *        The extendedKeyUsage is filled with serverAuth if \p bIsServer is true, otherwise clientAuth.
  *        The subject alternative name is filled with \p uri and/or \p dns .
  *        The basic constraints is set to false for the CA flag.
@@ -690,7 +690,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              SOPC_CSR** ppCSR);
 
 /**
- * \brief           Encodes a \p pCSR as a DER buffer and writes the result in \p ppDest.
+ * \brief           Encodes CSR \p pCSR as a DER buffer and writes the result in \p ppDest.
  *
  * \param pCSR     A valid pointer to the CSR.
  * \param pKey     A valid pointer to the asymmetric key. The key shall be private.
