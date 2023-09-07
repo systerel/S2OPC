@@ -87,6 +87,7 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
     for (i = 0; i < pResp->NoOfEndpoints; ++i)
     {
         pEndp = &pResp->Endpoints[i];
+        pBufCert = &pEndp->ServerCertificate;
         /* As we asked for a GetEndpoints on ENDPOINT_URL, it should only return endpoints with that URL */
         /* TODO: freeopcua translates the given hostname to an IP, so it is not possible to check that */
         /* ck_assert(strncmp(SOPC_String_GetRawCString(&pEndp->EndpointUrl), ENDPOINT_URL, strlen(ENDPOINT_URL)
@@ -114,12 +115,10 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
         {
             bSecuChecked = true;
             iSecLevelWithSecu = pEndp->SecurityLevel;
-            pBufCert = &pEndp->ServerCertificate;
             ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
                                                                      &pCert) == SOPC_STATUS_OK);
             SOPC_KeyManager_Certificate_Free(pCert);
             pCert = NULL;
-            pBufCert = NULL;
         }
 
         if (strncmp(SOPC_String_GetRawCString(&pEndp->SecurityPolicyUri), SOPC_SecurityPolicy_Basic256Sha256_URI,
@@ -128,12 +127,10 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
         {
             bSecuChecked = true;
             iSecLevelWithSecu = pEndp->SecurityLevel;
-            pBufCert = &pEndp->ServerCertificate;
             ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBufCert->Data, (uint32_t) pBufCert->Length,
                                                                      &pCert) == SOPC_STATUS_OK);
             SOPC_KeyManager_Certificate_Free(pCert);
             pCert = NULL;
-            pBufCert = NULL;
         }
     }
 

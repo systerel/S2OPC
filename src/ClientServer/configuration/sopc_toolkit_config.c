@@ -215,7 +215,6 @@ static SOPC_ReturnStatus SOPC_ToolkitServer_SecurityCheck(void)
                     if (SOPC_STATUS_OK != status)
                     {
                         statusSecurityCheck = status;
-                        status = SOPC_STATUS_OK;
                     }
                 }
             }
