@@ -118,8 +118,6 @@ SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_CreateEmpty(void)
 {
     struct SOPC_Dataset_LL_NetworkMessage* result = SOPC_Calloc(1, sizeof(SOPC_Dataset_LL_NetworkMessage));
 
-    memset(&result->msgHeader, 0, sizeof(result->msgHeader));
-
     // publisher id type is int 32
     result->msgHeader.flagsConfig.PublisherIdFlag = true;
     result->msgHeader.publisher_id.data.byte = 0;
@@ -139,7 +137,10 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
     {
         return;
     }
-    SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
+    if (DataSet_LL_PubId_String_Id == nm->msgHeader.publisher_id.type)
+    {
+        SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
+    }
     Dataset_LL_Delete_DataSetMessages_Array(nm);
     SOPC_Free(nm);
 }
@@ -226,6 +227,7 @@ void SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_String(SOPC_Dataset_LL_Netwo
     if (NULL != nmh)
     {
         nmh->publisher_id.type = DataSet_LL_PubId_String_Id;
+        SOPC_String_Initialize(&nmh->publisher_id.data.string);
         SOPC_String_Copy(&nmh->publisher_id.data.string, &id);
         nmh->flagsConfig.PublisherIdFlag = true;
     }

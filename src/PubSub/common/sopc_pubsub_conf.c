@@ -480,6 +480,7 @@ bool SOPC_PubSubConnection_Set_PublisherId_String(SOPC_PubSubConnection* connect
 {
     SOPC_ASSERT(NULL != connection && NULL != id && SOPC_PubSubConnection_Pub == connection->type);
     connection->publisherId.type = SOPC_String_PublisherId;
+    SOPC_String_Initialize(&connection->publisherId.data.string);
     SOPC_ReturnStatus status = SOPC_String_Copy(&connection->publisherId.data.string, id);
     return (SOPC_STATUS_OK == status);
 }
@@ -731,6 +732,7 @@ bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC
 {
     SOPC_ASSERT(NULL != group && NULL != id);
     group->publisherId.type = SOPC_String_PublisherId;
+    SOPC_String_Initialize(&group->publisherId.data.string);
     SOPC_ReturnStatus status = SOPC_String_Copy(&group->publisherId.data.string, id);
     return (SOPC_STATUS_OK == status);
 }
