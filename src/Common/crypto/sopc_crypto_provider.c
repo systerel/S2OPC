@@ -1876,7 +1876,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  * ------------------------------------------------------------------------------------------------
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
-                                                           const SOPC_PKIProvider* pPKI,
+                                                           SOPC_PKIProvider* pPKI,
                                                            const SOPC_PKI_Type pPKIType,
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error)

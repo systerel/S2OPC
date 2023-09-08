@@ -448,8 +448,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  *                  in \p pCRL.
  *
  *   This function does not set match to false if there are CRL that do not match any Certificate.
- *   This function skips certificates in /p pCert that are not authorities.
- *   Warning: this function fails with SOPC_STATUS_NOK if there are only CA without CRL.
+ *   This function skips certificates in \p pCert that are not authorities.
+ *
+ * \warning If the list \p pCert became empty then the list \p pCert is set to NULL.
  *
  * \param pCert     A valid pointer to the Certificate list.
  * \param pCRL      A valid pointer to the CRL list.
@@ -460,10 +461,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  *
  * \note            Content of \p pbMatch is unspecified when return value is not SOPC_STATUS_OK.
  *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
- *                  and SOPC_STATUS_NOK when all certificate are CA without CRL.
+ * \return          SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList* pCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch);
 
@@ -674,12 +674,12 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
 SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLList** ppCrlCopy);
 
 /**
- * \brief           Return the number of chained CRL in \p pCrl list.
+ * \brief           Returns the number of chained CRL in \p pCrl list.
  *
  * \param pCrl      A valid pointer to the CRL list.
  * \param pLength   A valid pointer to the computed length of the list.
  *
- * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ * \note            Content of the output is unspecified when the returned value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL.
  */

@@ -46,6 +46,8 @@
 #include "mbedtls/x509.h"
 #include "mbedtls/x509_csr.h"
 
+#define SOPC_KEY_MANAGER_SHA1_SIZE 20
+
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API
  * ------------------------------------------------------------------------------------------------
@@ -1211,7 +1213,7 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
 
     /* Make SHA-1 thumbprint */
     const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
-    uint8_t pDest[20];
+    uint8_t pDest[SOPC_KEY_MANAGER_SHA1_SIZE];
 
     int err = mbedtls_md(pmd, raw->p, raw->len, pDest);
     if (0 != err)
@@ -1226,7 +1228,7 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     {
         return NULL;
     }
-    for (size_t i = 0; i < 20; ++i)
+    for (size_t i = 0; i < SOPC_KEY_MANAGER_SHA1_SIZE; ++i)
     {
         snprintf(ret + 2 * i, 3, "%02X", pDest[i]);
     }
@@ -1261,111 +1263,202 @@ char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pC
     return sha_1_cert;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_CertificateList* pCert,
+/**
+ * \brief The function removes the certificate \p ppCur form the linked list \p ppHeadCertList and pointer \p ppCur
+ * changes to be linked to the next item. The function links the previous certificate \p ppPrev to the newly current
+ * certificate \p ppCur .
+ *
+ * \warning If the list \p ppHeadCertList became empty then list \p ppHeadCertList and certificate \p ppCur are set to
+ * NULL.
+ *
+ * \param ppCur The item of the the linked list \p ppHeadCertList to be removed.
+ * \param ppPrev The previous item of the current one \p ppCur .
+ * \param ppHeadCertList The linked list .
+ */
+static void sopc_key_manager_remove_cert_from_list(mbedtls_x509_crt** ppCur,
+                                                   mbedtls_x509_crt** ppPrev,
+                                                   SOPC_CertificateList** ppHeadCertList)
+{
+    SOPC_ASSERT(NULL != ppCur);
+    SOPC_ASSERT(NULL != *ppCur); /* Current cert shall not be NULL */
+    SOPC_ASSERT(NULL != ppPrev);
+    SOPC_ASSERT(NULL != ppHeadCertList);
+    SOPC_ASSERT(NULL != *ppHeadCertList); /* Head shall not be NULL */
+
+    SOPC_CertificateList* pHeadCertList = *ppHeadCertList;
+    mbedtls_x509_crt* pCur = *ppCur;      /* Current cert */
+    mbedtls_x509_crt* pPrev = *ppPrev;    /* Parent of current cert */
+    mbedtls_x509_crt* pNext = pCur->next; /* Next cert */
+    pCur->next = NULL;
+    mbedtls_x509_crt_free(pCur);
+    if (NULL == pPrev)
+    {
+        if (NULL == pNext)
+        {
+            /* The list is empty, Free it and stop the iteration  */
+            SOPC_Free(pHeadCertList);
+            pHeadCertList = NULL;
+            pCur = NULL;
+        }
+        else
+        {
+            /* Head of the list is a special case */
+            pHeadCertList->crt = *pNext; /* Use an assignment operator to do the copy */
+            /* We have to free the new next certificate */
+            SOPC_Free(pNext);
+
+            /* Do not iterate: current certificate has changed with the new head (pCur = &pHeadCertList->crt) */
+        }
+    }
+    else
+    {
+        /* We have to free the certificate if it is not the first in the list */
+        SOPC_Free(pCur);
+        pPrev->next = pNext;
+        /* Iterate */
+        pCur = pNext;
+    }
+    *ppCur = pCur;
+    *ppPrev = pPrev;
+    *ppHeadCertList = pHeadCertList;
+}
+
+/**
+ * \brief Checks if the issuer subject name of \p pCa is the same as the CRL \p pCrl .
+ *        Checks if the CRL \p pCrl is correctly signed by the CA \p pCa .
+ *
+ * \param pCrl The CRL.
+ * \param pCa The CA.
+ * \param[out] pbMatch Defines whether the CRL \p pCrl matches with the CA \p pCa .
+ *
+ * \return SOPC_STATUS_OK if successful.
+ *
+ */
+static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const mbedtls_x509_crl* pCrl,
+                                                             mbedtls_x509_crt* pCa,
+                                                             bool* pbMatch)
+{
+    SOPC_ASSERT(NULL != pCrl);
+    SOPC_ASSERT(NULL != pCa);
+    SOPC_ASSERT(pCa->ca_istrue);
+    SOPC_ASSERT(NULL != pbMatch);
+
+    *pbMatch = false;
+    bool bMatch = false;
+    int res = -1;
+    const mbedtls_md_info_t* hashInfo = NULL;
+    uint8_t* pHash = NULL;
+    unsigned char hashLen = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Compare the subject name */
+    if (pCrl->issuer_raw.len == pCa->subject_raw.len)
+    {
+        res = memcmp(pCrl->issuer_raw.p, pCa->subject_raw.p, pCrl->issuer_raw.len);
+        bMatch = res == 0;
+    }
+    /* Check if the CRL is correctly signed by the CA */
+    if (bMatch)
+    {
+        hashInfo = mbedtls_md_info_from_type(pCrl->sig_md);
+        status = NULL != hashInfo ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status && bMatch)
+    {
+        hashLen = mbedtls_md_get_size(hashInfo);
+        pHash = SOPC_Calloc(hashLen, sizeof(uint8_t));
+        status = NULL != pHash ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status && bMatch)
+    {
+        res = mbedtls_md(hashInfo, pCrl->tbs.p, pCrl->tbs.len, pHash);
+        status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status && bMatch)
+    {
+        res = mbedtls_pk_verify_ext(pCrl->sig_pk, pCrl->sig_opts, &pCa->pk, pCrl->sig_md, pHash, hashLen, pCrl->sig.p,
+                                    pCrl->sig.len);
+        bMatch = res == 0;
+    }
+
+    SOPC_Free(pHash);
+    if (SOPC_STATUS_OK == status)
+    {
+        *pbMatch = bMatch;
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList* pCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch)
 {
-    if (NULL == pCRL || NULL == pCert)
+    if (NULL == pCRL || NULL == pCert || NULL == pbMatch)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     /* For each CA, find its CRL. If not found, log and match = false */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    bool list_match = true;
-    mbedtls_x509_crt* crt = &pCert->crt;
-    mbedtls_x509_crt* prev = NULL; /* Parent of current cert */
-    while (NULL != crt)
+    int crl_count = 0;                   /* Number of CRL for the current CA */
+    bool crl_match = false;              /* Defines whether the current CRL matches the current CA. */
+    bool list_match = true;              /* Defines if all CA have exactly one CRL */
+    mbedtls_x509_crt* crt = &pCert->crt; /* Current cert */
+    mbedtls_x509_crt* prev = NULL;       /* Parent of current cert */
+    while (NULL != crt && SOPC_STATUS_OK == status)
     {
         /* Skip certificates that are not authorities */
-        if (!crt->ca_istrue)
+        if (crt->ca_istrue)
         {
-            /* Iterate */
-            prev = crt;
-            crt = crt->next;
-            continue;
-        }
-
-        int crl_found = 0;
-        const mbedtls_x509_crl* crl = &pCRL->crl;
-        for (; NULL != crl; crl = crl->next)
-        {
-            /* This is the test done by mbedtls internally in x509_crt_verifycrl.
-             * It verifies the subject only, but further verifications are done by mbedtls.
-             * With this test, the CA list is restricted to have only one CA with a given subject.
-             * Without this restriction, we could have a newer and an older version of the same CA,
-             * which in any case would be confusing for end users. */
-            bool match = crl->issuer_raw.len == crt->subject_raw.len &&
-                         memcmp(crl->issuer_raw.p, crt->subject_raw.p, crl->issuer_raw.len) == 0;
-            if (crl_found > 0 && match)
+            crl_count = 0;
+            crl_match = false;
+            const mbedtls_x509_crl* crl = &pCRL->crl;
+            while (NULL != crl && SOPC_STATUS_OK == status)
             {
-                if (1 == crl_found)
+                status = sopc_key_manager_check_crl_ca_match(crl, crt, &crl_match);
+                if (SOPC_STATUS_OK == status)
                 {
+                    if (crl_match)
+                    {
+                        crl_count = crl_count + 1;
+                    }
+                    /* Iterate */
+                    crl = crl->next;
+                    crl_match = false;
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                if (1 != crl_count)
+                {
+                    list_match = false;
                     char* fpr = get_crt_sha1(crt);
-                    fprintf(
-                        stderr,
-                        "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one associated "
-                        "CRL.\n",
-                        fpr);
+                    if (0 == crl_count)
+                    {
+                        fprintf(
+                            stderr,
+                            "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has no CRL, and is removed "
+                            "from the CAs list.\n",
+                            fpr);
+                    }
+                    else
+                    {
+                        fprintf(stderr,
+                                "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one "
+                                "associated CRL, and is removed from the CAs list.\n",
+                                fpr);
+                    }
                     SOPC_Free(fpr);
-                }
-                if (crl_found < INT_MAX)
-                {
-                    ++crl_found;
-                }
-            }
-            else if (match)
-            {
-                ++crl_found;
-            }
-        }
 
-        if (1 != crl_found)
-        {
-            list_match = false;
-            char* fpr = get_crt_sha1(crt);
-            fprintf(stderr,
-                    "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has no CRL or multiple CRLs, and is "
-                    "removed from the CAs list.\n",
-                    fpr);
-            SOPC_Free(fpr);
-
-            /* Remove the certificate from the chain and safely delete it */
-            mbedtls_x509_crt* next = crt->next;
-            crt->next = NULL;
-            mbedtls_x509_crt_free(crt);
-
-            /* Set new next certificate (if possible) */
-            if (NULL == prev)
-            {
-                if (NULL == next)
-
-                {
-                    /*
-                     * The list would be empty, but we cannot do it here.
-                     * We have no choice but failing with current design.
-                     */
-                    crt = NULL; // make iteration stop
-                    status = SOPC_STATUS_NOK;
+                    /* Remove the certificate from the chain and safely delete it */
+                    sopc_key_manager_remove_cert_from_list(&crt, &prev, &pCert);
                 }
                 else
                 {
-                    /* Head of the chain is a special case */
-                    pCert->crt = *next;
-                    /* We have to free the new next certificate (copied as first one) */
-                    SOPC_Free(next);
-
-                    /* Do not iterate: current certificate has changed */
+                    /* Iterate */
+                    prev = crt;
+                    crt = crt->next;
                 }
-            }
-            else
-            {
-                /* We have to free the certificate if it is not the first in the list */
-                SOPC_Free(crt);
-                prev->next = next;
-
-                /* Iterate */
-                crt = next;
             }
         }
         else
@@ -1376,12 +1469,10 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveUnmatchedCRL(SOPC_Certif
         }
     }
 
-    /* There may be unused CRLs */
-    if (NULL != pbMatch)
+    if (SOPC_STATUS_OK == status)
     {
         *pbMatch = list_match;
     }
-
     return status;
 }
 
@@ -1522,45 +1613,14 @@ static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLLi
     mbedtls_x509_crl* cur = &pHeadCRLList->crl; /* Current crl */
     mbedtls_x509_crl* prev = NULL;              /* Parent of current crl */
     mbedtls_x509_crl* next = NULL;              /* Next crl */
-    const mbedtls_md_info_t* hashInfo = NULL;
-    uint8_t* pHash = NULL;
-    unsigned char hashLen = 0;
-    bool bFound = true;
-    int res = -1;
+    bool bFound = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     /* Search the crl */
     while (NULL != cur && SOPC_STATUS_OK == status)
     {
-        /* Compare the subject name */
-        if (cur->issuer_raw.len == ca->subject_raw.len)
-        {
-            res = memcmp(cur->issuer_raw.p, ca->subject_raw.p, cur->issuer_raw.len);
-            bFound = res == 0;
-        }
-        /* Check if the CRL is correctly signed by the CA */
-        if (bFound)
-        {
-            hashInfo = mbedtls_md_info_from_type(cur->sig_md);
-            status = NULL != hashInfo ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == status && bFound)
-        {
-            hashLen = mbedtls_md_get_size(hashInfo);
-            pHash = SOPC_Calloc(hashLen, sizeof(uint8_t));
-            status = NULL != pHash ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        if (SOPC_STATUS_OK == status && bFound)
-        {
-            res = mbedtls_md(hashInfo, cur->tbs.p, cur->tbs.len, pHash);
-            status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == status && bFound)
-        {
-            res = mbedtls_pk_verify_ext(cur->sig_pk, cur->sig_opts, &ca->pk, cur->sig_md, pHash, hashLen, cur->sig.p,
-                                        cur->sig.len);
-            bFound = res == 0;
-        }
+        bFound = false;
+        status = sopc_key_manager_check_crl_ca_match(cur, ca, &bFound);
         /* Remove the current crl if found */
         if (SOPC_STATUS_OK == status && bFound)
         {
@@ -1600,11 +1660,6 @@ static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLLi
             prev = cur;
             cur = cur->next;
         }
-        /* Clear */
-        SOPC_Free(pHash);
-        pHash = NULL;
-        bFound = false;
-        res = -1;
     }
     *ppCRLList = pHeadCRLList;
     return status;
@@ -1616,14 +1671,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
                                                                      bool* pbMatch,
                                                                      bool* pbIsIssuer)
 {
-    /* Initial return value */
-    *pbMatch = false;
-    *pbIsIssuer = false;
-
-    if (NULL == ppCertList || NULL == ppCRLList || NULL == pThumbprint || NULL == pbMatch)
+    if (NULL == ppCertList || NULL == ppCRLList || NULL == pThumbprint || NULL == pbMatch || NULL == pbIsIssuer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    /* Initialize the return values */
+    *pbMatch = false;
+    *pbIsIssuer = false;
 
     size_t lenThumbprint = strlen(pThumbprint);
     if (40 != lenThumbprint)
@@ -1639,35 +1694,37 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
     }
     mbedtls_x509_crt* cur = &pHeadCertList->crt; /* Current cert */
     mbedtls_x509_crt* prev = NULL;               /* Parent of current cert */
-    mbedtls_x509_crt* next = NULL;               /* Next certificate */
     int res = -1;
     bool bFound = false;
     bool bIsIssuer = false;
-    uint8_t* pHash = NULL;
     const mbedtls_md_info_t* pmd = mbedtls_md_info_from_type(MBEDTLS_MD_SHA1);
 
-    uint8_t* pThumb = SOPC_Calloc(20, sizeof(uint8_t));
-    if (NULL == pThumb)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    uint8_t* pHash = SOPC_Calloc(SOPC_KEY_MANAGER_SHA1_SIZE, sizeof(uint8_t));
+    if (NULL == pHash)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(pThumbprint, pThumb, 20);
+    uint8_t* pThumb = SOPC_Calloc(SOPC_KEY_MANAGER_SHA1_SIZE, sizeof(uint8_t));
+    if (NULL == pThumb)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    else
+    {
+        status = SOPC_HelperDecode_Hex(pThumbprint, pThumb, SOPC_KEY_MANAGER_SHA1_SIZE);
+    }
 
     /* Search the certificate */
     while (NULL != cur && !bFound && SOPC_STATUS_OK == status)
     {
         /* Get the current hash */
-        pHash = SOPC_Calloc(20, sizeof(uint8_t));
-        status = NULL != pHash ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
-        if (SOPC_STATUS_OK == status)
-        {
-            res = mbedtls_md(pmd, cur->raw.p, cur->raw.len, pHash);
-            status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        }
+        res = mbedtls_md(pmd, cur->raw.p, cur->raw.len, pHash);
+        status = 0 == res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         /* Compare with the hash ref */
         if (SOPC_STATUS_OK == status)
         {
-            res = memcmp(pThumb, pHash, 20);
+            res = memcmp(pThumb, pHash, SOPC_KEY_MANAGER_SHA1_SIZE);
             /* Check match*/
             if (0 == res)
             {
@@ -1683,36 +1740,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
         /* Remove the certificate if found */
         if (SOPC_STATUS_OK == status && bFound)
         {
-            next = cur->next;
-            cur->next = NULL;
-            mbedtls_x509_crt_free(cur);
-            if (NULL == prev)
-            {
-                if (NULL == next)
-                {
-                    /* The list is empty, Free it and stop the iteration  */
-                    SOPC_Free(pHeadCertList);
-                    pHeadCertList = NULL;
-                    cur = NULL;
-                }
-                else
-                {
-                    /* Head of the list is a special case */
-                    pHeadCertList->crt = *next; /* Use an assignment operator to do the copy */
-                    /* We have to free the new next certificate */
-                    SOPC_Free(next);
-
-                    /* Do not iterate: current certificate has changed with the new head (cur = &pHeadCerts->crt) */
-                }
-            }
-            else
-            {
-                /* We have to free the certificate if it is not the first in the list */
-                SOPC_Free(cur);
-                prev->next = next;
-                /* Iterate */
-                cur = next;
-            }
+            sopc_key_manager_remove_cert_from_list(&cur, &prev, &pHeadCertList);
         }
         else
         {
@@ -1720,10 +1748,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
             prev = cur;
             cur = cur->next;
         }
-        /* Clear */
-        SOPC_Free(pHash);
-        pHash = NULL;
     }
+    /* Clear */
+    SOPC_Free(pHash);
     SOPC_Free(pThumb);
     *ppCertList = pHeadCertList;
     *pbMatch = bFound;

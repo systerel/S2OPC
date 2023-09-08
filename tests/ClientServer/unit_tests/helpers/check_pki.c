@@ -115,12 +115,12 @@ START_TEST(invalid_write)
     ck_assert_ptr_nonnull(pPKI);
     /* Directory store path is not defined */
     status = SOPC_PKIProvider_WriteToStore(pPKI, true);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
     /* Invalid directory store path  */
     status = SOPC_PKIProvider_SetStorePath("invalid/not_exist", pPKI);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     status = SOPC_PKIProvider_WriteToStore(pPKI, true);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
 
     SOPC_KeyManager_Certificate_Free(pTrustedCerts);
     SOPC_KeyManager_CRL_Free(pTrustedCrl);
@@ -478,7 +478,7 @@ START_TEST(functional_test_from_list)
     SOPC_CertificateList* pRejectedList = NULL;
     size_t rejectedLen = 0;
     char* cStrThumbprint = NULL;
-    status = SOPC_PKIProvider_WriteRejectedCertToList(pPKI, &pRejectedList);
+    status = SOPC_PKIProvider_CopyRejectedList(pPKI, &pRejectedList);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pRejectedList);
     status = SOPC_KeyManager_Certificate_GetListLength(pRejectedList, &rejectedLen);

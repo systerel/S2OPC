@@ -273,7 +273,7 @@ struct SOPC_Client_Config
 
     const SOPC_SerializedCertificate* clientCertificate; /**< Certificate might be set from paths */
     const SOPC_SerializedAsymmetricKey* clientKey;       /**< Key might be set from paths */
-    const SOPC_PKIProvider* clientPKI;                   /**< PKI might be set from paths */
+    SOPC_PKIProvider* clientPKI;                         /**< PKI might be set from paths */
 
     uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
     SOPC_SecureConnection_Config*

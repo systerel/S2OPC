@@ -1002,7 +1002,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
-        const SOPC_PKIProvider* pkiProvider = config->pX509_UserIdentity_PKI;
+        SOPC_PKIProvider* pkiProvider = config->pX509_UserIdentity_PKI;
         SOPC_PKI_Profile* pProfile = NULL;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;

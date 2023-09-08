@@ -1075,12 +1075,10 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
 /**
  * \brief           Validates the given Certificate \p pCert.
  *
- *   This function first verifies that the signed public key respects the current
+ *   This function verifies that the signed public key respects the current
  *   security policy (asymmetric key type and length, signature hash type, ...),
- *   and then let the PKIProvider handle the signature validation.
- *   The verification of the signature chain up to the certificate authority is
- *   not endorsed by the SOPC_CryptoProvider, but by the PKIProvider, which must be
- *   created and configured outside the stack.
+ *   and also handle the signature chain up to the certificate authority.
+ *   The verifications are not endorsed by the SOPC_CryptoProvider, but by the PKIProvider.
  *
  * \param pProvider An initialized cryptographic context.
  * \param pPKI      An initialized public key infrastructure (PKIProvider).
@@ -1097,7 +1095,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
  *                  and SOPC_STATUS_NOK when there was an error.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_Certificate_Validate(const SOPC_CryptoProvider* pProvider,
-                                                           const SOPC_PKIProvider* pPKI,
+                                                           SOPC_PKIProvider* pPKI,
                                                            const SOPC_PKI_Type PKIType,
                                                            const SOPC_CertificateList* pCert,
                                                            uint32_t* error);

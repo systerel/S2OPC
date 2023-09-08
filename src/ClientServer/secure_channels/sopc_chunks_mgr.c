@@ -345,7 +345,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
     SOPC_ByteString otherBsAppCert;
     SOPC_ByteString_Initialize(&otherBsAppCert);
     const SOPC_CertificateList* runningAppCert = NULL;
-    const SOPC_PKIProvider* pkiProvider = NULL;
+    SOPC_PKIProvider* pkiProvider = NULL;
     SOPC_ByteString senderCertificate;
     SOPC_ByteString_Initialize(&senderCertificate);
     SOPC_ByteString receiverCertThumb;

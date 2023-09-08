@@ -528,7 +528,7 @@ void session_core_bs__get_session_user_secu_client(const constants__t_session_i 
  */
 static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData,
                                                const SOPC_String* appUri,
-                                               SOPC_PKIProvider** ppPKI,
+                                               SOPC_PKIProvider* pPKI,
                                                bool* ok)
 {
     SOPC_CertificateList* certificate = NULL;
@@ -567,7 +567,7 @@ static SOPC_ReturnStatus check_application_uri(const SOPC_ByteString* certData,
     }
     if (SOPC_STATUS_OK != status)
     {
-        status = SOPC_PKIProvider_AddCertToRejectedList(ppPKI, certificate);
+        status = SOPC_PKIProvider_AddCertToRejectedList(pPKI, certificate);
     }
     else
     {
@@ -713,7 +713,7 @@ void session_core_bs__server_create_session_req_do_crypto(
         if (SOPC_STATUS_OK == status)
         {
             status = check_application_uri(&pReq->ClientCertificate, &pReq->ClientDescription.ApplicationUri,
-                                           &pECfg->serverConfigPtr->pki, &application_uri_ok);
+                                           pECfg->serverConfigPtr->pki, &application_uri_ok);
         }
 
         if (SOPC_STATUS_OK == status)

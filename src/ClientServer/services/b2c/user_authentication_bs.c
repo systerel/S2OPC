@@ -312,8 +312,20 @@ static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_Extensio
         if (SOPC_STATUS_OK != status)
         {
             // Cannot append the user cert to the rejected list (we do not have the PKI pointer for this layer)
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                     "User leaf certificate check failed with error: %" PRIX32 "", validError);
+            char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCrtUser);
+            if (NULL != thumbprint)
+            {
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "User leaf certificate check failed with error: %" PRIX32
+                                         " for certificate thumbprint %s",
+                                         validError, thumbprint);
+            }
+            else
+            {
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                         "User leaf certificate check failed with error: %" PRIX32 "", validError);
+            }
+            SOPC_Free(thumbprint);
         }
     }
 

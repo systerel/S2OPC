@@ -472,7 +472,7 @@ static SOPC_ReturnStatus authentication_test_sks(SOPC_UserAuthentication_Manager
         SOPC_ASSERT(NULL != authn);
         SOPC_ASSERT(NULL != authn->pData);
 
-        const SOPC_PKIProvider* pkiProvider = authn->pData;
+        SOPC_PKIProvider* pkiProvider = authn->pData;
         SOPC_PKI_Profile* pProfile = NULL;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;

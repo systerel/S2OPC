@@ -499,7 +499,7 @@ void SOPC_PKIProvider_DeleteProfile(SOPC_PKI_Profile** ppProfile);
  * \return SOPC_STATUS_OK when the certificate is successfully validated, and
  *         SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(const SOPC_PKIProvider* pPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
                                                        const SOPC_CertificateList* pToValidate,
                                                        const SOPC_PKI_Profile* pProfile,
                                                        uint32_t* error);
@@ -603,16 +603,16 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* p
                                                        SOPC_CertificateList** ppIssuerCerts,
                                                        SOPC_CRLList** ppIssuerCrl);
 
-/** \brief Get the list of certificate that have been rejected.
+/** \brief Copy the list of certificate that have been rejected.
  *
  * \param pPKI A valid pointer to the PKIProvider.
- * \param[out] ppCert A copy of the PKI rejected list.
+ * \param[out] ppCert A copy of the PKI rejected list (NULL if no certificate has been rejected).
  *
  * \note The maximum number of certificates returned is \c SOPC_PKI_MAX_NB_CERT_REJECTED.
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
+SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
 
 /** \brief Write the rejected certificates files in the rejected folder of the PKI storage.
  *         The format of the written files is DER.
@@ -620,7 +620,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToList(const SOPC_PKIProvide
  * \param pPKI A valid pointer to the PKIProvider.
  * \param bEraseExistingFiles whether the existing files of the rejected folder shall be deleted.
  *
- * \note At the maximum, we could have 2 * \c SOPC_PKI_MAX_NB_CERT_REJECTED in the rejected folder.
+ * \note The maximum number of certificates written in the rejected folder is \c SOPC_PKI_MAX_NB_CERT_REJECTED .
  *       This function removes older files, if the maximum is reach.
  *
  * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProvider_CreateFromList ) then
@@ -633,7 +633,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvid
 
 /** \brief Add a certificate to the PKI rejected list.
  *
- * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pPKI A valid pointer to the PKIProvider.
  * \param pCert A valid pointer to the certificate to be added.
  *
  * \note The function removes the oldest certificate if the list size reaches \c SOPC_PKI_MAX_NB_CERT_REJECTED.
@@ -642,7 +642,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvid
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider** ppPKI, const SOPC_CertificateList* pCert);
+SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI, const SOPC_CertificateList* pCert);
 
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
@@ -667,7 +667,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
                                                   SOPC_CRLList* pIssuerCrl,
                                                   const bool bIncludeExistingList);
 
-/** \brief  Remove All the certificate which match with the given thumbprint.
+/** \brief  Remove all the certificates matching with the given thumbprint.
  *          If the Certificate is a CA Certificate then all the CRLs for that CA are removed.
  *
  * \warning This function will fail if \p pThumbprint does not match the SHA1 hex digest size.
@@ -676,16 +676,16 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
  * \param pThumbprint The SHA1 of the certificate formatted as an hexadecimal C string (NULL terminated)
  *                    40 bytes shall be allocated in \p pThumbprint (+ 1 byte for the NULL character)
  * \param bIsTrusted whether the certificate to remove is a trusted certificate.
- * \param[out] pbIsRemove A valid pointer indicating whether the certificate has been found and deleted.
- * \param[out] pbIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
+ * \param[out] pIsRemoved A valid pointer indicating whether the certificate has been found and deleted.
+ * \param[out] pIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
  *
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
                                                      const char* pThumbprint,
                                                      const bool bIsTrusted,
-                                                     bool* pbIsRemove,
-                                                     bool* pbIsIssuer);
+                                                     bool* pIsRemoved,
+                                                     bool* pIsIssuer);
 
 /**
  * \brief Free a PKI provider.
