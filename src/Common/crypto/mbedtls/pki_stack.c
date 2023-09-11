@@ -1985,7 +1985,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
                                "> PKI creation error: too many (%" PRIu32
                                ") certificates and CRLs. The maximum configured is %" PRIu32
                                ", please change SOPC_PKI_MAX_NB_CERT_AND_CRL",
-                               listLength, SOPC_PKI_MAX_NB_CERT_AND_CRL);
+                               listLength, (uint32_t) SOPC_PKI_MAX_NB_CERT_AND_CRL);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -2694,7 +2694,7 @@ static SOPC_ReturnStatus check_list_length(SOPC_PKIProvider* pPKI,
                                "> PKI creation error: too many (%" PRIu32
                                ") certificates and CRLs. The maximum configured is %" PRIu32
                                ", please change SOPC_PKI_MAX_NB_CERT_AND_CRL",
-                               PKILen + updateLen, SOPC_PKI_MAX_NB_CERT_AND_CRL);
+                               PKILen + updateLen, (uint32_t) SOPC_PKI_MAX_NB_CERT_AND_CRL);
     }
     return status;
 }
