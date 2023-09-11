@@ -32,6 +32,9 @@
 #define MBEDTLS_CAN_RESOLVE_HOSTNAME 1
 #else
 #define MBEDTLS_CAN_RESOLVE_HOSTNAME 0
+/* X509 SAN are not implemented before 2.28 but these values are only used to write generic ASN.1 buffer */
+#define MBEDTLS_X509_SAN_DNS_NAME 2
+#define MBEDTLS_X509_SAN_UNIFORM_RESOURCE_IDENTIFIER 6
 #endif // MBEDTLS_VERSION_MINOR >= 28
 
 /* MBEDTLS V2 */
