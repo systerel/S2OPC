@@ -439,7 +439,10 @@ void Dataset_LL_Delete_DataSetMessages_Array(SOPC_Dataset_LL_NetworkMessage* nm)
             SOPC_Dataset_LL_DataSetMessage* message = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
             SOPC_Dataset_LL_DataSetMsg_Delete_DataSetField_Array(message);
         }
-        SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
+        if (DataSet_LL_PubId_String_Id == nm->msgHeader.publisher_id.type)
+        {
+            SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
+        }
         nm->dataset_messages_length = 0;
         SOPC_Free(nm->dataset_messages);
         nm->dataset_messages = NULL;
