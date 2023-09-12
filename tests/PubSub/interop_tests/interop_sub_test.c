@@ -66,6 +66,9 @@ static SOPC_PubSubConnection* subConnection = NULL;
 
 SOPC_SKManager* g_skmanager = NULL;
 
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature 32
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey 32
+#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce 4
 SOPC_Byte signingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature] = {0};
 SOPC_Byte encryptingKey[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey] = {0};
 SOPC_Byte keyNonce[SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce] = {0};

@@ -27,6 +27,7 @@
 #ifndef SOPC_CRYPTO_PROFILES_H_
 #define SOPC_CRYPTO_PROFILES_H_
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "sopc_crypto_decl.h"
@@ -37,96 +38,74 @@
 // "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
 #include "s2opc_common_export.h"
 
-// API
-const SOPC_CryptoProfile* SOPC_CryptoProfile_Get(const char* uri);
-const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
-
 // Client-server security policies
 
 // Crypto profiles uri and ID
-#define SOPC_SecurityPolicy_Invalid_ID 0
+typedef enum SOPC_SecurityPolicy_ID
+{
+    SOPC_SecurityPolicy_Invalid_ID = 0,
+    SOPC_SecurityPolicy_Basic256Sha256_ID = 1,
+    SOPC_SecurityPolicy_Basic256_ID = 2,
+    SOPC_SecurityPolicy_None_ID = 3,
+    SOPC_SecurityPolicy_PubSub_Aes256_ID = 4,
+    SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID = 5,
+    SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID = 6,
+    SOPC_SecurityPolicy_Last_ID
+} SOPC_SecurityPolicy_ID;
+
 #define SOPC_SecurityPolicy_Basic256Sha256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"
-#define SOPC_SecurityPolicy_Basic256Sha256_ID 1
 #define SOPC_SecurityPolicy_Basic256_URI "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
-#define SOPC_SecurityPolicy_Basic256_ID 2
 #define SOPC_SecurityPolicy_None_URI "http://opcfoundation.org/UA/SecurityPolicy#None"
-#define SOPC_SecurityPolicy_None_ID 3
+#define SOPC_SecurityPolicy_PubSub_Aes256_URI "http://opcfoundation.org/UA/SecurityPolicy#PubSub-Aes256-CTR"
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI "http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep"
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID 5
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI "http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss"
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID 6
 
-// Basic256Sha256, sizes in bytes
-#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey 32
-#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_Basic256Sha256_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits 2048
-#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-#define SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength 32
-
-// Aes128-Sha256-RsaOaep, sizes in bytes
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey 16
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMinBits 2048
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI_SignAlgo "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
-#define SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SecureChannelNonceLength 32
-
-// Aes256-Sha256-RsaPss, sizes in bytes
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_CryptoKey 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_OAEP_Hash 32 /*< RSA OAEP uses SHA2-256 */
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMinBits 2048
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI_SignAlgo "http://opcfoundation.org/UA/security/rsa-pss-sha2-256"
-#define SOPC_SecurityPolicy_Aes256Sha256RsaPss_SecureChannelNonceLength 32
-
-// Basic256, sizes in bytes
-#define SOPC_SecurityPolicy_Basic256_SymmLen_Block 16
-#define SOPC_SecurityPolicy_Basic256_SymmLen_CryptoKey 32
-#define SOPC_SecurityPolicy_Basic256_SymmLen_SignKey 24
-#define SOPC_SecurityPolicy_Basic256_SymmLen_Signature 20
-#define SOPC_SecurityPolicy_Basic256_CertLen_Thumbprint 20
-#define SOPC_SecurityPolicy_Basic256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
-#define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMinBits 1024
-#define SOPC_SecurityPolicy_Basic256_AsymLen_KeyMaxBits 2048
 #define SOPC_SecurityPolicy_Basic256_URI_SignAlgo "http://www.w3.org/2000/09/xmldsig#rsa-sha1"
-#define SOPC_SecurityPolicy_Basic256_SecureChannelNonceLength 32
 
-// CryptoProfiles instances
+typedef struct SOPC_SecurityPolicy_Config
+{
+    const char* uri;
+    const bool isInvalid; /**< True for "Invalid" configuration (SOPC_SecurityPolicy_Invalid_ID) */
+    const char* name;     /**< A human-readable short name */
+    const SOPC_CryptoProfile* profile;
+    const SOPC_CryptoProfile_PubSub* psProfile;
+    uint8_t secuPolicyWeight;          /**< 0 = less secure */
+    uint32_t symmLen_CryptoKey;        /**< Length (Bytes) of symmetric signature encryption key. O if not supported. */
+    uint32_t symmLen_SignKey;          /**< Length (Bytes) of symmetric signature signing key. O if not supported. */
+    uint32_t symmLen_Signature;        /**< Length (Bytes) of symmetric signature. O if not supported. */
+    uint32_t symmLen_Block;            /**< Length (Bytes) of blocs for symmetric encryption. O if not supported. */
+    uint32_t symmLen_KeyNonce;         /**< Length (Bytes) of Nonce for symmetric key. 0 if not supported */
+    uint32_t symmLen_MessageRandom;    /**< Length (Bytes) of Random message for symmetric key. 0 if not supported */
+    uint32_t asymLen_KeyMinBits;       /**< Minimum length (Bytes) of assymetric keys. 0 if unused*/
+    uint32_t asymLen_KeyMaxBits;       /**< Maximum length (Bytes) of assymetric keys. 0 if unused*/
+    uint32_t secureChannelNonceLength; /**< Length (Bytes) of Nonce for Secure Channel. 0 if not supported */
+    uint32_t OAEP_Hash;                /**< Length (Bytes) of OAEP Hash */
+    uint32_t certLen_Thumbprint;       /**< Length (Bytes) of Thumbprint */
+    const char* URI_SignAlgo;          /**< URI if Signature algorithm */
+} SOPC_SecurityPolicy_Config;
+
+/** Get the configuration of the given security policy
+ This function never returns NULL, and a caller does not need to check this result.
+ This function will raise an assertion failure in case of invalid argument */
+const SOPC_SecurityPolicy_Config* SOPC_SecurityPolicy_Config_Get(SOPC_SecurityPolicy_ID policyId);
+
+// CryptoProfiles instances (Client/Server)
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpAes128Sha256RsaOaep;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpBasic256Sha256;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpBasic256;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile sopc_g_cpNone;
 
-// PubSub security policies
-
-// Crypto profiles uri and ID, reuse None
-#define SOPC_SecurityPolicy_PubSub_Aes256_URI "http://opcfoundation.org/UA/SecurityPolicy#PubSub-Aes256-CTR"
-#define SOPC_SecurityPolicy_PubSub_Aes256_ID 4
-
-// Sizes in bytes
-#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey 32
-#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_SignKey 32
-#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_Signature 32
-#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce 4
-#define SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom 4
-
-// CryptoProfiles instances
+// CryptoProfiles instances (PubSub)
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile_PubSub sopc_g_cppsPubSubAes256;
 S2OPC_COMMON_EXPORT extern const SOPC_CryptoProfile_PubSub sopc_g_cppsNone;
+
+// API
+const SOPC_SecurityPolicy_Config* SOPC_CryptoProfile_Get(const char* uri);
+const SOPC_CryptoProfile_PubSub* SOPC_CryptoProfile_PubSub_Get(const char* uri);
 
 /* ------------------------------------------------------------------------------------------------
  * Internal CryptoProfile function pointers.
@@ -215,7 +194,7 @@ typedef SOPC_ReturnStatus FnPubSubCrypt(const SOPC_CryptoProvider* pProvider,
  */
 struct SOPC_CryptoProfile
 {
-    const uint32_t SecurityPolicyID;
+    const SOPC_SecurityPolicy_ID SecurityPolicyID;
     FnSymmetricEncrypt* const pFnSymmEncrypt;
     FnSymmetricDecrypt* const pFnSymmDecrypt;
     FnSymmetricSign* const pFnSymmSign;

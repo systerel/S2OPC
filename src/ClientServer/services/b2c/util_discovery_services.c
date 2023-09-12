@@ -197,31 +197,19 @@ static void copyUserIdTokens(SOPC_SecurityPolicy* currentSecurityPolicy,
     Others values corresponds to more secured endPoints.*/
 static SOPC_Byte getSecurityLevel(OpcUa_MessageSecurityMode SecurityMode, SOPC_String* securityPolicy)
 {
-    const SOPC_CryptoProfile* secPolicy = SOPC_CryptoProfile_Get(SOPC_String_GetRawCString(securityPolicy));
+    const SOPC_SecurityPolicy_Config* pProfileCfg = SOPC_CryptoProfile_Get(SOPC_String_GetRawCString(securityPolicy));
+    if (NULL == pProfileCfg)
+    {
+        return 0;
+    }
+    const SOPC_CryptoProfile* secPolicy = pProfileCfg->profile;
     if (NULL == secPolicy)
     {
         // Unknown security policy, return unrecommended endpoint value
         return 0;
     }
-    SOPC_Byte secuPolicyWeight = 0;
 
-    switch (secPolicy->SecurityPolicyID)
-    {
-    case SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID:
-        secuPolicyWeight = 4;
-        break;
-    case SOPC_SecurityPolicy_Basic256Sha256_ID:
-        secuPolicyWeight = 3;
-        break;
-    case SOPC_SecurityPolicy_Basic256_ID:
-        secuPolicyWeight = 2;
-        break;
-    case SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID:
-        secuPolicyWeight = 1;
-        break;
-    default:
-        secuPolicyWeight = 0;
-    }
+    SOPC_Byte secuPolicyWeight = pProfileCfg->secuPolicyWeight;
 
     switch (SecurityMode)
     {

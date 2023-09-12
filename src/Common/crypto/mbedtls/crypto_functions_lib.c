@@ -47,6 +47,89 @@
 #include "mbedtls/md.h"
 #include "mbedtls/rsa.h"
 
+static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
+                                             const SOPC_CryptoProvider* pProvider,
+                                             const uint8_t* pInput,
+                                             uint32_t lenPlainText,
+                                             const SOPC_ExposedBuffer* pKey,
+                                             const SOPC_ExposedBuffer* pIV,
+                                             uint8_t* pOutput,
+                                             uint32_t lenOutput)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const SOPC_SecurityPolicy_Config* policy = SOPC_SecurityPolicy_Config_Get(policyId);
+    const uint32_t symmLen_Block = policy->symmLen_Block;
+    const uint32_t symmLen_CryptoKey = policy->symmLen_CryptoKey;
+    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
+                             // initialize a new context.
+
+    SOPC_UNUSED_ARG(pProvider);
+
+    if (lenOutput >= lenPlainText)
+    {
+        // IV is modified during the operation, so it must be copied first
+        unsigned char* iv_cpy = (unsigned char*) SOPC_Malloc(symmLen_Block);
+        SOPC_ASSERT(NULL != iv_cpy);
+        memcpy(iv_cpy, pIV, symmLen_Block);
+        mbedtls_aes_init(&aes);
+
+        if (mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8) == 0)
+        {
+            if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char*) pInput,
+                                      (unsigned char*) pOutput) == 0)
+            {
+                memset(iv_cpy, 0, symmLen_Block);
+                status = SOPC_STATUS_OK;
+            }
+        }
+        mbedtls_aes_free(&aes);
+        SOPC_Free(iv_cpy);
+    }
+    return status;
+}
+
+static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
+                                             const SOPC_CryptoProvider* pProvider,
+                                             const uint8_t* pInput,
+                                             uint32_t lenCipherText,
+                                             const SOPC_ExposedBuffer* pKey,
+                                             const SOPC_ExposedBuffer* pIV,
+                                             uint8_t* pOutput,
+                                             uint32_t lenOutput)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const SOPC_SecurityPolicy_Config* policy = SOPC_SecurityPolicy_Config_Get(policyId);
+    const uint32_t symmLen_Block = policy->symmLen_Block;
+    const uint32_t symmLen_CryptoKey = policy->symmLen_CryptoKey;
+
+    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
+                             // initialize a new context.
+
+    SOPC_UNUSED_ARG(pProvider);
+
+    if (lenOutput >= lenCipherText)
+    {
+        // IV is modified during the operation, so it must be copied first
+        unsigned char* iv_cpy = (unsigned char*) SOPC_Malloc(symmLen_Block);
+        SOPC_ASSERT(NULL != iv_cpy);
+        memcpy(iv_cpy, pIV, symmLen_Block);
+        mbedtls_aes_init(&aes);
+
+        if (mbedtls_aes_setkey_dec(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8) == 0)
+        {
+            if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char*) pInput,
+                                      (unsigned char*) pOutput) == 0)
+            {
+                memset(iv_cpy, 0, symmLen_Block);
+                status = SOPC_STATUS_OK;
+            }
+        }
+        mbedtls_aes_free(&aes);
+        SOPC_Free(iv_cpy);
+    }
+    return status;
+}
+
 /* ------------------------------------------------------------------------------------------------
  * Aes128-Sha256-RsaOaep
  * ------------------------------------------------------------------------------------------------
@@ -60,38 +143,8 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    int res;
-    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
-                             // initialize a new context.
-    unsigned char iv_cpy[SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block]; // IV is modified during the operation,
-                                                                                 // so it must be copied first
-
-    SOPC_UNUSED_ARG(pProvider);
-
-    if (lenOutput < lenPlainText)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
-
-    res = mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pKey,
-                                 SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey * 8);
-    if (0 != res)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    res = mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char*) pInput,
-                                (unsigned char*) pOutput);
-    if (0 != res)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    memset(iv_cpy, 0, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
-    mbedtls_aes_free(&aes);
-
-    return SOPC_STATUS_OK;
+    return generic_SymmEncrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pProvider, pInput, lenPlainText, pKey, pIV,
+                               pOutput, lenOutput);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
@@ -102,39 +155,8 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    int res;
-    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
-                             // initialize a new context.
-    unsigned char iv_cpy[SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block]; // IV is modified during the operation,
-                                                                                 // so it must be copied first
-
-    SOPC_UNUSED_ARG(pProvider);
-
-    if (lenOutput < lenCipherText)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
-    mbedtls_aes_init(&aes);
-
-    res = mbedtls_aes_setkey_dec(&aes, (const unsigned char*) pKey,
-                                 SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey * 8);
-    if (0 != res)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    res = mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char*) pInput,
-                                (unsigned char*) pOutput);
-    if (0 != res)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    memset(iv_cpy, 0, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_Block);
-    mbedtls_aes_free(&aes);
-
-    return SOPC_STATUS_OK;
+    return generic_SymmDecrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pProvider, pInput, lenCipherText, pKey, pIV,
+                               pOutput, lenOutput);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -151,28 +173,8 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
-                             // initialize a new context.
-    unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so
-                                                                            // it must be copied first
-
-    SOPC_UNUSED_ARG(pProvider);
-
-    if (lenOutput < lenPlainText) // TODO: we are in our own lib, arguments have already been verified.
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
-
-    if (mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pKey, 256) != 0)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char*) pInput,
-                              (unsigned char*) pOutput) != 0)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
-    mbedtls_aes_free(&aes);
-
-    return SOPC_STATUS_OK;
+    return generic_SymmEncrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pProvider, pInput, lenPlainText, pKey, pIV,
+                               pOutput, lenOutput);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
@@ -183,30 +185,8 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
-                             // initialize a new context.
-    unsigned char iv_cpy[SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block]; // IV is modified during the operation, so
-                                                                            // it must be copied first
-
-    SOPC_UNUSED_ARG(pProvider);
-
-    if (lenOutput < lenCipherText)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    memcpy(iv_cpy, pIV, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
-    mbedtls_aes_init(&aes);
-
-    if (mbedtls_aes_setkey_dec(&aes, (const unsigned char*) pKey,
-                               SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey * 8) != 0)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char*) pInput,
-                              (unsigned char*) pOutput) != 0)
-        return SOPC_STATUS_INVALID_PARAMETERS;
-
-    memset(iv_cpy, 0, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block);
-    mbedtls_aes_free(&aes);
-
-    return SOPC_STATUS_OK;
+    return generic_SymmDecrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pProvider, pInput, lenCipherText, pKey, pIV,
+                               pOutput, lenOutput);
 }
 
 static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,
@@ -958,6 +938,9 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
                                                   uint8_t* pOutput)
 {
     SOPC_UNUSED_ARG(pProvider);
+    const SOPC_SecurityPolicy_Config* policy = SOPC_SecurityPolicy_Config_Get(SOPC_SecurityPolicy_PubSub_Aes256_ID);
+    const uint32_t keyNonce = policy->symmLen_KeyNonce;
+    const uint32_t msgRandom = policy->symmLen_MessageRandom;
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     mbedtls_aes_context aes;
@@ -973,17 +956,15 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
 
         /* 4 bytes KeyNonce, 4 bytes MessageRandom, 4 bytes SequenceNumber (Little-endian), 4 for block counter
          * (Big-endian) */
-        SOPC_ASSERT(16 == (SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce +
-                           SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom + sizeof(uint32_t) +
-                           4 /* BlockCounter length */) &&
+        SOPC_ASSERT(16 == (keyNonce + msgRandom + sizeof(uint32_t) + 4 /* BlockCounter length */) &&
                     "Invalid AES-CTR parameters, lengths must add up to 16 bytes block, as per AES specification...");
 
         uint8_t counter[16] = {0};
         uint8_t* p = counter;
-        memcpy(p, pExpNonce, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce);
-        p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_KeyNonce;
-        memcpy(p, pRandom, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom);
-        p += SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_MessageRandom;
+        memcpy(p, pExpNonce, keyNonce);
+        p += keyNonce;
+        memcpy(p, pRandom, msgRandom);
+        p += msgRandom;
         memcpy(p, &uSequenceNumber, sizeof(uint32_t));
         p += sizeof(uint32_t);
 

@@ -37,6 +37,16 @@
 #define S2OPC_DEFAULT_ENDPOINT_URL "opc.tcp://LOCALhost:4841"
 #define S2OPC_DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"
 
+// Test constants
+#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Block 16
+#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_SignKey 32
+#define SOPC_SecurityPolicy_Basic256Sha256_SymmLen_Signature 32
+#define SOPC_SecurityPolicy_Basic256Sha256_CertLen_Thumbprint 20
+#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_OAEP_Hash 20 /*< RSA OAEP uses SHA-1 */
+#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMinBits 2048
+#define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
+#define SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength 32
+
 START_TEST(invalid_create)
 {
     SOPC_PKIProvider* pPKI = NULL;

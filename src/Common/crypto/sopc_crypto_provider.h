@@ -342,19 +342,15 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(const SOPC_Cr
  * \note            Internal API.
  *
  * \note            Specific to client-server security policies.
+ * \param pProvider An initialized cryptographic context.
+ * \param length    A valid pointer to the output length in bytes. Its content is unspecified when
+ *                      return value is not SOPC_STATUS_OK.
+ * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
+ *                  \p pProvider not correctly initialized and SOPC_STATUS_NOK if hthe policy does not support this
+ * feature.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const SOPC_CryptoProvider* pProvider,
                                                                          uint32_t* length);
-
-/**
- * \brief           Provides the length of the hash used for PSS signature/verification.
- *
- * \note            Internal API.
- *
- * \note            Specific to client-server security policies.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_PSSHashLength(const SOPC_CryptoProvider* pProvider,
-                                                                        uint32_t* length);
 
 /**
  * \brief           Provides the lengths in bytes of the messages used in asymmetric encryption process.
@@ -501,7 +497,8 @@ const char* SOPC_CryptoProvider_AsymmetricGetUri_SignAlgorithm(const SOPC_Crypto
  * \note            Specific to client-server security policies.
  *
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized.
+ *                  \p pProvider not correctly initialized, and SOPC_STATUS_NOK for an unsupported
+ *                  security policy.
  */
 SOPC_ReturnStatus SOPC_CryptoProvider_CertificateGetLength_Thumbprint(const SOPC_CryptoProvider* pProvider,
                                                                       uint32_t* pLength);

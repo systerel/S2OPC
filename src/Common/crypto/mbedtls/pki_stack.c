@@ -277,6 +277,30 @@ static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha1_1024 = {.curves = SO
                                                                     .pkAlgo = SOPC_PKI_PK_RSA,
                                                                     .RSAMinimumKeySize = 1024};
 
+typedef struct Profile_Cfg
+{
+    const SOPC_PKI_ChainProfile* chain;
+    const SOPC_PKI_LeafProfile* leaf;
+    const SOPC_SecurityPolicy_ID id;
+} Profile_Cfg;
+
+static const Profile_Cfg g_all_profiles[] = {
+    {.id = SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID,
+     .leaf = &g_leaf_profile_rsa_sha256_2048_4096,
+     .chain = &g_chain_profile_rsa_sha256_2048},
+    {.id = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID,
+     .leaf = &g_leaf_profile_rsa_sha256_2048_4096,
+     .chain = &g_chain_profile_rsa_sha256_2048},
+    {.id = SOPC_SecurityPolicy_Basic256Sha256_ID,
+     .leaf = &g_leaf_profile_rsa_sha256_2048_4096,
+     .chain = &g_chain_profile_rsa_sha256_2048},
+    {.id = SOPC_SecurityPolicy_Basic256_ID,
+     .leaf = &g_leaf_profile_rsa_sha1_1024_2048,
+     .chain = &g_chain_profile_rsa_sha1_1024},
+};
+
+#define NB_PROFILES (sizeof(g_all_profiles) / sizeof(*g_all_profiles))
+
 static const SOPC_PKI_LeafProfile* get_leaf_profile_from_security_policy(const char* uri)
 {
     if (NULL == uri)
@@ -284,27 +308,17 @@ static const SOPC_PKI_LeafProfile* get_leaf_profile_from_security_policy(const c
         return NULL;
     }
 
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
+    const size_t len = strlen(uri) + 1;
+    for (size_t i = 0; i < NB_PROFILES; ++i)
     {
-        return &g_leaf_profile_rsa_sha256_2048_4096;
+        const struct Profile_Cfg* pProfile = &g_all_profiles[i];
+        const SOPC_SecurityPolicy_Config* pPolicy = SOPC_SecurityPolicy_Config_Get(pProfile->id);
+        const char* pUri = pPolicy->uri;
+        if (pUri != NULL && SOPC_strncmp_ignore_case(uri, pUri, len) == 0)
+        {
+            return pProfile->leaf;
+        }
     }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
-    {
-        return &g_leaf_profile_rsa_sha256_2048_4096;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                 strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
-    {
-        return &g_leaf_profile_rsa_sha256_2048_4096;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
-        0)
-    {
-        return &g_leaf_profile_rsa_sha1_1024_2048;
-    }
-
     return NULL;
 }
 
@@ -315,25 +329,16 @@ static const SOPC_PKI_ChainProfile* get_chain_profile_from_security_policy(const
         return NULL;
     }
 
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI) + 1) == 0)
+    const size_t len = strlen(uri) + 1;
+    for (size_t i = 0; i < NB_PROFILES; ++i)
     {
-        return &g_chain_profile_rsa_sha256_2048;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI,
-                                 strlen(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI) + 1) == 0)
-    {
-        return &g_chain_profile_rsa_sha256_2048;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256Sha256_URI,
-                                 strlen(SOPC_SecurityPolicy_Basic256Sha256_URI) + 1) == 0)
-    {
-        return &g_chain_profile_rsa_sha256_2048;
-    }
-    if (SOPC_strncmp_ignore_case(uri, SOPC_SecurityPolicy_Basic256_URI, strlen(SOPC_SecurityPolicy_Basic256_URI) + 1) ==
-        0)
-    {
-        return &g_chain_profile_rsa_sha1_1024;
+        const struct Profile_Cfg* pProfile = &g_all_profiles[i];
+        const SOPC_SecurityPolicy_Config* pPolicy = SOPC_SecurityPolicy_Config_Get(pProfile->id);
+        const char* pUri = pPolicy->uri;
+        if (pUri != NULL && SOPC_strncmp_ignore_case(uri, pUri, len) == 0)
+        {
+            return pProfile->chain;
+        }
     }
 
     return NULL;
