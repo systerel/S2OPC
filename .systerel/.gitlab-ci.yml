@@ -40,7 +40,7 @@
 #     - build-win64
 #     - build-rpi
 #     - build-zephyr
-#     - build-freeertos
+#     - build-freertos
 #
 #########################################################
 
@@ -264,7 +264,7 @@ build-zephyr:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
-build-freeertos:
+build-freertos:
   stage: build-others
   image: docker.aix.systerel.fr/c838/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
   script:
