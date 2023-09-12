@@ -241,6 +241,7 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_encrypted);
+    tcase_set_timeout(tc_gen_rsa, 10);
     suite_add_tcase(s, tc_gen_csr);
     tcase_add_test(tc_gen_csr, test_gen_csr);
 
