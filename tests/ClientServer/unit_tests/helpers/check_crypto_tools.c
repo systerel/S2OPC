@@ -479,6 +479,5 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_cert_list_to_array);
     tcase_add_test(tc_check_crypto_list_to_array, test_crypto_check_crl_list_to_array);
 
-
     return s;
 }

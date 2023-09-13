@@ -532,7 +532,7 @@ SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pG
     uint32_t bufLength = 0;
 
     SOPC_ASSERT(NULL != pCtx->pPKI);
-    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteRejectedCertToList(pCtx->pPKI, &pCerts);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_CopyRejectedList(pCtx->pPKI, &pCerts);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(
