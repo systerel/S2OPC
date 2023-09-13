@@ -27,6 +27,7 @@ endif()
 # to "MODULE" source code reference in the same CMakelist.txt (typically : s2opc/src)
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1)
 add_definitions (-DWITH_USER_ASSERT=1)
+add_definitions (-DSOPC_HAS_FILESYSTEM=0)
 add_definitions (-UNDEBUG)
 add_definitions (-Werror)
 

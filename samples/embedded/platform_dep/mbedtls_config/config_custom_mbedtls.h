@@ -58,8 +58,5 @@
 #ifdef MBEDTLS_FS_IO
 #undef MBEDTLS_FS_IO
 #endif
-#if SOPC_HAS_FILESYSTEM
-#define MBEDTLS_FS_IO
-#endif
 
 #endif /* __CONFIG_CUSTOM_MBEDTLS_H__ */

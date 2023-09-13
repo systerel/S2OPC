@@ -1476,6 +1476,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_Certif
     return status;
 }
 
+#if SOPC_HAS_FILESYSTEM
 static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* directoryPath)
 {
     SOPC_ASSERT(NULL != buf && NULL != directoryPath);
@@ -1535,7 +1536,6 @@ static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* 
     return status;
 }
 
-#if SOPC_HAS_FILESYSTEM
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* pCerts, const char* directoryPath)
 {
     if (NULL == pCerts)

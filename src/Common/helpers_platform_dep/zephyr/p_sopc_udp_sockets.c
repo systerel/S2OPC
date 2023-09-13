@@ -253,8 +253,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 
     SOPC_Buffer_Reset(buffer);
 
-    S2OPC_TEMP_FAILURE_RETRY(recv_len, recvfrom(sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &saddr, &slen);                    //)
-    
+    S2OPC_TEMP_FAILURE_RETRY(recv_len,
+                             recvfrom(sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &saddr, &slen));
+
     if (recv_len >= 0)
     {
         buffer->length = (uint32_t) recv_len;
