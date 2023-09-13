@@ -66,8 +66,8 @@ typedef SOPC_Buffer SOPC_SerializedCertificate;
  * \param buffer    A valid pointer to the buffer containing the DER or PEM description.
  * \param lenBuf    The length in bytes of the DER/PEM description of the key.
  * \param is_public Whether the buffer holds a public or a private key.
- * \param ppKey     A handle to the created key.
- *                  This object must be freed with a call to ::SOPC_KeyManager_AsymmetricKey_Free .
+ * \param[out] ppKey A handle to the created key.
+ *                   This object must be freed with a call to ::SOPC_KeyManager_AsymmetricKey_Free .
  *
  * \note            Content of the key is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -89,8 +89,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
  *   ::SOPC_KeyManager_AsymmetricKey_CreateFromCertificate .
  *
  * \param szPath    The path to the DER/PEM file.
- * \param ppKey     A handle to the created key. This object must be freed with a call to
- *                  ::SOPC_KeyManager_AsymmetricKey_Free .
+ * \param[out] ppKey A handle to the created key. This object must be freed with a call to
+ *                   ::SOPC_KeyManager_AsymmetricKey_Free .
  * \param password  An optional password. The password must be a zero-terminated string with at most \p lenPassword
  *                  non null chars, and at least \p lenPassword + 1 allocated chars.
  * \param lenPassword  The length of the password.
@@ -110,7 +110,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
  * \brief  Generate an RSA asymmetric key.
  *
  * \param RSAKeySize The RSA key length to generate.
- * \param ppKey      A handle to the generated key. This object must be freed with a call to
+ * \param[out] ppKey A handle to the generated key. This object must be freed with a call to
  *                   ::SOPC_KeyManager_AsymmetricKey_Free
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
@@ -124,7 +124,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
  *                  by ::SOPC_KeyManager_Certificate_Free .
  *
  * \param pCert     A valid pointer to the signed public key.
- * \param pKey      A handle to the created key structure, the SOPC_AsymmetricKey will then be rewritten to contain the
+ * \param[out] pKey A handle to the created key structure, the SOPC_AsymmetricKey will then be rewritten to contain the
  *                  public key. This is not a deep copy, and the key is not valid anymore when the certificate is not
  *                  valid. This object must be freed with a call to ::SOPC_KeyManager_AsymmetricKey_Free which will
  *                  only deallocate the structure.
@@ -157,9 +157,9 @@ void SOPC_KeyManager_AsymmetricKey_Free(SOPC_AsymmetricKey* pKey);
  *
  * \param pKey         A valid pointer to the asymmetric key (public/private) to encode.
  * \param is_public    Whether the key is public or private.
- * \param pDest        A valid pointer to the buffer which will receive the DER encoded key.
+ * \param[out] pDest   A valid pointer to the buffer which will receive the DER encoded key.
  * \param lenDest      The length in bytes of the buffer \p pDest.
- * \param pLenWritten  A valid pointer to the number of bytes written to pDest.
+ * \param[out] pLenWritten  A valid pointer to the number of bytes written to pDest.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -198,9 +198,9 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
 /**
  * \brief Creates a serialized asymmetric key from a DER or PEM payload.
  *
- * \param data   the key data in DER or PEM format
- * \param len   length of the data
- * \param key  out parameter, the created serialized key
+ * \param data     the key data in DER or PEM format
+ * \param len      length of the data
+ * \param[out] key the created serialized key
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -211,8 +211,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(const u
 /**
  * \brief Creates a serialized asymmetric key from a file in DER or PEM format.
  *
- * \param path  path to the file
- * \param key   out parameter, the created serialized key
+ * \param path     path to the file
+ * \param[out] key the created serialized key
  *
  * \deprecated  Use ::SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd instead
  *
@@ -226,7 +226,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(const c
  *                      with an optional \p password for the encrypted private key (PEM format).
  *
  * \param keyPath       The path to the DER/PEM file.
- * \param key           the newly allocated serialized.
+ * \param[out] key      the newly allocated serialized key.
  * \param password      An optional password (!= NULL). The password must be a zero-terminated string with
  *                      at most \p lenPassword non null chars, and at least \p lenPassword + 1 allocated chars.
  * \param lenPassword   The length of the password.
@@ -245,7 +245,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
  *
  * \param pKey      A valid pointer to the asymmetric key (public/private) to serialize.
  * \param is_public Whether the key is public or private.
- * \param out       the newly allocated serialized key
+ * \param[out] out  the newly allocated serialized key
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -258,7 +258,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(const SO
  *
  * \param key        the serialized key
  * \param is_public  whether the serialized key is a public or a private key
- * \param res        out parameter, the decoded key as a newly allocated SOPC_AsymmetricKey
+ * \param[out] res   out parameter, the decoded key as a newly allocated SOPC_AsymmetricKey
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -286,9 +286,9 @@ void SOPC_KeyManager_SerializedAsymmetricKey_Delete(SOPC_SerializedAsymmetricKey
  *
  * \param bufferDER A valid pointer to the buffer containing the DER description.
  * \param lenDER    The length in bytes of the DER description of the certificate.
- * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
- *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
- *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free .
+ * \param[out] ppCert Creation: a valid handle which will point to the newly created Certificate.
+ *                    Addition: a pointer to a pointer to a Certificate list to which add the certificate.
+ *                    In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free .
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole certificate list is freed,
@@ -308,10 +308,10 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
  *   \p szPath is the path to the file containing the key. It should be zero-terminated.
  *   The key may be described in the DER of PEM format.
  *
- * \param szPath    The path to the DER/PEM file.
- * \param ppCert    Creation: a valid handle which will point to the newly created Certificate.
- *                  Addition: a pointer to a pointer to a Certificate list to which add the certificate.
- *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free
+ * \param szPath      The path to the DER/PEM file.
+ * \param[out] ppCert Creation: a valid handle which will point to the newly created Certificate.
+ *                    Addition: a pointer to a pointer to a Certificate list to which add the certificate.
+ *                    In either cases, this object must be freed with a call to ::SOPC_KeyManager_Certificate_Free
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole certificate list is freed,
@@ -336,10 +336,10 @@ void SOPC_KeyManager_Certificate_Free(SOPC_CertificateList* pCert);
 /**
  * \brief           Encodes a \p pCert as a DER buffer and writes the result in \p ppDest.
  *
- * \param pCert     A valid pointer to the Certificate. There must be only one certificate in the list.
- * \param ppDest    A valid pointer to the newly created buffer that stores the DER description of the signed public
- *                  key. The allocated buffer must be freed by the caller.
- * \param pLenAllocated  A valid pointer to the length allocated by this operation.
+ * \param pCert       A valid pointer to the Certificate. There must be only one certificate in the list.
+ * \param[out] ppDest A valid pointer to the newly created buffer that stores the DER description of the signed public
+ *                    key. The allocated buffer must be freed by the caller.
+ * \param[out] pLenAllocated  A valid pointer to the length allocated by this operation.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -374,8 +374,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
  *
  * \param pProvider An initialized cryptographic context.
  * \param pCert     A valid pointer to the signed public key to thumbprint.
- * \param pDest     A valid pointer to the buffer that will contain the thumbprint.
- * \param lenDest   The length in bytes of \p pDest.
+ * \param[out] pDest   A valid pointer to the buffer that will contain the thumbprint.
+ * \param[out] lenDest The length in bytes of \p pDest.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -420,8 +420,8 @@ bool SOPC_KeyManager_Certificate_CheckApplicationUri(const SOPC_CertificateList*
  *                  extract the application URI from a field that is not the right one).
  *
  * \param pCert     The certificate.
- * \param ppApplicationUri  A pointer to the newly allocated zero-terminated string containing the application URI.
- * \param pStringLength     Optional pointer to the string length (excluding the trailing \0).
+ * \param[out] ppApplicationUri  A pointer to the newly allocated zero-terminated string containing the application URI.
+ * \param[out] pStringLength     Optional pointer to the string length (excluding the trailing \0).
  *
  * \warning         \p pCert must contain a single certificate.
  *
@@ -434,8 +434,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 /**
  * \brief           Return the number of chained certificates in the certificate list \p pCert.
  *
- * \param pCert     The certificate or certificate list.
- * \param pLength   A valid pointer to the computed length of the list.
+ * \param pCert        The certificate or certificate list.
+ * \param[out] pLength A valid pointer to the computed length of the list.
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -452,12 +452,12 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  *
  * \warning If the list \p pCert became empty then the list \p pCert is set to NULL.
  *
- * \param pCert     A valid pointer to the Certificate list.
- * \param pCRL      A valid pointer to the CRL list.
- * \param pbMatch   An optional pointer to the result of the test.
- *                  True value indicates that each certificate in \p pCert has exactly one associated CRL in \p pCRL,
- *                  and no certificate has been freed.
- *                  Otherwise false.
+ * \param pCert        A valid pointer to the Certificate list.
+ * \param pCRL         A valid pointer to the CRL list.
+ * \param[out] pbMatch An optional pointer to the result of the test.
+ *                     True value indicates that each certificate in \p pCert has exactly one associated CRL in \p pCRL,
+ *                     and no certificate has been freed.
+ *                     Otherwise false.
  *
  * \note            Content of \p pbMatch is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -470,11 +470,11 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_Certif
 /**
  * \brief           Finds whether a certificate is in the given certificate list or not.
  *
- * \param pList     An optional pointer to the Certificate list.
- * \param pCert     An optional pointer to a single Certificate to find in the list.
- * \param pbMatch   A valid pointer to the result of the find.
- *                  True indicates that the certificate was found in the list.
- *                  Otherwise false.
+ * \param pList        An optional pointer to the Certificate list.
+ * \param pCert        An optional pointer to a single Certificate to find in the list.
+ * \param[out] pbMatch A valid pointer to the result of the find.
+ *                     True indicates that the certificate was found in the list.
+ *                     Otherwise false.
  *
  * \warning         \p pCert must contain a single certificate.
  *
@@ -513,9 +513,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
 /**
  * \brief Creates a serialized certificate from a DER payload.
  *
- * \param der   the certificate data in DER format
- * \param len   length of the DER data
- * \param cert  out parameter, the created serialized certificate
+ * \param der        the certificate data in DER format
+ * \param len        length of the DER data
+ * \param[out] cert  the created serialized certificate
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -526,8 +526,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint
 /**
  * \brief Creates a serialized certificate from a file in DER format.
  *
- * \param path  path to the file
- * \param cert  out parameter, the created serialized certificate
+ * \param path       path to the file
+ * \param[out] cert  the created serialized certificate
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -537,8 +537,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const cha
 /**
  * \brief Deserializes a serialized certificate.
  *
- * \param cert  the serialized certificate
- * \param res   out parameter, the decoded certificate as a newly allocated SOPC_CertificateList
+ * \param cert     the serialized certificate
+ * \param[out] res the decoded certificate as a newly allocated SOPC_CertificateList
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
@@ -571,8 +571,8 @@ char* SOPC_KeyManager_Certificate_GetCstring_SHA1(const SOPC_CertificateList* pC
 /**
  * \brief                Whether the first item of a certificate list is self signed.
  *
- * \param pCert          A valid pointer to the certificate list.
- * \param pbIsSelfSigned A valid pointer to the result.
+ * \param pCert               A valid pointer to the certificate list.
+ * \param[out] pbIsSelfSigned A valid pointer to the result.
  *
  * \note            Only the first certificate of \p pCert is processed.
  *
@@ -584,9 +584,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
 /**
  * \brief            Makes a copy of a given certificate list.
  *
- * \param pCert      A valid pointer to the certificate list to copy.
- * \param ppCertCopy A pointer to store the newly allocated certificate list copy.
- *                   Caller is responsible to call ::SOPC_KeyManager_Certificate_Free if needed.
+ * \param pCert           A valid pointer to the certificate list to copy.
+ * \param[out] ppCertCopy A pointer to store the newly allocated certificate list copy.
+ *                        Caller is responsible to call ::SOPC_KeyManager_Certificate_Free if needed.
  *
  * \return           SOPC_STATUS_OK when successful.
  *
@@ -612,11 +612,11 @@ void SOPC_KeyManager_SerializedCertificate_Delete(SOPC_SerializedCertificate* ce
  *
  *   \p bufferDER is \p lenDER long, and describes one CRL in the DER format.
  *
- * \param bufferDER A valid pointer to the buffer containing the DER description.
- * \param lenDER    The length in bytes of the DER description of the certificate.
- * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
- *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
- *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
+ * \param bufferDER  A valid pointer to the buffer containing the DER description.
+ * \param lenDER     The length in bytes of the DER description of the certificate.
+ * \param[out] ppCRL Creation: a valid handle which will point to the newly created CRL.
+ *                   Addition: a pointer to a pointer to a CRL list to which add the CRL.
+ *                   In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
  *
  * \note            Content of the CRL is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
@@ -636,10 +636,10 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
  *   \p szPath is the path to the file containing the key. It should be zero-terminated.
  *   The key may be described in the DER of PEM format.
  *
- * \param szPath    The path to the DER/PEM file.
- * \param ppCRL     Creation: a valid handle which will point to the newly created CRL.
- *                  Addition: a pointer to a pointer to a CRL list to which add the CRL.
- *                  In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
+ * \param szPath     The path to the DER/PEM file.
+ * \param[out] ppCRL Creation: a valid handle which will point to the newly created CRL.
+ *                   Addition: a pointer to a pointer to a CRL list to which add the CRL.
+ *                   In either cases, this object must be freed with a call to ::SOPC_KeyManager_CRL_Free .
  *
  * \note            Content of the certificate is unspecified when return value is not SOPC_STATUS_OK.
  *                  However, in case of a failed addition, the whole CRL list is freed,
@@ -664,9 +664,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_ToDER_Files(SOPC_CRLList* pCrls, const cha
 /**
  * \brief            Makes a copy of a given CRL list.
  *
- * \param pCrl       A valid pointer to the CRL list to copy.
- * \param ppCrlCopy  A pointer to store the newly allocated CRL list copy.
- *                   Caller is responsible to call ::SOPC_KeyManager_CRL_Free if needed.
+ * \param pCrl            A valid pointer to the CRL list to copy.
+ * \param[out] ppCrlCopy  A pointer to store the newly allocated CRL list copy.
+ *                        Caller is responsible to call ::SOPC_KeyManager_CRL_Free if needed.
  *
  * \return          SOPC_STATUS_OK when successful.
  *
@@ -676,8 +676,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_Copy(const SOPC_CRLList* pCrl, SOPC_CRLLis
 /**
  * \brief           Returns the number of chained CRL in \p pCrl list.
  *
- * \param pCrl      A valid pointer to the CRL list.
- * \param pLength   A valid pointer to the computed length of the list.
+ * \param pCrl           A valid pointer to the CRL list.
+ * \param[out] pLength   A valid pointer to the computed length of the list.
  *
  * \note            Content of the output is unspecified when the returned value is not SOPC_STATUS_OK.
  *
@@ -707,7 +707,7 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
  * \param mdType       The MD algorithm (terminated by '\0') use for the signature eg SHA1, SHA256...
  * \param uri          The application URI (terminated by '\0'). Shall not be NULL.
  * \param dns          The DSN name of the server (terminated by '\0'). Shall not be NULL.
- * \param ppCSR        A handle to the created CSR. This object must be freed
+ * \param[out] ppCSR   A handle to the created CSR. This object must be freed
  *                     with a call to ::SOPC_KeyManager_CSR_Free .
  *
  * \note  The keyUsage is filled with digitalSignature, nonRepudiation, keyEncipherment and dataEncipherment.
@@ -730,11 +730,11 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
  * \param pCSR     A valid pointer to the CSR.
  * \param pKey     A valid pointer to the asymmetric key. The key shall be private.
  *                 The key is attached to the CSR but not freed by ::SOPC_KeyManager_CSR_Free .
- * \param ppDest   A valid pointer to the newly created buffer that stores the DER.
- *                 The allocated buffer must be freed by the caller.
- * \param pLenAllocated  A valid pointer to the length allocated by this operation.
+ * \param[out] ppDest   A valid pointer to the newly created buffer that stores the DER.
+ *                      The allocated buffer must be freed by the caller.
+ * \param[out] pLenAllocated  A valid pointer to the length allocated by this operation.
  *
- * \note           Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ * \note           Content of the outputs is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return \c SOPC_STATUS_OK on success, or an error code in case of failure.
  */
