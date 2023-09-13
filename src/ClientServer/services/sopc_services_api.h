@@ -114,6 +114,12 @@ typedef enum SOPC_Services_Event
                                          Automatically called by ::SOPC_Toolkit_Clear for both client and server.<BR>
                                          params = true if for SCs as client only, false if both client and server SCs.
                                        */
+    APP_TO_SE_REVALIDATE_SCS_CERTS,   /**< Validate the certificate used by the secure channels due to PKI application
+                                         trust list update. <BR>
+  
+                                         params = (bool) flag indicating if it concerns server (true) or client (false)
+                                                 application secure channels. */
+
 } SOPC_Services_Event;
 
 /* API to enqueue an event for services */

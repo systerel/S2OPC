@@ -603,6 +603,12 @@ static void onServiceEvent(SOPC_EventHandler* handler,
             onServiceEvent(handler, SE_TO_SE_SC_ALL_DISCONNECTED, id, params, auxParam);
         }
         break;
+    case APP_TO_SE_REVALIDATE_SCS_CERTS:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_REVALIDATE_SCS_CERTS isServer=%" PRIuPTR, params);
+        status = SOPC_SecureChannels_EnqueueEvent(SCS_REVALIDATE_CERTS, id, params, auxParam);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        break;
     default:
         SOPC_ASSERT(false);
     }

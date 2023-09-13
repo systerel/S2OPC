@@ -3523,6 +3523,67 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     }
 }
 
+static void SOPC_Internal_SC_RevalidateCert(SOPC_SecureConnection* conn, uint32_t connIdx, uintptr_t isServer)
+{
+    const bool bIsServer = (bool) isServer;
+    if (bIsServer != conn->isServerConnection)
+    {
+        return;
+    }
+    if (SECURE_CONNECTION_STATE_SC_CONNECTED != conn->state &&
+        SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW != conn->state)
+    {
+        return;
+    }
+
+    SOPC_SecureChannel_Config* clientConfig = NULL;
+    SOPC_Endpoint_Config* serverConfig = NULL;
+    SOPC_PKIProvider* pkiProvider = NULL;
+
+    if (bIsServer)
+    {
+        serverConfig = SOPC_ToolkitServer_GetEndpointConfig(conn->serverEndpointConfigIdx);
+        if (NULL != serverConfig)
+        {
+            pkiProvider = serverConfig->serverConfigPtr->pki;
+        }
+    }
+    else
+    {
+        clientConfig = SOPC_ToolkitClient_GetSecureChannelConfig(conn->secureChannelConfigIdx);
+        if (NULL != clientConfig)
+        {
+            pkiProvider = clientConfig->clientConfigPtr->clientPKI;
+        }
+    }
+
+    if (NULL != pkiProvider)
+    {
+        SOPC_StatusCode errorStatus = OpcUa_BadUnexpectedError;
+        SOPC_PKI_Type PKIType = bIsServer ? SOPC_PKI_TYPE_SERVER_APP : SOPC_PKI_TYPE_CLIENT_APP;
+        const SOPC_CertificateList* cert = SC_PeerCertificate(conn);
+        SOPC_ReturnStatus status =
+            SOPC_CryptoProvider_Certificate_Validate(conn->cryptoProvider, pkiProvider, PKIType, cert, &errorStatus);
+
+        if (SOPC_STATUS_OK != status)
+        {
+            char* pThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
+            const char* thumbprint = NULL == pThumbprint ? "NULL" : pThumbprint;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "Closing secure channel idx=%" PRIu32
+                                     ": certificate %s is not valid anymore after PKI trust list update",
+                                     connIdx, thumbprint);
+            SOPC_Free(pThumbprint);
+            SC_CloseSecureConnection(conn, connIdx, false, false, OpcUa_BadSecurityChecksFailed,
+                                     "Certificate is not valid anymore after PKI trust list update");
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "SC_RevalidateCert: unexpected NULL PKI provider");
+    }
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               uintptr_t params,
@@ -3746,6 +3807,9 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                    "ServicesMgr: SC_DISCONNECTED_ACK: invalid connection or state for scIdx=%" PRIu32,
                                    eltId);
         }
+        break;
+    case SCS_REVALIDATE_CERTS:
+        SC_ApplyToAllSCs(&SOPC_Internal_SC_RevalidateCert, params);
         break;
     default:
         // Already filtered by secure channels API module

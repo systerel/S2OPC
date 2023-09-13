@@ -173,12 +173,9 @@ void SOPC_SecureChannels_OnInputEvent(SOPC_EventHandler* handler,
     case SC_REVERSE_CONNECT:
     case SC_DISCONNECT:
     case SC_SERVICE_SND_MSG:
-        SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
-        break;
     case SC_SERVICE_SND_ERR:
-        SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
-        break;
     case SC_DISCONNECTED_ACK:
+    case SCS_REVALIDATE_CERTS:
         SOPC_SecureConnectionStateMgr_Dispatcher(scEvent, eltId, params, auxParam);
         break;
     default:
@@ -207,6 +204,7 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
     case SC_SERVICE_SND_MSG:
     case SC_SERVICE_SND_ERR:
     case SC_DISCONNECTED_ACK:
+    case SCS_REVALIDATE_CERTS:
         status = SOPC_EventHandler_Post(secureChannelsInputEventHandler, (int32_t) scEvent, id, params, auxParam);
         break;
     default:

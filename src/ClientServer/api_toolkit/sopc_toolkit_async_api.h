@@ -86,6 +86,14 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  *       reverseEndpointConfigIdx == 0 => classic connection
  *
  */
+
+/**
+ * \brief Request to re-evaluate the current server secure channels peer certificates using the PKI.
+ *        This shall be triggered when a PKI trust list update occurred.
+ *        If certificate is not valid or trusted anymore, the secure channel is closed.
+ */
+void SOPC_ToolkitServer_AsyncReEvalSecureChannelsCerts(void);
+
 typedef struct SOPC_EndpointConnectionCfg
 {
     SOPC_ReverseEndpointConfigIdx
@@ -294,5 +302,12 @@ void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx r
  *
  */
 void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
+
+/**
+ * \brief Request to re-evaluate the current client secure channels peer certificates using the PKI.
+ *        This shall be triggered when a PKI trust list update occurred.
+ *        If certificate is not valid or trusted anymore, the secure channel is closed.
+ */
+void SOPC_ToolkitClient_AsyncReEvalSecureChannelsCerts(void);
 
 #endif /* SOPC_TOOLKIT_ASYNC_API_H_ */

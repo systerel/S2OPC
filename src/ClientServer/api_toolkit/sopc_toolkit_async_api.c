@@ -48,6 +48,11 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
                                requestContext);
 }
 
+void SOPC_ToolkitServer_AsyncReEvalSecureChannelsCerts(void)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_REVALIDATE_SCS_CERTS, 0, (uintptr_t) true, 0);
+}
+
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
     SOPC_ASSERT(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
@@ -338,4 +343,9 @@ void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx r
 void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx)
 {
     SOPC_Services_EnqueueEvent(APP_TO_SE_CLOSE_REVERSE_ENDPOINT, reverseEndpointConfigIdx, (uintptr_t) NULL, 0);
+}
+
+void SOPC_ToolkitClient_AsyncReEvalSecureChannelsCerts(void)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_REVALIDATE_SCS_CERTS, 0, (uintptr_t) false, 0);
 }

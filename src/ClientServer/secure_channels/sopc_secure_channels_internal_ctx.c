@@ -96,6 +96,16 @@ const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn)
     return conn->isServerConnection ? conn->clientCertificate : conn->serverCertificate;
 }
 
+void SC_ApplyToAllSCs(SC_ApplyToConnection* applyToConnection, uintptr_t param)
+{
+    for (uint32_t i = 1; i < SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED; i++)
+    {
+        SOPC_SecureConnection* conn = SC_GetConnection(i);
+        SOPC_ASSERT(NULL != conn);
+        applyToConnection(conn, i, param);
+    }
+}
+
 uint32_t SOPC_ScInternalContext_GetNbIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx)
 {
     SOPC_ASSERT(NULL != chunkCtx);
