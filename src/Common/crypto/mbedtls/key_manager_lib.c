@@ -2274,30 +2274,29 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
     {
         /* Let mbedtls fail if the buffer size is too small */
         lenWritten = mbedtls_x509write_csr_der(&pCSR->csr, buf, sizeof(buf), mbedtls_ctr_drbg_random, &ctxDrbg);
-        errLib = 0 < lenWritten ? 0 : -1;
+        errLib = 0 < lenWritten && SIZE_MAX >= (uint64_t) lenWritten && UINT32_MAX >= (uint64_t) lenWritten ? 0 : -1;
     }
     if (0 == errLib)
     {
-        *pLenAllocated = (uint32_t) lenWritten;
-        pDest = SOPC_Malloc(*pLenAllocated * sizeof(uint8_t));
+        pDest = SOPC_Malloc((size_t) lenWritten * sizeof(uint8_t));
         errLib = NULL != pDest ? 0 : -2;
     }
     if (0 == errLib)
     {
         /* mbedtls_x509write_csr_der writes data backward from the end of the buffer */
-        memcpy(pDest, buf + sizeof(buf) - *pLenAllocated, *pLenAllocated);
+        memcpy(pDest, buf + sizeof(buf) - (size_t) lenWritten, (size_t) lenWritten);
+        *pLenAllocated = (uint32_t) lenWritten;
+        *ppDest = pDest;
     }
     else
     {
-        *pLenAllocated = 0;
         SOPC_Free(pDest);
     }
-    *ppDest = pDest;
     /* Clear */
     mbedtls_entropy_free(&ctxEnt);
     mbedtls_ctr_drbg_free(&ctxDrbg);
 
-    return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    return 0 == errLib ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
