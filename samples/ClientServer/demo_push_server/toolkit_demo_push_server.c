@@ -63,14 +63,9 @@ static SOPC_ReturnStatus DemoPushSrv_LoadConfigurationFromFiles(void)
      *
      * In case of success returns the file path otherwise display error message and return failure status.
      */
-    // const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
-    // const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
-    // const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
-    const char* xml_server_config_path =
-        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/S2OPC_Server_Demo_Config.xml";
-    const char* xml_address_space_config_path =
-        "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/S2OPC_Demo_Push_AddSpace.xml";
-    const char* xml_users_config_path = "/home/rba/PROJECTS/C838_S2OPC/GIT/S2OPC/build/bin/S2OPC_Users_Demo_Config.xml";
+    const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
+    const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
+    const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
 
     if (NULL == xml_server_config_path || NULL == xml_address_space_config_path || NULL == xml_users_config_path)
     {
