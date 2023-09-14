@@ -1649,25 +1649,20 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DeleteSubscription(SOPC_ClientHelper_Subs
         }
     }
 
-    if (SOPC_STATUS_OK == status)
+    // Unregister the notification context if the subscription was deleted
+    SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
+    // Remove the subscription context if the subscription was deleted
+    if (NULL != reqCtx)
     {
-        // Unregister the notification context if the subscription was deleted
-        SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
-        // Remove the subscription context if the subscription was deleted
-        if (NULL != reqCtx)
-        {
-            SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
-        }
+        SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
     }
 
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Free(subscription);
-        *ppSubscription = NULL;
-    }
+    SOPC_Free(subscription);
+    *ppSubscription = NULL;
+
     return status;
 }
 
