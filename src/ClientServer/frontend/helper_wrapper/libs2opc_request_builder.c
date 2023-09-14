@@ -1227,7 +1227,7 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaul
         }
         if (SOPC_STATUS_OK != status)
         {
-            OpcUa_CreateMonitoredItemsRequest_Clear(&req);
+            OpcUa_CreateMonitoredItemsRequest_Clear(req);
             SOPC_Free(req);
             req = NULL;
         }
@@ -1257,7 +1257,7 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_CreateDefaul
         }
         if (SOPC_STATUS_OK != status)
         {
-            OpcUa_CreateMonitoredItemsRequest_Clear(&req);
+            OpcUa_CreateMonitoredItemsRequest_Clear(req);
             SOPC_Free(req);
             req = NULL;
         }
