@@ -86,13 +86,13 @@ typedef struct SOPC_TrLst_TimeEvent
  */
 typedef struct SOPC_TrustListContext
 {
-    uint32_t maxTrustListSize;           /*!< Defined the maximum size in byte for the TrustList */
+    uint32_t maxTrustListSize;           /*!< Defines the maximum size in byte for the TrustList */
     SOPC_NodeId* pObjectId;              /*!< The nodeId of the the TrustList */
     char* cStrObjectId;                  /*!< The C string nodeId of the the TrustList (it is used for logs) */
-    SOPC_TrLst_Handle handle;            /*!< Defined the TrustList handle */
-    SOPC_TrLst_OpenMode openingMode;     /*!< Defined the opening mode (read or write + erase if existing) */
-    SOPC_TrLst_Mask openingMask;         /*!< Defined the opening mask to read only part of the TrustList */
-    SOPC_TrustList_Type groupType;       /*!< Defined the TrustList type (associated to user or application) */
+    SOPC_TrLst_Handle handle;            /*!< Defines the TrustList handle */
+    SOPC_TrLst_OpenMode openingMode;     /*!< Defines the opening mode (read or write + erase if existing) */
+    SOPC_TrLst_Mask openingMask;         /*!< Defines the opening mask to read only part of the TrustList */
+    SOPC_TrustList_Type groupType;       /*!< Defines the TrustList type (associated to user or application) */
     SOPC_TrLst_VarCfg varIds;            /*!< The structure which gather all the variable nodIds
                                               belonging to the TrustList */
     SOPC_Buffer* pTrustListEncoded;      /*!< The buffer holding the instance of the TrustListDataType
@@ -140,9 +140,35 @@ SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
 void TrustList_DictRemove(const SOPC_NodeId* pObjectId);
 
 /**
+ * \brief Start the activity timeout.
+ *
+ * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
+ *       ::TrustList_DictGet )
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ */
+void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext);
+
+/**
+ * \brief Reset the activity timeout.
+ *
+ * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
+ *       ::TrustList_DictGet )
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ */
+void TrustList_ResetActivityTimeout(SOPC_TrustListContext* pContext);
+
+/**
  * \brief Generate a random handle and attach it to the TrustList.
  *
  * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
  *
  * \return SOPC_STATUS_OK if successful
  */

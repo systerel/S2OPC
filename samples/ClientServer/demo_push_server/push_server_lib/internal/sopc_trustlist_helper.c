@@ -514,6 +514,30 @@ static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustLi
     return status;
 }
 
+/* Start the activity timeout */
+void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext)
+{
+    SOPC_ASSERT(NULL != pContext);
+    SOPC_Event activityTimeoutEvent = {0};
+    activityTimeoutEvent.params = (uintptr_t) pContext;
+    pContext->event.activityTimeoutTimId =
+        SOPC_EventTimer_Create(pContext->event.pHandler, activityTimeoutEvent, SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS);
+    if (0 == pContext->event.activityTimeoutTimId)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: failed to start the activity timeout",
+                                 pContext->cStrObjectId);
+    }
+}
+
+/* Reset the activity timeout */
+void TrustList_ResetActivityTimeout(SOPC_TrustListContext* pContext)
+{
+    SOPC_ASSERT(NULL != pContext);
+    SOPC_EventTimer_Cancel(pContext->event.activityTimeoutTimId);
+    SOPC_Atomic_Int_Set(&pContext->event.timeoutElapsed, 0);
+    TrustList_StartActivityTimeout(pContext);
+}
+
 /* Generate a random handle */
 SOPC_ReturnStatus TrustList_GenRandHandle(SOPC_TrustListContext* pTrustList)
 {

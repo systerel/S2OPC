@@ -1056,14 +1056,10 @@ SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
     {
         if (bCheckActivityTimeout)
         {
-            /* Reset the timer */
-            SOPC_EventTimer_Cancel(pCtx->event.activityTimeoutTimId);
-
-            /* Check period elapsed */
-            SOPC_Event activityTimeoutEvent = {0};
-            activityTimeoutEvent.params = (uintptr_t) pCtx;
-            if (SOPC_Atomic_Int_Get(&pCtx->event.timeoutElapsed))
+            /* Check the elapsed period and close the TrustList if necessary */
+            if (1 == SOPC_Atomic_Int_Get(&pCtx->event.timeoutElapsed))
             {
+                /* Close the TrustList */
                 SOPC_AddressSpaceAccess* pAddSpAccess = NULL;
                 if (NULL != callContextPtr)
                 {
@@ -1073,18 +1069,6 @@ SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                          "TrustList:%s: activity timeout period elapsed (TrustList has been closed)",
                                          pCtx->cStrObjectId);
-            }
-            else
-            {
-                /* Start the timer */
-                pCtx->event.activityTimeoutTimId = SOPC_EventTimer_Create(pCtx->event.pHandler, activityTimeoutEvent,
-                                                                          SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS);
-                if (0 == pCtx->event.activityTimeoutTimId)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "TrustList:%s: failed to start the activity timeout", pCtx->cStrObjectId);
-                    return NULL;
-                }
             }
         }
     }
