@@ -47,9 +47,7 @@
 /* Server callback definition to ask for private key password during configuration phase */
 static bool DemoPushSrv_PrivateKeyAskPass_FromTerminal(char** outPassword)
 {
-    *outPassword = SOPC_strdup("password"); // Do a copy
-    return NULL != *outPassword;
-    // return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
 }
 
 /*---------------------------------------------------------------------------
