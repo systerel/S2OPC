@@ -630,6 +630,13 @@ uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList)
     return bufLength;
 }
 
+/* Get the specifiedLists mask */
+SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    return pTrustList->specifiedLists;
+}
+
 /* Check the TrustList handle */
 bool TrustList_CheckHandle(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_Handle expected, const char* msg)
 {
@@ -1062,9 +1069,9 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
 }
 
 /* Validate the certificate and update the PKI that belongs to the TrustList */
-SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
-                                    const SOPC_ByteString* pBsCert,
-                                    const char* secPolUri)
+SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* pTrustList,
+                                                         const SOPC_ByteString* pBsCert,
+                                                         const char* secPolUri)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
@@ -1156,7 +1163,7 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
 }
 
 /* Validate the written TrustList and update the PKI.*/
-SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri)
+SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustList, const char* secPolUri)
 {
     SOPC_ASSERT(NULL != pTrustList);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
@@ -1319,11 +1326,6 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
 /* Raise an event to re-evaluate the certificate. */
 SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
 {
-    /* No fields are provided => Do nothing */
-    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
-    {
-        return SOPC_STATUS_OK;
-    }
     // TODO : Create the event and record it !
     SOPC_UNUSED_ARG(pTrustList);
     return SOPC_STATUS_OK;
