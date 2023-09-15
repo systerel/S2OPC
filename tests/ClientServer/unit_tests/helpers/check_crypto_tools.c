@@ -31,9 +31,6 @@
 #define PASSWORD "password"
 #define CSR_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 #define CSR_PATH "./crypto_tools_csr.der"
-#define CSR_SUBJECT_NAME                           \
-    "C=FR,ST=France,O=Systerel,CN=S2OPC Demo CSR " \
-    "generation,emailAddress=s2opc-support@systerel.fr,L=Aix-en-Provence"
 #define CSR_SAN_URI "URI:urn:S2OPC:localhost"
 #define CSR_SAN_DNS "localhost"
 #define CSR_MD "SHA256"
@@ -199,28 +196,39 @@ START_TEST(test_gen_csr)
        > openssl req -text -in <csr_pem> -noout -verify (to verify manually the content)
     */
     SOPC_AsymmetricKey* pKey = NULL;
+    SOPC_CertificateList* pCert = NULL;
+    char* subjectName = NULL;
+    uint32_t subjectNameLen = 0;
     SOPC_CSR* pCSR = NULL;
     uint8_t* pDER = NULL;
     uint32_t pLen = 0;
     size_t pwdLen = strlen(PASSWORD);
-    ck_assert(pwdLen < UINT32_MAX);
+    ck_assert_uint_gt(UINT32_MAX, pwdLen);
     SOPC_ReturnStatus status =
         SOPC_KeyManager_AsymmetricKey_CreateFromFile(CSR_KEY_PATH, &pKey, PASSWORD, (uint32_t) pwdLen);
-    ck_assert(SOPC_STATUS_OK == status);
-    status = SOPC_KeyManager_CSR_Create(CSR_SUBJECT_NAME, true, CSR_MD, CSR_SAN_URI, CSR_SAN_DNS, &pCSR);
-    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pCert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &subjectName, &subjectNameLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(subjectName);
+    ck_assert_int_eq('\0', subjectName[subjectNameLen]);
+    status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, CSR_SAN_DNS, &pCSR);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);
-    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     FILE* fp = NULL;
     fp = fopen(CSR_PATH, "wb");
-    ck_assert(NULL != fp);
+    ck_assert_ptr_nonnull(fp);
     size_t nb_written = fwrite(pDER, 1, pLen, fp);
     fclose(fp);
     ck_assert(pLen == nb_written);
 
     SOPC_KeyManager_AsymmetricKey_Free(pKey);
+    SOPC_KeyManager_Certificate_Free(pCert);
     SOPC_KeyManager_CSR_Free(pCSR);
+    SOPC_Free(subjectName);
     SOPC_Free(pDER);
 }
 END_TEST

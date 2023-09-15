@@ -1206,6 +1206,47 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
     return SOPC_STATUS_OK;
 }
 
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateList* pCert,
+                                                             char** ppSubjectName,
+                                                             uint32_t* pSubjectNameLen)
+{
+    if (NULL == pCert || NULL == ppSubjectName || NULL == pSubjectNameLen)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t nbCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nbCert);
+    if (SOPC_STATUS_OK != status || 1 != nbCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    mbedtls_x509_crt* crt = &pCert->crt;
+    char* pSubjectName = SOPC_Calloc(crt->subject_raw.len + 1, sizeof(char)); /* +1 for \0 */
+    if (NULL == pSubjectName)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    /* crt->subject_raw.len is suitable because the raw subject structure includes the asn1 encoding (tag length value)
+     * as well as the data */
+    int nbWritten = mbedtls_x509_dn_gets(pSubjectName, crt->subject_raw.len + 1, &crt->subject);
+    if (nbWritten < 0)
+    {
+        status = SOPC_STATUS_NOK;
+        SOPC_Free(pSubjectName);
+        pSubjectName = NULL;
+    }
+    else
+    {
+        pSubjectName[nbWritten] = '\0';
+    }
+
+    *ppSubjectName = pSubjectName;
+    *pSubjectNameLen = (uint32_t) nbWritten;
+    return status;
+}
+
 /* Creates a new string: free the result */
 static char* get_raw_sha1(const mbedtls_x509_buf* raw)
 {

@@ -444,6 +444,23 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetMaybeApplicationUri(const SOPC_
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_CertificateList* pCert, size_t* pLength);
 
 /**
+ * \brief          Returns the subject name of certificate \p pCert as a C String.
+ *
+ * \param pCert                The certificate.
+ * \param[out] ppSubjectName   The newly subject name of certificate \p pCert (NULL terminated C string)
+ * \param[out] pSubjectNameLen The length of \p ppSubjectName .
+ *
+ * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ *
+ * \warning         \p pCert must contain a single certificate.
+ *
+ * \return          SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateList* pCert,
+                                                             char** ppSubjectName,
+                                                             uint32_t* pSubjectNameLen);
+
+/**
  * \brief           Removes (and frees) certificates from \p pCert that do not have exactly one revocation list
  *                  in \p pCRL.
  *
