@@ -32,6 +32,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_trustlist.h"
 
 /*---------------------------------------------------------------------------
@@ -1099,17 +1100,20 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     SOPC_CertificateList* pToUpdateIssuerCerts = NULL;
     SOPC_CRLList* pToUpdateIssuerCRLs = NULL;
 
-    /* TODO: we should rework SOPC_PKIProvider_UpdateFromList to handle both CloseAndUpdate and AddCertificate (avoid copies and tmp PKI, cf public issue #1262) */
+    /* TODO: we should rework SOPC_PKIProvider_UpdateFromList to handle both CloseAndUpdate and AddCertificate (avoid
+     * copies and tmp PKI, cf public issue #1262) */
 
     /* Create the certificate */
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pToUpdateTrustedCerts);
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length,
+                                                                              &pToUpdateTrustedCerts);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_KeyManager_Certificate_Copy(pToUpdateTrustedCerts, &pCert);
     }
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: certificate parse failed", pTrustList->cStrObjectId);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: certificate parse failed",
+                               pTrustList->cStrObjectId);
         statusCode = OpcUa_BadCertificateInvalid;
     }
     else
@@ -1120,18 +1124,23 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     /* Create a temporary PKI with the current certificates plus the trusted leaf certificate to be added  */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_WriteOrAppendToList(pTrustList->pPKI, &pToUpdateTrustedCerts, &pToUpdateTrustedCRLs, &pToUpdateIssuerCerts, &pToUpdateIssuerCRLs);
+        status = SOPC_PKIProvider_WriteOrAppendToList(pTrustList->pPKI, &pToUpdateTrustedCerts, &pToUpdateTrustedCRLs,
+                                                      &pToUpdateIssuerCerts, &pToUpdateIssuerCRLs);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: PKI WriteOrAppendToList function failed", pTrustList->cStrObjectId);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "TrustList:%s:AddCertificate: PKI WriteOrAppendToList function failed",
+                                   pTrustList->cStrObjectId);
             statusCode = OpcUa_BadUnexpectedError;
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_CreateFromList(pToUpdateTrustedCerts, pToUpdateTrustedCRLs, pToUpdateIssuerCerts, pToUpdateIssuerCRLs, &pTmpPKI);
+            status = SOPC_PKIProvider_CreateFromList(pToUpdateTrustedCerts, pToUpdateTrustedCRLs, pToUpdateIssuerCerts,
+                                                     pToUpdateIssuerCRLs, &pTmpPKI);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: PKI creation failed", pTrustList->cStrObjectId);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: PKI creation failed",
+                                       pTrustList->cStrObjectId);
                 statusCode = OpcUa_BadUnexpectedError;
             }
         }
@@ -1151,16 +1160,21 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
                                                   .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                                   .pkAlgo = SOPC_PKI_PK_RSA,
                                                   .RSAMinimumKeySize = 1024};
-            const SOPC_PKI_Profile profile = {.leafProfile = pLeafProfile, .chainProfile = &chainProfile, .bAppendRejectCert = false, .bApplyLeafProfile = true, .bBackwardInteroperability = false};
+            const SOPC_PKI_Profile profile = {.leafProfile = pLeafProfile,
+                                              .chainProfile = &chainProfile,
+                                              .bAppendRejectCert = false,
+                                              .bApplyLeafProfile = true,
+                                              .bBackwardInteroperability = false};
 
             /* Validate the certificate */
             status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pCert, &profile, &validationError);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                    "TrustList:%s:AddCertificate: certificate validation failed with error code %" PRIX32
-                                    " for thumbprint <%s>",
-                                    pTrustList->cStrObjectId, validationError, thumb);
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "TrustList:%s:AddCertificate: certificate validation failed with error code %" PRIX32
+                    " for thumbprint <%s>",
+                    pTrustList->cStrObjectId, validationError, thumb);
                 statusCode = validationError;
             }
         }
@@ -1230,7 +1244,8 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
     SOPC_CertificateList* pToUpdateIssuerCerts = NULL;
     SOPC_CRLList* pToUpdateIssuerCRLs = NULL;
 
-    /* TODO: we should optimize by adding VerifyEveryCertificate inside the UpdateFromList (avoid copies and tmp PKI, cf public issue #1262) */
+    /* TODO: we should optimize by adding VerifyEveryCertificate inside the UpdateFromList (avoid copies and tmp PKI, cf
+     * public issue #1262) */
     if (NULL != pTrustList->pTrustedCerts)
     {
         status = SOPC_KeyManager_Certificate_Copy(pTrustList->pTrustedCerts, &pToUpdateTrustedCerts);
@@ -1363,9 +1378,20 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
 /* Raise an event to re-evaluate the certificate. */
 SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
 {
-    // TODO : Create the event and record it !
-    SOPC_UNUSED_ARG(pTrustList);
-    return SOPC_STATUS_OK;
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (SOPC_TRUSTLIST_GROUP_APP == pTrustList->groupType)
+    {
+        SOPC_ToolkitServer_AsyncReEvalSecureChannelsCerts();
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:RaiseEvent: unexpected certificate group type : %d",
+                               pTrustList->cStrObjectId, (const int) pTrustList->groupType);
+        status = SOPC_STATUS_NOK;
+    }
+    return status;
 }
 
 /* Write the value of the Size variable */
