@@ -837,7 +837,7 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
     # Stop server if already running
     pubsubserver.stop()
     helpTestStopStart(pubsubserver, False, logger)
-    
+
     # Init Subscriber variables
     helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
     helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
@@ -875,7 +875,10 @@ def testPubSubDynamicConf(TapFileName):
         # TC 1 : Test with Publisher only configuration => only pub variables change
         #
         logger.begin_section("TC 1 : Publisher only")
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBLISHER_ONLY, logger)
+        
+        # Stop the running PubSub Server
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
 
         # Init Subscriber variables
         helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
@@ -886,6 +889,8 @@ def testPubSubDynamicConf(TapFileName):
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 1500, logger)
         helpTestSetValue(pubsubserver, NID_PUB_INT, -50, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBLISHER_ONLY, logger)
         sleep(DYN_CONF_PUB_INTERVAL_1000)
         logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
