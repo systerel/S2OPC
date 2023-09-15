@@ -376,7 +376,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
 
     /* Verify and Update the TrustList */
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
-    statusCode = TrustList_WriteUpdate(pTrustList, secPolUri);
+    statusCode = TrustList_UpdateWithWriteMethod(pTrustList, secPolUri);
     /* Export the update (certificate files) */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
@@ -388,8 +388,9 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
-    /* Raise an event to re-evaluate the certificate  */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    SOPC_TrLst_Mask mask = TrustList_GetSpecifiedListsMask(pTrustList);
+    /* Raise an event to re-evaluate the certificate if trustListDataType fields are provided */
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask) && SOPC_TL_MASK_NONE != mask)
     {
         status = TrustList_RaiseEvent(pTrustList);
         if (SOPC_STATUS_OK != status)
@@ -485,7 +486,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     }
     /* Validate the certificate and update the PKI that belongs to the TrustList */
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
-    statusCode = TrustList_AddUpdate(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
+    statusCode = TrustList_UpdateWithAddCertificateMethod(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
     /* Export the update (certificate files) */
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
@@ -569,6 +570,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring,
                                       inputArgs[1].Value.Boolean, secPolUri, &bIsRemove, &bIsIssuer);
+    SOPC_UNUSED_ARG(bIsIssuer);
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
         if (!bIsRemove)
@@ -587,7 +589,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
-    if (bIsIssuer && 0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
         /* Raise an event to re-evaluate the certificate  */
         status = TrustList_RaiseEvent(pTrustList);

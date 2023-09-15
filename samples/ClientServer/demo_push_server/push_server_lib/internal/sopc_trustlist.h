@@ -218,6 +218,20 @@ uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList);
 uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList);
 
 /**
+ * \brief Get the specifiedLists mask of the written TrustListDataType.
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \note If the trusted list is not opened in write mode, or if no write operation is performed,
+ *       the function returns SOPC_TL_MASK_NONE.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL)
+ *
+ * \return The specifiedLists mask
+ */
+SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTrustList);
+
+/**
  * \brief Check the TrustList handle.
  *
  * \param pTrustList The TrustList context.
@@ -343,9 +357,9 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
  *
  * \return SOPC_GoodGenericStatus if successful or a validation error.
  */
-SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
-                                    const SOPC_ByteString* pBsCert,
-                                    const char* secPolUri);
+SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* pTrustList,
+                                                         const SOPC_ByteString* pBsCert,
+                                                         const char* secPolUri);
 
 /**
  * \brief Validate the written TrustList and update the PKI.
@@ -358,7 +372,7 @@ SOPC_StatusCode TrustList_AddUpdate(SOPC_TrustListContext* pTrustList,
  *
  * \return SOPC_GoodGenericStatus if successful.
  */
-SOPC_StatusCode TrustList_WriteUpdate(SOPC_TrustListContext* pTrustList, const char* secPolUri);
+SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustList, const char* secPolUri);
 
 /**
  * \brief Export the update
