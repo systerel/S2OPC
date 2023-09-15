@@ -122,8 +122,10 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
         status = TrustList_GenRandHandle(pTrustList);
         statusCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
     }
+
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
+        TrustList_StartActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
         Trustlist_WriteVarOpenCount(pTrustList, pAddSpAccess);
@@ -231,6 +233,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     }
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
+        TrustList_StartActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
         Trustlist_WriteVarOpenCount(pTrustList, pAddSpAccess);
@@ -498,6 +501,11 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
+    /* Reset the activity timeout */
+    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    {
+        TrustList_ResetActivityTimeout(pTrustList);
+    }
 
     return statusCode;
 }
@@ -600,6 +608,11 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
+    /* Reset the activity timeout */
+    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    {
+        TrustList_ResetActivityTimeout(pTrustList);
+    }
     return statusCode;
 }
 
@@ -693,6 +706,7 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     }
     if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
     {
+        TrustList_ResetActivityTimeout(pTrustList);
         /* The variant is deleted by the method call manager */
         *nbOutputArgs = 1;
         *outputArgs = pVariant;
@@ -776,6 +790,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
         return OpcUa_BadUnexpectedError;
     }
 
+    TrustList_ResetActivityTimeout(pTrustList);
     return SOPC_GoodGenericStatus;
 }
 
@@ -855,6 +870,7 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     *nbOutputArgs = 1;
     *outputArgs = pVariant;
 
+    TrustList_ResetActivityTimeout(pTrustList);
     return SOPC_GoodGenericStatus;
 }
 
@@ -927,5 +943,6 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
         return OpcUa_BadUnexpectedError;
     }
 
+    TrustList_ResetActivityTimeout(pTrustList);
     return SOPC_GoodGenericStatus;
 }
