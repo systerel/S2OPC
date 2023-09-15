@@ -1206,7 +1206,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateList* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_CertificateList* pCert,
                                                              char** ppSubjectName,
                                                              uint32_t* pSubjectNameLen)
 {
@@ -1222,7 +1222,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateLis
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    mbedtls_x509_crt* crt = &pCert->crt;
+    const mbedtls_x509_crt* crt = &pCert->crt;
     char* pSubjectName = SOPC_Calloc(crt->subject_raw.len + 1, sizeof(char)); /* +1 for \0 */
     if (NULL == pSubjectName)
     {
@@ -1236,6 +1236,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateLis
         status = SOPC_STATUS_NOK;
         SOPC_Free(pSubjectName);
         pSubjectName = NULL;
+        nbWritten = 0;
     }
     else
     {

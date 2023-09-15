@@ -31,6 +31,7 @@
 #define PASSWORD "password"
 #define CSR_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 #define CSR_PATH "./crypto_tools_csr.der"
+#define CSR_SUBJECT_NAME "C=FR, ST=France, L=Aix-en-Provence, O=Systerel, CN=S2OPC Demo Certificate for Server Tests"
 #define CSR_SAN_URI "URI:urn:S2OPC:localhost"
 #define CSR_SAN_DNS "localhost"
 #define CSR_MD "SHA256"
@@ -213,6 +214,8 @@ START_TEST(test_gen_csr)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(subjectName);
     ck_assert_int_eq('\0', subjectName[subjectNameLen]);
+    int match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
+    ck_assert_int_eq(0, match);
     status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, CSR_SAN_DNS, &pCSR);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);

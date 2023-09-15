@@ -450,13 +450,13 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetListLength(const SOPC_Certifica
  * \param[out] ppSubjectName   The newly subject name of certificate \p pCert (NULL terminated C string)
  * \param[out] pSubjectNameLen The length of \p ppSubjectName .
  *
- * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
+ * \note            Content of the output is unspecified when the value returned is not SOPC_STATUS_OK.
  *
  * \warning         \p pCert must contain a single certificate.
  *
  * \return          SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(SOPC_CertificateList* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_CertificateList* pCert,
                                                              char** ppSubjectName,
                                                              uint32_t* pSubjectNameLen);
 
