@@ -25,8 +25,12 @@
 
 #include "check_crypto_certificates.h"
 #include "hexlify.h"
+
+#include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
+
+#include "server_static_security_data.h"
 
 #define PASSWORD "password"
 #define CSR_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
@@ -35,6 +39,9 @@
 #define CSR_SAN_URI "URI:urn:S2OPC:localhost"
 #define CSR_SAN_DNS "localhost"
 #define CSR_MD "SHA256"
+
+#define SRV_CERT_PATH "./server_public/server_2k_cert.der"
+#define SRV_KEY_PATH "./server_private/encrypted_server_2k_key.pem"
 
 START_TEST(test_crypto_check_app_uri)
 {
@@ -236,14 +243,138 @@ START_TEST(test_gen_csr)
 }
 END_TEST
 
+static void SOPC_KeyCertPairUpdateCallback(uintptr_t updateParam)
+{
+    bool* updatedBool = (bool*) updateParam;
+    *updatedBool = true;
+}
+
+static void test_key_pair(bool isFiles)
+{
+    bool updateDone = false;
+    SOPC_KeyCertPair* keyCertPair = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_SerializedCertificate* serializedCert = NULL;
+    SOPC_CertificateList* cert = NULL;
+    SOPC_AsymmetricKey* key = NULL;
+
+    if (isFiles)
+    {
+        status = SOPC_KeyCertPair_CreateFromPaths(SRV_CERT_PATH, SRV_KEY_PATH, PASSWORD, &keyCertPair);
+    }
+    else
+    {
+        status = SOPC_KeyCertPair_CreateFromBytes(sizeof(server_2k_cert), server_2k_cert, sizeof(server_2k_key),
+                                                  server_2k_key, &keyCertPair);
+    }
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(keyCertPair);
+    // Try to update key / cert pair without update CB defined
+    status = SOPC_KeyCertPair_UpdateFromBytes(keyCertPair, sizeof(server_2k_cert), server_2k_cert,
+                                              sizeof(server_2k_key), server_2k_key);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
+
+    status = SOPC_KeyCertPair_SetUpdateCb(keyCertPair, &SOPC_KeyCertPairUpdateCallback, (uintptr_t) &updateDone);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Callback redefinition is not valid
+    status = SOPC_KeyCertPair_SetUpdateCb(keyCertPair, &SOPC_KeyCertPairUpdateCallback, (uintptr_t) &updateDone);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
+
+    // Try to update key without certificate: invalid
+    status = SOPC_KeyCertPair_UpdateFromBytes(keyCertPair, 0, NULL, sizeof(server_2k_key), server_2k_key);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert(!updateDone);
+    // Update cert only: valid
+    status = SOPC_KeyCertPair_UpdateFromBytes(keyCertPair, sizeof(server_2k_cert), server_2k_cert, 0, NULL);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(updateDone);
+    updateDone = false;
+    // Update both cert and key: valid
+    status = SOPC_KeyCertPair_UpdateFromBytes(keyCertPair, sizeof(server_2k_cert), server_2k_cert,
+                                              sizeof(server_2k_key), server_2k_key);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(updateDone);
+    updateDone = false;
+
+    status = SOPC_KeyCertPair_GetSerializedCertCopy(keyCertPair, &serializedCert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(serializedCert->length, sizeof(server_2k_cert));
+    int cmp = memcmp(server_2k_cert, serializedCert->data, serializedCert->length);
+    ck_assert_int_eq(0, cmp);
+
+    status = SOPC_KeyCertPair_GetCertCopy(keyCertPair, &cert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(cert);
+
+    // Check cert copy is the expected cert
+    uint8_t* pExpSerCert = NULL;
+    uint32_t pLen = 0;
+    status = SOPC_KeyManager_Certificate_ToDER(cert, &pExpSerCert, &pLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(pLen, sizeof(server_2k_cert));
+    cmp = memcmp(server_2k_cert, pExpSerCert, sizeof(server_2k_cert));
+    ck_assert_int_eq(0, cmp);
+    SOPC_Free(pExpSerCert);
+
+    status = SOPC_KeyCertPair_GetKeyCopy(keyCertPair, &key);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(key);
+
+    // Check the key copy is the expected key
+    SOPC_AsymmetricKey* pExpKey = NULL;
+    status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(server_2k_key, sizeof(server_2k_key), false, &pExpKey);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pExpKey);
+    // Serialize expected key to remove PEM encoding
+    SOPC_SerializedAsymmetricKey* pExpSerKey = NULL;
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pExpKey, false, &pExpSerKey);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pExpSerKey);
+    // Serialize key copy to remove PEM encoding
+    SOPC_SerializedAsymmetricKey* pActualSerKey = NULL;
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(key, false, &pActualSerKey);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pActualSerKey);
+    // Compare both
+    ck_assert_uint_eq(SOPC_SecretBuffer_GetLength(pExpSerKey), SOPC_SecretBuffer_GetLength(pActualSerKey));
+
+    const SOPC_ExposedBuffer* pActualSerKeyExposed = SOPC_SecretBuffer_Expose(pActualSerKey);
+    const SOPC_ExposedBuffer* pExpSerKeyExposed = SOPC_SecretBuffer_Expose(pExpSerKey);
+    cmp = memcmp(pExpSerKeyExposed, pExpSerKeyExposed, SOPC_SecretBuffer_GetLength(pExpSerKey));
+    ck_assert_int_eq(0, cmp);
+    SOPC_SecretBuffer_Unexpose(pActualSerKeyExposed, pActualSerKey);
+    SOPC_SecretBuffer_Unexpose(pExpSerKeyExposed, pExpSerKey);
+    SOPC_KeyManager_AsymmetricKey_Free(pExpKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pExpSerKey);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pActualSerKey);
+
+    SOPC_KeyCertPair_Delete(&keyCertPair);
+    ck_assert_ptr_null(keyCertPair);
+
+    SOPC_KeyManager_SerializedCertificate_Delete(serializedCert);
+    SOPC_KeyManager_Certificate_Free(cert);
+    SOPC_KeyManager_AsymmetricKey_Free(key);
+}
+
+START_TEST(test_key_pair_files)
+{
+    test_key_pair(true);
+}
+
+START_TEST(test_key_pair_bytes)
+{
+    test_key_pair(false);
+}
+
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
-    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL;
+    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL, *tc_key_pair = NULL;
 
     tc_check_app_uri = tcase_create("Check application URI");
     tc_gen_rsa = tcase_create("Generate RSA keys");
     tc_gen_csr = tcase_create("Generate CSR");
+    tc_key_pair = tcase_create("Update Key / Cert pair");
 
     suite_add_tcase(s, tc_check_app_uri);
     tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
@@ -255,6 +386,9 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_set_timeout(tc_gen_rsa, 10);
     suite_add_tcase(s, tc_gen_csr);
     tcase_add_test(tc_gen_csr, test_gen_csr);
+    suite_add_tcase(s, tc_key_pair);
+    tcase_add_test(tc_key_pair, test_key_pair_files);
+    tcase_add_test(tc_key_pair, test_key_pair_bytes);
 
     return s;
 }

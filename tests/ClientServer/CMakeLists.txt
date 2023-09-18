@@ -100,7 +100,9 @@ add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_
 file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/check_*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS} unit_tests/helpers/hexlify.c ${TEST_SERVER_ADDRESS_SPACE_C})
 add_dependencies(check_helpers make-server-address-space)
-target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES})
+target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
+                                                 "validation_tests/server") # Reuse data of test server
+
 target_link_libraries(check_helpers PRIVATE Check::check s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_compile_options(check_helpers PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(check_helpers PRIVATE ${S2OPC_DEFINITIONS})
