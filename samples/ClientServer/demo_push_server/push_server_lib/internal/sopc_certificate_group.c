@@ -32,6 +32,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_certificate_group.h"
 #include "sopc_certificate_group_itf.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_trustlist.h"
@@ -40,6 +41,11 @@
 /*---------------------------------------------------------------------------
  *                             Constants
  *---------------------------------------------------------------------------*/
+
+#define SOPC_CERT_GRP_MIN_KEY_SIZE 2048
+#define SOPC_CERT_GRP_MIN_MD_ALG "SHA256"
+#define SOPC_CERT_GRP_MAX_KEY_SIZE 4096
+#define SOPC_CERT_GRP_MAX_MD_ALG "SHA256"
 
 /*---------------------------------------------------------------------------
  *                             Internal types
@@ -159,6 +165,7 @@ static void cert_group_initialize_context(SOPC_CertGroupContext* pCertGroup)
     pCertGroup->pTrustListId = NULL;
     pCertGroup->pKey = NULL;
     pCertGroup->pCert = NULL;
+    pCertGroup->pNewKey = NULL;
     pCertGroup->bDoNotDelete = false;
 }
 
@@ -177,6 +184,8 @@ static void cert_group_clear_context(SOPC_CertGroupContext* pCertGroup)
     SOPC_Free(pCertGroup->pCertificateTypeId);
     SOPC_Free(pCertGroup->pCertificateTypeValueId);
     SOPC_Free(pCertGroup->pTrustListId);
+    SOPC_KeyManager_AsymmetricKey_Free(pCertGroup->pNewKey);
+    pCertGroup->pNewKey = NULL;
     /* Safely unreference crypto pointer */
     pCertGroup->pKey = NULL;
     pCertGroup->pCert = NULL;
@@ -495,6 +504,172 @@ void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId)
         return;
     }
     SOPC_Dict_Remove(gObjIdToCertGroup, (const uintptr_t) pObjectId);
+}
+
+const char* CertificateGroup_GetStrNodeId(const SOPC_CertGroupContext* pGroupCtx)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    return (const char*) pGroupCtx->cStrId;
+}
+
+bool CertificateGroup_CheckType(const SOPC_CertGroupContext* pGroupCtx, const SOPC_NodeId* pExpectedCertTypeId)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_ASSERT(NULL != pExpectedCertTypeId);
+
+    bool bIsEqual = SOPC_NodeId_Equal(pGroupCtx->pCertificateTypeValueId, pExpectedCertTypeId);
+    return bIsEqual;
+}
+
+bool CertificateGroup_CheckSubjectName(SOPC_CertGroupContext* pGroupCtx, const SOPC_String* pSubjectName)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_UNUSED_ARG(pSubjectName);
+
+    SOPC_Logger_TraceWarning(
+        SOPC_LOG_MODULE_CLIENTSERVER,
+        "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: custom subjectName for CSR is not supported",
+        pGroupCtx->cStrId);
+    return true;
+}
+
+SOPC_ReturnStatus CertificateGroup_RegeneratePrivateKey(SOPC_CertGroupContext* pGroupCtx)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_Logger_TraceWarning(
+        SOPC_LOG_MODULE_CLIENTSERVER,
+        "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: regenerate server private key is not supported",
+        pGroupCtx->cStrId);
+    return SOPC_STATUS_OK;
+}
+
+void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_KeyManager_AsymmetricKey_Free(pGroupCtx->pNewKey);
+    pGroupCtx->pNewKey = NULL;
+}
+
+SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* pGroupCtx,
+                                                        const SOPC_String* pSubjectName,
+                                                        const bool bRegeneratePrivateKey,
+                                                        SOPC_ByteString* pCertificateRequest)
+{
+    SOPC_ASSERT(NULL != pGroupCtx);
+    SOPC_UNUSED_ARG(pSubjectName);
+
+    if (NULL == pCertificateRequest)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL != pCertificateRequest->Data || -1 != pCertificateRequest->Length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_CertificateList* pCert = NULL;
+    SOPC_CSR* pNewCSR = NULL;
+    char* pURI = NULL;
+    char* pCertSubjectName = NULL;
+    uint32_t subjectNameLen = 0;
+    uint8_t* pCSR_DER = NULL;
+    uint32_t CSR_DERLen = 0;
+
+    uint32_t keySize = 0;
+    char* mdAlg = NULL;
+
+    SOPC_AsymmetricKey* pNewKey = NULL;
+    SOPC_AsymmetricKey* pCurKey = NULL;
+    SOPC_AsymmetricKey* pKey = NULL;
+
+    /* Get properties form group */
+    if (OpcUaId_RsaMinApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
+    {
+        keySize = SOPC_CERT_GRP_MIN_KEY_SIZE;
+        mdAlg = SOPC_strdup(SOPC_CERT_GRP_MIN_MD_ALG);
+    }
+    else if (OpcUaId_RsaSha256ApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
+    {
+        keySize = SOPC_CERT_GRP_MAX_KEY_SIZE;
+        mdAlg = SOPC_strdup(SOPC_CERT_GRP_MAX_MD_ALG);
+    }
+    else
+    {
+        char* pToPrint = SOPC_NodeId_ToCString(pGroupCtx->pCertificateTypeValueId);
+        const char* toPrint = NULL == pToPrint ? "NULL" : pToPrint;
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "PushSrvCfg:Method_CreateSigningRequest:CertificateGroup:%s: rcv unexpected certificate type nodeId : %s",
+            pGroupCtx->cStrId, toPrint);
+        SOPC_Free(pToPrint);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    status = SOPC_KeyManager_SerializedCertificate_Deserialize(pGroupCtx->pCert, &pCert);
+    /* Get the subjectName of the current certificate */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &pCertSubjectName, &subjectNameLen);
+    }
+    /* Get the URI of the current certificate */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_Certificate_GetMaybeApplicationUri(pCert, &pURI, NULL);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CSR_Create(pCertSubjectName, true, mdAlg, pURI, "NotSupported", &pNewCSR);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        if (bRegeneratePrivateKey)
+        {
+            status = SOPC_KeyManager_AsymmetricKey_GenRSA(keySize, &pNewKey);
+        }
+        else
+        {
+            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pGroupCtx->pKey, false, &pCurKey);
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pKey = bRegeneratePrivateKey ? pNewKey : pCurKey;
+        status = SOPC_KeyManager_CSR_ToDER(pNewCSR, pKey, &pCSR_DER, &CSR_DERLen);
+        if (SOPC_STATUS_OK == status)
+        {
+            if (INT32_MAX < CSR_DERLen)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ByteString_Initialize(pCertificateRequest);
+        pCertificateRequest->Data = pCSR_DER;
+        pCertificateRequest->Length = (int32_t) CSR_DERLen;
+    }
+
+    /* Clear */
+    SOPC_KeyManager_Certificate_Free(pCert);
+    SOPC_Free(pCertSubjectName);
+    SOPC_Free(pURI);
+    SOPC_Free(mdAlg);
+    SOPC_KeyManager_CSR_Free(pNewCSR);
+    SOPC_KeyManager_AsymmetricKey_Free(pCurKey);
+    pCurKey = NULL;
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(pNewKey);
+        pNewKey = NULL;
+        SOPC_Free(pCSR_DER);
+        pCSR_DER = NULL;
+        SOPC_ByteString_Initialize(pCertificateRequest);
+    }
+
+    pGroupCtx->pNewKey = pNewKey;
+    return status;
 }
 
 SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pGroupCtx,

@@ -38,9 +38,10 @@ typedef struct SOPC_CertGroupContext
     SOPC_SerializedAsymmetricKey* pKey;   /*!< A valid pointer to the private key that belongs to the
                                                CertificateGroup object. */
     SOPC_SerializedCertificate* pCert;    /*!< A valid pointer to the certificate that belongs to the
-                                               CertificateGroup object. */
+                                              CertificateGroup object. */
+    SOPC_AsymmetricKey* pNewKey;          /*!< Pointer to the new generated key */
     SOPC_NodeId* pCertificateTypeId;      /*!< The nodeId of the certificateType variable that belongs to the
-                                               CertificateGroup object. */
+                                              CertificateGroup object. */
     SOPC_NodeId* pCertificateTypeValueId; /*!< The value of the certificateType variable. */
     SOPC_NodeId* pTrustListId;            /*!< The TrustList nodeId that belongs to the CertificateGroup object */
     bool bDoNotDelete;                    /*!< Defined whatever the CertificateGroup context shall be deleted */
@@ -74,23 +75,100 @@ SOPC_CertGroupContext* CertificateGroup_DictGet(const SOPC_NodeId* pObjectId, bo
 void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId);
 
 /**
+ * \brief Get the C string of the CertificateGroup nodeId
+ *
+ * \param pGroupCtx The CertificateGroup context.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ *\return The CertificateGroup nodeId (C string)
+ */
+const char* CertificateGroup_GetStrNodeId(const SOPC_CertGroupContext* pGroupCtx);
+
+/**
+ * \brief Check the certificate type that belongs to the group.
+ *
+ * \param pGroupCtx The CertificateGroup context.
+ * \param expected  The expected CertificateType.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ * \return True if match.
+ */
+bool CertificateGroup_CheckType(const SOPC_CertGroupContext* pGroupCtx, const SOPC_NodeId* pExpectedCertTypeId);
+
+/**
+ * \brief Check the format of the given subjectName \p pSubjectName .
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ * \param[out] pSubjectName The subject name to used.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ * \return Return true if the subjectName \p pSubjectName is valid otherwise false.
+ */
+bool CertificateGroup_CheckSubjectName(SOPC_CertGroupContext* pGroupCtx, const SOPC_String* pSubjectName);
+
+/**
  * \brief Get the rejected list
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  * \param[out] ppBsCertArray A valid pointer to the newly created ByteString array.
  * \param[out] pLength The length of \p ppBsCertArray
  *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
  * \return Return SOPC_GoodGenericStatus if successful.
  */
 SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pGroupCtx,
                                                  SOPC_ByteString** ppBsCertArray,
                                                  uint32_t* pLength);
+/**
+ * \brief Regenerates the server’s private key.
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ * \return Return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus CertificateGroup_RegeneratePrivateKey(SOPC_CertGroupContext* pGroupCtx);
+
+/**
+ * \brief Create a PKCS #10 DER encoded Certificate Request that is signed with the Server’s private key
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ * \param pSubjectName The subjectName of the CSR, if NULL then the subjectName of the current certificate is used.
+ * \param bRegeneratePrivateKey Defines whether the private key of the server shall be regenerated.
+ * \param[out] pCertificateRequest A valid byte string to store the CSR.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ * \return Return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* pGroupCtx,
+                                                        const SOPC_String* pSubjectName,
+                                                        const bool bRegeneratePrivateKey,
+                                                        SOPC_ByteString* pCertificateRequest);
+
+/**
+ * \brief  Discards previously generated new key pair.
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
+ *
+ * \return Return SOPC_STATUS_OK if successful.
+ */
+void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx);
 
 /**
  * \brief Export the rejected list.
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  * \param bEraseExiting Define if the existing certificate shall be deleted or include.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL)
  *
  * \return SOPC_STATUS_OK if successful.
  */
