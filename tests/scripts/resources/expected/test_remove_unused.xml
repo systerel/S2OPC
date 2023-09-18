@@ -64,6 +64,8 @@
     <Description>Describes a value that is either TRUE or FALSE.</Description>
     <References>
       <Reference IsForward="false" ReferenceType="HasSubtype">i=24</Reference>
+      <Reference IsForward="false" ReferenceType="ns=1;i=15043">ns=1;i=15002</Reference>
+      <Reference IsForward="false" ReferenceType="UsedAliasGrandChildReferenceType">ns=1;i=15006</Reference>
     </References>
   </UADataType>
   <UADataType BrowseName="String" NodeId="i=12">
@@ -123,7 +125,6 @@
     <Description>The base type for all object nodes.</Description>
     <References>
       <Reference ReferenceType="HasSubtype">i=61</Reference>
-      <Reference ReferenceType="HasSubtype">i=77</Reference>
       <Reference ReferenceType="HasSubtype">ns=1;i=15001</Reference>
       <Reference IsForward="false" ReferenceType="Organizes">i=88</Reference>
     </References>
@@ -161,35 +162,6 @@
       <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=2294</Reference>
     </References>
   </UAVariableType>
-  <UAObjectType BrowseName="ModellingRuleType" NodeId="i=77">
-    <DisplayName>ModellingRuleType</DisplayName>
-    <References>
-      <Reference IsForward="false" ReferenceType="HasSubtype">i=58</Reference>
-      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=78</Reference>
-      <Reference IsForward="false" ReferenceType="HasTypeDefinition">i=80</Reference>
-    </References>
-  </UAObjectType>
-  <UAObject BrowseName="Mandatory" NodeId="i=78" SymbolicName="ModellingRule_Mandatory">
-    <DisplayName>Mandatory</DisplayName>
-    <References>
-      <Reference ReferenceType="HasTypeDefinition">i=77</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=2369</Reference>
-      <Reference IsForward="false" ReferenceType="ns=1;i=15043">ns=1;i=15002</Reference>
-      <Reference IsForward="false" ReferenceType="UsedAliasGrandChildReferenceType">ns=1;i=15006</Reference>
-    </References>
-  </UAObject>
-  <UAObject BrowseName="Optional" NodeId="i=80" SymbolicName="ModellingRule_Optional">
-    <DisplayName>Optional</DisplayName>
-    <References>
-      <Reference ReferenceType="HasTypeDefinition">i=77</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=2366</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=2367</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=17567</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=17568</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">i=17569</Reference>
-      <Reference IsForward="false" ReferenceType="HasModellingRule">ns=1;i=15007</Reference>
-    </References>
-  </UAObject>
   <UAObject BrowseName="Root" NodeId="i=84" SymbolicName="RootFolder">
     <DisplayName>Root</DisplayName>
     <Description>The root of the server address space.</Description>
@@ -287,7 +259,6 @@
     <DisplayName>Definition</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=2365</Reference>
     </References>
   </UAVariable>
@@ -295,7 +266,6 @@
     <DisplayName>ValuePrecision</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=2365</Reference>
     </References>
   </UAVariable>
@@ -313,7 +283,6 @@
     <DisplayName>InstrumentRange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=15318</Reference>
     </References>
   </UAVariable>
@@ -321,7 +290,6 @@
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=15318</Reference>
     </References>
   </UAVariable>
@@ -329,7 +297,6 @@
     <DisplayName>EngineeringUnits</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=15318</Reference>
     </References>
   </UAVariable>
@@ -346,7 +313,6 @@
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=78</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">i=2368</Reference>
     </References>
   </UAVariable>
@@ -379,7 +345,7 @@
       <Reference ReferenceType="HasProperty">ns=1;i=15006</Reference>
       <Reference ReferenceType="HasProperty">ns=1;i=15007</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
-      <Reference ReferenceType="ns=1;i=15043">i=78</Reference>
+      <Reference ReferenceType="ns=1;i=15043">i=1</Reference>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=15001</Reference>
     </References>
   </UAVariable>
@@ -387,7 +353,7 @@
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="UsedAliasGrandChildReferenceType">i=78</Reference>
+      <Reference ReferenceType="UsedAliasGrandChildReferenceType">i=1</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">ns=1;i=15002</Reference>
     </References>
   </UAVariable>
@@ -395,7 +361,6 @@
     <DisplayName>EngineeringUnits</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="HasModellingRule">i=80</Reference>
       <Reference IsForward="false" ReferenceType="HasProperty">ns=1;i=15002</Reference>
     </References>
   </UAVariable>
@@ -480,4 +445,4 @@
       <Reference IsForward="false" ReferenceType="HasSubtype">ns=1;i=15032</Reference>
     </References>
   </UADataType>
-  </UANodeSet>
+</UANodeSet>

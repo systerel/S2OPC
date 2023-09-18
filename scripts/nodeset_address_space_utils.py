@@ -220,6 +220,7 @@ class NSIndexReassigner(NSFinder):
 
 
 class NodesetMerger(NSFinder):
+    #TODO too big: split into various roles, encapsulate tree access
 
     def __init__(self, verbose):
         super(NodesetMerger, self).__init__(dict())
@@ -623,7 +624,7 @@ class NodesetMerger(NSFinder):
                     # this is a reference
                     if nid in placeholder_nids:
                         # but a placeholder instance declaration to be removed if the type is removed
-                        placeholder_refs.append(node)
+                        placeholder_refs.append(nid)
                     else:
                         return True, []
         # no reference found, potentially placeholder nodes only
@@ -635,7 +636,7 @@ class NodesetMerger(NSFinder):
         for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject", False),
                    ('UAVariableType', ".//uanodeset:UAVariable", False),
                    ('UADataType', ".//uanodeset:UAVariable[@DataType='{}']", True),
-                   ('UAReferenceType', ".//*/uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
+                   ('UAReferenceType', ".//uanodeset:References/uanodeset:Reference[@ReferenceType='{}']", True)]:
             while True:
                 # loop while the removed types produce unused types
                 removed_nids = set()
@@ -676,16 +677,15 @@ class NodesetMerger(NSFinder):
                         if found:
                             # this type is used by data
                             continue
-                        else:
-                            # remove placeholder nodes
-                            for p in placeholders_to_remove:
-                                self.tree.getroot().remove(p)
-                                removed_nids.add(p.get('NodeId'))
-                    self.tree.getroot().remove(ty_node)
+                    #FIXME: when a removed object is referenced in a 'HasModellingRule', its removal changes the status
+                    #of the referencing node: it is no more considered an instance declaration !
+                    for p in placeholders_to_remove:
+                        self.remove_subtree(p)
+                        removed_nids.add(p)
+                    self.remove_subtree(nid)
                     removed_nids.add(nid)
                 if len(removed_nids) == 0:
                     break
-                self._remove_refs_to_nids(removed_nids)
 
     def sanitize(self):
         """
@@ -882,6 +882,9 @@ class NodesetMerger(NSFinder):
                     refs.remove(ref)
                 close_node_indent(refs, 2)
 
+    def write_tree(self, file):
+        self.tree.write(file, encoding="utf-8", xml_declaration=True)
+
 
 def run_merge(args):
     # check option compatibility and raise error
@@ -925,7 +928,7 @@ def run_merge(args):
         merger.remove_backward_refs(set(args.retain_nodes))
 
     if res:
-        merger.tree.write(args.fn_out or sys.stdout.buffer, encoding="utf-8", xml_declaration=True)
+        merger.write_tree(args.fn_out or sys.stdout.buffer)
     else:
         print('There was some unrecoverable error{}'
               .format(', did not save to {}'.format(args.fn_out) if args.fn_out else ''),

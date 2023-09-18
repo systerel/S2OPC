@@ -74,14 +74,14 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">ns=1;i=15061</Reference>
     </References>
   </UAObjectType>
-  <UAObjectType NodeId="ns=1;i=15070" BrowseName="1:UnusedExceptInPlaceHolder">
-    <DisplayName>Unused Except in PlaceHolder</DisplayName>
+  <UAObjectType NodeId="ns=1;i=15070" BrowseName="1:UnusedExceptInInstanceDeclaration">
+    <DisplayName>Unused Except in InstanceDeclaration</DisplayName>
     <References>
     </References>
   </UAObjectType>
-  <UAObject NodeId="ns=1;i=15071" BrowseName="1:PlaceHolderOf15070">
-    <DisplayName>PlaceHolder for 15070</DisplayName>
-    <!-- Has 1:15070 as type definition, but also has a modelling rule so this is only a placeholder -->
+  <UAObject NodeId="ns=1;i=15071" BrowseName="1:InstanceDeclarationOf15070">
+    <DisplayName>InstanceDeclaration for 15070</DisplayName>
+    <!-- Has 1:15070 as type definition, but also has a modelling rule so this is only an instance declaration -->
 	<!-- This object is deemed to disappear along with its type definition as unused type -->
     <References>
       <Reference ReferenceType="HasModellingRule">i=80</Reference>
@@ -162,7 +162,7 @@
       <Reference ReferenceType="HasProperty">ns=1;i=15006</Reference>
       <Reference ReferenceType="HasProperty">ns=1;i=15007</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2368</Reference>
-      <Reference ReferenceType="ns=1;i=15043">i=78</Reference>
+      <Reference ReferenceType="ns=1;i=15043">i=1</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=15001</Reference>
     </References>
   </UAVariable>
@@ -170,7 +170,7 @@
     <DisplayName>EURange</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
-      <Reference ReferenceType="UsedAliasGrandChildReferenceType">i=78</Reference>
+      <Reference ReferenceType="UsedAliasGrandChildReferenceType">i=1</Reference>
       <Reference ReferenceType="HasProperty" IsForward="false">ns=1;i=15002</Reference>
     </References>
   </UAVariable>
