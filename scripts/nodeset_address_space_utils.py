@@ -546,11 +546,8 @@ class NodesetMerger(NSFinder):
         for ref in self._iterfind(n, "uanodeset:References/uanodeset:Reference"):
             if is_forward(ref) != downwards:
                 continue
-            child_nid = ref.text.strip()
-            if _is_ns0(child_nid):
-                # ignore NS0 children
-                continue
             if _is_hierarchical_ref(ref):
+                child_nid = ref.text.strip()
                 yield child_nid
 
     def _rec_compute_subtree(self, root_nid, subtree: dict):
