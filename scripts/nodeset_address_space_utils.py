@@ -881,7 +881,7 @@ class NodesetMerger(NSFinder):
 
 def run_merge(args):
     # check option compatibility and raise error
-    if not args.sanitize and (args.remove_subtree is not None or args.remove_unused or args.remove_backward_refs):
+    if not args.sanitize and (args.remove_subtrees or args.remove_unused or args.remove_backward_refs):
         raise Exception("sanitization is required when removing a subtree, unused types or backward references")
 
     merger = NodesetMerger(args.verbose)
@@ -905,13 +905,14 @@ def run_merge(args):
     if args.remove_node_ids_gt > 0:
         merger.remove_node_ids_greater_than(args.remove_node_ids_gt)
 
-    if args.sanitize or args.remove_subtree is not None or args.remove_unused:
+    if args.sanitize or args.remove_subtrees or args.remove_unused:
         res = merger.sanitize()
     else:
         res = True
 
-    if res and args.remove_subtree is not None:
-        merger.remove_subtree(args.remove_subtree)
+    if res and args.remove_subtrees:
+        for node in args.remove_subtrees:
+            merger.remove_subtree(node)
 
     if res and args.remove_unused:
         merger.remove_unused(args.retain_ns0, frozenset(args.retain_types))
@@ -950,9 +951,10 @@ def make_argparser():
                         help='Remove the MaxNodesPerNodeManagement node and references to it')
     parser.add_argument('--remove-node-ids-greater-than', default=0, type=int, dest='remove_node_ids_gt',
                         help='Remove the nodes of NS 0 with a NodeId greater than the given value')
-    parser.add_argument('--remove-subtree', default=0, type=str, dest='remove_subtree',
+    parser.add_argument('--remove-subtrees', default=[], nargs='+', dest='remove_subtrees',
                         help='''
-                        Remove the node with the given NodeId along with all its descendants, except for those with another ancestry.
+                        For each given nodeId, remove the node along with all its descendants,
+                        except for those with another ancestry.
                         This  option forces the creation of reciprocal references (sanitize).
                         ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',

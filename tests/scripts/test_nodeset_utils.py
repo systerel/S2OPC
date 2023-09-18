@@ -145,6 +145,10 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_remove_subtree_ns0_RootFolder.xml', ['--remove-subtree', 'i=84'],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
 
+    def test_remove_subtrees_several(self):
+        self.run_test('test_remove_subtrees_several.xml', ['--remove-subtrees', 'i=58', 'i=85', 'ns=1;i=15001', 'ns=1;i=15008'],
+                      'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+
     def test_remove_unused(self):
         self.run_test('test_remove_unused.xml', ['--remove-unused'],
                       'ns0.xml', 'TestUnusedTypes.NodeSet2.xml')
