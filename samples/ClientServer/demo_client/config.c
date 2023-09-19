@@ -181,9 +181,8 @@ struct argparse_option CONN_OPTIONS[16] = {
 int nCfgWithSecuCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
 int nCfgCreated = 0;         /* Number of created configs with PKI created (might be necessary for user encryption)  */
 
-SOPC_SerializedCertificate* pCrtCli = NULL;
 SOPC_SerializedCertificate* pCrtSrv = NULL;
-SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
+SOPC_KeyCertPair* pCliKeyCertPair = NULL;
 SOPC_PKIProvider* pPki = NULL;
 
 SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityMode);
@@ -238,9 +237,8 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
 
             if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
             {
-                clientAppCfg->clientCertificate = pCrtCli;
+                clientAppCfg->clientKeyCertPair = pCliKeyCertPair;
                 pscConfig->peerAppCert = pCrtSrv;
-                clientAppCfg->clientKey = pKeyCli;
             }
         }
         else
@@ -286,12 +284,9 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     /* Garbage collect, if needed */
     if (0 == nCfgWithSecuCreated)
     {
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
+        SOPC_KeyCertPair_Delete(&pCliKeyCertPair);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
-        pCrtCli = NULL;
         pCrtSrv = NULL;
-        pKeyCli = NULL;
     }
     if (0 == nCfgCreated)
     {
@@ -308,12 +303,6 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
     {
         if (0 == nCfgWithSecuCreated)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_CLIENT_PUBL, &pCrtCli);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("# Error: Failed to load client certificate\n");
-            }
-
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_SERVER_PUBL, &pCrtSrv);
@@ -324,22 +313,13 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
             }
 
             char* password = NULL;
-            size_t lenPassword = 0;
             bool res = false;
 
             if (!NO_KEY_ENCRYPTION)
             {
                 res = getClientKeyPassword_Fct(&password);
 
-                if (res)
-                {
-                    lenPassword = strlen(password);
-                    if (UINT32_MAX < lenPassword)
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
-                }
-                else
+                if (!res)
                 {
                     status = SOPC_STATUS_INVALID_PARAMETERS;
                 }
@@ -347,13 +327,14 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                    PATH_CLIENT_PRIV, &pKeyCli, password, (uint32_t) lenPassword);
+                status =
+                    SOPC_KeyCertPair_CreateFromPaths(PATH_CLIENT_PUBL, PATH_CLIENT_PRIV, password, &pCliKeyCertPair);
                 if (SOPC_STATUS_OK != status)
                 {
                     printf(
-                        "# Error: Failed to load client private key. Please check the password if the key is "
-                        "encrypted and check the key format (PEM)\n");
+                        "# Error: Failed to load client certificate or private key."
+                        " Please check the certificate is X509 in DER format. "
+                        " Please check the password if the key is encrypted\n");
                 }
             }
 
@@ -465,9 +446,7 @@ bool Config_Client_GetUserCertAndKey(SOPC_SerializedCertificate** userX509cert,
                                                                                 (uint32_t) lenPassword);
         if (SOPC_STATUS_OK != status)
         {
-            printf(
-                "# Error: Failed to load user private key. Please check the password if the key is "
-                "encrypted and check the key format (PEM)\n");
+            printf("# Error: Failed to load user private key. Please check the password if the key is encrypted\n");
         }
     }
 

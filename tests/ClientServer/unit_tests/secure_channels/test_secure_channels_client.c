@@ -64,8 +64,8 @@ int main(int argc, char* argv[])
     uint32_t scConnectionId = 0;
 
     SOPC_PKIProvider* pki = NULL;
-    SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL;
-    SOPC_SerializedAsymmetricKey* priv_cli = NULL;
+    SOPC_KeyCertPair* clientKeyCertPair = NULL;
+    SOPC_SerializedCertificate* crt_srv = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -174,15 +174,30 @@ int main(int argc, char* argv[])
         printf(">>Stub_Client: used paths for keys and certificates ='%s', '%s' and '%s'\n", keyLocation,
                certificateLocation, certificateSrvLocation);
 
-        // The certificates: load
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateLocation, &crt_cli);
+        /* Retrieve key password */
+        char* password = NULL;
+
+        bool res_cb = SOPC_TestHelper_AskPass_FromEnv(&password);
+        status = res_cb ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Private key and certificate: load
+            status = SOPC_KeyCertPair_CreateFromPaths(certificateLocation, keyLocation, password, &clientKeyCertPair);
+        }
+
         if (SOPC_STATUS_OK != status)
         {
-            printf(">>Stub_Client: Failed to load client certificate\n");
+            printf(">>Stub_Client: Failed to load private key and certificate\n");
         }
         else
         {
-            printf(">>Stub_Client: Client certificate loaded\n");
+            printf(">>Stub_Client: Client private key loaded and certificate\n");
+        }
+
+        if (NULL != password)
+        {
+            SOPC_Free(password);
         }
     }
 
@@ -196,45 +211,6 @@ int main(int argc, char* argv[])
         else
         {
             printf(">>Stub_Client: Server certificate loaded\n");
-        }
-    }
-
-    if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
-    {
-        char* password = NULL;
-        size_t lenPassword = 0;
-
-        bool res_cb = SOPC_TestHelper_AskPass_FromEnv(&password);
-        status = res_cb ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-
-        if (SOPC_STATUS_OK == status)
-        {
-            lenPassword = strlen(password);
-            if (UINT32_MAX < lenPassword)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            // Private key: load
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(keyLocation, &priv_cli, password,
-                                                                                    (uint32_t) lenPassword);
-        }
-
-        if (SOPC_STATUS_OK != status)
-        {
-            printf(">>Stub_Client: Failed to load private key\n");
-        }
-        else
-        {
-            printf(">>Stub_Client: Client private key loaded\n");
-        }
-
-        if (NULL != password)
-        {
-            SOPC_Free(password);
         }
     }
 
@@ -298,9 +274,8 @@ int main(int argc, char* argv[])
         scConfig.peerAppCert = crt_srv;
         scConfig.requestedLifetime = 100000;
         scConfig.url = sEndpointUrl;
-        clientConfig.clientCertificate = crt_cli;
-        clientConfig.clientKey = priv_cli;
         clientConfig.clientPKI = pki;
+        clientConfig.clientKeyCertPair = clientKeyCertPair;
 
         scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
         SOPC_ASSERT(scConfigIdx != 0);
@@ -439,9 +414,8 @@ int main(int argc, char* argv[])
 
     SOPC_PKIProvider_Free(&pki);
     SOPC_String_Clear(&stEndpointUrl);
-    SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
+    SOPC_KeyCertPair_Delete(&clientKeyCertPair);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
     SOPC_EventRecorder_Delete(servicesEvents);
 
     if (SOPC_STATUS_OK == status)

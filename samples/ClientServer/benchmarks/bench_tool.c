@@ -474,8 +474,7 @@ static const char* getenv_default(const char* name, const char* default_value)
     return (val != NULL) ? val : default_value;
 }
 
-static bool load_keys(SOPC_SerializedCertificate** cert,
-                      SOPC_SerializedAsymmetricKey** key,
+static bool load_keys(SOPC_KeyCertPair** keyCertPair,
                       SOPC_SerializedCertificate** server_cert,
                       SOPC_CertificateList** ca,
                       SOPC_CRLList** cacrl)
@@ -485,11 +484,6 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
     const char* server_cert_path = getenv_default("SOPC_SERVER_CERT", DEFAULT_SERVER_CERT_PATH);
     const char* ca_path = getenv_default("SOPC_CA", DEFAULT_CA_PATH);
     const char* crl_path = getenv_default("SOPC_CRL", DEFAULT_CRL_PATH);
-
-    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(cert_path, cert) != SOPC_STATUS_OK)
-    {
-        fprintf(stderr, "Error while loading client certificate from %s\n", cert_path);
-    }
 
     char* password = NULL;
     size_t lenPassword = 0;
@@ -510,10 +504,10 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         fprintf(stderr, "Error while retrieve password for private key\n");
     }
 
-    if (SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(key_path, key, password,
-                                                                       (uint32_t) lenPassword) != SOPC_STATUS_OK)
+    if (SOPC_KeyCertPair_CreateFromPaths(cert_path, key_path, password, keyCertPair) != SOPC_STATUS_OK)
     {
-        fprintf(stderr, "Error while loading private key from %s\n", key_path);
+        fprintf(stderr, "Error while loading certificate %s or private key %s from paths\n", server_cert_path,
+                key_path);
     }
 
     if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(server_cert_path, server_cert) != SOPC_STATUS_OK)
@@ -536,13 +530,9 @@ static bool load_keys(SOPC_SerializedCertificate** cert,
         SOPC_Free(password);
     }
 
-    if (*cert == NULL || *key == NULL || *server_cert == NULL || *ca == NULL)
+    if (*keyCertPair == NULL || *server_cert == NULL || *ca == NULL)
     {
-        SOPC_KeyManager_SerializedCertificate_Delete(*cert);
-        *cert = NULL;
-
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(*key);
-        *key = NULL;
+        SOPC_KeyCertPair_Delete(keyCertPair);
 
         SOPC_KeyManager_SerializedCertificate_Delete(*server_cert);
         *server_cert = NULL;
@@ -644,8 +634,7 @@ int main(int argc, char** argv)
     scConfig.msgSecurityMode = msg_sec_mode;
     scConfig.requestedLifetime = 60000;
 
-    SOPC_SerializedCertificate* cert = NULL;
-    SOPC_SerializedAsymmetricKey* key = NULL;
+    SOPC_KeyCertPair* cliKeyCertPair = NULL;
     SOPC_SerializedCertificate* server_cert = NULL;
     SOPC_CertificateList* ca = NULL;
     SOPC_CRLList* cacrl = NULL;
@@ -653,13 +642,12 @@ int main(int argc, char** argv)
 
     if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
     {
-        bool bRet = load_keys(&cert, &key, &server_cert, &ca, &cacrl);
+        bool bRet = load_keys(&cliKeyCertPair, &server_cert, &ca, &cacrl);
         status = SOPC_PKIProvider_CreateFromList(ca, cacrl, NULL, NULL, &pki);
         if (!bRet || SOPC_STATUS_OK != status)
         {
             SOPC_PKIProvider_Free(&pki);
-            SOPC_KeyManager_SerializedCertificate_Delete(cert);
-            SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
+            SOPC_KeyCertPair_Delete(&cliKeyCertPair);
             SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
             SOPC_KeyManager_Certificate_Free(ca);
             SOPC_KeyManager_CRL_Free(cacrl);
@@ -667,8 +655,7 @@ int main(int argc, char** argv)
         }
 
         scConfig.peerAppCert = server_cert;
-        clientConfig.clientCertificate = cert;
-        clientConfig.clientKey = key;
+        clientConfig.clientKeyCertPair = cliKeyCertPair;
         clientConfig.clientPKI = pki;
     }
 
@@ -684,8 +671,7 @@ int main(int argc, char** argv)
 
     SOPC_Toolkit_Clear();
     SOPC_PKIProvider_Free(&pki);
-    SOPC_KeyManager_SerializedCertificate_Delete(cert);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
+    SOPC_KeyCertPair_Delete(&cliKeyCertPair);
     SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
     SOPC_KeyManager_Certificate_Free(ca);
     SOPC_KeyManager_CRL_Free(cacrl);

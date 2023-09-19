@@ -210,7 +210,7 @@ static void establishSC(void)
     {
         printf("SC_Rcv_Buffer Init: Toolkit initialized\n");
     }
-    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     Check_SC_Init();
 
@@ -223,8 +223,13 @@ static void establishSC(void)
     scConfig.requestedLifetime = 100000;
     scConfig.url = sEndpointUrl;
     scConfig.peerAppCert = crt_srv;
-    clientConfig.clientCertificate = crt_cli;
-    clientConfig.clientKey = priv_cli;
+    const SOPC_ExposedBuffer* priv_cli_exposed = SOPC_SecretBuffer_Expose(priv_cli);
+    ck_assert_ptr_nonnull(priv_cli_exposed);
+    status = SOPC_KeyCertPair_CreateFromBytes(crt_cli->length, crt_cli->data, SOPC_SecretBuffer_GetLength(priv_cli),
+                                              priv_cli_exposed, &clientConfig.clientKeyCertPair);
+    SOPC_SecretBuffer_Unexpose(priv_cli_exposed, priv_cli);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
     clientConfig.clientPKI = pki;
 
     scConfigIdx = SOPC_ToolkitClient_AddSecureChannelConfig(&scConfig);
