@@ -100,9 +100,7 @@ workflow:
   tags:
     - docker
     - linux
-.zephyr-job: &zephyr_job
-  tags:
-    - zephyr
+
 ###
 # Generation jobs
 ###
@@ -448,7 +446,6 @@ test-uactt:
 # Test others jobs
 ###
 test-zephyr:
-  <<: *zephyr_job
   stage: test-others
   image: docker.aix.systerel.fr/c838/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
   script:
