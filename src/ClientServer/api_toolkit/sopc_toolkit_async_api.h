@@ -88,11 +88,21 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  */
 
 /**
- * \brief Request to re-evaluate the current server secure channels peer certificates using the PKI.
- *        This shall be triggered when a PKI trust list update occurred.
- *        If certificate is not valid or trusted anymore, the secure channel is closed.
+ * \brief Request to re-evaluate the current server secure channels due to server certificate / key update (force SC
+ * re-establishment) or server PKI trust list update (client certificate re-validation necessary) When \p ownCert is set
+ * it concerns a certificate / key application update, otherwise it concerns a PKI trust list update.
+ *
+ *        This shall be triggered in case of server certificate / key update ( \p ownCert = true)
+ *        or when an server PKI trust list update occurred ( \p ownCert = false).
+ *
+ *        If server certificate changed, the secure channels using it are closed.
+ *        If server PKI trustlist changed and client certificate is not valid or trusted anymore, the secure channel is
+ * closed.
+ *
+ * \param ownCert  It shall be true when server certificate / key update occurred and false when server PKI trust list
+ * occurred
  */
-void SOPC_ToolkitServer_AsyncReEvalSecureChannelsCerts(void);
+void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert);
 
 typedef struct SOPC_EndpointConnectionCfg
 {
@@ -304,10 +314,20 @@ void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx r
 void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
 
 /**
- * \brief Request to re-evaluate the current client secure channels peer certificates using the PKI.
- *        This shall be triggered when a PKI trust list update occurred.
- *        If certificate is not valid or trusted anymore, the secure channel is closed.
+ * \brief Request to re-evaluate the client secure channels due to client certificate / key update (force SC
+ * re-establishment) or client PKI trust list update (server certificate re-validation necessary) When \p ownCert is set
+ * it concerns a certificate / key application update, otherwise it concerns a PKI trust list update.
+ *
+ *        This shall be triggered in case of client certificate / key update ( \p ownCert = true)
+ *        or when an client PKI trust list update occurred ( \p ownCert = false).
+ *
+ *        If client certificate changed, the secure channels using it are closed.
+ *        If client PKI trustlist changed and server certificate is not valid or trusted anymore, the secure channel is
+ * closed.
+ *
+ * \param ownCert  It shall be true when client certificate / key update occurred and false when client PKI trust list
+ * occurred
  */
-void SOPC_ToolkitClient_AsyncReEvalSecureChannelsCerts(void);
+void SOPC_ToolkitClient_AsyncReEvalSecureChannels(bool ownCert);
 
 #endif /* SOPC_TOOLKIT_ASYNC_API_H_ */

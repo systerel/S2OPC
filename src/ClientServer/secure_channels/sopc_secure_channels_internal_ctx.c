@@ -96,13 +96,13 @@ const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn)
     return conn->isServerConnection ? conn->clientCertificate : conn->serverCertificate;
 }
 
-void SC_ApplyToAllSCs(SC_ApplyToConnection* applyToConnection, uintptr_t param)
+void SC_ApplyToAllSCs(SC_ApplyToConnection* applyToConnection, uintptr_t param, uintptr_t auxParam)
 {
     for (uint32_t i = 1; i < SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED; i++)
     {
         SOPC_SecureConnection* conn = SC_GetConnection(i);
         SOPC_ASSERT(NULL != conn);
-        applyToConnection(conn, i, param);
+        applyToConnection(conn, i, param, auxParam);
     }
 }
 

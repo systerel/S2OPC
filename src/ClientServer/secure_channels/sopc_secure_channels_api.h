@@ -37,36 +37,40 @@
  */
 typedef enum
 {
-    EP_OPEN = 0x200,      /**< id = endpoint description configuration index */
-    EP_CLOSE,             /**< id = endpoint description configuration index */
-    REVERSE_EP_OPEN,      /**< Client: open a reverse endpoint<BR>
-                             id = reverse endpoint configuration index */
-    REVERSE_EP_CLOSE,     /**< Client: close a reverse endpoint<BR>
-                             id = reverse endpoint configuration index */
-    SC_CONNECT,           /**< id = secure channel configuration index */
-    SC_REVERSE_CONNECT,   /**< Client: Activate the connection on next available server reverse connection<BR>
-                             id = reverse endpoint configuration index<BR>
-                             params = (uint32_t) secure channel configuration index */
-    SC_DISCONNECT,        /**< id = secure channel connection index */
-    SC_SERVICE_SND_MSG,   /**< id = secure channel connection index<BR>
-                            params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
-                            followed by encoded OpcUa message<BR>
-                            auxParam = (uint32_t) request Id context if response (server) / request Handle context if
-                            request (client) */
-    SC_SERVICE_SND_ERR,   /**< id = secure channel connection index<BR>
-                             params = (SOPC_StatusCode) encoding failure status code or security check failed (user
-                             auth)<BR>
-                             auxParam = (uint32_t) request Id context of response (Debug info only)
-                           */
-    SC_DISCONNECTED_ACK,  /**< Notify secure channel disconnected state was received<BR>
-                             id = secure channel connection index<BR>
-                             params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)
-                           */
-    SCS_REVALIDATE_CERTS, /**< Validate the certificate used by the secure channels due to PKI application trust list
-                            update. <BR>
-
-                            params = (bool) flag indicating if it concerns server (true) or client (false)
-                            application secure channels. */
+    EP_OPEN = 0x200,     /**< id = endpoint description configuration index */
+    EP_CLOSE,            /**< id = endpoint description configuration index */
+    REVERSE_EP_OPEN,     /**< Client: open a reverse endpoint<BR>
+                            id = reverse endpoint configuration index */
+    REVERSE_EP_CLOSE,    /**< Client: close a reverse endpoint<BR>
+                            id = reverse endpoint configuration index */
+    SC_CONNECT,          /**< id = secure channel configuration index */
+    SC_REVERSE_CONNECT,  /**< Client: Activate the connection on next available server reverse connection<BR>
+                            id = reverse endpoint configuration index<BR>
+                            params = (uint32_t) secure channel configuration index */
+    SC_DISCONNECT,       /**< id = secure channel connection index */
+    SC_SERVICE_SND_MSG,  /**< id = secure channel connection index<BR>
+                           params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)
+                           followed by encoded OpcUa message<BR>
+                           auxParam = (uint32_t) request Id context if response (server) / request Handle context if
+                           request (client) */
+    SC_SERVICE_SND_ERR,  /**< id = secure channel connection index<BR>
+                            params = (SOPC_StatusCode) encoding failure status code or security check failed (user
+                            auth)<BR>
+                            auxParam = (uint32_t) request Id context of response (Debug info only)
+                          */
+    SC_DISCONNECTED_ACK, /**< Notify secure channel disconnected state was received<BR>
+                            id = secure channel connection index<BR>
+                            params = (uint32_t) secure channel config index (SERVER SIDE ONLY) or 0 (CLIENT SIDE)
+                          */
+    SCS_REEVALUATE_SCS,  /**< Re-evaluate the secure channels due to application certificate/key update (force SC
+                              re-establishment) or PKI application trust list update (peer certificate re-validation
+                              necessary).<BR>
+ 
+                             params = (bool) flag indicating if it concerns server (true) or client (false)
+                             application secure channels.<BR>
+                             auxParam = (bool) flag indicating if it concerns application certificate/key update (true),
+                             otherwise the PKI trust list update (false).
+                          */
 } SOPC_SecureChannels_InputEvent;
 
 /**

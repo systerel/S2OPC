@@ -3523,24 +3523,13 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
     }
 }
 
-static void SOPC_Internal_SC_RevalidateCert(SOPC_SecureConnection* conn, uint32_t connIdx, uintptr_t isServer)
+static void SOPC_Internal_Sc_RevalidatePeerCert(SOPC_SecureConnection* conn, uint32_t connIdx, bool isServer)
 {
-    const bool bIsServer = (bool) isServer;
-    if (bIsServer != conn->isServerConnection)
-    {
-        return;
-    }
-    if (SECURE_CONNECTION_STATE_SC_CONNECTED != conn->state &&
-        SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW != conn->state)
-    {
-        return;
-    }
-
     SOPC_SecureChannel_Config* clientConfig = NULL;
     SOPC_Endpoint_Config* serverConfig = NULL;
     SOPC_PKIProvider* pkiProvider = NULL;
 
-    if (bIsServer)
+    if (isServer)
     {
         serverConfig = SOPC_ToolkitServer_GetEndpointConfig(conn->serverEndpointConfigIdx);
         if (NULL != serverConfig)
@@ -3560,7 +3549,7 @@ static void SOPC_Internal_SC_RevalidateCert(SOPC_SecureConnection* conn, uint32_
     if (NULL != pkiProvider)
     {
         SOPC_StatusCode errorStatus = OpcUa_BadUnexpectedError;
-        SOPC_PKI_Type PKIType = bIsServer ? SOPC_PKI_TYPE_SERVER_APP : SOPC_PKI_TYPE_CLIENT_APP;
+        SOPC_PKI_Type PKIType = isServer ? SOPC_PKI_TYPE_SERVER_APP : SOPC_PKI_TYPE_CLIENT_APP;
         const SOPC_CertificateList* cert = SC_PeerCertificate(conn);
         SOPC_ReturnStatus status =
             SOPC_CryptoProvider_Certificate_Validate(conn->cryptoProvider, pkiProvider, PKIType, cert, &errorStatus);
@@ -3580,7 +3569,104 @@ static void SOPC_Internal_SC_RevalidateCert(SOPC_SecureConnection* conn, uint32_
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "SC_RevalidateCert: unexpected NULL PKI provider");
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Sc_RevalidatePeerCert: unexpected NULL PKI provider");
+    }
+}
+
+static void SOPC_Internal_Sc_CheckOwnCertChange(SOPC_SecureConnection* conn, uint32_t connIdx, bool isServer)
+{
+    SOPC_SecureChannel_Config* clientConfig = NULL;
+    SOPC_Endpoint_Config* serverConfig = NULL;
+    SOPC_KeyCertPair* ownKeyCertPair = NULL;
+
+    if (isServer)
+    {
+        serverConfig = SOPC_ToolkitServer_GetEndpointConfig(conn->serverEndpointConfigIdx);
+        if (NULL != serverConfig)
+        {
+            ownKeyCertPair = serverConfig->serverConfigPtr->serverKeyCertPair;
+        }
+    }
+    else
+    {
+        clientConfig = SOPC_ToolkitClient_GetSecureChannelConfig(conn->secureChannelConfigIdx);
+        if (NULL != clientConfig)
+        {
+            ownKeyCertPair = clientConfig->clientConfigPtr->clientKeyCertPair;
+        }
+    }
+    if (NULL != ownKeyCertPair)
+    {
+        const SOPC_CertificateList* cert = SC_OwnCertificate(conn);
+
+        SOPC_SerializedCertificate* ownCert = NULL;
+        uint8_t* scCertData = NULL;
+        uint32_t scCertLen = 0;
+        SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_ToDER(cert, &scCertData, &scCertLen);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyCertPair_GetSerializedCertCopy(ownKeyCertPair, &ownCert);
+        }
+
+        // Check if SC certificate is the current application certificate
+        if (SOPC_STATUS_OK == status)
+        {
+            if (scCertLen != ownCert->length)
+            {
+                status = SOPC_STATUS_WOULD_BLOCK;
+            }
+            else
+            {
+                int comparison = memcmp(scCertData, ownCert->data, (size_t) scCertLen);
+                status = (comparison == 0) ? SOPC_STATUS_OK : SOPC_STATUS_WOULD_BLOCK;
+            }
+        }
+
+        if (SOPC_STATUS_OK != status)
+        {
+            char* pThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(cert);
+            const char* thumbprint = NULL == pThumbprint ? "NULL" : pThumbprint;
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "Closing secure channel idx=%" PRIu32
+                ": certificate %s is not valid anymore after application (key /) certificate update",
+                connIdx, thumbprint);
+            SOPC_Free(pThumbprint);
+            SC_CloseSecureConnection(conn, connIdx, false, false, OpcUa_BadSecurityChecksFailed,
+                                     "Certificate is not valid anymore after application (key /) certificate update");
+        }
+
+        SOPC_Free(scCertData);
+        SOPC_KeyManager_SerializedCertificate_Delete(ownCert);
+    } // else : no key/cert
+}
+
+static void SOPC_Internal_SC_ReEvaluate(SOPC_SecureConnection* conn,
+                                        uint32_t connIdx,
+                                        uintptr_t isServer,
+                                        uintptr_t isOwnCert)
+{
+    const bool bIsServer = (bool) isServer;
+    const bool bIsOwnCert = (bool) isOwnCert;
+
+    if (bIsServer != conn->isServerConnection)
+    {
+        return;
+    }
+    if (SECURE_CONNECTION_STATE_SC_CONNECTED != conn->state &&
+        SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW != conn->state)
+    {
+        return;
+    }
+
+    if (bIsOwnCert)
+    {
+        SOPC_Internal_Sc_CheckOwnCertChange(conn, connIdx, bIsServer);
+    }
+    else
+    {
+        SOPC_Internal_Sc_RevalidatePeerCert(conn, connIdx, bIsServer);
     }
 }
 
@@ -3808,8 +3894,11 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                                    eltId);
         }
         break;
-    case SCS_REVALIDATE_CERTS:
-        SC_ApplyToAllSCs(&SOPC_Internal_SC_RevalidateCert, params);
+    case SCS_REEVALUATE_SCS:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SCS_REEVALUATE_SCS isServer=%" PRIuPTR " isOwnCert=%" PRIuPTR, params,
+                               auxParam);
+        SC_ApplyToAllSCs(&SOPC_Internal_SC_ReEvaluate, params, auxParam);
         break;
     default:
         // Already filtered by secure channels API module

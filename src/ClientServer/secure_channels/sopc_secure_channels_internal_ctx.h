@@ -250,9 +250,9 @@ SOPC_SecureConnection* SC_GetConnection(uint32_t connectionIdx);
 const SOPC_CertificateList* SC_OwnCertificate(SOPC_SecureConnection* conn);
 const SOPC_CertificateList* SC_PeerCertificate(SOPC_SecureConnection* conn);
 
-typedef void SC_ApplyToConnection(SOPC_SecureConnection* conn, uint32_t connIdx, uintptr_t param);
+typedef void SC_ApplyToConnection(SOPC_SecureConnection* conn, uint32_t connIdx, uintptr_t param, uintptr_t auxParam);
 
-void SC_ApplyToAllSCs(SC_ApplyToConnection* applyToConnection, uintptr_t param);
+void SC_ApplyToAllSCs(SC_ApplyToConnection* applyToConnection, uintptr_t param, uintptr_t auxParam);
 
 /** @brief Retrieve the number of intermediate chunks already received */
 uint32_t SOPC_ScInternalContext_GetNbIntermediateInputChunks(SOPC_SecureConnection_ChunkMgrCtx* chunkCtx);
