@@ -427,17 +427,25 @@ void user_authentication_bs__is_valid_user_x509_authentication(
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     SOPC_ASSERT(NULL != epConfig);
     SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
-    SOPC_ASSERT(NULL != epConfig->serverConfigPtr->serverCertificate);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr->serverKeyCertPair);
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
+    SOPC_SerializedCertificate* serverSerCert = NULL;
 
     const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
 
-    status = is_valid_user_token_signature(
-        user_authentication_bs__p_user_token, user_authentication_bs__p_user_token_signature,
-        user_authentication_bs__p_server_nonce, epConfig->serverConfigPtr->serverCertificate, usedSecuPolicy);
+    status = SOPC_KeyCertPair_GetSerializedCertCopy(epConfig->serverConfigPtr->serverKeyCertPair, &serverSerCert);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = is_valid_user_token_signature(user_authentication_bs__p_user_token,
+                                               user_authentication_bs__p_user_token_signature,
+                                               user_authentication_bs__p_server_nonce, serverSerCert, usedSecuPolicy);
+        SOPC_KeyManager_SerializedCertificate_Delete(serverSerCert);
+        serverSerCert = NULL;
+    }
     if (SOPC_STATUS_OK == status)
     {
         status = is_cert_comply_with_security_policy(user_authentication_bs__p_user_token, usedSecuPolicy);
@@ -605,7 +613,7 @@ static bool internal_user_name_token_copy(OpcUa_UserNameIdentityToken* source, S
 
 static SOPC_ReturnStatus internal_decrypt_user_password(const OpcUa_UserNameIdentityToken* userToken,
                                                         const SOPC_CryptoProvider* cp,
-                                                        const SOPC_SerializedAsymmetricKey* serverKey,
+                                                        SOPC_KeyCertPair* serverKeyCertPair,
                                                         SOPC_Buffer** decryptedBuffer)
 {
     SOPC_ASSERT(NULL != decryptedBuffer);
@@ -613,7 +621,7 @@ static SOPC_ReturnStatus internal_decrypt_user_password(const OpcUa_UserNameIden
     uint32_t decryptedLength = 0;
     SOPC_Buffer* buffer = NULL;
 
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serverKey, false, &key);
+    SOPC_ReturnStatus status = SOPC_KeyCertPair_GetKeyCopy(serverKeyCertPair, &key);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_CryptoProvider_AsymmetricGetLength_Decryption(cp, key, (uint32_t) userToken->Password.Length,
@@ -732,7 +740,7 @@ static SOPC_ReturnStatus decrypt_user_token(const OpcUa_UserNameIdentityToken* u
     // Decrypt password and nonce
     SOPC_Buffer* decryptedBuffer = NULL;
     SOPC_ReturnStatus status =
-        internal_decrypt_user_password(userToken, cp, epConfig->serverConfigPtr->serverKey, &decryptedBuffer);
+        internal_decrypt_user_password(userToken, cp, epConfig->serverConfigPtr->serverKeyCertPair, &decryptedBuffer);
 
     // Compare nonces and retrieve password length (depends on nonce length)
     uint32_t passwordLength = 0;

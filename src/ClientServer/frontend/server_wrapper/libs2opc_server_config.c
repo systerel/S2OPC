@@ -186,7 +186,7 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
     // Check that the server defines certificates and PKI provider if endpoint uses security
     if (hasSecurity)
     {
-        if (NULL == pConfig->serverConfig.serverCertificate || NULL == pConfig->serverConfig.serverKey)
+        if (NULL == pConfig->serverConfig.serverKeyCertPair)
         {
             SOPC_Logger_TraceError(
                 SOPC_LOG_MODULE_CLIENTSERVER,

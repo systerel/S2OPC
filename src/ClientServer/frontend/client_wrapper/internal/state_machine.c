@@ -83,25 +83,26 @@ struct SOPC_StaMac_Machine
     SOPC_SLinkedList* pListDelMonIt; /* List of monitored items deletion request successful, where the
                                         SOPC_DeleteMonitoredItem_Ctx is the listed value */
 
-    uint32_t nTokenTarget;                     /* Target number of available tokens */
-    bool tooManyTokenRcvd;                     /* Flag set when server returns a too many token service fault,
-                                                   wait for next response without fault. */
-    uint32_t nTokenUsable;                     /* Tokens available to the server
-                                                * (PublishRequest_sent - PublishResponse_sent) */
-    bool bAckSubscr;                           /* Indicates whether an acknowledgement should be sent
-                                                * in the next PublishRequest */
-    uint32_t iAckSeqNum;                       /* The sequence number to acknowledge after a PublishResponse */
-    const char* szPolicyId;                    /* See SOPC_LibSub_ConnectionCfg */
-    const char* szUsername;                    /* See SOPC_LibSub_ConnectionCfg */
-    const char* szPassword;                    /* See SOPC_LibSub_ConnectionCfg */
-    SOPC_SerializedCertificate* pUserCertX509; /* X509 serialized certificate for X509IdentiyToken (DER format) */
-    SOPC_SerializedAsymmetricKey* pUserKey;    /* Serialized private key for X509IdentiyToken (PEM format) */
-    int64_t iTimeoutMs;                        /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
-    SOPC_SLinkedList* dataIdToNodeIdList;      /* A list of data ids to node ids */
-    SOPC_Dict* miCliHandleToUserAppCtxDict;    /* A dictionary of monitored client handles to user app contexts
-                                                        (new API only)*/
-    SOPC_Dict* miIdToCliHandleDict;            /* A dictionary of ids to client handles (new API only)*/
-    uintptr_t userContext;                     /* A state machine user defined context */
+    uint32_t nTokenTarget;  /* Target number of available tokens */
+    bool tooManyTokenRcvd;  /* Flag set when server returns a too many token service fault,
+                                wait for next response without fault. */
+    uint32_t nTokenUsable;  /* Tokens available to the server
+                             * (PublishRequest_sent - PublishResponse_sent) */
+    bool bAckSubscr;        /* Indicates whether an acknowledgement should be sent
+                             * in the next PublishRequest */
+    uint32_t iAckSeqNum;    /* The sequence number to acknowledge after a PublishResponse */
+    const char* szPolicyId; /* See SOPC_LibSub_ConnectionCfg */
+    const char* szUsername; /* See SOPC_LibSub_ConnectionCfg */
+    const char* szPassword; /* See SOPC_LibSub_ConnectionCfg */
+    SOPC_SerializedCertificate*
+        pUserCertX509;                      /* X509 serialized certificate for X509IdentiyToken (DER or PEM format) */
+    SOPC_SerializedAsymmetricKey* pUserKey; /* Serialized private key for X509IdentiyToken (DER or PEM format) */
+    int64_t iTimeoutMs;                     /* See SOPC_LibSub_ConnectionCfg.timeout_ms */
+    SOPC_SLinkedList* dataIdToNodeIdList;   /* A list of data ids to node ids */
+    SOPC_Dict* miCliHandleToUserAppCtxDict; /* A dictionary of monitored client handles to user app contexts
+                                                     (new API only)*/
+    SOPC_Dict* miIdToCliHandleDict;         /* A dictionary of ids to client handles (new API only)*/
+    uintptr_t userContext;                  /* A state machine user defined context */
 };
 
 /* Internal functions */

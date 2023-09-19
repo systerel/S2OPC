@@ -28,6 +28,7 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_internal.h"
 
+#include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -70,46 +71,29 @@ static bool SOPC_HelperInternal_CreatePKIfromPaths(void)
 static bool SOPC_HelperInternal_LoadCertsFromPaths(void)
 {
     SOPC_Server_Config* serverConfig = &SOPC_CommonHelper_GetConfiguration()->serverConfig;
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverConfig->serverCertPath,
-                                                                                    &serverConfig->serverCertificate);
     bool res = true;
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "Failed to load server certificate file %s. Please check it is a X509 certificate at DER format.",
-            serverConfig->serverCertPath);
-        res = false;
-    }
 
     char* password = NULL;
-    size_t lenPassword = 0;
 
     if (serverConfig->serverKeyEncrypted)
     {
         res = SOPC_ServerInternal_GetKeyPassword(&password);
     }
 
-    if (res && NULL != password)
+    if (res)
     {
-        lenPassword = strlen(password);
-        if (UINT32_MAX < lenPassword)
+        SOPC_ReturnStatus status = SOPC_KeyCertPair_CreateFromPaths(
+            serverConfig->serverCertPath, serverConfig->serverKeyPath, password, &serverConfig->serverKeyCertPair);
+
+        if (SOPC_STATUS_OK != status)
         {
             res = false;
         }
-    }
-
-    if (res)
-    {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-            serverConfig->serverKeyPath, &serverConfig->serverKey, password, (uint32_t) lenPassword);
-        if (SOPC_STATUS_OK != status)
+        else
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "Failed to load server private key file %s. Please check the password if the key is "
-                                   "encrypted and check the key format (PEM)",
-                                   serverConfig->serverKeyPath);
-            res = false;
+            status = SOPC_KeyCertPair_SetUpdateCb(serverConfig->serverKeyCertPair,
+                                                  &SOPC_ServerInternal_KeyCertPairUpdateCb, (uintptr_t) NULL);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
     }
 

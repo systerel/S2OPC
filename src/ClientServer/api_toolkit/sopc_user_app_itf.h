@@ -31,6 +31,7 @@
 #include "sopc_call_method_manager.h"
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
 #include "sopc_service_call_context.h"
 #include "sopc_toolkit_config_constants.h"
@@ -271,9 +272,8 @@ struct SOPC_Client_Config
                                                      key if if isConfigFromPathsNeeded is true. NULL otherwise.
                                                      (used to configure clientCertificate, clientKey and clientPKI) */
 
-    const SOPC_SerializedCertificate* clientCertificate; /**< Certificate might be set from paths */
-    const SOPC_SerializedAsymmetricKey* clientKey;       /**< Key might be set from paths */
-    SOPC_PKIProvider* clientPKI;                         /**< PKI might be set from paths */
+    SOPC_KeyCertPair* clientKeyCertPair; /**< Key and certificate might be set from paths or bytes arrays */
+    SOPC_PKIProvider* clientPKI;         /**< PKI might be set from paths or bytes arrays */
 
     uint16_t nbSecureConnections; /**< Number of secure connections defined by the client */
     SOPC_SecureConnection_Config*
@@ -340,14 +340,13 @@ struct SOPC_Server_Config
     SOPC_Endpoint_Config* endpoints; /**< Endpoint configuration array */
 
     /* To be instantiated by applicative code: */
-    SOPC_SerializedCertificate* serverCertificate; /**< Server certificate to be instantiated from path or bytes */
-    SOPC_SerializedAsymmetricKey* serverKey;       /**< Server key to be instantiated from path or bytes */
-    SOPC_PKIProvider* pki;                         /**< PKI provider to be instantiated. Possible use of
-                                                      ::SOPC_PKIProvider_CreateFromStore or ::SOPC_PKIProvider_CreateFromList. */
-    SOPC_MethodCallManager* mcm;                   /**< Method Call service configuration.
-                                                        Can be instantiated with SOPC_MethodCallManager_Create()
-                                                        or specific code by applicative code.
-                                                        Can be NULL if Method Call service is not used. */
+    SOPC_KeyCertPair* serverKeyCertPair;        /**< Server key and certificate to be instantiated from path or bytes */
+    SOPC_PKIProvider* pki;                      /**< PKI provider to be instantiated. Possible use of
+                                                   ::SOPC_PKIProvider_CreateFromStore or ::SOPC_PKIProvider_CreateFromList. */
+    SOPC_MethodCallManager* mcm;                /**< Method Call service configuration.
+                                                     Can be instantiated with SOPC_MethodCallManager_Create()
+                                                     or specific code by applicative code.
+                                                     Can be NULL if Method Call service is not used. */
     SOPC_CreateMI_NodeAvailFunc* nodeAvailFunc; /**< If defined, the callback is called by CreateMonitoredItem service
                                                      when NodeId is not already part of server AddressSpace.
                                                      The callback indicates if it should be considered known by server

@@ -53,22 +53,15 @@ const OpcUa_UserTokenPolicy userNameUserTokenPolicy = {
 };
 SOPC_GCC_DIAGNOSTIC_RESTORE
 
-static void SOPC_SetServerCertificate(SOPC_Endpoint_Config* sopcEndpointConfig, SOPC_ByteString* serverCert)
+static void SOPC_SetServerCertificate(SOPC_SerializedCertificate* serverCertificate, SOPC_ByteString* serverCert)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_ASSERT(NULL != serverCertificate);
     uint32_t tmpLength = 0;
-
-    if (sopcEndpointConfig->serverConfigPtr->serverCertificate == NULL)
-    {
-        return;
-    }
-
-    SOPC_ASSERT(sopcEndpointConfig->serverConfigPtr->serverCertificate->length <= INT32_MAX);
-    status = SOPC_ByteString_CopyFromBytes(serverCert, sopcEndpointConfig->serverConfigPtr->serverCertificate->data,
-                                           (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length);
+    SOPC_ReturnStatus status =
+        SOPC_ByteString_CopyFromBytes(serverCert, serverCertificate->data, (int32_t) serverCertificate->length);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_ASSERT(tmpLength <= INT32_MAX);
-    serverCert->Length = (int32_t) sopcEndpointConfig->serverConfigPtr->serverCertificate->length;
+    serverCert->Length = (int32_t) serverCertificate->length;
 }
 
 static void SOPC_SetServerApplicationDescription(SOPC_Endpoint_Config* sopcEndpointConfig,
@@ -262,6 +255,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
     SOPC_SecurityPolicy* tabSecurityPolicy = NULL;
     OpcUa_EndpointDescription* currentConfig_EndpointDescription = NULL;
     bool userTokenEncryptionNeeded = false;
+    SOPC_SerializedCertificate* serverCertificate = NULL;
 
     SOPC_String_Initialize(&configEndPointURL);
 
@@ -274,6 +268,16 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "Failed to set endpoint URL value in application description of response");
+        }
+
+        if (sopcEndpointConfig->serverConfigPtr->serverKeyCertPair != NULL)
+        {
+            status = SOPC_KeyCertPair_GetSerializedCertCopy(sopcEndpointConfig->serverConfigPtr->serverKeyCertPair,
+                                                            &serverCertificate);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to retrieve server certificate data");
+            }
         }
 
         /* Note: comparison with requested URL is not necessary since we have to return a default URL in any case */
@@ -362,7 +366,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                         // Set serverCertificate in case it is needed for a user token policy
                         if (userTokenEncryptionNeeded)
                         {
-                            SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
+                            SOPC_SetServerCertificate(serverCertificate, &newEndPointDescription->ServerCertificate);
                         }
                         // Set ApplicationDescription
                         SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
@@ -410,7 +414,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     if (!isCreateSessionResponse)
                     {
                         // Set serverCertificate
-                        SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
+                        SOPC_SetServerCertificate(serverCertificate, &newEndPointDescription->ServerCertificate);
                         // Set ApplicationDescription
                         SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
                                                              &newEndPointDescription->Server);
@@ -455,7 +459,7 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
                     if (!isCreateSessionResponse)
                     {
                         // Set serverCertificate
-                        SOPC_SetServerCertificate(sopcEndpointConfig, &newEndPointDescription->ServerCertificate);
+                        SOPC_SetServerCertificate(serverCertificate, &newEndPointDescription->ServerCertificate);
                         // Set ApplicationDescription
                         SOPC_SetServerApplicationDescription(sopcEndpointConfig, preferredLocales,
                                                              &newEndPointDescription->Server);
@@ -510,6 +514,8 @@ constants_statuscodes_bs__t_StatusCode_i SOPC_Discovery_GetEndPointsDescriptions
 
         SOPC_Free(preferredLocales);
     }
+
+    SOPC_KeyManager_SerializedCertificate_Delete(serverCertificate);
 
     return serviceResult;
 }

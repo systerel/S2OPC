@@ -2534,37 +2534,33 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 
 static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
 {
-    const SOPC_SerializedAsymmetricKey* serialized_private_key = NULL;
-    const SOPC_Buffer* cert_data = NULL;
+    SOPC_KeyCertPair* keyCertPair = NULL;
     const SOPC_Buffer* peer_cert_data = NULL;
 
     if (sc->isServerConnection)
     {
         SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(sc->serverEndpointConfigIdx);
         SOPC_ASSERT(epConfig != NULL);
-        serialized_private_key = epConfig->serverConfigPtr->serverKey;
-        cert_data = epConfig->serverConfigPtr->serverCertificate;
+        keyCertPair = epConfig->serverConfigPtr->serverKeyCertPair;
     }
     else
     {
         SOPC_SecureChannel_Config* scConfig = SOPC_ToolkitClient_GetSecureChannelConfig(sc->secureChannelConfigIdx);
         SOPC_ASSERT(scConfig != NULL);
         SOPC_ASSERT(scConfig->clientConfigPtr != NULL);
-        serialized_private_key = scConfig->clientConfigPtr->clientKey;
-        cert_data = scConfig->clientConfigPtr->clientCertificate;
+        keyCertPair = scConfig->clientConfigPtr->clientKeyCertPair;
         peer_cert_data = scConfig->peerAppCert;
     }
 
-    if (serialized_private_key == NULL || cert_data == NULL)
+    if (keyCertPair == NULL)
     {
         return true;
     }
 
     SOPC_CertificateList** cert = sc->isServerConnection ? &sc->serverCertificate : &sc->clientCertificate;
 
-    if (SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(serialized_private_key, false, &sc->privateKey) !=
-            SOPC_STATUS_OK ||
-        SOPC_KeyManager_Certificate_CreateOrAddFromDER(cert_data->data, cert_data->length, cert) != SOPC_STATUS_OK ||
+    if (SOPC_KeyCertPair_GetKeyCopy(keyCertPair, &sc->privateKey) != SOPC_STATUS_OK ||
+        SOPC_KeyCertPair_GetCertCopy(keyCertPair, cert) != SOPC_STATUS_OK ||
         (peer_cert_data != NULL &&
          SOPC_KeyManager_Certificate_CreateOrAddFromDER(peer_cert_data->data, peer_cert_data->length,
                                                         &sc->serverCertificate) != SOPC_STATUS_OK))

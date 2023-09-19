@@ -216,8 +216,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
         SOPC_ASSERT(NULL != configFromPaths);
 
         SOPC_PKIProvider* pki = NULL;
-        SOPC_SerializedCertificate* cliCert = NULL;
-        SOPC_SerializedAsymmetricKey* cliKey = NULL;
+        SOPC_KeyCertPair* cliKeyCertPair = NULL;
 
         if (NULL == cConfig->clientPKI && NULL != configFromPaths->clientPkiPath)
         {
@@ -240,29 +239,11 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
 
         if (SOPC_STATUS_OK == status)
         {
-            if (NULL == cConfig->clientCertificate && NULL != configFromPaths->clientCertPath)
+            if (NULL == cConfig->clientKeyCertPair && NULL != configFromPaths->clientCertPath &&
+                NULL != configFromPaths->clientKeyPath)
             {
-                status =
-                    SOPC_KeyManager_SerializedCertificate_CreateFromFile(configFromPaths->clientCertPath, &cliCert);
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                           "Failed to load client certificate from path.");
-                }
-            }
-            else if (NULL != configFromPaths->clientCertPath)
-            {
-                SOPC_Logger_TraceWarning(
-                    SOPC_LOG_MODULE_CLIENTSERVER,
-                    "Client certificate config from path ignored since a certificate is already instantiated.");
-            }
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            if (NULL == cConfig->clientKey && NULL != configFromPaths->clientKeyPath)
-            {
+                /* Retrieve key password if encrypted */
                 char* password = NULL;
-                size_t lenPassword = 0;
                 if (configFromPaths->clientKeyEncrypted)
                 {
                     bool res = SOPC_ClientInternal_GetClientKeyPassword(&password);
@@ -275,26 +256,10 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
                     }
                 }
 
-                if (SOPC_STATUS_OK == status && NULL != password)
-                {
-                    lenPassword = strlen(password);
-                    if (UINT32_MAX < lenPassword)
-                    {
-                        status = SOPC_STATUS_NOK;
-                    }
-                }
-
                 if (SOPC_STATUS_OK == status)
                 {
-                    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                        configFromPaths->clientKeyPath, &cliKey, password, (uint32_t) lenPassword);
-                    if (SOPC_STATUS_OK != status)
-                    {
-                        SOPC_Logger_TraceError(
-                            SOPC_LOG_MODULE_CLIENTSERVER,
-                            "Failed to load client private key from path. Please check the password if the key "
-                            "is encrypted and check the key format (PEM)");
-                    }
+                    status = SOPC_KeyCertPair_CreateFromPaths(
+                        configFromPaths->clientCertPath, configFromPaths->clientKeyPath, password, &cliKeyCertPair);
                 }
 
                 if (NULL != password)
@@ -302,25 +267,30 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
                     SOPC_Free(password);
                 }
             }
-            else if (NULL != configFromPaths->clientKeyPath)
+            else if (NULL != cConfig->clientKeyCertPair)
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                         "Client key config from path ignored since a key is already instantiated.");
+                                         "Client key / certificate config from path ignored since a key / certificate "
+                                         "pair is already instantiated.");
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "Client key / certificate config from path error since at least one path is missing.");
             }
         }
-
         if (SOPC_STATUS_OK == status)
         {
             cConfig->clientPKI = (NULL != pki ? pki : cConfig->clientPKI);
-            cConfig->clientCertificate = (NULL != cliCert ? cliCert : cConfig->clientCertificate);
-            cConfig->clientKey = (NULL != cliKey ? cliKey : cConfig->clientKey);
+            cConfig->clientKeyCertPair = (NULL != cliKeyCertPair ? cliKeyCertPair : cConfig->clientKeyCertPair);
             cConfig->isConfigFromPathsNeeded = false;
         }
         else
         {
             SOPC_PKIProvider_Free(&pki);
-            SOPC_KeyManager_SerializedCertificate_Delete(cliCert);
-            SOPC_KeyManager_SerializedAsymmetricKey_Delete(cliKey);
+            SOPC_KeyCertPair_Delete(&cliKeyCertPair);
         }
     }
     else
@@ -331,7 +301,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No client PKI configured");
     }
-    if (NULL == cConfig->clientCertificate || NULL == cConfig->clientKey)
+    if (NULL == cConfig->clientKeyCertPair)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "No client certificate/key configured");
     }
@@ -446,7 +416,7 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (securityNeeded)
     {
-        if (cConfig->clientCertificate == NULL || cConfig->clientKey == NULL)
+        if (cConfig->clientKeyCertPair == NULL)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Connection %s [%" PRIu16

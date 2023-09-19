@@ -656,9 +656,8 @@ void session_core_bs__server_create_session_req_do_crypto(
 
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_ASSERT(pECfg->serverConfigPtr->serverKey != NULL);
-            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pECfg->serverConfigPtr->serverKey, false,
-                                                                         &privateKey);
+            SOPC_ASSERT(pECfg->serverConfigPtr->serverKeyCertPair != NULL);
+            status = SOPC_KeyCertPair_GetKeyCopy(pECfg->serverConfigPtr->serverKeyCertPair, &privateKey);
         }
 
         if (SOPC_STATUS_OK == status)
@@ -766,7 +765,7 @@ void session_core_bs__clear_Signature(const constants__t_SignatureData_i session
 
 static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
                                                      const char* pSecuPolicyUri,
-                                                     const SOPC_SerializedAsymmetricKey* pKeyPriv,
+                                                     const SOPC_AsymmetricKey* pKeyPriv,
                                                      SOPC_ByteString* pServerNonce,
                                                      const SOPC_Buffer* pServerCert,
                                                      const char** errorReason)
@@ -774,7 +773,6 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     uint8_t* pToSign = NULL;
     uint32_t lenToSign = 0;
-    SOPC_AsymmetricKey* pKey = NULL;
     SOPC_CryptoProvider* pProvider = NULL;
 
     SOPC_ASSERT(NULL != pSign || NULL != pSecuPolicyUri || NULL != pKeyPriv || NULL != pServerNonce ||
@@ -802,17 +800,12 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pKeyPriv, false, &pKey);
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
         memcpy(pToSign, pServerCert->data, (size_t) pServerCert->length);
         memcpy(pToSign + pServerCert->length, pServerNonce->Data, (size_t) pServerNonce->Length);
 
         /* Sign and store the signature in pSign */
         status =
-            SOPC_CryptoProvider_AsymmetricGetLength_Signature(pProvider, pKey, (uint32_t*) &pSign->Signature.Length);
+            SOPC_CryptoProvider_AsymmetricGetLength_KeyBytes(pProvider, pKeyPriv, (uint32_t*) &pSign->Signature.Length);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -833,7 +826,7 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pKey, pSign->Signature.Data,
+        status = SOPC_CryptoProvider_AsymmetricSign(pProvider, pToSign, lenToSign, pKeyPriv, pSign->Signature.Data,
                                                     (uint32_t) pSign->Signature.Length, errorReason);
     }
 
@@ -844,8 +837,6 @@ static SOPC_ReturnStatus session_core_asymetric_sign(OpcUa_SignatureData* pSign,
     }
 
     /* Clean */
-    SOPC_KeyManager_AsymmetricKey_Free(pKey);
-    pKey = NULL;
     SOPC_Free(pToSign);
     pToSign = NULL;
     SOPC_CryptoProvider_Free(pProvider);
@@ -908,8 +899,15 @@ void session_core_bs__client_activate_session_req_do_crypto(
         OpcUa_SignatureData_Initialize(pSign);
 
         /* Use the client private key to sign the server certificate + server nonce */
-        status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, pSCCfg->clientConfigPtr->clientKey,
-                                             serverNonce, serverCert, &errorReason);
+        SOPC_AsymmetricKey* privKey = NULL;
+        status = SOPC_KeyCertPair_GetKeyCopy(pSCCfg->clientConfigPtr->clientKeyCertPair, &privKey);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, privKey, serverNonce, serverCert,
+                                                 &errorReason);
+            SOPC_KeyManager_AsymmetricKey_Free(privKey);
+            privKey = NULL;
+        }
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -971,10 +969,18 @@ void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_c
         }
         /* Initialise the signature */
         OpcUa_SignatureData_Initialize(pSignUserToken);
-        /* Use the user private key to sign the server certificate + server nonce */
-        status = session_core_asymetric_sign(pSignUserToken, userSecurityPolicy,
-                                             (const SOPC_SerializedAsymmetricKey*) pKeyUserToken, serverNonce,
-                                             serverCert, &errorReason);
+        SOPC_AsymmetricKey* pKey = NULL;
+        status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pKeyUserToken, false, &pKey);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            /* Use the user private key to sign the server certificate + server nonce */
+            status = session_core_asymetric_sign(pSignUserToken, userSecurityPolicy, pKey, serverNonce, serverCert,
+                                                 &errorReason);
+            SOPC_KeyManager_AsymmetricKey_Free(pKey);
+            pKey = NULL;
+        }
+
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(
@@ -986,6 +992,11 @@ void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_c
         if (SOPC_STATUS_OK == status)
         {
             *session_core_bs__p_user_token_signature = pSignUserToken;
+        }
+        else
+        {
+            OpcUa_SignatureData_Clear(pSignUserToken);
+            SOPC_Free(pSignUserToken);
         }
     }
 }
@@ -1315,7 +1326,7 @@ void session_core_bs__client_create_session_check_crypto(
     /* Retrieve the security policy and mode */
     pSCCfg = SOPC_ToolkitClient_GetSecureChannelConfig(session_core_bs__p_channel_config_idx);
 
-    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr || NULL == pSCCfg->clientConfigPtr->clientCertificate ||
+    if (NULL == pSCCfg || NULL == pSCCfg->clientConfigPtr || NULL == pSCCfg->clientConfigPtr->clientKeyCertPair ||
         NULL == pSCCfg->peerAppCert)
     {
         return;
@@ -1339,9 +1350,13 @@ void session_core_bs__client_create_session_check_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv,
-                                 pSCCfg->clientConfigPtr->clientCertificate, &pSession->nonceClient,
-                                 &pSignCandid->Signature, &errorReason);
+        SOPC_SerializedCertificate* clientCert = NULL;
+        status = SOPC_KeyCertPair_GetSerializedCertCopy(pSCCfg->clientConfigPtr->clientKeyCertPair, &clientCert);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtSrv, clientCert,
+                                     &pSession->nonceClient, &pSignCandid->Signature, &errorReason);
+        }
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1352,6 +1367,7 @@ void session_core_bs__client_create_session_check_crypto(
         {
             *session_core_bs__valid = true;
         }
+        SOPC_KeyManager_SerializedCertificate_Delete(clientCert);
     }
 
     SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtSrv);
@@ -1406,7 +1422,7 @@ void session_core_bs__server_activate_session_check_crypto(
     }
 
     epConfig = SOPC_ToolkitServer_GetEndpointConfig(session_core_bs__p_endpoint_config_idx);
-    if (NULL == epConfig || NULL == epConfig->serverConfigPtr || NULL == epConfig->serverConfigPtr->serverCertificate)
+    if (NULL == epConfig || NULL == epConfig->serverConfigPtr || NULL == epConfig->serverConfigPtr->serverKeyCertPair)
     {
         return;
     }
@@ -1429,9 +1445,13 @@ void session_core_bs__server_activate_session_check_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtCli,
-                                 epConfig->serverConfigPtr->serverCertificate, pNonce, &pSignCandid->Signature,
-                                 &errorReason);
+        SOPC_SerializedCertificate* serverCert = NULL;
+        status = SOPC_KeyCertPair_GetSerializedCertCopy(epConfig->serverConfigPtr->serverKeyCertPair, &serverCert);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = check_signature(pSCCfg->reqSecuPolicyUri, &pSignCandid->Algorithm, pKeyCrtCli, serverCert, pNonce,
+                                     &pSignCandid->Signature, &errorReason);
+        }
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1444,6 +1464,7 @@ void session_core_bs__server_activate_session_check_crypto(
         }
 
         /* Clear */
+        SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
         SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
         SOPC_KeyManager_Certificate_Free(pCrtCli);
     }

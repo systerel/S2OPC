@@ -104,8 +104,7 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     }
     SOPC_Free(config->endpoints);
 
-    SOPC_KeyManager_SerializedCertificate_Delete(config->serverCertificate);
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete(config->serverKey);
+    SOPC_KeyCertPair_Delete(&config->serverKeyCertPair);
     SOPC_PKIProvider_Free(&config->pki);
     SOPC_MethodCallManager_Free(config->mcm);
 
@@ -158,14 +157,10 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
         }
     }
 
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) config->clientCertificate);
-    config->clientCertificate = NULL;
-    SOPC_KeyManager_SerializedAsymmetricKey_Delete((SOPC_SerializedAsymmetricKey*) config->clientKey);
-    config->clientKey = NULL;
-    SOPC_PKIProvider_Free((SOPC_PKIProvider**) (&config->clientPKI));
+    SOPC_KeyCertPair_Delete(&config->clientKeyCertPair);
+    config->clientKeyCertPair = NULL;
+    SOPC_PKIProvider_Free(&config->clientPKI);
     config->clientPKI = NULL;
-    SOPC_GCC_DIAGNOSTIC_RESTORE
 
     for (uint16_t i = 0; i < config->nbSecureConnections; i++)
     {

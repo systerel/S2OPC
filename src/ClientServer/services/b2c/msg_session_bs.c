@@ -121,7 +121,8 @@ void msg_session_bs__write_create_session_req_msg_crypto(
     *msg_session_bs__bret = false;
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     OpcUa_CreateSessionRequest* pReq = (OpcUa_CreateSessionRequest*) msg_session_bs__p_req_msg;
-    const SOPC_Buffer* pSerialCertCli = NULL;
+    SOPC_SerializedCertificate* pSerialCertCli = NULL;
+    SOPC_CertificateList* pCertCli = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
     /* Retrieve the certificate */
@@ -132,9 +133,9 @@ void msg_session_bs__write_create_session_req_msg_crypto(
         return;
     }
 
-    pSerialCertCli = pSCCfg->clientConfigPtr->clientCertificate;
+    status = SOPC_KeyCertPair_GetSerializedCertCopy(pSCCfg->clientConfigPtr->clientKeyCertPair, &pSerialCertCli);
 
-    if (NULL == pSerialCertCli)
+    if (SOPC_STATUS_OK != status)
     {
         return;
     }
@@ -145,56 +146,57 @@ void msg_session_bs__write_create_session_req_msg_crypto(
     SOPC_ASSERT(pSerialCertCli->length <= INT32_MAX);
     status =
         SOPC_ByteString_CopyFromBytes(&pReq->ClientCertificate, pSerialCertCli->data, (int32_t) pSerialCertCli->length);
-    if (SOPC_STATUS_OK != status)
-        return;
-    pReq->ClientCertificate.Length = (int32_t) pSerialCertCli->length;
-
-    /* Write the nonce */
-    SOPC_ByteString_Clear(&pReq->ClientNonce);
-
-    status = SOPC_ByteString_Copy(&pReq->ClientNonce, msg_session_bs__p_nonce);
-    if (SOPC_STATUS_OK != status)
-        return;
-
-    SOPC_CertificateList* pCertCli = NULL;
-
-    if (SOPC_STATUS_OK != SOPC_KeyManager_SerializedCertificate_Deserialize(pSerialCertCli, &pCertCli))
-        return;
-
-    size_t len = 0;
-    char* applicationURI = NULL;
-    if (SOPC_STATUS_OK == SOPC_KeyManager_Certificate_GetMaybeApplicationUri(pCertCli, &applicationURI, &len) &&
-        len <= INT32_MAX)
+    if (SOPC_STATUS_OK == status)
     {
-        // Clear the previously configured ApplicationURI
-        SOPC_String_Clear(&pReq->ClientDescription.ApplicationUri);
-        pReq->ClientDescription.ApplicationUri.Data = (SOPC_Byte*) applicationURI;
-        pReq->ClientDescription.ApplicationUri.Length = (int32_t) len;
-        *msg_session_bs__bret = true;
+        pReq->ClientCertificate.Length = (int32_t) pSerialCertCli->length;
+        /* Write the nonce */
+        SOPC_ByteString_Clear(&pReq->ClientNonce);
+        status = SOPC_ByteString_Copy(&pReq->ClientNonce, msg_session_bs__p_nonce);
     }
-    else
+
+    if (SOPC_STATUS_OK == status)
     {
-        if (pReq->ClientDescription.ApplicationUri.Length > 0)
+        status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSerialCertCli, &pCertCli);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t len = 0;
+        char* applicationURI = NULL;
+        status = SOPC_KeyManager_Certificate_GetMaybeApplicationUri(pCertCli, &applicationURI, &len);
+        if (SOPC_STATUS_OK == status && len <= INT32_MAX)
         {
-            // An application URI was already configured, keep it but signal the extraction failed
-            SOPC_Logger_TraceWarning(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
-                "scConfigIdx=%" PRIu32 ", the configured one '%s' will be used instead",
-                msg_session_bs__p_channel_config_idx, (char*) pReq->ClientDescription.ApplicationUri.Data);
+            // Clear the previously configured ApplicationURI
+            SOPC_String_Clear(&pReq->ClientDescription.ApplicationUri);
+            pReq->ClientDescription.ApplicationUri.Data = (SOPC_Byte*) applicationURI;
+            pReq->ClientDescription.ApplicationUri.Length = (int32_t) len;
             *msg_session_bs__bret = true;
         }
         else
         {
-            // No applicationURI configured, terminate in error
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
-                "scConfigIdx=%" PRIu32,
-                msg_session_bs__p_channel_config_idx);
+            if (pReq->ClientDescription.ApplicationUri.Length > 0)
+            {
+                // An application URI was already configured, keep it but signal the extraction failed
+                SOPC_Logger_TraceWarning(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
+                    "scConfigIdx=%" PRIu32 ", the configured one '%s' will be used instead",
+                    msg_session_bs__p_channel_config_idx, (char*) pReq->ClientDescription.ApplicationUri.Data);
+                *msg_session_bs__bret = true;
+            }
+            else
+            {
+                // No applicationURI configured, terminate in error
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "write_create_session_req_msg_crypto: Failed to extract ApplicationUri from client certificate on "
+                    "scConfigIdx=%" PRIu32,
+                    msg_session_bs__p_channel_config_idx);
+            }
         }
     }
 
+    SOPC_KeyManager_SerializedCertificate_Delete(pSerialCertCli);
     SOPC_KeyManager_Certificate_Free(pCertCli);
 }
 
@@ -255,7 +257,7 @@ void msg_session_bs__write_create_session_resp_cert(
 {
     SOPC_Endpoint_Config* pEndpointConfig = NULL;
 
-    const SOPC_Buffer* pCrtSrv = NULL;
+    SOPC_SerializedCertificate* pCrtSrv = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     bool result = true;
     OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) msg_session_bs__p_msg;
@@ -268,8 +270,9 @@ void msg_session_bs__write_create_session_resp_cert(
     }
     if (result)
     {
-        pCrtSrv = pEndpointConfig->serverConfigPtr->serverCertificate;
-        if (NULL == pCrtSrv)
+        status = SOPC_KeyCertPair_GetSerializedCertCopy(pEndpointConfig->serverConfigPtr->serverKeyCertPair, &pCrtSrv);
+
+        if (SOPC_STATUS_OK != status)
         {
             result = false;
         }
@@ -283,6 +286,8 @@ void msg_session_bs__write_create_session_resp_cert(
         status = SOPC_ByteString_CopyFromBytes(&pResp->ServerCertificate, pCrtSrv->data, (int32_t) pCrtSrv->length);
         result = SOPC_STATUS_OK == status;
     }
+
+    SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
 
     *msg_session_bs__bret = result;
 }

@@ -172,7 +172,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromPath(const char* cli
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
 
-    if (NULL == pConfig->clientConfig.clientKey &&
+    if (NULL == pConfig->clientConfig.clientKeyCertPair &&
         (NULL == pConfig->clientConfig.configFromPaths || NULL == pConfig->clientConfig.configFromPaths->clientKeyPath))
     {
         if (NULL == pConfig->clientConfig.configFromPaths)
@@ -235,27 +235,16 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
 
-    if (NULL == pConfig->clientConfig.clientKey)
+    if (NULL == pConfig->clientConfig.clientKeyCertPair)
     {
-        SOPC_SerializedCertificate* cert = NULL;
-        SOPC_SerializedAsymmetricKey* key = NULL;
+        SOPC_KeyCertPair* cliKeyCertPair = NULL;
 
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(clientPrivateKey, (uint32_t) keyNbBytes, &key);
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(clientCertificate,
-                                                                         (uint32_t) certificateNbBytes, &cert);
-        }
+        status = SOPC_KeyCertPair_CreateFromBytes(certificateNbBytes, clientCertificate, keyNbBytes, clientPrivateKey,
+                                                  &cliKeyCertPair);
 
         if (SOPC_STATUS_OK == status)
         {
-            pConfig->clientConfig.clientKey = key;
-            pConfig->clientConfig.clientCertificate = cert;
-        }
-        else
-        {
-            SOPC_KeyManager_SerializedAsymmetricKey_Delete(key);
-            SOPC_KeyManager_SerializedCertificate_Delete(cert);
+            pConfig->clientConfig.clientKeyCertPair = cliKeyCertPair;
         }
     }
     else
@@ -299,7 +288,7 @@ SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_CreateSecureConnection(con
         secConnConfig = SOPC_Calloc(1, sizeof(*secConnConfig));
         if (NULL != secConnConfig)
         {
-            if (SOPC_SecurityPolicy_None != secuPolicy && NULL == pConfig->clientConfig.clientKey &&
+            if (SOPC_SecurityPolicy_None != secuPolicy && NULL == pConfig->clientConfig.clientKeyCertPair &&
                 (!pConfig->clientConfig.isConfigFromPathsNeeded ||
                  NULL == pConfig->clientConfig.configFromPaths->clientKeyPath))
             {

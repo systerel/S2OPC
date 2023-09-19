@@ -122,7 +122,7 @@ typedef struct
  * \param iCntLifetime            The number of times a PublishResponse cannot be sent
  *                                before killing the subscription
  * \param iTokenTarget            Number of subscription tokens the server should always have
- * \param iTimeoutMs              Timeout for the synchroneous calls
+ * \param iTimeoutMs              Timeout for the synchronous calls
  * \param cbkGenericEvent         Callback for generic responses to a call to SOPC_LibSub_AsyncSendRequestOnSession()
  * \param userContext             Caller defined user context that could be retrieved or set using accessors
  * \param ppSM                    The returned machine, when successful

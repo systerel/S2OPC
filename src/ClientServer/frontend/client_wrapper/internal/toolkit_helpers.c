@@ -58,8 +58,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
     SOPC_SerializedCertificate* pCrtSrv = NULL;
-    SOPC_SerializedCertificate* pCrtCli = NULL;
-    SOPC_SerializedAsymmetricKey* pKeyCli = NULL;
+    SOPC_KeyCertPair* pCliKeyCertPair = NULL;
     SOPC_PKIProvider* pPki = NULL;
 
     if (NULL == szServerUrl || NULL == szSecuPolicy || OpcUa_MessageSecurityMode_Invalid == msgSecurityMode ||
@@ -162,19 +161,11 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
             }
         }
 
-        if (SOPC_STATUS_OK == status && NULL != szPathCertClient && NULL == clientAppCfg->clientCertificate)
+        if (SOPC_STATUS_OK == status && NULL != szPathCertClient && NULL != szPathKeyClient &&
+            NULL == clientAppCfg->clientKeyCertPair)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertClient, &pCrtCli);
-            if (SOPC_STATUS_OK != status)
-            {
-                Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load client certificate.");
-            }
-        }
-
-        if (SOPC_STATUS_OK == status && NULL == clientAppCfg->clientKey)
-        {
+            /* Retrieve key password if needed */
             char* password = NULL;
-            size_t lenPassword = 0;
             bool clientKeyEncrypted = SOPC_ClientInternal_IsEncryptedClientKey();
             if (clientKeyEncrypted)
             {
@@ -187,25 +178,10 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
                 }
             }
 
-            if (SOPC_STATUS_OK == status && NULL != password)
-            {
-                lenPassword = strlen(password);
-                if (UINT32_MAX < lenPassword)
-                {
-                    status = SOPC_STATUS_NOK;
-                }
-            }
-
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(
-                    szPathKeyClient, &pKeyCli, password, (uint32_t) lenPassword);
-                if (SOPC_STATUS_OK != status)
-                {
-                    Helpers_Log(SOPC_LOG_LEVEL_ERROR,
-                                "Failed to load client private key. Please check the password if the key is encrypted "
-                                "and check the key format (PEM)");
-                }
+                status =
+                    SOPC_KeyCertPair_CreateFromPaths(szPathCertClient, szPathKeyClient, password, &pCliKeyCertPair);
             }
 
             if (NULL != password)
@@ -218,13 +194,9 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     /* Create the configuration */
     if (SOPC_STATUS_OK == status)
     {
-        if (NULL == clientAppCfg->clientCertificate)
+        if (NULL == clientAppCfg->clientKeyCertPair)
         {
-            clientAppCfg->clientCertificate = pCrtCli;
-        }
-        if (NULL == clientAppCfg->clientKey)
-        {
-            clientAppCfg->clientKey = pKeyCli;
+            clientAppCfg->clientKeyCertPair = pCliKeyCertPair;
         }
         if (NULL == clientAppCfg->clientPKI)
         {
@@ -292,8 +264,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         SOPC_PKIProvider_Free(&pPki);
         SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtCli);
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(pKeyCli);
+        SOPC_KeyCertPair_Delete(&pCliKeyCertPair);
         SOPC_Free(pscConfig);
     }
 

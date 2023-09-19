@@ -205,8 +205,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* ser
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
-        NULL != pConfig->serverConfig.serverKey)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverKeyCertPair)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -215,61 +214,32 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* ser
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_SerializedCertificate* serverCert = NULL;
-    SOPC_SerializedAsymmetricKey* serverKey = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCertPath, &serverCert);
+    SOPC_KeyCertPair* serverKeyCertPair = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    /* Retrieve key password if needed */
+    char* password = NULL;
+
+    if (encrypted)
+    {
+        bool res = SOPC_ServerInternal_GetKeyPassword(&password);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
     if (SOPC_STATUS_OK == status)
     {
-        char* password = NULL;
-        size_t lenPassword = 0;
-
-        if (encrypted)
-        {
-            bool res = SOPC_ServerInternal_GetKeyPassword(&password);
-            status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-        }
-
-        if (SOPC_STATUS_OK == status && NULL != password)
-        {
-            lenPassword = strlen(password);
-            if (UINT32_MAX < lenPassword)
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverKeyPath, &serverKey, password,
-                                                                                    (uint32_t) lenPassword);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Failed to load server key from path %s. Please check the password if the key "
-                                       "is encrypted and check the key format (PEM)\n",
-                                       serverKeyPath);
-            }
-        }
-        if (NULL != password)
-        {
-            SOPC_Free(password);
-        }
+        status = SOPC_KeyCertPair_CreateFromPaths(serverCertPath, serverKeyPath, password, &serverKeyCertPair);
     }
-    else
+
+    if (NULL != password)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server certificate from path %s\n",
-                               serverCertPath);
-    }
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
-        serverCert = NULL;
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
-        serverKey = NULL;
+        SOPC_Free(password);
     }
 
-    pConfig->serverConfig.serverCertificate = serverCert;
-    pConfig->serverConfig.serverKey = serverKey;
+    if (SOPC_STATUS_OK == status)
+    {
+        pConfig->serverConfig.serverKeyCertPair = serverKeyCertPair;
+    }
 
     return status;
 }
@@ -281,8 +251,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certifi
 {
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
-    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverCertificate ||
-        NULL != pConfig->serverConfig.serverKey)
+    if (!SOPC_ServerInternal_IsConfiguring() || NULL != pConfig->serverConfig.serverKeyCertPair)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -292,34 +261,18 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certifi
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_SerializedCertificate* serverCert = NULL;
-    SOPC_SerializedAsymmetricKey* serverKey = NULL;
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(
-        serverCertificate, (uint32_t) certificateNbBytes, &serverCert);
-    if (SOPC_STATUS_OK == status)
+    SOPC_KeyCertPair* serverKeyCertPair = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyCertPair_CreateFromBytes(certificateNbBytes, serverCertificate, keyNbBytes,
+                                                                serverPrivateKey, &serverKeyCertPair);
+    if (SOPC_STATUS_OK != status)
     {
-        status =
-            SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(serverPrivateKey, (uint32_t) keyNbBytes, &serverKey);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server key from bytes array\n");
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Failed to load server key and certificate from bytes arrays.");
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to load server certificate from bytes array\n");
+        pConfig->serverConfig.serverKeyCertPair = serverKeyCertPair;
     }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
-        serverCert = NULL;
-        SOPC_KeyManager_SerializedAsymmetricKey_Delete(serverKey);
-        serverKey = NULL;
-    }
-
-    pConfig->serverConfig.serverCertificate = serverCert;
-    pConfig->serverConfig.serverKey = serverKey;
 
     return status;
 }

@@ -376,10 +376,10 @@ static bool SOPC_Internal_CheckClientSecureChannelConfig(const SOPC_SecureChanne
                 "AddSecureChannelConfig check: PKI is not defined but is required due to Security policy / mode");
             result = false;
         }
-        if (NULL == scConfig->clientConfigPtr->clientCertificate || NULL == scConfig->clientConfigPtr->clientKey)
+        if (NULL == scConfig->clientConfigPtr->clientKeyCertPair)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "AddSecureChannelConfig check: Client certificate or key is not defined but is "
+                                   "AddSecureChannelConfig check: Client certificate / key pair is not defined but is "
                                    "required due to Security policy / mode");
             result = false;
         }
