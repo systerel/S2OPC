@@ -31,7 +31,9 @@
 #     - build-win32
 #     - build-win64
 #     - windows-appveyor
-#
+#     - build-zephyr
+#   - test-others:
+#     - test-zephyr
 # CI pipeline manual run with 'WINDOWS_TEST = 1':
 # - jobs run in stages:
 #   - build-others:
@@ -45,6 +47,8 @@
 #     - build-rpi
 #     - build-zephyr
 #     - build-freertos
+#   - test-others:
+#     - test-zephyr
 #########################################################
 
 # Ensures job failure whenn intermediate script line fails

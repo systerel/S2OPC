@@ -32,6 +32,9 @@
 #   - build-others:
 #     - build-win32
 #     - build-win64
+#     - build-zephyr
+#   - test-others:
+#     - test-zephyr
 #
 # CI pipeline manual run with 'CROSS_COMPILE = 1':
 # - jobs run in stages:
@@ -41,6 +44,8 @@
 #     - build-rpi
 #     - build-zephyr
 #     - build-freertos
+#   - test-others:
+#     - test-zephyr
 #
 #########################################################
 
@@ -95,7 +100,9 @@ workflow:
   tags:
     - docker
     - linux
-
+.zephyr-job: &zephyr_job
+  tags:
+    - zephyr
 ###
 # Generation jobs
 ###
@@ -446,6 +453,8 @@ test-zephyr:
   image: docker.aix.systerel.fr/c838/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
+  dependencies:
+    - build-zephyr
   variables:
     <<: *nominal_test_variables
   rules: # run the task only if Zephyr samples have been compiled
