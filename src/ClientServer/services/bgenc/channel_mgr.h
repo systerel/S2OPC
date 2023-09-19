@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 21/03/2023 09:49:02
+ Date                 : 19/09/2023 15:00:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -53,7 +53,7 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 extern t_bool channel_mgr__all_channel_closing;
-extern t_bool channel_mgr__all_client_channel_closing;
+extern t_bool channel_mgr__all_client_only_channel_closing;
 
 /*------------------------
    INITIALISATION Clause

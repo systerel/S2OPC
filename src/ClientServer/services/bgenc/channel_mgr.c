@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 21/03/2023 09:49:02
+ Date                 : 19/09/2023 15:00:44
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -36,14 +36,14 @@
    CONCRETE_VARIABLES Clause
   ----------------------------*/
 t_bool channel_mgr__all_channel_closing;
-t_bool channel_mgr__all_client_channel_closing;
+t_bool channel_mgr__all_client_only_channel_closing;
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void channel_mgr__INITIALISATION(void) {
    channel_mgr__all_channel_closing = false;
-   channel_mgr__all_client_channel_closing = false;
+   channel_mgr__all_client_only_channel_closing = false;
 }
 
 /*--------------------
@@ -78,7 +78,7 @@ void channel_mgr__l_check_all_channel_lost(void) {
       constants__t_channel_i channel_mgr__l_channel;
       
       if ((channel_mgr__all_channel_closing == true) ||
-         (channel_mgr__all_client_channel_closing == true)) {
+         (channel_mgr__all_client_only_channel_closing == true)) {
          channel_mgr__l_con = false;
          channel_mgr_it__init_iter_channel(&channel_mgr__l_continue);
          while ((channel_mgr__l_continue == true) &&
@@ -88,16 +88,16 @@ void channel_mgr__l_check_all_channel_lost(void) {
             channel_mgr_1__is_client_channel(channel_mgr__l_channel,
                &channel_mgr__l_cli_con);
             if ((channel_mgr__all_channel_closing == true) ||
-               ((channel_mgr__all_client_channel_closing == true) &&
+               ((channel_mgr__all_client_only_channel_closing == true) &&
                (channel_mgr__l_cli_con == true))) {
                channel_mgr_1__is_channel_connected(channel_mgr__l_channel,
                   &channel_mgr__l_con);
             }
          }
          if (channel_mgr__l_con == false) {
-            channel_mgr_bs__last_connected_channel_lost(channel_mgr__all_client_channel_closing);
+            channel_mgr_bs__last_connected_channel_lost(channel_mgr__all_client_only_channel_closing);
             channel_mgr__all_channel_closing = false;
-            channel_mgr__all_client_channel_closing = false;
+            channel_mgr__all_client_only_channel_closing = false;
          }
       }
    }
@@ -235,7 +235,7 @@ void channel_mgr__close_all_channel(
       }
       channel_mgr__all_channel_closing = ((channel_mgr__p_clientOnly == false) &&
          (channel_mgr__l_any_channel_closing == true));
-      channel_mgr__all_client_channel_closing = ((channel_mgr__p_clientOnly == true) &&
+      channel_mgr__all_client_only_channel_closing = ((channel_mgr__p_clientOnly == true) &&
          (channel_mgr__l_any_channel_closing == true));
       *channel_mgr__bres = channel_mgr__l_any_channel_closing;
    }

@@ -35,15 +35,15 @@ IMPORTS
 
 CONCRETE_VARIABLES
     all_channel_closing, /* Indicates all secure channels are in closing state (S2OPC toolkit clear case) */
-    all_client_channel_closing /* Indicates all secure channels as a client are in closing state (S2OPC client activity clear) */
+    all_client_only_channel_closing /* Indicates all secure channels as a client are in closing state (S2OPC client activity clear) */
 
 INVARIANT
     all_channel_closing : BOOL &
-    all_client_channel_closing : BOOL
+    all_client_only_channel_closing : BOOL
 
 INITIALISATION
     all_channel_closing := FALSE;
-    all_client_channel_closing := FALSE
+    all_client_only_channel_closing := FALSE
 
 PROMOTES
     is_valid_channel_config_idx,
@@ -79,12 +79,12 @@ LOCAL_OPERATIONS
         channels_to_iterate,
         channels_iterated,
         all_channel_closing,
-        all_client_channel_closing
+        all_client_only_channel_closing
         :(  channels_to_iterate <: t_channel &
             channels_iterated   <: t_channel &
             channels_to_iterate /\ channels_iterated = {} &
             all_channel_closing : BOOL &
-            all_client_channel_closing : BOOL
+            all_client_only_channel_closing : BOOL
          )
      END
      ;
@@ -129,7 +129,7 @@ OPERATIONS
         l_continue,
         l_channel
     IN
-        IF  all_channel_closing = TRUE or all_client_channel_closing = TRUE THEN
+        IF  all_channel_closing = TRUE or all_client_only_channel_closing = TRUE THEN
             l_con := FALSE;
             l_continue <-- init_iter_channel;
             WHILE
@@ -138,7 +138,7 @@ OPERATIONS
             DO
                 l_continue, l_channel <-- continue_iter_channel;
                 l_cli_con <-- is_client_channel (l_channel);
-                IF all_channel_closing = TRUE or (all_client_channel_closing = TRUE & l_cli_con = TRUE)
+                IF all_channel_closing = TRUE or (all_client_only_channel_closing = TRUE & l_cli_con = TRUE)
                 THEN
                     l_con <-- is_channel_connected(l_channel)
                 END
@@ -151,9 +151,9 @@ OPERATIONS
                card(channels_to_iterate)
             END;
             IF  l_con = FALSE THEN
-                last_connected_channel_lost(all_client_channel_closing);
+                last_connected_channel_lost(all_client_only_channel_closing);
                 all_channel_closing := FALSE;
-                all_client_channel_closing := FALSE
+                all_client_only_channel_closing := FALSE
             END
         END
     END
@@ -274,7 +274,7 @@ OPERATIONS
             card(channels_to_iterate)
         END;
         all_channel_closing := bool(p_clientOnly = FALSE & l_any_channel_closing = TRUE);
-        all_client_channel_closing := bool(p_clientOnly = TRUE & l_any_channel_closing = TRUE);
+        all_client_only_channel_closing := bool(p_clientOnly = TRUE & l_any_channel_closing = TRUE);
         bres := l_any_channel_closing
     END
     ;
