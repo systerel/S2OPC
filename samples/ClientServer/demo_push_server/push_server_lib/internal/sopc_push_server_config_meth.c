@@ -42,10 +42,8 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                                     SOPC_Variant** outputArgs,
                                                     void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
-    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
 
     printf("Method UpdateCertificate Call\n");
@@ -55,20 +53,122 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
     *nbOutputArgs = 0;
     *outputArgs = NULL;
 
-    SOPC_Variant* v = SOPC_Variant_Create();
-    if (NULL == v)
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    const char* cStrId = NULL;
+    bool bIsValidGroup = true;
+    bool bIsValidType = false;
+    bool bFound = false;
+    SOPC_CertGroupContext* pGroupCtx = NULL;
+    SOPC_Variant* pVariant = NULL;
+    /* Check input arguments */
+    if ((6 != nbInputArgs) || (NULL == inputArgs))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_UpdateCertificate: unable to create a variant");
+                               "PushSrvCfg:Method_UpdateCertificate: bad inputs arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check type of input arguments */
+    if (SOPC_NodeId_Id != inputArgs[0].BuiltInTypeId || SOPC_NodeId_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_ByteString_Id != inputArgs[2].BuiltInTypeId || SOPC_ByteString_Id != inputArgs[3].BuiltInTypeId ||
+        SOPC_String_Id != inputArgs[4].BuiltInTypeId || SOPC_ByteString_Id != inputArgs[5].BuiltInTypeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate: bad BuiltInTypeId arguments");
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Check the certificate group */
+    bIsValidGroup = CertificateGroup_CheckGroup(inputArgs[0].Value.NodeId);
+    if (!bIsValidGroup)
+    {
+        char* pCStrGrpId = SOPC_NodeId_ToCString(inputArgs[0].Value.NodeId);
+        const char* cStrGrpId = NULL == pCStrGrpId ? "NULL" : pCStrGrpId;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate: rcv invalid group : %s", cStrGrpId);
+        SOPC_Free(pCStrGrpId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* Retrieve the Certificate Group  */
+    pGroupCtx = CertificateGroup_DictGet(inputArgs[0].Value.NodeId, &bFound);
+    if (NULL == pGroupCtx && !bFound)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+    cStrId = CertificateGroup_GetStrNodeId(pGroupCtx);
+    /* Check if the given certificate type belongs to the group */
+    bIsValidType = CertificateGroup_CheckType(pGroupCtx, inputArgs[1].Value.NodeId);
+    if (!bIsValidType)
+    {
+        char* pCStrTypeId = SOPC_NodeId_ToCString(inputArgs[1].Value.NodeId);
+        const char* cStrTypeId = NULL == pCStrTypeId ? "NULL" : pCStrTypeId;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: rcv invalid certificateTypeId : %s",
+                               cStrId, cStrTypeId);
+        SOPC_Free(pCStrTypeId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* TODO: Update with a new privateKey and certificate created outside the server is not allowed */
+    if (NULL != inputArgs[5].Value.Bstring.Data || -1 != inputArgs[5].Value.Bstring.Length)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: update with a new privateKey and "
+                               "certificate created outside is not allowed",
+                               cStrId);
+        return OpcUa_BadNotSupported;
+    }
+    /* TODO: Use the given issuers to verify the signature on the new Certificate */
+    if (NULL != inputArgs[3].Value.Array.Content.BstringArr || 0 < inputArgs[3].Value.Array.Length)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: signature check of the new "
+                               "certificate with the given issuer is not implemented",
+                               cStrId);
+        return OpcUa_BadNotSupported;
+    }
+    /* Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
+     * certificates) */
+    statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring,
+                                                    inputArgs[3].Value.Array.Content.BstringArr,
+                                                    inputArgs[3].Value.Array.Length);
+    if (!SOPC_IsGoodStatus(statusCode))
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: update of the new key-cert pair failed", cStrId);
+        return statusCode;
+    }
+    /* Export the update */
+    status = CertificateGroup_Export(pGroupCtx, &inputArgs[2].Value.Bstring);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: export of the new key-cert pair failed", cStrId);
         return OpcUa_BadUnexpectedError;
     }
-
-    v->ArrayType = SOPC_VariantArrayType_SingleValue;
-    v->BuiltInTypeId = SOPC_Boolean_Id;
-    SOPC_Boolean_Initialize(&v->Value.Boolean);
-    v->Value.Boolean = false;
+    /* Raise an event to re-evaluate the certificate for all the SCs */
+    status = CertificateGroup_RaiseEvent(pGroupCtx);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: event failed", cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+    /* Create the output variant */
+    pVariant = SOPC_Variant_Create();
+    if (NULL == pVariant)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: unable to create a variant", cStrId);
+        return OpcUa_BadUnexpectedError;
+    }
+    /* Set applyChangesRequired to false as S2OPC do not support transaction */
+    pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
+    pVariant->BuiltInTypeId = SOPC_Boolean_Id;
+    SOPC_Boolean_Initialize(&pVariant->Value.Boolean);
+    pVariant->Value.Boolean = false;
     *nbOutputArgs = 1;
-    *outputArgs = v;
+    *outputArgs = pVariant;
 
     return SOPC_GoodGenericStatus;
 }
@@ -83,8 +183,8 @@ SOPC_StatusCode PushSrvCfg_Method_ApplyChanges(const SOPC_CallContext* callConte
 {
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(param);
 
     printf("Method ApplyChanges Call\n");
@@ -119,6 +219,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const char* cStrId = NULL;
+    bool bIsValidGroup = false;
     bool bIsValidType = false;
     bool bIsValidSubject = false;
     bool bFound = false;
@@ -150,6 +251,17 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     pCertificateTypeId = inputArgs[1].Value.NodeId;
     pSubjectName = &inputArgs[2].Value.String;
     bRegeneratePrivateKey = inputArgs[3].Value.Boolean;
+    /* Check the certificate group */
+    bIsValidGroup = CertificateGroup_CheckGroup(pCertificateGroupId);
+    if (!bIsValidGroup)
+    {
+        char* pCStrGrpId = SOPC_NodeId_ToCString(pCertificateGroupId);
+        const char* cStrGrpId = NULL == pCStrGrpId ? "NULL" : pCStrGrpId;
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_UpdateCertificate: rcv invalid group : %s", cStrGrpId);
+        SOPC_Free(pCStrGrpId);
+        return OpcUa_BadInvalidArgument;
+    }
     /* Retrieve the Certificate Group  */
     pGroupCtx = CertificateGroup_DictGet(pCertificateGroupId, &bFound);
     if (NULL == pGroupCtx && !bFound)
@@ -161,15 +273,32 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     bIsValidType = CertificateGroup_CheckType(pGroupCtx, pCertificateTypeId);
     if (!bIsValidType)
     {
-        char* cStrTypeId = SOPC_NodeId_ToCString(pCertificateTypeId);
+        char* pCStrTypeId = SOPC_NodeId_ToCString(pCertificateTypeId);
+        const char* cStrTypeId = NULL == pCStrTypeId ? "NULL" : pCStrTypeId;
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,
             "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: rcv invalid certificateTypeId : %s", cStrId,
             cStrTypeId);
-        SOPC_Free(cStrTypeId);
+        SOPC_Free(pCStrTypeId);
         return OpcUa_BadInvalidArgument;
     }
-    /* Check the given subjectName */
+    /* TODO: private key regeneration is not allowed */
+    if (bRegeneratePrivateKey)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: regeneration of the server "
+                               "private key is not allowed",
+                               cStrId);
+        return OpcUa_BadNotSupported;
+    }
+    /* TODO: Check the given subjectName */
+    if (NULL != pSubjectName->Data || -1 != pSubjectName->Length)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: custom subjectName is not allowed",
+                               cStrId);
+        return OpcUa_BadNotSupported;
+    }
     bIsValidSubject = CertificateGroup_CheckSubjectName(pGroupCtx, pSubjectName);
     if (!bIsValidSubject)
     {
@@ -184,7 +313,8 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     if (NULL == pVariant)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_CreateSigningRequest: unable to create a variant");
+                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: unable to create a variant",
+                               cStrId);
         return OpcUa_BadUnexpectedError;
     }
     pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
@@ -198,7 +328,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_CreateSigningRequest: failed to set up the CSR");
+                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: failed to set up the CSR", cStrId);
         statusCode = OpcUa_BadUnexpectedError;
     }
     if (SOPC_IsGoodStatus(statusCode))

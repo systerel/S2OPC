@@ -40,6 +40,8 @@ typedef struct SOPC_CertGroupContext
     SOPC_SerializedCertificate* pCert;    /*!< A valid pointer to the certificate that belongs to the
                                               CertificateGroup object. */
     SOPC_AsymmetricKey* pNewKey;          /*!< Pointer to the new generated key */
+    char* pKeyPath;                       /*!< Path to the private key that belongs to the CertificateGroup object */
+    char* pCertPath;                      /*!< Path to the certificate that belongs to the CertificateGroup object */
     SOPC_NodeId* pCertificateTypeId;      /*!< The nodeId of the certificateType variable that belongs to the
                                               CertificateGroup object. */
     SOPC_NodeId* pCertificateTypeValueId; /*!< The value of the certificateType variable. */
@@ -84,6 +86,15 @@ void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId);
  *\return The CertificateGroup nodeId (C string)
  */
 const char* CertificateGroup_GetStrNodeId(const SOPC_CertGroupContext* pGroupCtx);
+
+/**
+ * \brief Check if the give certificate group nodeId is valid (!= DefaultUserTokenGroup)
+ *
+ * \param pGroupId  The nodeId of the group to check.
+ *
+ * \return True if valid.
+ */
+bool CertificateGroup_CheckGroup(const SOPC_NodeId* pGroupId);
 
 /**
  * \brief Check the certificate type that belongs to the group.
@@ -150,6 +161,53 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
                                                         const SOPC_String* pSubjectName,
                                                         const bool bRegeneratePrivateKey,
                                                         SOPC_ByteString* pCertificateRequest);
+
+/**
+ * \brief Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
+ * certificates)
+ *
+ * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context \p
+ * pGroupCtx .
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ * \param pCertificate A valid pointer to the new certificate.
+ * \param pIssuerArray An array of issuer certificates needed to verify the signature on the new certificate.
+ * \param arrayLength The length of the array \p pIssuerArray
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL).
+ *
+ * \return Return SOPC_GoodGenericStatus if successful or an OpcUa error code.
+ */
+SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* pGroupCtx,
+                                                   const SOPC_ByteString* pCertificate,
+                                                   const SOPC_ByteString* pIssuerArray,
+                                                   const int32_t arrayLength);
+
+/**
+ * \brief Export the new key-cert pair.
+ *
+ * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context \p
+ * pGroupCtx .
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ * \param pCertificate A valid pointer to the new certificate.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL).
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx, const SOPC_ByteString* pCertificate);
+
+/**
+ * \brief Raise an event to re-evaluate the certificate for all SCs.
+ *
+ * \param pGroupCtx A valid pointer to the CertificateGroup context.
+ *
+ * \warning \p pGroupCtx shall be valid (!= NULL).
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus CertificateGroup_RaiseEvent(const SOPC_CertGroupContext* pGroupCtx);
 
 /**
  * \brief  Discards previously generated new key pair.

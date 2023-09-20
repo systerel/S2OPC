@@ -359,6 +359,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const SOPC_Certificate_Type appCertType,
                                                                 SOPC_SerializedAsymmetricKey* pServerKey,
                                                                 SOPC_SerializedCertificate* pServerCert,
+                                                                const char* pServerKeyPath,
+                                                                const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,
                                                                 const SOPC_Certificate_Type usrCertType,
                                                                 const uint32_t maxTrustListSize,
@@ -383,9 +385,9 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     }
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_APP, appCertType, pPKIApp,
-                                                          maxTrustListSize, pServerKey, pServerCert, &pAppCertGroupCfg);
+        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_APP, appCertType, pPKIApp,
+                                                               maxTrustListSize, pServerKey, pServerCert,
+                                                               pServerKeyPath, pServerCertPath, &pAppCertGroupCfg);
     }
     if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
@@ -396,8 +398,9 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     }
     if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
-        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
-                                                               maxTrustListSize, NULL, NULL, &pUsrCertGroupCfg);
+        status =
+            SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
+                                                          maxTrustListSize, NULL, NULL, NULL, NULL, &pUsrCertGroupCfg);
     }
     if (SOPC_STATUS_OK == status)
     {
