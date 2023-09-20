@@ -51,6 +51,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
  * \param appCertType         The application certificate type.
  * \param pServerKey          A valid pointer to server the private key.
  * \param pServerCert         A valid pointer to the server certificate.
+ * \param pServerKeyPath      Path to the server private key (NULL if the platform has no file system).
+ * \param pServerCertPath     Path to the server certificate (NULL if the platform has no file system).
  * \param pPKIUsr             A valid pointer to the PKI of the users TrustList (NULL if not used).
  * \param usrCertType         The users certificate type (ignored if \p pPKIUsr is NULL).
  * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
@@ -63,6 +65,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const SOPC_Certificate_Type appCertType,
                                                                 SOPC_SerializedAsymmetricKey* pServerKey,
                                                                 SOPC_SerializedCertificate* pServerCert,
+                                                                const char* pServerKeyPath,
+                                                                const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,
                                                                 const SOPC_Certificate_Type usrCertType,
                                                                 const uint32_t maxTrustListSize,

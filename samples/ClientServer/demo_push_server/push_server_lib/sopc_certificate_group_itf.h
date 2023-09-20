@@ -66,6 +66,10 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void);
  *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
  * \param pCert A valid pointer to the certificate that belongs to the CertificateGroup object
  *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
+  *\param pKeyPath Path to the private key that belongs to the CertificateGroup object
+                   (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR or if the platform has no file system).
+ * \param pCertPath Path to the certificate that belongs to the CertificateGroup object
+                   (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR or if the platform has no file system).
  * \param[out] ppConfig A newly created configuration. You should delete it with
  *                      ::SOPC_CertificateGroup_DeleteConfiguration .
  *
@@ -77,6 +81,8 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
                                                                 const uint32_t maxTrustListSize,
                                                                 SOPC_SerializedAsymmetricKey* pKey,
                                                                 SOPC_SerializedCertificate* pCert,
+                                                                const char* pKeyPath,
+                                                                const char* pCertPath,
                                                                 SOPC_CertificateGroup_Config** ppConfig);
 
 /**
