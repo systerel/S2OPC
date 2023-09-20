@@ -79,17 +79,17 @@ typedef struct SOPC_SecurityPolicy_Config
     uint32_t symmLen_Block;            /**< Length (Bytes) of blocs for symmetric encryption. O if not supported. */
     uint32_t symmLen_KeyNonce;         /**< Length (Bytes) of Nonce for symmetric key. 0 if not supported */
     uint32_t symmLen_MessageRandom;    /**< Length (Bytes) of Random message for symmetric key. 0 if not supported */
-    uint32_t asymLen_KeyMinBits;       /**< Minimum length (Bytes) of assymetric keys. 0 if unused*/
-    uint32_t asymLen_KeyMaxBits;       /**< Maximum length (Bytes) of assymetric keys. 0 if unused*/
+    uint32_t asymLen_OAEP_Hash;        /**< Length (Bytes) of asymmetric OAEP Hash */
+    uint32_t asymLen_KeyMinBits;       /**< Minimum length (Bytes) of asymmetric keys. 0 if unused*/
+    uint32_t asymLen_KeyMaxBits;       /**< Maximum length (Bytes) of asymmetric keys. 0 if unused*/
     uint32_t secureChannelNonceLength; /**< Length (Bytes) of Nonce for Secure Channel. 0 if not supported */
-    uint32_t OAEP_Hash;                /**< Length (Bytes) of OAEP Hash */
     uint32_t certLen_Thumbprint;       /**< Length (Bytes) of Thumbprint */
     const char* URI_SignAlgo;          /**< URI if Signature algorithm */
 } SOPC_SecurityPolicy_Config;
 
 /** Get the configuration of the given security policy
  This function never returns NULL, and a caller does not need to check this result.
- This function will raise an assertion failure in case of invalid argument */
+ In case of invalid arguments the returned value will point to the configuration of ::SOPC_SecurityPolicy_Invalid_ID*/
 const SOPC_SecurityPolicy_Config* SOPC_SecurityPolicy_Config_Get(SOPC_SecurityPolicy_ID policyId);
 
 // CryptoProfiles instances (Client/Server)

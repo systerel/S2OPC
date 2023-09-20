@@ -48,7 +48,6 @@
 #include "mbedtls/rsa.h"
 
 static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
-                                             const SOPC_CryptoProvider* pProvider,
                                              const uint8_t* pInput,
                                              uint32_t lenPlainText,
                                              const SOPC_ExposedBuffer* pKey,
@@ -63,8 +62,6 @@ static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
                              // initialize a new context.
 
-    SOPC_UNUSED_ARG(pProvider);
-
     if (lenOutput >= lenPlainText)
     {
         // IV is modified during the operation, so it must be copied first
@@ -73,10 +70,12 @@ static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
         memcpy(iv_cpy, pIV, symmLen_Block);
         mbedtls_aes_init(&aes);
 
-        if (mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8) == 0)
+        int res = mbedtls_aes_setkey_enc(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8);
+        if (res == 0)
         {
-            if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char*) pInput,
-                                      (unsigned char*) pOutput) == 0)
+            res = mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_ENCRYPT, lenPlainText, iv_cpy, (const unsigned char*) pInput,
+                                        (unsigned char*) pOutput);
+            if (res == 0)
             {
                 memset(iv_cpy, 0, symmLen_Block);
                 status = SOPC_STATUS_OK;
@@ -89,7 +88,6 @@ static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
 }
 
 static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
-                                             const SOPC_CryptoProvider* pProvider,
                                              const uint8_t* pInput,
                                              uint32_t lenCipherText,
                                              const SOPC_ExposedBuffer* pKey,
@@ -105,8 +103,6 @@ static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
     mbedtls_aes_context aes; // Performance note: a context is initialized each time, as the _setkey operation
                              // initialize a new context.
 
-    SOPC_UNUSED_ARG(pProvider);
-
     if (lenOutput >= lenCipherText)
     {
         // IV is modified during the operation, so it must be copied first
@@ -115,10 +111,12 @@ static SOPC_ReturnStatus generic_SymmDecrypt(SOPC_SecurityPolicy_ID policyId,
         memcpy(iv_cpy, pIV, symmLen_Block);
         mbedtls_aes_init(&aes);
 
-        if (mbedtls_aes_setkey_dec(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8) == 0)
+        int res = mbedtls_aes_setkey_dec(&aes, (const unsigned char*) pKey, symmLen_CryptoKey * 8);
+        if (res == 0)
         {
-            if (mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char*) pInput,
-                                      (unsigned char*) pOutput) == 0)
+            res = mbedtls_aes_crypt_cbc(&aes, MBEDTLS_AES_DECRYPT, lenCipherText, iv_cpy, (const unsigned char*) pInput,
+                                        (unsigned char*) pOutput);
+            if (res == 0)
             {
                 memset(iv_cpy, 0, symmLen_Block);
                 status = SOPC_STATUS_OK;
@@ -143,8 +141,9 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    return generic_SymmEncrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pProvider, pInput, lenPlainText, pKey, pIV,
-                               pOutput, lenOutput);
+    SOPC_UNUSED_ARG(pProvider);
+    return generic_SymmEncrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenPlainText, pKey, pIV, pOutput,
+                               lenOutput);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* pProvider,
@@ -155,8 +154,9 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    return generic_SymmDecrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pProvider, pInput, lenCipherText, pKey, pIV,
-                               pOutput, lenOutput);
+    SOPC_UNUSED_ARG(pProvider);
+    return generic_SymmDecrypt(SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID, pInput, lenCipherText, pKey, pIV, pOutput,
+                               lenOutput);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -173,8 +173,9 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    return generic_SymmEncrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pProvider, pInput, lenPlainText, pKey, pIV,
-                               pOutput, lenOutput);
+    SOPC_UNUSED_ARG(pProvider);
+    return generic_SymmEncrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenPlainText, pKey, pIV, pOutput,
+                               lenOutput);
 }
 
 SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* pProvider,
@@ -185,8 +186,9 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
                                                     uint8_t* pOutput,
                                                     uint32_t lenOutput)
 {
-    return generic_SymmDecrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pProvider, pInput, lenCipherText, pKey, pIV,
-                               pOutput, lenOutput);
+    SOPC_UNUSED_ARG(pProvider);
+    return generic_SymmDecrypt(SOPC_SecurityPolicy_Basic256Sha256_ID, pInput, lenCipherText, pKey, pIV, pOutput,
+                               lenOutput);
 }
 
 static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pProvider,

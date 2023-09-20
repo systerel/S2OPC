@@ -89,15 +89,18 @@ static const SOPC_SecurityPolicy_Config* getPSSecurityPolicyFromProvider(const S
 
 static inline bool checkKeyLengthRange(const SOPC_SecurityPolicy_Config* pPolicy,
                                        uint32_t lenKey,
-                                       const char** errorReason)
+                                       const char** errorReason,
+                                       bool isPublic)
 {
+    static const char* invalidKeyMsg[2] = {"invalid private key size for given profile",
+                                           "invalid public key size for given profile"};
     bool result = true;
     // When not used, both Max and Min are equal to 0
     if (pPolicy->asymLen_KeyMaxBits > pPolicy->asymLen_KeyMinBits)
     {
         if (lenKey < pPolicy->asymLen_KeyMinBits || lenKey > pPolicy->asymLen_KeyMaxBits)
         {
-            *errorReason = "invalid private key size for given profile";
+            *errorReason = invalidKeyMsg[isPublic ? 1 : 0];
             result = false;
         }
     }
@@ -429,7 +432,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(const S
     }
 
     const SOPC_SecurityPolicy_Config* pPolicy = getCSSecurityPolicyFromProvider(pProvider);
-    return fill_UInt32_FromPolicy(pPolicy, pLength, pPolicy->OAEP_Hash);
+    return fill_UInt32_FromPolicy(pPolicy, pLength, pPolicy->asymLen_OAEP_Hash);
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_CryptoProvider* pProvider,
@@ -1248,7 +1251,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricEncrypt(const SOPC_CryptoProvide
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason))
+    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason, true))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1310,7 +1313,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricDecrypt(const SOPC_CryptoProvide
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason))
+    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason, false))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1376,7 +1379,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricSign(const SOPC_CryptoProvider* 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason))
+    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason, false))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -1434,7 +1437,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricVerify(const SOPC_CryptoProvider
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason))
+    if (!checkKeyLengthRange(pPolicy, lenKey, errorReason, true))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

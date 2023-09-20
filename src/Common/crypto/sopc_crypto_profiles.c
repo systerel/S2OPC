@@ -38,10 +38,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 0,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 0,
      .asymLen_KeyMinBits = 0,
      .asymLen_KeyMaxBits = 0,
      .secureChannelNonceLength = 0,
-     .OAEP_Hash = 0,
      .URI_SignAlgo = NULL,
      .certLen_Thumbprint = 0},
     // SOPC_SecurityPolicy_Basic256Sha256_ID
@@ -57,10 +57,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 16,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 20,
      .asymLen_KeyMinBits = 2048,
      .asymLen_KeyMaxBits = 4096,
      .secureChannelNonceLength = 32,
-     .OAEP_Hash = 20,
      .URI_SignAlgo = SOPC_SecurityPolicy_Basic256Sha256_URI_SignAlgo,
      .certLen_Thumbprint = 20},
     // SOPC_SecurityPolicy_Basic256_ID
@@ -76,10 +76,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 16,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 20,
      .asymLen_KeyMinBits = 1024,
      .asymLen_KeyMaxBits = 2048,
      .secureChannelNonceLength = 32,
-     .OAEP_Hash = 20,
      .URI_SignAlgo = SOPC_SecurityPolicy_Basic256_URI_SignAlgo,
      .certLen_Thumbprint = 20},
     // SOPC_SecurityPolicy_None_ID
@@ -95,10 +95,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 0,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 0,
      .asymLen_KeyMinBits = 0,
      .asymLen_KeyMaxBits = 0,
      .secureChannelNonceLength = 0,
-     .OAEP_Hash = 0,
      .URI_SignAlgo = NULL,
      .certLen_Thumbprint = 0},
     // SOPC_SecurityPolicy_PubSub_Aes256_ID
@@ -114,10 +114,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 0,
      .symmLen_KeyNonce = 4,
      .symmLen_MessageRandom = 4,
+     .asymLen_OAEP_Hash = 0,
      .asymLen_KeyMinBits = 0,
      .asymLen_KeyMaxBits = 0,
      .secureChannelNonceLength = 0,
-     .OAEP_Hash = 0,
      .URI_SignAlgo = NULL,
      .certLen_Thumbprint = 0},
     // SOPC_SecurityPolicy_Aes128Sha256RsaOaep_ID
@@ -133,10 +133,10 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 16,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 20,
      .asymLen_KeyMinBits = 2048,
      .asymLen_KeyMaxBits = 4096,
      .secureChannelNonceLength = 32,
-     .OAEP_Hash = 20,
      .URI_SignAlgo = SOPC_SecurityPolicy_Aes128Sha256RsaOaep_URI_SignAlgo,
      .certLen_Thumbprint = 20},
     // SOPC_SecurityPolicy_Aes256Sha256RsaPss_ID
@@ -152,17 +152,20 @@ const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID]
      .symmLen_Block = 16,
      .symmLen_KeyNonce = 0,
      .symmLen_MessageRandom = 0,
+     .asymLen_OAEP_Hash = 32,
      .asymLen_KeyMinBits = 2048,
      .asymLen_KeyMaxBits = 4096,
      .secureChannelNonceLength = 32,
-     .OAEP_Hash = 32,
      .URI_SignAlgo = SOPC_SecurityPolicy_Aes256Sha256RsaPss_URI_SignAlgo,
      .certLen_Thumbprint = 20},
 };
 
 const SOPC_SecurityPolicy_Config* SOPC_SecurityPolicy_Config_Get(SOPC_SecurityPolicy_ID policyId)
 {
-    SOPC_ASSERT(((uint32_t) policyId) < SOPC_SecurityPolicy_Last_ID);
+    if (((uint32_t) policyId) >= SOPC_SecurityPolicy_Last_ID)
+    {
+        policyId = SOPC_SecurityPolicy_Invalid_ID;
+    }
     return &securityPolicy_cfg[policyId];
 }
 
