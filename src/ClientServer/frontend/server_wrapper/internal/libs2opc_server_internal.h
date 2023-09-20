@@ -210,4 +210,7 @@ void SOPC_ServerInternal_ClosedEndpoint(uint32_t epConfigIdx, SOPC_ReturnStatus 
 // Clear low level endpoint config (clear strings, do not clear user managers)
 void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig);
 
+// Callback instance to be used on client application key / certificate pair update
+void SOPC_ServerInternal_KeyCertPairUpdateCb(uintptr_t updateParam);
+
 #endif

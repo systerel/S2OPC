@@ -231,6 +231,13 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* ser
         status = SOPC_KeyCertPair_CreateFromPaths(serverCertPath, serverKeyPath, password, &serverKeyCertPair);
     }
 
+    if (SOPC_STATUS_OK == status)
+    {
+        status =
+            SOPC_KeyCertPair_SetUpdateCb(serverKeyCertPair, &SOPC_ServerInternal_KeyCertPairUpdateCb, (uintptr_t) NULL);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
+
     if (NULL != password)
     {
         SOPC_Free(password);
@@ -272,6 +279,10 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certifi
     else
     {
         pConfig->serverConfig.serverKeyCertPair = serverKeyCertPair;
+
+        status =
+            SOPC_KeyCertPair_SetUpdateCb(serverKeyCertPair, &SOPC_ServerInternal_KeyCertPairUpdateCb, (uintptr_t) NULL);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
 
     return status;

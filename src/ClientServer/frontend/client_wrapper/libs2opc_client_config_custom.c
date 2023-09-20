@@ -245,6 +245,10 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
         if (SOPC_STATUS_OK == status)
         {
             pConfig->clientConfig.clientKeyCertPair = cliKeyCertPair;
+
+            status = SOPC_KeyCertPair_SetUpdateCb(cliKeyCertPair, &SOPC_ClientInternal_KeyCertPairUpdateCb,
+                                                  (uintptr_t) NULL);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
     }
     else

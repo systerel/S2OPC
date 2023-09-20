@@ -120,4 +120,9 @@ bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassw
 
 uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx);
 
+/**
+ * \brief Callback instance to be used on client application key / certificate pair update
+ */
+void SOPC_ClientInternal_KeyCertPairUpdateCb(uintptr_t updateParam);
+
 #endif /* LIBS2OPC_CLIENT_INTERNAL_H_ */

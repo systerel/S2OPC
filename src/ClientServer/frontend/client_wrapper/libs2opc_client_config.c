@@ -31,6 +31,7 @@
 #include "sopc_atomic.h"
 #include "sopc_key_manager.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_toolkit_async_api.h"
@@ -260,6 +261,13 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
                 {
                     status = SOPC_KeyCertPair_CreateFromPaths(
                         configFromPaths->clientCertPath, configFromPaths->clientKeyPath, password, &cliKeyCertPair);
+                }
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status = SOPC_KeyCertPair_SetUpdateCb(cliKeyCertPair, &SOPC_ClientInternal_KeyCertPairUpdateCb,
+                                                          (uintptr_t) NULL);
+                    SOPC_ASSERT(SOPC_STATUS_OK == status);
                 }
 
                 if (NULL != password)
@@ -744,4 +752,10 @@ uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConf
         return (rEPcfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS);
     }
     return 0;
+}
+
+void SOPC_ClientInternal_KeyCertPairUpdateCb(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitClient_AsyncReEvalSecureChannels(true);
 }

@@ -31,6 +31,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 
 static void SOPC_ServerHelper_ComEventCb(SOPC_App_Com_Event event,
@@ -681,6 +682,12 @@ void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig)
         }
     }
     // Do not clear user managers since it is managed in a global way in high level API
+}
+
+void SOPC_ServerInternal_KeyCertPairUpdateCb(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitServer_AsyncReEvalSecureChannels(true);
 }
 
 SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
