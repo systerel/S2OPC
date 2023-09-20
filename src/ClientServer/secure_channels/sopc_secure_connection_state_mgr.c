@@ -3843,8 +3843,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
         }
         else
         {
-            // buffer: transfered to be sent
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
+            // buffer: transferred to be sent
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_MSG_CHUNKS, eltId, params, auxParam);
         }
         break;
     case SC_SERVICE_SND_ERR:
