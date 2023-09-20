@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -34,18 +33,7 @@
 #define ITEM_1_FILE_NAME "item1File.log"
 #define ITEM_2_FILE_NAME "item2File.log"
 
-static int32_t gbStopFlag = false;
 static char* gLogDirPath = NULL;
-
-static void set_stop_flag(SOPC_Boolean res)
-{
-    SOPC_Atomic_Int_Set(&gbStopFlag, res ? true : false);
-}
-
-static SOPC_Boolean get_stop_flag(void)
-{
-    return SOPC_Atomic_Int_Get(&gbStopFlag) == true;
-}
 
 /*-----------------------
  * Logger configuration
@@ -83,18 +71,6 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
                                                     NULL);
 }
 
-static void ServerStoppedCallback(SOPC_ReturnStatus status)
-{
-    SOPC_UNUSED_ARG(status);
-    set_stop_flag(true);
-}
-
-static void stop_signal(int arg)
-{
-    SOPC_UNUSED_ARG(arg);
-    set_stop_flag(true);
-}
-
 /* Close file CallBack */
 static void(UserCloseCallback)(const char* tmp_file_path)
 {
@@ -128,8 +104,6 @@ int main(int argc, char* argv[])
 {
     SOPC_UNUSED_ARG(argc);
     printf("<test_server_file_transfer: Server started\n");
-    signal(SIGINT, stop_signal);
-    signal(SIGTERM, stop_signal);
 
     // Configure the server to support file transfer message size of 100 Ko
     SOPC_Common_EncodingConstants encConf = SOPC_Common_GetDefaultEncodingConstants();
@@ -211,10 +185,10 @@ int main(int argc, char* argv[])
     SOPC_Free(tmp_file_path_item2);
 
     // START SERVER :
-    status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
+    status = SOPC_FileTransfer_StartServer();
     SOPC_ASSERT("<test_server_file_transfer: Server startup failed" && status == SOPC_STATUS_OK);
 
-    while (!get_stop_flag())
+    while (SOPC_FileTransfer_IsServerRunning())
     {
         SOPC_Sleep(1);
     }

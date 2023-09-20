@@ -407,7 +407,8 @@ int main(int argc, char* argv[])
         status = SOPC_ServerHelper_Serve(true);
 
         /**
-         * Alternative is using SOPC_ServerHelper_StartServer to make server start asynchronously.
+         * Alternative is using SOPC_ServerHelper_StartServer to make server start asynchronously
+         * (and then SOPC_ServerHelper_StopServer to stop it).
          * It is then possible to use local services to access / write data:
          * - Synchronously with SOPC_ServerHelper_LocalServiceSync(...)
          * - Asynchronously with SOPC_ServerHelper_LocalServiceAsync(...): need

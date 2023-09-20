@@ -33,9 +33,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "sopc_assert.h"
 #include "sopc_file_transfer.h"
-#include "sopc_logger.h"
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"
@@ -43,12 +41,15 @@
 #include "libs2opc_server_config.h"
 
 #include "opcua_statuscodes.h"
+#include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_dict.h"
 #include "sopc_hash.h"
+#include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
@@ -389,6 +390,41 @@ static SOPC_Dict* g_objectId_to_file = NULL;
 static SOPC_Dict* g_handle_to_file = NULL;
 static int32_t g_tombstone_key = -1;
 static SOPC_MethodCallManager* g_method_call_manager = NULL;
+
+static int32_t gbStopFlag = false;
+static int32_t gbStoppedFlag = false;
+
+static void set_stop_flag(bool res)
+{
+    SOPC_Atomic_Int_Set(&gbStopFlag, res ? true : false);
+}
+
+static bool get_stop_flag(void)
+{
+    return SOPC_Atomic_Int_Get(&gbStopFlag) == true;
+}
+
+static void set_stopped_flag(bool res)
+{
+    SOPC_Atomic_Int_Set(&gbStoppedFlag, res ? true : false);
+}
+
+static bool get_stopped_flag(void)
+{
+    return (bool) SOPC_Atomic_Int_Get(&gbStoppedFlag);
+}
+
+static void stop_signal(int arg)
+{
+    SOPC_UNUSED_ARG(arg);
+    set_stop_flag(true);
+}
+
+static void ServerStoppedCallback(SOPC_ReturnStatus status)
+{
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "FileTransfer: Server stopped with status %d\n", status);
+    set_stopped_flag(true);
+}
 
 static bool check_openModeArg(SOPC_OpenMode mode)
 {
@@ -1081,6 +1117,9 @@ static void FileTransfer_FileType_Delete(SOPC_FileType** filetype)
 
 SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 {
+    signal(SIGINT, stop_signal);
+    signal(SIGTERM, stop_signal);
+
     if (NULL != g_objectId_to_file || NULL != g_method_call_manager)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1139,6 +1178,17 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
 
 void SOPC_FileTransfer_Clear(void)
 {
+    SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
+    const uint32_t sleepTimeout = 500;
+    uint32_t loopCpt = 0;
+    uint32_t loopTimeout = 5000; // 5 seconds
+    while (!get_stopped_flag() && loopCpt * sleepTimeout <= loopTimeout)
+    {
+        loopCpt++;
+        SOPC_Sleep(sleepTimeout);
+    }
+    SOPC_ServerConfigHelper_Clear();
+
     SOPC_Dict_Delete(g_objectId_to_file);
     g_objectId_to_file = NULL;
     SOPC_Dict_Delete(g_handle_to_file);
@@ -2127,7 +2177,7 @@ static void local_write_all(const uintptr_t key, uintptr_t value, uintptr_t user
     }
 }
 
-SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback)
+SOPC_ReturnStatus SOPC_FileTransfer_StartServer(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(&AsyncRespCb_Fct);
@@ -2141,6 +2191,11 @@ SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerSt
         SOPC_Dict_ForEach(g_objectId_to_file, &local_write_all, (uintptr_t) &status);
     }
     return status;
+}
+
+bool SOPC_FileTransfer_IsServerRunning(void)
+{
+    return !get_stop_flag() && !get_stopped_flag();
 }
 
 static void AsyncRespCb_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext)

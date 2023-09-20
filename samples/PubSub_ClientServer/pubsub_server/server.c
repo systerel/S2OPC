@@ -547,12 +547,16 @@ bool Server_Trigger_Publisher(uint16_t writerGroupId)
 
 void Server_StopAndClear(void)
 {
-    SOPC_ServerConfigHelper_Clear();
+    SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
 
-    if (Server_IsRunning())
+    uint32_t loopCpt = 0;
+    uint32_t loopTimeout = 5000; // 5 seconds
+    while (Server_IsRunning() && loopCpt * SLEEP_TIMEOUT <= loopTimeout)
     {
-        SOPC_Atomic_Int_Set(&serverOnline, false);
+        loopCpt++;
+        SOPC_Sleep(SLEEP_TIMEOUT);
     }
+    SOPC_ServerConfigHelper_Clear();
 
     if (NULL != lastPubSubConfigPath)
     {

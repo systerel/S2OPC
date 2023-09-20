@@ -22,12 +22,8 @@
  * \brief Typical use of the API to manage the OPC UA FileTransfer.
  */
 
-#include <assert.h>
-#include <inttypes.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "libs2opc_common_config.h"
@@ -41,7 +37,6 @@
 #include "sopc_common_constants.h"
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
-#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_platform_time.h"
 
@@ -54,24 +49,6 @@
 
 static int32_t gB_file_is_close = false;
 static char* gCstr_tmp_path = NULL;
-
-static int32_t gbStopFlag = false;
-
-static void set_stop_flag(SOPC_Boolean res)
-{
-    SOPC_Atomic_Int_Set(&gbStopFlag, res ? true : false);
-}
-
-static SOPC_Boolean get_stop_flag(void)
-{
-    return SOPC_Atomic_Int_Get(&gbStopFlag) == true;
-}
-
-static void stop_signal(int arg)
-{
-    SOPC_UNUSED_ARG(arg);
-    set_stop_flag(true);
-}
 
 static void set_file_closing_status(SOPC_Boolean res)
 {
@@ -179,12 +156,6 @@ static SOPC_StatusCode RemoteExecution_Method_Test(const SOPC_CallContext* callC
     /********************/
 }
 
-static void ServerStoppedCallback(SOPC_ReturnStatus status)
-{
-    set_stop_flag(true);
-    printf("******* Server stopped with status %d\n", status);
-}
-
 /*
  * User Close method callback definition.
  * The callback function shall not do anything blocking or long treatment since it will block any other
@@ -239,8 +210,6 @@ static void UserWriteNotificationCallback(const SOPC_CallContext* callContextPtr
 int main(int argc, char* argv[])
 {
     printf("******* Starting demo FileTransfer server\n");
-    signal(SIGINT, stop_signal);
-    signal(SIGTERM, stop_signal);
 
     // Note: avoid unused parameter warning from compiler
     (void) argc;
@@ -344,7 +313,7 @@ int main(int argc, char* argv[])
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_FileTransfer_StartServer(ServerStoppedCallback);
+        status = SOPC_FileTransfer_StartServer();
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to start server ...\n");
@@ -353,7 +322,7 @@ int main(int argc, char* argv[])
 
     bool file_is_closing = false;
     bool file_is_closed = false;
-    while (SOPC_STATUS_OK == status && !get_stop_flag())
+    while (SOPC_STATUS_OK == status && SOPC_FileTransfer_IsServerRunning())
     {
         file_is_closing = get_file_closing_status();
         if (file_is_closing && !file_is_closed)

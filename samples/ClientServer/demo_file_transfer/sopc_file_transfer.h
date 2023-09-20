@@ -116,12 +116,18 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
 
 /**
  * \brief Start the server asynchronously
- * \param ServerStoppedCallback  callback called when server will stop (on purpose or due to endpoint opening isssue)
  * \return SOPC_STATUS_OK in case of success. SOPC_STATUS_INVALID_STATE if the configuration is not possible (toolkit
  * not initialized, server already started). SOPC_STATUS_NOK if at least one local write of variable failed for one
  * fileType object on the address space.
  */
-SOPC_ReturnStatus SOPC_FileTransfer_StartServer(SOPC_ServerStopped_Fct* ServerStoppedCallback);
+SOPC_ReturnStatus SOPC_FileTransfer_StartServer(void);
+
+/**
+ * \brief Returns true if the server is running, false if the server stopped
+ *
+ * \return true if the server is running, false if the server is stopped
+ */
+bool SOPC_FileTransfer_IsServerRunning(void);
 
 /**
  * \brief Uninitialize the API (Free the memory)
