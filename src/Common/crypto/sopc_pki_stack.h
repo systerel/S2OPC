@@ -23,6 +23,9 @@
  *
  * The stack will not to provide a full-blown configurable PKI.
  * The stack provides only a minimal, always safe validating PKI.
+ * The stack provides a thread-safe PKI, it is necessary
+ * for OPC UA client use case (shared between services and secure channel layers)
+ * and PKI trust list update feature (shared between S2OPC library layers and possibly application thread).
  */
 
 #ifndef SOPC_PKI_STACK_H_
@@ -86,7 +89,6 @@
 
 /*
 TODO :
-    - Add mutex and do not direct access to the PKI until it is there (update, write, set operations)
     - Handle that the security level of the update is not higher than the security level of the endpoint
       (The following issue has been SUBMITTED : https://mantis.opcfoundation.org/view.php?id=8976)
 */
@@ -521,7 +523,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
  * \return SOPC_STATUS_OK when every certificate is successfully validated, and
  *         SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE, SOPC_STATUS_OUT_OF_MEMORY or SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(const SOPC_PKIProvider* pPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI,
                                                           const SOPC_PKI_ChainProfile* pProfile,
                                                           uint32_t** pErrors,
                                                           char*** ppThumbprints,
@@ -572,7 +574,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(const SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles);
+SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles);
 
 /** \brief Extracts certificates from the PKI object.
  *
@@ -597,7 +599,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(const SOPC_PKIProvider* pPKI, co
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* pPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
                                                        SOPC_CertificateList** ppTrustedCerts,
                                                        SOPC_CRLList** ppTrustedCrl,
                                                        SOPC_CertificateList** ppIssuerCerts,
@@ -612,7 +614,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(const SOPC_PKIProvider* p
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(const SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
+SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert);
 
 /** \brief Write the rejected certificates files in the rejected folder of the PKI storage.
  *         The format of the written files is DER.
@@ -628,8 +630,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(const SOPC_PKIProvider* pPKI
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(const SOPC_PKIProvider* pPKI,
-                                                            const bool bEraseExistingFiles);
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles);
 
 /** \brief Add a certificate to the PKI rejected list.
  *
