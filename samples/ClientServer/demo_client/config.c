@@ -367,7 +367,7 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_UpdateFromList(&pPki, NULL, pTrustedCerts, NULL, NULL, NULL, true);
+            status = SOPC_PKIProvider_UpdateFromList(pPki, NULL, pTrustedCerts, NULL, NULL, NULL, true);
         }
 
         if (SOPC_STATUS_OK != status)

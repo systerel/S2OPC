@@ -505,7 +505,7 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrlToUpdate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* Validation is OK */
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
@@ -675,7 +675,7 @@ START_TEST(functional_test_pki_permissive)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &tCrl);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_UpdateFromList(&pPKI, NULL, tCrt, tCrl, NULL, NULL, true);
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, tCrt, tCrl, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
 
     SOPC_KeyManager_Certificate_Free(tCrt);
@@ -717,7 +717,7 @@ START_TEST(functional_test_verify_every_cert)
     status =
         SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pTrustedCertToUpdate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_UpdateFromList(&pPKI, NULL, pTrustedCertToUpdate, pTrustedCrl, NULL, NULL, false);
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, pTrustedCertToUpdate, pTrustedCrl, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* client_2k_cert is now invalid */
     status = SOPC_PKIProvider_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints, &nbError);
@@ -799,7 +799,7 @@ START_TEST(functional_test_remove_cert)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     /* Test with an invalid thumbprint */
-    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!bIsRemove);
@@ -820,7 +820,7 @@ START_TEST(functional_test_remove_cert)
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove client_2k_cert.der */
-    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
@@ -841,7 +841,7 @@ START_TEST(functional_test_remove_cert)
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove user_cacert.der */
-    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "C1D7F2035F7E5CF84A0A9CFB37BACB9289D02898", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "C1D7F2035F7E5CF84A0A9CFB37BACB9289D02898", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
@@ -862,7 +862,7 @@ START_TEST(functional_test_remove_cert)
     check_free_list(&pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts, &pPKI_IssuerCRLs);
 
     /* Remove cacert.der */
-    status = SOPC_PKIProvider_RemoveCertificate(&pPKI, "8B3615C23983024A9D1E42C404481CB640B5A793", true, &bIsRemove,
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "8B3615C23983024A9D1E42C404481CB640B5A793", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);

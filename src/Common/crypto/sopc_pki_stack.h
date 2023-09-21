@@ -647,20 +647,20 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
 
 /** \brief Update the PKI with new lists of certificates and CRL.
  *
- * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pPKI A valid pointer to the PKIProvider.
  * \param securityPolicyUri The URI describing the security policy of the secure channel.
  * \param pTrustedCerts A valid pointer to the trusted certificate list. NULL if this part shall not updated.
  * \param pTrustedCrl A valid pointer to the trusted CRL list. NULL if this part shall not updated.
  * \param pIssuerCerts A valid pointer to the issuer certificate list. NULL if this part shall not updated.
  * \param pIssuerCrl A valid pointer to the issuer CRL list. NULL if this part shall not updated.
- * \param bIncludeExistingList whether the update shall includes the existing certificates of \p ppPKI plus
+ * \param bIncludeExistingList whether the update shall includes the existing certificates of \p pPKI plus
  *                             \p pTrustedCerts , \p pTrustedCrl , \p pIssuerCerts  and \p pIssuerCrl .
  *
  * \warning \p securityPolicyUri is not used yet and could be NULL.
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
                                                   const char* securityPolicyUri,
                                                   SOPC_CertificateList* pTrustedCerts,
                                                   SOPC_CRLList* pTrustedCrl,
@@ -673,7 +673,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
  *
  * \warning This function will fail if \p pThumbprint does not match the SHA1 hex digest size.
  *
- * \param ppPKI A valid pointer to the PKIProvider.
+ * \param pPKI A valid pointer to the PKIProvider.
  * \param pThumbprint The SHA1 of the certificate formatted as an hexadecimal C string (NULL terminated)
  *                    40 bytes shall be allocated in \p pThumbprint (+ 1 byte for the NULL character)
  * \param bIsTrusted whether the certificate to remove is a trusted certificate.
@@ -682,7 +682,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
                                                      const char* pThumbprint,
                                                      const bool bIsTrusted,
                                                      bool* pIsRemoved,

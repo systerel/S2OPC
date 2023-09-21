@@ -2800,7 +2800,7 @@ static SOPC_ReturnStatus check_list_length(SOPC_PKIProvider* pPKI,
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
                                                   const char* securityPolicyUri,
                                                   SOPC_CertificateList* pTrustedCerts,
                                                   SOPC_CRLList* pTrustedCrl,
@@ -2808,7 +2808,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider** ppPKI,
                                                   SOPC_CRLList* pIssuerCrl,
                                                   const bool bIncludeExistingList)
 {
-    SOPC_PKIProvider* pPKI = *ppPKI;
     /* Check parameters */
     if (NULL == pPKI)
     {
@@ -3000,7 +2999,7 @@ static SOPC_ReturnStatus sopc_pki_remove_cert_by_thumbprint(SOPC_CertificateList
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
+SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
                                                      const char* pThumbprint,
                                                      const bool bIsTrusted,
                                                      bool* pIsRemoved,
@@ -3009,12 +3008,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider** ppPKI,
     /* Initialized the value to return */
     *pIsRemoved = false;
     *pIsIssuer = false;
-    if (NULL == ppPKI || NULL == pThumbprint)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_PKIProvider* pPKI = *ppPKI;
-    if (NULL == pPKI)
+    if (NULL == pPKI || NULL == pThumbprint)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
