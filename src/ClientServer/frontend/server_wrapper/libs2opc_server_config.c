@@ -107,6 +107,19 @@ bool SOPC_ServerInternal_IsStopped(void)
     return res;
 }
 
+bool SOPC_ServerInternal_IsConfigClearable(void)
+{
+    bool res = false;
+    if (SOPC_Atomic_Int_Get(&sopc_server_helper_config.initialized))
+    {
+        SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
+        res = SOPC_SERVER_STATE_STOPPED == sopc_server_helper_config.state ||
+              sopc_server_helper_config.state < SOPC_SERVER_STATE_STARTED;
+        SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
+    }
+    return res;
+}
+
 static uint64_t SOPC_Internal_String_Hash(const uintptr_t s)
 {
     SOPC_ASSERT(NULL != (void*) s);
@@ -518,6 +531,10 @@ void SOPC_ServerConfigHelper_Clear(void)
     {
         return;
     }
+
+    SOPC_ASSERT(
+        SOPC_ServerInternal_IsConfigClearable() &&
+        "Server is not yet stopped, check SOPC_ServerHelper_StopServer was called and stop callback call awaited.");
 
     SOPC_CommonHelper_SetServerComEvent(NULL);
 

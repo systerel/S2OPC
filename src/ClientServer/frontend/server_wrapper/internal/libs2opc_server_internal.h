@@ -174,6 +174,10 @@ bool SOPC_ServerInternal_IsStarted(void);
 // Returns true if the server is in stopped state, false otherwise
 bool SOPC_ServerInternal_IsStopped(void);
 
+// Returns true if the server is in stopped state or in a state previous to started state, false otherwise
+// Note: server configuration is not clearable in shutdown or stopping states
+bool SOPC_ServerInternal_IsConfigClearable(void);
+
 // Check for configuration issues and set server state as configured in case of success
 bool SOPC_ServerInternal_CheckConfigAndSetConfiguredState(void);
 
