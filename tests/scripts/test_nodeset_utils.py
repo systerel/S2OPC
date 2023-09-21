@@ -146,8 +146,12 @@ class MergeTests(unittest.TestCase):
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
 
     def test_remove_subtrees_several(self):
-        self.run_test('test_remove_subtrees_several.xml', ['--remove-subtrees', 'i=58', 'i=85', 'ns=1;i=15001', 'ns=1;i=15008'],
+        self.run_test('test_remove_subtrees_several.xml', ['--remove-subtrees', 'i=58', 'ns=1;i=15001', 'ns=1;i=15008'],
                       'ns0.xml', 'TestTemperatureNS.NodeSet2.xml')
+
+    def test_remove_subtree_base_nodeset(self):
+        self.run_test('s2opc_base_nodeset_check_no_i93_i7617.xml', ['--remove-subtrees', 'i=93'],
+                      's2opc_base_nodeset_check.xml')
 
     def test_remove_unused(self):
         self.run_test('test_remove_unused.xml', ['--remove-unused'],

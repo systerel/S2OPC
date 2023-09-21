@@ -241,6 +241,10 @@ class NodesetMerger(NSFinder):
     def _iter_nid_nodes(self):
         yield from self._iter_nid_nodes_in(self.tree)
 
+    def _create_elem(self, tag, attrib={}, xmlns='uanodeset'):
+        ns_tag = '{' + self.namespaces[xmlns] + '}' + tag
+        return ET.Element(ns_tag, attrib)
+
     def _add_ref(self, node, ref_type, tgt, is_forward=True):
         # Add a reference from a node to the other NodeId nid in the given direction
         attribs = {'ReferenceType': ref_type}
@@ -249,7 +253,7 @@ class NodesetMerger(NSFinder):
 
         refs_nodes = self._findall(node, 'uanodeset:References')
         if len(refs_nodes) == 0:
-            refs = ET.Element('uanodeset:References', self.namespaces)
+            refs = self._create_elem('References')
             node.append(refs)
         else:
             refs, = refs_nodes
@@ -258,7 +262,7 @@ class NodesetMerger(NSFinder):
                     # avoid duplicate reference
                     return
 
-        elem = ET.Element('Reference', attribs)
+        elem = self._create_elem('Reference', attribs)
         elem.text = tgt
         close_node_indent(refs, 3)
         refs.append(elem)
@@ -325,7 +329,7 @@ class NodesetMerger(NSFinder):
 
         tree_ns_uris = self._find('uanodeset:NamespaceUris')
         if tree_ns_uris is None:
-            tree_ns_uris = ET.Element('uanodeset:NamespaceUris')
+            tree_ns_uris = self._create_elem('NamespaceUris')
             self.tree.getroot().insert(0, new_ns_uris)
         else:
             tree_ns_uris[-1].tail = indent(2)
@@ -385,7 +389,7 @@ class NodesetMerger(NSFinder):
 
         # Add new aliases
         for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
-            elem = ET.Element('Alias', {'Alias': alias})
+            elem = self._create_elem('Alias', {'Alias': alias})
             elem.text = new_alias_dict[alias]
             # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
             close_node_indent(tree_aliases, 2)
@@ -550,7 +554,7 @@ class NodesetMerger(NSFinder):
                 child_nid = ref.text.strip()
                 yield child_nid
 
-    def _rec_compute_subtree(self, root_nid, subtree: dict):
+    def _rec_compute_subtree(self, root_nid: str, subtree: dict):
         n = self._find_node_with_nid(root_nid)
         if n is None:
             return
@@ -585,7 +589,7 @@ class NodesetMerger(NSFinder):
         if children:
             self._rec_bf_remove_subtree(children, subtree)
     
-    def remove_subtree(self, remove_root_nid):
+    def remove_subtree(self, remove_root_nid: str):
         subtree = dict()
         self._rec_compute_subtree(remove_root_nid, subtree)
         # retain nodes with a parent outside the subtree
@@ -792,7 +796,7 @@ class NodesetMerger(NSFinder):
                 print('Sanitize: child Node without reference to its parent (Node {}, which parent is {})'
                       .format(node.get('NodeId'), pnid), file=sys.stderr)
                 # Type is unknown in fact
-                #refs.append(ET.Element('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
+                #refs.append(self._create_elem('Reference', {'ReferenceType': 'HasComponent', 'IsForward': 'false'}, text=pnid))
                 # Note: the attrib member may be an interface, so this is not portable; however the ET lib does not provide other means to do this.
                 del node.attrib['ParentNodeId']
     
