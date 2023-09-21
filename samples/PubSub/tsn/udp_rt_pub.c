@@ -45,6 +45,17 @@
 
 static int32_t stopPublisher = false;
 
+static const SOPC_DataSet_LL_UadpDataSetMessageContentMask default_Uapd_DSM_Mask = {
+    .validFlag = true,
+    .fieldEncoding = DataSet_LL_FieldEncoding_Variant,
+    .dataSetMessageSequenceNumberFlag = false,
+    .statusFlag = false,
+    .configurationVersionMajorVersionFlag = false,
+    .configurationVersionMinorFlag = false,
+    .dataSetMessageType = DataSet_LL_MessageType_KeyFrame,
+    .timestampFlag = false,
+    .picoSecondsFlag = false};
+
 static void Test_StopSignal(int sig)
 {
     /* avoid unused parameter compiler warning */
@@ -86,6 +97,7 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, 1245);
     SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, 963852);
     SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, 123);
+    SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &default_Uapd_DSM_Mask);
 
     SOPC_Variant* variant;
     // variant 1
