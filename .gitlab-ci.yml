@@ -593,6 +593,7 @@ check_doc:
   variables:
     <<: *build_linux_variables
   artifacts:
+    name: 'check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
       - '$BUILD_DIR/doc.log'
     expire_in: '1 month'
