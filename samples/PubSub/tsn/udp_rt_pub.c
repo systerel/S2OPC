@@ -35,15 +35,22 @@
 #include "sopc_udp_sockets.h"
 
 /* Publisher cycle time in nano seconds */
-#define CYCLE_TIME 1000000
+#define DEFAULT_CYCLE_TIME 1000000
 /* Transmit wake delay */
-#define WAKE_DELAY 500000
-#define MCAST_PORT "4840"
-#define MCAST_ADDR "232.1.2.100"
+#define DEFAULT_WAKE_DELAY 500000
+#define DEFAULT_SO_PRIORITY 3
+#define DEFAULT_MCAST_PORT "4840"
+#define DEFAULT_MCAST_ADDR "232.1.2.100"
 /* Ethernet interface selection */
-#define ETH_INTERFACE "enp1s0"
+#define DEFAULT_ETH_INTERFACE "enp1s0"
 
 static int32_t stopPublisher = false;
+static uint64_t cycle_time = DEFAULT_CYCLE_TIME;
+static uint64_t wake_delay = DEFAULT_WAKE_DELAY;
+static int so_priority = DEFAULT_SO_PRIORITY;
+static char* interface = DEFAULT_ETH_INTERFACE;
+static char* mcastPort = DEFAULT_MCAST_PORT;
+static char* mcastAddr = DEFAULT_MCAST_ADDR;
 
 static const SOPC_DataSet_LL_UadpDataSetMessageContentMask default_Uapd_DSM_Mask = {
     .validFlag = true,
@@ -139,11 +146,70 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     return nm;
 }
 
-int main(void)
+static void usage(char* progname)
+{
+    printf(
+        " Usage : %s [options]\n"
+        "  -i [name]          use network interface 'name' (default %s)\n"
+        "  -c [num]           period in nanoseconds (default %d)\n"
+        "  -d [num]           delta from wake up to txtime in nanoseconds (default %d)\n"
+        "  -p [num]           set SO_PRIORITY to 'num' (default %d)\n"
+        "  -h                 print this message and exit\n"
+        "  -a [addr]          multicast address used (default %s)\n"
+        "  -u [port]          udp port used (default %s)\n"
+        "  \n",
+        progname, DEFAULT_ETH_INTERFACE, DEFAULT_CYCLE_TIME, DEFAULT_WAKE_DELAY, DEFAULT_SO_PRIORITY,
+        DEFAULT_MCAST_ADDR, DEFAULT_MCAST_PORT);
+}
+
+int main(int argc, char* argv[])
 {
     // Install signal handler to close the server gracefully when server needs to stop
     signal(SIGINT, Test_StopSignal);
     signal(SIGTERM, Test_StopSignal);
+
+    // Parse argument
+    int opt = 0;
+    char* progname = strrchr(argv[0], '/');
+    progname = progname ? 1 + progname : argv[0];
+    while ((opt = getopt(argc, argv, "hi:c:d:p:a:u:")) != -1)
+    {
+        switch (opt)
+        {
+        case 'h':
+            usage(progname);
+            return 0;
+            break;
+        case 'i':
+            interface = optarg;
+            break;
+        case 'c':
+            cycle_time = (uint64_t) atol(optarg);
+            break;
+        case 'd':
+            wake_delay = (uint64_t) atol(optarg);
+            break;
+        case 'p':
+            so_priority = atoi(optarg);
+            break;
+        case 'a':
+            mcastAddr = optarg;
+            break;
+        case 'u':
+            mcastPort = optarg;
+            break;
+        case '?':
+            usage(progname);
+            return 1;
+            break;
+        default:
+            printf("Unknown option %c\n", opt);
+            usage(progname);
+            return 1;
+            break;
+        }
+    }
+
     uint64_t txtime = 0;
     int clockErr = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -152,14 +218,14 @@ int main(void)
     struct pollfd sockErrPoll;
 
     SOPC_Helper_EndiannessCfg_Initialize();
-    SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
+    SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, mcastAddr, mcastPort);
     status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
     if (SOPC_STATUS_NOK == status)
     {
         return -1;
     }
 
-    status = SOPC_UDP_SO_TXTIME_Socket_Option(ETH_INTERFACE, &sock);
+    status = SOPC_UDP_SO_TXTIME_Socket_Option((const char*) interface, &sock, (uint32_t) so_priority);
     if (SOPC_STATUS_INVALID_PARAMETERS == status)
     {
         printf("Invalid parameters\n");
@@ -182,28 +248,30 @@ int main(void)
     /* Get current time and start 1 second in future and add wake tx delay */
     clock_gettime(CLOCKID, &sleepTime);
     sleepTime.tv_sec += 1;
-    sleepTime.tv_nsec = ONE_SEC - WAKE_DELAY;
+    sleepTime.tv_nsec = ONE_SEC - (long) wake_delay;
     Timestamp_Normalize(&sleepTime);
     txtime = (uint64_t)(sleepTime.tv_sec * ONE_SEC + sleepTime.tv_nsec);
-    txtime += WAKE_DELAY;
+    txtime += wake_delay;
     memset(&sockErrPoll, 0, sizeof(sockErrPoll));
     sockErrPoll.fd = sock;
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {
+        printf("\nFirst packet txtime %" PRIu64 "\n", txtime);
         while (0 == returnCode && SOPC_STATUS_OK == status && SOPC_Atomic_Int_Get(&stopPublisher) == false)
         {
             clockErr = clock_nanosleep(CLOCKID, TIMER_ABSTIME, &sleepTime, NULL);
             switch (clockErr)
             {
             case 0:
-                status = SOPC_TX_UDP_send(sock, buffer->data, buffer->length, txtime, MCAST_ADDR, MCAST_PORT);
+                status = SOPC_TX_UDP_send(sock, buffer->data, buffer->length, txtime, (const char*) mcastAddr,
+                                          (const char*) mcastPort);
                 if (status == SOPC_STATUS_NOK)
                 {
                     printf("TX buffer send failed\n");
                 }
-                sleepTime.tv_nsec += CYCLE_TIME;
+                sleepTime.tv_nsec += (long) cycle_time;
                 Timestamp_Normalize(&sleepTime);
-                txtime += CYCLE_TIME;
+                txtime += cycle_time;
                 if (poll(&sockErrPoll, 1, 0) && sockErrPoll.revents & POLLERR) // 0x008
                 {
                     if (SOPC_TX_UDP_Socket_Error_Queue(sock))
