@@ -33,6 +33,14 @@ sed '1d' s2opc.xml.tmp >> s2opc.xml
 echo '' >> s2opc.xml
 rm s2opc.xml.tmp
 
+# Generate PubSub demo NodeSet for Micro profile
+../../../../scripts/nodeset-address-space-utils.py --output s2opc_pubsub_server.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml ../../../PubSub_ClientServer/data/address_space/s2opc_demo_pubsub.xml
+cat licence.xml > s2opc_pubsub_server.xml
+sed '1d' s2opc_pubsub_server.xml.tmp >> s2opc_pubsub_server.xml
+echo '' >> s2opc_pubsub_server.xml
+mv s2opc_pubsub_server.xml ../../../PubSub_ClientServer/data/address_space/
+rm s2opc_pubsub_server.xml.tmp
+
 # Generate demo NodeSet for Micro profile + SKS
 ../../../../scripts/nodeset-address-space-utils.py --output s2opc_sks.xml.tmp --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 cat licence.xml > s2opc_sks.xml
@@ -46,6 +54,14 @@ cat licence.xml > s2opc_nano.xml
 sed '1d' s2opc_nano.xml.tmp >> s2opc_nano.xml
 echo '' >> s2opc_nano.xml
 rm s2opc_nano.xml.tmp
+
+# Generate PubSub demo NodeSet for Nano profile
+../../../../scripts/nodeset-address-space-utils.py --output s2opc_pubsub_nano_server.xml.tmp --remove-max-node-management --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml ../../../PubSub_ClientServer/data/address_space/s2opc_demo_pubsub.xml
+cat licence.xml > s2opc_pubsub_nano_server.xml
+sed '1d' s2opc_pubsub_nano_server.xml.tmp >> s2opc_pubsub_nano_server.xml
+echo '' >> s2opc_pubsub_nano_server.xml
+mv s2opc_pubsub_nano_server.xml ../../../PubSub_ClientServer/data/address_space/
+rm s2opc_pubsub_nano_server.xml.tmp
 
 # Generate demo NodeSet with limited base info data
 ../../../../scripts/nodeset-address-space-utils.py --output s2opc_no_base_info.xml.tmp --remove-node-ids-greater-than 3000 --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
