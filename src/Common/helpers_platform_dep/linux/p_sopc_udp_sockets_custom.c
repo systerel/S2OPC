@@ -54,7 +54,7 @@ https://man7.org/linux/man-pages/man8/tc-etf.8.html
 https://lwn.net/Articles/748879/
 */
 
-SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock)
+SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock, uint32_t soPriority)
 {
     /* This sample TSN application uses strict txtime with SO_PRIORITY 3 mode by
        default.
@@ -73,12 +73,11 @@ SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket
     // To enable packet drop report, assign "SOF_TXTIME_REPORT_ERRORS" flag by
     // replacing 0 - debugging purpose.
     static uint16_t receiveErrors = 0;
-    // SO_PRIORITY value 3 mapped to traffic class 0 in the tc qdisc command.
-    // Refer Wiki.
+
     // In near future, the SO_PRIORITY will be user defined via XML.
     // If soPriority is changed, then it has to mapped to TC in the Qdisc command.
     // Refer Qdisc man page.
-    uint32_t soPriority = 3;
+
     const int trueInt = true;
     int setOptStatus = -1;
     int res = 0;

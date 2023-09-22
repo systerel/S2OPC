@@ -59,12 +59,12 @@ typedef struct
  *
  *  \param interface   Interface selection - HW timestamp enabled NIC
  *  \param sock        Value pointed is set with the newly created socket
- *
+ *  \param soPriority Set priority of packets sent by this socket
  *  \return            SOPC_STATUS_OK if operation succeeded,
  * SOPC_STATUS_INVALID_PARAMETERS
  *  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock);
+SOPC_ReturnStatus SOPC_UDP_SO_TXTIME_Socket_Option(const char* interface, Socket* sock, uint32_t soPriority);
 
 /**
  *  \brief Send data through the UDP socket to given IP address and port
