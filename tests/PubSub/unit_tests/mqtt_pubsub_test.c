@@ -35,7 +35,7 @@
 static const char* URI_MQTT_BROKER = "127.0.0.1:1883";
 static const char* BAD_PORT_URI_MQTT_BROKER = "127.0.0.1:18";
 static const char* MQTT_LIB_TOPIC_NAME[MQTT_LIB_MAX_NB_TOPIC_NAME] = {"test1", "test2", "test3"};
-static const uint16_t NB_TOPIC = 3;
+#define NB_TOPIC 3
 static const char* USERNAME = "user1";
 static const char* PASSWORD = "password";
 /* Arbitrary network message */
