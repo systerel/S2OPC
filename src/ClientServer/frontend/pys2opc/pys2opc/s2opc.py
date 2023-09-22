@@ -729,26 +729,20 @@ class PyS2OPC_Server(PyS2OPC):
             if serverCfg.serverCertPath != NULL or serverCfg.serverKeyPath != NULL:
                 assert serverCfg.serverCertPath != NULL and serverCfg.serverKeyPath != NULL,\
                     'The server private key and server certificate work by pair. Either configure them both of them or none of them.'
-                ppCert = ffi.addressof(serverCfg, 'serverCertificate')
-                status = libsub.SOPC_KeyManager_SerializedCertificate_CreateFromFile(serverCfg.serverCertPath, ppCert)
-                assert status == ReturnStatus.OK,\
-                    'Cannot load server certificate file {} with status {}. Is path correct?'\
-                    .format(ffi.string(serverCfg.serverCertPath), ReturnStatus.get_both_from_id(status))
-
-                ppKey = ffi.addressof(serverCfg, 'serverKey')
+                ppKeyCertPair = ffi.addressof(serverCfg, 'serverKeyCertPair')
 
                 password = NULL
-                lenPassword = 0
                 # Retrieve the password if the key is encrypted
                 if serverCfg.serverKeyEncrypted:
                     password = PyS2OPC_Server.get_server_key_password()
                     password = password.encode() + b'\0' # Add protection to avoid buffer overrun with C code
                     password = ffi.new('char[]', password)
-                    lenPassword = len(password)
-                status = libsub.SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd(serverCfg.serverKeyPath, ppKey, password, lenPassword)
+
+                status = libsub.SOPC_KeyCertPair_CreateFromPaths(serverCfg.serverCertPath, serverCfg.serverKeyPath, password, ppKeyCertPair)
+
                 assert status == ReturnStatus.OK,\
-                    'Cannot load secret key file {} with status {}. Is path correct?'\
-                    .format(ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
+                    'Cannot load server certificate file {} or secret key file {} with status {}. Are paths correct ? Is key password correct ?'\
+                    .format(ffi.string(serverCfg.serverCertPath), ffi.string(serverCfg.serverKeyPath), ReturnStatus.get_both_from_id(status))
 
             # PKI is not required if no CA is configured
             if (serverCfg.serverPkiPath != NULL):
