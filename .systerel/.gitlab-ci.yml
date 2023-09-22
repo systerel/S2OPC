@@ -114,7 +114,7 @@ generation:
     - ./.pre-build-ext.sh
     - ./.check_generated_code.sh
   artifacts:
-    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'pre-build.log'
     when: always
@@ -144,7 +144,7 @@ generation:
     DOCKER_IMAGE: 'sha256:346ec7469f7dfedc8d5078c51c0d485915667647a2816b8ac36e1e35d0419060'
     BUILD_DIR: build
   artifacts:
-    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '*.log'
       - 'build/'  # Required by tests / coverage
@@ -211,7 +211,7 @@ build-win64: &build_win64
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
     WARNINGS_AS_ERRORS: 0 # Some format warnings remain on MinGW
   artifacts:
-    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-w64-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
@@ -225,7 +225,7 @@ build-win32:
     <<: *build_win64_variables
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64.cmake'
   artifacts:
-    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-w32-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '$BUILD_DIR/bin/'
     expire_in: '1 week'
@@ -244,7 +244,7 @@ build-rpi:
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
   artifacts:
-    name: 'bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '$BUILD_DIR/bin'
     expire_in: '1 week'
@@ -263,7 +263,7 @@ build-zephyr:
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_client'
   variables:
   artifacts:
-    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'build_zephyr/'
     expire_in: '1 month'
@@ -280,7 +280,7 @@ build-freertos:
     - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg.elf'
   variables:
   artifacts:
-    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'build_freertos/'
     when: always
@@ -348,7 +348,7 @@ test-check:
   variables:
       DOCKER_IMAGE: 'sha256:55f5a3f10a3e6dd4b1c2d076df98c818eaeb749d623ef57208f6293061a7b8a4'
   artifacts:
-    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'pre-build-check.log'
       - 'clang_tidy.log'
@@ -368,7 +368,7 @@ test-check:
     - './.set-bin-root.sh'
     - './test-all.sh'
   artifacts:
-    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'test-unit-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'build/bin/**/*.tap'
       - 'build/bin/**/*.log'
@@ -407,7 +407,7 @@ test-unit:
   script:
     - 'cd tests/ClientServer/acceptance_tools/ && ./launch_acceptance_tests.sh'
   artifacts:
-    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'uactt-logs-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'build/bin/**/*.tap'
       - 'build/bin/**/*.log'
@@ -468,7 +468,7 @@ coverage-analysis:
   script:
     - ./.gen_coverage.sh
   artifacts:
-    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'coverage-report-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - 'report'
     expire_in: '1 week'
@@ -511,7 +511,7 @@ check_doc:
   variables:
     <<: *build_linux_variables
   artifacts:
-    name: 'check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
+    name: 'check_doc-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '$BUILD_DIR/doc.log'
     expire_in: '1 week'
