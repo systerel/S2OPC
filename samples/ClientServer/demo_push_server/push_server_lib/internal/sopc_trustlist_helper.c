@@ -1064,7 +1064,7 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
     bool bIsIssuer = false;
     SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
     SOPC_ReturnStatus status =
-        SOPC_PKIProvider_RemoveCertificate(&pTrustList->pPKI, cStrThumb, bIsTrustedCert, &bIsRemove, &bIsIssuer);
+        SOPC_PKIProvider_RemoveCertificate(pTrustList->pPKI, cStrThumb, bIsTrustedCert, &bIsRemove, &bIsIssuer);
 
     if (bIsRemove && SOPC_STATUS_OK == status)
     {
@@ -1210,7 +1210,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     /* Update the PKI with the new certificate */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_UpdateFromList(&pTrustList->pPKI, secPolUri, pCert, NULL, NULL, NULL, true);
+        status = SOPC_PKIProvider_UpdateFromList(pTrustList->pPKI, secPolUri, pCert, NULL, NULL, NULL, true);
         if (SOPC_STATUS_OK != status)
         {
             /* The security level of the update is probably higher than the security level of the secure channel */
@@ -1354,7 +1354,7 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
     if (SOPC_STATUS_OK == status)
     {
         status =
-            SOPC_PKIProvider_UpdateFromList(&pTrustList->pPKI, secPolUri, pToUpdateTrustedCerts, pToUpdateTrustedCRLs,
+            SOPC_PKIProvider_UpdateFromList(pTrustList->pPKI, secPolUri, pToUpdateTrustedCerts, pToUpdateTrustedCRLs,
                                             pToUpdateIssuerCerts, pToUpdateIssuerCRLs, bIncludeExistingList);
         if (SOPC_STATUS_OK != status)
         {
@@ -1406,7 +1406,7 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (SOPC_TRUSTLIST_GROUP_APP == pTrustList->groupType)
     {
-        SOPC_ToolkitServer_AsyncReEvalSecureChannelsCerts();
+        SOPC_ToolkitServer_AsyncReEvalSecureChannels(false);
     }
     else
     {

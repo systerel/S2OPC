@@ -35,6 +35,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_trustlist.h"
 #include "sopc_trustlist_itf.h"
 
@@ -71,8 +72,7 @@ struct SOPC_CertificateGroup_Config
     SOPC_Certificate_Type certType;       /*!< The CertificateType. */
     const SOPC_PKIProvider* pPKI;         /*!< The PKI that belongs to the group. */
     SOPC_TrustList_Type groupType;        /*!< Define the group type (user or app) */
-    SOPC_SerializedAsymmetricKey* pKey;   /*!< The private key that belongs to the group.*/
-    SOPC_SerializedCertificate* pCert;    /*!< The certificate that belongs to the group.*/
+    SOPC_KeyCertPair* pKeyCertPair;       /*!< The private key and certificate that belongs to the group.*/
     char* pKeyPath;                       /*!< Path to the private key that belongs to the group */
     char* pCertPath;                      /*!< Path to the certificate that belongs to the group */
 };
@@ -165,8 +165,7 @@ static void cert_group_initialize_context(SOPC_CertGroupContext* pCertGroup)
     pCertGroup->pCertificateTypeId = NULL;
     pCertGroup->pCertificateTypeValueId = NULL;
     pCertGroup->pTrustListId = NULL;
-    pCertGroup->pKey = NULL;
-    pCertGroup->pCert = NULL;
+    pCertGroup->pKeyCertPair = NULL;
     pCertGroup->pKeyPath = NULL;
     pCertGroup->pCertPath = NULL;
     pCertGroup->pNewKey = NULL;
@@ -193,9 +192,8 @@ static void cert_group_clear_context(SOPC_CertGroupContext* pCertGroup)
     CertificateGroup_DiscardNewKey(pCertGroup);
     pCertGroup->pKeyPath = NULL;
     pCertGroup->pCertPath = NULL;
-    /* Safely unreference crypto pointer */
-    pCertGroup->pKey = NULL;
-    pCertGroup->pCert = NULL;
+    /* Safely unreference the keyCertPair */
+    pCertGroup->pKeyCertPair = NULL;
     pCertGroup->bDoNotDelete = true;
 }
 
@@ -276,8 +274,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
                                                                 const SOPC_Certificate_Type certType,
                                                                 SOPC_PKIProvider* pPKI,
                                                                 const uint32_t maxTrustListSize,
-                                                                SOPC_SerializedAsymmetricKey* pKey,
-                                                                SOPC_SerializedCertificate* pCert,
+                                                                SOPC_KeyCertPair* pKeyCertPair,
                                                                 const char* pKeyPath,
                                                                 const char* pCertPath,
                                                                 SOPC_CertificateGroup_Config** ppConfig)
@@ -303,22 +300,17 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* key <=> cert */
-    if ((NULL == pKey && NULL != pCert) || (NULL != pKey && NULL == pCert))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* key path <=> cert path */
-    if ((NULL == pKeyPath && NULL != pCertPath) || (NULL != pKeyPath && NULL == pCertPath))
+    /* keyCertPair <=> key and cert paths */
+    if ((NULL != pKeyCertPair) && ((NULL != pKeyPath && NULL == pCertPath) || (NULL == pKeyPath && NULL != pCertPath)))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* key and cert has no meaning for user group */
-    if (SOPC_TRUSTLIST_GROUP_USR == groupType && NULL != pKey && NULL != pCert)
+    if (SOPC_TRUSTLIST_GROUP_USR == groupType && NULL != pKeyCertPair)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_TRUSTLIST_GROUP_USR != groupType && (NULL == pKey || NULL == pCert))
+    if (SOPC_TRUSTLIST_GROUP_USR != groupType && NULL == pKeyCertPair)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -355,8 +347,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
         pCfg->pPKI = pPKI;
         pCfg->groupType = groupType;
         pCfg->certType = certType;
-        pCfg->pKey = pKey;
-        pCfg->pCert = pCert;
+        pCfg->pKeyCertPair = pKeyCertPair;
         pCfg->pKeyPath = keyPath;
         pCfg->pCertPath = certPath;
     }
@@ -405,22 +396,18 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* key <=> cert */
-    if ((NULL == pCfg->pKey && NULL != pCfg->pCert) || (NULL != pCfg->pKey && NULL == pCfg->pCert))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* key path <=> cert path */
-    if ((NULL == pCfg->pKeyPath && NULL != pCfg->pCertPath) || (NULL != pCfg->pKeyPath && NULL == pCfg->pCertPath))
+    /* keyCertPair <=> key and cert paths */
+    if (NULL != pCfg->pKeyCertPair &&
+        ((NULL == pCfg->pKeyPath && NULL != pCfg->pCertPath) || (NULL != pCfg->pKeyPath && NULL == pCfg->pCertPath)))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     /* key and cert has no meaning for user group */
-    if (SOPC_TRUSTLIST_GROUP_USR == pCfg->groupType && NULL != pCfg->pKey && NULL != pCfg->pCert)
+    if (SOPC_TRUSTLIST_GROUP_USR == pCfg->groupType && NULL != pCfg->pKeyCertPair)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType && (NULL == pCfg->pKey || NULL == pCfg->pCert))
+    if (SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType && NULL == pCfg->pKeyCertPair)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -492,8 +479,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     /* Finally add the certificateGroup to the dictionary */
     if (SOPC_STATUS_OK == status)
     {
-        pCertGroup->pKey = pCfg->pKey;
-        pCertGroup->pCert = pCfg->pCert;
+        pCertGroup->pKeyCertPair = pCfg->pKeyCertPair;
         bool res = CertificateGroup_DictInsert(pCertGroup->pObjectId, pCertGroup);
         status = !res ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
@@ -678,7 +664,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    status = SOPC_KeyManager_SerializedCertificate_Deserialize(pGroupCtx->pCert, &pCert);
+    status = SOPC_KeyCertPair_GetCertCopy(pGroupCtx->pKeyCertPair, &pCert);
     /* Get the subjectName of the current certificate */
     if (SOPC_STATUS_OK == status)
     {
@@ -702,7 +688,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
         }
         else
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pGroupCtx->pKey, false, &pCurKey);
+            status = SOPC_KeyCertPair_GetKeyCopy(pGroupCtx->pKeyCertPair, &pCurKey);
         }
     }
     if (SOPC_STATUS_OK == status)
@@ -734,7 +720,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     pCurKey = NULL;
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_KeyManager_AsymmetricKey_Free(pNewKey);
+        CertificateGroup_DiscardNewKey(pGroupCtx);
         pNewKey = NULL;
         SOPC_Free(pCSR_DER);
         pCSR_DER = NULL;
@@ -898,7 +884,7 @@ SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext*
     }
 }
 
-SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* pGroupCtx,
+SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
                                                    const SOPC_ByteString* pIssuerArray,
                                                    const int32_t arrayLength)
@@ -921,15 +907,19 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
     }
 
     SOPC_StatusCode stCode = SOPC_GoodGenericStatus;
-    SOPC_CertificateList* pGivenCert = NULL;
-    SOPC_AsymmetricKey* pGivenPublicKey = NULL;
-    SOPC_AsymmetricKey* pCurrentPublicKey = NULL;
+    SOPC_CertificateList* pNewCert = NULL;
+    SOPC_AsymmetricKey* pNewPublicKey = NULL;
+    SOPC_AsymmetricKey* pCurrentKey = NULL;
+    SOPC_SerializedCertificate* pSerNewCert = NULL;
     SOPC_SerializedAsymmetricKey* pSerGivenPublicKey = NULL;
     SOPC_SerializedAsymmetricKey* pSerCurrentPublicKey = NULL;
-    uint32_t givenPublicKeyLen = 0;
+    SOPC_SerializedAsymmetricKey* pSerNewKey = NULL;
+    uint32_t newPublicKeyLen = 0;
     uint32_t currentPublicKeyLen = 0;
-    const SOPC_ExposedBuffer* pRawGivenPublicKey = NULL;
+    uint32_t newKeyLen = 0;
+    const SOPC_ExposedBuffer* pRawNewPublicKey = NULL;
     const SOPC_ExposedBuffer* pRawCurrentPubicKey = NULL;
+    const SOPC_ExposedBuffer* pRawNewKey = NULL;
     SOPC_CertificateList* pGivenIssuers = NULL;
     SOPC_CertificateList* pCurrentServerCert = NULL;
     char* pURI = NULL;
@@ -938,14 +928,14 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
     /* TODO: Add a new function declaration in KeyManager API to check if a public-private pair of keys matches. (with
      * mbedtls_pk_check_pair function )*/
     /* Load the public key from the given certificate */
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
-        pCertificate->Data, (uint32_t) pCertificate->Length, &pGivenCert);
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromDER(pCertificate->Data, (uint32_t) pCertificate->Length, &pNewCert);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pGivenCert, &pGivenPublicKey);
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pNewCert, &pNewPublicKey);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pGivenPublicKey, true, &pSerGivenPublicKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pNewPublicKey, true, &pSerGivenPublicKey);
         }
     }
     if (SOPC_STATUS_OK != status)
@@ -957,18 +947,16 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
     {
         if (NULL != pGroupCtx->pNewKey)
         {
-            pCurrentPublicKey = pGroupCtx->pNewKey;
+            pCurrentKey = pGroupCtx->pNewKey;
         }
         else
         {
-            /* The input buffer pGroupCtx->pKey parse by MbedTls is not a public key */
-            status = SOPC_KeyManager_SerializedAsymmetricKey_Deserialize(pGroupCtx->pKey, false, &pCurrentPublicKey);
+            status = SOPC_KeyCertPair_GetKeyCopy(pGroupCtx->pKeyCertPair, &pCurrentKey);
         }
         if (SOPC_STATUS_OK == status)
         {
             /* Get the serialized public key part */
-            status =
-                SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pCurrentPublicKey, true, &pSerCurrentPublicKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pCurrentKey, true, &pSerCurrentPublicKey);
         }
         if (SOPC_STATUS_OK != status)
         {
@@ -978,24 +966,24 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
     /* Check if the public key match with the existing certificate and the privateKey */
     if (SOPC_STATUS_OK == status)
     {
-        givenPublicKeyLen = SOPC_SecretBuffer_GetLength(pSerGivenPublicKey);
+        newPublicKeyLen = SOPC_SecretBuffer_GetLength(pSerGivenPublicKey);
         currentPublicKeyLen = SOPC_SecretBuffer_GetLength(pSerCurrentPublicKey);
-        if (givenPublicKeyLen != currentPublicKeyLen)
+        if (newPublicKeyLen != currentPublicKeyLen)
         {
             status = SOPC_STATUS_NOK;
             stCode = OpcUa_BadSecurityChecksFailed;
         }
         else
         {
-            pRawGivenPublicKey = SOPC_SecretBuffer_Expose(pSerGivenPublicKey);
+            pRawNewPublicKey = SOPC_SecretBuffer_Expose(pSerGivenPublicKey);
             pRawCurrentPubicKey = SOPC_SecretBuffer_Expose(pSerCurrentPublicKey);
-            int match = memcmp(pRawGivenPublicKey, pRawCurrentPubicKey, givenPublicKeyLen);
+            int match = memcmp(pRawNewPublicKey, pRawCurrentPubicKey, newPublicKeyLen);
             if (0 != match)
             {
                 status = SOPC_STATUS_NOK;
                 stCode = OpcUa_BadSecurityChecksFailed;
             }
-            SOPC_SecretBuffer_Unexpose(pRawGivenPublicKey, pSerGivenPublicKey);
+            SOPC_SecretBuffer_Unexpose(pRawNewPublicKey, pSerGivenPublicKey);
             SOPC_SecretBuffer_Unexpose(pRawCurrentPubicKey, pSerCurrentPublicKey);
         }
     }
@@ -1019,7 +1007,7 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
     /* Retrieve the application URI from the current server certificate */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_Deserialize(pGroupCtx->pCert, &pCurrentServerCert);
+        status = SOPC_KeyCertPair_GetCertCopy(pGroupCtx->pKeyCertPair, &pCurrentServerCert);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_KeyManager_Certificate_GetMaybeApplicationUri(pCurrentServerCert, &pURI, NULL);
@@ -1066,10 +1054,10 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_CheckLeafCertificate(pGivenCert, &profile, &errorCode);
+            status = SOPC_PKIProvider_CheckLeafCertificate(pNewCert, &profile, &errorCode);
             if (SOPC_STATUS_OK != status)
             {
-                char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pGivenCert);
+                char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pNewCert);
                 const char* thumb = NULL == pThumb ? "NULL" : pThumb;
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "PushSrvCfg:Method_UpdateCertificate:CertificateGroup:%s: validation failed "
@@ -1084,17 +1072,48 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
      * (§7.3.4 part 2 v1.05) */
     /* TODO: Validate the signature of the updated certificate with the given issuer (PKI can not be used, as no CRL are
      * provided) */
-    /* TODO: Update the new key-cert pair */
 
+    /* Update the new key-cert pair */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyCertPair_GetSerializedCertCopy(pGroupCtx->pKeyCertPair, &pSerNewCert);
+        if (SOPC_STATUS_OK == status && NULL != pGroupCtx->pNewKey)
+        {
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pCurrentKey, true, &pSerNewKey);
+            if (SOPC_STATUS_OK == status)
+            {
+                pRawNewKey = SOPC_SecretBuffer_Expose(pSerNewKey);
+                newKeyLen = SOPC_SecretBuffer_GetLength(pSerNewKey);
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyCertPair_UpdateFromBytes(pGroupCtx->pKeyCertPair, pSerNewCert->length,
+                                                      (const unsigned char*) pSerNewCert->data, newKeyLen, pRawNewKey);
+            if (NULL != pRawNewKey)
+            {
+                SOPC_SecretBuffer_Unexpose(pRawNewKey, pSerNewKey);
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            CertificateGroup_DiscardNewKey(pGroupCtx);
+            /* Request to re-evaluate the current server secure channels due to server certificate / key update (force
+             * SC re-establishment) */
+            SOPC_ToolkitServer_AsyncReEvalSecureChannels(true);
+        }
+    }
     /* Clear */
-    SOPC_KeyManager_AsymmetricKey_Free(pGivenPublicKey);
-    SOPC_KeyManager_AsymmetricKey_Free(pCurrentPublicKey);
-    SOPC_KeyManager_Certificate_Free(pGivenCert);
+    SOPC_KeyManager_AsymmetricKey_Free(pNewPublicKey);
+    SOPC_KeyManager_AsymmetricKey_Free(pCurrentKey);
+    SOPC_KeyManager_Certificate_Free(pNewCert);
     SOPC_KeyManager_Certificate_Free(pCurrentServerCert);
     SOPC_KeyManager_Certificate_Free(pGivenIssuers);
     SOPC_Free(pURI);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerCurrentPublicKey);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGivenPublicKey);
+    SOPC_KeyManager_SerializedCertificate_Delete(pSerNewCert);
+    SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerNewKey);
 
     return stCode;
 }
@@ -1107,16 +1126,5 @@ SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx
     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                              "PushSrvCfg:CertificateGroup:%s: the export of the update is not implemented",
                              pGroupCtx->cStrId);
-    return SOPC_STATUS_OK;
-}
-
-SOPC_ReturnStatus CertificateGroup_RaiseEvent(const SOPC_CertGroupContext* pGroupCtx)
-{
-    SOPC_ASSERT(NULL != pGroupCtx);
-
-    SOPC_Logger_TraceWarning(
-        SOPC_LOG_MODULE_CLIENTSERVER,
-        "PushSrvCfg:CertificateGroup:%s: the event to re-evaluate the certificate for all SCs is not implemented",
-        pGroupCtx->cStrId);
     return SOPC_STATUS_OK;
 }

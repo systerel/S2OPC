@@ -357,8 +357,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void)
 
 SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider* pPKIApp,
                                                                 const SOPC_Certificate_Type appCertType,
-                                                                SOPC_SerializedAsymmetricKey* pServerKey,
-                                                                SOPC_SerializedCertificate* pServerCert,
+                                                                SOPC_KeyCertPair* pServerKeyCertPair,
                                                                 const char* pServerKeyPath,
                                                                 const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,
@@ -366,7 +365,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const uint32_t maxTrustListSize,
                                                                 SOPC_PushServerConfig_Config** ppConfig)
 {
-    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == pServerKey || NULL == pServerCert || NULL == ppConfig)
+    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == pServerKeyCertPair || NULL == ppConfig)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -386,8 +385,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_APP, appCertType, pPKIApp,
-                                                               maxTrustListSize, pServerKey, pServerCert,
-                                                               pServerKeyPath, pServerCertPath, &pAppCertGroupCfg);
+                                                               maxTrustListSize, pServerKeyCertPair, pServerKeyPath,
+                                                               pServerCertPath, &pAppCertGroupCfg);
     }
     if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
@@ -398,9 +397,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     }
     if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
-        status =
-            SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
-                                                          maxTrustListSize, NULL, NULL, NULL, NULL, &pUsrCertGroupCfg);
+        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
+                                                               maxTrustListSize, NULL, NULL, NULL, &pUsrCertGroupCfg);
     }
     if (SOPC_STATUS_OK == status)
     {

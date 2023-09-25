@@ -26,6 +26,7 @@
 #define SOPC_CERTIFICATE_GROUP_
 
 #include "sopc_builtintypes.h"
+#include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
 
 /**
@@ -35,10 +36,8 @@ typedef struct SOPC_CertGroupContext
 {
     SOPC_NodeId* pObjectId;               /*!< The nodeId of the the CertificateGroup */
     char* cStrId;                         /*!< The C string nodeId of the CertificateGroup (it is used for logs) */
-    SOPC_SerializedAsymmetricKey* pKey;   /*!< A valid pointer to the private key that belongs to the
+    SOPC_KeyCertPair* pKeyCertPair;       /*!< A valid pointer to the private key and certificate that belongs to the
                                                CertificateGroup object. */
-    SOPC_SerializedCertificate* pCert;    /*!< A valid pointer to the certificate that belongs to the
-                                              CertificateGroup object. */
     SOPC_AsymmetricKey* pNewKey;          /*!< Pointer to the new generated key */
     char* pKeyPath;                       /*!< Path to the private key that belongs to the CertificateGroup object */
     char* pCertPath;                      /*!< Path to the certificate that belongs to the CertificateGroup object */
@@ -166,8 +165,9 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
  * \brief Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
  * certificates)
  *
- * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context \p
- * pGroupCtx .
+ * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context
+ *       \p pGroupCtx . If the update succeeded then a request is send to re-evaluate the current server
+ *       secure channels due to server certificate / key update (force SC re-establishment).
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  * \param pCertificate A valid pointer to the new certificate.
@@ -178,7 +178,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
  *
  * \return Return SOPC_GoodGenericStatus if successful or an OpcUa error code.
  */
-SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* pGroupCtx,
+SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
                                                    const SOPC_ByteString* pIssuerArray,
                                                    const int32_t arrayLength);
@@ -197,17 +197,6 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(const SOPC_CertGroupContext* 
  * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx, const SOPC_ByteString* pCertificate);
-
-/**
- * \brief Raise an event to re-evaluate the certificate for all SCs.
- *
- * \param pGroupCtx A valid pointer to the CertificateGroup context.
- *
- * \warning \p pGroupCtx shall be valid (!= NULL).
- *
- * \return SOPC_STATUS_OK if successful.
- */
-SOPC_ReturnStatus CertificateGroup_RaiseEvent(const SOPC_CertGroupContext* pGroupCtx);
 
 /**
  * \brief  Discards previously generated new key pair.

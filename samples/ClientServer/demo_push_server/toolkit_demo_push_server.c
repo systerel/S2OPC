@@ -98,10 +98,10 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     }
     s2opcConfig = SOPC_CommonHelper_GetConfiguration();
     serverConfig = &s2opcConfig->serverConfig;
-    status = SOPC_PushServerConfig_GetDefaultConfiguration(
-        serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, serverConfig->serverKey,
-        serverConfig->serverCertificate, serverConfig->serverKeyPath, serverConfig->serverCertPath, NULL,
-        SOPC_CERT_TYPE_UNKNOW, SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
+    status = SOPC_PushServerConfig_GetDefaultConfiguration(serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION,
+                                                           serverConfig->serverKeyCertPair, serverConfig->serverKeyPath,
+                                                           serverConfig->serverCertPath, NULL, SOPC_CERT_TYPE_UNKNOW,
+                                                           SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
 
     if (SOPC_STATUS_OK == status)
     {
