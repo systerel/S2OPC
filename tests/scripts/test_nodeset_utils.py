@@ -177,5 +177,11 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_remove_backward_refs_retain.xml', ['--remove-backward-refs', '--retain-nodes', 'Organizes', 'HasTypeDefinition'],
                       'ns0.xml')
 
+    def test_merge_identity(self):
+        self.run_test('s2opc_base_nodeset_identity.xml', [],
+                      's2opc_base_nodeset_check.xml')
+        self.run_test('s2opc_base_nodeset_identity.xml', [],
+                      's2opc_base_nodeset_identity.xml')
+        
 if __name__ == '__main__':
     unittest.main()

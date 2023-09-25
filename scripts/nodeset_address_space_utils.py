@@ -41,6 +41,7 @@ PREFIX_IDX_FORMATTER = '{}:{}'
 UA_URI = 'http://opcfoundation.org/UA/'
 UA_NODESET_URI = 'http://opcfoundation.org/UA/2011/03/UANodeSet.xsd'
 UA_TYPES_URI = 'http://opcfoundation.org/UA/2008/02/Types.xsd'
+UA_TYPES_PREFIX = 'uax'
 STRING_TAG = f'{{{UA_TYPES_URI}}}String'
 
 HIERARCHICAL_REFERENCE_TYPES = frozenset([
@@ -483,6 +484,9 @@ class NodesetMerger(NSFinder):
             # We have to name it to be able to use it.
             if '' in self.namespaces:
                 self.namespaces['uanodeset'] = self.namespaces['']
+            if UA_TYPES_PREFIX not in self.namespaces:
+                ET.register_namespace(UA_TYPES_PREFIX, UA_TYPES_URI)
+                self.namespaces[UA_TYPES_PREFIX] = UA_TYPES_URI
             self.__fill_namespace_array()
             self._check_all_namespaces_declared(self.tree)
             return True
