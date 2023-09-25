@@ -126,12 +126,15 @@ static SOPC_ReturnStatus SOPC_Internal_CreateFromBytes(size_t certificateNbBytes
     SOPC_SerializedAsymmetricKey* key = NULL;
     SOPC_ReturnStatus status =
         SOPC_KeyManager_SerializedCertificate_CreateFromDER(certificate, (uint32_t) certificateNbBytes, &cert);
-    if (SOPC_STATUS_OK == status && !noKeySet)
+    if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(privateKey, (uint32_t) keyNbBytes, &key);
-        if (SOPC_STATUS_OK != status)
+        if (!noKeySet)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Failed to load key from bytes array\n");
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromData(privateKey, (uint32_t) keyNbBytes, &key);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Failed to load key from bytes array\n");
+            }
         }
     }
     else
@@ -261,6 +264,11 @@ SOPC_ReturnStatus SOPC_KeyCertPair_GetSerializedCertCopy(SOPC_KeyCertPair* keyCe
     if (NULL != certCopy)
     {
         status = SOPC_Buffer_Copy(certCopy, keyCertPair->certificate);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Reset position in case it is not at 0
+        status = SOPC_Buffer_SetPosition(certCopy, 0);
     }
     mutStatus = SOPC_Mutex_Unlock(&keyCertPair->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
