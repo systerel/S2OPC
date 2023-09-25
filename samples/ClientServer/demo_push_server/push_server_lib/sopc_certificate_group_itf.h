@@ -25,6 +25,7 @@
 #ifndef SOPC_CERTIFICATE_GROUP_ITF_
 #define SOPC_CERTIFICATE_GROUP_ITF_
 
+#include "sopc_key_cert_pair.h"
 #include "sopc_trustlist_itf.h"
 
 /**
@@ -62,10 +63,8 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void);
  * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
  * \param maxTrustListSize Defined the maximum size in byte of the TrustList that belongs to the
  *                         CertificateGroup object.
- * \param pKey  A valid pointer to the private key that belongs to the CertificateGroup object
- *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
- * \param pCert A valid pointer to the certificate that belongs to the CertificateGroup object
- *              (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
+ * \param pKeyCertPair A valid pointer to the private key and certificate that belongs to the CertificateGroup object
+ *                     (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
   *\param pKeyPath Path to the private key that belongs to the CertificateGroup object
                    (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR or if the platform has no file system).
  * \param pCertPath Path to the certificate that belongs to the CertificateGroup object
@@ -79,8 +78,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
                                                                 const SOPC_Certificate_Type certType,
                                                                 SOPC_PKIProvider* pPKI,
                                                                 const uint32_t maxTrustListSize,
-                                                                SOPC_SerializedAsymmetricKey* pKey,
-                                                                SOPC_SerializedCertificate* pCert,
+                                                                SOPC_KeyCertPair* pKeyCertPair,
                                                                 const char* pKeyPath,
                                                                 const char* pCertPath,
                                                                 SOPC_CertificateGroup_Config** ppConfig);

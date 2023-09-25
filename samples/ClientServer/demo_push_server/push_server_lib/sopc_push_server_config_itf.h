@@ -49,8 +49,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
  *
  * \param pPKIApp             A valid pointer to the PKI of the application TrustList.
  * \param appCertType         The application certificate type.
- * \param pServerKey          A valid pointer to server the private key.
- * \param pServerCert         A valid pointer to the server certificate.
+ * \param pServerKeyCertPair  A valid pointer to the server private key and certificate.
  * \param pServerKeyPath      Path to the server private key (NULL if the platform has no file system).
  * \param pServerCertPath     Path to the server certificate (NULL if the platform has no file system).
  * \param pPKIUsr             A valid pointer to the PKI of the users TrustList (NULL if not used).
@@ -63,8 +62,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
  */
 SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider* pPKIApp,
                                                                 const SOPC_Certificate_Type appCertType,
-                                                                SOPC_SerializedAsymmetricKey* pServerKey,
-                                                                SOPC_SerializedCertificate* pServerCert,
+                                                                SOPC_KeyCertPair* pServerKeyCertPair,
                                                                 const char* pServerKeyPath,
                                                                 const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,

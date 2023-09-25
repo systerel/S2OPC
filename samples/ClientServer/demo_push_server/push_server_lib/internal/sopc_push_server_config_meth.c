@@ -146,14 +146,6 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
             "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: export of the new key-cert pair failed", cStrId);
         return OpcUa_BadUnexpectedError;
     }
-    /* Raise an event to re-evaluate the certificate for all the SCs */
-    status = CertificateGroup_RaiseEvent(pGroupCtx);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: event failed", cStrId);
-        return OpcUa_BadUnexpectedError;
-    }
     /* Create the output variant */
     pVariant = SOPC_Variant_Create();
     if (NULL == pVariant)

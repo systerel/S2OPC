@@ -454,7 +454,8 @@ START_TEST(test_key_pair_bytes)
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
-    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL,  *tc_check_crypto_list_to_array = NULL, *tc_key_pair = NULL;
+    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL, *tc_check_crypto_list_to_array = NULL,
+          *tc_key_pair = NULL;
 
     tc_check_app_uri = tcase_create("Check application URI");
     tc_gen_rsa = tcase_create("Generate RSA keys");
