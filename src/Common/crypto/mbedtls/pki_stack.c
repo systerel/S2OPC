@@ -2190,9 +2190,19 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     return status;
 }
 
-static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
-                                               bool bDefaultBuild,
-                                               SOPC_PKIProvider** ppPKI)
+static bool pki_updated_trust_list_dir_exists(const char* path)
+{
+    SOPC_Array* pFilePaths = NULL;
+    SOPC_FileSystem_GetDirResult dirRes = SOPC_FileSystem_GetDirFilePaths(path, &pFilePaths);
+    SOPC_Array_Delete(pFilePaths);
+    return (SOPC_FileSystem_GetDir_OK == dirRes);
+}
+
+static SOPC_ReturnStatus pki_create_from_store(
+    const char* directoryStorePath,
+    bool bDefaultBuild, /* If true load the root PKI directory without trust list update,
+                           if false try to load the updated trust list subdirectory.*/
+    SOPC_PKIProvider** ppPKI)
 {
     SOPC_ASSERT(NULL != directoryStorePath);
     SOPC_ASSERT(NULL != ppPKI);
@@ -2206,7 +2216,7 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     char* path = NULL;
     char* trust_list_name = NULL;
 
-    /* Select the right folder*/
+    /* Select the right folder: add updateTrustList subdirectory path containing PKI update*/
     if (!bDefaultBuild)
     {
         status = SOPC_StrConcat(directoryStorePath, STR_TRUSTLIST_NAME, &path);
@@ -2214,15 +2224,27 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
         {
             return status;
         }
-        basePath = path;
+        if (pki_updated_trust_list_dir_exists(path))
+        {
+            basePath = path;
+        }
+        else
+        {
+            SOPC_Free(path);
+            path = NULL;
+            status = SOPC_STATUS_WOULD_BLOCK;
+        }
     }
     else
     {
         basePath = directoryStorePath;
     }
     /* Load the files from the directory Store path */
-    status = load_certificate_and_crl_list_from_store(basePath, &pTrustedCerts, &pTrustedCrl, &pIssuerCerts,
-                                                      &pIssuerCrl, bDefaultBuild);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = load_certificate_and_crl_list_from_store(basePath, &pTrustedCerts, &pTrustedCrl, &pIssuerCerts,
+                                                          &pIssuerCrl, bDefaultBuild);
+    }
     /* Check if the trustList is empty */
     if (SOPC_STATUS_OK == status && NULL == pTrustedCerts && NULL == pTrustedCrl && NULL == pIssuerCerts &&
         NULL == pIssuerCrl)
@@ -2246,9 +2268,13 @@ static SOPC_ReturnStatus pki_create_from_store(const char* directoryStorePath,
     /* if error then try with trusted and issuers folder. */
     if (!bDefaultBuild && SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                 "> PKI creation warning: updated trustList is missing or bad built, switch to trusted "
-                                 "and issuers folders.");
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON,
+                              "> PKI creation: loading PKI store root directory %s content (default behavior).",
+                              directoryStorePath);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_COMMON,
+                              "> PKI creation: the updated PKI store subdirectory %s%s is absent"
+                              " or its content cannot be loaded (see warnings in this case).",
+                              directoryStorePath, STR_TRUSTLIST_NAME);
         status = pki_create_from_store(directoryStorePath, true, ppPKI);
     }
     /* Copy the directoryStorePath */
