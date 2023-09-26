@@ -491,7 +491,7 @@ static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustLi
     }
     else
     {
-        *deep = *deep - 1;
+        *deep = (uint8_t)(*deep - 1);
     }
     SOPC_TrLst_Handle genHandle = SOPC_TRUSTLIST_INVALID_HANDLE;
     SOPC_ExposedBuffer* pBuff = NULL;

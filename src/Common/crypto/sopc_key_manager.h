@@ -764,7 +764,7 @@ const SOPC_Buffer* SOPC_KeyManager_SerializedCRL_Data(const SOPC_SerializedCRL* 
  * \warning  The returned ::SOPC_SerializedCRL must not be used after the CRL list is freed
  *           by ::SOPC_KeyManager_CRL_Free .
  *
- * \param pCerts                 The DER CRL list to attach
+ * \param pCRLs                  The DER CRL list to attach
  * \param[out] pSerializedArray  The serialized CRL array
  * \param[out] pLenArray         The length of \p pSerializedArray
  *
