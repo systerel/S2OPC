@@ -116,15 +116,6 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                cStrId);
         return OpcUa_BadNotSupported;
     }
-    /* TODO: Use the given issuers to verify the signature on the new Certificate */
-    if (NULL != inputArgs[3].Value.Array.Content.BstringArr || 0 < inputArgs[3].Value.Array.Length)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: signature check of the new "
-                               "certificate with the given issuer is not implemented",
-                               cStrId);
-        return OpcUa_BadNotSupported;
-    }
     /* Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
      * certificates) */
     statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring,
@@ -276,15 +267,6 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         SOPC_Free(pCStrTypeId);
         return OpcUa_BadInvalidArgument;
     }
-    /* TODO: private key regeneration is not allowed */
-    // if (bRegeneratePrivateKey)
-    // {
-    //     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-    //                            "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: regeneration of the server "
-    //                            "private key is not allowed",
-    //                            cStrId);
-    //     return OpcUa_BadNotSupported;
-    // }
     /* TODO: Check the given subjectName */
     if (NULL != pSubjectName->Data || -1 != pSubjectName->Length)
     {

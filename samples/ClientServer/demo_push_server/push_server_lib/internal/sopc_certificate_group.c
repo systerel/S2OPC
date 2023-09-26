@@ -934,10 +934,6 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
 
     /* Check parameters */
-    if ((NULL == pIssuerArray && 0 != arrayLength) || (NULL != pIssuerArray && 0 == arrayLength))
-    {
-        return OpcUa_BadInvalidArgument;
-    }
     if (NULL == pCertificate)
     {
         return OpcUa_BadCertificateInvalid;
