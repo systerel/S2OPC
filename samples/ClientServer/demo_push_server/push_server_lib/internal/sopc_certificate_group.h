@@ -190,13 +190,12 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
  * pGroupCtx .
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
- * \param pCertificate A valid pointer to the new certificate.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL).
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx, const SOPC_ByteString* pCertificate);
+SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx);
 
 /**
  * \brief  Discards previously generated new key pair.
