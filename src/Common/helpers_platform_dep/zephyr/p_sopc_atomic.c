@@ -17,72 +17,37 @@
  * under the License.
  */
 
+#include <zephyr/sys/atomic.h>
 #include <zephyr/sys/util.h> // ensure __SIZEOF_POINTER__ is defined
 
 #include "sopc_atomic.h"
 
+/* Notes :
+ * - In Zephyr, atomic_t/atomic_val_t are defined as a "long", which is large enough to hold an int32_t
+ * - In Zephyr, atomic_ptr_t/atomic_ptr_val_t are defined as a "void*"
+ */
+
 int32_t SOPC_Atomic_Int_Get(int32_t* atomic)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-    // This version works with TSan, the other one creates false positives...
-    return (int32_t) __atomic_load_4(atomic, __ATOMIC_SEQ_CST);
-#else
-    __sync_synchronize();
-    return *atomic;
-#endif
+    return (int32_t) atomic_get((atomic_t*) atomic);
 }
 
 void SOPC_Atomic_Int_Set(int32_t* atomic, int32_t val)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-    __atomic_store_4(atomic, (unsigned int) val, __ATOMIC_SEQ_CST);
-#else
-    *atomic = val;
-    __sync_synchronize();
-#endif
+    atomic_set((atomic_t*) atomic, (atomic_val_t) val);
 }
 
 int32_t SOPC_Atomic_Int_Add(int32_t* atomic, int32_t val)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-    return __atomic_fetch_add(atomic, val, __ATOMIC_SEQ_CST);
-#else
-    return __sync_fetch_and_add(atomic, val);
-#endif
+    return (int32_t) atomic_add((atomic_t*) atomic, (atomic_val_t) val);
 }
 
 void* SOPC_Atomic_Ptr_Get(void** atomic)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-
-#if __SIZEOF_POINTER__ == 4
-    return (void*) __atomic_load_4(atomic, __ATOMIC_SEQ_CST);
-#elif __SIZEOF_POINTER__ == 8
-    return (void*) __atomic_load_8(atomic, __ATOMIC_SEQ_CST);
-#else
-#error "Unsupported pointer size"
-#endif
-
-#else
-    __sync_synchronize();
-    return *atomic;
-#endif // !defined(clang)
+    return (void*) atomic_ptr_get((atomic_ptr_t*) atomic);
 }
 
 void SOPC_Atomic_Ptr_Set(void** atomic, void* val)
 {
-#if !defined(__clang__) && (__GNUC__ > 4)
-
-#if __SIZEOF_POINTER__ == 4
-    __atomic_store_4(atomic, (uintptr_t) val, __ATOMIC_SEQ_CST);
-#elif __SIZEOF_POINTER__ == 8
-    __atomic_store_8(atomic, (uintptr_t) val, __ATOMIC_SEQ_CST);
-#else
-#error "Unsupported pointer size"
-#endif
-
-#else
-    *atomic = val;
-    __sync_synchronize();
-#endif // !defined(clang)
+    atomic_ptr_set((atomic_ptr_t*) atomic, (atomic_ptr_val_t) val);
 }
