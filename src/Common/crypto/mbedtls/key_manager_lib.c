@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
@@ -67,7 +68,7 @@
 #define SOPC_SIZE_STR_TO_MD_TABLE 5
 #define SOPC_EXT_BASIC_CONSTRAINT_BYTE_SIZE 5
 #define SOPC_EXT_EXTENDED_KU_BYTE_SIZE 12
-#define SOPC_EXT_SAN_BYTE_SIZE 15
+#define SOPC_EXT_SAN_BYTE_SIZE 10
 #define SOPC_CSR_MAX_DER_BYTE_SIZE 4096
 
 /**
@@ -1248,6 +1249,125 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_Certific
     return status;
 }
 
+#if MBEDTLS_CAN_RESOLVE_HOSTNAME
+
+static void sopc_free_c_string_from_ptr(void* data)
+{
+    if (NULL != data)
+    {
+        SOPC_Free(*(char**) data);
+    }
+}
+
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_CertificateList* pCert,
+                                                             char*** ppDnsNameArray,
+                                                             uint32_t* pArrayLength)
+{
+    if (NULL == pCert || NULL == ppDnsNameArray || NULL == pArrayLength)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    size_t nbCert = 0;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nbCert);
+    if (SOPC_STATUS_OK != status || 1 != nbCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    bool bResAppend = false;
+    char* pItem = NULL;
+    char** pCStrArray = NULL;
+    size_t arrayLen = 0;
+    SOPC_Array* pArray = SOPC_Array_Create(sizeof(char*), 0, sopc_free_c_string_from_ptr);
+    if (NULL == pArray)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    const mbedtls_x509_sequence* asn1_seq = &pCert->crt.subject_alt_names;
+    mbedtls_x509_subject_alternative_name san_out = {0};
+    int err = 0;
+    while (NULL != asn1_seq && SOPC_STATUS_OK == status)
+    {
+        const mbedtls_x509_buf* pBuf = &san_out.san.unstructured_name;
+        err = mbedtls_x509_parse_subject_alt_name(&asn1_seq->buf, &san_out);
+        /* Only "dnsName" and "otherName" is supported by mbedtls */
+        if (MBEDTLS_ERR_X509_FEATURE_UNAVAILABLE != err && 0 != err)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            if (MBEDTLS_X509_SAN_DNS_NAME == san_out.type)
+            {
+                pItem = SOPC_Calloc(pBuf->len + 1, sizeof(char));
+                status = NULL == pItem ? SOPC_STATUS_OUT_OF_MEMORY : status;
+                if (SOPC_STATUS_OK == status)
+                {
+                    memcpy(pItem, pBuf->p, pBuf->len);
+                    pItem[pBuf->len] = '\0';
+                    bResAppend = SOPC_Array_Append(pArray, pItem);
+                    if (!bResAppend)
+                    {
+                        status = SOPC_STATUS_NOK;
+                    }
+                }
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Free(pItem); // case of append error;
+                }
+            }
+        }
+        /* next iteration */
+        memset(&san_out, 0, sizeof(mbedtls_x509_subject_alternative_name));
+        asn1_seq = asn1_seq->next;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        arrayLen = SOPC_Array_Size(pArray);
+        if (UINT32_MAX < arrayLen)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        if (SOPC_STATUS_OK == status && 0 != arrayLen)
+        {
+            pCStrArray = SOPC_Array_Into_Raw(pArray);
+            if (NULL == pCStrArray)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+                arrayLen = 0;
+            }
+            else
+            {
+                pArray = NULL;
+            }
+        }
+    }
+
+    /* Clear */
+    SOPC_Array_Delete(pArray);
+    /* Set output value */
+    *ppDnsNameArray = pCStrArray;
+    *pArrayLength = (uint32_t) arrayLen;
+
+    return status;
+}
+#else
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsName(const SOPC_CertificateList* pCert,
+                                                            char*** ppDnsNameArray,
+                                                            uint32_t* pArrayLength)
+{
+    SOPC_UNUSED_ARG(pCert);
+    SOPC_UNUSED_ARG(ppDnsNameArray);
+    SOPC_UNUSED_ARG(pArrayLength);
+    /* Not implemented in version prior to 2.28.0 */
+    fprintf(stderr, "mbedtls_x509_parse_subject_alt_name is not implemented in version %d.%d.%d of MbedTLS\n",
+            MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* MBEDTLS_CAN_RESOLVE_HOSTNAME */
+
 /* Creates a new string: free the result */
 static char* get_raw_sha1(const mbedtls_x509_buf* raw)
 {
@@ -2156,14 +2276,27 @@ static int sopc_csr_set_san_ext(unsigned char** val,
 static int sopc_csr_set_subject_alt_name(mbedtls_x509write_csr* ctx,
                                          const unsigned char* uri,
                                          size_t uriLen,
-                                         const unsigned char* dns,
-                                         size_t dnsLen)
+                                         char** pDnsArray,
+                                         uint32_t arrayLength)
 {
     SOPC_ASSERT(NULL != ctx);
-    SOPC_ASSERT(NULL != uri || NULL != dns);
-    /* +12 bytes max for the length field
-       +3 bytes max for the tag */
-    size_t bufLen = uriLen + dnsLen + SOPC_EXT_SAN_BYTE_SIZE;
+    SOPC_ASSERT(NULL != uri);
+    SOPC_ASSERT(NULL != pDnsArray);
+    SOPC_ASSERT(0 < arrayLength);
+
+    size_t dnsLenTot = 0;
+    for (uint32_t idx = 0; idx < arrayLength; idx++)
+    {
+        if (NULL != pDnsArray[idx])
+        {
+            dnsLenTot = dnsLenTot + strlen(pDnsArray[idx]);
+        }
+    }
+    /* +8 bytes max for the length field
+       +arrayLength*4 bytes max for the length field
+       +2 bytes max for the tag
+       +arrayLength bytes max for the tag */
+    size_t bufLen = uriLen + dnsLenTot + arrayLength * 5 + SOPC_EXT_SAN_BYTE_SIZE;
     unsigned char* tlv = SOPC_Malloc(bufLen * sizeof(unsigned char));
     if (NULL == tlv)
     {
@@ -2172,15 +2305,20 @@ static int sopc_csr_set_subject_alt_name(mbedtls_x509write_csr* ctx,
     unsigned char* val = tlv + bufLen;
     int valLen = 0;
     size_t valLenTot = 0;
+    size_t dnsLen = 0;
 
-    if (NULL != dns)
+    for (uint32_t idx = 0; idx < arrayLength && 0 <= valLen; idx++)
     {
-        valLen =
-            sopc_csr_set_san_ext(&val, tlv, MBEDTLS_ASN1_CONTEXT_SPECIFIC | MBEDTLS_X509_SAN_DNS_NAME, dns, dnsLen);
+        if (NULL != pDnsArray[idx])
+        {
+            dnsLen = strlen(pDnsArray[idx]);
+            valLen = sopc_csr_set_san_ext(&val, tlv, MBEDTLS_ASN1_CONTEXT_SPECIFIC | MBEDTLS_X509_SAN_DNS_NAME,
+                                          (const unsigned char*) pDnsArray[idx], dnsLen);
+            valLenTot = valLenTot + (size_t) valLen;
+        }
     }
     if (0 <= valLen)
     {
-        valLenTot = (size_t) valLen;
         valLen = sopc_csr_set_san_ext(
             &val, tlv, MBEDTLS_ASN1_CONTEXT_SPECIFIC | MBEDTLS_X509_SAN_UNIFORM_RESOURCE_IDENTIFIER, uri, uriLen);
     }
@@ -2228,14 +2366,15 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              const bool bIsServer,
                                              const char* mdType,
                                              const char* uri,
-                                             const char* dns,
+                                             char** pDnsArray,
+                                             uint32_t arrayLength,
                                              SOPC_CSR** ppCSR)
 {
     if (NULL == subjectName || NULL == ppCSR || NULL == mdType)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (NULL == uri || NULL == dns)
+    if (NULL == uri || NULL == pDnsArray || 0 == arrayLength)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2273,9 +2412,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     if (0 == errLib)
     {
         size_t uriLen = strlen(uri);
-        size_t dnsLen = strlen(dns);
-        errLib = sopc_csr_set_subject_alt_name(&pCSR->csr, (const unsigned char*) uri, uriLen,
-                                               (const unsigned char*) dns, dnsLen);
+        errLib = sopc_csr_set_subject_alt_name(&pCSR->csr, (const unsigned char*) uri, uriLen, pDnsArray, arrayLength);
     }
     if (0 != errLib)
     {

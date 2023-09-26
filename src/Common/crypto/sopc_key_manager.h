@@ -461,6 +461,24 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_Certific
                                                              uint32_t* pSubjectNameLen);
 
 /**
+ * \brief          Returns all the DNS names of certificate \p pCert as an array of C String.
+ *
+ * \param pCert                The certificate.
+ * \param[out] ppDnsNameArray  The newly allocated array of DNS names for the certificate \p pCert
+ *                             (each name shall be a NULL terminated C string)
+ * \param[out] pArrayLength    The length of \p ppDnsNameArray .
+ *
+ * \note            Content of the output is unspecified when the value returned is not SOPC_STATUS_OK.
+ *
+ * \warning         \p pCert must contain a single certificate. No error is returned if no DNS is defined.
+ *
+ * \return          SOPC_STATUS_OK when successful.
+ */
+SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_CertificateList* pCert,
+                                                             char*** ppDnsNameArray,
+                                                             uint32_t* pArrayLength);
+
+/**
  * \brief           Removes (and frees) certificates from \p pCert that do not have exactly one revocation list
  *                  in \p pCRL.
  *
@@ -723,7 +741,9 @@ void SOPC_KeyManager_CRL_Free(SOPC_CRLList* pCRL);
  * \param bIsServer    Whether this CSR is to request a server or a client certificate.
  * \param mdType       The MD algorithm (terminated by '\0') use for the signature eg SHA1, SHA256...
  * \param uri          The application URI (terminated by '\0'). Shall not be NULL.
- * \param dns          The DSN name of the server (terminated by '\0'). Shall not be NULL.
+ * \param pDnsArray    Array of DSN names of the server (name terminated by '\0'). Shall not be NULL.
+ *                     Array is not modified by the function.
+ * \param arrayLength  The length of \p pDnsArray.
  * \param[out] ppCSR   A handle to the created CSR. This object must be freed
  *                     with a call to ::SOPC_KeyManager_CSR_Free .
  *
@@ -738,7 +758,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
                                              const bool bIsServer,
                                              const char* mdType,
                                              const char* uri,
-                                             const char* dns,
+                                             char** pDnsArray,
+                                             uint32_t arrayLength,
                                              SOPC_CSR** ppCSR);
 
 /**

@@ -205,6 +205,8 @@ START_TEST(test_gen_csr)
     */
     SOPC_AsymmetricKey* pKey = NULL;
     SOPC_CertificateList* pCert = NULL;
+    char** pDNSNames = NULL;
+    uint32_t DNSLen = 0;
     char* subjectName = NULL;
     uint32_t subjectNameLen = 0;
     SOPC_CSR* pCSR = NULL;
@@ -217,13 +219,19 @@ START_TEST(test_gen_csr)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./server_public/server_2k_cert.der", &pCert);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_GetSanDnsNames(pCert, &pDNSNames, &DNSLen);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_nonnull(pDNSNames);
+    ck_assert_uint_eq(1, DNSLen);
+    int match = memcmp(pDNSNames[0], CSR_SAN_DNS, strlen(CSR_SAN_DNS));
+    ck_assert_int_eq(0, match);
     status = SOPC_KeyManager_Certificate_GetSubjectName(pCert, &subjectName, &subjectNameLen);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(subjectName);
     ck_assert_int_eq('\0', subjectName[subjectNameLen]);
-    int match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
+    match = memcmp(subjectName, CSR_SUBJECT_NAME, subjectNameLen);
     ck_assert_int_eq(0, match);
-    status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, CSR_SAN_DNS, &pCSR);
+    status = SOPC_KeyManager_CSR_Create(subjectName, true, CSR_MD, CSR_SAN_URI, pDNSNames, DNSLen, &pCSR);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CSR_ToDER(pCSR, pKey, &pDER, &pLen);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -234,6 +242,9 @@ START_TEST(test_gen_csr)
     size_t nb_written = fwrite(pDER, 1, pLen, fp);
     fclose(fp);
     ck_assert(pLen == nb_written);
+
+    SOPC_Free(pDNSNames[0]);
+    SOPC_Free(pDNSNames);
 
     SOPC_KeyManager_AsymmetricKey_Free(pKey);
     SOPC_KeyManager_Certificate_Free(pCert);
