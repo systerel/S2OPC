@@ -30,6 +30,7 @@ ATTRIBUTE_CONNECTION_MODE = "mode"
 ATTRIBUTE_CONNECTION_MQTT_USERNAME = "mqttUsername"
 ATTRIBUTE_CONNECTION_MQTT_PASSWORD = "mqttPassword"
 ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER = "acyclicPublisher"
+ATTRIBUTE_CONNECTION_INTERFACE_NAME = "interfaceName"
 VALUE_CONNECTION_MODE_PUBLISHER = "publisher"
 VALUE_CONNECTION_MODE_SUBSCRIBER = "subscriber"
 
@@ -113,7 +114,8 @@ class CnxContext:
         self.address = connection.get(ATTRIBUTE_CONNECTION_ADDRESS)
         self.mqttUsername = connection.get(ATTRIBUTE_CONNECTION_MQTT_USERNAME)
         self.mqttPassword = connection.get(ATTRIBUTE_CONNECTION_MQTT_PASSWORD)
-        self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER,False))
+        self.acyclicPublisher = bool(getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_ACYCLIC_PUBLISHER, False))
+        self.interfaceName = getOptionalAttribute(connection, ATTRIBUTE_CONNECTION_INTERFACE_NAME, None)
         self.messages = connection.findall("./%s" % TAG_MESSAGE)
 
 
@@ -288,6 +290,15 @@ def handlePubConnection(publisherId, connection, index, result):
     SOPC_PubSubConnection_Set_AcyclicPublisher(connection, %d);
     """ % (cnxContext.acyclicPublisher))
 
+        if cnxContext.interfaceName :
+            result.add("""
+    if (alloc)
+    {
+        // Set interface name to "%s"
+        alloc = SOPC_PubSubConnection_Set_InterfaceName(connection, "%s");
+    }
+            """%(cnxContext.interfaceName, cnxContext.interfaceName))
+            
         result.add("""
     if (alloc)
     {
