@@ -23,6 +23,7 @@
  * the Push model.
  */
 
+#include <stdio.h>
 #include <string.h>
 
 #include "sopc_assert.h"
@@ -134,6 +135,7 @@ static void cert_group_clear_context(SOPC_CertGroupContext* pCertGroup);
 static void cert_group_delete_context(SOPC_CertGroupContext** ppCertGroup);
 static void cert_group_dict_free_context_value(uintptr_t value);
 static SOPC_ReturnStatus cert_group_set_cert_type(SOPC_CertGroupContext* pCertGroup, SOPC_Certificate_Type certType);
+static SOPC_ReturnStatus certificate_group_write_file(const char* filePath, const uint8_t* data, uint32_t length);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
@@ -248,6 +250,45 @@ static SOPC_ReturnStatus cert_group_set_cert_type(SOPC_CertGroupContext* pCertGr
     }
     return status;
 }
+
+#if SOPC_HAS_FILESYSTEM
+static SOPC_ReturnStatus certificate_group_write_file(const char* filePath, const uint8_t* data, uint32_t length)
+{
+    if (NULL == filePath || NULL == data || 0 == length)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_GoodGenericStatus;
+    /* Open in binary format and erase if existing */
+    FILE* fp = fopen(filePath, "wb+");
+    if (NULL == fp)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t nb_written = fwrite(data, 1, length, fp);
+        if (length != nb_written)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    /* Close*/
+    if (NULL != fp)
+    {
+        fclose(fp);
+    }
+    return status;
+}
+#else
+static SOPC_ReturnStatus certificate_group_write_file(const char* filePath, const uint8_t* data, uint32_t length)
+{
+    SOPC_UNUSED_ARG(filePath);
+    SOPC_UNUSED_ARG(data);
+    SOPC_UNUSED_ARG(length);
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+#endif /* SOPC_HAS_FILESYSTEM  */
 
 /*---------------------------------------------------------------------------
  *                             ITF Functions (implementation)
@@ -910,7 +951,6 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     SOPC_CertificateList* pNewCert = NULL;
     SOPC_AsymmetricKey* pNewPublicKey = NULL;
     SOPC_AsymmetricKey* pCurrentKey = NULL;
-    SOPC_SerializedCertificate* pSerNewCert = NULL;
     SOPC_SerializedAsymmetricKey* pSerGivenPublicKey = NULL;
     SOPC_SerializedAsymmetricKey* pSerCurrentPublicKey = NULL;
     SOPC_SerializedAsymmetricKey* pSerNewKey = NULL;
@@ -1076,10 +1116,9 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     /* Update the new key-cert pair */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyCertPair_GetSerializedCertCopy(pGroupCtx->pKeyCertPair, &pSerNewCert);
-        if (SOPC_STATUS_OK == status && NULL != pGroupCtx->pNewKey)
+        if (NULL != pGroupCtx->pNewKey)
         {
-            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pCurrentKey, true, &pSerNewKey);
+            status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromKey(pCurrentKey, false, &pSerNewKey);
             if (SOPC_STATUS_OK == status)
             {
                 pRawNewKey = SOPC_SecretBuffer_Expose(pSerNewKey);
@@ -1088,8 +1127,8 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyCertPair_UpdateFromBytes(pGroupCtx->pKeyCertPair, pSerNewCert->length,
-                                                      (const unsigned char*) pSerNewCert->data, newKeyLen, pRawNewKey);
+            status = SOPC_KeyCertPair_UpdateFromBytes(pGroupCtx->pKeyCertPair, (uint32_t) pCertificate->Length,
+                                                      (const unsigned char*) pCertificate->Data, newKeyLen, pRawNewKey);
             if (NULL != pRawNewKey)
             {
                 SOPC_SecretBuffer_Unexpose(pRawNewKey, pSerNewKey);
@@ -1097,34 +1136,73 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
         }
         if (SOPC_STATUS_OK == status)
         {
-            CertificateGroup_DiscardNewKey(pGroupCtx);
             /* Request to re-evaluate the current server secure channels due to server certificate / key update (force
              * SC re-establishment) */
             SOPC_ToolkitServer_AsyncReEvalSecureChannels(true);
         }
+        else
+        {
+            stCode = OpcUa_BadUnexpectedError;
+        }
     }
     /* Clear */
     SOPC_KeyManager_AsymmetricKey_Free(pNewPublicKey);
-    SOPC_KeyManager_AsymmetricKey_Free(pCurrentKey);
+    if (NULL == pGroupCtx->pNewKey)
+    {
+        SOPC_KeyManager_AsymmetricKey_Free(pCurrentKey);
+    }
     SOPC_KeyManager_Certificate_Free(pNewCert);
     SOPC_KeyManager_Certificate_Free(pCurrentServerCert);
     SOPC_KeyManager_Certificate_Free(pGivenIssuers);
     SOPC_Free(pURI);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerCurrentPublicKey);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGivenPublicKey);
-    SOPC_KeyManager_SerializedCertificate_Delete(pSerNewCert);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerNewKey);
 
     return stCode;
 }
 
-SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx, const SOPC_ByteString* pCertificate)
+SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
-    SOPC_UNUSED_ARG(pCertificate);
 
-    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                             "PushSrvCfg:CertificateGroup:%s: the export of the update is not implemented",
-                             pGroupCtx->cStrId);
-    return SOPC_STATUS_OK;
+    // TODO: Add a way to retrieve the password for the private encryption.
+    // TODO: Add a store configuration "own" for key-cert pair with defaults value in case update or export failed.
+    SOPC_SerializedCertificate* pOldCert = NULL;
+    SOPC_SerializedCertificate* pNewCert = NULL;
+    SOPC_ReturnStatus restoreStatus = SOPC_STATUS_OK;
+    /* Get the new certificate */
+    SOPC_ReturnStatus status = SOPC_KeyCertPair_GetSerializedCertCopy(pGroupCtx->pKeyCertPair, &pNewCert);
+    /* Save the old certificate */
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(pGroupCtx->pCertPath, &pOldCert);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Write in binary format and erase the old certificate */
+        status = certificate_group_write_file(pGroupCtx->pCertPath, pNewCert->data, pNewCert->length);
+        /* If error then restore the old certificate */
+        if (SOPC_STATUS_OK != status)
+        {
+            restoreStatus = certificate_group_write_file(pGroupCtx->pCertPath, pOldCert->data, pOldCert->length);
+            SOPC_ASSERT(SOPC_STATUS_OK == restoreStatus);
+        }
+        /* Write the new key */
+        if (SOPC_STATUS_OK == status && NULL != pGroupCtx->pNewKey)
+        {
+            status = SOPC_KeyManager_AsymmetricKey_ToPEMFile(pGroupCtx->pNewKey, false, pGroupCtx->pKeyPath, NULL, 0);
+            /* If error then restore the old certificate */
+            if (SOPC_STATUS_OK != status)
+            {
+                /* Set the old cert */
+                restoreStatus = certificate_group_write_file(pGroupCtx->pCertPath, pOldCert->data, pOldCert->length);
+                SOPC_ASSERT(SOPC_STATUS_OK == restoreStatus);
+            }
+        }
+    }
+    /* Clear */
+    SOPC_KeyManager_SerializedCertificate_Delete(pOldCert);
+    SOPC_KeyManager_SerializedCertificate_Delete(pNewCert);
+    return status;
 }

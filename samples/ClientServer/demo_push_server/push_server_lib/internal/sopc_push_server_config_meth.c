@@ -138,7 +138,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
         return statusCode;
     }
     /* Export the update */
-    status = CertificateGroup_Export(pGroupCtx, &inputArgs[2].Value.Bstring);
+    status = CertificateGroup_Export(pGroupCtx);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(
@@ -146,6 +146,8 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
             "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: export of the new key-cert pair failed", cStrId);
         return OpcUa_BadUnexpectedError;
     }
+    /* Remove the internal new key from the context */
+    CertificateGroup_DiscardNewKey(pGroupCtx);
     /* Create the output variant */
     pVariant = SOPC_Variant_Create();
     if (NULL == pVariant)
@@ -275,14 +277,14 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         return OpcUa_BadInvalidArgument;
     }
     /* TODO: private key regeneration is not allowed */
-    if (bRegeneratePrivateKey)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: regeneration of the server "
-                               "private key is not allowed",
-                               cStrId);
-        return OpcUa_BadNotSupported;
-    }
+    // if (bRegeneratePrivateKey)
+    // {
+    //     SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+    //                            "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: regeneration of the server "
+    //                            "private key is not allowed",
+    //                            cStrId);
+    //     return OpcUa_BadNotSupported;
+    // }
     /* TODO: Check the given subjectName */
     if (NULL != pSubjectName->Data || -1 != pSubjectName->Length)
     {
