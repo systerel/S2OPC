@@ -703,6 +703,7 @@ SOPC_ReturnStatus SOPC_String_AttachFrom(SOPC_String* dest, SOPC_String* src);
 
 /**
  * \brief Create a shallow copy of \a src (C-String) into \a dest.
+ *        The \a src string must not be freed/modified before \a dest is cleared
  * \param dest  The pointer to the destination SOPC_String object
  * \param src  The C-String data that will be copied to the destination SOPC_String object
  * \return SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_PARAMETERS
