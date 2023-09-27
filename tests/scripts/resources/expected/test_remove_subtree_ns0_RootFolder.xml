@@ -4,9 +4,9 @@
     <Uri>https://www.systerel.fr/S2OPC/test/temperature</Uri>
   </NamespaceUris>
   <Models>
-    <Model ModelUri="http://opcfoundation.org/UA/" PublicationDate="2019-05-01T00:00:00Z" Version="1.05" />
-    <Model ModelUri="https://www.systerel.fr/S2OPC/test/temperature" PublicationDate="2023-04-01T00:00:00Z" Version="1.0.0">
-      <RequiredModel ModelUri="http://opcfoundation.org/UA/" PublicationDate="2019-05-01T00:00:00Z" Version="1.05" />
+    <Model ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
+    <Model ModelUri="https://www.systerel.fr/S2OPC/test/temperature" Version="1.0.0" PublicationDate="2023-04-01T00:00:00Z">
+      <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
     </Model>
   </Models>
 

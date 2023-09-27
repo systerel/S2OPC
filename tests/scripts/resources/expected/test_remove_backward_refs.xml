@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <UANodeSet xmlns="http://opcfoundation.org/UA/2011/03/UANodeSet.xsd" xmlns:uax="http://opcfoundation.org/UA/2008/02/Types.xsd">
   <Models>
-    <Model ModelUri="http://opcfoundation.org/UA/" PublicationDate="2019-05-01T00:00:00Z" Version="1.05" />
+    <Model ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
   </Models>
 
   
@@ -289,7 +289,7 @@
       <Reference ReferenceType="HasModellingRule">i=80</Reference>
     </References>
   </UAVariable>
-  <UAVariableType BrowseName="BaseAnalogType" DataType="Number" NodeId="i=15318" ValueRank="-2">
+  <UAVariableType NodeId="i=15318" BrowseName="BaseAnalogType" DataType="Number" ValueRank="-2">
     <DisplayName>BaseAnalogType</DisplayName>
     <References>
       <Reference ReferenceType="HasProperty">i=17567</Reference>
