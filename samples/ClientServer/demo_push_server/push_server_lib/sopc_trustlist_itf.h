@@ -33,7 +33,7 @@
 /**
  * \brief Defined the default maximum size in byte of the trustList certificate
  */
-#define SOPC_TRUSTLIST_DEFAULT_MAX_SIZE 20000u
+#define SOPC_TRUSTLIST_DEFAULT_MAX_SIZE 65535u
 
 /**
  * \brief The TrustList type
