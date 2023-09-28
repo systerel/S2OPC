@@ -42,4 +42,4 @@ gen_nodeset s2opc_sks.xml --remove-max-node-management s2opc_base_nodeset_origin
 gen_nodeset s2opc_nano.xml --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet with limited base info data
-gen_nodeset s2opc_no_base_info.xml --remove-node-ids-greater-than 3000 --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
+gen_nodeset s2opc_no_base_info.xml --remove-subtree "i=92" "i=93" --remove-unused --remove-backward-refs --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
