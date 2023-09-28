@@ -655,6 +655,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
         {
             // An acyclic publisher shall provide a keep alive timer for all messages
             LOG_XML_ERROR("Message keepAliveTime is missing");
+            result = false;
         }
         else if (ctx->connectionArr[ctx->nb_connections - 1].is_publisher &&
                  (SOPC_UInteger_PublisherId == msg->publisher_id.type ||
