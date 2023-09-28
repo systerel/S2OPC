@@ -28,7 +28,7 @@ function test_cli()
     [ ! -f ${CLI_BIN} ] && echo " File ${CLI_BIN} not found. Are you sure having built S2OPC embedded samples ?" && exit 1
 
     echo "launch ${CLI_BIN}"
-    timeout --preserve-status -s SIGTERM -k 10s 1 ${CLI_BIN}
+    timeout --preserve-status --verbose -s SIGTERM -k 10s 1 ${CLI_BIN}
     exit_status=$?
 
     if [ "$exit_status" -eq "0" ]; then
