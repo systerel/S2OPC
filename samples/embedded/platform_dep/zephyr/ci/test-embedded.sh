@@ -20,6 +20,7 @@
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 S2OPC_ROOT_DIR="$(cd ${SCRIPT_DIR}/../../../../../ && pwd)"
 EXIT_STATUS=""
+EXPECTED_STATUS="137" # We expect kill signal to stop the process
 
 function test_cli()
 {
@@ -28,10 +29,13 @@ function test_cli()
     [ ! -f ${CLI_BIN} ] && echo " File ${CLI_BIN} not found. Are you sure having built S2OPC embedded samples ?" && exit 1
 
     echo "launch ${CLI_BIN}"
-    timeout --preserve-status -s SIGTERM -k 10s 1 ${CLI_BIN}
+
+    # If the process stopped before kill we will retrieve another status.
+    # (We are not able to catch signals in the process)
+    timeout --verbose -s SIGKILL -k 10s 1s ${CLI_BIN}
     exit_status=$?
 
-    if [ "$exit_status" -eq "0" ]; then
+    if [ "$exit_status" -eq "${EXPECTED_STATUS}" ]; then
         echo -e "\n SUCCESS executing file ${CLI_BIN} \n"
     else
         echo -e "\n ERROR executing file ${CLI_BIN} \n"
@@ -46,7 +50,7 @@ test_cli "${S2OPC_ROOT_DIR}/build_zephyr/cli_pubsub_server_native_posix_64.bin"
 
 # check if there has been an error
 for result in $EXIT_STATUS; do
-    [ "$result" -ne "0" ] && exit 1
+    [ "$result" -ne "${EXPECTED_STATUS}" ] && exit 1
 done
 
 exit 0
