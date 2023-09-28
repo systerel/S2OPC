@@ -2074,7 +2074,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         if (bTrustedCaFound)
         {
             status =
-                SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
+                SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(&tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
             if (NULL == tmp_pTrustedCerts)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -2092,7 +2092,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     {
         if (bIssuerCaFound)
         {
-            status = SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
+            status = SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(&tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
             if (NULL == tmp_pIssuerCerts)
             {
                 SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,

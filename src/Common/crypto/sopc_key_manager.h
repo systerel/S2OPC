@@ -479,26 +479,25 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_Certific
                                                              uint32_t* pArrayLength);
 
 /**
- * \brief           Removes (and frees) certificates from \p pCert that do not have exactly one revocation list
+ * \brief           Removes (and frees) certificates from \p ppCert that do not have exactly one revocation list
  *                  in \p pCRL.
  *
  *   This function does not set match to false if there are CRL that do not match any Certificate.
- *   This function skips certificates in \p pCert that are not authorities.
+ *   This function skips certificates in \p ppCert that are not authorities.
  *
- * \warning If the list \p pCert became empty then the list \p pCert is set to NULL.
+ * \warning If the list \p ppCert became empty then the list \p ppCert is set to NULL.
  *
- * \param pCert        A valid pointer to the Certificate list.
+ * \param ppCert       A valid pointer to the Certificate list.
  * \param pCRL         A valid pointer to the CRL list.
  * \param[out] pbMatch An optional pointer to the result of the test.
- *                     True value indicates that each certificate in \p pCert has exactly one associated CRL in \p pCRL,
- *                     and no certificate has been freed.
- *                     Otherwise false.
+ *                     True value indicates that each certificate in \p ppCert has exactly one associated CRL in \p
+ * pCRL, and no certificate has been freed. Otherwise false.
  *
  * \note            Content of \p pbMatch is unspecified when return value is not SOPC_STATUS_OK.
  *
  * \return          SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList** ppCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch);
 

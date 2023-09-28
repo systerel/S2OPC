@@ -1551,22 +1551,28 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const mbedtls_x509_
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList* pCert,
+SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_CertificateList** ppCert,
                                                                      const SOPC_CRLList* pCRL,
                                                                      bool* pbMatch)
 {
-    if (NULL == pCRL || NULL == pCert || NULL == pbMatch)
+    if (NULL == pCRL || NULL == ppCert || NULL == pbMatch)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    if (NULL == *ppCert)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_CertificateList* pHeadCertList = *ppCert;
     /* For each CA, find its CRL. If not found, log and match = false */
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int crl_count = 0;                   /* Number of CRL for the current CA */
-    bool crl_match = false;              /* Defines whether the current CRL matches the current CA. */
-    bool list_match = true;              /* Defines if all CA have exactly one CRL */
-    mbedtls_x509_crt* crt = &pCert->crt; /* Current cert */
-    mbedtls_x509_crt* prev = NULL;       /* Parent of current cert */
+    int crl_count = 0;                           /* Number of CRL for the current CA */
+    bool crl_match = false;                      /* Defines whether the current CRL matches the current CA. */
+    bool list_match = true;                      /* Defines if all CA have exactly one CRL */
+    mbedtls_x509_crt* crt = &pHeadCertList->crt; /* Current cert */
+    mbedtls_x509_crt* prev = NULL;               /* Parent of current cert */
     while (NULL != crt && SOPC_STATUS_OK == status)
     {
         /* Skip certificates that are not authorities */
@@ -1613,7 +1619,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_Certif
                     SOPC_Free(fpr);
 
                     /* Remove the certificate from the chain and safely delete it */
-                    sopc_key_manager_remove_cert_from_list(&crt, &prev, &pCert);
+                    sopc_key_manager_remove_cert_from_list(&crt, &prev, &pHeadCertList);
                 }
                 else
                 {
@@ -1635,6 +1641,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_Certif
     {
         *pbMatch = list_match;
     }
+    *ppCert = pHeadCertList;
     return status;
 }
 
