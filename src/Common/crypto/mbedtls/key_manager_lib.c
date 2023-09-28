@@ -1597,25 +1597,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(SOPC_Certif
             }
             if (SOPC_STATUS_OK == status)
             {
-                if (1 != crl_count)
+                if (0 == crl_count)
                 {
                     list_match = false;
                     char* fpr = get_crt_sha1(crt);
-                    if (0 == crl_count)
-                    {
-                        fprintf(
-                            stderr,
+                    fprintf(stderr,
                             "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has no CRL, and is removed "
                             "from the CAs list.\n",
                             fpr);
-                    }
-                    else
-                    {
-                        fprintf(stderr,
-                                "> MatchCRLList warning: Certificate with SHA-1 fingerprint %s has more than one "
-                                "associated CRL, and is removed from the CAs list.\n",
-                                fpr);
-                    }
                     SOPC_Free(fpr);
 
                     /* Remove the certificate from the chain and safely delete it */
