@@ -669,6 +669,8 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_CertificateList* pCert = NULL;
     SOPC_CSR* pNewCSR = NULL;
+    char** pDNSArray = NULL;
+    uint32_t DNSArrayLen = 0;
     char* pURI = NULL;
     char* pCertSubjectName = NULL;
     uint32_t subjectNameLen = 0;
@@ -716,10 +718,22 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     {
         status = SOPC_KeyManager_Certificate_GetMaybeApplicationUri(pCert, &pURI, NULL);
     }
+    /* Get the DNS names of the current certificate */
     if (SOPC_STATUS_OK == status)
     {
-        /* TODO: Add a new function declaration in keyManager API to extract the DNS/hostName of one certificate */
-        status = SOPC_KeyManager_CSR_Create(pCertSubjectName, true, mdAlg, pURI, "NotSupported", &pNewCSR);
+        status = SOPC_KeyManager_Certificate_GetSanDnsNames(pCert, &pDNSArray, &DNSArrayLen);
+        if (0 == DNSArrayLen)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "PushSrvCfg:Method_CreateSigningRequest:CertificateGroup:%s: DNS name is not "
+                                   "defined for the current server certificate (x509 SubjectAlternativeName extension)",
+                                   pGroupCtx->cStrId);
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CSR_Create(pCertSubjectName, true, mdAlg, pURI, pDNSArray, DNSArrayLen, &pNewCSR);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -755,6 +769,14 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     SOPC_KeyManager_Certificate_Free(pCert);
     SOPC_Free(pCertSubjectName);
     SOPC_Free(pURI);
+    if (NULL != pDNSArray)
+    {
+        for (uint32_t idx = 0; idx < DNSArrayLen; idx++)
+        {
+            SOPC_Free(pDNSArray[idx]);
+        }
+        SOPC_Free(pDNSArray);
+    }
     SOPC_Free(mdAlg);
     SOPC_KeyManager_CSR_Free(pNewCSR);
     SOPC_KeyManager_AsymmetricKey_Free(pCurKey);
