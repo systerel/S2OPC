@@ -249,6 +249,10 @@ SOPC_ReturnStatus SOPC_NumericRange_Parse(const char* text, SOPC_NumericRange** 
     }
 
     range->dimensions = SOPC_Array_Into_Raw(dimensions);
+    if (NULL == range->dimensions)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
     *result = range;
 
     return SOPC_STATUS_OK;
