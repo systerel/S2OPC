@@ -71,6 +71,7 @@ typedef struct SOPC_TrLst_VarCfg
     SOPC_NodeId* pWritableId;
     SOPC_NodeId* pUserWritableId;
     SOPC_NodeId* pOpenCountId;
+    SOPC_NodeId* pLastUpdateTimeId;
 } SOPC_TrLst_VarCfg;
 
 typedef struct SOPC_TrLst_TimeEvent
@@ -453,6 +454,17 @@ void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_Addres
  *
  */
 void Trustlist_WriteVarOpenCount(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess);
+
+/**
+ * \brief Write the current time in the LastUpdateTime variable.
+ *
+ * \param pTrustList The TrustList context.
+ * \param pAddSpAccess The address space access.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ */
+void Trustlist_WriteVarLastUpdateTime(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess);
 
 /**
  * \brief Reset the context of the TrustList but keep the user configuration.

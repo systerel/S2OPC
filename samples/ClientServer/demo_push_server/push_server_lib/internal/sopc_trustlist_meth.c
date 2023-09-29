@@ -402,8 +402,11 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
+
+    SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
     if (0 == (statusCode & SOPC_GoodGenericStatus))
     {
+        Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
         /* The variant is deleted by the method call manager */
         *nbOutputArgs = 1;
         *outputArgs = pVariant;
@@ -413,7 +416,6 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         SOPC_Variant_Delete(pVariant);
     }
     /* Close => Reset the context */
-    SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
     TrustList_Reset(pTrustList, pAddSpAccess);
 
     return statusCode;
@@ -505,6 +507,8 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     if (0 == (statusCode & SOPC_GoodGenericStatus))
     {
         TrustList_ResetActivityTimeout(pTrustList);
+        SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+        Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
     }
 
     return statusCode;
@@ -612,6 +616,8 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     if (0 == (statusCode & SOPC_GoodGenericStatus))
     {
         TrustList_ResetActivityTimeout(pTrustList);
+        SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
+        Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
     }
     return statusCode;
 }
