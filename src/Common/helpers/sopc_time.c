@@ -79,8 +79,8 @@ char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
         return NULL;
     }
 
-    int res2 = sprintf(buf + 19, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
-    SOPC_ASSERT(res2 > 0);
+    int res2 = snprintf(buf + res, 5, compact ? "_%03" PRIu32 : ".%03" PRIu32, milliseconds);
+    SOPC_ASSERT(4 == res2);
 
     return buf;
 }
