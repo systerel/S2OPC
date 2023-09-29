@@ -64,6 +64,7 @@ typedef struct TrustList_NodeIds
     SOPC_NodeId* pOpenCountId;         /*!< The nodeId of the OpenCount variable. */
     SOPC_NodeId* pUserWritableId;      /*!< The nodeId of the UserWritable variable. */
     SOPC_NodeId* pWritableId;          /*!< The nodeId of the Writable variable. */
+    SOPC_NodeId* pLastUpdateTimeId;    /*!< The nodeId of the LastUpdateTime variable */
 } TrustList_NodeIds;
 
 /**
@@ -150,6 +151,10 @@ static SOPC_NodeId gAppUserWritableId = {
     .IdentifierType = SOPC_IdentifierType_Numeric,
     .Namespace = 0,
     .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_UserWritable};
+static SOPC_NodeId gAppLastUpdateTimeId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultApplicationGroup_TrustList_LastUpdateTime};
 
 /* NodeIds of the TrustList instance of the DefaultUserTokenGroup */
 static SOPC_NodeId gUsrTrustListId = {
@@ -212,6 +217,10 @@ static SOPC_NodeId gUsrUserWritableId = {
     .IdentifierType = SOPC_IdentifierType_Numeric,
     .Namespace = 0,
     .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_UserWritable};
+static SOPC_NodeId gUsrLastUpdateTimeId = {
+    .IdentifierType = SOPC_IdentifierType_Numeric,
+    .Namespace = 0,
+    .Data.Numeric = OpcUaId_ServerConfiguration_CertificateGroups_DefaultUserTokenGroup_TrustList_LastUpdateTime};
 
 /* NodeIds of the TrustListType */
 static SOPC_NodeId gTypeOpenId = {.IdentifierType = SOPC_IdentifierType_Numeric,
@@ -261,6 +270,7 @@ static TrustList_NodeIds gAppNodeIds = {
     .pOpenCountId = &gAppOpenCountId,
     .pUserWritableId = &gAppUserWritableId,
     .pWritableId = &gAppWritableId,
+    .pLastUpdateTimeId = &gAppLastUpdateTimeId,
 };
 
 static TrustList_NodeIds gUsrNodeIds = {
@@ -279,6 +289,7 @@ static TrustList_NodeIds gUsrNodeIds = {
     .pOpenCountId = &gUsrOpenCountId,
     .pUserWritableId = &gUsrUserWritableId,
     .pWritableId = &gUsrWritableId,
+    .pLastUpdateTimeId = &gUsrLastUpdateTimeId,
 };
 
 static TrustList_NodeIds gTypeNodeIds = {
@@ -297,6 +308,7 @@ static TrustList_NodeIds gTypeNodeIds = {
     .pOpenCountId = NULL,
     .pUserWritableId = NULL,
     .pWritableId = NULL,
+    .pLastUpdateTimeId = NULL,
 };
 
 /*---------------------------------------------------------------------------
@@ -366,6 +378,7 @@ static void trustlist_initialize_context(SOPC_TrustListContext* pTrustList,
     pTrustList->varIds.pSizeId = NULL;
     pTrustList->varIds.pUserWritableId = NULL;
     pTrustList->varIds.pWritableId = NULL;
+    pTrustList->varIds.pLastUpdateTimeId = NULL;
     pTrustList->maxTrustListSize = maxTrustListSize;
     pTrustList->groupType = groupType;
     pTrustList->pPKI = pPKI;
@@ -392,6 +405,7 @@ static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
     trustlist_delete_single_node_id(&pTrustList->varIds.pWritableId);
     trustlist_delete_single_node_id(&pTrustList->varIds.pUserWritableId);
     trustlist_delete_single_node_id(&pTrustList->varIds.pOpenCountId);
+    trustlist_delete_single_node_id(&pTrustList->varIds.pLastUpdateTimeId);
     SOPC_Looper_Delete(pTrustList->event.pLooper);
     pTrustList->bDoNotDelete = true;
 }
@@ -464,6 +478,7 @@ static void trustlist_delete_node_ids(TrustList_NodeIds** ppNodeIds, bool bDoNot
     trustlist_delete_single_node_id(&pNodeIds->pOpenCountId);
     trustlist_delete_single_node_id(&pNodeIds->pUserWritableId);
     trustlist_delete_single_node_id(&pNodeIds->pWritableId);
+    trustlist_delete_single_node_id(&pNodeIds->pLastUpdateTimeId);
     SOPC_Free(pNodeIds);
     pNodeIds = NULL;
     *ppNodeIds = pNodeIds;
@@ -558,7 +573,7 @@ static SOPC_ReturnStatus trustlist_copy_node_ids(TrustList_NodeIds* pSrc, TrustL
         NULL == pSrc->pCloseAndUpdateId || NULL == pSrc->pAddCertificateId || NULL == pSrc->pRemoveCertificateId ||
         NULL == pSrc->pCloseId || NULL == pSrc->pReadId || NULL == pSrc->pWriteId || NULL == pSrc->pGetPosId ||
         NULL == pSrc->pSetPosId || NULL == pSrc->pSizeId || NULL == pSrc->pOpenCountId ||
-        NULL == pSrc->pUserWritableId || NULL == pSrc->pWritableId)
+        NULL == pSrc->pUserWritableId || NULL == pSrc->pWritableId || NULL == pSrc->pLastUpdateTimeId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -591,6 +606,11 @@ static SOPC_ReturnStatus trustlist_copy_node_ids(TrustList_NodeIds* pSrc, TrustL
     {
         pDest->pWritableId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(pDest->pWritableId, pSrc->pWritableId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pDest->pLastUpdateTimeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pDest->pLastUpdateTimeId, pSrc->pLastUpdateTimeId);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -824,7 +844,7 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_Met
         NULL == pIds->pCloseAndUpdateId || NULL == pIds->pAddCertificateId || NULL == pIds->pRemoveCertificateId ||
         NULL == pIds->pCloseId || NULL == pIds->pReadId || NULL == pIds->pWriteId || NULL == pIds->pGetPosId ||
         NULL == pIds->pSetPosId || NULL == pIds->pSizeId || NULL == pIds->pOpenCountId ||
-        NULL == pIds->pUserWritableId || NULL == pIds->pWritableId)
+        NULL == pIds->pUserWritableId || NULL == pIds->pWritableId || NULL == pIds->pLastUpdateTimeId)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -971,6 +991,11 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_Met
     {
         pTrustList->varIds.pOpenCountId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(pTrustList->varIds.pOpenCountId, pIds->pOpenCountId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pTrustList->varIds.pLastUpdateTimeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = SOPC_NodeId_Copy(pTrustList->varIds.pLastUpdateTimeId, pIds->pLastUpdateTimeId);
     }
 
     if (SOPC_STATUS_OK == status)

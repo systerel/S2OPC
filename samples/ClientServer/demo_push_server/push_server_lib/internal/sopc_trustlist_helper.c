@@ -1505,6 +1505,44 @@ void Trustlist_WriteVarOpenCount(const SOPC_TrustListContext* pTrustList, SOPC_A
     SOPC_Free(dv);
 }
 
+/* Write the value of the LastUpdateTime variable */
+void Trustlist_WriteVarLastUpdateTime(const SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    SOPC_ASSERT(NULL != pTrustList->varIds.pLastUpdateTimeId);
+    if (NULL == pAddSpAccess)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:LastUpdateTime: bad address space access",
+                                 pTrustList->cStrObjectId);
+        return;
+    }
+
+    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
+    if (NULL == dv)
+    {
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:LastUpdateTime: unable to create the dataValue",
+                                 pTrustList->cStrObjectId);
+        return;
+    }
+
+    dv->Value.BuiltInTypeId = SOPC_DateTime_Id;
+    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv->Value.Value.Date = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_DateTime ts = 0; // will set current time as source TS
+    SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pLastUpdateTimeId,
+                                                                NULL, &dv->Value, NULL, &ts, NULL);
+    if (!SOPC_IsGoodStatus(stCode))
+    {
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "TrustList:%s:LastUpdateTime: unable to write the current time to the LastUpdateTime variable",
+            pTrustList->cStrObjectId);
+    }
+    SOPC_DataValue_Clear(dv);
+    SOPC_Free(dv);
+}
+
 /* Reset the TrustList context when close method is call */
 void TrustList_Reset(SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess* pAddSpAccess)
 {
