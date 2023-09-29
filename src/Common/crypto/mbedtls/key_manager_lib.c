@@ -1338,10 +1338,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_Certific
                 status = SOPC_STATUS_OUT_OF_MEMORY;
                 arrayLen = 0;
             }
-            else
-            {
-                pArray = NULL;
-            }
+            // Deallocated by SOPC_Array_Into_Raw in any cases
+            pArray = NULL;
         }
     }
 
