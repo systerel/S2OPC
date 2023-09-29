@@ -2704,9 +2704,37 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     {
         status = SOPC_STATUS_OK;
     }
-    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+
+    bool bFound = false;
+    mbedtls_x509_crt* next = NULL;
+    mbedtls_x509_crt* crt = NULL != pPKI->pRejectedList ? &pPKI->pRejectedList->crt : NULL;
+    while (NULL != crt && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pRejected);
+        /* Unlink */
+        next = crt->next;
+        crt->next = NULL;
+        if (NULL != pRejected)
+        {
+            SOPC_CertificateList crtToFind = {.crt = *crt};
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pRejected, &crtToFind, &bFound);
+        }
+        if (!bFound && SOPC_STATUS_OK == status)
+        {
+            if (UINT32_MAX < crt->raw.len)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                status =
+                    SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pRejected);
+            }
+        }
+        /* Link */
+        crt->next = next;
+        /* iterate */
+        crt = crt->next;
+        bFound = false;
     }
     /* Clear */
     if (SOPC_STATUS_OK != status)
