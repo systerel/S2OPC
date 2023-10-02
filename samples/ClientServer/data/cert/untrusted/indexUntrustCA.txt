@@ -1,0 +1,2 @@
+V	251001105416Z		2000	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Trusted Certificate for Client Tests
+V	251001105419Z		2001	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Trusted Certificate for Server Tests
