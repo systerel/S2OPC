@@ -21,6 +21,7 @@
 #define TOOLKIT_DEMO_SERVER_METHODS_H_
 
 #include "sopc_builtintypes.h"
+#include "sopc_call_method_manager.h"
 #include "sopc_service_call_context.h"
 
 /*---------------------------------------------------------------------------
@@ -72,5 +73,18 @@ SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContext
                                              uint32_t* nbOutputArgs,
                                              SOPC_Variant** outputArgs,
                                              void* param);
+
+/*---------------------------------------------------------------------------
+ *                    Demo Methods registration in Method Call Manager
+ *---------------------------------------------------------------------------*/
+
+/**
+ * \brief Add OPC UA demo methods defined in this module into the given Method Call Manager
+ *
+ * \param mcm The Method Call Manager into which the method implementations are added
+ *
+ * \return SOPC_STATUS_OK in case of success.
+ */
+SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm);
 
 #endif

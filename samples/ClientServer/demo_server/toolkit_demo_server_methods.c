@@ -384,3 +384,94 @@ SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContext
     SOPC_Free(myVarId);
     return sc;
 }
+
+SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
+{
+    char* sNodeId;
+    SOPC_NodeId* methodId;
+    SOPC_MethodCallFunc_Ptr* methodFunc;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    if (NULL == mcm)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    /* Add methods implementation in the method call manager used */
+    /* No input, no output */
+    sNodeId = "ns=1;s=MethodNoArg";
+    methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+    if (NULL != methodId)
+    {
+        methodFunc = &SOPC_Method_Func_IncCounter;
+        status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
+    }
+    else
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Only input, no output */
+        sNodeId = "ns=1;s=MethodI";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_AddToCounter;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Only input, no output", NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* No input, only output */
+        sNodeId = "ns=1;s=MethodO";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_GetCounterValue;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, only output", NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* Input, output */
+        sNodeId = "ns=1;s=MethodIO";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_UpdateAndGetPreviousHello;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Input, output", NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "ns=1;s=AddVariableMethod";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_AddVariable;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "AddVariable", NULL);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    return status;
+}
