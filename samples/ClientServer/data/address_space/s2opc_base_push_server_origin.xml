@@ -1317,9 +1317,12 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=12637</Reference>
     </References>
     <!-- TODO: Set ServerCapabilities value in the runtime node variable changes API -->
+    <!-- TODO: Configuration should be shared with the RegisterServer2 service
+               see SOPC_RegisterServer2Request_CreateFromServerConfiguration
+    -->
     <Value>
       <ListOfString xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
-        <String>GDS</String>
+        <String>DA</String>
       </ListOfString>
     </Value>
   </UAVariable>
