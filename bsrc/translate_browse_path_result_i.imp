@@ -471,6 +471,8 @@ OPERATIONS
     IN
         l_size <-- get_BrowsePathResultSize;
         l_continue <-- init_iter_browsePathIdx(l_size);
+
+        l_index := 0;
         WHILE l_continue = TRUE
         DO
             l_continue, l_index <-- continue_iter_browsePathIdx;
@@ -484,7 +486,7 @@ OPERATIONS
             nextBrowsePathIdx = l_index + 1 &
             l_continue = bool(l_index < l_size)
         VARIANT
-            0
+            l_size - l_index
         END
         ;
         init_BrowsePathResult
@@ -500,6 +502,8 @@ OPERATIONS
     IN
         l_size <-- get_BrowsePathRemainingSize;
         l_continue <-- init_iter_browsePathIdx(l_size);
+
+        l_index := 0;
         WHILE l_continue = TRUE
         DO
             l_continue, l_index <-- continue_iter_browsePathIdx;
@@ -513,7 +517,7 @@ OPERATIONS
             nextBrowsePathIdx = l_index + 1 &
             l_continue = bool(l_index < l_size)
         VARIANT
-            0
+            l_size - l_index
         END
         ;
         init_BrowsePathRemaining

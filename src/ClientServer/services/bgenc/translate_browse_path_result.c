@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 24/07/2023 14:29:22
+ Date                 : 03/10/2023 14:12:15
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -94,6 +94,7 @@ void translate_browse_path_result__free_BrowsePathResult(void) {
       translate_browse_path_result_1__get_BrowsePathResultSize(&translate_browse_path_result__l_size);
       translate_browse_path_result_1_it__init_iter_browsePathIdx(translate_browse_path_result__l_size,
          &translate_browse_path_result__l_continue);
+      translate_browse_path_result__l_index = 0;
       while (translate_browse_path_result__l_continue == true) {
          translate_browse_path_result_1_it__continue_iter_browsePathIdx(&translate_browse_path_result__l_continue,
             &translate_browse_path_result__l_index);
@@ -115,6 +116,7 @@ void translate_browse_path_result__free_BrowsePathRemaining(void) {
       translate_browse_path_result_1__get_BrowsePathRemainingSize(&translate_browse_path_result__l_size);
       translate_browse_path_result_1_it__init_iter_browsePathIdx(translate_browse_path_result__l_size,
          &translate_browse_path_result__l_continue);
+      translate_browse_path_result__l_index = 0;
       while (translate_browse_path_result__l_continue == true) {
          translate_browse_path_result_1_it__continue_iter_browsePathIdx(&translate_browse_path_result__l_continue,
             &translate_browse_path_result__l_index);
