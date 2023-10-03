@@ -69,7 +69,7 @@ SOPC_Buffer* SOPC_Buffer_CreateResizable(uint32_t initial_size, uint32_t maximum
  *
  * \return The created SOPC_Buffer, or NULL on memory allocation failure.
  *
- * The ownership of the memory area is tranfered to the SOPC_Buffer. In other
+ * The ownership of the memory area is transferred to the SOPC_Buffer. In other
  * words, the memory will be freed when \ref SOPC_Buffer_Clear or
  * \ref SOPC_Buffer_Delete is called.
  */

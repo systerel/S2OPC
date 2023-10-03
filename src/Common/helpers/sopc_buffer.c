@@ -463,4 +463,4 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-#endif
+#endif // SOPC_HAS_FILESYSTEM
