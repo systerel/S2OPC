@@ -44,7 +44,7 @@
 typedef SOPC_SecretBuffer SOPC_SerializedAsymmetricKey;
 
 /**
- * \brief A serialized representation of a certificate.
+ * \brief A serialized representation of a certificate in DER format.
  *
  * This representation is safe to share across threads.
  */
@@ -558,7 +558,7 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint
                                                                       SOPC_SerializedCertificate** cert);
 
 /**
- * \brief Creates a serialized certificate from a file in DER format.
+ * \brief Creates a serialized certificate from a file in DER or PEM format.
  *
  * \param path       path to the file
  * \param[out] cert  the created serialized certificate

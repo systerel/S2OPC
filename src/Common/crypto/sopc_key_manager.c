@@ -164,7 +164,33 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromDER(const uint
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_CreateFromFile(const char* path,
                                                                        SOPC_SerializedCertificate** cert)
 {
-    return SOPC_Buffer_ReadFile(path, cert);
+    // Create a certificate which might be a PEM or DER certificate as input
+    SOPC_CertificateList* tmpCert = NULL;
+    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(path, &tmpCert);
+    if (SOPC_STATUS_OK == status)
+    {
+        uint8_t* dataDER = NULL;
+        uint32_t lenDER = 0;
+        status = SOPC_KeyManager_Certificate_ToDER(tmpCert, &dataDER, &lenDER);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_Buffer* res = SOPC_Buffer_Attach(dataDER, lenDER);
+            if (NULL != res)
+            {
+                *cert = res;
+            }
+            else
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+    }
+    if (NULL != tmpCert)
+    {
+        SOPC_KeyManager_Certificate_Free(tmpCert);
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_SerializedCertificate_Deserialize(const SOPC_SerializedCertificate* cert,
