@@ -18,6 +18,8 @@ build_zephyr/
 build_freertos/
 build-analyzer
 .vscode
+index*.txt.*
+serial*.txt.*
 
 # Temporary directories for B to C translation
 pre-build/
