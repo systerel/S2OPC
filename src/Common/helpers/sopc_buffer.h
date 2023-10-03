@@ -235,11 +235,12 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf);
  *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
  * content, full buffer avoiding operation)
  */
-SOPC_ReturnStatus SOPC_Buffer_PrintU32(const uint32_t value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_Buffer_PrintU32(SOPC_Buffer* buf, const uint32_t value);
 
 /**
  *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
  * position and length if necessary)
+ * The I32 format written in the buffer does not take into account the spacing for '-' in the case of a positive value.
  *
  *  \param value       int32_t to print into the buffer
  *  \param buf         Pointer to the buffer to write into
@@ -247,11 +248,23 @@ SOPC_ReturnStatus SOPC_Buffer_PrintU32(const uint32_t value, SOPC_Buffer* buf);
  *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
  * content, full buffer avoiding operation)
  */
-SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value);
 
 /**
  *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
  * position and length if necessary)
+ * The float/double format written in the buffer does not take into account the spacing for '-' in the case
+ * of a positive value.
+ * The output is equivalent to '%.*g' printf format with SOPC_PRECISION_PRINTING_FLOAT_NUMBERS as precision.
+ *
+ * For exemple : '42', '-4.3e+111'
+ *
+ * About special values, the syntax is as follows (including double quote) :
+ * - Not a Number : '"NaN"'
+ * - Positive infinity : '"Infinity"'
+ * - Negative infinity : '"-Infinity"'
+ *
+ * This format is JSON compatible for standard values.
  *
  *  \param value       double to print into the buffer
  *  \param buf         Pointer to the buffer to write into
@@ -259,6 +272,6 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf);
  *  \return            SOPC_STATUS_OK if succeeded, an error code otherwise (NULL pointer, non allocated buffer
  * content, full buffer avoiding operation)
  */
-SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* buf);
+SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double value);
 
 #endif /* SOPC_BUFFER_H_ */

@@ -71,6 +71,7 @@
     <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
     <xs:attribute name="keepAliveTime" type="xs:double" use="optional"/> <!-- required if is acyclic publisher. Time scale is milliseconds -->
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
+    <xs:attribute name="jsonEncode" type="xs:boolean" use="optional"/> <!-- true to enable json encoding. If omitted or false, set UADP encoding -->
   </xs:complexType>
   <xs:complexType name="skserver">
         <xs:attribute name="endpointUrl" type="xs:string" use="required"/>

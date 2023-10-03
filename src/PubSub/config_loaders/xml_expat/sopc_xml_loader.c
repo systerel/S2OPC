@@ -95,8 +95,9 @@
 #define ATTR_MESSAGE_PUBLISHER_ID "publisherId"
 #define ATTR_MESSAGE_GROUP_ID "groupId"
 #define ATTR_MESSAGE_GROUP_VERSION "groupVersion"
-#define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
+#define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
+#define ATTR_MESSAGE_JSON_ENCODE "jsonEncode"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
 #define ATTR_DATASET_SEQ_NUM "useSequenceNumber"
@@ -160,6 +161,7 @@ struct sopc_xml_pubsub_message_t
     uint16_t groupId;
     uint32_t groupVersion;
     char* mqttTopic;
+    bool jsonEncode;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
 
@@ -609,13 +611,17 @@ static bool parse_message_attributes(const char* attr_name,
         result = parse_unsigned_value(attr_val, strlen(attr_val), 32, &msg->groupVersion);
         result &= msg->groupVersion > 0;
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_KEEP_ALIVE, attr_name))
+    {
+        result = SOPC_strtodouble(attr_val, strlen(attr_val), sizeof(double) * 8, &msg->keepAliveTime);
+    }
     else if (TEXT_EQUALS(ATTR_MESSAGE_MQTT_TOPIC, attr_name))
     {
         result = copy_any_string_attribute_value(&msg->mqttTopic, attr_val);
     }
-    else if (TEXT_EQUALS(ATTR_MESSAGE_KEEP_ALIVE, attr_name))
+    else if (TEXT_EQUALS(ATTR_MESSAGE_JSON_ENCODE, attr_name))
     {
-        result = SOPC_strtodouble(attr_val, strlen(attr_val), sizeof(double) * 8, &msg->keepAliveTime);
+        result = parse_boolean(attr_val, strlen(attr_val), &msg->jsonEncode);
     }
     else
     {
@@ -1243,6 +1249,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_Version(writerGroup, msg->groupVersion);
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
                 SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
+                SOPC_WriterGroup_Set_JsonEncode(writerGroup, msg->jsonEncode);
 
                 // Associate dataSet with writer
                 SOPC_ASSERT(msg->nb_datasets < 0x100);

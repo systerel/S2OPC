@@ -141,6 +141,8 @@ struct SOPC_WriterGroup
 
     double keepAliveTimeMs;
 
+    bool jsonEncode;
+
     char* securityGroupId;
     SOPC_SecurityKeyServices* securityKeyServices;
     uint32_t securityKeyServices_length;
@@ -1158,6 +1160,18 @@ void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms
 {
     SOPC_ASSERT(NULL != group);
     group->keepAliveTimeMs = keepAlive_ms;
+}
+
+bool SOPC_WriterGroup_Get_JsonEncode(SOPC_WriterGroup* group)
+{
+    SOPC_ASSERT(NULL != group);
+    return group->jsonEncode;
+}
+
+void SOPC_WriterGroup_Set_JsonEncode(SOPC_WriterGroup* group, bool jsonEncode)
+{
+    SOPC_ASSERT(NULL != group);
+    group->jsonEncode = jsonEncode;
 }
 
 /** DataSetWriter **/

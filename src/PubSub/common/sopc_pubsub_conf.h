@@ -302,6 +302,9 @@ void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offs
 double SOPC_WriterGroup_Get_KeepAlive(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms);
 
+bool SOPC_WriterGroup_Get_JsonEncode(SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_JsonEncode(SOPC_WriterGroup* group, bool jsonEncode);
+
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,
                                                     SOPC_UadpNetworkMessageContentMask contentMask);

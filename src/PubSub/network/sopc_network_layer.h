@@ -20,6 +20,7 @@
 #ifndef SOPC_NETWORK_LAYER_H_
 #define SOPC_NETWORK_LAYER_H_
 
+#include <inttypes.h>
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
 #include "sopc_pubsub_conf.h"
@@ -223,9 +224,9 @@ typedef enum
     SOPC_JSON_NetworkMessage_Error_Generate_Unique_MessageId = 0x50000000,
     SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName,
     SOPC_JSON_NetworkMessage_Error_Encode,
-    SOPC_JSON_DataSetMessage_Error_Encode,
-    SOPC_JSON_Variant_Error_Encode,
-    SOPC_JSON_Error_Closing_Structure,
+    SOPC_JSON_NetworkMessage_Error_DataSetMessage_Encode,
+    SOPC_JSON_NetworkMessage_Error_Variant_Encode,
+    SOPC_JSON_NetworkMessage_Error_Write_Closing_Structure,
 } SOPC_UADP_NetworkMessage_Error_Code;
 
 /**

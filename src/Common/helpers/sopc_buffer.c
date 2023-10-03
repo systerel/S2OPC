@@ -17,6 +17,7 @@
  * under the License.
  */
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -26,7 +27,14 @@
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_pubsub_constants.h"
+
+/* 2^32 = 4294967296 maximum number you could represent plus \0 at the end */
+#define SOPC_MAX_LENGTH_UINT32_TO_STRING 11
+
+/* 2^31 = 2147483648 maximum number you could represent plus \0 at the end plus '-'*/
+#define SOPC_MAX_LENGTH_INT32_TO_STRING 12
+
+#define SOPC_PRECISION_PRINTING_FLOAT_NUMBERS 10
 
 static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
 {
@@ -467,63 +475,69 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf)
 
 #endif // SOPC_HAS_FILESYSTEM
 
-SOPC_ReturnStatus SOPC_Buffer_PrintU32(const uint32_t value, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_Buffer_PrintU32(SOPC_Buffer* buf, const uint32_t value)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     char buffer[SOPC_MAX_LENGTH_UINT32_TO_STRING];
     int res = snprintf(buffer, SOPC_MAX_LENGTH_UINT32_TO_STRING, "%" PRIu32, value);
     if (res > 0 && res < SOPC_MAX_LENGTH_UINT32_TO_STRING)
     {
-        status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, strlen(buffer));
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, (uint32_t) strlen(buffer));
     }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Buffer_PrintI32(const int32_t value, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     char buffer[SOPC_MAX_LENGTH_INT32_TO_STRING];
     int res = snprintf(buffer, SOPC_MAX_LENGTH_INT32_TO_STRING, "%" PRIi32, value);
     if (res > 0 && res < SOPC_MAX_LENGTH_INT32_TO_STRING)
     {
-        status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, strlen(buffer));
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, (uint32_t) strlen(buffer));
     }
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(const double value, SOPC_Buffer* buf)
+SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double value)
 {
     static const char* infinity_str_json_format = "\"Infinity\"";
     static const char* infinity_str_minus_json_format = "\"-Infinity\"";
     static const char* nan_str_json_format = "\"NaN\"";
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     // buffer needs a minimum length of 12 to store the worst case : "\"-Infinity\"" + '\0'
-    // Or a length of SOPC_PRECISION_PRINTING_FLOAT_NUMBERS (decimal storage) + 7 ('.e+ddd' + '\0' storage)
-    static const uint16_t bufferLength =
-        (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) > 12 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 7) : 12;
+    // Or a length of SOPC_PRECISION_PRINTING_FLOAT_NUMBERS (decimal storage) + 8 ('-.e+ddd' + '\0' storage)
+    static const uint16_t bufferLength = SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8;
+    //     (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8) > 12 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8) : 12;
     char buffer[bufferLength]; // (decimal + '.e+ddd' + '\0')
-    int res = snprintf(buffer, bufferLength, "%.*g", SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
-    if (res > 0 && res < bufferLength)
+
+    /* If value it's a special number */
+    // If it's a NaN
+    if (isnan(value))
     {
-        // If value it's a special number
-        if (0 == strcmp(buffer, "inf") || 0 == strcmp(buffer, "infinity"))
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) nan_str_json_format, (uint32_t) strlen(nan_str_json_format));
+    }
+    // If it's a +Inf
+    else if (1 == isinf(value))
+    {
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_json_format,
+                                   (uint32_t) strlen(infinity_str_json_format));
+    }
+    // If it's a -Inf
+    else if (-1 == isinf(value))
+    {
+        status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_minus_json_format,
+                                   (uint32_t) strlen(infinity_str_minus_json_format));
+    }
+    // Else, it's a normal decimal number
+    else
+    {
+        int res = snprintf(buffer, bufferLength, "%.*g", SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
+        if (res > 0 && res < SOPC_MAX_LENGTH_INT32_TO_STRING)
         {
-            status =
-                SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_json_format, strlen(infinity_str_json_format));
-        }
-        else if (0 == strcmp(buffer, "-inf") || 0 == strcmp(buffer, "-infinity"))
-        {
-            status = SOPC_Buffer_Write(buf, (const uint8_t*) infinity_str_minus_json_format,
-                                       strlen(infinity_str_minus_json_format));
-        }
-        else if (0 == strcmp(buffer, "nan") || 0 == strcmp(buffer, "-nan"))
-        {
-            status = SOPC_Buffer_Write(buf, (const uint8_t*) nan_str_json_format, strlen(nan_str_json_format));
-        }
-        else
-        {
-            status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, strlen(buffer));
+            status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, (uint32_t) strlen(buffer));
         }
     }
+
     return status;
 }
