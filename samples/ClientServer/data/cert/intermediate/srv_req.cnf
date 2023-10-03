@@ -1,0 +1,25 @@
+[ req ]
+prompt              = no
+distinguished_name  = server_distinguished_name
+string_mask         = utf8only
+req_extensions      = req_ext
+
+[ server_distinguished_name ]
+countryName         = FR
+stateOrProvinceName = France
+organizationName    = Systerel
+commonName          = S2OPC Demo Int Certificate for Server Tests
+emailAddress        = s2opc-support@systerel.fr
+localityName        = Aix-en-Provence
+
+[ server_cert ]
+# Extensions for server certificates (`man x509v3_config`).
+basicConstraints = CA:FALSE
+subjectKeyIdentifier = hash
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName = @alternate_names
+
+[ alternate_names ]
+URI     = urn:S2OPC:localhost  # ApplicationUri
+DNS.1   = localhost
