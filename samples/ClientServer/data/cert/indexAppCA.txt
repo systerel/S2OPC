@@ -2,3 +2,5 @@ V	250312135855Z		00	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OP
 V	250312135857Z		01	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Certificate for Client Tests
 V	250312135859Z		02	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Certificate for Server Tests
 V	250312135901Z		03	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Certificate for Server Tests
+V	251002092931Z		04	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Intermediate Client Authority for Tests
+V	251002092933Z		05	unknown	/C=FR/ST=France/L=Aix-en-Provence/O=Systerel/CN=S2OPC Demo Intermediate Server Authority for Tests
