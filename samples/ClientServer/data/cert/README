@@ -1,0 +1,25 @@
+Demo certificates organization is the following:
+- Application certificate:
+  - (Trusted Root CA issuer) S2OPC Century Certificate Authority for Tests: ca*
+    - (Client certificate issued) S2OPC Demo Certificate for Client Tests: client_2k/4k*
+    - (Server certificate issued) S2OPC Demo Certificate for Server Tests: server_2k/4k*
+    - (Trusted Intermediate Client CA issuer) S2OPC Demo Intermediate Client Authority for Tests: int_cli_ca*
+      - (Client application issued) S2OPC Demo Int Certificate for Client tests: int_client*
+    - (Trusted Intermediate Server CA issuer) S2OPC Demo Intermediate Server Authority for Tests: int_srv_ca*
+      - (Server application issued) S2OPC Demo Int Certificate for Server tests: int_server*
+  - (Untrusted Root CA issuer)  S2OPC Demo Untrusted Authority for Tests: untrusted_ca*
+    - (Trusted Client certificate issued) S2OPC Demo Trusted Certificate for Client Tests: trusted_client*
+    - (Trusted Server certificate issued) S2OPC Demo Trusted Certificate for Server Tests: trusted_server*
+- User certificate:
+  - (Trusted Root CA issuer) S2OPC Demo Certificate Authority for X509IdentityToken Tests: user_ca*
+    - (User certificate issued) S2OPC Demo Certificate for X509IdentityToken Tests: user_2k/4k*
+
+Folders and scripts:
+- generate_certs.sh: generate root CA and root signed client/server certificates
+- revoke_certs.sh: revoke root signed client/server certificates
+- renew_certs.sh: renew root signed client/server certificates
+- generate_user_certs.sh: generate root CA and root signed user certificates
+- intermediate:
+  - generate_int_certs.sh: generate intermediate CA and intermediate signed client/server certificates
+- untrusted: 
+  - generate_trusted_certs.sh: generate untrusted CA and untrusted signed client/server trusted certificates
