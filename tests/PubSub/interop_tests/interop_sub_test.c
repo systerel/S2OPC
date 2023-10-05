@@ -415,7 +415,6 @@ int main(int argc, char** argv)
 {
     Socket sock;
     SOPC_Socket_AddressInfo* listenAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
-    SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
     if (argc > 1)
     {
         if (0 == strncmp(argv[1], "none", 4))
@@ -438,17 +437,6 @@ int main(int argc, char** argv)
     SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, NULL, true, true, &sock);
     buffer = SOPC_Buffer_Create(4096);
 
-    if (SOPC_STATUS_OK == status && buffer != NULL)
-    {
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_UDP_Socket_AddMembership(sock, NULL, listenAddr, localAddr);
-            if (SOPC_STATUS_OK != status)
-            {
-                printf("SOPC_UDP_Socket_AddMembership failed\n");
-            }
-        }
-    }
     if (SOPC_STATUS_OK == status)
     {
         SOPC_Sub_SocketsMgr_Initialize(NULL, 0, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE, 0);
@@ -464,7 +452,6 @@ int main(int argc, char** argv)
     SOPC_Buffer_Delete(buffer);
     SOPC_UDP_Socket_Close(&sock);
     SOPC_UDP_SocketAddress_Delete(&listenAddr);
-    SOPC_UDP_SocketAddress_Delete(&localAddr);
     SOPC_PubSubConfiguration_Delete(configuration);
     clear_setupConnection();
 

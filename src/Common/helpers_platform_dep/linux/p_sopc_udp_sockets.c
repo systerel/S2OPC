@@ -101,9 +101,7 @@ static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
     return addr->ai_addr;
 }
 
-static struct ip_mreqn SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr,
-                                                  const SOPC_Socket_AddressInfo* localAddr,
-                                                  unsigned int if_index)
+static struct ip_mreqn SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr, unsigned int if_index)
 {
     SOPC_ASSERT(multiCastAddr != NULL);
     struct ip_mreqn membership;
@@ -111,22 +109,12 @@ static struct ip_mreqn SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo*
     membership.imr_multiaddr.s_addr = ((struct sockaddr_in*) get_ai_addr(multiCastAddr))->sin_addr.s_addr;
     SOPC_ASSERT(if_index > 0);
     membership.imr_ifindex = (int) if_index;
-    if (NULL == localAddr)
-    {
-        membership.imr_address.s_addr = htonl(INADDR_ANY);
-    }
-    else
-    {
-        membership.imr_address.s_addr = ((struct sockaddr_in*) get_ai_addr(localAddr))->sin_addr.s_addr;
-    }
+    membership.imr_address.s_addr = htonl(INADDR_ANY);
     return membership;
 }
 
-static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInfo* multiCastAddr,
-                                                    const SOPC_Socket_AddressInfo* localAddr,
-                                                    unsigned int if_index)
+static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInfo* multiCastAddr, unsigned int if_index)
 {
-    SOPC_UNUSED_ARG(localAddr);
     SOPC_ASSERT(if_index > 0);
     SOPC_ASSERT(multiCastAddr != NULL);
     SOPC_ASSERT(SOPC_Socket_AddrInfo_IsIPV6(multiCastAddr));
@@ -140,7 +128,6 @@ static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInf
 
 static bool setMembershipOption(Socket sock,
                                 const SOPC_Socket_AddressInfo* multicast,
-                                const SOPC_Socket_AddressInfo* local,
                                 unsigned int ifindex,
                                 int level,
                                 int optname)
@@ -150,13 +137,13 @@ static bool setMembershipOption(Socket sock,
     {
         if (SOPC_Socket_AddrInfo_IsIPV6(multicast))
         {
-            struct ipv6_mreq membershipV6 = SOPC_Internal_Fill_IP6_mreq(multicast, local, ifindex);
+            struct ipv6_mreq membershipV6 = SOPC_Internal_Fill_IP6_mreq(multicast, ifindex);
             setOptStatus = setsockopt(sock, level, optname, &membershipV6, sizeof(membershipV6));
         }
     }
     else if (IPPROTO_IP == level)
     {
-        struct ip_mreqn membership = SOPC_Internal_Fill_IP_mreq(multicast, local, ifindex);
+        struct ip_mreqn membership = SOPC_Internal_Fill_IP_mreq(multicast, ifindex);
         setOptStatus = setsockopt(sock, level, optname, &membership, sizeof(membership));
     }
     else
@@ -168,7 +155,6 @@ static bool setMembershipOption(Socket sock,
 
 static SOPC_ReturnStatus applyMembershipToAllInterfaces(Socket sock,
                                                         const SOPC_Socket_AddressInfo* multicast,
-                                                        const SOPC_Socket_AddressInfo* local,
                                                         int optnameIPv4,
                                                         int optnameIPv6)
 {
@@ -193,8 +179,8 @@ static SOPC_ReturnStatus applyMembershipToAllInterfaces(Socket sock,
                 if (AF_INET6 == ifa->ifa_addr->sa_family)
                 {
                     counter++;
-                    atLeastOneItfSuccess |= setMembershipOption(sock, multicast, local, if_nametoindex(ifa->ifa_name),
-                                                                IPPROTO_IPV6, optnameIPv6);
+                    atLeastOneItfSuccess |=
+                        setMembershipOption(sock, multicast, if_nametoindex(ifa->ifa_name), IPPROTO_IPV6, optnameIPv6);
                 }
             }
             else
@@ -202,8 +188,8 @@ static SOPC_ReturnStatus applyMembershipToAllInterfaces(Socket sock,
                 if (AF_INET == ifa->ifa_addr->sa_family)
                 {
                     counter++;
-                    atLeastOneItfSuccess |= setMembershipOption(sock, multicast, local, if_nametoindex(ifa->ifa_name),
-                                                                IPPROTO_IP, optnameIPv4);
+                    atLeastOneItfSuccess |=
+                        setMembershipOption(sock, multicast, if_nametoindex(ifa->ifa_name), IPPROTO_IP, optnameIPv4);
                 }
             }
         }
@@ -227,12 +213,11 @@ static SOPC_ReturnStatus applyMembershipToAllInterfaces(Socket sock,
     }
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
+                                                       const char* interfaceName,
+                                                       const SOPC_Socket_AddressInfo* multicast)
 {
-    if (NULL == multicast || NULL == local || SOPC_INVALID_SOCKET == sock || multicast->ai_family != local->ai_family)
+    if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -243,8 +228,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         unsigned int ifindex = if_nametoindex(interfaceName);
         bool ipv4success = false;
         bool ipv6success = false;
-        ipv6success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP);
-        ipv4success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_ADD_MEMBERSHIP);
+        ipv6success = setMembershipOption(sock, multicast, ifindex, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP);
+        ipv4success = setMembershipOption(sock, multicast, ifindex, IPPROTO_IP, IP_ADD_MEMBERSHIP);
         if (!ipv6success && SOPC_Socket_AddrInfo_IsIPV6(multicast))
         {
             SOPC_CONSOLE_PRINTF("AddMembership failure (error='%s') on interface for IPv6: %s\n", strerror(errno),
@@ -265,38 +250,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         }
     }
 
-    return applyMembershipToAllInterfaces(sock, multicast, local, IP_ADD_MEMBERSHIP, IPV6_ADD_MEMBERSHIP);
-}
-
-SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
-                                                 const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast,
-                                                 const SOPC_Socket_AddressInfo* local)
-{
-    if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    // Using interfaceName provided
-    if (NULL != interfaceName)
-    {
-        bool success = false;
-        unsigned int ifindex = if_nametoindex(interfaceName);
-        success |= setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IPV6, IPV6_DROP_MEMBERSHIP);
-        success |= setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_DROP_MEMBERSHIP);
-
-        if (success)
-        {
-            return SOPC_STATUS_OK;
-        }
-        else
-        {
-            return SOPC_STATUS_NOK;
-        }
-    }
-
-    return applyMembershipToAllInterfaces(sock, multicast, local, IP_DROP_MEMBERSHIP, IPV6_DROP_MEMBERSHIP);
+    return applyMembershipToAllInterfaces(sock, multicast, IP_ADD_MEMBERSHIP, IPV6_ADD_MEMBERSHIP);
 }
 
 static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo* addr,
@@ -376,11 +330,29 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
         SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
     if (SOPC_STATUS_OK == status)
     {
+        SOPC_ASSERT(NULL != sock);
         int res = bind(*sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
         if (res == -1)
         {
             SOPC_UDP_Socket_Close(sock);
             status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            bool isMC = false;
+            if (listenAddress->ai_family == AF_INET)
+            {
+                // IPV4: first address byte indicates if this is a multicast address
+                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->ai_addr;
+                const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
+                isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
+            }
+
+            // If address is multicast, then add membership
+            if (isMC)
+            {
+                status = SOPC_UDP_Socket_AddMembership(*sock, interfaceName, listenAddress);
+            }
         }
     }
     return status;
@@ -442,5 +414,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 
 void SOPC_UDP_Socket_Close(Socket* sock)
 {
+    // Linux does not need to drop membership explicitly in case of MC socket.
     SOPC_Socket_Close(sock);
 }

@@ -112,34 +112,18 @@ static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
     return addr->ai_addr;
 }
 
-static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr,
-                                                 const SOPC_Socket_AddressInfo* localAddr)
+static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr)
 {
     configASSERT(multiCastAddr != NULL);
     struct ip_mreq membership;
 
     membership.imr_multiaddr.s_addr = ((struct sockaddr_in*) get_ai_addr(multiCastAddr))->sin_addr.s_addr;
-
-    if (NULL == localAddr)
-    {
-        membership.imr_interface.s_addr = htonl(INADDR_ANY);
-    }
-    else
-    {
-        membership.imr_interface.s_addr = ((struct sockaddr_in*) get_ai_addr(localAddr))->sin_addr.s_addr;
-    }
+    membership.imr_interface.s_addr = htonl(INADDR_ANY);
     return membership;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus socket_AddMembership(Socket* sock, const SOPC_Socket_AddressInfo* multicast)
 {
-    // This argument is needed to match prototype function (common to all OS implementations)
-    // But is not used because of the lack of an element (int imr_ifindex) in the
-    // ip_mreq structure in lwip (2.1.2) compared to POSIX ip_mreqn structure.
-    SOPC_UNUSED_ARG(interfaceName);
     int setOptStatus = -1;
 
     if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
@@ -147,20 +131,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (local != NULL)
-    {
-        if (multicast->ai_family != local->ai_family)
-        {
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-
     if (AF_INET6 == multicast->ai_family)
     {
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    struct ip_mreq membership = SOPC_Internal_Fill_IP_mreq(multicast, local);
+    struct ip_mreq membership = SOPC_Internal_Fill_IP_mreq(multicast);
     setOptStatus = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &membership, sizeof(struct ip_mreq));
 
     if (setOptStatus < 0)
@@ -173,15 +149,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
     }
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
-                                                 const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast,
-                                                 const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus socket_DropMembership(Socket* sock)
 {
-    // This argument is needed to match protype function (common to all OS implementations)
-    // But is not used because of the lack of an element (int imr_ifindex) in the
-    // ip_mreq structure in lwip (2.1.2) compared to POSIX ip_mreqn structure.
-    SOPC_UNUSED_ARG(interfaceName);
     int setOptStatus = -1;
 
     if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
@@ -194,7 +163,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    struct ip_mreq membership = SOPC_Internal_Fill_IP_mreq(multicast, local);
+    struct ip_mreq membership = SOPC_Internal_Fill_IP_mreq(multicast);
     setOptStatus = setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &membership, sizeof(struct ip_mreq));
 
     if (setOptStatus < 0)
@@ -278,6 +247,24 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
         {
             SOPC_UDP_Socket_Close(sock);
             status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            bool isMC = false;
+            if (listenAddress->ai_family == AF_INET)
+            {
+                // IPV4: first address byte indicates if this is a multicast address
+                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->ai_addr;
+                const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
+                isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
+                printf("SOPC_UDP_Socket_CreateToReceive : IP= %08X, IsMc=%d\n", ip, isMC);
+            }
+
+            // If address is multicast, then add membership
+            if (isMC)
+            {
+                status = socket_AddMembership(sock, listenAddress);
+            }
         }
     }
     return status;
@@ -364,5 +351,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 
 void SOPC_UDP_Socket_Close(Socket* sock)
 {
+    socket_DropMembership(*sock);
     SOPC_Socket_Close(sock);
 }

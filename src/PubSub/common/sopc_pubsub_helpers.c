@@ -65,34 +65,12 @@ static bool SOPC_Internal_PubSubHelpers_ParseAddressUDP(const char* address,
     return (NULL != *multicastAddr);
 }
 
-bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(const char* address, SOPC_Socket_AddressInfo** multicastAddr)
+bool SOPC_PubSubHelpers_ParseAddressUDP(const char* address, SOPC_Socket_AddressInfo** multicastAddr)
 {
     char* port = NULL;
     bool result = SOPC_Internal_PubSubHelpers_ParseAddressUDP(address, multicastAddr, &port);
     SOPC_Free(port);
     return result;
-}
-
-bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(const char* address,
-                                                            SOPC_Socket_AddressInfo** multicastAddr,
-                                                            SOPC_Socket_AddressInfo** localAddr)
-{
-    SOPC_ASSERT(NULL != localAddr);
-
-    char* port = NULL;
-    bool result = SOPC_Internal_PubSubHelpers_ParseAddressUDP(address, multicastAddr, &port);
-    if (result)
-    {
-        *localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, port);
-    }
-    SOPC_Free(port);
-
-    if (NULL == *localAddr)
-    {
-        SOPC_Socket_AddrInfoDelete(multicastAddr);
-    }
-
-    return (NULL != *localAddr);
 }
 
 bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,

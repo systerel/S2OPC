@@ -883,7 +883,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
     {
     case SOPC_PubSubProtocol_UDP:
     {
-        allocSuccess = SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(address, &outUDPaddr);
+        allocSuccess = SOPC_PubSubHelpers_ParseAddressUDP(address, &outUDPaddr);
         if (!allocSuccess)
         {
             return false;

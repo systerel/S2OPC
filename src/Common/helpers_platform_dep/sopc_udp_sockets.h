@@ -108,38 +108,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
 SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer);
 
 /**
- * \brief Join a multicast group with provided local IP address and multicast addess
- *
- *  \param sock           The socket to configure
- *  \param interfaceName  The name of the interface to use, or null if unspecified.
- *                        The name shall be a null-terminated string if defined.
- *  \param multicast      The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
- *  \param local          The local IPv4 address joining the group
- *
- *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise
- */
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local);
-
-/**
- * \brief Quit a multicast group with provided local IP address and multicast addess
- *
- *  \param sock           The socket to configure
- *  \param interfaceName  The name of the interface to use, or null if unspecified.
- *                        The name shall be a null-terminated string if defined.
- *  \param multicast      The multicast group IPv4 address (range 224.0.0.0 - 239.255.255.255)
- *  \param local          The local IPv4 address leaving the group
- *
- *  \return        SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_NOK otherwise
- */
-SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
-                                                 const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast,
-                                                 const SOPC_Socket_AddressInfo* local);
-
-/**
  *  \brief Set the Multicast TTL configuration value (default value is 1)
  *   Controls the live time of datagram (decremented by 1 by each router).
  *   In IPv4 multicasting is also used as threshold:

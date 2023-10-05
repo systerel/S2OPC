@@ -130,8 +130,7 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** pptrAddrInfo)
 
 SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
                                                 const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+                                                const SOPC_Socket_AddressInfo* multicast)
 {
     if (NULL != interfaceName)
     {
@@ -139,7 +138,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
+    if (multicast == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -149,8 +148,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
 
 SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
                                                  const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast,
-                                                 const SOPC_Socket_AddressInfo* local)
+                                                 const SOPC_Socket_AddressInfo* multicast)
 {
     if (NULL != interfaceName)
     {
@@ -158,7 +156,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    if (multicast == NULL || (local != NULL && local->ai_family != multicast->ai_family))
+    if (multicast == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

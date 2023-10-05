@@ -45,8 +45,6 @@ static int retCode = 2;
 static void init_mcast_addrs(void)
 {
     printf("config:");
-    SOPC_Socket_AddressInfo* localAddr = SOPC_UDP_SocketAddress_Create(false, NULL, MCAST_PORT);
-    SOPC_ASSERT(localAddr != NULL);
     char* addr = SOPC_Calloc(1, sizeof(MCAST_ADDR));
     for (uint16_t i = 0; i < NB_ADDRS; i++)
     {
@@ -57,12 +55,9 @@ static void init_mcast_addrs(void)
         SOPC_ASSERT(NULL != addressArr[i]);
         SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addressArr[i], NULL, true, true, &socketArr[i]);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
-        status = SOPC_UDP_Socket_AddMembership(socketArr[i], NULL, addressArr[i], localAddr);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
         sockIdxArr[i] = i;
     }
     SOPC_Free(addr);
-    SOPC_UDP_SocketAddress_Delete(&localAddr);
 }
 
 static void uninit_mcast_addrs(void)

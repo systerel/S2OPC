@@ -33,28 +33,12 @@
  * Limitation: IP are limited to IPv4 for now (detection function missing)
  *
  * \param address             Cstring address with format opc.udp://<IP>:<PORT>
- * \param[out] multicastAddr  the multicast address to send data through socket
+ * \param[out] multicastAddr  the multicast address. Must be cleared by caller with ::SOPC_Socket_AddrInfoDelete
+ *                            after use.
  *
  * \return true in case of success, false otherwise
  */
-bool SOPC_PubSubHelpers_Publisher_ParseMulticastAddressUDP(const char* address,
-                                                           SOPC_Socket_AddressInfo** multicastAddr);
-
-/*
- * Parse a multicast address and return 2 addresses info, local address to receive data and to be added as member of the
- * multicast group.
- *
- * Limitation: IP are limited to IPv4 for now (detection function missing)
- *
- * \param address             Cstring address with format opc.udp://<IP>:<PORT>
- * \param[out] multicastAddr  the multicast address to join
- * \param[out] localAddr      the local address to listen to (bound automatically on the multicast port)
- *
- * \return true in case of success, false otherwise
- */
-bool SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(const char* address,
-                                                            SOPC_Socket_AddressInfo** multicastAddr,
-                                                            SOPC_Socket_AddressInfo** localAddr);
+bool SOPC_PubSubHelpers_ParseAddressUDP(const char* address, SOPC_Socket_AddressInfo** multicastAddr);
 
 /**
  * Check if the variant is compatible (value type and value rank) with the field meta data

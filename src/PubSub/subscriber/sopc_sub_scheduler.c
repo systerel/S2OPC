@@ -595,8 +595,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                     SOPC_PubSubProtocol_Type protocol = SOPC_PubSub_Protocol_From_URI(address);
 
-                    SOPC_Socket_AddressInfo* multicastAddr = NULL;
-                    SOPC_Socket_AddressInfo* localAddr = NULL;
+                    SOPC_Socket_AddressInfo* udpAddrInfo = NULL;
                     size_t hostnameLength = 0;
                     size_t portIdx = 0;
                     size_t portLength = 0;
@@ -605,8 +604,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     switch (protocol)
                     {
                     case SOPC_PubSubProtocol_UDP:
-                        result =
-                            SOPC_PubSubHelpers_Subscriber_ParseMulticastAddressUDP(address, &multicastAddr, &localAddr);
+                        result = SOPC_PubSubHelpers_ParseAddressUDP(address, &udpAddrInfo);
                         status = (result ? status : SOPC_STATUS_INVALID_PARAMETERS);
 
                         // Create reception socket
@@ -617,27 +615,15 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                             schedulerCtx.nbSockets++;
                             status = SOPC_UDP_Socket_CreateToReceive(
-                                multicastAddr, SOPC_PubSubConnection_Get_InterfaceName(connection), true, true,
+                                udpAddrInfo, SOPC_PubSubConnection_Get_InterfaceName(connection), true, true,
                                 &schedulerCtx.transport[iIter].sock);
-                            // Add socket to multicast group
-                            if (SOPC_STATUS_OK == status)
-                            {
-                                status = SOPC_UDP_Socket_AddMembership(
-                                    schedulerCtx.transport[iIter].sock,
-                                    SOPC_PubSubConnection_Get_InterfaceName(connection), multicastAddr, localAddr);
-                            }
-                            else
-                            {
-                                status = SOPC_STATUS_NOK;
-                            }
                         }
                         else
                         {
                             status = SOPC_STATUS_INVALID_PARAMETERS;
                         }
 
-                        SOPC_Socket_AddrInfoDelete(&multicastAddr);
-                        SOPC_Socket_AddrInfoDelete(&localAddr);
+                        SOPC_Socket_AddrInfoDelete(&udpAddrInfo);
                         break;
                     case SOPC_PubSubProtocol_MQTT:
                         result = SOPC_Helper_URI_ParseUri_WithPrefix(MQTT_PREFIX, address, &hostnameLength, &portIdx,
