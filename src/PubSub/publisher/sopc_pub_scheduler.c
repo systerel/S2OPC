@@ -90,12 +90,18 @@ struct SOPC_PubScheduler_TransportCtx
     bool isAcyclic;
 };
 
+/* Context for each DataSetMessage in a NetworkMessage */
+typedef struct SOPC_DataSetMessageCtx_t
+{
+    uint16_t sequenceNumber; // DataSetMessage Sequence Number
+} SOPC_DataSetMessageCtx_t;
+
 typedef struct MessageCtx
 {
     SOPC_WriterGroup* group; /* TODO: There's seem to be a problem as there may be multiple DSM but only one group */
     SOPC_Dataset_NetworkMessage* message;
     SOPC_Dataset_NetworkMessage* messageKeepAlive;
-    uint16_t writerMessageSequence; /* TODO add a context by dataSetWriter in writer group when several possible */
+    SOPC_Array* dataSetMessageCtx;
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
     SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
@@ -268,6 +274,8 @@ static void MessageCtx_Array_Clear(void)
             SOPC_Free(arr[i].security);
             arr[i].security = NULL;
             SOPC_RealTime_Delete(&arr[i].next_timeout);
+            SOPC_Array_Delete(arr[i].dataSetMessageCtx);
+            arr[i].dataSetMessageCtx = NULL;
         }
 
         /* Destroy messages array */
@@ -313,15 +321,17 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         context->mqttTopic = NULL;
     }
 
+    uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
+
     context->group = group;
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
     context->warned = false;
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
-    context->writerMessageSequence = 1;
     context->next_timeout = SOPC_RealTime_Create(tRef);
-
+    context->dataSetMessageCtx = SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, NULL);
+    SOPC_ASSERT(NULL != context->dataSetMessageCtx);
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
@@ -372,6 +382,13 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         return false;
     }
 
+    /* Fill in dataSetMessage context */
+    for (uint8_t i = 0; i < nbDataset; i++)
+    {
+        SOPC_DataSetMessageCtx_t dataSetMsgCtx = {.sequenceNumber = 1};
+        SOPC_Array_Append(context->dataSetMessageCtx, dataSetMsgCtx);
+    }
+
     /* Fill in security context */
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
@@ -393,6 +410,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         SOPC_PubSub_Security_Clear(context->security);
         SOPC_Free(context->security);
         context->security = NULL;
+        SOPC_Array_Delete(context->dataSetMessageCtx);
     }
     else
     {
@@ -456,15 +474,22 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
     bool typeCheckingSuccess = true;
 
+    size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
+    SOPC_ASSERT(nDsm == nbDsmCtx);
+
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
         // Note : It has been asserted that there are as many DataSetMessages as DataSetWriters
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
         const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, (uint8_t) iDsm);
 
-        // TODO: manage several writers SNs (only 1 writer by group for now)
-        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, context->writerMessageSequence);
-        context->writerMessageSequence++;
+        // Retrieve DSM context
+        SOPC_DataSetMessageCtx_t* dsmCtx = SOPC_Array_Get_Ptr(context->dataSetMessageCtx, iDsm);
+        SOPC_ASSERT(NULL != dsmCtx);
+
+        // Monotonically increase DSM sequence number
+        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmCtx->sequenceNumber);
+        dsmCtx->sequenceNumber++;
 
         uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
@@ -607,8 +632,10 @@ static void send_keepAlive_message(MessageCtx* context)
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, (int) iDsm);
-        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, context->writerMessageSequence);
-        context->writerMessageSequence++;
+
+        SOPC_DataSetMessageCtx_t* dsmCtx = SOPC_Array_Get_Ptr(context->dataSetMessageCtx, iDsm);
+        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmCtx->sequenceNumber);
+        dsmCtx->sequenceNumber++;
     }
 
     if (NULL != security)
