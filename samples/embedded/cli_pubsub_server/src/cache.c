@@ -206,7 +206,7 @@ static SOPC_DataValue* new_datavalue(SOPC_BuiltinId type, const SOPC_VariantArra
     return dv;
 }
 
-bool Cache_Initialize(SOPC_PubSubConfiguration* config)
+bool Cache_Initialize(SOPC_PubSubConfiguration* config, bool noSubCache)
 {
     if (NULL == config)
     {
@@ -287,7 +287,7 @@ bool Cache_Initialize(SOPC_PubSubConfiguration* config)
     }
 
     const uint32_t nbSubConnection = SOPC_PubSubConfiguration_Nb_SubConnection(config);
-    for (uint32_t i = 0; res && i < nbSubConnection; ++i)
+    for (uint32_t i = 0; res && i < nbSubConnection && false == noSubCache; ++i)
     {
         const SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, i);
         const uint16_t nbReaderGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);

@@ -38,8 +38,12 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_target_variable.h"
 
-/** Initializes the cache from the configuration using default zero-values (or null strings) */
-bool Cache_Initialize(SOPC_PubSubConfiguration* config);
+/** Initializes the cache from the configuration using default zero-values (or null strings).
+ * If the cache is not used by the Subscriber (typically if the SetTargetVariable callback
+ * writes directly into an AddressSpace), the cache will only contain Published variables.
+ * In this case, use noSubCache = true. Otherwise, use noSubCache= false.
+ **/
+bool Cache_Initialize(SOPC_PubSubConfiguration* config, bool noSubCache);
 
 /**
  * \brief Get a value in the cache

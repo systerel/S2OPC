@@ -681,7 +681,7 @@ static void setupPubSub(void)
     SOPC_PubSubSKS_Init();
     SOPC_PubSubSKS_SetSkManager(g_skmanager);
 
-    Cache_Initialize(pPubSubConfig);
+    Cache_Initialize(pPubSubConfig, true);
 }
 
 /***************************************************/
