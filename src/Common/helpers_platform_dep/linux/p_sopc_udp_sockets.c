@@ -129,6 +129,7 @@ static struct ipv6_mreq SOPC_Internal_Fill_IP6_mreq(const SOPC_Socket_AddressInf
     SOPC_UNUSED_ARG(localAddr);
     SOPC_ASSERT(if_index > 0);
     SOPC_ASSERT(multiCastAddr != NULL);
+    SOPC_ASSERT(SOPC_Socket_AddrInfo_IsIPV6(multiCastAddr));
     struct ipv6_mreq membership;
 
     membership.ipv6mr_multiaddr = ((struct sockaddr_in6*) get_ai_addr(multiCastAddr))->sin6_addr;
@@ -147,8 +148,11 @@ static bool setMembershipOption(Socket sock,
     int setOptStatus = -1;
     if (IPPROTO_IPV6 == level)
     {
-        struct ipv6_mreq membershipV6 = SOPC_Internal_Fill_IP6_mreq(multicast, local, ifindex);
-        setOptStatus = setsockopt(sock, level, optname, &membershipV6, sizeof(membershipV6));
+        if (SOPC_Socket_AddrInfo_IsIPV6(multicast))
+        {
+            struct ipv6_mreq membershipV6 = SOPC_Internal_Fill_IP6_mreq(multicast, local, ifindex);
+            setOptStatus = setsockopt(sock, level, optname, &membershipV6, sizeof(membershipV6));
+        }
     }
     else if (IPPROTO_IP == level)
     {
@@ -241,7 +245,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         bool ipv6success = false;
         ipv6success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IPV6, IPV6_ADD_MEMBERSHIP);
         ipv4success = setMembershipOption(sock, multicast, local, ifindex, IPPROTO_IP, IP_ADD_MEMBERSHIP);
-        if (!ipv6success)
+        if (!ipv6success && SOPC_Socket_AddrInfo_IsIPV6(multicast))
         {
             SOPC_CONSOLE_PRINTF("AddMembership failure (error='%s') on interface for IPv6: %s\n", strerror(errno),
                                 interfaceName);
