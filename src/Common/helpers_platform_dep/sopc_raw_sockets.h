@@ -82,7 +82,7 @@ SOPC_Socket_AddressInfo* SOPC_Socket_AddrInfo_IterNext(SOPC_Socket_AddressInfo* 
  *
  *  \return        0 if address is not IPV6 and not 0 value otherwise.
  */
-uint8_t SOPC_Socket_AddrInfo_IsIPV6(SOPC_Socket_AddressInfo* addr);
+uint8_t SOPC_Socket_AddrInfo_IsIPV6(const SOPC_Socket_AddressInfo* addr);
 
 /**
  *  \brief Deallocate a linked list of socket addressing information.
