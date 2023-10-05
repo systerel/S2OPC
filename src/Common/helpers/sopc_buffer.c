@@ -34,6 +34,7 @@
 /* 2^31 = 2147483648 maximum number you could represent plus \0 at the end plus '-'*/
 #define SOPC_MAX_LENGTH_INT32_TO_STRING 12
 
+/* A MINIMUM of 4 is required  ! (or problems such as infinite management appear.) */
 #define SOPC_PRECISION_PRINTING_FLOAT_NUMBERS 10
 
 static SOPC_ReturnStatus SOPC_Buffer_Init(SOPC_Buffer* buffer, uint32_t initial_size, uint32_t maximum_size)
@@ -507,9 +508,7 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double va
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     // buffer needs a minimum length of 12 to store the worst case : "\"-Infinity\"" + '\0'
     // Or a length of SOPC_PRECISION_PRINTING_FLOAT_NUMBERS (decimal storage) + 8 ('-.e+ddd' + '\0' storage)
-    static const uint16_t bufferLength = SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8;
-    //     (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8) > 12 ? (SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8) : 12;
-    char buffer[bufferLength]; // (decimal + '.e+ddd' + '\0')
+    char buffer[SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8]; // (decimal + '.e+ddd' + '\0')
 
     /* If value it's a special number */
     // If it's a NaN
@@ -532,8 +531,9 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double va
     // Else, it's a normal decimal number
     else
     {
-        int res = snprintf(buffer, bufferLength, "%.*g", SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
-        if (res > 0 && res < SOPC_MAX_LENGTH_INT32_TO_STRING)
+        int res = snprintf(buffer, SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8, "%.*g",
+                           SOPC_PRECISION_PRINTING_FLOAT_NUMBERS, value);
+        if (res > 0 && res < SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8)
         {
             status = SOPC_Buffer_Write(buf, (const uint8_t*) buffer, (uint32_t) strlen(buffer));
         }

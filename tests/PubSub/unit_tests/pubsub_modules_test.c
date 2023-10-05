@@ -27,6 +27,7 @@
  */
 
 #include <check.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include "sopc_dataset_layer.h"
@@ -50,7 +51,88 @@ SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_Sin
                                 {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
                                 {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
 
-/* Test network message layer */
+/* Test network message layer JSON encoded */
+
+#define ENCODED_DATA_SIZE_JSON 549
+#define NB_VARS_JSON 9
+
+SOPC_Byte text[16] = {'T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 't', 'e', 'x', 't', ' ', '!'};
+SOPC_Variant varArrJSON[NB_VARS_JSON] = {
+    {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
+    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64839}},
+    {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -65133}},
+    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = (double) 5462.16515561}}, // ~ 5462.165156
+    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 546216515561}},     // ~ 5.462165094e+11
+    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 1.0 / 0.0}},
+    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) -1.0 / 0.0}},
+    {true, SOPC_Double_Id, SOPC_VariantArrayType_SingleValue, {.Doublev = NAN}},
+    {true,
+     SOPC_String_Id,
+     SOPC_VariantArrayType_SingleValue,
+     {.String = {.Length = 16, .DoNotClear = true, .Data = text}}}};
+
+static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] =
+    "{"
+    "\"MessageId\":\"42-0\","
+    "\"MessageType\":\"ua-data\","
+    "\"PublisherId\":\"46\","
+    "\"Messages\":["
+    "{"
+    "\"DataSetWriterId\":255,"
+    "\"MessageType\":\"ua-keyframe\","
+    "\"Payload\":{"
+    "\"0-0\":{"
+    "\"Type\":1,"
+    "\"Body\":true"
+    "},"
+    "\"0-1\":{"
+    "\"Type\":7,"
+    "\"Body\":64839"
+    "},"
+    "\"0-2\":{"
+    "\"Type\":6,"
+    "\"Body\":-65133"
+    "},"
+    "\"0-3\":{"
+    "\"Type\":11,"
+    "\"Body\":5462.165156"
+    "},"
+    "\"0-4\":{"
+    "\"Type\":10,"
+    "\"Body\":5.462165094e+11"
+    "},"
+    "\"0-5\":{"
+    "\"Type\":10,"
+    "\"Body\":\"Infinity\""
+    "},"
+    "\"0-6\":{"
+    "\"Type\":10,"
+    "\"Body\":\"-Infinity\""
+    "},"
+    "\"0-7\":{"
+    "\"Type\":11,"
+    "\"Body\":\"NaN\""
+    "},"
+    "\"0-8\":{"
+    "\"Type\":12,"
+    "\"Body\":\"This is a text !\""
+    "}"
+    "}"
+    "},"
+    "{"
+    "\"DataSetWriterId\":10,"
+    "\"MessageType\":\"ua-keyframe\","
+    "\"Payload\":{"
+    "\"1-0\":{"
+    "\"Type\":1,"
+    "\"Body\":false"
+    "}"
+    "}"
+    "}"
+    "]"
+    "}";
+
+/* Test network message layer UADP encoded*/
 
 #define ENCODED_DATA_SIZE 37
 uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0x00, 0xE8, 0x03, 0x00, 0x00,
@@ -324,6 +406,74 @@ START_TEST(test_tc_tools_test)
     SOPC_RealTime_Delete(&t1);
     SOPC_RealTime_Delete(&t2);
 }
+
+START_TEST(test_hl_network_msg_encode_json)
+{
+    // Initialize endianess for encoders
+    SOPC_Helper_EndiannessCfg_Initialize();
+
+    SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
+    SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
+
+    bool res = SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(nm, 2);
+    ck_assert_int_eq(true, res);
+
+    SOPC_Dataset_LL_NetworkMessage_Set_PublisherId_Byte(header, NETWORK_MSG_PUBLISHER_ID);
+
+    SOPC_Dataset_LL_NetworkMessage_SetVersion(header, NETWORK_MSG_VERSION);
+
+    SOPC_Dataset_LL_NetworkMessage_Set_GroupId(nm, NETWORK_MSG_GROUP_ID);
+    SOPC_Dataset_LL_NetworkMessage_Set_GroupVersion(nm, NETWORK_MSG_GROUP_VERSION);
+
+    SOPC_Dataset_LL_DataSetMessage* msg_dsm0 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 0);
+    SOPC_Dataset_LL_DataSetMessage* msg_dsm1 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, 1);
+
+    /* 1st Dataset Message */
+    SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm0, (uint16_t)(DATASET_MSG_WRITER_ID_BASE));
+    res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm0, NB_VARS_JSON);
+    ck_assert_int_eq(true, res);
+
+    // Fill in variants of 1st Dataset Message
+    for (uint16_t i = 0; i < NB_VARS_JSON; i++)
+    {
+        SOPC_Variant* var = SOPC_Variant_Create();
+        SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArrJSON[i]);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+        res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm0, var, i);
+        ck_assert_int_eq(true, res);
+    }
+
+    /* 2nd Dataset Message */
+    SOPC_Dataset_LL_DataSetMsg_Set_WriterId(msg_dsm1, (uint16_t)(10));
+    res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm1, 1);
+
+    // Fill in variant of 2nd Dataset Message
+    SOPC_Variant* var = SOPC_Variant_Create();
+    varArrJSON[0].Value.Boolean = false;
+    SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArrJSON[0]);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm1, var, 0);
+    ck_assert_int_eq(true, res);
+
+    /* Encode */
+    SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(nm);
+
+    /* Control encoding result */
+    // Check Size
+    ck_assert_uint_eq(ENCODED_DATA_SIZE_JSON, buffer->length);
+
+    // Check buffer values
+    for (uint32_t i = 0; i < buffer->length; i++)
+    {
+        ck_assert_uint_eq(encoded_network_msg_json[i], buffer->data[i]);
+    }
+
+    SOPC_Buffer_Delete(buffer);
+    SOPC_Dataset_LL_NetworkMessage_Delete(nm);
+}
+END_TEST
 
 START_TEST(test_hl_network_msg_encode)
 {
@@ -1506,6 +1656,7 @@ int main(void)
 
     TCase* tc_hl_network_msg = tcase_create("Network message layer");
     suite_add_tcase(suite, tc_hl_network_msg);
+    tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_json);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_decode);
     tcase_add_test(tc_hl_network_msg, test_hl_network_msg_encode_multi_dsm);

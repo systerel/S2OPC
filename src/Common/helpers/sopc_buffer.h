@@ -255,7 +255,7 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value);
  * position and length if necessary)
  * The float/double format written in the buffer does not take into account the spacing for '-' in the case
  * of a positive value.
- * The output is equivalent to '%.*g' printf format with SOPC_PRECISION_PRINTING_FLOAT_NUMBERS as precision.
+ * The output is equivalent to '%.*g' print format with SOPC_PRECISION_PRINTING_FLOAT_NUMBERS as precision.
  *
  * For exemple : '42', '-4.3e+111'
  *
