@@ -179,17 +179,50 @@ static int verify_cert(void* findTrustedCrt, mbedtls_x509_crt* crt, int certific
 {
     SOPC_UNUSED_ARG(certificate_depth);
     SOPC_FindTrustedCrtInChain* findTrustedCrtInChain = (SOPC_FindTrustedCrtInChain*) findTrustedCrt;
-    SOPC_CertificateList* trustedCrts = (SOPC_CertificateList*) findTrustedCrtInChain->trustedCrts;
-    mbedtls_x509_crt* crtTrusted = &trustedCrts->crt; /* Current cert */
-    while (0 == *flags && NULL != crtTrusted)
+
+    /**
+     * Specific trusted self-signed certificate case
+     */
+    if (findTrustedCrtInChain->isTrustedInChain && 0 == certificate_depth &&
+        MBEDTLS_X509_BADCERT_NOT_TRUSTED == (*flags & MBEDTLS_X509_BADCERT_NOT_TRUSTED))
     {
-        if (crt->subject_raw.len == crtTrusted->subject_raw.len &&
-            0 == memcmp(crt->subject_raw.p, crtTrusted->subject_raw.p, crt->subject_raw.len) &&
-            crt->raw.len == crtTrusted->raw.len && 0 == memcmp(crt->raw.p, crtTrusted->raw.p, crt->subject_raw.len))
+        /* Is it self-signed? Issuer and subject are the same.
+         * Note: this verification is not sufficient by itself to conclude that the certificate is self-signed,
+         * but the self-signature verification is.
+         */
+        if (crt->issuer_raw.len == crt->subject_raw.len &&
+            0 == memcmp(crt->issuer_raw.p, crt->subject_raw.p, crt->issuer_raw.len))
         {
-            findTrustedCrtInChain->isTrustedInChain = true;
+            /* Is it correctly signed? Inspired by x509_crt_check_signature */
+            const mbedtls_md_info_t* md_info = mbedtls_md_info_from_type(crt->sig_md);
+            unsigned char hash[MBEDTLS_MD_MAX_SIZE];
+
+            /* First hash the certificate, then verify it is signed */
+            if (mbedtls_md(md_info, crt->tbs.p, crt->tbs.len, hash) == 0)
+            {
+                if (mbedtls_pk_verify_ext(crt->sig_pk, crt->sig_opts, &crt->pk, crt->sig_md, hash,
+                                          mbedtls_md_get_size(md_info), crt->sig.p, crt->sig.len) == 0)
+                {
+                    /* Finally set the certificate as trusted */
+                    *flags = (*flags & ~(uint32_t) MBEDTLS_X509_BADCERT_NOT_TRUSTED);
+                }
+            }
         }
-        crtTrusted = crtTrusted->next;
+    }
+    else /* Otherwise at least one certificate shall be trusted in the chain */
+    {
+        SOPC_CertificateList* trustedCrts = (SOPC_CertificateList*) findTrustedCrtInChain->trustedCrts;
+        mbedtls_x509_crt* crtTrusted = &trustedCrts->crt; /* Current cert */
+        while (0 == *flags && NULL != crtTrusted)
+        {
+            if (crt->subject_raw.len == crtTrusted->subject_raw.len &&
+                0 == memcmp(crt->subject_raw.p, crtTrusted->subject_raw.p, crt->subject_raw.len) &&
+                crt->raw.len == crtTrusted->raw.len && 0 == memcmp(crt->raw.p, crtTrusted->raw.p, crt->subject_raw.len))
+            {
+                findTrustedCrtInChain->isTrustedInChain = true;
+            }
+            crtTrusted = crtTrusted->next;
+        }
     }
 
     /* Only fatal errors could be returned here, as this error code will be forwarded to the caller of
@@ -992,7 +1025,6 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     SOPC_ASSERT(NULL != mbed_profile);
     SOPC_ASSERT(NULL != thumbprint);
     SOPC_ASSERT(NULL != error);
-    SOPC_UNUSED_ARG(bIsTrusted);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_CertificateList* trust_list = pPKI->pAllRoots; // bIsTrusted ? pPKI->pAllRoots : pPKI->pTrustedRoots;
@@ -1003,6 +1035,10 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
     mbedtls_x509_crt* pLinkCert = NULL;
     pLinkCert = &pPKI->pAllCerts->crt;
+
+    // TODO: if is trusted + self-sign add to ca_root ? (authorized by mbedtls and
+    //                                                   avoid specific treatment for self-sign in verify_cert)
+    //       or restore specific treatment for self-sign cert in verif_cert (done ?)
     /*if (bIsTrusted)
     {
         if (NULL != pPKI->pAllCerts)
@@ -1019,7 +1055,7 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     }
     */
 
-    SOPC_FindTrustedCrtInChain findTrustedCrt = {.trustedCrts = pPKI->pAllTrusted, .isTrustedInChain = false};
+    SOPC_FindTrustedCrtInChain findTrustedCrt = {.trustedCrts = pPKI->pAllTrusted, .isTrustedInChain = bIsTrusted};
     mbed_cert_list->next = pLinkCert;
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
