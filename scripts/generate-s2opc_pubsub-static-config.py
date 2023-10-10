@@ -46,6 +46,7 @@ VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
 ATTRIBUTE_MESSAGE_MQTT_TOPIC = "mqttTopic"
+ATTRIBUTE_MESSAGE_JSON_ENCODE = "jsonEncode"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -129,6 +130,7 @@ class MessageContext:
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
         self.keepAliveTime = float(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL, -1.))
         self.mqttTopic = str(toCStringPtrName(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_MQTT_TOPIC, None)))
+        self.jsonEncode = bool(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_JSON_ENCODE, False))
 
 
 def getCSecurityMode(mode):
@@ -347,12 +349,13 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // Interval = %f ms
         // Offest = %d us
         // mqttTopic = %s
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s);
+        // jsonEncode = %d
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s, %d);
         alloc = NULL != writerGroup;
     }
     """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
-        msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic))
+        msgContext.jsonEncode, msgIndex, msgContext.id, msgContext.version, msgContext.interval,
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, msgContext.jsonEncode))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
@@ -692,7 +695,8 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            double interval,
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
-                                                           const char* mqttTopic)
+                                                           const char* mqttTopic,
+                                                           bool jsonEncode)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
@@ -700,6 +704,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
+    SOPC_WriterGroup_Set_JsonEncode(group, jsonEncode);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
