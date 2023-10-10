@@ -207,6 +207,7 @@ struct SOPC_SubScheduler_TransportCtx
 
     // specific to SOPC_PubSubProtocol_MQTT
     MqttContextClient* mqttClient;
+    const char** mqttTopics;
 
     // specific to SOPC_PubSubProtocol_ETH
     SOPC_ETH_Socket_ReceiveAddressInfo* ethAddr;
@@ -651,6 +652,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                             status = SOPC_MQTT_Create_Client(&schedulerCtx.transport[iIter].mqttClient);
                             if (SOPC_STATUS_OK != status)
                             {
+                                SOPC_Free(topic);
                                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                                                        "Not enough space to allocate mqttClient");
                             }
@@ -660,7 +662,14 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                     schedulerCtx.transport[iIter].mqttClient, &address[strlen(MQTT_PREFIX)],
                                     SOPC_PubSubConnection_Get_MqttUsername(connection),
                                     SOPC_PubSubConnection_Get_MqttPassword(connection), topic, nbReaderGroups,
-                                    on_mqtt_message_received, schedulerCtx.transport[iIter].connection);
+                                    on_mqtt_message_received,
+                                    SOPC_PubSubConfiguration_Get_FatalError_Callback(connection),
+                                    schedulerCtx.transport[iIter].connection);
+
+                                schedulerCtx.transport[iIter].fctClear = SOPC_SubScheduler_CtxMqtt_Clear;
+                                schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_MQTT;
+                                schedulerCtx.transport[iIter].sock = -1;
+                                schedulerCtx.transport[iIter].mqttTopics = topic;
 
                                 if (SOPC_STATUS_OK != status)
                                 {
@@ -668,14 +677,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                         SOPC_LOG_MODULE_PUBSUB,
                                         "Subscriber MQTT configuration failed: check if topic is set");
                                 }
-                                else
-                                {
-                                    schedulerCtx.transport[iIter].fctClear = SOPC_SubScheduler_CtxMqtt_Clear;
-                                    schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_MQTT;
-                                    schedulerCtx.transport[iIter].sock = -1;
-                                }
                             }
-                            SOPC_Free(topic);
                         }
                         break;
                     case SOPC_PubSubProtocol_ETH:
@@ -872,6 +874,8 @@ static void SOPC_SubScheduler_CtxUdp_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 static void SOPC_SubScheduler_CtxMqtt_Clear(SOPC_SubScheduler_TransportCtx* ctx)
 {
     SOPC_MQTT_Release_Client(ctx->mqttClient);
+    SOPC_Free(ctx->mqttTopics);
+    ctx->mqttTopics = NULL;
 }
 
 static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)

@@ -186,18 +186,6 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
                 status = SOPC_STATUS_NOK;
                 *contextClient->clientState = SOPC_MQTT_CLIENT_FAILED_CONNECT;
             }
-            else
-            {
-                // wait for connexion result
-                while (*contextClient->clientState == SOPC_MQTT_CLIENT_INITIALIZED)
-                {
-                    SOPC_Sleep(POLLING_CYCLE_MS);
-                }
-                if (*contextClient->clientState != SOPC_MQTT_CLIENT_CONNECTED)
-                {
-                    status = SOPC_STATUS_NOK;
-                }
-            }
         }
     }
     return status;
@@ -254,7 +242,10 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
             SOPC_ASSERT(false);
             break;
         }
+        MQTTAsync_destroy(&contextClient->client);
+        contextClient->client = NULL;
         SOPC_Free(contextClient->clientState);
+        contextClient->clientState = NULL;
     }
     SOPC_Free(contextClient);
 }
@@ -285,6 +276,8 @@ MqttClientState SOPC_MQTT_Client_Get_State(MqttContextClient* contextClient)
 static void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successData* response)
 {
     SOPC_UNUSED_ARG(response);
+    SOPC_ASSERT(NULL != context);
+
     MqttContextClient* contextClient = (MqttContextClient*) context;
     if (contextClient->isSubscriber)
     {
@@ -300,6 +293,8 @@ static int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_me
 {
     SOPC_UNUSED_ARG(topic);
     SOPC_UNUSED_ARG(topicLen);
+    SOPC_ASSERT(NULL != context);
+
     MqttContextClient* contextClient = (MqttContextClient*) context;
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s received a message and transmit to callback",
                            contextClient->clientId);
@@ -310,6 +305,7 @@ static int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_me
 
 static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* response)
 {
+    SOPC_ASSERT(NULL != context);
     MqttContextClient* contextClient = (MqttContextClient*) context;
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection failed, error code %d",
                            contextClient->clientId, response->code);
@@ -318,6 +314,7 @@ static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* respons
 
 static void cb_connexion_lost(void* context, char* cause)
 {
+    SOPC_ASSERT(NULL != context);
     MqttContextClient* contextClient = (MqttContextClient*) context;
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection lost, cause %s", contextClient->clientId,
                            cause);
@@ -326,6 +323,7 @@ static void cb_connexion_lost(void* context, char* cause)
 
 static void cb_disconnect_failed(void* context, MQTTAsync_failureData* response)
 {
+    SOPC_ASSERT(NULL != context);
     MqttContextClient* contextClient = (MqttContextClient*) context;
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                            "Mqtt client %s failed to disconnect, failure code %d. consider client hase disconnected "
@@ -391,6 +389,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
                                                         const char** subTopic,
                                                         uint16_t nbSubTopic,
                                                         FctMessageReceived* cbMessageReceived,
+                                                        SOPC_PubSub_OnFatalError* cbFatalError,
                                                         void* userContext)
 {
     SOPC_UNUSED_ARG(contextClient);
@@ -400,6 +399,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
     SOPC_UNUSED_ARG(subTopic);
     SOPC_UNUSED_ARG(nbSubTopic);
     SOPC_UNUSED_ARG(cbMessageReceived);
+    SOPC_UNUSED_ARG(cbFatalError);
     SOPC_UNUSED_ARG(userContext);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
