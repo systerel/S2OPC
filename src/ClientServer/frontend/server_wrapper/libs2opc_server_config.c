@@ -258,6 +258,12 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create a default authentication manager");
             res = false;
         }
+        else
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "No authentication manager configured: fallback to default permissive authentication manager");
+        }
     }
     if (NULL == sopc_server_helper_config.authorizationManager)
     {
@@ -266,6 +272,12 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create a default authorization manager");
             res = false;
+        }
+        else
+        {
+            SOPC_Logger_TraceWarning(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "No authorization manager configured: fallback to default permissive authorization manager");
         }
     }
     // Associate global user authentication/authorization managers with each low-level endpoint configuration
