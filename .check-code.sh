@@ -139,15 +139,15 @@ if [[ $? != 0 ]]; then
 fi
 
 #### Clang static analyzer ####
-echo "[DESACTIVATED STG] Compilation with Clang static analyzer" | tee -a $LOGPATH
-# rm -fr build-analyzer && ./.run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
+echo "Compilation with Clang static analyzer" | tee -a $LOGPATH
+rm -fr build-analyzer && ./.run-clang-static-analyzer.sh 2>&1 | tee -a $LOGPATH
 
 # Keep result
 STATIC_ANALYSIS_STATUS=${PIPESTATUS[0]}
 
 ## Analyze C sources with clang-tidy ####
 
-echo "[DESACTIVATED STG] Checking specific CERT rules using clang-tidy tool" | tee -a $LOGPATH
+echo "Checking specific CERT rules using clang-tidy tool" | tee -a $LOGPATH
 # CERT rules to verify
 if [[ -z $ISADVANCED || $ISADVANCED != "advanced" ]]; then
     # remove default rules
@@ -158,25 +158,25 @@ else
     REMOVE_DEFAULT_RULES=""
 fi
 
-# CERT_RULES=cert-flp30-c,cert-fio38-c,cert-env33-c,cert-err34-c,cert-msc30-c
-# # Define include directories
-# SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -type d`)
-# SRC_INCL=${SRC_DIRS[@]/#/-I}
-# # includes the generated export file
-# SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
-# CLANG_TIDY_LOG=clang_tidy.log
-# # Run clang-tidy removing default checks (-*) and adding CERT rules verification
-# find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
-# # Check if resulting log contains error or warnings
-# grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
-# if [[ $? != 0 ]]; then
-#     echo "ERROR: checking CERT rules $CERT_RULES with clang-tidy: see log $CLANG_TIDY_LOG" | tee -a $LOGPATH
-#     # Note: for default checks the scan-build tool can be use to build the project (scan-build ./build.sh).
-#     #       It generates an HTML report providing diagnostics of the warning
-#     EXITCODE=1
-# else
-#     \rm $CLANG_TIDY_LOG
-# fi
+CERT_RULES=cert-flp30-c,cert-fio38-c,cert-env33-c,cert-err34-c,cert-msc30-c
+# Define include directories
+SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -type d`)
+SRC_INCL=${SRC_DIRS[@]/#/-I}
+# includes the generated export file
+SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
+CLANG_TIDY_LOG=clang_tidy.log
+# Run clang-tidy removing default checks (-*) and adding CERT rules verification
+find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
+# Check if resulting log contains error or warnings
+grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
+if [[ $? != 0 ]]; then
+    echo "ERROR: checking CERT rules $CERT_RULES with clang-tidy: see log $CLANG_TIDY_LOG" | tee -a $LOGPATH
+    # Note: for default checks the scan-build tool can be use to build the project (scan-build ./build.sh).
+    #       It generates an HTML report providing diagnostics of the warning
+    EXITCODE=1
+else
+    \rm $CLANG_TIDY_LOG
+fi
 
 # Remove static analysis build since it is not necessary anymore
 if [[ $STATIC_ANALYSIS_STATUS != 0 ]]; then
