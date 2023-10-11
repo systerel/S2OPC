@@ -1196,7 +1196,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(SOPC_PKIProvider* pPKI,
     pThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
     thumbprint = NULL == pThumbprint ? "NULL" : pThumbprint;
     /* If CA root and backward interoperability */
-    if (pToValidateCpy->crt.ca_istrue && bIsSelfSign && pProfile->bBackwardInteroperability)
+    if (pToValidateCpy->crt.ca_istrue && 0 == pToValidateCpy->crt.max_pathlen && bIsSelfSign &&
+        pProfile->bBackwardInteroperability)
     {
         /* Root is trusted? */
         if (NULL != pPKI->pTrustedRoots)
