@@ -1117,7 +1117,6 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     SOPC_CertificateList* pCert = NULL;
     char* pThumb = NULL;
     const char* thumb = NULL;
-    SOPC_PKI_LeafProfile* pLeafProfile = NULL;
     SOPC_PKIProvider* pTmpPKI = NULL;
     SOPC_CertificateList* pToUpdateTrustedCerts = NULL;
     SOPC_CRLList* pToUpdateTrustedCRLs = NULL;
@@ -1172,24 +1171,24 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     /* Create the PKI profile and validate the certificate */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_CreateLeafProfile(NULL, &pLeafProfile);
+        /* Minimum profile (we do not know for which security policy this will be used) */
+        SOPC_PKI_ChainProfile chainProfile = {.curves = SOPC_PKI_CURVES_ANY,
+                                              .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+                                              .pkAlgo = SOPC_PKI_PK_RSA,
+                                              .RSAMinimumKeySize = 1024};
+        SOPC_PKI_Profile profile = {.leafProfile = NULL,
+                                    .chainProfile = &chainProfile,
+                                    .bAppendRejectCert = false,
+                                    .bApplyLeafProfile = true,
+                                    .bBackwardInteroperability = pTrustList->pPKI};
+        status = SOPC_PKIProvider_CreateLeafProfile(NULL, &profile.leafProfile);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_LeafProfileSetUsageFromType(pLeafProfile, SOPC_PKI_TYPE_SERVER_APP);
+            // Note: this will activate bAppendToRejectedList, it seems a good thing but might be changed if needed.
+            status = SOPC_PKIProvider_ProfileSetUsageFromType(&profile, SOPC_PKI_TYPE_SERVER_APP);
         }
         if (SOPC_STATUS_OK == status)
         {
-            /* Minimum profile for the chain */
-            SOPC_PKI_ChainProfile chainProfile = {.curves = SOPC_PKI_CURVES_ANY,
-                                                  .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
-                                                  .pkAlgo = SOPC_PKI_PK_RSA,
-                                                  .RSAMinimumKeySize = 1024};
-            const SOPC_PKI_Profile profile = {.leafProfile = pLeafProfile,
-                                              .chainProfile = &chainProfile,
-                                              .bAppendRejectCert = false,
-                                              .bApplyLeafProfile = true,
-                                              .bBackwardInteroperability = false};
-
             /* Validate the certificate */
             status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pCert, &profile, &validationError);
             if (SOPC_STATUS_OK != status)
@@ -1206,6 +1205,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
         {
             statusCode = OpcUa_BadUnexpectedError;
         }
+        SOPC_PKIProvider_DeleteLeafProfile(&profile.leafProfile);
     }
     /* Update the PKI with the new certificate */
     if (SOPC_STATUS_OK == status)
@@ -1229,7 +1229,6 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     }
     /* Clear */
     SOPC_Free(pThumb);
-    SOPC_PKIProvider_DeleteLeafProfile(&pLeafProfile);
     SOPC_PKIProvider_Free(&pTmpPKI);
     SOPC_KeyManager_Certificate_Free(pToUpdateTrustedCerts);
     SOPC_KeyManager_CRL_Free(pToUpdateTrustedCRLs);
