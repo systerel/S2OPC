@@ -215,9 +215,9 @@ static int verify_cert(void* findTrustedCrt, mbedtls_x509_crt* crt, int certific
         mbedtls_x509_crt* crtTrusted = &trustedCrts->crt; /* Current cert */
         while (0 == *flags && NULL != crtTrusted)
         {
-            if (crt->subject_raw.len == crtTrusted->subject_raw.len &&
+            if (crt->subject_raw.len == crtTrusted->subject_raw.len && crt->raw.len == crtTrusted->raw.len &&
                 0 == memcmp(crt->subject_raw.p, crtTrusted->subject_raw.p, crt->subject_raw.len) &&
-                crt->raw.len == crtTrusted->raw.len && 0 == memcmp(crt->raw.p, crtTrusted->raw.p, crt->subject_raw.len))
+                0 == memcmp(crt->raw.p, crtTrusted->raw.p, crt->subject_raw.len))
             {
                 findTrustedCrtInChain->isTrustedInChain = true;
             }
@@ -1061,7 +1061,8 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
     uint32_t failure_reasons = 0;
     int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, mbed_profile, NULL,
                                                    &failure_reasons, verify_cert, &findTrustedCrt);
-    if (0 == ret && !findTrustedCrt.isTrustedInChain)
+    // Check if at a least one trusted certificate is present in trust chain
+    if (!findTrustedCrt.isTrustedInChain)
     {
         ret = -1;
         failure_reasons = (failure_reasons | (uint32_t) MBEDTLS_X509_BADCERT_NOT_TRUSTED);
