@@ -21,7 +21,7 @@
 #define SOPC_PUBSUB_PROTOCOL_H_
 
 #define UADP_PREFIX "opc.udp://"
-#define MQTT_PREFIX "mqtts://"
+#define MQTT_PREFIX "mqtt://"
 #define ETH_PREFIX "opc.eth://"
 #define ETH_ETHERTYPE 0xB62C
 

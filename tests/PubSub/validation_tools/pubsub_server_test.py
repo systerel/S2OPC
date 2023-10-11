@@ -124,7 +124,7 @@ XML_PUBSUB_LOOP = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1">
+    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -134,7 +134,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
+    <connection address="mqtt://127.0.0.1:1883" mode="subscriber">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -147,7 +147,7 @@ XML_PUBSUB_LOOP_MQTT = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1">
+    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -161,7 +161,7 @@ XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber">
+    <connection address="mqtt://127.0.0.1:1883" mode="subscriber">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC" >
             <dataset writerId="50" >
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -178,7 +178,7 @@ XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user1" mqttPassword="password">
+    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user1" mqttPassword="password">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -188,7 +188,7 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" >
+    <connection address="mqtt://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password" >
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -201,7 +201,7 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
-    <connection address="mqtts://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user" mqttPassword="passwor">
+    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user" mqttPassword="passwor">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -211,7 +211,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtts://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
+    <connection address="mqtt://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />

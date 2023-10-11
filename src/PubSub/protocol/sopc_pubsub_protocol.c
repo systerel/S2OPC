@@ -22,6 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "sopc_helper_string.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 
 static bool SOPC_PubSub_Protocol_StartWith(const char* uri, const char* prefix);
@@ -48,6 +49,8 @@ SOPC_PubSubProtocol_Type SOPC_PubSub_Protocol_From_URI(const char* uri)
     }
     else
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                               "Failed to determine the protocol from uri '%s'", uri);
         return SOPC_PubSubProtocol_UNKOWN;
     }
 }

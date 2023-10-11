@@ -24,6 +24,7 @@
 #include "sopc_assert.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
+#include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_protocol.h"
 
@@ -117,6 +118,8 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
     if (0 != strncmp(prefix, UADP_PREFIX, strlen(UADP_PREFIX)) &&
         0 != strncmp(prefix, MQTT_PREFIX, strlen(MQTT_PREFIX)) && 0 != strncmp(prefix, TCP_PREFIX, strlen(TCP_PREFIX)))
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                               "Failed to determine the protocol from prefix '%s'", prefix);
         return false;
     }
 
