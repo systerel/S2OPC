@@ -778,10 +778,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
         {
             SOPC_ASSERT(schedulerCtx.nbConnections <= UINT16_MAX);
             // Run the socket manager with the context
-            if (0 < schedulerCtx.nbSockets)
-            {
-                result = SOPC_SubScheduler_Start_Sockets(threadPriority);
-            }
+            result = SOPC_SubScheduler_Start_Sockets(threadPriority);
             if (!result)
             {
                 uninit_sub_scheduler_ctx();
@@ -823,6 +820,11 @@ void SOPC_SubScheduler_Stop(void)
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, false);
 }
 
+static void SOPC_Sub_PeriodicTick(void* ctx)
+{
+    SOPC_UNUSED_ARG(ctx);
+}
+
 /*
   precondition :
    - call init_sub_scheduler_ctx
@@ -831,7 +833,6 @@ void SOPC_SubScheduler_Stop(void)
 */
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
 {
-    SOPC_ASSERT(0 < schedulerCtx.nbSockets);
     SOPC_ASSERT(NULL == schedulerCtx.sockArray);
 
     uint16_t nb_socket = schedulerCtx.nbSockets;
@@ -860,8 +861,8 @@ static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
 
     SOPC_ASSERT(nb_socket == sockIdx);
     SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
-                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received, NULL, NULL,
-                                   threadPriority);
+                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received,
+                                   &SOPC_Sub_PeriodicTick, NULL, threadPriority);
 
     return true;
 }

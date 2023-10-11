@@ -56,23 +56,30 @@ static struct
 static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
     SOPC_UNUSED_ARG(nullData);
-    int32_t nbReady = 0;
     SOPC_SocketSet readSet, writeSet, exceptSet;
     SOPC_TimeReference lastTick = SOPC_TimeReference_GetCurrent();
 
     while (SOPC_Atomic_Int_Get(&receptionThread.stopFlag) == false)
     {
-        SOPC_SocketSet_Clear(&readSet);
-        SOPC_SocketSet_Clear(&writeSet);
-        SOPC_SocketSet_Clear(&exceptSet);
-
-        for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
+        int32_t nbReady = 0;
+        if (receptionThread.nbSockets > 0)
         {
-            SOPC_SocketSet_Add(receptionThread.socketArray[i], &readSet);
-        }
+            SOPC_SocketSet_Clear(&readSet);
+            SOPC_SocketSet_Clear(&writeSet);
+            SOPC_SocketSet_Clear(&exceptSet);
 
-        // Returns number of ready descriptor or -1 in case of error
-        nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, TIMEOUT_MS);
+            for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
+            {
+                SOPC_SocketSet_Add(receptionThread.socketArray[i], &readSet);
+            }
+
+            // Returns number of ready descriptor or -1 in case of error
+            nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, TIMEOUT_MS);
+        }
+        else
+        {
+            SOPC_Sleep(TIMEOUT_MS);
+        }
 
         if (nbReady < 0)
         {

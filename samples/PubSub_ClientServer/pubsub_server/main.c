@@ -194,6 +194,7 @@ int main(int argc, char* const argv[])
         status = Server_WritePubSubNodes();
     }
 
+    int startWaitSec = 0;
     /* Wait for a signal */
     while (SOPC_STATUS_OK == status && Server_IsRunning() && stopSignal == 0)
     {
@@ -202,8 +203,14 @@ int main(int argc, char* const argv[])
         {
             PubSub_Stop();
             SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "PubSub stopped through Start/Stop Command");
+            startWaitSec = WAIT_STOP_START / SLEEP_TIMEOUT;
         }
-        if (Server_PubSubStart_Requested())
+        if (startWaitSec > 0)
+        {
+            // This avoids to restart instantly after a STOP
+            startWaitSec--;
+        }
+        else if (Server_PubSubStart_Requested())
         {
             status = PubSub_Configure();
             if (SOPC_STATUS_OK == status)
