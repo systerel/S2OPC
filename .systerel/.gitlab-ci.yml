@@ -299,7 +299,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check_cyclone@sha256:e2ca3efbf6f040b8431116f7359b29b33183aa9533dbd55b71b78ec6c37defb2 # digest of check_cyclone:1.1
+  image: docker.aix.systerel.fr/c838/check_cyclone@sha256:2e43c8601f5726b7222bbfa3cec7520d1884bcd0b61792922c5ce01e0fbb6521 # digest of check_cyclone:1.3
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -313,7 +313,7 @@ test-check:
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
     - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
-      DOCKER_IMAGE: 'sha256:f4cbb1c28938954cd56be8731088bcdf1ed41987ccfca6cf45002ed897e4014d'
+      DOCKER_IMAGE: 'sha256:02e51fdbd4623a98e2812370e6d479f4682af9518667acdf36363557e6be00a6'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}'
     paths:
