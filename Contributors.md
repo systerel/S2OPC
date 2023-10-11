@@ -33,3 +33,4 @@ the legal rights to contribute.
 * Henri de Pesquidoux <henri.de.pesquidoux-stg@systerel.fr>
 * tajan <sebastien.tajan-stg@systerel.fr>
 * Nathan Lebeau <nathan.lebeau-stg@systerel.fr>
+* Lebeau <nathan.lebeau@systerel.fr>
