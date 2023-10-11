@@ -27,7 +27,6 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
-#include "sopc_pubsub_conf.h"
 
 #include "MQTTAsync.h"
 
@@ -50,6 +49,7 @@ struct MQTT_CONTEXT_CLIENT
 
     bool isSubscriber; /* True if client is subscriber */
     SubscriberContext subContext;
+    bool hasSubscribed;
 
     int nbReconnectTries; /* Store number of connection and reconnection tries */
     MqttClientState* clientState;
@@ -141,6 +141,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
     contextClient->nbReconnectTries = 0;
     contextClient->subContext.cbMessageArrived = cbMessageReceived;
     contextClient->subContext.nbTopic = nbSubTopic;
+    contextClient->hasSubscribed = false;
     contextClient->pUser = userContext;
     contextClient->clientState = SOPC_Calloc(1, sizeof(*contextClient->clientState));
     contextClient->cbFatalError = cbFatalError;
@@ -161,6 +162,8 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
         snprintf(contextClient->clientId, SOPC_MAX_LENGTH_UINT64_TO_STRING - 1, "%" PRIu64, clientId);
         int MQTTAsyncResult =
             MQTTAsync_create(&contextClient->client, uri, contextClient->clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "MQTTAsync_create returned %p",
+                              (const void*) contextClient->client);
         if (MQTTAsyncResult != 0)
         {
             status = SOPC_STATUS_NOK;
@@ -213,20 +216,14 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
     SOPC_ASSERT(NULL != contextClient);
     if (NULL != contextClient->clientState)
     {
-        MQTTAsync_disconnectOptions options = MQTTAsync_disconnectOptions_initializer;
-        options.onSuccess = cb_disconnect_success;
-        options.onFailure = cb_disconnect_failed;
-        options.context = contextClient;
-        int resDisconnect = 0;
-        switch (*contextClient->clientState)
+        if (MQTTAsync_isConnected(contextClient->client))
         {
-        case SOPC_MQTT_CLIENT_UNITIALIZED:
-        case SOPC_MQTT_CLIENT_INITIALIZED:
-        case SOPC_MQTT_CLIENT_DISCONNECTED:
-        case SOPC_MQTT_CLIENT_LOST_CONNECTION:
-        case SOPC_MQTT_CLIENT_FAILED_CONNECT:
-            break;
-        case SOPC_MQTT_CLIENT_CONNECTED:
+            MQTTAsync_disconnectOptions options = MQTTAsync_disconnectOptions_initializer;
+            options.onSuccess = cb_disconnect_success;
+            options.onFailure = cb_disconnect_failed;
+            options.context = contextClient;
+            int resDisconnect = 0;
+
             resDisconnect = MQTTAsync_disconnect(contextClient->client, &options);
             if (MQTTASYNC_SUCCESS != resDisconnect)
             {
@@ -240,12 +237,9 @@ void SOPC_MQTT_Release_Client(MqttContextClient* contextClient)
                     SOPC_Sleep(POLLING_CYCLE_MS);
                 }
             }
-            break;
-        default:
-            // should'nt come here
-            SOPC_ASSERT(false);
-            break;
         }
+        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "MQTTAsync_destroy (%p)", (const void*) contextClient->client);
+
         MQTTAsync_destroy(&contextClient->client);
         contextClient->client = NULL;
         SOPC_Free(contextClient->clientState);
@@ -283,10 +277,12 @@ static void cb_subscribe_on_connexion_success(void* context, MQTTAsync_successDa
     SOPC_ASSERT(NULL != context);
 
     MqttContextClient* contextClient = (MqttContextClient*) context;
-    if (contextClient->isSubscriber)
+    if (contextClient->isSubscriber && !contextClient->hasSubscribed)
     {
-        MQTTAsync_subscribeMany(contextClient->client, contextClient->subContext.nbTopic,
-                                contextClient->subContext.topic, contextClient->subContext.qos, NULL);
+        int res = MQTTAsync_subscribeMany(contextClient->client, contextClient->subContext.nbTopic,
+                                          contextClient->subContext.topic, contextClient->subContext.qos, NULL);
+        // Avoid duplicate susbcriptions
+        contextClient->hasSubscribed = (res == MQTTASYNC_SUCCESS);
     }
     SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s successfully connected to the server",
                            contextClient->clientId);
@@ -317,17 +313,12 @@ static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* respons
 
     // If the connection failed due to a Broker restart, there are high chances
     // that "reconnect" will never succeed and get stuck. Notify the application.
-    SOPC_PubSubConnection* connection = (SOPC_PubSubConnection*)contextClient->pUser;
-    if (NULL != connection)
+    const char* name = contextClient->clientId;
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "MQTT connection '%s' got disconnected.", name ? name : "<NULL>");
+    SOPC_PubSub_OnFatalError* callback = contextClient->cbFatalError;
+    if (NULL != callback)
     {
-        const char* name = SOPC_PubSubConnection_Get_Name(connection);
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "MQTT connection '%s' got disconnected.",
-                name ? name : "<NULL>");
-        SOPC_PubSub_OnFatalError* callback = SOPC_PubSubConfiguration_Get_FatalError_Callback(connection);
-        if (NULL != callback)
-        {
-            (*callback)(connection, "MQTT_CLIENT_FAILED_CONNECT");
-        }
+        (*callback)(contextClient->pUser, response ? response->message : NULL);
     }
 }
 
@@ -337,6 +328,21 @@ static void cb_connexion_lost(void* context, char* cause)
     MqttContextClient* contextClient = (MqttContextClient*) context;
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection lost, cause %s", contextClient->clientId,
                            cause);
+    if (contextClient->isSubscriber && contextClient->hasSubscribed)
+    {
+        int res = MQTTAsync_unsubscribeMany(contextClient->client, contextClient->subContext.nbTopic,
+                                            contextClient->subContext.topic, NULL);
+        // Avoid duplicate susbcriptions
+        if (res == MQTTASYNC_SUCCESS)
+        {
+            contextClient->hasSubscribed = false;
+        }
+        else
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "MQTT connection failed to unsubscribe to topics, Res= %d.",
+                                   res);
+        }
+    }
     *contextClient->clientState = SOPC_MQTT_CLIENT_LOST_CONNECTION;
 }
 
