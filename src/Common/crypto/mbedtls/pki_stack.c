@@ -64,9 +64,10 @@
 
 typedef struct
 {
-    SOPC_CertificateList* trustedCrts;
+    const SOPC_CertificateList* trustedCrts;
+    const SOPC_CRLList* allCRLs;
     bool isTrustedInChain;
-} SOPC_FindTrustedCrtInChain;
+} SOPC_CheckTrustedAndCRLinChain;
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
@@ -175,21 +176,46 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unknown;
 }
 
-static int verify_cert(void* findTrustedCrt, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
+static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int certificate_depth, uint32_t* flags)
 {
-    SOPC_UNUSED_ARG(certificate_depth);
-    SOPC_UNUSED_ARG(flags);
-    SOPC_FindTrustedCrtInChain* findTrustedCrtInChain = (SOPC_FindTrustedCrtInChain*) findTrustedCrt;
+    SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRLinChain = (SOPC_CheckTrustedAndCRLinChain*) checkTrustedAndCRL;
+
+    /* Check if a revocation list is present when not the certificate leaf
+       (that might have CA bit set if self-signed and OPC UA backward compatibility active) */
+    /*
+     * Note: it is necessary because mbedtls make it our responsibility:
+     * It is your responsibility to provide up-to-date CRLs for all trusted CAs. If no CRL is provided for the CA
+     * that was used to sign the certificate, CRL verification is skipped silently, that is without setting any flag.
+     */
+    if (0 != certificate_depth)
+    {
+        bool matchCRL = false;
+        // Unlink cert temporarily for CRL verification
+        mbedtls_x509_crt* backupNextCrt = crt->next;
+        crt->next = NULL;
+        SOPC_ReturnStatus status =
+            SOPC_KeyManagerLib_CertificateList_FindCRL(crt, &checkTrustedAndCRLinChain->allCRLs->crl, &matchCRL);
+        // Restore link
+        crt->next = backupNextCrt;
+        if (SOPC_STATUS_OK != status)
+        {
+            matchCRL = false;
+        }
+        if (!matchCRL)
+        {
+            *flags = *flags | MBEDTLS_X509_BADCRL_NOT_TRUSTED;
+        }
+    }
 
     /* Check if certificate chain element is part of PKI trusted certificates */
-    mbedtls_x509_crt* crtTrusted = &findTrustedCrtInChain->trustedCrts->crt; /* Current cert */
-    while (!findTrustedCrtInChain->isTrustedInChain && NULL != crtTrusted)
+    const mbedtls_x509_crt* crtTrusted = &checkTrustedAndCRLinChain->trustedCrts->crt; /* Current cert */
+    while (!checkTrustedAndCRLinChain->isTrustedInChain && NULL != crtTrusted)
     {
         if (crt->subject_raw.len == crtTrusted->subject_raw.len && crt->raw.len == crtTrusted->raw.len &&
             0 == memcmp(crt->subject_raw.p, crtTrusted->subject_raw.p, crt->subject_raw.len) &&
             0 == memcmp(crt->raw.p, crtTrusted->raw.p, crt->subject_raw.len))
         {
-            findTrustedCrtInChain->isTrustedInChain = true;
+            checkTrustedAndCRLinChain->isTrustedInChain = true;
         }
         crtTrusted = crtTrusted->next;
     }
@@ -1041,13 +1067,14 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         mbed_cert->next = pLinkCert;
     }
 
-    SOPC_FindTrustedCrtInChain findTrustedCrt = {.trustedCrts = pPKI->pAllTrusted, .isTrustedInChain = false};
+    SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {
+        .trustedCrts = pPKI->pAllTrusted, .allCRLs = pPKI->pAllCrl, .isTrustedInChain = false};
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
     int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert, mbed_ca_root, mbed_crl, mbed_profile, NULL,
-                                                   &failure_reasons, verify_cert, &findTrustedCrt);
+                                                   &failure_reasons, verify_cert, &checkTrustedAndCRL);
     // Check if at a least one trusted certificate is present in trust chain
-    if (!findTrustedCrt.isTrustedInChain)
+    if (!checkTrustedAndCRL.isTrustedInChain)
     {
         ret = -1;
         failure_reasons = (failure_reasons | (uint32_t) MBEDTLS_X509_BADCERT_NOT_TRUSTED);
@@ -2095,8 +2122,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     {
         if (bTrustedCaFound)
         {
-            status =
-                SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(&tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
+            status = SOPC_KeyManagerLib_CertificateList_FindCRL(&tmp_pTrustedCerts->crt, &tmp_pTrustedCrl->crl,
+                                                                &bTrustedCRL);
             if (NULL == tmp_pTrustedCerts)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -2114,13 +2141,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     {
         if (bIssuerCaFound)
         {
-            status = SOPC_KeyManager_CertificateList_RemoveCAWithoutCRL(&tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
-            if (NULL == tmp_pIssuerCerts)
-            {
-                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                         "> PKI creation warning: After deleting CAs without CRL, the list of issuer "
-                                         "certificates became empty");
-            }
+            status =
+                SOPC_KeyManagerLib_CertificateList_FindCRL(&tmp_pIssuerCerts->crt, &tmp_pIssuerCrl->crl, &bIssuerCRL);
         }
         else
         {
