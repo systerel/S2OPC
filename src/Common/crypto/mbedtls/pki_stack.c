@@ -981,16 +981,16 @@ static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProf
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider* pPKI,
-                                                         mbedtls_x509_crt* mbed_cert_list,
-                                                         mbedtls_x509_crt_profile* mbed_profile,
-                                                         bool bIsSelfSigned,
-                                                         const char* thumbprint,
-                                                         uint32_t* error)
+static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
+                                                   mbedtls_x509_crt* mbed_cert,
+                                                   mbedtls_x509_crt_profile* mbed_profile,
+                                                   bool bIsSelfSigned,
+                                                   const char* thumbprint,
+                                                   uint32_t* error)
 {
     SOPC_ASSERT(NULL != pPKI);
-    SOPC_ASSERT(NULL != mbed_cert_list);
-    SOPC_ASSERT(NULL == mbed_cert_list->next); // TODO: thus we don't validate a chain but a single certificate !!
+    SOPC_ASSERT(NULL != mbed_cert);
+    SOPC_ASSERT(NULL == mbed_cert->next); // TODO: thus we don't validate a chain but a single certificate !!
     // TODO: reflect we validate only 1 certificate here because we need this property for self-signed
     SOPC_ASSERT(NULL != mbed_profile);
     SOPC_ASSERT(NULL != thumbprint);
@@ -1023,7 +1023,7 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
         if (NULL == mbed_ca_root)
         {
             // Set self-signed validating cert as single element
-            mbed_ca_root = mbed_cert_list;
+            mbed_ca_root = mbed_cert;
         }
         else
         {
@@ -1033,18 +1033,18 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
                 lastRoot = lastRoot->next;
             }
             // Set self-signed validating cert as last element
-            lastRoot->next = mbed_cert_list;
+            lastRoot->next = mbed_cert;
         }
     }
     else /* If certificate is not self signed, add the intermediate certificates to the trust chain to evaluate */
     {
-        mbed_cert_list->next = pLinkCert;
+        mbed_cert->next = pLinkCert;
     }
 
     SOPC_FindTrustedCrtInChain findTrustedCrt = {.trustedCrts = pPKI->pAllTrusted, .isTrustedInChain = false};
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
-    int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert_list, mbed_ca_root, mbed_crl, mbed_profile, NULL,
+    int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert, mbed_ca_root, mbed_crl, mbed_profile, NULL,
                                                    &failure_reasons, verify_cert, &findTrustedCrt);
     // Check if at a least one trusted certificate is present in trust chain
     if (!findTrustedCrt.isTrustedInChain)
@@ -1060,14 +1060,14 @@ static SOPC_ReturnStatus sopc_validate_certificate_chain(const SOPC_PKIProvider*
                                *error, thumbprint);
         status = SOPC_STATUS_NOK;
     }
-    /* Unlink mbed_cert_list from root CAs if it was added */
+    /* Unlink mbed_cert from root CAs if it was added */
     if (NULL != lastRoot)
     {
         lastRoot->next = NULL;
     }
-    /* Unlink intermediate CAs from mbed_cert_list,
+    /* Unlink intermediate CAs from mbed_cert,
        otherwise destroying the pToValidate will also destroy trusted or untrusted links */
-    mbed_cert_list->next = NULL;
+    mbed_cert->next = NULL;
     return status;
 }
 
@@ -1144,10 +1144,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
     return status;
 }
 
-static SOPC_ReturnStatus sopc_validate_certificate(SOPC_PKIProvider* pPKI,
-                                                   const SOPC_CertificateList* pToValidate,
-                                                   const SOPC_PKI_Profile* pProfile,
-                                                   uint32_t* error)
+static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvider* pPKI,
+                                                                   const SOPC_CertificateList* pToValidate,
+                                                                   const SOPC_PKI_Profile* pProfile,
+                                                                   uint32_t* error)
 {
     if (NULL == pPKI || NULL == pToValidate || NULL == pProfile || NULL == error)
     {
@@ -1222,8 +1222,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(SOPC_PKIProvider* pPKI,
     if (SOPC_STATUS_OK == status)
     {
         mbedtls_x509_crt* mbedCertToValidate = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
-        status = sopc_validate_certificate_chain(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, thumbprint,
-                                                 &currentError);
+        status =
+            sopc_validate_certificate(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, thumbprint, &currentError);
         if (SOPC_STATUS_OK != status)
         {
             if (!bErrorFound)
@@ -1342,7 +1342,7 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         }
         if (SOPC_STATUS_OK == status)
         {
-            statusChain = sopc_validate_certificate_chain(pPKI, crt, mbed_profile, bIsSelfSigned, thumbprint, &error);
+            statusChain = sopc_validate_certificate(pPKI, crt, mbed_profile, bIsSelfSigned, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
                 *bErrorFound = true;
@@ -2198,7 +2198,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->pAllCrl = tmp_pAllCrl;
         pPKI->pRejectedList = NULL;
         pPKI->directoryStorePath = NULL;
-        pPKI->pFnValidateCert = &sopc_validate_certificate;
+        pPKI->pFnValidateCert = &sopc_PKI_validate_profile_and_certificate;
         pPKI->isPermissive = false;
         *ppPKI = pPKI;
     }
