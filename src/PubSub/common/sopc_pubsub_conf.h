@@ -59,6 +59,13 @@ typedef SOPC_UADP_Configuration SOPC_UadpNetworkMessageContentMask;
 
 typedef struct SOPC_PublishedVariable SOPC_PublishedVariable;
 
+/**
+ * Notifies a fatal error on a Pub or Sub connection, that is not automatically recoverable
+ * @param index The corresponding index of the connection in ::SOPC_PubSubConfiguration
+ * @param message A textual information about the error
+ */
+typedef void SOPC_PubSub_OnFatalError(void* userContext, const char* message);
+
 typedef enum
 {
     SOPC_PubSubConnection_Pub = 0,
@@ -134,7 +141,6 @@ uint32_t SOPC_PubSubConfiguration_Nb_SubConnection(const SOPC_PubSubConfiguratio
 
 SOPC_PubSubConnection* SOPC_PubSubConfiguration_Get_SubConnection_At(const SOPC_PubSubConfiguration* configuration,
                                                                      uint32_t index);
-
 // Publisher Only
 bool SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(SOPC_PubSubConfiguration* configuration, uint32_t nb);
 uint32_t SOPC_PubSubConfiguration_Nb_PublishedDataSet(const SOPC_PubSubConfiguration* configuration);
@@ -150,6 +156,10 @@ const char* SOPC_PubSubConnection_Get_Name(const SOPC_PubSubConnection* connecti
 bool SOPC_PubSubConnection_Set_Name(SOPC_PubSubConnection* connection, const char* name);
 bool SOPC_PubSubConnection_Is_Enabled(const SOPC_PubSubConnection* connection);
 void SOPC_PubSubConnection_Set_Enabled(SOPC_PubSubConnection* connection, bool enabled);
+
+void SOPC_PubSubConfiguration_Set_FatalError_Callback(SOPC_PubSubConnection* connection,
+                                                      SOPC_PubSub_OnFatalError* callback);
+SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_PubSubConnection* connection);
 
 /* Publisher only */
 void SOPC_PubSubConnection_Set_AcyclicPublisher(SOPC_PubSubConnection* connection, bool acyclicPublisher);

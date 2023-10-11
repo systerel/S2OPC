@@ -884,7 +884,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         status = SOPC_MQTT_InitializeAndConnect_Client(
             pubSchedulerCtx.transport[index].mqttClient, &address[strlen(MQTT_PREFIX)],
             SOPC_PubSubConnection_Get_MqttUsername(connection), SOPC_PubSubConnection_Get_MqttPassword(connection),
-            NULL, 0, NULL, NULL);
+            NULL, 0, NULL, NULL, NULL);
 
         if (SOPC_STATUS_OK != status)
         {

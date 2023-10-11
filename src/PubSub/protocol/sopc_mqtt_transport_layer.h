@@ -28,6 +28,7 @@
 #include "sopc_atomic.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -83,7 +84,8 @@ SOPC_ReturnStatus SOPC_MQTT_Send_Message(MqttContextClient* contextClient, const
  * @param subTopic Array of topics to subscribe, can be NULL
  * @param nbSubTopic Number of topics to subscribe, can be NULL
  * @param cbMessageReceived Callback of message reception
- * @param userContext Connexion context of user
+ * @param cbFatalError Callback for broker disconnection
+ * @param userContext Connexion context of user (Passed to ::cbFatalError and cbMessageReceived::)
  * @return ::SOPC_STATUS_OK if succeed to initialize mqtt contextClient, ::SOPC_STATUS_NOK if failed to create a mqtt
  * Client or failed to connect
  */
@@ -94,6 +96,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
                                                         const char** subTopic,
                                                         uint16_t nbSubTopic,
                                                         FctMessageReceived* cbMessageReceived,
+                                                        SOPC_PubSub_OnFatalError* cbFatalError,
                                                         void* userContext);
 
 /**

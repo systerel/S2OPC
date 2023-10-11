@@ -345,6 +345,11 @@ bool Server_IsRunning(void)
     return true == SOPC_Atomic_Int_Get(&serverOnline);
 }
 
+void Server_PubSubStop_RequestRestart(void)
+{
+    SOPC_Atomic_Int_Set(&pubSubStopRequested, true);
+    SOPC_Atomic_Int_Set(&pubSubStartRequested, true);
+}
 bool Server_PubSubStop_Requested(void)
 {
     bool requested = SOPC_Atomic_Int_Get(&pubSubStopRequested);

@@ -84,6 +84,7 @@ struct SOPC_PubSubConnection
 
     bool acyclicPublisher;
 
+    SOPC_PubSub_OnFatalError* onFatalError;
     // For the next version:
     // uint32_t connectionPropertiesLength: not used;
     // KeyValuePair *connectionProperties: not used;
@@ -451,6 +452,19 @@ void SOPC_PubSubConnection_Set_Enabled(SOPC_PubSubConnection* connection, bool e
 {
     SOPC_ASSERT(NULL != connection);
     connection->enabled = enabled;
+}
+
+void SOPC_PubSubConfiguration_Set_FatalError_Callback(SOPC_PubSubConnection* connection,
+                                                      SOPC_PubSub_OnFatalError* callback)
+{
+    SOPC_ASSERT(NULL != connection);
+    connection->onFatalError = callback;
+}
+
+SOPC_PubSub_OnFatalError* SOPC_PubSubConfiguration_Get_FatalError_Callback(SOPC_PubSubConnection* connection)
+{
+    SOPC_ASSERT(NULL != connection);
+    return connection->onFatalError;
 }
 
 // PublisherId

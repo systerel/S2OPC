@@ -49,11 +49,12 @@ typedef void SOPC_SubscriberDataSetMessageSequenceNumberGap_Func(SOPC_Conf_Publi
                                                                  uint16_t prevSN,
                                                                  uint16_t receivedSN);
 
-/* Only state changed callback can be NULL */
+/* Only ::pStateChangedCb callback and ::pSubDisconnectedCb can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
                              SOPC_SubscriberDataSetMessageSequenceNumberGap_Func sdmSnGapCb,
+                             SOPC_PubSub_OnFatalError* pSubDisconnectedCb,
                              int threadPriority);
 
 void SOPC_SubScheduler_Stop(void);

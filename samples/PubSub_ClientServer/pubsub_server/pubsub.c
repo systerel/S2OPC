@@ -27,6 +27,7 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"
 #include "sopc_logger.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_protocol.h"
@@ -116,6 +117,13 @@ static void PubSub_SaveConfiguration(char* configBuffer)
     }
 }
 #endif
+
+static void pubSub_OnFatalError(void* userContext, const char* message)
+{
+    SOPC_UNUSED_ARG(userContext);
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "PubSub FatalError with message \"%s\"", message ? message : "");
+    Server_PubSubStop_RequestRestart();
+}
 
 static void Server_GapInDsmSnCb(SOPC_Conf_PublisherId pubId, uint16_t writerId, uint16_t prevSN, uint16_t receivedSN)
 {
@@ -437,8 +445,8 @@ bool PubSub_Start(void)
     if (sub_nb_connections > 0)
     {
         // Note: use SetSubStatusAsync function to avoid blocking treatment in sub scheduler
-        subOK =
-            SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatusAsync, Server_GapInDsmSnCb, 0);
+        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatusAsync, Server_GapInDsmSnCb,
+                                        pubSub_OnFatalError, 0);
     }
     if (pub_nb_connections > 0)
     {

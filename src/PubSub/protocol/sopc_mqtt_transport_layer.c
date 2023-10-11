@@ -27,6 +27,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_logger.h"
+#include "sopc_pubsub_conf.h"
 
 #include "MQTTAsync.h"
 
@@ -52,6 +53,7 @@ struct MQTT_CONTEXT_CLIENT
 
     int nbReconnectTries; /* Store number of connection and reconnection tries */
     MqttClientState* clientState;
+    SOPC_PubSub_OnFatalError* cbFatalError;
     void* pUser; /* User Context */
 };
 
@@ -128,6 +130,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
                                                         const char** subTopic,
                                                         uint16_t nbSubTopic,
                                                         FctMessageReceived* cbMessageReceived,
+                                                        SOPC_PubSub_OnFatalError* cbFatalError,
                                                         void* userContext)
 {
     MQTTAsync_deliveryComplete* cbDeliveryComplete = NULL;
@@ -140,6 +143,7 @@ SOPC_ReturnStatus SOPC_MQTT_InitializeAndConnect_Client(MqttContextClient* conte
     contextClient->subContext.nbTopic = nbSubTopic;
     contextClient->pUser = userContext;
     contextClient->clientState = SOPC_Calloc(1, sizeof(*contextClient->clientState));
+    contextClient->cbFatalError = cbFatalError;
     SOPC_ASSERT(NULL != contextClient->clientState);
     *contextClient->clientState = SOPC_MQTT_CLIENT_UNITIALIZED;
     memset(contextClient->clientId, 0, SOPC_MAX_LENGTH_UINT64_TO_STRING);
@@ -310,6 +314,21 @@ static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* respons
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection failed, error code %d",
                            contextClient->clientId, response->code);
     *contextClient->clientState = SOPC_MQTT_CLIENT_FAILED_CONNECT;
+
+    // If the connection failed due to a Broker restart, there are high chances
+    // that "reconnect" will never succeed and get stuck. Notify the application.
+    SOPC_PubSubConnection* connection = (SOPC_PubSubConnection*)contextClient->pUser;
+    if (NULL != connection)
+    {
+        const char* name = SOPC_PubSubConnection_Get_Name(connection);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB, "MQTT connection '%s' got disconnected.",
+                name ? name : "<NULL>");
+        SOPC_PubSub_OnFatalError* callback = SOPC_PubSubConfiguration_Get_FatalError_Callback(connection);
+        if (NULL != callback)
+        {
+            (*callback)(connection, "MQTT_CLIENT_FAILED_CONNECT");
+        }
+    }
 }
 
 static void cb_connexion_lost(void* context, char* cause)

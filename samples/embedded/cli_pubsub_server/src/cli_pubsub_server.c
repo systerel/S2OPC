@@ -988,7 +988,7 @@ static int cmd_demo_sub(WordList* pList)
         // start subscriber (will fail if already started)
         bool bResult;
         bResult = SOPC_SubScheduler_Start(pPubSubConfig, pTargetConfig, cb_SetSubStatus, cb_ReceiveGapDsmSequenceNumber,
-                                          CONFIG_SOPC_SUBSCRIBER_PRIORITY);
+                                          NULL, CONFIG_SOPC_SUBSCRIBER_PRIORITY);
         if (!bResult)
         {
             PRINT("\r\nFailed to start Subscriber!\r\n");

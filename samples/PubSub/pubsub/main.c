@@ -261,7 +261,7 @@ int main(int argc, char* const argv[])
             /* Note: a state changed callback can be made to handle PubSub state changes (unused here) */
             /* Note2: a Gap received Sequence number callback can be made to handle unexpected
              * DataSetMessageSequenceNumber reception (unused here) */
-            bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL, NULL, 99);
+            bool res = SOPC_SubScheduler_Start(config, targetConfig, NULL, NULL, NULL, 99);
             if (res)
             {
                 printf("# Info: Subscriber started\n");

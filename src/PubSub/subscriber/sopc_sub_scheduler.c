@@ -527,7 +527,8 @@ static void uninit_sub_scheduler_ctx(void)
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
                                                 SOPC_SubTargetVariableConfig* targetConfig,
                                                 SOPC_SubscriberStateChanged_Func* pStateChangedCb,
-                                                SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb)
+                                                SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb,
+                                                SOPC_PubSub_OnFatalError* pSubDisconnectedCb)
 {
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
     SOPC_ASSERT(nb_connections > 0);
@@ -643,6 +644,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                                                                      &portLength);
                         status = (result ? status : SOPC_STATUS_INVALID_PARAMETERS);
 
+                        SOPC_PubSubConfiguration_Set_FatalError_Callback(connection, pSubDisconnectedCb);
                         if (SOPC_STATUS_OK == status)
                         {
                             SOPC_ASSERT(nbReaderGroups <= MQTT_LIB_MAX_NB_TOPIC_NAME);
@@ -748,6 +750,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
                              SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb,
+                             SOPC_PubSub_OnFatalError* pSubDisconnectedCb,
                              int threadPriority)
 {
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
@@ -773,7 +776,8 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
     if (result)
     {
         // Prepare connections context: socket creation & connection config context
-        SOPC_ReturnStatus status = init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb, dsmSnGapCb);
+        SOPC_ReturnStatus status =
+            init_sub_scheduler_ctx(config, targetConfig, pStateChangedCb, dsmSnGapCb, pSubDisconnectedCb);
         if (SOPC_STATUS_OK == status)
         {
             SOPC_ASSERT(schedulerCtx.nbConnections <= UINT16_MAX);

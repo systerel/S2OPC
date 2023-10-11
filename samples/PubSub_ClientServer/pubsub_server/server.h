@@ -52,6 +52,7 @@ SOPC_ReturnStatus Server_WritePubSubNodes(void);
 bool Server_Trigger_Publisher(uint16_t writerGroupId);
 void Server_StopAndClear(void);
 
+void Server_PubSubStop_RequestRestart(void);
 bool Server_PubSubStop_Requested(void);
 bool Server_PubSubStart_Requested(void);
 int32_t Server_PubAcyclicSend_Requested(void);
