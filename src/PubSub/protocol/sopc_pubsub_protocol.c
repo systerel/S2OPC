@@ -49,8 +49,7 @@ SOPC_PubSubProtocol_Type SOPC_PubSub_Protocol_From_URI(const char* uri)
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                               "Failed to determine the protocol from uri '%s'", uri);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Failed to determine the protocol from uri '%s'", uri);
         return SOPC_PubSubProtocol_UNKOWN;
     }
 }
