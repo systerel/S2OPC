@@ -73,21 +73,21 @@ for fradix in ca client_2k_ client_4k_ server_2k_ server_4k_; do
 done
 
 # Output hexlified certificate to include in check_crypto_certificates.c
-echo "Server signed 2k public key:"
+echo "Server signed 2k certificate (please update static security data 'char server_2k_cert[]'):"
 hexdump -ve '/1 "%02x"' server_2k_cert.der
 echo
 echo -e "\nServer's 2k certificate thumbprint (SHA-1):"
 openssl x509 -noout -fingerprint -in server_2k_cert.pem
 echo
-echo "Client signed 2k public key:"
+echo "Client signed 2k certificate (please update static security data 'char client_2k_cert[]'):"
 hexdump -ve '/1 "%02x"' client_2k_cert.der
 echo
 echo -e "\nClient's 2k certificate thumbprint (SHA-1):"
 openssl x509 -noout -fingerprint -in client_2k_cert.pem
 echo
-echo -e "\nApplication certificate Authority signed public key:"
+echo -e "\nApplication certificate Authority (please update static security data 'char cacert[]'):"
 hexdump -ve '/1 "%02x"' cacert.der
 echo
-echo -e "\nCRL of the CA:"
+echo -e "\nCRL of the CA (please update static security data 'char cacrl[]'):"
 hexdump -ve '/1 "%02x"' cacrl.der
 echo

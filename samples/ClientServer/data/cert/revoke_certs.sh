@@ -21,13 +21,8 @@
 set -e
 
 CONF_FILE=cassl.cnf
-CONF_CLI=cli_req.cnf
-CONF_SRV=srv_req.cnf
-CA_KEY=cakey.pem
-CA_CERT=cacert.pem
 
 DURATION=730
-
 
 # Revoke certificates
 openssl ca -config $CONF_FILE -revoke client_2k_cert.pem
@@ -39,6 +34,6 @@ openssl ca -config $CONF_FILE -revoke server_4k_cert.pem
 openssl ca -config $CONF_FILE -crldays $DURATION -gencrl -out cacrl.pem
 openssl crl -in cacrl.pem -outform der -out cacrl.der
 
-echo -e "\nCRL of the CA:"
+echo -e "\nCRL of the CA (please update static security data 'char cacrl[]'):"
 hexdump -ve '/1 "%02x"' cacrl.der
 echo

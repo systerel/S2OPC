@@ -22,4 +22,4 @@ Folders and scripts:
 - intermediate:
   - generate_int_certs.sh: generate intermediate CA and intermediate signed client/server certificates
 - untrusted: 
-  - generate_trusted_certs.sh: generate untrusted CA and untrusted signed client/server trusted certificates
+  - generate_trusted_certs.sh: generate trusted client/server certificates signed by untrusted CA
