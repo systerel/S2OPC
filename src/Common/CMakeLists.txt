@@ -14,6 +14,8 @@ include (CheckTypeSize)
 
 if(NOT WITH_CYCLONE_CRYPTO)
   find_package(MBEDTLS REQUIRED)
+else()
+  find_package(CYCLONE_CRYPTO REQUIRED)
 endif()
 
 ### Compilation of S2OPC common library source files ###
@@ -41,7 +43,7 @@ endif()
 if(NOT WITH_CYCLONE_CRYPTO)
   set(CRYPTO_LIB mbedtls mbedx509 mbedcrypto)
 else()
-  set(CRYPTO_LIB cyclone_crypto cyclone_common ${THREAD_LIB})
+  set(CRYPTO_LIB cyclone_crypto cyclone_common)
 endif()
 
 # Update variable containing S2OPC library dependencies
@@ -102,10 +104,7 @@ set(S2OPC_COMMON_PUBLIC_INCLUDES
 if(NOT WITH_CYCLONE_CRYPTO)
   set(S2OPC_COMMON_PRIVATE_INCLUDES "crypto/mbedtls")
 else()
-  set(S2OPC_COMMON_PRIVATE_INCLUDES "crypto/cyclone_crypto"
-                                    /usr/local/include/cyclone_crypto
-                                    /usr/local/include/cyclone_config
-                                    /usr/local/include/cyclone_common)
+  set(S2OPC_COMMON_PRIVATE_INCLUDES "crypto/cyclone_crypto")
 endif()
 
 ### Configure S2OPC library and its properties ###
