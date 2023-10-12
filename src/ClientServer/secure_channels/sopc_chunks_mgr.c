@@ -929,10 +929,6 @@ static bool SC_Chunks_CheckAsymmetricSecurityHeader(SOPC_SecureConnection* scCon
         case OpcUa_BadCertificateUriInvalid:
         case OpcUa_BadCertificateUseNotAllowed:
         case OpcUa_BadCertificateIssuerUseNotAllowed:
-        case OpcUa_BadCertificateRevocationUnknown:
-        case OpcUa_BadCertificateIssuerRevocationUnknown:
-        case OpcUa_BadCertificateRevoked:
-        case OpcUa_BadCertificateIssuerRevoked:
             // keep status code as specified in part 4 - table 106 - Certificate Validation Steps
             break;
         default:
