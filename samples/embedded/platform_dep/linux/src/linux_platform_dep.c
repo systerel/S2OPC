@@ -49,13 +49,14 @@ char* SOPC_Shell_ReadLine(void)
     char* line = NULL;
     size_t len = 0;
     ssize_t result = getline(&line, &len, stdin);
-
+    SOPC_ASSERT(NULL != line);
     SOPC_ASSERT(result != -1);
+
     // getline may return a longer buffer than actually filled. Ensure to stop at first \0 char
     len = strlen(line);
 
     // Remove EOL chars
-    while (-1 != result && NULL != line && len > 0 && line[len - 1] < ' ')
+    while (-1 != result && len > 0 && line[len - 1] < ' ')
     {
         len--;
         line[len] = 0;
