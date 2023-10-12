@@ -212,6 +212,20 @@ static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
         {
             status = SOPC_STATUS_NOK;
         }
+        if (SOPC_STATUS_OK == status)
+        {
+            methodId = SOPC_Calloc(1, sizeof(*methodId));
+            if (NULL != methodId)
+            {
+                methodId->Data.Numeric = OpcUaId_PubSubKeyServiceType_GetSecurityKeys;
+                methodFunc = &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys;
+                status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, skm, NULL);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
     }
 
     return status;
