@@ -69,7 +69,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     rsaInitPublicKey(&key->pubKey);
     rsaInitPrivateKey(&key->privKey);
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     if (is_public)
     {
@@ -170,9 +170,10 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     }
     else
     {
-        char_t buffer_decrypted[2 * length]; // Length of the decrypted buffer, 2*size should be enough.
+        char_t* buffer_decrypted =
+            SOPC_Malloc((2 * length) * sizeof(char_t)); // Length of the decrypted buffer, 2*size should be enough.
         size_t lenBuffer_decrypted;
-        int errLib =
+        error_t errLib =
             pemDecryptPrivateKey((const char_t*) pBuffer, length, password, buffer_decrypted, &lenBuffer_decrypted);
 
         if (!errLib)
@@ -180,6 +181,8 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
             status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer((uint8_t*) buffer_decrypted,
                                                                     (uint32_t) lenBuffer_decrypted, false, ppKey);
         }
+
+        SOPC_Free(buffer_decrypted);
     }
 
     SOPC_SecretBuffer_Unexpose(pBuffer, pSecretBuffer);
@@ -258,19 +261,21 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         return SOPC_STATUS_NOK;
     }
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     if (is_public)
     {
         // The function x509ExportRsaPublicKey does not give the full DER,
         // so we first export the key to PEM, then we do PEM to DER.
-        char_t bufferPEM[2 * lenDest];
+        char_t* bufferPEM = SOPC_Malloc((2 * lenDest) * sizeof(char_t));
         size_t writtenPEM;
         errLib = pemExportRsaPublicKey(&pKey->pubKey, bufferPEM, &writtenPEM);
         if (!errLib)
         {
             errLib = pemDecodeFile(bufferPEM, writtenPEM, "PUBLIC KEY", buffer, &lengthWritten, NULL, NULL);
         }
+
+        SOPC_Free(bufferPEM);
     }
     else // Key is private
     {
@@ -349,7 +354,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int errLib = -1;
+    error_t errLib = 1;
 
     /* Create the new cert and initialize it */
     SOPC_CertificateList* pCertNew = SOPC_Calloc(1, sizeof(SOPC_CertificateList));
@@ -435,7 +440,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     SOPC_Buffer* pBuffer = NULL;
     SOPC_ReturnStatus status = SOPC_Buffer_ReadFile(szPath, &pBuffer);
@@ -447,7 +452,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         /* It failed. Maybe the file is PEM ? */
         if (SOPC_STATUS_OK != status)
         {
-            uint8_t bufferDER[2 * pBuffer->length];
+            uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
             // Convert the PEM to DER
@@ -457,6 +462,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
             {
                 status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCert);
             }
+
+            SOPC_Free(bufferDER);
         }
     }
 
@@ -553,7 +560,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
 
     // SOPC_ReturnStatus status = certificate_check_single(pCert);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int errLib = -1;
+    error_t errLib = 1;
 
     /* Assert allocation length */
     uint32_t lenSupposed = 0;
@@ -725,7 +732,7 @@ static char* get_raw_sha1(SOPC_Buffer* raw)
 
     uint8_t pDest[20];
 
-    int errLib = sha1Compute(raw->data, raw->length, pDest);
+    error_t errLib = sha1Compute(raw->data, raw->length, pDest);
 
     if (errLib)
     {
@@ -945,7 +952,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int errLib = -1;
+    error_t errLib = 1;
 
     /* Create the new CRL and initialize it */
     SOPC_CRLList* pCRLNew = SOPC_Calloc(1, sizeof(SOPC_CRLList));
@@ -1031,15 +1038,17 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         /* It failed. Maybe the file is PEM ? */
         if (SOPC_STATUS_OK != status)
         {
-            uint8_t bufferDER[2 * pBuffer->length];
+            uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
             // Convert the PEM to DER
-            int errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
+            error_t errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
             if (!errLib)
             {
                 status = SOPC_KeyManager_CRL_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCRL);
             }
+
+            SOPC_Free(bufferDER);
         }
     }
 

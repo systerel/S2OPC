@@ -52,7 +52,7 @@ SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
 
     // TODO: it may be nice to not create a full context with SecuPolicy None
     pCryptoProvider->pCryptolibContext = pctx;
-    int errLib = yarrowInit(&pctx->YarrowCtx);
+    error_t errLib = yarrowInit(&pctx->YarrowCtx);
     if (errLib)
     {
         return SOPC_STATUS_NOK;

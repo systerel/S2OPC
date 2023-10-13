@@ -222,7 +222,8 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
  */
 static int ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
 {
-    int errLib = -1;
+    int err = 1;
+    error_t errLib = 1;
     const X509Extensions* extensions;
 
     // Point to the X.509 extensions of the issuer certificate
@@ -246,7 +247,12 @@ static int ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
                                  &crt->tbsCert.subjectPublicKeyInfo, &crt->signatureValue);
 
     // Return status code
-    return errLib;
+    if (!errLib)
+    {
+        err = 0;
+    }
+
+    return err;
 }
 
 /* Returns SOPC_STATUS_OK if all key usages and extended key usages are ok.
@@ -303,7 +309,7 @@ static SOPC_ReturnStatus check_key_usages(const SOPC_CertificateList* cert, bool
 static int crt_check_revocation(const SOPC_CertificateList* child, SOPC_CRLList* crl)
 {
     SOPC_CRLList* cur_crl = NULL;
-    int errLib = -1;
+    error_t errLib = 1;
 
     for (cur_crl = crl; NULL != cur_crl; cur_crl = cur_crl->next)
     {
@@ -326,7 +332,7 @@ static int crt_find_parent_in(const SOPC_CertificateList* child,
                               SOPC_CertificateList** ppParent)
 {
     SOPC_CertificateList* parent = NULL;
-    int errLib = -1;
+    error_t errLib = 1;
 
     for (parent = candidates; NULL != parent; parent = parent->next)
     {
@@ -360,7 +366,7 @@ static int crt_find_parent_in(const SOPC_CertificateList* child,
  * \param parent will contain a NULL pointer if no parent is found.
  * Always returns 0. TODO : Fix it.
  */
-static int crt_find_parent(const SOPC_CertificateList* child,
+static error_t crt_find_parent(const SOPC_CertificateList* child,
                            SOPC_CertificateList* candidates,
                            uint32_t* failure_reasons,
                            SOPC_CertificateList** parent,
@@ -368,15 +374,15 @@ static int crt_find_parent(const SOPC_CertificateList* child,
 {
     SOPC_CertificateList* search_list = NULL;
     *parent_is_trusted = 1;
-    int errLib = -1;
+    int err = 1;
 
     while (1)
     {
         search_list = *parent_is_trusted ? candidates : child->next;
-        errLib = crt_find_parent_in(child, search_list, failure_reasons, parent);
+        err = crt_find_parent_in(child, search_list, failure_reasons, parent);
 
         /* stop here if found or already in second iteration */
-        if (!errLib && (NULL != *parent || 0 == *parent_is_trusted))
+        if (!err && (NULL != *parent || 0 == *parent_is_trusted))
         {
             break;
         }
@@ -406,7 +412,7 @@ static int crt_verify_chain(const SOPC_CertificateList* pToValidate,
     SOPC_CertificateList* cur_trust_ca = NULL;
     int parent_is_trusted = 0;
     int child_is_trusted = 0;
-    int errLib = -1;
+    error_t errLib = 1;
 
     while (1)
     {
@@ -495,13 +501,13 @@ static int crt_validate_with_profile(const SOPC_CertificateList* pToValidate,
 
     /* 2) Verify the chain */
     int certificate_depth = 0;
-    int errLib = crt_verify_chain(pToValidate, trust_list, cert_crl, pCrt_profile, failure_reasons, &certificate_depth);
+    int err = crt_verify_chain(pToValidate, trust_list, cert_crl, pCrt_profile, failure_reasons, &certificate_depth);
 
     /* 3) Treat the cert if it is self-signed */
     if (*bIssued && 0 == certificate_depth && 0 != (*failure_reasons & X509_BADCERT_NOT_TRUSTED))
     {
-        errLib = ValidateSelfSignedCertificate(&pToValidate->crt);
-        if (!errLib)
+        err = ValidateSelfSignedCertificate(&pToValidate->crt);
+        if (!err)
         {
             *failure_reasons ^= X509_BADCERT_NOT_TRUSTED;
         }
@@ -512,7 +518,7 @@ static int crt_validate_with_profile(const SOPC_CertificateList* pToValidate,
         return -1;
     }
 
-    return errLib;
+    return err;
 }
 
 /* Returns :
@@ -569,14 +575,14 @@ static SOPC_ReturnStatus PKIProviderStack_ValidateCertificate(const SOPC_PKIProv
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
     /* Verify the certificate chain */
-    int errLib = -1;
+    int err = -1;
     if (SOPC_STATUS_OK == status)
     {
         uint32_t failure_reasons = 0;
-        errLib = crt_validate_with_profile(pToValidateCopy, trust_list, cert_crl, &crt_profile_minimal,
-                                           &failure_reasons, &bIssued);
+        err = crt_validate_with_profile(pToValidateCopy, trust_list, cert_crl, &crt_profile_minimal, &failure_reasons,
+                                        &bIssued);
 
-        if (0 != errLib) // The certificate is not validated, get the error reasons
+        if (0 != err) // The certificate is not validated, get the error reasons
         {
             *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
             status = SOPC_STATUS_NOK;

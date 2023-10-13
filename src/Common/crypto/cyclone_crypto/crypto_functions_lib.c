@@ -72,7 +72,7 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES128(const SOPC_CryptoProvider* p
 
     /* Declare and initialize the AES-128 context, which is lib-specific */
     AesContext aes = {0};
-    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
+    error_t errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
     if (errLib)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -118,7 +118,7 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES128(const SOPC_CryptoProvider* p
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     AesContext aes = {0};
-    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
+    error_t errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Aes128Sha256RsaOaep_SymmLen_CryptoKey);
     if (errLib)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -167,7 +167,7 @@ SOPC_ReturnStatus CryptoProvider_SymmEncrypt_AES256(const SOPC_CryptoProvider* p
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     AesContext aes = {0};
-    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
+    error_t errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
     if (errLib)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -210,7 +210,7 @@ SOPC_ReturnStatus CryptoProvider_SymmDecrypt_AES256(const SOPC_CryptoProvider* p
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     AesContext aes = {0};
-    int errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
+    error_t errLib = aesInit(&aes, pKey, SOPC_SecurityPolicy_Basic256Sha256_SymmLen_CryptoKey);
     if (0 != errLib)
     {
         status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -265,7 +265,7 @@ static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pP
     if (SOPC_STATUS_OK == status)
     {
         /* Do the HMAC */
-        int errLib = hmacCompute(pHash, pKey, lenKey, pInput, lenInput, pOutput);
+        error_t errLib = hmacCompute(pHash, pKey, lenKey, pInput, lenInput, pOutput);
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
@@ -353,13 +353,15 @@ static inline SOPC_ReturnStatus prng_yarrow_get_random(YarrowContext* context,
     uint32_t lenSeeded = (32 > lenData) ? 32 : lenData;
 
     // We can't use SOPC_Buffer here because the size of the file "dev/urandom" is 0
-    unsigned char input_random[lenSeeded];
+    unsigned char* input_random = SOPC_Malloc(lenSeeded * sizeof(unsigned char));
     FILE* file = fopen("/dev/urandom", "rb");
     size_t read_len = fread(input_random, 1, lenSeeded, file);
     fclose(file);
 
     /* We seed the context with the input_random gathered */
-    int errLib = yarrowSeed(context, input_random, lenSeeded);
+    error_t errLib = yarrowSeed(context, input_random, lenSeeded);
+
+    SOPC_Free(input_random);
 
     if (read_len != lenSeeded)
     {
@@ -511,7 +513,7 @@ static inline SOPC_ReturnStatus PSHA(HmacContext* context,
     lenHash = (uint32_t) pHash->digestSize;
 
     /* A(0) is seed, A(1) = HMAC_SHA256(secret, A(0)) */
-    int errLib = hmacInit(context, pHash, pSecret, lenSecret);
+    error_t errLib = hmacInit(context, pHash, pSecret, lenSecret);
     if (errLib)
     {
         return SOPC_STATUS_NOK;
@@ -588,7 +590,7 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
     uint32_t lenMsgCiph = 0;
     uint32_t lenToCiph = 0;
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     /**
      * lenPlainText should be < (n - 2*hash.digestSize - 2), where n is the size of the modulus of the key.
@@ -644,7 +646,7 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
     uint32_t lenMsgPlain = 0, lenMsgCiph = 0;
     size_t lenDeciphed = 0;
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     SOPC_ReturnStatus status = SOPC_CryptoProvider_AsymmetricGetLength_Msgs(pProvider, pKey, &lenMsgCiph, &lenMsgPlain);
     if (SOPC_STATUS_OK != status)
@@ -758,7 +760,7 @@ static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
     *ppHash = pHashRes;
 
     /* Compute the MD */
-    int errLib = pHash->compute(pInput, (size_t) lenInput, pHashRes);
+    error_t errLib = pHash->compute(pInput, (size_t) lenInput, pHashRes);
     if (errLib)
     {
         return SOPC_STATUS_NOK;
@@ -793,7 +795,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
 {
     uint8_t* hash = NULL;
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     // signatureLen will contain the length of the resulting signature
     size_t signatureLen = 0;
@@ -863,7 +865,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
 {
     uint8_t* hash = NULL;
 
-    int errLib = -1;
+    error_t errLib = 1;
 
     SOPC_ReturnStatus status = NewMsgDigestBuffer(pInput, lenInput, pHash, &hash);
 
@@ -980,14 +982,14 @@ SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_Cryp
     X509SignatureAlgo signAlgo = {0};
     const HashAlgo* hashAlgo = NULL;
 
-    int errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
+    error_t errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
     if (errLib)
     {
         return SOPC_STATUS_NOK;
     }
 
-    errLib = strcmp(hashAlgo->name, "SHA-256");
-    if (errLib)
+    int err = strcmp(hashAlgo->name, "SHA-256");
+    if (err)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -1115,7 +1117,7 @@ SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC
     X509SignatureAlgo signAlgo = {0};
     const HashAlgo* hashAlgo = NULL;
 
-    int errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
+    error_t errLib = x509GetSignHashAlgo(&pCert->crt.signatureAlgo, &signAlgo, &hashAlgo);
     if (errLib)
     {
         return SOPC_STATUS_NOK;
@@ -1153,7 +1155,7 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     AesContext aes = {0};
-    int errLib = aesInit(&aes, pExpKey, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey);
+    error_t errLib = aesInit(&aes, pExpKey, SOPC_SecurityPolicy_PubSub_Aes256_SymmLen_CryptoKey);
     if (errLib)
     {
         status = SOPC_STATUS_NOK;

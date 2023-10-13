@@ -51,8 +51,8 @@ SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_Exp
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    int errLib = pbkdf2(&sha256HashAlgo, pSecret, (size_t) lenSecret, pSalt, (size_t) lenSalt, (size_t) iteration_count,
-                        pOutput, (size_t) lenOutput);
+    error_t errLib = pbkdf2(&sha256HashAlgo, pSecret, (size_t) lenSecret, pSalt, (size_t) lenSalt, iteration_count,
+                            pOutput, (size_t) lenOutput);
 
     if (errLib)
     {
