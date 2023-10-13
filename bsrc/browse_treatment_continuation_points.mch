@@ -112,7 +112,6 @@ OPERATIONS
             p_browseView : t_NodeId_i                   &
             p_nodeId : t_NodeId_i                       &
             p_browseDirection : t_BrowseDirection_i     &
-            p_browseDirection : t_BrowseDirection       &
             p_referenceType : t_NodeId_i                &
             p_includeSubtypes : BOOL                    &
             p_nodeClassMask : t_BrowseNodeClassMask_i   &
@@ -122,7 +121,8 @@ OPERATIONS
             /* Clear the continuation point once used to free session continuation point for BrowseNext treatment */
             (bres = TRUE =>
                 p_nodeId : t_NodeId &
-                p_referenceType : t_NodeId
+                p_referenceType : t_NodeId &
+                p_browseDirection : t_BrowseDirection
             )
         )
     END
