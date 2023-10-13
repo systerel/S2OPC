@@ -367,10 +367,10 @@ static int crt_find_parent_in(const SOPC_CertificateList* child,
  * Always returns 0. TODO : Fix it.
  */
 static error_t crt_find_parent(const SOPC_CertificateList* child,
-                           SOPC_CertificateList* candidates,
-                           uint32_t* failure_reasons,
-                           SOPC_CertificateList** parent,
-                           int* parent_is_trusted)
+                               SOPC_CertificateList* candidates,
+                               uint32_t* failure_reasons,
+                               SOPC_CertificateList** parent,
+                               int* parent_is_trusted)
 {
     SOPC_CertificateList* search_list = NULL;
     *parent_is_trusted = 1;
