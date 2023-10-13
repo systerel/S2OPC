@@ -339,6 +339,10 @@ build-freertos:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
     - 'test -f build_freertos/freertos-sopc.elf'
     - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg.elf'
+    - 'rm -rf /tmp/ws_freertos/build'
+    - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh -- --nocrypto'
+    - 'test -f build_freertos/freertos-sopc.elf'
+    - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg-nocrypto.elf'
   variables:
   artifacts:
     name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
