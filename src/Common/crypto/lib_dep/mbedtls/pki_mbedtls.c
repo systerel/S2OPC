@@ -30,6 +30,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
+#include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_filesystem.h"
@@ -41,8 +42,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
+#include "sopc_pki_struct_lib_internal.h"
 
-#include "key_manager_lib.h"
+#include "key_manager_mbedtls.h"
 #include "mbedtls_common.h"
 
 #include "mbedtls/oid.h"
@@ -196,8 +198,8 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
         SOPC_ReturnStatus status = SOPC_STATUS_NOK;
         if (NULL != checkTrustedAndCRLinChain->allCRLs)
         {
-            status =
-                SOPC_KeyManagerLib_CertificateList_CheckCRL(crt, &checkTrustedAndCRLinChain->allCRLs->crl, &matchCRL);
+            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(crt, &checkTrustedAndCRLinChain->allCRLs->crl,
+                                                                      &matchCRL);
         }
         // Restore link
         crt->next = backupNextCrt;
@@ -233,36 +235,6 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
      * Errors may be MBEDTLS_ERR_X509_FATAL_ERROR, or application specific */
     return 0;
 }
-
-typedef SOPC_ReturnStatus SOPC_FnValidateCert(SOPC_PKIProvider* pPKI,
-                                              const SOPC_CertificateList* pToValidate,
-                                              const SOPC_PKI_Profile* pProfile,
-                                              uint32_t* error);
-
-/**
- * \brief The PKIProvider object for the Public Key Infrastructure.
- */
-struct SOPC_PKIProvider
-{
-    SOPC_Mutex mutex;                    /*!< The mutex used to have thread-safe accesses to PKI.
-                                              IMPORTANT: it shall remain the first field for ::SOPC_Internal_ReplacePKI treatment */
-    char* directoryStorePath;            /*!< The directory store path of the PKI*/
-    SOPC_CertificateList* pTrustedCerts; /*!< Trusted intermediate CA + trusted certificates*/
-    SOPC_CertificateList* pTrustedRoots; /*!< Trusted root CA*/
-    SOPC_CRLList* pTrustedCrl;           /*!< CRLs of trusted intermediate CA and trusted root CA*/
-    SOPC_CertificateList* pIssuerCerts;  /*!< Issuer intermediate CA*/
-    SOPC_CertificateList* pIssuerRoots;  /*!< Issuer root CA*/
-    SOPC_CRLList* pIssuerCrl;            /*!< CRLs of issuer intermediate CA and issuer root CA*/
-    SOPC_CertificateList* pRejectedList; /*!< The list of Certificates that have been rejected */
-
-    SOPC_CertificateList* pAllCerts;   /*!< Issuer certs + trusted certs (root not included)*/
-    SOPC_CertificateList* pAllRoots;   /*!< Issuer roots + trusted roots*/
-    SOPC_CertificateList* pAllTrusted; /*!< trusted root + trusted intermediate CAs + trusted certs */
-
-    SOPC_CRLList* pAllCrl;                /*!< Issuer CRLs + trusted CRLs */
-    SOPC_FnValidateCert* pFnValidateCert; /*!< Pointer to validation function*/
-    bool isPermissive;                    /*!< Define whatever the PKI is permissive (without security)*/
-};
 
 // PKI clear operation declaration
 static void sopc_pki_clear(SOPC_PKIProvider* pPKI);
@@ -650,7 +622,7 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     size_t keyLenBits = 0;
     bool bErr = false;
     // Retrieve key
-    SOPC_ReturnStatus status = KeyManager_Certificate_GetPublicKey(pToValidate, &pub_key);
+    SOPC_ReturnStatus status = SOPC_KeyManagerInternal_Certificate_GetPublicKey(pToValidate, &pub_key);
     if (SOPC_STATUS_OK != status)
     {
         return status;
@@ -2129,8 +2101,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     {
         if (bTrustedCaFound)
         {
-            status = SOPC_KeyManagerLib_CertificateList_CheckCRL(&tmp_pTrustedCerts->crt, &tmp_pTrustedCrl->crl,
-                                                                 &bTrustedCRL);
+            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(&tmp_pTrustedCerts->crt, &tmp_pTrustedCrl->crl,
+                                                                      &bTrustedCRL);
             if (NULL == tmp_pTrustedCerts)
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -2148,8 +2120,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     {
         if (bIssuerCaFound)
         {
-            status =
-                SOPC_KeyManagerLib_CertificateList_CheckCRL(&tmp_pIssuerCerts->crt, &tmp_pIssuerCrl->crl, &bIssuerCRL);
+            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(&tmp_pIssuerCerts->crt, &tmp_pIssuerCrl->crl,
+                                                                      &bIssuerCRL);
         }
         else
         {

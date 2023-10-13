@@ -28,7 +28,6 @@
 
 #include <string.h>
 
-#include "key_manager_lib.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"

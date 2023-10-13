@@ -34,9 +34,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 
-#include "crypto_functions_lib.h"
-#include "crypto_provider_lib.h"
-#include "key_manager_lib.h"
+#include "crypto_functions_mbedtls.h"
+#include "crypto_provider_mbedtls.h"
+#include "key_manager_mbedtls.h"
 
 // Note : this file MUST be included before other mbedtls headers
 #include "mbedtls_common.h"

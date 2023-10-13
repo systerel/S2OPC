@@ -27,13 +27,9 @@
 #define SOPC_CRYPTO_PROVIDER_H_
 
 #include "sopc_crypto_decl.h"
-#include "sopc_key_manager.h"
-#include "sopc_key_sets.h"
-#include "sopc_pki_stack.h"
-#include "sopc_secret_buffer.h"
-#include "sopc_types.h"
-
 #include "sopc_enums.h"
+#include "sopc_key_sets.h"
+#include "sopc_pki_decl.h"
 
 /**
  * \brief   The SOPC_CryptoProvider context.
@@ -109,24 +105,6 @@ SOPC_CryptoProvider* SOPC_CryptoProvider_CreatePubSub(const char* uri);
  * \param pCryptoProvider  The SOPC_CryptoProvider to free.
  */
 void SOPC_CryptoProvider_Free(SOPC_CryptoProvider* pCryptoProvider);
-
-/**
- * \brief       Initializes a SOPC_CryptoProvider context.
- *              Called by SOPC_CryptoProvider_Create() upon context creation.
- *
- * \note        The implementation is specific to the chosen cryptographic library.
- * \note        Internal API.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider);
-
-/**
- * \brief       Deinitializes a SOPC_CryptoProvider context (this process is specific to the chosen cryptographic
- *              library). Called by SOPC_CryptoProvider_Free() upon context destruction.
- *
- * \note        The implementation is specific to the chosen cryptographic library.
- * \note        Internal API.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider);
 
 /**
  * \brief       Returns the non NULL client-server crypto profile but returns NULL if the PubSub profile is non NULL.
@@ -295,28 +273,6 @@ SOPC_ReturnStatus SOPC_CryptoProvider_DeriveGetLengths(const SOPC_CryptoProvider
                                                        uint32_t* pSymmInitVectorLength);
 
 /**
- * \brief           Writes the length in bits in \p pLenKeyBits of the asymmetric key \p pKey.
- *
- *   The main purpose of this function is to verify the length of the modulus of the
- *   asymmetric key \p pKey with respect to the security policy.
- *
- * \param pProvider    An initialized cryptographic context.
- * \param pKey         A valid pointer to an SOPC_AsymmetricKey.
- * \param pLenKeyBits  A valid pointer to the output length in bits. Its content is unspecified when
- *                     return value is not SOPC_STATUS_OK.
- *
- * \note            The implementation is specific to the chosen cryptographic library.
- *
- * \note            Specific to client-server security policies.
- *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_KeyBits(const SOPC_CryptoProvider* pProvider,
-                                                                  const SOPC_AsymmetricKey* pKey,
-                                                                  uint32_t* pLenKeyBits);
-
-/**
  * \brief           Writes the length in bytes in \p pLenKeyBytes of the asymmetric key \p pKey.
  *
  *   The main purpose of this function is to verify the length of the modulus of the
@@ -374,45 +330,6 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_Msgs(const SOPC_Crypto
                                                                const SOPC_AsymmetricKey* pKey,
                                                                uint32_t* pCipherTextBlockSize,
                                                                uint32_t* pPlainTextBlockSize);
-
-/**
- * \brief           Provides the maximum length in bytes of a message to be encrypted with a single asymmetric
- *                  encryption operation.
- *
- * \param pProvider An initialized cryptographic context.
- * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
- * \param pLenMsg   A valid pointer to the length in bytes of the maximum length in bytes of the plain text message
- *                  used by the encryption process.
- *
- * \note            The implementation is specific to the chosen cryptographic library.
- *
- * \note            Specific to client-server security policies.
- *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOPC_CryptoProvider* pProvider,
-                                                                       const SOPC_AsymmetricKey* pKey,
-                                                                       uint32_t* pLenMsg);
-
-/**
- * \brief           Provides the length in bytes of a ciphered message to be decrypted with a single asymmetric
- *                  decryption operation.
- *
- * \param pProvider An initialized cryptographic context.
- * \param pKey      A valid pointer to an SOPC_AsymmetricKey.
- * \param pLenMsg   A valid pointer to the length in bytes of the ciphered message used by the decryption process.
- *
- * \note            The implementation is specific to the chosen cryptographic library.
- *
- * \note            Specific to client-server security policies.
- *
- * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL or
- *                  \p pProvider not correctly initialized.
- */
-SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgCipherText(const SOPC_CryptoProvider* pProvider,
-                                                                        const SOPC_AsymmetricKey* pKey,
-                                                                        uint32_t* pLenMsg);
 
 /** \brief          Calculates the size of the required output buffer to cipher lengthIn bytes through
  *                  asymmetric encryption.

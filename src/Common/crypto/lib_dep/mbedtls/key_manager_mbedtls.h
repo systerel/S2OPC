@@ -17,15 +17,13 @@
  * under the License.
  */
 
-/** \file key_manager_lib.h
+/** \file key_manager_mbedtls.h
  *
  * Implementations for SOPC_AsymmetricKey and SOPC_CertificateList are mainly lib-specific.
  */
 
 #ifndef SOPC_KEY_MANAGER_LIB_H_
 #define SOPC_KEY_MANAGER_LIB_H_
-
-#include <stdbool.h>
 
 #include "sopc_crypto_decl.h"
 #include "sopc_enums.h"
@@ -84,16 +82,12 @@ struct SOPC_CRLList
     mbedtls_x509_crl crl;
 };
 
-/**
- * \brief The CSR representation.
- *
- *  It should be treated as an abstract handle.
- *  The CSR structure is mainly lib-specific. Its content can be enriched for future uses.
- */
 struct SOPC_CSR
 {
     mbedtls_x509write_csr csr; /**< The context of the CSR, mbedtls specific */
 };
+
+// INTERNAL FUNCTIONS
 
 /**
  * \brief           Returns the internal public key of the given signed public key.
@@ -113,7 +107,8 @@ struct SOPC_CSR
  * \return          SOPC_STATUS_OK when successful, SOPC_STATUS_INVALID_PARAMETERS when parameters are NULL,
  *                  and SOPC_STATUS_NOK when there was an error.
  */
-SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey);
+SOPC_ReturnStatus SOPC_KeyManagerInternal_Certificate_GetPublicKey(const SOPC_CertificateList* pCert,
+                                                                   SOPC_AsymmetricKey* pKey);
 
 /**
  * \brief Checks if each CA certificate from \p pCert have a revocation list available in \p pCRL.
@@ -132,8 +127,8 @@ SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList
  *
  * \return          SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_KeyManagerLib_CertificateList_CheckCRL(mbedtls_x509_crt* pCert,
-                                                              const mbedtls_x509_crl* pCRL,
-                                                              bool* bMatch);
+SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_crt* pCert,
+                                                                   const mbedtls_x509_crl* pCRL,
+                                                                   bool* bMatch);
 
 #endif /* SOPC_KEY_MANAGER_LIB_H_ */

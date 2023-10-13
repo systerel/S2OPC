@@ -196,8 +196,7 @@ static void SOPC_SKProvider_Clear_RandomPubSub_Aes256(void* pdata)
     }
 
     SOPC_SKProvider_RandomPubSub* data = (SOPC_SKProvider_RandomPubSub*) pdata;
-    SOPC_CryptoProvider_Deinit(data->cryptoProvider);
-    SOPC_Free(data->cryptoProvider);
+    SOPC_CryptoProvider_Free(data->cryptoProvider);
     data->cryptoProvider = NULL;
     data->nbMaxKeys = 0;
     SOPC_Free(data);

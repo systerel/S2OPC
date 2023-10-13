@@ -55,6 +55,23 @@ if (USE_STATIC_EXPAT_LIB)
   endif()
 endif()
 
+#########################
+# Choose crypto option
+option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" ON)
+
+set(S2OPC_CRYPTO_LIB "nocrypto")
+if (S2OPC_CRYPTO_MBEDTLS)
+set(S2OPC_CRYPTO_LIB "mbedtls")
+endif()
+
+# Final check on crypto options
+message("-- Using '${S2OPC_CRYPTO_LIB}' as crypto library")
+
+# Check S2OPC_CRYPTO_LIB parameters
+if(NOT DEFINED S2OPC_CRYPTO_LIB)
+    message(FATAL_ERROR "'S2OPC_CRYPTO_LIB' is not defined!")
+endif()
+
 option(S2OPC_CLIENTSERVER_ONLY "Only build the common library and client server libraries, tests, and samples (effectively excludes pubsub)." OFF)
 option(S2OPC_PUBSUB_ONLY "Only build the common library and the pubsub library, tests, and samples (effectively excludes clientserver)." OFF)
 if(S2OPC_CLIENTSERVER_ONLY AND NOT WITH_PYS2OPC)

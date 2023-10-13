@@ -17,7 +17,7 @@
  * under the License.
  */
 
-/** \file hash_based_crypto_lib.c
+/** \file hash_based_crypto_mbedtls.c
  *
  * Gathers the definitions of the lib-specific and crypto-related functions to performing hash mechanisms.
  *
@@ -25,8 +25,8 @@
  *              nor sanitize their arguments.
  */
 
-#include "hash_based_crypto_lib.h"
 #include "sopc_assert.h"
+#include "sopc_hash_based_crypto_lib_itf.h"
 #include "sopc_mem_alloc.h"
 
 // Note : this file MUST be included before other mbedtls headers

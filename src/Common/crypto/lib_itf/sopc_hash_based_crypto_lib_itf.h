@@ -17,13 +17,15 @@
  * under the License.
  */
 
-/** \file hash_based_crypto_lib.h
+/** \file
  *
- * Gathers the definitions of the lib-specific and crypto-related functions to performing hash mechanisms.
+ * \brief Defines the cryptographic abstraction interface to performing hash mechanisms.
+ *        A cryptographic implementation must define all the functions declared in this file.
+ *
  */
 
-#ifndef SOPC_HASH_BASED_CRYPTO_LIB_H_
-#define SOPC_HASH_BASED_CRYPTO_LIB_H_
+#ifndef SOPC_HASH_BASED_CRYPTO_LIB_ITF_H
+#define SOPC_HASH_BASED_CRYPTO_LIB_ITF_H
 
 #include "sopc_enums.h"
 #include "sopc_secret_buffer.h"
@@ -57,4 +59,4 @@ SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_Exp
                                                                   SOPC_ExposedBuffer** ppOutput,
                                                                   uint32_t lenOutput);
 
-#endif /* SOPC_HASH_BASED_CRYPTO_LIB_H_ */
+#endif /* SOPC_HASH_BASED_CRYPTO_LIB_ITF_H */

@@ -26,8 +26,11 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-#include "crypto_provider_lib.h"
-#include "key_manager_lib.h"
+#include "crypto_provider_mbedtls.h"
+#include "key_manager_mbedtls.h"
+
+// The services which are implemented in this file are declared here
+#include "sopc_crypto_provider_lib_itf.h"
 
 /* ------------------------------------------------------------------------------------------------
  * CryptoProvider creation

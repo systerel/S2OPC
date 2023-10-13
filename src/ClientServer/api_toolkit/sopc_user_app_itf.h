@@ -33,6 +33,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
+#include "sopc_pki_decl.h"
 #include "sopc_service_call_context.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"

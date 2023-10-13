@@ -31,9 +31,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
-#include "key_manager_lib.h"
-
-// Note : this file MUST be included before other mbedtls headers
 #include "mbedtls_common.h"
 
 #include "mbedtls/asn1write.h"
@@ -46,6 +43,8 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/x509.h"
 #include "mbedtls/x509_csr.h"
+
+#include "key_manager_mbedtls.h"
 
 #define SOPC_KEY_MANAGER_SHA1_SIZE 20
 
@@ -223,7 +222,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC
     (*pKey)->isBorrowedFromCert = true;
     mbedtls_pk_init(&(*pKey)->pk);
 
-    return KeyManager_Certificate_GetPublicKey(pCert, *pKey);
+    return SOPC_KeyManagerInternal_Certificate_GetPublicKey(pCert, *pKey);
 }
 
 /**
@@ -972,7 +971,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
  * \brief       Fills \p pKey with public key information retrieved from \p pCert.
  * \warning     \p pKey is not valid anymore when \p pCert is freed.
  */
-SOPC_ReturnStatus KeyManager_Certificate_GetPublicKey(const SOPC_CertificateList* pCert, SOPC_AsymmetricKey* pKey)
+SOPC_ReturnStatus SOPC_KeyManagerInternal_Certificate_GetPublicKey(const SOPC_CertificateList* pCert,
+                                                                   SOPC_AsymmetricKey* pKey)
 {
     if (NULL == pCert || NULL == pKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1549,9 +1549,9 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const mbedtls_x509_
     return status;
 }
 
-SOPC_ReturnStatus SOPC_KeyManagerLib_CertificateList_CheckCRL(mbedtls_x509_crt* pCert,
-                                                              const mbedtls_x509_crl* pCRL,
-                                                              bool* bMatch)
+SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_crt* pCert,
+                                                                   const mbedtls_x509_crl* pCRL,
+                                                                   bool* bMatch)
 {
     if (NULL == pCRL || NULL == pCert || NULL == bMatch)
     {

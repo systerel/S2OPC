@@ -33,6 +33,7 @@
 #include "sopc_helper_encode.h"
 #include "sopc_helper_expat.h"
 #include "sopc_helper_string.h"
+#include "sopc_key_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"

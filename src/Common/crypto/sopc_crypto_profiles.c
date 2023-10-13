@@ -22,6 +22,7 @@
 #include "sopc_assert.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_crypto_profiles_lib_itf.h"
 #include "sopc_helper_string.h"
 
 const SOPC_SecurityPolicy_Config securityPolicy_cfg[SOPC_SecurityPolicy_Last_ID] = {

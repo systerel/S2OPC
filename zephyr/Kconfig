@@ -43,6 +43,13 @@ config SOPC_ETH_NETMASK
 	help
 	  This value is used by Server sample
 
+config SOPC_CRYPTO_LIB_NAME
+    string "Name of crypto library implementation"
+    default "mbedtls"
+    depends on S2OPC
+    help
+      Current supported values are "mbedtls" and "nocrypto" 
+
 config SOPC_PUBLISHER_ITF_NAME
 	string "Publisher network interface name"
 	default ""

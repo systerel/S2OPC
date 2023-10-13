@@ -27,6 +27,7 @@
 #include "sopc_common_build_info.h"
 //#include "sopc_crypto_profiles.h"
 #include "sopc_crypto_decl.h"
+#include "sopc_pki_decl.h"
 //#include "sopc_key_manager.h"
 //#include "sopc_types.h"
 //#include "sopc_user_manager.h"

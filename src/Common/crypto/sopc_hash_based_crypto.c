@@ -26,8 +26,9 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "hash_based_crypto_lib.h"
 #include "sopc_hash_based_crypto.h"
+
+#include "sopc_hash_based_crypto_lib_itf.h"
 
 /**
  * \brief   cryptographic structure to configure the algorithm used.

@@ -46,7 +46,8 @@ zephyr_include_directories(
     ${S2OPC_SRC}/ClientServer/sockets
     ${S2OPC_SRC}/ClientServer/secure_channels
     ${S2OPC_SRC}/Common/crypto
-    ${S2OPC_SRC}/Common/crypto/mbedtls
+    ${S2OPC_SRC}/Common/crypto/lib_itf
+    ${S2OPC_SRC}/Common/crypto/lib_dep/${CONFIG_SOPC_CRYPTO_LIB_NAME}
     ${S2OPC_SRC}/ClientServer/api_toolkit
     ${S2OPC_SRC}/ClientServer/frontend/helper_wrapper
     ${S2OPC_SRC}/ClientServer/frontend/client_wrapper
@@ -80,10 +81,19 @@ zephyr_library()
 # Include all Common sources, except "helpers_platform_dep"
 file(GLOB_RECURSE SOPC_COMMON_SRC ${S2OPC_SRC}/Common/*.c)
 list(FILTER SOPC_COMMON_SRC EXCLUDE REGEX "${S2OPC_SRC}/Common/helpers_platform_dep/.*" )
+list(FILTER SOPC_COMMON_SRC EXCLUDE REGEX "${S2OPC_SRC}/Common/crypto/lib_dep/.*" )
 
 # Include specific "helpers_platform_dep" files
 file(GLOB SOPC_ZEPHYR_SRC ${S2OPC_SRC}/Common/helpers_platform_dep/zephyr/*.c
      ${S2OPC_SRC}/Common/helpers_platform_dep/*.c)
+
+# Include Crypto library specific files
+if(NOT IS_DIRECTORY ${S2OPC_SRC}/Common/crypto/lib_dep/${CONFIG_SOPC_CRYPTO_LIB_NAME})
+  message(FATAL_ERROR "Crypto library '${CONFIG_SOPC_CRYPTO_LIB_NAME}' not found. Please check the parameter 'CONFIG_SOPC_CRYPTO_LIB_NAME'")
+else()
+ message("-- SOPC is using crypto library '${CONFIG_SOPC_CRYPTO_LIB_NAME}'")
+endif()
+file(GLOB SOPC_CRYPTO_SRC ${S2OPC_SRC}/Common/crypto/lib_dep/${CONFIG_SOPC_CRYPTO_LIB_NAME}/*.c)
 
 # Include other files
 file(GLOB_RECURSE SOPC_CLIENT_SERVER_SRC ${S2OPC_SRC}/ClientServer/*.c)
@@ -99,6 +109,7 @@ list(FILTER SOPC_PUBSUB_SRC EXCLUDE REGEX "${S2OPC_SRC}/PubSub/config_loaders/.*
 
 zephyr_library_sources(
     ${SOPC_COMMON_SRC}
+    ${SOPC_CRYPTO_SRC}
     ${SOPC_ZEPHYR_SRC}
     ${SOPC_CLIENT_SERVER_SRC}
     ${SOPC_PUBSUB_SRC}

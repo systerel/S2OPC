@@ -26,7 +26,10 @@
 
 #include <stddef.h>
 
-#include "crypto_functions_lib.h"
+// The services which are implemented in this file are declared here
+#include "sopc_crypto_profiles_lib_itf.h"
+
+#include "crypto_functions_mbedtls.h"
 #include "sopc_crypto_profiles.h"
 
 const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {
@@ -116,3 +119,8 @@ const SOPC_CryptoProfile_PubSub sopc_g_cppsNone = {
     .pFnSymmVerif = NULL,
     .pFnGenRnd = &CryptoProvider_GenTrueRnd,
 };
+
+bool SOPC_CryptoProfile_Is_Implemented(void)
+{
+    return true;
+}

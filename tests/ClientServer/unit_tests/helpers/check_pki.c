@@ -31,8 +31,10 @@
 #include "check_helpers.h"
 #include "hexlify.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_pki_struct_lib_internal.h"
 
 #define S2OPC_DEFAULT_ENDPOINT_URL "opc.tcp://LOCALhost:4841"
 #define S2OPC_DEFAULT_APPLICATION_URI "urn:S2OPC:localhost"

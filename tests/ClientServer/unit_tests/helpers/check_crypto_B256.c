@@ -33,6 +33,7 @@
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_crypto_provider_lib_itf.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
