@@ -205,6 +205,18 @@ build-with_missing_libs:
       when: on_success
   artifacts:
 
+# Used by ALL_BUILDS to check we manage to build with nocrypto lib
+build-with_no_crypto:
+  <<: *build_linux
+  variables:
+    <<: *build_linux_variables
+  script:
+    - S2OPC_CRYPTO_MBEDTLS=0 ./build.sh || exit $?
+  rules:
+    - if: "$ALL_BUILDS != null"
+      when: on_success
+  artifacts:
+
 # Used by all-tests pipeline (add tests which needs NO_ASAN)
 build-linux64-pys2opc:
   <<: *build_linux
