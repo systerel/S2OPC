@@ -24,11 +24,13 @@ S2OPC_SAMPLE=${S2OPC_BASE-}/samples/embedded
 SRC_DIR=${FREERTOS_CORE_DIR-}/Src/sopc
 
 OPT_LAZY=false
+OPT_CRYPTO="mbedtls"
 while [[ "$#" -gt 0 ]] ; do
 PARAM=$1
 shift
 [[ "${PARAM-}" == "--lazy" ]] && OPT_LAZY=true  && continue
-echo "Unexpected parameter : ${PARAM-}" && exit 127
+[[ "${PARAM-}" == "--nocrypto" ]] && OPT_CRYPTO="nocrypto"  && continue
+echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
 
 echo "Installing S2OPC for freeRTOS samples..."
@@ -63,6 +65,10 @@ mv ${SRC_DIR-}/Common/helpers_platform_dep/freertos/s2opc_common_export.h_ ${SRC
 ( cd ${SRC_DIR-}/Common/helpers_platform_dep && for f in * ; do [ -d ${f-} ] && [[ ${f-} != freertos ]] && rm -rf ${f-} ; done )
 # Remove EXPAT-related files
 find  ${SRC_DIR-} -name "*expat*.c" -or -name "*config_xml*.c" -or -path "*xml_expat*.c" |xargs rm -fv
+# Remove CRYPTO-related files
+( cd ${SRC_DIR-}/Common/crypto/lib_dep && for f in * ; do [ -d ${f-} ] && [[ ${f-} != ${OPT_CRYPTO-} ]] && rm -rf ${f-} && echo "removed '${SRC_DIR-}/Common/crypto/lib_dep/${f}/**'" ; done )
+
+echo "[II] Using crypto library '${OPT_CRYPTO-}'"
 echo "[II] Source copied to ${S2OPC_SRC-}"
 
 # Move .h files to include folder

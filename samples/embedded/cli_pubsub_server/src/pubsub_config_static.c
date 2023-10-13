@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
+#include "sopc_crypto_profiles_lib_itf.h"
 
 #include "samples_platform_dep.h"
 #include "test_config.h"
@@ -154,6 +155,8 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
 
 SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 {
+    const SOPC_SecurityMode_Type security_Mode =
+        SOPC_CryptoProfile_Is_Implemented() ? CONFIG_SOPC_PUBSUB_SECURITY_MODE : SOPC_SecurityMode_None;
     bool alloc = true;
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
     SOPC_PubSubConnection* connection;
@@ -208,9 +211,8 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     SOPC_DataSetWriter* writer = NULL;
     if (alloc)
     {
-        writer =
-            SOPC_PubSubConfig_SetPubMessageAt(connection, 0, MESSAGE_ID, MESSAGE_VERSION,
-                                              CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, CONFIG_SOPC_PUBSUB_SECURITY_MODE);
+        writer = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, MESSAGE_ID, MESSAGE_VERSION,
+                                                   CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000, security_Mode);
         alloc = NULL != writer;
     }
 
@@ -274,7 +276,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     if (alloc)
     {
         reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID, MESSAGE_VERSION, 1000,
-                                                   CONFIG_SOPC_PUBSUB_SECURITY_MODE);
+                                                   security_Mode);
         alloc = NULL != reader;
     }
 

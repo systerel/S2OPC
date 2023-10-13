@@ -64,10 +64,14 @@ cd ${SAMPLESDIR} || exit 4
 git config --global --add safe.directory ${S2OPCDIR}
 
 export BOARD=$1
-export APP=$2
+shift
+export APP=$1
+shift
+export ADD_CONF=$*
 
 [[ -z $BOARD ]] && export BOARD=mimxrt1064_evk && echo "Using default board ${BOARD}"
 [[ -z $APP ]]   && export APP=cli_pubsub_server && echo "Using default application ${APP}"
+[[ ! -z ${ADD_CONF} ]] && echo "Using additional extra configuration : '${ADD_CONF}'"
 
 west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' for the list of supported targets."
 [ -d "${SAMPLESDIR}/${APP}" ] || fail "Invalid application $APP"
@@ -75,7 +79,9 @@ west boards |grep -q ^$BOARD$ || fail "Invalid board $BOARD. Type 'west boards' 
 echo " ** Building ${APP} ... " |tee -a ${OUTDIR}/${APP}_${BOARD}.log
 cd ${SAMPLESDIR}/${APP} || return 1
 sudo rm -rf build || return  1
-west build -b ${BOARD} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
+
+echo "Command : 'west build -b ${BOARD} -- ${ADD_CONF} . '"
+west build -b ${BOARD} -- ${ADD_CONF} . 2>&1 |tee ${OUTDIR}/${APP}_${BOARD}.log
 mv build/zephyr/zephyr.exe build/zephyr/zephyr.bin 2> /dev/null
 if ! [ -f build/zephyr/zephyr.bin ] ; then
   echo " ** Build ${APP} failed " |tee -a ${OUTDIR}/${APP}_${BOARD}.log

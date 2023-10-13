@@ -22,6 +22,7 @@
 
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
+#include "sopc_crypto_profiles_lib_itf.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -349,7 +350,7 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
     } // else: secu is None => client/server keys not needed but PKI might be necessary
       //                       to validate server certificate prior to user token encryption using it
 
-    if (0 == nCfgCreated && SOPC_STATUS_OK == status)
+    if (0 == nCfgCreated && SOPC_STATUS_OK == status && SOPC_CryptoProfile_Is_Implemented())
     {
         SOPC_CertificateList* pTrustedCerts = NULL;
 

@@ -24,7 +24,7 @@ set -o pipefail
 function _help() {
     echo "$1 build the FreeRTOS sample. This script must be called from within the docker."
     echo "This script reproduces the options used by STMCubeIde for a specific build on STM23H723. It may not be adapted to any other target."
-    echo "Usage: $1 [--help] [--lazy]"
+    echo "Usage: $1 [--help] [--lazy] -- [any options to pass to build script]"
     echo "    --lazy : do not reinstall S2OPC sources (avoids full rebuild)"
 }
 
@@ -34,7 +34,8 @@ PARAM=$1
 shift
 [[ "${PARAM-}" =~ --h(elp)? ]] && _help $0 && exit 0
 [[ "${PARAM-}" =~ --lazy ]] && OPT_LAZY=true && OPT_INSTALL="--lazy" && continue
-echo "Unexpected parameter : ${PARAM-}" && exit 127
+[[ "${PARAM-}" == "--" ]] && break
+echo "$0: Unexpected parameter : ${PARAM-}" && exit 127
 done
 
 export GCC=arm-none-eabi-gcc 
@@ -52,7 +53,7 @@ cd ${FREERTOS_CORE_DIR-}
 
 ${OPT_LAZY-} &&  echo "Lazy build => not reinstalling sources"
 ${OPT_LAZY-} || cp -rf /stmcube_ws/* ${WS-}
-${SOPC_ROOT-}/samples/embedded/platform_dep/freertos/install.sh ${OPT_INSTALL-} ||  exit $?
+${SOPC_ROOT-}/samples/embedded/platform_dep/freertos/install.sh ${OPT_INSTALL-} $* ||  exit $?
 
 echo "Installation OK, starting compile step"
 

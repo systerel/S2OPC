@@ -71,6 +71,7 @@ function build() {
 }
 build stm32h735g_disco cli_client
 build mimxrt1064_evk cli_pubsub_server
+build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
 build native_posix_64 cli_pubsub_server
 build native_posix_64 cli_client
 
