@@ -36,12 +36,12 @@
 #include "key_manager_lib.h"
 
 // TODO: the right cyclone_crypto includes here
-#include "cyclone_crypto/cipher/aes.h"
-#include "cyclone_crypto/cipher_modes/cbc.h"
-#include "cyclone_crypto/cipher_modes/ctr.h"
-#include "cyclone_crypto/hash/sha1.h"
-#include "cyclone_crypto/hash/sha256.h"
-#include "cyclone_crypto/mac/hmac.h"
+#include "cipher/aes.h"
+#include "cipher_modes/cbc.h"
+#include "cipher_modes/ctr.h"
+#include "hash/sha1.h"
+#include "hash/sha256.h"
+#include "mac/hmac.h"
 
 /* ------------------------------------------------------------------------------------------------
  * Aes128-Sha256-RsaOaep

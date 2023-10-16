@@ -41,9 +41,9 @@
 
 #include "key_manager_lib.h"
 
-#include "cyclone_crypto/pkix/x509_cert_validate.h"
-#include "cyclone_crypto/pkix/x509_crl_validate.h"
-#include "cyclone_crypto/pkix/x509_sign_verify.h"
+#include "pkix/x509_cert_validate.h"
+#include "pkix/x509_crl_validate.h"
+#include "pkix/x509_sign_verify.h"
 
 #define MAX_CERTIFICATE_DEPTH 10
 

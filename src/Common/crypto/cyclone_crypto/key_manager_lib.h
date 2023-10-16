@@ -30,7 +30,7 @@
 #include "sopc_assert.h"
 #include "sopc_key_manager.h"
 
-#include "cyclone_crypto/pkix/x509_common.h"
+#include "pkix/x509_common.h"
 
 /**
  * \brief   The asymmetric key representation.

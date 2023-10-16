@@ -28,15 +28,15 @@
 
 #include "key_manager_lib.h"
 
-#include "cyclone_crypto/pkix/pem_decrypt.h"
-#include "cyclone_crypto/pkix/pem_export.h"
-#include "cyclone_crypto/pkix/pem_import.h"
-#include "cyclone_crypto/pkix/pkcs8_key_parse.h"
-#include "cyclone_crypto/pkix/x509_cert_parse.h"
-#include "cyclone_crypto/pkix/x509_cert_validate.h"
-#include "cyclone_crypto/pkix/x509_crl_parse.h"
-#include "cyclone_crypto/pkix/x509_key_format.h"
-#include "cyclone_crypto/pkix/x509_key_parse.h"
+#include "pkix/pem_decrypt.h"
+#include "pkix/pem_export.h"
+#include "pkix/pem_import.h"
+#include "pkix/pkcs8_key_parse.h"
+#include "pkix/x509_cert_parse.h"
+#include "pkix/x509_cert_validate.h"
+#include "pkix/x509_crl_parse.h"
+#include "pkix/x509_key_format.h"
+#include "pkix/x509_key_parse.h"
 
 /* ------------------------------------------------------------------------------------------------
  * AsymmetricKey API

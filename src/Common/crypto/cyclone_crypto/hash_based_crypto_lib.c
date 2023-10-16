@@ -29,8 +29,8 @@
 #include "sopc_assert.h"
 #include "sopc_mem_alloc.h"
 
-#include "cyclone_crypto/hash/sha256.h"
-#include "cyclone_crypto/kdf/pbkdf.h"
+#include "hash/sha256.h"
+#include "kdf/pbkdf.h"
 
 SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_ExposedBuffer* pSecret,
                                                                   uint32_t lenSecret,
