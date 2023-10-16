@@ -193,8 +193,12 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
         // Unlink cert temporarily for CRL verification
         mbedtls_x509_crt* backupNextCrt = crt->next;
         crt->next = NULL;
-        SOPC_ReturnStatus status =
-            SOPC_KeyManagerLib_CertificateList_CheckCRL(crt, &checkTrustedAndCRLinChain->allCRLs->crl, &matchCRL);
+        SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+        if (NULL != checkTrustedAndCRLinChain->allCRLs)
+        {
+            status =
+                SOPC_KeyManagerLib_CertificateList_CheckCRL(crt, &checkTrustedAndCRLinChain->allCRLs->crl, &matchCRL);
+        }
         // Restore link
         crt->next = backupNextCrt;
         if (SOPC_STATUS_OK != status)
@@ -208,7 +212,11 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
     }
 
     /* Check if certificate chain element is part of PKI trusted certificates */
-    const mbedtls_x509_crt* crtTrusted = &checkTrustedAndCRLinChain->trustedCrts->crt; /* Current cert */
+    const mbedtls_x509_crt* crtTrusted = NULL;
+    if (NULL != checkTrustedAndCRLinChain->trustedCrts)
+    {
+        crtTrusted = &checkTrustedAndCRLinChain->trustedCrts->crt; /* Current cert */
+    }
     while (!checkTrustedAndCRLinChain->isTrustedInChain && NULL != crtTrusted)
     {
         if (crt->subject_raw.len == crtTrusted->subject_raw.len && crt->raw.len == crtTrusted->raw.len &&
@@ -1016,8 +1024,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
 {
     SOPC_ASSERT(NULL != pPKI);
     SOPC_ASSERT(NULL != mbed_cert);
-    SOPC_ASSERT(NULL == mbed_cert->next); // TODO: thus we don't validate a chain but a single certificate !!
-    // TODO: reflect we validate only 1 certificate here because we need this property for self-signed
+    SOPC_ASSERT(NULL == mbed_cert->next);
     SOPC_ASSERT(NULL != mbed_profile);
     SOPC_ASSERT(NULL != thumbprint);
     SOPC_ASSERT(NULL != error);
