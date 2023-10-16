@@ -300,6 +300,10 @@ static int cb_msg_arrived(void* context, char* topic, int topicLen, MQTTAsync_me
                            contextClient->clientId);
     contextClient->subContext.cbMessageArrived((uint8_t*) message->payload, (uint16_t) message->payloadlen,
                                                contextClient->pUser);
+
+    MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topic);
+
     return true;
 }
 
