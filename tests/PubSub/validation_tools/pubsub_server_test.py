@@ -123,6 +123,27 @@ XML_PUBSUB_LOOP = """<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_UNICAST = """<PubSub>
+    <connection address="opc.udp://127.0.0.1:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://127.0.0.1:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
     <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
@@ -856,12 +877,12 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
 
     helpAssertState(pubsubserver, PubSubState.OPERATIONAL, logger)
 
-def testPubSubDynamicConf(TapFileName):
+def testPubSubDynamicConf(logger):
 
-    logger = TapLogger(TapFileName)
     pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
 
     defaultXml2Restore = False
+    allTestsDone = False
 
     try:
         # backup of default XML file
@@ -1273,6 +1294,27 @@ def testPubSubDynamicConf(TapFileName):
         logger.begin_section("TC 26 : Test malformed UInteger publisher Id")
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID, logger, possibleFail=True)
 
+        #
+        # TC 27 : Test with Publisher and Subscriber configuration(unicast) => subscriber variables change through Pub/Sub
+        #
+        logger.begin_section("TC 27 : Publisher Subscriber Unicast")
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 27, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_UNICAST, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_200)
+        logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', 27 == pubsubserver.getValue(NID_SUB_INT))
+
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+        allTestsDone = True
+        
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)
 
@@ -1281,16 +1323,17 @@ def testPubSubDynamicConf(TapFileName):
         if defaultXml2Restore:
             move(DEFAULT_XML_PATH + ".bakup", DEFAULT_XML_PATH)
 
+        logger.begin_section("TC 99 : End of test")
         pubsubserver.disconnect()
         logger.add_test('Not connected to OPCUA Server', not pubsubserver.isConnected())
+        logger.add_test('All test executed.', allTestsDone)
         retcode = -1 if logger.has_failed_tests else 0
         logger.finalize_report()
         sys.exit(retcode)
 
 # test with static configuration : data/config_pubsub_server.xml
-def testPubSubStaticConf(tapFileName):
+def testPubSubStaticConf(logger):
 
-    logger = TapLogger(tapFileName)
     pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND, NID_ACYCLIC_SEND_STATUS)
 
     defaultXml2Restore = False
@@ -1396,8 +1439,10 @@ if __name__=='__main__':
     argparser.add_argument('--static', action='store_true', default=False,
                            help='Flag to indicates that Pub-Sub configuration is static. Default is false')
     argparser.add_argument('--tap', dest='tap', default='pubsub_server_test.tap', help='Set the TAP file name for tests results')
+    argparser.add_argument('--verbose', action='store_true', default=False, help='Verbose mode. Default is false')
     args = argparser.parse_args()
+    logger = TapLogger(args.tap, verbose=args.verbose)
     if args.static:
-        testPubSubStaticConf(args.tap)
+        testPubSubStaticConf(logger)
     else:
-        testPubSubDynamicConf(args.tap)
+        testPubSubDynamicConf(logger)

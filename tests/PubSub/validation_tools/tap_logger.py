@@ -22,13 +22,14 @@ class TapLogger(object):
     """
     Generates a TAP report from test descriptions and result.
     """
-    def __init__(self, report_name):
+    def __init__(self, report_name, verbose=False):
         self.report_name = report_name
         self.nb_tests = 0
         self.fd = open(file=report_name, mode='w', encoding='utf-8')
         self.tests_results = list()
         self.section = ""
         self.has_failed_tests = False
+        self.verbose = verbose
         self._finalized = False
 
     def __del__(self):
@@ -37,7 +38,14 @@ class TapLogger(object):
             #  it means it is our last chance to save it.
             self.finalize_report(last_chance_finalization = True)
 
+    def append_verbose(self, text: str):
+        if self.verbose:
+            print(text)
+        self.tests_results.append(text)
+        
     def begin_section(self, section_name):
+        if self.verbose:
+            print(section_name)
         self.section = section_name
 
     def add_test(self, test_description, test_result):
@@ -45,7 +53,7 @@ class TapLogger(object):
         if test_result:
             self.tests_results.append("ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
         else:
-            self.tests_results.append("not ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
+            self.append_verbose("not ok {0} {1} {2}\n".format(self.nb_tests, self.section, test_description))
             self.has_failed_tests = True
 
     def finalize_report(self, last_chance_finalization = False):

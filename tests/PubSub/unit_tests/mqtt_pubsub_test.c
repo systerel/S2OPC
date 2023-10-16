@@ -29,6 +29,9 @@
 #include <check.h>
 #include <stdlib.h>
 
+#include "sopc_atomic.h"
+#include "sopc_common.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mqtt_transport_layer.h"
 
@@ -54,12 +57,63 @@ uint8_t encoded_network_msg_data[ENCODED_DATA_SIZE] = {0x71, 0x2E, 0x03, 0x2A, 0
 SOPC_Buffer encoded_network_msg = {ENCODED_DATA_SIZE, ENCODED_DATA_SIZE,       ENCODED_DATA_SIZE, 0,
                                    ENCODED_DATA_SIZE, encoded_network_msg_data};
 
-static int nbFatalError = 0;
+#define VERBOSE 0 // Use 1 for verbose mode (debug)
+
+#if VERBOSE
+#define DEBUG(x) printf x
+// This is necessary to use a separate macro to avoid warnings from CLANG
+#define VERBOSE_EXPECTED(x, y, remTimeMs, timeout)                                     \
+    do                                                                                 \
+    {                                                                                  \
+        if ((x) == (y))                                                                \
+        {                                                                              \
+            DEBUG(("'" #x "= " #y "' obtained. Rem time = %d ms\n", (int) remTimeMs)); \
+        }                                                                              \
+        else                                                                           \
+        {                                                                              \
+            DEBUG(("'" #x "= " #y "' NOT obtained after %d ms\n", (int) timeout));     \
+        }                                                                              \
+    } while (0)
+
+static void logCb(const char* category, const char* const line)
+{
+    DEBUG(("[%s]: %s\n", category ? category : "NONE", line));
+}
+
+#else
+#define DEBUG(x)
+#define VERBOSE_EXPECTED(x, y, remTimeMs, timeout)
+#endif
+
+#define MAX_WAIT_MS 2000
+
+#define WAIT_FOR(x, y, timeout)                                              \
+    do                                                                       \
+    {                                                                        \
+        static int32_t remTimeMs = (timeout);                                \
+        DEBUG(("Waiting for '" #x " = " #y "' for %d ms\n", (int) timeout)); \
+        while ((x) != (y) && remTimeMs >= 100)                               \
+        {                                                                    \
+            SOPC_Sleep(100);                                                 \
+            remTimeMs -= 100;                                                \
+        }                                                                    \
+        VERBOSE_EXPECTED(x, y, (int) remTimeMs, (int) timeout);              \
+    } while (0)
+
+#define WAIT_AND_CHECK_EQ(x, y, timeout)        \
+    do                                          \
+    {                                           \
+        WAIT_FOR(x, y, timeout);                \
+        ck_assert_int_eq((int) (x), (int) (y)); \
+    } while (0)
+
+static int32_t nbFatalError = 0;
+static int32_t nbReceived = 0;
 static void onFatalError(void* userContext, const char* message)
 {
     SOPC_UNUSED_ARG(userContext);
     SOPC_UNUSED_ARG(message);
-    nbFatalError++;
+    SOPC_Atomic_Int_Add(&nbFatalError, 1);
 }
 
 static void cbMessageArrivedTest(uint8_t* data, uint16_t size, void* user)
@@ -70,6 +124,7 @@ static void cbMessageArrivedTest(uint8_t* data, uint16_t size, void* user)
     {
         ck_assert_uint_eq(encoded_network_msg_data[i], data[i]);
     }
+    SOPC_Atomic_Int_Add(&nbReceived, 1);
 }
 
 START_TEST(test_create_client)
@@ -84,13 +139,14 @@ END_TEST
 START_TEST(test_difference_topic_nbTopic_fail)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME,
                                                    NB_TOPIC + 2, cbMessageArrivedTest, &onFatalError, NULL);
-    ck_assert_int_eq(0, nbFatalError);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    SOPC_Sleep(500);
+    ck_assert_int_eq(0, SOPC_Atomic_Int_Get(&nbFatalError));
     SOPC_MQTT_Release_Client(contextClient);
 }
 END_TEST
@@ -98,15 +154,15 @@ END_TEST
 START_TEST(test_username_noPassword_fail)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, "randomUsername", NULL,
                                                    MQTT_LIB_TOPIC_NAME, NB_TOPIC + 2, cbMessageArrivedTest,
                                                    &onFatalError, NULL);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
-    SOPC_Sleep(100);
-    ck_assert_int_eq(nbFatalError, 0);
+    SOPC_Sleep(500);
+    ck_assert_int_eq(SOPC_Atomic_Int_Get(&nbFatalError), 0);
     SOPC_MQTT_Release_Client(contextClient);
 }
 END_TEST
@@ -114,69 +170,74 @@ END_TEST
 START_TEST(test_connexion_fail)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, BAD_PORT_URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL,
                                                    &onFatalError, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    WAIT_AND_CHECK_EQ(SOPC_Atomic_Int_Get(&nbFatalError), 1, MAX_WAIT_MS);
     SOPC_MQTT_Release_Client(contextClient);
-    SOPC_Sleep(100);
-    ck_assert_int_eq(nbFatalError, 1);
 }
 END_TEST
 
 START_TEST(test_publisher_send)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, NULL, 0, NULL,
                                                    &onFatalError, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_Sleep(1000); // Wait for connection // TODO : we should provide a mecanism of feedback Connected/notConnected
+
+    WAIT_AND_CHECK_EQ(SOPC_MQTT_Client_Is_Connected(contextClient), 1, MAX_WAIT_MS);
+
     for (int i = 0; i < NB_TOPIC; i++)
     {
         status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[i], encoded_network_msg);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
     }
     SOPC_MQTT_Release_Client(contextClient);
-    SOPC_Sleep(100);
-    ck_assert_int_eq(nbFatalError, 0);
+    SOPC_Sleep(500);
+    ck_assert_int_eq(SOPC_Atomic_Int_Get(&nbFatalError), 0);
 }
 END_TEST
 
 START_TEST(test_callback_subscription)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
+    SOPC_Atomic_Int_Set(&nbReceived, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, NULL, NULL, MQTT_LIB_TOPIC_NAME,
                                                    NB_TOPIC, cbMessageArrivedTest, &onFatalError, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    SOPC_Sleep(1000); // Wait for connection // TODO : we should provide a mecanism of feedback Connected/notConnected
+
+    WAIT_AND_CHECK_EQ(SOPC_MQTT_Client_Is_Connected(contextClient), 1, MAX_WAIT_MS);
 
     status = SOPC_MQTT_Send_Message(contextClient, MQTT_LIB_TOPIC_NAME[0], encoded_network_msg);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    WAIT_AND_CHECK_EQ(nbReceived > 0, true, MAX_WAIT_MS);
     SOPC_MQTT_Release_Client(contextClient);
     SOPC_Sleep(100);
-    ck_assert_int_eq(nbFatalError, 0);
+    ck_assert_int_eq(SOPC_Atomic_Int_Get(&nbFatalError), 0);
 }
 END_TEST
 
 START_TEST(test_connexion_authentification)
 {
     MqttContextClient* contextClient;
-    nbFatalError = 0;
+    SOPC_Atomic_Int_Set(&nbFatalError, 0);
     SOPC_ReturnStatus status = SOPC_MQTT_Create_Client(&contextClient);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_MQTT_InitializeAndConnect_Client(contextClient, URI_MQTT_BROKER, USERNAME, PASSWORD, NULL, 0, NULL,
                                                    &onFatalError, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    SOPC_Sleep(1000); // Wait for connection // TODO : we should provide a mecanism of feedback Connected/notConnected
+    WAIT_AND_CHECK_EQ(SOPC_MQTT_Client_Is_Connected(contextClient), 1, MAX_WAIT_MS);
 
     for (int i = 0; i < NB_TOPIC; i++)
     {
@@ -185,7 +246,7 @@ START_TEST(test_connexion_authentification)
     }
     SOPC_MQTT_Release_Client(contextClient);
     SOPC_Sleep(100);
-    ck_assert_int_eq(nbFatalError, 0);
+    ck_assert_int_eq(SOPC_Atomic_Int_Get(&nbFatalError), 0);
 }
 END_TEST
 
@@ -195,6 +256,12 @@ int main(void)
     Suite* suite = suite_create("MQTT PubSub module test");
     SRunner* sr;
 
+#if VERBOSE
+    SOPC_Log_Configuration logCfg;
+    logCfg.logSystem = SOPC_LOG_SYSTEM_USER;
+    logCfg.logSysConfig.userSystemLogConfig.doLog = &logCb;
+    SOPC_Common_Initialize(logCfg);
+#endif
     TCase* tc_client = tcase_create("Mqtt client creation and initialisation");
     suite_add_tcase(suite, tc_client);
     tcase_add_test(tc_client, test_create_client);
