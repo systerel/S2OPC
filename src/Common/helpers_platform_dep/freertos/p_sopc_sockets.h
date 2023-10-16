@@ -24,13 +24,20 @@
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 
-#define SOPC_INVALID_SOCKET (-1)
 #define SOPC_MAX_PENDING_CONNECTIONS (2)
+
+typedef struct
+{
+    int sock;
+    struct ip_mreq* membership; // NULL if not used
+} Socket_t;
 
 /**
  *  \brief Socket base type
  */
-typedef int Socket;
+typedef Socket_t* Socket;
+#define SOPC_INVALID_SOCKET (NULL)
+#define INVALID_SOCKET_ID (-1)
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type

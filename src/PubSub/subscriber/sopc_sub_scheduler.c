@@ -656,7 +656,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
                                 schedulerCtx.transport[iIter].fctClear = SOPC_SubScheduler_CtxMqtt_Clear;
                                 schedulerCtx.transport[iIter].protocol = SOPC_PubSubProtocol_MQTT;
-                                schedulerCtx.transport[iIter].sock = -1;
+                                schedulerCtx.transport[iIter].sock = SOPC_INVALID_SOCKET;
                                 schedulerCtx.transport[iIter].mqttTopics = topic;
 
                                 if (SOPC_STATUS_OK != status)

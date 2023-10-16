@@ -934,7 +934,7 @@ static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
         pubSchedulerCtx.transport[index].pFctClear = SOPC_PubScheduler_CtxMqtt_Clear;
         pubSchedulerCtx.transport[index].pFctSend = SOPC_PubScheduler_CtxMqtt_Send;
         pubSchedulerCtx.transport[index].udpAddr = NULL;
-        pubSchedulerCtx.transport[index].sock = -1;
+        pubSchedulerCtx.transport[index].sock = SOPC_INVALID_SOCKET;
         pubSchedulerCtx.transport[index].isAcyclic = SOPC_PubSubConnection_Get_AcyclicPublisher(connection);
         *ctx = &pubSchedulerCtx.transport[index];
         return true;

@@ -343,7 +343,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
             if (listenAddress->ai_family == AF_INET)
             {
                 // IPV4: first address byte indicates if this is a multicast address
-                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->ai_addr;
+                struct sockaddr_in* sAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
                 const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
                 isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
             }
