@@ -182,8 +182,8 @@ fi
 if [[ $STATIC_ANALYSIS_STATUS != 0 ]]; then
     # Do not remove in case of analysis failure
     EXITCODE=1
-else
-    rm -fr build-analyzer
+#else
+#    rm -fr build-analyzer
 fi
 
 #### Format C sources with clang-format ####

@@ -33,6 +33,7 @@ option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static versio
 option(BUILD_SHARED_LIBS "Build dynamic libraries for S2OPC instead of static libraries" OFF)
 if(USE_STATIC_EXT_LIBS)
   set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
+  set(USE_STATIC_CYCLONE_CRYPTO_LIB ${USE_STATIC_EXT_LIBS})
   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
 
   if(BUILD_SHARED_LIBS)
@@ -208,7 +209,7 @@ if(SOPC_HAS_SUBTYPE_HYBRID_RESOLUTION)
 endif()
 
 # S2OPC swap mbedtls library to cyclone_crypto
-option(WITH_CYCLONE_CRYPTO "Use cyclone_crypto library" OFF)
+option(WITH_CYCLONE_CRYPTO "Use cyclone_crypto library" ON)
 # option to load static security data for embedded systems without filesystems
 option(WITH_STATIC_SECURITY_DATA "Use static security data" OFF)
 # option to put non-writeable data in const part of the memory
