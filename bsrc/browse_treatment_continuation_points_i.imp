@@ -36,6 +36,11 @@ INVARIANT
     session_hasContinuationPoint_i : t_session_i --> BOOL &
     session_ContinuationPoint_i    : t_session_i --> t_ContinuationPoint_i &
 
+    session_ContinuationPoint~ = session_ContinuationPoint_i |>> {c_ContinuationPoint_indet} &
+    dom(session_ContinuationPoint_i |>> {c_ContinuationPoint_indet}) =
+        dom(session_hasContinuationPoint_i |> {TRUE})
+
+ASSERTIONS
     s_ContinuationPoints = session_ContinuationPoint_i[dom(session_hasContinuationPoint_i |> {TRUE})] &
     ran(session_ContinuationPoint) = dom(session_hasContinuationPoint_i |> {TRUE}) &
     dom(session_ContinuationPoint) = session_ContinuationPoint_i[dom(session_hasContinuationPoint_i |> {TRUE})]
