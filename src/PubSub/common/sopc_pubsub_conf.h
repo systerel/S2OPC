@@ -61,7 +61,7 @@ typedef struct SOPC_PublishedVariable SOPC_PublishedVariable;
 
 /**
  * Notifies a fatal error on a Pub or Sub connection, that is not automatically recoverable
- * @param index The corresponding index of the connection in ::SOPC_PubSubConfiguration
+ * @param userContext The user context.
  * @param message A textual information about the error
  */
 typedef void SOPC_PubSub_OnFatalError(void* userContext, const char* message);

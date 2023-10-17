@@ -832,7 +832,6 @@ static void SOPC_Sub_PeriodicTick(void* ctx)
 /*
   precondition :
    - call init_sub_scheduler_ctx
-   - schedulerCtx.nbSockets > 0
    - schedulerCtx.sockArray is non NULL
 */
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)

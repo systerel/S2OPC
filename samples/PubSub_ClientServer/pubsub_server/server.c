@@ -363,7 +363,7 @@ bool Server_PubSubStop_Requested(void)
 
 bool Server_PubSubStart_Requested(void)
 {
-    bool requested = SOPC_Atomic_Int_Get(&pubSubStartRequested);
+    bool requested = SOPC_Atomic_Int_Get(&pubSubStartRequested) && !SOPC_Atomic_Int_Get(&pubSubStopRequested);
     if (requested)
     {
         // Reset since request is transmitted on return
