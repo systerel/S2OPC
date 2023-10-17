@@ -55,9 +55,9 @@ OPERATIONS
         p_resultMask : t_BrowseResultMask_i
     THEN
         /* Memory should allow to create a new continuation point */
-        bres := bool(s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)) ||
         IF s_ContinuationPoints /= t_ContinuationPoint & t_ContinuationPointId /= ran(id_ContinuationPoint)
         THEN
+            bres := TRUE ||
             ANY l_ContinuationPoint, l_continuationPointId WHERE
                 l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints &
                 l_continuationPointId : t_ContinuationPointId - ran(id_ContinuationPoint)
@@ -67,6 +67,7 @@ OPERATIONS
                 id_ContinuationPoint(l_ContinuationPoint) := l_continuationPointId
             END
         ELSE
+            bres := FALSE ||
             p_ContinuationPoint := c_ContinuationPoint_indet
         END
     END
