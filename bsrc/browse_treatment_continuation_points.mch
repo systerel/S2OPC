@@ -77,15 +77,23 @@ OPERATIONS
         /* No continuation point shall be defined for given session to create a new one */
         IF p_session : t_session &  p_session /: ran(session_ContinuationPoint)
         THEN
-            bres := TRUE ||
-            ANY l_ContinuationPoint, l_continuationPointId WHERE
-                l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints &
-                l_continuationPointId : t_ContinuationPointId - ran(id_ContinuationPoint)
+            /* Memory check */
+            IF s_ContinuationPoints /= t_ContinuationPoint &
+               t_ContinuationPointId /= ran(id_ContinuationPoint)
             THEN
-                p_ContinuationPointId :(p_ContinuationPointId : t_ContinuationPointId_i & p_ContinuationPointId = l_continuationPointId) ||
-                s_ContinuationPoints := s_ContinuationPoints \/ {l_ContinuationPoint} ||
-                id_ContinuationPoint(l_ContinuationPoint) := l_continuationPointId ||
-                session_ContinuationPoint := session_ContinuationPoint \/ {l_ContinuationPoint |-> p_session}
+                bres := TRUE ||
+                ANY l_ContinuationPoint, l_continuationPointId WHERE
+                    l_ContinuationPoint : t_ContinuationPoint - s_ContinuationPoints &
+                    l_continuationPointId : t_ContinuationPointId - ran(id_ContinuationPoint)
+                THEN
+                    p_ContinuationPointId :(p_ContinuationPointId : t_ContinuationPointId_i & p_ContinuationPointId = l_continuationPointId) ||
+                    s_ContinuationPoints := s_ContinuationPoints \/ {l_ContinuationPoint} ||
+                    id_ContinuationPoint(l_ContinuationPoint) := l_continuationPointId ||
+                    session_ContinuationPoint := session_ContinuationPoint \/ {l_ContinuationPoint |-> p_session}
+                END
+            ELSE
+                bres := FALSE ||
+                p_ContinuationPointId := c_ContinuationPointId_indet
             END
         ELSE
             bres := FALSE ||
