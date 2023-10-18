@@ -32,6 +32,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_pki_struct_lib_internal.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_trustlist.h"
 

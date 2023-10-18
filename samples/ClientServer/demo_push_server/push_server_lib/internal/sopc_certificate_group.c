@@ -36,6 +36,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_pki_struct_lib_internal.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_trustlist.h"
 #include "sopc_trustlist_itf.h"
