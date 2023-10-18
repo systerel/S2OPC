@@ -31,6 +31,11 @@
 #include "p_sopc_sockets.h"
 #include "sopc_macros.h"
 
+static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
+{
+    return addr->ai_addr;
+}
+
 static SOPC_ReturnStatus P_SOCKET_UDP_CreateSocket(const SOPC_Socket_AddressInfo* pAddrInfo,
                                                    const char* interfaceName,
                                                    bool setReuseAddr,
@@ -180,24 +185,36 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
         P_SOCKET_UDP_CreateSocket(listenAddress, interfaceName, setReuseAddr, setNonBlocking, &sock);
     if (SOPC_STATUS_OK == status)
     {
+        bool isMC = false;
         if (listenAddress->ai_family == AF_INET)
         {
-            // Multicast must be set before Bind for ZEPHYR
-            status = P_MULTICAST_AddIpV4Membership(sock, listenAddress);
-            if (SOPC_STATUS_OK == status)
+            // IPV4: first address byte indicates if this is a multicast address
+            struct sockaddr_in* sAddr = (struct sockaddr_in*) get_ai_addr(listenAddress);
+            const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
+            isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
+            // If address is multicast, then add membership
+            if (isMC)
             {
-                int res = zsock_bind(sock, &listenAddress->_ai_addr, listenAddress->ai_addrlen);
-                if (res < 0)
-                {
-                    P_MULTICAST_DropIpV4Membership(sock, listenAddress);
-                    SOPC_UDP_Socket_Close(&sock);
-                    status = SOPC_STATUS_NOK;
-                }
+                // Multicast must be set before Bind for ZEPHYR
+                status = P_MULTICAST_AddIpV4Membership(sock, listenAddress);
             }
         }
         else
         {
             status = SOPC_STATUS_NOK;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            int res = zsock_bind(sock, &listenAddress->_ai_addr, listenAddress->ai_addrlen);
+            if (res < 0)
+            {
+                if (isMC)
+                {
+                    P_MULTICAST_DropIpV4Membership(sock, listenAddress);
+                }
+                SOPC_UDP_Socket_Close(&sock);
+                status = SOPC_STATUS_NOK;
+            }
         }
     }
 
