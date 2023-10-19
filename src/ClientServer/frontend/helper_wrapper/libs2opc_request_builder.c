@@ -1440,4 +1440,68 @@ SOPC_ReturnStatus SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
     return SOPC_STATUS_OK;
 }
 
+OpcUa_CallRequest* SOPC_CallRequest_Create(size_t nbMethodsToCalls)
+{
+    OpcUa_CallRequest* req = NULL;
+    if (nbMethodsToCalls > INT32_MAX)
+    {
+        return req;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CallRequest_EncodeableType, (void**) &req);
+    if (SOPC_STATUS_OK != status)
+    {
+        return req;
+    }
+    req->NoOfMethodsToCall = (int32_t) nbMethodsToCalls;
+    req->MethodsToCall = SOPC_Calloc(nbMethodsToCalls, sizeof(*req->MethodsToCall));
+    if (NULL != req->MethodsToCall)
+    {
+        for (size_t i = 0; i < nbMethodsToCalls; i++)
+        {
+            OpcUa_CallMethodRequest_Initialize(&req->MethodsToCall[i]);
+        }
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    return req;
+}
+
+SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCall(OpcUa_CallRequest* callRequest,
+                                                   size_t index,
+                                                   const SOPC_NodeId* objectId,
+                                                   const SOPC_NodeId* methodId,
+                                                   int32_t nbOfInputArguments,
+                                                   const SOPC_Variant* inputArguments)
+{
+    if (NULL == callRequest || !CHECK_ELEMENT_EXISTS(callRequest, NoOfMethodsToCall, index))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_CallMethodRequest* callMethod = &callRequest->MethodsToCall[index];
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&callMethod->ObjectId, objectId);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(&callMethod->MethodId, methodId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        callMethod->InputArguments = SOPC_Calloc((size_t) nbOfInputArguments, sizeof(*callMethod->InputArguments));
+        status = (NULL != callMethod->InputArguments ? status : SOPC_STATUS_OUT_OF_MEMORY);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Copy_Array(nbOfInputArguments, callMethod->InputArguments, inputArguments, sizeof(SOPC_Variant),
+                                 &SOPC_Variant_CopyAux);
+        callMethod->NoOfInputArguments = nbOfInputArguments;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_CallMethodRequest_Clear(callMethod);
+    }
+    return status;
+}
+
 #undef CHECK_ELEMENT_EXISTS

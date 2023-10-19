@@ -996,4 +996,47 @@ SOPC_ReturnStatus SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
     size_t index,
     uint32_t monitoredItemId);
 
+/**
+ * \brief Creates a Call request for the given number of method calls
+ *
+ * \param nbMethodsToCalls Number of method calls to create with the request.
+ *                         \p nbMethodsToCalls <= INT32_MAX.
+ *                         ::SOPC_CallRequest_SetMethodToCall shall be called for each method call index.
+ *
+ * \return allocated Call request in case of success, NULL in case of failure
+ *         (invalid parameters or out of memory)
+ */
+OpcUa_CallRequest* SOPC_CallRequest_Create(size_t nbMethodsToCalls);
+
+/**
+ * \brief Sets the method call parameters for the given index in the the call request.
+ *
+ * \param callRequest  The call request to configure
+ *
+ * \param index        Index of the method call to configure in the request.
+ *                     \p index < number of method calls configured in ::SOPC_CallRequest_Create
+ *
+ * \param objectId     The nodeId of the object node on which method call will be executed.
+ *                     \p objectId shall not be NULL
+ *
+ * \param methodId     The nodeId of the method node to execute
+ *                     (it might be object's method node instance or method node of its ObjectType).
+ *                     \p methodId shall not be NULL
+ *
+ * \param nbOfInputArguments  The number of input arguments provided as a Variant array in \p inputArguments .
+ *                            It shall be compliant with the number of arguments expected by the method \p methodId .
+ *
+ * \param inputArguments      The Variant array containing the \p nbOfInputArguments input arguments
+ *                            for the method call.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or number of input arguments.
+ */
+SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCall(OpcUa_CallRequest* callRequest,
+                                                   size_t index,
+                                                   const SOPC_NodeId* objectId,
+                                                   const SOPC_NodeId* methodId,
+                                                   int32_t nbOfInputArguments,
+                                                   const SOPC_Variant* inputArguments);
+
 #endif /* LIBS2OPC_REQUEST_BUILDER_H_ */
