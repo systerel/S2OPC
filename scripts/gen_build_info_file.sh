@@ -51,9 +51,9 @@ echo "Building SOPC-$VERSION"
 
 if [ -f "$BUILD_INFO_FILE" ]
 then
-    sed -i 's/.buildSrcCommit =.*/.buildSrcCommit = "'"$VERSION"'",/' $BUILD_INFO_FILE
-    sed -i 's/.buildDockerId =.*/.buildDockerId = "'"$DOCKER_IMAGE"'",/' $BUILD_INFO_FILE
-    sed -i 's/.buildBuildDate =.*/.buildBuildDate = "'"$DATE"'",/' $BUILD_INFO_FILE
+    sed -i 's|.buildSrcCommit =.*|.buildSrcCommit = "'"$VERSION"'",|' $BUILD_INFO_FILE
+    sed -i 's|.buildDockerId =.*|.buildDockerId = "'"$DOCKER_IMAGE"'",|' $BUILD_INFO_FILE
+    sed -i 's|.buildBuildDate =.*|.buildBuildDate = "'"$DATE"'",|' $BUILD_INFO_FILE
 else
     echo "ERROR: file $BUILD_INFO_FILE not found"
     exit 1
