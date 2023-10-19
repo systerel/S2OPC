@@ -1232,7 +1232,6 @@
       <Reference ReferenceType="HasTypeDefinition" IsForward="false">i=83</Reference>
     </References>
   </UAObjectType>
-  
   <UAVariable NodeId="i=111" BrowseName="NamingRule" ParentNodeId="i=77" DataType="i=120">
     <DisplayName>NamingRule</DisplayName>
     <References>
@@ -1472,7 +1471,6 @@
       <Reference ReferenceType="HasModellingRule" IsForward="false">i=2338</Reference>
     </References>
   </UAObject>
-  
   <UAVariable NodeId="i=112" BrowseName="NamingRule" ParentNodeId="i=78" DataType="i=120">
     <DisplayName>NamingRule</DisplayName>
     <References>
@@ -1512,7 +1510,6 @@
       <Reference ReferenceType="HasModellingRule" IsForward="false">i=2328</Reference>
     </References>
   </UAObject>
-  
   <UAVariable NodeId="i=113" BrowseName="NamingRule" ParentNodeId="i=80" DataType="i=120">
     <DisplayName>NamingRule</DisplayName>
     <References>
@@ -1530,7 +1527,6 @@
       <Reference ReferenceType="HasProperty">i=114</Reference>
     </References>
   </UAObject>
-  
   <UAVariable NodeId="i=114" BrowseName="NamingRule" ParentNodeId="i=83" DataType="i=120">
     <DisplayName>NamingRule</DisplayName>
     <References>
@@ -3537,7 +3533,6 @@
       <Reference ReferenceType="HasComponent">i=2256</Reference>
       <Reference ReferenceType="HasProperty">i=2267</Reference>
       <Reference ReferenceType="HasProperty">i=2994</Reference>
-      
       <Reference ReferenceType="HasComponent">i=2268</Reference>
       <Reference ReferenceType="HasComponent">i=2274</Reference>
       <Reference ReferenceType="HasComponent">i=2295</Reference>
@@ -3688,8 +3683,6 @@
       <Reference ReferenceType="HasProperty" IsForward="false">i=2253</Reference>
     </References>
   </UAVariable>
-  
-  
   <UAObject NodeId="i=2268" BrowseName="ServerCapabilities" ParentNodeId="i=2253">
     <DisplayName>ServerCapabilities</DisplayName>
     <References>
@@ -3701,7 +3694,6 @@
       <Reference ReferenceType="HasProperty">i=2737</Reference>
       <Reference ReferenceType="HasComponent">i=2996</Reference>
       <Reference ReferenceType="HasComponent">i=2997</Reference>
-      
       <Reference ReferenceType="HasTypeDefinition">i=2013</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
     </References>
@@ -3764,20 +3756,14 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
     </References>
   </UAObject>
-  
-  
   <UAObject NodeId="i=2274" BrowseName="ServerDiagnostics" ParentNodeId="i=2253">
     <DisplayName>ServerDiagnostics</DisplayName>
     <References>
-      
-      
       <Reference ReferenceType="HasProperty">i=2294</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2020</Reference>
       <Reference ReferenceType="HasComponent" IsForward="false">i=2253</Reference>
     </References>
   </UAObject>
-  
-  
   <UAVariable NodeId="i=2294" BrowseName="EnabledFlag" ParentNodeId="i=2274" DataType="Boolean">
     <DisplayName>EnabledFlag</DisplayName>
     <References>
@@ -5414,7 +5400,7 @@
     <DisplayName>EnumField</DisplayName>
     <Category>Address Space DataTypeDefinition Attribute</Category>
     <References>
-    </References>
+      </References>
     <Definition Name="EnumField">
       <Field Name="Name" DataType="i=12" />
     </Definition>
@@ -7203,7 +7189,6 @@
       <uax:XmlElement>&lt;XmlElement:S2OPC/&gt;</uax:XmlElement>
     </Value>
   </UAVariable>
-  
   <UAVariable AccessLevel="99" BrowseName="1:SByte" DataType="SByte" NodeId="ns=1;i=1007" ParentNodeId="ns=1;i=1000">
     <DisplayName>SByte_1dn</DisplayName>
     <Description>SByte_1d</Description>
@@ -7298,7 +7283,7 @@
       </uax:ListOfBoolean>
     </Value>
   </UAVariable>
-    <UAVariable AccessLevel="99" BrowseName="1:ByteList" DataType="Byte" NodeId="ns=1;i=1016" ParentNodeId="ns=1;i=1000" ValueRank="1">
+  <UAVariable AccessLevel="99" BrowseName="1:ByteList" DataType="Byte" NodeId="ns=1;i=1016" ParentNodeId="ns=1;i=1000" ValueRank="1">
     <DisplayName>Byte list DN</DisplayName>
     <Description>Byte list Description</Description>
     <References>
@@ -7525,12 +7510,11 @@
     <References>
       <Reference IsForward="false" ReferenceType="HasComponent">ns=1;i=1000</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
-
       <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=Level2Folder3</Reference>
       <Reference IsForward="false" ReferenceType="HasOrderedComponent">ns=1;s=Level2Folder3</Reference>
     </References>
     <Value>
-        <uax:Boolean>true</uax:Boolean>
+      <uax:Boolean>true</uax:Boolean>
     </Value>
   </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:Number" DataType="Number" NodeId="ns=1;i=1030" ParentNodeId="ns=1;i=1000" ValueRank="-1">
@@ -7541,7 +7525,7 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-        <uax:UInt64>0</uax:UInt64>
+      <uax:UInt64>0</uax:UInt64>
     </Value>
   </UAVariable>
   <UAVariable AccessLevel="99" BrowseName="1:UInteger" DataType="UInteger" NodeId="ns=1;i=1031" ParentNodeId="ns=1;i=1000" ValueRank="-1">
@@ -7602,28 +7586,28 @@
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
     <Value>
-            <uax:ListOfQualifiedName>
-              <uax:QualifiedName>
-                <uax:NamespaceIndex>41</uax:NamespaceIndex>
-                <uax:Name>testName1</uax:Name>
-              </uax:QualifiedName>
-              <uax:QualifiedName>
-                <uax:NamespaceIndex>42</uax:NamespaceIndex>
-                <uax:Name>testName2</uax:Name>
-              </uax:QualifiedName>
-              <uax:QualifiedName>
-                <uax:NamespaceIndex>43</uax:NamespaceIndex>
-                <uax:Name>testName3</uax:Name>
-              </uax:QualifiedName>
-              <uax:QualifiedName>
-                <uax:NamespaceIndex>44</uax:NamespaceIndex>
-                <uax:Name>testName4</uax:Name>
-              </uax:QualifiedName>
-              <uax:QualifiedName>
-                <uax:NamespaceIndex>45</uax:NamespaceIndex>
-                <uax:Name>testName5</uax:Name>
-              </uax:QualifiedName>
-          </uax:ListOfQualifiedName>
+      <uax:ListOfQualifiedName>
+        <uax:QualifiedName>
+          <uax:NamespaceIndex>41</uax:NamespaceIndex>
+          <uax:Name>testName1</uax:Name>
+        </uax:QualifiedName>
+        <uax:QualifiedName>
+          <uax:NamespaceIndex>42</uax:NamespaceIndex>
+          <uax:Name>testName2</uax:Name>
+        </uax:QualifiedName>
+        <uax:QualifiedName>
+          <uax:NamespaceIndex>43</uax:NamespaceIndex>
+          <uax:Name>testName3</uax:Name>
+        </uax:QualifiedName>
+        <uax:QualifiedName>
+          <uax:NamespaceIndex>44</uax:NamespaceIndex>
+          <uax:Name>testName4</uax:Name>
+        </uax:QualifiedName>
+        <uax:QualifiedName>
+          <uax:NamespaceIndex>45</uax:NamespaceIndex>
+          <uax:Name>testName5</uax:Name>
+        </uax:QualifiedName>
+      </uax:ListOfQualifiedName>
     </Value>
   </UAVariable>
   <UAObject BrowseName="1:15361" NodeId="ns=1;i=15361" ParentNodeId="i=85">
@@ -7634,9 +7618,7 @@
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs</Reference>
-      
       <Reference ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs</Reference>
-      
       <Reference ReferenceType="Organizes">ns=1;s=Objects.7681.BLOCKs</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.SIGNALs</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.SWITCHs</Reference>
@@ -7694,7 +7676,7 @@
       </uax:ListOfExtensionObject>
     </Value>
   </UAVariable>
-<UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemArrayInt32" BrowseName="1:AnalogItem" DataType="Int32" ValueRank="1">
+  <UAVariable AccessLevel="99" NodeId="ns=1;s=AnalogItemArrayInt32" BrowseName="1:AnalogItem" DataType="Int32" ValueRank="1">
     <DisplayName>AnalogItemArrayInt32</DisplayName>
     <Description>AnalogItemArrayInt32 description</Description>
     <References>
@@ -7998,16 +7980,13 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level9Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
-  </UAObject>  
-
-  
-   <UAObject BrowseName="1:Level1Folder1" NodeId="ns=1;s=Level1Folder1" ParentNodeId="ns=1;s=TestReferencesFolder">
+  </UAObject>
+  <UAObject BrowseName="1:Level1Folder1" NodeId="ns=1;s=Level1Folder1" ParentNodeId="ns=1;s=TestReferencesFolder">
     <DisplayName>Level1Folder1</DisplayName>
     <Description>Level1Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
@@ -8019,7 +7998,6 @@
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
@@ -8031,13 +8009,11 @@
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=TestReferencesFolder</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level2Folder3</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level2Folder1" NodeId="ns=1;s=Level2Folder1">
     <DisplayName>Level2Folder1</DisplayName>
     <Description>Level2Folder1 containing nodes with references necessary for UACTT tests</Description>
@@ -8046,7 +8022,6 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
@@ -8060,7 +8035,6 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
@@ -8074,16 +8048,13 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level1Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level3Folder3</Reference>
-
       <Reference ReferenceType="HasComponent">ns=1;i=1029</Reference>
       <Reference ReferenceType="HasOrderedComponent">ns=1;i=1029</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level3Folder1" NodeId="ns=1;s=Level3Folder1">
     <DisplayName>Level3Folder1</DisplayName>
     <Description>Level3Folder1 containing nodes with references necessary for UACTT tests</Description>
@@ -8092,7 +8063,6 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level4Folder1</Reference>
     </References>
   </UAObject>
@@ -8104,7 +8074,6 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
     </References>
   </UAObject>
   <UAObject BrowseName="1:Level3Folder3" NodeId="ns=1;s=Level3Folder3">
@@ -8115,76 +8084,62 @@
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder2</Reference>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level2Folder3</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level4Folder1" NodeId="ns=1;s=Level4Folder1">
     <DisplayName>Level4Folder1</DisplayName>
     <Description>Level4Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level3Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level5Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level5Folder1" NodeId="ns=1;s=Level5Folder1">
     <DisplayName>Level5Folder1</DisplayName>
     <Description>Level5Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level4Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level6Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level6Folder1" NodeId="ns=1;s=Level6Folder1">
     <DisplayName>Level6Folder1</DisplayName>
     <Description>Level6Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level5Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level7Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level7Folder1" NodeId="ns=1;s=Level7Folder1">
     <DisplayName>Level7Folder1</DisplayName>
     <Description>Level7Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level6Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level8Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level8Folder1" NodeId="ns=1;s=Level8Folder1">
     <DisplayName>Level8Folder1</DisplayName>
     <Description>Level8Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level7Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level9Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:Level9Folder1" NodeId="ns=1;s=Level9Folder1">
     <DisplayName>Level9Folder1</DisplayName>
     <Description>Level9Folder1 containing nodes with references necessary for UACTT tests</Description>
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">ns=1;s=Level8Folder1</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level10Folder1</Reference>
     </References>
   </UAObject>
-  
   <UAMethod NodeId="ns=1;s=MethodI" BrowseName="MethodInput" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>AddToCounter</DisplayName>
     <Description>AddToCounter</Description>
@@ -8370,7 +8325,6 @@
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.BLOCKs.B_1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="1:B_1" NodeId="ns=1;s=Objects.15361.BLOCKs.B_1" ParentNodeId="ns=1;s=Objects.15361.BLOCKs">
     <DisplayName>B_1</DisplayName>
     <Description>B_1</Description>
@@ -8955,8 +8909,6 @@
       <uax:Boolean>false</uax:Boolean>
     </Value>
   </UAVariable>
-  
-  
   <UAObject BrowseName="1:BLOCKs" NodeId="ns=1;s=Objects.7681.BLOCKs" ParentNodeId="ns=1;i=15361">
     <DisplayName>BLOCKs (7681)</DisplayName>
     <Description>BLOCKS (7681): same as BLOCKs regarding qualified name but different node/subnodes</Description>
@@ -9041,13 +8993,11 @@
     <References>
       <Reference ReferenceType="Organizes" IsForward="false">i=85</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
-
       <Reference ReferenceType="Organizes">ns=1;s=Level1Folder1</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level1Folder2</Reference>
       <Reference ReferenceType="Organizes">ns=1;s=Level1Folder3</Reference>
     </References>
   </UAObject>
-  
   <UAVariable AccessLevel="99" NodeId="ns=1;s=TwoStateDiscreteItemVar" BrowseName="1:TwoStateDiscreteItem" DataType="Boolean" ValueRank="-1">
     <DisplayName>TwoStateDiscreteItem</DisplayName>
     <Description>TwoStateDiscreteItem description</Description>
@@ -9069,10 +9019,10 @@
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
     </References>
     <Value>
-        <uax:LocalizedText>
-          <uax:Locale>fr-FR</uax:Locale>
-          <uax:Text>Faux</uax:Text>
-        </uax:LocalizedText>
+      <uax:LocalizedText>
+        <uax:Locale>fr-FR</uax:Locale>
+        <uax:Text>Faux</uax:Text>
+      </uax:LocalizedText>
     </Value>
   </UAVariable>
   <UAVariable NodeId="ns=1;s=TwoStateDiscreteItemVarTrueState" BrowseName="0:TrueState" DataType="LocalizedText" ValueRank="-1">
@@ -9083,13 +9033,12 @@
       <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
     </References>
     <Value>
-        <uax:LocalizedText>
-          <uax:Locale>fr-FR</uax:Locale>
-          <uax:Text>Vrai</uax:Text>
-        </uax:LocalizedText>
+      <uax:LocalizedText>
+        <uax:Locale>fr-FR</uax:Locale>
+        <uax:Text>Vrai</uax:Text>
+      </uax:LocalizedText>
     </Value>
   </UAVariable>
-  
   <UAVariable AccessLevel="98" BrowseName="1:WriteOnlySByte" DataType="SByte" NodeId="ns=1;s=WriteOnlySByte">
     <DisplayName>WriteOnlySByte</DisplayName>
     <Description>WriteOnlySByte</Description>
@@ -9107,7 +9056,6 @@
       <Reference ReferenceType="Organizes">ns=2;s=Objects.15362.BLOCKs.B_1</Reference>
     </References>
   </UAObject>
-  
   <UAObject BrowseName="2:B_1" NodeId="ns=2;s=Objects.15362.BLOCKs.B_1" ParentNodeId="ns=2;s=Objects.15362.BLOCKs">
     <DisplayName>B_1</DisplayName>
     <Description>B_1</Description>
