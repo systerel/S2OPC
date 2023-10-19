@@ -53,7 +53,7 @@ TARGET_BRANCH=$2
 REF_MR=$3
 URL=$4
 
-[[ -z ${CURRENT_MILESTONE} ]] && echo "CURRENT_MILESTONE must be defined in call to $0" && exit 1
+[[ -z ${CURRENT_MILESTONE} ]] && usage && exit 1
 
 SHA=$(git log -1 --oneline | cut -d ' ' -f 1)
 echo "Checking commits ${TARGET_BRANCH}..${SHA}"
@@ -123,7 +123,10 @@ do
         TICKET_ID=${BASH_REMATCH[2]}
         NAME="Ticket #${TICKET_ID} (SHA ${COMMIT_ID})"
         ${VERBOSE} && echo "------------"
-        echo "Processing ${NAME}..." |tee -a "${COMMITFILE}"
+        # Skip tickets that have already been checked
+        grep -q "#${TICKET_ID}" "${COMMITFILE}" && continue
+        echo "Processing ${NAME}..."
+        echo "#${TICKET_ID}" >> "${COMMITFILE}"
         
         URL_REQUEST "issues/${TICKET_ID}" ISSUE
         ${VERBOSE} && echo "ISSUE=$ISSUE"
@@ -152,22 +155,16 @@ do
             fi
         fi
 
-        MR_CNT=$(JSON_EXTRACT "${ISSUE}" 'obj[u"merge_requests_count"]')
-        if [[ ${MR_CNT} == "0" ]]; then
-            echo "[Error] ${NAME} has no MR attached" |tee -a "${ERRFILE}"
+        # Retreive list of MR
+        URL_REQUEST "issues/${TICKET_ID}/related_merge_requests" MRS
+        MR_RID=$(JSON_EXTRACT "${MRS}" '["!%s"%o["iid"] for o in obj]')
+        MR_RID_OK=$(JSON_EXTRACT "${MRS}" "${MR_ID}"' in [o["iid"] for o in obj]')
+                    
+        # Check MR validity
+        if [[ ${MR_RID_OK} != "True" ]] ; then
+            echo "[Error] Expected MR !${MR_ID} not found in related MR of ${NAME} (found ${MR_RID})" |tee -a "${ERRFILE}"
         else
-            # Retreive list of MR
-            URL_REQUEST "issues/${TICKET_ID}/related_merge_requests" MRS
-            MR_RID=$(JSON_EXTRACT "${MRS}" '["!%s"%o["iid"] for o in obj]')
-            MR_RID_OK=$(JSON_EXTRACT "${MRS}" "${MR_ID}"' in [o["iid"] for o in obj]')
-                        
-            # Check MR validity
-            if [[ ${MR_RID_OK} != "True" ]] ; then
-                echo "[Error] Expected MR !${MR_ID} not found in related MR of ${NAME} (found ${MR_RID})" |tee -a "${ERRFILE}"
-            else
-                ${VERBOSE} && echo "${NAME} has valid MR '${MR_RID}'"
-            fi
-            
+            ${VERBOSE} && echo "${NAME} has valid MR '${MR_RID}'"
         fi
     else
         echo "[Error] Commit header has invalid format: '${line}'"
