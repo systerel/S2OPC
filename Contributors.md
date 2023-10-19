@@ -34,3 +34,4 @@ the legal rights to contribute.
 * tajan <sebastien.tajan-stg@systerel.fr>
 * Nathan Lebeau <nathan.lebeau-stg@systerel.fr>
 * Sebastien Tajan <sebastien.tajan@systerel.fr>
+* Lebeau <nathan.lebeau@systerel.fr>
