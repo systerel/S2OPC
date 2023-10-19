@@ -9,8 +9,6 @@
       <RequiredModel ModelUri="http://opcfoundation.org/UA/" Version="1.05" PublicationDate="2019-05-01T00:00:00Z" />
     </Model>
   </Models>
-
-  
   <Aliases>
     <Alias Alias="Boolean">i=1</Alias>
     <Alias Alias="Byte">i=3</Alias>
@@ -72,16 +70,14 @@
     </References>
     <InverseName>TypeDefinitionOf</InverseName>
   </UAReferenceType>
-
-
   <UAObject BrowseName="Mandatory" NodeId="i=78" SymbolicName="ModellingRule_Mandatory">
     <DisplayName>Mandatory</DisplayName>
     <References>
-    </References>
+      </References>
   </UAObject>
   <UAObject BrowseName="Optional" NodeId="i=80" SymbolicName="ModellingRule_Optional">
     <DisplayName>Optional</DisplayName>
     <References>
-    </References>
+      </References>
   </UAObject>
 </UANodeSet>

@@ -131,8 +131,6 @@
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
     </References>
   </UAObject>
-
-
   <UAObject NodeId="i=2253" BrowseName="Server" EventNotifier="1">
     <DisplayName>Server</DisplayName>
     <References>

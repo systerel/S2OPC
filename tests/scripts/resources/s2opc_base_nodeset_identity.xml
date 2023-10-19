@@ -134,8 +134,6 @@
       <Reference ReferenceType="Organizes">i=93</Reference>
     </References>
   </UAObject>
-
-
   <UAObject NodeId="i=93" BrowseName="OPC Binary" SymbolicName="OPCBinarySchema_TypeSystem" ReleaseStatus="Deprecated">
     <DisplayName>OPC Binary</DisplayName>
     <References>
@@ -144,8 +142,6 @@
       <Reference ReferenceType="HasComponent">i=7617</Reference>
     </References>
   </UAObject>
-
-
   <UAVariable NodeId="i=7617" BrowseName="Opc.Ua" SymbolicName="OpcUa_BinarySchema" ReleaseStatus="Deprecated" DataType="ByteString">
     <DisplayName>Opc.Ua</DisplayName>
     <References>
@@ -153,8 +149,6 @@
       <Reference ReferenceType="HasTypeDefinition">i=72</Reference>
     </References>
   </UAVariable>
-
-
   <UAObject NodeId="i=2253" BrowseName="Server" EventNotifier="1">
     <DisplayName>Server</DisplayName>
     <References>

@@ -31,7 +31,6 @@ import xml.etree.ElementTree as ET
 import re
 
 
-INDENT_SPACES = '  '
 NS_IDX_MATCHER = re.compile(r'ns=(\d+);(.+)')
 NS_IDX_FORMATTER = 'ns={};{}'
 PREFIX_IDX_MATCHER = re.compile(r'(\d+):(.+)')
@@ -58,18 +57,6 @@ HIERARCHICAL_REFERENCE_TYPES = frozenset([
 
 
 TYPE_DEFINITION_REFERENCE_TYPE = 'HasTypeDefinition'
-
-
-def indent(level):
-    return '\n' + INDENT_SPACES*level
-
-
-def close_node_indent(node, indent_level):
-    if len(node) > 0:
-        node[-1].tail = indent(indent_level)
-    else:
-        #TODO: node.text = None to make the node close on 1 line
-        node.text = indent(indent_level)
 
 
 # Namespaces are very hard to handle in XPath and the ET API does not help much
@@ -122,18 +109,9 @@ def append_strings(parent_l_str: ET.Element, str_values):
     if len(str_values) == 0:
         # nothing to do
         return
-    parent_l_str.text = indent(4)
-    parent_l_str.tail = indent(2)
-    # indent after last pre-existing child, if any
-    children = list(parent_l_str)
-    if len(children) > 0:
-        children[-1].tail = indent(4)
     for str_val in str_values:
         str_elem = ET.SubElement(parent_l_str, STRING_TAG)
         str_elem.text = str_val
-        str_elem.tail = indent(4)
-    # dedent after last child
-    str_elem.tail = indent(3)
 
 
 class NSFinder:
@@ -266,9 +244,7 @@ class NodesetMerger(NSFinder):
 
         elem = self._create_elem('Reference', attribs)
         elem.text = tgt
-        close_node_indent(refs, 3)
         refs.append(elem)
-        close_node_indent(refs, 2)
 
     def _remove_nids(self, nids):
         # Remove the nodes that match the NodeIds given in nids
@@ -291,7 +267,6 @@ class NodesetMerger(NSFinder):
                     if self.verbose:
                         print('RemoveRef: {} -> {}'.format(node.get('NodeId'), ref.text.strip()), file=sys.stderr)
                     refs.remove(ref)
-                    close_node_indent(refs, 2)
 
     def _remove_nids_and_refs(self, nids):
         self._remove_nids(nids)
@@ -333,13 +308,10 @@ class NodesetMerger(NSFinder):
         if tree_ns_uris is None:
             tree_ns_uris = self._create_elem('NamespaceUris')
             self.tree.getroot().insert(0, new_ns_uris)
-        else:
-            tree_ns_uris[-1].tail = indent(2)
 
         new_ns_uri_nodes = self.ns_idx_reassigner.compute_reassignment(tree_ns_uris, new_ns_uris)
         for ns in new_ns_uri_nodes:
             tree_ns_uris.append(ns)
-        tree_ns_uris[-1].tail = indent(1)
         return True
 
     def __merge_models(self, new: ET.ElementTree):
@@ -349,7 +321,6 @@ class NodesetMerger(NSFinder):
             print("Missing a NS0 model")
             return False
         new_models = self._find_in(new, 'uanodeset:Models')
-        tree_models[-1].tail = indent(2)
         for model in new_models:
             new_model_uri = model.get('ModelUri')
             already_model = self._find_in(tree_models, f'uanodeset:Model[@ModelUri="{new_model_uri}"]')
@@ -367,7 +338,6 @@ class NodesetMerger(NSFinder):
                 if req_ns0_version != ns0_version:
                     raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
             tree_models.append(model)
-        tree_models[-1].tail = indent(1)
 
     def __merge_aliases(self, new: ET.ElementTree):
         tree_aliases = self._find('uanodeset:Aliases')
@@ -393,13 +363,8 @@ class NodesetMerger(NSFinder):
         for alias in sorted(set(new_alias_dict) - set(tree_alias_dict)):
             elem = self._create_elem('Alias', {'Alias': alias})
             elem.text = new_alias_dict[alias]
-            # Set correct indent level for current tag (tail of previous <Alias/> or text of <Aliases>)
-            close_node_indent(tree_aliases, 2)
             tree_aliases.append(elem)
     
-        if len(tree_aliases) > 0:
-            # Restore correct level for next tag which is </Aliases>
-            tree_aliases[-1].tail = indent(1)
         return True
 
     def __split_merged_nodes(self, new: ET.ElementTree):
@@ -443,9 +408,6 @@ class NodesetMerger(NSFinder):
         tree_root = self.tree.getroot()
         # New unique nids
         new_nids = set(new_nodes)
-        if len(new_nids) > 0 and len(tree_root) > 0:
-            # indent for first node added
-            tree_root[-1].tail = indent(1)
         for nid in sorted(new_nids):
             if self.verbose:
                 print('Merge: add node {}'.format(nid), file=sys.stderr)
@@ -462,9 +424,6 @@ class NodesetMerger(NSFinder):
             assert nodea is not None
             for ref in refsb:
                 self._add_ref(nodea, ref.get('ReferenceType'), ref.text, is_forward=is_forward(ref))
-            close_node_indent(refsb, 2)
-
-        tree_root[-1].tail = indent(0)
 
     def merge(self, source):
         # Merge new tree into tree
@@ -603,7 +562,6 @@ class NodesetMerger(NSFinder):
         # even with a Breadth-First Search; so we start with the entire subtree, then
         # retain only the nodes with no outer parent
         self._rec_bf_remove_subtree({remove_root_nid}, subtree, is_root=True)
-        close_node_indent(self.tree.getroot(), 0)
 
     def __get_aliases(self):
         tree_aliases = self._find('uanodeset:Aliases')
@@ -810,16 +768,10 @@ class NodesetMerger(NSFinder):
     
         return True
 
-    def __fetch_subelement(self, elem, subtag, indentation=-1) -> ET.Element:
+    def __fetch_subelement(self, elem, subtag) -> ET.Element:
         subelem = self._find_in(elem, subtag)
         if subelem is None:
-            if len(elem) > 0:
-                last = elem[-1]
-                last.tail += INDENT_SPACES
             subelem = ET.SubElement(elem, subtag)
-            if indentation >= 0:
-                subelem.text = indent(indentation)
-                subelem.tail = indent(indentation - 2)
         return subelem
 
     def __merge_server_array(self, new: ET.ElementTree):
@@ -828,8 +780,8 @@ class NodesetMerger(NSFinder):
         tree_server_array = self._find(".//uanodeset:UAVariable[@NodeId='i=2254'][@BrowseName='ServerArray']")
         if tree_server_array is None:
             raise Exception("Missing UAVariable ServerArray (i=2254) in NS0")
-        tree_value = self.__fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value', 3)
-        tree_l_str = self.__fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString', 4)
+        tree_value = self.__fetch_subelement(tree_server_array, f'{{{UA_NODESET_URI}}}Value')
+        tree_l_str = self.__fetch_subelement(tree_value, f'{{{UA_TYPES_URI}}}ListOfString')
         tree_uris = [uri.text for uri in self._findall(tree_l_str, f'{{{UA_TYPES_URI}}}String')]
         new_uris = [uri.text for uri in self._findall(new, f"uanodeset:UAVariable[@NodeId='i=2254']/uanodeset:Value/{{{UA_TYPES_URI}}}ListOfString/{{{UA_TYPES_URI}}}String")]
         ns1_uri = self._find('uanodeset:NamespaceUris/uanodeset:Uri')
@@ -852,7 +804,7 @@ class NodesetMerger(NSFinder):
         namespace_array_node = self._find(".//uanodeset:UAVariable[@NodeId='i=2255'][@BrowseName='NamespaceArray']")
         if namespace_array_node is None:
             raise Exception("Missing UAVariable NamespaceArray (i=2255) in NS0")
-        value = self.__fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value', 3)
+        value = self.__fetch_subelement(namespace_array_node, f'{{{UA_NODESET_URI}}}Value')
         l_str = self.__fetch_subelement(value, f'{{{UA_TYPES_URI}}}ListOfString')
         l_str.clear()
         ns_uris = self._findall(self.tree, 'uanodeset:NamespaceUris/uanodeset:Uri')
@@ -884,9 +836,9 @@ class NodesetMerger(NSFinder):
                         back_refs.append(ref)
                 for ref in back_refs:
                     refs.remove(ref)
-                close_node_indent(refs, 2)
 
     def write_tree(self, file):
+        ET.indent(self.tree)
         self.tree.write(file, encoding="utf-8", xml_declaration=True)
 
 
