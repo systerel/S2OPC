@@ -137,11 +137,11 @@ generation:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:af66ce2bbd3102b18136c7a5193110bfd895f6cac4d51c8075aeb25fff5ee645 # digest of build:1.36
+  image: docker.aix.systerel.fr/c838/build@sha256:02ad63cd5279dc9f056edd1bbd519f19087d41680f331c68050179d6516c4062 # digest of build:1.38
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_IMAGE: 'sha256:346ec7469f7dfedc8d5078c51c0d485915667647a2816b8ac36e1e35d0419060'
+    DOCKER_IMAGE: 'sha256:fead56aec4f11f9591bf7ea5fd271066f711c44414521d76cf4d9e47c748b1e6'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -336,7 +336,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check@sha256:703cb46fcbd6ae53db6cf7fa485f2ca553a68d21067c8546a7d950034b05af70 # digest of check:1.17
+  image: docker.aix.systerel.fr/c838/check@sha256:b05a6baec56920cb2980b743299337a28b1e75613dcb1e72721c310db3631707 # digest of check:1.19
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -350,7 +350,7 @@ test-check:
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
     - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
-      DOCKER_IMAGE: 'sha256:55f5a3f10a3e6dd4b1c2d076df98c818eaeb749d623ef57208f6293061a7b8a4'
+      DOCKER_IMAGE: 'sha256:f2b565c7dfb6dc1890887ca6982514a06d3e7dfa6f2d9093351fb715f64b78c2'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
