@@ -311,8 +311,9 @@ static void cb_on_connexion_failed(void* context, MQTTAsync_failureData* respons
 {
     SOPC_ASSERT(NULL != context);
     MqttContextClient* contextClient = (MqttContextClient*) context;
+    int code = (NULL == response ? 0 : response->code);
     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Mqtt client %s connection failed, error code %d",
-                           contextClient->clientId, response->code);
+                           contextClient->clientId, code);
     *contextClient->clientState = SOPC_MQTT_CLIENT_FAILED_CONNECT;
 
     // If the connection failed due to a Broker restart, there are high chances
