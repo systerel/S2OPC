@@ -123,6 +123,27 @@ XML_PUBSUB_LOOP = """<PubSub>
     </connection>
 </PubSub>"""
 
+XML_PUBSUB_UNICAST = """<PubSub>
+    <connection address="opc.udp://127.0.0.1:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://127.0.0.1:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
+
 XML_PUBSUB_LOOP_MQTT = """<PubSub>
     <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
@@ -1272,6 +1293,30 @@ def testPubSubDynamicConf(logger):
         # TC 26 : Test malformed uinteger publisher Id
         logger.begin_section("TC 26 : Test malformed UInteger publisher Id")
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID, logger, possibleFail=True)
+
+        #
+        # TC 27 : Test with Publisher and Subscriber configuration(unicast) => subscriber variables change through Pub/Sub
+        #
+        logger.begin_section("TC 27 : Publisher Subscriber Unicast")
+
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -327, logger)
+        
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 27, logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_UNICAST, logger)
+        sleep(DYN_CONF_PUB_INTERVAL_200)
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -327 == pubsubserver.getValue(NID_SUB_INT))
+
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
 
         allTestsDone = True
         
