@@ -1135,7 +1135,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 }
 
 /**
- * /brief Encode the payload of a datasetmessage
+ * /brief Decode the payload of a datasetmessage
  * /param dsm The DataSetMessage to encode
  * /param buffer_payload The Payload
  * /param dsmSize The expected size (bytes) of the decoded payload from the DataSetMessage.
@@ -1158,8 +1158,8 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Byte data;
 
-    const SOPC_DataSet_LL_UadpDataSetMessageContentMask* contentMask = SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
-    SOPC_DataSet_LL_UadpDataSetMessageContentMask dsm_conf = *contentMask;
+    /* Retrieve Content mask partially filled */
+    SOPC_DataSet_LL_UadpDataSetMessageContentMask dsm_conf = *SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
 
     uint32_t dsmStartBufferPos;
     status = SOPC_Buffer_GetPosition(buffer_payload, &dsmStartBufferPos);
@@ -1231,7 +1231,7 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed);
         if (SOPC_STATUS_OK == status)
         {
-            if (NULL != readerConf->checkDataSetMessageSN_Func && contentMask->dataSetMessageSequenceNumberFlag)
+            if (NULL != readerConf->checkDataSetMessageSN_Func)
             {
                 /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
                  */
