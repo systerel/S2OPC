@@ -68,25 +68,23 @@ OPERATIONS
         l_isvalid,
         l_node
     IN
+        p_BrowseName := c_QualifiedName_indet;
+        p_DisplayName := c_LocalizedText_indet;
+        p_NodeClass := c_NodeClass_indet;
+        p_TypeDefinition := c_ExpandedNodeId_indet;
+
         l_local_server, l_NodeId <-- getall_conv_ExpandedNodeId_NodeId(p_TargetNodeId);
+
         IF  l_local_server = TRUE THEN
             l_isvalid, l_node <-- readall_AddressSpace_Node(l_NodeId);
             IF l_isvalid = TRUE THEN
                 p_BrowseName <-- get_BrowseName(l_node);
                 p_DisplayName <-- get_DisplayName(l_node);
                 p_NodeClass <-- get_NodeClass(l_node);
-                p_TypeDefinition <-- get_TypeDefinition(l_node)
-            ELSE
-                p_BrowseName := c_QualifiedName_indet;
-                p_DisplayName := c_LocalizedText_indet;
-                p_NodeClass := c_NodeClass_indet;
-                p_TypeDefinition := c_ExpandedNodeId_indet
+                IF p_NodeClass = e_ncl_Variable or p_NodeClass = e_ncl_Object THEN
+                    p_TypeDefinition <-- get_TypeDefinition(l_node)
+                END
             END
-        ELSE
-            p_BrowseName := c_QualifiedName_indet;
-            p_DisplayName := c_LocalizedText_indet;
-            p_NodeClass := c_NodeClass_indet;
-            p_TypeDefinition := c_ExpandedNodeId_indet
         END
     END
 

@@ -97,7 +97,15 @@ OPERATIONS
                 p_BrowseName = a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
                 p_DisplayName = a_DisplayName(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
                 p_NodeClass = a_NodeClass(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId))) &
-                p_TypeDefinition = Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId)))
+                (p_NodeClass : {e_ncl_Variable, e_ncl_Object}
+                    =>
+                    p_TypeDefinition =
+                        Ref_HasTypeDefinition(a_NodeId~(conv_ExpandedNodeId_NodeId(p_TargetNodeId)))
+                ) &
+                (p_NodeClass /: {e_ncl_Variable, e_ncl_Object}
+                    =>
+                    p_TypeDefinition = c_ExpandedNodeId_indet
+                )
           ) &
           (not (p_TargetNodeId : dom(conv_ExpandedNodeId_NodeId) &
                 conv_ExpandedNodeId_NodeId(p_TargetNodeId) : ran(a_NodeId))

@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment_1.c
 
- Date                 : 04/08/2022 14:53:00
+ Date                 : 27/10/2023 05:20:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -101,6 +101,10 @@ void browse_treatment_1__get_optional_fields_ReferenceDescription(
       t_bool browse_treatment_1__l_isvalid;
       constants__t_Node_i browse_treatment_1__l_node;
       
+      *browse_treatment_1__p_BrowseName = constants__c_QualifiedName_indet;
+      *browse_treatment_1__p_DisplayName = constants__c_LocalizedText_indet;
+      *browse_treatment_1__p_NodeClass = constants__c_NodeClass_indet;
+      *browse_treatment_1__p_TypeDefinition = constants__c_ExpandedNodeId_indet;
       constants__getall_conv_ExpandedNodeId_NodeId(browse_treatment_1__p_TargetNodeId,
          &browse_treatment_1__l_local_server,
          &browse_treatment_1__l_NodeId);
@@ -115,21 +119,12 @@ void browse_treatment_1__get_optional_fields_ReferenceDescription(
                browse_treatment_1__p_DisplayName);
             address_space_itf__get_NodeClass(browse_treatment_1__l_node,
                browse_treatment_1__p_NodeClass);
-            address_space_itf__get_TypeDefinition(browse_treatment_1__l_node,
-               browse_treatment_1__p_TypeDefinition);
+            if ((*browse_treatment_1__p_NodeClass == constants__e_ncl_Variable) ||
+               (*browse_treatment_1__p_NodeClass == constants__e_ncl_Object)) {
+               address_space_itf__get_TypeDefinition(browse_treatment_1__l_node,
+                  browse_treatment_1__p_TypeDefinition);
+            }
          }
-         else {
-            *browse_treatment_1__p_BrowseName = constants__c_QualifiedName_indet;
-            *browse_treatment_1__p_DisplayName = constants__c_LocalizedText_indet;
-            *browse_treatment_1__p_NodeClass = constants__c_NodeClass_indet;
-            *browse_treatment_1__p_TypeDefinition = constants__c_ExpandedNodeId_indet;
-         }
-      }
-      else {
-         *browse_treatment_1__p_BrowseName = constants__c_QualifiedName_indet;
-         *browse_treatment_1__p_DisplayName = constants__c_LocalizedText_indet;
-         *browse_treatment_1__p_NodeClass = constants__c_NodeClass_indet;
-         *browse_treatment_1__p_TypeDefinition = constants__c_ExpandedNodeId_indet;
       }
    }
 }
