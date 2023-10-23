@@ -565,7 +565,7 @@ OPERATIONS
                 browsePaths_to_iterate /\ browsePaths_iterated = {} &
                 l_continue = bool(browsePaths_to_iterate /= {})
             VARIANT
-                card(browsePaths_iterated)
+                card(browsePaths_to_iterate)
             END
         END
         ;
