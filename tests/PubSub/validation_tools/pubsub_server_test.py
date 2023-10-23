@@ -51,8 +51,7 @@ DEFAULT_XML_PATH = 'config_pubsub_server.xml'
 
 # PublishingInterval (seconds) of XML default configuration
 STATIC_CONF_PUB_INTERVAL = 1.2
-DYN_CONF_PUB_INTERVAL_1000 = 2.1
-DYN_CONF_PUB_INTERVAL_200 = 0.5
+DYN_CONF_PUB_INTERVAL = 1.0
 
 # Time to sleep in order to receive Keys and pubsub message
 DYNAMIC_CONF_SKS_INTERVAL = 0.8
@@ -222,7 +221,7 @@ XML_PUBSUB_LOOP_MQTT_SECU = """<PubSub>
 </PubSub>"""
 
 XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
-    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user" mqttPassword="passwor">
+    <connection address="mqtt://127.0.0.1:1883" mode="publisher" publisherId="i=1" mqttUsername="user1" mqttPassword="password">
         <message groupId="1" publishingInterval="1000" groupVersion="1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
@@ -232,7 +231,7 @@ XML_PUBSUB_LOOP_MQTT_SECU_FAIL = """<PubSub>
             </dataset>
         </message>
     </connection>
-    <connection address="mqtt://127.0.0.1:1883" mode="subscriber" mqttUsername="user1" mqttPassword="password">
+    <connection address="mqtt://127.0.0.1:1883" mode="subscriber" mqttUsername="user" mqttPassword="passwords">
         <message groupId="1" publishingInterval="1000" groupVersion="1" publisherId="i=1" mqttTopic="S2OPC">
             <dataset writerId="50">
                 <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
@@ -748,15 +747,32 @@ XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID = """<PubSub>
 </PubSub>
 """
 
+def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
+    """
+        @param res_fcn a callable function (no parameters). Must return a boolean.
+        @param maxWait_s Timeout in second waiting for res_fcn() to return True
+        @param period_s Polling period
+        @return True if res_fcn() returned true within expected time
+    """
+    _t = maxWait_s;
+    res = False
+    while _t >= 0 and not res:
+        _t -= period_s
+        sleep(period_s)
+        res = res_fcn()
+    return res
+
 # TODO: group these helpers in an helper class that wraps both the client to the pubsub_server and the logger instances
 # Test connection and status depending of pStart command
 def helpTestStopStart(pPubsubserver, pStart, pLogger, possibleFail=False):
     if not possibleFail:
-        pLogger.add_test('Connected to pubsub_server', pPubsubserver.isConnected())
+        connected = waitForEvent(lambda:pPubsubserver.isConnected())
+        started = waitForEvent(lambda:pPubsubserver.isStart())
+        pLogger.add_test('Connected to pubsub_server', connected)
         if pStart:
-            pLogger.add_test('PubSub Module is started' , pPubsubserver.isStart())
+            pLogger.add_test('PubSub Module is started' , started)
         else:
-            pLogger.add_test('PubSub Module is stopped', not pPubsubserver.isStart())
+            pLogger.add_test('PubSub Module is stopped', not started)
 
     # TODO: for now "possibleFail" is in fact "expectedFail"
     if pStart:
@@ -814,7 +830,7 @@ def helpTestSetValue(pPubsubserver, nodeId, value, pLogger):
 def helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger):
     state = pPubsubServer.getAcyclicSendStatus()
     while(PUBLISHER_ACYCLIC_NOT_TRIGGERED == state or PUBLISHER_ACYCLIC_IN_PROGRESS == state):
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        sleep(0.1)
         state = pPubsubServer.getAcyclicSendStatus()
     pLogger.add_test('send request succeed', PUBLISHER_ACYCLIC_SENT == state)
 
@@ -825,29 +841,35 @@ def helpTestSetSendValue(pPubsubServer,value,pLogger):
     helpTestWaitAcyclicSendStatusChange(pPubsubServer,pLogger)
 
 def helpAssertState(psserver, expected, pLogger):
+    waitForEvent(lambda:psserver.getPubSubState() == expected)
     state = psserver.getPubSubState()
     pLogger.add_test(f'PubSub Module state is {state}, should be {expected}', state == expected)
 
 def helperTestPubSubConnectionFail(pubsubserver, xmlfile, logger, possibleFail=False):
 
+    # ensure to get some unique value in each test case
+    try: pubsubserver._testContext += 1
+    except: pubsubserver._testContext = 1
     # Stop server if already running
     pubsubserver.stop()
     helpTestStopStart(pubsubserver, False, logger)
 
     # Init Subscriber variables
     helpTestSetValue(pubsubserver, NID_SUB_BOOL, False, logger)
-    helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456, logger)
+    helpTestSetValue(pubsubserver, NID_SUB_UINT16, 1456 + pubsubserver._testContext, logger)
     helpTestSetValue(pubsubserver, NID_SUB_INT, 123654, logger)
+    waitForEvent(lambda:not pubsubserver.getValue(NID_SUB_BOOL))
 
     # Change Publisher variables
     helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
-    helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456, logger)
+    helpTestSetValue(pubsubserver, NID_PUB_UINT16, 456 + pubsubserver._testContext, logger)
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger, possibleFail=possibleFail)
-    sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
-    logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
-    logger.add_test('Subscriber uint16 is not changed', 1456 == pubsubserver.getValue(NID_SUB_UINT16))
+    boolIsTrue = waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
+    
+    logger.add_test('Subscriber bool is not changed', not boolIsTrue)
+    logger.add_test('Subscriber uint16 is not changed', 1456 + pubsubserver._testContext == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
 
     if not possibleFail:
@@ -870,7 +892,9 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger)
-    sleep(DYNAMIC_CONF_SKS_INTERVAL) # because > DYN_CONF_PUB_INTERVAL_200
+    
+    waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))
+    
     logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
     logger.add_test('Subscriber uint16 is changed', 456 == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is changed', 789 == pubsubserver.getValue(NID_SUB_INT))
@@ -881,6 +905,9 @@ def testPubSubDynamicConf(logger):
 
     pubsubserver = PubSubServer(DEFAULT_URI, NID_CONFIGURATION, NID_START_STOP, NID_STATUS, NID_ACYCLIC_SEND,NID_ACYCLIC_SEND_STATUS)
 
+    def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
+    def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
+    
     defaultXml2Restore = False
     allTestsDone = False
 
@@ -891,70 +918,32 @@ def testPubSubDynamicConf(logger):
 
         # secure channel connection
         pubsubserver.connect()
-
+        
+        # Stop the running PubSub Server
+        pubsubserver.stop()
         #
         # TC 1 : Test with Publisher only configuration => only pub variables change
         #
         logger.begin_section("TC 1 : Publisher only")
         
-        # Stop the running PubSub Server
-        pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
-        # Init Subscriber variables
-        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
-
-        # Set Publisher variables
-        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 1500, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_INT, -50, logger)
-
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBLISHER_ONLY, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
-        logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
-
-        pubsubserver.stop()
-        helpTestStopStart(pubsubserver, False, logger)
+        helperTestPubSubConnectionFail(pubsubserver, XML_PUBLISHER_ONLY, logger, possibleFail=False)
 
         #
         # TC 2 : Test with Subscriber only configuration => no variables change
         #
         logger.begin_section("TC 2 : Subscriber only")
 
-        # Init Subscriber variables
-        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
-
-        helpConfigurationChangeAndStart(pubsubserver, XML_SUBSCRIBER_ONLY, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
-        logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
-
-        pubsubserver.stop()
-        helpTestStopStart(pubsubserver, False, logger)
-
+        helperTestPubSubConnectionFail(pubsubserver, XML_SUBSCRIBER_ONLY, logger, possibleFail=False)
+        
         #
         # TC 3 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 3 : Publisher Subscriber Loop")
 
-        # Init Subscriber variables
-        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
-
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
-        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is changed', 1500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is changed', -50 == pubsubserver.getValue(NID_SUB_INT))
-
+        helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP, logger)
+        
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
@@ -963,23 +952,27 @@ def testPubSubDynamicConf(logger):
         #
         logger.begin_section("TC 4 : Publisher Subscriber Loop")
 
+        boolInit = pubsubserver.getValue(NID_SUB_BOOL)
+        uint16Init = pubsubserver.getValue(NID_PUB_UINT16)
+        intInit = pubsubserver.getValue(NID_PUB_INT)
+        
         # Change Publisher variables
-        helpTestSetValue(pubsubserver, NID_PUB_BOOL, True, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 6500, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_INT, -600, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, not boolInit, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, uint16Init + 100, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -intInit, logger)
 
-        sleep(DYN_CONF_PUB_INTERVAL_200)
-        logger.add_test('Subscriber bool is not changed', False == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is not changed', 1500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is not changed', -50 == pubsubserver.getValue(NID_SUB_INT))
+        waitForEvent(lambda:  pubsubserver.getValue(NID_SUB_BOOL) != boolInit)
+        logger.add_test('Subscriber bool is not changed', boolInit == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is not changed', uint16Init == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is not changed', intInit == pubsubserver.getValue(NID_SUB_INT))
 
         # Start to change Subscriber variables
         pubsubserver.start()
         helpTestStopStart(pubsubserver, True, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
-        logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is changed', 6500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is changed', -600 == pubsubserver.getValue(NID_SUB_INT))
+        waitForEvent(lambda:  pubsubserver.getValue(NID_SUB_BOOL) != boolInit)
+        logger.add_test('Subscriber bool is changed', (not boolInit) == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', uint16Init + 100 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -intInit == pubsubserver.getValue(NID_SUB_INT))
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
@@ -1001,7 +994,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_NULL, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        waitForEvent(lSubBoolIsFalse)
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
@@ -1013,7 +1006,7 @@ def testPubSubDynamicConf(logger):
         # TC 6 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT): variables change through Pub/Sub")
-
+        
         # Init Publisher variables
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
@@ -1025,15 +1018,16 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
         helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
+        waitForEvent(lSubBoolIsTrue)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
         logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        sleep(DYN_CONF_PUB_INTERVAL)
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
@@ -1196,18 +1190,19 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        
+        subIsFalse = waitForEvent(lSubBoolIsFalse)
 
-        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber bool is changed', subIsFalse)
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
         logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        sleep(DYN_CONF_PUB_INTERVAL)
 
         # TC 22 : Test with bad username and bad password from mqtt security
         logger.begin_section("TC 22 : Test with Publisher and Subscriber bad security configuration (MQTT) ")
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU_FAIL, logger, possibleFail=True)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        sleep(DYN_CONF_PUB_INTERVAL)
 
         # TC 23 : Test with various topics
         logger.begin_section("TC 23 : Test with Publisher and Subscriber various topic (MQTT)")
@@ -1225,13 +1220,14 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        
+        subIsFalse = waitForEvent(lSubBoolIsFalse)
 
-        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber bool is changed', subIsFalse)
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
         logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
+        sleep(DYN_CONF_PUB_INTERVAL)
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
@@ -1251,20 +1247,19 @@ def testPubSubDynamicConf(logger):
 
         # Wait some long time and check nothing happen
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_ACYCLIC, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
-        logger.add_test('Subscriber bool is not changed', True == pubsubserver.getValue(NID_SUB_BOOL))
+        subIsFalse = waitForEvent(lSubBoolIsFalse)
+        logger.add_test('Subscriber bool is not changed', not subIsFalse)
         logger.add_test('Subscriber uint16 is not changed', 500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is not changed', 100 == pubsubserver.getValue(NID_SUB_INT))
 
         # Send the message
         writerGroupId = 1
         helpTestSetSendValue(pubsubserver,writerGroupId,logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        subIsFalse = waitForEvent(lSubBoolIsFalse)
 
-        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber bool is not changed', subIsFalse)
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
-        sleep(DYN_CONF_PUB_INTERVAL_1000)
 
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
@@ -1285,7 +1280,9 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test String pubId Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_STRING_PUBID, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
+        
+        waitForEvent(lSubBoolIsFalse)
+        
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
@@ -1298,23 +1295,9 @@ def testPubSubDynamicConf(logger):
         # TC 27 : Test with Publisher and Subscriber configuration(unicast) => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 27 : Publisher Subscriber Unicast")
-
-        # Init Publisher variables
-        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
-        helpTestSetValue(pubsubserver, NID_PUB_INT, -327, logger)
         
-        # Init Subscriber variables
-        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
-        helpTestSetValue(pubsubserver, NID_SUB_INT, 27, logger)
-
-        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_UNICAST, logger)
-        sleep(DYN_CONF_PUB_INTERVAL_200)
-        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
-        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is changed', -327 == pubsubserver.getValue(NID_SUB_INT))
-
+        helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_UNICAST, logger)
+        
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
