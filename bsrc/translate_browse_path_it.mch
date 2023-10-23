@@ -54,7 +54,7 @@ OPERATIONS
     THEN
         browsePaths_iterated   := {}        ||
         browsePaths_to_iterate := BrowsePaths ||
-        p_continue             := bool(browsePaths_to_iterate /= {})
+        p_continue             := bool(BrowsePaths /= {})
     END
     ;
 
