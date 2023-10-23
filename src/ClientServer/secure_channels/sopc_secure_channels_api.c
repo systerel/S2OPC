@@ -213,15 +213,6 @@ SOPC_ReturnStatus SOPC_SecureChannels_EnqueueEvent(SOPC_SecureChannels_InputEven
     return status;
 }
 
-void SOPC_SecureChannels_EnqueueInternalEvent(SOPC_SecureChannels_InternalEvent event,
-                                              uint32_t id,
-                                              uintptr_t params,
-                                              uintptr_t auxParam)
-{
-    SOPC_ASSERT(secureChannelsInternalEventHandler != NULL);
-    SOPC_EventHandler_Post(secureChannelsInternalEventHandler, (int32_t) event, id, params, auxParam);
-}
-
 void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_InternalEvent event,
                                                     uint32_t id,
                                                     uintptr_t params,

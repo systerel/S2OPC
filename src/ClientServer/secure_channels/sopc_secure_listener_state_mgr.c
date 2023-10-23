@@ -141,7 +141,7 @@ static bool SOPC_SecureListenerStateMgr_CloseReverseEpListener(uint32_t reverseE
             {
                 if (scListener->isUsedConnectionIdxArray[idx])
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(
                         INT_SC_CLOSE, scListener->connectionIdxArray[idx],
                         (uintptr_t) "Reverse endpoint closing: close waiting SC connections",
                         OpcUa_BadConnectionClosed);
@@ -357,7 +357,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             (SECURE_LISTENER_STATE_OPENED != scListener->state && SECURE_LISTENER_STATE_INACTIVE != scListener->state))
         {
             // Error case: require secure channel closure
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL,
+                                                           eltId);
         }
         else
         {
@@ -366,7 +367,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             if (!result)
             {
                 // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, eltId);
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL,
+                                                               eltId);
             }
         }
         break;
@@ -423,8 +425,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
                 if (result)
                 {
                     // Do transition on the selected SC
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_RCV_RHE_TRANSITION, scIdx, (uintptr_t) NULL,
-                                                             (uintptr_t) NULL);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_RCV_RHE_TRANSITION, scIdx, (uintptr_t) NULL,
+                                                                   (uintptr_t) NULL);
                 }
                 else
                 {
@@ -473,7 +475,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             (SECURE_LISTENER_STATE_OPENING != scListener->state && SECURE_LISTENER_STATE_OPENED != scListener->state))
         {
             // Error case: require secure channel closure
-            SOPC_SecureChannels_EnqueueInternalEvent(
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(
                 INT_SC_CLOSE, scIdx, (uintptr_t) "Reverse endpoint in incorrect state or invalid parameters",
                 OpcUa_BadInvalidState);
         }
@@ -484,7 +486,7 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
             if (!result)
             {
                 // Error case: require secure channel closure
-                SOPC_SecureChannels_EnqueueInternalEvent(
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(
                     INT_SC_CLOSE, scIdx, (uintptr_t) "Reverse endpoint connection slots full or invalid parameters",
                     OpcUa_BadOutOfMemory);
             }
@@ -600,7 +602,7 @@ void SOPC_SecureListenerStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             else
             {
                 // Request creation of a new secure connection with given socket
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATE, eltId, (uintptr_t) NULL, auxParam);
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATE, eltId, (uintptr_t) NULL, auxParam);
             }
         }
         break;
@@ -689,8 +691,8 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                  clientToConnIdx++)
             {
                 // Self generate SC_REVERSE_CONNECT events for connection state manager
-                SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL,
-                                                         (uintptr_t) clientToConnIdx);
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL,
+                                                               (uintptr_t) clientToConnIdx);
             }
             if (!result)
             {

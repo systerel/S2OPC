@@ -2145,15 +2145,17 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           uint32_t scConnectionIdx,
                                           SOPC_Buffer* receivedBuffer)
 {
-    bool result = true;
     SOPC_ASSERT(scConnection != NULL);
     SOPC_ASSERT(receivedBuffer != NULL);
     SOPC_ASSERT(receivedBuffer->position == 0);
 
-    SOPC_StatusCode errorStatus = SOPC_GoodGenericStatus; // Good
     uint32_t requestIdOrHandle = 0;
     bool ignoreExpiredMessage = false; // Set to true if message is response to expired request
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
+    SOPC_SLinkedList* intEventsLIFO = SOPC_SLinkedList_Create(0);
+    SOPC_Event* intEvent = NULL;
+    bool result = (NULL != intEventsLIFO);
+    SOPC_StatusCode errorStatus = (result ? SOPC_GoodGenericStatus : OpcUa_BadOutOfMemory);
 
     // Continue until an error occurred OR received buffer is empty (could contain 1 or several messages)
     while (result && SOPC_Buffer_Remaining(receivedBuffer) > 0)
@@ -2203,21 +2205,27 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             {
                 if (!ignoreExpiredMessage)
                 {
-                    // Transmit OPC UA message to secure connection state manager
+                    // Enqueue in LIFO for transmission of OPC UA message to secure connection state manager
+                    // Note: LIFO is necessary since we will enqueue in AsNext mode in the end
                     SOPC_SecureChannels_InternalEvent scEvent =
                         SC_Chunks_MsgTypeToRcvEvent(chunkCtx->currentMsgType, chunkCtx->currentMsgIsFinal);
-                    if (scEvent == INT_SC_RCV_ERR || scEvent == INT_SC_RCV_CLO)
+                    intEvent = SOPC_Calloc(1, sizeof(*intEvent));
+                    result = (NULL != intEvent);
+                    if (result)
                     {
-                        // Treat as prio events
-                        SOPC_SecureChannels_EnqueueInternalEventAsNext(scEvent, scConnectionIdx,
-                                                                       (uintptr_t) chunkCtx->currentMessageInputBuffer,
-                                                                       requestIdOrHandle);
+                        intEvent->event = (int32_t) scEvent;
+                        intEvent->eltId = scConnectionIdx;
+                        intEvent->params = (uintptr_t) chunkCtx->currentMessageInputBuffer;
+                        intEvent->auxParam = requestIdOrHandle;
+
+                        uintptr_t addedEvent =
+                            SOPC_SLinkedList_Append(intEventsLIFO, requestIdOrHandle, (uintptr_t) intEvent);
+                        result = (addedEvent == (uintptr_t) intEvent);
+                        intEvent = NULL;
                     }
-                    else
+                    if (!result)
                     {
-                        SOPC_SecureChannels_EnqueueInternalEvent(scEvent, scConnectionIdx,
-                                                                 (uintptr_t) chunkCtx->currentMessageInputBuffer,
-                                                                 requestIdOrHandle);
+                        errorStatus = OpcUa_BadOutOfMemory;
                     }
                     /* currentMessageInputBuffer is lent to the secure channel, which will free it */
                     chunkCtx->currentMessageInputBuffer = NULL;
@@ -2244,6 +2252,16 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         }
     }
 
+    // Transmit OPC UA message to secure connection state manager by keeping order (LIFO + AsNext)
+    intEvent = (SOPC_Event*) SOPC_SLinkedList_PopLast(intEventsLIFO);
+    while (result && NULL != intEvent)
+    {
+        SOPC_SecureChannels_EnqueueInternalEventAsNext((SOPC_SecureChannels_InternalEvent) intEvent->event,
+                                                       intEvent->eltId, intEvent->params, intEvent->auxParam);
+        SOPC_Free(intEvent);
+        intEvent = (SOPC_Event*) SOPC_SLinkedList_PopLast(intEventsLIFO);
+    }
+
     if (!result)
     {
         SOPC_Logger_TraceError(
@@ -2257,6 +2275,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
     }
 
+    SOPC_SLinkedList_Delete(intEventsLIFO);
     SOPC_Buffer_Delete(receivedBuffer);
 }
 
@@ -4536,7 +4555,8 @@ void SOPC_ChunksMgr_Dispatcher(SOPC_SecureChannels_InternalEvent event,
             {
                 if (failedWithAbortMessage)
                 {
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SENT_ABORT_FAILURE, eltId, auxParam, errorStatus);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SENT_ABORT_FAILURE, eltId, auxParam,
+                                                                   errorStatus);
                 }
                 else
                 {

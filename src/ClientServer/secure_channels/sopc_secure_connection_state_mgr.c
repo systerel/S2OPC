@@ -574,8 +574,8 @@ static void SC_CloseSecureConnection(
                                                (uintptr_t) scConfigIdx, OpcUa_BadSecureChannelClosed);
                     }
                     // Server side: notify listener that connection closed
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_DISCONNECTED, serverEndpointConfigIdx,
-                                                             (uintptr_t) NULL, scConnectionIdx);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_DISCONNECTED, serverEndpointConfigIdx,
+                                                                   (uintptr_t) NULL, scConnectionIdx);
                 }
             }
         }
@@ -772,7 +772,7 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
     {
         scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_HEL, scConnectionIdx, (uintptr_t) msgBuffer, 0);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_HEL, scConnectionIdx, (uintptr_t) msgBuffer, 0);
     }
     else if (msgBuffer != NULL)
     {
@@ -1073,7 +1073,7 @@ static bool SC_ClientTransitionHelper_SendOPN(SOPC_SecureConnection* scConnectio
 
     if (result)
     {
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnMsgBuffer, 0);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnMsgBuffer, 0);
     }
     else
     {
@@ -1607,7 +1607,7 @@ static bool SC_ServerTransition_TcpNegotiate_To_ScInit(SOPC_SecureConnection* sc
     {
         *errorStatus = SOPC_GoodGenericStatus;
         scConnection->state = SECURE_CONNECTION_STATE_SC_INIT;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_ACK, scConnectionIdx, (uintptr_t) ackMsgBuffer, 0);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_ACK, scConnectionIdx, (uintptr_t) ackMsgBuffer, 0);
     }
     else
     {
@@ -1716,7 +1716,7 @@ static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection*
     {
         scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_RHE, scConnectionIdx, (uintptr_t) msgBuffer, 0);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_RHE, scConnectionIdx, (uintptr_t) msgBuffer, 0);
     }
     else if (msgBuffer != NULL)
     {
@@ -2236,7 +2236,8 @@ static bool SC_ServerTransition_ScConnecting_To_ScConnected(SOPC_SecureConnectio
     if (result)
     {
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnRespBuffer, requestId);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnRespBuffer,
+                                                       requestId);
     }
     else if (opnRespBuffer != NULL)
     {
@@ -2522,7 +2523,8 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
         scConnection->currentSecuKeySets = newSecuKeySets;
         // Precedent security token will remain active until expiration or recetion of client message with new token
         scConnection->serverNewSecuTokenActive = false;
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnRespBuffer, requestId);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_OPN, scConnectionIdx, (uintptr_t) opnRespBuffer,
+                                                       requestId);
     }
     else
     {
@@ -2769,8 +2771,9 @@ static void onServerSideOpen(SOPC_SecureConnection* scConnection, uint32_t scIdx
         if (scConnection->isReverseConnection)
         {
             // Generate SC_REVERSE_CONNECT events for connection state manager
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, scConnection->serverEndpointConfigIdx,
-                                                     (uintptr_t) NULL, (uintptr_t) scConnection->serverReverseConnIdx);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_REVERSE_CONNECT,
+                                                           scConnection->serverEndpointConfigIdx, (uintptr_t) NULL,
+                                                           (uintptr_t) scConnection->serverReverseConnIdx);
         }
 
         return;
@@ -2836,7 +2839,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             // notify socket that connection is accepted
             SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, (uint32_t) auxParam, (uintptr_t) NULL, connectionIdx);
             // notify secure listener that connection is accepted
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, eltId, (uintptr_t) NULL, connectionIdx);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, eltId, (uintptr_t) NULL, connectionIdx);
         }
         else
         {
@@ -3352,8 +3355,8 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
         if (scConnection->isServerConnection)
         {
             // Add connection into associated EP listener
-            SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
-                                                     (uintptr_t) NULL, (uintptr_t) eltId);
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
+                                                           (uintptr_t) NULL, (uintptr_t) eltId);
             // Send a Reverse Hello message on TCP connection
             result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
         }
@@ -3446,7 +3449,7 @@ void SOPC_SecureConnectionStateMgr_OnTimerEvent(SOPC_SecureChannels_TimerEvent e
         secureListenersArray[eltId].reverseConnRetryTimerIds[params] = 0;
 
         // Generate SC_REVERSE_CONNECT events for connection state manager
-        SOPC_SecureChannels_EnqueueInternalEvent(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL, params);
+        SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_REVERSE_CONNECT, eltId, (uintptr_t) NULL, params);
         break;
     }
     case TIMER_SC_CLIENT_OPN_RENEW:
@@ -3764,8 +3767,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                     scConnection->isReverseConnection = true;
                     scConnection->clientReverseEpConfigIdx = reverseEpCfgIdx;
                     scConnection->state = SECURE_CONNECTION_STATE_TCP_REVERSE_INIT;
-                    SOPC_SecureChannels_EnqueueInternalEvent(INT_REVERSE_EP_REQ_CONNECTION, reverseEpCfgIdx,
-                                                             (uintptr_t) NULL, (uintptr_t) idx);
+                    SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_REVERSE_EP_REQ_CONNECTION, reverseEpCfgIdx,
+                                                                   (uintptr_t) NULL, (uintptr_t) idx);
                 }
             }
             else
