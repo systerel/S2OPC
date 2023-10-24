@@ -1130,6 +1130,10 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
     {
         const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         found = compare_publisherId(&ctx->pubId, pubId);
+        if (found && ctx->writerId != writerId)
+        {
+            found = false;
+        }
     }
 
     if (!found)
