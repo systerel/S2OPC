@@ -186,6 +186,7 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_next_resp &
+        ResponseBrowseNext = p_resp_msg &
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
@@ -234,6 +235,7 @@ LOCAL_OPERATIONS
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
         a_msg_out_type = e_msg_view_browse_next_resp &
+        ResponseBrowseNext = p_resp_msg &
 
         p_cpi       : t_BrowseValue_i &
         p_cpi       : t_BrowseValue &
@@ -500,6 +502,8 @@ OPERATIONS
                         p_index : dom(ResponseBrowseNext_ContinuationPoint) &
                         p_index : dom(ResponseBrowseNext_ResultReferences)
                     ) &
+                    /* Pre-condition for operation called in the loop */
+                    ResponseBrowseNext = p_resp_msg &
 
                     isBrowseValueContextDefined = FALSE &
                     isBrowseResultComputed      = FALSE &
