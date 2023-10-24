@@ -140,6 +140,10 @@ LOCAL_OPERATIONS
         ResponseBrowse_ContinuationPoint,
         ResponseBrowse_ResultReferences
         :(
+            ResponseBrowse_BrowseStatus      : t_BrowseValue +-> t_StatusCode &
+            ResponseBrowse_ContinuationPoint : t_BrowseValue +-> t_ContinuationPointId_i &
+            ResponseBrowse_ResultReferences  : t_BrowseValue +-> t_BrowseResultReferences &
+
             {p_bvi} <<| ResponseBrowse_BrowseStatus = {p_bvi} <<| ResponseBrowse_BrowseStatus$0 &
             {p_bvi} <<| ResponseBrowse_ResultReferences = {p_bvi} <<| ResponseBrowse_ResultReferences$0 &
             {p_bvi} <<| ResponseBrowse_ContinuationPoint = {p_bvi} <<| ResponseBrowse_ContinuationPoint$0 &
@@ -191,6 +195,10 @@ LOCAL_OPERATIONS
         ResponseBrowseNext_ContinuationPoint,
         ResponseBrowseNext_ResultReferences
         :(
+            ResponseBrowseNext_BrowseStatus      : t_BrowseValue +-> t_StatusCode &
+            ResponseBrowseNext_ContinuationPoint : t_BrowseValue +-> t_ContinuationPointId_i &
+            ResponseBrowseNext_ResultReferences  : t_BrowseValue +-> t_BrowseResultReferences &
+
             {p_cpi} <<| ResponseBrowseNext_BrowseStatus = {p_cpi} <<| ResponseBrowseNext_BrowseStatus$0 &
             {p_cpi} <<| ResponseBrowseNext_ResultReferences = {p_cpi} <<| ResponseBrowseNext_ResultReferences$0 &
             {p_cpi} <<| ResponseBrowseNext_ContinuationPoint = {p_cpi} <<| ResponseBrowseNext_ContinuationPoint$0 &
@@ -231,6 +239,8 @@ LOCAL_OPERATIONS
                  only operation result are forwarded by translate browse path machines */
         ResponseBrowseNext_BrowseStatus
         :(
+            ResponseBrowseNext_BrowseStatus : t_BrowseValue +-> t_StatusCode &
+
             {p_cpi} <<| ResponseBrowseNext_BrowseStatus = {p_cpi} <<| ResponseBrowseNext_BrowseStatus$0 &
             ResponseBrowseNext_BrowseStatus(p_cpi) : {e_sc_ok, e_sc_bad_continuation_point_invalid}
         )
