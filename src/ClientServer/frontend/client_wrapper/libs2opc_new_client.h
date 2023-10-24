@@ -136,7 +136,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
- * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_TIMEOUT in case of timeout to receive response,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
  * \note Request memory is managed by the client after a successful return or in case of timeout
@@ -248,7 +249,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
- * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
+ * \return SOPC_STATUS_OK in case of success,  SOPC_STATUS_TIMEOUT in case of timeout to receive response,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
  * \note Request memory is managed by the client after a successful return or in case of timeout.

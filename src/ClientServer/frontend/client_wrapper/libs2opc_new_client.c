@@ -209,10 +209,13 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_GenReqCtx_WaitFinishedOrTimeo
     /* Wait for the response */
     while (SOPC_STATUS_OK == mutStatus && !genReqCtx->finished)
     {
-        mutStatus = SOPC_Mutex_UnlockAndWaitCond(&genReqCtx->condition, &genReqCtx->mutex);
-        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        // Note: limit to 2*SOPC_REQUEST_TIMEOUT_MS since a request timeout is at least expected after
+        // SOPC_REQUEST_TIMEOUT_MS. It guarantees we will not
+        mutStatus =
+            SOPC_Mutex_UnlockAndTimedWaitCond(&genReqCtx->condition, &genReqCtx->mutex, 2 * SOPC_REQUEST_TIMEOUT_MS);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus || SOPC_STATUS_TIMEOUT == mutStatus);
     }
-    return genReqCtx->status;
+    return (SOPC_STATUS_OK == mutStatus ? genReqCtx->status : SOPC_STATUS_TIMEOUT);
 }
 
 static bool SOPC_ClientHelperInternal_CheckConnectionValid(const SOPC_S2OPC_Config* config,
