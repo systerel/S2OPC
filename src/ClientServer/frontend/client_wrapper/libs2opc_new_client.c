@@ -54,7 +54,6 @@ struct SOPC_ClientConnection
     bool syncConnection;
 
     uint16_t secureConnectionIdx;
-    SOPC_SecureChannelConfigIdx cfgId;
     bool isDiscovery;
     SOPC_StaMac_Machine* stateMachine; // only if !isDiscovery
 };
@@ -485,69 +484,6 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 }
 
-static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC_SecureConnection_Config* secConnConfig,
-                                                                      SOPC_ReverseEndpointConfigIdx* res)
-{
-    if (NULL == secConnConfig->reverseURL)
-    {
-        // Not a reverse connection, nothing to do
-        return SOPC_STATUS_OK;
-    }
-    SOPC_ASSERT(NULL != res);
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    const SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    bool foundIdx = false;
-    uint16_t rEPidx = 0;
-    for (uint16_t i = 0; !foundIdx && i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
-    {
-        if (0 == strcmp(pConfig->clientConfig.reverseEndpointURLs[i], secConnConfig->reverseURL))
-        {
-            foundIdx = true;
-            rEPidx = i;
-        }
-    }
-    if (foundIdx)
-    {
-        SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
-            sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
-        // If config not already present, create it
-        if (0 == reverseConfigIdx)
-        {
-            reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
-        }
-        if (0 != reverseConfigIdx)
-        {
-            // If the reverse endpoint is not opened, open it
-            const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
-            if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
-            {
-                // Store the reverse EP configuration index
-                sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx] = reverseConfigIdx;
-                // Open the reverse endpoint
-                SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseConfigIdx);
-                sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset] = true;
-            }
-            *res = reverseConfigIdx;
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "SOPC_ClientHelperInternal_MayCreateReverseEp: creation of reverse endpoint config %s failed",
-                secConnConfig->reverseURL);
-        }
-    }
-    else
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "SOPC_ClientHelperInternal_MayCreateReverseEp: unexpected: reverse endpoint URL %s not "
-                               "recorded in client config",
-                               secConnConfig->reverseURL);
-    }
-    return status;
-}
-
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
     const SOPC_SecureConnection_Config* secConnConfig,
     bool isDiscovery,
@@ -555,56 +491,38 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
 {
     SOPC_ASSERT(secConnConfig != NULL);
     SOPC_ASSERT(outClientConnection != NULL);
-    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
 
     SOPC_ClientConnection* res = SOPC_Calloc(sizeof(*res), 1);
+    SOPC_StaMac_Machine* stateMachine = NULL;
+
     if (NULL == res)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayCreateReverseEp(secConnConfig, &reverseConfigIdx);
+    // Note: still create state machine even in discovery since it might be used for non-discovery later
+    const char* username = NULL;
+    const char* password = NULL;
 
-    SOPC_SecureChannelConfigIdx cfgId = 0;
-    SOPC_StaMac_Machine* stateMachine = NULL;
-    if (SOPC_STATUS_OK == status)
+    const SOPC_SerializedCertificate* pUserCertX509 = NULL;
+    const SOPC_SerializedAsymmetricKey* pUserKey = NULL;
+
+    if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
     {
-        /* TODO: propagate the const in low level API ? */
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        cfgId = SOPC_ToolkitClient_AddSecureChannelConfig((SOPC_SecureChannel_Config*) &secConnConfig->scConfig);
-        SOPC_GCC_DIAGNOSTIC_RESTORE
-        if (0 != cfgId)
-        {
-            status = SOPC_STATUS_OK;
-        }
+        username = secConnConfig->sessionConfig.userToken.userName.userName;
+        password = secConnConfig->sessionConfig.userToken.userName.userPwd;
+    }
+    else if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_Certificate)
+    {
+        pUserCertX509 = secConnConfig->sessionConfig.userToken.userX509.certX509;
+        pUserKey = secConnConfig->sessionConfig.userToken.userX509.keyX509;
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        // Note: still create state machine even in discovery since it might be used for non-discovery later
-        const char* username = NULL;
-        const char* password = NULL;
-
-        const SOPC_SerializedCertificate* pUserCertX509 = NULL;
-        const SOPC_SerializedAsymmetricKey* pUserKey = NULL;
-
-        if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_UserName)
-        {
-            username = secConnConfig->sessionConfig.userToken.userName.userName;
-            password = secConnConfig->sessionConfig.userToken.userName.userPwd;
-        }
-        else if (secConnConfig->sessionConfig.userTokenType == OpcUa_UserTokenType_Certificate)
-        {
-            pUserCertX509 = secConnConfig->sessionConfig.userToken.userX509.certX509;
-            pUserKey = secConnConfig->sessionConfig.userToken.userX509.keyX509;
-        }
-
-        status = SOPC_StaMac_Create(cfgId, reverseConfigIdx, secConnConfig->secureConnectionIdx,
-                                    secConnConfig->sessionConfig.userPolicyId, username, password, pUserCertX509,
-                                    pUserKey, NULL, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT,
-                                    TMP_MAX_LIFETIME_COUNT, SOPC_DEFAULT_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS,
-                                    SOPC_ClientInternal_EventCbk, 0, &stateMachine);
-    }
+    SOPC_ReturnStatus status = SOPC_StaMac_Create(
+        secConnConfig->secureChannelConfigIdx, secConnConfig->reverseEndpointConfigIdx,
+        secConnConfig->secureConnectionIdx, secConnConfig->sessionConfig.userPolicyId, username, password,
+        pUserCertX509, pUserKey, NULL, TMP_PUBLISH_PERIOD_MS, TMP_MAX_KEEP_ALIVE_COUNT, TMP_MAX_LIFETIME_COUNT,
+        SOPC_DEFAULT_PUBLISH_N_TOKEN, TMP_TIMEOUT_MS, SOPC_ClientInternal_EventCbk, 0, &stateMachine);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -614,7 +532,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
         mutStatus = SOPC_Mutex_Initialization(&res->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        res->cfgId = cfgId;
         res->secureConnectionIdx = secConnConfig->secureConnectionIdx;
         res->isDiscovery = isDiscovery;
         res->stateMachine = stateMachine;
@@ -655,12 +572,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
     }
 
     SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
-
-    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_ClientHelperInternal_MayCreateReverseEp(secConnConfig, &reverseConfigIdx);
-    }
 
     SOPC_ClientConnection* res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
     if (SOPC_STATUS_OK == status && NULL == res)
@@ -715,8 +626,9 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         /* send the request */
         if (SOPC_STATUS_OK == status)
         {
-            SOPC_EndpointConnectionCfg endpointConnectionCfg = {.reverseEndpointConfigIdx = reverseConfigIdx,
-                                                                .secureChannelConfigIdx = res->cfgId};
+            SOPC_EndpointConnectionCfg endpointConnectionCfg = {
+                .reverseEndpointConfigIdx = secConnConfig->reverseEndpointConfigIdx,
+                .secureChannelConfigIdx = secConnConfig->secureChannelConfigIdx};
 
             status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);
         }

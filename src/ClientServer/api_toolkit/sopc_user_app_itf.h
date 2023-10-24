@@ -230,7 +230,12 @@ typedef struct SOPC_SecureConnection_Config
 
     SOPC_Session_Config sessionConfig; /**< Session activation data */
 
-    uint16_t secureConnectionIdx; /**< Index into ::SOPC_Client_Config secureConnections array */
+    uint16_t secureConnectionIdx;      /**< Index into ::SOPC_Client_Config secureConnections array */
+    uint32_t reverseEndpointConfigIdx; /**< (Optional) Index of the Reverse Endpoint configuration to listen for server
+                                          connection returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig(). If not
+                                          applicable it shall be 0. */
+    uint32_t secureChannelConfigIdx; /**< Index of the Secure Channel configuration for endpoint connection returned by
+                                        ::SOPC_ToolkitClient_AddSecureChannelConfig(). It shall not be 0. */
     bool finalized; /** < Set when the configuration of the secure connection is frozen and configuration from paths
                           has been done. */
 } SOPC_SecureConnection_Config;

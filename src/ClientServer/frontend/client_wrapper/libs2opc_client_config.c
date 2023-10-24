@@ -477,6 +477,69 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config*
     return status;
 }
 
+static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC_SecureConnection_Config* secConnConfig,
+                                                                      SOPC_ReverseEndpointConfigIdx* res)
+{
+    if (NULL == secConnConfig->reverseURL)
+    {
+        // Not a reverse connection, nothing to do
+        return SOPC_STATUS_OK;
+    }
+    SOPC_ASSERT(NULL != res);
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    const SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    bool foundIdx = false;
+    uint16_t rEPidx = 0;
+    for (uint16_t i = 0; !foundIdx && i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
+    {
+        if (0 == strcmp(pConfig->clientConfig.reverseEndpointURLs[i], secConnConfig->reverseURL))
+        {
+            foundIdx = true;
+            rEPidx = i;
+        }
+    }
+    if (foundIdx)
+    {
+        SOPC_ReverseEndpointConfigIdx reverseConfigIdx =
+            sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx];
+        // If config not already present, create it
+        if (0 == reverseConfigIdx)
+        {
+            reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
+        }
+        if (0 != reverseConfigIdx)
+        {
+            // If the reverse endpoint is not opened, open it
+            const uint32_t reverseConfigIdxNoOffset = reverseConfigIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
+            if (!sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset])
+            {
+                // Store the reverse EP configuration index
+                sopc_client_helper_config.configuredReverseEndpointsToCfgIdx[rEPidx] = reverseConfigIdx;
+                // Open the reverse endpoint
+                SOPC_ToolkitClient_AsyncOpenReverseEndpoint(reverseConfigIdx);
+                sopc_client_helper_config.openedReverseEndpointsFromCfgIdx[reverseConfigIdxNoOffset] = true;
+            }
+            *res = reverseConfigIdx;
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_CLIENTSERVER,
+                "SOPC_ClientHelperInternal_MayCreateReverseEp: creation of reverse endpoint config %s failed",
+                secConnConfig->reverseURL);
+        }
+    }
+    else
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "SOPC_ClientHelperInternal_MayCreateReverseEp: unexpected: reverse endpoint URL %s not "
+                               "recorded in client config",
+                               secConnConfig->reverseURL);
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_Client_Config* cConfig,
                                                                           SOPC_SecureConnection_Config* secConnConfig)
 {
@@ -542,6 +605,30 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientConfigHelper_CheckConfig(cConfig, secConnConfig);
+    }
+
+    // Add configuration into low level layer
+    SOPC_ReverseEndpointConfigIdx reverseConfigIdx = 0;
+    SOPC_SecureChannelConfigIdx cfgIdx = 0;
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ClientHelperInternal_MayCreateReverseEp(secConnConfig, &reverseConfigIdx);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        /* TODO: propagate the const in low level API ? */
+        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+        cfgIdx = SOPC_ToolkitClient_AddSecureChannelConfig((SOPC_SecureChannel_Config*) &secConnConfig->scConfig);
+        SOPC_GCC_DIAGNOSTIC_RESTORE
+        status = (0 != cfgIdx ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        secConnConfig->reverseEndpointConfigIdx = reverseConfigIdx;
+        secConnConfig->secureChannelConfigIdx = cfgIdx;
         secConnConfig->finalized = true;
     }
 
