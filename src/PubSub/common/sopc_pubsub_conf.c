@@ -141,7 +141,7 @@ struct SOPC_WriterGroup
 
     double keepAliveTimeMs;
 
-    bool jsonEncode;
+    SOPC_Pubsub_MessageEncodingType messageEncoding;
 
     char* securityGroupId;
     SOPC_SecurityKeyServices* securityKeyServices;
@@ -1162,16 +1162,16 @@ void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms
     group->keepAliveTimeMs = keepAlive_ms;
 }
 
-bool SOPC_WriterGroup_Get_JsonEncode(SOPC_WriterGroup* group)
+SOPC_Pubsub_MessageEncodingType SOPC_WriterGroup_Get_Encoding(const SOPC_WriterGroup* group)
 {
     SOPC_ASSERT(NULL != group);
-    return group->jsonEncode;
+    return group->messageEncoding;
 }
 
-void SOPC_WriterGroup_Set_JsonEncode(SOPC_WriterGroup* group, bool jsonEncode)
+void SOPC_WriterGroup_Set_Encoding(SOPC_WriterGroup* group, SOPC_Pubsub_MessageEncodingType messageEncoding)
 {
     SOPC_ASSERT(NULL != group);
-    group->jsonEncode = jsonEncode;
+    group->messageEncoding = messageEncoding;
 }
 
 /** DataSetWriter **/

@@ -68,6 +68,12 @@ typedef void SOPC_PubSub_OnFatalError(void* userContext, const char* message);
 
 typedef enum
 {
+    SOPC_MessageEncodeUADP = 0,
+    SOPC_MessageEncodeJSON
+} SOPC_Pubsub_MessageEncodingType;
+
+typedef enum
+{
     SOPC_PubSubConnection_Pub = 0,
     SOPC_PubSubConnection_Sub = 1
 } SOPC_PubSubConnection_Type;
@@ -302,8 +308,8 @@ void SOPC_WriterGroup_Set_PublishingOffset(SOPC_WriterGroup* group, int32_t offs
 double SOPC_WriterGroup_Get_KeepAlive(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_KeepAlive(SOPC_WriterGroup* group, double keepAlive_ms);
 
-bool SOPC_WriterGroup_Get_JsonEncode(SOPC_WriterGroup* group);
-void SOPC_WriterGroup_Set_JsonEncode(SOPC_WriterGroup* group, bool jsonEncode);
+SOPC_Pubsub_MessageEncodingType SOPC_WriterGroup_Get_Encoding(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_Encoding(SOPC_WriterGroup* group, SOPC_Pubsub_MessageEncodingType encoding);
 
 SOPC_UadpNetworkMessageContentMask SOPC_WriterGroup_Get_NetworkMessageContentMask(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_NetworkMessageContentMask(SOPC_WriterGroup* group,

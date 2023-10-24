@@ -565,9 +565,9 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
         // Encode with the configured message format
         SOPC_Buffer* buffer = NULL;
-        if (SOPC_WriterGroup_Get_JsonEncode(group))
+        if (SOPC_MessageEncodeJSON == SOPC_WriterGroup_Get_Encoding(group))
         {
-            buffer = SOPC_JSON_NetworkMessage_Encode(message);
+            buffer = SOPC_JSON_NetworkMessage_Encode(message, security);
         }
         else
         {

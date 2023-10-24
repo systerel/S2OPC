@@ -654,10 +654,17 @@ static SOPC_ReturnStatus generate_MessageId_JSON(char* buffer,
     return SOPC_STATUS_OK;
 }
 
-SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message)
+SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message,
+                                             SOPC_PubSub_SecurityType* security)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     static const uint8_t comma = ',';
+
+    if (NULL != security) // security not supported
+    {
+        check_status_and_set_default(status, SOPC_JSON_NetworkMessage_Error_Security_Unsupported);
+        return NULL;
+    }
 
     // DatasetMessageSequenceNumber
     const SOPC_Dataset_LL_DataSetMessage* dsm0 = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(message, 0);

@@ -46,7 +46,7 @@ VALUE_MESSAGE_SECURITY_MODE_SIGNANDENCRYPT = "signAndEncrypt"
 ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
 ATTRIBUTE_MESSAGE_MQTT_TOPIC = "mqttTopic"
-ATTRIBUTE_MESSAGE_JSON_ENCODE = "jsonEncode"
+ATTRIBUTE_MESSAGE_ENCODING = "encoding"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -130,7 +130,7 @@ class MessageContext:
         self.securityMode = message.get(ATTRIBUTE_MESSAGE_SECURITY_MODE, VALUE_MESSAGE_SECURITY_MODE_NONE)
         self.keepAliveTime = float(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL, -1.))
         self.mqttTopic = str(toCStringPtrName(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_MQTT_TOPIC, None)))
-        self.jsonEncode = bool(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_JSON_ENCODE, False))
+        self.encoding = getOptionalAttribute(message, ATTRIBUTE_MESSAGE_ENCODING, "uadp")
 
 
 def getCSecurityMode(mode):
@@ -324,6 +324,9 @@ def handlePubConnection(publisherId, connection, index, result):
             handlePubMessage(cnxContext, message, msgIndex, result)
             msgIndex += 1
 
+def encodingStringToEnum(encoding : str):
+    try:return {'uadp': "SOPC_MessageEncodeUADP", 'json' : "SOPC_MessageEncodeJSON"}[encoding]
+    except:raise Exception(f"Invalid Message Encoding{encoding}")
 
 def handlePubMessage(cnxContext, message, msgIndex, result):
     global IS_DEFINED_C_GROUP
@@ -349,13 +352,13 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // Interval = %f ms
         // Offest = %d us
         // mqttTopic = %s
-        // jsonEncode = %d
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s, %d);
+        // encoding = %s
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s, %s);
         alloc = NULL != writerGroup;
     }
     """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
-        msgContext.jsonEncode, msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, msgContext.jsonEncode))
+        encodingStringToEnum(msgContext.encoding), msgIndex, msgContext.id, msgContext.version, msgContext.interval,
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, encodingStringToEnum(msgContext.encoding)))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
@@ -696,7 +699,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
                                                            const char* mqttTopic,
-                                                           bool jsonEncode)
+                                                           const SOPC_Pubsub_MessageEncodingType encoding)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
@@ -704,7 +707,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_PublishingInterval(group, interval);
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
-    SOPC_WriterGroup_Set_JsonEncode(group, jsonEncode);
+    SOPC_WriterGroup_Set_Encoding(group, encoding);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);

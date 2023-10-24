@@ -506,11 +506,9 @@ SOPC_ReturnStatus SOPC_Buffer_PrintFloatDouble(SOPC_Buffer* buf, const double va
     static const char* infinity_str_minus_json_format = "\"-Infinity\"";
     static const char* nan_str_json_format = "\"NaN\"";
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    // buffer needs a minimum length of 12 to store the worst case : "\"-Infinity\"" + '\0'
-    // Or a length of SOPC_PRECISION_PRINTING_FLOAT_NUMBERS (decimal storage) + 8 ('-.e+ddd' + '\0' storage)
-    char buffer[SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8]; // (decimal + '.e+ddd' + '\0')
+    char buffer[SOPC_PRECISION_PRINTING_FLOAT_NUMBERS + 8]; // (decimal + '-.e+ddd' + '\0')
 
-    /* If value it's a special number */
+    /* Check if value is a special number */
     // If it's a NaN
     if (isnan(value))
     {

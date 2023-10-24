@@ -53,11 +53,11 @@ SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_Sin
 
 /* Test network message layer JSON encoded */
 
-#define ENCODED_DATA_SIZE_JSON 549
+#define ENCODED_DATA_SIZE_JSON 548
 #define NB_VARS_JSON 9
 
-SOPC_Byte text[16] = {'T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 't', 'e', 'x', 't', ' ', '!'};
-SOPC_Variant varArrJSON[NB_VARS_JSON] = {
+static SOPC_Byte gSampleText[] = "This is a text !";
+static const SOPC_Variant varArrJSON[NB_VARS_JSON] = {
     {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
     {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64839}},
     {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -65133}},
@@ -69,7 +69,7 @@ SOPC_Variant varArrJSON[NB_VARS_JSON] = {
     {true,
      SOPC_String_Id,
      SOPC_VariantArrayType_SingleValue,
-     {.String = {.Length = 16, .DoNotClear = true, .Data = text}}}};
+     {.String = {.Length = sizeof(gSampleText) - 1, .DoNotClear = true, .Data = gSampleText}}}};
 
 static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] =
     "{"
@@ -125,7 +125,7 @@ static const uint8_t encoded_network_msg_json[ENCODED_DATA_SIZE_JSON] =
     "\"Payload\":{"
     "\"1-0\":{"
     "\"Type\":1,"
-    "\"Body\":false"
+    "\"Body\":true"
     "}"
     "}"
     "}"
@@ -450,7 +450,6 @@ START_TEST(test_hl_network_msg_encode_json)
 
     // Fill in variant of 2nd Dataset Message
     SOPC_Variant* var = SOPC_Variant_Create();
-    varArrJSON[0].Value.Boolean = false;
     SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArrJSON[0]);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -458,7 +457,7 @@ START_TEST(test_hl_network_msg_encode_json)
     ck_assert_int_eq(true, res);
 
     /* Encode */
-    SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(nm);
+    SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(nm, NULL);
 
     /* Control encoding result */
     // Check Size

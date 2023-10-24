@@ -228,6 +228,7 @@ SOPC_ReturnStatus SOPC_Buffer_ReadFile(const char* path, SOPC_Buffer** buf);
 /**
  *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
  * position and length if necessary)
+ * There is no terminating NULL character added at the end of the printed value.
  *
  *  \param value       uint32_t to print into the buffer
  *  \param buf         Pointer to the buffer to write into
@@ -241,6 +242,7 @@ SOPC_ReturnStatus SOPC_Buffer_PrintU32(SOPC_Buffer* buf, const uint32_t value);
  *  \brief             Print the value into the buffer data bytes from the buffer position (adapting buffer
  * position and length if necessary)
  * The I32 format written in the buffer does not take into account the spacing for '-' in the case of a positive value.
+ * There is no terminating NULL character added at the end of the printed value.
  *
  *  \param value       int32_t to print into the buffer
  *  \param buf         Pointer to the buffer to write into
@@ -256,6 +258,7 @@ SOPC_ReturnStatus SOPC_Buffer_PrintI32(SOPC_Buffer* buf, const int32_t value);
  * The float/double format written in the buffer does not take into account the spacing for '-' in the case
  * of a positive value.
  * The output is equivalent to '%.*g' print format with SOPC_PRECISION_PRINTING_FLOAT_NUMBERS as precision.
+ * There is no terminating NULL character added at the end of the printed value.
  *
  * For exemple : '42', '-4.3e+111'
  *

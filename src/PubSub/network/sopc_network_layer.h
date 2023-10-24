@@ -52,10 +52,13 @@ typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_Publishe
  * \brief Encode a NetworkMessage with JSON Mapping
  *
  * \param message is the NetworkMessage to encode
+ * \param security is the data use to encrypt and sign. Can be NULL if security is not used.
+ *                 No security possible for JSON encoding.
  *
  * \return A buffer containing the JSON string or NULL if the operation does not succeed
  */
-SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message);
+SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message,
+                                             SOPC_PubSub_SecurityType* security);
 
 /**
  * \brief Encode a NetworkMessage with UADP Mapping
@@ -227,6 +230,7 @@ typedef enum
     SOPC_JSON_NetworkMessage_Error_DataSetMessage_Encode,
     SOPC_JSON_NetworkMessage_Error_Variant_Encode,
     SOPC_JSON_NetworkMessage_Error_Write_Closing_Structure,
+    SOPC_JSON_NetworkMessage_Error_Security_Unsupported,
 } SOPC_UADP_NetworkMessage_Error_Code;
 
 /**
