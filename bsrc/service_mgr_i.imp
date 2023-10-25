@@ -597,6 +597,14 @@ OPERATIONS
                     /* service not supported for clients (only as a local service) */
                     StatusCode_service := e_sc_bad_service_unsupported
                 END
+            /*
+             * CAUTION:
+             *
+             *   When implementing e_msg_node_delete_references_req or
+             *   e_msg_node_delete_nodes_req, take care of the case of
+             *   continuation points of the Browse service that may contain a
+             *   node id pointing to the node or reference to delete.
+             */
             ELSE
                 /* service is not supported */
                 StatusCode_service := e_sc_bad_service_unsupported
