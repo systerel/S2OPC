@@ -856,7 +856,7 @@ void session_core_bs__client_activate_session_req_do_crypto(
 
     SOPC_SecureChannel_Config* pSCCfg = NULL;
     SOPC_ByteString* serverNonce = NULL;
-    const SOPC_Buffer* serverCert = NULL;
+    SOPC_SerializedCertificate* serverCert = NULL;
     OpcUa_SignatureData* pSign = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     const char* errorReason = "";
@@ -881,8 +881,8 @@ void session_core_bs__client_activate_session_req_do_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        // retrieve expected sender certificate as a ByteString
-        serverCert = pSCCfg->peerAppCert;
+        // retrieve expected sender certificate
+        status = SOPC_KeyCertPair_GetSerializedCertCopy(pSCCfg->peerAppCert, &serverCert);
     }
 
     int res = strcmp(pSCCfg->reqSecuPolicyUri, SOPC_SecurityPolicy_None_URI);
@@ -925,6 +925,8 @@ void session_core_bs__client_activate_session_req_do_crypto(
     {
         *session_core_bs__valid = true;
     }
+
+    SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
 }
 
 void session_core_bs__sign_user_token(const constants__t_byte_buffer_i session_core_bs__p_user_server_cert,
@@ -1341,7 +1343,7 @@ void session_core_bs__client_create_session_check_crypto(
     }
 
     const char* errorReason = "";
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->peerAppCert, &pCrtSrv);
+    SOPC_ReturnStatus status = SOPC_KeyCertPair_GetCertCopy(pSCCfg->peerAppCert, &pCrtSrv);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1436,7 +1438,7 @@ void session_core_bs__server_activate_session_check_crypto(
     }
 
     const char* errorReason = "";
-    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_Deserialize(pSCCfg->peerAppCert, &pCrtCli);
+    SOPC_ReturnStatus status = SOPC_KeyCertPair_GetCertCopy(pSCCfg->peerAppCert, &pCrtCli);
 
     if (SOPC_STATUS_OK == status)
     {

@@ -475,7 +475,7 @@ static const char* getenv_default(const char* name, const char* default_value)
 }
 
 static bool load_keys(SOPC_KeyCertPair** keyCertPair,
-                      SOPC_SerializedCertificate** server_cert,
+                      SOPC_CertHolder** srvCertHolder,
                       SOPC_CertificateList** ca,
                       SOPC_CRLList** cacrl)
 {
@@ -510,7 +510,7 @@ static bool load_keys(SOPC_KeyCertPair** keyCertPair,
                 key_path);
     }
 
-    if (SOPC_KeyManager_SerializedCertificate_CreateFromFile(server_cert_path, server_cert) != SOPC_STATUS_OK)
+    if (SOPC_KeyCertPair_CreateCertHolderFromPath(server_cert_path, srvCertHolder) != SOPC_STATUS_OK)
     {
         fprintf(stderr, "Error while loading server certificate from %s\n", ca_path);
     }
@@ -530,12 +530,10 @@ static bool load_keys(SOPC_KeyCertPair** keyCertPair,
         SOPC_Free(password);
     }
 
-    if (*keyCertPair == NULL || *server_cert == NULL || *ca == NULL)
+    if (*keyCertPair == NULL || *srvCertHolder == NULL || *ca == NULL)
     {
         SOPC_KeyCertPair_Delete(keyCertPair);
-
-        SOPC_KeyManager_SerializedCertificate_Delete(*server_cert);
-        *server_cert = NULL;
+        SOPC_KeyCertPair_Delete(srvCertHolder);
 
         SOPC_KeyManager_Certificate_Free(*ca);
         *ca = NULL;
@@ -635,26 +633,26 @@ int main(int argc, char** argv)
     scConfig.requestedLifetime = 60000;
 
     SOPC_KeyCertPair* cliKeyCertPair = NULL;
-    SOPC_SerializedCertificate* server_cert = NULL;
+    SOPC_CertHolder* srvCertHolder = NULL;
     SOPC_CertificateList* ca = NULL;
     SOPC_CRLList* cacrl = NULL;
     SOPC_PKIProvider* pki = NULL;
 
     if (msg_sec_mode != OpcUa_MessageSecurityMode_None)
     {
-        bool bRet = load_keys(&cliKeyCertPair, &server_cert, &ca, &cacrl);
+        bool bRet = load_keys(&cliKeyCertPair, &srvCertHolder, &ca, &cacrl);
         status = SOPC_PKIProvider_CreateFromList(ca, cacrl, NULL, NULL, &pki);
         if (!bRet || SOPC_STATUS_OK != status)
         {
             SOPC_PKIProvider_Free(&pki);
             SOPC_KeyCertPair_Delete(&cliKeyCertPair);
-            SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+            SOPC_KeyCertPair_Delete(&srvCertHolder);
             SOPC_KeyManager_Certificate_Free(ca);
             SOPC_KeyManager_CRL_Free(cacrl);
             return 1;
         }
 
-        scConfig.peerAppCert = server_cert;
+        scConfig.peerAppCert = srvCertHolder;
         clientConfig.clientKeyCertPair = cliKeyCertPair;
         clientConfig.clientPKI = pki;
     }
@@ -672,7 +670,7 @@ int main(int argc, char** argv)
     SOPC_Toolkit_Clear();
     SOPC_PKIProvider_Free(&pki);
     SOPC_KeyCertPair_Delete(&cliKeyCertPair);
-    SOPC_KeyManager_SerializedCertificate_Delete(server_cert);
+    SOPC_KeyCertPair_Delete(&srvCertHolder);
     SOPC_KeyManager_Certificate_Free(ca);
     SOPC_KeyManager_CRL_Free(cacrl);
 

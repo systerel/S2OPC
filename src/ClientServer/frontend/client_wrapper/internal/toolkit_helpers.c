@@ -57,7 +57,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_SecureChannel_Config* pscConfig = NULL;
-    SOPC_SerializedCertificate* pCrtSrv = NULL;
+    SOPC_CertHolder* pCertHolderSrv = NULL;
     SOPC_KeyCertPair* pCliKeyCertPair = NULL;
     SOPC_PKIProvider* pPki = NULL;
 
@@ -154,7 +154,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     {
         if (NULL != szPathCertServer)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(szPathCertServer, &pCrtSrv);
+            status = SOPC_KeyCertPair_CreateCertHolderFromPath(szPathCertServer, &pCertHolderSrv);
             if (SOPC_STATUS_OK != status)
             {
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Failed to load server certificate.");
@@ -208,7 +208,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
         if (NULL != pscConfig)
         {
             pscConfig->isClientSc = true;
-            pscConfig->peerAppCert = pCrtSrv;
+            pscConfig->peerAppCert = pCertHolderSrv;
             pscConfig->requestedLifetime = iScRequestedLifetime;
             pscConfig->msgSecurityMode = msgSecurityMode;
             pscConfig->expectedEndpoints = expectedEndpoints;
@@ -263,7 +263,7 @@ SOPC_ReturnStatus Helpers_NewSCConfigFromLibSubCfg(const char* szServerUrl,
     if (SOPC_STATUS_OK != status)
     {
         SOPC_PKIProvider_Free(&pPki);
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
+        SOPC_KeyCertPair_Delete(&pCertHolderSrv);
         SOPC_KeyCertPair_Delete(&pCliKeyCertPair);
         SOPC_Free(pscConfig);
     }
@@ -280,8 +280,8 @@ void Helpers_SecureChannel_Config_Free(SOPC_SecureChannel_Config** ppscConfig)
 
     SOPC_SecureChannel_Config* pscConfig = *ppscConfig;
 
+    SOPC_KeyCertPair_Delete(&pscConfig->peerAppCert);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) pscConfig->peerAppCert);
     SOPC_Free((void*) pscConfig->serverUri);
     SOPC_Free((void*) pscConfig->url);
     SOPC_Free((void*) pscConfig->reqSecuPolicyUri);

@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 
     SOPC_PKIProvider* pki = NULL;
     SOPC_KeyCertPair* clientKeyCertPair = NULL;
-    SOPC_SerializedCertificate* crt_srv = NULL;
+    SOPC_CertHolder* serverCertHolder = NULL;
 
     // Endpoint URL
     SOPC_String stEndpointUrl;
@@ -203,7 +203,7 @@ int main(int argc, char* argv[])
 
     if (messageSecurityMode != OpcUa_MessageSecurityMode_None && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyCertPair_CreateCertHolderFromPath(certificateSrvLocation, &serverCertHolder);
         if (SOPC_STATUS_OK != status)
         {
             printf(">>Stub_Client: Failed to load server certificate\n");
@@ -271,7 +271,7 @@ int main(int argc, char* argv[])
         scConfig.clientConfigPtr = &clientConfig;
         scConfig.msgSecurityMode = messageSecurityMode;
         scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;
-        scConfig.peerAppCert = crt_srv;
+        scConfig.peerAppCert = serverCertHolder;
         scConfig.requestedLifetime = 100000;
         scConfig.url = sEndpointUrl;
         clientConfig.clientPKI = pki;
@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
     SOPC_PKIProvider_Free(&pki);
     SOPC_String_Clear(&stEndpointUrl);
     SOPC_KeyCertPair_Delete(&clientKeyCertPair);
-    SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
+    SOPC_KeyCertPair_Delete(&serverCertHolder);
     SOPC_EventRecorder_Delete(servicesEvents);
 
     if (SOPC_STATUS_OK == status)

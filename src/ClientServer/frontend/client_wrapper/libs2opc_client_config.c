@@ -559,13 +559,14 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
     SOPC_ReturnStatus status = SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPaths(cConfig);
     if (SOPC_STATUS_OK == status && secConnConfig->isServerCertFromPathNeeded)
     {
-        SOPC_SerializedCertificate* srvCert = NULL;
+        SOPC_CertHolder* srvCertHolder = NULL;
         if (NULL != secConnConfig->serverCertPath)
         {
-            status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(secConnConfig->serverCertPath, &srvCert);
+            status = SOPC_KeyCertPair_CreateCertHolderFromPath(secConnConfig->serverCertPath, &srvCertHolder);
+
             if (SOPC_STATUS_OK == status)
             {
-                scConfig->peerAppCert = srvCert;
+                scConfig->peerAppCert = srvCertHolder;
             }
             else
             {
@@ -624,7 +625,11 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
         SOPC_GCC_DIAGNOSTIC_RESTORE
         status = (0 != cfgIdx ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
-
+    if (SOPC_STATUS_OK == status && NULL != secConnConfig->serverCertUpdateCb)
+    {
+        status = SOPC_KeyCertPair_SetUpdateCb(secConnConfig->scConfig.peerAppCert, secConnConfig->serverCertUpdateCb,
+                                              secConnConfig->serverCertUpdateParam);
+    }
     if (SOPC_STATUS_OK == status)
     {
         secConnConfig->reverseEndpointConfigIdx = reverseConfigIdx;

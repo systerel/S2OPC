@@ -238,9 +238,15 @@ static SOPC_SecureConnection_Config* Client_GetSecureConnectionConfig(const char
             &g_Client_SecureConnection_Config[g_Client_SecureConnection_Current]->scConfig;
         if (0 == strcmp(scCfg->url, endpoint_url))
         {
-            if (scCfg->peerAppCert->length == server_cert->length &&
-                0 == memcmp(scCfg->peerAppCert->data, server_cert->data, server_cert->length))
+            SOPC_SerializedCertificate* peerSrvCrt = NULL;
+            SOPC_ReturnStatus status = SOPC_KeyCertPair_GetSerializedCertCopy(scCfg->peerAppCert, &peerSrvCrt);
+            if (SOPC_STATUS_OK == status && peerSrvCrt->length == server_cert->length &&
+                0 == memcmp(peerSrvCrt->data, server_cert->data, server_cert->length))
+            {
+                SOPC_KeyManager_SerializedCertificate_Delete(peerSrvCrt);
                 return g_Client_SecureConnection_Config[g_Client_SecureConnection_Current];
+            }
+            SOPC_KeyManager_SerializedCertificate_Delete(peerSrvCrt);
         }
     }
     return NULL;

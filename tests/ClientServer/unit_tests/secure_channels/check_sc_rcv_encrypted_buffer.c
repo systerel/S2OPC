@@ -63,7 +63,8 @@ static SOPC_Client_Config clientConfig;
 uint32_t scConfigIdx = 0;
 
 static SOPC_PKIProvider* pki = NULL;
-static SOPC_SerializedCertificate *crt_cli = NULL, *crt_srv = NULL, *crt_ca = NULL;
+static SOPC_SerializedCertificate *crt_cli = NULL, *crt_ca = NULL;
+static SOPC_CertHolder* crt_holder_srv = NULL;
 static SOPC_SerializedAsymmetricKey* priv_cli = NULL;
 
 static SOPC_ReturnStatus Check_Client_Closed_SC_Helper(SOPC_StatusCode status)
@@ -78,8 +79,8 @@ static void clearToolkit(void)
 
     // Free all allocated resources
     SOPC_KeyManager_SerializedCertificate_Delete(crt_cli);
-    SOPC_KeyManager_SerializedCertificate_Delete(crt_srv);
     SOPC_KeyManager_SerializedCertificate_Delete(crt_ca);
+    SOPC_KeyCertPair_Delete(&crt_holder_srv);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(priv_cli);
 }
 
@@ -132,7 +133,7 @@ static void establishSC(void)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certificateSrvLocation, &crt_srv);
+        status = SOPC_KeyCertPair_CreateCertHolderFromPath(certificateSrvLocation, &crt_holder_srv);
         if (SOPC_STATUS_OK != status)
         {
             printf("SC_Rcv_Buffer Init: Failed to load server certificate\n");
@@ -222,7 +223,7 @@ static void establishSC(void)
     scConfig.reqSecuPolicyUri = pRequestedSecurityPolicyUri;
     scConfig.requestedLifetime = 100000;
     scConfig.url = sEndpointUrl;
-    scConfig.peerAppCert = crt_srv;
+    scConfig.peerAppCert = crt_holder_srv;
     const SOPC_ExposedBuffer* priv_cli_exposed = SOPC_SecretBuffer_Expose(priv_cli);
     ck_assert_ptr_nonnull(priv_cli_exposed);
     status = SOPC_KeyCertPair_CreateFromBytes(crt_cli->length, crt_cli->data, SOPC_SecretBuffer_GetLength(priv_cli),

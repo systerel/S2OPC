@@ -124,7 +124,7 @@ static void SOPC_SecureChannelConfig_Clear(SOPC_SecureChannel_Config* scConfig)
     scConfig->reqSecuPolicyUri = NULL;
     scConfig->url = NULL;
 
-    SOPC_KeyManager_SerializedCertificate_Delete((SOPC_SerializedCertificate*) scConfig->peerAppCert);
+    SOPC_KeyCertPair_Delete(&scConfig->peerAppCert);
     scConfig->peerAppCert = NULL;
     SOPC_GCC_DIAGNOSTIC_RESTORE
     scConfig->clientConfigPtr = NULL;

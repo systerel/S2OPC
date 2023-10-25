@@ -565,7 +565,7 @@ void msg_session_bs__write_create_session_resp_msg_maxRequestMessageSize(
 
 static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i p_channel_config_idx,
                                          const char* scSecurityPolicy,
-                                         const SOPC_SerializedCertificate* scCertificate,
+                                         SOPC_CertHolder* scCertificateHolder,
                                          const SOPC_ByteString* pCreateSessionCert)
 {
     bool result = false;
@@ -573,18 +573,20 @@ static bool check_certificate_same_as_SC(const constants__t_channel_config_idx_i
 
     constants__t_SecurityPolicy SCsecPol = constants__e_secpol_B256S256;
 
-    bool scHasCertificate = scCertificate != NULL;
+    bool scHasCertificate = scCertificateHolder != NULL;
 
     /* If SC certificate provided, check if the certificate is the same. */
     if (scHasCertificate && pCreateSessionCert->Length > 0)
     {
-        const SOPC_Buffer* scCert = SOPC_KeyManager_SerializedCertificate_Data(scCertificate);
+        SOPC_SerializedCertificate* scCert = NULL;
+        SOPC_ReturnStatus status = SOPC_KeyCertPair_GetSerializedCertCopy(scCertificateHolder, &scCert);
 
-        if (scCert->length == (uint32_t) pCreateSessionCert->Length)
+        if (SOPC_STATUS_OK == status && scCert->length == (uint32_t) pCreateSessionCert->Length)
         {
             int comparison = memcmp(scCert->data, pCreateSessionCert->Data, (size_t) scCert->length);
             sameCertificate = (comparison == 0);
         }
+        SOPC_KeyManager_SerializedCertificate_Delete(scCert);
     }
 
     if (sameCertificate)

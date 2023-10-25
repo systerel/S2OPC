@@ -182,7 +182,7 @@ struct argparse_option CONN_OPTIONS[16] = {
 int nCfgWithSecuCreated = 0; /* Number of created configs with certificates, to remember when to release certificates */
 int nCfgCreated = 0;         /* Number of created configs with PKI created (might be necessary for user encryption)  */
 
-SOPC_SerializedCertificate* pCrtSrv = NULL;
+SOPC_CertHolder* pCrtHolderSrv = NULL;
 SOPC_KeyCertPair* pCliKeyCertPair = NULL;
 SOPC_PKIProvider* pPki = NULL;
 
@@ -239,7 +239,7 @@ SOPC_SecureChannel_Config* Config_NewSCConfig(const char* reqSecuPolicyUri, OpcU
             if (OpcUa_MessageSecurityMode_None != msgSecurityMode)
             {
                 clientAppCfg->clientKeyCertPair = pCliKeyCertPair;
-                pscConfig->peerAppCert = pCrtSrv;
+                pscConfig->peerAppCert = pCrtHolderSrv;
             }
         }
         else
@@ -286,8 +286,7 @@ void Config_DeleteSCConfig(SOPC_SecureChannel_Config** ppscConfig)
     if (0 == nCfgWithSecuCreated)
     {
         SOPC_KeyCertPair_Delete(&pCliKeyCertPair);
-        SOPC_KeyManager_SerializedCertificate_Delete(pCrtSrv);
-        pCrtSrv = NULL;
+        SOPC_KeyCertPair_Delete(&pCrtHolderSrv);
     }
     if (0 == nCfgCreated)
     {
@@ -306,7 +305,7 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
         {
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(PATH_SERVER_PUBL, &pCrtSrv);
+                status = SOPC_KeyCertPair_CreateCertHolderFromPath(PATH_SERVER_PUBL, &pCrtHolderSrv);
                 if (SOPC_STATUS_OK != status)
                 {
                     printf("# Error: Failed to load server certificate\n");

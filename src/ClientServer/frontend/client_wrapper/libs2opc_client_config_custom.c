@@ -567,13 +567,13 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertificateFromBytes(SOPC
     if (!secConnConfig->finalized && NULL == secConnConfig->scConfig.peerAppCert &&
         !secConnConfig->isServerCertFromPathNeeded)
     {
-        SOPC_SerializedCertificate* srvCert = NULL;
-        status = SOPC_KeyManager_SerializedCertificate_CreateFromDER(serverCertificate, (uint32_t) certificateNbBytes,
-                                                                     &srvCert);
+        SOPC_CertHolder* peerAppCert = NULL;
+        status =
+            SOPC_KeyCertPair_CreateCertHolderFromBytes((uint32_t) certificateNbBytes, serverCertificate, &peerAppCert);
 
         if (SOPC_STATUS_OK == status)
         {
-            secConnConfig->scConfig.peerAppCert = srvCert;
+            secConnConfig->scConfig.peerAppCert = peerAppCert;
         }
     }
     else
@@ -752,7 +752,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
         // Client wrapper not initialized
         return SOPC_STATUS_INVALID_STATE;
     }
-    if (NULL == userCertificate || 0 == certificateNbBytes || NULL == userPrivateKey || 0 == keyNbBytes)
+    if (NULL == secConnConfig || NULL == userCertificate || 0 == certificateNbBytes || NULL == userPrivateKey ||
+        0 == keyNbBytes)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -807,6 +808,37 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
         status = SOPC_STATUS_INVALID_STATE;
     }
 
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertUpdateCb(SOPC_SecureConnection_Config* secConnConfig,
+                                                                    SOPC_KeyCertPairUpdateCb* serverCertUpdateCb,
+                                                                    uintptr_t updateParam)
+{
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        // Client wrapper not initialized
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    if (NULL == secConnConfig || NULL == serverCertUpdateCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (secConnConfig->finalized || NULL != secConnConfig->serverCertUpdateCb)
+    {
+        status = SOPC_STATUS_INVALID_STATE;
+    }
+    else
+    {
+        secConnConfig->serverCertUpdateCb = serverCertUpdateCb;
+        secConnConfig->serverCertUpdateParam = updateParam;
+    }
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 

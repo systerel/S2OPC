@@ -312,6 +312,26 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
                                                                    const unsigned char* userPrivateKey);
 
 /**
+ * \brief Set the callback to be called if the server certificate held by ::SOPC_CertHolder is updated at runtime using
+ *        ::SOPC_KeyCertPair_UpdateFromBytes (manually called by application code).
+ *        The callback content shall implement the consequence of an update on the secure connection at runtime.
+ *
+ * \warning It is mandatory to set this callback to allow possible call to the certificate update function
+ *          ::SOPC_KeyCertPair_UpdateFromBytes.
+ *
+ * \param secConnConfig      The secure connection configuration to set
+ * \param serverCertUpdateCb The callback to be called in case of update of server certificate configuration at runtime
+ * \param updateParam        The parameter to be passed to the callback containing the necessary context
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
+ *         SOPC_STATUS_INVALID_STATE if the configuration is not possible
+ *        (wrapper not initialized, callback already set, connection already finalized).
+ */
+SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetServerCertUpdateCb(SOPC_SecureConnection_Config* secConnConfig,
+                                                                    SOPC_KeyCertPairUpdateCb* serverCertUpdateCb,
+                                                                    uintptr_t updateParam);
+
+/**
  * \brief Gets the configured secure connections array
  *
  * \param[out] nbScConfigs     The number of secure connection configurations

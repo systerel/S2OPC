@@ -64,12 +64,12 @@ typedef struct SOPC_SecureChannel_Config
                                 on ReverseHello reception. */
     const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
 
-    const SOPC_SerializedCertificate* peerAppCert; /*< Peer application certificate:
-                                                       isClientSc => serverCertificate (configuration data)
-                                                       !isClientSc => clientCertificate (runtime data) */
-    const char* reqSecuPolicyUri;                  /**< Requested Security Policy URI */
-    uint32_t requestedLifetime;                    /**< Requested Secure channel lifetime */
-    OpcUa_MessageSecurityMode msgSecurityMode;     /**< Requested Security Mode */
+    SOPC_CertHolder* peerAppCert;              /*< Peer application certificate:
+                                                                    isClientSc => serverCertificate (configuration data)
+                                                                    !isClientSc => clientCertificate (runtime data) */
+    const char* reqSecuPolicyUri;              /**< Requested Security Policy URI */
+    uint32_t requestedLifetime;                /**< Requested Secure channel lifetime */
+    OpcUa_MessageSecurityMode msgSecurityMode; /**< Requested Security Mode */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
                                        connecting phase) */
@@ -227,6 +227,9 @@ typedef struct SOPC_SecureConnection_Config
     bool isServerCertFromPathNeeded; /**< True if the following field shall be treated to configure the client */
     char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
                                (scConfig.peerAppCert shall be instantiated by applicative code) */
+    SOPC_KeyCertPairUpdateCb* serverCertUpdateCb; /**< This callback shall be set in case the server certificate held
+                                                     by scConfig.peerAppCert needs to be updated at runtime.*/
+    uintptr_t serverCertUpdateParam;              /**< The parameter to provide to serverCertUpdateCb callback*/
 
     SOPC_Session_Config sessionConfig; /**< Session activation data */
 

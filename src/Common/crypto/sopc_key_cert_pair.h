@@ -162,4 +162,39 @@ SOPC_ReturnStatus SOPC_KeyCertPair_GetKeyCopy(SOPC_KeyCertPair* keyCertPair, SOP
  */
 void SOPC_KeyCertPair_Delete(SOPC_KeyCertPair** ppKeyCertPair);
 
+/**
+ * \brief An abstract structure used to store a certificate in a thread-safe context.
+ */
+typedef SOPC_KeyCertPair SOPC_CertHolder;
+
+/**
+ * \brief Creates a certificate holder from file path.
+ *
+ * \note ::SOPC_KeyCertPair functions should then be used to access/update the stored certificate
+ *
+ * \param certPath the file path to a X509 certificate in DER format
+ * \param[out] ppCertHolder A pointer to the newly allocated holder filled with certificate holder in case of success
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case a parameter is NULL
+ *         SOPC_STATUS_OUT_OF_MEMORY in case of memory issue
+ *         or SOPC_STATUS_NOK in other cases.
+ */
+SOPC_ReturnStatus SOPC_KeyCertPair_CreateCertHolderFromPath(const char* certPath, SOPC_CertHolder** ppCertHolder);
+
+/**
+ * \brief Creates a certificate holder from bytes arrays.
+ *
+ * \note ::SOPC_KeyCertPair functions should then be used to access/update the stored certificate
+ *
+ * \param certificateNbBytes the number of bytes in \p certificate
+ * \param certificate the bytes array containing one X509 certificate (DER / PEM)
+ * \param[out] ppCertHolder A pointer to the newly allocated holder filled with certificate in case of success
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case a parameter is NULL
+ *         and SOPC_STATUS_OUT_OF_MEMORY in case of memory issue.
+ */
+SOPC_ReturnStatus SOPC_KeyCertPair_CreateCertHolderFromBytes(size_t certificateNbBytes,
+                                                             const unsigned char* certificate,
+                                                             SOPC_CertHolder** ppCertHolder);
+
 #endif /* SOPC_KEY_CERT_PAIR_H */

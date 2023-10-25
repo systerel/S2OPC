@@ -1904,9 +1904,14 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             *errorStatus = OpcUa_BadTcpInternalError;
         }
 
+        if (result && NULL != cert_buffer)
+        {
+            status = SOPC_KeyCertPair_CreateCertHolderFromBytes(cert_buffer->length, cert_buffer->data,
+                                                                &nconfig->peerAppCert);
+            result = (SOPC_STATUS_OK == status);
+        }
         if (result)
         {
-            nconfig->peerAppCert = cert_buffer;
             nconfig->isClientSc = false;
             nconfig->msgSecurityMode = opnReq->SecurityMode;
             nconfig->reqSecuPolicyUri = scConnection->serverAsymmSecuInfo.securityPolicyUri;
@@ -1927,8 +1932,9 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         if (!result)
         {
             SOPC_Free(nconfig);
-            SOPC_Free(cert_buffer);
+            SOPC_KeyCertPair_Delete(&nconfig->peerAppCert);
         }
+        SOPC_Buffer_Delete(cert_buffer);
     }
 
     if (result)
@@ -2535,7 +2541,7 @@ static bool SC_ServerTransition_ScConnectedRenew_To_ScConnected(SOPC_SecureConne
 static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
 {
     SOPC_KeyCertPair* keyCertPair = NULL;
-    const SOPC_Buffer* peer_cert_data = NULL;
+    SOPC_CertHolder* peer_cert_data = NULL;
 
     if (sc->isServerConnection)
     {
@@ -2562,8 +2568,7 @@ static bool sc_init_key_and_certs(SOPC_SecureConnection* sc)
     if (SOPC_KeyCertPair_GetKeyCopy(keyCertPair, &sc->privateKey) != SOPC_STATUS_OK ||
         SOPC_KeyCertPair_GetCertCopy(keyCertPair, cert) != SOPC_STATUS_OK ||
         (peer_cert_data != NULL &&
-         SOPC_KeyManager_Certificate_CreateOrAddFromDER(peer_cert_data->data, peer_cert_data->length,
-                                                        &sc->serverCertificate) != SOPC_STATUS_OK))
+         SOPC_KeyCertPair_GetCertCopy(peer_cert_data, &sc->serverCertificate) != SOPC_STATUS_OK))
     {
         SOPC_KeyManager_AsymmetricKey_Free(sc->privateKey);
         sc->privateKey = NULL;

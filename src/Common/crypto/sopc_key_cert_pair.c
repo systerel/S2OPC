@@ -39,7 +39,7 @@ static SOPC_ReturnStatus SOPC_Internal_KeyCertPair_Create(SOPC_SerializedCertifi
                                                           SOPC_SerializedAsymmetricKey* key,
                                                           SOPC_KeyCertPair** ppKeyCertPair)
 {
-    SOPC_ASSERT(NULL != cert && NULL != key);
+    SOPC_ASSERT(NULL != cert);
     SOPC_ASSERT(NULL != ppKeyCertPair);
     SOPC_KeyCertPair* newPair = SOPC_Calloc(1, sizeof(*newPair));
     if (NULL == newPair)
@@ -112,6 +112,33 @@ SOPC_ReturnStatus SOPC_KeyCertPair_CreateFromPaths(const char* certPath,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_KeyCertPair_CreateCertHolderFromPath(const char* certPath, SOPC_CertHolder** ppCertHolder)
+{
+    SOPC_SerializedCertificate* cert = NULL;
+    if (NULL == certPath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_KeyManager_SerializedCertificate_CreateFromFile(certPath, &cert);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "Failed to load certificate from path %s."
+                               " Please check the certificate is X509 in DER format.",
+                               certPath);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Internal_KeyCertPair_Create(cert, NULL, ppCertHolder);
+    }
+    else
+    {
+        SOPC_KeyManager_SerializedCertificate_Delete(cert);
+    }
+    return status;
+}
+
 static SOPC_ReturnStatus SOPC_Internal_CreateFromBytes(size_t certificateNbBytes,
                                                        const unsigned char* certificate,
                                                        bool noKeySet,
@@ -180,6 +207,26 @@ SOPC_ReturnStatus SOPC_KeyCertPair_CreateFromBytes(size_t certificateNbBytes,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_KeyCertPair_CreateCertHolderFromBytes(size_t certificateNbBytes,
+                                                             const unsigned char* certificate,
+                                                             SOPC_CertHolder** ppCertHolder)
+{
+    if (0 == certificateNbBytes || NULL == certificate)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_SerializedCertificate* cert = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_Internal_CreateFromBytes(certificateNbBytes, certificate, true, 0, NULL, &cert, NULL);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Internal_KeyCertPair_Create(cert, NULL, ppCertHolder);
+    }
+
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_KeyCertPair_SetUpdateCb(SOPC_KeyCertPair* keyCertPair,
                                                SOPC_KeyCertPairUpdateCb* updateCb,
                                                uintptr_t updateParam)
@@ -220,7 +267,12 @@ SOPC_ReturnStatus SOPC_KeyCertPair_UpdateFromBytes(SOPC_KeyCertPair* keyCertPair
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&keyCertPair->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (NULL != keyCertPair->callback)
+    if (NULL == keyCertPair->key && NULL != privateKey)
+    {
+        // SOPC_KeyCertPair is actually a SOPC_CertHolder and cannot be update with a key
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else if (NULL != keyCertPair->callback)
     {
         SOPC_SerializedCertificate* cert = NULL;
         SOPC_SerializedAsymmetricKey* key = NULL;
