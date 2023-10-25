@@ -128,7 +128,7 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
         p_nb_bvi : NAT &
         p_nb_bvi = card(RequestBrowseNext_ContinuationPointId)
     THEN
@@ -150,7 +150,7 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
         ResponseBrowseNext = p_resp_msg &
         p_bvi  : t_BrowseValue_i &
         p_bvi  : t_BrowseValue   &
@@ -168,7 +168,7 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
         ResponseBrowseNext = p_resp_msg &
         p_bvi : t_BrowseValue_i &
         p_bvi : t_BrowseValue   &
@@ -186,7 +186,7 @@ OPERATIONS
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
         p_resp_msg = c_msg_out &
-        a_msg_out_type = e_msg_view_browse_resp &
+        a_msg_out_type = e_msg_view_browse_next_resp &
         ResponseBrowseNext = p_resp_msg &
         p_bvi          : t_BrowseValue_i  &
         p_bvi          : t_BrowseValue    &
