@@ -56,6 +56,7 @@ DEFINITIONS
     d_init_req ==
         d_variables_req
         :(
+            RequestBrowseNext = c_msg_indet &
             RequestBrowseNext_ReleaseContinuationPoints = FALSE &
             RequestBrowseNext_ContinuationPointId = {}
         )
@@ -63,6 +64,7 @@ DEFINITIONS
     d_init_resp ==
         d_variables_resp
         :(
+            ResponseBrowseNext = c_msg_indet &
             ResponseBrowseNext_BrowseStatus        = {} &
             ResponseBrowseNext_ContinuationPoint   = {} &
             ResponseBrowseNext_ResultReferences    = {} &
