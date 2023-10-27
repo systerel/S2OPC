@@ -25,17 +25,17 @@ SEES
 ABSTRACT_VARIABLES
     s_ContinuationPoints,
     id_ContinuationPoint,
-    session_ContinuationPoint
+    ContinuationPoint_session
 
 INVARIANT
     s_ContinuationPoints <: t_ContinuationPoint &
     id_ContinuationPoint : s_ContinuationPoints >-> t_ContinuationPointId & // Each continuation has a unique Id
-    session_ContinuationPoint : s_ContinuationPoints >-> t_session // a continuation point is associated to a session (=> 1 CP / session)
+    ContinuationPoint_session : s_ContinuationPoints >-> t_session // a continuation point is associated to a session (=> 1 CP / session)
 
 INITIALISATION
     s_ContinuationPoints :: {} ||
     id_ContinuationPoint :: {} ||
-    session_ContinuationPoint :: {}
+    ContinuationPoint_session :: {}
 
 OPERATIONS
 
@@ -46,9 +46,9 @@ OPERATIONS
         bres, p_ContinuationPointId
         :(bres : BOOL &
           p_ContinuationPointId : t_ContinuationPointId_i &
-          bres = bool(p_session : t_session & p_session : ran(session_ContinuationPoint)) &
+          bres = bool(p_session : t_session & p_session : ran(ContinuationPoint_session)) &
           (bres = TRUE =>
-              p_ContinuationPointId = id_ContinuationPoint(session_ContinuationPoint~(p_session))) &
+              p_ContinuationPointId = id_ContinuationPoint(ContinuationPoint_session~(p_session))) &
           (bres = FALSE =>
               p_ContinuationPointId = c_ContinuationPointId_indet)
          )
@@ -75,7 +75,7 @@ OPERATIONS
         p_resultMask    : t_BrowseResultMask_i
     THEN
         /* No continuation point shall be defined for given session to create a new one */
-        IF p_session : t_session &  p_session /: ran(session_ContinuationPoint)
+        IF p_session : t_session &  p_session /: ran(ContinuationPoint_session)
         THEN
             /* Memory check */
             IF s_ContinuationPoints /= t_ContinuationPoint &
@@ -89,7 +89,7 @@ OPERATIONS
                     p_ContinuationPointId :(p_ContinuationPointId : t_ContinuationPointId_i & p_ContinuationPointId = l_continuationPointId) ||
                     s_ContinuationPoints := s_ContinuationPoints \/ {l_ContinuationPoint} ||
                     id_ContinuationPoint(l_ContinuationPoint) := l_continuationPointId ||
-                    session_ContinuationPoint := session_ContinuationPoint \/ {l_ContinuationPoint |-> p_session}
+                    ContinuationPoint_session := ContinuationPoint_session \/ {l_ContinuationPoint |-> p_session}
                 END
             ELSE
                 bres := FALSE ||
@@ -126,7 +126,7 @@ OPERATIONS
             p_nodeClassMask : t_BrowseNodeClassMask_i   &
             p_resultMask    : t_BrowseResultMask_i &
 
-            bres = bool(id_ContinuationPoint(session_ContinuationPoint~(p_session)) = p_continuationPointId) &
+            bres = bool(id_ContinuationPoint(ContinuationPoint_session~(p_session)) = p_continuationPointId) &
             /* Clear the continuation point once used to free session continuation point for BrowseNext treatment */
             (bres = TRUE =>
                 p_nodeId : t_NodeId &
@@ -143,18 +143,18 @@ OPERATIONS
         p_session : t_session &
         p_continuationPointId : t_ContinuationPointId_i
     THEN
-        s_ContinuationPoints, id_ContinuationPoint, session_ContinuationPoint, bres
+        s_ContinuationPoints, id_ContinuationPoint, ContinuationPoint_session, bres
         :(
-            bres = bool(id_ContinuationPoint(session_ContinuationPoint$0~(p_session)) = p_continuationPointId) &
+            bres = bool(id_ContinuationPoint(ContinuationPoint_session$0~(p_session)) = p_continuationPointId) &
             /* Release the continuation point  */
             (bres = TRUE =>
-                s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint$0~(p_session)} &
-                id_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| id_ContinuationPoint$0 &
-                session_ContinuationPoint = session_ContinuationPoint$0 |>> {p_session}) &
+                s_ContinuationPoints = s_ContinuationPoints$0 - {ContinuationPoint_session$0~(p_session)} &
+                id_ContinuationPoint = {ContinuationPoint_session$0~(p_session)} <<| id_ContinuationPoint$0 &
+                ContinuationPoint_session = ContinuationPoint_session$0 |>> {p_session}) &
             (bres = FALSE =>
                 s_ContinuationPoints = s_ContinuationPoints$0 &
                 id_ContinuationPoint = id_ContinuationPoint$0 &
-                session_ContinuationPoint = session_ContinuationPoint$0)
+                ContinuationPoint_session = ContinuationPoint_session$0)
         )
     END
     ;
@@ -176,10 +176,10 @@ OPERATIONS
         p_session : t_session
     THEN
         /* De-associate and clear the continuation point associated with session */
-        session_ContinuationPoint := session_ContinuationPoint |>> {p_session} ||
-        IF p_session : ran(session_ContinuationPoint) THEN
-            s_ContinuationPoints := s_ContinuationPoints - {session_ContinuationPoint~(p_session)} ||
-            id_ContinuationPoint := {session_ContinuationPoint~(p_session)} <<| id_ContinuationPoint
+        ContinuationPoint_session := ContinuationPoint_session |>> {p_session} ||
+        IF p_session : ran(ContinuationPoint_session) THEN
+            s_ContinuationPoints := s_ContinuationPoints - {ContinuationPoint_session~(p_session)} ||
+            id_ContinuationPoint := {ContinuationPoint_session~(p_session)} <<| id_ContinuationPoint
         END
     END
     ;
@@ -188,7 +188,7 @@ OPERATIONS
     BEGIN
         s_ContinuationPoints :: {} ||
         id_ContinuationPoint :: {} ||
-        session_ContinuationPoint :: {}
+        ContinuationPoint_session :: {}
     END
 
 END

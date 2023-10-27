@@ -36,14 +36,14 @@ INVARIANT
     session_hasContinuationPoint_i : t_session_i --> BOOL &
     session_ContinuationPoint_i    : t_session_i --> t_ContinuationPoint_i &
 
-    session_ContinuationPoint~ = session_ContinuationPoint_i |>> {c_ContinuationPoint_indet} &
+    ContinuationPoint_session~ = session_ContinuationPoint_i |>> {c_ContinuationPoint_indet} &
     dom(session_ContinuationPoint_i |>> {c_ContinuationPoint_indet}) =
         session_hasContinuationPoint_i~[{TRUE}]
 
 ASSERTIONS
     s_ContinuationPoints = session_ContinuationPoint_i[session_hasContinuationPoint_i~[{TRUE}]] &
-    ran(session_ContinuationPoint) = session_hasContinuationPoint_i~[{TRUE}] &
-    dom(session_ContinuationPoint) = session_ContinuationPoint_i[session_hasContinuationPoint_i~[{TRUE}]]
+    ran(ContinuationPoint_session) = session_hasContinuationPoint_i~[{TRUE}] &
+    dom(ContinuationPoint_session) = session_ContinuationPoint_i[session_hasContinuationPoint_i~[{TRUE}]]
 
 INITIALISATION
     session_hasContinuationPoint_i := t_session_i * {FALSE};
