@@ -987,12 +987,15 @@ static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProf
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
-                                                   mbedtls_x509_crt* mbed_cert,
-                                                   mbedtls_x509_crt_profile* mbed_profile,
-                                                   bool bIsSelfSigned,
-                                                   const char* thumbprint,
-                                                   uint32_t* error)
+static SOPC_ReturnStatus sopc_validate_certificate(
+    const SOPC_PKIProvider* pPKI,
+    mbedtls_x509_crt* mbed_cert,
+    mbedtls_x509_crt_profile* mbed_profile,
+    bool bIsSelfSigned,     /* Certificate is self-signed: added with root CAs for validation */
+    bool bForceTrustedCert, /* Force the certificate to be trusted for the validation:
+                               for sopc_verify_every_certificate only */
+    const char* thumbprint,
+    uint32_t* error)
 {
     SOPC_ASSERT(NULL != pPKI);
     SOPC_ASSERT(NULL != mbed_cert);
@@ -1047,7 +1050,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     }
 
     SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {
-        .trustedCrts = pPKI->pAllTrusted, .allCRLs = pPKI->pAllCrl, .isTrustedInChain = false};
+        .trustedCrts = pPKI->pAllTrusted, .allCRLs = pPKI->pAllCrl, .isTrustedInChain = bForceTrustedCert};
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
     int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert, mbed_ca_root, mbed_crl, mbed_profile, NULL,
@@ -1062,8 +1065,9 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI validation failed with error code %" PRIX32 " for certificate thumbprint %s",
-                               *error, thumbprint);
+                               "> PKI validation failed with error code 0x%" PRIX32 " (mbedtls code 0x%" PRIX32
+                               ") for certificate thumbprint %s",
+                               *error, failure_reasons, thumbprint);
         status = SOPC_STATUS_NOK;
     }
     /* Unlink mbed_cert from root CAs if it was added */
@@ -1228,8 +1232,8 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     if (SOPC_STATUS_OK == status)
     {
         mbedtls_x509_crt* mbedCertToValidate = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
-        status =
-            sopc_validate_certificate(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, thumbprint, &currentError);
+        status = sopc_validate_certificate(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, false, thumbprint,
+                                           &currentError);
         if (SOPC_STATUS_OK != status)
         {
             if (!bErrorFound)
@@ -1348,7 +1352,10 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         }
         if (SOPC_STATUS_OK == status)
         {
-            statusChain = sopc_validate_certificate(pPKI, crt, mbed_profile, bIsSelfSigned, thumbprint, &error);
+            // When verifying all certificates, we shall ignore trusted validation since we also validate untrusted ones
+            const bool forceTrustedCert = true;
+            statusChain =
+                sopc_validate_certificate(pPKI, crt, mbed_profile, bIsSelfSigned, forceTrustedCert, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
                 *bErrorFound = true;
