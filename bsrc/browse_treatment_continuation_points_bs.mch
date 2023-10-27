@@ -120,7 +120,7 @@ OPERATIONS
             s_ContinuationPoints, id_ContinuationPoint
             :(
                 s_ContinuationPoints = s_ContinuationPoints$0 - {p_continuationPoint} &
-                id_ContinuationPoint = id_ContinuationPoint$0 - {p_continuationPoint |-> id_ContinuationPoint$0(p_continuationPoint)}
+                id_ContinuationPoint = {p_continuationPoint} <<| id_ContinuationPoint$0
             )
         END
     END

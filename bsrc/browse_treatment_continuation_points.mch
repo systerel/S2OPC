@@ -46,7 +46,7 @@ OPERATIONS
         bres, p_ContinuationPointId
         :(bres : BOOL &
           p_ContinuationPointId : t_ContinuationPointId_i &
-          bres = bool(p_session : t_session & p_session : dom(session_ContinuationPoint~)) &
+          bres = bool(p_session : t_session & p_session : ran(session_ContinuationPoint)) &
           (bres = TRUE =>
               p_ContinuationPointId = id_ContinuationPoint(session_ContinuationPoint~(p_session))) &
           (bres = FALSE =>
@@ -150,7 +150,7 @@ OPERATIONS
             (bres = TRUE =>
                 s_ContinuationPoints = s_ContinuationPoints$0 - {session_ContinuationPoint$0~(p_session)} &
                 id_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| id_ContinuationPoint$0 &
-                session_ContinuationPoint = {session_ContinuationPoint$0~(p_session)} <<| session_ContinuationPoint$0) &
+                session_ContinuationPoint = session_ContinuationPoint$0 |>> {p_session}) &
             (bres = FALSE =>
                 s_ContinuationPoints = s_ContinuationPoints$0 &
                 id_ContinuationPoint = id_ContinuationPoint$0 &
