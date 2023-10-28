@@ -126,7 +126,9 @@ OPERATIONS
             p_nodeClassMask : t_BrowseNodeClassMask_i   &
             p_resultMask    : t_BrowseResultMask_i &
 
-            bres = bool(id_ContinuationPoint(ContinuationPoint_session~(p_session)) = p_continuationPointId) &
+            bres = bool(p_session : ran(ContinuationPoint_session) &
+                        id_ContinuationPoint(ContinuationPoint_session~(p_session)) =
+                            p_continuationPointId) &
             /* Clear the continuation point once used to free session continuation point for BrowseNext treatment */
             (bres = TRUE =>
                 p_nodeId : t_NodeId &
@@ -145,7 +147,9 @@ OPERATIONS
     THEN
         s_ContinuationPoints, id_ContinuationPoint, ContinuationPoint_session, bres
         :(
-            bres = bool(id_ContinuationPoint(ContinuationPoint_session$0~(p_session)) = p_continuationPointId) &
+            bres = bool(p_session: ran(ContinuationPoint_session$0) &
+                        id_ContinuationPoint(ContinuationPoint_session$0~(p_session)) =
+                            p_continuationPointId) &
             /* Release the continuation point  */
             (bres = TRUE =>
                 s_ContinuationPoints = s_ContinuationPoints$0 - {ContinuationPoint_session$0~(p_session)} &
