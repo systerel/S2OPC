@@ -234,8 +234,7 @@ static SOPC_SecureConnection_Config* Client_GetSecureConnectionConfig(const char
 {
     for (uint32_t i = 0; NULL != g_Client_SecureConnection_Config[i] && i <= g_Client_SecureConnection_Current; i++)
     {
-        SOPC_SecureChannel_Config* scCfg =
-            &g_Client_SecureConnection_Config[g_Client_SecureConnection_Current]->scConfig;
+        SOPC_SecureChannel_Config* scCfg = &g_Client_SecureConnection_Config[i]->scConfig;
         if (0 == strcmp(scCfg->url, endpoint_url))
         {
             SOPC_SerializedCertificate* peerSrvCrt = NULL;
@@ -244,7 +243,7 @@ static SOPC_SecureConnection_Config* Client_GetSecureConnectionConfig(const char
                 0 == memcmp(peerSrvCrt->data, server_cert->data, server_cert->length))
             {
                 SOPC_KeyManager_SerializedCertificate_Delete(peerSrvCrt);
-                return g_Client_SecureConnection_Config[g_Client_SecureConnection_Current];
+                return g_Client_SecureConnection_Config[i];
             }
             SOPC_KeyManager_SerializedCertificate_Delete(peerSrvCrt);
         }
