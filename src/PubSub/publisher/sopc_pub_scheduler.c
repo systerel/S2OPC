@@ -383,14 +383,14 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     }
 
     /* Fill in dataSetMessage context */
-    for (uint8_t i = 0; i < nbDataset; i++)
+    for (uint8_t i = 0; result && i < nbDataset; i++)
     {
         SOPC_DataSetMessageCtx_t dataSetMsgCtx = {.sequenceNumber = 1};
-        SOPC_Array_Append(context->dataSetMessageCtx, dataSetMsgCtx);
+        result = SOPC_Array_Append(context->dataSetMessageCtx, dataSetMsgCtx);
     }
 
     /* Fill in security context */
-    if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
+    if (result && (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode))
     {
         context->security->mode = SOPC_WriterGroup_Get_SecurityMode(group);
         context->security->groupKeys = NULL;
@@ -411,6 +411,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         SOPC_Free(context->security);
         context->security = NULL;
         SOPC_Array_Delete(context->dataSetMessageCtx);
+        context->dataSetMessageCtx = NULL;
     }
     else
     {
