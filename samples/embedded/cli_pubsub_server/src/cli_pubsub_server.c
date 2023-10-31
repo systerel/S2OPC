@@ -386,6 +386,7 @@ static SOPC_DataValue* Server_LocalReadSingleNode(const SOPC_NodeId* pNid)
         // Allocate the result only if the response contains exactly the expected content
         result = SOPC_Malloc(sizeof(*result));
         SOPC_ASSERT(NULL != result);
+        SOPC_DataValue_Initialize(result);
         SOPC_DataValue_Copy(result, &response->Results[0]);
     }
     OpcUa_ReadResponse_Clear(response);
