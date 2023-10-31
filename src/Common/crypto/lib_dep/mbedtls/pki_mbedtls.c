@@ -1015,8 +1015,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(
     mbedtls_x509_crt* mbed_ca_root = (mbedtls_x509_crt*) (NULL != pPKI->pAllRoots ? &pPKI->pAllRoots->crt : NULL);
     mbedtls_x509_crl* mbed_crl = (mbedtls_x509_crl*) (NULL != cert_crl ? &cert_crl->crl : NULL);
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
-    mbedtls_x509_crt* pLinkCert = NULL;
-    pLinkCert = &pPKI->pAllCerts->crt;
+    mbedtls_x509_crt* pLinkCert = (NULL != pPKI->pAllCerts ? &pPKI->pAllCerts->crt : NULL);
 
     /* Add self-signed to validate to root CAs */
     /*
@@ -1196,13 +1195,11 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     pThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
     thumbprint = NULL == pThumbprint ? "NULL" : pThumbprint;
     /* Certificate shall not be a CA or only for self-signed backward compatibility
-       (and pathLen shall be 0 which means crt.max_pathlen is 1 due to mbedtls choice: 1 higher than RFC 5280) */
-    if (!pToValidateCpy->crt.ca_istrue ||
-        (bIsSelfSigned && pProfile->bBackwardInteroperability && 1 == pToValidateCpy->crt.max_pathlen))
-    {
-        // No error detected
-    }
-    else
+   (and pathLen shall be 0 which means crt.max_pathlen is 1 due to mbedtls choice: 1 higher than RFC 5280) */
+    bool certToValidateConstraints =
+        (!pToValidateCpy->crt.ca_istrue ||
+         (bIsSelfSigned && pProfile->bBackwardInteroperability && 1 == pToValidateCpy->crt.max_pathlen));
+    if (!certToValidateConstraints)
     {
         /* CA certificates are always rejected (except for roots if backward interoperability is enabled) */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -1211,6 +1208,7 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
         firstError = SOPC_CertificateValidationError_UseNotAllowed;
         bErrorFound = true;
     }
+
     /* Apply verification on the certificate */
     if (pProfile->bApplyLeafProfile)
     {
@@ -2110,13 +2108,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         {
             status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(&tmp_pTrustedCerts->crt, &tmp_pTrustedCrl->crl,
                                                                       &bTrustedCRL);
-            if (NULL == tmp_pTrustedCerts)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                       "> PKI creation error: After deleting CAs without CRL, the list of trusted "
-                                       "certificates became empty");
-                status = SOPC_STATUS_NOK;
-            }
         }
         else
         {
@@ -2141,17 +2132,15 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given trusted certificates have a "
-                "single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.");
+                "> PKI creation warning: Not all certificate authorities in given trusted certificates have at least "
+                "one certificate revocation list! Certificates issued by these CAs will be refused.");
         }
         if (!bIssuerCRL)
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given issuer certificates have a "
-                "single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.");
+                "> PKI creation warning: Not all certificate authorities in given issuer certificates have at least "
+                "one certificate revocation list! Certificates issued by these CAs will be refused.");
         }
     }
     /* Retrieve the root from list */
