@@ -40,6 +40,7 @@ function usage() {
     echo "  <url>           : the REST API for GITLaB access (See GITLAB variables CI_API_V4_URL and CI_PROJECT_ID)"
 }
 
+MAX_PER_PAGE=50
 VERBOSE=false
 CHECK_OPEN=false
 [[ $1 =~ -(-)?h(elp)? ]] && usage && exit 1
@@ -78,7 +79,7 @@ function URL_REQUEST() {
 function JSON_EXTRACT() {
     local SRC="$1"
     shift
-    echo "${SRC}" |  python -c "import json,sys;obj=json.load(sys.stdin);print ($*)"
+    echo "${SRC}" |  python -c "import json,sys;obj=json.load(sys.stdin);print ($*)" 2> /dev/null
 }
 
 HAS_ERRORS=false
@@ -124,7 +125,7 @@ do
         NAME="Ticket #${TICKET_ID} (SHA ${COMMIT_ID})"
         ${VERBOSE} && echo "------------"
         # Skip tickets that have already been checked
-        grep -q "#${TICKET_ID}" "${COMMITFILE}" && continue
+        grep -q "#${TICKET_ID}" "${COMMITFILE}" 2>/dev/null && continue
         echo "Processing ${NAME}..."
         echo "#${TICKET_ID}" >> "${COMMITFILE}"
         
@@ -139,8 +140,10 @@ do
         fi
          
         # Check milestone   
+        ${VERBOSE} && echo "Check milestone '${CURRENT_MILESTONE}' in ${NAME}"
         TICKET_MILESTONE=$(JSON_EXTRACT "${ISSUE}" '(obj[u"milestone"][u"title"] if obj[u"milestone"] else "None")')
-        if [[ "${TICKET_MILESTONE}" != "${CURRENT_MILESTONE}" ]];then
+        if [[ "${TICKET_MILESTONE}" != "${CURRENT_MILESTONE}" ]]
+        then
             echo "[Error] ${NAME} has invalid milestone ('${TICKET_MILESTONE}' found instead of '${CURRENT_MILESTONE}')" |tee -a "${ERRFILE}"
         else
             ${VERBOSE} && echo "${NAME} has a valid milestone (${TICKET_MILESTONE})"
@@ -148,7 +151,8 @@ do
         
         if ${CHECK_OPEN} ; then
             STATE=$(JSON_EXTRACT "${ISSUE}" 'obj[u"state"]')
-            if [[ ${STATE} != "opened" ]]; then
+            if [[ ${STATE} != "opened" ]]
+            then
                 echo "[Error] ${NAME} has invalid status ('${STATE}' found instead of 'opened')" |tee -a "${ERRFILE}"
             else
                 ${VERBOSE} && echo "${NAME} has valid status '${STATE}'"
@@ -156,15 +160,31 @@ do
         fi
 
         # Retreive list of MR
-        URL_REQUEST "issues/${TICKET_ID}/related_merge_requests" MRS
-        MR_RID=$(JSON_EXTRACT "${MRS}" '["!%s"%o["iid"] for o in obj]')
-        MR_RID_OK=$(JSON_EXTRACT "${MRS}" "${MR_ID}"' in [o["iid"] for o in obj]')
+        ${VERBOSE} && echo "Check that ${NAME} referes to MR !${MR_ID}"
+        page=1
+        MR_RID_OK="False"
+        ALL_MR=""
+        while [[ ${MR_RID_OK} != "True" ]] && [[ $page -gt 0 ]] ; do
+            URL_REQUEST "issues/${TICKET_ID}/related_merge_requests?per_page=${MAX_PER_PAGE}&page=${page}" MRS
+            MR_RID=$(JSON_EXTRACT "${MRS}" '["!%s"%o["iid"] for o in obj]')
+            MR_RID_OK=$(JSON_EXTRACT "${MRS}" "${MR_ID}"' in [o["iid"] for o in obj]')
+            ALL_MR=${ALL_MR}' '$(JSON_EXTRACT "${MRS}" '" ".join(["!%s"%o["iid"] for o in obj])')
+            HAS_NEXT=$(JSON_EXTRACT "${MRS}" 'len(obj) >= '"${MAX_PER_PAGE}")
+            if [[ ${MR_RID_OK} != "True" ]] && [[ $HAS_NEXT == "True" ]]
+            then
+                page=$(($page+1))
+                ${VERBOSE} && echo "Issue #${TICKET_ID} has too many related MR. Fetching page $page"
+            else
+                page=0
+            fi
+        done
+        
                     
         # Check MR validity
         if [[ ${MR_RID_OK} != "True" ]] ; then
-            echo "[Error] Expected MR !${MR_ID} not found in related MR of ${NAME} (found ${MR_RID})" |tee -a "${ERRFILE}"
+            echo "[Error] Expected MR !${MR_ID} not found in related MR of ${NAME} (found ${ALL_MR})" |tee -a "${ERRFILE}"
         else
-            ${VERBOSE} && echo "${NAME} has valid MR '${MR_RID}'"
+            ${VERBOSE} && echo "${NAME} contains reference to MR !${MR_ID}"
         fi
     else
         echo "[Error] Commit header has invalid format: '${line}'"
