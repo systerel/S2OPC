@@ -2220,12 +2220,16 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
 
                         uintptr_t addedEvent =
                             SOPC_SLinkedList_Append(intEventsLIFO, requestIdOrHandle, (uintptr_t) intEvent);
-                        result = (addedEvent == (uintptr_t) intEvent);
-                        intEvent = NULL;
-                    }
-                    if (!result)
-                    {
-                        errorStatus = OpcUa_BadOutOfMemory;
+                        if (addedEvent == (uintptr_t) intEvent)
+                        {
+                            intEvent = NULL;
+                        }
+                        else
+                        {
+                            SOPC_Free(intEvent);
+                            errorStatus = OpcUa_BadOutOfMemory;
+                            result = false;
+                        }
                     }
                     /* currentMessageInputBuffer is lent to the secure channel, which will free it */
                     chunkCtx->currentMessageInputBuffer = NULL;
