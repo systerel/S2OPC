@@ -310,9 +310,9 @@ OPERATIONS
 
     continuation_points_UNINITIALISATION =
     BEGIN
-        s_ContinuationPoints :: {} ||
-        ContinuationPoint_session :: {} ||
-        id_ContinuationPoint :: {}
+        s_ContinuationPoints := {} ||
+        ContinuationPoint_session := {} ||
+        id_ContinuationPoint := {}
     END
     ;
 

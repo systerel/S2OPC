@@ -32,8 +32,10 @@ INVARIANT
     id_ContinuationPoint : s_ContinuationPoints >-> t_ContinuationPointId
 
 INITIALISATION
-    s_ContinuationPoints :: {} ||
-    id_ContinuationPoint :: {}
+    /* should really be ":=" substitutions, but would raise a b2c translator bug */
+    s_ContinuationPoints, id_ContinuationPoint:(
+        s_ContinuationPoints = {} &
+        id_ContinuationPoint = {})
 
 OPERATIONS
     bres, p_ContinuationPoint <-- create_continuation_point_bs (p_nextIndex, p_maxTargetRef, p_browseView,

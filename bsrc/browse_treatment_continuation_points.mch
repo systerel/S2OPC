@@ -33,9 +33,9 @@ INVARIANT
     ContinuationPoint_session : s_ContinuationPoints >-> t_session // a continuation point is associated to a session (=> 1 CP / session)
 
 INITIALISATION
-    s_ContinuationPoints :: {} ||
-    id_ContinuationPoint :: {} ||
-    ContinuationPoint_session :: {}
+    s_ContinuationPoints := {} ||
+    id_ContinuationPoint := {} ||
+    ContinuationPoint_session := {}
 
 OPERATIONS
 
@@ -190,9 +190,9 @@ OPERATIONS
 
     continuation_points_UNINITIALISATION =
     BEGIN
-        s_ContinuationPoints :: {} ||
-        id_ContinuationPoint :: {} ||
-        ContinuationPoint_session :: {}
+        s_ContinuationPoints := {} ||
+        id_ContinuationPoint := {} ||
+        ContinuationPoint_session := {}
     END
 
 END
