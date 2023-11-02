@@ -1929,10 +1929,10 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
             scConnection->clientCertificate = scConnection->serverAsymmSecuInfo.clientCertificate;
         }
 
-        if (!result)
+        if (!result && NULL != nconfig)
         {
-            SOPC_Free(nconfig);
             SOPC_KeyCertPair_Delete(&nconfig->peerAppCert);
+            SOPC_Free(nconfig);
         }
         SOPC_Buffer_Delete(cert_buffer);
     }

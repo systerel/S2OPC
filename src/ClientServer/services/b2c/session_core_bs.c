@@ -891,16 +891,16 @@ void session_core_bs__client_activate_session_req_do_crypto(
     {
         /* Allocated the signature */
         pSign = SOPC_Malloc(sizeof(OpcUa_SignatureData));
-        if (NULL == pSign)
-        {
-            return;
-        }
+        status = (NULL != pSign) ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
         /* Initialise the signature */
         OpcUa_SignatureData_Initialize(pSign);
 
         /* Use the client private key to sign the server certificate + server nonce */
         SOPC_AsymmetricKey* privKey = NULL;
-        status = SOPC_KeyCertPair_GetKeyCopy(pSCCfg->clientConfigPtr->clientKeyCertPair, &privKey);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_KeyCertPair_GetKeyCopy(pSCCfg->clientConfigPtr->clientKeyCertPair, &privKey);
+        }
         if (SOPC_STATUS_OK == status)
         {
             status = session_core_asymetric_sign(pSign, pSCCfg->reqSecuPolicyUri, privKey, serverNonce, serverCert,
@@ -912,8 +912,8 @@ void session_core_bs__client_activate_session_req_do_crypto(
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Services: session=%" PRIu32
-                                   " client signature (server certificate + server nonce) failed: %s",
-                                   session_core_bs__session, errorReason);
+                                   " client signature (server certificate + server nonce) failed: status=%d reason=%s",
+                                   session_core_bs__session, status, errorReason);
         }
         else
         {
@@ -1393,6 +1393,7 @@ void session_core_bs__server_activate_session_check_crypto(
     SOPC_CertificateList* pCrtCli = NULL;
     SOPC_AsymmetricKey* pKeyCrtCli = NULL;
     SOPC_Endpoint_Config* epConfig = NULL;
+    SOPC_SerializedCertificate* serverCert = NULL;
 
     /* Default answer */
     *session_core_bs__valid = false;
@@ -1442,12 +1443,11 @@ void session_core_bs__server_activate_session_check_crypto(
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
+        status = SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(pCrtCli, &pKeyCrtCli);
     }
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_SerializedCertificate* serverCert = NULL;
         status = SOPC_KeyCertPair_GetSerializedCertCopy(epConfig->serverConfigPtr->serverKeyCertPair, &serverCert);
         if (SOPC_STATUS_OK == status)
         {
@@ -1464,12 +1464,11 @@ void session_core_bs__server_activate_session_check_crypto(
         {
             *session_core_bs__valid = true;
         }
-
-        /* Clear */
-        SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
-        SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
-        SOPC_KeyManager_Certificate_Free(pCrtCli);
     }
+    /* Clear */
+    SOPC_KeyManager_SerializedCertificate_Delete(serverCert);
+    SOPC_KeyManager_AsymmetricKey_Free(pKeyCrtCli);
+    SOPC_KeyManager_Certificate_Free(pCrtCli);
 }
 
 void session_core_bs__client_activate_session_resp_check(
