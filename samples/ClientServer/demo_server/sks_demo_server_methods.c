@@ -89,7 +89,7 @@ SOPC_StatusCode SOPC_Method_Func_PublishSubscribe_GetSecurityKeys(const SOPC_Cal
     }
 
     /* Check Security Group argument */
-    if (SOPC_String_Id != inputArgs[1].BuiltInTypeId && SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType &&
+    if (SOPC_String_Id != inputArgs[0].BuiltInTypeId || SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType ||
         0 != strcmp(SKS_SECURITY_GROUPID, SOPC_String_GetRawCString(&inputArgs[0].Value.String)))
     {
         return OpcUa_BadInvalidArgument;
