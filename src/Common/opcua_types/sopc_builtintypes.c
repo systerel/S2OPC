@@ -1184,18 +1184,26 @@ char* SOPC_String_GetCString(const SOPC_String* string)
 
 const char* SOPC_String_GetRawCString(const SOPC_String* string)
 {
-    char* cString = NULL;
-    if (string != NULL && string->Length > 0)
+    const char* cString = NULL;
+    if (string == NULL)
+    {
+        return NULL;
+    }
+    if (string->Length > 0)
     {
         if (CHAR_BIT == 8)
         {
-            cString = (char*) string->Data;
+            cString = (const char*) string->Data;
             SOPC_ASSERT(string->Data[string->Length] == '\0');
         }
         else
         {
             SOPC_ASSERT(false);
         }
+    }
+    else
+    {
+        cString = "\0";
     }
     return cString;
 }

@@ -688,8 +688,9 @@ char* SOPC_String_GetCString(const SOPC_String* string);
  *  - The returned value shall not be freed.
  *
  * \brief Retrieve the raw C-String of a SOPC_String pointer.
- * \param string The SOPC_String pointer whose content will be extracted.
- * \return A valid C-String otherwise it returns NULL pointer if allocation failed.
+ * \param string The SOPC_String pointer which content will be extracted.
+ * \return A valid C-String. Returns NULL if \a string was NULL.
+ * \note The presence of a terminated NULL char is ensured by all ::SOPC_String constructors.
  */
 const char* SOPC_String_GetRawCString(const SOPC_String* string);
 
