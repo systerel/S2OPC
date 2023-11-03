@@ -106,4 +106,16 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
  */
 const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
 
+/**
+ *  \brief (CLIENT SIDE ONLY)  Returns true if the client shall listen all interfaces for the given reverse endpoint
+ *                             configuration index, false if it shall listen the resolved interface only.
+ *
+ *  \param reverseEpCfgIdx  The secure channel configuration index requested
+ *
+ *  \return true if the client shall listen all interfaces for the given reverse endpoint,
+ *          false if it shall listen only the resolved interface only and in case of error
+ *          (index is invalid or toolkit is not initialized).
+ */
+bool SOPC_ToolkitClient_IsReverseEndpointListeningAllItfs(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx);
+
 #endif /* SOPC_TOOLKIT_CONFIG_INTERNAL_H_ */

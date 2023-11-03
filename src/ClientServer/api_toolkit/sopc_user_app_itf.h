@@ -132,12 +132,28 @@ typedef struct SOPC_Server_ClientToConnect
 } SOPC_Server_ClientToConnect;
 
 /**
+ * \brief Server endpoint connection listening mode:
+ *        - all interfaces,
+ *        - only endpoint address resolved interface,
+ *        - no listening (for reverse connection only)
+ */
+typedef enum
+{
+    SOPC_Endpoint_ListenResolvedInterfaceOnly = 0, /**< The server endpoint listen only on the endpoint address resolved
+                                                  interface */
+    SOPC_Endpoint_ListenAllInterfaces,             /**< The server endpoint listen on all network interfaces */
+    SOPC_Endpoint_NoListening /**< The server endpoint does not listen: reverse connection to client only */
+} SOPC_Endpoint_ListenModeEnum;
+
+/**
  * \brief Server configuration of a Endpoint connection listener
  */
 typedef struct SOPC_Endpoint_Config
 {
-    SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
-    char* endpointURL;                   /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Server_Config* serverConfigPtr;        /**< Pointer to the server configuration containing this endpoint */
+    char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Endpoint_ListenModeEnum listeningMode; /**< Listening mode indicating on the defined endpoint
+                                                     (single interface, all interfaces, no listening)  */
     bool hasDiscoveryEndpoint; /**< Implicit discovery endpoint with same endpoint URL is added if necessary when set */
     uint8_t nbSecuConfigs;     /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
@@ -155,7 +171,6 @@ typedef struct SOPC_Endpoint_Config
         authorizationManager; /**< The user authorization manager: user access level evaluation */
 
     /* Configure reverse connection mechanism */
-    bool noListening;            /**< If Flag is set, the server does not listen connection initiated by clients */
     uint16_t nbClientsToConnect; /**< Number of clients to connect using reverse connection mechanism */
     SOPC_Server_ClientToConnect
         clientsToConnect[SOPC_MAX_REVERSE_CLIENT_CONNECTIONS]; /**< Array of configuration for reverse connection
@@ -292,6 +307,9 @@ struct SOPC_Client_Config
     uint16_t nbReverseEndpointURLs;
     char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
                                                                              per secure connection config. */
+    bool reverseEndpointListenAllItfs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint listening mode
+                                                                                     (resolved interface only or all
+                                                                                     network interfaces) */
 };
 
 /**

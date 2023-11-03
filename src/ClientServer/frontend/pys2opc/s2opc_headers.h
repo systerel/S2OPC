@@ -170,6 +170,8 @@ typedef SOPC_Buffer SOPC_SerializedCertificate;
 
 /* sopc_key_cert_pair.h */
 typedef struct SOPC_KeyCertPair SOPC_KeyCertPair;
+typedef SOPC_KeyCertPair SOPC_CertHolder;
+typedef void SOPC_KeyCertPairUpdateCb(uintptr_t updateParam);
 SOPC_ReturnStatus SOPC_KeyCertPair_CreateFromPaths(const char* certPath,
                                                    const char* privateKeyPath,
                                                    char* keyPassword,

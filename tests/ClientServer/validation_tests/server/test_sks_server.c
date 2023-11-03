@@ -381,6 +381,11 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
         ep = SOPC_HelperConfigServer_CreateEndpoint(DEFAULT_ENDPOINT_URL, true);
         status = NULL == ep ? SOPC_STATUS_OUT_OF_MEMORY : status;
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        bool res = SOPC_EndpointConfig_SetListeningMode(ep, SOPC_Endpoint_ListenAllInterfaces);
+        status = res ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
 
     /*
      * Define the certificates, security policies, security modes and user token policies supported by endpoint

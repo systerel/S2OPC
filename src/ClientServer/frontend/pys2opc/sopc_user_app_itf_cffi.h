@@ -28,6 +28,7 @@
 //#include "sopc_crypto_profiles.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_pki_decl.h"
+//#include "sopc_key_cert_pair.h"
 //#include "sopc_key_manager.h"
 //#include "sopc_types.h"
 //#include "sopc_user_manager.h"
@@ -57,12 +58,12 @@ typedef struct SOPC_SecureChannel_Config
                                 on ReverseHello reception. */
     const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
 
-    const SOPC_SerializedCertificate* peerAppCert; /*< Peer application certificate:
+    SOPC_CertHolder* peerAppCert;              /*< Peer application certificate:
                                                        isClientSc => serverCertificate (configuration data)
                                                        !isClientSc => clientCertificate (runtime data) */
-    const char* reqSecuPolicyUri;                  /**< Requested Security Policy URI */
-    uint32_t requestedLifetime;                    /**< Requested Secure channel lifetime */
-    OpcUa_MessageSecurityMode msgSecurityMode;     /**< Requested Security Mode */
+    const char* reqSecuPolicyUri;              /**< Requested Security Policy URI */
+    uint32_t requestedLifetime;                /**< Requested Secure channel lifetime */
+    OpcUa_MessageSecurityMode msgSecurityMode; /**< Requested Security Mode */
 
     uintptr_t internalProtocolData; /**< Internal use only: used to store internal protocol data (set only during
                                        connecting phase) */
@@ -135,12 +136,28 @@ typedef struct SOPC_Server_ClientToConnect
 } SOPC_Server_ClientToConnect;
 
 /**
+ * \brief Server endpoint connection listening mode:
+ *        - all interfaces,
+ *        - only endpoint address resolved interface,
+ *        - no listening (for reverse connection only)
+ */
+typedef enum
+{
+    SOPC_Endpoint_ListenResolvedInterfaceOnly = 0, /**< The server endpoint listen only on the endpoint address resolved
+                                                  interface */
+    SOPC_Endpoint_ListenAllInterfaces,             /**< The server endpoint listen on all network interfaces */
+    SOPC_Endpoint_NoListening /**< The server endpoint does not listen: reverse connection to client only */
+} SOPC_Endpoint_ListenModeEnum;
+
+/**
  * \brief Server configuration of a Endpoint connection listener
  */
 typedef struct SOPC_Endpoint_Config
 {
-    SOPC_Server_Config* serverConfigPtr; /**< Pointer to the server configuration containing this endpoint */
-    char* endpointURL;                   /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Server_Config* serverConfigPtr;        /**< Pointer to the server configuration containing this endpoint */
+    char* endpointURL;                          /**< Endpoint URL: opc.tcp://IP-HOSTNAME:PORT(/NAME)*/
+    SOPC_Endpoint_ListenModeEnum listeningMode; /**< Listening mode indicating on the defined endpoint
+                                                     (single interface, all interfaces, no listening)  */
     bool hasDiscoveryEndpoint; /**< Implicit discovery endpoint with same endpoint URL is added if necessary when set */
     uint8_t nbSecuConfigs;     /**< Number of security configuration (<= SOPC_MAX_SECU_POLICIES_CFG) */
     SOPC_SecurityPolicy
@@ -216,11 +233,19 @@ typedef struct SOPC_SecureConnection_Config
 
     bool isServerCertFromPathNeeded; /**< True if the following field shall be treated to configure the client */
     char* serverCertPath; /**< Path to the server certificate if isServerCertFromPathNeeded true, NULL otherwise
-                               (scConfig.crt_srv shall be instantiated by applicative code) */
+                               (scConfig.peerAppCert shall be instantiated by applicative code) */
+    SOPC_KeyCertPairUpdateCb* serverCertUpdateCb; /**< This callback shall be set in case the server certificate held
+                                                     by scConfig.peerAppCert needs to be updated at runtime.*/
+    uintptr_t serverCertUpdateParam;              /**< The parameter to provide to serverCertUpdateCb callback*/
 
     SOPC_Session_Config sessionConfig;
 
-    uint16_t secureConnectionIdx; /**< Index into ::SOPC_Client_Config secureConnections array */
+    uint16_t secureConnectionIdx;      /**< Index into ::SOPC_Client_Config secureConnections array */
+    uint32_t reverseEndpointConfigIdx; /**< (Optional) Index of the Reverse Endpoint configuration to listen for server
+                                          connection returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig(). If not
+                                          applicable it shall be 0. */
+    uint32_t secureChannelConfigIdx; /**< Index of the Secure Channel configuration for endpoint connection returned by
+                                        ::SOPC_ToolkitClient_AddSecureChannelConfig(). It shall not be 0. */
     bool finalized; /** < Set when the configuration of the secure connection is frozen and configuration from paths
                           has been done. */
 } SOPC_SecureConnection_Config;
@@ -268,6 +293,9 @@ struct SOPC_Client_Config
     uint16_t nbReverseEndpointURLs;
     char* reverseEndpointURLs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint URLs array. Maximum 1
                                                                              per secure connection config. */
+    bool reverseEndpointListenAllItfs[SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG]; /**< Reverse endpoint listening mode
+                                                                                     (resolved interface only or all
+                                                                                     network interfaces) */
 };
 
 /**

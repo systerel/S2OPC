@@ -269,17 +269,20 @@ bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
                                             const char* clientAppUri,
                                             const char* clientEndpointUrl);
 /**
- * \brief Configure the endpoint to not listen to incoming connections
- *        in case only reverse connections shall be possible.
- *        It will fail if no reverse connection is configured.
+ * \brief Configure the endpoint listening mode:
+ *        - ::SOPC_Endpoint_ListenResolvedInterfaceOnly (default): listen only on the resolved interface from address,
+ *        - ::SOPC_Endpoint_ListenAllInterfaces : listen on all network interfaces,
+ *        - ::SOPC_Endpoint_NoListening : do not listen in case only reverse connections to clients shall be possible
+ *                                        (it will fail if no reverse connection is configured).
  *
  * \param destEndpoint  Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
+ * \param mode          The endpoint listening mode to set
  *
- * \return True if the server endpoint is correctly configured to not listen for incoming connections from client.
- *         False in case no reverse connection configuration was defined with ::SOPC_EndpointConfig_AddClientToConnect
- *         or invalid parameter is provided.
+ * \return True if the server endpoint is correctly configured.
+ *         False in case ::SOPC_Endpoint_NoListening mode was set without reverse connection configuration defined with
+ *         ::SOPC_EndpointConfig_AddClientToConnect or invalid parameter is provided.
  */
-bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
+bool SOPC_EndpointConfig_SetListeningMode(SOPC_Endpoint_Config* destEndpoint, SOPC_Endpoint_ListenModeEnum mode);
 
 /* Address space configuration without XML */
 

@@ -221,17 +221,26 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
 
     // Manage reverseEndpointURL
     attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "reverseEndpointURL", attrs);
-
+    const char* listen_all_itfs_attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "listenAllItfs", attrs);
+    bool listenAllItfs = (NULL == listen_all_itfs_attr_val ? false : (0 == strcmp(listen_all_itfs_attr_val, "true")));
     if (attr_val != NULL)
     {
         bool found = false;
+        uint16_t found_i = 0;
         for (uint16_t i = 0; !found && i < ctx->nbReverseUrls; i++)
         {
             found = (0 == strcmp(attr_val, ctx->clientConfigPtr->reverseEndpointURLs[i]));
+            found_i = i;
         }
-        if (!found)
+        if (found)
+        {
+            // Keep more restrictive mode for the endpoint
+            ctx->clientConfigPtr->reverseEndpointListenAllItfs[found_i] &= listenAllItfs;
+        }
+        else
         {
             ctx->clientConfigPtr->reverseEndpointURLs[ctx->nbReverseUrls] = SOPC_strdup(attr_val);
+            ctx->clientConfigPtr->reverseEndpointListenAllItfs[ctx->nbReverseUrls] = listenAllItfs;
             if (NULL == ctx->clientConfigPtr->reverseEndpointURLs[ctx->nbReverseUrls])
             {
                 LOG_MEMORY_ALLOCATION_FAILURE;

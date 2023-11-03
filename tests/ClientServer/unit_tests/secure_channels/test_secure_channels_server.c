@@ -205,6 +205,7 @@ int main(int argc, char* argv[])
     {
         epConfig.endpointURL = endpointUrl;
         epConfig.hasDiscoveryEndpoint = true;
+        epConfig.listeningMode = SOPC_Endpoint_ListenAllInterfaces;
         epConfig.nbSecuConfigs = NB_SECU_POLICY_CONFIGS;
         epConfig.serverConfigPtr->serverKeyCertPair = serverKeyCertPair;
         epConfig.serverConfigPtr->pki = pki;

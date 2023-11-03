@@ -140,13 +140,16 @@ typedef uint32_t SOPC_ReverseEndpointConfigIdx;
  *  (::SOPC_Toolkit_Initialize required).
  *
  *  \param reverseEndpointURL  The client endpointURL for reverse connections from server(s)
+ *  \param listenAllItfs       Flag indicating if the endpoint shall listen to all network interfaces (true)
+ *                             or if it listens only on the resolved interface
  *
- *  Note1: it is forbidden to have 2 configurations with same endpointURL
+ *  Note: it is forbidden to have 2 configurations with same endpointURL
  *
  *  \return reverse endpoint configuration index configuration succeeded,
  *  0 if toolkit is not initialized or parameters provided are incorrect
  */
-SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL);
+SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL,
+                                                                          bool listenAllItfs);
 
 /**
  * \brief Get Toolkit build information

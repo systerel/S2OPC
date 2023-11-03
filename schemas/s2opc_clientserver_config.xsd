@@ -32,6 +32,13 @@
       <xs:enumeration value="certificate"/>
     </xs:restriction>
   </xs:simpleType>
+  <xs:simpleType name="ListeningMode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="EndpointInterface"/>
+      <xs:enumeration value="AllInterfaces"/>
+      <xs:enumeration value="NoListening"/>
+    </xs:restriction>
+  </xs:simpleType>
   <xs:complexType name="NamespaceType">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -216,9 +223,12 @@
         <xs:documentation>By default each endpoint has an implicit discovery endpoint if security mode None is not available. Set to 'false' to deactivate.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:boolean" name="enableListening" use="optional" default="true">
+    <xs:attribute type="ListeningMode" name = "listeningMode" use="optional" default="EndpointInterface">
       <xs:annotation>
-        <xs:documentation>This attribute might be set to false to avoid listening for client connections only if at least one ReverseConnection is defined.</xs:documentation>
+        <xs:documentation>This attribute might be set to "AllInterfaces" to listen on all available network interfaces,
+                          or "NoListening" to avoid listening for client connections only if at least one ReverseConnection is defined.
+                          The default value is "EndpointInterface" which only listen on the resolved interface for the endpoint address.
+        </xs:documentation>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -288,6 +298,14 @@
     <xs:attribute type="xs:anyURI" name="reverseEndpointURL">
       <xs:annotation>
         <xs:documentation>When the attribute is set, the connection uses reverse mechanism.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:boolean" name = "endpointListenAllItfs" use="optional" default="false">
+      <xs:annotation>
+        <xs:documentation>It might be set only if a reverseEndpointURL is defined.
+                          By default the endpoint only listens the interface resolved for the endpoint address (false),
+                          set attribute to true to listen connection to any network interface available.
+        </xs:documentation>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute type="xs:anyURI" name="serverURI">

@@ -308,7 +308,7 @@ int main(void)
     /* Create a Reverse Endpoint to create a Secure Channel through a connection initiated by server */
     if (SOPC_STATUS_OK == status)
     {
-        reverse_ep_config_idx = SOPC_ToolkitClient_AddReverseEndpointConfig(REVERSE_ENDPOINT_URL);
+        reverse_ep_config_idx = SOPC_ToolkitClient_AddReverseEndpointConfig(REVERSE_ENDPOINT_URL, true);
         if (0 != reverse_ep_config_idx)
         {
             result = true;

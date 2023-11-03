@@ -382,7 +382,7 @@ static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
     SOPC_Endpoint_Config* epConfig = &sConfig->endpoints[0];
     ck_assert_ptr_eq(epConfig->serverConfigPtr, sConfig);
     ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME", epConfig->endpointURL));
-    ck_assert(epConfig->noListening);
+    ck_assert_int_eq(SOPC_Endpoint_NoListening, epConfig->listeningMode);
 
     /* Check reverse connections */
     ck_assert_uint_eq(2, epConfig->nbClientsToConnect);
@@ -521,6 +521,7 @@ static void check_parsed_s2opc_server_config(SOPC_S2OPC_Config* s2opcConfig)
     epConfig = &sConfig->endpoints[1];
     ck_assert_ptr_eq(epConfig->serverConfigPtr, sConfig);
     ck_assert_int_eq(0, strcmp("opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2", epConfig->endpointURL));
+    ck_assert_int_eq(SOPC_Endpoint_ListenResolvedInterfaceOnly, epConfig->listeningMode);
 
     /* Check security policies */
     ck_assert_uint_eq(2, epConfig->nbSecuConfigs);
@@ -684,6 +685,8 @@ static void check_parsed_s2opc_client_config(SOPC_S2OPC_Config* s2opcConfig)
     /* global reverse endpoints for all connections */
     ck_assert_uint_eq(1, cConfig->nbReverseEndpointURLs);
     ck_assert_int_eq(0, strcmp("opc.tcp://MY_CLIENT_HOST:4844", cConfig->reverseEndpointURLs[0]));
+    ck_assert_int_eq(false,
+                     cConfig->reverseEndpointListenAllItfs[0]); // one is true and other false, more restrictive kept
 }
 #endif
 

@@ -391,7 +391,7 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
             "2", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
         SOPC_SecureConnection_Config* secureConnConfig3 = SOPC_ClientConfigHelper_CreateSecureConnection(
             "3", DEFAULT_ENDPOINT_URL, MSG_SECURITY_MODE, REQ_SECURITY_POLICY);
-        status = SOPC_SecureConnectionConfig_SetReverseConnection(secureConnConfig3, REVERSE_ENDPOINT_URL);
+        status = SOPC_SecureConnectionConfig_SetReverseConnection(secureConnConfig3, REVERSE_ENDPOINT_URL, true);
 
         if (secureConnConfig1 == NULL || secureConnConfig2 == NULL || secureConnConfig3 == NULL ||
             SOPC_STATUS_OK != status)

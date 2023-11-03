@@ -116,10 +116,11 @@ SOPC_ReturnStatus Server_CreateServerConfig(void)
      */
 
     SOPC_Endpoint_Config* ep = SOPC_ServerConfigHelper_CreateEndpoint(ENDPOINT_URL, true);
+    bool res = SOPC_EndpointConfig_SetListeningMode(ep, SOPC_Endpoint_ListenAllInterfaces);
     SOPC_SecurityPolicy* spNone = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_None);
     SOPC_SecurityPolicy* spSecu = SOPC_EndpointConfig_AddSecurityConfig(ep, SOPC_SecurityPolicy_Basic256Sha256);
 
-    if (NULL == ep || NULL == spNone || NULL == spSecu)
+    if (!res || NULL == ep || NULL == spNone || NULL == spSecu)
     {
         SOPC_Free(ep);
         return SOPC_STATUS_OUT_OF_MEMORY;

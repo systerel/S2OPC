@@ -25,7 +25,7 @@
     </ApplicationDescription>
     <Endpoints>
       <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
-      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME" enableListening="false">
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME" listeningMode="NoListening">
         <ReverseConnections>
           <ReverseConnection clientUrl="opc.tcp://localhost:4842"/>
           <ReverseConnection clientAppUri="urn:S2OPC:client" clientUrl="opc.tcp://localhost:4843"/>
@@ -136,7 +136,7 @@
         <SecurityMode mode="SignAndEncrypt"/>
         <UserPolicy policyId="user" tokenType="username"/>
       </Connection>
-      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="ThirdConnection">
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" endpointListenAllItfs="true" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="ThirdConnection">
         <ServerCertificate path="server_cert.der"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
         <SecurityMode mode="Sign"/>

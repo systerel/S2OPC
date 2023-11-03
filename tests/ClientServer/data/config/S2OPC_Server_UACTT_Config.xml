@@ -21,7 +21,7 @@
       <ApplicationType type="Server"/>
     </ApplicationDescription>
     <Endpoints>
-      <Endpoint url="opc.tcp://localhost:4841" enableListening="true">
+      <Endpoint url="opc.tcp://localhost:4841" listeningMode="AllInterfaces">
         <ReverseConnections>
           <ReverseConnection clientAppUri="urn:S2OPC:client" clientUrl="opc.tcp://localhost:4844"/>
         </ReverseConnections>

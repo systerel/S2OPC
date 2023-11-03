@@ -171,8 +171,11 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
  * \brief Sets the Secure Connection in reverse connection mode
  *
  * \param secConnConfig             The secure connection configuration to set
- * \param clientReverseEndpointUri  The client reverse endpoint URI to be used to listen for reverse connection from the
+ * \param clientReverseEndpointUrl  The client reverse endpoint URL to be used to listen for reverse connection from the
  * server
+ *  \param listenAllItfs            Flag indicating if the endpoint shall listen to all network interfaces (true)
+ *                                  or if it listens only on the resolved interface. If different flag values
+ *                                  are provided for the same endpoint URL, false value is retained.
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameters,
  *         SOPC_STATUS_INVALID_STATE if the configuration is not possible (wrapper not initialized)
@@ -180,7 +183,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
  *         or reverse endpoint already set), SOPC_STATUS_OUT_OF_MEMORY if OOM raised.
  */
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureConnection_Config* secConnConfig,
-                                                                   const char* clientReverseEndpointUri);
+                                                                   const char* clientReverseEndpointUrl,
+                                                                   bool listenAllItfs);
 
 /**
  * \brief Defines the lifetime requested to the server for this secure connection (symmetric keys renewal)

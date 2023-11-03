@@ -50,6 +50,7 @@ static struct
     SOPC_Mutex mut;
     SOPC_SecureChannel_Config* scConfigs[SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED + 1];
     const char* reverseEpConfigs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1]; // index 0 reserved
+    bool reverseEpConfigListeningAllItfs[SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS + 1];
     uint32_t scConfigIdxMax;
     uint32_t reverseEpConfigIdxMax;
 
@@ -219,9 +220,10 @@ SOPC_SecureChannel_Config* SOPC_ToolkitClient_GetSecureChannelConfig(uint32_t sc
     return res;
 }
 
-SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL)
+SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const char* reverseEndpointURL,
+                                                                          bool listenAllItfs)
 {
-    uint32_t result = 0;
+    SOPC_ReverseEndpointConfigIdx result = 0;
     SOPC_ASSERT(NULL != reverseEndpointURL);
 
     if (tConfig.initDone)
@@ -232,14 +234,15 @@ SOPC_ReverseEndpointConfigIdx SOPC_ToolkitClient_AddReverseEndpointConfig(const 
             tConfig.reverseEpConfigIdxMax++;
             SOPC_ASSERT(NULL == tConfig.reverseEpConfigs[tConfig.reverseEpConfigIdxMax]);
             tConfig.reverseEpConfigs[tConfig.reverseEpConfigIdxMax] = reverseEndpointURL;
+            tConfig.reverseEpConfigListeningAllItfs[tConfig.reverseEpConfigIdxMax] = listenAllItfs;
             result = tConfig.reverseEpConfigIdxMax;
         }
         SOPC_Mutex_Unlock(&tConfig.mut);
     }
     if (0 != result)
     {
-        // Make server endpoint and client reverse endpoint configuration indexes disjoints
-        return result + SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
+        // Make server endpoint and client reverse endpoint configuration indexes disjoint
+        result += SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS;
     }
     return result;
 }
@@ -254,6 +257,22 @@ const char* SOPC_ToolkitClient_GetReverseEndpointURL(SOPC_ReverseEndpointConfigI
         {
             SOPC_Mutex_Lock(&tConfig.mut);
             res = tConfig.reverseEpConfigs[reverseEpCfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
+            SOPC_Mutex_Unlock(&tConfig.mut);
+        }
+    }
+    return res;
+}
+
+bool SOPC_ToolkitClient_IsReverseEndpointListeningAllItfs(SOPC_ReverseEndpointConfigIdx reverseEpCfgIdx)
+{
+    bool res = false;
+    if (SOPC_IS_VALID_REVERSE_EP_CONFIGURATION(reverseEpCfgIdx))
+    {
+        if (tConfig.initDone)
+        {
+            SOPC_Mutex_Lock(&tConfig.mut);
+            res =
+                tConfig.reverseEpConfigListeningAllItfs[reverseEpCfgIdx - SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS];
             SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }

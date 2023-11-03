@@ -445,7 +445,8 @@ static void setupServer(void)
     PRINT("Create endpoint '%s'\n", CONFIG_SOPC_ENDPOINT_ADDRESS);
     g_epConfig = SOPC_ServerConfigHelper_CreateEndpoint(CONFIG_SOPC_ENDPOINT_ADDRESS, true);
     SOPC_ASSERT(NULL != g_epConfig && "SOPC_ServerConfigHelper_CreateEndpoint failed");
-
+    bool res = SOPC_EndpointConfig_SetListeningMode(g_epConfig, SOPC_Endpoint_ListenAllInterfaces);
+    SOPC_ASSERT(res);
     log_UserCallback(NULL, "Setting up security...");
 
     /* 1st Security policy is None without user (users on unsecure channel shall be forbidden) */

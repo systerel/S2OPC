@@ -22,7 +22,7 @@
     </ApplicationDescription>
     <Endpoints>
       <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
-      <Endpoint url="opc.tcp://localhost:4841">
+      <Endpoint url="opc.tcp://localhost:4841" listeningMode="AllInterfaces">
         <SecurityPolicies>
           <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
             <SecurityModes>

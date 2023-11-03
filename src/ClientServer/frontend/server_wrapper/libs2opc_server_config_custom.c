@@ -420,13 +420,23 @@ bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
     return true;
 }
 
-bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint)
+bool SOPC_EndpointConfig_SetListeningMode(SOPC_Endpoint_Config* destEndpoint, SOPC_Endpoint_ListenModeEnum mode)
 {
-    if (NULL == destEndpoint || !SOPC_ServerInternal_IsConfiguring() || destEndpoint->nbClientsToConnect <= 0)
+    if (NULL == destEndpoint || !SOPC_ServerInternal_IsConfiguring() ||
+        (SOPC_Endpoint_NoListening == mode && destEndpoint->nbClientsToConnect <= 0))
     {
         return false;
     }
-    destEndpoint->noListening = true;
+    switch (mode)
+    {
+    case SOPC_Endpoint_ListenResolvedInterfaceOnly:
+    case SOPC_Endpoint_ListenAllInterfaces:
+    case SOPC_Endpoint_NoListening:
+        destEndpoint->listeningMode = mode;
+        break;
+    default:
+        return false;
+    }
     return true;
 }
 

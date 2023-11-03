@@ -255,14 +255,26 @@ static bool start_endpoint(struct parse_context_t* ctx, const XML_Char** attrs)
         epConfig.hasDiscoveryEndpoint = (strcmp(attr_val, "true") == 0);
     }
 
-    // Manage the enableListening flag
-    bool enableListening = true; // default value
-    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "enableListening", attrs);
-    if (attr_val != NULL)
+    // Manage the listeningMode attribute
+    SOPC_Endpoint_ListenModeEnum listeningMode = SOPC_Endpoint_ListenResolvedInterfaceOnly; // default value
+    attr_val = SOPC_HelperExpat_GetAttr(&ctx->helper_ctx, "listeningMode", attrs);
+    if (attr_val != NULL && strcmp(attr_val, "EndpointInterface") != 0)
     {
-        enableListening = (strcmp(attr_val, "true") == 0);
+        if (strcmp(attr_val, "AllInterfaces") == 0)
+        {
+            listeningMode = SOPC_Endpoint_ListenAllInterfaces;
+        }
+        else if (strcmp(attr_val, "NoListening") == 0)
+        {
+            listeningMode = SOPC_Endpoint_NoListening;
+        }
+        else
+        {
+            LOG_XML_ERROR(ctx->helper_ctx.parser, "invalid listeningMode attribute");
+            return false;
+        }
     }
-    epConfig.noListening = !enableListening;
+    epConfig.listeningMode = listeningMode;
 
     if (!SOPC_Array_Append(ctx->endpoints, epConfig) || SOPC_Array_Size(ctx->endpoints) > UINT8_MAX)
     {

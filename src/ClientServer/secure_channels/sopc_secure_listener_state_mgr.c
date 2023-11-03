@@ -666,26 +666,28 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
         if (epConfig != NULL)
         {
-            if (!epConfig->noListening)
+            switch (epConfig->listeningMode)
             {
+            case SOPC_Endpoint_ListenResolvedInterfaceOnly:
+            case SOPC_Endpoint_ListenAllInterfaces:
                 result = SOPC_SecureListenerStateMgr_OpeningListener(eltId, false);
-
                 if (result)
                 {
-                    // URL is not modified but API cannot allow to keep const qualifier: cast to const on treatment
-                    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                     // Notify Sockets layer to create the listener
-                    SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) epConfig->endpointURL,
-                                              SOPC_LISTENER_LISTEN_ALL_INTERFACES);
-                    SOPC_GCC_DIAGNOSTIC_RESTORE
+                    SOPC_Sockets_EnqueueEvent(
+                        SOCKET_CREATE_LISTENER, eltId, (uintptr_t) epConfig->endpointURL,
+                        (uintptr_t)(SOPC_Endpoint_ListenAllInterfaces == epConfig->listeningMode));
                 }
-            }
-            else
-            {
+                break;
+            case SOPC_Endpoint_NoListening:
                 SOPC_ASSERT(epConfig->nbClientsToConnect > 0 &&
                             "Endpoint cannot be configured to not listen without reverse connection");
                 // Define a listener
                 result = SOPC_SecureListenerStateMgr_NoListener(eltId);
+                break;
+            default:
+                SOPC_ASSERT(false);
+                break;
             }
             for (uint16_t clientToConnIdx = 0; result && clientToConnIdx < epConfig->nbClientsToConnect;
                  clientToConnIdx++)
@@ -738,7 +740,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                 SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
                 // Notify Sockets layer to create the listener
                 SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_LISTENER, eltId, (uintptr_t) reverseEndpointURL,
-                                          SOPC_LISTENER_LISTEN_ALL_INTERFACES);
+                                          (uintptr_t) SOPC_ToolkitClient_IsReverseEndpointListeningAllItfs(eltId));
                 SOPC_GCC_DIAGNOSTIC_RESTORE
             }
             else

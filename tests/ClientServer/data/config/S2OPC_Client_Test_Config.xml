@@ -27,7 +27,7 @@
         <SecurityMode mode="SignAndEncrypt"/>
         <UserPolicy policyId="username_Basic256Sha256" tokenType="username"/>
       </Connection>
-      <Connection reverseEndpointURL="opc.tcp://localhost:4844" serverURL="opc.tcp://localhost:4841" id="3">
+      <Connection reverseEndpointURL="opc.tcp://localhost:4844" endpointListenAllItfs="true" serverURL="opc.tcp://localhost:4841" id="3">
         <ServerCertificate path="server_public/server_2k_cert.der"/>
         <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
         <SecurityMode mode="SignAndEncrypt"/>

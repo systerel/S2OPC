@@ -505,7 +505,8 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_MayCreateReverseEp(const SOPC
         // If config not already present, create it
         if (0 == reverseConfigIdx)
         {
-            reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(secConnConfig->reverseURL);
+            reverseConfigIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(
+                secConnConfig->reverseURL, pConfig->clientConfig.reverseEndpointListenAllItfs[rEPidx]);
         }
         if (0 != reverseConfigIdx)
         {

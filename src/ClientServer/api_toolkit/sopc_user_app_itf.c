@@ -202,6 +202,7 @@ void SOPC_ClientConfig_Clear(SOPC_Client_Config* config)
     {
         SOPC_Free(config->reverseEndpointURLs[i]);
         config->reverseEndpointURLs[i] = NULL;
+        config->reverseEndpointListenAllItfs[i] = false;
     }
     memset(config, 0, sizeof(*config));
 }

@@ -410,7 +410,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
 }
 
 SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureConnection_Config* secConnConfig,
-                                                                   const char* clientReverseEndpointUrl)
+                                                                   const char* clientReverseEndpointUrl,
+                                                                   bool listenAllItfs)
 {
     if (!SOPC_ClientInternal_IsInitialized())
     {
@@ -435,12 +436,19 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
         {
             // Find if this reverse EP already exists in client application
             bool found = false;
+            uint16_t found_i = 0;
             for (uint16_t i = 0; !found && i < pConfig->clientConfig.nbReverseEndpointURLs; i++)
             {
                 found = (0 == strcmp(clientReverseEndpointUrl, pConfig->clientConfig.reverseEndpointURLs[i]));
+                found_i = i;
             }
             // Add new reverse EP to client application if it not already defined
-            if (!found)
+            if (found)
+            {
+                // Keep more restrictive mode for the endpoint
+                pConfig->clientConfig.reverseEndpointListenAllItfs[found_i] &= listenAllItfs;
+            }
+            else
             {
                 // Note: it is not be possible to create more secure connections and thus more reverse EPs through API
                 SOPC_ASSERT(pConfig->clientConfig.nbReverseEndpointURLs < SOPC_MAX_CLIENT_SECURE_CONNECTIONS_CONFIG);
@@ -449,6 +457,8 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetReverseConnection(SOPC_SecureCo
                 {
                     pConfig->clientConfig.reverseEndpointURLs[pConfig->clientConfig.nbReverseEndpointURLs] =
                         rEpURLcopyBis;
+                    pConfig->clientConfig.reverseEndpointListenAllItfs[pConfig->clientConfig.nbReverseEndpointURLs] =
+                        listenAllItfs;
                     pConfig->clientConfig.nbReverseEndpointURLs++;
                 }
                 else

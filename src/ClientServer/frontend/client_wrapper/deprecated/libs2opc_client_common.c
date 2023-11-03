@@ -254,7 +254,7 @@ uint32_t SOPC_ClientCommon_CreateReverseEndpoint(const char* reverseEndpointURL)
         return 0;
     }
     reverseEpConfigs[nbReverseEndpoints].reverseEpURL = SOPC_strdup(reverseEndpointURL);
-    reverseEpIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(reverseEndpointURL);
+    reverseEpIdx = SOPC_ToolkitClient_AddReverseEndpointConfig(reverseEndpointURL, true);
 
     if (NULL != reverseEpConfigs[nbReverseEndpoints].reverseEpURL && 0 != reverseEpIdx)
     {
