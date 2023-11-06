@@ -1014,11 +1014,38 @@ static int cmd_demo_sub(WordList* pList)
 }
 
 /***************************************************/
+/** Allow parsing of a nodeId but tries with prepending prefix "ns=1;s=" in case of
+ * failure to ease user input */
+static SOPC_ReturnStatus createNodeIdFromInput(SOPC_NodeId* pNid, const char* input)
+{
+    const size_t len = strlen(input);
+    if (len == 0)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(pNid, input, (int32_t) len);
+    if (SOPC_STATUS_OK != status)
+    {
+        static const char* prefix = "ns=1;s=";
+        const size_t len2 = strlen(prefix) + len + 1;
+        char* nodeId = (char*) SOPC_Calloc(1, len2);
+        sprintf(nodeId, "%s%s", prefix, input);
+        PRINT("Could not find nodeId '%s', trying with '%s'\n", input, nodeId);
+        status = SOPC_NodeId_InitializeFromCString(pNid, nodeId, (int32_t) len2);
+        SOPC_Free(nodeId);
+    }
+    return status;
+}
+
+/***************************************************/
 static int cmd_demo_write(WordList* pList)
 {
     const char* nodeIdC = CLI_GetNextWord(pList);
     const char* dvC = CLI_GetNextWord(pList);
-    if (dvC[0] == 0)
+
+    SOPC_NodeId nid;
+    SOPC_ReturnStatus status = createNodeIdFromInput(&nid, nodeIdC);
+    if (SOPC_STATUS_OK != status || dvC[0] == 0)
     {
         PRINT("usage: demo write <nodeid> <value>\n");
         PRINT("<value> must be prefixed by b for a BOOL, s for a String, B for a byte,\n");
@@ -1027,9 +1054,6 @@ static int cmd_demo_write(WordList* pList)
         return 0;
     }
 
-    SOPC_NodeId nid;
-    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_DataValue dv;
     SOPC_DataValue_Initialize(&dv);
 
@@ -1093,15 +1117,15 @@ static int cmd_demo_date(WordList* pList)
 static int cmd_demo_read(WordList* pList)
 {
     const char* nodeIdC = CLI_GetNextWord(pList);
-    if (nodeIdC[0] == 0)
+
+    SOPC_NodeId nid;
+    SOPC_ReturnStatus status = createNodeIdFromInput(&nid, nodeIdC);
+
+    if (SOPC_STATUS_OK != status)
     {
         PRINT("usage: demo read <nodeid>\n");
         return 0;
     }
-
-    SOPC_NodeId nid;
-    SOPC_ReturnStatus status = SOPC_NodeId_InitializeFromCString(&nid, nodeIdC, (int32_t) strlen(nodeIdC));
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_DataValue* dv = Server_LocalReadSingleNode(&nid);
 
