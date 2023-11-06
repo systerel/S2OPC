@@ -236,6 +236,14 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
     return 0;
 }
 
+// removes cert from a linked list
+static void sopc_remove_cert_from_list(mbedtls_x509_crt** ppCur,
+                                       mbedtls_x509_crt** ppPrev,
+                                       SOPC_CertificateList** ppHeadCertList);
+
+// PKI remove certificate from rejected list declaration
+static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert);
+
 // PKI clear operation declaration
 static void sopc_pki_clear(SOPC_PKIProvider* pPKI);
 
@@ -1080,6 +1088,93 @@ static SOPC_ReturnStatus sopc_validate_certificate(
     return status;
 }
 
+static void sopc_remove_cert_from_list(mbedtls_x509_crt** ppCur,
+                                       mbedtls_x509_crt** ppPrev,
+                                       SOPC_CertificateList** ppHeadCertList)
+{
+    SOPC_ASSERT(NULL != ppCur);
+    SOPC_ASSERT(NULL != *ppCur); /* Current cert shall not be NULL */
+    SOPC_ASSERT(NULL != ppPrev);
+    SOPC_ASSERT(NULL != ppHeadCertList);
+    SOPC_ASSERT(NULL != *ppHeadCertList); /* Head shall not be NULL */
+
+    SOPC_CertificateList* pHeadCertList = *ppHeadCertList;
+    mbedtls_x509_crt* pCur = *ppCur;      /* Current cert */
+    mbedtls_x509_crt* pPrev = *ppPrev;    /* Parent of current cert */
+    mbedtls_x509_crt* pNext = pCur->next; /* Next cert */
+    pCur->next = NULL;
+    mbedtls_x509_crt_free(pCur);
+    if (NULL == pPrev)
+    {
+        if (NULL == pNext)
+        {
+            /* The list is empty, Free it and stop the iteration  */
+            SOPC_Free(pHeadCertList);
+            pHeadCertList = NULL;
+            pCur = NULL;
+        }
+        else
+        {
+            /* Head of the list is a special case */
+            pHeadCertList->crt = *pNext; /* Use an assignment operator to do the copy */
+            /* We have to free the new next certificate */
+            SOPC_Free(pNext);
+
+            /* Do not iterate: current certificate has changed with the new head (pCur = &pHeadCertList->crt) */
+        }
+    }
+    else
+    {
+        /* We have to free the certificate if it is not the first in the list */
+        SOPC_Free(pCur);
+        pPrev->next = pNext;
+        /* Iterate */
+        pCur = pNext;
+    }
+    *ppCur = pCur;
+    *ppPrev = pPrev;
+    *ppHeadCertList = pHeadCertList;
+}
+
+static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert)
+{
+    SOPC_ASSERT(NULL != ppRejectedList);
+    SOPC_ASSERT(NULL != pCert);
+
+    /* Head of the rejected list */
+    SOPC_CertificateList* pHeadRejectedCertList = *ppRejectedList;
+    if (NULL == pHeadRejectedCertList)
+    {
+        /* the certificate list is empty, do nothing*/
+        return;
+    }
+    const mbedtls_x509_crt* crt = &pCert->crt;
+    mbedtls_x509_crt* cur = &pHeadRejectedCertList->crt; /* Current cert */
+    mbedtls_x509_crt* prev = NULL;                       /* Parent of current cert */
+    bool bFound = false;
+
+    while (NULL != cur && !bFound)
+    {
+        if (crt->subject_raw.len == cur->subject_raw.len && crt->raw.len == cur->raw.len &&
+            0 == memcmp(crt->subject_raw.p, cur->subject_raw.p, crt->subject_raw.len) &&
+            0 == memcmp(crt->raw.p, cur->raw.p, crt->subject_raw.len))
+        {
+            bFound = true;
+        }
+        if (bFound)
+        {
+            sopc_remove_cert_from_list(&cur, &prev, &pHeadRejectedCertList);
+        }
+        else
+        {
+            prev = cur;
+            cur = cur->next;
+        }
+    }
+    *ppRejectedList = pHeadRejectedCertList;
+    return;
+}
+
 SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI, const SOPC_CertificateList* pCert)
 {
     if (NULL == pPKI || NULL == pCert)
@@ -1087,6 +1182,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    bool bFound = false; // indicating whether the certificate is already in the rejected certificates list
     size_t listLength = 0;
     SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &listLength);
     if (SOPC_STATUS_OK != status || 1 != listLength)
@@ -1104,32 +1200,36 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
 
     if (NULL != pPKI->pRejectedList)
     {
-        status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &listLength);
-        /* Remove the oldest certificate (HEAD of the chain) if the rejected list is too large */
-        if (SOPC_STATUS_OK == status)
+        status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pRejectedList, pCert, &bFound);
+        if (SOPC_STATUS_OK == status && !bFound)
         {
-            if (SOPC_PKI_MAX_NB_CERT_REJECTED == listLength)
+            status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &listLength);
+            /* Remove the oldest certificate (HEAD of the chain) if the rejected list is too large */
+            if (SOPC_STATUS_OK == status)
             {
-                /* Change the HEAD */
-                mbedtls_x509_crt* cur = &pPKI->pRejectedList->crt;
-                mbedtls_x509_crt* next = cur->next;
-                cur->next = NULL;
-                if (NULL == next)
+                if (SOPC_PKI_MAX_NB_CERT_REJECTED == listLength)
                 {
-                    /* case where SOPC_PKI_MAX_NB_CERT_REJECTED == 1 */
-                    SOPC_KeyManager_Certificate_Free(pPKI->pRejectedList);
-                    pPKI->pRejectedList = NULL;
-                }
-                else
-                {
-                    mbedtls_x509_crt_free(cur);
-                    pPKI->pRejectedList->crt = *next; /* Copy with an assignment operator */
-                    SOPC_Free(next);
+                    /* Change the HEAD */
+                    mbedtls_x509_crt* cur = &pPKI->pRejectedList->crt;
+                    mbedtls_x509_crt* next = cur->next;
+                    cur->next = NULL;
+                    if (NULL == next)
+                    {
+                        /* case where SOPC_PKI_MAX_NB_CERT_REJECTED == 1 */
+                        SOPC_KeyManager_Certificate_Free(pPKI->pRejectedList);
+                        pPKI->pRejectedList = NULL;
+                    }
+                    else
+                    {
+                        mbedtls_x509_crt_free(cur);
+                        pPKI->pRejectedList->crt = *next; /* Copy with an assignment operator */
+                        SOPC_Free(next);
+                    }
                 }
             }
         }
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && !bFound)
     {
         /* Create the rejected list if empty or append at the end */
         status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pCert->crt.raw.p, (uint32_t) pCert->crt.raw.len,
@@ -1185,6 +1285,7 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     bool bIsSelfSigned = false;
     char* pThumbprint = NULL;
     const char* thumbprint = NULL;
+    bool bFoundRejectedCert = false;
     status = cert_is_self_signed(&crt, &bIsSelfSigned);
     if (SOPC_STATUS_OK != status)
     {
@@ -1256,6 +1357,18 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
         }
         *error = firstError;
         status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        if (pProfile->bAppendRejectCert)
+        {
+            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pRejectedList, pToValidateCpy,
+                                                                    &bFoundRejectedCert);
+            if (bFoundRejectedCert && SOPC_STATUS_OK == status)
+            {
+                sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
+            }
+        }
     }
 
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
@@ -1757,39 +1870,7 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
             if (SOPC_STATUS_OK == status)
             {
                 /* Remove the certificate from the chain and safely delete it */
-                mbedtls_x509_crt* next = cur->next;
-                cur->next = NULL;
-                mbedtls_x509_crt_free(cur);
-                /* Set new next certificate (if possible) */
-                if (NULL == prev)
-                {
-                    if (NULL == next)
-
-                    {
-                        /* The list is empty, Free it */
-                        SOPC_Free(pHeadCerts);
-                        pHeadCerts = NULL;
-                        cur = NULL; // make iteration stop
-                    }
-                    else
-                    {
-                        /* Head of the chain is a special case */
-                        pHeadCerts->crt = *next; /* Use an assignment operator to do the copy */
-                        /* We have to free the new next certificate */
-                        SOPC_Free(next);
-
-                        /* Do not iterate: current certificate has changed with the new head (cur =
-                         * &pHeadCerts->crt) */
-                    }
-                }
-                else
-                {
-                    /* We have to free the certificate if it is not the first in the list */
-                    SOPC_Free(cur);
-                    prev->next = next;
-                    /* Iterate */
-                    cur = next;
-                }
+                sopc_remove_cert_from_list(&cur, &prev, &pHeadCerts);
             }
         }
         else
@@ -2733,36 +2814,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
         status = SOPC_STATUS_OK;
     }
 
-    bool bFound = false;
-    mbedtls_x509_crt* next = NULL;
-    mbedtls_x509_crt* crt = NULL != pPKI->pRejectedList ? &pPKI->pRejectedList->crt : NULL;
-    while (NULL != crt && SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
     {
-        /* Unlink */
-        next = crt->next;
-        crt->next = NULL;
-        if (NULL != pRejected)
-        {
-            SOPC_CertificateList crtToFind = {.crt = *crt};
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pRejected, &crtToFind, &bFound);
-        }
-        if (!bFound && SOPC_STATUS_OK == status)
-        {
-            if (UINT32_MAX < crt->raw.len)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                status =
-                    SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw.p, (uint32_t) crt->raw.len, &pRejected);
-            }
-        }
-        /* Link */
-        crt->next = next;
-        /* iterate */
-        crt = crt->next;
-        bFound = false;
+        status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pRejected);
     }
     /* Clear */
     if (SOPC_STATUS_OK != status)
