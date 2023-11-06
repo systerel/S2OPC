@@ -110,8 +110,6 @@ struct SOPC_PKI_ChainProfile
  *   set to True will be marked as root CA and as trusted certificates.
  * @var SOPC_PKI_Profile::bApplyLeafProfile
  *   Defines if the leaf properties is check during ::SOPC_PKIProvider_ValidateCertificate .
- * @var SOPC_PKI_Profile::bAppendRejectCert
- *   Defines if the certificates rejected during ::SOPC_PKIProvider_ValidateCertificate shall be stored by the PKI.
  */
 struct SOPC_PKI_Profile
 {
@@ -119,7 +117,6 @@ struct SOPC_PKI_Profile
     SOPC_PKI_ChainProfile* chainProfile;
     bool bBackwardInteroperability;
     bool bApplyLeafProfile;
-    bool bAppendRejectCert;
 };
 
 /**

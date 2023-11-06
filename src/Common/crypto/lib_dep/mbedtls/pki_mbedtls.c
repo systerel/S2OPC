@@ -512,7 +512,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
         pProfile->chainProfile = pChainProfile;
         pProfile->bBackwardInteroperability = true;
         pProfile->bApplyLeafProfile = true;
-        pProfile->bAppendRejectCert = true;
     }
     else
     {
@@ -539,17 +538,14 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pPr
     case SOPC_PKI_TYPE_CLIENT_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
-        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_SERVER_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
-        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_USER:
         pProfile->bApplyLeafProfile = false;
         pProfile->bBackwardInteroperability = false;
-        pProfile->bAppendRejectCert = true;
         break;
     default:
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1345,29 +1341,22 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
 
     if (bErrorFound)
     {
-        if (pProfile->bAppendRejectCert)
+        status = SOPC_PKIProvider_AddCertToRejectedList(pPKI, pToValidateCpy);
+        if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_PKIProvider_AddCertToRejectedList(pPKI, pToValidateCpy);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                         "> PKI : AddCertToRejectedList failed for certificate thumbprint %s",
-                                         thumbprint);
-            }
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "> PKI : AddCertToRejectedList failed for certificate thumbprint %s", thumbprint);
         }
         *error = firstError;
         status = SOPC_STATUS_NOK;
     }
     else
     {
-        if (pProfile->bAppendRejectCert)
+        status =
+            SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pRejectedList, pToValidateCpy, &bFoundRejectedCert);
+        if (bFoundRejectedCert && SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pRejectedList, pToValidateCpy,
-                                                                    &bFoundRejectedCert);
-            if (bFoundRejectedCert && SOPC_STATUS_OK == status)
-            {
-                sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
-            }
+            sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
         }
     }
 
