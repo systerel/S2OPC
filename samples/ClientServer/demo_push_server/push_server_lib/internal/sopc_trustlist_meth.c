@@ -105,7 +105,7 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
                                "TrustList:%s:OpenWithMask: failed to encode the trustList", cStrId);
         statusCode = OpcUa_BadUnexpectedError;
     }
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         /* Create the output variant */
         pVariant = SOPC_Variant_Create();
@@ -117,14 +117,15 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
         }
     }
     /* Generate and set the handle */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         status = TrustList_GenRandHandle(pTrustList);
         statusCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
     }
 
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
+        SOPC_ASSERT(NULL != pVariant); // Avoid dereference warning
         TrustList_StartActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
@@ -214,7 +215,7 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
                                cStrId);
         statusCode = OpcUa_BadUnexpectedError;
     }
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         /* Create the output variant */
         pVariant = SOPC_Variant_Create();
@@ -226,13 +227,14 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
         }
     }
     /* Generate and set the random handle */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         status = TrustList_GenRandHandle(pTrustList);
         statusCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
     }
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
+        SOPC_ASSERT(NULL != pVariant); // Avoid dereference warning
         TrustList_StartActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarSize(pTrustList, pAddSpAccess);
@@ -381,7 +383,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_UpdateWithWriteMethod(pTrustList, secPolUri);
     /* Export the update (certificate files) */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         status = TrustList_Export(pTrustList, false, false);
         if (SOPC_STATUS_OK != status)
@@ -393,7 +395,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     }
     SOPC_TrLst_Mask mask = TrustList_GetSpecifiedListsMask(pTrustList);
     /* Raise an event to re-evaluate the certificate if trustListDataType fields are provided */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask) && SOPC_TL_MASK_NONE != mask)
+    if (SOPC_IsGoodStatus(statusCode) && SOPC_TL_MASK_NONE != mask)
     {
         status = TrustList_RaiseEvent(pTrustList);
         if (SOPC_STATUS_OK != status)
@@ -404,7 +406,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     }
 
     SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
-    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
         /* The variant is deleted by the method call manager */
@@ -493,7 +495,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_UpdateWithAddCertificateMethod(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
     /* Export the update (certificate files) */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         SOPC_ReturnStatus status = TrustList_Export(pTrustList, false, true);
         if (SOPC_STATUS_OK != status)
@@ -504,7 +506,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
         }
     }
     /* Reset the activity timeout */
-    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         TrustList_ResetActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
@@ -583,7 +585,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     statusCode = TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring,
                                       inputArgs[1].Value.Boolean, secPolUri, &bIsRemove, &bIsIssuer);
     SOPC_UNUSED_ARG(bIsIssuer);
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         if (!bIsRemove)
         {
@@ -591,7 +593,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         }
     }
     /* Export the update (certificate files) */
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         status = TrustList_Export(pTrustList, true, true);
         if (SOPC_STATUS_OK != status)
@@ -601,7 +603,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
             statusCode = OpcUa_BadUnexpectedError;
         }
     }
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         /* Raise an event to re-evaluate the certificate  */
         status = TrustList_RaiseEvent(pTrustList);
@@ -613,7 +615,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         }
     }
     /* Reset the activity timeout */
-    if (0 == (statusCode & SOPC_GoodGenericStatus))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         TrustList_ResetActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
@@ -710,7 +712,7 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
                                "TrustList:%s:Read: failed to read the Ua Binary encoded trustlist", cStrId);
         statusCode = OpcUa_BadUnexpectedError;
     }
-    if (0 == (statusCode & SOPC_GoodStatusOppositeMask))
+    if (SOPC_IsGoodStatus(statusCode))
     {
         TrustList_ResetActivityTimeout(pTrustList);
         /* The variant is deleted by the method call manager */

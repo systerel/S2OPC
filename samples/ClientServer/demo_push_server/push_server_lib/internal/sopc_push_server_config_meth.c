@@ -107,7 +107,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
         SOPC_Free(pCStrTypeId);
         return OpcUa_BadInvalidArgument;
     }
-    /* TODO: Update with a new privateKey and certificate created outside the server is not allowed */
+    /* Update with a new privateKey and certificate created outside the server is not allowed */
     if (NULL != inputArgs[5].Value.Bstring.Data || -1 != inputArgs[5].Value.Bstring.Length)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -243,7 +243,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         char* pCStrGrpId = SOPC_NodeId_ToCString(pCertificateGroupId);
         const char* cStrGrpId = NULL == pCStrGrpId ? "NULL" : pCStrGrpId;
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_UpdateCertificate: rcv invalid group : %s", cStrGrpId);
+                               "PushSrvCfg:Method_CreateSigningRequest: rcv invalid group : %s", cStrGrpId);
         SOPC_Free(pCStrGrpId);
         return OpcUa_BadInvalidArgument;
     }
@@ -267,7 +267,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         SOPC_Free(pCStrTypeId);
         return OpcUa_BadInvalidArgument;
     }
-    /* TODO: Check the given subjectName */
+    /* TODO: Check the given subjectName (cf public issue #1289)*/
     if (NULL != pSubjectName->Data || -1 != pSubjectName->Length)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

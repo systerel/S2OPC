@@ -656,7 +656,8 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
 {
     SOPC_ASSERT(NULL != pGroupCtx);
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
-    SOPC_UNUSED_ARG(pSubjectName); // TODO: if not NULL then use pSubjectName instead of the current subjectName
+    SOPC_UNUSED_ARG(pSubjectName); // TODO: if not NULL then use pSubjectName instead of the current subjectName (cf
+                                   // public issue 1289)
 
     if (NULL == pCertificateRequest)
     {
@@ -984,8 +985,8 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     char* pURI = NULL;
     uint32_t errorCode = 0;
 
-    /* TODO: Add a new function declaration in KeyManager API to check if a public-private pair of keys matches. (with
-     * mbedtls_pk_check_pair function )*/
+    /* TODO: Add a new function declaration in KeyManager API to check if a public-private pair of keys matches (cf
+     * public issue #1290)*/
     /* Load the public key from the given certificate */
     SOPC_ReturnStatus status =
         SOPC_KeyManager_Certificate_CreateOrAddFromDER(pCertificate->Data, (uint32_t) pCertificate->Length, &pNewCert);
@@ -1079,17 +1080,16 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     /* Check the certificate properties */
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_PKI_LeafProfile profile = {
-            .mdSign = SOPC_PKI_MD_SHA256,
-            .pkAlgo = SOPC_PKI_PK_RSA,
-            .RSAMinimumKeySize = 1024,
-            .RSAMaximumKeySize = 4096,
-            .bApplySecurityPolicy = true,
-            .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
-                        SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION,
-            .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH,
-            .sanApplicationUri = pURI,
-            .sanURL = NULL}; // TODO: Add a new function declaration to extract the DNS/hostName
+        SOPC_PKI_LeafProfile profile = {.mdSign = SOPC_PKI_MD_SHA256,
+                                        .pkAlgo = SOPC_PKI_PK_RSA,
+                                        .RSAMinimumKeySize = 1024,
+                                        .RSAMaximumKeySize = 4096,
+                                        .bApplySecurityPolicy = true,
+                                        .keyUsage = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
+                                                    SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION,
+                                        .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH,
+                                        .sanApplicationUri = pURI,
+                                        .sanURL = NULL};
         /* Get properties form group */
         if (OpcUaId_RsaMinApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
         {
@@ -1129,8 +1129,8 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     }
     /* TODO: Handle that the security level of the update isn't higher than the security level of the secure channel.
      * (§7.3.4 part 2 v1.05) */
-    /* TODO: Validate the signature of the updated certificate with the given issuer (PKI can not be used, as no CRL are
-     * provided) */
+    /* TODO: Validate the signature of the updated certificate with the given issuer (PKI can not be used, cf public
+     * issue #1291) */
 
     /* Update the new key-cert pair */
     if (SOPC_STATUS_OK == status)
@@ -1186,7 +1186,8 @@ SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx
     SOPC_ASSERT(NULL != pGroupCtx);
 
     // TODO: Add a way to retrieve the password for the private encryption.
-    // TODO: Add a store configuration "own" for key-cert pair with defaults value in case update or export failed.
+    // TODO: Add a store configuration "own" for key-cert pair with defaults value in case update or export failed (cf
+    // public issue #1285)
     SOPC_SerializedCertificate* pOldCert = NULL;
     SOPC_SerializedCertificate* pNewCert = NULL;
     SOPC_ReturnStatus restoreStatus = SOPC_STATUS_OK;
