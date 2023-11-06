@@ -411,17 +411,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
  *         The format of the written files is DER.
  *
  * \param pPKI A valid pointer to the PKIProvider.
- * \param bEraseExistingFiles whether the existing files of the rejected folder shall be deleted.
  *
  * \note The maximum number of certificates written in the rejected folder is \c SOPC_PKI_MAX_NB_CERT_REJECTED .
- *       This function removes older files, if the maximum is reach.
+ *       This function removes the existing files.
+ *
  *
  * \warning If the \p pPKI is built from lists ( ::SOPC_PKIProvider_CreateFromList ) then
  *          you shall define the directory store path with ::SOPC_PKIProvider_SetStorePath .
  *
  * \return SOPC_STATUS_OK when successful.
  */
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles);
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI);
 
 /** \brief Add a certificate to the PKI rejected list.
  *

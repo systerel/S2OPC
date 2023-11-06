@@ -2497,7 +2497,7 @@ void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
 }
 
 #if SOPC_HAS_FILESYSTEM
-static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts, size_t curRejectedLen)
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
     SOPC_ASSERT(NULL != directoryPath);
 
@@ -2514,15 +2514,6 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsR
         return SOPC_STATUS_NOK;
     }
     size_t nbFiles = SOPC_Array_Size(pFilePaths);
-    if (bIsRejectedCerts)
-    {
-        if (nbFiles + curRejectedLen <= SOPC_PKI_MAX_NB_CERT_REJECTED)
-        {
-            /* Do nothing */
-            SOPC_Array_Delete(pFilePaths);
-            return SOPC_STATUS_OK;
-        }
-    }
     for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
         pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
@@ -2536,11 +2527,9 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsR
     return status;
 }
 #else
-static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts, size_t curRejectedLen)
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
     SOPC_UNUSED_ARG(directoryPath);
-    SOPC_UNUSED_ARG(bIsRejectedCerts);
-    SOPC_UNUSED_ARG(curRejectedLen);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 #endif /* SOPC_HAS_FILESYSTEM */
@@ -2554,7 +2543,7 @@ static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath, false, 0);
+        status = remove_files(directoryPath);
     }
     if (SOPC_STATUS_OK == status && NULL != pRoots)
     {
@@ -2575,7 +2564,7 @@ static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath, false, 0);
+        status = remove_files(directoryPath);
     }
     if (SOPC_STATUS_OK == status && NULL != pCrl)
     {
@@ -2832,14 +2821,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles)
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI)
 
 {
     if (NULL == pPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    size_t curRejectedLen = 0;
     char* path = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
@@ -2855,21 +2843,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pP
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
-    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    if (SOPC_STATUS_OK == status)
     {
         status = may_create_pki_folder(pPKI->directoryStorePath, STR_REJECTED, &path);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &curRejectedLen);
+            status = remove_files(path);
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = remove_files(path, !bEraseExistingFiles, curRejectedLen);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_Certificate_ToDER_Files(pPKI->pRejectedList, path);
-        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    {
+        status = SOPC_KeyManager_Certificate_ToDER_Files(pPKI->pRejectedList, path);
     }
     SOPC_Free(path);
 

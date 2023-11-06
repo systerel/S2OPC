@@ -218,10 +218,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles)
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI)
 {
     SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(bEraseExistingFiles);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
