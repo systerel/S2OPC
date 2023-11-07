@@ -36,39 +36,73 @@
 typedef enum
 {
     /* External events */
-    SOCKET_CREATE_LISTENER = 0x0, /**< id = endpoint description config index <br>
-                                   params = (const char*) URI <br>
+    SOCKET_CREATE_LISTENER = 0x0, /**<
+                                 id = endpoint description config index <br/>
+                                   params = (const char*) URI <br/>
                                    auxParam = (bool) listenAllInterfaces
                                  */
-    SOCKET_ACCEPTED_CONNECTION,   /**< id = socket index <br>
-                                     auxParam = secure channel connection index */
+    SOCKET_ACCEPTED_CONNECTION,   /**<
+                                 Notifies to associate the new secure channel connection, given by secure channel
+                                 connection index, with the given socket index<br/>
+                                 id = socket index <br/>
+                                  auxParam = secure channel connection index */
 
-    SOCKET_CREATE_CONNECTION, /**< id = secure channel connection index <br>
+    SOCKET_CREATE_CONNECTION, /**<
+                                 Requests to create a new socket for the given secure channel connection index
+                                 and with provided URI data<br/>
+                                 id = secure channel connection index <br/>
                                  params = (const char*) URI
                                */
-    SOCKET_CLOSE,             /**< id = socket index, auxParam = secure channel connection index  */
-    SOCKET_CLOSE_LISTENER,    /**< id = socket index, auxParam = endpoint description config index */
-    SOCKET_WRITE              /**< id = socket index <br>
+    SOCKET_CLOSE,             /**<
+                                 Requests to close the socket and clear the data for the given socket index<br/>
+                                 id = socket index<br/> auxParam = secure channel connection index  */
+    SOCKET_CLOSE_LISTENER,    /**<
+                                 Requests to create a new socket connection listener for the given SC listener
+                                 configuration index, provided URI data and listening all network interfaces.<br/>
+                                 id = socket index, auxParam = endpoint description config index */
+    SOCKET_WRITE              /**<
+                                 Requests to write TCP UA message chunk on the socket connection for the given
+                                 socket index and bytes buffer<br/>
+                                 id = socket index <br/>
                                  params = (SOPC_Buffer*) message buffer */
 } SOPC_Sockets_InputEvent;
 
 /** Sockets output events to Secure Channel layer */
 typedef enum
 {
-    SOCKET_LISTENER_OPENED = 0x100, /**< id = endpoint description config index <br>
+    SOCKET_LISTENER_OPENED = 0x100, /**< Socket connection listener opened for the given endpoint
+                                       description configuration index and with the given new socket
+                                       connection listener index. Registers SC listener as opened.<br/>
+                                       id = endpoint description config index <br/>
                                        auxParam = (uint32_t) socket index
                                     */
-    SOCKET_LISTENER_CONNECTION,     /**< id = endpoint description config index <br>
+    SOCKET_LISTENER_CONNECTION,     /**< A new socket connection occurred on socket connection listener
+                                       for the given endpoint description configuration index and with
+                                       the given new socket connection index. Requests to create a new
+                                       SC connection by triggering INT_EP_SC_CREATE output event.<br/>
+                                       id = endpoint description config index <br/>
                                        auxParam = (uint32_t) new connection socket index
                                    */
-    SOCKET_LISTENER_FAILURE,        /**< id = endpoint description config index */
+    SOCKET_LISTENER_FAILURE,        /**< A failure occurred on the socket connection listener for the given
+                                         endpoint description configuration index. Closes the SC listener<br/>
+                                         id = endpoint description config index */
 
-    SOCKET_CONNECTION, /**< id = secure channel connection index <br>
+    SOCKET_CONNECTION, /**< A requested client socket connection was established for the secure channel
+                          connection configuration index and with the given new socket connection index.
+                          Associates it to the secure channel connection instance.<br/>
+                          id = secure channel connection index <br/>
                           auxParam = (uint32_t) socket index */
 
-    SOCKET_FAILURE,   /**< id = secure channel connection index <br>
+    SOCKET_FAILURE,   /**<
+                         An existing socket was closed due to failure for the given secure channel connection
+                         index and socket index. Close the associated secure channel connection instance.<br/>
+                         id = secure channel connection index <br/>
                          auxParam = (uint32_t) socket index */
-    SOCKET_RCV_BYTES, /**< id = secure channel connection index <br>
+    SOCKET_RCV_BYTES, /**<
+                         Received bytes on the socket connection with given secure channel connection index and bytes
+                         buffer (maximum size determined by static configuration). Decodes TCP UA headers, check
+                         security properties and decrypts message and verifies signature (if necessary).<br/>
+                         id = secure channel connection index <br/>
                          params = (SOPC_Buffer*) received buffer containing complete TCP UA chunk
                        */
 } SOPC_Sockets_OutputEvent;

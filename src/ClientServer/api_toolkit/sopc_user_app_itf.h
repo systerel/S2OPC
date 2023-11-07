@@ -383,56 +383,69 @@ typedef uint32_t SOPC_SessionId;
 typedef enum SOPC_App_Com_Event
 {
     /* Client application events */
-    SE_REVERSE_ENDPOINT_CLOSED = 0x700, /**< (Client)<br/>
+    SE_REVERSE_ENDPOINT_CLOSED = 0x700, /**< Client side only:<br/>
+                                         *  Notifies the reverse connection is closed<br/>
                                          *  id = reverse endpoint configuration index<br/>
                                          *  auxParams = (SOPC_ReturnStatus) status reason
                                          */
-    SE_SESSION_ACTIVATION_FAILURE,      /**< (Client)<br/>
+    SE_SESSION_ACTIVATION_FAILURE,      /**< Client side only:<br/>
+                                         *   Notifies the session activation (or re-activation) failed<br/>
                                          *   id = (SOPC_SessionId) internal session id (or 0 if not yet defined)<br/>
                                          *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
                                          *   auxParam = user application session context
                                          */
-    SE_ACTIVATED_SESSION,               /**< (Client)<br/>
+    SE_ACTIVATED_SESSION,               /**< Client side only:<br/>
+                                         *   Notifies the session is active (newly created session or re-activated session)<br/>
                                          *   id = (SOPC_SessionId) internal session id<br/>
                                          *   auxParam = user application session context
                                          */
-    SE_SESSION_REACTIVATING,            /**< (Client) automatic new SC or manual new user on same SC */
-                                        /**< (Client)<br/>
-                                         *   id = (SOPC_SessionId) internal session id<br/>
-                                         *   auxParam = user application session context
-                                         */
-    SE_RCV_SESSION_RESPONSE,            /**< (Client)<br/>
-                                         *   id = (SOPC_SessionId) internal session id<br/>
-                                         *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
-                                         *   (deallocated by toolkit after callback call ends)<br/>
-                                         *   auxParam = user application request context
-                                         */
-    SE_CLOSED_SESSION,                  /**< (Client)<br/>
-                                         *   id = (SOPC_SessionId) internal session id<br/>
-                                         *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
-                                         *   auxParam = user application session context
-                                         */
-    SE_RCV_DISCOVERY_RESPONSE,          /**< (Client)<br/>
-                                         *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
-                                         *   structure (deallocated by toolkit after callback call ends) auxParam = user<br/>
-                                         *   application request context
-                                         */
-    SE_SND_REQUEST_FAILED,              /**< (Client)<br/>
-                                         *   idOrStatus = (SOPC_ReturnStatus) status,<br/>
-                                         *   params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
-                                         *   auxParam = user application request context
-                                         */
+    SE_SESSION_REACTIVATING,   /**< Client side only:<br/>Notifies the session is currently re-activating due to
+                                  connection issue */
+                               /**< Client side only:<br/>
+                                *   id = (SOPC_SessionId) internal session id<br/>
+                                *   auxParam = user application session context
+                                */
+    SE_RCV_SESSION_RESPONSE,   /**< Client side only:<br/>
+                                *   Notifies the service response to a previously (non-discovery) service request sent
+                                * over a session<br/>
+                                * id = (SOPC_SessionId) internal session id<br/>
+                                * params =(OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                                * (deallocated by toolkit after callback call ends)<br/>
+                                * auxParam = user application request context
+                                */
+    SE_CLOSED_SESSION,         /**< Client side only:<br/>
+                                *   Notifies the session is closed after requesting a session close.<br/>
+                                *   id = (SOPC_SessionId) internal session id<br/>
+                                *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
+                                *   auxParam = user application session context
+                                */
+    SE_RCV_DISCOVERY_RESPONSE, /**< Client side only:<br/>
+                                *   Notifies the service response to a previously discovery service request sent<br/>
+                                *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
+                                *   structure (deallocated by toolkit after callback call ends) <br/>
+                                *   auxParam = user application request context
+                                */
+    SE_SND_REQUEST_FAILED,     /**< Client side only:<br/>
+                                *   Notifies the service request sending failed (connection issue or timeout for response to
+                                * be received)<br/>
+                                * idOrStatus = (SOPC_ReturnStatus) status,<br/>
+                                * params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
+                                * auxParam = user application request context
+                                */
 
     /* Server application events */
-    SE_CLOSED_ENDPOINT,       /**< (Server)<br/>
+    SE_CLOSED_ENDPOINT,       /**< Server side only:<br/>
+                               *   Notifies the endpoint listening for connections is closed or failed to be opened.<br/>
                                *   id = endpoint configuration index,<br/>
                                *   auxParam = SOPC_ReturnStatus
                                */
-    SE_LOCAL_SERVICE_RESPONSE /**< (Server)<br/>
-                               *   id = endpoint configuration index,<br/>
-                               *   params = (OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
-                               *   (deallocated by toolkit after callback call ends)<br/>
-                               *   auxParam = user application request context
+    SE_LOCAL_SERVICE_RESPONSE /**< Server side only:<br/>
+                               *   Notifies the service response for the local service request previously
+                               * requested.<br/>
+                               * id = endpoint configuration index,<br/>
+                               * params =(OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                               * (deallocated by toolkit after callback call ends)<br/>
+                               * auxParam = user application request context
                                */
 } SOPC_App_Com_Event;
 
@@ -444,7 +457,9 @@ typedef enum SOPC_App_Com_Event
 typedef enum SOPC_App_AddSpace_Event
 {
     /* Server application events */
-    AS_WRITE_EVENT = 0x800, /**< opParam = (OpcUa_WriteValue*) single write value operation<br/>
+    AS_WRITE_EVENT = 0x800, /**< Server side only:<BR/>
+                             *   Notifies a write operation on the server address space.<br/>
+                             *   opParam = (OpcUa_WriteValue*) single write value operation<br/>
                              *   opStatus = status of the write operation
                              */
 } SOPC_App_AddSpace_Event;
