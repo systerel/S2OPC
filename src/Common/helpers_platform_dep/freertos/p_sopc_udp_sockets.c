@@ -17,6 +17,8 @@
  * under the License.
  */
 
+#include "p_sopc_sockets.h"
+
 #include "sopc_assert.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -109,11 +111,6 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
     return SOPC_STATUS_INVALID_PARAMETERS;
 }
 
-static inline bool isValidSocket(const Socket sock)
-{
-    return NULL != sock && INVALID_SOCKET_ID != sock->sock;
-}
-
 static in_addr_t get_ai_addr(const SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ASSERT(NULL != addr);
@@ -133,7 +130,7 @@ static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_Add
 {
     int setOptStatus = -1;
 
-    if (NULL == multicast || !isValidSocket(sock))
+    if (NULL == multicast || !SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -152,6 +149,8 @@ static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_Add
 
     if (setOptStatus < 0)
     {
+        SOPC_Free(sock->membership);
+        sock->membership = NULL;
         return SOPC_STATUS_NOK;
     }
     else
@@ -164,7 +163,7 @@ static SOPC_ReturnStatus socket_DropMembership(Socket sock)
 {
     int setOptStatus = -1;
 
-    if (!isValidSocket(sock))
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -199,7 +198,7 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
         result->sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
         result->membership = NULL;
 
-        if (INVALID_SOCKET_ID == result->sock)
+        if (SOPC_FREERTOS_INVALID_SOCKET_ID == result->sock)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -302,7 +301,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
     configASSERT(buffer->position == 0);
-    if (!isValidSocket(sock) || NULL == destAddr || NULL == buffer)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == destAddr || NULL == buffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -346,7 +345,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
 
 SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 {
-    if (!isValidSocket(sock) || NULL == buffer)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == buffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }

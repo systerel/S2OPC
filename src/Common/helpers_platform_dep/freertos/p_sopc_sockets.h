@@ -37,7 +37,7 @@ typedef struct
  */
 typedef Socket_t* Socket;
 #define SOPC_INVALID_SOCKET (NULL)
-#define INVALID_SOCKET_ID (-1)
+#define SOPC_FREERTOS_INVALID_SOCKET_ID (-1)
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
@@ -58,5 +58,7 @@ typedef struct
     fd_set set; /**< set */
     uint8_t rfu[2];
 } SOPC_SocketSet;
+
+#define SOPC_FREERTOS_SOCKET_IS_VALID(pSock) (NULL != (pSock) && SOPC_FREERTOS_INVALID_SOCKET_ID != (pSock)->sock)
 
 #endif /* SOPC_P_SOCKETS_H_ */

@@ -36,11 +36,6 @@
 #error "LwIP 'SO_REUSE' is required for this sample!"
 #endif
 
-static inline bool isValidSocket(const Socket sock)
-{
-    return NULL != sock && INVALID_SOCKET_ID != sock->sock;
-}
-
 bool SOPC_Socket_Network_Initialize()
 {
     return true;
@@ -140,7 +135,7 @@ void SOPC_Socket_Clear(Socket* sock)
 {
     if (NULL != sock && NULL != *sock)
     {
-        (*sock)->sock = INVALID_SOCKET_ID;
+        (*sock)->sock = SOPC_FREERTOS_INVALID_SOCKET_ID;
         SOPC_Free((*sock)->membership);
         (*sock)->membership = NULL;
     }
@@ -148,7 +143,7 @@ void SOPC_Socket_Clear(Socket* sock)
 
 static SOPC_ReturnStatus Socket_Configure(Socket sock, bool setNonBlocking)
 {
-    if (!isValidSocket(sock))
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -193,7 +188,7 @@ SOPC_ReturnStatus SOPC_Socket_CreateNew(SOPC_Socket_AddressInfo* addr,
     result->sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
     result->membership = NULL;
 
-    if (!isValidSocket(result))
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(result))
     {
         status = SOPC_STATUS_NOK;
     }
@@ -243,7 +238,7 @@ SOPC_ReturnStatus SOPC_Socket_Listen(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     int bindListenStatus = -1;
-    if (NULL != addr && isValidSocket(sock))
+    if (NULL != addr && SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         bindListenStatus = bind(sock->sock, addr->ai_addr, addr->ai_addrlen);
         if (-1 != bindListenStatus)
@@ -284,10 +279,10 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
     socklen_t addrLen = sizeof(remoteAddr);
     (*acceptedSock) = NULL;
 
-    if (isValidSocket(listeningSock))
+    if (SOPC_FREERTOS_SOCKET_IS_VALID(listeningSock))
     {
         int sock = accept(listeningSock->sock, &remoteAddr, &addrLen);
-        if (INVALID_SOCKET_ID != sock)
+        if (SOPC_FREERTOS_INVALID_SOCKET_ID != sock)
         {
             // A new socket must be created.
             *acceptedSock = (Socket_t*) SOPC_Calloc(1, sizeof(Socket_t));
@@ -313,7 +308,7 @@ SOPC_ReturnStatus SOPC_Socket_Accept(Socket listeningSock, bool setNonBlocking, 
 
 SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr)
 {
-    if (NULL == addr || !isValidSocket(sock))
+    if (NULL == addr || !SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -338,7 +333,7 @@ SOPC_ReturnStatus SOPC_Socket_Connect(Socket sock, SOPC_Socket_AddressInfo* addr
 
 SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 {
-    SOPC_ASSERT(isValidSocket(to));
+    SOPC_ASSERT(SOPC_FREERTOS_SOCKET_IS_VALID(to));
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_Socket_AddressInfo addr;
     struct sockaddr saddr;
@@ -357,7 +352,7 @@ SOPC_ReturnStatus SOPC_Socket_ConnectToLocal(Socket from, Socket to)
 
 SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 {
-    if (!isValidSocket(sock))
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -374,7 +369,7 @@ SOPC_ReturnStatus SOPC_Socket_CheckAckConnect(Socket sock)
 
 void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (isValidSocket(sock) && NULL != sockSet)
+    if (SOPC_FREERTOS_SOCKET_IS_VALID(sock) && NULL != sockSet)
     {
         FD_SET(sock->sock, &sockSet->set);
         if (sock->sock > sockSet->fdmax)
@@ -386,7 +381,7 @@ void SOPC_SocketSet_Add(Socket sock, SOPC_SocketSet* sockSet)
 
 bool SOPC_SocketSet_IsPresent(Socket sock, SOPC_SocketSet* sockSet)
 {
-    if (isValidSocket(sock) && NULL != sockSet)
+    if (SOPC_FREERTOS_SOCKET_IS_VALID(sock) && NULL != sockSet)
     {
         if (false == FD_ISSET(sock->sock, &sockSet->set))
         {
@@ -447,7 +442,7 @@ int32_t SOPC_Socket_WaitSocketEvents(SOPC_SocketSet* readSet,
 
 SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t count, uint32_t* sentBytes)
 {
-    if (!isValidSocket(sock) || NULL == data || count > INT32_MAX || sentBytes == NULL)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == data || count > INT32_MAX || sentBytes == NULL)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -472,7 +467,7 @@ SOPC_ReturnStatus SOPC_Socket_Write(Socket sock, const uint8_t* data, uint32_t c
 
 SOPC_ReturnStatus SOPC_Socket_Read(Socket sock, uint8_t* data, uint32_t dataSize, uint32_t* readCount)
 {
-    if (!isValidSocket(sock) || NULL == data || 0 >= dataSize || NULL == readCount)
+    if (!SOPC_FREERTOS_SOCKET_IS_VALID(sock) || NULL == data || 0 >= dataSize || NULL == readCount)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -512,10 +507,10 @@ void SOPC_Socket_Close(Socket* pSock)
     if (NULL != pSock)
     {
         Socket sock = *pSock;
-        if (isValidSocket(sock))
+        if (SOPC_FREERTOS_SOCKET_IS_VALID(sock))
         {
             close(sock->sock);
-            sock->sock = INVALID_SOCKET_ID;
+            sock->sock = SOPC_FREERTOS_INVALID_SOCKET_ID;
             SOPC_ASSERT(sock->membership == NULL);
         }
         SOPC_Free(sock);

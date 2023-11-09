@@ -52,7 +52,9 @@ void SOPC_UDP_SocketAddress_Delete(SOPC_Socket_AddressInfo** addr);
 /**
  *  \brief Create a new UDP socket and bind it
  *
- *  \param listenAddress     Address on which the socket shall listen for input data
+ *  \param listenAddress     Address on which the socket shall listen for input data.
+ *                           If listenAddress is a multicast address, then the socket
+ *                           will automatically be added in a dedicated multicast group.
  *  \param interfaceName     The name of the interface to use, or null if unspecified.
  *                           The name shall be a null-terminated string if defined.
  *  \param setReuseAddr      If value is not false (0) the socket is configured to be reused
@@ -127,6 +129,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
 
 /**
  *  \brief Close the socket connection and/or clear the socket
+ *   If the socket was automatically added to a multicast group at creation (see ::SOPC_UDP_Socket_CreateToReceive),
+ *   then the multicast group is dropped before closing the socket.
  *
  *  \param sock     The socket to disconnect and/or clear
  */
