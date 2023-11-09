@@ -37,7 +37,10 @@ typedef enum
 {
     /* External events */
     SOCKET_CREATE_LISTENER = 0x0, /**<
-                                 id = endpoint description config index <br/>
+                                   Requests to create a new socket connection listener for the given SC listener
+                                   configuration index, provided URI data and listening all network interfaces
+                                   depending on flag value.<br/>
+                                   id = endpoint description config index <br/>
                                    params = (const char*) URI <br/>
                                    auxParam = (bool) listenAllInterfaces
                                  */

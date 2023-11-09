@@ -399,39 +399,38 @@ typedef enum SOPC_App_Com_Event
                                          *   id = (SOPC_SessionId) internal session id<br/>
                                          *   auxParam = user application session context
                                          */
-    SE_SESSION_REACTIVATING,   /**< Client side only:<br/>Notifies the session is currently re-activating due to
-                                  connection issue */
-                               /**< Client side only:<br/>
-                                *   id = (SOPC_SessionId) internal session id<br/>
-                                *   auxParam = user application session context
-                                */
-    SE_RCV_SESSION_RESPONSE,   /**< Client side only:<br/>
-                                *   Notifies the service response to a previously (non-discovery) service request sent
-                                * over a session<br/>
-                                * id = (SOPC_SessionId) internal session id<br/>
-                                * params =(OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
-                                * (deallocated by toolkit after callback call ends)<br/>
-                                * auxParam = user application request context
-                                */
-    SE_CLOSED_SESSION,         /**< Client side only:<br/>
-                                *   Notifies the session is closed after requesting a session close.<br/>
-                                *   id = (SOPC_SessionId) internal session id<br/>
-                                *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
-                                *   auxParam = user application session context
-                                */
-    SE_RCV_DISCOVERY_RESPONSE, /**< Client side only:<br/>
-                                *   Notifies the service response to a previously discovery service request sent<br/>
-                                *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
-                                *   structure (deallocated by toolkit after callback call ends) <br/>
-                                *   auxParam = user application request context
-                                */
-    SE_SND_REQUEST_FAILED,     /**< Client side only:<br/>
-                                *   Notifies the service request sending failed (connection issue or timeout for response to
-                                * be received)<br/>
-                                * idOrStatus = (SOPC_ReturnStatus) status,<br/>
-                                * params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
-                                * auxParam = user application request context
-                                */
+    SE_SESSION_REACTIVATING,            /**< Client side only:<br/>
+                                         *  Notifies the session is currently re-activating due to connection issue.<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_RCV_SESSION_RESPONSE,            /**< Client side only:<br/>
+                                         *   Notifies the service response to a previously (non-discovery) service request sent
+                                         * over a session<br/>
+                                         * id = (SOPC_SessionId) internal session id<br/>
+                                         * params =(OpcUa_<MessageStruct>*) OPC UA message header + payload structure<br/>
+                                         * (deallocated by toolkit after callback call ends)<br/>
+                                         * auxParam = user application request context
+                                         */
+    SE_CLOSED_SESSION,                  /**< Client side only:<br/>
+                                         *   Notifies the session is closed after requesting a session close.<br/>
+                                         *   id = (SOPC_SessionId) internal session id<br/>
+                                         *   params = (SOPC_StatusCode)(uintptr_t) status code reason<br/>
+                                         *   auxParam = user application session context
+                                         */
+    SE_RCV_DISCOVERY_RESPONSE,          /**< Client side only:<br/>
+                                         *   Notifies the service response to a previously discovery service request sent<br/>
+                                         *   params = (OpcUa_<MessageStruct>*) OPC UA discovery message header + payload<br/>
+                                         *   structure (deallocated by toolkit after callback call ends) <br/>
+                                         *   auxParam = user application request context
+                                         */
+    SE_SND_REQUEST_FAILED,              /**< Client side only:<br/>
+                                         *   Notifies the service request sending failed (connection issue or timeout for response to
+                                         * be received)<br/>
+                                         * idOrStatus = (SOPC_ReturnStatus) status,<br/>
+                                         * params = (SOPC_EncodeableType*) request type (shall not be deallocated)<br/>
+                                         * auxParam = user application request context
+                                         */
 
     /* Server application events */
     SE_CLOSED_ENDPOINT,       /**< Server side only:<br/>
