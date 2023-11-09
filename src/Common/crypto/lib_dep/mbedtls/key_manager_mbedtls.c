@@ -28,6 +28,7 @@
 #include "sopc_helper_encode.h"
 #include "sopc_helper_string.h"
 #include "sopc_key_manager.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -299,7 +300,8 @@ static int sopc_write_key_pem_file(unsigned char* PEMToWrite, size_t PEMLen, con
             int err = remove(filePath);
             if (0 != err)
             {
-                fprintf(stderr, "> KeyManager: removing written PEM file '%s' failed.\n", filePath);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "KeyManager: removing written PEM file '%s' failed.",
+                                       filePath);
             }
             return -2;
         }
@@ -547,7 +549,8 @@ static int sopc_export_rsa_key(SOPC_AsymmetricKey* pKey,
     }
     if (UINT32_MAX < DERSize)
     {
-        fprintf(stderr, "> KeyManager: the size in bits of the key '%s' is too large.\n", filePath);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "KeyManager: the size in bits of the key '%s' is too large.",
+                               filePath);
         return -1;
     }
     unsigned char* pDER = SOPC_Calloc(DERSize, sizeof(unsigned char));
@@ -764,8 +767,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: certificate buffer parse failed with error code: -0x%X\n",
-                    (unsigned int) -err);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "KeyManager: certificate buffer parse failed with error code: -0x%X",
+                                   (unsigned int) -err);
         }
     }
 
@@ -808,8 +812,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: certificate file \"%s\" parse failed with error code: -0x%X\n", szPath,
-                    (unsigned int) -err);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "KeyManager: certificate file \"%s\" parse failed with error code: -0x%X", szPath,
+                                   (unsigned int) -err);
         }
     }
 
@@ -1360,8 +1365,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsName(const SOPC_Certifica
     SOPC_UNUSED_ARG(ppDnsNameArray);
     SOPC_UNUSED_ARG(pArrayLength);
     /* Not implemented in version prior to 2.28.0 */
-    fprintf(stderr, "mbedtls_x509_parse_subject_alt_name is not implemented in version %d.%d.%d of MbedTLS\n",
-            MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
+    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                           "mbedtls_x509_parse_subject_alt_name is not implemented in version %d.%d.%d of MbedTLS",
+                           MBEDTLS_VERSION_MAJOR, MBEDTLS_VERSION_MINOR, MBEDTLS_VERSION_PATCH);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 #endif /* MBEDTLS_CAN_RESOLVE_HOSTNAME */
@@ -1378,7 +1384,8 @@ static char* get_raw_sha1(const mbedtls_x509_buf* raw)
     int err = mbedtls_md(pmd, raw->p, raw->len, pDest);
     if (0 != err)
     {
-        fprintf(stderr, "Cannot compute thumbprint of certificate, err -0x%X\n", (unsigned int) -err);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Cannot compute thumbprint of certificate, err -0x%X",
+                               (unsigned int) -err);
         return NULL;
     }
 
@@ -1592,10 +1599,10 @@ SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(mbedtls_x509_
                 {
                     list_match = false;
                     char* fpr = get_crt_sha1(crt);
-                    fprintf(stderr,
-                            "> MatchCRLList warning: CA Certificate with SHA-1 fingerprint %s has no CRL and will not "
-                            "be considered as valid issuer.\n",
-                            fpr);
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                             "MatchCRLList: CA Certificate with SHA-1 fingerprint %s has no "
+                                             "CRL and will not be considered as valid issuer.",
+                                             fpr);
                     SOPC_Free(fpr);
                 }
                 /* Iterate */
@@ -1658,7 +1665,8 @@ static SOPC_ReturnStatus raw_buf_to_der_file(mbedtls_x509_buf* buf, const char* 
             int err = remove(filePath);
             if (0 != err)
             {
-                fprintf(stderr, "> KeyManager: removing partially written DER file '%s' failed.\n", filePath);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                       "KeyManager: removing partially written DER file '%s' failed.", filePath);
             }
             status = SOPC_STATUS_NOK;
         }
@@ -2005,7 +2013,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: crl buffer parse failed with error code: -0x%X\n", (unsigned int) -err);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "KeyManager: crl buffer parse failed with error code: -0x%X",
+                                   (unsigned int) -err);
         }
     }
 
@@ -2025,7 +2034,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 {
     if (NULL == szPath || NULL == ppCRL)
     {
-        fprintf(stderr, "> KeyManager: crl file \"%s\" parse failed: misses the trailing '\n'", szPath);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "KeyManager: crl file \"%s\" parse failed: misses the trailing '\n'", szPath);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -2039,8 +2049,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         if (0 != err)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: crl file \"%s\" parse failed with error code: -0x%X", szPath,
-                    (unsigned int) -err);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "KeyManager: crl file \"%s\" parse failed with error code: -0x%X", szPath,
+                                   (unsigned int) -err);
         }
     }
 
