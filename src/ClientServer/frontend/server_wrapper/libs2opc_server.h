@@ -112,6 +112,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
  *
  * \param request   An instance of the following OPC UA requests:
+ *                  - ::OpcUa_AddNodesRequest
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
@@ -120,6 +121,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_Serve(bool catchSigStop);
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
  *                  - ::OpcUa_RegisterServer2Request
+ *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
@@ -139,6 +143,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
  *
  * \param request   An instance of on of the following OPC UA request:
+ *                  - ::OpcUa_AddNodesRequest
  *                  - ::OpcUa_ReadRequest
  *                  - ::OpcUa_WriteRequest
  *                  - ::OpcUa_BrowseRequest
@@ -147,7 +152,11 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                  - ::OpcUa_FindServersRequest
  *                  - ::OpcUa_FindServersOnNetworkRequest
  *                  - ::OpcUa_RegisterServer2Request
- *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment
+ *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
+ *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse

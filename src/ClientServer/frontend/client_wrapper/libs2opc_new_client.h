@@ -28,7 +28,7 @@
  * (socket closed, etc.), the client application might use the connections.
  * This is done using OPC UA services using ::SOPC_ClientHelperNew_ServiceAsync (or
  * ::SOPC_ClientHelperNew_ServiceSync).
- * The request messages might be built using the helper functions of libs2opc_request_builder.h
+ * The request messages can be built using the helper functions of libs2opc_request_builder.h
  * (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  *
  * Dedicated functions are provided to handle subscriptions:
@@ -97,6 +97,10 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  *                  - ::OpcUa_GetEndpointsRequest
  *                  - ::OpcUa_RegisterServerRequest
  *                  - ::OpcUa_RegisterServer2Request
+ *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_GetEndpointsRequest_Create, ::SOPC_GetEndpointsRequest_SetPreferredLocales, etc.).
+ *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
  *
@@ -124,6 +128,10 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *                  - ::OpcUa_GetEndpointsRequest
  *                  - ::OpcUa_RegisterServerRequest
  *                  - ::OpcUa_RegisterServer2Request
+ *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_GetEndpointsRequest_Create, ::SOPC_GetEndpointsRequest_SetPreferredLocales, etc.).
+ *
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_FindServersResponse
  *                     \li ::OpcUa_FindServersOnNetworkResponse
@@ -200,6 +208,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  *                  - ::OpcUa_RegisterServer2Request
  *                  - etc, ...
  *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
+ *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
  *
@@ -233,7 +244,12 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *                  - ::OpcUa_FindServersOnNetworkRequest
  *                  - ::OpcUa_RegisterServer2Request
  *                  - etc, ...
- *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment
+ *
+ *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
+ *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
+ *
+ *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_ReadResponse
  *                     \li ::OpcUa_WriteResponse

@@ -73,8 +73,8 @@ The main functions for server execution are defined by libs2opc_server.h:
 - ::SOPC_ServerHelper_StartServer: starts the server asynchronously, it runs until requested to stop.
 - ::SOPC_ServerHelper_StopServer: stops the server.
 - ::SOPC_ServerHelper_Serve synchronous alternative to ::SOPC_ServerHelper_StartServer, it blocks until server stopped.
-- ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse.
-- ::SOPC_ServerHelper_LocalServiceSync: execute a local service (read, write, etc.) on server synchronously.
+- ::SOPC_ServerHelper_LocalServiceAsync: execute a local service (add nodes, read, write, etc.) on server asynchronously, service response is provided through callback defined with ::SOPC_HelperConfigServer_SetLocalServiceAsyncResponse.
+- ::SOPC_ServerHelper_LocalServiceSync: execute a local service (add nodes, read, write, etc.) on server synchronously.
 
 See implementation examples
 <a href="https://gitlab.com/systerel/S2OPC/-/blob/master/samples/ClientServer/demo_server/toolkit_demo_server.c">toolkit_demo_server.c</a> (XML configuration only),
