@@ -1160,7 +1160,7 @@ SOPC_ReturnStatus SOPC_FileTransfer_Initialize(void)
     }
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetMethodCallManager(g_method_call_manager);
+        status = SOPC_ServerConfigHelper_SetMethodCallManager(g_method_call_manager);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1193,7 +1193,7 @@ void SOPC_FileTransfer_Clear(void)
     g_objectId_to_file = NULL;
     SOPC_Dict_Delete(g_handle_to_file);
     g_handle_to_file = NULL;
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
     // MethodCallManager free by SOPC_CommonHelper_Clear->SOPC_S2OPC_Config_Clear->SOPC_ServerConfig_Clear
     g_method_call_manager = NULL;
@@ -2180,7 +2180,7 @@ static void local_write_all(const uintptr_t key, uintptr_t value, uintptr_t user
 SOPC_ReturnStatus SOPC_FileTransfer_StartServer(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    status = SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(&AsyncRespCb_Fct);
+    status = SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(&AsyncRespCb_Fct);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerHelper_StartServer(ServerStoppedCallback);

@@ -194,7 +194,7 @@ static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
     SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetMethodCallManager(mcm);
+        status = SOPC_ServerConfigHelper_SetMethodCallManager(mcm);
     }
 
     /* Add methods implementation in the method call manager used */
@@ -316,7 +316,7 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromFiles(char* argv0)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
+    return SOPC_ServerConfigHelper_ConfigureFromXML(xml_server_config_path, xml_address_space_config_path,
                                                     xml_users_config_path, NULL);
 }
 
@@ -353,14 +353,14 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&logConfig);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
     }
 
     if (SOPC_STATUS_OK == status)
     {
         /* This function must be called after the initialization functions of the server library and
            before starting the server and its configuration. */
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
     }
 
     /* Configuration of:
@@ -399,7 +399,7 @@ int main(int argc, char* argv[])
     /* Define address space write notification callback */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetWriteNotifCallback(Demo_WriteNotificationCallback);
+        status = SOPC_ServerConfigHelper_SetWriteNotifCallback(Demo_WriteNotificationCallback);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -426,7 +426,7 @@ int main(int argc, char* argv[])
          * It is then possible to use local services to access / write data:
          * - Synchronously with SOPC_ServerHelper_LocalServiceSync(...)
          * - Asynchronously with SOPC_ServerHelper_LocalServiceAsync(...): need
-         * SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(...) to be configured prior to start server
+         * SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(...) to be configured prior to start server
          */
 
         if (SOPC_STATUS_OK != status)
@@ -451,7 +451,7 @@ int main(int argc, char* argv[])
     SOPC_Free(skManager);
 
     /* Clear the server library (stop all library threads) and server configuration */
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK != status)

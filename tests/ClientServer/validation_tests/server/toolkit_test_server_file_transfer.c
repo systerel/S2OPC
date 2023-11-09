@@ -67,7 +67,7 @@ static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
     // User credentials and authorizations
     const char* xml_users_cfg_path = "./S2OPC_UACTT_Users.xml";
 
-    return SOPC_HelperConfigServer_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
+    return SOPC_ServerConfigHelper_ConfigureFromXML(xml_server_cfg_path, xml_address_space_path, xml_users_cfg_path,
                                                     NULL);
 }
 
@@ -120,12 +120,12 @@ int main(int argc, char* argv[])
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
     }
     SOPC_ASSERT("<test_server_file_transfer: Server initialization failed" && SOPC_STATUS_OK == status);
 
     // Define the callback to retrieve the password of server private key
-    status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
+    status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_TestHelper_AskPass_FromEnv);
     SOPC_ASSERT("<test_server_file_transfer: SetKeyPasswordCallback failed" && SOPC_STATUS_OK == status);
 
     // load config from XML file :

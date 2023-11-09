@@ -93,7 +93,7 @@ static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
 static SOPC_ReturnStatus Server_LoadServerConfigurationFromPaths(void)
 {
     SOPC_ReturnStatus status =
-        SOPC_HelperConfigServer_ConfigureFromXML(XML_SERVER_CFG_PATH, XML_ADDRESS_SPACE_PATH, XML_USERS_CFG_PATH, NULL);
+        SOPC_ServerConfigHelper_ConfigureFromXML(XML_SERVER_CFG_PATH, XML_ADDRESS_SPACE_PATH, XML_USERS_CFG_PATH, NULL);
     if (SOPC_STATUS_OK != status)
     {
         printf("******* Failed to load configuration from paths:\n");
@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
     logDirPath = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_Initialize();
+        status = SOPC_ServerConfigHelper_Initialize();
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Unable to initialize the S2OPC Server frontend configuration.\n");
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
     {
         /* This function must be called after the initialization functions of the server library and
            before starting the server and its configuration. */
-        status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
+        status = SOPC_ServerConfigHelper_SetKeyPasswordCallback(&SOPC_PrivateKeyAskPass_FromTerminal);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -267,7 +267,7 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_HelperConfigServer_SetWriteNotifCallback(&UserWriteNotificationCallback);
+        status = SOPC_ServerConfigHelper_SetWriteNotifCallback(&UserWriteNotificationCallback);
         if (SOPC_STATUS_OK != status)
         {
             printf("******* Failed to configure the @ space modification notification callback\n");

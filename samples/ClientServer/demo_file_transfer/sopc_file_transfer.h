@@ -86,7 +86,7 @@ typedef struct SOPC_FileType_Config
 /**
  * \brief Initialise the API.
  * \note Memory allocation, need to call SOPC_FileTransfer_Clear after use.
- * \warning The function shall be called after SOPC_HelperConfigServer_Initialize and before any other function of the
+ * \warning The function shall be called after SOPC_ServerConfigHelper_Initialize and before any other function of the
  *  server wrapper module (for exemple local services...).
  * \return SOPC_STATUS_OK if no error
  */
