@@ -69,6 +69,7 @@ typedef struct
     const SOPC_CertificateList* trustedCrts;
     const SOPC_CRLList* allCRLs;
     bool isTrustedInChain;
+    bool disableRevocationCheck;
 } SOPC_CheckTrustedAndCRLinChain;
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
@@ -189,7 +190,7 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
      * It is your responsibility to provide up-to-date CRLs for all trusted CAs. If no CRL is provided for the CA
      * that was used to sign the certificate, CRL verification is skipped silently, that is without setting any flag.
      */
-    if (0 != certificate_depth)
+    if (0 != certificate_depth && !checkTrustedAndCRLinChain->disableRevocationCheck)
     {
         bool matchCRL = false;
         // Unlink cert temporarily for CRL verification
@@ -295,12 +296,14 @@ static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha1_1024_2048 = {.mdSign =
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha256_2048 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                       .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
                                                                       .pkAlgo = SOPC_PKI_PK_RSA,
-                                                                      .RSAMinimumKeySize = 2048};
+                                                                      .RSAMinimumKeySize = 2048,
+                                                                      .bDisableRevocationCheck = false};
 
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha1_1024 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                     .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                                                     .pkAlgo = SOPC_PKI_PK_RSA,
-                                                                    .RSAMinimumKeySize = 1024};
+                                                                    .RSAMinimumKeySize = 1024,
+                                                                    .bDisableRevocationCheck = false};
 
 typedef struct Profile_Cfg
 {
@@ -995,9 +998,10 @@ static SOPC_ReturnStatus sopc_validate_certificate(
     const SOPC_PKIProvider* pPKI,
     mbedtls_x509_crt* mbed_cert,
     mbedtls_x509_crt_profile* mbed_profile,
-    bool bIsSelfSigned,     /* Certificate is self-signed: added with root CAs for validation */
-    bool bForceTrustedCert, /* Force the certificate to be trusted for the validation:
-                               for sopc_verify_every_certificate only */
+    bool bIsSelfSigned,           /* Certificate is self-signed: added with root CAs for validation */
+    bool bForceTrustedCert,       /* Force the certificate to be trusted for the validation:
+                                     for sopc_verify_every_certificate only */
+    bool bDisableRevocationCheck, /* Defined if no error is reported if a CA certificate have not a revocation list. */
     const char* thumbprint,
     uint32_t* error)
 {
@@ -1052,8 +1056,10 @@ static SOPC_ReturnStatus sopc_validate_certificate(
         mbed_cert->next = pLinkCert;
     }
 
-    SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {
-        .trustedCrts = pPKI->pAllTrusted, .allCRLs = pPKI->pAllCrl, .isTrustedInChain = bForceTrustedCert};
+    SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {.trustedCrts = pPKI->pAllTrusted,
+                                                         .allCRLs = pPKI->pAllCrl,
+                                                         .isTrustedInChain = bForceTrustedCert,
+                                                         .disableRevocationCheck = bDisableRevocationCheck};
     /* Verify the certificate chain */
     uint32_t failure_reasons = 0;
     int ret = mbedtls_x509_crt_verify_with_profile(mbed_cert, mbed_ca_root, mbed_crl, mbed_profile, NULL,
@@ -1324,8 +1330,8 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     if (SOPC_STATUS_OK == status)
     {
         mbedtls_x509_crt* mbedCertToValidate = (mbedtls_x509_crt*) (&pToValidateCpy->crt);
-        status = sopc_validate_certificate(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, false, thumbprint,
-                                           &currentError);
+        status = sopc_validate_certificate(pPKI, mbedCertToValidate, &crt_profile, bIsSelfSigned, false,
+                                           pProfile->chainProfile->bDisableRevocationCheck, thumbprint, &currentError);
         if (SOPC_STATUS_OK != status)
         {
             if (!bErrorFound)
@@ -1401,6 +1407,7 @@ static void sopc_free_c_string_from_ptr(void* data)
 static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPkiCerts,
                                                        const SOPC_PKIProvider* pPKI,
                                                        mbedtls_x509_crt_profile* mbed_profile,
+                                                       const bool bDisableRevocationCheck,
                                                        bool* bErrorFound,
                                                        SOPC_Array* pErrors,
                                                        SOPC_Array* pThumbprints)
@@ -1446,8 +1453,8 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         {
             // When verifying all certificates, we shall ignore trusted validation since we also validate untrusted ones
             const bool forceTrustedCert = true;
-            statusChain =
-                sopc_validate_certificate(pPKI, crt, mbed_profile, bIsSelfSigned, forceTrustedCert, thumbprint, &error);
+            statusChain = sopc_validate_certificate(pPKI, crt, mbed_profile, bIsSelfSigned, forceTrustedCert,
+                                                    bDisableRevocationCheck, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
                 *bErrorFound = true;
@@ -1515,16 +1522,18 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     {
         if (NULL != pPKI->pAllCerts)
         {
-            status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, &bErrorFound, pErrArray,
-                                                   pThumbArray);
+            status =
+                sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
+                                              &bErrorFound, pErrArray, pThumbArray);
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         if (NULL != pPKI->pAllRoots)
         {
-            status = sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, &bErrorFound, pErrArray,
-                                                   pThumbArray);
+            status =
+                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
+                                              &bErrorFound, pErrArray, pThumbArray);
         }
     }
 
@@ -1986,45 +1995,21 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     /* trusted CA => trusted CRL*/
     if (0 != trusted_ca_count && NULL == pTrustedCrl)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: trusted CA certificates are provided but no CRL.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: trusted CA certificates are provided but no CRL.");
     }
-    /* check and warn in case there is no trusted leaf certificates and no trusted roots (only trusted intermediate
-     * CA).
-     */
-    if ((0 == issued_cert_count) && (0 == trusted_root_count))
-    {
-        /* In this case, no certificates will be accepted. */
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: no trusted leaf certificate and no trusted root is given: no "
-                               "certificates will be accepted.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
     get_list_stats(pIssuerCerts, &issuer_ca_count, &issuer_list_length, &issuer_root_count);
     /* issuer CA => issuer CRL*/
     if (0 != issuer_ca_count && NULL == pIssuerCrl)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: issuer CA certificates are provided but no CRL.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: issuer CA certificates are provided but no CRL.");
     }
     /* Check if issuerCerts list is only filled with CA. */
     if (issuer_list_length != issuer_ca_count)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: not all issuer certificates are CAs.");
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* check and warn in case there is no trusted leaf certificates but issuer certificates. */
-    if ((0 != issuer_ca_count) && (0 == issued_cert_count))
-    {
-        /* In this case, only trusted root CA will be accepted (if Backward interoperability is enabled). */
-        SOPC_Logger_TraceWarning(
-            SOPC_LOG_MODULE_COMMON,
-            "> PKI creation warning: issuer certificates are given but no trusted leaf certificates: "
-            "only certificates issued by the trusted Root CA will be accepted and the root itself if backward "
-            "interoperability is enabled");
     }
     /* check and warn in case no roots is provided wheras at least one trusted leaf certificate is provided. */
     if ((0 == issuer_root_count) && (0 == trusted_root_count) && (0 != issued_cert_count))
@@ -2166,7 +2151,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     bool bIssuerCRL = false;
     if (SOPC_STATUS_OK == status)
     {
-        if (bTrustedCaFound)
+        if (bTrustedCaFound && NULL != tmp_pTrustedCrl)
         {
             status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(&tmp_pTrustedCerts->crt, &tmp_pTrustedCrl->crl,
                                                                       &bTrustedCRL);
@@ -2178,7 +2163,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (bIssuerCaFound)
+        if (bIssuerCaFound && NULL != tmp_pIssuerCrl)
         {
             status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(&tmp_pIssuerCerts->crt, &tmp_pIssuerCrl->crl,
                                                                       &bIssuerCRL);

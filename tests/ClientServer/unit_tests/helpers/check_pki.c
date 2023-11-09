@@ -72,21 +72,6 @@ START_TEST(invalid_create)
     status = SOPC_PKIProvider_CreateFromList(NULL, pTrustedCrl, pIssuersCerts, pIssuersCrl, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
     ck_assert_ptr_null(pPKI);
-    /* Only intermediate CA is provided for trustedCerts */
-    status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, pIssuersCrl, &pPKI);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    ck_assert_ptr_null(pPKI);
-    /* Trusted CA certificates is provided but no CRL */
-    status =
-        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_UACTT_PKI/trusted/certs/cacert.der", &pTrustedCerts);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, NULL, pIssuersCerts, pIssuersCrl, &pPKI);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    ck_assert_ptr_null(pPKI);
-    /* Issuer CA certificate is provided but no CRL */
-    status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, pIssuersCerts, NULL, &pPKI);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    ck_assert_ptr_null(pPKI);
     /* Not all issuer certificates are CAs */
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pIssuersCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -713,7 +698,8 @@ START_TEST(functional_test_verify_every_cert)
     const SOPC_PKI_ChainProfile profile = {.curves = SOPC_PKI_CURVES_ANY,
                                            .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                            .pkAlgo = SOPC_PKI_PK_ANY,
-                                           .RSAMinimumKeySize = 2048};
+                                           .RSAMinimumKeySize = 2048,
+                                           .bDisableRevocationCheck = false};
     status = SOPC_PKIProvider_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints, &nbError);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_uint_eq(0, nbError);
@@ -888,6 +874,41 @@ START_TEST(functional_test_remove_cert)
 }
 END_TEST
 
+START_TEST(functional_test_pki_without_revocation_list)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_CertificateList* pTrustedRoot = NULL;
+    SOPC_CertificateList* pCertToValidate = NULL;
+    SOPC_ReturnStatus status =
+        SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pTrustedRoot);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    uint32_t error = 0;
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCertToValidate);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Create a PKI without CRLs only warns and no error is reported */
+    status = SOPC_PKIProvider_CreateFromList(pTrustedRoot, NULL, NULL, NULL, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_PKI_Profile* pProfile = NULL;
+    status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Validation failed as no CRL is provided for the trusted root */
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, error);
+    /* Disable the revocation check => No error */
+    pProfile->chainProfile->bDisableRevocationCheck = true;
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    SOPC_KeyManager_Certificate_Free(pTrustedRoot);
+    SOPC_KeyManager_Certificate_Free(pCertToValidate);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
 Suite* tests_make_suite_pki(void)
 {
     Suite* s;
@@ -922,6 +943,7 @@ Suite* tests_make_suite_pki(void)
     tcase_add_test(functional, functional_test_pki_permissive);
     tcase_add_test(functional, functional_test_verify_every_cert);
     tcase_add_test(functional, functional_test_remove_cert);
+    tcase_add_test(functional, functional_test_pki_without_revocation_list);
     suite_add_tcase(s, functional);
 
     return s;

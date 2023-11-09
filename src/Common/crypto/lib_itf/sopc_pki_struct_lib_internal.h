@@ -85,6 +85,8 @@ struct SOPC_PKI_LeafProfile
  *   The elliptic curves allowed.
  * @var SOPC_PKI_ChainProfile::RSAMinimumKeySize
  *   The minimum RSA key size allowed.
+ * @var SOPC_PKI_ChainProfile::bDisableRevocationCheck
+ *   Defines if no error is reported if a CA certificate have not a revocation list.
  */
 struct SOPC_PKI_ChainProfile
 {
@@ -92,6 +94,7 @@ struct SOPC_PKI_ChainProfile
     SOPC_PKI_PkAlgo pkAlgo;
     SOPC_PKI_EllipticCurves curves;
     uint32_t RSAMinimumKeySize;
+    bool bDisableRevocationCheck;
 };
 
 /**
