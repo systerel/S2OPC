@@ -141,7 +141,6 @@ static void assert_UserCallback(const char* context)
     PRINT("ASSERT FAILED : <%p>\n", (const void*) context);
     PRINT("Context: <%s>\n", context);
     stopSignal = 1;
-    exit(1);
 }
 
 /***************************************************/
@@ -252,6 +251,9 @@ void SOPC_Platform_Main(void)
 
     PRINT("\nBUILD DATE : " __DATE__ " " __TIME__ "\n");
 
+    /* Setup platform-dependant features (network, ...)*/
+    SOPC_Platform_Setup();
+
     epURL = SOPC_strdup(CONFIG_SOPC_ENDPOINT_ADDRESS);
     SOPC_Assert_Set_UserCallback(&assert_UserCallback);
     SOPC_Log_Configuration logCfg = {.logLevel = SOPC_LOG_LEVEL_WARNING,
@@ -259,9 +261,6 @@ void SOPC_Platform_Main(void)
                                      .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
     status = SOPC_CommonHelper_Initialize(&logCfg);
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_CommonHelper_Initialize failed");
-
-    /* Setup platform-dependant features (network, ...)*/
-    SOPC_Platform_Setup();
 
     /* Create thread for Command Line Input management*/
     status = SOPC_Thread_Create(&CLI_thread, &CLI_thread_exec, NULL, "CLI");
@@ -331,8 +330,42 @@ static int cmd_demo_configure(WordList* pList)
 {
     if (NULL != gConfiguration)
     {
+        bool configureClient = false;
         PRINT("\nClient already configured!\n");
-        return 0;
+        PRINT("Do you want to overwrite Configuration ? [y/n]\n");
+        char* overwriteBuffer = SOPC_Shell_ReadLine();
+        char* wordList = overwriteBuffer;
+
+        const char* word = CLI_GetNextWord(&wordList);
+        if(word != NULL && word[0] != 0)
+        {
+            if (0 == strcmp(word, "y"))
+            {
+                SOPC_ClientConfigHelper_Clear();
+                SOPC_ReturnStatus status = SOPC_ClientConfigHelper_Initialize();
+                if (SOPC_STATUS_OK != status)
+                {
+                    PRINT("Failed to initialized client toolkit with status %d\n", status);
+                }
+                else
+                {
+                    configureClient = true;
+                }
+            }
+            else if (0 == strcmp(word, "n"))
+            {
+                PRINT("Configuration not modified \n");
+            }
+            else
+            {
+                PRINT("Unknown response \n Nothing done !\n");
+            }
+        }
+        SOPC_Free(overwriteBuffer);
+        if (!configureClient)
+        {
+            return 0;
+        }
     }
 
     const char* word = CLI_GetNextWord(pList);
