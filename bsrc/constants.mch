@@ -481,6 +481,7 @@ ABSTRACT_CONSTANTS
     cast_t_BrowsePath,
     cast_t_CallMethod,
     cast_t_channel,
+    cast_t_channel_config_idx,
     cast_t_subscription,
     cast_t_ReadValue,
     cast_t_WriteValue,
@@ -892,6 +893,8 @@ PROPERTIES
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
+    cast_t_channel_config_idx : NAT +-> t_channel_config_idx_i &
+    cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
     t_timer_id <: t_timer_id_i &
     c_timer_id_indet : t_timer_id_i &
@@ -1094,6 +1097,22 @@ OPERATIONS
         p_res := bool(p_config_idx : t_channel_config_idx)
     END
     ;
+
+    p_card_channel_config <-- get_card_t_channel_config_idx =
+    BEGIN
+        p_card_channel_config := card(t_channel_config_idx)
+    END
+    ;
+
+    p_config <-- get_cast_t_channel_config_idx(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_channel_config_idx)
+    THEN
+        p_config := cast_t_channel_config_idx(p_ind)
+    END
+    ;
+
 
     p_res <-- is_t_endpoint_config_idx(p_endpoint_config_idx) =
     PRE

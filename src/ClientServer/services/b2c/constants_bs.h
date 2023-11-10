@@ -257,6 +257,7 @@ extern void constants_bs__get_CurrentTimestamp(constants_bs__t_Timestamp* const 
 extern void constants_bs__get_SupportedLocales(const constants_bs__t_endpoint_config_idx_i constants_bs__p_in,
                                                constants_bs__t_LocaleIds_i* const constants_bs__p_localeIds);
 extern void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_channel);
+extern void constants_bs__get_card_t_channel_config_idx(t_entier4* const constants_bs__p_card_channel_config);
 extern void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session);
 extern void constants_bs__get_card_t_subscription(t_entier4* const constants_bs__p_card_subscription);
 extern void constants_bs__get_cast_t_BrowsePath(const t_entier4 constants_bs__p_ind,
@@ -265,6 +266,9 @@ extern void constants_bs__get_cast_t_CallMethod(const t_entier4 constants_bs__p_
                                                 constants_bs__t_CallMethod_i* const constants_bs__p_callMethod);
 extern void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_channel_i* const constants_bs__p_channel);
+extern void constants_bs__get_cast_t_channel_config_idx(
+    const t_entier4 constants_bs__p_ind,
+    constants_bs__t_channel_config_idx_i* const constants_bs__p_config);
 extern void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,
                                              constants_bs__t_session_i* const constants_bs__p_session);
 extern void constants_bs__get_cast_t_subscription(const t_entier4 constants_bs__p_ind,

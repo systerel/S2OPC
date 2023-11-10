@@ -83,6 +83,9 @@ LOCAL_OPERATIONS
         :(  channels_to_iterate <: t_channel &
             channels_iterated   <: t_channel &
             channels_to_iterate /\ channels_iterated = {} &
+            channel_configs_to_iterate <: t_channel_config_idx &
+            channel_configs_iterated   <: t_channel_config_idx &
+            channel_configs_to_iterate /\ channel_configs_iterated = {} &
             all_channel_closing : BOOL &
             all_client_only_channel_closing : BOOL
          )
@@ -125,22 +128,24 @@ OPERATIONS
     l_check_all_channel_lost =
     VAR
         l_cli_con,
-        l_con,
+        l_any_channel_connected_or_connecting,
         l_continue,
-        l_channel
+        l_channel,
+        l_config_idx
     IN
         IF  all_channel_closing = TRUE or all_client_only_channel_closing = TRUE THEN
-            l_con := FALSE;
+            /* Connected channels */
+            l_any_channel_connected_or_connecting := FALSE;
             l_continue <-- init_iter_channel;
             WHILE
                 l_continue = TRUE &
-                l_con      = FALSE
+                l_any_channel_connected_or_connecting = FALSE
             DO
                 l_continue, l_channel <-- continue_iter_channel;
                 l_cli_con <-- is_client_channel (l_channel);
                 IF all_channel_closing = TRUE or (all_client_only_channel_closing = TRUE & l_cli_con = TRUE)
                 THEN
-                    l_con <-- is_channel_connected(l_channel)
+                    l_any_channel_connected_or_connecting <-- is_channel_connected(l_channel)
                 END
             INVARIANT
                channels_to_iterate <: t_channel &
@@ -150,7 +155,20 @@ OPERATIONS
             VARIANT
                card(channels_to_iterate)
             END;
-            IF  l_con = FALSE THEN
+            /* Connecting channels */
+            l_continue <-- init_iter_channel_config_idx;
+            WHILE l_continue = TRUE & l_any_channel_connected_or_connecting = FALSE DO
+                l_continue, l_config_idx <-- continue_iter_channel_config_idx;
+                l_any_channel_connected_or_connecting <-- is_cli_channel_connecting(l_config_idx)
+            INVARIANT
+                channel_configs_to_iterate <: t_channel_config_idx &
+                channel_configs_iterated   <: t_channel_config_idx &
+                channel_configs_to_iterate /\ channel_configs_iterated = {} &
+                channel_configs_to_iterate \/ channel_configs_iterated = t_channel_config_idx
+            VARIANT
+                card(channel_configs_to_iterate)
+            END;
+            IF  l_any_channel_connected_or_connecting = FALSE THEN
                 last_connected_channel_lost(all_client_only_channel_closing);
                 all_channel_closing := FALSE;
                 all_client_only_channel_closing := FALSE
@@ -249,20 +267,23 @@ OPERATIONS
     VAR
         l_continue,
         l_channel,
-        l_con,
+        l_config_idx,
+        l_connected,
+        l_connecting,
         l_cli_con,
-        l_any_channel_closing
+        l_any_channel_closing_or_connecting
     IN
-        l_any_channel_closing := FALSE;
+        l_any_channel_closing_or_connecting := FALSE;
         l_continue <-- init_iter_channel;
+        /* Connected channels */
         WHILE l_continue = TRUE DO
             l_continue, l_channel <-- continue_iter_channel;
-            l_con <-- is_channel_connected(l_channel);
+            l_connected <-- is_channel_connected(l_channel);
             l_cli_con <-- is_client_channel (l_channel);
-            IF l_con = TRUE &
+            IF l_connected = TRUE &
                 (p_clientOnly = FALSE or l_cli_con = TRUE)
             THEN
-                l_any_channel_closing := TRUE;
+                l_any_channel_closing_or_connecting := TRUE;
                 l_close_secure_channel(l_channel)
             END
         INVARIANT
@@ -273,9 +294,29 @@ OPERATIONS
         VARIANT
             card(channels_to_iterate)
         END;
-        all_channel_closing := bool(p_clientOnly = FALSE & l_any_channel_closing = TRUE);
-        all_client_only_channel_closing := bool(p_clientOnly = TRUE & l_any_channel_closing = TRUE);
-        bres := l_any_channel_closing
+        /* Connecting channels */
+        l_continue <-- init_iter_channel_config_idx;
+        WHILE l_continue = TRUE DO
+            l_continue, l_config_idx <-- continue_iter_channel_config_idx;
+            l_connecting <-- is_cli_channel_connecting(l_config_idx);
+            IF l_connecting = TRUE
+            THEN
+                l_any_channel_closing_or_connecting := TRUE;
+                /* Set as disconnecting to be closed in case of set connected event: see cli_set_connected_channel */
+                add_cli_channel_disconnecting(l_config_idx)
+            END
+        INVARIANT
+            channel_configs_to_iterate <: t_channel_config_idx &
+            channel_configs_iterated   <: t_channel_config_idx &
+            channel_configs_to_iterate /\ channel_configs_iterated = {} &
+            channel_configs_to_iterate \/ channel_configs_iterated = t_channel_config_idx
+        VARIANT
+            card(channel_configs_to_iterate)
+        END;
+
+        all_channel_closing := bool(p_clientOnly = FALSE & l_any_channel_closing_or_connecting = TRUE);
+        all_client_only_channel_closing := bool(p_clientOnly = TRUE & l_any_channel_closing_or_connecting = TRUE);
+        bres := l_any_channel_closing_or_connecting
     END
     ;
 
@@ -299,10 +340,12 @@ OPERATIONS
     bres <-- cli_set_connected_channel (config_idx, reverse_endpoint_config_idx, channel) =
     VAR
         l_is_channel_connecting,
+        l_is_channel_disconnecting,
         l_is_channel_connected,
         l_current_time
     IN
         l_is_channel_connecting <-- is_cli_channel_connecting(config_idx);
+        l_is_channel_disconnecting <-- is_disconnecting_channel(config_idx);
         l_is_channel_connected  <-- is_channel_connected(channel);
         IF  l_is_channel_connecting = TRUE &
             l_is_channel_connected = FALSE
@@ -312,6 +355,12 @@ OPERATIONS
             add_channel_connected(channel, l_current_time);
             set_config(channel, config_idx, reverse_endpoint_config_idx);
             define_SecurityPolicy(channel);
+            /* If channel was tagged for disconnection, close it now it is connected */
+            IF l_is_channel_disconnecting = TRUE
+            THEN
+                l_close_secure_channel(channel)
+            END
+            ;
             bres := TRUE
         ELSE
             bres := FALSE
@@ -326,6 +375,7 @@ OPERATIONS
         l_res <-- is_cli_channel_connecting(config_idx);
         IF  l_res = TRUE THEN
             remove_cli_channel_connecting(config_idx);
+            l_check_all_channel_lost;
             bres := TRUE
         ELSE
             bres := FALSE

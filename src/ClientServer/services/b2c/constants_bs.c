@@ -115,6 +115,11 @@ void constants_bs__get_card_t_channel(t_entier4* const constants_bs__p_card_chan
     *constants_bs__p_card_channel = constants_bs__t_channel_i_max;
 }
 
+void constants_bs__get_card_t_channel_config_idx(t_entier4* const constants_bs__p_card_channel_config)
+{
+    *constants_bs__p_card_channel_config = constants_bs__t_channel_config_idx_i_max;
+}
+
 void constants_bs__get_card_t_session(t_entier4* const constants_bs__p_card_session)
 {
     *constants_bs__p_card_session = constants_bs__t_session_i_max;
@@ -129,6 +134,12 @@ void constants_bs__get_cast_t_channel(const t_entier4 constants_bs__p_ind,
                                       constants_bs__t_channel_i* const constants_bs__p_channel)
 {
     *constants_bs__p_channel = (uint32_t) constants_bs__p_ind; // TODO: add precondition in B model
+}
+
+void constants_bs__get_cast_t_channel_config_idx(const t_entier4 constants_bs__p_ind,
+                                                 constants_bs__t_channel_config_idx_i* const constants_bs__p_config)
+{
+    *constants_bs__p_config = (SOPC_SecureChannelConfigIdx) constants_bs__p_ind;
 }
 
 void constants_bs__get_cast_t_session(const t_entier4 constants_bs__p_ind,

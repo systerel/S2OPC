@@ -229,6 +229,7 @@ ABSTRACT_CONSTANTS
     t_msg,
     t_request_context,
     t_channel_config_idx,
+    cast_t_channel_config_idx,
     t_endpoint_config_idx,
     t_reverse_endpoint_config_idx,
     t_client_request_handle,
@@ -448,6 +449,8 @@ PROPERTIES
     t_channel_config_idx <: t_channel_config_idx_i &
     c_channel_config_idx_indet : t_channel_config_idx_i &
     c_channel_config_idx_indet /: t_channel_config_idx &
+    cast_t_channel_config_idx : NAT +-> t_channel_config_idx_i &
+    cast_t_channel_config_idx : perm(t_channel_config_idx) &
 
     t_endpoint_config_idx <: t_endpoint_config_idx_i &
     c_endpoint_config_idx_indet : t_endpoint_config_idx_i &
@@ -572,6 +575,21 @@ OPERATIONS
         p_config_idx : t_channel_config_idx_i
     THEN
         p_res := bool(p_config_idx : t_channel_config_idx)
+    END
+    ;
+
+    p_card_channel_config <-- get_card_t_channel_config_idx =
+    BEGIN
+        p_card_channel_config := card(t_channel_config_idx)
+    END
+    ;
+
+    p_config <-- get_cast_t_channel_config_idx(p_ind) =
+    PRE
+        p_ind : NAT &
+        p_ind : dom(cast_t_channel_config_idx)
+    THEN
+        p_config := cast_t_channel_config_idx(p_ind)
     END
     ;
 

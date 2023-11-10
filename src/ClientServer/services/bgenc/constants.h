@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 03/05/2023 10:43:33
+ Date                 : 10/11/2023 17:24:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -524,11 +524,13 @@ extern void constants__INITIALISATION(void);
 #define constants__get_CurrentTimestamp constants_bs__get_CurrentTimestamp
 #define constants__get_SupportedLocales constants_bs__get_SupportedLocales
 #define constants__get_card_t_channel constants_bs__get_card_t_channel
+#define constants__get_card_t_channel_config_idx constants_bs__get_card_t_channel_config_idx
 #define constants__get_card_t_session constants_bs__get_card_t_session
 #define constants__get_card_t_subscription constants_bs__get_card_t_subscription
 #define constants__get_cast_t_BrowsePath constants_bs__get_cast_t_BrowsePath
 #define constants__get_cast_t_CallMethod constants_bs__get_cast_t_CallMethod
 #define constants__get_cast_t_channel constants_bs__get_cast_t_channel
+#define constants__get_cast_t_channel_config_idx constants_bs__get_cast_t_channel_config_idx
 #define constants__get_cast_t_session constants_bs__get_cast_t_session
 #define constants__get_cast_t_subscription constants_bs__get_cast_t_subscription
 #define constants__get_copy_ExpandedNodeId constants_bs__get_copy_ExpandedNodeId

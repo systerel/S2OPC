@@ -27,19 +27,26 @@ SEES
     constants
 
 CONCRETE_VARIABLES
-    channel_i
+    channel_i,
+    channel_config_i
 
 INVARIANT
     channel_i : INT &
     channel_i : 0 .. size(cast_t_channel) &
-    channels_to_iterate = cast_t_channel[1..channel_i]
+    channels_to_iterate = cast_t_channel[1..channel_i] &
+    channel_config_i : INT &
+    channel_config_i : 0 .. size(cast_t_channel) &
+    channel_configs_to_iterate = cast_t_channel_config_idx[1..channel_config_i]
 
 ASSERTIONS
    (cast_t_channel[1..channel_i] /= {} <=> 1 <= channel_i);
-   (channels_to_iterate /= {} <=> 1 <= channel_i)
+   (channels_to_iterate /= {} <=> 1 <= channel_i);
+   (cast_t_channel_config_idx[1..channel_config_i] /= {} <=> 1 <= channel_config_i);
+   (channel_configs_to_iterate /= {} <=> 1 <= channel_config_i)
 
 INITIALISATION
-    channel_i := 0
+    channel_i := 0;
+    channel_config_i := 0
 
 OPERATIONS
 
@@ -55,6 +62,21 @@ OPERATIONS
         p_channel <-- get_cast_t_channel(channel_i);
         channel_i  := channel_i - 1;
         p_continue := bool(1 <= channel_i)
+    END
+    ;
+
+    p_continue <-- init_iter_channel_config_idx =
+    BEGIN
+        channel_config_i <-- get_card_t_channel_config_idx;
+        p_continue := bool(1 <= channel_config_i)
+    END
+    ;
+
+    p_continue, p_config_idx <-- continue_iter_channel_config_idx =
+    BEGIN
+        p_config_idx <-- get_cast_t_channel_config_idx(channel_config_i);
+        channel_config_i  := channel_config_i - 1;
+        p_continue := bool(1 <= channel_config_i)
     END
 
 END

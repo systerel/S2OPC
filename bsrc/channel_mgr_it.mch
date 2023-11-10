@@ -26,13 +26,18 @@ SEES
 DEFINITIONS
     d_variables ==
         channels_to_iterate,
-        channels_iterated
+        channels_iterated,
+        channel_configs_to_iterate,
+        channel_configs_iterated
     ;
 
     d_inv ==
         channels_to_iterate <: t_channel &
         channels_iterated   <: t_channel &
-        channels_to_iterate /\ channels_iterated = {}
+        channels_to_iterate /\ channels_iterated = {} &
+        channel_configs_to_iterate <: t_channel_config_idx &
+        channel_configs_iterated   <: t_channel_config_idx &
+        channel_configs_to_iterate /\ channel_configs_iterated = {}
 
 ABSTRACT_VARIABLES
     d_variables
@@ -66,6 +71,31 @@ OPERATIONS
             channels_to_iterate := channels_to_iterate -  {l_channel} ||
             p_channel           := l_channel                          ||
             p_continue          := bool(channels_to_iterate /= {l_channel})
+        END
+    END
+    ;
+
+    p_continue <-- init_iter_channel_config_idx =
+    BEGIN
+        channel_configs_iterated   := {}        ||
+        channel_configs_to_iterate := t_channel_config_idx ||
+        p_continue          := bool(t_channel_config_idx /= {})
+    END
+    ;
+
+    p_continue, p_config_idx <-- continue_iter_channel_config_idx =
+    PRE
+        channel_configs_to_iterate /= {}
+    THEN
+        ANY l_config WHERE
+            l_config : t_channel_config_idx_i &
+            l_config : t_channel_config_idx   &
+            l_config : channel_configs_to_iterate
+        THEN
+            channel_configs_iterated   := channel_configs_iterated   \/ {l_config} ||
+            channel_configs_to_iterate := channel_configs_to_iterate -  {l_config} ||
+            p_config_idx           := l_config                          ||
+            p_continue          := bool(channel_configs_to_iterate /= {l_config})
         END
     END
 

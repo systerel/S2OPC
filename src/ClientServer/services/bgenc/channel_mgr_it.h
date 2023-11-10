@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_it.h
 
- Date                 : 04/08/2022 14:53:06
+ Date                 : 10/11/2023 17:24:45
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,6 +43,7 @@
 /*----------------------------
    CONCRETE_VARIABLES Clause
   ----------------------------*/
+extern t_entier4 channel_mgr_it__channel_config_i;
 extern t_entier4 channel_mgr_it__channel_i;
 
 /*------------------------
@@ -56,7 +57,12 @@ extern void channel_mgr_it__INITIALISATION(void);
 extern void channel_mgr_it__continue_iter_channel(
    t_bool * const channel_mgr_it__p_continue,
    constants__t_channel_i * const channel_mgr_it__p_channel);
+extern void channel_mgr_it__continue_iter_channel_config_idx(
+   t_bool * const channel_mgr_it__p_continue,
+   constants__t_channel_config_idx_i * const channel_mgr_it__p_config_idx);
 extern void channel_mgr_it__init_iter_channel(
+   t_bool * const channel_mgr_it__p_continue);
+extern void channel_mgr_it__init_iter_channel_config_idx(
    t_bool * const channel_mgr_it__p_continue);
 
 #endif
