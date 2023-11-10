@@ -151,6 +151,7 @@ SOPC_ReturnStatus CertificateGroup_RegeneratePrivateKey(SOPC_CertGroupContext* p
  * \param pSubjectName The subjectName of the CSR, if NULL then the subjectName of the current certificate is used.
  * \param bRegeneratePrivateKey Defines whether the private key of the server shall be regenerated.
  * \param[out] pCertificateRequest A valid byte string to store the CSR.
+ * \param endpointConfigIdx The index associated to the configuration endpoint.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL)
  *
@@ -159,7 +160,8 @@ SOPC_ReturnStatus CertificateGroup_RegeneratePrivateKey(SOPC_CertGroupContext* p
 SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* pGroupCtx,
                                                         const SOPC_String* pSubjectName,
                                                         const bool bRegeneratePrivateKey,
-                                                        SOPC_ByteString* pCertificateRequest);
+                                                        SOPC_ByteString* pCertificateRequest,
+                                                        const uint32_t endpointConfigIdx);
 
 /**
  * \brief Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
@@ -173,6 +175,7 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
  * \param pCertificate A valid pointer to the new certificate.
  * \param pIssuerArray An array of issuer certificates needed to verify the signature on the new certificate.
  * \param arrayLength The length of the array \p pIssuerArray
+ * \param endpointConfigIdx The index associated to the configuration endpoint.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL).
  *
@@ -181,7 +184,8 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
 SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
                                                    const SOPC_ByteString* pIssuerArray,
-                                                   const int32_t arrayLength);
+                                                   const int32_t arrayLength,
+                                                   const uint32_t endpointConfigIdx);
 
 /**
  * \brief Export the new key-cert pair.

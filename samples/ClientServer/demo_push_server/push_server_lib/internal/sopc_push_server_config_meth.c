@@ -62,7 +62,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
     SOPC_CertGroupContext* pGroupCtx = NULL;
     SOPC_Variant* pVariant = NULL;
     /* Check input arguments */
-    if ((6 != nbInputArgs) || (NULL == inputArgs))
+    if ((6 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "PushSrvCfg:Method_UpdateCertificate: bad inputs arguments");
@@ -116,11 +116,12 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                cStrId);
         return OpcUa_BadNotSupported;
     }
+    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
     /* Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
      * certificates) */
     statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring,
                                                     inputArgs[3].Value.Array.Content.BstringArr,
-                                                    inputArgs[3].Value.Array.Length);
+                                                    inputArgs[3].Value.Array.Length, endpointConfigIdx);
     if (!SOPC_IsGoodStatus(statusCode))
     {
         SOPC_Logger_TraceError(
@@ -190,7 +191,6 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
                                                        SOPC_Variant** outputArgs,
                                                        void* param)
 {
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(objectId);
     SOPC_UNUSED_ARG(param);
 
@@ -216,7 +216,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     const SOPC_String* pSubjectName = NULL;
     SOPC_Boolean bRegeneratePrivateKey = false;
     /* Check input arguments */
-    if ((5 != nbInputArgs) || (NULL == inputArgs))
+    if ((5 != nbInputArgs) || (NULL == inputArgs) || (NULL == callContextPtr))
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "PushSrvCfg:Method_CreateSigningRequest: bad inputs arguments");
@@ -293,14 +293,15 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
                                cStrId);
         return OpcUa_BadUnexpectedError;
     }
+    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
     pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
     pVariant->BuiltInTypeId = SOPC_ByteString_Id;
     SOPC_ByteString_Initialize(&pVariant->Value.Bstring);
     /* Discard the previous new key */
     CertificateGroup_DiscardNewKey(pGroupCtx);
     /* Create the signing request */
-    status =
-        CertificateGroup_CreateSigningRequest(pGroupCtx, pSubjectName, bRegeneratePrivateKey, &pVariant->Value.Bstring);
+    status = CertificateGroup_CreateSigningRequest(pGroupCtx, pSubjectName, bRegeneratePrivateKey,
+                                                   &pVariant->Value.Bstring, endpointConfigIdx);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

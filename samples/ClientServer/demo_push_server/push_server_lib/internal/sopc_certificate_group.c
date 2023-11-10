@@ -34,10 +34,12 @@
 #include "sopc_certificate_group.h"
 #include "sopc_certificate_group_itf.h"
 #include "sopc_helper_string.h"
+#include "sopc_helper_uri.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_pki_struct_lib_internal.h"
 #include "sopc_toolkit_async_api.h"
+#include "sopc_toolkit_config_internal.h"
 #include "sopc_trustlist.h"
 #include "sopc_trustlist_itf.h"
 
@@ -652,7 +654,8 @@ void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx)
 SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* pGroupCtx,
                                                         const SOPC_String* pSubjectName,
                                                         const bool bRegeneratePrivateKey,
-                                                        SOPC_ByteString* pCertificateRequest)
+                                                        SOPC_ByteString* pCertificateRequest,
+                                                        const uint32_t endpointConfigIdx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
@@ -685,6 +688,11 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     SOPC_AsymmetricKey* pNewKey = NULL;
     SOPC_AsymmetricKey* pCurKey = NULL;
     SOPC_AsymmetricKey* pKey = NULL;
+
+    char* pEndPointHostName = NULL;
+    char* pEndpointPort = NULL;
+    char** DNSToUse = NULL;
+    uint32_t nameCount = 0;
 
     /* Get properties form group */
     if (OpcUaId_RsaMinApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
@@ -733,9 +741,55 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
             status = SOPC_STATUS_INVALID_STATE;
         }
     }
+    /* Get HostName name of the current endpoint */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CSR_Create(pCertSubjectName, true, mdAlg, pURI, pDNSArray, DNSArrayLen, &pNewCSR);
+        SOPC_Endpoint_Config* pEndpointCfg = SOPC_ToolkitServer_GetEndpointConfig(endpointConfigIdx);
+        SOPC_ASSERT(NULL != pEndpointCfg);
+
+        SOPC_UriType type = SOPC_URI_UNDETERMINED;
+        status = SOPC_Helper_URI_SplitUri(pEndpointCfg->endpointURL, &type, &pEndPointHostName, &pEndpointPort);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "PushSrvCfg:Method_CreateSigningRequest:CertificateGroup:%s: Unable to split the "
+                                   "given endpoint url %s to retrieve the hostName",
+                                   pGroupCtx->cStrId, pEndpointCfg->endpointURL);
+        }
+        SOPC_ASSERT(NULL != pEndPointHostName);
+    }
+    DNSToUse = SOPC_Calloc((size_t) DNSArrayLen + 1, sizeof(char*));
+    if (NULL == DNSToUse)
+    {
+        status = SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    /* Append the HostName of the current endpoint to the array of DNS name */
+    if (SOPC_STATUS_OK == status)
+    {
+        size_t endpointHostNameLen = strlen(pEndPointHostName);
+        int match = -1;
+        /* Exchange the data */
+        for (size_t idx = 0; idx < DNSArrayLen; idx++)
+        {
+            if (0 != match)
+            {
+                if (endpointHostNameLen == strlen(pDNSArray[idx]))
+                {
+                    match = SOPC_strncmp_ignore_case(pEndPointHostName, pDNSArray[idx], endpointHostNameLen);
+                }
+            }
+            DNSToUse[idx] = pDNSArray[idx];
+        }
+        nameCount = DNSArrayLen;
+        if (0 != match)
+        {
+            DNSToUse[DNSArrayLen] = pEndPointHostName;
+            nameCount = DNSArrayLen + 1;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_KeyManager_CSR_Create(pCertSubjectName, true, mdAlg, pURI, DNSToUse, nameCount, &pNewCSR);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -771,6 +825,9 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
     SOPC_KeyManager_Certificate_Free(pCert);
     SOPC_Free(pCertSubjectName);
     SOPC_Free(pURI);
+    SOPC_Free(pEndpointPort);
+    SOPC_Free(pEndPointHostName);
+    SOPC_Free(DNSToUse);
     if (NULL != pDNSArray)
     {
         for (uint32_t idx = 0; idx < DNSArrayLen; idx++)
@@ -952,7 +1009,8 @@ SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext*
 SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
                                                    const SOPC_ByteString* pIssuerArray,
-                                                   const int32_t arrayLength)
+                                                   const int32_t arrayLength,
+                                                   const uint32_t endpointConfigIdx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
     SOPC_ASSERT(NULL != pGroupCtx->pCertificateTypeValueId);
@@ -1077,6 +1135,10 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
             stCode = OpcUa_BadUnexpectedError;
         }
     }
+    /* Retrieve the current endpoint configuration */
+    SOPC_Endpoint_Config* pEndpointCfg = SOPC_ToolkitServer_GetEndpointConfig(endpointConfigIdx);
+    SOPC_ASSERT(NULL != pEndpointCfg);
+
     /* Check the certificate properties */
     if (SOPC_STATUS_OK == status)
     {
@@ -1089,7 +1151,7 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
                                                     SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION,
                                         .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH,
                                         .sanApplicationUri = pURI,
-                                        .sanURL = NULL};
+                                        .sanURL = pEndpointCfg->endpointURL};
         /* Get properties form group */
         if (OpcUaId_RsaMinApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
         {
