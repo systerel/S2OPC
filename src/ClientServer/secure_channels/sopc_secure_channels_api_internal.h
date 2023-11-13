@@ -38,6 +38,11 @@ typedef enum
     INT_EP_SC_REVERSE_CONNECT, /**<
                                   Server side only:
                                   Start reverse connection to a client reverse endpoint.<br/>
+                                  This event is triggered on ::EP_OPEN event treatment for each reverse connection
+                                  configured, <br/>
+                                  when a connection is established (client shall be able to connect again) or <br/>
+                                  when a connection failed on retry timeout with event
+                                  ::TIMER_SC_SERVER_REVERSE_CONN_RETRY.<br/>
                                   id = endpoint description configuration index<br/>
                                   auxParam = (uint16_t) client to connect configuration index in endpoint config */
     INT_SC_RCV_RHE_TRANSITION, /**<
@@ -138,7 +143,7 @@ typedef enum
                               params = (SOPC_Buffer*) buffer positioned to message payload<br/>
                               auxParam = (uint32_t) request Id context if response / request Handle if request when MSG */
     INT_SC_SND_CLO,        /**<
-                              Povides OPC UA CloseSecureChannel message payload to send for the given connection
+                              Provides OPC UA CloseSecureChannel message payload to send for the given connection
                               index.<br/>
                               id = secure channel connection index<br/>
                               params = (SOPC_Buffer*) buffer positioned to message payload */
@@ -164,9 +169,10 @@ typedef enum
                                               Clears the secure channel data (if it is still not connected) and
                                               notifies it.<br/>
                                               id = secure channel connection index */
-    TIMER_SC_SERVER_REVERSE_CONN_RETRY,  /**<
-                                              Timeout on server reverse Hello connection. A new reverse Hello
-                                              connection will be started upon event.<br/>
+    TIMER_SC_SERVER_REVERSE_CONN_RETRY,  /**< This event is triggered on connection retry timeout
+                                              after a reverse connection failure.<br/>
+                                              A new reverse connection event ::INT_EP_SC_REVERSE_CONNECT will be
+                                              triggered on event treatment.<br/>
                                               id = endpoint configuration index<br/>
                                               params = reverse connection index in endpoint
                                           */

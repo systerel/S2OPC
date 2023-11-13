@@ -550,17 +550,21 @@ static void SC_CloseSecureConnection(
             if (immediateClose)
             {
                 serverEndpointConfigIdx = scConnection->serverEndpointConfigIdx;
-                // Manage reverse connections retry attempts (only when connection never established)
+                // Manage reverse connections retry attempts
+                // (only when connection never established and EP is not closed)
                 if (scConnection->isReverseConnection && scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED &&
                     scConnection->state != SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW)
                 {
                     SOPC_ASSERT(scConnection->serverReverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
                     SOPC_SecureListener* scListener = &secureListenersArray[serverEndpointConfigIdx];
 
-                    // Configure a timer for next reverse connection attempt to client
-                    SC_Server_StartReverseConnRetryTimer(
-                        &scListener->reverseConnRetryTimerIds[scConnection->serverReverseConnIdx],
-                        scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
+                    if (scListener->state != SECURE_LISTENER_STATE_CLOSED)
+                    {
+                        // Configure a timer for next reverse connection attempt to client if listener is not closed
+                        SC_Server_StartReverseConnRetryTimer(
+                            &scListener->reverseConnRetryTimerIds[scConnection->serverReverseConnIdx],
+                            scConnection->serverEndpointConfigIdx, scConnection->serverReverseConnIdx);
+                    }
                 }
 
                 // Immediately close the connection if failed
@@ -2865,7 +2869,8 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
 
         // Retrieve EP configuration
         epConfig = SOPC_ToolkitServer_GetEndpointConfig(eltId);
-        if (epConfig != NULL && epConfig->nbClientsToConnect > auxParam)
+        if (epConfig != NULL && SECURE_LISTENER_STATE_CLOSED != secureListenersArray[eltId].state &&
+            epConfig->nbClientsToConnect > auxParam)
         {
             // Note: we do not know the socket index yet, it will be set by
             // SC_ServerTransition_TcpReverserInit_To_TcpInit after SOCKET_CONNECTION

@@ -102,6 +102,7 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
             {
                 if (scListener->isUsedConnectionIdxArray[idx])
                 {
+                    // Note: since it is enqueued as next event, state transition of EP and SCs is synchronous
                     SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CLOSE, scListener->connectionIdxArray[idx],
                                                                    (uintptr_t) NULL, endpointConfigIdx);
                     scListener->isUsedConnectionIdxArray[idx] = false;
@@ -114,6 +115,7 @@ static bool SOPC_SecureListenerStateMgr_CloseEpListener(SOPC_Endpoint_Config* ep
                 SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE_LISTENER, scListener->socketIndex, (uintptr_t) NULL,
                                           (uintptr_t) endpointConfigIdx);
             }
+            // => SECURE_LISTENER_STATE_CLOSED
             memset(scListener, 0, sizeof(SOPC_SecureListener));
         }
         else if (scListener->state == SECURE_LISTENER_STATE_OPENING)
@@ -720,7 +722,7 @@ void SOPC_SecureListenerStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event
                 status = SOPC_STATUS_OK;
             }
         }
-        // Notify Services layer that EP_OPEN failed
+        // Notify Services layer that EP_CLOSED
         SOPC_EventHandler_Post(secureChannelsEventHandler, EP_CLOSED, eltId, (uintptr_t) NULL, status);
         break;
     case REVERSE_EP_OPEN:
