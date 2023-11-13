@@ -310,7 +310,7 @@ SOPC_ReturnStatus PubSub_Configure(void)
         if (NULL == g_skProvider && NULL != providers)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
-            for (uint32_t i = 0; i < nbSks + 1; i++)
+            for (uint32_t i = 0; i < nbSks; i++)
             {
                 SOPC_SKProvider_Clear(providers[i]);
                 SOPC_Free(providers[i]);
