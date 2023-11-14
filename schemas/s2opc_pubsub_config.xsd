@@ -71,6 +71,7 @@
     <xs:attribute name="groupVersion" type="xs:unsignedInt" use="optional"/>
     <xs:attribute name="keepAliveTime" type="xs:double" use="optional"/> <!-- required if is acyclic publisher. Time scale is milliseconds -->
     <xs:attribute name="mqttTopic" type="xs:string" use="optional"/> <!-- mandatory when mqtt protocol is used-->
+    <xs:attribute name="publisherFixedSize" type="xs:boolean" use="optional"/> <!-- true to enable publishing optimisation for buffer of fixed size, false by default -->
     <xs:attribute name="encoding" use="optional"> <!-- "json" to enable JSON encoding."uadp" or omitted, set UADP encoding -->
       <xs:simpleType>
         <xs:restriction base="xs:string">

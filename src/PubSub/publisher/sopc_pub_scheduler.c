@@ -36,6 +36,7 @@
 #include "sopc_missing_c99.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_mutexes.h"
+#include "sopc_pub_fixed_buffer.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_pubsub_helpers.h"
@@ -195,6 +196,19 @@ static void* thread_start_publish(void* arg);
  * /param context The message context to send
  */
 static void MessageCtx_send_publish_message(MessageCtx* context);
+
+/**
+ * @brief Initialize dataSetField with empty variants from WriterGroup information. This function is intended to be used
+ * when preencoding strategy is enabled. Function will check if variants types configured by user are compatible with
+ * preencoding strategy.
+ *
+ * @param message networkMessage with dataSetFields to initialize
+ * @param group WriterGroup
+ *
+ * @return SOPC_ReturnStatus SOPC_STATUS_OK if success, SOPC_STATUS_NOK otherwise
+ */
+static SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_NetworkMessage* message,
+                                                                  SOPC_WriterGroup* group);
 
 /**
  * @brief Send keep alive message for acyclic publisher
@@ -402,6 +416,34 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         }
     }
 
+    // TODO should be configurable and retrieve by configuration API
+    bool usePreencodedBuffer = false;
+    if (result && usePreencodedBuffer)
+    {
+        if (NULL != context->security)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "Cannot use security with fixed size buffer optimisation");
+            result = false;
+        }
+        else
+        {
+            // Initialise dataSetFields with empty values
+            SOPC_ReturnStatus status = initialize_DataSetField_from_WriterGroup(context->message, group);
+            result = (SOPC_STATUS_OK == status);
+            if (result)
+            {
+                status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer_ctx(context->message);
+                result = (SOPC_STATUS_OK == status);
+            }
+        }
+    }
+
+    if (result && NULL != context->security && NULL != context->security->msgNonceRandom)
+    {
+        SOPC_Free(context->security->msgNonceRandom);
+        context->security->msgNonceRandom = NULL;
+    }
+
     if (!result)
     {
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
@@ -478,6 +520,8 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
     SOPC_ASSERT(nDsm == nbDsmCtx);
 
+    bool isPreencoded = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(message);
+
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
         // Note : It has been asserted that there are as many DataSetMessages as DataSetWriters
@@ -508,8 +552,16 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             SOPC_ASSERT(NULL != fieldData);
             SOPC_DataValue* dv = &values[iField];
 
+            bool isCompatible = false;
             bool isBad = false;
-            bool isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+            if (isPreencoded)
+            {
+                isCompatible = SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(fieldData, &dv->Value);
+            }
+            else
+            {
+                isCompatible = SOPC_PubSubHelpers_IsCompatibleVariant(fieldData, &dv->Value, &isBad);
+            }
 
             // We also want to consider case the value was valid but provided with Bad status, therefore we
             // do not consider isNullOrBad in the first condition
@@ -604,25 +656,38 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         }
         else
         {
-            SOPC_Buffer* buffer_payload = NULL;
-            SOPC_UADP_NetworkMessage_Error_Code errorCode =
-                SOPC_UADP_NetworkMessage_Encode_Buffers(message, security, &buffer, &buffer_payload);
-            if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode || buffer == NULL || buffer_payload == NULL)
+            SOPC_UADP_NetworkMessage_Error_Code errorCode = SOPC_UADP_NetworkMessage_Error_Code_None;
+            if (isPreencoded)
             {
-                SOPC_Logger_TraceError(
-                    SOPC_LOG_MODULE_PUBSUB,
-                    "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
-                    (const void*) message, (unsigned) errorCode);
+                buffer = SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(message, security);
+                if (NULL == buffer)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                           "Failed to retrieve updated preencode buffer at message %p",
+                                           (const void*) message);
+                }
             }
             else
             {
-                errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(security, buffer, &buffer_payload);
-                if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode)
+                SOPC_Buffer* buffer_payload = NULL;
+                errorCode = SOPC_UADP_NetworkMessage_Encode_Buffers(message, security, &buffer, &buffer_payload);
+                if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode || buffer == NULL || buffer_payload == NULL)
                 {
-                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                           "Failed to sign and encrypt and merge encoded buffers "
-                                           "SOPC_UADP_NetworkMessage_Error_Code is : %08X",
-                                           (unsigned) errorCode);
+                    SOPC_Logger_TraceError(
+                        SOPC_LOG_MODULE_PUBSUB,
+                        "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                        (const void*) message, (unsigned) errorCode);
+                }
+                else
+                {
+                    errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(security, buffer, &buffer_payload);
+                    if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode)
+                    {
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                               "Failed to sign and encrypt and merge encoded buffers "
+                                               "SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                                               (unsigned) errorCode);
+                    }
                 }
             }
         }
@@ -636,8 +701,11 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (NULL != buffer)
         {
             context->transport->pFctSend(context->transport, buffer);
-            SOPC_Buffer_Delete(buffer);
-            buffer = NULL;
+            if (!isPreencoded)
+            {
+                SOPC_Buffer_Delete(buffer);
+                buffer = NULL;
+            }
         }
     }
 }
@@ -1121,4 +1189,72 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
     status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return result;
+}
+
+SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
+                                                           SOPC_WriterGroup* group)
+{
+    if (NULL == networkMessage || NULL == group)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (uint8_t iWg = 0; iWg < nbDataset; iWg++)
+    {
+        SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, iWg);
+        SOPC_ASSERT(NULL != writer);
+        const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
+        SOPC_ASSERT(NULL != dataset);
+        uint16_t nbField = SOPC_PublishedDataSet_Nb_FieldMetaData(dataset);
+        for (uint16_t iField = 0; iField < nbField && SOPC_STATUS_OK == status; iField++)
+        {
+            SOPC_FieldMetaData* metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, iField);
+            SOPC_ASSERT(NULL != metadata);
+            SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+            int32_t rank = SOPC_FieldMetaData_Get_ValueRank(metadata);
+            if (-1 != rank)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                       "Array are not supported with preencoding buffer optimization");
+                status = SOPC_STATUS_NOK;
+            }
+            else
+            {
+                SOPC_Variant* variant = SOPC_Variant_Create();
+                SOPC_ASSERT(NULL != variant);
+                switch (type)
+                {
+                case SOPC_Null_Id:
+                case SOPC_Boolean_Id:
+                case SOPC_SByte_Id:
+                case SOPC_Byte_Id:
+                case SOPC_Int16_Id:
+                case SOPC_UInt16_Id:
+                case SOPC_Int32_Id:
+                case SOPC_UInt32_Id:
+                case SOPC_Int64_Id:
+                case SOPC_UInt64_Id:
+                case SOPC_Float_Id:
+                case SOPC_Double_Id:
+                case SOPC_DateTime_Id:
+                case SOPC_Guid_Id:
+                case SOPC_StatusCode_Id:
+                    SOPC_Variant_Initialize_Empty(variant, type);
+                    SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, variant, metadata);
+                    break;
+                default:
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                           "Invalid type %d when using preencoding buffer optimization", type);
+                    status = SOPC_STATUS_NOK;
+                    break;
+                }
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Variant_Delete(variant);
+                }
+            }
+        }
+    }
+    return status;
 }

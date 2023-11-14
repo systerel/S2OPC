@@ -57,6 +57,17 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
                                             const SOPC_Variant* variant,
                                             bool* out_isBad);
 
+/**
+ * @brief Check if variant is compatible (value type and value rank) with field meta data in case of preencoded buffer
+ *
+ * @param fieldMetaData  The field meta data with which compliance shall be verified
+ * @param variant   the variant to check
+ *
+ * @return true if variant is compatible with the field meta data, false otherwise
+ */
+bool SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(const SOPC_FieldMetaData* fieldMetaData,
+                                                     const SOPC_Variant* variant);
+
 // TODO: to be defined in S2OPC
 // Note: only suitable for TCP / UDP / MQTT prefixes
 bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
