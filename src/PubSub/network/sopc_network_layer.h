@@ -35,6 +35,7 @@
 #include <inttypes.h>
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_pub_fixed_buffer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
@@ -144,8 +145,8 @@ SOPC_NetworkMessage_Error_Code SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_N
  *
  * @param nm is the NetworkMessage to encode
  * @param security is the data use to set security flags. Can be NULL if security is not used
- * @param buffer_header pointer to a newly allocated buffer with header flags
- * @param buffer_payload pointer to a newly allocated buffer with payload data
+ * @param buffer_header pointer to a newly allocated buffer with header flags encoded. Should point to a NULL buffer
+ * @param buffer_payload pointer to a newly allocated buffer with payload data encoded. Should point to a NULL buffer
  * @return ::SOPC_NetworkMessage_Error_Code_None if header and payload buffer are successfully encoded. Appropriate
  * error code otherwise
  */
@@ -160,12 +161,22 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
  * @param security is the data used to encrypt and sign. Can be NULL if security is not used
  * @param buffer_header [IN/OUT] encoded header buffer which will become the final buffer
  * @param buffer_payload encoded payload buffer. Freed in all cases by this function
- * @return SOPC_NetworkMessage_Error_Code SOPC_NetworkMessage_Error_Code_None in case of succes another code
- * otherwise
+ * @return SOPC_NetworkMessage_Error_Code_None in case of succes another code otherwise
  */
 SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_PubSub_SecurityType* security,
                                                                           SOPC_Buffer* buffer_header,
                                                                           SOPC_Buffer** buffer_payload);
+
+/**
+ * @brief Get updated preencoded buffer.
+ *
+ * @param nm NetworkMessage containing preencoded strucure
+ * @param security the data used to encrypt and sign. Must be NULL, preencode mechanism cannot handle sign and encrypt
+ *
+ * @return SOPC_Buffer* pointer to updated preencoded buffer, NULL if an error occur.
+ */
+SOPC_Buffer* SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                           SOPC_PubSub_SecurityType* security);
 
 /**
  * \brief A callback for ReaderGroup identification. When a network message is received, this

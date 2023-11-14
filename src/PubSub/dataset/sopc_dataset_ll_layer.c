@@ -24,13 +24,14 @@
 #include "sopc_pubsub_conf.h"
 
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_logger.h"
+#include "sopc_network_layer.h"
+#include "sopc_pub_fixed_buffer.h"
 
 struct SOPC_Dataset_LL_DataSetField
 {
     SOPC_Variant* variant;
 };
-
-typedef struct SOPC_Dataset_LL_DataSetField SOPC_Dataset_LL_DataSetField;
 
 struct SOPC_Dataset_LL_DataSetMessage
 {
@@ -79,6 +80,9 @@ struct SOPC_Dataset_LL_NetworkMessage
 
     SOPC_Dataset_LL_DataSetMessage* dataset_messages;
     uint8_t dataset_messages_length;
+
+    // NULL IF unused
+    SOPC_PubFixedBuffer_Buffer_ctx* preencode;
 };
 
 /**
@@ -128,7 +132,28 @@ SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_CreateEmpty(void)
 
     SOPC_Dataset_LL_NetworkMessage_Set_GroupId(result, 0);
 
+    result->preencode = NULL;
+
     return result;
+}
+
+bool SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    SOPC_ASSERT(NULL != nm);
+    return (NULL != nm->preencode);
+}
+
+void SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                         SOPC_PubFixedBuffer_Buffer_ctx* preencode)
+{
+    SOPC_ASSERT(NULL != nm);
+    nm->preencode = preencode;
+}
+
+SOPC_PubFixedBuffer_Buffer_ctx* SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
+{
+    SOPC_ASSERT(NULL != nm);
+    return nm->preencode;
 }
 
 void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
@@ -142,6 +167,7 @@ void SOPC_Dataset_LL_NetworkMessage_Delete(SOPC_Dataset_LL_NetworkMessage* nm)
         SOPC_String_Clear(&nm->msgHeader.publisher_id.data.string);
     }
     Dataset_LL_Delete_DataSetMessages_Array(nm);
+    SOPC_PubFixedBuffer_Delete_Preencode_Buffer_ctx(nm->preencode);
     SOPC_Free(nm);
 }
 
@@ -278,7 +304,7 @@ uint16_t SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(const SOPC_Dataset_LL_DataSe
     return dsm->dataset_fields_length;
 }
 
-static const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(
+const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(
     const SOPC_Dataset_LL_DataSetMessage* dsm,
     uint16_t index)
 {
@@ -338,6 +364,12 @@ uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_Dat
 {
     SOPC_ASSERT(NULL != dsm);
     return dsm->dataset_message_sequence_number;
+}
+
+const uint16_t* SOPC_Dataset_LL_DataSetMsg_Get_PointerSequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm)
+{
+    SOPC_ASSERT(NULL != dsm);
+    return &dsm->dataset_message_sequence_number;
 }
 
 /**
@@ -513,4 +545,10 @@ bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_Ne
     }
     nm->dataset_messages_length = dsm_nb;
     return true;
+}
+
+const SOPC_Variant* SOPC_Dataset_LL_DataSetField_Get_Variant(const SOPC_Dataset_LL_DataSetField* dsf)
+{
+    SOPC_ASSERT(NULL != dsf);
+    return dsf->variant;
 }

@@ -1297,7 +1297,6 @@ def testPubSubDynamicConf(logger):
         logger.begin_section("TC 27 : Publisher Subscriber Unicast")
         
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_UNICAST, logger)
-        
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 

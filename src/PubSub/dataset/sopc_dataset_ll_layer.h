@@ -24,6 +24,7 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_pubsub_conf.h"
+#include "sopc_pubsub_security.h"
 
 #define UADP_VERSION1 1
 #define UADP_DEFAULT_VERSION UADP_VERSION1
@@ -32,6 +33,7 @@ typedef struct SOPC_Dataset_LL_DataSetMessage SOPC_Dataset_LL_DataSetMessage;
 
 typedef struct SOPC_Dataset_LL_NetworkMessage SOPC_Dataset_LL_NetworkMessage;
 typedef struct SOPC_Dataset_LL_NetworkMessage_Header SOPC_Dataset_LL_NetworkMessage_Header;
+typedef struct SOPC_Dataset_LL_DataSetField SOPC_Dataset_LL_DataSetField;
 
 typedef enum SOPC_DataSet_LL_PublisherIdType
 {
@@ -83,6 +85,8 @@ typedef struct SOPC_DataSet_LL_UadpDataSetMessageContentMask
     bool picoSecondsFlag;
 } SOPC_DataSet_LL_UadpDataSetMessageContentMask;
 
+struct SOPC_PubFixedBuffer_Buffer_ctx;
+
 /**
  * Header NetworkMessage
  */
@@ -96,6 +100,13 @@ typedef struct SOPC_DataSet_LL_UadpDataSetMessageContentMask
  * \return Dataset_LL_NetworkMessage
  */
 SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb, uint8_t uadp_version);
+
+bool SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(SOPC_Dataset_LL_NetworkMessage* nm);
+
+void SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                         struct SOPC_PubFixedBuffer_Buffer_ctx* preencode);
+struct SOPC_PubFixedBuffer_Buffer_ctx* SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(
+    SOPC_Dataset_LL_NetworkMessage* nm);
 
 // todo change interface to create nm without dsm
 SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_CreateEmpty(void);
@@ -187,7 +198,7 @@ SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(
 // dataset message sequence number
 void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn);
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm);
-
+const uint16_t* SOPC_Dataset_LL_DataSetMsg_Get_PointerSequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm);
 /**
  * Header DataSetField
  */
@@ -211,5 +222,10 @@ bool SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(SOPC_Dataset_LL_Data
  */
 const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(const SOPC_Dataset_LL_DataSetMessage* dsm,
                                                               uint16_t index);
+const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(
+    const SOPC_Dataset_LL_DataSetMessage* dsm,
+    uint16_t index);
+
+const SOPC_Variant* SOPC_Dataset_LL_DataSetField_Get_Variant(const SOPC_Dataset_LL_DataSetField* dsf);
 
 #endif /* SOPC_DATASET_LL_LAYER_H_ */

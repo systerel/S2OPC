@@ -3592,6 +3592,7 @@ static SOPC_ReturnStatus AllocVariantArrayBuiltInType(SOPC_BuiltinId builtInType
             // Note union fields content are aligned: provide pointer to data
             // (i.e. content of the first field)
             array->BooleanArr = SOPC_Calloc(size, SOPC_BuiltInType_HandlingTable[builtInTypeId].size);
+            memset(array->BooleanArr, 0, size * (SOPC_BuiltInType_HandlingTable[builtInTypeId].size));
             if (NULL != array->BooleanArr)
                 return SOPC_STATUS_OK;
             break;
@@ -3920,6 +3921,95 @@ void SOPC_Variant_Initialize(SOPC_Variant* variant)
     if (variant != NULL)
     {
         memset(variant, 0, sizeof(SOPC_Variant));
+    }
+}
+
+void SOPC_Variant_Initialize_Empty(SOPC_Variant* variant, SOPC_BuiltinId builtInId)
+{
+    if (NULL != variant)
+    {
+        variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+        variant->BuiltInTypeId = builtInId;
+        variant->DoNotClear = 0;
+        switch (builtInId)
+        {
+        case SOPC_Null_Id:
+            break;
+        case SOPC_Boolean_Id:
+            SOPC_Boolean_Initialize(&variant->Value.Boolean);
+            break;
+        case SOPC_SByte_Id:
+            SOPC_SByte_Initialize(&variant->Value.Sbyte);
+            break;
+        case SOPC_Byte_Id:
+            SOPC_Byte_Initialize(&variant->Value.Byte);
+            break;
+        case SOPC_Int16_Id:
+            SOPC_Int16_Initialize(&variant->Value.Int16);
+            break;
+        case SOPC_UInt16_Id:
+            SOPC_UInt16_Initialize(&variant->Value.Uint16);
+            break;
+        case SOPC_Int32_Id:
+            SOPC_Int32_Initialize(&variant->Value.Int32);
+            break;
+        case SOPC_UInt32_Id:
+            SOPC_UInt32_Initialize(&variant->Value.Uint32);
+            break;
+        case SOPC_Int64_Id:
+            SOPC_Int64_Initialize(&variant->Value.Int64);
+            break;
+        case SOPC_UInt64_Id:
+            SOPC_UInt64_Initialize(&variant->Value.Uint64);
+            break;
+        case SOPC_Float_Id:
+            SOPC_Float_Initialize(&variant->Value.Floatv);
+            break;
+        case SOPC_Double_Id:
+            SOPC_Double_Initialize(&variant->Value.Doublev);
+            break;
+        case SOPC_String_Id:
+            SOPC_String_Initialize(&variant->Value.String);
+            break;
+        case SOPC_DateTime_Id:
+            SOPC_DateTime_Initialize(&variant->Value.Date);
+            break;
+        case SOPC_Guid_Id:
+            SOPC_Guid_Initialize(variant->Value.Guid);
+            break;
+        case SOPC_ByteString_Id:
+            SOPC_ByteString_Initialize(&variant->Value.Bstring);
+            break;
+        case SOPC_XmlElement_Id:
+            SOPC_XmlElement_Initialize(&variant->Value.XmlElt);
+            break;
+        case SOPC_NodeId_Id:
+            SOPC_NodeId_Initialize(variant->Value.NodeId);
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            SOPC_ExpandedNodeId_Initialize(variant->Value.ExpNodeId);
+            break;
+        case SOPC_StatusCode_Id:
+            SOPC_StatusCode_Initialize(&variant->Value.Status);
+            break;
+        case SOPC_QualifiedName_Id:
+            SOPC_QualifiedName_Initialize(variant->Value.Qname);
+            break;
+        case SOPC_LocalizedText_Id:
+            SOPC_LocalizedText_Initialize(variant->Value.LocalizedText);
+            break;
+        case SOPC_ExtensionObject_Id:
+            SOPC_ExtensionObject_Initialize(variant->Value.ExtObject);
+            break;
+        case SOPC_DataValue_Id:
+            SOPC_DataValue_Initialize(variant->Value.DataValue);
+            break;
+        case SOPC_DiagnosticInfo_Id:
+            SOPC_DiagnosticInfo_Initialize(variant->Value.DiagInfo);
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -6395,7 +6485,7 @@ bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRa
         // ScalarOrOneDimension (−3): src can be scalar (-1) or one dimension array (1)
         return (src_valueRank == -1 || src_valueRank == 1);
     case -2:
-        // Any (−2): src can be have any value rank
+        // Any (−2): src can have any value rank
         return true;
     case -1:
         // Scalar (−1): src can be scalar (-1) only

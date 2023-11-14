@@ -242,3 +242,21 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
     }
     return false;
 }
+
+bool SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(const SOPC_FieldMetaData* fieldMetaData,
+                                                     const SOPC_Variant* variant)
+{
+    SOPC_ASSERT(NULL != fieldMetaData);
+    SOPC_ASSERT(NULL != variant);
+
+    SOPC_BuiltinId expBuiltInType = SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData);
+
+    if (expBuiltInType == variant->BuiltInTypeId)
+    {
+        int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
+        int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
+
+        return (expValueRank == actualValueRank);
+    }
+    return false;
+}
