@@ -129,8 +129,8 @@ START_TEST(test_crypto_gen_rsa_export_import_public)
     SOPC_ExposedBuffer* pRawImpPubKeyWithHeader = NULL;
     uint32_t impKeyPubWithHeaderLen = 0;
     SOPC_AsymmetricKey* pImpPubKey = NULL;
-    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd("./crypto_tools_gen_public_key.pem",
-                                                                            &pSerImpPubKeyWithHeader, NULL, 0);
+    status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile("./crypto_tools_gen_public_key.pem",
+                                                                    &pSerImpPubKeyWithHeader);
     ck_assert(SOPC_STATUS_OK == status);
     impKeyPubWithHeaderLen = SOPC_SecretBuffer_GetLength(pSerImpPubKeyWithHeader);
     pRawImpPubKeyWithHeader = SOPC_SecretBuffer_ExposeModify(pSerImpPubKeyWithHeader);

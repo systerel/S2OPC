@@ -110,17 +110,8 @@ SOPC_ReturnStatus SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile_WithPwd
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    if (NULL == password)
-    {
-        // The key is not encrypt
-        status = SOPC_KeyManager_SerializedAsymmetricKey_CreateFromFile(keyPath, key);
-        return status;
-    }
-
     SOPC_AsymmetricKey* pKey = NULL;
-    status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, password, lenPassword);
+    SOPC_ReturnStatus status = SOPC_KeyManager_AsymmetricKey_CreateFromFile(keyPath, &pKey, password, lenPassword);
 
     if (SOPC_STATUS_OK == status)
     {
