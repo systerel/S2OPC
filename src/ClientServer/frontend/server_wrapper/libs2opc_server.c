@@ -656,45 +656,56 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_Mutex_Lock(&sopc_server_helper_config.syncLocalServiceMutex);
-    SOPC_ASSERT(NULL == sopc_server_helper_config.syncResp);
-    // Set helper local service context
-    ctx->eventCtx.localService.isSyncCall = true;
-    ctx->eventCtx.localService.syncId = sopc_server_helper_config.syncLocalServiceId;
-
-    // Send request
-    SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request, (uintptr_t) ctx);
-
-    // Wait until response received or error status (timeout)
-    while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
+    if (sopc_server_helper_config.syncCalled)
     {
-        status = SOPC_Mutex_UnlockAndTimedWaitCond(&sopc_server_helper_config.syncLocalServiceCond,
-                                                   &sopc_server_helper_config.syncLocalServiceMutex,
-                                                   SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS);
+        // Synchronous call already in execution
+        status = SOPC_STATUS_INVALID_STATE;
     }
-    if (SOPC_STATUS_OK == status)
+    else
     {
-        SOPC_ASSERT(NULL != sopc_server_helper_config.syncResp);
-        // Set response output
-        *response = sopc_server_helper_config.syncResp;
-    }
-    else if (NULL != sopc_server_helper_config.syncResp)
-    {
-        // This is possible timeout occurred during response reception, in this case we might ignore timeout
-        if (SOPC_STATUS_TIMEOUT == status)
+        sopc_server_helper_config.syncCalled = true;
+        SOPC_ASSERT(NULL == sopc_server_helper_config.syncResp);
+        // Set helper local service context
+        ctx->eventCtx.localService.isSyncCall = true;
+        ctx->eventCtx.localService.syncId = sopc_server_helper_config.syncLocalServiceId;
+
+        // Send request
+        SOPC_ToolkitServer_AsyncLocalServiceRequest(sopc_server_helper_config.endpointIndexes[0], request,
+                                                    (uintptr_t) ctx);
+
+        // Wait until response received or error status (timeout)
+        while (SOPC_STATUS_OK == status && NULL == sopc_server_helper_config.syncResp)
         {
+            status = SOPC_Mutex_UnlockAndTimedWaitCond(&sopc_server_helper_config.syncLocalServiceCond,
+                                                       &sopc_server_helper_config.syncLocalServiceMutex,
+                                                       SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ASSERT(NULL != sopc_server_helper_config.syncResp);
             // Set response output
             *response = sopc_server_helper_config.syncResp;
-            status = SOPC_STATUS_OK;
         }
-        else
+        else if (NULL != sopc_server_helper_config.syncResp)
         {
-            // Clear response since result incorrect
-            SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_server_helper_config.syncResp,
-                                        sopc_server_helper_config.syncResp);
+            // This is possible timeout occurred during response reception, in this case we might ignore timeout
+            if (SOPC_STATUS_TIMEOUT == status)
+            {
+                // Set response output
+                *response = sopc_server_helper_config.syncResp;
+                status = SOPC_STATUS_OK;
+            }
+            else
+            {
+                // Clear response since result incorrect
+                SOPC_EncodeableObject_Clear(*(SOPC_EncodeableType**) sopc_server_helper_config.syncResp,
+                                            sopc_server_helper_config.syncResp);
+            }
         }
+        sopc_server_helper_config.syncResp = NULL;
+        sopc_server_helper_config.syncCalled = false;
+        sopc_server_helper_config.syncLocalServiceId++;
     }
-    sopc_server_helper_config.syncResp = NULL;
-    sopc_server_helper_config.syncLocalServiceId++;
     SOPC_Mutex_Unlock(&sopc_server_helper_config.syncLocalServiceMutex);
     return status;
 }

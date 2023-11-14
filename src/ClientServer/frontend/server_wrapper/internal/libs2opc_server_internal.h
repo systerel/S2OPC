@@ -95,6 +95,7 @@ typedef struct SOPC_ServerHelper_Config
     SOPC_Condition syncLocalServiceCond;
     SOPC_Mutex syncLocalServiceMutex;
     uint32_t syncLocalServiceId;
+    bool syncCalled;
     void* syncResp;
 
     // Stop server management:

@@ -142,6 +142,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *
  * \note Local services are not restricted by AccessLevel attribute value but only Value attribute is modifiable.
  *
+ * \warning Concurrent synchronous calls are not supported and ::SOPC_STATUS_INVALID_STATE will be returned if called
+ *          concurrently
+ *
  * \param request   An instance of on of the following OPC UA request:
  *                  - ::OpcUa_AddNodesRequest
  *                  - ::OpcUa_ReadRequest
@@ -171,8 +174,9 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  *                     in this case the \c response.encodeableType points to ::OpcUa_ServiceFault_EncodeableType
  *                     and ::SOPC_IsGoodStatus(\c response.ResponseHeader.ServiceResult) is \c false.
  *
- * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE if the server is not running otherwise
- *         SOPC_STATUS_TIMEOUT if ::SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS is reached before response provided.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_STATE if the server is not running or a synchronous
+ *         call is already ongoing otherwise SOPC_STATUS_TIMEOUT if
+ *         ::SOPC_HELPER_LOCAL_RESPONSE_TIMEOUT_MS is reached before response provided.
  *
  * \note request memory is managed by the server after a successful return or in case of timeout
  * \note caller is responsible of output response memory after successful call

@@ -46,6 +46,7 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .writeNotifCb = NULL,
     .asyncRespCb = NULL,
     .syncLocalServiceId = 0,
+    .syncCalled = false,
     .syncResp = NULL,
     .syncServeStopData =
         {
