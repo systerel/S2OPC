@@ -56,10 +56,10 @@
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
 
-.variables: &nominal_build_variables
+.nominal_build_variables: &nominal_build_variables
   S2OPC_NODE_MANAGEMENT: 1
 
-.variables: &nominal_test_variables
+.nominal_test_variables: &nominal_test_variables
   S2OPC_NODE_MANAGEMENT: 1
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
@@ -70,10 +70,10 @@ variables:
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
 
-.variables: &all-tests_build_variables
+.all-tests_build_variables: &all-tests_build_variables
   WITH_PYS2OPC: 1
 
-.variables: &all-builds_build_variables
+.all-builds_build_variables: &all-builds_build_variables
   WITH_STATIC_SECURITY_DATA: 1
   WITH_CONST_ADDSPACE: 1
   PUBSUB_STATIC_CONFIG: 1
@@ -126,7 +126,6 @@ generation:
       - 'pre-build.log'
     when: always
     expire_in: '1 month'
-    when: always
   rules:
     - if: "$NO_GEN == null && \
            $WINDOWS_TEST == null && \
@@ -187,8 +186,7 @@ check_commit_validity:
 build-linux64-ASan:
   <<: *build_linux
   variables:
-    <<: *build_linux_variables
-    <<: *nominal_build_variables
+    <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
@@ -230,8 +228,7 @@ build-with_no_crypto:
 build-linux64-pys2opc:
   <<: *build_linux
   variables:
-    <<: *build_linux_variables
-    <<: *all-tests_build_variables # add pys2opc
+    <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$ALL_TESTS != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE != '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
       when: on_success
@@ -240,8 +237,7 @@ build-linux64-pys2opc:
 build-linux64-static-conf:
   <<: *build_linux
   variables:
-    <<: *build_linux_variables
-    <<: *all-builds_build_variables # add static conf
+    <<: [*build_linux_variables,*all-builds_build_variables] # add static conf
   rules: # single case rule of ALL_BUILDS
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -342,7 +338,6 @@ build-zephyr:
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh mimxrt1064_evk cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_pubsub_server'
     - 'samples/embedded/platform_dep/zephyr/ci/build-zephyr-samples-docker.sh native_posix_64 cli_client'
-  variables:
   artifacts:
     name: 'bin-zephyr-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -364,7 +359,6 @@ build-freertos:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh -- --nocrypto'
     - 'test -f build_freertos/freertos-sopc.elf'
     - 'mv build_freertos/freertos-sopc.elf build_freertos/freertos-sopc-stm32h723zg-nocrypto.elf'
-  variables:
   artifacts:
     name: 'bin-freertos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
