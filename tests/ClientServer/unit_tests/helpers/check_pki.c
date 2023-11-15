@@ -512,9 +512,14 @@ START_TEST(functional_test_from_list)
     /* Validation is OK */
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* The rejected list is now empty */
+    SOPC_KeyManager_Certificate_Free(pRejectedList);
+    status = SOPC_PKIProvider_CopyRejectedList(pPKI, &pRejectedList);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(pRejectedList);
+    /* Write in the file system for the next functional test */
     status = SOPC_PKIProvider_SetStorePath("./unit_test_pki", pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    /* Write in the file system for the next functional test */
     status = SOPC_PKIProvider_WriteToStore(pPKI, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 

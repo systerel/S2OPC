@@ -237,8 +237,8 @@ static int verify_cert(void* checkTrustedAndCRL, mbedtls_x509_crt* crt, int cert
 }
 
 // removes cert from a linked list
-static void sopc_remove_cert_from_list(mbedtls_x509_crt** ppCur,
-                                       mbedtls_x509_crt** ppPrev,
+static void sopc_remove_cert_from_list(mbedtls_x509_crt* pPrev,
+                                       mbedtls_x509_crt** ppCur,
                                        SOPC_CertificateList** ppHeadCertList);
 
 // PKI remove certificate from rejected list declaration
@@ -1084,19 +1084,17 @@ static SOPC_ReturnStatus sopc_validate_certificate(
     return status;
 }
 
-static void sopc_remove_cert_from_list(mbedtls_x509_crt** ppCur,
-                                       mbedtls_x509_crt** ppPrev,
+static void sopc_remove_cert_from_list(mbedtls_x509_crt* pPrev,
+                                       mbedtls_x509_crt** ppCur,
                                        SOPC_CertificateList** ppHeadCertList)
 {
     SOPC_ASSERT(NULL != ppCur);
     SOPC_ASSERT(NULL != *ppCur); /* Current cert shall not be NULL */
-    SOPC_ASSERT(NULL != ppPrev);
     SOPC_ASSERT(NULL != ppHeadCertList);
     SOPC_ASSERT(NULL != *ppHeadCertList); /* Head shall not be NULL */
 
     SOPC_CertificateList* pHeadCertList = *ppHeadCertList;
     mbedtls_x509_crt* pCur = *ppCur;      /* Current cert */
-    mbedtls_x509_crt* pPrev = *ppPrev;    /* Parent of current cert */
     mbedtls_x509_crt* pNext = pCur->next; /* Next cert */
     pCur->next = NULL;
     mbedtls_x509_crt_free(pCur);
@@ -1128,7 +1126,6 @@ static void sopc_remove_cert_from_list(mbedtls_x509_crt** ppCur,
         pCur = pNext;
     }
     *ppCur = pCur;
-    *ppPrev = pPrev;
     *ppHeadCertList = pHeadCertList;
 }
 
@@ -1136,6 +1133,7 @@ static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList,
 {
     SOPC_ASSERT(NULL != ppRejectedList);
     SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL == pCert->crt.next);
 
     /* Head of the rejected list */
     SOPC_CertificateList* pHeadRejectedCertList = *ppRejectedList;
@@ -1159,7 +1157,7 @@ static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList,
         }
         if (bFound)
         {
-            sopc_remove_cert_from_list(&cur, &prev, &pHeadRejectedCertList);
+            sopc_remove_cert_from_list(prev, &cur, &pHeadRejectedCertList);
         }
         else
         {
@@ -1281,7 +1279,6 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     bool bIsSelfSigned = false;
     char* pThumbprint = NULL;
     const char* thumbprint = NULL;
-    bool bFoundRejectedCert = false;
     status = cert_is_self_signed(&crt, &bIsSelfSigned);
     if (SOPC_STATUS_OK != status)
     {
@@ -1352,12 +1349,7 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     }
     else
     {
-        status =
-            SOPC_KeyManager_CertificateList_FindCertInList(pPKI->pRejectedList, pToValidateCpy, &bFoundRejectedCert);
-        if (bFoundRejectedCert && SOPC_STATUS_OK == status)
-        {
-            sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
-        }
+        sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
     }
 
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
@@ -1859,7 +1851,7 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
             if (SOPC_STATUS_OK == status)
             {
                 /* Remove the certificate from the chain and safely delete it */
-                sopc_remove_cert_from_list(&cur, &prev, &pHeadCerts);
+                sopc_remove_cert_from_list(prev, &cur, &pHeadCerts);
             }
         }
         else
