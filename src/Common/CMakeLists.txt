@@ -12,7 +12,9 @@ endif()
 ### Dependencies ###
 include (CheckTypeSize)
 
-find_package(MBEDTLS REQUIRED)
+if (S2OPC_CRYPTO_MBEDTLS)
+  find_package(MBEDTLS REQUIRED)
+endif()
 
 ### Compilation of S2OPC common library source files ###
 
