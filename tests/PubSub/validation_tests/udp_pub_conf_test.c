@@ -198,7 +198,18 @@ int main(void)
     }
     UDP_Pub_Test_Fill_NetworkMessage(conf_group, nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    status = (SOPC_NetworkMessage_Error_Code_None == errorCode) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+    if (SOPC_STATUS_OK == status && buffer != NULL && buffer_payload != NULL)
+    {
+        errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+        SOPC_ASSERT(NULL == buffer_payload);
+        status = (SOPC_NetworkMessage_Error_Code_None == errorCode) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
 
     if (SOPC_STATUS_OK == status && buffer != NULL)
     {

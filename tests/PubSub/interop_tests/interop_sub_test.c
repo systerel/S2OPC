@@ -241,14 +241,6 @@ static void clear_setupConnection(void)
 
 static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
 {
-    if (NULL == uadp_nm)
-    {
-        printf("Network Message NOK. Message is null\n");
-        const SOPC_UADP_NetworkMessage_Error_Code errCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
-
-        printf("Last SOPC_UADP_NetworkMessage_Get_Last_Error()= %d (0x%08X)\n", (int) errCode, (int) errCode);
-        return -1;
-    }
     int result = 0;
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
@@ -379,6 +371,7 @@ static void readyToReceive(void* sockContext, Socket sock)
         .targetConfig = NULL};
 
     SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, buffer);
+    SOPC_NetworkMessage_Error_Code code = SOPC_NetworkMessage_Error_Code_None;
     if (SOPC_STATUS_OK == status && buffer->length > 1)
     {
         uint64_t i = 0;
@@ -387,8 +380,17 @@ static void readyToReceive(void* sockContext, Socket sock)
         if (SOPC_STATUS_OK == status)
         {
             // do not manage security
-            SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, subConnection);
-            returnCode = TestNetworkMessage(uadp_nm);
+            SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+            code = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, subConnection, &uadp_nm);
+            if (NULL == uadp_nm)
+            {
+                printf("Network Message NOK. Message is null errorCode = 0x%08X\n", code);
+                returnCode = -1;
+            }
+            else
+            {
+                returnCode = TestNetworkMessage(uadp_nm);
+            }
             SOPC_UADP_NetworkMessage_Delete(uadp_nm);
         }
         SOPC_Atomic_Int_Set(&stop, true);

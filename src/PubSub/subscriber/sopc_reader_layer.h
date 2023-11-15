@@ -34,11 +34,11 @@
  * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
  * \param snCBck : function to check if sequence number receive is newer or not
  */
-SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
-                                        SOPC_Buffer* buffer,
-                                        SOPC_SubTargetVariableConfig* config,
-                                        SOPC_UADP_GetSecurity_Func securityCBck,
-                                        SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck);
+SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
+                                                     SOPC_Buffer* buffer,
+                                                     SOPC_SubTargetVariableConfig* config,
+                                                     SOPC_UADP_GetSecurity_Func securityCBck,
+                                                     SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck);
 
 /**
  * Return default reception filtering functions.

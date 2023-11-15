@@ -281,7 +281,9 @@ uint8_t encoded_network_msg_no_pubId[] = {
 
 static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, size_t nbDsr);
 
-static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffer, SOPC_PubSubConnection* connection)
+static SOPC_NetworkMessage_Error_Code Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffer,
+                                                                   SOPC_PubSubConnection* connection,
+                                                                   SOPC_UADP_NetworkMessage** uadp_nm)
 {
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL,
@@ -289,7 +291,9 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffe
         .checkDataSetMessageSN_Func = NULL,
         .targetConfig = NULL};
 
-    return SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
+    SOPC_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection, uadp_nm);
+    return errorCode;
 }
 
 static void check_network_msg_content_uni_keep_alive_dsm(SOPC_Dataset_LL_NetworkMessage* nm)
@@ -456,7 +460,11 @@ START_TEST(test_hl_network_msg_encode_json)
     ck_assert_int_eq(true, res);
 
     /* Encode */
-    SOPC_Buffer* buffer = SOPC_JSON_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_NetworkMessage_Error_Code errorCode = SOPC_JSON_NetworkMessage_Encode(nm, NULL, &buffer);
+
+    ck_assert_int_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
 
     /* Control encoding result */
     // Check Size
@@ -523,7 +531,18 @@ START_TEST(test_hl_network_msg_encode)
     // Check network message content
     check_network_msg_content_uni_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
     ck_assert_uint_eq(ENCODED_DATA_SIZE, buffer->length);
 
@@ -547,9 +566,9 @@ START_TEST(test_hl_network_msg_decode)
     SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
     ck_assert_ptr_nonnull(connection);
 
-    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(&encoded_network_msg, connection);
-    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code = Decode_NetworkMessage_NoSecu(&encoded_network_msg, connection, &uadp_nm);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, code);
     ck_assert_ptr_nonnull(uadp_nm);
 
     // Check network message content
@@ -598,7 +617,18 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
     // Check network message content
     check_network_msg_content_uni_keep_alive_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
     ck_assert_uint_eq(ENCODED_KEEP_ALIVE_DATA, buffer->length);
 
@@ -622,9 +652,10 @@ START_TEST(test_hl_network_msg_decode_uni_keep_alive_dsm)
     SOPC_PubSubConnection* connection = SOPC_PubSubConfiguration_Get_SubConnection_At(config, 0);
     ck_assert_ptr_nonnull(connection);
 
-    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(&encoded_network_keep_alive_msg, connection);
-    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code =
+        Decode_NetworkMessage_NoSecu(&encoded_network_keep_alive_msg, connection, &uadp_nm);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, code);
     ck_assert_ptr_nonnull(uadp_nm);
 
     check_network_msg_content_uni_keep_alive_dsm(uadp_nm->nm);
@@ -696,10 +727,18 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     // Check network message content
     check_network_msg_content_multi_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, false);
-    const SOPC_UADP_NetworkMessage_Error_Code eCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, eCode);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
     ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
 #if 0 // switch to debug
     {
@@ -842,8 +881,11 @@ START_TEST(test_hl_network_msg_decode_multi_dsm)
     SOPC_Buffer_Write(buffer, encoded_network_msg_multi_dsm_data, bufferLen);
     SOPC_Buffer_SetPosition(buffer, 0);
 
-    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code = Decode_NetworkMessage_NoSecu(buffer, connection, &uadp_nm);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, code);
     ck_assert_ptr_nonnull(uadp_nm);
+
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     ck_assert_ptr_nonnull(nm);
@@ -921,9 +963,13 @@ START_TEST(test_hl_network_msg_decode_multi_dsm_nok)
     status = SOPC_Buffer_SetPosition(buffer, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code = Decode_NetworkMessage_NoSecu(buffer, connection, &uadp_nm);
+
     // Check that Network message is not decoded
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed, code);
     ck_assert_ptr_null(uadp_nm);
+
     SOPC_Buffer_Delete(buffer);
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
     SOPC_PubSubConfiguration_Delete(config);
@@ -947,10 +993,10 @@ START_TEST(test_hl_network_msg_decode_null_pubid)
     SOPC_Buffer_Write(buffer, encoded_network_msg_no_pubId, bufferLen);
     SOPC_Buffer_SetPosition(buffer, 0);
 
-    SOPC_UADP_NetworkMessage* uadp_nm = Decode_NetworkMessage_NoSecu(buffer, connection);
-    const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(code, SOPC_UADP_NetworkMessage_Error_Code_None);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code = Decode_NetworkMessage_NoSecu(buffer, connection, &uadp_nm);
     ck_assert_ptr_nonnull(uadp_nm);
+    ck_assert_uint_eq(SOPC_NetworkMessage_Error_Code_None, code);
     SOPC_Dataset_LL_NetworkMessage* nm = uadp_nm->nm;
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
     ck_assert_ptr_nonnull(nm);
@@ -1188,7 +1234,7 @@ static bool setTargetVariablesCb_ReaderTest_Multi(OpcUa_WriteValue* nodesToWrite
 START_TEST(test_subscriber_reader_layer_multi_dsm)
 {
     // Same test as above, with 2 DSM
-    SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Error_Code_None;
+    SOPC_NetworkMessage_Error_Code code = SOPC_NetworkMessage_Error_Code_None;
     SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[2];
@@ -1203,11 +1249,9 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
     setTargetVariablesCb_ReaderTest_nbVal = 0;
-    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_Buffer_SetPosition(&encoded_network_msg2, 0);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
+    ck_assert_int_eq(SOPC_NetworkMessage_Error_Code_None, code);
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_msg2, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert_int_eq(true, setTargetVariablesCb_ReaderTest_called);
@@ -1221,9 +1265,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // Change PUBLISHER ID and check that message has not been fully parsed.
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, NETWORK_MSG_PUBLISHER_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg2, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1237,10 +1279,8 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // WRONG DATA SET WRITER ID on second DSM
     SOPC_DataSetReader_Set_DataSetWriterId(dsr[1], DATASET_MSG_WRITER_ID_BASE - 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
+    ck_assert_int_eq(SOPC_NetworkMessage_Error_Code_None, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg2, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -1253,10 +1293,8 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
     // WRONG DATA SET WRITER ID on first DSM
     SOPC_DataSetReader_Set_DataSetWriterId(dsr[0], DATASET_MSG_WRITER_ID_BASE - 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Code_None, code);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg2, targetConfig, NULL, NULL);
+    ck_assert_int_eq(SOPC_NetworkMessage_Error_Code_None, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg2, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -1274,7 +1312,7 @@ END_TEST
 
 START_TEST(test_subscriber_reader_layer)
 {
-    SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Error_Code_None;
+    SOPC_NetworkMessage_Error_Code code = SOPC_NetworkMessage_Error_Code_None;
     SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[1];
@@ -1287,9 +1325,9 @@ START_TEST(test_subscriber_reader_layer)
 
     // NOMINAL
     setTargetVariablesCb_ReaderTest_called = false;
-    SOPC_ReturnStatus status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
+    ck_assert_int_eq(SOPC_NetworkMessage_Error_Code_None, code);
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert_int_eq(true, setTargetVariablesCb_ReaderTest_called);
@@ -1300,9 +1338,7 @@ START_TEST(test_subscriber_reader_layer)
     // Change PUBLISHER ID and check that message has not been fully parsed.
     SOPC_ReaderGroup_Set_PublisherId_UInteger(readerGroup, NETWORK_MSG_PUBLISHER_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1314,9 +1350,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP ID
     SOPC_ReaderGroup_Set_GroupId(readerGroup, NETWORK_MSG_GROUP_ID + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1328,9 +1362,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG GROUP VERSION
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, NETWORK_MSG_GROUP_VERSION + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1342,9 +1374,7 @@ START_TEST(test_subscriber_reader_layer)
     // WRONG DATA SET WRITER ID
     SOPC_DataSetReader_Set_DataSetWriterId(*dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingReader, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -1358,9 +1388,7 @@ START_TEST(test_subscriber_reader_layer)
     SOPC_ReaderGroup_Set_GroupVersion(readerGroup, NETWORK_MSG_GROUP_VERSION + 1);
     SOPC_DataSetReader_Set_DataSetWriterId(*dsr, DATASET_MSG_WRITER_ID_BASE + 1);
 
-    status = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
-    code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_int_eq(SOPC_STATUS_ENCODING_ERROR, status);
+    code = SOPC_Reader_Read_UADP(connection, &encoded_network_msg, targetConfig, NULL, NULL);
     ck_assert_int_eq(SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup, code);
     status = SOPC_Buffer_SetPosition(&encoded_network_msg, 0);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

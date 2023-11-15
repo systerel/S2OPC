@@ -193,13 +193,26 @@ int main(void)
     UDP_Pub_Test_Fill_NetworkMessage(conf_group, nm);
 
     SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
-        if (buffer == NULL)
+        SOPC_NetworkMessage_Error_Code errorCode =
+            SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+        status = (SOPC_NetworkMessage_Error_Code_None == errorCode) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+        if (SOPC_STATUS_OK == status && buffer != NULL && buffer_payload != NULL)
         {
-            const SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Get_Last_Error();
-            fprintf(stderr, "NetworkMessage error: %08X\n", code);
+            errorCode = SOPC_UADP_NetworkMessage_BuildFinalMessage(NULL, buffer, &buffer_payload);
+            SOPC_ASSERT(NULL == buffer_payload);
+            status = (SOPC_NetworkMessage_Error_Code_None == errorCode) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+            if (SOPC_STATUS_OK != status || buffer == NULL)
+            {
+                fprintf(stderr, "Sign and encrypt and merge encoded buffers error: 0x%08X\n", errorCode);
+            }
+        }
+        else
+        {
+            fprintf(stderr, "NetworkMessage error: 0x%08X\n", errorCode);
         }
     }
 

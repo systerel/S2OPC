@@ -143,8 +143,14 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuff
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .checkDataSetMessageSN_Func = NULL,
         .targetConfig = NULL};
-
-    return SOPC_UADP_NetworkMessage_Decode(pBuffer, &readerConf, subConnection);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_NetworkMessage_Error_Code code =
+        SOPC_UADP_NetworkMessage_Decode(pBuffer, &readerConf, subConnection, &uadp_nm);
+    if (SOPC_NetworkMessage_Error_Code_None != code)
+    {
+        printf("Failed to decode errorcode = 0x%08X\n", (unsigned) code);
+    }
+    return uadp_nm;
 }
 
 static void printVariant(const SOPC_Variant* variant)
@@ -245,13 +251,6 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
                 printVariant(variant);
             }
         }
-    }
-    else
-    {
-        printf("UADP Msg = <NULL>\n");
-        const SOPC_UADP_NetworkMessage_Error_Code errCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
-
-        printf("Last SOPC_UADP_NetworkMessage_Get_Last_Error()= %d (0x%08X)\n", (int) errCode, (int) errCode);
     }
 }
 

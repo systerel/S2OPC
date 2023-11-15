@@ -82,28 +82,30 @@ const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Defau
     .pGetReader_Func = &SOPC_Sub_GetReader,
     .pSetDsm_Func = &SOPC_Sub_ReceiveDsm};
 
-SOPC_ReturnStatus SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
-                                        SOPC_Buffer* buffer,
-                                        SOPC_SubTargetVariableConfig* config,
-                                        SOPC_UADP_GetSecurity_Func securityCBck,
-                                        SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck)
+SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
+                                                     SOPC_Buffer* buffer,
+                                                     SOPC_SubTargetVariableConfig* config,
+                                                     SOPC_UADP_GetSecurity_Func securityCBck,
+                                                     SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_NetworkMessage_Error_Code errorCode = SOPC_NetworkMessage_Error_Code_None;
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = securityCBck,
         .checkDataSetMessageSN_Func = snCBck,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .targetConfig = config};
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    errorCode = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection, &uadp_nm);
+
     if (NULL == uadp_nm)
     {
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
          * random bytes found on the network */
-        return SOPC_STATUS_ENCODING_ERROR;
+        return errorCode;
     }
 
     SOPC_UADP_NetworkMessage_Delete(uadp_nm);
-    return status;
+    return errorCode;
 }
 
 static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnection* connection,

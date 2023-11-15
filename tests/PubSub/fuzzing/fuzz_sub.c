@@ -159,7 +159,9 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         .checkDataSetMessageSN_Func = NULL,
         .targetConfig = NULL};
 
-    SOPC_UADP_NetworkMessage* uadp_nm = SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection);
+    SOPC_UADP_NetworkMessage* uadp_nm = NULL;
+    SOPC_UADP_NetworkMessage_Decode(sopc_buffer, &readerConf, subConnection, &uadp_nm);
+
     if (NULL != uadp_nm)
         SOPC_UADP_NetworkMessage_Delete(uadp_nm);
 

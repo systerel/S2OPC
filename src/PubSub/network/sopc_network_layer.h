@@ -17,6 +17,18 @@
  * under the License.
  */
 
+/**
+ * \file sopc_network_layer.h
+ * UADP Encoding is divided in two stages
+ *  - UADP header and UADP payload are mapped in two distinct buffers
+ *  - Depending on security configuration we sign and encrypt and merge the two buffers in one buffer.
+ *
+ * The header buffer contains the final buffer to be sent. It is composed of non-encrypted headers followed by the
+ * payload buffer copy, which may be encrypted
+ *
+ * The payload buffer contains the unencrypted payload
+ */
+
 #ifndef SOPC_NETWORK_LAYER_H_
 #define SOPC_NETWORK_LAYER_H_
 
@@ -27,9 +39,74 @@
 #include "sopc_pubsub_security.h"
 #include "sopc_sub_target_variable.h"
 
-// TODO: use security mode instead of security enabled
-// TODO: remove SOPC_UADP_NetworkMessage_Get_Last_Error and provide a call-specific return value
-//
+/** Error code used by encoding and decoding functions */
+typedef enum
+{
+    SOPC_NetworkMessage_Error_Code_None = 0,
+    SOPC_NetworkMessage_Error_Code_InvalidParameters,
+    SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed = 0x10000000,
+    SOPC_UADP_NetworkMessage_Error_Write_PubId_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_GroupId_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_GroupVersion_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_WriterId_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_SecuFooter_Failed,
+    SOPC_NetworkMessage_Error_Write_Alloc_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_EncryptPaylod_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_PayloadFlush_Failed,
+    SOPC_UADP_NetworkMessage_Error_Write_Sign_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed = 0x20000000,
+    SOPC_UADP_NetworkMessage_Error_Read_Short_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_Int_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_Security_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecuritySignSize_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecurityNonce_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecurityDecrypt_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSkip_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNumCheck_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_InvalidBit,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed,
+    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup = 0x30000000,
+    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingReader,
+    SOPC_UADP_NetworkMessage_Error_Read_BadMetaData,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Version = 0x40000000,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags2,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_SeqNum,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Timestamp,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_Picoseconds,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_SecurityFooterReset,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_PromotedFields,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmType,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp,
+    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmPicoseconds,
+    SOPC_JSON_NetworkMessage_Error_Generate_Unique_MessageId = 0x50000000,
+    SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName,
+    SOPC_JSON_NetworkMessage_Error_Encode,
+    SOPC_JSON_NetworkMessage_Error_DataSetMessage_Encode,
+    SOPC_JSON_NetworkMessage_Error_Variant_Encode,
+    SOPC_JSON_NetworkMessage_Error_Write_Closing_Structure,
+    SOPC_JSON_NetworkMessage_Error_Security_Unsupported,
+} SOPC_NetworkMessage_Error_Code;
+
 typedef struct SOPC_UADP_Network_Message
 {
     SOPC_Dataset_LL_NetworkMessage* nm;
@@ -54,23 +131,41 @@ typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_Publishe
  * \param message is the NetworkMessage to encode
  * \param security is the data use to encrypt and sign. Can be NULL if security is not used.
  *                 No security possible for JSON encoding.
+ * \param buffer   pointer to a newly allocated buffer containing the JSON string
  *
- * \return A buffer containing the JSON string or NULL if the operation does not succeed
+ * \return ::SOPC_NetworkMessage_Error_Code_None if buffer is successfully encoded. Appropriate error code otherwise
  */
-SOPC_Buffer* SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message,
-                                             SOPC_PubSub_SecurityType* security);
+SOPC_NetworkMessage_Error_Code SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* message,
+                                                               SOPC_PubSub_SecurityType* security,
+                                                               SOPC_Buffer** buffer);
 
 /**
- * \brief Encode a NetworkMessage with UADP Mapping
+ * @brief Encode a NetworkMessage with UADP Mapping. Buffer is split in a Header buffer and payload buffer
  *
- * \param nm is the NetworkMessage to encode
- * \param securityCtx is the data use to encrypt and sign. Can be NULL if security is not used
- *
- * \return A buffer containing the UADP bytes or NULL if the operation does not succeed
- *
+ * @param nm is the NetworkMessage to encode
+ * @param security is the data use to set security flags. Can be NULL if security is not used
+ * @param buffer_header pointer to a newly allocated buffer with header flags
+ * @param buffer_payload pointer to a newly allocated buffer with payload data
+ * @return ::SOPC_NetworkMessage_Error_Code_None if header and payload buffer are successfully encoded. Appropriate
+ * error code otherwise
  */
-SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,     //
-                                             SOPC_PubSub_SecurityType* securityCtx); //
+SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Dataset_LL_NetworkMessage* nm,
+                                                                       SOPC_PubSub_SecurityType* security,
+                                                                       SOPC_Buffer** buffer_header,
+                                                                       SOPC_Buffer** buffer_payload);
+
+/**
+ * @brief Sign and encrypt encoded buffer if necessary and merge header and payload buffer in one buffer.
+ *
+ * @param security is the data used to encrypt and sign. Can be NULL if security is not used
+ * @param buffer_header [IN/OUT] encoded header buffer which will become the final buffer
+ * @param buffer_payload encoded payload buffer. Freed in all cases by this function
+ * @return SOPC_NetworkMessage_Error_Code SOPC_NetworkMessage_Error_Code_None in case of succes another code
+ * otherwise
+ */
+SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_PubSub_SecurityType* security,
+                                                                          SOPC_Buffer* buffer_header,
+                                                                          SOPC_Buffer** buffer_payload);
 
 /**
  * \brief A callback for ReaderGroup identification. When a network message is received, this
@@ -149,97 +244,20 @@ typedef struct
 
  * \param reader_config The configuration for message parsing/filtering
  * \param connection The related connection
+ * \param uadp_nm a pointer to a new network message (must be freed by caller) if decoding succeeded
  *
- *
- * \return a pointer to a new network message (must be freed by caller) if decoding succeeded and led
- *          to at least 1 variable update.
- *          Otherwise, call ::SOPC_UADP_NetworkMessage_Get_Last_Error to identify decoding error.
+ * \return  ::SOPC_NetworkMessage_Error_Code_None if buffer is successfully decoded  and led to at least 1 variable
+ update.
+ *          Appropriate error code otherwise.
  *          Note that this can simply caused by the fact that the received message does not
  *          fit any Group/PublisherId/WriterId filters.
  */
-SOPC_UADP_NetworkMessage* SOPC_UADP_NetworkMessage_Decode(
+SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Decode(
     SOPC_Buffer* buffer,
     const SOPC_UADP_NetworkMessage_Reader_Configuration* reader_config,
-    const SOPC_PubSubConnection* connection);
+    const SOPC_PubSubConnection* connection,
+    SOPC_UADP_NetworkMessage** uadp_nm);
 
 void SOPC_UADP_NetworkMessage_Delete(SOPC_UADP_NetworkMessage* uadp_nm);
-
-/** Error code used by ::SOPC_UADP_NetworkMessage_Encode
- * or ::SOPC_UADP_NetworkMessage_Decode. Call ::SOPC_UADP_NetworkMessage_Get_Last_Error to
- * retrieve the last encountered error */
-typedef enum
-{
-    SOPC_UADP_NetworkMessage_Error_Code_None = 0,
-    SOPC_UADP_NetworkMessage_Error_Write_Buffer_Failed = 0x10000000,
-    SOPC_UADP_NetworkMessage_Error_Write_PubId_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_GroupId_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_GroupVersion_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_WriterId_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_TokenId_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_SecuHdr_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_SecuFooter_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_Alloc_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_DsmSize_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_DsmPreSize_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_DsmSeqNum_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_EncryptPaylod_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_PayloadFlush_Failed,
-    SOPC_UADP_NetworkMessage_Error_Write_Sign_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_Byte_Failed = 0x20000000,
-    SOPC_UADP_NetworkMessage_Error_Read_Short_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_Int_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_Alloc_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_Security_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecurityConf_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecuritySign_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecuritySignSize_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecurityNonce_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecurityDecrypt_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SecurityNone_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_SeqNum_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmSkip_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmSize_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNumCheck_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_InvalidBit,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmFields_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_DsmSizeCheck_Failed,
-    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingGroup = 0x30000000,
-    SOPC_UADP_NetworkMessage_Error_Read_NoMatchingReader,
-    SOPC_UADP_NetworkMessage_Error_Read_BadMetaData,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Version = 0x40000000,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags1,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Flags2,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_PubIdType,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_ClassId,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_MessageNum,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_SeqNum,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Timestamp,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_Picoseconds,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_SecurityFooterReset,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_PromotedFields,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_EncodingType,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmType,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmSeqNum,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmTimeStamp,
-    SOPC_UADP_NetworkMessage_Error_Unsupported_DsmPicoseconds,
-    SOPC_JSON_NetworkMessage_Error_Generate_Unique_MessageId = 0x50000000,
-    SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName,
-    SOPC_JSON_NetworkMessage_Error_Encode,
-    SOPC_JSON_NetworkMessage_Error_DataSetMessage_Encode,
-    SOPC_JSON_NetworkMessage_Error_Variant_Encode,
-    SOPC_JSON_NetworkMessage_Error_Write_Closing_Structure,
-    SOPC_JSON_NetworkMessage_Error_Security_Unsupported,
-} SOPC_UADP_NetworkMessage_Error_Code;
-
-/**
- * Return the last decode/encode error and reset its value.
- * This function should be called after a \c NULL returned value in a call to ::SOPC_UADP_NetworkMessage_Encode
- * or ::SOPC_UADP_NetworkMessage_Decode
- * This value is not thread-safe, and is only intended for debugging/maintenance purpose
- * @return The last error code.
- */
-SOPC_UADP_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Get_Last_Error(void);
 
 #endif /* SOPC_NETWORK_LAYER_H_ */
