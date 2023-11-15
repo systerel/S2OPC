@@ -69,6 +69,23 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const SOPC_Certificate_Type usrCertType,
                                                                 const uint32_t maxTrustListSize,
                                                                 SOPC_PushServerConfig_Config** ppConfig);
+/**
+ * \brief Get the default configuration for the ServerConfigurationType object in TOFU state.
+ *
+ * \param pPKIApp             A valid pointer to the PKI of the application TrustList.
+ * \param appCertType         The application certificate type.
+ * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
+ * \param pFnUpdateCompleted  The callback when a new valid update of the TrustList has occurred.
+ * \param[out] ppConfig       A newly created configuration. You should delete it with
+ *                            ::SOPC_PushServerConfig_DeleteConfiguration .
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus SOPC_PushServerConfig_GetTOFUConfiguration(SOPC_PKIProvider* pPKIApp,
+                                                             const SOPC_Certificate_Type appCertType,
+                                                             const uint32_t maxTrustListSize,
+                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
+                                                             SOPC_PushServerConfig_Config** ppConfig);
 
 /**
  * \brief Delete configuration.

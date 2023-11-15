@@ -79,6 +79,7 @@ struct SOPC_CertificateGroup_Config
     SOPC_KeyCertPair* pKeyCertPair;       /*!< The private key and certificate that belongs to the group.*/
     char* pKeyPath;                       /*!< Path to the private key that belongs to the group */
     char* pCertPath;                      /*!< Path to the certificate that belongs to the group */
+    bool bIsTofuSate;                     /*!< When flag is set, the TOFU state is enabled. */
 };
 
 /*---------------------------------------------------------------------------
@@ -394,6 +395,53 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
         pCfg->pKeyCertPair = pKeyCertPair;
         pCfg->pKeyPath = keyPath;
         pCfg->pCertPath = certPath;
+        pCfg->bIsTofuSate = false;
+    }
+    else
+    {
+        SOPC_Free(pCfg);
+        pCfg = NULL;
+    }
+    *ppConfig = pCfg;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_CertificateGroup_GetTOFUConfiguration(const SOPC_Certificate_Type certType,
+                                                             SOPC_PKIProvider* pPKI,
+                                                             const uint32_t maxTrustListSize,
+                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
+                                                             SOPC_CertificateGroup_Config** ppConfig)
+{
+    if (NULL == pPKI || 0 == maxTrustListSize || NULL == pFnUpdateCompleted || NULL == ppConfig)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != certType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != certType)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    const CertificateGroup_NodeIds* pNodeIds = &appNodeIds;
+
+    SOPC_CertificateGroup_Config* pCfg = SOPC_Calloc(1, sizeof(SOPC_CertificateGroup_Config));
+    if (NULL == pCfg)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_TrustList_Config* pTrustListCfg = NULL;
+    status = SOPC_TrustList_GetTOFUConfiguration(SOPC_TRUSTLIST_GROUP_APP, pPKI, maxTrustListSize, pFnUpdateCompleted,
+                                                 &pTrustListCfg);
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg->pIds = pNodeIds;
+        pCfg->pTrustListCfg = pTrustListCfg;
+        pCfg->pPKI = pPKI;
+        pCfg->groupType = SOPC_TRUSTLIST_GROUP_APP;
+        pCfg->certType = certType;
+        pCfg->pKeyCertPair = NULL;
+        pCfg->pKeyPath = NULL;
+        pCfg->pCertPath = NULL;
+        pCfg->bIsTofuSate = true;
     }
     else
     {
@@ -451,7 +499,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType && NULL == pCfg->pKeyCertPair)
+    if (SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType && NULL == pCfg->pKeyCertPair && !pCfg->bIsTofuSate)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -491,7 +539,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
         }
     }
     /* Add the paths */
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && !pCfg->bIsTofuSate)
     {
         if (NULL != pCfg->pKeyPath)
         {

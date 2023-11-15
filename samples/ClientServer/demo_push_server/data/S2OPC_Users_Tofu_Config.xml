@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC_Users xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_users_config.xsd">
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
+    <!-- "adminTOFU" pwd=adminTOFU has all right accesses.
+        note: still restricted by nodes static access rights in address space.
+    -->
+    <UserPassword user="adminTOFU" hash="61a28f2f9f204d45bfaf2481a44af9f6fdcccfefef23293dcba5d062fd674408" salt="7aaa8f0e38c972eab26d0ebb25bdd976">
+      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+    </UserPassword>
+  </UserPasswordConfiguration>
+</S2OPC_Users>

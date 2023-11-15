@@ -105,6 +105,7 @@ typedef struct SOPC_TrustListContext
     SOPC_CRLList* pTrustedCRLs;          /*!< The trusted CRL list to be updated */
     SOPC_CRLList* pIssuerCRLs;           /*!< The issuer CRL list to be updated */
     SOPC_TrLst_TimeEvent event;
+    SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted; /*!< Calls when a new valid update has occurred */
     bool bDoNotDelete; /*!< Defined whatever the TrustList context shall be deleted */
 } SOPC_TrustListContext;
 
@@ -257,6 +258,17 @@ uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList);
  * \return The specifiedLists mask
  */
 SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTrustList);
+
+/**
+ * \brief Get the TOFU state status
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ *
+ * \return True if the server is in TOFU state.
+ */
+bool TrustList_isInTofuSate(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Check the TrustList handle.
@@ -430,6 +442,16 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
  * \return SOPC_STATUS_OK if successful.
  */
 SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList);
+
+/**
+ * \brief Executes user callback to indicate the end of a valid update.
+ *        Do nothing if the callback is not configured.
+ *
+ * \param pTrustList The TrustList context.
+ *
+ * \warning \p pTrustList shall be valid (!= NULL).
+ */
+void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Write the value of the TrustList Size variable.
