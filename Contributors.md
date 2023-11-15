@@ -35,3 +35,4 @@ the legal rights to contribute.
 * Nathan Lebeau <nathan.lebeau-stg@systerel.fr>
 * Sebastien Tajan <sebastien.tajan@systerel.fr>
 * Lebeau <nathan.lebeau@systerel.fr>
+* Eloïse Rotondo <eloise.rotondo@systerel.fr>
