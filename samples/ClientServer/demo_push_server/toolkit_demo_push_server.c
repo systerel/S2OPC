@@ -22,8 +22,23 @@
  * \brief  Demo server implementing the Push Model of the certificate management.
  *         The server shall not be Nano compliant since CallMethod service is not available.
  *         S2OPC shall be build with S2OPC_DYNAMIC_TYPE_RESOLUTION option.
+ *
+ *         This demo server support the default application group (RsaSha256ApplicationCertificateType)
+ *
+ *         The server can start in TOFU mode (Trust On First Use). The TOFU mode allows to start the server
+ *         with an empty PKI and allows a specific user to configure the TrustList for the first time.
+ *         In TOFU mode, when a valid update is completed through TrustList.AddCertificate or TrustList.Write +
+ *         TrustList.CloseAndUpdate methods then the server reboot with the new configuration of the TrustList.
+ *         The TOFU mode works during a period and if the timeout has elapsed then the server is stopped.
+ *
+ *         To activate TOFU mode, you must set the TOFU period value from the binary command line eg:
+ *         <./toolkit_demo_push_server 1> (server will start in TOFU state with a timeout of 1 minute)
+ *         The users allowed in TOFU state are defined by an XML configuration file which is retrieved by
+ *         the environemnt variable TEST_TOFU_USERS_XML_CONFIG.
  */
 
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,13 +47,34 @@
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "sopc_askpass.h"
+#include "sopc_assert.h"
 #include "sopc_enums.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_push_server_config_itf.h"
 #include "sopc_user_app_itf.h"
+
+#define DEMO_PUSH_M_TO_MS 60000
+
+/*---------------------------------------------------------------------------
+ *                          Server variables content
+ *---------------------------------------------------------------------------*/
+
+typedef struct DemoPushSrv_AppCtx
+{
+    SOPC_Mutex mutex;
+    SOPC_Condition cond;
+    bool stopFlag;
+    bool isTofu;
+    bool rebootFlag;
+    uint32_t tofuPeriod; // ms
+    char* password;
+} DemoPushSrv_AppCtx;
+
+static DemoPushSrv_AppCtx gAppCtx = {0};
 
 /*---------------------------------------------------------------------------
  *                          Callbacks definition
@@ -47,7 +83,52 @@
 /* Server callback definition to ask for private key password during configuration phase */
 static bool DemoPushSrv_PrivateKeyAskPass_FromTerminal(char** outPassword)
 {
-    return SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+    bool res = false;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (NULL == gAppCtx.password)
+    {
+        res = SOPC_AskPass_CustomPromptFromTerminal("Private key password:\n", outPassword);
+        gAppCtx.password = SOPC_strdup(*outPassword);
+    }
+    else
+    {
+        *outPassword = SOPC_strdup(gAppCtx.password);
+        res = true;
+    }
+    mutStatus = SOPC_Mutex_Unlock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    return res;
+}
+
+static void DemoPushSrv_StoppedCb(SOPC_ReturnStatus status)
+{
+    SOPC_UNUSED_ARG(status);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    printf("<Demo_Push_Server: Server stop callback\n");
+    gAppCtx.stopFlag = true;
+    SOPC_Condition_SignalAll(&gAppCtx.cond);
+    mutStatus = SOPC_Mutex_Unlock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+}
+
+static void DemoPushSrv_StopSignal(int arg)
+{
+    SOPC_UNUSED_ARG(arg);
+    SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
+}
+
+static void DemoPushSrv_TrustList_UpdateCompleted(uintptr_t context)
+{
+    SOPC_UNUSED_ARG(context);
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    printf("<Demo_Push_Server: Trustlist update is completed\n");
+    gAppCtx.rebootFlag = true;
+    SOPC_Condition_SignalAll(&gAppCtx.cond);
+    mutStatus = SOPC_Mutex_Unlock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 }
 
 /*---------------------------------------------------------------------------
@@ -57,20 +138,30 @@ static bool DemoPushSrv_PrivateKeyAskPass_FromTerminal(char** outPassword)
 static SOPC_ReturnStatus DemoPushSrv_LoadConfigurationFromFiles(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
-     * TEST_SERVER_XML_ADDRESS_SPACE and TEST_USERS_XML_CONFIG.
+     * TEST_SERVER_XML_ADDRESS_SPACE, TEST_USERS_XML_CONFIG and TEST_TOFU_USERS_XML_CONFIG
      *
      * In case of success returns the file path otherwise display error message and return failure status.
      */
     const char* xml_server_config_path = getenv("TEST_SERVER_XML_CONFIG");
     const char* xml_address_space_config_path = getenv("TEST_SERVER_XML_ADDRESS_SPACE");
-    const char* xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
+    const char* xml_users_config_path = NULL;
+
+    if (gAppCtx.isTofu)
+    {
+        xml_users_config_path = getenv("TEST_TOFU_USERS_XML_CONFIG");
+    }
+    else
+    {
+        xml_users_config_path = getenv("TEST_USERS_XML_CONFIG");
+    }
 
     if (NULL == xml_server_config_path || NULL == xml_address_space_config_path || NULL == xml_users_config_path)
     {
         const char* server_config_missing = (NULL == xml_server_config_path ? "TEST_SERVER_XML_CONFIG, " : "");
         const char* addspace_config_missing =
             (NULL == xml_address_space_config_path ? "TEST_SERVER_XML_ADDRESS_SPACE, " : "");
-        const char* users_config_missing = (NULL == xml_users_config_path ? "TEST_USERS_XML_CONFIG" : "");
+        const char* users_config_missing =
+            (NULL == xml_users_config_path ? "TEST_USERS_XML_CONFIG or TEST_TOFU_USERS_XML_CONFIG" : "");
         printf(
             "Error: an XML server configuration file path shall be provided, e.g.: "
             "TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml "
@@ -98,11 +189,28 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     }
     s2opcConfig = SOPC_CommonHelper_GetConfiguration();
     serverConfig = &s2opcConfig->serverConfig;
-    status = SOPC_PushServerConfig_GetDefaultConfiguration(serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION,
-                                                           serverConfig->serverKeyCertPair, serverConfig->serverKeyPath,
-                                                           serverConfig->serverCertPath, NULL, SOPC_CERT_TYPE_UNKNOW,
-                                                           SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
-
+    if (gAppCtx.isTofu)
+    {
+        SOPC_PKIProvider_Free(&serverConfig->pki);
+        status = SOPC_PKIPermissive_Create(&serverConfig->pki);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PKIProvider_SetStorePath(serverConfig->serverPkiPath, serverConfig->pki);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PushServerConfig_GetTOFUConfiguration(
+                serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, SOPC_TRUSTLIST_DEFAULT_MAX_SIZE,
+                &DemoPushSrv_TrustList_UpdateCompleted, &pPushConfig);
+        }
+    }
+    else
+    {
+        status = SOPC_PushServerConfig_GetDefaultConfiguration(
+            serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, serverConfig->serverKeyCertPair,
+            serverConfig->serverKeyPath, serverConfig->serverCertPath, NULL, SOPC_CERT_TYPE_UNKNOW,
+            SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
+    }
     if (SOPC_STATUS_OK == status)
     {
         pMcm = SOPC_MethodCallManager_Create();
@@ -142,13 +250,37 @@ static char* DemoPushSrv_ConfigLogPath(const char* logDirName)
 }
 
 /*---------------------------------------------------------------------------
- *                             Server main function
+ *                             Server function
  *---------------------------------------------------------------------------*/
 
-int main(int argc, char* argv[])
+static SOPC_ReturnStatus DemoPushSrv_WaitUntilStop(void)
 {
-    SOPC_UNUSED_ARG(argc);
+    SOPC_ReturnStatus mutStatus = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (gAppCtx.isTofu)
+    {
+        status =
+            SOPC_Mutex_UnlockAndTimedWaitCond(&gAppCtx.cond, &gAppCtx.mutex, DEMO_PUSH_M_TO_MS * gAppCtx.tofuPeriod);
 
+        if (SOPC_STATUS_TIMEOUT == status)
+        {
+            printf("<Demo_Push_Server: TOFU timeout elapsed\n");
+        }
+
+        printf("<Demo_Push_Server: Server is leaving TOFU state ...\n");
+
+        SOPC_UNUSED_RESULT(SOPC_ServerHelper_StopServer());
+    }
+    while (SOPC_STATUS_OK == mutStatus && !gAppCtx.stopFlag)
+    {
+        mutStatus = SOPC_Mutex_UnlockAndWaitCond(&gAppCtx.cond, &gAppCtx.mutex);
+    }
+
+    return status;
+}
+
+static SOPC_ReturnStatus DemoPushSrv_MainCommon(const char* logName)
+{
     /* Get the toolkit build information and print it */
     SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
     printf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
@@ -161,7 +293,7 @@ int main(int argc, char* argv[])
     /* Configure the server logger */
     SOPC_Log_Configuration logConfig = SOPC_Common_GetDefaultLogConfiguration();
     logConfig.logLevel = SOPC_LOG_LEVEL_DEBUG;
-    char* logDirPath = DemoPushSrv_ConfigLogPath(argv[0]);
+    char* logDirPath = DemoPushSrv_ConfigLogPath(logName);
     logConfig.logSysConfig.fileSystemLogConfig.logDirPath = logDirPath;
 
     /* Initialize the server library (start library threads) */
@@ -173,26 +305,15 @@ int main(int argc, char* argv[])
 
     if (SOPC_STATUS_OK == status)
     {
-        /* This function must be called after the initialization functions of the server library and
-           before starting the server and its configuration. */
         status = SOPC_HelperConfigServer_SetKeyPasswordCallback(&DemoPushSrv_PrivateKeyAskPass_FromTerminal);
     }
-
-    /* Configuration of:
-     * - Server endpoints configuration from XML server configuration file (comply with s2opc_clientserver_config.xsd) :
-         - Enpoint URL,
-         - Security endpoint properties,
-         - Cryptographic parameters,
-         - Application description
-       - Server address space initial content from XML configuration file (comply with UANodeSet.xsd)
-       - User authentication and authorization management from XML configuration file
-         (comply with s2opc_clientserver_users_config.xsd):
-         - User credentials
-         - User access rights
-    */
     if (SOPC_STATUS_OK == status)
     {
         status = DemoPushSrv_LoadConfigurationFromFiles();
+        if (SOPC_STATUS_OK != status)
+        {
+            printf("<Demo_Push_Server: Failed to load configuration files (error = '%d')\n", status);
+        }
     }
 
     if (SOPC_STATUS_OK == status)
@@ -200,51 +321,151 @@ int main(int argc, char* argv[])
         status = DemoPushSrv_AddServerConfigurationType();
         if (SOPC_STATUS_OK != status)
         {
-            printf("<Demo_Push_Server: Failed to load ServerConfigurationType\n");
+            printf("<Demo_Push_Server: Failed to add the ServerConfigurationType (error = '%d')\n", status);
         }
     }
 
+    /* Signals configuration to stop the server */
+    signal(SIGINT, DemoPushSrv_StopSignal);
+    signal(SIGTERM, DemoPushSrv_StopSignal);
+
     if (SOPC_STATUS_OK == status)
     {
-        printf("<Demo_Push_Server: Server started\n");
-
-        /* Run the server until error  or stop server signal detected (Ctrl-C) */
-        status = SOPC_ServerHelper_Serve(true);
-
-        /**
-         * Alternative is using SOPC_ServerHelper_StartServer to make server start asynchronously.
-         * It is then possible to use local services to access / write data:
-         * - Synchronously with SOPC_ServerHelper_LocalServiceSync(...)
-         * - Asynchronously with SOPC_ServerHelper_LocalServiceAsync(...): need
-         * SOPC_HelperConfigServer_SetLocalServiceAsyncResponse(...) to be configured prior to start server
-         */
-
+        /* Run the server  */
+        status = SOPC_ServerHelper_StartServer(&DemoPushSrv_StoppedCb);
         if (SOPC_STATUS_OK != status)
         {
             printf("<Demo_Push_Server: Failed to run the server or end to serve with error = '%d'\n", status);
         }
         else
         {
-            printf("<Demo_Push_Server: Server ended to serve successfully\n");
+            char* state = gAppCtx.isTofu ? "and in TOFU state\n" : "\n";
+            printf("<Demo_Push_Server: Server started %s", state);
+            if (gAppCtx.rebootFlag)
+            {
+                SOPC_Free(gAppCtx.password);
+                gAppCtx.password = NULL;
+            }
         }
     }
     else
     {
-        printf("<Demo_Server: Error during configuration phase, see logs in %s directory for details.\n",
+        printf("<Demo_Push_Server: Error during configuration phase, see logs in %s directory for details.\n",
                logConfig.logSysConfig.fileSystemLogConfig.logDirPath);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = DemoPushSrv_WaitUntilStop();
     }
 
     /* Clear the server library (stop all library threads) and server configuration */
     SOPC_PushServerConfig_Clear();
-    SOPC_HelperConfigServer_Clear();
+    SOPC_ServerConfigHelper_Clear();
     SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK != status)
     {
-        printf("<Demo_Server: Terminating with error status, see logs in %s directory for details.\n",
+        printf("<Demo_Push_Server: Terminating with error status, see logs in %s directory for details.\n",
                logConfig.logSysConfig.fileSystemLogConfig.logDirPath);
     }
+    else
+    {
+        printf("<Demo_Push_Server: Server ended to serve successfully\n");
+    }
     SOPC_Free(logDirPath);
+    return status;
+}
+
+static SOPC_ReturnStatus DemoPushSrv_SetArg(int argc, char* argv[])
+{
+    errno = 0;
+    bool bBadUsage = true;
+    gAppCtx.isTofu = false;
+    if (1 == argc)
+    {
+        bBadUsage = false;
+    }
+    if (2 == argc)
+    {
+        char* end = NULL;
+        int period = (int) strtol(argv[1], (char**) &end, 0);
+        if ('\0' == end[0] && 0 == errno && 0 <= period)
+        {
+            if (0 != period)
+            {
+                if ((uint32_t) period < UINT32_MAX / DEMO_PUSH_M_TO_MS)
+                {
+                    bBadUsage = false;
+                    gAppCtx.tofuPeriod = (uint32_t) period;
+                    gAppCtx.isTofu = true;
+                }
+            }
+            else
+            {
+                bBadUsage = false;
+            }
+        }
+    }
+
+    if (bBadUsage)
+    {
+        printf("toolkit_demo_push_server: Invalid command\n");
+        printf("Usage: ./toolkit_demo_push_server <optional integer in range [0;%d[>\n",
+               (UINT32_MAX / DEMO_PUSH_M_TO_MS));
+        printf("Example: ./toolkit_demo_push_server 1 (Server will start in TOFU state with a timeout of 1 minute)\n");
+    }
+
+    return bBadUsage ? SOPC_STATUS_INVALID_PARAMETERS : SOPC_STATUS_OK;
+}
+
+static void DemoPushSrv_InitAppCtx(void)
+{
+    memset(&gAppCtx, 0, sizeof(struct DemoPushSrv_AppCtx));
+
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Initialization(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Condition_Init(&gAppCtx.cond);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+}
+
+static void DemoPushSrv_ClearAppCtx(void)
+{
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Unlock(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Mutex_Clear(&gAppCtx.mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    mutStatus = SOPC_Condition_Clear(&gAppCtx.cond);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    SOPC_Free(gAppCtx.password);
+    memset(&gAppCtx, 0, sizeof(struct DemoPushSrv_AppCtx));
+}
+
+/*---------------------------------------------------------------------------
+ *                             Server main function
+ *---------------------------------------------------------------------------*/
+
+int main(int argc, char* argv[])
+{
+    DemoPushSrv_InitAppCtx();
+    SOPC_ReturnStatus status = DemoPushSrv_SetArg(argc, argv);
+    if (SOPC_STATUS_OK != status)
+    {
+        return 1;
+    }
+
+    status = DemoPushSrv_MainCommon(argv[0]);
+    if (SOPC_STATUS_OK == status && gAppCtx.rebootFlag && gAppCtx.isTofu)
+    {
+        printf("<Demo_Push_Server: Server reboot with a new configuration\n");
+        gAppCtx.isTofu = false;
+        gAppCtx.stopFlag = false;
+        status = DemoPushSrv_MainCommon(argv[0]);
+    }
+
+    DemoPushSrv_ClearAppCtx();
 
     return (status == SOPC_STATUS_OK) ? 0 : 1;
 }

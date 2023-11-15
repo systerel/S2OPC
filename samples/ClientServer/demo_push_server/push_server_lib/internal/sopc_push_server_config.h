@@ -40,10 +40,8 @@ SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint
 /**
  * \brief Export the rejected list.
  *
- * \param bEraseExiting Define if the existing certificate shall be deleted or include.
- *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting);
+SOPC_StatusCode PushServer_ExportRejectedList(void);
 
 #endif /* SOPC_PUSH_SERVER_CONFIG_ */

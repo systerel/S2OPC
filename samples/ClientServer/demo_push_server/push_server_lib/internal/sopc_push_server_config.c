@@ -71,6 +71,17 @@ typedef struct PushServerConfig_NodeIds
 } PushServerConfig_NodeIds;
 
 /**
+ * \brief Internal structure to gather method.
+ */
+typedef struct PushServerConfig_MethodFunc_Ptr
+{
+    SOPC_MethodCallFunc_Ptr* UpdateCertificate;
+    SOPC_MethodCallFunc_Ptr* ApplyChanges;
+    SOPC_MethodCallFunc_Ptr* CreateSigningRequest;
+    SOPC_MethodCallFunc_Ptr* GetRejectedList;
+} PushServerConfig_MethodFunc_Ptr;
+
+/**
  * \brief Structure to gather the ServerConfiguration object data
  */
 struct SOPC_PushServerConfig_Config
@@ -81,6 +92,7 @@ struct SOPC_PushServerConfig_Config
                                                          belongs to the CertificateGroupeFolderType */
     SOPC_CertificateGroup_Config* pUsrCertGroupCfg; /*!< Users certificate group configuration that belongs to the
                                                          CertificateGroupeFolderType (NULL if not used) */
+    bool bIsTofuSate;                               /*!< When flag is set, the TOFU state is enabled. */
 };
 
 /*---------------------------------------------------------------------------
@@ -141,6 +153,19 @@ static PushServerConfig_NodeIds gTypeNodeIds = {
     .pUpdateCertificateId = &gTypeUpdateCertificateId,
     .pAppGroupId = NULL,
     .pUsrGroupId = NULL,
+};
+
+static const PushServerConfig_MethodFunc_Ptr gMethodFunc_Ptr = {
+    .UpdateCertificate = &PushSrvCfg_Method_UpdateCertificate,
+    .ApplyChanges = &PushSrvCfg_Method_ApplyChanges,
+    .CreateSigningRequest = &PushSrvCfg_Method_CreateSigningRequest,
+    .GetRejectedList = &PushSrvCfg_Method_GetRejectedList,
+};
+static const PushServerConfig_MethodFunc_Ptr gTofuMethodFunc_Ptr = {
+    .UpdateCertificate = &PushSrvCfg_Method_TofuNotSuported,
+    .ApplyChanges = &PushSrvCfg_Method_ApplyChanges,
+    .CreateSigningRequest = &PushSrvCfg_Method_TofuNotSuported,
+    .GetRejectedList = &PushSrvCfg_Method_GetRejectedList,
 };
 
 static PushServerContext gServerContext = {0};
@@ -409,11 +434,58 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
         pCfg->pAppCertGroupCfg = pAppCertGroupCfg;
         pCfg->pUsrCertGroupCfg = pUsrCertGroupCfg;
         pCfg->bDoNotClearIds = false;
+        pCfg->bIsTofuSate = false;
     }
     else
     {
         SOPC_CertificateGroup_DeleteConfiguration(&pAppCertGroupCfg);
         SOPC_CertificateGroup_DeleteConfiguration(&pUsrCertGroupCfg);
+        SOPC_Free(pCfg);
+        pCfg = NULL;
+    }
+    *ppConfig = pCfg;
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_PushServerConfig_GetTOFUConfiguration(SOPC_PKIProvider* pPKIApp,
+                                                             const SOPC_Certificate_Type appCertType,
+                                                             const uint32_t maxTrustListSize,
+                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
+                                                             SOPC_PushServerConfig_Config** ppConfig)
+{
+    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == pFnUpdateCompleted || NULL == ppConfig)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != appCertType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != appCertType)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_CertificateGroup_Config* pAppCertGroupCfg = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    *ppConfig = NULL;
+    SOPC_PushServerConfig_Config* pCfg = SOPC_Calloc(1, sizeof(SOPC_PushServerConfig_Config));
+    if (NULL == pCfg)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    status = SOPC_CertificateGroup_GetTOFUConfiguration(appCertType, pPKIApp, maxTrustListSize, pFnUpdateCompleted,
+                                                        &pAppCertGroupCfg);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = push_server_config_copy_node_ids(&gNodeIds, &pCfg->pIds, false);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        pCfg->pAppCertGroupCfg = pAppCertGroupCfg;
+        pCfg->pUsrCertGroupCfg = NULL;
+        pCfg->bDoNotClearIds = false;
+        pCfg->bIsTofuSate = true;
+    }
+    else
+    {
+        SOPC_CertificateGroup_DeleteConfiguration(&pAppCertGroupCfg);
         SOPC_Free(pCfg);
         pCfg = NULL;
     }
@@ -492,28 +564,38 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
         status = push_server_config_copy_meth_node_ids(&gTypeNodeIds, &pTypeIds);
         status = NULL == pTypeIds ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
     }
+
+    const PushServerConfig_MethodFunc_Ptr* pMethodFunc = NULL;
+    if (pCfg->bIsTofuSate)
+    {
+        pMethodFunc = &gTofuMethodFunc_Ptr;
+    }
+    else
+    {
+        pMethodFunc = &gMethodFunc_Ptr;
+    }
     /* Add methods ... */
     if (SOPC_STATUS_OK == status)
     {
         /* Method nodeIds are clear by the methodCall manager */
         pCfg->bDoNotClearIds = true;
         SOPC_ReturnStatus statusMcm = SOPC_MethodCallManager_AddMethod(
-            pMcm, pIds->pUpdateCertificateId, &PushSrvCfg_Method_UpdateCertificate, "UpdateCertificate", NULL);
+            pMcm, pIds->pUpdateCertificateId, pMethodFunc->UpdateCertificate, "UpdateCertificate", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
             /* But if AddMethod failed, the manager do not clear the nodeId */
             push_server_config_delete_single_node_id(&pIds->pUpdateCertificateId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(
-            pMcm, pTypeIds->pUpdateCertificateId, &PushSrvCfg_Method_UpdateCertificate, "TypeUpdateCertificate", NULL);
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pUpdateCertificateId,
+                                                     pMethodFunc->UpdateCertificate, "TypeUpdateCertificate", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
             /* But if AddMethod failed, the manager do not clear the nodeId */
             push_server_config_delete_single_node_id(&pTypeIds->pUpdateCertificateId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pApplyChangesId, &PushSrvCfg_Method_ApplyChanges,
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pApplyChangesId, pMethodFunc->ApplyChanges,
                                                      "ApplyChanges", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
@@ -521,7 +603,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
             push_server_config_delete_single_node_id(&pIds->pApplyChangesId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pApplyChangesId, &PushSrvCfg_Method_ApplyChanges,
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pApplyChangesId, pMethodFunc->ApplyChanges,
                                                      "TypeApplyChanges", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
@@ -529,8 +611,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
             push_server_config_delete_single_node_id(&pTypeIds->pApplyChangesId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(
-            pMcm, pIds->pCreateSigningRequestId, &PushSrvCfg_Method_CreateSigningRequest, "CreateSigningRequest", NULL);
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pCreateSigningRequestId,
+                                                     pMethodFunc->CreateSigningRequest, "CreateSigningRequest", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
             /* But if AddMethod failed, the manager do not clear the nodeId */
@@ -538,15 +620,15 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
             status = SOPC_STATUS_INVALID_STATE;
         }
         statusMcm =
-            SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pCreateSigningRequestId,
-                                             &PushSrvCfg_Method_CreateSigningRequest, "TypeCreateSigningRequest", NULL);
+            SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pCreateSigningRequestId, pMethodFunc->CreateSigningRequest,
+                                             "TypeCreateSigningRequest", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
             /* But if AddMethod failed, the manager do not clear the nodeId */
             push_server_config_delete_single_node_id(&pTypeIds->pCreateSigningRequestId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pGetRejectedListId, &PushSrvCfg_Method_GetRejectedList,
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pIds->pGetRejectedListId, pMethodFunc->GetRejectedList,
                                                      "GetRejectedList", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
@@ -554,8 +636,8 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* 
             push_server_config_delete_single_node_id(&pIds->pGetRejectedListId);
             status = SOPC_STATUS_INVALID_STATE;
         }
-        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pGetRejectedListId,
-                                                     &PushSrvCfg_Method_GetRejectedList, "TypeGetRejectedList", NULL);
+        statusMcm = SOPC_MethodCallManager_AddMethod(pMcm, pTypeIds->pGetRejectedListId, pMethodFunc->GetRejectedList,
+                                                     "TypeGetRejectedList", NULL);
         if (SOPC_STATUS_OK != statusMcm)
         {
             /* But if AddMethod failed, the manager do not clear the nodeId */
@@ -688,7 +770,7 @@ SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint
     return stCode;
 }
 
-SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
+SOPC_StatusCode PushServer_ExportRejectedList(void)
 {
     SOPC_ASSERT(gServerContext.bIsInit && gServerContext.bIsConfigure);
     SOPC_ASSERT(NULL != gServerContext.pAppGroupId); // Application group is mandatory
@@ -702,7 +784,7 @@ SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
     {
         return OpcUa_BadUnexpectedError;
     }
-    stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+    stCode = CertificateGroup_ExportRejectedList(pGroupCtx);
     /* Retrieve the user group */
     if (NULL != gServerContext.pUsrGroupId && SOPC_IsGoodStatus(stCode))
     {
@@ -713,7 +795,7 @@ SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
         }
         if (SOPC_IsGoodStatus(stCode))
         {
-            stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+            stCode = CertificateGroup_ExportRejectedList(pGroupCtx);
         }
     }
     return stCode;

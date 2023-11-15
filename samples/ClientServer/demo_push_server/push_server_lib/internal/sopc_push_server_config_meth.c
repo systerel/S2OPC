@@ -366,7 +366,7 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     else
     {
         /* Export */
-        stCode = PushServer_ExportRejectedList(false);
+        stCode = PushServer_ExportRejectedList();
         if (!SOPC_IsGoodStatus(stCode))
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -394,4 +394,31 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     }
 
     return stCode;
+}
+
+SOPC_StatusCode PushSrvCfg_Method_TofuNotSuported(const SOPC_CallContext* callContextPtr,
+                                                  const SOPC_NodeId* objectId,
+                                                  uint32_t nbInputArgs,
+                                                  const SOPC_Variant* inputArgs,
+                                                  uint32_t* nbOutputArgs,
+                                                  SOPC_Variant** outputArgs,
+                                                  void* param)
+{
+    SOPC_UNUSED_ARG(callContextPtr);
+    SOPC_UNUSED_ARG(inputArgs);
+    SOPC_UNUSED_ARG(nbInputArgs);
+    SOPC_UNUSED_ARG(param);
+
+    /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
+     * / spec V1.05)*/
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    char* pNodeId = SOPC_NodeId_ToCString(objectId);
+    const char* nodeId = NULL == pNodeId ? "NULL" : pNodeId;
+    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                             "PushSrvCfg: call to method nodeId %s is not allowed during TOFU state", nodeId);
+    SOPC_Free(pNodeId);
+
+    return OpcUa_BadNotSupported;
 }

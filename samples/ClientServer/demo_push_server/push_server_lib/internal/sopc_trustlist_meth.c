@@ -385,7 +385,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     /* Export the update (certificate files) */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        status = TrustList_Export(pTrustList, false, false);
+        status = TrustList_Export(pTrustList, TrustList_isInTofuSate(pTrustList), false);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -408,7 +408,11 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
     if (SOPC_IsGoodStatus(statusCode))
     {
-        Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
+        if (SOPC_TL_MASK_NONE != mask)
+        {
+            Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
+            TrustList_UpdateCompleted(pTrustList);
+        }
         /* The variant is deleted by the method call manager */
         *nbOutputArgs = 1;
         *outputArgs = pVariant;
@@ -497,7 +501,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     /* Export the update (certificate files) */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        SOPC_ReturnStatus status = TrustList_Export(pTrustList, false, true);
+        SOPC_ReturnStatus status = TrustList_Export(pTrustList, TrustList_isInTofuSate(pTrustList), true);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -511,6 +515,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
         TrustList_ResetActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
+        TrustList_UpdateCompleted(pTrustList);
     }
 
     return statusCode;

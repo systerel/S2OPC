@@ -216,12 +216,11 @@ void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx);
  * \brief Export the rejected list.
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
- * \param bEraseExiting Define if the existing certificate shall be deleted or include.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL)
  *
  * \return SOPC_STATUS_OK if successful.
  */
-SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext* pGroupCtx, const bool bEraseExisting);
+SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext* pGroupCtx);
 
 #endif /* SOPC_CERTIFICATE_GROUP_ */

@@ -82,6 +82,24 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
                                                                 const char* pKeyPath,
                                                                 const char* pCertPath,
                                                                 SOPC_CertificateGroup_Config** ppConfig);
+/**
+ * \brief Get the address space configuration of the default application group in TOFU state.
+ *
+ * \param certType         Defined the certificate type (certificate properties).
+ * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
+ * \param maxTrustListSize Defined the maximum size in byte of the TrustList that belongs to the
+ *                         CertificateGroup object.
+ * \param pFnUpdateCompleted The callback when a new valid update of the TrustList has occurred.
+ * \param[out] ppConfig A newly created configuration. You should delete it with
+ *                      ::SOPC_CertificateGroup_DeleteConfiguration .
+ *
+ * \return SOPC_STATUS_OK if successful.
+ */
+SOPC_ReturnStatus SOPC_CertificateGroup_GetTOFUConfiguration(const SOPC_Certificate_Type certType,
+                                                             SOPC_PKIProvider* pPKI,
+                                                             const uint32_t maxTrustListSize,
+                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
+                                                             SOPC_CertificateGroup_Config** ppConfig);
 
 /**
  * \brief Delete CertificateGroup configuration.

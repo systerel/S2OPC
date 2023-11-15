@@ -663,6 +663,13 @@ SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTr
     return pTrustList->specifiedLists;
 }
 
+/* Get the TOFU state status */
+bool TrustList_isInTofuSate(const SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    return NULL != pTrustList->pFnUpdateCompleted;
+}
+
 /* Check the TrustList handle */
 bool TrustList_CheckHandle(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_Handle expected, const char* msg)
 {
@@ -1179,13 +1186,11 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
                                               .RSAMinimumKeySize = 1024};
         SOPC_PKI_Profile profile = {.leafProfile = NULL,
                                     .chainProfile = &chainProfile,
-                                    .bAppendRejectCert = false,
                                     .bApplyLeafProfile = true,
                                     .bBackwardInteroperability = pTrustList->pPKI};
         status = SOPC_PKIProvider_CreateLeafProfile(NULL, &profile.leafProfile);
         if (SOPC_STATUS_OK == status)
         {
-            // Note: this will activate bAppendToRejectedList, it seems a good thing but might be changed if needed.
             status = SOPC_PKIProvider_ProfileSetUsageFromType(&profile, SOPC_PKI_TYPE_SERVER_APP);
         }
         if (SOPC_STATUS_OK == status)
@@ -1416,6 +1421,16 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
         status = SOPC_STATUS_NOK;
     }
     return status;
+}
+
+/* Executes user callback to indicate the end of a valid update */
+void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList)
+{
+    SOPC_ASSERT(NULL != pTrustList);
+    if (TrustList_isInTofuSate(pTrustList))
+    {
+        pTrustList->pFnUpdateCompleted(0);
+    }
 }
 
 /* Write the value of the Size variable */
