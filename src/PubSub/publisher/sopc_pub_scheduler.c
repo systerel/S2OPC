@@ -594,10 +594,37 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         if (SOPC_MessageEncodeJSON == SOPC_WriterGroup_Get_Encoding(group))
         {
             buffer = SOPC_JSON_NetworkMessage_Encode(message, security);
+            if (NULL == buffer)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_PUBSUB,
+                    "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                    (const void*) message, (unsigned) SOPC_UADP_NetworkMessage_Get_Last_Error());
+            }
         }
         else
         {
-            buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+            SOPC_Buffer* buffer_payload = NULL;
+            SOPC_UADP_NetworkMessage_Error_Code errorCode =
+                SOPC_UADP_NetworkMessage_Encode_Buffers(message, security, &buffer, &buffer_payload);
+            if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode || buffer == NULL || buffer_payload == NULL)
+            {
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_PUBSUB,
+                    "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                    (const void*) message, (unsigned) errorCode);
+            }
+            else
+            {
+                errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(security, buffer, &buffer_payload);
+                if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode)
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                           "Failed to sign and encrypt and merge encoded buffers "
+                                           "SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                                           (unsigned) errorCode);
+                }
+            }
         }
 
         if (NULL != security)
@@ -606,13 +633,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             security->msgNonceRandom = NULL;
         }
         context->transport->mqttTopic = context->mqttTopic;
-        if (NULL == buffer)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                   "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
-                                   (const void*) message, (unsigned) SOPC_UADP_NetworkMessage_Get_Last_Error());
-        }
-        else
+        if (NULL != buffer)
         {
             context->transport->pFctSend(context->transport, buffer);
             SOPC_Buffer_Delete(buffer);
@@ -646,8 +667,29 @@ static void send_keepAlive_message(MessageCtx* context)
         security->sequenceNumber = pubSchedulerCtx.sequenceNumber;
         pubSchedulerCtx.sequenceNumber++;
     }
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(message, security);
+    SOPC_UADP_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(message, security, &buffer, &buffer_payload);
+    if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode || buffer == NULL || buffer_payload == NULL)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                               "Failed to encode PUB message at %p, SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                               (const void*) message, (unsigned) errorCode);
+    }
+    else
+    {
+        errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(security, buffer, &buffer_payload);
+        SOPC_ASSERT(buffer_payload == NULL);
+        if (SOPC_UADP_NetworkMessage_Error_Code_None != errorCode || NULL == buffer)
+        {
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_PUBSUB,
+                "Failed to sign and encrypt and merge encoded buffers SOPC_UADP_NetworkMessage_Error_Code is : %08X",
+                (unsigned) errorCode);
+        }
+    }
     if (NULL != security)
     {
         SOPC_Free(security->msgNonceRandom);

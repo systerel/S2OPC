@@ -243,7 +243,19 @@ int main(int argc, char* argv[])
         return -1;
     }
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_UADP_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    SOPC_ASSERT(SOPC_UADP_NetworkMessage_Error_Code_None == errorCode);
+    SOPC_ASSERT(NULL != buffer);
+    SOPC_ASSERT(NULL != buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(NULL, buffer, &buffer_payload);
+    SOPC_ASSERT(SOPC_UADP_NetworkMessage_Error_Code_None == errorCode);
+    SOPC_ASSERT(NULL != buffer);
+    SOPC_ASSERT(NULL == buffer_payload);
+
     int returnCode = 0;
     /* Get current time and start 1 second in future and add wake tx delay */
     clock_gettime(CLOCKID, &sleepTime);

@@ -525,7 +525,18 @@ START_TEST(test_hl_network_msg_encode)
     // Check network message content
     check_network_msg_content_uni_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_UADP_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
     ck_assert_uint_eq(ENCODED_DATA_SIZE, buffer->length);
 
@@ -602,7 +613,18 @@ START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
     // Check network message content
     check_network_msg_content_uni_keep_alive_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, NULL);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_UADP_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
     ck_assert_uint_eq(ENCODED_KEEP_ALIVE_DATA, buffer->length);
 
@@ -702,10 +724,18 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
     // Check network message content
     check_network_msg_content_multi_dsm(nm);
 
-    SOPC_Buffer* buffer = SOPC_UADP_NetworkMessage_Encode(nm, false);
-    const SOPC_UADP_NetworkMessage_Error_Code eCode = SOPC_UADP_NetworkMessage_Get_Last_Error();
-    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, eCode);
+    SOPC_Buffer* buffer = NULL;
+    SOPC_Buffer* buffer_payload = NULL;
+    SOPC_UADP_NetworkMessage_Error_Code errorCode =
+        SOPC_UADP_NetworkMessage_Encode_Buffers(nm, NULL, &buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
     ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_nonnull(buffer_payload);
+
+    errorCode = SOPC_UADP_NetworkMessage_SignAndEncrypt(NULL, buffer, &buffer_payload);
+    ck_assert_uint_eq(SOPC_UADP_NetworkMessage_Error_Code_None, errorCode);
+    ck_assert_ptr_nonnull(buffer);
+    ck_assert_ptr_null(buffer_payload);
 
 #if 0 // switch to debug
     {
