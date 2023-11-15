@@ -86,7 +86,7 @@ struct SOPC_PKI_LeafProfile
  * @var SOPC_PKI_ChainProfile::RSAMinimumKeySize
  *   The minimum RSA key size allowed.
  * @var SOPC_PKI_ChainProfile::bDisableRevocationCheck
- *   Defines if no error is reported if a CA certificate have not a revocation list.
+ *   When flag is set, no error is reported if a CA certificate has no revocation list.
  */
 struct SOPC_PKI_ChainProfile
 {

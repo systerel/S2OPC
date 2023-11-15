@@ -1001,7 +1001,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(
     bool bIsSelfSigned,           /* Certificate is self-signed: added with root CAs for validation */
     bool bForceTrustedCert,       /* Force the certificate to be trusted for the validation:
                                      for sopc_verify_every_certificate only */
-    bool bDisableRevocationCheck, /* Defined if no error is reported if a CA certificate have not a revocation list. */
+    bool bDisableRevocationCheck, /* When flag is set, no error is reported if a CA certificate has no revocation list.
+                                   */
     const char* thumbprint,
     uint32_t* error)
 {
