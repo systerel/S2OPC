@@ -660,6 +660,8 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
     {
         // Synchronous call already in execution
         status = SOPC_STATUS_INVALID_STATE;
+        SOPC_Free(ctx);
+        ctx = NULL;
     }
     else
     {
