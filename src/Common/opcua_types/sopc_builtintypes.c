@@ -6273,7 +6273,7 @@ bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRa
         // ScalarOrOneDimension (−3): src can be scalar (-1) or one dimension array (1)
         return (src_valueRank == -1 || src_valueRank == 1);
     case -2:
-        // Any (−2): src can be have any value rank
+        // Any (−2): src can have any value rank
         return true;
     case -1:
         // Scalar (−1): src can be scalar (-1) only
