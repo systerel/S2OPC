@@ -51,7 +51,6 @@ OPERATIONS
         p_browseDirection : t_BrowseDirection_i     &
         p_browseDirection : t_BrowseDirection       &
         p_referenceType : t_NodeId_i                &
-        p_referenceType : t_NodeId                  &
         p_includeSubtypes : BOOL                    &
         p_nodeClassMask : t_BrowseNodeClassMask_i   &
         p_resultMask : t_BrowseResultMask_i
@@ -95,7 +94,6 @@ OPERATIONS
             p_browseDirection : t_BrowseDirection_i     &
             p_browseDirection : t_BrowseDirection       &
             p_referenceType : t_NodeId_i                &
-            p_referenceType : t_NodeId                  &
             p_includeSubtypes : BOOL                    &
             p_nodeClassMask : t_BrowseNodeClassMask_i   &
             p_resultMask    : t_BrowseResultMask_i
