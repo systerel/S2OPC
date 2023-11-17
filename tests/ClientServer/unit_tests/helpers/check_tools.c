@@ -44,6 +44,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_random.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
@@ -5040,6 +5041,26 @@ START_TEST(test_ua_variant_set_range_matrix)
 }
 END_TEST
 
+#ifndef _WIN32
+START_TEST(test_get_random)
+{
+    // Build a buffer and fill it with random data
+    SOPC_Buffer* random_data = SOPC_Buffer_Create(100);
+    SOPC_ReturnStatus status = SOPC_GetRandom(random_data, 100);
+
+    // Assert result. We have a slight chance to fail the last test, (1 / 256) ^ 100
+    ck_assert(SOPC_STATUS_OK == status);
+    ck_assert(100 == random_data->length);
+    uint8_t zeros[100];
+    memset(zeros, 0, 100);
+    ck_assert(0 != memcmp(random_data->data, zeros, 100));
+
+    // Free the initial buffer
+    SOPC_Buffer_Delete(random_data);
+}
+END_TEST
+#endif
+
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
@@ -5100,6 +5121,12 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_array);
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_matrix);
     suite_add_tcase(s, tc_ua_types);
+
+#ifndef _WIN32
+    TCase* tc_get_random = tcase_create("Get Random");
+    tcase_add_test(tc_get_random, test_get_random);
+    suite_add_tcase(s, tc_get_random);
+#endif
 
     return s;
 }
