@@ -22,42 +22,31 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 
 SOPC_ReturnStatus SOPC_GetRandom(SOPC_Buffer* buffer, uint32_t length)
 {
-    // Initialize the seed once
-    static bool initialized = false;
-    if (!initialized)
+    // Check parameters
+    if (NULL == buffer || 0 == length)
     {
-        // Make a seed base on current time
-        struct timespec ts;
-        int has_get_time = timespec_get(&ts, TIME_UTC);
-        if (!has_get_time)
-        {
-            return SOPC_STATUS_NOK;
-        }
-
-        srandom((unsigned int) (ts.tv_nsec ^ ts.tv_sec));
-        initialized = true;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    // Get the number of random ints we will need
-    const size_t intLen = (length + sizeof(int) - 1) / sizeof(int);
-
-    int* random_data = SOPC_Malloc(intLen * sizeof(int));
+    uint8_t* random_data = SOPC_Malloc(length * sizeof(uint8_t));
     if (NULL == random_data)
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    // Iterate in order to call random() multiple times
-    for (unsigned int i = 0; i < intLen; i++)
+    FILE* file = fopen("/dev/urandom", "rb");
+    size_t read_len = fread(random_data, 1, length, file);
+    fclose(file);
+    if (read_len != length)
     {
-        random_data[i] = (int) random();
+        SOPC_Free(random_data);
+        return SOPC_STATUS_NOK;
     }
 
-    SOPC_ReturnStatus status = SOPC_Buffer_Write(buffer, (uint8_t*) random_data, length);
+    SOPC_ReturnStatus status = SOPC_Buffer_Write(buffer, random_data, length);
     SOPC_Free(random_data);
     return status;
 }
