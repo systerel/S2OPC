@@ -70,6 +70,19 @@ DEFINITIONS
         isBrowseResultAllocated
         ;
 
+    d_var_iter_browse_path_idx ==
+        browsePathIdx_to_iterate,
+        browsePathIdx_iterated,
+        nb_browsePathIdx_max_refs,
+        nextBrowsePathIdx
+    ;
+
+    d_var_iter_browse_result ==
+        translate_browseResult_to_iterate,
+        translate_browseResult_iterated,
+        nb_translate_browseResult_max_refs
+    ;
+
     d_inv_browse_result_out ==
         out_BrowseResult_BrowseStatus        : t_StatusCode_i             &
         out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i    &
@@ -92,7 +105,23 @@ DEFINITIONS
 
         isBrowseResultComputed             : BOOL                       &
         isBrowseResultAllocated            : BOOL
+    ;
 
+    d_inv_iter_browse_path_idx ==
+        nb_browsePathIdx_max_refs : NAT &
+        browsePathIdx_to_iterate <: NAT1 &
+        browsePathIdx_iterated   <: NAT1 &
+        browsePathIdx_to_iterate /\ browsePathIdx_iterated = {} &
+        nb_browsePathIdx_max_refs = card(browsePathIdx_to_iterate \/ browsePathIdx_iterated) &
+        nextBrowsePathIdx : NATURAL1
+    ;
+
+    d_inv_iter_browse_result ==
+        nb_translate_browseResult_max_refs : NAT &
+        translate_browseResult_to_iterate <: NAT1 &
+        translate_browseResult_iterated   <: NAT1 &
+        translate_browseResult_to_iterate /\ translate_browseResult_iterated = {} &
+        nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated)
 
 LOCAL_OPERATIONS
 
@@ -124,7 +153,10 @@ LOCAL_OPERATIONS
             c_ExpandedNodeId_indet /: ran(BrowsePathResult)     &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1)
-        )
+        ) ||
+
+        d_var_iter_browse_path_idx :(d_inv_iter_browse_path_idx) ||
+        d_var_iter_browse_result :(d_inv_iter_browse_result)
     END
     ;
 
@@ -161,7 +193,9 @@ LOCAL_OPERATIONS
 
         d_var_browse_result_out:(
             d_inv_browse_result_out
-        )
+        ) ||
+
+        d_var_iter_browse_result :(d_inv_iter_browse_result)
     END
     ;
 
@@ -206,7 +240,9 @@ LOCAL_OPERATIONS
                 out_BrowseResult_NodeId[1..nbReferences] &
             BrowsePathRemainingIndex[size(BrowsePathRemainingNodeId$0)+1 ..
                                      size(BrowsePathRemainingNodeId)] <: {path_index}
-        )
+        ) ||
+
+        d_var_iter_browse_result :(d_inv_iter_browse_result)
     END
     ;
 
