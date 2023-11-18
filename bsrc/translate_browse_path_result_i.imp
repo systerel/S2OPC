@@ -593,7 +593,13 @@ OPERATIONS
             browsePathIdx_iterated = 1 .. l_index            &
             browsePathIdx_to_iterate = l_index + 1 .. l_size &
             nextBrowsePathIdx = l_index + 1                  &
-            l_continue_source = bool(l_index < l_size)
+            l_continue_source = bool(l_index < l_size)       &
+
+            l_translate_statusCode : t_StatusCode_i &
+            statusCode_operation : t_StatusCode_i   &
+            statusCode_operation : {e_sc_ok, e_sc_bad_no_match, e_sc_bad_node_id_unknown,
+                e_sc_bad_nothing_to_do, e_sc_bad_out_of_memory, e_sc_bad_query_too_complex,
+                e_sc_uncertain_reference_out_of_server}
         VARIANT
             l_size - l_index
         END
@@ -666,7 +672,11 @@ OPERATIONS
             l_continue = bool((translate_browseResult_to_iterate /= {}) &
                               (statusCode_operation : {e_sc_ok,
                                   e_sc_uncertain_reference_out_of_server,
-                                  e_sc_bad_no_match}))
+                                  e_sc_bad_no_match})) &
+
+            statusCode_operation : t_StatusCode_i &
+            statusCode_operation : {e_sc_ok, e_sc_bad_no_match, e_sc_bad_out_of_memory,
+                e_sc_bad_query_too_complex, e_sc_uncertain_reference_out_of_server}
         VARIANT
             card(translate_browseResult_to_iterate)
         END
