@@ -37,7 +37,10 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        max_nb_references,
+        max_nb_references
+    ;
+
+    d_variables_out_status ==
         isBrowseResultAllocated
     ;
 
@@ -69,8 +72,11 @@ DEFINITIONS
         size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
         size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References &
 
-        max_nb_references                : NAT                        &
-        isBrowseResultAllocated          : BOOL
+        max_nb_references                : NAT
+    ;
+
+    d_inv_out_status ==
+        isBrowseResultAllocated : BOOL
     ;
 
     d_inv_mask ==
@@ -95,9 +101,12 @@ DEFINITIONS
             out_BrowseResult_DisplayName     = {}                         &
             out_BrowseResult_NodeClass       = {}                         &
             out_BrowseResult_TypeDefinition  = {}                         &
-            max_nb_references                = 0                          &
-            isBrowseResultAllocated          = FALSE
+            max_nb_references                = 0
         )
+    ;
+
+    d_init_out_status ==
+        isBrowseResultAllocated :(isBrowseResultAllocated = FALSE)
     ;
 
     d_init_mask ==
@@ -105,14 +114,17 @@ DEFINITIONS
 
 ABSTRACT_VARIABLES
     d_variables_out,
+    d_variables_out_status,
     d_variables_mask
 
 INVARIANT
     d_inv_out &
+    d_inv_out_status &
     d_inv_mask
 
 INITIALISATION
     d_init_out ||
+    d_init_out_status ||
     d_init_mask
 
 OPERATIONS
@@ -128,8 +140,11 @@ OPERATIONS
             p_alloc_bres := FALSE
         OR
             p_alloc_bres := TRUE ||
-            d_variables_out
+            d_variables_out,
+            d_variables_out_status
             :(  d_inv_out &
+                d_inv_out_status &
+
                 isBrowseResultAllocated            = TRUE                       &
                 max_nb_references                  = p_maxResultRefs            &
                 out_BrowseResult_BrowseStatus      = e_sc_ok                    &
@@ -220,13 +235,15 @@ OPERATIONS
     THEN
         p_browseResult := out_BrowseResultReferences ||
         p_nb_references := out_BrowseResult_nb_References ||
-        d_init_out
+        d_init_out ||
+        d_init_out_status
     END
     ;
 
     clear_browse_result =
     BEGIN
-        d_init_out
+        d_init_out ||
+        d_init_out_status
     END
     ;
 

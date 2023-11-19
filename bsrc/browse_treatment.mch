@@ -55,7 +55,10 @@ DEFINITIONS
         out_BrowseResult_BrowseName,
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
-        out_BrowseResult_TypeDefinition,
+        out_BrowseResult_TypeDefinition
+    ;
+
+    d_variables_out_status ==
         isBrowseResultComputed,
         isBrowseResultAllocated
     ;
@@ -99,11 +102,14 @@ DEFINITIONS
         size(out_BrowseResult_BrowseName)      = out_BrowseResult_nb_References &
         size(out_BrowseResult_DisplayName)     = out_BrowseResult_nb_References &
         size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
-        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References &
+        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References
+    ;
 
-        isBrowseResultComputed             : BOOL                       &
+    d_inv_out_status ==
+        isBrowseResultComputed             : BOOL &
         isBrowseResultAllocated            : BOOL
     ;
+
     d_init_in ==
         d_variables_in
         :(
@@ -140,26 +146,34 @@ DEFINITIONS
             out_BrowseResult_BrowseName        = {}                         &
             out_BrowseResult_DisplayName       = {}                         &
             out_BrowseResult_NodeClass         = {}                         &
-            out_BrowseResult_TypeDefinition    = {}                         &
-            isBrowseResultComputed             = FALSE                      &
-            isBrowseResultAllocated            = FALSE
+            out_BrowseResult_TypeDefinition    = {}
         )
+    ;
+
+    d_init_out_status ==
+        d_variables_out_status :(
+            isBrowseResultComputed             = FALSE &
+            isBrowseResultAllocated            = FALSE
+    )
 
 
 ABSTRACT_VARIABLES
     d_variables_in,
     d_variables_persist,
-    d_variables_out
+    d_variables_out,
+    d_variables_out_status
 
 INVARIANT
     d_inv_in &
     d_inv_persist &
-    d_inv_out
+    d_inv_out &
+    d_inv_out_status
 
 INITIALISATION
     d_init_in ||
     d_init_persist ||
-    d_init_out
+    d_init_out ||
+    d_init_out_status
 
 OPERATIONS
 
@@ -249,13 +263,16 @@ OPERATIONS
         isBrowseResultAllocated = FALSE
     THEN
         d_variables_out,
+        d_variables_out_status,
         p_serviceStatusCode,
         p_continuationPointId,
         p_nbReferences,
         s_ContinuationPoints,
         id_ContinuationPoint,
         ContinuationPoint_session
-        :(d_inv_out &
+        :(  d_inv_out &
+            d_inv_out_status &
+
             p_serviceStatusCode : t_StatusCode_i &
             p_serviceStatusCode : t_StatusCode   &
             p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
@@ -340,13 +357,15 @@ OPERATIONS
     THEN
         p_nb_references := out_BrowseResult_nb_References ||
         p_browseResult := out_BrowseResultReferences || /* Transfer ownership of BrowseResultReferences to caller */
-        d_init_out
+        d_init_out  ||
+        d_init_out_status
     END
     ;
 
     clear_browse_result =
     BEGIN
-        d_init_out
+        d_init_out ||
+        d_init_out_status
     END
 
 END

@@ -64,11 +64,13 @@ DEFINITIONS
         out_BrowseResult_DisplayName,
         out_BrowseResult_NodeClass,
         out_BrowseResult_TypeDefinition,
-        out_BrowseResultReferences,
+        out_BrowseResultReferences
+    ;
 
+    d_var_browse_result_status ==
         isBrowseResultComputed,
         isBrowseResultAllocated
-        ;
+    ;
 
     d_var_iter_browse_path_idx ==
         browsePathIdx_to_iterate,
@@ -101,9 +103,11 @@ DEFINITIONS
         size(out_BrowseResult_BrowseName)      = out_BrowseResult_nb_References &
         size(out_BrowseResult_DisplayName)     = out_BrowseResult_nb_References &
         size(out_BrowseResult_NodeClass)       = out_BrowseResult_nb_References &
-        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References &
+        size(out_BrowseResult_TypeDefinition)  = out_BrowseResult_nb_References
+    ;
 
-        isBrowseResultComputed             : BOOL                       &
+    d_inv_browse_result_status ==
+        isBrowseResultComputed             : BOOL &
         isBrowseResultAllocated            : BOOL
     ;
 
@@ -191,8 +195,10 @@ LOCAL_OPERATIONS
             BrowsePathRemainingIndex  : seq(NAT1)
         ) ||
 
-        d_var_browse_result_out:(
-            d_inv_browse_result_out
+        d_var_browse_result_out,
+        d_var_browse_result_status:(
+            d_inv_browse_result_out &
+            d_inv_browse_result_status
         ) ||
 
         d_var_iter_browse_result :(d_inv_iter_browse_result)
@@ -349,8 +355,10 @@ LOCAL_OPERATIONS
             (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE)
         ) ||
 
-        d_var_browse_result_out:(
-            d_inv_browse_result_out
+        d_var_browse_result_out,
+        d_var_browse_result_status:(
+            d_inv_browse_result_out &
+            d_inv_browse_result_status
         )
     END
     ;
