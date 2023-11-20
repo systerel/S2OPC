@@ -92,7 +92,7 @@ else:
 # Linux
     ffibuilder.set_source('_pys2opc',
                       source,
-                      extra_link_args=['-ls2opc_clientserver', '-ls2opc_common', '-lmbedcrypto', '-lmbedtls', '-lmbedx509', '-lexpat'],
+                      extra_link_args=['-ls2opc_clientserver', '-ls2opc_common', '-lmbedcrypto', '-lmbedtls', '-lmbedx509', '-lexpat', '-lcyclone_crypto', '-lcyclone_common'],
                       include_dirs=['.'],
                       library_dirs=['../lib', # working dir should be located in build dir
                                     '.'],  # Ease compilation outside of the S2OPC project
