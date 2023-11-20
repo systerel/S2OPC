@@ -770,7 +770,7 @@ SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint
     return stCode;
 }
 
-SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
+SOPC_StatusCode PushServer_ExportRejectedList(void)
 {
     SOPC_ASSERT(gServerContext.bIsInit && gServerContext.bIsConfigure);
     SOPC_ASSERT(NULL != gServerContext.pAppGroupId); // Application group is mandatory
@@ -784,7 +784,7 @@ SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
     {
         return OpcUa_BadUnexpectedError;
     }
-    stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+    stCode = CertificateGroup_ExportRejectedList(pGroupCtx);
     /* Retrieve the user group */
     if (NULL != gServerContext.pUsrGroupId && SOPC_IsGoodStatus(stCode))
     {
@@ -795,7 +795,7 @@ SOPC_StatusCode PushServer_ExportRejectedList(const bool bEraseExisting)
         }
         if (SOPC_IsGoodStatus(stCode))
         {
-            stCode = CertificateGroup_ExportRejectedList(pGroupCtx, bEraseExisting);
+            stCode = CertificateGroup_ExportRejectedList(pGroupCtx);
         }
     }
     return stCode;

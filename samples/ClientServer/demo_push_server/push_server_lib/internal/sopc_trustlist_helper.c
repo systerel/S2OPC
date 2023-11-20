@@ -1186,13 +1186,11 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
                                               .RSAMinimumKeySize = 1024};
         SOPC_PKI_Profile profile = {.leafProfile = NULL,
                                     .chainProfile = &chainProfile,
-                                    .bAppendRejectCert = false,
                                     .bApplyLeafProfile = true,
                                     .bBackwardInteroperability = pTrustList->pPKI};
         status = SOPC_PKIProvider_CreateLeafProfile(NULL, &profile.leafProfile);
         if (SOPC_STATUS_OK == status)
         {
-            // Note: this will activate bAppendToRejectedList, it seems a good thing but might be changed if needed.
             status = SOPC_PKIProvider_ProfileSetUsageFromType(&profile, SOPC_PKI_TYPE_SERVER_APP);
         }
         if (SOPC_STATUS_OK == status)

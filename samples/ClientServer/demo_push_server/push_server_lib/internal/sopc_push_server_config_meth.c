@@ -366,7 +366,7 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     else
     {
         /* Export */
-        stCode = PushServer_ExportRejectedList(false);
+        stCode = PushServer_ExportRejectedList();
         if (!SOPC_IsGoodStatus(stCode))
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

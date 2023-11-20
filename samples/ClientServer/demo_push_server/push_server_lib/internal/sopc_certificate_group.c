@@ -1024,7 +1024,7 @@ SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pG
     return stCode;
 }
 
-SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext* pGroupCtx, const bool bEraseExisting)
+SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext* pGroupCtx)
 {
     SOPC_ASSERT(NULL != pGroupCtx);
 
@@ -1041,7 +1041,7 @@ SOPC_StatusCode CertificateGroup_ExportRejectedList(const SOPC_CertGroupContext*
         return OpcUa_BadUnexpectedError;
     }
     SOPC_ASSERT(NULL != pCtx->pPKI);
-    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteRejectedCertToStore(pCtx->pPKI, bEraseExisting);
+    SOPC_ReturnStatus status = SOPC_PKIProvider_WriteRejectedCertToStore(pCtx->pPKI);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "CertificateGroup:%s: export of rejected list failed",
