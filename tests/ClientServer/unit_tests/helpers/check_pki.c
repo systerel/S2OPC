@@ -643,35 +643,54 @@ END_TEST
 
 START_TEST(functional_test_pki_permissive)
 {
+    /* Start from a permissive PKI */
     SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pCertToValidate = NULL;
+    uint32_t error = 0;
     SOPC_ReturnStatus status = SOPC_PKIPermissive_Create(&pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    /* Validate anything */
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCertToValidate);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    /* Validation OK (permissive PKI) */
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    ck_assert_int_eq(0, error);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Even if with invalid arguments */
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, NULL, NULL, NULL);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    /* Disable SetStorePath */
-    status = SOPC_PKIProvider_SetStorePath("./unit_test_pki", pPKI);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    /* Disable WriteToStore */
-    status = SOPC_PKIProvider_WriteToStore(pPKI, true);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    /* Disable WriteOrAppendToList */
+    ck_assert_int_eq(0, error);
+    /* Empty lists */
     SOPC_CertificateList* tCrt = NULL;
     SOPC_CertificateList* iCrt = NULL;
     SOPC_CRLList* tCrl = NULL;
     SOPC_CRLList* iCrl = NULL;
+    SOPC_CertificateList* rejected = NULL;
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &tCrt, &tCrl, &iCrt, &iCrl);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
-    /* Disable UpdateFromList */
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(tCrt);
+    ck_assert_ptr_null(tCrl);
+    ck_assert_ptr_null(iCrt);
+    ck_assert_ptr_null(iCrl);
+    status = SOPC_PKIProvider_CopyRejectedList(pPKI, &rejected);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_ptr_null(rejected);
+    /* Set a configuration (permissive PKI to nominal PKI) */
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &tCrt);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &tCrl);
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, tCrt, NULL, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
-    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, tCrt, tCrl, NULL, NULL, true);
-    ck_assert_int_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    /* Validation NOK (missing CRL )*/
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+    ck_assert_int_eq(SOPC_CertificateValidationError_RevocationUnknown, error);
 
     SOPC_KeyManager_Certificate_Free(tCrt);
-    SOPC_KeyManager_CRL_Free(tCrl);
+    SOPC_KeyManager_Certificate_Free(pCertToValidate);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
     SOPC_PKIProvider_Free(&pPKI);
 }
 END_TEST

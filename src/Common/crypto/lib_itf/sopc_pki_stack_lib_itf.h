@@ -126,7 +126,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
  * \param[out] ppPKI A valid pointer to the newly created PKIProvider. You should free such provider with
  *                   ::SOPC_PKIProvider_Free().
  * \warning  Using this PKI is considered harmful for the security of the connection.
- *           You can't export and update this PKI, it shall be used only for test.
+ *           This PKI shall be used for tests or to set a new configuration from a TOFU state.
  *
  * \return SOPC_STATUS_OK when successful.
  */

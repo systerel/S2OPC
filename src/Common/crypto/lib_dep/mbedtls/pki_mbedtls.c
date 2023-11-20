@@ -2569,23 +2569,15 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
+    /* Create if necessary the store */
+    SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_mkdir(directoryStorePath);
+    if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdir_res && SOPC_FileSystem_Creation_OK != mkdir_res)
     {
-        status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Create if necessary the store */
-        SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_mkdir(directoryStorePath);
-        if (SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdir_res && SOPC_FileSystem_Creation_OK != mkdir_res)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (SOPC_STATUS_OK == status)
@@ -2617,24 +2609,16 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    if (!pPKI->isPermissive)
-    {
-        status = SOPC_STATUS_OK;
-    }
 
     SOPC_CertificateList* pTrustedCerts = *ppTrustedCerts;
     SOPC_CRLList* pTrustedCrl = *ppTrustedCrl;
     SOPC_CertificateList* pIssuerCerts = *ppIssuerCerts;
     SOPC_CRLList* pIssuerCrl = *ppIssuerCrl;
 
-    if (SOPC_STATUS_OK == status)
-    {
-        status = merge_certificates(pPKI->pTrustedRoots, pPKI->pTrustedCerts, &pTrustedCerts);
-    }
+    status = merge_certificates(pPKI->pTrustedRoots, pPKI->pTrustedCerts, &pTrustedCerts);
     if (SOPC_STATUS_OK == status && NULL != pPKI->pTrustedCrl)
     {
         status = SOPC_KeyManager_CRL_Copy(pPKI->pTrustedCrl, &pTrustedCrl);
@@ -2678,16 +2662,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bo
     }
     char* basePath = NULL;
     char* path = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
-    {
-        status = SOPC_STATUS_OK;
-    }
     /* The case of the PKI is built from buffer (there is no store) */
-    if (SOPC_STATUS_OK == status && NULL == pPKI->directoryStorePath)
+    if (NULL == pPKI->directoryStorePath)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -2761,16 +2741,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     }
 
     SOPC_CertificateList* pRejected = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
-    {
-        status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    if (NULL != pPKI->pRejectedList)
     {
         status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pRejected);
     }
@@ -2796,17 +2771,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pP
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     char* path = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
-    {
-        status = SOPC_STATUS_OK;
-    }
-
     /* The case of the PKI is built from buffer (there is no store) */
-    if (SOPC_STATUS_OK == status && NULL == pPKI->directoryStorePath)
+    if (NULL == pPKI->directoryStorePath)
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -2902,20 +2872,12 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
     }
 
     SOPC_PKIProvider* pTmpPKI = NULL;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
-    {
-        status = SOPC_STATUS_OK;
-    }
-
     /* Check the number of certificates plus CRLs */
-    if (SOPC_STATUS_OK == status)
-    {
-        status = check_list_length(pPKI, pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, bIncludeExistingList);
-    }
+    status = check_list_length(pPKI, pTrustedCerts, pTrustedCrl, pIssuerCerts, pIssuerCrl, bIncludeExistingList);
 
     /* Handle that the security level of the update isn't higher than the
        security level of the secure channel. (§7.3.4 part 2 v1.05) */
@@ -2928,7 +2890,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
     if (SOPC_STATUS_OK == status)
     {
         /* Includes the existing TrustList plus any updates */
-        if (bIncludeExistingList)
+        if (bIncludeExistingList && !pPKI->isPermissive)
         {
             SOPC_CertificateList* tmp_pTrustedCerts = NULL; /* trusted intermediate CA + trusted certificates */
             SOPC_CertificateList* tmp_pTrustedCertsTmp = NULL;
@@ -3113,57 +3075,49 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
 
     bool bIsIssuer = false;
     bool bIsRemoved = false;
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    if (!pPKI->isPermissive)
+    /* Remove from trusted certificates */
+    if (bIsTrusted)
     {
-        status = SOPC_STATUS_OK;
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        /* Remove from trusted certificates */
-        if (bIsTrusted)
+        if (NULL != pPKI->pTrustedCerts)
         {
-            if (NULL != pPKI->pTrustedCerts)
-            {
-                status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedCerts, &pPKI->pTrustedCrl, pThumbprint,
-                                                            "trusted list", &bCertIsRemoved, &bCertIsCA);
-            }
-            if (NULL != pPKI->pTrustedRoots && SOPC_STATUS_OK == status)
-            {
-                status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedRoots, &pPKI->pTrustedCrl, pThumbprint,
-                                                            "trusted root list", &bRootIsRemoved, &bRootIsCA);
-                SOPC_ASSERT(SOPC_STATUS_OK != status || bRootIsCA == bRootIsRemoved);
-            }
-            if (NULL != pPKI->pAllTrusted && SOPC_STATUS_OK == status)
-            {
-                bool bAllTrustedRemoved = false;
-                bool bAllTrustedIsCA = false;
-                status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pAllTrusted, &pPKI->pTrustedCrl, pThumbprint,
-                                                            "trusted list", &bAllTrustedRemoved, &bAllTrustedIsCA);
-                SOPC_ASSERT(SOPC_STATUS_OK != status || (bAllTrustedRemoved == (bRootIsRemoved || bCertIsRemoved) &&
-                                                         (bAllTrustedIsCA == (bCertIsCA || bRootIsCA))));
-            }
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedCerts, &pPKI->pTrustedCrl, pThumbprint,
+                                                        "trusted list", &bCertIsRemoved, &bCertIsCA);
         }
-        else
+        if (NULL != pPKI->pTrustedRoots && SOPC_STATUS_OK == status)
         {
-            /* Remove from issuer certificates */
-            if (NULL != pPKI->pIssuerCerts)
-            {
-                status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerCerts, &pPKI->pIssuerCrl, pThumbprint,
-                                                            "issuer list", &bCertIsRemoved, &bCertIsCA);
-                SOPC_ASSERT(SOPC_STATUS_OK != status || bCertIsCA == bCertIsRemoved);
-            }
-            if (NULL != pPKI->pIssuerRoots && SOPC_STATUS_OK == status)
-            {
-                status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerRoots, &pPKI->pIssuerCrl, pThumbprint,
-                                                            "issuer root list", &bRootIsRemoved, &bRootIsCA);
-                SOPC_ASSERT(SOPC_STATUS_OK != status || bRootIsCA == bRootIsRemoved);
-            }
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pTrustedRoots, &pPKI->pTrustedCrl, pThumbprint,
+                                                        "trusted root list", &bRootIsRemoved, &bRootIsCA);
+            SOPC_ASSERT(SOPC_STATUS_OK != status || bRootIsCA == bRootIsRemoved);
+        }
+        if (NULL != pPKI->pAllTrusted && SOPC_STATUS_OK == status)
+        {
+            bool bAllTrustedRemoved = false;
+            bool bAllTrustedIsCA = false;
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pAllTrusted, &pPKI->pTrustedCrl, pThumbprint, NULL,
+                                                        &bAllTrustedRemoved, &bAllTrustedIsCA);
+            SOPC_ASSERT(SOPC_STATUS_OK != status || (bAllTrustedRemoved == (bRootIsRemoved || bCertIsRemoved) &&
+                                                     (bAllTrustedIsCA == (bCertIsCA || bRootIsCA))));
+        }
+    }
+    else
+    {
+        /* Remove from issuer certificates */
+        if (NULL != pPKI->pIssuerCerts)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerCerts, &pPKI->pIssuerCrl, pThumbprint,
+                                                        "issuer list", &bCertIsRemoved, &bCertIsCA);
+            SOPC_ASSERT(SOPC_STATUS_OK != status || bCertIsCA == bCertIsRemoved);
+        }
+        if (NULL != pPKI->pIssuerRoots && SOPC_STATUS_OK == status)
+        {
+            status = sopc_pki_remove_cert_by_thumbprint(&pPKI->pIssuerRoots, &pPKI->pIssuerCrl, pThumbprint,
+                                                        "issuer root list", &bRootIsRemoved, &bRootIsCA);
+            SOPC_ASSERT(SOPC_STATUS_OK != status || bRootIsCA == bRootIsRemoved);
         }
     }
     if (SOPC_STATUS_OK == status)
