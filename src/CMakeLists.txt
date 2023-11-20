@@ -43,6 +43,7 @@ install(FILES
   ${CMAKE_BINARY_DIR}/s2opc-config.cmake
   ${CMAKE_BINARY_DIR}/s2opc-config-version.cmake
   ${S2OPC_ROOT_PATH}/CMake/FindMBEDTLS.cmake
+  ${S2OPC_ROOT_PATH}/CMake/FindCYCLONE_CRYPTO.cmake
   DESTINATION lib/cmake/s2opc
   )
 

@@ -71,7 +71,19 @@ for c in $DISABLED_CHECKERS; do SCAN_BUILD="${SCAN_BUILD} -disable-checker $c"; 
 
 mkdir build-analyzer
 cd build-analyzer
-$SCAN_BUILD cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo $SRC_DIR
+
+#Add CMake options for the compilation with Clang
+append_cmake_option ()
+{
+    if [[ -n "${!1}" ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -D$1=${!1}"
+    elif [[ -n "$2" ]]; then
+        CMAKE_OPTIONS="$CMAKE_OPTIONS -D$1=$2"
+    fi
+}
+append_cmake_option S2OPC_CRYPTO_CYCLONE_CRYPTO
+
+$SCAN_BUILD cmake $CMAKE_OPTIONS -DCMAKE_BUILD_TYPE=RelWithDebInfo $SRC_DIR
 $SCAN_BUILD make -j$(nproc)
 
 # Report folders have names of the form 2018-07-...
