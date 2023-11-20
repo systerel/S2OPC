@@ -36,6 +36,11 @@ SEES
     message_in_bs,
     message_out_bs
 
+INVARIANT
+    isBrowseValueContextDefined = FALSE &
+    isBrowseResultComputed      = FALSE
+
+
 LOCAL_OPERATIONS
 
     StatusCode_service <-- treat_browse_request_BrowseValues(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_nb_browse_value) =
@@ -584,6 +589,7 @@ OPERATIONS
                 browsePaths_iterated   <: t_BrowsePath &
                 browsePaths_to_iterate /\ browsePaths_iterated = {} &
                 l_continue = bool(browsePaths_to_iterate /= {})
+
             VARIANT
                 card(browsePaths_to_iterate)
             END

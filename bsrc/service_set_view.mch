@@ -26,30 +26,6 @@ SEES
     message_in_bs,
     message_out_bs
 
-DEFINITIONS
-    d_var_browse ==
-        isBrowseValueContextDefined,
-        isBrowseResultComputed
-    ;
-
-    d_inv_browse ==
-        isBrowseValueContextDefined = FALSE &
-        isBrowseResultComputed      = FALSE
-    ;
-
-    d_init_browse ==
-        isBrowseValueContextDefined := FALSE ||
-        isBrowseResultComputed      := FALSE
-
-ABSTRACT_VARIABLES
-    d_var_browse
-
-INVARIANT
-    d_inv_browse
-
-INITIALISATION
-    d_init_browse
-
 OPERATIONS
 
     StatusCode_service <-- treat_browse_request (p_session, p_req_msg, p_resp_msg) =
