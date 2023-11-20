@@ -84,6 +84,7 @@ else
     append_cmake_option CMAKE_C_FLAGS
     append_cmake_option CMAKE_EXE_LINKER_FLAGS
     append_cmake_option S2OPC_CRYPTO_MBEDTLS
+    append_cmake_option S2OPC_CRYPTO_CYCLONE_CRYPTO
     append_cmake_option S2OPC_CLIENTSERVER_ONLY
     append_cmake_option S2OPC_PUBSUB_ONLY
     append_cmake_option ENABLE_TESTING
