@@ -1088,6 +1088,7 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     const SOPC_ExposedBuffer* pRawNewKey = NULL;
     SOPC_CertificateList* pGivenIssuers = NULL;
     SOPC_CertificateList* pCurrentServerCert = NULL;
+    SOPC_PKIProvider* pTmpPKI = NULL;
     char* pURI = NULL;
     uint32_t errorCode = 0;
 
@@ -1170,6 +1171,11 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
             stCode = OpcUa_BadInvalidArgument;
         }
     }
+    /* Create a temporary PKI with the given certificate */
+    if (SOPC_STATUS_OK == status && NULL != pGivenIssuers)
+    {
+        status = SOPC_PKIProvider_CreateFromList(pGivenIssuers, NULL, NULL, NULL, &pTmpPKI);
+    }
     /* Retrieve the application URI from the current server certificate */
     if (SOPC_STATUS_OK == status)
     {
@@ -1186,11 +1192,8 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     /* Retrieve the current endpoint configuration */
     SOPC_Endpoint_Config* pEndpointCfg = SOPC_ToolkitServer_GetEndpointConfig(endpointConfigIdx);
     SOPC_ASSERT(NULL != pEndpointCfg);
-
-    /* Check the certificate properties */
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_PKI_LeafProfile profile = {.mdSign = SOPC_PKI_MD_SHA256,
+    /* Set the PKI leaf profile */
+    SOPC_PKI_LeafProfile leafProfile = {.mdSign = SOPC_PKI_MD_SHA256,
                                         .pkAlgo = SOPC_PKI_PK_RSA,
                                         .RSAMinimumKeySize = 1024,
                                         .RSAMaximumKeySize = 4096,
@@ -1200,14 +1203,16 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
                                         .extendedKeyUsage = SOPC_PKI_EKU_SERVER_AUTH,
                                         .sanApplicationUri = pURI,
                                         .sanURL = pEndpointCfg->endpointURL};
+    if (SOPC_STATUS_OK == status)
+    {
         /* Get properties form group */
         if (OpcUaId_RsaMinApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
         {
-            profile.RSAMaximumKeySize = SOPC_CERT_GRP_MIN_KEY_SIZE;
+            leafProfile.RSAMaximumKeySize = SOPC_CERT_GRP_MIN_KEY_SIZE;
         }
         else if (OpcUaId_RsaSha256ApplicationCertificateType == pGroupCtx->pCertificateTypeValueId->Data.Numeric)
         {
-            profile.RSAMinimumKeySize = SOPC_CERT_GRP_MIN_KEY_SIZE;
+            leafProfile.RSAMinimumKeySize = SOPC_CERT_GRP_MIN_KEY_SIZE;
         }
         else
         {
@@ -1221,21 +1226,49 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
             status = SOPC_STATUS_NOK;
             stCode = OpcUa_BadUnexpectedError;
         }
-        if (SOPC_STATUS_OK == status)
+    }
+    /* Check the certificate properties */
+    if (SOPC_STATUS_OK == status)
+    {
+        char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pNewCert);
+        const char* thumb = NULL == pThumb ? "NULL" : pThumb;
+        if (NULL == pTmpPKI)
         {
-            status = SOPC_PKIProvider_CheckLeafCertificate(pNewCert, &profile, &errorCode);
+            /* Check only the leaf if no given issuer certificate are provided */
+            status = SOPC_PKIProvider_CheckLeafCertificate(pNewCert, &leafProfile, &errorCode);
             if (SOPC_STATUS_OK != status)
             {
-                char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pNewCert);
-                const char* thumb = NULL == pThumb ? "NULL" : pThumb;
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                        "PushSrvCfg:Method_UpdateCertificate:CertificateGroup:%s: validation failed "
                                        "with error code %" PRIx32 " for certificate thumbprint <%s>",
                                        pGroupCtx->cStrId, errorCode, thumb);
-                SOPC_Free(pThumb);
                 stCode = OpcUa_BadSecurityChecksFailed;
             }
         }
+        else
+        {
+            /* Validate the certificate with the given issuers */
+            SOPC_PKI_ChainProfile chainProfile = {
+                .curves = SOPC_PKI_CURVES_ANY,
+                .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
+                .pkAlgo = SOPC_PKI_PK_RSA,
+                .RSAMinimumKeySize = 1024,
+                .bDisableRevocationCheck = true}; // Disable the revocation check (BadRevocationUnknown)
+            const SOPC_PKI_Profile pkiProfile = {.bApplyLeafProfile = true,
+                                                 .bBackwardInteroperability = false, // Disable CA interop
+                                                 .chainProfile = &chainProfile,
+                                                 .leafProfile = &leafProfile};
+            status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pNewCert, &pkiProfile, &errorCode);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "PushSrvCfg:Method_UpdateCertificate:CertificateGroup:%s: validation failed "
+                                       "with error code %" PRIx32 " for certificate thumbprint <%s>",
+                                       pGroupCtx->cStrId, errorCode, thumb);
+                stCode = OpcUa_BadSecurityChecksFailed;
+            }
+        }
+        SOPC_Free(pThumb);
     }
     /* TODO: Handle that the security level of the update isn't higher than the security level of the secure channel.
      * (§7.3.4 part 2 v1.05) */
@@ -1287,6 +1320,7 @@ SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroup
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerCurrentPublicKey);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerGivenPublicKey);
     SOPC_KeyManager_SerializedAsymmetricKey_Delete(pSerNewKey);
+    SOPC_PKIProvider_Free(&pTmpPKI);
 
     return stCode;
 }
