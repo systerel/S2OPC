@@ -166,6 +166,11 @@ endif()
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>>)
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion>)
+# Special compilation flag (for GCC + Clang) for CycloneCRYPTO
+if(S2OPC_CRYPTO_CYCLONE_CRYPTO)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-D__error_t_defined>)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-D__error_t_defined>)
+endif()
 
 # Set MSVC compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MSVC}:/W3 /Zi /sdl>)
