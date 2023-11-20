@@ -416,9 +416,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
         }
     }
 
-    // TODO should be configurable and retrieve by configuration API
-    bool usePreencodedBuffer = false;
-    if (result && usePreencodedBuffer)
+    const SOPC_WriterGroup_Options* writerGroupOptions = SOPC_WriterGroup_Get_Options(group);
+    if (result && writerGroupOptions->useFixedSizeBuffer)
     {
         if (NULL != context->security)
         {

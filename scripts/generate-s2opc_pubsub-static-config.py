@@ -47,6 +47,7 @@ ATTRIBUTE_MESSAGE_PUBLISHERID = "publisherId"
 ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL = "keepAliveTime"
 ATTRIBUTE_MESSAGE_MQTT_TOPIC = "mqttTopic"
 ATTRIBUTE_MESSAGE_ENCODING = "encoding"
+ATTRIBUTE_MESSAGE_FIXED_SIZE = "publisherFixedSize"
 
 TAG_DATASET = "dataset"
 ATTRIBUTE_DATASET_WRITERID = "writerId"
@@ -131,6 +132,7 @@ class MessageContext:
         self.keepAliveTime = float(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_KEEPALIVE_INTERVAL, -1.))
         self.mqttTopic = str(toCStringPtrName(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_MQTT_TOPIC, None)))
         self.encoding = getOptionalAttribute(message, ATTRIBUTE_MESSAGE_ENCODING, "uadp")
+        self.fixedSizeBuffer = bool(getOptionalAttribute(message, ATTRIBUTE_MESSAGE_FIXED_SIZE, False))
 
 
 def getCSecurityMode(mode):
@@ -332,7 +334,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     global IS_DEFINED_C_GROUP
 
     msgContext = MessageContext(cnxContext, message)
-
+    isFixedBufferSize = getOptionalAttribute(message, ATTRIBUTE_MESSAGE_FIXED_SIZE, 0)
     datasets = message.findall(TAG_DATASET)
 
     if not IS_DEFINED_C_GROUP:
@@ -353,12 +355,12 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
         // Offest = %d us
         // mqttTopic = %s
         // encoding = %s
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s, %s);
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, %d, %d, %d, %f, %d, %s, %s, %s, %d);
         alloc = NULL != writerGroup;
     }
     """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
         encodingStringToEnum(msgContext.encoding), msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, encodingStringToEnum(msgContext.encoding)))
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, encodingStringToEnum(msgContext.encoding), isFixedBufferSize))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
@@ -699,7 +701,8 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
                                                            const char* mqttTopic,
-                                                           const SOPC_Pubsub_MessageEncodingType encoding)
+                                                           const SOPC_Pubsub_MessageEncodingType encoding,
+                                                           const bool isFixedBufferSize)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
@@ -708,6 +711,8 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     SOPC_WriterGroup_Set_Encoding(group, encoding);
+    const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = isFixedBufferSize};
+    SOPC_WriterGroup_Set_Options(group, writerGroupOptions);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);

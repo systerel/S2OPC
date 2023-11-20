@@ -288,7 +288,15 @@ bool SOPC_FieldTarget_Set_TargetIndexRange(SOPC_FieldTarget* target, const char*
 /******************/
 /** Writer Group **/
 /******************/
+typedef struct SOPC_WriterGroup_Options
+{
+    bool useFixedSizeBuffer;
+} SOPC_WriterGroup_Options;
+
 const SOPC_PubSubConnection* SOPC_WriterGroup_Get_Connection(const SOPC_WriterGroup* group);
+
+const SOPC_WriterGroup_Options* SOPC_WriterGroup_Get_Options(const SOPC_WriterGroup* group);
+void SOPC_WriterGroup_Set_Options(SOPC_WriterGroup* group, const SOPC_WriterGroup_Options options);
 
 uint16_t SOPC_WriterGroup_Get_Id(const SOPC_WriterGroup* group);
 void SOPC_WriterGroup_Set_Id(SOPC_WriterGroup* group, uint16_t id);
