@@ -98,6 +98,7 @@
 #define ATTR_MESSAGE_MQTT_TOPIC "mqttTopic"
 #define ATTR_MESSAGE_KEEP_ALIVE "keepAliveTime"
 #define ATTR_MESSAGE_ENCODING "encoding"
+#define ATTR_MESSAGE_FIXED_SIZE "publisherFixedSize"
 
 #define ATTR_DATASET_WRITER_ID "writerId"
 #define ATTR_DATASET_SEQ_NUM "useSequenceNumber"
@@ -164,6 +165,7 @@ struct sopc_xml_pubsub_message_t
     SOPC_Pubsub_MessageEncodingType encoding;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
+    bool isPublishFixedSize;
 
     /* Array of to define Security Key Servers (SKS) that manage the security keys for the SecurityGroup
        assigned to the PubSubGroup. Null if the SecurityMode is None. */
@@ -636,6 +638,10 @@ static bool parse_message_attributes(const char* attr_name,
             result = false;
         }
     }
+    else if (TEXT_EQUALS(ATTR_MESSAGE_FIXED_SIZE, attr_name))
+    {
+        result = parse_boolean(attr_val, strlen(attr_val), &msg->isPublishFixedSize);
+    }
     else
     {
         LOG_XML_ERRORF("Unexpected 'message' attribute <%s>", attr_name);
@@ -651,6 +657,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     msg->publishing_interval = 0.0;
     msg->publishing_offset = -1;
     msg->keepAliveTime = -1.0;
+    msg->isPublishFixedSize = false;
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
 
     if (result)
@@ -701,6 +708,11 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
                 LOG_XML_ERROR("Publisher Id type string cannot be empty");
                 result = false;
             }
+        }
+        if (!ctx->connectionArr[ctx->nb_connections - 1].is_publisher && true == msg->isPublishFixedSize)
+        {
+            LOG_XML_ERROR("Fixed size buffer is an optimization only available for publisher");
+            result = false;
         }
         if (result)
         {
@@ -1262,6 +1274,9 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_SecurityMode(writerGroup, msg->security_mode);
                 SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
                 SOPC_WriterGroup_Set_Encoding(writerGroup, msg->encoding);
+
+                const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = msg->isPublishFixedSize};
+                SOPC_WriterGroup_Set_Options(writerGroup, writerGroupOptions);
 
                 // Associate dataSet with writer
                 SOPC_ASSERT(msg->nb_datasets < 0x100);
