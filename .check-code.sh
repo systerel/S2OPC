@@ -164,9 +164,11 @@ SRC_DIRS=(`find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path 
 SRC_INCL=${SRC_DIRS[@]/#/-I}
 # includes the generated export file
 SRC_INCL="$SRC_INCL -Ibuild-analyzer/src/Common"
+# mandatory include for CycloneCRYPTO
+SRC_INCL="$SRC_INCL -I/usr/local/include/cyclone_crypto"
 CLANG_TIDY_LOG=clang_tidy.log
 # Run clang-tidy removing default checks (-*) and adding CERT rules verification
-find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE \; &> $CLANG_TIDY_LOG
+find $CSRC -not -path "*windows*" -not -path "*freertos*" -not -path "*zephyr*" -not -path "*uanodeset_expat*" -name "*.c" -exec clang-tidy {} -warnings-as-errors -header-filter=.* -checks=$REMOVE_DEFAULT_RULES$CERT_RULES -- $SRC_INCL -D_GNU_SOURCE -D__error_t_defined \; &> $CLANG_TIDY_LOG
 # Check if resulting log contains error or warnings
 grep -wiEc "(error|warning)" $CLANG_TIDY_LOG | xargs test 0 -eq
 if [[ $? != 0 ]]; then
