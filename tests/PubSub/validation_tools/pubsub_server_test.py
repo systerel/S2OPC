@@ -747,6 +747,83 @@ XML_PUBSUB_LOOP_BAD_UINTEGER_PUBID = """<PubSub>
 </PubSub>
 """
 
+XML_PUBSUB_LOOP_FIXED_SIZE_ONE_DSM = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none" publisherFixedSize="true">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_LOOP_FIXED_SIZE_MULTI_DSM = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none" publisherFixedSize="true">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_LOOP_FIXED_SIZE_SECU_FAIL = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt" publisherFixedSize="true">
+            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
+XML_PUBSUB_LOOP_FIXED_SIZE_BAD_DATASET = """<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="none" publisherFixedSize="true">
+            <dataset writerId="50">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String" />
+            </dataset>
+            <dataset writerId="51">
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>
+"""
+
 def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
     """
         @param res_fcn a callable function (no parameters). Must return a boolean.
@@ -867,7 +944,7 @@ def helperTestPubSubConnectionFail(pubsubserver, xmlfile, logger, possibleFail=F
 
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger, possibleFail=possibleFail)
     boolIsTrue = waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))  # Event not reached
-    
+
     logger.add_test('Subscriber bool is not changed', not boolIsTrue)
     logger.add_test('Subscriber uint16 is not changed', 1456 + pubsubserver._testContext == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is not changed', 123654 == pubsubserver.getValue(NID_SUB_INT))
@@ -892,9 +969,9 @@ def helperTestPubSubConnectionPass(pubsubserver, xmlfile, logger):
     helpTestSetValue(pubsubserver, NID_PUB_INT, 789, logger)
 
     helpConfigurationChangeAndStart(pubsubserver, xmlfile, logger)
-    
+
     waitForEvent(lambda:pubsubserver.getValue(NID_SUB_BOOL))
-    
+
     logger.add_test('Subscriber bool is changed', True == pubsubserver.getValue(NID_SUB_BOOL))
     logger.add_test('Subscriber uint16 is changed', 456 == pubsubserver.getValue(NID_SUB_UINT16))
     logger.add_test('Subscriber int is changed', 789 == pubsubserver.getValue(NID_SUB_INT))
@@ -907,7 +984,7 @@ def testPubSubDynamicConf(logger):
 
     def lSubBoolIsFalse():return False == pubsubserver.getValue(NID_SUB_BOOL)
     def lSubBoolIsTrue():return True == pubsubserver.getValue(NID_SUB_BOOL)
-    
+
     defaultXml2Restore = False
     allTestsDone = False
 
@@ -918,14 +995,14 @@ def testPubSubDynamicConf(logger):
 
         # secure channel connection
         pubsubserver.connect()
-        
+
         # Stop the running PubSub Server
         pubsubserver.stop()
         #
         # TC 1 : Test with Publisher only configuration => only pub variables change
         #
         logger.begin_section("TC 1 : Publisher only")
-        
+
         helpTestStopStart(pubsubserver, False, logger)
 
         helperTestPubSubConnectionFail(pubsubserver, XML_PUBLISHER_ONLY, logger, possibleFail=False)
@@ -936,14 +1013,14 @@ def testPubSubDynamicConf(logger):
         logger.begin_section("TC 2 : Subscriber only")
 
         helperTestPubSubConnectionFail(pubsubserver, XML_SUBSCRIBER_ONLY, logger, possibleFail=False)
-        
+
         #
         # TC 3 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 3 : Publisher Subscriber Loop")
 
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP, logger)
-        
+
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
@@ -955,7 +1032,7 @@ def testPubSubDynamicConf(logger):
         boolInit = pubsubserver.getValue(NID_SUB_BOOL)
         uint16Init = pubsubserver.getValue(NID_PUB_UINT16)
         intInit = pubsubserver.getValue(NID_PUB_INT)
-        
+
         # Change Publisher variables
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, not boolInit, logger)
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, uint16Init + 100, logger)
@@ -1006,7 +1083,7 @@ def testPubSubDynamicConf(logger):
         # TC 6 : Test with Publisher and Subscriber configuration => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 6 : Test with Publisher and Subscriber configuration (MQTT): variables change through Pub/Sub")
-        
+
         # Init Publisher variables
         helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
         helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
@@ -1190,7 +1267,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_SECU, logger)
-        
+
         subIsFalse = waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', subIsFalse)
@@ -1220,7 +1297,7 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test MQTT Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_MQTT_VARIOUS_TOPIC, logger)
-        
+
         subIsFalse = waitForEvent(lSubBoolIsFalse)
 
         logger.add_test('Subscriber bool is changed', subIsFalse)
@@ -1280,9 +1357,9 @@ def testPubSubDynamicConf(logger):
         helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test String pubId Not set", logger)
 
         helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_STRING_PUBID, logger)
-        
+
         waitForEvent(lSubBoolIsFalse)
-        
+
         logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
         logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
@@ -1295,13 +1372,36 @@ def testPubSubDynamicConf(logger):
         # TC 27 : Test with Publisher and Subscriber configuration(unicast) => subscriber variables change through Pub/Sub
         #
         logger.begin_section("TC 27 : Publisher Subscriber Unicast")
-        
+
         helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_UNICAST, logger)
+
+        # TC 28 : Test preencode mechanism
+        logger.begin_section("TC 28 : Publisher fixed size buffer")
+
+        helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_ONE_DSM, logger)
+
+        # TC 29 : Test preencode mechanism with multi dataSetMessage
+        logger.begin_section("TC 29 : Publisher fixed size buffer multi DataSetMessage")
+
+        helperTestPubSubConnectionPass(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_MULTI_DSM, logger)
+
+        # TC 30 : Test preencode mechanism with security
+        logger.begin_section("TC 30 : Publisher fixed size buffer with security fail")
+
+        helperTestPubSubConnectionFail(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_SECU_FAIL, logger, possibleFail=True)
+
+        # TC 31 : Test preencode mechanism failed with bad dataSet configuration
+        logger.begin_section("TC 31 : Publisher fixed size buffer incompatible dataSetField configured")
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_LOOP_FIXED_SIZE_BAD_DATASET, logger, possibleFail=True)
+
+        waitForEvent(lambda: 3 == pubsubserver.getValue(NID_STATUS))
+
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 
         allTestsDone = True
-        
+
     except Exception as e:
         logger.add_test('Received exception %s'%e, False)
 
