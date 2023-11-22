@@ -169,6 +169,7 @@ check_commit_validity:
     CMAKE_INSTALL_PREFIX: '../install_linux64'
     DOCKER_IMAGE: 'sha256:8e0b9d304625e87b124620cf0c961e7b2a045134d6631affac0793fd7f3d4fcb'
     BUILD_DIR: build
+    S2OPC_CRYPTO_CYCLONE: 1
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -218,7 +219,7 @@ build-with_no_crypto:
   variables:
     <<: *build_linux_variables
   script:
-    - S2OPC_CRYPTO_CYCLONE=0 ./build.sh || exit $?
+    - S2OPC_CRYPTO_CYCLONE=0 S2OPC_CRYPTO_MBEDTLS=0 ./build.sh || exit $?
   rules:
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -428,6 +429,7 @@ test-check:
     - 'git ls-files -m | test 0 -eq `wc -l`'
   variables:
       DOCKER_IMAGE: 'sha256:bf7e8accd7bf22c7092fa706bb7662e089e4a0b178908bfc1d13f7094e880b01'
+      S2OPC_CRYPTO_CYCLONE: 1
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
