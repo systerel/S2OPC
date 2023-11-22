@@ -218,7 +218,7 @@ build-with_no_crypto:
   variables:
     <<: *build_linux_variables
   script:
-    - S2OPC_CRYPTO_CYCLONE_CRYPTO=0 ./build.sh || exit $?
+    - S2OPC_CRYPTO_CYCLONE=0 ./build.sh || exit $?
   rules:
     - if: "$ALL_BUILDS != null"
       when: on_success

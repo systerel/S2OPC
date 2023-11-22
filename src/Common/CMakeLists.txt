@@ -14,7 +14,7 @@ include (CheckTypeSize)
 
 if (S2OPC_CRYPTO_MBEDTLS)
   find_package(MBEDTLS REQUIRED)
-elseif(S2OPC_CRYPTO_CYCLONE_CRYPTO)
+elseif(S2OPC_CRYPTO_CYCLONE)
   find_package(CYCLONE_CRYPTO REQUIRED)
 endif()
 
@@ -41,7 +41,7 @@ else()
 endif()
 
 # Update variable containing S2OPC library dependencies
-if (S2OPC_CRYPTO_CYCLONE_CRYPTO)
+if (S2OPC_CRYPTO_CYCLONE)
   list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES cyclone_crypto cyclone_common)
 elseif(S2OPC_CRYPTO_MBEDTLS)
   list(APPEND S2OPC_COMMON_PRIVATE_LINK_LIBRARIES mbedtls mbedx509 mbedcrypto)
