@@ -59,10 +59,10 @@ endif()
 #########################
 # Choose crypto option
 option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" OFF)
-option(S2OPC_CRYPTO_CYCLONE_CRYPTO "Use CycloneCRYPTO" ON)
+option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" ON)
 
 set(S2OPC_CRYPTO_LIB "nocrypto")
-if(S2OPC_CRYPTO_CYCLONE_CRYPTO)
+if(S2OPC_CRYPTO_CYCLONE)
   set(S2OPC_CRYPTO_LIB "cyclone_crypto")
 elseif(S2OPC_CRYPTO_MBEDTLS)
   set(S2OPC_CRYPTO_LIB "mbedtls")
@@ -167,7 +167,7 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:$<${IS_WARNINGS_AS_ERRORS}:-Werro
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion>)
 # Special compilation flag (for GCC + Clang) for CycloneCRYPTO
-if(S2OPC_CRYPTO_CYCLONE_CRYPTO)
+if(S2OPC_CRYPTO_CYCLONE)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-D__error_t_defined>)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-D__error_t_defined>)
 endif()

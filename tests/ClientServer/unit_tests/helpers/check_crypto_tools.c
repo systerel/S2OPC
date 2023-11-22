@@ -74,7 +74,7 @@ START_TEST(test_crypto_get_app_uri)
 }
 END_TEST
 
-#ifndef S2OPC_CRYPTO_CYCLONE_CRYPTO
+#ifndef S2OPC_CRYPTO_CYCLONE
 START_TEST(test_crypto_gen_rsa_export_import)
 {
     /* Generate a new RSA key*/
@@ -383,7 +383,7 @@ Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
 
-#ifndef S2OPC_CRYPTO_CYCLONE_CRYPTO
+#ifndef S2OPC_CRYPTO_CYCLONE
     TCase *tc_gen_rsa = NULL, *tc_gen_csr = NULL;
     tc_gen_rsa = tcase_create("Generate RSA keys");
     tc_gen_csr = tcase_create("Generate CSR");
