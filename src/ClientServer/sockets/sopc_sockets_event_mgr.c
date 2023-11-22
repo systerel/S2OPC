@@ -720,7 +720,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             // No new attempt possible, indicates socket connection failed and close the socket
             SOPC_Sockets_Emit(SOCKET_FAILURE,
                               socketElt->connectionId, // endpoint description config index
-                              (uintptr_t) NULL, 0);
+                              (uintptr_t) NULL, socketIdx);
             // Definitively close the socket
             SOPC_SocketsInternalContext_CloseSocket(socketIdx);
         }
