@@ -72,6 +72,7 @@ typedef struct
     const SOPC_CertificateList* trustedCrts;
     const SOPC_CRLList* allCRLs;
     bool isTrustedInChain;
+    bool disableRevocationCheck;
 } SOPC_CheckTrustedAndCRLinChain;
 
 // Bitmask errors for OPCUA error order compliance
@@ -210,19 +211,20 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unknown;
 }
 
-static void verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
-                        SOPC_CertificateList* crt,
-                        int certificate_depth,
-                        uint32_t* flags)
+static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
+                       SOPC_CertificateList* crt,
+                       int certificate_depth,
+                       uint32_t* flags)
 {
-    SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRLinChain = (SOPC_CheckTrustedAndCRLinChain*) checkTrustedAndCRL;
+    SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRLinChain = checkTrustedAndCRL;
+    int err = 0;
 
-    /* Check if a revocation list is present when not the certificate leaf
+    /* Check if a revocation list is present when the certificate is not a leaf
      * (that might have CA bit set if self-signed and OPC UA backward compatibility active)
      * It is your responsibility to provide up-to-date CRLs for all trusted CAs. If no CRL is provided for the CA
      * that was used to sign the certificate, CRL verification is skipped silently, that is without setting any flag.
      */
-    if (0 != certificate_depth)
+    if (0 != certificate_depth && !checkTrustedAndCRLinChain->disableRevocationCheck)
     {
         bool matchCRL = false;
         // Unlink cert temporarily for CRL verification
@@ -243,6 +245,7 @@ static void verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
         if (!matchCRL)
         {
             *flags |= X509_BADCRL_NOT_TRUSTED;
+            err = -1;
         }
     }
 
@@ -264,7 +267,17 @@ static void verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
         }
         crtTrusted = crtTrusted->next;
     }
+
+    return err;
 }
+
+// removes cert from a linked list
+static void sopc_remove_cert_from_list(SOPC_CertificateList* pPrev,
+                                       SOPC_CertificateList** ppCur,
+                                       SOPC_CertificateList** ppHeadCertList);
+
+// PKI remove certificate from rejected list declaration
+static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert);
 
 // PKI clear operation declaration
 static void sopc_pki_clear(SOPC_PKIProvider* pPKI);
@@ -534,7 +547,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
         pProfile->chainProfile = pChainProfile;
         pProfile->bBackwardInteroperability = true;
         pProfile->bApplyLeafProfile = true;
-        pProfile->bAppendRejectCert = true;
     }
     else
     {
@@ -561,17 +573,14 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pPr
     case SOPC_PKI_TYPE_CLIENT_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
-        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_SERVER_APP:
         pProfile->bApplyLeafProfile = true;
         pProfile->bBackwardInteroperability = true;
-        pProfile->bAppendRejectCert = true;
         break;
     case SOPC_PKI_TYPE_USER:
         pProfile->bApplyLeafProfile = false;
         pProfile->bBackwardInteroperability = false;
-        pProfile->bAppendRejectCert = true;
         break;
     default:
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1161,7 +1170,11 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
 
     while (1 && 0 == err)
     {
-        verify_cert(checkTrustedAndCRL, child, certificate_depth, failure_reasons);
+        err = verify_cert(checkTrustedAndCRL, child, certificate_depth, failure_reasons);
+        if (err)
+        {
+            return err;
+        }
 
         if (child_is_trusted)
         {
@@ -1294,10 +1307,14 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
 {
     int err = 0;
 
-    verify_cert(checkTrustedAndCRL, pToValidate, 0, failure_reasons);
+    int ret = verify_cert(checkTrustedAndCRL, pToValidate, 0, failure_reasons);
+    if (ret)
+    {
+        err = -1;
+    }
 
     // Check validity
-    int ret = crt_check_validity(&pToValidate->crt);
+    ret = crt_check_validity(&pToValidate->crt);
     if (ret)
     {
         err = -1;
@@ -1323,7 +1340,7 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
     return err;
 }
 
-/* Some verifications the certificate.
+/* Some verifications on the certificate.
  * Returns -1 if the certificate failed the verifications, 0 on success.
  */
 static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
@@ -1373,6 +1390,8 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
                                                    SOPC_CertificateList* cert,
                                                    cyclone_crypto_crt_profile* crt_profile,
                                                    bool bIsSelfSigned,
+                                                   bool bForceTrustedCert,
+                                                   bool bDisableRevocationCheck,
                                                    const char* thumbprint,
                                                    uint32_t* error)
 {
@@ -1398,9 +1417,10 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     uint32_t failure_reasons = 0;
     int ret = crt_verify_with_profile(cert, crt_profile, &failure_reasons);
 
-    SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {
-        .trustedCrts = pPKI->pAllTrusted, .allCRLs = pPKI->pAllCrl, .isTrustedInChain = false};
-
+    SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {.trustedCrts = pPKI->pAllTrusted,
+                                                         .allCRLs = pPKI->pAllCrl,
+                                                         .isTrustedInChain = bForceTrustedCert,
+                                                         .disableRevocationCheck = bDisableRevocationCheck};
     /* CycloneCRYPTO : x509ValidateCertificate() function returns error if
      * the issuer of the certificate is not CA. It is then a special case.
      */
@@ -1436,6 +1456,96 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     cert->next = NULL;
 
     return status;
+}
+
+static void sopc_remove_cert_from_list(SOPC_CertificateList* pPrev,
+                                       SOPC_CertificateList** ppCur,
+                                       SOPC_CertificateList** ppHeadCertList)
+{
+    SOPC_ASSERT(NULL != ppCur);
+    SOPC_ASSERT(NULL != *ppCur); /* Current cert shall not be NULL */
+    SOPC_ASSERT(NULL != ppHeadCertList);
+    SOPC_ASSERT(NULL != *ppHeadCertList); /* Head shall not be NULL */
+
+    SOPC_CertificateList* pHeadCertList = *ppHeadCertList;
+    SOPC_CertificateList* pCur = *ppCur;      /* Current cert */
+    SOPC_CertificateList* pNext = pCur->next; /* Next cert */
+    pCur->next = NULL;
+    SOPC_Buffer_Delete(pCur->raw);
+    rsaFreePublicKey(&pCur->pubKey);
+    if (NULL == pPrev)
+    {
+        if (NULL == pNext)
+        {
+            /* The list is empty, Free it and stop the iteration  */
+            SOPC_Free(pHeadCertList);
+            pHeadCertList = NULL;
+            pCur = NULL;
+        }
+        else
+        {
+            /* Head of the list is a special case */
+            *pHeadCertList = *pNext; /* Use an assignment operator to do the copy */
+            /* We have to free the new next certificate */
+            SOPC_Free(pNext);
+
+            /* Do not iterate: current certificate has changed with the new head (pCur = &pHeadCertList->crt) */
+        }
+    }
+    else
+    {
+        /* We have to free the certificate if it is not the first in the list */
+        SOPC_Free(pCur);
+        pPrev->next = pNext;
+        /* Iterate */
+        pCur = pNext;
+    }
+    *ppCur = pCur;
+    *ppHeadCertList = pHeadCertList;
+}
+
+static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert)
+{
+    SOPC_ASSERT(NULL != ppRejectedList);
+    SOPC_ASSERT(NULL != pCert);
+    SOPC_ASSERT(NULL == pCert->next);
+
+    /* Head of the rejected list */
+    SOPC_CertificateList* pHeadRejectedCertList = *ppRejectedList;
+    if (NULL == pHeadRejectedCertList)
+    {
+        /* the certificate list is empty, do nothing*/
+        return;
+    }
+    SOPC_CertificateList* cur = pHeadRejectedCertList; /* Current cert */
+    SOPC_CertificateList* prev = NULL;                 /* Parent of current cert */
+    bool bFound = false;
+    bool_t bMatchName = false;
+
+    while (NULL != cur && !bFound)
+    {
+        /* Compare the subject name */
+        bMatchName = x509CompareName(pCert->crt.tbsCert.subject.rawData, pCert->crt.tbsCert.subject.rawDataLen,
+                                     cur->crt.tbsCert.subject.rawData, cur->crt.tbsCert.subject.rawDataLen);
+        if (bMatchName)
+        {
+            if (0 == memcmp(pCert->raw->data, cur->raw->data, pCert->raw->length))
+            {
+                bFound = true;
+            }
+        }
+        if (bFound)
+        {
+            sopc_remove_cert_from_list(prev, &cur, &pHeadRejectedCertList);
+        }
+        else
+        {
+            prev = cur;
+            cur = cur->next;
+        }
+    }
+    *ppRejectedList = pHeadRejectedCertList;
+    return;
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI, const SOPC_CertificateList* pCert)
@@ -1590,8 +1700,8 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
 
     if (SOPC_STATUS_OK == status)
     {
-        status =
-            sopc_validate_certificate(pPKI, pToValidateCpy, &crt_profile, bIsSelfSigned, thumbprint, &currentError);
+        status = sopc_validate_certificate(pPKI, pToValidateCpy, &crt_profile, bIsSelfSigned, false,
+                                           pProfile->chainProfile->bDisableRevocationCheck, thumbprint, &currentError);
         if (SOPC_STATUS_OK != status)
         {
             if (!bErrorFound)
@@ -1604,18 +1714,18 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
 
     if (bErrorFound)
     {
-        if (pProfile->bAppendRejectCert)
+        status = SOPC_PKIProvider_AddCertToRejectedList(pPKI, pToValidateCpy);
+        if (SOPC_STATUS_OK != status)
         {
-            status = SOPC_PKIProvider_AddCertToRejectedList(pPKI, pToValidateCpy);
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
-                                         "> PKI : AddCertToRejectedList failed for certificate thumbprint %s",
-                                         thumbprint);
-            }
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "> PKI : AddCertToRejectedList failed for certificate thumbprint %s", thumbprint);
         }
         *error = firstError;
         status = SOPC_STATUS_NOK;
+    }
+    else
+    {
+        sopc_pki_remove_rejected_cert(&pPKI->pRejectedList, pToValidateCpy);
     }
 
     SOPC_KeyManager_Certificate_Free(pToValidateCpy);
@@ -1667,6 +1777,7 @@ static void sopc_free_c_string_from_ptr(void* data)
 static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPkiCerts,
                                                        const SOPC_PKIProvider* pPKI,
                                                        cyclone_crypto_crt_profile* crt_profile,
+                                                       const bool bDisableRevocationCheck,
                                                        bool* bErrorFound,
                                                        SOPC_Array* pErrors,
                                                        SOPC_Array* pThumbprints)
@@ -1710,7 +1821,9 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         }
         if (SOPC_STATUS_OK == status)
         {
-            statusChain = sopc_validate_certificate(pPKI, crt, crt_profile, bIsSelfSigned, thumbprint, &error);
+            const bool forceTrustedCert = true;
+            statusChain = sopc_validate_certificate(pPKI, crt, crt_profile, bIsSelfSigned, forceTrustedCert,
+                                                    bDisableRevocationCheck, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
                 *bErrorFound = true;
@@ -1778,16 +1891,18 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     {
         if (NULL != pPKI->pAllCerts)
         {
-            status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, &bErrorFound, pErrArray,
-                                                   pThumbArray);
+            status =
+                sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
+                                              &bErrorFound, pErrArray, pThumbArray);
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         if (NULL != pPKI->pAllRoots)
         {
-            status = sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, &bErrorFound, pErrArray,
-                                                   pThumbArray);
+            status =
+                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
+                                              &bErrorFound, pErrArray, pThumbArray);
         }
     }
 
@@ -2281,45 +2396,21 @@ static SOPC_ReturnStatus check_lists(SOPC_CertificateList* pTrustedCerts,
     /* trusted CA => trusted CRL*/
     if (0 != trusted_ca_count && NULL == pTrustedCrl)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: trusted CA certificates are provided but no CRL.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: trusted CA certificates are provided but no CRL.");
     }
-    /* check and warn in case there is no trusted leaf certificates and no trusted roots (only trusted intermediate
-     * CA).
-     */
-    if ((0 == issued_cert_count) && (0 == trusted_root_count))
-    {
-        /* In this case, no certificates will be accepted. */
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: no trusted leaf certificate and no trusted root is given: no "
-                               "certificates will be accepted.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
     get_list_stats(pIssuerCerts, &issuer_ca_count, &issuer_list_length, &issuer_root_count);
     /* issuer CA => issuer CRL*/
     if (0 != issuer_ca_count && NULL == pIssuerCrl)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                               "> PKI creation error: issuer CA certificates are provided but no CRL.");
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                 "> PKI creation warning: issuer CA certificates are provided but no CRL.");
     }
     /* Check if issuerCerts list is only filled with CA. */
     if (issuer_list_length != issuer_ca_count)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> PKI creation error: not all issuer certificates are CAs.");
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* check and warn in case there is no trusted leaf certificates but issuer certificates. */
-    if ((0 != issuer_ca_count) && (0 == issued_cert_count))
-    {
-        /* In this case, only trusted root CA will be accepted (if Backward interoperability is enabled). */
-        SOPC_Logger_TraceWarning(
-            SOPC_LOG_MODULE_COMMON,
-            "> PKI creation warning: issuer certificates are given but no trusted leaf certificates: "
-            "only certificates issued by the trusted Root CA will be accepted and the root itself if backward "
-            "interoperability is enabled");
     }
     /* check and warn in case no roots is provided wheras at least one trusted leaf certificate is provided. */
     if ((0 == issuer_root_count) && (0 == trusted_root_count) && (0 != issued_cert_count))
@@ -2462,16 +2553,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     bool bIssuerCRL = false;
     if (SOPC_STATUS_OK == status)
     {
-        if (bTrustedCaFound)
+        if (bTrustedCaFound && NULL != tmp_pTrustedCrl)
         {
             status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(tmp_pTrustedCerts, tmp_pTrustedCrl, &bTrustedCRL);
-            if (NULL == tmp_pTrustedCerts)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                       "> PKI creation error: After deleting CAs without CRL, the list of trusted "
-                                       "certificates became empty");
-                status = SOPC_STATUS_NOK;
-            }
         }
         else
         {
@@ -2480,7 +2564,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (bIssuerCaFound)
+        if (bIssuerCaFound && NULL != tmp_pIssuerCrl)
         {
             status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(tmp_pIssuerCerts, tmp_pIssuerCrl, &bIssuerCRL);
         }
@@ -2495,20 +2579,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given trusted certificates have a "
-                "single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.");
+                "> PKI creation warning: Not all certificate authorities in given trusted certificates have at least "
+                "one certificate revocation list! Certificates issued by these CAs will be refused.");
         }
         if (!bIssuerCRL)
         {
             SOPC_Logger_TraceWarning(
                 SOPC_LOG_MODULE_COMMON,
-                "> PKI creation warning: Not all certificate authorities in given issuer certificates have a "
-                "single "
-                "certificate revocation list! Certificates issued by these CAs will be refused.");
+                "> PKI creation warning: Not all certificate authorities in given issuer certificates have at least "
+                "one certificate revocation list! Certificates issued by these CAs will be refused.");
         }
     }
-
     /* Retrieve the root from list */
     if (SOPC_STATUS_OK == status)
     {
@@ -2782,7 +2863,7 @@ void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
 }
 
 #if SOPC_HAS_FILESYSTEM
-static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts, size_t curRejectedLen)
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
     SOPC_ASSERT(NULL != directoryPath);
 
@@ -2799,15 +2880,6 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsR
         return SOPC_STATUS_NOK;
     }
     size_t nbFiles = SOPC_Array_Size(pFilePaths);
-    if (bIsRejectedCerts)
-    {
-        if (nbFiles + curRejectedLen <= SOPC_PKI_MAX_NB_CERT_REJECTED)
-        {
-            /* Do nothing */
-            SOPC_Array_Delete(pFilePaths);
-            return SOPC_STATUS_OK;
-        }
-    }
     for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
         pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
@@ -2821,11 +2893,9 @@ static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsR
     return status;
 }
 #else
-static SOPC_ReturnStatus remove_files(const char* directoryPath, const bool bIsRejectedCerts, size_t curRejectedLen)
+static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
     SOPC_UNUSED_ARG(directoryPath);
-    SOPC_UNUSED_ARG(bIsRejectedCerts);
-    SOPC_UNUSED_ARG(curRejectedLen);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 #endif /* SOPC_HAS_FILESYSTEM */
@@ -2839,7 +2909,7 @@ static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath, false, 0);
+        status = remove_files(directoryPath);
     }
     if (SOPC_STATUS_OK == status && NULL != pRoots)
     {
@@ -2860,7 +2930,7 @@ static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (bEraseExistingFiles)
     {
-        status = remove_files(directoryPath, false, 0);
+        status = remove_files(directoryPath);
     }
     if (SOPC_STATUS_OK == status && NULL != pCrl)
     {
@@ -3143,14 +3213,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     return status;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles)
+SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI)
 
 {
     if (NULL == pPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    size_t curRejectedLen = 0;
     char* path = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
@@ -3166,21 +3235,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pP
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
-    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    if (SOPC_STATUS_OK == status)
     {
         status = may_create_pki_folder(pPKI->directoryStorePath, STR_REJECTED, &path);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_KeyManager_Certificate_GetListLength(pPKI->pRejectedList, &curRejectedLen);
+            status = remove_files(path);
         }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = remove_files(path, !bEraseExistingFiles, curRejectedLen);
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_Certificate_ToDER_Files(pPKI->pRejectedList, path);
-        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
+    {
+        status = SOPC_KeyManager_Certificate_ToDER_Files(pPKI->pRejectedList, path);
     }
     SOPC_Free(path);
 
