@@ -351,8 +351,6 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScListenerMgr: INT_EP_SC_CREATED epCfgIdx=%" PRIu32 " scIdx=%" PRIuPTR, eltId,
                                auxParam);
-        /* id = endpoint description configuration index,
-           auxParam = socket index for connection */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
 
         if (NULL == scListener ||
@@ -454,7 +452,8 @@ void SOPC_SecureListenerStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalEve
            auxParam = secure channel connection index */
         scListener = SOPC_SecureListenerStateMgr_GetListener(eltId);
 
-        if (scListener != NULL && scListener->state == SECURE_LISTENER_STATE_OPENED)
+        if (scListener != NULL &&
+            (SECURE_LISTENER_STATE_OPENED == scListener->state || SECURE_LISTENER_STATE_INACTIVE == scListener->state))
         {
             SOPC_SecureListenerStateMgr_RemoveConnection(scListener, (uint32_t) auxParam);
         }
