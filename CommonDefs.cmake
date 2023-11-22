@@ -58,8 +58,8 @@ endif()
 
 #########################
 # Choose crypto option
-option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" OFF)
-option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" ON)
+option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" ON)
+option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" OFF)
 
 set(S2OPC_CRYPTO_LIB "nocrypto")
 if(S2OPC_CRYPTO_CYCLONE)
