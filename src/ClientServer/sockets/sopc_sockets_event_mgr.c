@@ -516,6 +516,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         if (NULL != socketElt)
         {
             socketElt->connectionId = eltId;
+            SOPC_Sockets_Emit(SOCKET_CREATED, eltId, (uintptr_t) NULL, socketElt->socketIdx);
         }
         else
         {
