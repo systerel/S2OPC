@@ -709,9 +709,7 @@ static bool SC_DeriveSymmetricKeySets(bool isServer,
     return result;
 }
 
-static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* scConnection,
-                                                        uint32_t scConnectionIdx,
-                                                        uint32_t socketIdx)
+static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* scConnection, uint32_t scConnectionIdx)
 {
     SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer;
@@ -774,7 +772,6 @@ static bool SC_ClientTransition_TcpInit_To_TcpNegotiate(SOPC_SecureConnection* s
 
     if (result)
     {
-        scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_NEGOTIATE;
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_HEL, scConnectionIdx, (uintptr_t) msgBuffer, 0);
     }
@@ -1651,9 +1648,7 @@ static bool get_certificate_der(SOPC_CertificateList* cert, SOPC_Buffer** buffer
     return true;
 }
 
-static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection* scConnection,
-                                                          uint32_t scConnectionIdx,
-                                                          uint32_t socketIdx)
+static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection* scConnection, uint32_t scConnectionIdx)
 {
     SOPC_ASSERT(scConnection != NULL);
     SOPC_Buffer* msgBuffer = NULL;
@@ -1718,7 +1713,6 @@ static bool SC_ServerTransition_TcpReverseInit_To_TcpInit(SOPC_SecureConnection*
 
     if (result)
     {
-        scConnection->socketIndex = socketIdx;
         scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
         SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_SC_SND_RHE, scConnectionIdx, (uintptr_t) msgBuffer, 0);
     }
@@ -2977,7 +2971,7 @@ void SOPC_SecureConnectionStateMgr_OnInternalEvent(SOPC_SecureChannels_InternalE
             // Do REVERSE_INIT -> INIT transition now we found a secure connection to use
             scConnection->state = SECURE_CONNECTION_STATE_TCP_INIT;
             // Do INIT -> NEGOTIATE transition
-            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, scConnection->socketIndex);
+            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId);
             if (!result)
             {
                 // Error case: close the secure connection if invalid state or unexpected error.
@@ -3335,13 +3329,14 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
 
     switch (event)
     {
+    case SOCKET_CREATED:
     case SOCKET_CONNECTION:
         // CLIENT side (or SERVER side with ReverseHello)
         /* id = secure channel connection index,
            auxParam = socket index */
 
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: %s scIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
+                               (SOCKET_CREATED == event ? "SOCKET_CREATED" : "SOCKET_CONNECTION"), eltId, auxParam);
         SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         scConnection = SC_GetConnection(eltId);
@@ -3357,27 +3352,40 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             return;
         }
 
-        if (scConnection->isServerConnection)
+        switch (event)
         {
-            // Add connection into associated EP listener
-            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
-                                                           (uintptr_t) NULL, (uintptr_t) eltId);
-            // Send a Reverse Hello message on TCP connection
-            result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId, (uint32_t) auxParam);
+        case SOCKET_CREATED:
+            // Associate socket to secure channel
+            scConnection->socketIndex = (uint32_t) auxParam;
+            if (scConnection->isServerConnection)
+            {
+                // Add connection into associated EP listener
+                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
+                                                               (uintptr_t) NULL, (uintptr_t) eltId);
+            }
+            break;
+        case SOCKET_CONNECTION:
+            if (scConnection->isServerConnection)
+            {
+                // Send a Reverse Hello message on TCP connection
+                result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId);
+            }
+            else
+            {
+                // Send an Hello message on TCP connection
+                result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId);
+            }
+            if (!result)
+            {
+                // Error case: close the secure connection if invalid state or unexpected error.
+                //  (client case only on SOCKET_CONNECTION event)
+                SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
+                                         "SecureConnection: closed on SOCKET_CONNECTION");
+            }
+            break;
+        default:
+            SOPC_ASSERT(false);
         }
-        else
-        {
-            // Send an Hello message on TCP connection
-            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId, (uint32_t) auxParam);
-        }
-        if (!result)
-        {
-            // Error case: close the secure connection if invalid state or unexpected error.
-            //  (client case only on SOCKET_CONNECTION event)
-            SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
-                                     "SecureConnection: closed on SOCKET_CONNECTION");
-        }
-
         break;
     case SOCKET_FAILURE:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,

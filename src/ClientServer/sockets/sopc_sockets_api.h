@@ -89,10 +89,16 @@ typedef enum
     SOCKET_LISTENER_FAILURE,        /**< A failure occurred on the socket connection listener for the given
                                          endpoint description configuration index. Closes the SC listener<br/>
                                          id = endpoint description config index */
+    SOCKET_CREATED,                 /**< A new socket was created for the given secure channel connection
+                                         configuration index and with the given new socket connection index.
+                                         Associates it to the secure channel connection instance.<br/>
+                                         id = secure channel connection index <br/>
+                                         auxParam = (uint32_t) socket index
+                                     */
 
-    SOCKET_CONNECTION, /**< A requested client socket connection was established for the secure channel
+    SOCKET_CONNECTION, /**< A requested client connection was established for the secure channel
                           connection configuration index and with the given new socket connection index.
-                          Associates it to the secure channel connection instance.<br/>
+                          SOCKET_CREATED has already been triggered prior to this event.
                           id = secure channel connection index <br/>
                           auxParam = (uint32_t) socket index */
 

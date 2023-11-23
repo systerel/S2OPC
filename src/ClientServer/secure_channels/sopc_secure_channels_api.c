@@ -109,6 +109,7 @@ void SOPC_SecureChannels_OnSocketsEvent(SOPC_EventHandler* handler,
         SOPC_SecureListenerStateMgr_OnSocketEvent(sockEvent, eltId, params, auxParam);
         break;
     /* Sockets manager -> SC connection state manager */
+    case SOCKET_CREATED:
     case SOCKET_CONNECTION:
     case SOCKET_FAILURE:
         SOPC_SecureConnectionStateMgr_OnSocketEvent(sockEvent, eltId, params, auxParam);
