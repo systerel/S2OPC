@@ -535,13 +535,17 @@ static void SC_CloseSecureConnection(
             if (!immediateClose)
             {
                 bool result = false;
-                // Server shall alway send a ERR message before closing socket
-                if (OpcUa_BadSecurityChecksFailed == errorStatus)
+                if (scConnection->state >= SECURE_CONNECTION_STATE_TCP_INIT)
                 {
-                    // Reason shall not provide more information in this case
-                    reason = "";
+                    // If the connection is initialized:
+                    // Server shall alway send a ERR message before closing socket
+                    if (OpcUa_BadSecurityChecksFailed == errorStatus)
+                    {
+                        // Reason shall not provide more information in this case
+                        reason = "";
+                    }
+                    result = SC_Server_SendErrorMsgAndClose(scConnectionIdx, errorStatus, reason);
                 }
-                result = SC_Server_SendErrorMsgAndClose(scConnectionIdx, errorStatus, reason);
                 if (!result)
                 {
                     immediateClose = true;
