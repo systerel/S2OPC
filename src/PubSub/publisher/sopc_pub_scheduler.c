@@ -141,7 +141,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
    return NULL if every publisher is acyclic */
 static MessageCtx* MessageCtxArray_FindMostExpired(void);
 
-static void SOPC_PubScheduler_Context_Clear(void);
+static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted);
 
 // Allocation and initialization of a transport context. ctx is the field of message context.
 static bool SOPC_PubScheduler_Connection_Get_Transport(uint32_t index,
@@ -217,10 +217,14 @@ static SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_N
 static void send_keepAlive_message(MessageCtx* context);
 
 // Clear pub scheduler context
-static void SOPC_PubScheduler_Context_Clear(void)
+static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
 {
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.quit, 1);
-    SOPC_Thread_Join(pubSchedulerCtx.thPublisher);
+    // Join the thread only if it has been created
+    if (isPubThreadStarted)
+    {
+        SOPC_Thread_Join(pubSchedulerCtx.thPublisher);
+    }
 
     /* Destroy messages and messages array */
     MessageCtx_Array_Clear();
@@ -851,6 +855,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
+    bool isPubThreadStarted = false;
 
     SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
 
@@ -939,11 +944,15 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
             resultSOPC = SOPC_Thread_CreatePrioritized(&pubSchedulerCtx.thPublisher, &thread_start_publish, NULL,
                                                        threadPriority, "Publisher");
         }
+        if (SOPC_STATUS_OK == resultSOPC)
+        {
+            isPubThreadStarted = true;
+        }
     }
 
     if (SOPC_STATUS_OK != resultSOPC)
     {
-        SOPC_PubScheduler_Context_Clear();
+        SOPC_PubScheduler_Context_Clear(isPubThreadStarted);
         SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     }
     else
@@ -966,7 +975,7 @@ void SOPC_PubScheduler_Stop(void)
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stopping Pub Scheduler...");
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true); /* TODO: ? -> remove when using an enum */
-    SOPC_PubScheduler_Context_Clear();
+    SOPC_PubScheduler_Context_Clear(true);
 
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, false);
