@@ -179,15 +179,16 @@ SOPC_ReturnStatus SOPC_CryptoProvider_AsymmetricGetLength_MsgPlainText(const SOP
     }
 
     uint32_t lenHash = 0;
-    if (SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash) != SOPC_STATUS_OK)
+    SOPC_ReturnStatus status = SOPC_CryptoProvider_AsymmetricGetLength_OAEPHashLength(pProvider, &lenHash);
+    if (SOPC_STATUS_OK != status)
     {
-        return SOPC_STATUS_NOK;
+        return status;
     }
 
     lenMessage -= 2 * lenHash + 2; // TODO: check for underflow?
     *pLenMsg = (uint32_t) lenMessage;
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 /**

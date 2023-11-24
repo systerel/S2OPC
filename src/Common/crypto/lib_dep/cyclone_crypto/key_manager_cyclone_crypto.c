@@ -30,6 +30,7 @@
 #include "sopc_helper_encode.h"
 #include "sopc_helper_string.h"
 #include "sopc_key_manager.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_random.h"
@@ -203,59 +204,15 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     return status;
 }
 
-/* Define CycloneCRYPTO _weak_func used in rsaGenerateKeyPair() here.
- */
-error_t mpiCheckProbablePrime(const Mpi* a)
-{
-    // Not implemented yet.
-
-    SOPC_UNUSED_ARG(a);
-
-    return 1;
-}
-
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC_AsymmetricKey** ppKey)
 {
-    if (NULL == ppKey || 0 == RSAKeySize)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_UNUSED_ARG(RSAKeySize);
+    SOPC_UNUSED_ARG(ppKey);
 
-    SOPC_AsymmetricKey* pKey = SOPC_Calloc(1, sizeof(SOPC_AsymmetricKey));
-    if (NULL == pKey)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    pKey->isBorrowedFromCert = false;
-    rsaInitPublicKey(&pKey->pubKey);
-    rsaInitPrivateKey(&pKey->privKey);
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // It requires to implement a _weak_func of CycloneCRYPTO which is not easily implementable.
 
-    // Create and seed the PRNG context
-    YarrowContext YarrowCtx = {0};
-    error_t errLib = yarrowInit(&YarrowCtx);
-    SOPC_Buffer* buffer_random = SOPC_Buffer_Create(32);
-    SOPC_ReturnStatus status = SOPC_GetRandom(buffer_random, 32);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Buffer_Delete(buffer_random);
-        return SOPC_STATUS_NOK;
-    }
-    errLib = yarrowSeed(&YarrowCtx, buffer_random->data, 32);
-    SOPC_Buffer_Delete(buffer_random);
-
-    errLib =
-        rsaGenerateKeyPair(&yarrowPrngAlgo, &YarrowCtx, RSAKeySize, SOPC_RSA_EXPONENT, &pKey->privKey, &pKey->pubKey);
-
-    if (0 != errLib)
-    {
-        SOPC_KeyManager_AsymmetricKey_Free(pKey);
-        pKey = NULL;
-    }
-
-    yarrowDeinit(&YarrowCtx);
-    *ppKey = pKey;
-
-    return errLib ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    return SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(const SOPC_CertificateList* pCert,
@@ -380,7 +337,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
     SOPC_UNUSED_ARG(pwd);
     SOPC_UNUSED_ARG(pwdLen);
 
-    // Not implemented yet
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -467,7 +424,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: certificate buffer parse failed with error code: %d\n", errLib);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> KeyManager: certificate buffer parse failed with error code: %d\n", errLib);
         }
     }
 
@@ -536,7 +494,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
         /* It failed. Maybe the file is PEM ? */
         if (SOPC_STATUS_OK != status)
         {
-            fprintf(stderr, "> KeyManager: certificate buffer parse failed. Retrying with PEM decoding...\n");
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "> KeyManager: certificate file \"%s\" parse failed. Retrying with PEM decoding...\n", szPath);
             uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
@@ -819,8 +779,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_Certific
     SOPC_UNUSED_ARG(ppSubjectName);
     SOPC_UNUSED_ARG(pSubjectNameLen);
 
-    // Not implemented yet. CycloneCRYPTO does not provide any function that prints the name
-    // in such string format :
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // CycloneCRYPTO does not provide any function that prints the name in such string format :
     // "C=FR, ST=France, L=Aix-en-Provence, O=Systerel, CN=S2OPC Demo Certificate for Server Tests".
 
     return SOPC_STATUS_NOK;
@@ -1499,8 +1459,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         if (errLib)
         {
             status = SOPC_STATUS_NOK;
-            fprintf(stderr, "> KeyManager: crl buffer parse failed with error code: %d. Maybe the CRL is empty ?\n",
-                    errLib);
+            SOPC_Logger_TraceError(
+                SOPC_LOG_MODULE_COMMON,
+                "KeyManager: crl buffer parse failed with error code: %d. Maybe the CRL is empty ?\n", errLib);
         }
     }
 
@@ -1543,6 +1504,8 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
 {
     if (NULL == szPath || NULL == ppCRL)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "KeyManager: crl file \"%s\" parse failed: misses the trailing '\n'", szPath);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -1556,7 +1519,9 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         /* It failed. Maybe the file is PEM ? */
         if (SOPC_STATUS_OK != status)
         {
-            fprintf(stderr, "> KeyManager: crl buffer parse failed. Retrying with PEM decoding...\n");
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                   "> KeyManager: crl file \"%s\" parse failed. Retrying with PEM decoding...\n",
+                                   szPath);
             uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
@@ -1680,7 +1645,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     SOPC_UNUSED_ARG(arrayLength);
     SOPC_UNUSED_ARG(ppCSR);
 
-    // Not implemented yet
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -1695,7 +1660,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
     SOPC_UNUSED_ARG(ppDest);
     SOPC_UNUSED_ARG(pLenAllocated);
 
-    // Not implemented yet
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -1704,5 +1669,5 @@ void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
 {
     SOPC_UNUSED_ARG(pCSR);
 
-    // Not implemented yet
+    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
 }

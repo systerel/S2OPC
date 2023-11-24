@@ -910,17 +910,6 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PSS(const SOPC_CryptoProvider
     return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo, true);
 }
 
-SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA256_2048_4096(const SOPC_CryptoProvider* pCrypto,
-                                                                 const SOPC_CertificateList* pCert)
-{
-    SOPC_UNUSED_ARG(pCrypto);
-    SOPC_UNUSED_ARG(pCert);
-
-    // Not implemented yet
-
-    return SOPC_STATUS_NOK;
-}
-
 /* ------------------------------------------------------------------------------------------------
  * Basic256
  * ------------------------------------------------------------------------------------------------
@@ -1007,17 +996,6 @@ SOPC_ReturnStatus CryptoProvider_AsymVerify_RSASSA_PKCS1_v15_w_SHA1(const SOPC_C
                                                                     const uint8_t* pSignature)
 {
     return AsymVerify_RSASSA(pProvider, pInput, lenInput, pKey, pSignature, &sha1HashAlgo, false);
-}
-
-SOPC_ReturnStatus CryptoProvider_CertVerify_RSA_SHA1_SHA256_1024_2048(const SOPC_CryptoProvider* pCrypto,
-                                                                      const SOPC_CertificateList* pCert)
-{
-    SOPC_UNUSED_ARG(pCrypto);
-    SOPC_UNUSED_ARG(pCert);
-
-    // Not implemented yet
-
-    return SOPC_STATUS_NOK;
 }
 
 /* ------------------------------------------------------------------------------------------------
