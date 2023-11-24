@@ -22,6 +22,19 @@
  * \brief  Demo server implementing the Push Model of the certificate management.
  *         The server shall not be Nano compliant since CallMethod service is not available.
  *         S2OPC shall be build with S2OPC_DYNAMIC_TYPE_RESOLUTION option.
+ *
+ *         This demo server support the default application group (RsaSha256ApplicationCertificateType)
+ *
+ *         The server can start in TOFU mode (Trust On First Use). The TOFU mode allows to start the server
+ *         with an empty PKI and allows a specific user to configure the TrustList for the first time.
+ *         In TOFU mode, when a valid update is completed through TrustList.AddCertificate or TrustList.Write +
+ *         TrustList.CloseAndUpdate methods then the server reboot with the new configuration of the TrustList.
+ *         The TOFU mode works during a period and if the timeout has elapsed then the server is stopped.
+ *
+ *         To activate TOFU mode, you must set the TOFU period value from the binary command line eg:
+ *         <./toolkit_demo_push_server 1> (server will start in TOFU state with a timeout of 1 minute)
+ *         The users allowed in TOFU state are defined by an XML configuration file which is retrieved by
+ *         the environemnt variable TEST_TOFU_USERS_XML_CONFIG.
  */
 
 #include <errno.h>
@@ -125,7 +138,7 @@ static void DemoPushSrv_TrustList_UpdateCompleted(uintptr_t context)
 static SOPC_ReturnStatus DemoPushSrv_LoadConfigurationFromFiles(void)
 {
     /* Retrieve XML configuration file path from environment variables TEST_SERVER_XML_CONFIG,
-     * TEST_SERVER_XML_ADDRESS_SPACE and TEST_USERS_XML_CONFIG.
+     * TEST_SERVER_XML_ADDRESS_SPACE, TEST_USERS_XML_CONFIG and TEST_TOFU_USERS_XML_CONFIG
      *
      * In case of success returns the file path otherwise display error message and return failure status.
      */
