@@ -161,6 +161,11 @@ START_TEST(test_sockets)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
+    /*
+     * CLIENT SIDE: socket created event
+     */
+    SOPC_Free(expect_event(SOCKET_CREATED, clientSecureChannelConnectionId));
+
     /* SERVER SIDE: accepted connection (socket level only)
      * CLIENT SIDE: socket connection done (it does not mean accepted)
      * Note: both events can occur first, therefore check both at same time

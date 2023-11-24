@@ -256,6 +256,7 @@ static void establishSC(void)
     socketEvent = NULL;
 
     // Simulate event from socket
+    SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CREATED, scConfigIdx, (uintptr_t) NULL, scConfigIdx);
     SOPC_EventHandler_Post(socketsEventHandler, SOCKET_CONNECTION, scConfigIdx, (uintptr_t) NULL, scConfigIdx);
     printf("SC_Rcv_Buffer Init: Simulating socket connection\n");
 
