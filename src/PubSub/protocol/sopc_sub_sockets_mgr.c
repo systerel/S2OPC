@@ -26,7 +26,7 @@
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
-#define TIMEOUT_MS 500
+#define TIMEOUT_MS 10
 
 static struct
 {

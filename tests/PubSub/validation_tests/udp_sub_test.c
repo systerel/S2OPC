@@ -142,7 +142,7 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuff
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
-        .checkDataSetMessageSN_Func = NULL,
+        .dsmSnGapCallback = NULL,
         .targetConfig = NULL};
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;
     SOPC_NetworkMessage_Error_Code code =

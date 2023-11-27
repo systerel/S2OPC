@@ -44,16 +44,16 @@ typedef void SOPC_SubscriberStateChanged_Func(SOPC_PubSubState state);
  * @param prevSN previous DataSetMessage sequence number received
  * @param receivedSN current DataSetMessage sequence number received
  */
-typedef void SOPC_SubscriberDataSetMessageSequenceNumberGap_Func(SOPC_Conf_PublisherId pubId,
-                                                                 uint16_t writerId,
-                                                                 uint16_t prevSN,
-                                                                 uint16_t receivedSN);
+typedef void SOPC_SubscriberDataSetMessageSNGap_Func(SOPC_Conf_PublisherId pubId,
+                                                     uint16_t writerId,
+                                                     uint16_t prevSN,
+                                                     uint16_t receivedSN);
 
 /* Only ::pStateChangedCb callback and ::pSubDisconnectedCb can be NULL */
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
-                             SOPC_SubscriberDataSetMessageSequenceNumberGap_Func sdmSnGapCb,
+                             SOPC_SubscriberDataSetMessageSNGap_Func sdmSnGapCb,
                              SOPC_PubSub_OnFatalError* pSubDisconnectedCb,
                              int threadPriority);
 
