@@ -23,8 +23,10 @@
 #include <inttypes.h>
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_platform_time.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_security.h"
+#include "sopc_sub_scheduler.h"
 #include "sopc_sub_target_variable.h"
 
 // TODO: use security mode instead of security enabled
@@ -35,18 +37,32 @@ typedef struct SOPC_UADP_Network_Message
     SOPC_Dataset_LL_NetworkMessage* nm;
 } SOPC_UADP_NetworkMessage;
 
-/**
- * \brief Function used to check if a DataSetMessage sequence number is newer for the identified DataSetWriter.
+enum SOPC_SubScheduler_Mode
+{
+    SOPC_SubScheduler_Mode_BadCommunication,
+    SOPC_SubScheduler_Mode_Connected,
+    SOPC_SubScheduler_Mode_Timeout
+};
+
+/** The dynamic context of a reader */
+typedef struct SOPC_SubScheduler_Writer_Ctx
+{
+    SOPC_Conf_PublisherId pubId;
+    uint16_t writerId;
+    bool dataSetMessageSequenceNumberSet;
+    uint16_t dataSetMessageSequenceNumber;
+    SOPC_RealTime* timeout;
+    enum SOPC_SubScheduler_Mode connectionMode;
+} SOPC_SubScheduler_Writer_Ctx;
+
+/** Get the dynamic context for a Reader
  *
  * \param pubId       the publisher id associated to the DataSetWriter
  * \param writerId    the DataSetWriter id
- * \param receivedSN  the dataset message sequence number
  *
- * \return True if \a receivedSn is newer (valid) for this dataSetWriter. False otherwise
- */
-typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_PublisherId* pubId,
-                                                        const uint16_t writerId,
-                                                        const uint16_t receivedSN);
+ * \return The associated writer context or NULL if not found */
+typedef SOPC_SubScheduler_Writer_Ctx* SOPC_Nextwork_Layer_Get_Reader_Ctx_Func(const SOPC_Conf_PublisherId* pubId,
+                                                                              const uint16_t writerId);
 
 /**
  * \brief Encode a NetworkMessage with JSON Mapping
@@ -138,8 +154,9 @@ typedef struct
 {
     SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
     SOPC_UADP_GetSecurity_Func* pGetSecurity_Func;
-    SOPC_UADP_IsWriterSequenceNumberNewer_Func* checkDataSetMessageSN_Func;
+    SOPC_Nextwork_Layer_Get_Reader_Ctx_Func* getReaderCtx_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
+    SOPC_SubscriberDataSetMessageSNGap_Func* dsmSnGapCallback;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 
 /**

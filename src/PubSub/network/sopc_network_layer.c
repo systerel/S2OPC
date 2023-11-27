@@ -443,6 +443,45 @@ static bool Network_Layer_Is_Sequence_Number_Newer(uint32_t received, uint32_t p
     }
 }
 
+static bool Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processed)
+{
+    // See Spec OPC UA Part 14 - Table 133 - rev 1.05
+    // NetworkMessages the following formula shall be used:
+    // (received sequence number - 1 - last processed sequence number) modulo 65536.
+    // Results below 16384 indicate that the received NetworkMessages is newer than
+    // the last processed NetworkMessages...
+    // Results above 49152 indicate that the received message is older (or same) than
+    // the last processed NetworkMessages...
+    // Other results are invalid...
+    const uint16_t diff = (uint16_t)(received - 1 - processed);
+
+    /* We actually don't make difference between results above upper bound and between lower and upper bound
+     * because we don't handle reordering message */
+    return diff < 16384;
+}
+
+// Returns true if the sequence number is newer
+static bool Is_Writer_SN_Newer(SOPC_SubScheduler_Writer_Ctx* ctx, const uint16_t receivedSN)
+{
+    SOPC_ASSERT(NULL != ctx);
+    bool result = false;
+    if (ctx->dataSetMessageSequenceNumberSet)
+    {
+        if (Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+        {
+            ctx->dataSetMessageSequenceNumber = receivedSN;
+            result = true;
+        }
+    }
+    else
+    {
+        ctx->dataSetMessageSequenceNumber = receivedSN;
+        ctx->dataSetMessageSequenceNumberSet = true;
+        result = true;
+    }
+    return result;
+}
+
 /**
  * \brief Print Variant value in buf according to its type.
  *
@@ -1140,6 +1179,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
  * /param buffer_payload The Payload
  * /param dsmSize The expected size (bytes) of the decoded payload from the DataSetMessage.
  *  Set to 0 if unknown
+ * /param readerCtx The reader dynamic context
  * /return SOPC_STATUS_OK in case of success:
  *    - dsmSize matches actual decoded size, or dsmSize = 0
  *    - decoding stream is consistent (and payload large enough).
@@ -1148,7 +1188,7 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Encode(SOPC_Dataset_LL_NetworkMessage* nm,
 static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* dsm,
                                                SOPC_Buffer* buffer_payload,
                                                uint16_t dsmSize,
-                                               SOPC_Conf_PublisherId pubId,
+                                               SOPC_SubScheduler_Writer_Ctx* writerCtx,
                                                const SOPC_UADP_NetworkMessage_Reader_Configuration* readerConf)
 {
     SOPC_ASSERT(NULL != buffer_payload);
@@ -1231,17 +1271,22 @@ static SOPC_ReturnStatus decode_dataSetMessage(SOPC_Dataset_LL_DataSetMessage* d
         check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_DsmSeqNum_Failed);
         if (SOPC_STATUS_OK == status)
         {
-            if (NULL != readerConf->checkDataSetMessageSN_Func)
+            /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
+             */
+            const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+            if (0 != writerId)
             {
-                /* If tuple [PublisherId, DataSetWriterId] is not defined don't check the dataSetMessage sequence number
-                 */
-                const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
-                if (0 != writerId)
+                /* If subscriber doesn't meet configuration or is not newer still decode dataSetMessage */
+                if (Is_Writer_SN_Newer(writerCtx, dsmSN))
                 {
-                    /* If subscriber don't meet configuration or is not newer still decode dataSetMessage */
-                    if (readerConf->checkDataSetMessageSN_Func(&pubId, writerId, dsmSN))
+                    SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmSN);
+                }
+                else
+                {
+                    if (NULL != readerConf->dsmSnGapCallback)
                     {
-                        SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmSN);
+                        readerConf->dsmSnGapCallback(writerCtx->pubId, writerId,
+                                                     writerCtx->dataSetMessageSequenceNumber, dsmSN);
                     }
                 }
             }
@@ -1659,10 +1704,12 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
                                                   const SOPC_ReaderGroup* group)
 {
     SOPC_ASSERT(NULL != header && NULL != nm && NULL != group && NULL != readerConf &&
-                NULL != readerConf->callbacks.pGetReader_Func && NULL != readerConf->callbacks.pSetDsm_Func);
+                NULL != readerConf->callbacks.pGetReader_Func && NULL != readerConf->callbacks.pSetDsm_Func &&
+                NULL != readerConf->getReaderCtx_Func);
 
     const uint16_t group_id = SOPC_ReaderGroup_Get_GroupId(group);
     const SOPC_DataSetReader** dsmReaders = NULL;
+    SOPC_SubScheduler_Writer_Ctx** dsmCtx = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // number of DataSetMessage. Should be one
     SOPC_Byte msg_count = 0;
@@ -1691,6 +1738,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
     if (SOPC_STATUS_OK == status)
     {
         dsmReaders = SOPC_Calloc(msg_count, sizeof(SOPC_DataSetReader*));
+        dsmCtx = SOPC_Calloc(msg_count, sizeof(*dsmCtx));
         SOPC_ASSERT(NULL != dsmReaders);
     }
 
@@ -1709,6 +1757,9 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
             {
                 SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
                 dsmReaders[i] = readerConf->callbacks.pGetReader_Func(group, conf, writer_id, (uint8_t) i);
+                const SOPC_Conf_PublisherId pubId =
+                    Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
+                dsmCtx[i] = readerConf->getReaderCtx_Func(&pubId, writer_id);
             }
 
             // Check if there is at last one DSM to read, otherwise decoding can be canceled
@@ -1807,14 +1858,31 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
         const SOPC_DataSetReader* reader = dsmReaders[i];
         if (NULL != reader)
         {
-            status = decode_dataSetMessage(
-                dsm, buffer_payload, size,
-                Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header)), readerConf);
+            status = decode_dataSetMessage(dsm, buffer_payload, size, dsmCtx[i], readerConf);
 
             if (SOPC_STATUS_OK == status)
             {
+                SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+                SOPC_ASSERT(NULL != now);
+
                 status = readerConf->callbacks.pSetDsm_Func(dsm, readerConf->targetConfig, reader);
                 check_status_and_set_default(status, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
+                if (SOPC_STATUS_OK == status)
+                {
+                    // Restart timeout
+                    double timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(reader);
+                    SOPC_RealTime_AddSynchedDuration(now, (uint64_t)(timeoutMs * 1000), -1);
+                    if (NULL == dsmCtx[i]->timeout)
+                    {
+                        dsmCtx[i]->timeout = SOPC_RealTime_Create(now);
+                    }
+                    else
+                    {
+                        SOPC_RealTime_Copy(dsmCtx[i]->timeout, now);
+                    }
+                    dsmCtx[i]->connectionMode = SOPC_SubScheduler_Mode_Connected;
+                }
+                SOPC_RealTime_Delete(&now);
             }
         }
         else
@@ -1841,6 +1909,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
     {
         SOPC_Free(dsmReaders);
     }
+    SOPC_Free(dsmCtx);
 
     // delete the Payload if it has been decrypted
     if (NULL != buffer_payload && buffer != buffer_payload)

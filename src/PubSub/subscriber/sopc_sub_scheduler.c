@@ -157,27 +157,11 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
  */
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId);
 
-typedef struct SOPC_SubScheduler_Writer_Ctx
-{
-    SOPC_Conf_PublisherId pubId;
-    uint16_t writerId;
-    bool dataSetMessageSequenceNumberSet;
-    uint16_t dataSetMessageSequenceNumber;
-} SOPC_SubScheduler_Writer_Ctx;
-
 /**
- * @brief Check if sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and
- * received sequence number.
- *
- * @param pubId PublisherId attach to a networkMessage
- * @param writerId DataSetW attach to a dataSetMessage
- * @param receivedSN received sequence number
- * @return true if sequence number received is newer and valid
- * @return false if sequence number received is older or invalid
+ * See ::SOPC_Nextwork_Layer_Get_Reader_Ctx_Func
  */
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
-                                                 const uint16_t writerId,
-                                                 const uint16_t receivedSN);
+static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_PublisherId* pubId,
+                                                            const uint16_t writerId);
 // End of data set writer context
 
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
@@ -252,7 +236,7 @@ static struct
 
     /* Callback to notify gaps in received DataSetMessage sequence number
      * (only when received is newer regarding part 14 definition)*/
-    SOPC_SubscriberDataSetMessageSequenceNumberGap_Func* dsmSnGapCallback;
+    SOPC_SubscriberDataSetMessageSNGap_Func* dsmSnGapCallback;
 
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
@@ -452,7 +436,7 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
         /* TODO: have a more resilient behavior and avoid stopping the subscriber because of
          *  random bytes found on the network */
         result = SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos,
-                                       SOPC_SubScheduler_Is_Writer_SN_Newer);
+                                       Sub_Get_Writer_Context, schedulerCtx.dsmSnGapCallback);
 
         if (SOPC_STATUS_ENCODING_ERROR == result)
         {
@@ -524,16 +508,27 @@ static void uninit_sub_scheduler_ctx(void)
     schedulerCtx.dsmSnGapCallback = NULL;
 }
 
+// Free Arrays of SOPC_SubScheduler_Writer_Ctx
+static void free_writer_ctx(void* data)
+{
+    SOPC_SubScheduler_Writer_Ctx* ctx = (SOPC_SubScheduler_Writer_Ctx*) data;
+    if (NULL == ctx)
+        return;
+
+    SOPC_RealTime_Delete(&ctx->timeout);
+}
+
 static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config,
                                                 SOPC_SubTargetVariableConfig* targetConfig,
                                                 SOPC_SubscriberStateChanged_Func* pStateChangedCb,
-                                                SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb,
+                                                SOPC_SubscriberDataSetMessageSNGap_Func dsmSnGapCb,
                                                 SOPC_PubSub_OnFatalError* pSubDisconnectedCb)
 {
     uint32_t nb_connections = SOPC_PubSubConfiguration_Nb_SubConnection(config);
     SOPC_ASSERT(nb_connections > 0);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
 
     schedulerCtx.config = config;
     schedulerCtx.targetConfig = targetConfig;
@@ -567,8 +562,8 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
     if (SOPC_STATUS_OK == status)
     {
-        schedulerCtx.writerCtx =
-            SOPC_Array_Create(sizeof(SOPC_SubScheduler_Writer_Ctx), SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER, NULL);
+        schedulerCtx.writerCtx = SOPC_Array_Create(sizeof(SOPC_SubScheduler_Writer_Ctx),
+                                                   SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER, &free_writer_ctx);
         status = (NULL != schedulerCtx.writerCtx ? status : SOPC_STATUS_OUT_OF_MEMORY);
     }
 
@@ -723,6 +718,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             }
         }
     }
+    SOPC_RealTime_Delete(&now);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -735,7 +731,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_SubTargetVariableConfig* targetConfig,
                              SOPC_SubscriberStateChanged_Func* pStateChangedCb,
-                             SOPC_SubscriberDataSetMessageSequenceNumberGap_Func dsmSnGapCb,
+                             SOPC_SubscriberDataSetMessageSNGap_Func dsmSnGapCb,
                              SOPC_PubSub_OnFatalError* pSubDisconnectedCb,
                              int threadPriority)
 {
@@ -1089,23 +1085,6 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
     return ctx;
 }
 
-static bool Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processed)
-{
-    // See Spec OPC UA Part 14 - Table 133 - rev 1.05
-    // NetworkMessages the following formula shall be used:
-    // (received sequence number - 1 - last processed sequence number) modulo 65536.
-    // Results below 16384 indicate that the received NetworkMessages is newer than
-    // the last processed NetworkMessages...
-    // Results above 49152 indicate that the received message is older (or same) than
-    // the last processed NetworkMessages...
-    // Other results are invalid...
-    const uint16_t diff = (uint16_t)(received - 1 - processed);
-
-    /* We actually don't make difference between results above upper bound and between lower and upper bound
-     * because we don't handle reordering message */
-    return diff < 16384;
-}
-
 static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId)
 {
     SOPC_ASSERT(NULL != pubId);
@@ -1129,52 +1108,30 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
         ctx.writerId = writerId;
         ctx.dataSetMessageSequenceNumberSet = false;
         ctx.dataSetMessageSequenceNumber = 0;
+        ctx.connectionMode = SOPC_SubScheduler_Mode_BadCommunication;
+        ctx.timeout = NULL; // Initially null to allow distinction between "timeout" and "NoCommunication"
         bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
         SOPC_ASSERT(res);
     }
 }
 
-// Returns true if the sequence number is newer
-static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
-                                                 const uint16_t writerId,
-                                                 const uint16_t receivedSN)
+static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
 {
-    SOPC_ASSERT(NULL != pubId);
+    if (NULL == pubId)
+        return NULL;
+    SOPC_SubScheduler_Writer_Ctx* result = NULL;
+
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
-    for (size_t i = 0; i < size; i++)
+    for (size_t i = 0; i < size && NULL == result; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         if (ctx->pubId.type == pubId->type && ctx->writerId == writerId)
         {
-            bool found = compare_publisherId(&ctx->pubId, pubId);
-            if (found)
+            if (compare_publisherId(&ctx->pubId, pubId))
             {
-                if (ctx->dataSetMessageSequenceNumberSet)
-                {
-                    if (Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
-                    {
-                        ctx->dataSetMessageSequenceNumber = receivedSN;
-                        return true;
-                    }
-                    else
-                    {
-                        if (NULL != schedulerCtx.dsmSnGapCallback)
-                        {
-                            schedulerCtx.dsmSnGapCallback(*pubId, writerId, ctx->dataSetMessageSequenceNumber,
-                                                          receivedSN);
-                        }
-                        return false;
-                    }
-                }
-                else
-                {
-                    ctx->dataSetMessageSequenceNumber = receivedSN;
-                    ctx->dataSetMessageSequenceNumberSet = true;
-                    return true;
-                }
+                result = ctx;
             }
         }
     }
-    // (PubId, WriterId) tuple not configured as expected in Subscriber
-    return false;
+    return result;
 }
