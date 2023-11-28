@@ -2040,7 +2040,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
                     {
                         SOPC_RealTime_Copy(dsmCtx[i]->timeout, now);
                     }
-                    dsmCtx[i]->connectionMode = SOPC_SubScheduler_Mode_Connected;
+                    SOPC_SubScheduler_SetDsmState(dsmCtx[i], SOPC_PubSubState_Operational);
                 }
                 SOPC_RealTime_Delete(&now);
             }

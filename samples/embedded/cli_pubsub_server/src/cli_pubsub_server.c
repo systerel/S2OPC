@@ -124,7 +124,7 @@ static SOPC_SubTargetVariableConfig* pTargetConfig = NULL;
 static SOPC_PubSourceVariableConfig* pSourceConfig = NULL;
 static bool gPubStarted = false;
 static bool gSubStarted = false;
-static bool gSubOperational = false;
+static SOPC_PubSubState gSubOperational = SOPC_PubSubState_Disabled;
 // Date of last reception on Sub
 static SOPC_RealTime* gLastReceptionDateMs = NULL;
 SOPC_SKManager* g_skmanager = NULL;
@@ -174,6 +174,59 @@ static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"
                                           {"sub", cmd_demo_sub, "Manage Subscriber"},
                                           {"cache", cmd_demo_cache, "Print content of cache"},
                                           {NULL, NULL, NULL}};
+
+#define NB_MAX_SUB_WRITERS 10
+
+/***************************************************/
+typedef struct WriterIdState
+{
+    uint16_t writerId;
+    SOPC_PubSubState state;
+} WriterIdState;
+static WriterIdState writerIdStates[NB_MAX_SUB_WRITERS] = {0};
+
+/***************************************************/
+static const char* subStateToString(SOPC_PubSubState state)
+{
+    switch (state)
+    {
+    case SOPC_PubSubState_Disabled:
+        return "DISABLED";
+    case SOPC_PubSubState_Paused:
+        return "PAUSED";
+    case SOPC_PubSubState_Operational:
+        return "OPERATIONAL";
+    case SOPC_PubSubState_Error:
+        return "ERROR";
+    default:
+        return "<Unknown>";
+    }
+}
+/***************************************************/
+static const char* subWriterIdStateToString(uint16_t writerId)
+{
+    SOPC_PubSubState state = SOPC_PubSubState_Error;
+    for (int i = 0; i < NB_MAX_SUB_WRITERS; i++)
+    {
+        if (writerIdStates[i].writerId == writerId)
+        {
+            state = writerIdStates[i].state;
+        }
+    }
+    switch (state)
+    {
+    case SOPC_PubSubState_Disabled:
+        return "DISABLED";
+    case SOPC_PubSubState_Paused:
+        return "PAUSED";
+    case SOPC_PubSubState_Operational:
+        return "OPERATIONAL";
+    case SOPC_PubSubState_Error:
+        return "ERROR";
+    default:
+        return "<Unknown>";
+    }
+}
 
 /**************************************************************************/
 static void serverStopped_cb(SOPC_ReturnStatus status)
@@ -862,15 +915,38 @@ static int cmd_demo_info(WordList* pList)
     PRINT("Publisher address     : %s\n", CONFIG_SOPC_PUBLISHER_ADDRESS);
     PRINT("Publisher running     : %s\n", YES_NO(gPubStarted));
     PRINT("Publisher period      : %d ms\n", CONFIG_SOPC_PUBLISHER_PERIOD_US / 1000);
-    PRINT("Subscriber address    : %s\n", CONFIG_SOPC_SUBSCRIBER_ADDRESS);
-    PRINT("Subscriber running    : %s\n", YES_NO(gSubStarted));
-    if (gSubOperational)
+    PRINT("Subscriber            : %s : %s\n", CONFIG_SOPC_SUBSCRIBER_ADDRESS, subStateToString(gSubOperational));
+    if (gSubOperational == SOPC_PubSubState_Operational)
     {
         int delta_ms = (int) (SOPC_RealTime_DeltaUs(gLastReceptionDateMs, NULL) / 1000);
-        PRINT("Subscriber last rcpt  : %d ms\n", delta_ms);
-    }
+        PRINT(" -> Last Rcp: %d ms\n", delta_ms);
 
-    PRINT("NET INTERFACE         : %s\n", SOPC_Platform_Get_Default_Net_Itf());
+        if (pPubSubConfig != NULL)
+        {
+            uint32_t nbSub = SOPC_PubSubConfiguration_Nb_SubConnection(pPubSubConfig);
+            for (uint32_t iSub = 0; iSub < nbSub; iSub++)
+            {
+                SOPC_PubSubConnection* cnx = SOPC_PubSubConfiguration_Get_SubConnection_At(pPubSubConfig, iSub);
+                uint16_t nbReader = SOPC_PubSubConnection_Nb_ReaderGroup(cnx);
+                for (uint16_t iReader = 0; iReader < nbReader; iReader++)
+                {
+                    SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(cnx, iReader);
+                    uint8_t nbDsm = SOPC_ReaderGroup_Nb_DataSetReader(group);
+                    for (uint8_t iDsm = 0; iDsm < nbDsm; iDsm++)
+                    {
+                        SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, iDsm);
+                        uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
+                        PRINT(" -> Group (WriterId= %" PRIu16 ") : %s\n", writerId, subWriterIdStateToString(writerId));
+                    }
+                }
+            }
+        }
+    }
+    const char* netItf = SOPC_Platform_Get_Default_Net_Itf();
+    if (netItf != NULL && netItf[0] != 0)
+    {
+        PRINT("NET INTERFACE         : %s\n", SOPC_Platform_Get_Default_Net_Itf());
+    }
 
     return 0;
 }
@@ -953,10 +1029,35 @@ static int cmd_demo_pub(WordList* pList)
 }
 
 /***************************************************/
-static void cb_SetSubStatus(SOPC_PubSubState state)
+static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
 {
-    PRINT("New Sub state: %d\n", (int) state);
-    gSubOperational = (SOPC_PubSubState_Operational == state);
+    if (pubId == NULL)
+    {
+        PRINT("New Sub state: %d\n", (int) state);
+        gSubOperational = state;
+    }
+    else
+    {
+        int freeIndex = -1;
+        for (int i = 0; i < NB_MAX_SUB_WRITERS; i++)
+        {
+            if (freeIndex == -1 && writerIdStates[i].writerId == 0)
+            {
+                freeIndex = i;
+            }
+            if (writerIdStates[i].writerId == writerId)
+            {
+                writerIdStates[i].state = state;
+                freeIndex = -2;
+            }
+        }
+        if (freeIndex >= 0)
+        {
+            writerIdStates[freeIndex].state = state;
+            writerIdStates[freeIndex].writerId = writerId;
+        }
+        PRINT("New Sub state for WriterId %d: %d\n", (int) writerId, (int) state);
+    }
 }
 
 /***************************************************/
@@ -1157,6 +1258,16 @@ static int cmd_demo_cache(WordList* pList)
 static int cmd_demo_quit(WordList* pList)
 {
     SOPC_UNUSED_ARG(pList);
+    if (gPubStarted)
+    {
+        SOPC_PubScheduler_Stop();
+        gPubStarted = false;
+    }
+    if (gSubStarted)
+    {
+        SOPC_SubScheduler_Stop();
+        gSubStarted = false;
+    }
     SOPC_ServerHelper_StopServer();
     LOG_WARNING("Server manually stopped!\n");
 
