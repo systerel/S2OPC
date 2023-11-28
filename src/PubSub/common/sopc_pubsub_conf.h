@@ -402,6 +402,10 @@ int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata);
 void SOPC_FieldMetaData_Set_ValueRank(SOPC_FieldMetaData* metadata, int32_t valueRank);
 SOPC_BuiltinId SOPC_FieldMetaData_Get_BuiltinType(const SOPC_FieldMetaData* metadata);
 void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_BuiltinId builtinType);
+/* ValueRank define dimension of the array ArrayDimensions. ValueRank should be set before allocating ArrayDimensions */
+bool SOPC_FieldMetaData_Allocate_ArrayDimensions_Array(SOPC_FieldMetaData* metadata);
+uint32_t* SOPC_FieldMetaData_Get_ArrayDimensions(const SOPC_FieldMetaData* metadata);
+
 // only for Subscriber
 SOPC_FieldTarget* SOPC_FieldMetaData_Get_TargetVariable(const SOPC_FieldMetaData* fieldMetaData);
 // only for Publisher

@@ -205,6 +205,7 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
 {
     SOPC_ASSERT(NULL != fieldMetaData);
     SOPC_ASSERT(NULL != variant);
+    bool res = true;
     if (NULL != out_isBad)
     {
         *out_isBad = false;
@@ -221,7 +222,13 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
         int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
         int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
 
-        return SOPC_ValueRank_IsAssignableInto(expValueRank, actualValueRank);
+        res = SOPC_ValueRank_IsAssignableInto(expValueRank, actualValueRank);
+        if (res)
+        {
+            uint32_t* expectedArrayDimensions = SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData);
+            res = SOPC_ArrayDimensions_isCompatible(expectedArrayDimensions, actualValueRank, *variant);
+        }
+        return res;
     }
     else if (SOPC_Null_Id == variant->BuiltInTypeId)
     {

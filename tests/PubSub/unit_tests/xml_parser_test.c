@@ -144,6 +144,7 @@ START_TEST(test_pub_xml_parsing)
     fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet2, 0);
     ck_assert_int_eq(SOPC_UInt32_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
     ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    ck_assert_ptr_null(SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData));
 
     pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
     ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
@@ -157,6 +158,7 @@ START_TEST(test_pub_xml_parsing)
     fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet2, 1);
     ck_assert_int_eq(SOPC_UInt16_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
     ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    ck_assert_ptr_null(SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData));
 
     pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
     ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
@@ -169,10 +171,13 @@ START_TEST(test_pub_xml_parsing)
     /*****************************/
     /* Third published data set */
     nb_fields = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataSet3);
-    ck_assert_uint_eq(1, nb_fields);
+    ck_assert_uint_eq(2, nb_fields);
     fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet3, 0);
     ck_assert_int_eq(SOPC_Int16_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
-    ck_assert_int_eq(-1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    ck_assert_int_eq(1, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    uint32_t* arrayDimensions = SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData);
+    ck_assert_ptr_nonnull(arrayDimensions);
+    ck_assert_int_eq(0, *arrayDimensions);
 
     pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
     ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
@@ -180,6 +185,24 @@ START_TEST(test_pub_xml_parsing)
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
     ck_assert_int_eq(1, nodeId->Namespace);
     ck_assert_int_eq(2, nodeId->Data.Numeric);
+    ck_assert_ptr_null(SOPC_PublishedVariable_Get_IndexRange(pubVar)); // No index range in XML
+
+    /* Second Variable */
+    fieldMetaData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet3, 1);
+    ck_assert_int_eq(SOPC_UInt64_Id, SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData));
+    ck_assert_int_eq(3, SOPC_FieldMetaData_Get_ValueRank(fieldMetaData));
+    arrayDimensions = SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData);
+    ck_assert_ptr_nonnull(arrayDimensions);
+    ck_assert_int_eq(2, *arrayDimensions);
+    ck_assert_int_eq(6, *(arrayDimensions + 1));
+    ck_assert_int_eq(0, *(arrayDimensions + 2));
+
+    pubVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
+    ck_assert_uint_eq(13, SOPC_PublishedVariable_Get_AttributeId(pubVar)); // Value => AttributeId = 13
+    nodeId = SOPC_PublishedVariable_Get_NodeId(pubVar);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, nodeId->IdentifierType);
+    ck_assert_int_eq(1, nodeId->Namespace);
+    ck_assert_int_eq(3, nodeId->Data.Numeric);
     ck_assert_ptr_null(SOPC_PublishedVariable_Get_IndexRange(pubVar)); // No index range in XML
 
     // Delete config

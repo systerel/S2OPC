@@ -6375,3 +6375,46 @@ bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRa
         return false; // value rank equality already tested prior to switch/case, otherwise false
     }
 }
+
+/* Before checking ArrayDimensions ValueRank should be checked */
+bool SOPC_ArrayDimensions_isCompatible(uint32_t* dest_arrayDimensions, int32_t src_valueRank, SOPC_Variant src_variant)
+{
+    if (-1 == src_valueRank)
+    {
+        return true;
+    }
+    // If Variant is not a scalar arrayDimesion should have been define
+    if (NULL == dest_arrayDimensions)
+    {
+        return false;
+    }
+    if (1 == src_valueRank)
+    {
+        if (0 == *dest_arrayDimensions)
+        {
+            return true;
+        }
+        else
+        {
+            return src_variant.Value.Array.Length <= (int32_t) *dest_arrayDimensions;
+        }
+    }
+    else
+    {
+        bool res = true;
+        for (int i = 0; res && i < src_valueRank; i++)
+        {
+            if (0 == *(dest_arrayDimensions + i))
+            {
+                res = true;
+            }
+            else
+            {
+                res = (*(src_variant.Value.Matrix.ArrayDimensions + i) <= (int32_t) * (dest_arrayDimensions + i));
+            }
+        }
+        return res;
+    }
+    /* Shouldn't go here */
+    return false;
+}

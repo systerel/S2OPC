@@ -20,7 +20,8 @@
             <!-- one to many -->
             <dataset writerId="52">
                 <!-- one to many -->
-                <variable nodeId="ns=1;i=2" displayName="Tata" dataType="Int16"/>
+                <variable nodeId="ns=1;i=2" displayName="Tata" dataType="Int16" valueRank="1"/>
+                <variable nodeId="ns=1;i=3" displayName="Nono" dataType="UInt64" valueRank="3" arrayDimensions="2,6"/>
             </dataset>
         </message>
     </connection>
