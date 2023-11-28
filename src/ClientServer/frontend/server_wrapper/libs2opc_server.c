@@ -104,6 +104,7 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
         }
         if (SOPC_STATUS_OK != status)
         {
+            SOPC_Encodeable_Delete(encType, &sopc_server_helper_config.syncResp);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Issue %d treating synchronous local service response: %s", (int) status,
                                    SOPC_EncodeableType_GetName(encType));
@@ -209,13 +210,14 @@ static SOPC_ReturnStatus SOPC_HelperInternal_FinalizeToolkitConfiguration(void)
         status = (res ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE);
     }
 
-    uint32_t* endpointIndexes = SOPC_Calloc((size_t) nbEndpoints, sizeof(uint32_t));
-    bool* endpointClosed = SOPC_Calloc((size_t) nbEndpoints, sizeof(bool));
-    if (NULL == endpointIndexes || NULL == endpointClosed)
+    uint32_t* endpointIndexes = NULL;
+    bool* endpointClosed = NULL;
+
+    if (SOPC_STATUS_OK == status)
     {
-        SOPC_Free(endpointIndexes);
-        SOPC_Free(endpointClosed);
-        return SOPC_STATUS_OUT_OF_MEMORY;
+        endpointIndexes = SOPC_Calloc((size_t) nbEndpoints, sizeof(uint32_t));
+        endpointClosed = SOPC_Calloc((size_t) nbEndpoints, sizeof(bool));
+        status = (NULL == endpointIndexes || NULL == endpointClosed) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
     }
 
     for (uint8_t i = 0; SOPC_STATUS_OK == status && i < nbEndpoints; i++)
@@ -279,6 +281,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa
         {
             OpcUa_WriteRequest_Clear(writeRequest);
             SOPC_Free(writeRequest);
+            SOPC_Encodeable_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
         }
     }
 
