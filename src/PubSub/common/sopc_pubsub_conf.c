@@ -236,6 +236,7 @@ struct SOPC_FieldMetaData
     // char* name;
     SOPC_BuiltinId builtinType;
     int32_t valueRank;
+    uint32_t* arrayDimensions;
 
     // other field are not used
     // only one element. used for subscriber
@@ -769,6 +770,8 @@ static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
         SOPC_Free(metaData->fields[i].targetVariable);
         SOPC_PublishedVariable_Clear(metaData->fields[i].publishedVariable);
         SOPC_Free(metaData->fields[i].publishedVariable);
+        SOPC_Free(metaData->fields[i].arrayDimensions);
+        metaData->fields[i].arrayDimensions = NULL;
     }
     metaData->fields_length = 0;
     SOPC_Free(metaData->fields);
@@ -1247,6 +1250,27 @@ void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_Built
 {
     SOPC_ASSERT(NULL != metadata);
     metadata->builtinType = builtinType;
+}
+
+bool SOPC_FieldMetaData_Allocate_ArrayDimensions_Array(SOPC_FieldMetaData* metadata)
+{
+    SOPC_ASSERT(NULL != metadata);
+    if (metadata->valueRank < 1)
+    {
+        return false;
+    }
+    metadata->arrayDimensions = SOPC_Calloc((size_t) metadata->valueRank, sizeof(*metadata->arrayDimensions));
+    if (NULL == metadata->arrayDimensions)
+    {
+        return false;
+    }
+    return true;
+}
+
+uint32_t* SOPC_FieldMetaData_Get_ArrayDimensions(const SOPC_FieldMetaData* metadata)
+{
+    SOPC_ASSERT(NULL != metadata);
+    return metadata->arrayDimensions;
 }
 
 /* SOPC_PublishedDataSet */

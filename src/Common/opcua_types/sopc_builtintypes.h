@@ -1120,6 +1120,7 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
+bool SOPC_ArrayDimensions_isCompatible(uint32_t* dest_arrayDimensions, int32_t src_valueRank, SOPC_Variant src_Variant);
 
 /**** DataValue ****/
 /** \see description in similar function SOPC_Boolean_xxxx */
