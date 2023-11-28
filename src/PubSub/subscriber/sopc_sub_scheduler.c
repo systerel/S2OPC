@@ -300,7 +300,7 @@ static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SO
 }
 
 // Update the state of a single DSM
-static void set_dsm_state(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
+void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
 {
     SOPC_ASSERT(NULL != ctx);
     if (new != ctx->connectionMode)
@@ -327,13 +327,12 @@ static void set_new_state(SOPC_PubSubState new)
     // The DSM states are updated accordingly, except that they do not get the Operational
     // state. They need to receive a valid message to reach that state.
     // At startup : Sub global state is Operational and DSM states are Disabled until timeout or reception.
-    const SOPC_PubSubState dsmState =
-            (new == SOPC_PubSubState_Operational ? SOPC_PubSubState_Disabled: new);
+    const SOPC_PubSubState dsmState = (new == SOPC_PubSubState_Operational ? SOPC_PubSubState_Disabled : new);
     for (size_t i = 0; i < nbCtx; i++)
     {
-        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get(schedulerCtx.writerCtx, SOPC_SubScheduler_Writer_Ctx*, i);
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         SOPC_ASSERT(NULL != ctx);
-        set_dsm_state(ctx, dsmState);
+        SOPC_SubScheduler_SetDsmState(ctx, dsmState);
     }
 }
 
@@ -837,9 +836,9 @@ static void SOPC_Sub_PeriodicTick(void* param)
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
 
     const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
-    for (size_t i = 0; i < nbCtx; i++)
+    for (size_t i = 0; i < nbCtx && schedulerCtx.state == SOPC_PubSubState_Operational; i++)
     {
-        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get(schedulerCtx.writerCtx, SOPC_SubScheduler_Writer_Ctx*, i);
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         SOPC_ASSERT(NULL != ctx);
 
         if (ctx->connectionMode == SOPC_PubSubState_Operational)
@@ -851,21 +850,21 @@ static void SOPC_Sub_PeriodicTick(void* param)
                 if (ctx->pubId.type == SOPC_UInteger_PublisherId)
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                             "# Timeout on Sub (pubId=%s, writerId=%" PRIu16 ")",
-                                             SOPC_String_GetRawCString(&ctx->pubId.data.string), ctx->writerId);
+                                             "# Timeout on Sub (pubId=%" PRIu64 ", writerId=%" PRIu16 ")",
+                                             ctx->pubId.data.uint, ctx->writerId);
                 }
                 else if (ctx->pubId.type == SOPC_String_PublisherId)
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                             "# Timeout on Sub (pubId=%" PRIu64 ", writerId=%" PRIu16 ")",
-                                             ctx->pubId.data.uint, ctx->writerId);
+                                             "# Timeout on Sub (pubId=%s, writerId=%" PRIu16 ")",
+                                             SOPC_String_GetRawCString(&ctx->pubId.data.string), ctx->writerId);
                 }
                 else
                 {
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
                                              "# Timeout on Sub (pubId=<NULL>, writerId=%" PRIu16 ")", ctx->writerId);
                 }
-                set_dsm_state(ctx, SOPC_PubSubState_Error);
+                SOPC_SubScheduler_SetDsmState(ctx, SOPC_PubSubState_Error);
             }
         }
     }

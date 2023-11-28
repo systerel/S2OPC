@@ -1880,7 +1880,7 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
                     {
                         SOPC_RealTime_Copy(dsmCtx[i]->timeout, now);
                     }
-                    dsmCtx[i]->connectionMode = SOPC_PubSubState_Operational;
+                    SOPC_SubScheduler_SetDsmState(dsmCtx[i], SOPC_PubSubState_Operational);
                 }
                 SOPC_RealTime_Delete(&now);
             }

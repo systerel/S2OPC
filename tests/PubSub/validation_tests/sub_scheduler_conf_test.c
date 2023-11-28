@@ -114,7 +114,8 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
 static void stateChangedCb(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
 {
     SOPC_UNUSED_ARG(writerId);
-    if (pubId != NULL) return; // Only consider global changes. Not DSM changes.
+    if (pubId != NULL)
+        return; // Only consider global changes. Not DSM changes.
 
     stateChanged++;
     printf("[sub]state changed to '%u' !\n", state);

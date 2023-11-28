@@ -48,6 +48,8 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     SOPC_PubSubState connectionMode;
 } SOPC_SubScheduler_Writer_Ctx;
 
+void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new);
+
 /** Get the dynamic context for a Reader
  *
  * \param pubId       the publisher id associated to the DataSetWriter
