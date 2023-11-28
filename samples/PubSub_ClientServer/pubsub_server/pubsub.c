@@ -432,6 +432,16 @@ static bool PubSub_SKS_Start(void)
     return sksOK;
 }
 
+static void setSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
+{
+    SOPC_UNUSED_ARG(writerId);
+    // Only consider Global changes.
+    if (NULL == pubId)
+    {
+        Server_SetSubStatusAsync(state);
+    }
+}
+
 bool PubSub_Start(void)
 {
     bool subOK = false;
@@ -445,7 +455,7 @@ bool PubSub_Start(void)
     if (sub_nb_connections > 0)
     {
         // Note: use SetSubStatusAsync function to avoid blocking treatment in sub scheduler
-        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, Server_SetSubStatusAsync, Server_GapInDsmSnCb,
+        subOK = SOPC_SubScheduler_Start(g_pPubSubConfig, g_pTargetConfig, setSubStatus, Server_GapInDsmSnCb,
                                         pubSub_OnFatalError, 0);
     }
     if (pub_nb_connections > 0)

@@ -209,7 +209,8 @@ static struct
     SOPC_SubTargetVariableConfig* targetConfig;
     SOPC_SubscriberStateChanged_Func* pStateCallback;
 
-    /* Internal context */
+    /* Internal context. This is the main state and cannot reach Error State (only DSM can).
+     * See each DSM individual state in writerCtx. */
     SOPC_PubSubState state;
 
     SOPC_Buffer* receptionBufferSockets; /*For all socket connections (UDP / raw Ethernet)*/
@@ -298,14 +299,42 @@ static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SO
     return result;
 }
 
+// Update the state of a single DSM
+static void set_dsm_state(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
+{
+    SOPC_ASSERT(NULL != ctx);
+    if (new != ctx->connectionMode)
+    {
+        ctx->connectionMode = new;
+        if (NULL != schedulerCtx.pStateCallback)
+        {
+            schedulerCtx.pStateCallback(&ctx->pubId, ctx->writerId, new);
+        }
+    }
+}
+
+// Set the new global mode.
 static void set_new_state(SOPC_PubSubState new)
 {
-    SOPC_PubSubState prev = schedulerCtx.state;
-    if ((prev != new) && (NULL != schedulerCtx.pStateCallback))
-    {
-        schedulerCtx.pStateCallback(new);
-    }
+    SOPC_ASSERT(new != SOPC_PubSubState_Error);
+    const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
     schedulerCtx.state = new;
+
+    if (NULL != schedulerCtx.pStateCallback)
+    {
+        schedulerCtx.pStateCallback(NULL, 0, new);
+    }
+    // The DSM states are updated accordingly, except that they do not get the Operational
+    // state. They need to receive a valid message to reach that state.
+    // At startup : Sub global state is Operational and DSM states are Disabled until timeout or reception.
+    const SOPC_PubSubState dsmState =
+            (new == SOPC_PubSubState_Operational ? SOPC_PubSubState_Disabled: new);
+    for (size_t i = 0; i < nbCtx; i++)
+    {
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get(schedulerCtx.writerCtx, SOPC_SubScheduler_Writer_Ctx*, i);
+        SOPC_ASSERT(NULL != ctx);
+        set_dsm_state(ctx, dsmState);
+    }
 }
 
 /**
@@ -446,10 +475,6 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
                                    "Failed to decode SUB message %s, SOPC_UADP_NetworkMessage_Error_Code is : 0x%08X",
                                    name ? name : "<NULL>", (unsigned) err);
             result = SOPC_STATUS_OK;
-        }
-        else if (SOPC_STATUS_OK != result)
-        {
-            set_new_state(SOPC_PubSubState_Error);
         }
     }
 
@@ -806,9 +831,45 @@ void SOPC_SubScheduler_Stop(void)
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, false);
 }
 
-static void SOPC_Sub_PeriodicTick(void* ctx)
+static void SOPC_Sub_PeriodicTick(void* param)
 {
-    SOPC_UNUSED_ARG(ctx);
+    SOPC_UNUSED_ARG(param);
+    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+
+    const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
+    for (size_t i = 0; i < nbCtx; i++)
+    {
+        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get(schedulerCtx.writerCtx, SOPC_SubScheduler_Writer_Ctx*, i);
+        SOPC_ASSERT(NULL != ctx);
+
+        if (ctx->connectionMode == SOPC_PubSubState_Operational)
+        {
+            // Check timeout for this DSM
+            const double delta_ms = (double) SOPC_RealTime_DeltaUs(now, ctx->timeout);
+            if (delta_ms <= 0)
+            {
+                if (ctx->pubId.type == SOPC_UInteger_PublisherId)
+                {
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                             "# Timeout on Sub (pubId=%s, writerId=%" PRIu16 ")",
+                                             SOPC_String_GetRawCString(&ctx->pubId.data.string), ctx->writerId);
+                }
+                else if (ctx->pubId.type == SOPC_String_PublisherId)
+                {
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                             "# Timeout on Sub (pubId=%" PRIu64 ", writerId=%" PRIu16 ")",
+                                             ctx->pubId.data.uint, ctx->writerId);
+                }
+                else
+                {
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
+                                             "# Timeout on Sub (pubId=<NULL>, writerId=%" PRIu16 ")", ctx->writerId);
+                }
+                set_dsm_state(ctx, SOPC_PubSubState_Error);
+            }
+        }
+    }
+    SOPC_RealTime_Delete(&now);
 }
 
 /*
@@ -1108,7 +1169,7 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
         ctx.writerId = writerId;
         ctx.dataSetMessageSequenceNumberSet = false;
         ctx.dataSetMessageSequenceNumber = 0;
-        ctx.connectionMode = SOPC_SubScheduler_Mode_BadCommunication;
+        ctx.connectionMode = SOPC_PubSubState_Disabled;
         ctx.timeout = NULL; // Initially null to allow distinction between "timeout" and "NoCommunication"
         bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
         SOPC_ASSERT(res);

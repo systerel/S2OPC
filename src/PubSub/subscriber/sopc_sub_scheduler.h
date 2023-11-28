@@ -32,8 +32,12 @@ typedef enum SOPC_PubSubState
     SOPC_PubSubState_Error = 3
 } SOPC_PubSubState;
 
-/* \param state   the new subscriber state */
-typedef void SOPC_SubscriberStateChanged_Func(SOPC_PubSubState state);
+/* Notification of DSM state change
+ * \param pubId    the publisher Id of changed DSM. NULL for a global state change.
+ * \param writerId the writer Id of changed DSM. 0 for a global state change.
+ * \param state    the new DSM subscriber state
+ *  */
+typedef void SOPC_SubscriberStateChanged_Func(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state);
 
 /**
  * @brief Callback to notify gaps in received DataSetMessage sequence number.

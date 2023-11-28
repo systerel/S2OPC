@@ -22,6 +22,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_sub_target_variable.h"
@@ -110,8 +111,11 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
     return true;
 }
 
-static void stateChangedCb(SOPC_PubSubState state)
+static void stateChangedCb(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
 {
+    SOPC_UNUSED_ARG(writerId);
+    if (pubId != NULL) return; // Only consider global changes. Not DSM changes.
+
     stateChanged++;
     printf("[sub]state changed to '%u' !\n", state);
     if (SOPC_Atomic_Int_Get(&stop))

@@ -953,10 +953,17 @@ static int cmd_demo_pub(WordList* pList)
 }
 
 /***************************************************/
-static void cb_SetSubStatus(SOPC_PubSubState state)
+static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
 {
-    PRINT("New Sub state: %d\n", (int) state);
-    gSubOperational = (SOPC_PubSubState_Operational == state);
+    if (pubId == NULL)
+    {
+        PRINT("New Sub state: %d\n", (int) state);
+        gSubOperational = (SOPC_PubSubState_Operational == state);
+    }
+    else
+    {
+        PRINT("New Sub state for WriterId %d: %d\n", (int) writerId, (int) state);
+    }
 }
 
 /***************************************************/

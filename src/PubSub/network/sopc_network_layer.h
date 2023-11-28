@@ -37,13 +37,6 @@ typedef struct SOPC_UADP_Network_Message
     SOPC_Dataset_LL_NetworkMessage* nm;
 } SOPC_UADP_NetworkMessage;
 
-enum SOPC_SubScheduler_Mode
-{
-    SOPC_SubScheduler_Mode_BadCommunication,
-    SOPC_SubScheduler_Mode_Connected,
-    SOPC_SubScheduler_Mode_Timeout
-};
-
 /** The dynamic context of a reader */
 typedef struct SOPC_SubScheduler_Writer_Ctx
 {
@@ -52,7 +45,7 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     bool dataSetMessageSequenceNumberSet;
     uint16_t dataSetMessageSequenceNumber;
     SOPC_RealTime* timeout;
-    enum SOPC_SubScheduler_Mode connectionMode;
+    SOPC_PubSubState connectionMode;
 } SOPC_SubScheduler_Writer_Ctx;
 
 /** Get the dynamic context for a Reader
