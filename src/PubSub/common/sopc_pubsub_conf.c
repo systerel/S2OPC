@@ -235,7 +235,7 @@ struct SOPC_FieldMetaData
 {
     // char* name;
     SOPC_BuiltinId builtinType;
-    int32_t valueRank;
+    SOPC_PubSub_ArrayDimension arrDimension;
 
     // other field are not used
     // only one element. used for subscriber
@@ -769,9 +769,11 @@ static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
         SOPC_Free(metaData->fields[i].targetVariable);
         SOPC_PublishedVariable_Clear(metaData->fields[i].publishedVariable);
         SOPC_Free(metaData->fields[i].publishedVariable);
+        SOPC_Free(metaData->fields[i].arrDimension.arrayDimensions);
     }
     metaData->fields_length = 0;
     SOPC_Free(metaData->fields);
+    metaData->fields = NULL;
 }
 
 SOPC_ReaderGroup* SOPC_DataSetReader_Get_ReaderGroup(const SOPC_DataSetReader* reader)
@@ -1240,13 +1242,7 @@ SOPC_PublishedVariable* SOPC_FieldMetaData_Get_PublishedVariable(const SOPC_Fiel
 int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata)
 {
     SOPC_ASSERT(NULL != metadata);
-    return metadata->valueRank;
-}
-
-void SOPC_FieldMetaData_Set_ValueRank(SOPC_FieldMetaData* metadata, int32_t valueRank)
-{
-    SOPC_ASSERT(NULL != metadata);
-    metadata->valueRank = valueRank;
+    return metadata->arrDimension.valueRank;
 }
 
 SOPC_BuiltinId SOPC_FieldMetaData_Get_BuiltinType(const SOPC_FieldMetaData* metadata)
@@ -1259,6 +1255,49 @@ void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_Built
 {
     SOPC_ASSERT(NULL != metadata);
     metadata->builtinType = builtinType;
+}
+
+const SOPC_PubSub_ArrayDimension* SOPC_FieldMetaData_Get_ArrayDimension(const SOPC_FieldMetaData* metadata)
+{
+    SOPC_ASSERT(NULL != metadata);
+    return &metadata->arrDimension;
+}
+
+bool SOPC_FiledMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
+                                               const SOPC_PubSub_ArrayDimension* arrayDimensions)
+{
+    SOPC_ASSERT(NULL != metadata);
+    SOPC_ASSERT(NULL != arrayDimensions);
+    bool res = true;
+    if (NULL != metadata->arrDimension.arrayDimensions)
+    {
+        SOPC_Free(metadata->arrDimension.arrayDimensions);
+    }
+    metadata->arrDimension.arrayDimensions = NULL;
+    if (arrayDimensions->valueRank > 0)
+    {
+        metadata->arrDimension.arrayDimensions = SOPC_Calloc((size_t) arrayDimensions->valueRank, sizeof(uint32_t));
+        if (NULL != metadata->arrDimension.arrayDimensions)
+        {
+            memcpy(metadata->arrDimension.arrayDimensions, arrayDimensions->arrayDimensions,
+                   sizeof(*metadata->arrDimension.arrayDimensions) * (size_t) arrayDimensions->valueRank);
+        }
+        else
+        {
+            res = false;
+        }
+    }
+    if (res)
+    {
+        metadata->arrDimension.valueRank = arrayDimensions->valueRank;
+    }
+    return res;
+}
+
+void SOPC_FieldMetaData_ArrayDimension_Move(SOPC_FieldMetaData* metadata, SOPC_PubSub_ArrayDimension* arrayDimension)
+{
+    SOPC_ASSERT(NULL != metadata);
+    metadata->arrDimension = *arrayDimension;
 }
 
 /* SOPC_PublishedDataSet */

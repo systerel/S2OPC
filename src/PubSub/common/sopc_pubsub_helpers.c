@@ -199,12 +199,48 @@ bool SOPC_Helper_URI_ParseUri_WithPrefix(const char* prefix,
     return result;
 }
 
+/* Check if array dimension of src_variant respect limitations of dest_arrayDimensions.*/
+static bool SOPC_ArrayDimensions_isCompatible(const SOPC_PubSub_ArrayDimension* dest_arrayDimensions,
+                                              const SOPC_Variant* src_variant)
+{
+    if (NULL == dest_arrayDimensions || NULL == src_variant)
+    {
+        return false;
+    }
+    bool res = true;
+    int32_t src_valueRank = SOPC_Variant_Get_ValueRank(src_variant);
+
+    // If variant is a scalar nothing to check
+    if (src_valueRank >= 1)
+    {
+        if (NULL == dest_arrayDimensions->arrayDimensions)
+        {
+            res = false;
+        }
+        else if (dest_arrayDimensions->valueRank == src_valueRank)
+        {
+            for (int i = 0; res && i < src_valueRank; i++)
+            {
+                // Array dimension equal to zero means no up boundary
+                const uint32_t dimI = dest_arrayDimensions->arrayDimensions[i];
+                res = ((dimI == 0) || (src_variant->Value.Matrix.ArrayDimensions[i] <= (int32_t) dimI));
+            }
+        }
+        else
+        {
+            res = false;
+        }
+    }
+    return res;
+}
+
 bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaData,
                                             const SOPC_Variant* variant,
                                             bool* out_isBad)
 {
     SOPC_ASSERT(NULL != fieldMetaData);
     SOPC_ASSERT(NULL != variant);
+    bool res = true;
     if (NULL != out_isBad)
     {
         *out_isBad = false;
@@ -221,7 +257,15 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
         int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
         int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
 
-        return SOPC_ValueRank_IsAssignableInto(expValueRank, actualValueRank);
+        res = SOPC_ValueRank_IsAssignableInto(expValueRank, actualValueRank);
+        if (res)
+        {
+            const SOPC_PubSub_ArrayDimension* expectedArrayDimensions =
+                SOPC_FieldMetaData_Get_ArrayDimension(fieldMetaData);
+            SOPC_ASSERT(NULL != expectedArrayDimensions);
+            res = SOPC_ArrayDimensions_isCompatible(expectedArrayDimensions, variant);
+        }
+        return res;
     }
     else if (SOPC_Null_Id == variant->BuiltInTypeId)
     {

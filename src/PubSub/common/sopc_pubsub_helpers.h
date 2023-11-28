@@ -41,7 +41,7 @@
 bool SOPC_PubSubHelpers_ParseAddressUDP(const char* address, SOPC_Socket_AddressInfo** multicastAddr);
 
 /**
- * Check if the variant is compatible (value type and value rank) with the field meta data
+ * Check if the variant is compatible (value type, value rank and arrayDimension) with the field meta data
  *
  * \param fieldMetaData  the field meta data with which compliance shall be verified
  * \param variant        the variant to check

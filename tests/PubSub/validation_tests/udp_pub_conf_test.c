@@ -103,24 +103,26 @@ static SOPC_PubSubConfiguration* UDP_Pub_Test_Get_Conf(void)
     // Any (−2)
     // ScalarOrOneDimension (−3)
 
+    SOPC_PubSub_ArrayDimension arrDimension = {.valueRank = -1, .arrayDimensions = NULL};
+
     // Scalar uint16
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, 0);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, SOPC_UInt16_Id);
 
     // Scalar DateTime
     fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, 1);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, SOPC_DateTime_Id);
 
-    // Array one dimension uint32
+    // Scalar uint32
     fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, 2);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, SOPC_UInt32_Id);
 
     // Scalar String
     fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, 3);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, SOPC_String_Id);
 
     // SOPC_PublishedVariable* SOPC_PublishedDataSet_Get_SourceVariable_At(SOPC_PublishedDataSet* dataset, uint16_t

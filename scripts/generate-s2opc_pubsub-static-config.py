@@ -57,6 +57,7 @@ ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
 ATTRIBUTE_VARIABLE_TYPE = "dataType"
 ATTRIBUTE_VARIABLE_VALUE_RANK = "valueRank"
+ATTRIBUTE_VARIABLE_ARRAY_DIMENSIONS = "arrayDimensions"
 
 TAG_SKSERVER = "skserver"
 ATTRIBUTE_SKSERVER_URL = "endpointUrl"
@@ -479,6 +480,18 @@ def handleDataset(mode, msgContext : MessageContext, dataset, dsIndex, result):
     }
     """)
 
+def handle_arrayDimensions(arrayDimensions, valueRank, index, result):
+    arrayDimensionsTab = arrayDimensions.split(",")
+    for _ in range(valueRank - len(arrayDimensionsTab)):
+        arrayDimensionsTab.append("0")
+    result.add("""
+        uint32_t* arrayDimensions_%d_alloc = (uint32_t*) SOPC_Calloc(%d, sizeof(uint32_t));
+        const uint32_t arrayDimensions_%d[%d] = {%d""" % (index, valueRank, index, valueRank, int(arrayDimensionsTab.pop(0))))
+    for dimensions in arrayDimensionsTab:
+        result.add(", %d" %int(dimensions),)
+    result.add("""};
+        memcpy(arrayDimensions_%d_alloc, arrayDimensions_%d, sizeof(arrayDimensions_%d));""" % (index, index, index))
+
 # type is Pub or Sub
 def handleVariable(mode, variable, index, result):
     global DEFINE_C_SETPUBVARIABLEAT
@@ -491,12 +504,24 @@ def handleVariable(mode, variable, index, result):
     assert datatype in TYPE_IDS
     dataid = TYPE_IDS[datatype]
     if mode == PUB_MODE:
-        result.add("""
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, %d, "%s", %s, %d); // %s""" % (index, nodeId, dataid, valueRank, displayName))
+        if valueRank > 0:
+            arrayDimensions = str(getOptionalAttribute(variable, ATTRIBUTE_VARIABLE_ARRAY_DIMENSIONS,"0"))
+            handle_arrayDimensions(arrayDimensions, valueRank, index, result)
+            result.add("""
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, %d, "%s", %s, %d, arrayDimensions_%d); // %s""" % (index, nodeId, dataid, valueRank, index, displayName))
+        else :
+            result.add("""
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, %d, "%s", %s, %d, NULL); // %s""" % (index, nodeId, dataid, valueRank, displayName))
         DEFINE_C_SETPUBVARIABLEAT = True
     elif mode == SUB_MODE:
-        result.add("""
-        SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s, %d); // %s""" % (index, nodeId, dataid, valueRank, displayName))
+        if valueRank > 0:
+            arrayDimensions = str(getOptionalAttribute(variable, ATTRIBUTE_VARIABLE_ARRAY_DIMENSIONS,"0"))
+            handle_arrayDimensions(arrayDimensions, valueRank, index, result)
+            result.add("""
+            SOPC_PubSubConfig_SetSubVariableAt(dataset, %d, "%s", %s, %d, arrayDimensions_%d); // %s""" % (index, nodeId, dataid, valueRank, index, displayName))
+        else :
+            result.add("""
+            SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s, %d, NULL); // %s""" % (index, nodeId, dataid, valueRank, displayName))
         DEFINE_C_SETSUBVARIABLEAT = True
     else: assert(false)
 
@@ -760,10 +785,12 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
                                                const char* strNodeId,
                                                SOPC_BuiltinId builtinType,
-                                               int32_t valueRank)
+                                               int32_t valueRank,
+                                               uint32_t* arrayDimensions)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, valueRank);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valuerank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
@@ -839,15 +866,16 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
                                                uint16_t index,
                                                const char* strNodeId,
                                                SOPC_BuiltinId builtinType,
-                                               int32_t valueRank)
+                                               int32_t valueRank,
+                                               uint32_t* arrayDimensions)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_DataSetReader_Get_FieldMetaData_At(reader, index);
     SOPC_ASSERT(fieldmetadata != NULL);
 
     /* fieldmetadata: type the field */
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, valueRank);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
-
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valuerank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
     /* FieldTarget: link to the source/target data */
     SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldmetadata);
     SOPC_ASSERT(fieldTarget != NULL);

@@ -107,6 +107,7 @@
 #define ATTR_VARIABLE_DISPLAY_NAME "displayName"
 #define ATTR_VARIABLE_DATA_TYPE "dataType"
 #define ATTR_VARIABLE_VALUE_RANK "valueRank"
+#define ATTR_VARIABLE_ARRAY_DIMENSIONS "arrayDimensions"
 
 #define SCALAR_ARRAY_RANK -1
 
@@ -124,6 +125,12 @@ typedef enum
     PARSE_SKS,        // In a SKS Server
 } parse_state_t;
 
+typedef struct parse_arrayDimensions_t
+{
+    uint32_t* arrayDimensions; // Array of Dimensions
+    int16_t len;               // len of sets dimensions. Value rank cannot exceed INT16_MAX
+} parse_arrayDimensions_t;
+
 struct sopc_xml_pubsub_variable_t
 {
     SOPC_NodeId* nodeId;
@@ -132,6 +139,7 @@ struct sopc_xml_pubsub_variable_t
     SOPC_BuiltinId dataType;
     bool has_dataType;
     int16_t valueRank;
+    parse_arrayDimensions_t arrayDimensions; // Used only when value rank is > 0
 };
 
 struct sopc_xml_pubsub_dataset_t
@@ -333,6 +341,70 @@ static bool parse_boolean(const char* data, size_t len, bool* dest)
             *dest = false;
             result = true;
         }
+    }
+    return result;
+}
+
+static inline bool check_arrayDimension_isValid(uint32_t arrayDimension)
+{
+    return arrayDimension <= INT32_MAX;
+}
+
+static bool parse_arrayDimensions(const char* data, parse_arrayDimensions_t* dest)
+{
+    bool result = true;
+    size_t nbArrayDimensions = 1;
+    size_t startIndex = 0;
+    size_t len = strlen(data);
+    int indexArrayDimension = 0;
+
+    if (len <= 0)
+    {
+        result = false;
+    }
+    for (size_t i = 0; result && i < len; i++)
+    {
+        if (',' == data[i])
+        {
+            nbArrayDimensions++;
+        }
+        else if (data[i] < '0' || data[i] > '9')
+        {
+            result = false;
+        }
+    }
+    SOPC_ASSERT(nbArrayDimensions < INT16_MAX);
+    if (result)
+    {
+        dest->arrayDimensions = SOPC_Calloc(nbArrayDimensions, sizeof(uint32_t));
+        dest->len = (int16_t) nbArrayDimensions;
+        result = (NULL != dest->arrayDimensions);
+    }
+
+    for (size_t i = 0; result && i < len; i++)
+    {
+        if (',' == data[i])
+        {
+            SOPC_ASSERT(startIndex < len);
+            result = (SOPC_STATUS_OK ==
+                      SOPC_strtouint32_t(&data[startIndex], &dest->arrayDimensions[indexArrayDimension], 10, ','));
+            result &= check_arrayDimension_isValid(dest->arrayDimensions[indexArrayDimension]);
+            indexArrayDimension++;
+            startIndex = i + 1;
+        }
+    }
+    if (result)
+    {
+        result = (SOPC_STATUS_OK ==
+                  SOPC_strtouint32_t(&data[startIndex], &dest->arrayDimensions[indexArrayDimension], 10, '\0'));
+        result &= check_arrayDimension_isValid(dest->arrayDimensions[indexArrayDimension]);
+    }
+
+    if (!result && NULL != dest->arrayDimensions)
+    {
+        SOPC_Free(dest->arrayDimensions);
+        dest->arrayDimensions = NULL;
+        dest->len = 0;
     }
     return result;
 }
@@ -794,13 +866,23 @@ static bool parse_variable_attributes(const char* attr_name,
         int64_t rank;
 
         result = parse_signed64_value(attr_val, &rank) && rank >= -3 && rank <= 65535;
-        if (result && rank > 0)
+        if (result && (rank > 0 || rank == -1))
         {
             var->valueRank = (int16_t) rank;
         }
         else
         {
-            var->valueRank = -1;
+            result = false;
+            LOG_XML_ERRORF("Value rank %" PRIi64 " not supported", rank);
+        }
+    }
+    else if (TEXT_EQUALS(ATTR_VARIABLE_ARRAY_DIMENSIONS, attr_name))
+    {
+        parse_arrayDimensions_t arrayDimensions = {.arrayDimensions = NULL, .len = 0};
+        result = parse_arrayDimensions(attr_val, &arrayDimensions);
+        if (result && arrayDimensions.arrayDimensions != NULL)
+        {
+            var->arrayDimensions = arrayDimensions;
         }
     }
     else if (TEXT_EQUALS(ATTR_VARIABLE_DATA_TYPE, attr_name))
@@ -826,11 +908,29 @@ static bool start_variable(struct parse_context_t* ctx, struct sopc_xml_pubsub_v
     var->nodeId = NULL;
     var->has_displayName = false;
     var->has_dataType = false;
+    var->arrayDimensions.arrayDimensions = NULL;
+    var->arrayDimensions.len = 0;
 
     bool result = parse_attributes(attrs, parse_variable_attributes, ctx, (void*) var);
 
     if (result)
     {
+        // user don't set sufficient value for arrayDimensions compare to valueRank. Fill the rest with zeroes
+        if (var->valueRank > 0)
+        {
+            if (var->arrayDimensions.len < var->valueRank)
+            {
+                parse_arrayDimensions_t arrDimensionTmp = var->arrayDimensions;
+                var->arrayDimensions.arrayDimensions = SOPC_Calloc((size_t) var->valueRank, sizeof(uint32_t));
+                if (NULL != arrDimensionTmp.arrayDimensions)
+                {
+                    memcpy(var->arrayDimensions.arrayDimensions, arrDimensionTmp.arrayDimensions,
+                           sizeof(uint32_t) * (size_t) arrDimensionTmp.len);
+                    SOPC_Free(arrDimensionTmp.arrayDimensions);
+                }
+                var->arrayDimensions.len = var->valueRank;
+            }
+        }
         if (!var->nodeId)
         {
             LOG_XML_ERROR("Variable nodeId is missing");
@@ -1329,9 +1429,10 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_FieldMetaData* fieldMetaData =
                             SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, ivar);
                         SOPC_ASSERT(fieldMetaData != NULL);
-                        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
+                        SOPC_PubSub_ArrayDimension arrDimension = {
+                            .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
+                        allocSuccess = SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
-
                         SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
                         SOPC_ASSERT(publishedVar != NULL);
                         SOPC_PublishedVariable_Set_NodeId(publishedVar, var->nodeId);
@@ -1413,9 +1514,10 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_ASSERT(fieldMetaData != NULL);
 
                         /* FieldMetaData: type the field */
-                        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, var->valueRank);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
-
+                        SOPC_PubSub_ArrayDimension arrDimension = {
+                            .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
+                        allocSuccess = SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         /* FieldTarget: link to the source/target data */
                         SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
                         SOPC_ASSERT(fieldTarget != NULL);
@@ -1476,6 +1578,8 @@ static void clear_xml_pubsub_config(struct parse_context_t* ctx)
                     SOPC_NodeId_Clear(var->nodeId);
                     SOPC_Free(var->nodeId);
                     var->nodeId = NULL;
+                    SOPC_Free(var->arrayDimensions.arrayDimensions);
+                    var->arrayDimensions.arrayDimensions = NULL;
                 }
                 SOPC_Free(ds->variableArr);
                 ds->variableArr = NULL;

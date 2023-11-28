@@ -60,30 +60,31 @@ static void setupConnection(void)
     SOPC_DataSetReader_Set_DataSetWriterId(dsReader, 123);
 
     SOPC_DataSetReader_Allocate_FieldMetaData_Array(dsReader, SOPC_TargetVariablesDataType, 5);
+    SOPC_PubSub_ArrayDimension arrDimension = {.valueRank = -1, .arrayDimensions = NULL};
     // Var 1
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Byte_Id);
     // Var 3
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
     // Var 4
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
     // Var 5
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 4);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
 
     // Configuration for "udp_pub_conf_test"
@@ -102,22 +103,22 @@ static void setupConnection(void)
     // Var 1
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 0);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt16_Id);
     // Var 2
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 1);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_DateTime_Id);
     // Var 3
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 2);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
     // Var 4
     meta = SOPC_DataSetReader_Get_FieldMetaData_At(dsReader, 3);
     SOPC_ASSERT(NULL != meta);
-    SOPC_FieldMetaData_Set_ValueRank(meta, -1);
+    SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
 }
 

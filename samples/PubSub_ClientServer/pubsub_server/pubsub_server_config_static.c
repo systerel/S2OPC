@@ -75,7 +75,8 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                SOPC_BuiltinId builtinType)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = -1, .arrayDimensions = NULL};
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
@@ -134,7 +135,8 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
     SOPC_ASSERT(fieldmetadata != NULL);
 
     /* fieldmetadata: type the field */
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = -1, .arrayDimensions = NULL};
+    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
 
     /* FieldTarget: link to the source/target data */

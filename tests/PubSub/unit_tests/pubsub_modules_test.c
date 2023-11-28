@@ -1048,6 +1048,7 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, 
     ck_assert(nbDsr > 0);
     ck_assert(nbDsr <= NB_VARS);
 
+    SOPC_PubSub_ArrayDimension arrDimension = {.valueRank = -1, .arrayDimensions = NULL};
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
     ck_assert_ptr_nonnull(config);
 
@@ -1098,7 +1099,7 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, 
             ck_assert_ptr_nonnull(fieldMetaData);
 
             /* FieldMetaData: type the field */
-            SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, -1);
+            SOPC_FieldMetaData_ArrayDimension_Move(fieldMetaData, &arrDimension);
             SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, varArr[i].BuiltInTypeId);
 
             /* FieldTarget: link to the source/target data */
@@ -1413,6 +1414,8 @@ static SOPC_PubSubConfiguration* build_Pub_Config(SOPC_PublishedDataSet** out_pd
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
     ck_assert_ptr_nonnull(config);
 
+    SOPC_PubSub_ArrayDimension arrDimension = {.valueRank = -1, .arrayDimensions = NULL};
+
     bool allocSuccess = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 1);
     ck_assert_int_eq(true, allocSuccess);
 
@@ -1430,7 +1433,7 @@ static SOPC_PubSubConfiguration* build_Pub_Config(SOPC_PublishedDataSet** out_pd
         ck_assert_ptr_nonnull(fieldMetaData);
 
         /* FieldMetaData: type the field */
-        SOPC_FieldMetaData_Set_ValueRank(fieldMetaData, -1);
+        SOPC_FieldMetaData_ArrayDimension_Move(fieldMetaData, &arrDimension);
         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, varArr[i].BuiltInTypeId);
 
         /* FieldTarget: link to the source/target data */
@@ -1521,6 +1524,8 @@ static SOPC_PubSubConfiguration* build_PubConfig_From_VarArr(SOPC_WriterGroup** 
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
     ck_assert_ptr_nonnull(config);
 
+    SOPC_PubSub_ArrayDimension arrDimension = {.valueRank = -1, .arrayDimensions = NULL};
+
     bool allocSucceeded = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);
     ck_assert_int_eq(true, allocSucceeded);
     ck_assert_uint_eq(1, SOPC_PubSubConfiguration_Nb_PubConnection(config));
@@ -1540,7 +1545,7 @@ static SOPC_PubSubConfiguration* build_PubConfig_From_VarArr(SOPC_WriterGroup** 
         SOPC_FieldMetaData* field = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, i);
         ck_assert_ptr_nonnull(field);
         SOPC_FieldMetaData_Set_BuiltinType(field, varArr[i].BuiltInTypeId);
-        SOPC_FieldMetaData_Set_ValueRank(field, -1); // SingleValue
+        SOPC_FieldMetaData_ArrayDimension_Move(field, &arrDimension); // SingleValue
     }
 
     // Create the Connection with 1 WriterGroup / DataSetWriter with associated PublishedDataSet

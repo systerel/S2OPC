@@ -38,6 +38,12 @@ typedef struct SOPC_DataSetMetaData SOPC_DataSetMetaData;
 typedef struct SOPC_FieldMetaData SOPC_FieldMetaData;
 typedef struct SOPC_FieldTarget SOPC_FieldTarget;
 
+typedef struct SOPC_PubSub_ArrayDimension
+{
+    int32_t valueRank;         // -1 or >0 (Other values not supported)
+    uint32_t* arrayDimensions; // NULL if valueRank is == -1, an array of length ::valueRank otherwise
+} SOPC_PubSub_ArrayDimension;
+
 typedef struct SOPC_UADP_Configuration
 {
     bool PublisherIdFlag;
@@ -391,7 +397,6 @@ bool SOPC_PublishedVariable_Set_IndexRange(SOPC_PublishedVariable* variable, con
 /** SOPC_FieldMetaData **/
 /************************/
 
-int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata);
 /* n > 1: the dataType is an array with the specified number of dimensions.
  * OneDimension (1)
  * OneOrMoreDimensions (0)
@@ -399,9 +404,15 @@ int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata);
  * Any (−2)
  * ScalarOrOneDimension (−3)
  */
-void SOPC_FieldMetaData_Set_ValueRank(SOPC_FieldMetaData* metadata, int32_t valueRank);
+int32_t SOPC_FieldMetaData_Get_ValueRank(const SOPC_FieldMetaData* metadata);
 SOPC_BuiltinId SOPC_FieldMetaData_Get_BuiltinType(const SOPC_FieldMetaData* metadata);
 void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_BuiltinId builtinType);
+/* ValueRank define dimension of the array ArrayDimensions. ValueRank should be set before allocating ArrayDimensions */
+const SOPC_PubSub_ArrayDimension* SOPC_FieldMetaData_Get_ArrayDimension(const SOPC_FieldMetaData* metadata);
+void SOPC_FieldMetaData_ArrayDimension_Move(SOPC_FieldMetaData* metadata, SOPC_PubSub_ArrayDimension* arrayDimension);
+bool SOPC_FiledMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
+                                               const SOPC_PubSub_ArrayDimension* arrayDimensions);
+
 // only for Subscriber
 SOPC_FieldTarget* SOPC_FieldMetaData_Get_TargetVariable(const SOPC_FieldMetaData* fieldMetaData);
 // only for Publisher
