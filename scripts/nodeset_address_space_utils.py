@@ -592,21 +592,21 @@ class NodesetMerger(NSFinder):
                 return True
         return False
 
-    def __exists_typedef_ref(self, search: str, nids_or_aliases: set, placeholder_nids: set):
-        placeholder_refs = list()
+    def __exists_typedef_ref(self, search: str, nids_or_aliases: set, inst_decl_nids: set):
+        inst_decl_refs = list()
         # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
         for node in self._iterfind(self.tree, search):
             nid = node.get('NodeId')
             for type_ref in self._iterfind(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasTypeDefinition']"):
                 if type_ref.text.strip() in nids_or_aliases:
                     # this is a reference
-                    if nid in placeholder_nids:
-                        # but a placeholder instance declaration to be removed if the type is removed
-                        placeholder_refs.append(nid)
+                    if nid in inst_decl_nids:
+                        # but an instance declaration to be removed if the type is removed
+                        inst_decl_refs.append(nid)
                     else:
                         return True, []
-        # no reference found, potentially placeholder nodes only
-        return False, placeholder_refs
+        # no reference found, potentially instance declaration nodes only
+        return False, inst_decl_refs
 
     def remove_unused(self, retain_ns0: bool, retain_types: set):
         # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
@@ -619,13 +619,13 @@ class NodesetMerger(NSFinder):
                 # loop while the removed types produce unused types
                 removed_nids = set()
 
-                # identify the 'placeholder' nodes, which are not considered as references
-                placeholder_nids = set()
+                # identify the 'instance declaration' nodes, which are not considered as references
+                inst_decl_nids = set()
                 if not is_full_request:
-                    # these placeholder nodes are intended to be removed in case the corresponding type is removed
+                    # these instance declaration nodes are intended to be removed in case the corresponding type is removed
                     for node in self._iterfind(self.tree, search):
                         if self._find_in(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasModellingRule']") is not None:
-                            placeholder_nids.add(node.get('NodeId'))
+                            inst_decl_nids.add(node.get('NodeId'))
 
                 for ty_node in self._iterfind(self.tree, f"uanodeset:{ty}"):
                     nid = ty_node.get('NodeId')
@@ -651,13 +651,13 @@ class NodesetMerger(NSFinder):
                         if found:
                             continue
                     else:
-                        found, placeholders_to_remove = self.__exists_typedef_ref(search, refs, placeholder_nids)
+                        found, inst_decls_to_remove = self.__exists_typedef_ref(search, refs, inst_decl_nids)
                         if found:
                             # this type is used by data
                             continue
                     #FIXME: when a removed object is referenced in a 'HasModellingRule', its removal changes the status
                     #of the referencing node: it is no more considered an instance declaration !
-                    for p in placeholders_to_remove:
+                    for p in inst_decls_to_remove:
                         self.remove_subtree(p)
                         removed_nids.add(p)
                     self.remove_subtree(nid)
