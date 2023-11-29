@@ -54,7 +54,7 @@ static SOPC_SubScheduler_Writer_Ctx writerCtx2;
 
 static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
 {
-    (void)pubId;
+    (void) pubId;
     return (writerId == writerCtx1.writerId ? &writerCtx1 : &writerCtx2);
 }
 

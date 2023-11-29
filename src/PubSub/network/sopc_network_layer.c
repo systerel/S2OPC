@@ -1912,15 +1912,15 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
-                dsmReaders[i] = readerConf->callbacks.pGetReader_Func(group, conf, writer_id, (uint8_t) i);
-                const SOPC_Conf_PublisherId pubId =
-                    Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
-                dsmCtx[i] = readerConf->getReaderCtx_Func(&pubId, writer_id);
+                dsmReaders[i] = readerConf->callbacks.pGetReader_Func(group, conf, writer_id);
             }
 
             // Check if there is at last one DSM to read, otherwise decoding can be canceled
             if (dsmReaders[i] != NULL)
             {
+                const SOPC_Conf_PublisherId pubId =
+                    Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
+                dsmCtx[i] = readerConf->getReaderCtx_Func(&pubId, writer_id);
                 mustDecode = true;
             }
         }

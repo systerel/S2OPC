@@ -144,6 +144,14 @@ static SOPC_SKManager* createSKmanager(void)
     return skm;
 }
 
+static SOPC_SubScheduler_Writer_Ctx writerCtx;
+static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+{
+    (void) pubId;
+    (void) writerId;
+    return &writerCtx;
+}
+
 // Create connection, group and setup metadata so that message is accepted
 static void setupConnection(void)
 {
@@ -205,6 +213,11 @@ static void setupConnection(void)
     SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_Boolean_Id);
+
+    // Create Writer related context
+    memset(&writerCtx, 0, sizeof(writerCtx));
+    writerCtx.writerId = SOPC_DataSetReader_Get_DataSetWriterId(dsReader);
+    writerCtx.pubId = *(SOPC_ReaderGroup_Get_PublisherId(subReader));
 }
 
 static void printVariant(const SOPC_Variant* variant)
@@ -369,6 +382,7 @@ static void readyToReceive(void* sockContext, Socket sock)
         .pGetSecurity_Func = retrieve_security_info,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .dsmSnGapCallback = NULL,
+        .getReaderCtx_Func = get_Reader_Ctx,
         .targetConfig = NULL};
 
     SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, buffer);

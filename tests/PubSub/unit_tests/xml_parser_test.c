@@ -404,7 +404,7 @@ START_TEST(test_sub_xml_parsing)
     ck_assert_uint_eq(14, writerGroupId); // message Id
 
     uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(0, writerId);
+    ck_assert_uint_eq(50, writerId);
 
     // Test sks
     ck_assert_uint_eq(0, SOPC_ReaderGroup_Nb_SecurityKeyServices(readerGroup));
@@ -442,7 +442,7 @@ START_TEST(test_sub_xml_parsing)
     writerGroupId = SOPC_ReaderGroup_Get_GroupId(readerGroup);
     ck_assert_uint_eq(14, writerGroupId); // message Id
     writerId = SOPC_DataSetReader_Get_DataSetWriterId(dataSetReader);
-    ck_assert_uint_eq(0, writerId);
+    ck_assert_uint_eq(51, writerId);
 
     timeoutMs = SOPC_DataSetReader_Get_ReceiveTimeout(dataSetReader);
     ck_assert_double_eq(2 * 50., timeoutMs); // 2*publishingInternval

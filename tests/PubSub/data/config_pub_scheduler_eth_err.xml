@@ -15,7 +15,7 @@
             </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
-          <dataset>
+          <dataset writerId="52">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
           </dataset>

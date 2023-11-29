@@ -32,6 +32,7 @@
  * \param buffer : data to decode
  * \param config : configuration to provide to the target module which consumes the decoded data
  * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
+ * \param getCtxFunc : function to retrieve dynamic context of a writerGroup
  * \param snCBck : function to check if sequence number receive is newer or not
  */
 SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,

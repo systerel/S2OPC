@@ -4,7 +4,7 @@
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." securityMode="signAndEncrypt">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
-          <dataset>
+          <dataset writerId="1">
           <!-- one to many -->
             <variable nodeId="ns=1;s=PubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=PubString" displayName="varString" dataType="String"/>
@@ -12,7 +12,7 @@
           </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="1000.">
-          <dataset>
+          <dataset writerId="1">
             <!-- one to many -->
             <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>
@@ -24,7 +24,7 @@
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="100." publisherId="i=42" securityMode="signAndEncrypt">
           <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
-          <dataset>
+          <dataset writerId="1">
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubBool" displayName="varBool" dataType="Boolean"/>
             <variable nodeId="ns=1;s=SubString" displayName="varString" dataType="String"/>
@@ -32,7 +32,7 @@
           </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="1000." publisherId="i=42">
-          <dataset>
+          <dataset writerId="1">
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=SubUInt" displayName="varUInt" dataType="UInt64"/>

@@ -55,14 +55,12 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
  * \param group The group configuration
  * \param uadp_conf The received message configuration
  * \param writerId The received dataset writerId
- * \param dataSetIndex The index of the DataSet in the received message
  *
  * \return the dataset reader, or NULL if no matching reader found
  */
 static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
                                                     const SOPC_UADP_Configuration* uadp_conf,
-                                                    const uint16_t writerId,
-                                                    const uint8_t dataSetIndex);
+                                                    const uint16_t writerId);
 
 /** \brief
  *      Received a DSM and applies changes to target variables.
@@ -160,41 +158,22 @@ static const SOPC_ReaderGroup* SOPC_Sub_GetReaderGroup(const SOPC_PubSubConnecti
 
 static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* group,
                                                     const SOPC_UADP_Configuration* uadp_conf,
-                                                    const uint16_t writerId,
-                                                    const uint8_t dataSetIndex)
+                                                    const uint16_t writerId)
 {
     SOPC_ASSERT(NULL != group && uadp_conf != NULL);
     // Find a matching reader in group
     const SOPC_DataSetReader* result = NULL;
     const uint16_t nbReaders = SOPC_ReaderGroup_Nb_DataSetReader(group);
 
-    // Note: it has been checked previously that the group does not contain both zero and non-zero writerId
-    if (SOPC_ReaderGroup_HasNonZeroDataSetWriterId(group))
+    for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
     {
-        for (uint8_t i = 0; i < nbReaders && NULL == result; i++)
-        {
-            // Find matching WriterId
-            const SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
-            const uint16_t readerWriterId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
+        // Find matching WriterId
+        const SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, i);
+        const uint16_t readerWriterId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
 
-            if (writerId == readerWriterId && writerId != 0)
-            {
-                result = reader;
-            }
-        }
-    }
-    else
-    {
-        if (nbReaders <= dataSetIndex)
+        if (writerId == readerWriterId && writerId != 0)
         {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
-                                     "No writerId has been given to decrypt the dataSet to be chosen, message droped");
-            result = NULL;
-        }
-        else
-        {
-            // Use configuration order
-            result = SOPC_ReaderGroup_Get_DataSetReader_At(group, dataSetIndex);
+            result = reader;
         }
     }
     return result;

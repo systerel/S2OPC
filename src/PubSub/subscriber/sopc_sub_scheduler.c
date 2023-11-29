@@ -1159,11 +1159,9 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
     for (size_t i = 0; i < size && !found; i++)
     {
         const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        found = compare_publisherId(&ctx->pubId, pubId);
-        if (found && ctx->writerId != writerId)
-        {
-            found = false;
-        }
+        // Note that if writerId is zero, we want to store all elements since the order is used
+        // for the same PubId in that case.
+        found = compare_publisherId(&ctx->pubId, pubId) && writerId != 0 && ctx->writerId == writerId;
     }
 
     if (!found)
@@ -1190,13 +1188,17 @@ static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_Publ
     for (size_t i = 0; i < size && NULL == result; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        if (ctx->pubId.type == pubId->type && ctx->writerId == writerId)
+        if (compare_publisherId(&ctx->pubId, pubId))
         {
-            if (compare_publisherId(&ctx->pubId, pubId))
+            if (ctx->writerId == writerId)
             {
-                result = ctx;
+                if (compare_publisherId(&ctx->pubId, pubId))
+                {
+                    result = ctx;
+                }
             }
         }
     }
+    SOPC_ASSERT(result != NULL);
     return result;
 }

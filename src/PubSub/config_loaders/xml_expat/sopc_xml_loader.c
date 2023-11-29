@@ -806,7 +806,7 @@ static bool parse_dataset_attributes(const char* attr_name,
 
     if (TEXT_EQUALS(ATTR_DATASET_WRITER_ID, attr_name))
     {
-        // If present, the writerId cannot be equal to 0
+        // The writerId cannot be equal to 0
         result = parse_unsigned_value(attr_val, strlen(attr_val), 16, &ds->writer_id);
         result &= ds->writer_id > 0;
     }
@@ -830,6 +830,11 @@ static bool start_dataset(struct parse_context_t* ctx, struct sopc_xml_pubsub_da
 
     bool result = parse_attributes(attrs, parse_dataset_attributes, ctx, (void*) ds);
 
+    if (ds->writer_id == 0)
+    {
+        LOG_XML_ERROR("WriterId missing in dataSet");
+        result = false;
+    }
     ctx->state = PARSE_DATASET;
     return result;
 }
@@ -1213,7 +1218,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     struct parse_context_t* ctx = user_data;
     struct sopc_xml_pubsub_connection_t* connection = NULL;
     struct sopc_xml_pubsub_message_t* msg = NULL;
-    struct sopc_xml_pubsub_dataset_t* ds = NULL;
 
     switch (ctx->state)
     {
@@ -1229,7 +1233,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         }
         break;
     case PARSE_MESSAGE:
-        // It must be ensured that all dataset have consistent writerId (all 0 or all non-0)
         connection = &ctx->connectionArr[ctx->nb_connections - 1];
         SOPC_ASSERT(NULL != connection);
         msg = &connection->messageArr[connection->nb_messages - 1];
@@ -1239,24 +1242,6 @@ static void end_element_handler(void* user_data, const XML_Char* name)
             LOG("Message requires at least one DataSet.");
             XML_StopParser(ctx->parser, 0);
             return;
-        }
-        else
-        {
-            bool hasZero = false;
-            bool hasNonzero = false;
-            for (uint16_t iDs = 0; iDs < msg->nb_datasets; iDs++)
-            {
-                ds = &msg->datasetArr[iDs];
-                const bool isZero = (ds->writer_id == 0);
-                hasZero |= isZero;
-                hasNonzero |= !isZero;
-                if (hasNonzero && hasZero)
-                {
-                    LOG_XML_ERROR("Multiple DSM in the same message must be either all or none defining 'writer_id'");
-                    XML_StopParser(ctx->parser, 0);
-                    return;
-                }
-            }
         }
         ctx->nb_messages++;
         ctx->currentMessage = NULL;
@@ -1271,7 +1256,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         msg = &connection->messageArr[connection->nb_messages - 1];
         SOPC_ASSERT(NULL != msg);
         SOPC_ASSERT(msg->nb_datasets > 0);
-        // Check that there is no duplicate of writerid for the same Group
+        // Check that there is no duplicate of writerId for the same Group
         for (int jDs = 0; jDs < msg->nb_datasets - 1; ++jDs)
         {
             const uint16_t writerId = msg->datasetArr[msg->nb_datasets - 1].writer_id;

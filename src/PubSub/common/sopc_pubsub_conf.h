@@ -230,14 +230,6 @@ void SOPC_ReaderGroup_Set_GroupVersion(SOPC_ReaderGroup* group, uint32_t version
 const SOPC_Conf_PublisherId* SOPC_ReaderGroup_Get_PublisherId(SOPC_ReaderGroup* group);
 void SOPC_ReaderGroup_Set_PublisherId_UInteger(SOPC_ReaderGroup* group, uint64_t id);
 bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC_String* id);
-/**
- * /brief Indicates if the group contains readers with WriterIds specified or not.
- * /param  group The group to check
- * /return true if all readers in group contain only non-zero writerIds.
- * false if all readers in group contain only zero writerIds.
- * Other cases are impossible (checked during configuration elaboration)
- */
-bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group);
 
 const char* SOPC_ReaderGroup_Get_MqttTopic(const SOPC_ReaderGroup* reader);
 

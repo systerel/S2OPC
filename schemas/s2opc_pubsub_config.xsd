@@ -94,7 +94,14 @@
     <xs:sequence>
       <xs:element type="variable" name="variable" maxOccurs="unbounded"/>
     </xs:sequence>
-    <xs:attribute name="writerId" type="xs:unsignedShort" use="optional"/> <!-- If omitted, set as groupId of message -->
+    <xs:attribute name="writerId" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:integer">
+           <xs:minInclusive value="-1"/>
+           <xs:maxInclusive value="65535"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
     <xs:attribute name="useSequenceNumber" type="xs:boolean" use="optional"/> <!-- true (default) to enable DataSetMessageSequenceNumber -->
   </xs:complexType>
   <xs:complexType name="variable">

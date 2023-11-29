@@ -3,12 +3,12 @@
     <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
         <!-- one to many -->
         <message groupId="14" groupVersion="1" publishingInterval="50." publisherId="i=123" >
-          <dataset>
+          <dataset writerId="50">
             <!-- one to many -->
             <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
                 <!-- the nodeId is used to retrieve the variable in the address space -->
           </dataset>
-            <dataset>
+            <dataset writerId="51">
                 <!-- one to many -->
                 <variable nodeId="ns=2;i=6" displayName="Titi" dataType="UInt32"/>
                 <variable nodeId="ns=2;i=7" displayName="Tutu" dataType="UInt16"/>

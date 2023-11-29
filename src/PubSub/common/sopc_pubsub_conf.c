@@ -191,8 +191,6 @@ struct SOPC_ReaderGroup
     SOPC_DataSetReader* dataSetReaders;
     uint16_t groupId;
     uint32_t groupVersion;
-    bool hasNonZeroWriterIds;
-    bool hasZeroWriterIds;
 
     // Topic Specific to Mqtt
     char* mqttTopic;
@@ -753,12 +751,6 @@ bool SOPC_ReaderGroup_Set_PublisherId_String(SOPC_ReaderGroup* group, const SOPC
     return (SOPC_STATUS_OK == status);
 }
 
-bool SOPC_ReaderGroup_HasNonZeroDataSetWriterId(const SOPC_ReaderGroup* group)
-{
-    SOPC_ASSERT(NULL != group);
-    return group->hasNonZeroWriterIds;
-}
-
 /** DataSetReader **/
 
 static void SOPC_DataSetMetaData_Clear(SOPC_DataSetMetaData* metaData)
@@ -790,16 +782,7 @@ uint16_t SOPC_DataSetReader_Get_DataSetWriterId(const SOPC_DataSetReader* reader
 
 void SOPC_DataSetReader_Set_DataSetWriterId(SOPC_DataSetReader* reader, uint16_t id)
 {
-    SOPC_ASSERT(NULL != reader);
-    if (id != 0)
-    {
-        reader->group->hasNonZeroWriterIds = true;
-    }
-    else
-    {
-        reader->group->hasZeroWriterIds = true;
-    }
-    SOPC_ASSERT(!(reader->group->hasNonZeroWriterIds && reader->group->hasZeroWriterIds));
+    SOPC_ASSERT(NULL != reader && id > 0);
 
     reader->dataSetWriterId = id;
 }

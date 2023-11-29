@@ -2,12 +2,12 @@
     <!-- Error: ethernet subscriber listens on 'eth0' whereas publisher publishes on 'lo' interface -->
     <connection address="opc.eth://01-00-00-01-04-00" mode="subscriber" interfaceName="eth0">
         <message groupId="14" groupVersion="1" publishingInterval="50." publisherId="i=123" >
-          <dataset>
+          <dataset writerId="50">
             <variable nodeId="ns=1;s=Toto" displayName="Toto" dataType="Boolean"/>
           </dataset>
         </message>
         <message groupId="15" groupVersion="1" publishingInterval="100." publisherId="i=456" securityMode="sign">
-          <dataset>
+          <dataset writerId="50">
             <variable nodeId="ns=1;s=Tata" displayName="Tata" dataType="Int16"/>
           </dataset>
         </message>
