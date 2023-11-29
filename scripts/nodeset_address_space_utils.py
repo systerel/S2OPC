@@ -316,9 +316,12 @@ class NodesetMerger(NSFinder):
 
     def __merge_models(self, new: ET.ElementTree):
         tree_models = self._find('uanodeset:Models')
+        if tree_models is None:
+            print("Error: missing the <Models>")
+            return False
         ns0_version = get_ns0_version(tree_models)
         if ns0_version is None:
-            print("Missing a NS0 model")
+            print("Error: Missing a NS0 <Model>")
             return False
         new_models = self._find_in(new, 'uanodeset:Models')
         for model in new_models:
@@ -338,6 +341,7 @@ class NodesetMerger(NSFinder):
                 if req_ns0_version != ns0_version:
                     raise Exception(f'Incompatible NS0 version: provided {ns0_version} but require {req_ns0_version}')
             tree_models.append(model)
+        return True
 
     def __merge_aliases(self, new: ET.ElementTree):
         tree_aliases = self._find('uanodeset:Aliases')
@@ -455,7 +459,8 @@ class NodesetMerger(NSFinder):
             return False
 
         # Merge Models
-        self.__merge_models(new)
+        if not self.__merge_models(new):
+            return False
 
         # Merge ServerArray and NamespaceArray:
         self.__fill_namespace_array()
