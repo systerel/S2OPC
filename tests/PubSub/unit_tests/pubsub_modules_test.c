@@ -283,7 +283,9 @@ static SOPC_PubSubConfiguration* build_Sub_Config(SOPC_DataSetReader** out_dsr, 
 
 static SOPC_SubScheduler_Writer_Ctx writerCtx[NB_DATASET_MSG];
 
-static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx_NoSecu(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId);
+static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx_NoSecu(const SOPC_Conf_PublisherId* pubId,
+                                                           const uint16_t writerId,
+                                                           const uint8_t dsmIndex);
 
 static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffer, SOPC_PubSubConnection* connection)
 {
@@ -318,8 +320,11 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* buffe
     return SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection);
 }
 
-static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx_NoSecu(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx_NoSecu(const SOPC_Conf_PublisherId* pubId,
+                                                           const uint16_t writerId,
+                                                           const uint8_t dsmIndex)
 {
+    (void) dsmIndex;
     SOPC_SubScheduler_Writer_Ctx* result = NULL;
 
     for (int iCtx = 0; iCtx < NB_DATASET_MSG; ++iCtx)

@@ -54,10 +54,12 @@ void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSu
  *
  * \param pubId       the publisher id associated to the DataSetWriter
  * \param writerId    the DataSetWriter id
+ * \param dsmIndex    the DataSetMessage index. This is only used when writerId is not set (0)
  *
  * \return The associated writer context or NULL if not found */
 typedef SOPC_SubScheduler_Writer_Ctx* SOPC_Nextwork_Layer_Get_Reader_Ctx_Func(const SOPC_Conf_PublisherId* pubId,
-                                                                              const uint16_t writerId);
+                                                                              const uint16_t writerId,
+                                                                              const uint8_t dsmIndex);
 
 /**
  * \brief Encode a NetworkMessage with JSON Mapping

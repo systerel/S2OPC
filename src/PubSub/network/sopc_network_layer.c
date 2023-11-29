@@ -1757,14 +1757,14 @@ static inline SOPC_ReturnStatus Decode_Message_V1(SOPC_Buffer* buffer,
             {
                 SOPC_Dataset_LL_DataSetMsg_Set_WriterId(dsm, writer_id);
                 dsmReaders[i] = readerConf->callbacks.pGetReader_Func(group, conf, writer_id, (uint8_t) i);
-                const SOPC_Conf_PublisherId pubId =
-                    Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
-                dsmCtx[i] = readerConf->getReaderCtx_Func(&pubId, writer_id);
             }
 
             // Check if there is at last one DSM to read, otherwise decoding can be canceled
             if (dsmReaders[i] != NULL)
             {
+                const SOPC_Conf_PublisherId pubId =
+                    Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
+                dsmCtx[i] = readerConf->getReaderCtx_Func(&pubId, writer_id, (uint8_t) i);
                 mustDecode = true;
             }
         }

@@ -52,9 +52,12 @@ static SOPC_PubSubConnection* subConnection = NULL;
 static SOPC_SubScheduler_Writer_Ctx writerCtx1;
 static SOPC_SubScheduler_Writer_Ctx writerCtx2;
 
-static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx(const SOPC_Conf_PublisherId* pubId,
+                                                    const uint16_t writerId,
+                                                    const uint8_t dsmIndex)
 {
-    (void)pubId;
+    (void) pubId;
+    (void) dsmIndex;
     return (writerId == writerCtx1.writerId ? &writerCtx1 : &writerCtx2);
 }
 
