@@ -594,7 +594,8 @@ class NodesetMerger(NSFinder):
 
     def __exists_typedef_ref(self, search: str, nids_or_aliases: set, inst_decl_nids: set):
         inst_decl_refs = list()
-        # search in the text (it cannot be expressed in the reduced XPath language of Python 3.6)
+        # search in the text for nid or alias
+        # (text value belonging to a list cannot be expressed in the reduced XPath language of Python 3.10)
         for node in self._iterfind(self.tree, search):
             nid = node.get('NodeId')
             for type_ref in self._iterfind(node, "uanodeset:References/uanodeset:Reference[@ReferenceType='HasTypeDefinition']"):
@@ -609,7 +610,6 @@ class NodesetMerger(NSFinder):
         return False, inst_decl_refs
 
     def remove_unused(self, retain_ns0: bool, retain_types: set):
-        # Note: Python 3.6 does not yet have the [. = 'text'] syntax, hence the burden finding matching nodes
         aliases = self.__get_aliases()
         for ty, search, is_full_request in [('UAObjectType', ".//uanodeset:UAObject", False),
                    ('UAVariableType', ".//uanodeset:UAVariable", False),
