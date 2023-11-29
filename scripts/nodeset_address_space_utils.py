@@ -563,6 +563,22 @@ class NodesetMerger(NSFinder):
         # retain only the nodes with no outer parent
         self._rec_bf_remove_subtree({remove_root_nid}, subtree, is_root=True)
 
+    def remove_orphans(self):
+        orphans = list()
+        for t in ["UAObject", "UAVariable"]:
+            for n in self._iterfind(self.tree, ".//uanodeset:" + t):
+                for ref in self._iterfind(n, "uanodeset:References/uanodeset:Reference"):
+                    if _is_hierarchical_ref(ref):
+                        break
+                else:
+                    nid = n.get('NodeId')
+                    orphans.append(nid)
+        for nid in orphans:
+            if nid.replace(' ', '') in ['i=84', 'i=78', 'i=80']:
+                # retain Root, Mandatory, Optional
+                continue
+            self.remove_subtree(nid)
+
     def __get_aliases(self):
         tree_aliases = self._find('uanodeset:Aliases')
         if tree_aliases is None:
@@ -844,7 +860,8 @@ class NodesetMerger(NSFinder):
 
 def run_merge(args):
     # check option compatibility and raise error
-    if not args.sanitize and (args.remove_subtrees or args.remove_unused or args.remove_backward_refs):
+    sanitize = args.sanitize or args.remove_subtrees or args.remove_orphans or args.remove_unused or args.remove_backward_refs
+    if not args.sanitize and sanitize:
         raise Exception("sanitization is required when removing a subtree, unused types or backward references")
 
     merger = NodesetMerger(args.verbose)
@@ -868,7 +885,7 @@ def run_merge(args):
     if args.remove_node_ids_gt > 0:
         merger.remove_node_ids_greater_than(args.remove_node_ids_gt)
 
-    if args.sanitize or args.remove_subtrees or args.remove_unused:
+    if sanitize:
         res = merger.sanitize()
     else:
         res = True
@@ -877,10 +894,13 @@ def run_merge(args):
         for node in args.remove_subtrees:
             merger.remove_subtree(node)
 
+    if res and (args.remove_orphans or args.remove_unused):
+        merger.remove_orphans()
+
     if res and args.remove_unused:
         merger.remove_unused(args.retain_ns0, frozenset(args.retain_types))
 
-    if res and args.sanitize and args.remove_backward_refs:
+    if res and sanitize and args.remove_backward_refs:
         merger.remove_backward_refs(set(args.retain_nodes))
 
     if res:
@@ -930,10 +950,17 @@ def make_argparser():
     parser.add_argument('--verbose', '-v', action='store_true',
                         help='Display information (reciprocal references added, merged nodes, removed nodes, etc.)')
     rm_unused = parser.add_argument_group('Remove unused nodes')
+    rm_unused.add_argument('--remove-orphans', action='store_true', dest='remove_orphans',
+                        help='''
+                        Remove all orphan nodes, i.e. nodes with no hierarchical parent, except for Root node "i=84".
+                        This  option forces the creation of reciprocal references (sanitize).
+                        ''')
     rm_unused.add_argument('--remove-unused', action='store_true', dest='remove_unused',
                         help='''
-                        Remove all of the type definitions which are not used by the model. 
+                        Remove all of the type definitions which are not used by the model, as well as unused nodes. 
                         This  option forces the creation of reciprocal references (sanitize).
+                        This option starts with the removal of orphan nodes (see option --remove-orphans),
+                        then removes the unused type definitions.
                         To retain some of the type definitions, see options --retain-ns0 and --retain-types.
                         ''')
     rm_unused.add_argument('--retain-ns0', action='store_true', dest='retain_ns0',

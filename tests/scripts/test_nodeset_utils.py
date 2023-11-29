@@ -32,7 +32,7 @@ RESOURCE_DIR = pj(SCRIPT_DIR, 'resources')
 
 # remove the temporary files produced during the tests
 # set to False to keep the actual files and analyse them
-CLEANUP_TEMP = True
+CLEANUP_TEMP = False
 
 
 def make_temp_dir():
@@ -182,6 +182,12 @@ class MergeTests(unittest.TestCase):
                       's2opc_base_nodeset_check.xml')
         self.run_test('s2opc_base_nodeset_identity.xml', [],
                       's2opc_base_nodeset_identity.xml')
+
+    def test_remove_orphans(self):
+        self.run_test('test_orphans.xml', ['--remove-orphans'],
+                      'ns0.xml', 'Orphans.xml')
+
         
+
 if __name__ == '__main__':
     unittest.main()
