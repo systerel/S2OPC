@@ -55,6 +55,7 @@ TAG_VARIABLE = "variable"
 ATTRIBUTE_VARIABLE_NODEID = "nodeId"
 ATTRIBUTE_VARIABLE_NAME = "displayName"
 ATTRIBUTE_VARIABLE_TYPE = "dataType"
+ATTRIBUTE_VARIABLE_VALUE_RANK = "valueRank"
 
 TAG_SKSERVER = "skserver"
 ATTRIBUTE_SKSERVER_URL = "endpointUrl"
@@ -300,7 +301,7 @@ def handlePubConnection(publisherId, connection, index, result):
         alloc = SOPC_PubSubConnection_Set_InterfaceName(connection, "%s");
     }
             """%(cnxContext.interfaceName, cnxContext.interfaceName))
-            
+
         result.add("""
     if (alloc)
     {
@@ -385,7 +386,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     for dataset in datasets:
         handleDataset(PUB_MODE, msgContext, dataset, dsIndex, result)
         dsIndex += 1
-    
+
         skservers = message.findall(TAG_SKSERVER)
 
     if len(skservers) > 0:
@@ -485,15 +486,16 @@ def handleVariable(mode, variable, index, result):
     nodeId = variable.get(ATTRIBUTE_VARIABLE_NODEID)
     datatype = variable.get(ATTRIBUTE_VARIABLE_TYPE)
     displayName = variable.get(ATTRIBUTE_VARIABLE_NAME)
+    valueRank = int(getOptionalAttribute(variable, ATTRIBUTE_VARIABLE_VALUE_RANK, -1))
     assert datatype in TYPE_IDS
     dataid = TYPE_IDS[datatype]
     if mode == PUB_MODE:
         result.add("""
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, %d, "%s", %s); // %s""" % (index, nodeId, dataid, displayName))
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, %d, "%s", %s, %d); // %s""" % (index, nodeId, dataid, valueRank, displayName))
         DEFINE_C_SETPUBVARIABLEAT = True
     elif mode == SUB_MODE:
         result.add("""
-        SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s); // %s""" % (index, nodeId, dataid, displayName))
+        SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s, %d); // %s""" % (index, nodeId, dataid, valueRank, displayName))
         DEFINE_C_SETSUBVARIABLEAT = True
     else: assert(false)
 
@@ -753,10 +755,11 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
 static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
                                                const char* strNodeId,
-                                               SOPC_BuiltinId builtinType)
+                                               SOPC_BuiltinId builtinType,
+                                               int32_t valueRank)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, valueRank);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
@@ -831,13 +834,14 @@ static bool SOPC_PubSubConfig_SetSubNbVariables(SOPC_DataSetReader* reader, uint
 static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
                                                uint16_t index,
                                                const char* strNodeId,
-                                               SOPC_BuiltinId builtinType)
+                                               SOPC_BuiltinId builtinType,
+                                               int32_t valueRank)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_DataSetReader_Get_FieldMetaData_At(reader, index);
     SOPC_ASSERT(fieldmetadata != NULL);
 
     /* fieldmetadata: type the field */
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, valueRank);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
 
     /* FieldTarget: link to the source/target data */
