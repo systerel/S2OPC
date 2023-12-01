@@ -4427,22 +4427,29 @@ void SOPC_Variant_Clear(SOPC_Variant* variant)
                 {
                     matrixLength = 0;
                 }
-                for (idx = 0; idx < variant->Value.Matrix.Dimensions && false == error; idx++)
+                if (NULL != variant->Value.Matrix.ArrayDimensions)
                 {
-                    if (variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
-                        matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+                    for (idx = 0; idx < variant->Value.Matrix.Dimensions && false == error; idx++)
                     {
-                        matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                        if (variant->Value.Matrix.ArrayDimensions[idx] > 0 &&
+                            matrixLength * variant->Value.Matrix.ArrayDimensions[idx] <= INT32_MAX)
+                        {
+                            matrixLength *= variant->Value.Matrix.ArrayDimensions[idx];
+                        }
+                        else if (0 == variant->Value.Matrix.ArrayDimensions[idx])
+                        {
+                            // Don't increment array length if one of it's dimension is equal to 0
+                        }
+                        else
+                        {
+                            error = true;
+                        }
                     }
-                    else
-                    {
-                        error = true;
-                    }
+                    SOPC_Free(variant->Value.Matrix.ArrayDimensions);
+                    variant->Value.Matrix.ArrayDimensions = NULL;
                 }
                 if (false == error)
                 {
-                    SOPC_Free(variant->Value.Matrix.ArrayDimensions);
-                    variant->Value.Matrix.ArrayDimensions = NULL;
                     ClearToVariantArrayBuiltInType(variant->BuiltInTypeId, &variant->Value.Matrix.Content,
                                                    (int32_t*) &matrixLength, clearFunction);
                     variant->Value.Matrix.Dimensions = 0;
