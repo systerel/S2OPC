@@ -34,6 +34,6 @@ void SOPC_NetworkMessage_Set_Variant_At(SOPC_Dataset_NetworkMessage* nm,
                                         uint8_t dsm_index,
                                         uint16_t dsf_index,
                                         SOPC_Variant* variant,
-                                        SOPC_FieldMetaData* metadata);
+                                        const SOPC_FieldMetaData* metadata);
 
 #endif /* SOPC_DATASET_LAYER_H_ */

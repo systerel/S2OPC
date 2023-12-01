@@ -294,19 +294,26 @@ bool SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(const SOPC_FieldMetaData* f
     SOPC_ASSERT(NULL != variant);
 
     const SOPC_BuiltinId expBuiltInType = SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData);
-
+    bool res = false;
     if (expBuiltInType == variant->BuiltInTypeId)
     {
-        const int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
+        const SOPC_PubSub_ArrayDimension* arrDimension = SOPC_FieldMetaData_Get_ArrayDimension(fieldMetaData);
         const int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
-
-        /*
-         * Value rank -3, -2 and 0 cannot be used for subscriber configuration with fixed size optimization.
-         * Normally Publisher wouldn't send this values
-         * Only scalar values are supported.
-         */
-        SOPC_ASSERT(-1 == expValueRank);
-        return expValueRank == actualValueRank;
+        if (NULL != arrDimension)
+        {
+            if (arrDimension->valueRank == actualValueRank)
+            {
+                if (-1 == actualValueRank)
+                {
+                    res = true;
+                }
+                else if (1 == actualValueRank)
+                {
+                    SOPC_ASSERT(NULL != arrDimension->arrayDimensions);
+                    res = ((int32_t) *arrDimension->arrayDimensions == variant->Value.Array.Length);
+                }
+            }
+        }
     }
-    return false;
+    return res;
 }

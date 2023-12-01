@@ -118,7 +118,7 @@ void SOPC_NetworkMessage_Set_Variant_At(SOPC_Dataset_NetworkMessage* nm,
                                         uint8_t dsm_index,
                                         uint16_t dsf_index,
                                         SOPC_Variant* variant,
-                                        SOPC_FieldMetaData* metadata)
+                                        const SOPC_FieldMetaData* metadata)
 {
     SOPC_ASSERT(NULL != nm && NULL != variant && NULL != metadata);
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dsm_index);
