@@ -1,0 +1,98 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+/*
+ * An important part of the cases of PKI certificate validation are tested
+ * in UACTT, but some cases are not tested. This file contains these last
+ * cases.
+ */
+
+#include <check.h>
+
+#include "check_helpers.h"
+#include "sopc_crypto_profiles.h"
+#include "sopc_key_manager.h"
+#include "sopc_pki_stack.h"
+
+START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* pCertToValidate = NULL;
+    SOPC_CertificateList* cacert = NULL;
+    SOPC_CertificateList* int_cli_cacert = NULL;
+    SOPC_CRLList* int_cli_cacrl = NULL;
+    SOPC_CRLList* cacrl = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t validation_error = 0;
+
+    // Create a profile for the PKI
+    status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Create the certificates and the CRLs of the PKI
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/int_cli_cacert.pem",
+                                                             &int_cli_cacert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/int_cli_cacrl.pem", &int_cli_cacrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &cacert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &cacrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Create the PKI
+    status = SOPC_PKIProvider_CreateFromList(cacert, cacrl, int_cli_cacert, int_cli_cacrl, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Create the certificate to validate
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/int_client_cert.pem", &pCertToValidate);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // 1st validation : Root CA trusted only
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // 2nd validation : Intermediate CA trusted only
+    // Update the PKI
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, int_cli_cacert,
+                                             int_cli_cacrl, cacert, cacrl, 0);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Free
+    SOPC_KeyManager_Certificate_Free(cacert);
+    SOPC_KeyManager_Certificate_Free(int_cli_cacert);
+    SOPC_KeyManager_Certificate_Free(pCertToValidate);
+    SOPC_KeyManager_CRL_Free(cacrl);
+    SOPC_KeyManager_CRL_Free(int_cli_cacrl);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
+Suite* tests_make_suite_pki_cert_validate(void)
+{
+    Suite* s = suite_create("PKI certificate validation tests");
+    TCase* certificate_validation = tcase_create("certificate validation");
+    tcase_add_test(certificate_validation, certificate_validation_one_ca_trusted_only_in_chain);
+    suite_add_tcase(s, certificate_validation);
+
+    return s;
+}

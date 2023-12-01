@@ -65,6 +65,7 @@ int main(void)
     srunner_add_suite(sr, tests_make_suite_crypto_tools());
     srunner_add_suite(sr, tests_make_suite_hash_based_crypto());
     srunner_add_suite(sr, tests_make_suite_pki());
+    srunner_add_suite(sr, tests_make_suite_pki_cert_validate());
     srunner_add_suite(sr, tests_make_suite_tools());
     srunner_add_suite(sr, tests_make_suite_threads());
     srunner_add_suite(sr, tests_make_suite_time());
