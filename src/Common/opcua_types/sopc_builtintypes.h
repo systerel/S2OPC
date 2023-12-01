@@ -291,6 +291,16 @@ typedef enum SOPC_VariantArrayType
     SOPC_VariantArrayType_Matrix = 0x2
 } SOPC_VariantArrayType;
 
+typedef enum SOPC_ValueRankType
+{
+    SOPC_ValueRank_ScalarOrOneDimension = -3, // valueRank can't have a smallest value
+    SOPC_ValueRank_Any = -2,
+    SOPC_ValueRank_Scalar = -1,
+    SOPC_ValueRank_OneOrMoreDimensions = 0,
+    SOPC_ValueRank_OneDimension = 1,
+    SOPC_ValueRank_MoreThanOneDimension = 2, // Every matrix should have a valueRank equal or greater than this value
+} SOPC_ValueRankType;
+
 /**
  *  \brief This union provides all possible contents for Variant arrays, depending on their \a SOPC_BuiltinId.
  */

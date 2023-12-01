@@ -120,6 +120,7 @@ void SOPC_NetworkMessage_Set_Variant_At(SOPC_Dataset_NetworkMessage* nm,
                                         SOPC_Variant* variant,
                                         SOPC_FieldMetaData* metadata)
 {
+    // TODO Do we really need FieldMetaData in this function ? If yes should it be const ?
     SOPC_ASSERT(NULL != nm && NULL != variant && NULL != metadata);
     SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dsm_index);
     // checks bad index

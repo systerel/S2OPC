@@ -256,14 +256,29 @@ bool SOPC_PubSubHelpers_IsPreencodeCompatibleVariant(const SOPC_FieldMetaData* f
     SOPC_ASSERT(NULL != fieldMetaData);
     SOPC_ASSERT(NULL != variant);
 
-    SOPC_BuiltinId expBuiltInType = SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData);
+    const SOPC_BuiltinId expBuiltInType = SOPC_FieldMetaData_Get_BuiltinType(fieldMetaData);
 
     if (expBuiltInType == variant->BuiltInTypeId)
     {
-        int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
-        int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
-
-        return (expValueRank == actualValueRank);
+        const int32_t expValueRank = SOPC_FieldMetaData_Get_ValueRank(fieldMetaData);
+        const int32_t actualValueRank = SOPC_Variant_Get_ValueRank(variant);
+        const uint32_t* arrayDimensions = SOPC_FieldMetaData_Get_ArrayDimensions(fieldMetaData);
+        if (expValueRank == actualValueRank)
+        {
+            switch (actualValueRank)
+            {
+            case SOPC_ValueRank_Scalar:
+                return true;
+                break;
+            case SOPC_ValueRank_OneDimension:
+                SOPC_ASSERT(NULL != arrayDimensions);
+                return ((int32_t) *arrayDimensions == variant->Value.Array.Length);
+                break;
+            default:
+                return false;
+                break;
+            }
+        }
     }
     return false;
 }

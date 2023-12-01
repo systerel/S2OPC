@@ -208,7 +208,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context);
  * @return SOPC_ReturnStatus SOPC_STATUS_OK if success, SOPC_STATUS_NOK otherwise
  */
 static SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_NetworkMessage* message,
-                                                                  SOPC_WriterGroup* group);
+                                                                  const SOPC_WriterGroup* group);
 
 /**
  * @brief Send keep alive message for acyclic publisher
@@ -1200,34 +1200,29 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
 }
 
 SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,
-                                                           SOPC_WriterGroup* group)
+                                                           const SOPC_WriterGroup* group)
 {
     if (NULL == networkMessage || NULL == group)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
+    const uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     for (uint8_t iWg = 0; iWg < nbDataset; iWg++)
     {
-        SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, iWg);
+        const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, iWg);
         SOPC_ASSERT(NULL != writer);
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
         SOPC_ASSERT(NULL != dataset);
-        uint16_t nbField = SOPC_PublishedDataSet_Nb_FieldMetaData(dataset);
+        const uint16_t nbField = SOPC_PublishedDataSet_Nb_FieldMetaData(dataset);
         for (uint16_t iField = 0; iField < nbField && SOPC_STATUS_OK == status; iField++)
         {
             SOPC_FieldMetaData* metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, iField);
             SOPC_ASSERT(NULL != metadata);
-            SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
-            int32_t rank = SOPC_FieldMetaData_Get_ValueRank(metadata);
-            if (-1 != rank)
-            {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
-                                       "Array are not supported with preencoding buffer optimization");
-                status = SOPC_STATUS_NOK;
-            }
-            else
+            const SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
+            const int32_t rank = SOPC_FieldMetaData_Get_ValueRank(metadata);
+            const uint32_t* arrayDimensions = SOPC_FieldMetaData_Get_ArrayDimensions(metadata);
+            if (SOPC_ValueRank_Scalar == rank)
             {
                 SOPC_Variant* variant = SOPC_Variant_Create();
                 SOPC_ASSERT(NULL != variant);
@@ -1261,6 +1256,49 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
                 {
                     SOPC_Variant_Delete(variant);
                 }
+            }
+            else if (SOPC_ValueRank_OneDimension == rank)
+            {
+                SOPC_Variant* variant = SOPC_Variant_Create();
+                SOPC_ASSERT(NULL != variant);
+                switch (type)
+                {
+                case SOPC_Null_Id:
+                case SOPC_Boolean_Id:
+                case SOPC_SByte_Id:
+                case SOPC_Byte_Id:
+                case SOPC_Int16_Id:
+                case SOPC_UInt16_Id:
+                case SOPC_Int32_Id:
+                case SOPC_UInt32_Id:
+                case SOPC_Int64_Id:
+                case SOPC_UInt64_Id:
+                case SOPC_Float_Id:
+                case SOPC_Double_Id:
+                case SOPC_DateTime_Id:
+                case SOPC_Guid_Id:
+                case SOPC_StatusCode_Id:
+                    SOPC_ASSERT(NULL != arrayDimensions);
+                    SOPC_Variant_Initialize_Array(variant, type, (int32_t) *arrayDimensions);
+                    SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, variant, metadata);
+                    break;
+                default:
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                           "Invalid type %d when using preencoding buffer optimization", type);
+                    status = SOPC_STATUS_NOK;
+                    break;
+                }
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Variant_Delete(variant);
+                }
+            }
+            else
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
+                                       "Preencoding buffer optimization only support value rank equal to %d and %d",
+                                       SOPC_ValueRank_Scalar, SOPC_ValueRank_OneDimension);
+                status = SOPC_STATUS_NOK;
             }
         }
     }

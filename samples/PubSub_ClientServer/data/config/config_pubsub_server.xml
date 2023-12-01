@@ -16,6 +16,7 @@
             <!-- one to many -->
             <variable nodeId="ns=1;s=PubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=PubUInt" displayName="varUInt" dataType="UInt64"/>
+            <variable nodeId="ns=1;s=PubArrayInt" displayName="varInt" dataType="Int64" valueRank="1" arrayDimensions="3"/>
           </dataset>
         </message>
     </connection>
@@ -35,6 +36,7 @@
             <!-- one to many -->
             <variable nodeId="ns=1;s=SubInt" displayName="varInt" dataType="Int64"/>
             <variable nodeId="ns=1;s=SubUInt" displayName="varUInt" dataType="UInt64"/>
+            <variable nodeId="ns=1;s=SubArrayInt" displayName="varInt" dataType="Int64" valueRank="1"/>
           </dataset>
         </message>
     </connection>
