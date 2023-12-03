@@ -151,13 +151,24 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-Wimplicit -Wreturn-type -Wsequence-point -Wcast-qual -Wuninitialized -Wcast-align -Wstrict-prototypes -Wchar-subscripts -Wformat=2 -Wconversion -Wshadow -Wmissing-prototypes -Wdate-time -Wfloat-equal -Winit-self -Wjump-misses-init -Wlogical-op -Wnested-externs -Wnormalized -Wold-style-definition -Wpointer-arith -Wswitch-default -Wtrampolines >)
 # Make optional some flags not supported with GCC < 6
 list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},6>>:-Wduplicated-cond -Wnull-dereference >)
+# Make optional some flags not supported with GCC < 13
+list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},13>>:-Wenum-int-mismatch -Wbidi-chars=any -Warray-compare>)
 
 # Add security hardening compilation options
 option(SECURITY_HARDENING "Harden compilation options" OFF)
 if (SECURITY_HARDENING)
-  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-fcf-protection -fstack-clash-protection -fstack-protector-strong>)
+	list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wimplicit-fallthrough -Wl,-z,nodlopen -Wl,-z,noexecstack -fcf-protection=full -fstack-clash-protection -fstack-protector-strong -Wl,-z,relro -fno-delete-null-pointer-checks -fno-strict-overflow -fno-strict-aliasing>)
+  # Add some security hardening flags not supported with GCC < 13
+  list(APPEND S2OPC_COMPILER_FLAGS $<$<AND:${IS_GNU},$<VERSION_GREATER:${CMAKE_C_COMPILER_VERSION},13>>:-fharden-compares -fharden-conditional-branches -fstrict-flex-arrays=3 -ftrivial-auto-var-init=zero>)
+  
   # Set GNU definitions for security hardening
-  list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
+  if (DEFINED IS_GNU AND ${CMAKE_C_COMPILER_VERSION} VERSION_GREATER "13")
+    # Set GNU definitions for security hardening not supported with GCC < 13
+    list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=3 _GLIBCXX_ASSERTIONS>)
+  else()
+    list(APPEND S2OPC_DEFINITIONS $<${IS_GNU}:_FORTIFY_SOURCE=2 _GLIBCXX_ASSERTIONS>)
+  endif()
+  
   # Force symbol stripping (only available for GNU compatible compilers)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-s>)
   list(APPEND S2OPC_LINKER_FLAGS $<${IS_GNU}:-s>)
@@ -183,7 +194,7 @@ if (POSITION_INDEPENDENT_EXECUTABLE)
 endif()
 
 # Set Clang compiler flags
-list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-std=c99 -pedantic -fstack-protector -Wall -Wextra -Wunreachable-code>)
+list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-std=c99 -pedantic -fstack-protector -Wall -Wextra -Wunreachable-code -fexceptions>)
 # Add security hardening compilation options
 if (SECURITY_HARDENING)
   list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-mspeculative-load-hardening>)
