@@ -209,8 +209,9 @@ static struct
     SOPC_SubTargetVariableConfig* targetConfig;
     SOPC_SubscriberStateChanged_Func* pStateCallback;
 
-    /* Internal context. This is the main state and cannot reach Error State (only DSM can).
-     * See each DSM individual state in writerCtx. */
+    /* Internal context. This is the main publisher state. The Error state can only be reached
+     * if the configuration is incorrect (network reading is failing).
+     * Each DSM can have its own specific status. See DSM individual state in writerCtx. */
     SOPC_PubSubState state;
 
     SOPC_Buffer* receptionBufferSockets; /*For all socket connections (UDP / raw Ethernet)*/
@@ -316,18 +317,24 @@ void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSu
 // Set the new global mode.
 static void set_new_state(SOPC_PubSubState new)
 {
-    SOPC_ASSERT(new != SOPC_PubSubState_Error);
-    const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
-    schedulerCtx.state = new;
+    if (schedulerCtx.state == new)
+    {
+        return;
+    }
 
+    const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
+
+    // Update "Global" state of Subscriber.
     if (NULL != schedulerCtx.pStateCallback)
     {
         schedulerCtx.pStateCallback(NULL, 0, new);
     }
+    schedulerCtx.state = new;
+
     // The DSM states are updated accordingly, except that they do not get the Operational
     // state. They need to receive a valid message to reach that state.
     // At startup : Sub global state is Operational and DSM states are Disabled until timeout or reception.
-    const SOPC_PubSubState dsmState = (new == SOPC_PubSubState_Operational ? SOPC_PubSubState_Disabled : new);
+    const SOPC_PubSubState dsmState = (SOPC_PubSubState_Operational == new ? SOPC_PubSubState_Disabled : new);
     for (size_t i = 0; i < nbCtx; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
@@ -849,8 +856,8 @@ static void SOPC_Sub_PeriodicTick(void* param)
         if (ctx->connectionMode == SOPC_PubSubState_Operational)
         {
             // Check timeout for this DSM
-            const double delta_ms = (double) SOPC_RealTime_DeltaUs(now, ctx->timeout);
-            if (delta_ms <= 0)
+            const int64_t delta_us = SOPC_RealTime_DeltaUs(now, ctx->timeout);
+            if (delta_us <= 0)
             {
                 if (ctx->pubId.type == SOPC_UInteger_PublisherId)
                 {
@@ -1181,24 +1188,23 @@ static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId
 static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
 {
     if (NULL == pubId)
+    {
         return NULL;
+    }
     SOPC_SubScheduler_Writer_Ctx* result = NULL;
 
     size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < size && NULL == result; i++)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        SOPC_ASSERT(ctx != NULL);
         if (compare_publisherId(&ctx->pubId, pubId))
         {
             if (ctx->writerId == writerId)
             {
-                if (compare_publisherId(&ctx->pubId, pubId))
-                {
-                    result = ctx;
-                }
+                result = ctx;
             }
         }
     }
-    SOPC_ASSERT(result != NULL);
     return result;
 }

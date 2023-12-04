@@ -296,28 +296,6 @@ static SOPC_NetworkMessage_Error_Code Decode_NetworkMessage_NoSecu(SOPC_Buffer* 
         .dsmSnGapCallback = NULL,
         .targetConfig = NULL};
 
-    uint16_t iCtx = 0;
-    const SOPC_Conf_PublisherId* pubId = SOPC_PubSubConnection_Get_PublisherId(connection);
-
-    // Create a list containing all writer ids to ease further checks and searches in a single array.
-    memset(writerCtx, 0, sizeof(writerCtx));
-    for (uint16_t iCnx = 0; iCnx < SOPC_PubSubConnection_Nb_ReaderGroup(connection); iCnx++)
-    {
-        SOPC_ReaderGroup* grp = SOPC_PubSubConnection_Get_ReaderGroup_At(connection, iCnx);
-        for (uint8_t iGrp = 0; iGrp < SOPC_ReaderGroup_Nb_DataSetReader(grp); iGrp++)
-        {
-            SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(grp, iGrp);
-            uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
-
-            ck_assert_int_gt(NB_DATASET_MSG, iCtx);
-            writerCtx[iCtx].pubId = *pubId;
-            writerCtx[iCtx].writerId = writerId;
-            writerCtx[iCtx].timeout = NULL;
-            writerCtx[iCtx].dataSetMessageSequenceNumber = 0;
-            iCtx++;
-        }
-    }
-
     SOPC_NetworkMessage_Error_Code errorCode =
         SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection, uadp_nm);
     return errorCode;
