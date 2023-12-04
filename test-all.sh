@@ -73,7 +73,8 @@ s2opc_discovery.tap
 s2opc_wrapper_get_endpoints.tap
 s2opc_wrapper_subscribe.tap'
 
-PUBSUB_TAP_FILES='interop_pub_test.tap
+PUBSUB_TAP_FILES='cli_self_test.tap
+interop_pub_test.tap
 interop_sub_test.tap
 interop_pub_encrypted_interop.tap
 ll_multi_pub_sub_test.tap
