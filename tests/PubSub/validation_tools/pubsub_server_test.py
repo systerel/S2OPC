@@ -755,7 +755,7 @@ def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
         @return True if res_fcn() returned true within expected time
     """
     _t = maxWait_s;
-    res = False
+    res = res_fcn()
     while _t >= 0 and not res:
         _t -= period_s
         sleep(period_s)
@@ -1225,7 +1225,10 @@ def testPubSubDynamicConf(logger):
 
         logger.add_test('Subscriber bool is changed', subIsFalse)
         logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
-        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+        
+        # There are 2 distinct messages. Ensure second message is received when checking 
+        subIntIsMinus300 = waitForEvent(lambda: -300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber int is changed', subIntIsMinus300)
         logger.add_test('Subscriber string is changed', "Test MQTT From Publisher" == pubsubserver.getValue(NID_SUB_STRING))
         sleep(DYN_CONF_PUB_INTERVAL)
 
