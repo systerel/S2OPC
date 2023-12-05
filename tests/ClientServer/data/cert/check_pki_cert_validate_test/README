@@ -1,0 +1,3 @@
+These certificates and CRL are used to test degraded cases of the PKI certificate validation process.
+The CRL is a CRL issued by cacert, and it has not been renewed by it: it means that the field nextupdate of the CRL
+is in the past.
