@@ -548,8 +548,8 @@ static SOPC_ReturnStatus authorization_test_sks(SOPC_UserAuthorization_Manager* 
     // We use global user rights only and do not check user rights for a specific node
     (void) (nodeId);
     (void) (attributeId);
-    assert(NULL != authorizationManager);
-    assert(NULL != pbOperationAuthorized);
+    SOPC_ASSERT(NULL != authorizationManager);
+    SOPC_ASSERT(NULL != pbOperationAuthorized);
 
     *pbOperationAuthorized = false;
 
@@ -590,7 +590,7 @@ static SOPC_ReturnStatus authorization_test_sks(SOPC_UserAuthorization_Manager* 
         *pbOperationAuthorized = exec;
         break;
     default:
-        assert(false && "Unknown operation type.");
+        SOPC_ASSERT(false && "Unknown operation type.");
         break;
     }
 
