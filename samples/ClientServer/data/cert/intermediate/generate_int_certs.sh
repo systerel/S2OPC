@@ -64,15 +64,15 @@ rm ./*.csr
 
 # Generate, for the client and the server, the encrypted private keys (these commands require the password).
 echo "****** Server private keys encryption ******"
-openssl rsa -in "$SRV_KEY" -aes-256-cbc -out encrypted_"$SRV_KEY"
+openssl rsa -traditional  -in "$SRV_KEY" -aes-256-cbc -out encrypted_"$SRV_KEY"
 echo "****** Client private keys encryption ******"
-openssl rsa -in "$CLI_KEY" -aes-256-cbc -out encrypted_"$CLI_KEY"
+openssl rsa -traditional  -in "$CLI_KEY" -aes-256-cbc -out encrypted_"$CLI_KEY"
 
 # Generate the encrypted intermediate client/server CA private keys (these commands require the password).
 echo "****** Intermediate Server CA private keys encryption ******"
-openssl rsa -in "$CA_SRV_PREFIX"_cakey.pem -aes-256-cbc -out encrypted_"$CA_SRV_PREFIX"_cakey.pem
+openssl rsa -traditional  -in "$CA_SRV_PREFIX"_cakey.pem -aes-256-cbc -out encrypted_"$CA_SRV_PREFIX"_cakey.pem
 echo "****** Intermediate Client CA private keys encryption ******"
-openssl rsa -in "$CA_CLI_PREFIX"_cakey.pem -aes-256-cbc -out encrypted_"$CA_CLI_PREFIX"_cakey.pem
+openssl rsa -traditional  -in "$CA_CLI_PREFIX"_cakey.pem -aes-256-cbc -out encrypted_"$CA_CLI_PREFIX"_cakey.pem
 
 # Remove the unencrypted keys
 rm "$CLI_KEY" && rm "$SRV_KEY"
