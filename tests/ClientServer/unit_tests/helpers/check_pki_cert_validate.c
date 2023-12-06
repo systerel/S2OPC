@@ -87,6 +87,58 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
 }
 END_TEST
 
+START_TEST(certificate_validation_self_signed_ca_without_crl)
+{
+    SOPC_PKIProvider* pPKI = NULL;
+    SOPC_PKI_Profile* pProfile = NULL;
+    SOPC_CertificateList* cacert = NULL;
+    SOPC_CertificateList* self_signed_ca_pathLen0 = NULL;
+    SOPC_CRLList* cacrl = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    uint32_t validation_error = 0;
+
+    // Create a profile for the PKI
+    status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ProfileSetUsageFromType(pProfile, SOPC_PKI_TYPE_SERVER_APP);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Create the certificates and CRLs
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &cacert);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &cacrl);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(
+        "./S2OPC_Demo_PKI/trusted/certs/ca_selfsigned_pathLen0.der", &self_signed_ca_pathLen0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // 1st validation: self_signed_ca_pathLen0 is trusted and we want to validate it
+    // Create the PKI and validate
+    status = SOPC_PKIProvider_CreateFromList(self_signed_ca_pathLen0, NULL, NULL, NULL, &pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
+    // Validation result: must be OK.
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // 2nd validation: self_signed_ca_pathLen0 is issuer and we want to validate it
+    // Update the PKI and validate
+    // There must be at least one trusted certificate in the PKI (see the PKI function check_lists())
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, cacert, cacrl,
+                                             self_signed_ca_pathLen0, NULL, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
+    // Validation result: must be NOK cert untrusted
+    ck_assert_int_eq(SOPC_STATUS_NOK, status);
+
+    // Free
+    SOPC_KeyManager_Certificate_Free(cacert);
+    SOPC_KeyManager_Certificate_Free(self_signed_ca_pathLen0);
+    SOPC_KeyManager_CRL_Free(cacrl);
+    SOPC_PKIProvider_DeleteProfile(&pProfile);
+    SOPC_PKIProvider_Free(&pPKI);
+}
+END_TEST
+
 START_TEST(certificate_validation_crl_not_renewed)
 {
     SOPC_PKIProvider* pPKI = NULL;
@@ -135,6 +187,7 @@ Suite* tests_make_suite_pki_cert_validate(void)
     Suite* s = suite_create("PKI certificate validation tests");
     TCase* certificate_validation = tcase_create("certificate validation");
     tcase_add_test(certificate_validation, certificate_validation_one_ca_trusted_only_in_chain);
+    tcase_add_test(certificate_validation, certificate_validation_self_signed_ca_without_crl);
     tcase_add_test(certificate_validation, certificate_validation_crl_not_renewed);
     suite_add_tcase(s, certificate_validation);
 

@@ -86,6 +86,7 @@ if (expat_FOUND)
     # Add S2OPC application certs in S2OPC_Demo_PKI
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/certs/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/crl/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/selfsigned/ca_selfsigned_pathLen0.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/certs/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/untrusted/untrusted_cacert.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/issuers/certs/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/untrusted/untrusted_cacrl.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/issuers/crl/
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/untrusted/trusted_server_cert.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/certs/
