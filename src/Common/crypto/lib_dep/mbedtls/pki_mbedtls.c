@@ -619,6 +619,41 @@ static SOPC_ReturnStatus cert_is_self_signed(mbedtls_x509_crt* crt, bool* pbIsSe
     return status;
 }
 
+static SOPC_ReturnStatus check_common_name(const SOPC_CertificateList* pToValidate)
+{
+    SOPC_ASSERT(NULL != pToValidate);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
+    const char* thumb = NULL != pThumb ? pThumb : "NULL";
+
+    int found = -1;
+    const mbedtls_x509_name* attribute = &pToValidate->crt.subject;
+    /* mbedtls_asn1_find_named_data is not used because of const condition */
+    while (NULL != attribute && 0 != found)
+    {
+        found = MBEDTLS_OID_CMP(MBEDTLS_OID_AT_CN, &attribute->oid);
+        if (0 == found && NULL == attribute->val.p)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                     "> PKI validation : The Common Name attribute is specified with an empty name for "
+                                     "certificate thumbprint %s",
+                                     thumb);
+        }
+        attribute = attribute->next;
+    }
+    if (0 != found)
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI validation failed : The Common Name attribute is not specified for certificate thumbprint %s",
+            thumb);
+        status = SOPC_STATUS_NOK;
+    }
+    SOPC_Free(pThumb);
+    return status;
+}
+
 static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToValidate,
                                                const SOPC_PKI_LeafProfile* pConfig)
 {
@@ -1620,13 +1655,23 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     uint32_t currentError = SOPC_CertificateValidationError_Unknown;
     bool bErrorFound = false;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    status = check_common_name(pToValidate);
+    if (SOPC_STATUS_OK != status)
+    {
+        firstError = SOPC_CertificateValidationError_Invalid;
+        bErrorFound = true;
+    }
     if (pProfile->bApplySecurityPolicy)
     {
         status = check_security_policy(pToValidate, pProfile);
         if (SOPC_STATUS_OK != status)
         {
-            firstError = SOPC_CertificateValidationError_PolicyCheckFailed;
-            bErrorFound = true;
+            currentError = SOPC_CertificateValidationError_PolicyCheckFailed;
+            if (!bErrorFound)
+            {
+                firstError = currentError;
+                bErrorFound = true;
+            }
         }
     }
     if (NULL != pProfile->sanURL)
