@@ -35,7 +35,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_random.h"
 
-#include "key_manager_cyclone_crypto.h"
+#include "key_manager_cyclone.h"
 
 #include "pkc/rsa.h"
 #include "pkix/pem_decrypt.h"
@@ -56,8 +56,6 @@
  * AsymmetricKey API
  * ------------------------------------------------------------------------------------------------
  */
-
-#define SOPC_RSA_EXPONENT 65537
 
 /**
  * Creates an asymmetric key from a \p buffer, in DER or PEM format.
@@ -209,7 +207,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_GenRSA(uint32_t RSAKeySize, SOPC
     SOPC_UNUSED_ARG(RSAKeySize);
     SOPC_UNUSED_ARG(ppKey);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
     // It requires to implement a _weak_func of CycloneCRYPTO which is not easily implementable.
 
     return SOPC_STATUS_NOK;
@@ -337,7 +335,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToPEMFile(SOPC_AsymmetricKey* pK
     SOPC_UNUSED_ARG(pwd);
     SOPC_UNUSED_ARG(pwdLen);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -779,101 +777,22 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSubjectName(const SOPC_Certific
     SOPC_UNUSED_ARG(ppSubjectName);
     SOPC_UNUSED_ARG(pSubjectNameLen);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
-    // CycloneCRYPTO does not provide any function that prints the name in such string format :
-    // "C=FR, ST=France, L=Aix-en-Provence, O=Systerel, CN=S2OPC Demo Certificate for Server Tests".
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
-}
-
-static void sopc_free_c_string_from_ptr(void* data)
-{
-    if (NULL != data)
-    {
-        SOPC_Free(*(char**) data);
-    }
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetSanDnsNames(const SOPC_CertificateList* pCert,
                                                              char*** ppDnsNameArray,
                                                              uint32_t* pArrayLength)
 {
-    if (NULL == pCert || NULL == ppDnsNameArray || NULL == pArrayLength)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_UNUSED_ARG(pCert);
+    SOPC_UNUSED_ARG(ppDnsNameArray);
+    SOPC_UNUSED_ARG(pArrayLength);
 
-    size_t nbCert = 0;
-    SOPC_ReturnStatus status = SOPC_KeyManager_Certificate_GetListLength(pCert, &nbCert);
-    if (SOPC_STATUS_OK != status || 1 != nbCert)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 
-    bool bResAppend = false;
-    char_t* pItem = NULL;
-    char** pCStrArray = NULL;
-    size_t arrayLen = 0;
-    SOPC_Array* pArray = SOPC_Array_Create(sizeof(char*), 0, sopc_free_c_string_from_ptr);
-    if (NULL == pArray)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    bool bFound = false;
-    for (int i = 0; i < X509_MAX_SUBJECT_ALT_NAMES && (!bFound); i++)
-    {
-        if (X509_GENERAL_NAME_TYPE_DNS == pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].type)
-        {
-            bFound = true;
-            pItem =
-                SOPC_Calloc(pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length + 1, sizeof(char_t));
-            status = NULL == pItem ? SOPC_STATUS_OUT_OF_MEMORY : status;
-            if (SOPC_STATUS_OK == status)
-            {
-                memcpy(pItem, pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].value,
-                       pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length);
-                pItem[pCert->crt.tbsCert.extensions.subjectAltName.generalNames[i].length] = '\0';
-                bResAppend = SOPC_Array_Append(pArray, pItem);
-                if (!bResAppend)
-                {
-                    status = SOPC_STATUS_NOK;
-                }
-            }
-            if (SOPC_STATUS_OK != status)
-            {
-                SOPC_Free(pItem); // case of append error;
-            }
-        }
-    }
-
-    if (SOPC_STATUS_OK == status)
-    {
-        arrayLen = SOPC_Array_Size(pArray);
-        if (UINT32_MAX < arrayLen)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        if (SOPC_STATUS_OK == status && 0 != arrayLen)
-        {
-            pCStrArray = SOPC_Array_Into_Raw(pArray);
-            if (NULL == pCStrArray)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-                arrayLen = 0;
-            }
-            // Deallocated by SOPC_Array_Into_Raw in any cases
-            pArray = NULL;
-        }
-    }
-
-    /* Clear */
-    SOPC_Array_Delete(pArray);
-    /* Set output value */
-    *ppDnsNameArray = pCStrArray;
-    *pArrayLength = (uint32_t) arrayLen;
-
-    return status;
+    return SOPC_STATUS_NOK;
 }
 
 /* Creates a new string. Later have to free the result */
@@ -887,7 +806,7 @@ static char* get_raw_sha1(SOPC_Buffer* raw)
 
     if (errLib)
     {
-        fprintf(stderr, "Cannot compute thumbprint of certificate, err -0x%X\n", errLib);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Cannot compute thumbprint of certificate, err -0x%X", errLib);
         return NULL;
     }
 
@@ -1058,10 +977,10 @@ SOPC_ReturnStatus SOPC_KeyManagerInternal_CertificateList_CheckCRL(SOPC_Certific
                 {
                     list_match = false;
                     char* fpr = get_raw_sha1(current_cert->raw);
-                    fprintf(stderr,
-                            "> MatchCRLList warning: CA Certificate with SHA-1 fingerprint %s has no CRL and will not "
-                            "be considered as valid issuer.\n",
-                            fpr);
+                    SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_COMMON,
+                                             "MatchCRLList: CA Certificate with SHA-1 fingerprint %s has no "
+                                             "CRL and will not be considered as valid issuer.",
+                                             fpr);
                     SOPC_Free(fpr);
                 }
                 /* Iterate */
@@ -1124,7 +1043,8 @@ static SOPC_ReturnStatus raw_buf_to_der_file(SOPC_Buffer* buf, const char* direc
             int err = remove(filePath);
             if (0 != err)
             {
-                fprintf(stderr, "> KeyManager: removing partially written DER file '%s' failed.\n", filePath);
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                       "KeyManager: removing partially written DER file '%s' failed.", filePath);
             }
             status = SOPC_STATUS_NOK;
         }
@@ -1454,7 +1374,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
     /* Fill the CRL */
     if (SOPC_STATUS_OK == status)
     {
-        // Create the certificate from the attached buffer because Cyclone cert will point on it
+        // Create the crl from the attached buffer because Cyclone crl will point on it
         errLib = x509ParseCrl(pCRLNew->raw->data, (size_t) lenDER, &pCRLNew->crl);
         if (errLib)
         {
@@ -1465,14 +1385,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         }
     }
 
-    /* In case of error, free the new certificate and the whole list */
+    /* In case of error, free the new crl and the whole list */
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_CRL_Free(pCRLNew);
         return status;
     }
 
-    /* Finally add the cert to the list in ppCert */
+    /* Finally add the crl to the list in ppCRL */
     if (SOPC_STATUS_OK == status)
     {
         /* Special case when the input list is not created */
@@ -1645,7 +1565,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_Create(const char* subjectName,
     SOPC_UNUSED_ARG(arrayLength);
     SOPC_UNUSED_ARG(ppCSR);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -1660,7 +1580,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CSR_ToDER(SOPC_CSR* pCSR,
     SOPC_UNUSED_ARG(ppDest);
     SOPC_UNUSED_ARG(pLenAllocated);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 
     return SOPC_STATUS_NOK;
 }
@@ -1669,5 +1589,5 @@ void SOPC_KeyManager_CSR_Free(SOPC_CSR* pCSR)
 {
     SOPC_UNUSED_ARG(pCSR);
 
-    // Not implemented. Tests related to this funtion are disabled when compiling with Cyclone.
+    // Not implemented. Tests related to this function are disabled when compiling with Cyclone.
 }

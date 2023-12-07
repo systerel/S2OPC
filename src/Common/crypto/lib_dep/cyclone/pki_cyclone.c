@@ -46,7 +46,7 @@
 #include "sopc_pki_struct_lib_internal.h"
 #include "sopc_time.h"
 
-#include "key_manager_cyclone_crypto.h"
+#include "key_manager_cyclone.h"
 
 #include "encoding/oid.h"
 #include "pkix/x509_cert_validate.h"
@@ -330,12 +330,14 @@ static const SOPC_PKI_LeafProfile g_leaf_profile_rsa_sha1_1024_2048 = {.mdSign =
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha256_2048 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                       .mdSign = SOPC_PKI_MD_SHA256_OR_ABOVE,
                                                                       .pkAlgo = SOPC_PKI_PK_RSA,
-                                                                      .RSAMinimumKeySize = 2048};
+                                                                      .RSAMinimumKeySize = 2048,
+                                                                      .bDisableRevocationCheck = false};
 
 static const SOPC_PKI_ChainProfile g_chain_profile_rsa_sha1_1024 = {.curves = SOPC_PKI_CURVES_ANY,
                                                                     .mdSign = SOPC_PKI_MD_SHA1_OR_ABOVE,
                                                                     .pkAlgo = SOPC_PKI_PK_RSA,
-                                                                    .RSAMinimumKeySize = 1024};
+                                                                    .RSAMinimumKeySize = 1024,
+                                                                    .bDisableRevocationCheck = false};
 
 typedef struct Profile_Cfg
 {
@@ -1089,19 +1091,23 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
 static void crt_find_parent(const SOPC_CertificateList* child,
                             SOPC_CertificateList* candidates,
                             uint32_t* failure_reasons,
-                            SOPC_CertificateList** parent,
+                            SOPC_CertificateList** ppParent,
                             int* parent_is_trusted)
 {
+    // Make sure the container of the potential parent is not null, and empty.
+    SOPC_ASSERT(NULL != ppParent);
+    SOPC_ASSERT(NULL == *ppParent);
+
     SOPC_CertificateList* search_list = NULL;
     *parent_is_trusted = 1;
 
     while (1)
     {
         search_list = *parent_is_trusted ? candidates : child->next;
-        crt_find_parent_in(child, search_list, failure_reasons, parent);
+        crt_find_parent_in(child, search_list, failure_reasons, ppParent);
 
         /* stop here if found or already in second iteration */
-        if (NULL != *parent || 0 == *parent_is_trusted)
+        if (NULL != *ppParent || 0 == *parent_is_trusted)
         {
             break;
         }

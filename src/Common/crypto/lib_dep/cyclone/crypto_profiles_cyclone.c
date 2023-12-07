@@ -29,7 +29,7 @@
 // The services which are implemented in this file are declared here
 #include "sopc_crypto_profiles_lib_itf.h"
 
-#include "crypto_functions_cyclone_crypto.h"
+#include "crypto_functions_cyclone.h"
 #include "sopc_crypto_profiles.h"
 
 const SOPC_CryptoProfile sopc_g_cpAes256Sha256RsaPss = {

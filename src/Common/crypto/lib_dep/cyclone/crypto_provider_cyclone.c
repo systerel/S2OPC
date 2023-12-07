@@ -27,8 +27,8 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_random.h"
 
-#include "crypto_provider_cyclone_crypto.h"
-#include "key_manager_cyclone_crypto.h"
+#include "crypto_provider_cyclone.h"
+#include "key_manager_cyclone.h"
 
 // The services which are implemented in this file are declared here
 #include "sopc_crypto_provider_lib_itf.h"

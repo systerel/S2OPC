@@ -32,9 +32,9 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_random.h"
 
-#include "crypto_functions_cyclone_crypto.h"
-#include "crypto_provider_cyclone_crypto.h"
-#include "key_manager_cyclone_crypto.h"
+#include "crypto_functions_cyclone.h"
+#include "crypto_provider_cyclone.h"
+#include "key_manager_cyclone.h"
 
 // CycloneCRYPTO internal includes
 #include "cipher/aes.h"

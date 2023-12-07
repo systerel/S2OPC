@@ -63,7 +63,7 @@ option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" OFF)
 
 set(S2OPC_CRYPTO_LIB "nocrypto")
 if(S2OPC_CRYPTO_CYCLONE)
-  set(S2OPC_CRYPTO_LIB "cyclone_crypto")
+  set(S2OPC_CRYPTO_LIB "cyclone")
 elseif(S2OPC_CRYPTO_MBEDTLS)
   set(S2OPC_CRYPTO_LIB "mbedtls")
 endif()
