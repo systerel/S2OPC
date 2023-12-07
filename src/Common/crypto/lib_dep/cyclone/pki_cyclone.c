@@ -98,26 +98,8 @@ typedef struct
 #define X509_BADCRL_BAD_PK 0x040000 /**< The CRL is signed with an unacceptable PK alg (eg RSA vs ECDSA). */
 #define X509_BADCRL_BAD_KEY 0x080000 /**< The CRL is signed with an unacceptable key (eg bad curve, RSA too short). */
 
-// Bitmask for MD algos
-#define X509_ID_FLAG_MD_SHA1 0x01
-#define X509_ID_FLAG_MD_SHA224 0x02
-#define X509_ID_FLAG_MD_SHA256 0x04
-#define X509_ID_FLAG_MD_SHA384 0x08
-#define X509_ID_FLAG_MD_SHA512 0x10
-
 // Bitmask for public key algos
 #define X509_ID_FLAG_PK_RSA 0x01
-
-/* Definition of the CycloneCRYPTO profile cert structure */
-typedef struct cyclone_crypto_crt_profile
-{
-    uint32_t allowed_mds;    /**< MDs for signatures         */
-    uint32_t allowed_pks;    /**< PK algs for public keys;
-                              *   this applies to all certificates
-                              *   in the provided chain.     */
-    uint32_t allowed_curves; /**< Elliptic curves for ECDSA  */
-    uint32_t rsa_min_bitlen; /**< Minimum size for RSA keys  */
-} cyclone_crypto_crt_profile;
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
@@ -951,63 +933,6 @@ static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pTo
     return SOPC_STATUS_OK;
 }
 
-static SOPC_ReturnStatus set_profile_from_configuration(const SOPC_PKI_ChainProfile* pProfile,
-                                                        cyclone_crypto_crt_profile* pLibProfile)
-{
-    /* Set hashes allowed */
-    if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign)
-    {
-        pLibProfile->allowed_mds = X509_ID_FLAG_MD_SHA1 | X509_ID_FLAG_MD_SHA224 | X509_ID_FLAG_MD_SHA256 |
-                                   X509_ID_FLAG_MD_SHA384 | X509_ID_FLAG_MD_SHA512;
-    }
-    else if (SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign)
-    {
-        pLibProfile->allowed_mds = X509_ID_FLAG_MD_SHA256 | X509_ID_FLAG_MD_SHA384 | X509_ID_FLAG_MD_SHA512;
-    }
-    else if (SOPC_PKI_MD_SHA1 == pProfile->mdSign)
-    {
-        pLibProfile->allowed_mds = X509_ID_FLAG_MD_SHA1;
-    }
-    else if (SOPC_PKI_MD_SHA256 == pProfile->mdSign)
-    {
-        pLibProfile->allowed_mds = X509_ID_FLAG_MD_SHA256;
-    }
-    else if (SOPC_PKI_MD_SHA1_AND_SHA256 == pProfile->mdSign)
-    {
-        pLibProfile->allowed_mds = X509_ID_FLAG_MD_SHA1 | X509_ID_FLAG_MD_SHA256;
-    }
-    else
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* Set PK algo allowed */
-    if (SOPC_PKI_PK_ANY == pProfile->pkAlgo)
-    {
-        pLibProfile->allowed_pks = UINT32_MAX;
-    }
-    else if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
-    {
-        pLibProfile->allowed_pks = X509_ID_FLAG_PK_RSA;
-    }
-    else
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* Set curve allowed */
-    if (SOPC_PKI_CURVES_ANY == pProfile->curves)
-    {
-        pLibProfile->allowed_curves = UINT32_MAX;
-    }
-    else
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    /* Set minimum RSA key size allowed */
-    pLibProfile->rsa_min_bitlen = pProfile->RSAMinimumKeySize;
-
-    return SOPC_STATUS_OK;
-}
-
 /* Define the _weak_func used by x509ValidateCertificate() here.
  * TODO : Put this function in another file ?
  */
@@ -1119,39 +1044,57 @@ static void crt_find_parent(const SOPC_CertificateList* child,
     }
 }
 
-/* Converts a HashAlgo object to a its bitmask.
- * Returns 0 if it corresponds to a not known hash algo.
+/* Checks if the hashAlgo is an allowed algo for the profile.
+ * Returns 0 if it is ok.
  */
-static uint32_t HashAlgoToBitmask(const HashAlgo* hashAlgo)
+static int checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile* pProfile)
 {
     const char* hashAlgoName = hashAlgo->name;
+    int error = -1;
     int comparison = strcmp(hashAlgoName, "SHA-1");
     if (0 == comparison)
     {
-        return 0x01;
+        if (SOPC_PKI_MD_SHA1 == pProfile->mdSign || SOPC_PKI_MD_SHA1_AND_SHA256 == pProfile->mdSign ||
+            SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign)
+        {
+            error = 0;
+        }
     }
     comparison = strcmp(hashAlgoName, "SHA-224");
     if (0 == comparison)
     {
-        return 0x02;
+        if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign)
+        {
+            error = 0;
+        }
     }
     comparison = strcmp(hashAlgoName, "SHA-256");
     if (0 == comparison)
     {
-        return 0x04;
+        if (SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA1_AND_SHA256 == pProfile->mdSign ||
+            SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256 == pProfile->mdSign)
+        {
+            error = 0;
+        }
     }
     comparison = strcmp(hashAlgoName, "SHA-384");
     if (0 == comparison)
     {
-        return 0x08;
+        if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign)
+        {
+            error = 0;
+        }
     }
     comparison = strcmp(hashAlgoName, "SHA-512");
     if (0 == comparison)
     {
-        return 0x10;
+        if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign)
+        {
+            error = 0;
+        }
     }
 
-    return 0;
+    return error;
 }
 
 /* Verifies the chain of the certificate.
@@ -1162,7 +1105,7 @@ static uint32_t HashAlgoToBitmask(const HashAlgo* hashAlgo)
 static int crt_verify_chain(SOPC_CertificateList* pToValidate,
                             SOPC_CertificateList* trust_list,
                             SOPC_CRLList* cert_crl,
-                            const cyclone_crypto_crt_profile* crt_profile,
+                            const SOPC_PKI_ChainProfile* pProfile,
                             uint32_t* failure_reasons,
                             SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
 {
@@ -1200,7 +1143,7 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
 
         // b) Check if the parent's key suits to the profile.
         size_t keySize = parent->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
-        if (keySize < crt_profile->rsa_min_bitlen)
+        if (keySize < pProfile->RSAMinimumKeySize)
         {
             *failure_reasons |= X509_BADCERT_BAD_KEY;
             return -1;
@@ -1350,7 +1293,7 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
  * Returns -1 if the certificate failed the verifications, 0 on success.
  */
 static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
-                                   const cyclone_crypto_crt_profile* crt_profile,
+                                   const SOPC_PKI_ChainProfile* pProfile,
                                    uint32_t* failure_reasons)
 {
     /* 1) Check the type and size of the key */
@@ -1362,7 +1305,7 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
     }
     // Size.
     size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
-    if (keySize < crt_profile->rsa_min_bitlen)
+    if (keySize < pProfile->RSAMinimumKeySize)
     {
         *failure_reasons |= X509_BADCERT_BAD_KEY;
     }
@@ -1378,8 +1321,8 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
     }
 
     // hashAlgo should be at least SHA-256.
-    uint32_t hashAlgoId = HashAlgoToBitmask(hashAlgo);
-    if (0 == (hashAlgoId & crt_profile->allowed_mds)) // If the hash algo is not an allowed md.
+    int error = checkMdAllowed(hashAlgo, pProfile);
+    if (0 != error) // If the hash algo is not an allowed md.
     {
         *failure_reasons |= X509_BADCERT_BAD_MD;
     }
@@ -1394,7 +1337,7 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
 
 static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
                                                    SOPC_CertificateList* cert,
-                                                   cyclone_crypto_crt_profile* crt_profile,
+                                                   const SOPC_PKI_ChainProfile* pProfile,
                                                    bool bIsSelfSigned,
                                                    bool bForceTrustedCert,
                                                    bool bDisableRevocationCheck,
@@ -1404,7 +1347,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     SOPC_ASSERT(NULL != pPKI);
     SOPC_ASSERT(NULL != cert);
     SOPC_ASSERT(NULL == cert->next);
-    SOPC_ASSERT(NULL != crt_profile);
+    SOPC_ASSERT(NULL != pProfile);
     SOPC_ASSERT(NULL != thumbprint);
     SOPC_ASSERT(NULL != error);
 
@@ -1421,7 +1364,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
 
     /* Common verifications on the certificate (if it is self-signed or not) */
     uint32_t failure_reasons = 0;
-    int ret = crt_verify_with_profile(cert, crt_profile, &failure_reasons);
+    int ret = crt_verify_with_profile(cert, pProfile, &failure_reasons);
 
     SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {.trustedCrts = pPKI->pAllTrusted,
                                                          .allCRLs = pPKI->pAllCrl,
@@ -1439,7 +1382,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
         /* If certificate is not self signed, add the intermediate certificates to the trust chain to evaluate */
         cert->next = pLinkCert;
         /* Verify the certificate chain */
-        ret = crt_verify_chain(cert, ca_root, crl, crt_profile, &failure_reasons, &checkTrustedAndCRL);
+        ret = crt_verify_chain(cert, ca_root, crl, pProfile, &failure_reasons, &checkTrustedAndCRL);
     }
 
     // Check if at a least one trusted certificate is present in trust chain
@@ -1700,13 +1643,9 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
         }
     }
 
-    cyclone_crypto_crt_profile crt_profile = {0};
-    /* Set the profile from configuration */
-    status = set_profile_from_configuration(pProfile->chainProfile, &crt_profile);
-
     if (SOPC_STATUS_OK == status)
     {
-        status = sopc_validate_certificate(pPKI, pToValidateCpy, &crt_profile, bIsSelfSigned, false,
+        status = sopc_validate_certificate(pPKI, pToValidateCpy, pProfile->chainProfile, bIsSelfSigned, false,
                                            pProfile->chainProfile->bDisableRevocationCheck, thumbprint, &currentError);
         if (SOPC_STATUS_OK != status)
         {
@@ -1782,14 +1721,14 @@ static void sopc_free_c_string_from_ptr(void* data)
 
 static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPkiCerts,
                                                        const SOPC_PKIProvider* pPKI,
-                                                       cyclone_crypto_crt_profile* crt_profile,
+                                                       const SOPC_PKI_ChainProfile* pProfile,
                                                        const bool bDisableRevocationCheck,
                                                        bool* bErrorFound,
                                                        SOPC_Array* pErrors,
                                                        SOPC_Array* pThumbprints)
 {
     SOPC_ASSERT(NULL != pPkiCerts);
-    SOPC_ASSERT(NULL != crt_profile);
+    SOPC_ASSERT(NULL != pProfile);
     SOPC_ASSERT(NULL != pErrors);
     SOPC_ASSERT(NULL != pThumbprints);
 
@@ -1828,7 +1767,7 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         if (SOPC_STATUS_OK == status)
         {
             const bool forceTrustedCert = true;
-            statusChain = sopc_validate_certificate(pPKI, crt, crt_profile, bIsSelfSigned, forceTrustedCert,
+            statusChain = sopc_validate_certificate(pPKI, crt, pProfile, bIsSelfSigned, forceTrustedCert,
                                                     bDisableRevocationCheck, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
@@ -1876,7 +1815,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
-    cyclone_crypto_crt_profile crt_profile = {0};
     bool bErrorFound = false;
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
@@ -1888,27 +1826,18 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     {
         pErrArray = SOPC_Array_Create(sizeof(uint32_t), 0, NULL);
     }
-    if (NULL != pErrArray)
-    {
-        status = set_profile_from_configuration(pProfile, &crt_profile);
-    }
 
-    if (SOPC_STATUS_OK == status)
+    if (NULL != pPKI->pAllCerts)
     {
-        if (NULL != pPKI->pAllCerts)
-        {
-            status =
-                sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
-                                              &bErrorFound, pErrArray, pThumbArray);
-        }
+        status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, pProfile, pProfile->bDisableRevocationCheck,
+                                               &bErrorFound, pErrArray, pThumbArray);
     }
     if (SOPC_STATUS_OK == status)
     {
         if (NULL != pPKI->pAllRoots)
         {
-            status =
-                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, &crt_profile, pProfile->bDisableRevocationCheck,
-                                              &bErrorFound, pErrArray, pThumbArray);
+            status = sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, pProfile, pProfile->bDisableRevocationCheck,
+                                                   &bErrorFound, pErrArray, pThumbArray);
         }
     }
 
