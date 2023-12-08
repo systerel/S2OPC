@@ -862,19 +862,21 @@ static void sopc_key_manager_remove_cert_from_list(SOPC_CertificateList** ppCur,
     SOPC_CertificateList* pPrev = *ppPrev;    /* Parent of current cert */
     SOPC_CertificateList* pNext = pCur->next; /* Next cert */
     pCur->next = NULL;
-    SOPC_KeyManager_Certificate_Free(pCur);
+    SOPC_Buffer_Delete(pCur->raw);
+    rsaFreePublicKey(&pCur->pubKey);
     if (NULL == pPrev)
     {
         if (NULL == pNext)
         {
             /* The list is empty, Free it and stop the iteration  */
+            SOPC_Free(pHeadCertList);
             pHeadCertList = NULL;
             pCur = NULL;
         }
         else
         {
             /* Head of the list is a special case */
-            pHeadCertList = pNext; /* Use an assignment operator to do the copy */
+            *pHeadCertList = *pNext; /* Use an assignment operator to do the copy */
             /* We have to free the new next certificate */
             SOPC_Free(pNext);
 
@@ -884,6 +886,7 @@ static void sopc_key_manager_remove_cert_from_list(SOPC_CertificateList** ppCur,
     else
     {
         /* We have to free the certificate if it is not the first in the list */
+        SOPC_Free(pCur);
         pPrev->next = pNext;
         /* Iterate */
         pCur = pNext;
@@ -912,12 +915,16 @@ static SOPC_ReturnStatus sopc_key_manager_check_crl_ca_match(const SOPC_CRLList*
     SOPC_ASSERT(NULL != pCa);
     SOPC_ASSERT(pCa->crt.tbsCert.extensions.basicConstraints.cA);
     SOPC_ASSERT(NULL != pbMatch);
-
+    bool_t bMatch = false;
     *pbMatch = false;
 
-    /* Compare the subject name */
-    bool_t bMatch = x509CompareName(pCrl->crl.tbsCertList.issuer.rawData, pCrl->crl.tbsCertList.issuer.rawDataLen,
-                                    pCa->crt.tbsCert.subject.rawData, pCa->crt.tbsCert.subject.rawDataLen);
+    /* Compare the subject name if it exists */
+    if (pCrl->crl.tbsCertList.issuer.rawDataLen == pCa->crt.tbsCert.subject.rawDataLen)
+    {
+        bMatch = x509CompareName(pCrl->crl.tbsCertList.issuer.rawData, pCrl->crl.tbsCertList.issuer.rawDataLen,
+                                 pCa->crt.tbsCert.subject.rawData, pCa->crt.tbsCert.subject.rawDataLen);
+    }
+
     /* Check if the CRL is correctly signed by the CA */
     if (bMatch)
     {
@@ -1157,19 +1164,20 @@ static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLLi
         {
             next = cur->next;
             cur->next = NULL;
-            SOPC_KeyManager_CRL_Free(cur);
+            SOPC_Buffer_Delete(cur->raw);
             if (NULL == prev)
             {
                 if (NULL == next)
                 {
                     /* The list is empty, Free it and stop the iteration  */
+                    SOPC_Free(pHeadCRLList);
                     pHeadCRLList = NULL;
                     cur = NULL;
                 }
                 else
                 {
                     /* Head of the list is a special case */
-                    pHeadCRLList = next; /* Use an assignment operator to do the copy */
+                    *pHeadCRLList = *next; /* Use an assignment operator to do the copy */
                     /* We have to free the new next crl */
                     SOPC_Free(next);
                     /* Do not iterate: current crl has changed with the new head (cur = &pHeadCRLList->crl) */
@@ -1178,6 +1186,7 @@ static SOPC_ReturnStatus sopc_key_manager_crl_list_remove_crl_from_ca(SOPC_CRLLi
             else
             {
                 /* We have to free the crl if it is not the first in the list */
+                SOPC_Free(cur);
                 prev->next = next;
                 /* Iterate */
                 cur = next;
