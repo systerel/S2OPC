@@ -131,6 +131,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation <-- treat_one_relative_path_element_1(browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     PRE
+        isBrowseValueContextDefined = FALSE &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
@@ -166,6 +167,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation <-- treat_one_relative_path_element_2(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     PRE
+        isBrowseValueContextDefined = FALSE &
         statusCode_init : t_StatusCode_i &
         loop_index : NAT1 &
         browseDirection : t_BrowseDirection_i &
@@ -332,6 +334,7 @@ LOCAL_OPERATIONS
 
     statusCode_operation, nbReferences <-- compute_browse_result_from_source(source, browseDirection, referenceTypeId, includedSubtypes) =
     PRE
+        isBrowseValueContextDefined = FALSE &
         source : t_NodeId_i &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &

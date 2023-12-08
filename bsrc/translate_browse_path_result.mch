@@ -82,6 +82,7 @@ OPERATIONS
     statusCode_operation <-- treat_one_relative_path_element(relativePathElt, path_index) =
     PRE
         IsDecoded = TRUE &
+        isBrowseValueContextDefined = FALSE   &
         relativePathElt : t_RelativePathElt_i &
         relativePathElt : t_RelativePathElt   &
         relativePathElt : s_RelativePathElt   &

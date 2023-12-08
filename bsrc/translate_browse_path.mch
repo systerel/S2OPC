@@ -186,6 +186,7 @@ OPERATIONS
     treat_one_translate_browse_path(browsePath) =
     PRE
         IsDecoded = TRUE &
+        isBrowseValueContextDefined = FALSE &
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths &
         dom(BrowsePath_Res_NbTargetMax) = BrowsePaths

@@ -258,6 +258,7 @@ LOCAL_OPERATIONS
     statusCode_operation <-- treat_one_translate_browse_path_1(source, rel_path) =
     PRE
         IsDecoded = TRUE &
+        isBrowseValueContextDefined = FALSE &
         source : t_NodeId_i &
         source : t_NodeId   &
         rel_path : t_RelativePath_i &
@@ -294,6 +295,7 @@ LOCAL_OPERATIONS
     statusCode_operation, p_continue <-- treat_relative_path_sequence(rel_path_elt, path_index, continue) =
     PRE
         IsDecoded = TRUE &
+        isBrowseValueContextDefined = FALSE &
         rel_path_elt : t_RelativePathElt_i &
         rel_path_elt : t_RelativePathElt   &
         rel_path_elt : s_RelativePathElt   &
