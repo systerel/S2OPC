@@ -442,28 +442,24 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_Certificate_Free(pCertNew);
-        return status;
     }
-
-    /* Finally add the cert to the list in ppCert */
-    if (SOPC_STATUS_OK == status)
+    else /* Finally add the cert to the list in ppCert */
     {
         /* Special case when the input list is not created */
         if (NULL == *ppCert)
         {
             *ppCert = pCertNew;
-            return SOPC_STATUS_OK;
         }
-    }
-    SOPC_CertificateList* pCertLast = *ppCert;
-    if (SOPC_STATUS_OK == status)
-    {
-        while (NULL != pCertLast->next)
+        else
         {
-            pCertLast = pCertLast->next;
+            /* Otherwise, put the new certificate at the end of ppCert */
+            SOPC_CertificateList* pCertLast = *ppCert;
+            while (NULL != pCertLast->next)
+            {
+                pCertLast = pCertLast->next;
+            }
+            pCertLast->next = pCertNew;
         }
-        pCertLast->next = pCertNew;
-        return SOPC_STATUS_OK;
     }
 
     return status;
@@ -1394,32 +1390,28 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         }
     }
 
-    /* In case of error, free the new crl and the whole list */
+    /* In case of error, free the new certificate and the whole list */
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_CRL_Free(pCRLNew);
-        return status;
     }
-
-    /* Finally add the crl to the list in ppCRL */
-    if (SOPC_STATUS_OK == status)
+    else /* Finally add the cert to the list in ppCert */
     {
         /* Special case when the input list is not created */
         if (NULL == *ppCRL)
         {
             *ppCRL = pCRLNew;
-            return SOPC_STATUS_OK;
         }
-    }
-    SOPC_CRLList* pCRLLast = *ppCRL;
-    if (SOPC_STATUS_OK == status)
-    {
-        while (NULL != pCRLLast->next)
+        else
         {
-            pCRLLast = pCRLLast->next;
+            /* Otherwise, put the new certificate at the end of ppCert */
+            SOPC_CRLList* pCRLLast = *ppCRL;
+            while (NULL != pCRLLast->next)
+            {
+                pCRLLast = pCRLLast->next;
+            }
+            pCRLLast->next = pCRLNew;
         }
-        pCRLLast->next = pCRLNew;
-        return SOPC_STATUS_OK;
     }
 
     return status;
