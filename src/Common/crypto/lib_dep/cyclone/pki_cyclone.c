@@ -76,118 +76,42 @@ typedef struct
 } SOPC_CheckTrustedAndCRLinChain;
 
 // Bitmask errors for OPCUA error order compliance
-#define X509_BADCERT_EXPIRED 0x01 /**< The certificate validity has expired. */
-#define X509_BADCERT_REVOKED 0x02 /**< The certificate has been revoked (is on a CRL). */
-#define X509_BADCERT_CN_MISMATCH 0x04 /**< The certificate Common Name (CN) does not match with the expected CN. */
-#define X509_BADCERT_NOT_TRUSTED 0x08 /**< The certificate is not correctly signed by the trusted CA. */
-#define X509_BADCRL_NOT_TRUSTED 0x10 /**< The CRL is not correctly signed by the trusted CA. */
-#define X509_BADCRL_EXPIRED 0x20 /**< The CRL is expired. */
-#define X509_BADCERT_MISSING 0x40 /**< Certificate was missing. */
-#define X509_BADCERT_SKIP_VERIFY 0x80 /**< Certificate verification was skipped. */
-#define X509_BADCERT_OTHER 0x0100 /**< Other reason (can be used by verify callback) */
-#define X509_BADCERT_FUTURE 0x0200 /**< The certificate validity starts in the future. */
-#define X509_BADCRL_FUTURE 0x0400 /**< The CRL is from the future */
-#define X509_BADCERT_KEY_USAGE 0x0800 /**< Usage does not match the keyUsage extension. */
-#define X509_BADCERT_EXT_KEY_USAGE 0x1000 /**< Usage does not match the extendedKeyUsage extension. */
-#define X509_BADCERT_NS_CERT_TYPE 0x2000 /**< Usage does not match the nsCertType extension. */
-#define X509_BADCERT_BAD_MD 0x4000 /**< The certificate is signed with an unacceptable hash. */
-#define X509_BADCERT_BAD_PK 0x8000 /**< The certificate is signed with an unacceptable PK alg (eg RSA vs ECDSA). */
-#define X509_BADCERT_BAD_KEY \
-    0x010000 /**< The certificate is signed with an unacceptable key (eg bad curve, RSA too short). */
-#define X509_BADCRL_BAD_MD 0x020000 /**< The CRL is signed with an unacceptable hash. */
-#define X509_BADCRL_BAD_PK 0x040000 /**< The CRL is signed with an unacceptable PK alg (eg RSA vs ECDSA). */
-#define X509_BADCRL_BAD_KEY 0x080000 /**< The CRL is signed with an unacceptable key (eg bad curve, RSA too short). */
-
-// Bitmask for public key algos
-#define X509_ID_FLAG_PK_RSA 0x01
+#define PKI_CYCLONE_X509_BADCERT_EXPIRED 0x01 /**< The certificate validity has expired. */
+#define PKI_CYCLONE_X509_BADCERT_REVOKED 0x02 /**< The certificate has been revoked (is on a CRL). */
+#define PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED 0x04 /**< The certificate is not correctly signed by the trusted CA. */
+#define PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED 0x08 /**< The CRL is not correctly signed by the trusted CA. */
+#define PKI_CYCLONE_X509_BADCERT_BAD_MD 0x10 /**< The certificate is signed with an unacceptable hash. */
+#define PKI_CYCLONE_X509_BADCERT_BAD_PK \
+    0x20 /**< The certificate is signed with an unacceptable PK alg (eg RSA vs ECDSA). */
+#define PKI_CYCLONE_X509_BADCERT_BAD_KEY \
+    0x40 /**< The certificate is signed with an unacceptable key (eg bad curve, RSA too short). */
 
 static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_reasons)
 {
-    if ((failure_reasons & X509_BADCERT_MISSING) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_KEY_USAGE) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_EXT_KEY_USAGE) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_NS_CERT_TYPE) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_SKIP_VERIFY) != 0)
-    {
-        return SOPC_CertificateValidationError_UseNotAllowed;
-    }
-
-    else if ((failure_reasons & X509_BADCERT_BAD_KEY) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_BAD_MD) != 0)
-    {
-        return SOPC_CertificateValidationError_Invalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_BAD_PK) != 0)
+    if (0 != (failure_reasons &
+              (PKI_CYCLONE_X509_BADCERT_BAD_KEY | PKI_CYCLONE_X509_BADCERT_BAD_MD | PKI_CYCLONE_X509_BADCERT_BAD_PK)))
     {
         return SOPC_CertificateValidationError_Invalid;
     }
 
-    if ((failure_reasons & X509_BADCERT_NOT_TRUSTED) != 0)
+    if (0 != (failure_reasons & PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED))
     {
         return SOPC_CertificateValidationError_Untrusted;
     }
 
-    else if ((failure_reasons & X509_BADCERT_EXPIRED) != 0)
-    {
-        return SOPC_CertificateValidationError_TimeInvalid;
-    }
-    else if ((failure_reasons & X509_BADCERT_FUTURE) != 0)
+    if (0 != (failure_reasons & PKI_CYCLONE_X509_BADCERT_EXPIRED))
     {
         return SOPC_CertificateValidationError_TimeInvalid;
     }
 
-    else if ((failure_reasons & X509_BADCERT_CN_MISMATCH) != 0)
-    {
-        return SOPC_CertificateValidationError_HostNameInvalid;
-    }
-
-    else if ((failure_reasons & X509_BADCRL_NOT_TRUSTED) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & X509_BADCRL_EXPIRED) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & X509_BADCRL_FUTURE) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & X509_BADCRL_BAD_MD) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & X509_BADCRL_BAD_PK) != 0)
-    {
-        return SOPC_CertificateValidationError_RevocationUnknown;
-    }
-    else if ((failure_reasons & X509_BADCRL_BAD_KEY) != 0)
+    if (0 != (failure_reasons & PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED))
     {
         return SOPC_CertificateValidationError_RevocationUnknown;
     }
 
-    else if ((failure_reasons & X509_BADCERT_REVOKED) != 0)
+    if (0 != (failure_reasons & PKI_CYCLONE_X509_BADCERT_REVOKED))
     {
         return SOPC_CertificateValidationError_Revoked;
-    }
-    else if ((failure_reasons & X509_BADCERT_OTHER) != 0)
-    {
-        return SOPC_CertificateValidationError_Untrusted;
     }
 
     return SOPC_CertificateValidationError_Unknown;
@@ -226,7 +150,7 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
         }
         if (!matchCRL)
         {
-            *flags |= X509_BADCRL_NOT_TRUSTED;
+            *flags |= PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED;
             err = -1;
         }
     }
@@ -661,38 +585,38 @@ static SOPC_ReturnStatus check_security_policy(const SOPC_CertificateList* pToVa
     {
     case SOPC_PKI_MD_SHA1_OR_ABOVE:
         // Function oidComp() returns 0 if the 2 object identifiers are equal
-        if (oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA224_WITH_RSA_ENCRYPTION_OID, sizeof(SHA224_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA384_WITH_RSA_ENCRYPTION_OID, sizeof(SHA384_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA512_WITH_RSA_ENCRYPTION_OID, sizeof(SHA512_WITH_RSA_ENCRYPTION_OID)))
+        if (0 != oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA224_WITH_RSA_ENCRYPTION_OID, sizeof(SHA224_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA384_WITH_RSA_ENCRYPTION_OID, sizeof(SHA384_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA512_WITH_RSA_ENCRYPTION_OID, sizeof(SHA512_WITH_RSA_ENCRYPTION_OID)))
         {
             bErr = true;
         }
         break;
     case SOPC_PKI_MD_SHA256_OR_ABOVE:
-        if (oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA384_WITH_RSA_ENCRYPTION_OID, sizeof(SHA384_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA512_WITH_RSA_ENCRYPTION_OID, sizeof(SHA512_WITH_RSA_ENCRYPTION_OID)))
+        if (0 != oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA384_WITH_RSA_ENCRYPTION_OID, sizeof(SHA384_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA512_WITH_RSA_ENCRYPTION_OID, sizeof(SHA512_WITH_RSA_ENCRYPTION_OID)))
         {
             bErr = true;
         }
         break;
     case SOPC_PKI_MD_SHA1:
-        if (oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)))
+        if (0 != oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)))
         {
             bErr = true;
         }
         break;
     case SOPC_PKI_MD_SHA256:
-        if (oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)))
+        if (0 != oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)))
         {
             bErr = true;
         }
         break;
     case SOPC_PKI_MD_SHA1_AND_SHA256:
-        if (oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)) &&
-            oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)))
+        if (0 != oidComp(oid, oidLen, SHA1_WITH_RSA_ENCRYPTION_OID, sizeof(SHA1_WITH_RSA_ENCRYPTION_OID)) &&
+            0 != oidComp(oid, oidLen, SHA256_WITH_RSA_ENCRYPTION_OID, sizeof(SHA256_WITH_RSA_ENCRYPTION_OID)))
         {
             bErr = true;
         }
@@ -997,7 +921,7 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
         errLib = x509ValidateCertificate(&child->crt, &parent->crt, 0);
         if (ERROR_CERTIFICATE_EXPIRED == errLib)
         {
-            *failure_reasons |= X509_BADCERT_EXPIRED;
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
             break;
         }
 
@@ -1137,7 +1061,7 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         crt_find_parent(child, cur_trust_ca, failure_reasons, &parent, &parent_is_trusted);
         if (NULL == parent)
         {
-            *failure_reasons |= X509_BADCERT_NOT_TRUSTED;
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
             return -1;
         }
 
@@ -1145,7 +1069,7 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         size_t keySize = parent->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
         if (keySize < pProfile->RSAMinimumKeySize)
         {
-            *failure_reasons |= X509_BADCERT_BAD_KEY;
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
             return -1;
         }
 
@@ -1155,7 +1079,7 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         err = crt_check_revocation(child, cert_crl);
         if (err)
         {
-            *failure_reasons |= X509_BADCERT_REVOKED;
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
         }
 
         // d) Iterate.
@@ -1267,7 +1191,7 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
     if (ret)
     {
         err = -1;
-        *failure_reasons |= X509_BADCERT_EXPIRED;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
     }
 
     // Validate certificate
@@ -1275,7 +1199,7 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
     if (ret)
     {
         err = -1;
-        *failure_reasons |= X509_BADCERT_NOT_TRUSTED;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
     }
 
     // Check revocation
@@ -1283,7 +1207,7 @@ static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
     if (ret)
     {
         err = -1;
-        *failure_reasons |= X509_BADCERT_REVOKED;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
     }
 
     return err;
@@ -1301,13 +1225,13 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
                                                pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
     if (X509_KEY_TYPE_UNKNOWN == keyType)
     {
-        *failure_reasons |= X509_BADCERT_BAD_PK;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
     }
     // Size.
     size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
     if (keySize < pProfile->RSAMinimumKeySize)
     {
-        *failure_reasons |= X509_BADCERT_BAD_KEY;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
     }
 
     /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
@@ -1317,14 +1241,14 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
     error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
     if (ERROR_UNSUPPORTED_SIGNATURE_ALGO == errLib)
     {
-        *failure_reasons |= X509_BADCERT_BAD_PK;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
     }
 
     // hashAlgo should be at least SHA-256.
     int error = checkMdAllowed(hashAlgo, pProfile);
     if (0 != error) // If the hash algo is not an allowed md.
     {
-        *failure_reasons |= X509_BADCERT_BAD_MD;
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
     }
 
     if (0 != *failure_reasons) // If there's at least one failure reason, return error
@@ -1340,7 +1264,6 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
                                                    const SOPC_PKI_ChainProfile* pProfile,
                                                    bool bIsSelfSigned,
                                                    bool bForceTrustedCert,
-                                                   bool bDisableRevocationCheck,
                                                    const char* thumbprint,
                                                    uint32_t* error)
 {
@@ -1369,7 +1292,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {.trustedCrts = pPKI->pAllTrusted,
                                                          .allCRLs = pPKI->pAllCrl,
                                                          .isTrustedInChain = bForceTrustedCert,
-                                                         .disableRevocationCheck = bDisableRevocationCheck};
+                                                         .disableRevocationCheck = pProfile->bDisableRevocationCheck};
     /* CycloneCRYPTO : x509ValidateCertificate() function returns error if
      * the issuer of the certificate is not CA. It is then a special case.
      */
@@ -1389,7 +1312,7 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     if (!checkTrustedAndCRL.isTrustedInChain)
     {
         ret = -1;
-        failure_reasons = (failure_reasons | (uint32_t) X509_BADCERT_NOT_TRUSTED);
+        failure_reasons = (failure_reasons | (uint32_t) PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED);
     }
 
     if (0 != ret)
@@ -1646,7 +1569,7 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     if (SOPC_STATUS_OK == status)
     {
         status = sopc_validate_certificate(pPKI, pToValidateCpy, pProfile->chainProfile, bIsSelfSigned, false,
-                                           pProfile->chainProfile->bDisableRevocationCheck, thumbprint, &currentError);
+                                           thumbprint, &currentError);
         if (SOPC_STATUS_OK != status)
         {
             if (!bErrorFound)
@@ -1722,7 +1645,6 @@ static void sopc_free_c_string_from_ptr(void* data)
 static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPkiCerts,
                                                        const SOPC_PKIProvider* pPKI,
                                                        const SOPC_PKI_ChainProfile* pProfile,
-                                                       const bool bDisableRevocationCheck,
                                                        bool* bErrorFound,
                                                        SOPC_Array* pErrors,
                                                        SOPC_Array* pThumbprints)
@@ -1767,8 +1689,8 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         if (SOPC_STATUS_OK == status)
         {
             const bool forceTrustedCert = true;
-            statusChain = sopc_validate_certificate(pPKI, crt, pProfile, bIsSelfSigned, forceTrustedCert,
-                                                    bDisableRevocationCheck, thumbprint, &error);
+            statusChain =
+                sopc_validate_certificate(pPKI, crt, pProfile, bIsSelfSigned, forceTrustedCert, thumbprint, &error);
             if (SOPC_STATUS_OK != statusChain)
             {
                 *bErrorFound = true;
@@ -1829,15 +1751,14 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
 
     if (NULL != pPKI->pAllCerts)
     {
-        status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, pProfile, pProfile->bDisableRevocationCheck,
-                                               &bErrorFound, pErrArray, pThumbArray);
+        status = sopc_verify_every_certificate(pPKI->pAllCerts, pPKI, pProfile, &bErrorFound, pErrArray, pThumbArray);
     }
     if (SOPC_STATUS_OK == status)
     {
         if (NULL != pPKI->pAllRoots)
         {
-            status = sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, pProfile, pProfile->bDisableRevocationCheck,
-                                                   &bErrorFound, pErrArray, pThumbArray);
+            status =
+                sopc_verify_every_certificate(pPKI->pAllRoots, pPKI, pProfile, &bErrorFound, pErrArray, pThumbArray);
         }
     }
 
