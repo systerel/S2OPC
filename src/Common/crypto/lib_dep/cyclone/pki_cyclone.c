@@ -122,7 +122,9 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
                        int certificate_depth,
                        uint32_t* flags)
 {
-    SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRLinChain = checkTrustedAndCRL;
+    SOPC_ASSERT(NULL != checkTrustedAndCRL);
+    SOPC_ASSERT(NULL != crt);
+
     int err = 0;
 
     /* Check if a revocation list is present when the certificate is not a leaf
@@ -130,17 +132,16 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
      * It is your responsibility to provide up-to-date CRLs for all trusted CAs. If no CRL is provided for the CA
      * that was used to sign the certificate, CRL verification is skipped silently, that is without setting any flag.
      */
-    if (0 != certificate_depth && !checkTrustedAndCRLinChain->disableRevocationCheck)
+    if (0 != certificate_depth && !checkTrustedAndCRL->disableRevocationCheck)
     {
         bool matchCRL = false;
         // Unlink cert temporarily for CRL verification
         SOPC_CertificateList* backupNextCrt = crt->next;
         crt->next = NULL;
         SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-        if (NULL != checkTrustedAndCRLinChain->allCRLs)
+        if (NULL != checkTrustedAndCRL->allCRLs)
         {
-            status =
-                SOPC_KeyManagerInternal_CertificateList_CheckCRL(crt, checkTrustedAndCRLinChain->allCRLs, &matchCRL);
+            status = SOPC_KeyManagerInternal_CertificateList_CheckCRL(crt, checkTrustedAndCRL->allCRLs, &matchCRL);
         }
         // Restore link
         crt->next = backupNextCrt;
@@ -157,11 +158,11 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
 
     /* Check if the certificate is part of PKI trusted certificates */
     const SOPC_CertificateList* crtTrusted = NULL;
-    if (NULL != checkTrustedAndCRLinChain->trustedCrts)
+    if (NULL != checkTrustedAndCRL->trustedCrts)
     {
-        crtTrusted = checkTrustedAndCRLinChain->trustedCrts; /* Current cert */
+        crtTrusted = checkTrustedAndCRL->trustedCrts; /* Current cert */
     }
-    while (!checkTrustedAndCRLinChain->isTrustedInChain && NULL != crtTrusted)
+    while (!checkTrustedAndCRL->isTrustedInChain && NULL != crtTrusted)
     {
         if (crt->crt.tbsCert.subject.rawDataLen == crtTrusted->crt.tbsCert.subject.rawDataLen &&
             crt->raw->length == crtTrusted->raw->length &&
@@ -169,7 +170,7 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
                         crt->crt.tbsCert.subject.rawDataLen) &&
             0 == memcmp(crt->raw->data, crtTrusted->raw->data, crt->crt.tbsCert.subject.rawDataLen))
         {
-            checkTrustedAndCRLinChain->isTrustedInChain = true;
+            checkTrustedAndCRL->isTrustedInChain = true;
         }
         crtTrusted = crtTrusted->next;
     }
@@ -898,27 +899,27 @@ static int crt_check_revocation(const SOPC_CertificateList* child, SOPC_CRLList*
     return 0;
 }
 
-/* Find a parent in the chain candidates.
+/* Find a parent in the chain parentCandidates.
  * If a parent has been found, ppParent is filled with it.
  * Otherwise, ppParent is not modified.
  */
-static void crt_find_parent_in(const SOPC_CertificateList* child,
-                               SOPC_CertificateList* candidates,
+static void crt_find_parent_in(const SOPC_CertificateList* leafAndIntCA,
+                               SOPC_CertificateList* parentCandidates,
                                uint32_t* failure_reasons,
                                SOPC_CertificateList** ppParent)
 {
     SOPC_CertificateList* parent = NULL;
     error_t errLib = 1;
 
-    for (parent = candidates; NULL != parent; parent = parent->next)
+    for (parent = parentCandidates; NULL != parent; parent = parent->next)
     {
         /* This Cyclone function :
-         * - checks the validity of child ;
-         * - checks if parent is the parent of child ;
+         * - checks the validity of leafAndIntCA ;
+         * - checks if parent is the parent of leafAndIntCA ;
          * - verifies the signature ;
          * Returns 0 if all is ok.
          */
-        errLib = x509ValidateCertificate(&child->crt, &parent->crt, 0);
+        errLib = x509ValidateCertificate(&leafAndIntCA->crt, &parent->crt, 0);
         if (ERROR_CERTIFICATE_EXPIRED == errLib)
         {
             *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
@@ -935,10 +936,10 @@ static void crt_find_parent_in(const SOPC_CertificateList* child,
     }
 }
 
-/* Find a parent in the chain candidates OR in the chain of child.
+/* Find the parent of leafAndIntCA in the chain rootCA first, then up its chain if not found.
  */
-static void crt_find_parent(const SOPC_CertificateList* child,
-                            SOPC_CertificateList* candidates,
+static void crt_find_parent(const SOPC_CertificateList* leafAndIntCA,
+                            SOPC_CertificateList* rootCA,
                             uint32_t* failure_reasons,
                             SOPC_CertificateList** ppParent,
                             int* parent_is_trusted)
@@ -947,13 +948,13 @@ static void crt_find_parent(const SOPC_CertificateList* child,
     SOPC_ASSERT(NULL != ppParent);
     SOPC_ASSERT(NULL == *ppParent);
 
-    SOPC_CertificateList* search_list = NULL;
+    SOPC_CertificateList* parentCandidates = NULL;
     *parent_is_trusted = 1;
 
     while (1)
     {
-        search_list = *parent_is_trusted ? candidates : child->next;
-        crt_find_parent_in(child, search_list, failure_reasons, ppParent);
+        parentCandidates = *parent_is_trusted ? rootCA : leafAndIntCA->next;
+        crt_find_parent_in(leafAndIntCA, parentCandidates, failure_reasons, ppParent);
 
         /* stop here if found or already in second iteration */
         if (NULL != *ppParent || 0 == *parent_is_trusted)
@@ -971,7 +972,7 @@ static void crt_find_parent(const SOPC_CertificateList* child,
 /* Checks if the hashAlgo is an allowed algo for the profile.
  * Returns 0 if it is ok.
  */
-static int checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile* pProfile)
+static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile* pProfile)
 {
     const char* hashAlgoName = hashAlgo->name;
     int error = -1;
@@ -1033,32 +1034,32 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
                             uint32_t* failure_reasons,
                             SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
 {
-    SOPC_CertificateList* child = pToValidate;
+    SOPC_CertificateList* leafAndIntCA = pToValidate;
     SOPC_CertificateList* parent = NULL;
     SOPC_CertificateList* cur_trust_ca = NULL;
     int err = 0;
     int parent_is_trusted = 0;
-    int child_is_trusted = 0;
+    int leafAndIntCA_is_trusted = 0;
     int certificate_depth = 0;
 
     while (1 && 0 == err)
     {
-        err = verify_cert(checkTrustedAndCRL, child, certificate_depth, failure_reasons);
+        err = verify_cert(checkTrustedAndCRL, leafAndIntCA, certificate_depth, failure_reasons);
         if (err)
         {
             return err;
         }
 
-        if (child_is_trusted)
+        if (leafAndIntCA_is_trusted)
         {
             return 0;
         }
 
-        // a) Find a parent in trusted CA first or in the child chain.
+        // a) Find a parent in trusted CA first or in the leafAndIntCA chain.
         // This function will also verify the signature if a parent is found,
-        // and check time-validity of child.
+        // and check time-validity of leafAndIntCA.
         cur_trust_ca = trust_list;
-        crt_find_parent(child, cur_trust_ca, failure_reasons, &parent, &parent_is_trusted);
+        crt_find_parent(leafAndIntCA, cur_trust_ca, failure_reasons, &parent, &parent_is_trusted);
         if (NULL == parent)
         {
             *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
@@ -1076,16 +1077,16 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         // c) Check if the cert is not revoked, in any valid CRL.
         // TODO : proceed on some checks on the CRL (if it the signature suits the profile and if it is signed by a
         // trusted CA).
-        err = crt_check_revocation(child, cert_crl);
+        err = crt_check_revocation(leafAndIntCA, cert_crl);
         if (err)
         {
             *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
         }
 
         // d) Iterate.
-        child = parent;
+        leafAndIntCA = parent;
         parent = NULL;
-        child_is_trusted = parent_is_trusted;
+        leafAndIntCA_is_trusted = parent_is_trusted;
         certificate_depth += 1;
     }
 
@@ -1245,7 +1246,7 @@ static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
     }
 
     // hashAlgo should be at least SHA-256.
-    int error = checkMdAllowed(hashAlgo, pProfile);
+    bool error = checkMdAllowed(hashAlgo, pProfile);
     if (0 != error) // If the hash algo is not an allowed md.
     {
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
@@ -1275,13 +1276,12 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
     SOPC_ASSERT(NULL != error);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_CRLList* cert_crl = pPKI->pAllCrl;
     /* Note: we consider all root CAs as trusted since our criteria is that at least one certificate is trusted in the
      *       chain and it might not be the root CA.
      *       We do an additional check that it is the case during the verification.
      */
-    SOPC_CertificateList* ca_root = (NULL != pPKI->pAllRoots ? pPKI->pAllRoots : NULL);
-    SOPC_CRLList* crl = (NULL != cert_crl ? cert_crl : NULL);
+    SOPC_CertificateList* ca_root = pPKI->pAllRoots;
+    SOPC_CRLList* crl = pPKI->pAllCrl;
     /* Link certificate to validate with intermediate certificates (trusted links or untrusted links) */
     SOPC_CertificateList* pLinkCert = pPKI->pAllCerts;
 
