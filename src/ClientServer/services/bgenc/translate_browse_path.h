@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path.h
 
- Date                 : 24/07/2023 14:29:19
+ Date                 : 08/12/2023 16:24:01
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -62,11 +62,9 @@ extern void translate_browse_path__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define translate_browse_path__alloc_browse_path_result msg_translate_browse_path_bs__alloc_browse_path_result
 #define translate_browse_path__clear_browse_value_context translate_browse_path_result__clear_browse_value_context
 #define translate_browse_path__compute_browse_result translate_browse_path_result__compute_browse_result
 #define translate_browse_path__continuation_points_UNINITIALISATION translate_browse_path_result__continuation_points_UNINITIALISATION
-#define translate_browse_path__free_translate_browse_paths_response msg_translate_browse_path_bs__free_translate_browse_paths_response
 #define translate_browse_path__getall_and_move_browse_result translate_browse_path_result__getall_and_move_browse_result
 #define translate_browse_path__read_nb_BrowsePaths msg_translate_browse_path_bs__read_nb_BrowsePaths
 #define translate_browse_path__release_continuation_point translate_browse_path_result__release_continuation_point

@@ -183,26 +183,6 @@ OPERATIONS
     END
     ;
 
-    statusCode <-- alloc_browse_path_result =
-    PRE
-        card(BrowsePaths) > 0
-    THEN
-        d_variables_out,
-        statusCode
-        :(
-          statusCode : t_StatusCode_i &
-          statusCode : t_StatusCode   &
-          d_inv_out &
-
-          (statusCode = e_sc_ok =>
-              (dom(BrowsePath_Res_StatusCode)   = BrowsePaths &
-               dom(BrowsePath_Res_Target_Node)  = BrowsePaths &
-               dom(BrowsePath_Res_Target_Index) = BrowsePaths)
-           )
-        )
-    END
-    ;
-
     treat_one_translate_browse_path(browsePath) =
     PRE
         IsDecoded = TRUE &
@@ -236,13 +216,6 @@ OPERATIONS
         d_init
     END
     ;
-
-    free_translate_browse_paths_response =
-    BEGIN
-        skip
-    END
-    ;
-
 
     /* Promoted from msg_translate_browse_path_bs */
     p_nb_BrowsePaths <-- read_nb_BrowsePaths =

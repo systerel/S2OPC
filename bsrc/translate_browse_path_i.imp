@@ -38,9 +38,7 @@ IMPORTS
     translate_browse_path_source_it
 
 PROMOTES
-    alloc_browse_path_result,
     write_translate_browse_paths_response,
-    free_translate_browse_paths_response,
     read_nb_BrowsePaths,
     set_browse_value_context,
     set_browse_value_context_from_continuation_point,
