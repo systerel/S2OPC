@@ -907,10 +907,11 @@ static void crt_find_parent_in(const SOPC_CertificateList* leafAndIntCA,
                                uint32_t* failure_reasons,
                                SOPC_CertificateList** ppParent)
 {
-    SOPC_CertificateList* parent = NULL;
+    SOPC_CertificateList* parent = parentCandidates;
+    bool bFound = false;
     error_t errLib = 1;
 
-    for (parent = parentCandidates; NULL != parent; parent = parent->next)
+    while (!bFound && NULL != parent)
     {
         /* This Cyclone function :
          * - checks the validity of leafAndIntCA ;
@@ -919,19 +920,26 @@ static void crt_find_parent_in(const SOPC_CertificateList* leafAndIntCA,
          * Returns 0 if all is ok.
          */
         errLib = x509ValidateCertificate(&leafAndIntCA->crt, &parent->crt, 0);
-        if (ERROR_CERTIFICATE_EXPIRED == errLib)
+        if (0 == errLib)
         {
+            bFound = true;
+        }
+        else if (ERROR_CERTIFICATE_EXPIRED == errLib)
+        {
+            bFound = true;
             *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
-            break;
         }
 
-        if (errLib)
+        // If it's not the parent, iterate on the next candidate.
+        if (!bFound)
         {
-            continue; // test next parent candidate
+            parent = parent->next;
         }
+    }
 
+    if (bFound)
+    {
         *ppParent = parent;
-        break;
     }
 }
 
@@ -946,24 +954,15 @@ static void crt_find_parent(const SOPC_CertificateList* leafAndIntCA,
     SOPC_ASSERT(NULL != ppParent);
     SOPC_ASSERT(NULL == *ppParent);
 
-    SOPC_CertificateList* parentCandidates = NULL;
+    // Find a parent in rootCA
     *parent_is_trusted = 1;
+    crt_find_parent_in(leafAndIntCA, rootCA, failure_reasons, ppParent);
 
-    while (1)
+    // If no parent has been found, search up the leaf chain
+    if (NULL == *ppParent)
     {
-        parentCandidates = *parent_is_trusted ? rootCA : leafAndIntCA->next;
-        crt_find_parent_in(leafAndIntCA, parentCandidates, failure_reasons, ppParent);
-
-        /* stop here if found or already in second iteration */
-        if (NULL != *ppParent || 0 == *parent_is_trusted)
-        {
-            break;
-        }
-
-        /* prepare second iteration */
         *parent_is_trusted = 0;
-
-        // We assume the loop stops after the second iteration.
+        crt_find_parent_in(leafAndIntCA, leafAndIntCA->next, failure_reasons, ppParent);
     }
 }
 
