@@ -117,21 +117,19 @@ static uint32_t PKIProviderStack_GetCertificateValidationError(uint32_t failure_
     return SOPC_CertificateValidationError_Unknown;
 }
 
-static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
-                       SOPC_CertificateList* crt,
-                       int certificate_depth,
-                       uint32_t* flags)
+/* - Check if a CRL is present when the certificate is not a leaf
+ * (that might have CA bit set if self-signed and OPC UA backward compatibility active)
+ * - Checks if the certificate is trusted.
+ */
+static void verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
+                        SOPC_CertificateList* crt,
+                        int certificate_depth,
+                        uint32_t* flags)
 {
     SOPC_ASSERT(NULL != checkTrustedAndCRL);
     SOPC_ASSERT(NULL != crt);
 
-    int err = 0;
-
-    /* Check if a revocation list is present when the certificate is not a leaf
-     * (that might have CA bit set if self-signed and OPC UA backward compatibility active)
-     * It is your responsibility to provide up-to-date CRLs for all trusted CAs. If no CRL is provided for the CA
-     * that was used to sign the certificate, CRL verification is skipped silently, that is without setting any flag.
-     */
+    /* Check CRL if the cert is not a leaf */
     if (0 != certificate_depth && !checkTrustedAndCRL->disableRevocationCheck)
     {
         bool matchCRL = false;
@@ -152,7 +150,6 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
         if (!matchCRL)
         {
             *flags |= PKI_CYCLONE_X509_BADCRL_NOT_TRUSTED;
-            err = -1;
         }
     }
 
@@ -174,8 +171,6 @@ static int verify_cert(SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL,
         }
         crtTrusted = crtTrusted->next;
     }
-
-    return err;
 }
 
 // removes cert from a linked list
@@ -880,11 +875,15 @@ time_t getCurrentUnixTime(void)
 }
 
 /* Check in all the CRLs present in crl if child is revoked.
- * Returns -1 if child is revoked, 0 otherwise.
+ * Returns 1 if child is revoked, 0 otherwise.
  */
-static int crt_check_revocation(const SOPC_CertificateList* child, SOPC_CRLList* crl)
+static bool crt_check_revocation(const SOPC_CertificateList* child, SOPC_CRLList* crl)
 {
     SOPC_CRLList* cur_crl = NULL;
+
+    // Initialize at state "OK" (= non revoked)
+    bool err = 0;
+    // Initialize at state "error"
     error_t errLib = 1;
 
     for (cur_crl = crl; NULL != cur_crl; cur_crl = cur_crl->next)
@@ -892,11 +891,11 @@ static int crt_check_revocation(const SOPC_CertificateList* child, SOPC_CRLList*
         errLib = x509CheckRevokedCertificate(&child->crt, &cur_crl->crl);
         if (ERROR_CERTIFICATE_REVOKED == errLib)
         {
-            return -1;
+            err = 1;
         }
     }
 
-    return 0;
+    return err;
 }
 
 /* Find a parent in the chain parentCandidates.
@@ -936,13 +935,12 @@ static void crt_find_parent_in(const SOPC_CertificateList* leafAndIntCA,
     }
 }
 
-/* Find the parent of leafAndIntCA in the chain rootCA first, then up its chain if not found.
- */
+/* Find the parent of leafAndIntCA in the chain rootCA first, then up its chain if not found. */
 static void crt_find_parent(const SOPC_CertificateList* leafAndIntCA,
                             SOPC_CertificateList* rootCA,
                             uint32_t* failure_reasons,
                             SOPC_CertificateList** ppParent,
-                            int* parent_is_trusted)
+                            bool* parent_is_trusted)
 {
     // Make sure the container of the potential parent is not null, and empty.
     SOPC_ASSERT(NULL != ppParent);
@@ -1022,56 +1020,98 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     return error;
 }
 
-/* Verifies the chain of the certificate.
- * Returns -1 if the verification failed, and in this case
- * the failure reason is stored in the variable failure_reasons.
- * Returns 0 on success.
+/* Some verifications on the certificate with the profile.
+ * The result of the verification process is stored in failure_reasons.
  */
-static int crt_verify_chain(SOPC_CertificateList* pToValidate,
-                            SOPC_CertificateList* trust_list,
-                            SOPC_CRLList* cert_crl,
-                            const SOPC_PKI_ChainProfile* pProfile,
-                            uint32_t* failure_reasons,
-                            SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
+static void crt_verify_with_profile(SOPC_CertificateList* pToValidate,
+                                    const SOPC_PKI_ChainProfile* pProfile,
+                                    uint32_t* failure_reasons)
+{
+    // Avoid acessing memory if the pointer is NULL
+    if (NULL != pToValidate)
+    {
+        /* 1) Check the type and size of the key */
+        X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid,
+                                                   pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
+        if (X509_KEY_TYPE_UNKNOWN == keyType)
+        {
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
+        }
+        // Size.
+        if (X509_KEY_TYPE_RSA == keyType || X509_KEY_TYPE_RSA_PSS == keyType)
+        {
+            size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
+            if (keySize < pProfile->RSAMinimumKeySize)
+            {
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
+            }
+        }
+
+        /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
+        X509SignatureAlgo signAlgo = {0};
+        const HashAlgo* hashAlgo = NULL;
+        // Returns ERROR_UNSUPPORTED_SIGNATURE_ALGO on errors
+        error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
+        if (ERROR_UNSUPPORTED_SIGNATURE_ALGO == errLib)
+        {
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
+        }
+
+        // hashAlgo should be at least SHA-256.
+        bool error = checkMdAllowed(hashAlgo, pProfile);
+        if (0 != error) // If the hash algo is not an allowed md.
+        {
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
+        }
+    }
+}
+
+/* Verifies the chain of the certificate.*/
+static void crt_verify_chain(SOPC_CertificateList* pToValidate,
+                             SOPC_CertificateList* trust_list,
+                             SOPC_CRLList* cert_crl,
+                             const SOPC_PKI_ChainProfile* pProfile,
+                             uint32_t* failure_reasons,
+                             SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
 {
     SOPC_CertificateList* leafAndIntCA = pToValidate;
     SOPC_CertificateList* parent = NULL;
     SOPC_CertificateList* cur_trust_ca = NULL;
-    int err = 0;
-    int parent_is_trusted = 0;
-    int leafAndIntCA_is_trusted = 0;
+    uint32_t failure_reason_on_certificate = 0;
+    bool err = 0;
+    bool parent_is_trusted = 0;
+    bool leafAndIntCA_is_trusted = 0;
     int certificate_depth = 0;
 
-    while (1 && 0 == err)
+    /**
+     * While:
+     * 1) The validation on the previous certificate of the chain went ok
+     * 2) The new certificate of the chain is not trusted
+     */
+    while (0 == failure_reason_on_certificate && 0 == leafAndIntCA_is_trusted)
     {
-        err = verify_cert(checkTrustedAndCRL, leafAndIntCA, certificate_depth, failure_reasons);
-        if (err)
-        {
-            return err;
-        }
-
-        if (leafAndIntCA_is_trusted)
-        {
-            return 0;
-        }
+        // Check CRL and if trusted
+        verify_cert(checkTrustedAndCRL, leafAndIntCA, certificate_depth, &failure_reason_on_certificate);
+        // Verify with profile
+        crt_verify_with_profile(leafAndIntCA, pProfile, &failure_reason_on_certificate);
 
         // a) Find a parent in trusted CA first or in the leafAndIntCA chain.
         // This function will also verify the signature if a parent is found,
         // and check time-validity of leafAndIntCA.
         cur_trust_ca = trust_list;
-        crt_find_parent(leafAndIntCA, cur_trust_ca, failure_reasons, &parent, &parent_is_trusted);
+        crt_find_parent(leafAndIntCA, cur_trust_ca, &failure_reason_on_certificate, &parent, &parent_is_trusted);
         if (NULL == parent)
         {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
-            return -1;
+            failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
         }
-
-        // b) Check if the parent's key suits to the profile.
-        size_t keySize = parent->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
-        if (keySize < pProfile->RSAMinimumKeySize)
+        else
         {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
-            return -1;
+            // b) If a parent has been found, check if its key suits to the profile.
+            size_t keySize = parent->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
+            if (keySize < pProfile->RSAMinimumKeySize)
+            {
+                failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
+            }
         }
 
         // c) Check if the cert is not revoked, in any valid CRL.
@@ -1080,7 +1120,7 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         err = crt_check_revocation(leafAndIntCA, cert_crl);
         if (err)
         {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
+            failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_REVOKED;
         }
 
         // d) Iterate.
@@ -1090,7 +1130,15 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
         certificate_depth += 1;
     }
 
-    return -1;
+    if (leafAndIntCA_is_trusted)
+    {
+        // In this case, the last certificate of the chain has not been verified. Verify it here.
+        verify_cert(checkTrustedAndCRL, leafAndIntCA, certificate_depth, &failure_reason_on_certificate);
+        crt_verify_with_profile(leafAndIntCA, pProfile, &failure_reason_on_certificate);
+    }
+
+    // Merge the validation error with our global errors
+    *failure_reasons |= failure_reason_on_certificate;
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -1099,15 +1147,17 @@ static int crt_verify_chain(SOPC_CertificateList* pToValidate,
  */
 
 /* Check the validity of the certificate. Inspired of the Cyclone function x509ValidateCertificate().
- * Returns 0 if the certififcate is valid, -1 otherwise.
+ * Returns 0 if the certififcate is valid, 1 otherwise.
  */
-static int crt_check_validity(const X509CertificateInfo* crt)
+static bool crt_check_validity(const X509CertificateInfo* crt)
 {
+    // Initialize at state "error"
+    bool err = 1;
+
     // Retrieve current time
     time_t currentTime = getCurrentUnixTime();
 
-    // Any real-time clock implemented?
-    if (currentTime != 0)
+    if (0 != currentTime)
     {
         DateTime currentDate;
         const X509Validity* validity;
@@ -1121,52 +1171,63 @@ static int crt_check_validity(const X509CertificateInfo* crt)
         validity = &crt->tbsCert.validity;
 
         // Check the validity period
-        if (compareDateTime(&currentDate, &validity->notBefore) < 0 ||
-            compareDateTime(&currentDate, &validity->notAfter) > 0)
+        if (compareDateTime(&currentDate, &validity->notBefore) > 0 &&
+            compareDateTime(&currentDate, &validity->notAfter) < 0)
         {
             // The certificate has expired or is not yet valid
-            return -1;
+            err = 0;
         }
     }
 
-    return 0;
+    return err;
 }
 
 /* Self-signed validation function.
  * Basically do the same as x509ValidateCertificate() except
  * verifying that the issuer is CA.
- * Returns 0 if the certificate is validated, -1 otherwise.
+ * Returns 0 if the certificate is validated, 1 otherwise.
  */
-static int ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
+static bool ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
 {
-    // Initializes at states error
-    int err = -1;
-    error_t errLib = 1;
+    // Check params: verify is the issuer of the cert is equal to the subject
+    bool_t bMatch = x509CompareName(crt->tbsCert.issuer.rawData, crt->tbsCert.issuer.rawDataLen,
+                                    crt->tbsCert.subject.rawData, crt->tbsCert.subject.rawDataLen);
+    if (!bMatch)
+    {
+        return 1;
+    }
 
-    const X509Extensions* extensions;
+    // Initialize at states error
+    error_t errLib = 1;
+    bool err = 1;
 
     // Point to the X.509 extensions of the issuer certificate
-    extensions = &crt->tbsCert.extensions;
+    const X509Extensions* extensions = &crt->tbsCert.extensions;
 
     // Check if the keyUsage extension is present
-    if (extensions->keyUsage.bitmap != 0)
+    if (0 != extensions->keyUsage.bitmap)
     {
         // If the keyUsage extension is present, then the subject public key must
         // not be used to verify signatures on certificates unless the keyCertSign
         // bit is set (refer to RFC 5280, section 4.2.1.3)
-        if ((extensions->keyUsage.bitmap & X509_KEY_USAGE_KEY_CERT_SIGN) == 0)
+        if (0 != (extensions->keyUsage.bitmap & X509_KEY_USAGE_KEY_CERT_SIGN))
         {
-            return ERROR_BAD_CERTIFICATE;
+            // The ASN.1 DER-encoded tbsCertificate is used as the input to the signature
+            // function
+            errLib = x509VerifySignature(crt->tbsCert.rawData, crt->tbsCert.rawDataLen, &crt->signatureAlgo,
+                                         &crt->tbsCert.subjectPublicKeyInfo, &crt->signatureValue);
         }
     }
-
-    // The ASN.1 DER-encoded tbsCertificate is used as the input to the signature
-    // function
-    errLib = x509VerifySignature(crt->tbsCert.rawData, crt->tbsCert.rawDataLen, &crt->signatureAlgo,
-                                 &crt->tbsCert.subjectPublicKeyInfo, &crt->signatureValue);
+    else
+    {
+        // The ASN.1 DER-encoded tbsCertificate is used as the input to the signature
+        // function
+        errLib = x509VerifySignature(crt->tbsCert.rawData, crt->tbsCert.rawDataLen, &crt->signatureAlgo,
+                                     &crt->tbsCert.subjectPublicKeyInfo, &crt->signatureValue);
+    }
 
     // If no error
-    if (!errLib)
+    if (0 == errLib)
     {
         err = 0;
     }
@@ -1174,90 +1235,38 @@ static int ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
     return err;
 }
 
-static int crt_verify_self_signed(SOPC_CertificateList* pToValidate,
-                                  SOPC_CRLList* cert_crl,
-                                  uint32_t* failure_reasons,
-                                  SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
+static void crt_verify_self_signed(SOPC_CertificateList* pToValidate,
+                                   SOPC_CRLList* cert_crl,
+                                   const SOPC_PKI_ChainProfile* pProfile,
+                                   uint32_t* failure_reasons,
+                                   SOPC_CheckTrustedAndCRLinChain* checkTrustedAndCRL)
 {
-    int err = 0;
-
-    int ret = verify_cert(checkTrustedAndCRL, pToValidate, 0, failure_reasons);
-    if (ret)
-    {
-        err = -1;
-    }
+    // Verify the certificate with the profile.
+    crt_verify_with_profile(pToValidate, pProfile, failure_reasons);
 
     // Check validity
-    ret = crt_check_validity(&pToValidate->crt);
-    if (ret)
+    bool err = crt_check_validity(&pToValidate->crt);
+    if (0 != err)
     {
-        err = -1;
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
     }
 
     // Validate certificate
-    ret = ValidateSelfSignedCertificate(&pToValidate->crt);
-    if (ret)
+    err = ValidateSelfSignedCertificate(&pToValidate->crt);
+    if (0 != err)
     {
-        err = -1;
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
     }
 
     // Check revocation
-    ret = crt_check_revocation(pToValidate, cert_crl);
-    if (ret)
+    err = crt_check_revocation(pToValidate, cert_crl);
+    if (0 != err)
     {
-        err = -1;
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_REVOKED;
     }
 
-    return err;
-}
-
-/* Some verifications on the certificate.
- * Returns -1 if the certificate failed the verifications, 0 on success.
- */
-static int crt_verify_with_profile(SOPC_CertificateList* pToValidate,
-                                   const SOPC_PKI_ChainProfile* pProfile,
-                                   uint32_t* failure_reasons)
-{
-    /* 1) Check the type and size of the key */
-    X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid,
-                                               pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
-    if (X509_KEY_TYPE_UNKNOWN == keyType)
-    {
-        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-    }
-    // Size.
-    size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
-    if (keySize < pProfile->RSAMinimumKeySize)
-    {
-        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
-    }
-
-    /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
-    X509SignatureAlgo signAlgo = {0};
-    const HashAlgo* hashAlgo = NULL;
-    // Returns ERROR_UNSUPPORTED_SIGNATURE_ALGO on errors
-    error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
-    if (ERROR_UNSUPPORTED_SIGNATURE_ALGO == errLib)
-    {
-        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-    }
-
-    // hashAlgo should be at least SHA-256.
-    bool error = checkMdAllowed(hashAlgo, pProfile);
-    if (0 != error) // If the hash algo is not an allowed md.
-    {
-        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
-    }
-
-    if (0 != *failure_reasons) // If there's at least one failure reason, return error
-    {
-        return -1;
-    }
-
-    return 0;
+    // Check CRL and if it is trusted.
+    verify_cert(checkTrustedAndCRL, pToValidate, 0, failure_reasons);
 }
 
 static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
@@ -1287,8 +1296,6 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
 
     /* Common verifications on the certificate (if it is self-signed or not) */
     uint32_t failure_reasons = 0;
-    int ret = crt_verify_with_profile(cert, pProfile, &failure_reasons);
-
     SOPC_CheckTrustedAndCRLinChain checkTrustedAndCRL = {.trustedCrts = pPKI->pAllTrusted,
                                                          .allCRLs = pPKI->pAllCrl,
                                                          .isTrustedInChain = bForceTrustedCert,
@@ -1298,24 +1305,24 @@ static SOPC_ReturnStatus sopc_validate_certificate(const SOPC_PKIProvider* pPKI,
      */
     if (bIsSelfSigned)
     {
-        ret = crt_verify_self_signed(cert, crl, &failure_reasons, &checkTrustedAndCRL);
+        /* Verify and validate the self-signed certificate. */
+        crt_verify_self_signed(cert, crl, pProfile, &failure_reasons, &checkTrustedAndCRL);
     }
     else
     {
         /* If certificate is not self signed, add the intermediate certificates to the trust chain to evaluate */
         cert->next = pLinkCert;
-        /* Verify the certificate chain */
-        ret = crt_verify_chain(cert, ca_root, crl, pProfile, &failure_reasons, &checkTrustedAndCRL);
+        /* Verify and validate the chain */
+        crt_verify_chain(cert, ca_root, crl, pProfile, &failure_reasons, &checkTrustedAndCRL);
     }
 
     // Check if at a least one trusted certificate is present in trust chain
     if (!checkTrustedAndCRL.isTrustedInChain)
     {
-        ret = -1;
         failure_reasons = (failure_reasons | (uint32_t) PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED);
     }
 
-    if (0 != ret)
+    if (0 != failure_reasons)
     {
         *error = PKIProviderStack_GetCertificateValidationError(failure_reasons);
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
