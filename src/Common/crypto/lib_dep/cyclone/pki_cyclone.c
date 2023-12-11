@@ -1433,10 +1433,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (UINT32_MAX < pCert->raw->length)
-    {
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
     listLength = 0;
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
@@ -1462,8 +1458,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI,
                 }
                 else
                 {
-                    SOPC_KeyManager_Certificate_Free(cur);
-                    pPKI->pRejectedList = next; /* Copy with an assignment operator */
+                    rsaFreePublicKey(&cur->pubKey);
+                    SOPC_Buffer_Delete(cur->raw);
+                    *pPKI->pRejectedList = *next; /* Copy with an assignment operator */
+                    SOPC_Free(next);
                 }
             }
         }
@@ -1532,15 +1530,11 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     }
     pThumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidateCpy);
     thumbprint = NULL == pThumbprint ? "NULL" : pThumbprint;
-    /* Certificate shall not be a CA or only for self-signed backward compatibility
-       (and pathLen shall be 0 which means crt.max_pathlen is 1 due to mbedtls choice: 1 higher than RFC 5280) */
-    if (!pToValidateCpy->crt.tbsCert.extensions.basicConstraints.cA ||
-        (bIsSelfSigned && pProfile->bBackwardInteroperability &&
-         1 == pToValidateCpy->crt.tbsCert.extensions.basicConstraints.pathLenConstraint))
-    {
-        // No error detected
-    }
-    else
+    /* Certificate shall not be a CA or only for self-signed backward compatibility */
+    bool certToValidateConstraints = (!pToValidateCpy->crt.tbsCert.extensions.basicConstraints.cA ||
+                                      (bIsSelfSigned && pProfile->bBackwardInteroperability &&
+                                       0 == pToValidateCpy->crt.tbsCert.extensions.basicConstraints.pathLenConstraint));
+    if (!certToValidateConstraints)
     {
         /* CA certificates are always rejected (except for roots if backward interoperability is enabled) */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -1655,7 +1649,6 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
     SOPC_ASSERT(NULL != pThumbprints);
 
     SOPC_CertificateList* pCertsCpy = NULL;
-    SOPC_CertificateList* crtThumbprint = NULL;
     bool bResAppend = true;
     uint32_t error = 0;
     char* thumbprint = NULL;
@@ -1676,8 +1669,7 @@ static SOPC_ReturnStatus sopc_verify_every_certificate(SOPC_CertificateList* pPk
         save_next = crt->next;
         crt->next = NULL;
         /* Get thumbprint */
-        crtThumbprint = crt;
-        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(crtThumbprint);
+        thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(crt);
         if (NULL == thumbprint)
         {
             status = SOPC_STATUS_OUT_OF_MEMORY;
@@ -2087,37 +2079,7 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
             if (SOPC_STATUS_OK == status)
             {
                 /* Remove the certificate from the chain and safely delete it */
-                SOPC_CertificateList* next = cur->next;
-                // Dereferencing cur->next, otherwise freeing cur will free the whole chain
-                cur->next = NULL;
-                // We don't call SOPC_KeyManager_Certificate_Free() because it will delete the CertificateList.
-                SOPC_Buffer_Delete(cur->raw);
-                rsaFreePublicKey(&cur->pubKey);
-                /* Set new next certificate (if possible) */
-                if (NULL == prev)
-                {
-                    if (NULL == next)
-                    {
-                        /* The list is empty, Free it */
-                        SOPC_Free(pHeadCerts);
-                        pHeadCerts = NULL;
-                        cur = NULL; // make iteration stop
-                    }
-                    else
-                    {
-                        /* Head of the chain is a special case */
-                        *pHeadCerts = *next;
-                        SOPC_Free(next);
-                    }
-                }
-                else
-                {
-                    /* We have to free the certificate if it is not the first in the list */
-                    SOPC_Free(cur);
-                    prev->next = next;
-                    /* Iterate */
-                    cur = next;
-                }
+                sopc_remove_cert_from_list(prev, &cur, &pHeadCerts);
             }
         }
         else
@@ -2205,20 +2167,19 @@ static void get_list_stats(SOPC_CertificateList* pCert, uint32_t* caCount, uint3
         return;
     }
     bool is_self_sign = false;
-    SOPC_CertificateList* pCertCopy = pCert;
-    while (NULL != pCertCopy)
+    while (NULL != pCert)
     {
         *listLength = *listLength + 1;
-        if (pCertCopy->crt.tbsCert.extensions.basicConstraints.cA)
+        if (pCert->crt.tbsCert.extensions.basicConstraints.cA)
         {
             *caCount = *caCount + 1;
-            SOPC_KeyManager_Certificate_IsSelfSigned(pCertCopy, &is_self_sign);
+            SOPC_KeyManager_Certificate_IsSelfSigned(pCert, &is_self_sign);
             if (is_self_sign)
             {
                 *rootCount = *rootCount + 1;
             }
         }
-        pCertCopy = pCertCopy->next;
+        pCert = pCert->next;
     }
 }
 
@@ -3025,35 +2986,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
         status = SOPC_STATUS_OK;
     }
 
-    bool bFound = false;
-    SOPC_CertificateList* next = NULL;
-    SOPC_CertificateList* crt = NULL != pPKI->pRejectedList ? pPKI->pRejectedList : NULL;
-    while (NULL != crt && SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && NULL != pPKI->pRejectedList)
     {
-        /* Unlink */
-        next = crt->next;
-        crt->next = NULL;
-        if (NULL != pRejected)
-        {
-            SOPC_CertificateList* crtToFind = crt;
-            status = SOPC_KeyManager_CertificateList_FindCertInList(pRejected, crtToFind, &bFound);
-        }
-        if (!bFound && SOPC_STATUS_OK == status)
-        {
-            if (UINT32_MAX < crt->raw->length)
-            {
-                status = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(crt->raw->data, crt->raw->length, &pRejected);
-            }
-        }
-        /* Link */
-        crt->next = next;
-        /* iterate */
-        crt = crt->next;
-        bFound = false;
+        status = SOPC_KeyManager_Certificate_Copy(pPKI->pRejectedList, &pRejected);
     }
     /* Clear */
     if (SOPC_STATUS_OK != status)
