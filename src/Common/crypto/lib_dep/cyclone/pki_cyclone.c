@@ -822,19 +822,19 @@ time_t getCurrentUnixTime(void)
 }
 
 /* Checks if the hashAlgo is an allowed algo for the profile.
- * Returns 0 if it is ok.
+ * Returns 1 if it is ok, 0 if it is not ok.
  */
 static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile* pProfile)
 {
     const char* hashAlgoName = hashAlgo->name;
-    int error = -1;
+    bool bMatch = false;
     int comparison = strcmp(hashAlgoName, "SHA-1");
     if (0 == comparison)
     {
         if (SOPC_PKI_MD_SHA1 == pProfile->mdSign || SOPC_PKI_MD_SHA1_AND_SHA256 == pProfile->mdSign ||
             SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign)
         {
-            error = 0;
+            bMatch = true;
         }
     }
     comparison = strcmp(hashAlgoName, "SHA-224");
@@ -842,7 +842,7 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     {
         if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign)
         {
-            error = 0;
+            bMatch = true;
         }
     }
     comparison = strcmp(hashAlgoName, "SHA-256");
@@ -851,7 +851,7 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
         if (SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA1_AND_SHA256 == pProfile->mdSign ||
             SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256 == pProfile->mdSign)
         {
-            error = 0;
+            bMatch = true;
         }
     }
     comparison = strcmp(hashAlgoName, "SHA-384");
@@ -859,7 +859,7 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     {
         if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign)
         {
-            error = 0;
+            bMatch = true;
         }
     }
     comparison = strcmp(hashAlgoName, "SHA-512");
@@ -867,11 +867,11 @@ static bool checkMdAllowed(const HashAlgo* hashAlgo, const SOPC_PKI_ChainProfile
     {
         if (SOPC_PKI_MD_SHA1_OR_ABOVE == pProfile->mdSign || SOPC_PKI_MD_SHA256_OR_ABOVE == pProfile->mdSign)
         {
-            error = 0;
+            bMatch = true;
         }
     }
 
-    return error;
+    return bMatch;
 }
 
 static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* leafAndIntCA,
@@ -927,8 +927,8 @@ static void crt_verifycrl_and_check_revocation(const SOPC_CertificateList* leafA
                 }
             }
 
-            bool error = checkMdAllowed(hashAlgo, pProfile);
-            if (0 != error) // If the hash algo is not an allowed md.
+            bool bMatch = checkMdAllowed(hashAlgo, pProfile);
+            if (!bMatch) // If the hash algo is not an allowed md.
             {
                 *failure_reasons |= PKI_CYCLONE_X509_BADCRL_BAD_MD;
             }
@@ -1007,15 +1007,17 @@ static void crt_find_parent(const SOPC_CertificateList* pToValidate,
     // Make sure the container of the potential parent is not null, and empty.
     SOPC_ASSERT(NULL != ppParent);
     SOPC_ASSERT(NULL == *ppParent);
+    // Make sure leafAndIntCA is not null
+    SOPC_ASSERT(NULL != leafAndIntCA);
 
     // Find a parent in rootCA
-    *parent_is_trusted = 1;
+    *parent_is_trusted = true;
     crt_find_parent_in(leafAndIntCA, rootCA, failure_reasons, ppParent);
 
     // If no parent has been found, search up the initial leaf chain
     if (NULL == *ppParent)
     {
-        *parent_is_trusted = 0;
+        *parent_is_trusted = false;
         crt_find_parent_in(leafAndIntCA, pToValidate->next, failure_reasons, ppParent);
     }
 }
@@ -1025,67 +1027,62 @@ static void crt_find_parent(const SOPC_CertificateList* pToValidate,
  * - md and pk signature algos
  * The result of the verification process is stored in failure_reasons.
  */
-static void crt_verify_profile_in_chain(SOPC_CertificateList* pToValidate,
+static void crt_verify_profile_in_chain(const SOPC_CertificateList* pToValidate,
                                         const SOPC_PKI_ChainProfile* pProfile,
                                         uint32_t* failure_reasons)
 {
-    // Avoid acessing memory if the pointer is NULL
-    if (NULL != pToValidate)
+    SOPC_ASSERT(NULL != pToValidate);
+
+    /* 1) Check the type and size of the key */
+    X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid,
+                                               pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
+    // If the profile is RSA
+    if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
     {
-        /* 1) Check the type and size of the key */
-        X509KeyType keyType = x509GetPublicKeyType(pToValidate->crt.tbsCert.subjectPublicKeyInfo.oid,
-                                                   pToValidate->crt.tbsCert.subjectPublicKeyInfo.oidLen);
-        // If the profile is RSA
-        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
-        {
-            // Type.
-            if (X509_KEY_TYPE_RSA != keyType && X509_KEY_TYPE_RSA_PSS != keyType)
-            {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-            }
-            else
-            {
-                // If the key type suits to the profile, check its size.
-                size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
-                if (keySize < pProfile->RSAMinimumKeySize)
-                {
-                    *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
-                }
-            }
-        }
-
-        /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
-        X509SignatureAlgo signAlgo = {0};
-        const HashAlgo* hashAlgo = NULL;
-        error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
-        if (0 == errLib)
-        {
-            if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
-            {
-                if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
-                {
-                    *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
-                }
-            }
-
-            bool error = checkMdAllowed(hashAlgo, pProfile);
-            if (0 != error) // If the hash algo is not an allowed md.
-            {
-                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
-            }
-        }
-        else
+        // Type.
+        if (X509_KEY_TYPE_RSA != keyType && X509_KEY_TYPE_RSA_PSS != keyType)
         {
             *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
         }
+        else
+        {
+            // If the key type suits to the profile, check its size.
+            size_t keySize = pToValidate->crt.tbsCert.subjectPublicKeyInfo.rsaPublicKey.nLen * 8;
+            if (keySize < pProfile->RSAMinimumKeySize)
+            {
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_KEY;
+            }
+        }
+    }
+
+    /* 2) Check if md and pk algos of the signature of the cert suits to the profile. */
+    X509SignatureAlgo signAlgo = {0};
+    const HashAlgo* hashAlgo = NULL;
+    error_t errLib = x509GetSignHashAlgo(&pToValidate->crt.signatureAlgo, &signAlgo, &hashAlgo);
+    if (0 == errLib)
+    {
+        if (SOPC_PKI_PK_RSA == pProfile->pkAlgo)
+        {
+            if (X509_SIGN_ALGO_RSA != signAlgo && X509_SIGN_ALGO_RSA_PSS != signAlgo)
+            {
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
+            }
+        }
+
+        bool bMatch = checkMdAllowed(hashAlgo, pProfile);
+        if (!bMatch) // If the hash algo is not an allowed md.
+        {
+            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_MD;
+        }
+    }
+    else
+    {
+        *failure_reasons |= PKI_CYCLONE_X509_BADCERT_BAD_PK;
     }
 }
 
-static void crt_check_trusted(SOPC_CheckTrusted* checkTrusted, SOPC_CertificateList* crt)
+static void crt_check_trusted(SOPC_CheckTrusted* checkTrusted, const SOPC_CertificateList* crt)
 {
-    SOPC_ASSERT(NULL != checkTrusted);
-    SOPC_ASSERT(NULL != crt);
-
     /* Checks if the certificate is part of PKI trusted certificates */
     const SOPC_CertificateList* crtTrusted = NULL;
     if (NULL != checkTrusted->trustedCrts)
@@ -1114,11 +1111,16 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
                              uint32_t* failure_reasons,
                              SOPC_CheckTrusted* checkTrusted)
 {
+    // Check parameters
+    SOPC_ASSERT(NULL != pToValidate);
+    SOPC_ASSERT(NULL != pProfile);
+    SOPC_ASSERT(NULL != checkTrusted);
+
     SOPC_CertificateList* leafAndIntCA = pToValidate;
     SOPC_CertificateList* parent = NULL;
     uint32_t failure_reason_on_certificate = 0;
-    bool parent_is_trusted = 0;
-    bool leafAndIntCA_is_trusted = 0;
+    bool parent_is_trusted = false;
+    bool leafAndIntCA_is_trusted = false;
 
     /**
      * While:
@@ -1178,12 +1180,12 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
  */
 
 /* Check the validity of the certificate. Inspired of the Cyclone function x509ValidateCertificate().
- * Returns 0 if the certififcate is valid, 1 otherwise.
+ * Returns 1 if the certififcate is valid, 0 otherwise.
  */
 static bool crt_check_validity(const X509CertificateInfo* crt)
 {
     // Initialize at state "error"
-    bool err = 1;
+    bool bIsValid = false;
 
     // Retrieve current time
     time_t currentTime = getCurrentUnixTime();
@@ -1205,12 +1207,11 @@ static bool crt_check_validity(const X509CertificateInfo* crt)
         if (compareDateTime(&currentDate, &validity->notBefore) > 0 &&
             compareDateTime(&currentDate, &validity->notAfter) < 0)
         {
-            // The certificate has expired or is not yet valid
-            err = 0;
+            bIsValid = true;
         }
     }
 
-    return err;
+    return bIsValid;
 }
 
 /* Self-signed validation function.
@@ -1225,12 +1226,11 @@ static bool ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
                                     crt->tbsCert.subject.rawData, crt->tbsCert.subject.rawDataLen);
     if (!bMatch)
     {
-        return 1;
+        return false;
     }
 
     // Initialize at states error
     error_t errLib = 1;
-    bool err = 1;
 
     // Point to the X.509 extensions of the issuer certificate
     const X509Extensions* extensions = &crt->tbsCert.extensions;
@@ -1260,30 +1260,35 @@ static bool ValidateSelfSignedCertificate(const X509CertificateInfo* crt)
     // If no error
     if (0 == errLib)
     {
-        err = 0;
+        return true;
     }
 
-    return err;
+    return false;
 }
 
-static void crt_verify_self_signed(SOPC_CertificateList* pToValidate,
+static void crt_verify_self_signed(const SOPC_CertificateList* pToValidate,
                                    const SOPC_PKI_ChainProfile* pProfile,
                                    uint32_t* failure_reasons,
                                    SOPC_CheckTrusted* checkTrusted)
 {
+    // Check parameters
+    SOPC_ASSERT(NULL != pToValidate);
+    SOPC_ASSERT(NULL != pProfile);
+    SOPC_ASSERT(NULL != checkTrusted);
+
     // Verify the certificate with the profile.
     crt_verify_profile_in_chain(pToValidate, pProfile, failure_reasons);
 
     // Check validity
-    bool err = crt_check_validity(&pToValidate->crt);
-    if (0 != err)
+    bool bIsValid = crt_check_validity(&pToValidate->crt);
+    if (!bIsValid)
     {
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
     }
 
     // Validate certificate
-    err = ValidateSelfSignedCertificate(&pToValidate->crt);
-    if (0 != err)
+    bIsValid = ValidateSelfSignedCertificate(&pToValidate->crt);
+    if (!bIsValid)
     {
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
     }
