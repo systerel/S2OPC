@@ -996,8 +996,9 @@ static void crt_find_parent_in(const SOPC_CertificateList* leafAndIntCA,
     }
 }
 
-/* Find the parent of leafAndIntCA in the chain rootCA first, then up its chain if not found. */
-static void crt_find_parent(const SOPC_CertificateList* leafAndIntCA,
+/* Find the parent of leafAndIntCA in the chain rootCA first, then up the pToValidate chain if not found. */
+static void crt_find_parent(const SOPC_CertificateList* pToValidate,
+                            const SOPC_CertificateList* leafAndIntCA,
                             SOPC_CertificateList* rootCA,
                             uint32_t* failure_reasons,
                             SOPC_CertificateList** ppParent,
@@ -1011,11 +1012,11 @@ static void crt_find_parent(const SOPC_CertificateList* leafAndIntCA,
     *parent_is_trusted = 1;
     crt_find_parent_in(leafAndIntCA, rootCA, failure_reasons, ppParent);
 
-    // If no parent has been found, search up the leaf chain
+    // If no parent has been found, search up the initial leaf chain
     if (NULL == *ppParent)
     {
         *parent_is_trusted = 0;
-        crt_find_parent_in(leafAndIntCA, leafAndIntCA->next, failure_reasons, ppParent);
+        crt_find_parent_in(leafAndIntCA, pToValidate->next, failure_reasons, ppParent);
     }
 }
 
@@ -1115,7 +1116,6 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
 {
     SOPC_CertificateList* leafAndIntCA = pToValidate;
     SOPC_CertificateList* parent = NULL;
-    SOPC_CertificateList* cur_trust_ca = NULL;
     uint32_t failure_reason_on_certificate = 0;
     bool parent_is_trusted = 0;
     bool leafAndIntCA_is_trusted = 0;
@@ -1133,11 +1133,11 @@ static void crt_verify_chain(SOPC_CertificateList* pToValidate,
         // Check if trusted
         crt_check_trusted(checkTrusted, leafAndIntCA);
 
-        // Find a parent in trusted CA first or in the leafAndIntCA chain.
+        // Find a parent in trusted CA first or in the pToValidate chain.
         // This function will also verify the signature if a parent is found,
         // and check time-validity of leafAndIntCA.
-        cur_trust_ca = trust_list;
-        crt_find_parent(leafAndIntCA, cur_trust_ca, &failure_reason_on_certificate, &parent, &parent_is_trusted);
+        crt_find_parent(pToValidate, leafAndIntCA, trust_list, &failure_reason_on_certificate, &parent,
+                        &parent_is_trusted);
         if (NULL == parent)
         {
             failure_reason_on_certificate |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
