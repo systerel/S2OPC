@@ -40,72 +40,40 @@
 
 SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
 {
-    SOPC_CryptolibContext* pctx = NULL;
-
+    // Check parameter
     if (NULL == pCryptoProvider)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    // Create the CryptolibContext that will be attached to the CryptoProvider
+    SOPC_CryptolibContext* pctx = NULL;
     pctx = SOPC_Malloc(sizeof(SOPC_CryptolibContext));
     if (NULL == pctx)
     {
         return SOPC_STATUS_NOK;
     }
-
     memset(pctx, 0, sizeof(SOPC_CryptolibContext));
 
-    // TODO: it may be nice to not create a full context with SecuPolicy None
+    pctx->CyclonePrngCtx.ready = true;
+
     pCryptoProvider->pCryptolibContext = pctx;
-    error_t errLib = yarrowInit(&pctx->YarrowCtx);
-    if (errLib)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    /* We first gather some random data, which will be our initial seed.
-     * TODO1 : We add entropy with external sources, gathered in input_random.
-     * For the moment, we will take raw data for making the initial seed.
-     */
-    // Create the buffer which will receive the random data
-    SOPC_Buffer* buffer_random = SOPC_Buffer_Create(32);
-
-    // Fill the buffer with lenSeeded random data
-    SOPC_ReturnStatus status = SOPC_GetRandom(buffer_random, 32);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Buffer_Delete(buffer_random);
-        return SOPC_STATUS_NOK;
-    }
-
-    /* We seed the context. */
-    errLib = yarrowSeed(&pctx->YarrowCtx, buffer_random->data, 32);
-
-    // We can now free the buffer
-    SOPC_Buffer_Delete(buffer_random);
-
-    if (errLib)
-    {
-        return SOPC_STATUS_NOK;
-    }
 
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider)
 {
-    SOPC_CryptolibContext* pCtx = NULL;
-
+    // Check parameter
     if (NULL == pCryptoProvider)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    pCtx = pCryptoProvider->pCryptolibContext;
+    SOPC_CryptolibContext* pCtx = pCryptoProvider->pCryptolibContext;
     if (NULL != pCtx)
     {
-        yarrowDeinit(&pCtx->YarrowCtx);
+        pCtx->CyclonePrngCtx.ready = false;
         memset(pCtx, 0, sizeof(SOPC_CryptolibContext));
         SOPC_Free(pCtx);
     }

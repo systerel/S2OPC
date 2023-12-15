@@ -44,6 +44,39 @@
 #include "hash/sha256.h"
 #include "mac/hmac.h"
 
+static error_t CyclonePrngRead(CyclonePrngContext* context, uint8_t* output, size_t length)
+{
+    if (NULL == context || NULL == output || 0 == length)
+    {
+        return ERROR_INVALID_PARAMETER;
+    }
+
+    // Initialize at state "error"
+    error_t errLib = ERROR_FAILURE;
+
+    if (true == context->ready)
+    {
+        SOPC_Buffer* buffer_output = SOPC_Buffer_Create((uint32_t) length);
+        SOPC_ReturnStatus status = SOPC_GetRandom(buffer_output, (uint32_t) length);
+        memcpy(output, buffer_output->data, length);
+        SOPC_Buffer_Delete(buffer_output);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            // Successful processing
+            errLib = NO_ERROR;
+        }
+    }
+    else
+    {
+        errLib = ERROR_PRNG_NOT_READY;
+    }
+
+    return errLib;
+}
+
+const PrngAlgo CyclonePrng = {NULL, sizeof(CyclonePrngContext), NULL, NULL, NULL, (PrngAlgoRead) CyclonePrngRead, NULL};
+
 static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
                                              const uint8_t* pInput,
                                              uint32_t lenPlainText,
@@ -295,59 +328,19 @@ SOPC_ReturnStatus CryptoProvider_SymmVerify_HMAC_SHA256(const SOPC_CryptoProvide
     return HMAC_hashtype_verify(pProvider, pInput, lenInput, pKey, pSignature, &sha256HashAlgo);
 }
 
-static inline SOPC_ReturnStatus prng_yarrow_get_random(YarrowContext* context,
-                                                       SOPC_ExposedBuffer* pData,
-                                                       uint32_t lenData)
-{
-    /* We add entropy with external sources, gathered in input_random.
-     * Warning : Entropy quantity must be sufficient for a reseed,
-     * otherwise no reseed is done and the context remains the same as before.
-     **/
-
-    // errLib = yarrowAddEntropy(YarrowContext *context, uint_t source, const uint8_t *input,
-    //                        size_t length, size_t entropy);
-
-    uint32_t lenSeeded = (32 > lenData) ? 32 : lenData;
-
-    // Create the buffer which will receive the random data
-    SOPC_Buffer* buffer_random = SOPC_Buffer_Create(lenSeeded);
-
-    // Fill the buffer with lenSeeded random data
-    SOPC_ReturnStatus status = SOPC_GetRandom(buffer_random, lenSeeded);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Buffer_Delete(buffer_random);
-        return SOPC_STATUS_NOK;
-    }
-
-    /* We seed the context with the random data gathered */
-    error_t errLib = yarrowSeed(context, buffer_random->data, lenSeeded);
-
-    // We can now free the buffer
-    SOPC_Buffer_Delete(buffer_random);
-
-    /* Proceed Yarrow algo, the result is stored in pData */
-    errLib = yarrowRead(context, pData, lenData);
-    if (errLib)
-    {
-        return SOPC_STATUS_NOK;
-    }
-
-    return status;
-}
-
-// Fills a buffer with "truly" random data
 SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider,
                                             SOPC_ExposedBuffer* pData,
                                             uint32_t lenData)
 {
-    SOPC_CryptolibContext* pCtx = NULL;
-    pCtx = pProvider->pCryptolibContext;
+    SOPC_CryptolibContext* pCtx = pProvider->pCryptolibContext;
 
-    SOPC_ReturnStatus status = prng_yarrow_get_random(&(pCtx->YarrowCtx), pData, lenData);
+    error_t errLib = CyclonePrngRead(&pCtx->CyclonePrngCtx, pData, lenData);
+    if (0 == errLib)
+    {
+        return SOPC_STATUS_OK;
+    }
 
-    return status;
+    return SOPC_STATUS_NOK;
 }
 
 // PRF with SHA256 as defined in RFC 5246 (TLS v1.2), §5, without label.
@@ -572,8 +565,8 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
             lenToCiph = lenPlainText;
         }
 
-        errLib = rsaesOaepEncrypt(&yarrowPrngAlgo, &pProvider->pCryptolibContext->YarrowCtx, &pKey->pubKey, pHash, NULL,
-                                  pInput, (size_t) lenToCiph, pOutput, &lenWritten);
+        errLib = rsaesOaepEncrypt(&CyclonePrng, &pProvider->pCryptolibContext->CyclonePrngCtx, &pKey->pubKey, pHash,
+                                  NULL, pInput, (size_t) lenToCiph, pOutput, &lenWritten);
 
         if (errLib)
         {
@@ -792,7 +785,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                 maxSaltLen = keyLength - hLen - 2;
             }
 
-            errLib = rsassaPssSign(&yarrowPrngAlgo, &pProvider->pCryptolibContext->YarrowCtx, &pKey->privKey, pHash,
+            errLib = rsassaPssSign(&CyclonePrng, &pProvider->pCryptolibContext->CyclonePrngCtx, &pKey->privKey, pHash,
                                    maxSaltLen, hash, pSignature, &signatureLen);
         }
         else

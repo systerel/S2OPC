@@ -25,11 +25,13 @@
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
 #define SOPC_CRYPTO_PROVIDER_LIB_H_
 
-#include "rng/yarrow.h"
-
+typedef struct
+{
+    bool ready;
+} CyclonePrngContext;
 struct SOPC_CryptolibContext
 {
-    YarrowContext YarrowCtx;
+    CyclonePrngContext CyclonePrngCtx;
 };
 
 #endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */

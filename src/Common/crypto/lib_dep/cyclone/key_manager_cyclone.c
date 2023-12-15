@@ -48,7 +48,6 @@
 #include "pkix/x509_key_format.h"
 #include "pkix/x509_key_parse.h"
 #include "pkix/x509_sign_verify.h"
-#include "rng/yarrow.h"
 
 #define SOPC_KEY_MANAGER_SHA1_SIZE 20
 
