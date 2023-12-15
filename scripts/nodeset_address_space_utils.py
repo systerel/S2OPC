@@ -579,8 +579,8 @@ class NodesetMerger(NSFinder):
                     nid = n.get('NodeId')
                     orphans.append(nid)
         for nid in orphans:
-            if nid.replace(' ', '') in ['i=84', 'i=78', 'i=80']:
-                # retain Root, Mandatory, Optional
+            if nid.replace(' ', '') in ['i=84', 'i=78', 'i=11510', 'i=80', 'i=11508']:
+                # retain Root, Mandatory (and its placeholder), Optional (and its placeholder)
                 continue
             self.remove_subtree(nid)
 
