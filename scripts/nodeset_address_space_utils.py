@@ -573,7 +573,7 @@ class NodesetMerger(NSFinder):
         for t in ["UAObject", "UAVariable"]:
             for n in self._iterfind(self.tree, ".//uanodeset:" + t):
                 for ref in self._iterfind(n, "uanodeset:References/uanodeset:Reference"):
-                    if _is_hierarchical_ref(ref):
+                    if _is_hierarchical_ref(ref) and not is_forward(ref):
                         break
                 else:
                     nid = n.get('NodeId')
