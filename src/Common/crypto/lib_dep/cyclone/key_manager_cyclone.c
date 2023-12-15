@@ -442,6 +442,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_Certificate_Free(pCertNew);
+        SOPC_KeyManager_Certificate_Free(*ppCert);
+        *ppCert = NULL;
     }
     else /* Finally add the cert to the list in ppCert */
     {
@@ -473,6 +475,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
 {
     if (NULL == szPath || NULL == ppCert)
     {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                               "KeyManager: certificate file \"%s\" parse failed: misses the trailing '\n'", szPath);
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
@@ -483,27 +487,39 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCert);
+        // File is PEM or DER ? X.509 certificates are encoded using the "CERTIFICATE" label. This functions returns -1
+        // if no label has been found.
+        int_t i = pemFindTag((char_t*) pBuffer->data, pBuffer->length, "-----BEGIN ", "CERTIFICATE", "-----");
 
-        /* It failed. Maybe the file is PEM ? */
-        if (SOPC_STATUS_OK != status)
+        /* If the file is in DER format, directly call the certificate creation function */
+        if (0 > i)
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_COMMON,
-                "> KeyManager: certificate file \"%s\" parse failed. Retrying with PEM decoding...\n", szPath);
+            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCert);
+        }
+        else // The file is PEM, decode it first.
+        {
             uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
             // Convert the PEM to DER
             errLib = pemImportCertificate((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
 
-            if (!errLib)
+            if (0 == errLib)
             {
                 status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCert);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
             }
 
             SOPC_Free(bufferDER);
         }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> KeyManager: certificate file \"%s\" parse failed.\n", szPath);
     }
 
     SOPC_Buffer_Delete(pBuffer);
@@ -1294,7 +1310,6 @@ SOPC_ReturnStatus SOPC_KeyManager_CertificateList_RemoveCertFromSHA1(SOPC_Certif
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_CertificateList* pCert, bool* pbIsSelfSigned)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == pCert)
     {
         return SOPC_STATUS_NOK;
@@ -1316,7 +1331,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_IsSelfSigned(const SOPC_Certificat
         }
     }
 
-    return status;
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_Copy(const SOPC_CertificateList* pCert, SOPC_CertificateList** ppCertCopy)
@@ -1390,12 +1405,14 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         }
     }
 
-    /* In case of error, free the new certificate and the whole list */
+    /* In case of error, free the new CRL and the whole list */
     if (SOPC_STATUS_OK != status)
     {
         SOPC_KeyManager_CRL_Free(pCRLNew);
+        SOPC_KeyManager_CRL_Free(*ppCRL);
+        *ppCRL = NULL;
     }
-    else /* Finally add the cert to the list in ppCert */
+    else /* Finally add the CRL to the list in ppCRL */
     {
         /* Special case when the input list is not created */
         if (NULL == *ppCRL)
@@ -1404,7 +1421,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
         }
         else
         {
-            /* Otherwise, put the new certificate at the end of ppCert */
+            /* Otherwise, put the new CRL at the end of ppCRL */
             SOPC_CRLList* pCRLLast = *ppCRL;
             while (NULL != pCRLLast->next)
             {
@@ -1430,31 +1447,46 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    error_t errLib = 1;
+
     SOPC_Buffer* pBuffer = NULL;
     SOPC_ReturnStatus status = SOPC_Buffer_ReadFile(szPath, &pBuffer);
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCRL);
+        // File is PEM or DER ? CRLs are PEM-encoded using the "X509 CRL" label. This functions returns -1 if no label
+        // has been found.
+        int_t i = pemFindTag((char_t*) pBuffer->data, pBuffer->length, "-----BEGIN ", "X509 CRL", "-----");
 
-        /* It failed. Maybe the file is PEM ? */
-        if (SOPC_STATUS_OK != status)
+        /* If the file is in DER format, directly call the crl creation function */
+        if (0 > i)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
-                                   "> KeyManager: crl file \"%s\" parse failed. Retrying with PEM decoding...\n",
-                                   szPath);
+            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBuffer->data, pBuffer->length, ppCRL);
+        }
+        else // The file is PEM, decode it first.
+        {
             uint8_t* bufferDER = SOPC_Malloc((2 * pBuffer->length) * sizeof(uint8_t));
             size_t len_bufferDER;
 
             // Convert the PEM to DER
-            error_t errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
-            if (!errLib)
+            errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
+
+            if (0 == errLib)
             {
                 status = SOPC_KeyManager_CRL_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCRL);
+            }
+            else
+            {
+                status = SOPC_STATUS_NOK;
             }
 
             SOPC_Free(bufferDER);
         }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "> KeyManager: crl file \"%s\" parse failed.\n", szPath);
     }
 
     SOPC_Buffer_Delete(pBuffer);
