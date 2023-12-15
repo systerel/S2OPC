@@ -1,1 +1,2 @@
-This folder contains one unique certificate which is designed to be used as both CA certificate and leaf certificate (client).
+This folder contains one unique certificate which is designed to be used as both CA certificate and leaf certificate (client application). 
+Indeed a end-entity certificate could be a root CA for OPC UA protocol backward interoperability (see OPC UA spec. part 6).
