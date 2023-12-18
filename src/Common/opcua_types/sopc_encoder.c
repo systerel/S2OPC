@@ -2003,131 +2003,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
     return status;
 }
 
-/* Specific version of SOPC_Read_Array managing nested variant level */
-
-typedef SOPC_ReturnStatus(SOPC_PfnEncode_WithNestedLevel)(const void* value,
-                                                          SOPC_Buffer* msgBuffer,
-                                                          uint32_t nestedLevel);
-typedef SOPC_ReturnStatus(SOPC_PfnDecode_WithNestedLevel)(void* value, SOPC_Buffer* msgBuffer, uint32_t nestedLevel);
-
-static SOPC_ReturnStatus SOPC_Read_Array_WithNestedLevel(SOPC_Buffer* buf,
-                                                         int32_t* noOfElts,
-                                                         void** eltsArray,
-                                                         size_t sizeOfElt,
-                                                         SOPC_PfnDecode_WithNestedLevel* decodeFct,
-                                                         SOPC_EncodeableObject_PfnInitialize* initializeFct,
-                                                         SOPC_EncodeableObject_PfnClear* clearFct,
-                                                         uint32_t nestedStructLevel)
-{
-    SOPC_Byte* byteArray = NULL;
-
-    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    nestedStructLevel++;
-    SOPC_ReturnStatus status = SOPC_Int32_Read(noOfElts, buf, nestedStructLevel);
-
-    if (SOPC_STATUS_OK == status)
-    {
-        if ((*noOfElts >= 0) && (*noOfElts <= SOPC_Internal_Common_GetEncodingConstants()->max_array_length) &&
-            ((uint64_t) *noOfElts * sizeOfElt <= SIZE_MAX))
-        {
-            // OK: number of elements valid
-        }
-        else if (*noOfElts < 0)
-        {
-            // Normalize with 0 length value
-            *noOfElts = 0;
-        }
-        else
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status && *noOfElts > 0)
-    {
-        *eltsArray = SOPC_Malloc(sizeOfElt * (size_t) *noOfElts);
-        if (NULL == *eltsArray)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        else
-        {
-            byteArray = (SOPC_Byte*) *eltsArray;
-        }
-    }
-
-    if (SOPC_STATUS_OK == status && *noOfElts > 0)
-    {
-        size_t idx = 0;
-        size_t pos = 0;
-        for (idx = 0; SOPC_STATUS_OK == status && idx < (size_t) *noOfElts; idx++)
-        {
-            pos = idx * sizeOfElt;
-            initializeFct(&(byteArray[pos]));
-            status = decodeFct(&(byteArray[pos]), buf, nestedStructLevel);
-        }
-
-        if (SOPC_STATUS_OK != status)
-        {
-            size_t clearIdx = 0;
-            // idx - 1 => clear only cases in which status was ok since we don't know
-            //            the state in which byte array is in the last idx used (decode failed)
-            for (clearIdx = 0; clearIdx < (idx - 1); clearIdx++)
-            {
-                pos = clearIdx * sizeOfElt;
-                clearFct(&(byteArray[pos]));
-            }
-            SOPC_Free(*eltsArray);
-            *eltsArray = NULL;
-            *noOfElts = 0;
-        }
-    }
-
-    return status;
-}
-
-static SOPC_ReturnStatus SOPC_Write_Array_WithNestedLevel(SOPC_Buffer* buf,
-                                                          const int32_t* noOfElts,
-                                                          const void** eltsArray,
-                                                          size_t sizeOfElt,
-                                                          SOPC_PfnEncode_WithNestedLevel* encodeFct,
-                                                          uint32_t nestedStructLevel)
-{
-    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL == encodeFct ||
-        (*noOfElts > 0 && NULL == *eltsArray))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    nestedStructLevel++;
-    SOPC_ReturnStatus status = SOPC_Int32_Write(noOfElts, buf, nestedStructLevel);
-
-    if (SOPC_STATUS_OK == status && *noOfElts > 0)
-    {
-        const SOPC_Byte* byteArray = *eltsArray;
-        size_t idx = 0;
-        size_t pos = 0;
-        for (idx = 0; SOPC_STATUS_OK == status && idx < (size_t) *noOfElts; idx++)
-        {
-            pos = idx * sizeOfElt;
-            status = encodeFct(&(byteArray[pos]), buf, nestedStructLevel);
-        }
-    }
-    return status;
-}
-
 static SOPC_Byte GetVariantEncodingMask(const SOPC_Variant* variant)
 {
     SOPC_ASSERT(NULL != variant);
@@ -2362,13 +2237,13 @@ static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
         break;
     case SOPC_DataValue_Id:
         arr = array->DataValueArr;
-        status = SOPC_Write_Array_WithNestedLevel(buf, length, &arr, sizeof(SOPC_DataValue),
-                                                  SOPC_DataValue_WriteAux_Nested, nestedStructLevel);
+        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_DataValue), SOPC_DataValue_WriteAux_Nested,
+                                  nestedStructLevel);
         break;
     case SOPC_Variant_Id:
         arr = array->VariantArr;
-        status = SOPC_Write_Array_WithNestedLevel(buf, length, &arr, sizeof(SOPC_Variant), SOPC_Variant_WriteAux_Nested,
-                                                  nestedStructLevel);
+        status =
+            SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_Variant), SOPC_Variant_WriteAux_Nested, nestedStructLevel);
         break;
     case SOPC_DiagnosticInfo_Id:
         arr = array->DiagInfoArr;
@@ -2825,14 +2700,14 @@ static SOPC_ReturnStatus ReadVariantArrayBuiltInType(SOPC_Buffer* buf,
                                  SOPC_ExtensionObject_ClearAux, nestedStructLevel);
         break;
     case SOPC_DataValue_Id:
-        status = SOPC_Read_Array_WithNestedLevel(buf, length, (void**) &array->DataValueArr, sizeof(SOPC_DataValue),
-                                                 SOPC_DataValue_ReadAux_Nested, SOPC_DataValue_InitializeAux,
-                                                 SOPC_DataValue_ClearAux, nestedStructLevel);
+        status = SOPC_Read_Array(buf, length, (void**) &array->DataValueArr, sizeof(SOPC_DataValue),
+                                 SOPC_DataValue_ReadAux_Nested, SOPC_DataValue_InitializeAux, SOPC_DataValue_ClearAux,
+                                 nestedStructLevel);
         break;
     case SOPC_Variant_Id:
-        status = SOPC_Read_Array_WithNestedLevel(buf, length, (void**) &array->VariantArr, sizeof(SOPC_Variant),
-                                                 SOPC_Variant_ReadAux_Nested, SOPC_Variant_InitializeAux,
-                                                 SOPC_Variant_ClearAux, nestedStructLevel);
+        status =
+            SOPC_Read_Array(buf, length, (void**) &array->VariantArr, sizeof(SOPC_Variant), SOPC_Variant_ReadAux_Nested,
+                            SOPC_Variant_InitializeAux, SOPC_Variant_ClearAux, nestedStructLevel);
         break;
     case SOPC_DiagnosticInfo_Id:
         status = SOPC_Read_Array(buf, length, (void**) &array->DiagInfoArr, sizeof(SOPC_DiagnosticInfo),
@@ -3237,7 +3112,8 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
 {
     SOPC_Byte* byteArray = NULL;
 
-    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct)
+    if (NULL == buf || NULL == noOfElts || NULL == eltsArray || NULL != *eltsArray || NULL == decodeFct ||
+        0 == sizeOfElt)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -3264,7 +3140,7 @@ SOPC_ReturnStatus SOPC_Read_Array(SOPC_Buffer* buf,
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (*noOfElts > 0)
+    if (*noOfElts > 0 && (uint64_t) *noOfElts <= SIZE_MAX / sizeOfElt)
     {
         *eltsArray = SOPC_Calloc((size_t) *noOfElts, sizeOfElt);
 
