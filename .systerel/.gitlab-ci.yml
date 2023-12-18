@@ -339,10 +339,10 @@ test-check:
     - './.format.sh'
     # Check that generated files are up to date
     - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/pubsub_server.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
-    - 'git ls-files -m | test 0 -eq `wc -l`'
+    - './.verify-no-git-changes.sh'
     # Check generated demo nodesets are up to date
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
-    - 'git ls-files -m | test 0 -eq `wc -l`'
+    - './.verify-no-git-changes.sh'
   variables:
       DOCKER_IMAGE: 'sha256:bf7e8accd7bf22c7092fa706bb7662e089e4a0b178908bfc1d13f7094e880b01'
   artifacts:
