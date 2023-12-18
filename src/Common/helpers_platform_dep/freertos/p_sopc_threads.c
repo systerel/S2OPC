@@ -29,6 +29,7 @@
 #include "timers.h"
 
 #include "sopc_enums.h" /* s2opc includes */
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
 #include "p_sopc_synchronisation.h" /* synchronisation include */
@@ -36,9 +37,6 @@
 #include "p_sopc_utils.h"           /* private list include */
 
 #include "cmsis_os.h"
-#include "freertos_platform_dep.h"
-#include "freertos_shell.h"
-#include "samples_platform_dep.h"
 
 #define MAX_THREADS MAX_WAITERS
 
@@ -86,7 +84,6 @@ static configSTACK_DEPTH_TYPE getStckSizeByName(const char* name)
         }
     }
 
-    SOPC_Shell_Printf("Allocating %d bytes for thread %s\n", nbBytes, name ? name : "<NULL>");
     return nbBytes / sizeof(configSTACK_DEPTH_TYPE);
 }
 
@@ -635,7 +632,8 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
                                      void* startArgs,
                                      const char* taskName)
 {
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, 0, taskName, NULL, NULL);
+    static const int priority = 1; // 0 Is the lowest priority (IDLE)
+    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, priority, taskName, NULL, NULL);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
@@ -674,10 +672,8 @@ void SOPC_Sleep(unsigned int milliseconds)
 // Hook used to show stack overflows
 void vApplicationStackOverflowHook(xTaskHandle xTask, signed char* pcTaskName)
 {
-    char* name = (pcTaskName ? (char*) pcTaskName : "NULL");
-    shell_putString("\n\n!!!\nStack overflow in thread ");
-    shell_putString(name);
-    shell_putString("\n");
+    SOPC_UNUSED_ARG(xTask);
+    SOPC_UNUSED_ARG(pcTaskName);
     osDelay(500);
     __BKPT(0);
 }

@@ -32,9 +32,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_time.h"
 
-/* mbedtls includes */
-#include "mbedtls/platform_util.h"
-
 /* freertos includes */
 #include "FreeRTOS.h"
 #include "FreeRTOSConfig.h"

@@ -29,8 +29,6 @@
 #include "sopc_mutexes.h"
 #include "sopc_udp_sockets.h"
 
-#include "samples_platform_dep.h"
-
 #include "lwipopts.h"
 
 #include "lwip/dhcp.h"
