@@ -46,6 +46,7 @@
  *  \return            SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *      or SOPC_STATUS_NOK otherwise.
  *
+ *  \note              The created thread must be joined using ::SOPC_Thread_Join to ensure context deletion.
  *  \warning Depending on platform, the \p taskName length might be limited (e.g.: 16 characters including terminating
  * null byte for POSIX). In this case the \p taskName will be truncated to comply with limitation.
  */
@@ -77,6 +78,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
  *                        In prj.conf, the priorities configured MUST take into account this offset.
  * \param taskName  Name of the created thread
  *
+ * \note            The created thread must be joined using ::SOPC_Thread_Join to ensure context deletion.
  * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
  *                  or SOPC_STATUS_NOK otherwise.
  */
@@ -89,8 +91,8 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
 /**
  *  \brief Function to wait for a thread to terminate
  *
- *  \param thread   Thread to wait for
- *
+ *  \param thread   Thread to wait for, created either by ::SOPC_Thread_Create or ::SOPC_Thread_CreatePrioritized.
+ *                  Each thread can and shall be joined once only when terminating.
  */
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread);
 

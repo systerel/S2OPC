@@ -34,6 +34,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_mutexes.h"
+#include "sopc_platform_time.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
@@ -48,9 +49,12 @@ typedef struct CondRes
     uint32_t timeoutCondition;
 } CondRes;
 
+static const unsigned Thr_Sleep_Time_ms = 500;
+static const unsigned Thr_Sleep_Time_Uncertainty_ms = 20; // compensate possible windows imprecision
 static void* test_thread_exec_fct(void* args)
 {
     SOPC_Atomic_Int_Add((int32_t*) args, 1);
+    SOPC_Sleep(Thr_Sleep_Time_ms);
     return NULL;
 }
 
@@ -82,10 +86,16 @@ START_TEST(test_thread_exec)
     SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_OK);
 
+    SOPC_TimeReference t0 = SOPC_TimeReference_GetCurrent();
+
     ck_assert(wait_value(&cpt, 1));
 
     status = SOPC_Thread_Join(thread);
     ck_assert(status == SOPC_STATUS_OK);
+    SOPC_TimeReference t1 = SOPC_TimeReference_GetCurrent();
+
+    // Check that t1 >= t0 + Thr_Sleep_Time_ms
+    ck_assert(t1 >= t0 + Thr_Sleep_Time_ms - Thr_Sleep_Time_Uncertainty_ms);
 
     // Degraded behavior
     status = SOPC_Thread_Create(NULL, test_thread_exec_fct, &cpt, "test_exec");

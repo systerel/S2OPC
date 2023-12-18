@@ -29,15 +29,11 @@ typedef tThreadWks* SOPC_Thread;        // Handle workspace
 
 typedef void tPtrFct(void*);
 
-SOPC_ReturnStatus P_THREAD_Init(
-    SOPC_Thread* ptrWks, // Handle workspace
-    uint16_t wMaxRDV,    // Max parallel join
-    tPtrFct* fct,        // Callback
-    void* args,          // Args to pass to thread callback
-    int priority,
-    const char* taskName,       // Name of the task
-    tPtrFct* fctWatingForJoin,  // Callback debug wait for join
-    tPtrFct* fctReadyToSignal); // Callback debug joined, called before signal thread well ended
+SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Handle workspace
+                                tPtrFct* fct,        // Callback
+                                void* args,          // Args to pass to thread callback
+                                int priority,
+                                const char* taskName); // Callback debug joined, called before signal thread well ended
 
 SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* p);
 

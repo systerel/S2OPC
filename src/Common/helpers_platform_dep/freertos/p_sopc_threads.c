@@ -17,9 +17,8 @@
  * under the License.
  */
 
-#include <limits.h> /* stdlib includes */
-#include <stddef.h>
-#include <stdint.h>
+/* stdlib includes */
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -28,9 +27,12 @@
 #include "task.h"
 #include "timers.h"
 
-#include "sopc_enums.h" /* s2opc includes */
+/* s2opc includes */
+#include "sopc_assert.h"
+#include "sopc_enums.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_platform_time.h"
 
 #include "p_sopc_synchronisation.h" /* synchronisation include */
 #include "p_sopc_threads.h"         /* private thread include */
@@ -40,32 +42,82 @@
 
 #define MAX_THREADS MAX_WAITERS
 
+// The FreeRTOS "No Task" marker
+#define NO_FREERTOS_TASK ((TaskHandle_t) NULL)
+
 /* Private structure definition */
 
 typedef struct T_THREAD_ARGS
 {
-    tPtrFct* pCbExternalCallback; // External user callback
-    void* ptrStartArgs;           // External user callback parameters
+    tPtrFct* pEntry; // External user callback
+    void* ptrArgs;   // External user callback parameters
 } tThreadArgs;
 
 typedef struct T_THREAD_WKS
 {
-    tUtilsList taskList;                  // Task list joining this task
-    tPtrFct* pCbWaitingForJoin;           // Debug callback
-    tPtrFct* pCbReadyToSignal;            // Debug callback
-    TaskHandle_t handleTask;              // Handle freeRtos task
-    SemaphoreHandle_t lockRecHandle;      // Critical section
-    SemaphoreHandle_t signalReadyToWait;  // Task wait for at least one join call
-    SemaphoreHandle_t signalReadyToStart; // Authorize user callback execution
-    SOPC_Condition* pSignalThreadJoined;  // Cond var used to signal task end
+    TaskHandle_t handleTask;        // Handle freeRtos task
+    SemaphoreHandle_t signalJoined; // Task received a join call
     tThreadArgs args;
 } tThreadWks;
 
 /*****Private global definition*****/
-
-static tUtilsList* pgTaskList = NULL;
+static SemaphoreHandle_t gMutex; // Critical section
+static tThreadWks gThreads[MAX_THREADS];
 
 /*****Private thread api*****/
+static void criticalSectionIn(void)
+{
+    if (gMutex == NULL)
+    {
+        gMutex = xSemaphoreCreateBinary();
+    }
+    SOPC_ASSERT(NULL != gMutex);
+    xSemaphoreTake(gMutex, 0);
+}
+
+static inline void criticalSectionOut(void)
+{
+    SOPC_ASSERT(NULL != gMutex);
+    xSemaphoreGive(gMutex);
+}
+
+static tThreadWks* getFreeThread(void)
+{
+    tThreadWks* result = NULL;
+    tThreadWks* pThr = gThreads;
+    for (size_t i = 0; i < MAX_THREADS && NULL == result; i++, pThr++)
+    {
+        if (pThr->handleTask == NO_FREERTOS_TASK)
+        {
+            result = pThr;
+        }
+    }
+    return result;
+}
+
+static bool checkThread(const tThreadWks* pThr)
+{
+    bool result = false;
+    tThreadWks* pThrLoop = &gThreads[0];
+    for (size_t i = 0; i < MAX_THREADS && !result; i++, pThrLoop++)
+    {
+        if (pThrLoop == pThr)
+        {
+            result = true;
+        }
+    }
+    return result;
+}
+
+static inline void freeThread(tThreadWks* pThr)
+{
+    SOPC_ASSERT(NULL != pThr);
+    if (NULL != pThr->signalJoined)
+    {
+        vSemaphoreDelete(pThr->signalJoined);
+    }
+    memset(pThr, 0, sizeof(*pThr));
+}
 
 static configSTACK_DEPTH_TYPE getStckSizeByName(const char* name)
 {
@@ -87,93 +139,33 @@ static configSTACK_DEPTH_TYPE getStckSizeByName(const char* name)
     return nbBytes / sizeof(configSTACK_DEPTH_TYPE);
 }
 
-// Callback encapsulate user callback. Abstract start and stop synchronisation.
+// Callback encapsulate user callback. Abstract start and stop synchronization.
 static void cbInternalCallback(void* ptr)
 {
     SOPC_Thread ptrArgs = (SOPC_Thread) ptr;
+    SOPC_ASSERT(NULL != ptrArgs && NULL != ptrArgs->args.pEntry && NULL != ptrArgs->signalJoined);
 
-    if (NULL != ptrArgs)
-    {
-        if (NULL != ptrArgs->signalReadyToStart)
-        {
-            xSemaphoreTake(ptrArgs->signalReadyToStart, portMAX_DELAY);
-        }
+    // Call user task
+    (*ptrArgs->args.pEntry)(ptrArgs->args.ptrArgs);
 
-        if (NULL != ptrArgs->args.pCbExternalCallback)
-        {
-            (*ptrArgs->args.pCbExternalCallback)(ptrArgs->args.ptrStartArgs);
-        }
+    // on return, notify that task is ready to join
+    xSemaphoreGive(ptrArgs->signalJoined);
 
-        if (NULL != ptrArgs->pCbWaitingForJoin)
-        {
-            (*ptrArgs->pCbWaitingForJoin)(ptrArgs->args.ptrStartArgs);
-        }
-
-        if (NULL != ptrArgs->signalReadyToWait)
-        {
-            xSemaphoreTake(ptrArgs->signalReadyToWait, portMAX_DELAY);
-        }
-
-        if (NULL != ptrArgs->pCbReadyToSignal)
-        {
-            (*ptrArgs->pCbReadyToSignal)(ptrArgs->args.ptrStartArgs);
-        }
-
-        // At this level, wait for release mutex by condition variable called from join function
-        if (NULL != ptrArgs->lockRecHandle)
-        {
-            xSemaphoreTakeRecursive(ptrArgs->lockRecHandle, portMAX_DELAY);
-
-            // Signal terminaison thread
-            P_SYNCHRO_SignalConditionVariable(ptrArgs->pSignalThreadJoined, false);
-
-            xSemaphoreGiveRecursive(ptrArgs->lockRecHandle);
-        }
-    }
-    DEBUG_decrementCpt();
     vTaskDelete(NULL);
 }
 
 // Initializes created thread then launches it.
 SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
-                                uint16_t wMaxRDV,    // Max join
                                 tPtrFct* pFct,       // Callback
                                 void* args,          // Args
                                 int priority,
-                                const char* taskName,       // Name of the task
-                                tPtrFct* fctWaitingForJoin, // Debug wait for join
-                                tPtrFct* fctReadyToSignal)  // Debug wait for
+                                const char* taskName) // Debug wait for
 {
-    SOPC_ReturnStatus resPTHR = SOPC_STATUS_OK;
-    SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
-    SOPC_Thread handleWks = NULL;
+    SOPC_ReturnStatus result = SOPC_STATUS_OK;
 
     if (NULL == ptrWks || NULL == pFct)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    // Create global task list for first call.
-    /* TODO: outsource this initialization */
-    if (NULL == pgTaskList)
-    {
-        pgTaskList = SOPC_Malloc(sizeof(tUtilsList));
-        if (NULL != pgTaskList)
-        {
-            DEBUG_incrementCpt();
-            memset(pgTaskList, 0, sizeof(tUtilsList));
-            resList = P_UTILS_LIST_InitMT(pgTaskList, MAX_THREADS);
-            if (SOPC_STATUS_OK != resList)
-            {
-                DEBUG_decrementCpt();
-                SOPC_Free(pgTaskList);
-                pgTaskList = NULL;
-            }
-        }
-    }
-    if (NULL == pgTaskList)
-    {
-        return SOPC_STATUS_NOK;
     }
 
     if (NULL != (*ptrWks))
@@ -182,445 +174,78 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
     }
 
     /* Create the tThreadWks structure and assign it to (*ptrWks) */
-    handleWks = SOPC_Malloc(sizeof(tThreadWks));
+    criticalSectionIn();
+    tThreadWks* handleWks = getFreeThread();
 
     if (NULL == handleWks)
     {
+        criticalSectionOut();
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    DEBUG_incrementCpt();
-
-    memset(handleWks, 0, sizeof(tThreadWks));
-
-    handleWks->args.pCbExternalCallback = pFct;
-    handleWks->pCbReadyToSignal = fctReadyToSignal;
-    handleWks->pCbWaitingForJoin = fctWaitingForJoin;
-    handleWks->args.ptrStartArgs = args;
-    handleWks->handleTask = NULL;
-
-    handleWks->signalReadyToWait = xSemaphoreCreateBinary();
-    handleWks->signalReadyToStart = xSemaphoreCreateBinary();
-    handleWks->lockRecHandle = xSemaphoreCreateRecursiveMutex();
-    if (handleWks->signalReadyToWait)
+    SemaphoreHandle_t semJoin = xSemaphoreCreateBinary();
+    if (semJoin == NULL)
     {
-        DEBUG_incrementCpt();
-    }
-    if (handleWks->signalReadyToStart)
-    {
-        DEBUG_incrementCpt();
-    }
-    if (handleWks->lockRecHandle)
-    {
-        DEBUG_incrementCpt();
+        criticalSectionOut();
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    if (NULL == handleWks->signalReadyToWait || NULL == handleWks->signalReadyToStart ||
-        NULL == handleWks->lockRecHandle)
+    handleWks->args.pEntry = pFct;
+    handleWks->args.ptrArgs = args;
+    handleWks->handleTask = NO_FREERTOS_TASK;
+    handleWks->signalJoined = semJoin;
+
+    /* Semaphores (signals) are initialized "signaled", de-signal them */
+    xSemaphoreTake(handleWks->signalJoined, 0);
+    criticalSectionOut();
+
+    BaseType_t resTaskCreate = xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName,
+                                           getStckSizeByName(taskName), handleWks, priority, &handleWks->handleTask);
+
+    if (pdPASS != resTaskCreate)
     {
-        resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
+        result = SOPC_STATUS_NOK;
     }
 
-    if (SOPC_STATUS_OK == resPTHR)
+    if (SOPC_STATUS_OK != result)
     {
-        /* Semaphores (signals) are initialized "signaled", de-signal them */
-        xSemaphoreTake(handleWks->signalReadyToStart, 0);
-        xSemaphoreTake(handleWks->signalReadyToWait, 0);
-
-        // List of task to exclude
-        resList = P_UTILS_LIST_InitMT(&handleWks->taskList, wMaxRDV);
-        if (SOPC_STATUS_OK != resList)
-        {
-            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == resPTHR)
-    {
-        handleWks->pSignalThreadJoined = P_SYNCHRO_CreateConditionVariable(wMaxRDV);
-
-        if (handleWks->pSignalThreadJoined == NULL)
-        {
-            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-    if (SOPC_STATUS_OK == resPTHR)
-    {
-        BaseType_t resTaskCreate =
-            xTaskCreate(cbInternalCallback, taskName == NULL ? "appThread" : taskName, getStckSizeByName(taskName),
-                        handleWks, priority, &handleWks->handleTask);
-
-        if (pdPASS != resTaskCreate)
-        {
-            resPTHR = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (SOPC_STATUS_OK == resPTHR)
-    {
-        DEBUG_incrementCpt();
-        resList = P_UTILS_LIST_AddEltMT(pgTaskList,            // Thread list
-                                        handleWks->handleTask, // Handle task
-                                        handleWks,             // Workspace
-                                        0, 0);
-
-        if (SOPC_STATUS_OK != resList)
-        {
-            resPTHR = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == resPTHR)
-    {
-        // Set output parameter
-        *ptrWks = handleWks;
-        // Start thread
-        xSemaphoreGive(handleWks->signalReadyToStart);
+        /* Error: clean partially initialized components */
+        criticalSectionIn();
+        freeThread(handleWks);
+        criticalSectionOut();
     }
     else
     {
-        /* Error: clean partially initialized components */
-        if (NULL != handleWks->handleTask)
-        {
-            vTaskSuspend(handleWks->handleTask);
-            vTaskDelete(handleWks->handleTask);
-            handleWks->handleTask = NULL;
-            DEBUG_decrementCpt();
-        }
-        if (NULL != handleWks->lockRecHandle)
-        {
-            vSemaphoreDelete(handleWks->lockRecHandle);
-            handleWks->lockRecHandle = NULL;
-            DEBUG_decrementCpt();
-        }
-        if (NULL != handleWks->signalReadyToWait)
-        {
-            vQueueDelete(handleWks->signalReadyToWait);
-            handleWks->signalReadyToWait = NULL;
-            DEBUG_decrementCpt();
-        }
-        if (NULL != handleWks->signalReadyToStart)
-        {
-            vQueueDelete(handleWks->signalReadyToStart);
-            handleWks->signalReadyToStart = NULL;
-            DEBUG_decrementCpt();
-        }
-
-        P_UTILS_LIST_DeInitMT(&handleWks->taskList);
-        P_SYNCHRO_DestroyConditionVariable(&handleWks->pSignalThreadJoined);
-        // Reset structure memory
-        memset(handleWks, 0, sizeof(tThreadWks));
+        *ptrWks = handleWks;
     }
 
-    return resPTHR;
+    return result;
 }
 
-// Joins thread. Thread joined becomes not initilized.
-// Can be safely destroyed if just after return OK
 SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* pHandle)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-    SOPC_ReturnStatus resPSYNC = SOPC_STATUS_NOK;
-    SOPC_ReturnStatus resList = SOPC_STATUS_NOK;
-    tThreadWks* ptrCurrentThread = NULL;
-    tThreadWks* pOthersThread = NULL;
-    uint16_t wSlotId = UINT16_MAX;
-    uint16_t wSlotIdRes = UINT16_MAX;
-    TaskHandle_t handle = NULL;
-
     if (NULL == pHandle)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-
-    if (NULL == pgTaskList)
+    tThreadWks* pThr = *pHandle;
+    if (!checkThread(pThr))
     {
-        return SOPC_STATUS_INVALID_STATE;
+        return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    // Get current workspace from current task handle
-    ptrCurrentThread = P_UTILS_LIST_GetContextFromHandleMT(pgTaskList,                  // Global thread list
-                                                           xTaskGetCurrentTaskHandle(), //
-                                                           0,                           //
-                                                           0);                          //
+    // Note : the same thread cannot be joined several times
+    SOPC_ASSERT(NULL != pThr->signalJoined && NO_FREERTOS_TASK != pThr->handleTask);
 
-    if (NULL == ptrCurrentThread || NULL == ptrCurrentThread->lockRecHandle)
-    {
-        return SOPC_STATUS_NOK;
-    }
+    // Wait for the thread to terminate.
+    xSemaphoreTake(pThr->signalJoined, portMAX_DELAY);
 
-    tThreadWks* pThread = *pHandle;
-    if (NULL == pThread || NULL == pThread->lockRecHandle)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
+    // Remove task from list
+    criticalSectionIn();
+    freeThread(pThr);
+    criticalSectionOut();
 
-    // Critical section release or deleted after unlock and wait
-    xSemaphoreTakeRecursive(pThread->lockRecHandle, portMAX_DELAY);
-
-    // Don't join the current thread or an invalid thread
-    if (xTaskGetCurrentTaskHandle() == pThread->handleTask || NULL == pThread->handleTask)
-    {
-        result = SOPC_STATUS_INVALID_STATE;
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Verify that current thread is not excluded from threads to join
-        wSlotId = P_UTILS_LIST_GetEltIndexMT(&pThread->taskList,          // Local thread task list exception
-                                             xTaskGetCurrentTaskHandle(), //
-                                             0,                           //
-                                             0);                          //
-
-        if (wSlotId < UINT16_MAX)
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Verify that thread to join has not been joined by current thread
-        wSlotId = P_UTILS_LIST_GetEltIndexMT(&ptrCurrentThread->taskList, //
-                                             pThread->handleTask,         //
-                                             0,                           //
-                                             0);                          //
-
-        if (wSlotId < UINT16_MAX)
-        {
-            result = SOPC_STATUS_INVALID_STATE;
-        }
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Add thread to join to the exclusion list of the current thread
-        resList = P_UTILS_LIST_AddEltMT(&pThread->taskList,          //
-                                        xTaskGetCurrentTaskHandle(), //
-                                        NULL,                        //
-                                        0,                           //
-                                        0);                          //
-
-        if (SOPC_STATUS_OK != resList)
-        {
-            result = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Append current task to join-exclusion list of the threads that reference the task to join
-        wSlotId = UINT16_MAX;
-        do
-        {
-            pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, //
-                                                           &wSlotId);  //
-
-            if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
-            {
-                wSlotIdRes = P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList, //
-                                                        pThread->handleTask,      //
-                                                        0,                        //
-                                                        0);                       //
-                if (wSlotIdRes < UINT16_MAX)
-                {
-                    resList = P_UTILS_LIST_AddEltMT(&pOthersThread->taskList,    //
-                                                    xTaskGetCurrentTaskHandle(), //
-                                                    NULL,                        //
-                                                    0,                           //
-                                                    0);                          //
-                }
-            }
-        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == resList);
-
-        if (SOPC_STATUS_OK != resList)
-        {
-            // Restore if error occurred :
-            // Threads that reference the task to join don't record in addition the current
-            // thread
-            wSlotId = UINT16_MAX;
-            do
-            {
-                pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, &wSlotId);
-
-                if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
-                {
-                    wSlotIdRes = P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList, //
-                                                            pThread->handleTask,      //
-                                                            0,                        //
-                                                            0);                       //
-
-                    if (wSlotIdRes < UINT16_MAX)
-                    {
-                        P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList,    //
-                                                 xTaskGetCurrentTaskHandle(), //
-                                                 0,                           //
-                                                 0,                           //
-                                                 NULL);                       //
-                    }
-                }
-            } while (UINT16_MAX != wSlotId);
-
-            result = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Forward of all thread handle recorded by the current thread to thread to join
-        // exclusion list
-        wSlotId = UINT16_MAX;
-        do
-        {
-            handle = (TaskHandle_t) P_UTILS_LIST_ParseValueEltMT(&ptrCurrentThread->taskList, //
-                                                                 NULL,                        //
-                                                                 NULL,                        //
-                                                                 NULL,                        //
-                                                                 &wSlotId);                   //
-
-            if (NULL != handle)
-            {
-                resList = P_UTILS_LIST_AddEltMT(&pThread->taskList, //
-                                                handle,             //
-                                                NULL,               //
-                                                0,                  //
-                                                0);                 //
-            }
-        } while (UINT16_MAX != wSlotId && SOPC_STATUS_OK == resList);
-
-        if (SOPC_STATUS_OK != resList)
-        {
-            // Restore in case of error
-            wSlotId = UINT16_MAX;
-            do
-            {
-                handle = (TaskHandle_t) P_UTILS_LIST_ParseValueEltMT(&ptrCurrentThread->taskList, //
-                                                                     NULL,                        //
-                                                                     NULL,                        //
-                                                                     NULL,                        //
-                                                                     &wSlotId);                   //
-                if (NULL != handle)
-                {
-                    P_UTILS_LIST_RemoveEltMT(&pThread->taskList, //
-                                             handle,             //
-                                             0,                  //
-                                             0,                  //
-                                             NULL);              //
-                }
-            } while (UINT16_MAX != wSlotId);
-
-            result = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
-    if (SOPC_STATUS_OK == result)
-    {
-        // Indicate that a thread is ready to wait for join
-        xSemaphoreGive(pThread->signalReadyToWait);
-
-        // The recursive mutex is taken. So, push handle to stack to notify
-        resPSYNC = P_SYNCHRO_UnlockAndWaitForConditionVariable(pThread->pSignalThreadJoined, //
-                                                               &pThread->lockRecHandle,      //
-                                                               JOINTURE_SIGNAL,              //
-                                                               JOINTURE_CLEAR_SIGNAL,        //
-                                                               ULONG_MAX);                   //
-        // if OK, destroy workspace
-        if (SOPC_STATUS_OK != resPSYNC)
-        {
-            result = SOPC_STATUS_NOK;
-        }
-    }
-
-    if (SOPC_STATUS_OK == result)
-    {
-        // Unlink the condition variable and the mutex to avoid deadlock in multiple
-        // calls of Join
-        SemaphoreHandle_t tempLock = pThread->lockRecHandle;
-        pThread->lockRecHandle = NULL;
-
-        // After wait, clear and destroy condition variable. Unlock other join if necessary.
-        P_SYNCHRO_ClearConditionVariable(pThread->pSignalThreadJoined);
-        P_SYNCHRO_DestroyConditionVariable(&pThread->pSignalThreadJoined);
-        P_UTILS_LIST_DeInitMT(&pThread->taskList);
-
-        if (NULL != pThread->signalReadyToWait)
-        {
-            vQueueDelete(pThread->signalReadyToWait);
-            pThread->signalReadyToWait = NULL;
-            DEBUG_decrementCpt();
-        }
-        if (NULL != pThread->signalReadyToStart)
-        {
-            vQueueDelete(pThread->signalReadyToStart);
-            pThread->signalReadyToStart = NULL;
-            DEBUG_decrementCpt();
-        }
-
-        // Remove thread from global list
-        P_UTILS_LIST_RemoveEltMT(pgTaskList,          //
-                                 pThread->handleTask, //
-                                 0,                   //
-                                 0,                   //
-                                 NULL);               //
-
-        // Remove thread handle from local thread list exclusion
-        P_UTILS_LIST_RemoveEltMT(&ptrCurrentThread->taskList, //
-                                 pThread->handleTask,         //
-                                 0,                           //
-                                 0,                           //
-                                 NULL);                       //
-
-        // Remove thread handle from other thread list exclusion
-        wSlotId = UINT16_MAX;
-        do
-        {
-            pOthersThread = P_UTILS_LIST_ParseContextEltMT(pgTaskList, //
-                                                           &wSlotId);  //
-
-            if (pOthersThread != ptrCurrentThread && NULL != pOthersThread)
-            {
-                wSlotIdRes = P_UTILS_LIST_GetEltIndexMT(&pOthersThread->taskList, //
-                                                        pThread->handleTask,      //
-                                                        0,                        //
-                                                        0);                       //
-                if (wSlotIdRes < UINT16_MAX)
-                {
-                    P_UTILS_LIST_RemoveEltMT(&pOthersThread->taskList, //
-                                             pThread->handleTask,      //
-                                             0,                        //
-                                             0,                        //
-                                             NULL);                    //
-                }
-            }
-        } while (UINT16_MAX != wSlotId);
-
-        pThread->handleTask = NULL;
-
-        if (NULL != tempLock)
-        {
-            vSemaphoreDelete(tempLock);
-            tempLock = NULL;
-            DEBUG_decrementCpt();
-        }
-
-        /* Raz leaved memory */
-        memset(pThread, 0, sizeof(tThreadWks));
-
-        SOPC_Free(pThread);
-        *pHandle = NULL;
-        pThread = NULL;
-        DEBUG_decrementCpt();
-    }
-
-    // Critical section release if not deleted after unlock and wait.
-    // *pHandle might have changed in another P_THREAD_Join.
-    /* TODO: check if this block is still needed */
-    pThread = *pHandle;
-    if (NULL != pThread && NULL != pThread->lockRecHandle)
-    {
-        xSemaphoreGiveRecursive(pThread->lockRecHandle);
-    }
-
-    return result;
+    return SOPC_STATUS_OK;
 }
 
 // Relative task delay
@@ -633,7 +258,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
                                      const char* taskName)
 {
     static const int priority = 1; // 0 Is the lowest priority (IDLE)
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, priority, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, (tPtrFct*) startFct, startArgs, priority, taskName);
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
@@ -647,7 +272,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return P_THREAD_Init(thread, MAX_THREADS, (tPtrFct*) startFct, startArgs, priority, taskName, NULL, NULL);
+    return P_THREAD_Init(thread, (tPtrFct*) startFct, startArgs, priority, taskName);
 }
 
 // Join then destroy a thread
