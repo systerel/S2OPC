@@ -501,11 +501,24 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromFile(const char* sz
             size_t len_bufferDER;
 
             // Convert the PEM to DER
-            errLib = pemImportCertificate((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
-
+            size_t length_read = 0;
+            errLib =
+                pemImportCertificate((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, &length_read);
             if (0 == errLib)
             {
-                status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCert);
+                if (length_read + 1 < pBuffer->length) // + 1 if the data is a null-terminated string
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                           "KeyManager: PEM certificate file \"%s\" probably contains more than 1 "
+                                           "certificate. Please use PEM that contains one unique certificate.'\n'",
+                                           szPath);
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    status =
+                        SOPC_KeyManager_Certificate_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCert);
+                }
             }
             else
             {
@@ -1468,11 +1481,22 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromFile(const char* szPath, SO
             size_t len_bufferDER;
 
             // Convert the PEM to DER
-            errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, NULL);
-
+            size_t length_read = 0;
+            errLib = pemImportCrl((char_t*) pBuffer->data, pBuffer->length, bufferDER, &len_bufferDER, &length_read);
             if (0 == errLib)
             {
-                status = SOPC_KeyManager_CRL_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCRL);
+                if (length_read + 1 < pBuffer->length) // + 1 for the case: the data is a null-terminated string
+                {
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
+                                           "KeyManager: PEM crl file \"%s\" probably contains more than 1 crl. Please "
+                                           "use PEM that contains one unique crl.'\n'",
+                                           szPath);
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    status = SOPC_KeyManager_CRL_CreateOrAddFromDER(bufferDER, (uint32_t) len_bufferDER, ppCRL);
+                }
             }
             else
             {
