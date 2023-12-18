@@ -44,7 +44,7 @@
 #include "hash/sha256.h"
 #include "mac/hmac.h"
 
-static error_t CyclonePrngRead(CyclonePrngContext* context, uint8_t* output, size_t length)
+static error_t CyclonePrngRead(void* context, uint8_t* output, size_t length)
 {
     if (NULL == context || NULL == output || 0 == length)
     {
@@ -54,28 +54,21 @@ static error_t CyclonePrngRead(CyclonePrngContext* context, uint8_t* output, siz
     // Initialize at state "error"
     error_t errLib = ERROR_FAILURE;
 
-    if (true == context->ready)
-    {
-        SOPC_Buffer* buffer_output = SOPC_Buffer_Create((uint32_t) length);
-        SOPC_ReturnStatus status = SOPC_GetRandom(buffer_output, (uint32_t) length);
-        memcpy(output, buffer_output->data, length);
-        SOPC_Buffer_Delete(buffer_output);
+    SOPC_Buffer* buffer_output = SOPC_Buffer_Create((uint32_t) length);
+    SOPC_ReturnStatus status = SOPC_GetRandom(buffer_output, (uint32_t) length);
+    memcpy(output, buffer_output->data, length);
+    SOPC_Buffer_Delete(buffer_output);
 
-        if (SOPC_STATUS_OK == status)
-        {
-            // Successful processing
-            errLib = NO_ERROR;
-        }
-    }
-    else
+    if (SOPC_STATUS_OK == status)
     {
-        errLib = ERROR_PRNG_NOT_READY;
+        // Successful processing
+        errLib = NO_ERROR;
     }
 
     return errLib;
 }
 
-const PrngAlgo CyclonePrng = {NULL, sizeof(CyclonePrngContext), NULL, NULL, NULL, (PrngAlgoRead) CyclonePrngRead, NULL};
+const PrngAlgo CyclonePrng = {NULL, 0, NULL, NULL, NULL, (PrngAlgoRead) CyclonePrngRead, NULL};
 
 static SOPC_ReturnStatus generic_SymmEncrypt(SOPC_SecurityPolicy_ID policyId,
                                              const uint8_t* pInput,
@@ -332,9 +325,7 @@ SOPC_ReturnStatus CryptoProvider_GenTrueRnd(const SOPC_CryptoProvider* pProvider
                                             SOPC_ExposedBuffer* pData,
                                             uint32_t lenData)
 {
-    SOPC_CryptolibContext* pCtx = pProvider->pCryptolibContext;
-
-    error_t errLib = CyclonePrngRead(&pCtx->CyclonePrngCtx, pData, lenData);
+    error_t errLib = CyclonePrngRead(pProvider->pCryptolibContext, pData, lenData);
     if (0 == errLib)
     {
         return SOPC_STATUS_OK;
@@ -565,8 +556,8 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
             lenToCiph = lenPlainText;
         }
 
-        errLib = rsaesOaepEncrypt(&CyclonePrng, &pProvider->pCryptolibContext->CyclonePrngCtx, &pKey->pubKey, pHash,
-                                  NULL, pInput, (size_t) lenToCiph, pOutput, &lenWritten);
+        errLib = rsaesOaepEncrypt(&CyclonePrng, pProvider->pCryptolibContext, &pKey->pubKey, pHash, NULL, pInput,
+                                  (size_t) lenToCiph, pOutput, &lenWritten);
 
         if (errLib)
         {
@@ -785,8 +776,8 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
                 maxSaltLen = keyLength - hLen - 2;
             }
 
-            errLib = rsassaPssSign(&CyclonePrng, &pProvider->pCryptolibContext->CyclonePrngCtx, &pKey->privKey, pHash,
-                                   maxSaltLen, hash, pSignature, &signatureLen);
+            errLib = rsassaPssSign(&CyclonePrng, pProvider->pCryptolibContext, &pKey->privKey, pHash, maxSaltLen, hash,
+                                   pSignature, &signatureLen);
         }
         else
         {

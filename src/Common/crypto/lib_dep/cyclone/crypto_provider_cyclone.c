@@ -40,43 +40,24 @@
 
 SOPC_ReturnStatus SOPC_CryptoProvider_Init(SOPC_CryptoProvider* pCryptoProvider)
 {
-    // Check parameter
     if (NULL == pCryptoProvider)
-    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
 
-    // Create the CryptolibContext that will be attached to the CryptoProvider
-    SOPC_CryptolibContext* pctx = NULL;
-    pctx = SOPC_Malloc(sizeof(SOPC_CryptolibContext));
+    SOPC_CryptolibContext* pctx = SOPC_Malloc(sizeof(SOPC_CryptolibContext));
     if (NULL == pctx)
-    {
         return SOPC_STATUS_NOK;
-    }
-    memset(pctx, 0, sizeof(SOPC_CryptolibContext));
-
-    pctx->CyclonePrngCtx.ready = true;
 
     pCryptoProvider->pCryptolibContext = pctx;
-
+    pctx->randomCtx = 0;
     return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_CryptoProvider_Deinit(SOPC_CryptoProvider* pCryptoProvider)
 {
-    // Check parameter
     if (NULL == pCryptoProvider)
-    {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
 
-    SOPC_CryptolibContext* pCtx = pCryptoProvider->pCryptolibContext;
-    if (NULL != pCtx)
-    {
-        pCtx->CyclonePrngCtx.ready = false;
-        memset(pCtx, 0, sizeof(SOPC_CryptolibContext));
-        SOPC_Free(pCtx);
-    }
+    SOPC_Free(pCryptoProvider->pCryptolibContext);
 
     return SOPC_STATUS_OK;
 }

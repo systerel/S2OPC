@@ -25,13 +25,9 @@
 #ifndef SOPC_CRYPTO_PROVIDER_LIB_H_
 #define SOPC_CRYPTO_PROVIDER_LIB_H_
 
-typedef struct
-{
-    bool ready;
-} CyclonePrngContext;
 struct SOPC_CryptolibContext
 {
-    CyclonePrngContext CyclonePrngCtx;
+    uint64_t randomCtx;
 };
 
 #endif /* SOPC_CRYPTO_PROVIDER_LIB_H_ */
