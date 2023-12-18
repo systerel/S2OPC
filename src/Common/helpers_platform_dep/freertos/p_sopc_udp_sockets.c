@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// This file is not built if PubSub is not used
+#if !defined(S2OPC_CLIENTSERVER_ONLY) || S2OPC_CLIENTSERVER_ONLY == 0
+
 #include "p_sopc_sockets.h"
 
 #include "sopc_assert.h"
@@ -375,3 +378,5 @@ void SOPC_UDP_Socket_Close(Socket* pSock)
     socket_DropMembership(*pSock);
     SOPC_Socket_Close(pSock);
 }
+
+#endif

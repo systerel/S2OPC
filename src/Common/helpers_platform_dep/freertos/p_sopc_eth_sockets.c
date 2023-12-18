@@ -17,6 +17,9 @@
  * under the License.
  */
 
+// This file is not built if PubSub is not used
+#if !defined(S2OPC_CLIENTSERVER_ONLY) || S2OPC_CLIENTSERVER_ONLY == 0
+
 #include "p_sopc_sockets.h"
 #include "sopc_eth_sockets.h"
 #include "sopc_macros.h"
@@ -102,3 +105,5 @@ void SOPC_ETH_Socket_Close(Socket* sock)
     // TODO
     SOPC_UNUSED_ARG(sock);
 }
+
+#endif
