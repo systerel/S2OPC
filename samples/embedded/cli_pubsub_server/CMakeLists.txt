@@ -11,9 +11,9 @@ project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
 find_package(PythonInterp 3 REQUIRED)
 
 ######################################################
-# Generate test_address_space.c from pubsub_server.xml
+# Generate test_address_space.c from s2opc_pubsub_embedded_nodeset.xml
 set(c_aspace_file_name ${SAMPLE_SRC_DIR}/src/test_address_space.c)
-set(xml_uanodeset_path ${SAMPLE_SRC_DIR}/xml/pubsub_server.xml)
+set(xml_uanodeset_path ${SAMPLE_SRC_DIR}/xml/s2opc_pubsub_embedded_nodeset.xml)
 
 if(NOT "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
     set_source_files_properties(${c_aspace_file_name} PROPERTIES COMPILE_FLAGS -Wno-missing-field-initializers)

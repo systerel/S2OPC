@@ -43,7 +43,7 @@
 #define PRODUCT_URI "urn:S2OPC:localhost"
 #define SERVER_DESCRIPTION "S2OPC Server + PubSub"
 #define CLIENT_DESCRIPTION "S2OPC Client for SKS"
-#define ADDRESS_SPACE_PATH "./pubsub_server.xml"
+#define ADDRESS_SPACE_PATH "./s2opc_pubsub_nodeset.xml"
 #define SLEEP_TIMEOUT 100
 #define WAIT_STOP_START 2000
 #define NODEID_PUBSUB_STATUS "ns=1;s=PubSubStatus"

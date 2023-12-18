@@ -49,7 +49,7 @@ if(PUBSUB_STATIC_CONFIG)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DPUBSUB_STATIC_CONFIG")
   set(STATIC_ADDRESS_SPACE_C "pubsub_server_address_space.c")
   set(STATIC_PUBSUB_CONFIG_C "pubsub_server_config_static.c")
-  s2opc_embed_address_space(${STATIC_ADDRESS_SPACE_C} "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/pubsub_server.xml")
+  s2opc_embed_address_space(${STATIC_ADDRESS_SPACE_C} "${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_pubsub_nodeset.xml")
   pubsub_embed_config(${STATIC_PUBSUB_CONFIG_C} "${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml")
 endif()
 
@@ -105,6 +105,6 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/signingKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/encryptKey.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/security/keyNonce.key ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
-  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/address_space/s2opc_pubsub_nodeset.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config/config_pubsub_server.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )
