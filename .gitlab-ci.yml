@@ -132,6 +132,7 @@ generation:
     - if: "$NO_GEN == null && \
            $WINDOWS_TEST == null && \
            $CROSS_COMPILE == null && \
+           $TEST_NETWORK_FUZZ == null && \
            $WITH_COVERITY == null && \
            $S2OPC_PUBSUB_ONLY == null &&\
            $ALL_BUILDS == null && \
@@ -179,10 +180,6 @@ check_commit_validity:
       - 'build/'  # Required by tests / coverage
     expire_in: '1 week'
     when: always
-# Common rules overwritten by each job using this template
-#  rules: # note: should be repeated in each child job of *build_linux
-#    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $WITH_COVERITY == null && $WITH_DOC == null"
-#      when: on_success
 
 # Used by "normal" pipeline
 build-linux64-ASan:
@@ -192,7 +189,7 @@ build-linux64-ASan:
     WITH_ASAN: 1
     WITH_UBSAN: 1
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
-    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
+    - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && $TEST_NETWORK_FUZZ == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $NO_ASAN == null && $ALL_TESTS == null && $ALL_BUILDS == null" # avoid ASAN build in most of nightly builds
       when: on_success
@@ -371,6 +368,29 @@ build-freertos:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
+build-fuzz:
+  stage: build
+  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:2e8688172d2b87d5eac892ec5b3ed08bb2083f5bc3ef66ae0bcca2936ed3b40f #2.0 digest
+  variables:
+    TEST_PASSWORD_PRIVATE_KEY : password
+  script:
+    - apt-get update -y && apt-get install -y openssl
+    - ./.network_fuzzing.sh
+  artifacts:
+    name: 'fuzzing-results_job${CI_JOB_ID}'
+    paths:
+      - "./boofuzz-results"
+      - "./logs"
+    when: on_failure
+    expire_in: "30 days"
+  timeout: 24 hours
+  tags:
+    - fuzzing
+  rules: 
+    - if: "$TEST_NETWORK_FUZZ != null"
+      when: always
+
+
 ###
 # Test jobs
 ###
@@ -398,7 +418,8 @@ test-build-from-export:
   artifacts:
   rules:
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && \
+           $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null && \
            $ALL_BUILDS == null && $ALL_TESTS == null"
       when: on_success
@@ -406,11 +427,6 @@ test-build-from-export:
 .test-linux: &test_linux
   <<: *docker_job
   stage: test
-# Common rules overwritten by each job using this template
-#  rules: # note to be repeated by each child job of *test_linux
-#    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-#           $WITH_COVERITY == null && $WITH_COVERAGE == null"
-#      when: on_success
 
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
@@ -444,7 +460,8 @@ test-check:
     expire_in: '1 week'
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
+           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && \
+           $WITH_COVERAGE == null && $WITH_DOC == null && \
            $ALL_TESTS == null && $ALL_BUILDS == null"
       when: on_success
 
@@ -484,7 +501,7 @@ test-unit:
     <<: *nominal_test_variables
   rules: # repeat .test-linux variables exception since overwritten here
     - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_DOC == null && \
+           $TEST_NETWORK_FUZZ == null && $WITH_COVERITY == null && $WITH_DOC == null && \
            $ALL_TESTS == null" # + excludes ALL_TESTS
       when: on_success
 
@@ -524,7 +541,8 @@ test-uactt:
     LINUX_UACTT: 1
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
-           $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
+           $TEST_NETWORK_FUZZ != null && $WITH_COVERITY != null || \
+           $WITH_COVERAGE != null || $WITH_DOC != null || \
            $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
@@ -561,7 +579,8 @@ windows-appveyor:
   rules:
     - if: "$ALL_BUILDS != null || $WINDOWS_TEST != null || $CI_COMMIT_TAG || \
            $CI_COMMIT_BRANCH == 'master' && \
-           $ALL_TESTS == null && $WITH_COVERITY == null && $WITH_COVERAGE == null && \
+           $ALL_TESTS == null && $TEST_NETWORK_FUZZ == null && \
+           $WITH_COVERITY == null && $WITH_COVERAGE == null && \
            $NO_ASAN == null && $NO_GEN == null && \
            $S2OPC_PUBSUB_ONLY == null && $S2OPC_CLIENTSERVER_ONLY == null" # Avoid to run job on master for all nightly build except ALL_BUILDS
       when: always # run even if previous job in pipeline failed
