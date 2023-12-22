@@ -25,4 +25,4 @@ set -e
 
 source "$(dirname "$0")/".docker-images.sh
 
-"$(dirname "$0")/".run-in-docker.sh "$CHECK_IMAGE" DOCKER_IMAGE="$CHECK_IMAGE" "$@"
+"$(dirname "$0")/".run-in-docker.sh "$CHECK_DIGEST" DOCKER_DIGEST="$CHECK_DIGEST" "$@"

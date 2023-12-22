@@ -24,4 +24,4 @@ set -e
 
 source "$(dirname "$0")/".docker-images.sh
 
-"$(dirname "$0")/".run-in-docker.sh "$UACTT_LINUX_IMAGE" LINUX_UACTT=1 "$@"
+"$(dirname "$0")/".run-in-docker.sh "$UACTT_LINUX_DIGEST" LINUX_UACTT=1 "$@"

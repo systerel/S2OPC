@@ -20,15 +20,15 @@
 # Define the docker images used in S2OPC
 
 # Public images (registry.gitlab.com/systerel/s2opc)
-BUILD_IMAGE=sha256:8e0b9d304625e87b124620cf0c961e7b2a045134d6631affac0793fd7f3d4fcb # build:1.39
-MINGW_IMAGE=sha256:10b620d966863253a69ce402e6e11c0932321c77569de3ea4363c31d81ab849a # mingw_build:1.14
-RPI_IMAGE=sha256:6833a87456545ac3dcfa8a0490a11e20ada97383b3a6768b27f3406940c1b23b # rpi_build:1.6
-CHECK_IMAGE=sha256:bf7e8accd7bf22c7092fa706bb7662e089e4a0b178908bfc1d13f7094e880b01 # check 1.20
-TEST_IMAGE=sha256:6727e7354990d8cae3700093066e218b4360aeed84cbbd9f350d576c3c6033 # test:2.15
-ZEPHYR_IMAGE=sha256:f7c2b2759954d9b876adfc933978b2974cba027f591878a876b27ebee1c0d54d # zephyr_build:v3.2.0-b
-FREERTOS_IMAGE=sha256:93bc81ad9e4d8d6eda5566ea763987d87dfbfb3f202497bab9fecbb0b1e5c8b5 # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
+BUILD_DIGEST=registry.gitlab.com/systerel/s2opc/build@sha256:9919ba85c9d2bf359a2581b274d34b5cd3395114f098c1b99efcea49b043ccec # build:1.39
+MINGW_DIGEST=registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # mingw_build:1.14
+RPI_DIGEST=registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # rpi_build:1.6
+CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # check 1.20
+TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5 # test:2.15
+ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # zephyr_build:v3.2.0-b
+FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
 
 # Private images
-GEN_IMAGE=sha256:0772db3b0f8466def7656b952f1121ca8db70a521bf0b8fd0684e6e2beecc81d # docker.aix.systerel.fr/c838/gen:1.4
-UACTT_WIN_IMAGE=sha256:e150d10080d332400b4ee1318c1ff29e38fa57bc3a5348a517440c09e946e447 # com.systerel.fr:5000/c838/uactt-win:2.1
-UACTT_LINUX_IMAGE=sha256:39f254e66a175119714a8b1f1d2a2a74617885eb3a000e05c35a8fa5c61f39d3 # com.systerel.fr:5000/c838/uactt-linux:1.3
+GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4
+UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:a35a57c49df0ec5befde7a82b309ffd2cdea597358b31e44b046160036a523f0 # com.systerel.fr:5000/c838/uactt-win:2.1
+UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:c876e9998e15e7b2af08a32dbc3e85b6e0304f6f3dd3f8632e00b9271d405e07 # com.systerel.fr:5000/c838/uactt-linux:1.3

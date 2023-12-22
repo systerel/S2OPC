@@ -24,4 +24,4 @@ set -e
 
 source "$(dirname "$0")/".docker-images.sh
 
-"$(dirname "$0")/".run-in-docker.sh "$RPI_IMAGE" CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_IMAGE="$RPI_IMAGE" "$@"
+"$(dirname "$0")/".run-in-docker.sh "$RPI_DIGEST" CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_DIGEST="$RPI_DIGEST" "$@"
