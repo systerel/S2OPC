@@ -37,3 +37,4 @@ the legal rights to contribute.
 * Lebeau <nathan.lebeau@systerel.fr>
 * Eloïse Rotondo <eloise.rotondo@systerel.fr>
 * Nicolas Beauger <nicolas.beauger@systerel.fr>
+* Paul Chabas <paul.chabas@systerel.fr>
