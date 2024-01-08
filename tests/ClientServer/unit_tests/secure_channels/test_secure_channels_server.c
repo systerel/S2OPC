@@ -128,8 +128,8 @@ int main(int argc, char* argv[])
         }
     }
 
-    epConfig.authenticationManager = NULL;
-    epConfig.authorizationManager = NULL;
+    sConfig.authenticationManager = NULL;
+    sConfig.authorizationManager = NULL;
 
     // Initialize SOPC_Common
     if (SOPC_STATUS_OK == status)

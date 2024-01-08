@@ -58,8 +58,6 @@ const SOPC_ServerHelper_Config sopc_server_helper_config_default = {
     .configuredSecondsTillShutdown = SOPC_DEFAULT_SHUTDOWN_PHASE_IN_SECONDS,
     .configuredCurrentTimeRefreshIntervalMs = SOPC_DEFAULT_CURRENT_TIME_REFRESH_PERIOD_MS,
     .currentTimeRefreshTimerId = 0,
-    .authenticationManager = NULL,
-    .authorizationManager = NULL,
     .buildInfo = NULL,
     .nbEndpoints = 0,
     .endpointIndexes = NULL,
@@ -143,6 +141,7 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
                                "Error no endpoint defined, at least one shall be defined");
     }
     bool hasUserName = false;
+    bool hasUserCert = false;
     bool hasSecurity = false;
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
@@ -167,8 +166,12 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
                 OpcUa_UserTokenPolicy* utp = &sp->userTokenPolicies[k];
                 if (OpcUa_UserTokenType_UserName == utp->TokenType)
                 {
-                    // Note that SOPC_SecurityPolicy_AddUserTokenPolicy already warns when used with None security SC
+                    // Note that SOPC_SecurityConfig_AddUserTokenPolicy already warns when used with None security SC
                     hasUserName = true;
+                }
+                if (OpcUa_UserTokenType_Certificate == utp->TokenType)
+                {
+                    hasUserCert = true;
                 }
                 bool found = false;
                 OpcUa_UserTokenPolicy* uniqueUtp =
@@ -217,12 +220,22 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
         }
     }
     // Check that the server define user managers
-    if (hasUserName && (NULL == sopc_server_helper_config.authenticationManager ||
-                        NULL == sopc_server_helper_config.authorizationManager))
+    if ((hasUserName || hasUserCert) &&
+        (NULL == pConfig->serverConfig.authenticationManager || NULL == pConfig->serverConfig.authorizationManager))
     {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "No authentication and/or authorization user manager defined."
-                                 " Default will be permissive whereas UserName policy is used in endpoint(s).");
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "No authentication and/or authorization user manager defined."
+            " Default will be permissive whereas UserName or Certificate policy is used in endpoint(s).");
+    }
+    /* Check that the server define an user PKI */
+    if (NULL != pConfig->serverConfig.authenticationManager)
+    {
+        if (NULL == pConfig->serverConfig.authenticationManager->pUsrPKI)
+        {
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "No user PKI is defined whereas Certificate policy is used in endpoint(s).");
+        }
     }
 
     if (NULL == pConfig->serverConfig.namespaces)
@@ -251,10 +264,13 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
 {
     bool res = true;
 
-    if (NULL == sopc_server_helper_config.authenticationManager)
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+
+    if (NULL == pConfig->serverConfig.authenticationManager)
     {
-        sopc_server_helper_config.authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
-        if (NULL == sopc_server_helper_config.authenticationManager)
+        pConfig->serverConfig.authenticationManager = SOPC_UserAuthentication_CreateManager_AllowAll();
+        if (NULL == pConfig->serverConfig.authenticationManager)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create a default authentication manager");
             res = false;
@@ -266,10 +282,10 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
                 "No authentication manager configured: fallback to default permissive authentication manager");
         }
     }
-    if (NULL == sopc_server_helper_config.authorizationManager)
+    if (NULL == pConfig->serverConfig.authorizationManager)
     {
-        sopc_server_helper_config.authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
-        if (NULL == sopc_server_helper_config.authorizationManager)
+        pConfig->serverConfig.authorizationManager = SOPC_UserAuthorization_CreateManager_AllowAll();
+        if (NULL == pConfig->serverConfig.authorizationManager)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create a default authorization manager");
             res = false;
@@ -281,14 +297,6 @@ static bool SOPC_ServerConfigHelper_FinalizeCheckedConfig(void)
                 "No authorization manager configured: fallback to default permissive authorization manager");
         }
     }
-    // Associate global user authentication/authorization managers with each low-level endpoint configuration
-    // Note: in the future, low level configuration should be changed to define those at server level and not endpoint
-    if (res)
-    {
-        SOPC_ServerInternal_SetEndpointsUserMgr();
-    }
-
-    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
 
     if (NULL == pConfig->serverConfig.namespaces)
     {
@@ -423,15 +431,6 @@ void SOPC_ServerInternal_SetStoppedState(void)
         SOPC_Mutex_Lock(&sopc_server_helper_config.stateMutex);
         sopc_server_helper_config.state = SOPC_SERVER_STATE_STOPPED;
         SOPC_Mutex_Unlock(&sopc_server_helper_config.stateMutex);
-    }
-}
-
-void SOPC_ServerInternal_SetEndpointsUserMgr(void)
-{
-    for (uint8_t i = 0; i < sopc_server_helper_config.nbEndpoints; i++)
-    {
-        sopc_server_helper_config.endpoints[i]->authenticationManager = sopc_server_helper_config.authenticationManager;
-        sopc_server_helper_config.endpoints[i]->authorizationManager = sopc_server_helper_config.authorizationManager;
     }
 }
 
@@ -571,9 +570,6 @@ void SOPC_ServerConfigHelper_Clear(void)
     // Data used only when server is running with synchronous Serve function
     SOPC_Condition_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedCond);
     SOPC_Mutex_Clear(&sopc_server_helper_config.syncServeStopData.serverStoppedMutex);
-
-    SOPC_UserAuthentication_FreeManager(&sopc_server_helper_config.authenticationManager);
-    SOPC_UserAuthorization_FreeManager(&sopc_server_helper_config.authorizationManager);
 
     if (NULL != sopc_server_helper_config.buildInfo)
     {

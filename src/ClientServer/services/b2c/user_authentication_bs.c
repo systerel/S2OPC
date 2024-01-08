@@ -61,7 +61,7 @@ void user_authentication_bs__allocate_authenticated_user(
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     SOPC_ASSERT(NULL != epConfig);
 
-    SOPC_UserAuthorization_Manager* authorizationManager = epConfig->authorizationManager;
+    SOPC_UserAuthorization_Manager* authorizationManager = epConfig->serverConfigPtr->authorizationManager;
 
     *user_authentication_bs__p_user =
         SOPC_UserWithAuthorization_CreateFromIdentityToken(user_authentication_bs__p_user_token, authorizationManager);
@@ -387,7 +387,7 @@ void user_authentication_bs__is_valid_username_pwd_authentication(
         SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
     SOPC_ASSERT(NULL != epConfig);
 
-    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
+    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->serverConfigPtr->authenticationManager;
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
 
@@ -431,7 +431,7 @@ void user_authentication_bs__is_valid_user_x509_authentication(
 
     SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->authenticationManager;
+    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->serverConfigPtr->authenticationManager;
     SOPC_SerializedCertificate* serverSerCert = NULL;
 
     const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
@@ -1078,6 +1078,6 @@ void user_authentication_bs__get_local_user(
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     user_local.user = (SOPC_User*) SOPC_User_GetLocal();
     SOPC_GCC_DIAGNOSTIC_RESTORE
-    user_local.authorizationManager = epConfig->authorizationManager;
+    user_local.authorizationManager = epConfig->serverConfigPtr->authorizationManager;
     *session_core_bs__p_user = &user_local;
 }

@@ -169,8 +169,10 @@ static bool SOPC_HelperInternal_LoadUsersConfigFromFile(const char* filename)
     {
         return false;
     }
-    bool res = SOPC_UsersConfig_Parse(fd, &sopc_server_helper_config.authenticationManager,
-                                      &sopc_server_helper_config.authorizationManager);
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    bool res = SOPC_UsersConfig_Parse(fd, &pConfig->serverConfig.authenticationManager,
+                                      &pConfig->serverConfig.authorizationManager);
     fclose(fd);
 
     if (!res)

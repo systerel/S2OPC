@@ -49,9 +49,6 @@ static void SOPC_EndpointConfig_Clear(SOPC_Endpoint_Config* epConfig, bool freeC
             OpcUa_UserTokenPolicy_Clear(&epConfig->secuConfigurations[i].userTokenPolicies[j]);
         }
     }
-
-    SOPC_UserAuthentication_FreeManager(&epConfig->authenticationManager);
-    SOPC_UserAuthorization_FreeManager(&epConfig->authorizationManager);
 }
 
 void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config)
@@ -103,6 +100,9 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
         SOPC_EndpointConfig_Clear(&config->endpoints[i], config->freeCstringsFlag);
     }
     SOPC_Free(config->endpoints);
+
+    SOPC_UserAuthentication_FreeManager(&config->authenticationManager);
+    SOPC_UserAuthorization_FreeManager(&config->authorizationManager);
 
     SOPC_KeyCertPair_Delete(&config->serverKeyCertPair);
     SOPC_PKIProvider_Free(&config->pki);

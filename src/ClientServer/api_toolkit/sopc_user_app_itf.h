@@ -147,13 +147,6 @@ typedef struct SOPC_Endpoint_Config
                                                          * discovery endpoint and session endpoint are the same for this
                                                          * endpoint URL.
                                                          */
-
-    /* To be instantiated by applicative code: */
-    SOPC_UserAuthentication_Manager*
-        authenticationManager; /**< The user authentication manager: user authentication on session activation */
-    SOPC_UserAuthorization_Manager*
-        authorizationManager; /**< The user authorization manager: user access level evaluation */
-
     /* Configure reverse connection mechanism */
     bool noListening;            /**< If Flag is set, the server does not listen connection initiated by clients */
     uint16_t nbClientsToConnect; /**< Number of clients to connect using reverse connection mechanism */
@@ -361,6 +354,10 @@ struct SOPC_Server_Config
                                                      The callback indicates if it should be considered known by server
                                                      (and might exist later).
                                                      See ::SOPC_CreateMI_NodeAvailFunc for details. */
+    SOPC_UserAuthentication_Manager*
+        authenticationManager; /**< The user authentication manager: user authentication on session activation */
+    SOPC_UserAuthorization_Manager*
+        authorizationManager; /**< The user authorization manager: user access level evaluation */
 };
 
 /**

@@ -120,12 +120,6 @@ typedef struct SOPC_ServerHelper_Config
     uint16_t configuredCurrentTimeRefreshIntervalMs;
     uint32_t currentTimeRefreshTimerId;
 
-    // User authentication and authorization managers
-    // Note: temporarily duplicated with SOPC_S2OPC_Config endpoints
-    // until moved from SOPC_Endpoint_Config to SOPC_Server_Config
-    SOPC_UserAuthentication_Manager* authenticationManager;
-    SOPC_UserAuthorization_Manager* authorizationManager;
-
     // Server build info
     OpcUa_BuildInfo* buildInfo;
 
@@ -190,11 +184,6 @@ bool SOPC_ServerInternal_SetStoppingState(void);
 
 // Set server state as stopped
 void SOPC_ServerInternal_SetStoppedState(void);
-
-// Associate global user manager to existing endpoint configurations. It shall be called when user managers are set.
-// Note: temporarily necessary until low-level configuration also define managers at server configuration instead of
-//       endpoint configuration level.
-void SOPC_ServerInternal_SetEndpointsUserMgr(void);
 
 // Get password to decrypt server private key from internal callback
 bool SOPC_ServerInternal_GetKeyPassword(char** outPassword);
