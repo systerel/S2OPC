@@ -135,7 +135,7 @@ SERVER_PID=$!
 ${ROOT_DIR}/tests/ClientServer/scripts/wait_server.py
 popd
 
-if [[ -z "$LINUX_UACTT" ]]
+if [[ -z "$LINUX_UACTT" ]] || [[ "$LINUX_UACTT" -eq 0 ]]
 then
     mkdir -p /tmp/wineprefix
     export WINEPREFIX="/tmp/wineprefix"
