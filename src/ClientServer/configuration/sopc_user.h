@@ -77,8 +77,14 @@ const SOPC_String* SOPC_User_GetUsername(const SOPC_User* user);
 bool SOPC_User_IsUsername(const SOPC_User* user);
 
 /**
+ * \brief Returns a reference to the internal storage of the DER certificate.
+ *        The user shall be a user with a certificate.
+ */
+const SOPC_ByteString* SOPC_User_GetCertificate(const SOPC_User* user);
+
+/**
  * \brief Returns a reference to the internal storage of the thumbprint certificate (SHA1 hexadecimal format).
- *        The user must be a user with a certificate.
+ *        The user shall be a user with a certificate.
  */
 const SOPC_String* SOPC_User_GetCertificate_Thumbprint(const SOPC_User* user);
 
