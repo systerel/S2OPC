@@ -1293,6 +1293,7 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
             config->defaultCertRights = ctx.defaultCertRights;
             config->anonRights = ctx.anonymousRights;
             (*authentication)->pData = config;
+            (*authentication)->pUsrPKI = pX509_UserIdentity_PKI;
             (*authentication)->pFunctions = &authentication_functions;
             (*authorization)->pData = config;
             (*authorization)->pFunctions = &authorization_functions;

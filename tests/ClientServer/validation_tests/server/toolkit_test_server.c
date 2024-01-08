@@ -516,9 +516,9 @@ static SOPC_ReturnStatus authentication_uactt(SOPC_UserAuthentication_Manager* a
     if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
         SOPC_ASSERT(NULL != authn);
-        SOPC_ASSERT(NULL != authn->pData);
+        SOPC_ASSERT(NULL != authn->pUsrPKI);
 
-        SOPC_PKIProvider* pkiProvider = authn->pData;
+        SOPC_PKIProvider* pkiProvider = authn->pUsrPKI;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;
         SOPC_CertificateList* pUserCert = NULL;
@@ -576,9 +576,9 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
 {
     if (NULL != authentication)
     {
-        if (NULL != authentication->pData)
+        if (NULL != authentication->pUsrPKI)
         {
-            SOPC_PKIProvider_Free((SOPC_PKIProvider**) &authentication->pData);
+            SOPC_PKIProvider_Free(&authentication->pUsrPKI);
         }
         SOPC_Free(authentication);
     }
@@ -637,7 +637,8 @@ static SOPC_ReturnStatus Server_SetDefaultUserManagementConfig(void)
     {
         /* Set a user authentication function that complies with UACTT tests expectations */
         authenticationManager->pFunctions = &authentication_uactt_functions;
-        authenticationManager->pData = pX509_UserIdentity_PKI;
+        authenticationManager->pUsrPKI = pX509_UserIdentity_PKI;
+        authenticationManager->pData = (void*) NULL;
         SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
         SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);
     }

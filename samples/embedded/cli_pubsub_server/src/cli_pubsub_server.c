@@ -542,7 +542,7 @@ static void setupServer(void)
     // It is possible to store any user value in pData, which can provide some context while in
     // callback event (see function authentication_check)
     authenticationManager->pData = (void*) NULL;
-
+    authenticationManager->pUsrPKI = NULL;
     authenticationManager->pFunctions = &authentication_functions;
     SOPC_ServerConfigHelper_SetUserAuthenticationManager(authenticationManager);
     SOPC_ServerConfigHelper_SetUserAuthorizationManager(authorizationManager);

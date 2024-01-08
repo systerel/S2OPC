@@ -23,6 +23,8 @@
  * See s2opc_headers.h
  */
 
+#include "sopc_pki_decl.h"
+
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
 typedef struct SOPC_UserAuthorization_Manager SOPC_UserAuthorization_Manager;
 
@@ -82,6 +84,7 @@ typedef struct SOPC_UserAuthorization_Functions
 struct SOPC_UserAuthentication_Manager
 {
     const SOPC_UserAuthentication_Functions* pFunctions;
+    SOPC_PKIProvider* pUsrPKI;
     void* pData;
 };
 

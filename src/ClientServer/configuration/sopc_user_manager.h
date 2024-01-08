@@ -36,6 +36,7 @@
 #include <stdbool.h>
 
 #include "sopc_builtintypes.h"
+#include "sopc_pki_decl.h"
 #include "sopc_user.h"
 
 typedef struct SOPC_UserAuthentication_Manager SOPC_UserAuthentication_Manager;
@@ -148,6 +149,9 @@ struct SOPC_UserAuthentication_Manager
 {
     /** It is recommended to have a pointer to a static const instance */
     const SOPC_UserAuthentication_Functions* pFunctions;
+
+    /** PKI for X509IdentityToken or NULL if not used */
+    SOPC_PKIProvider* pUsrPKI;
 
     /** This field may be used to store instance specific data. */
     void* pData;
