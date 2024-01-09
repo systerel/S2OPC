@@ -311,7 +311,6 @@ static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_Extensio
         status = SOPC_PKIProvider_CheckLeafCertificate(pCrtUser, pProfile, &validError);
         if (SOPC_STATUS_OK != status)
         {
-            // Cannot append the user cert to the rejected list (we do not have the PKI pointer for this layer)
             char* thumbprint = SOPC_KeyManager_Certificate_GetCstring_SHA1(pCrtUser);
             if (NULL != thumbprint)
             {
@@ -472,6 +471,18 @@ void user_authentication_bs__is_valid_user_x509_authentication(
                 "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
                 user_authentication_bs__p_endpoint_config_idx);
         }
+    }
+    else
+    {
+        /* Append to the rejected list if signature or properties are invalid */
+        SOPC_CertificateList* pCrtUser = NULL;
+        OpcUa_X509IdentityToken* x509Token = user_authentication_bs__p_user_token->Body.Object.Value;
+        SOPC_ReturnStatus pkiStatus = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+            x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
+        SOPC_UNUSED_RESULT(pkiStatus);
+        pkiStatus = SOPC_PKIProvider_AddCertToRejectedList(authenticationManager->pUsrPKI, pCrtUser);
+        SOPC_UNUSED_RESULT(pkiStatus);
+        SOPC_KeyManager_Certificate_Free(pCrtUser);
     }
 
     logs_and_set_b_authentication_status_from_c(authnStatus, user_authentication_bs__p_sc_valid_user,
