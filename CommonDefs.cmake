@@ -33,6 +33,7 @@ option(USE_STATIC_EXT_LIBS "S2OPC libraries and binaries depend on static versio
 option(BUILD_SHARED_LIBS "Build dynamic libraries for S2OPC instead of static libraries" OFF)
 if(USE_STATIC_EXT_LIBS)
   set(USE_STATIC_MBEDTLS_LIB ${USE_STATIC_EXT_LIBS})
+  set(USE_STATIC_CYCLONE_CRYPTO_LIB ${USE_STATIC_EXT_LIBS})
   set(USE_STATIC_EXPAT_LIB ${USE_STATIC_EXT_LIBS})
 
   if(BUILD_SHARED_LIBS)
@@ -58,10 +59,13 @@ endif()
 #########################
 # Choose crypto option
 option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" ON)
+option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" OFF)
 
 set(S2OPC_CRYPTO_LIB "nocrypto")
-if (S2OPC_CRYPTO_MBEDTLS)
-set(S2OPC_CRYPTO_LIB "mbedtls")
+if(S2OPC_CRYPTO_CYCLONE)
+  set(S2OPC_CRYPTO_LIB "cyclone")
+elseif(S2OPC_CRYPTO_MBEDTLS)
+  set(S2OPC_CRYPTO_LIB "mbedtls")
 endif()
 
 # Final check on crypto options
@@ -162,7 +166,11 @@ endif()
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:$<${IS_WARNINGS_AS_ERRORS}:-Werror>>)
 # Specific flags for CERT rules
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-Wunicode -Wimplicit-int -Wreserved-id-macro -Wsometimes-uninitialized -Wunsequenced -Wincompatible-pointer-types-discards-qualifiers -Wunevaluated-expression -Wparentheses -Wint-conversion -Wint-to-pointer-cast -Wincompatible-pointer-types -Wvla -Wconversion>)
-
+# Special compilation flag (for GCC + Clang) for CycloneCRYPTO
+if(S2OPC_CRYPTO_CYCLONE)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:-D__error_t_defined>)
+  list(APPEND S2OPC_COMPILER_FLAGS $<${IS_CLANG}:-D__error_t_defined>)
+endif()
 
 # Set MSVC compiler flags
 list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MSVC}:/W3 /Zi /sdl>)

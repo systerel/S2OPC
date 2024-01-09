@@ -74,6 +74,7 @@ START_TEST(test_crypto_get_app_uri)
 }
 END_TEST
 
+#ifndef S2OPC_CRYPTO_CYCLONE
 START_TEST(test_crypto_gen_rsa_export_import)
 {
     /* Generate a new RSA key*/
@@ -253,6 +254,7 @@ START_TEST(test_gen_csr)
     SOPC_Free(pDER);
 }
 END_TEST
+#endif
 
 static void SOPC_KeyCertPairUpdateCallback(uintptr_t updateParam)
 {
@@ -380,16 +382,11 @@ START_TEST(test_key_pair_bytes)
 Suite* tests_make_suite_crypto_tools(void)
 {
     Suite* s = suite_create("Crypto tools test");
-    TCase *tc_check_app_uri = NULL, *tc_gen_rsa = NULL, *tc_gen_csr = NULL, *tc_key_pair = NULL;
 
-    tc_check_app_uri = tcase_create("Check application URI");
+#ifndef S2OPC_CRYPTO_CYCLONE
+    TCase *tc_gen_rsa = NULL, *tc_gen_csr = NULL;
     tc_gen_rsa = tcase_create("Generate RSA keys");
     tc_gen_csr = tcase_create("Generate CSR");
-    tc_key_pair = tcase_create("Update Key / Cert pair");
-
-    suite_add_tcase(s, tc_check_app_uri);
-    tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
-    tcase_add_test(tc_check_app_uri, test_crypto_get_app_uri);
     suite_add_tcase(s, tc_gen_rsa);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import);
     tcase_add_test(tc_gen_rsa, test_crypto_gen_rsa_export_import_public);
@@ -397,6 +394,16 @@ Suite* tests_make_suite_crypto_tools(void)
     tcase_set_timeout(tc_gen_rsa, 10);
     suite_add_tcase(s, tc_gen_csr);
     tcase_add_test(tc_gen_csr, test_gen_csr);
+#endif
+
+    TCase *tc_check_app_uri = NULL, *tc_key_pair = NULL;
+
+    tc_check_app_uri = tcase_create("Check application URI");
+    tc_key_pair = tcase_create("Update Key / Cert pair");
+
+    suite_add_tcase(s, tc_check_app_uri);
+    tcase_add_test(tc_check_app_uri, test_crypto_check_app_uri);
+    tcase_add_test(tc_check_app_uri, test_crypto_get_app_uri);
     suite_add_tcase(s, tc_key_pair);
     tcase_add_test(tc_key_pair, test_key_pair_files);
     tcase_add_test(tc_key_pair, test_key_pair_bytes);

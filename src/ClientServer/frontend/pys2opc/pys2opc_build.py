@@ -79,6 +79,11 @@ source = r'''
 # The other way, dlopen, loads the ABI, is less safe, slower, but only requires the .so/.dll
 # TODO: automatize configuration through cmake
 
+# with_cyclone is 1 if the environment variable S2OPC_CRYPTO_CYCLONE is set to 1, and 0 otherwise.
+# Note: It obliges the user to compile with the variable S2OPC_CRYPTO_CYCLONE when using CycloneCRYPTO. 
+#       We could avoid that by adding a configuration through cmake for targetting compile definition, like suggests the TODO.
+with_cyclone = os.environ.get("S2OPC_CRYPTO_CYCLONE", 0)
+
 if os.name == 'nt':
 # Windows
     ffibuilder.set_source('_pys2opc',
@@ -90,7 +95,16 @@ if os.name == 'nt':
                      )
 else:
 # Linux
-    ffibuilder.set_source('_pys2opc',
+    if with_cyclone:
+        ffibuilder.set_source('_pys2opc',
+                        source,
+                        extra_link_args=['-ls2opc_clientserver', '-ls2opc_common', '-lexpat', '-lcyclone_crypto', '-lcyclone_common'],
+                        include_dirs=['.'],
+                        library_dirs=['../lib', # working dir should be located in build dir
+                                        '.'],  # Ease compilation outside of the S2OPC project
+                        )
+    else:
+        ffibuilder.set_source('_pys2opc',
                       source,
                       extra_link_args=['-ls2opc_clientserver', '-ls2opc_common', '-lmbedcrypto', '-lmbedtls', '-lmbedx509', '-lexpat'],
                       include_dirs=['.'],
