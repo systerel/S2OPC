@@ -206,10 +206,18 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     }
     else
     {
-        status = SOPC_PushServerConfig_GetDefaultConfiguration(
-            serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, serverConfig->serverKeyCertPair,
-            serverConfig->serverKeyPath, serverConfig->serverCertPath, NULL, SOPC_CERT_TYPE_UNKNOW,
-            SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
+        if (NULL == serverConfig->authenticationManager)
+        {
+            printf("<Demo_Push_Server: No authentication manager is defined");
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PushServerConfig_GetDefaultConfiguration(
+                serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, serverConfig->serverKeyCertPair,
+                serverConfig->serverKeyPath, serverConfig->serverCertPath, serverConfig->authenticationManager->pUsrPKI,
+                SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -223,6 +231,18 @@ static SOPC_ReturnStatus DemoPushSrv_AddServerConfigurationType(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_PushServerConfig_Configure(pPushConfig, pMcm);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL == serverConfig->authenticationManager->pUsrPKI || gAppCtx.isTofu)
+        {
+            printf("<Demo_Push_Server: DefaultApplicationGroup is set\n");
+        }
+        else
+        {
+            printf("<Demo_Push_Server: DefaultApplicationGroup and DefaultUserTokenGroup are set\n");
+        }
     }
 
     SOPC_PushServerConfig_DeleteConfiguration(&pPushConfig);

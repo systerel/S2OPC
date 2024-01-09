@@ -1191,10 +1191,13 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
         status = SOPC_PKIProvider_CreateLeafProfile(NULL, &profile.leafProfile);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_ProfileSetUsageFromType(&profile, SOPC_PKI_TYPE_SERVER_APP);
+            SOPC_PKI_Type pki_type =
+                SOPC_TRUSTLIST_GROUP_APP == pTrustList->groupType ? SOPC_PKI_TYPE_SERVER_APP : SOPC_PKI_TYPE_USER;
+            status = SOPC_PKIProvider_ProfileSetUsageFromType(&profile, pki_type);
         }
         if (SOPC_STATUS_OK == status)
         {
+            profile.bApplyLeafProfile = true;
             /* Validate the certificate */
             status = SOPC_PKIProvider_ValidateCertificate(pTmpPKI, pCert, &profile, &validationError);
             if (SOPC_STATUS_OK != status)
@@ -1412,6 +1415,10 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
     if (SOPC_TRUSTLIST_GROUP_APP == pTrustList->groupType)
     {
         SOPC_ToolkitServer_AsyncReEvalSecureChannels(false);
+    }
+    else if (SOPC_TRUSTLIST_GROUP_USR == pTrustList->groupType)
+    {
+        SOPC_ToolkitServer_AsyncReEvalUserCertSessions();
     }
     else
     {

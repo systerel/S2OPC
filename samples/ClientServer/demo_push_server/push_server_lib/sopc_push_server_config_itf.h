@@ -53,7 +53,6 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
  * \param pServerKeyPath      Path to the server private key (NULL if the platform has no file system).
  * \param pServerCertPath     Path to the server certificate (NULL if the platform has no file system).
  * \param pPKIUsr             A valid pointer to the PKI of the users TrustList (NULL if not used).
- * \param usrCertType         The users certificate type (ignored if \p pPKIUsr is NULL).
  * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
  * \param[out] ppConfig       A newly created configuration. You should delete it with
  *                            ::SOPC_PushServerConfig_DeleteConfiguration .
@@ -66,7 +65,6 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const char* pServerKeyPath,
                                                                 const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,
-                                                                const SOPC_Certificate_Type usrCertType,
                                                                 const uint32_t maxTrustListSize,
                                                                 SOPC_PushServerConfig_Config** ppConfig);
 /**

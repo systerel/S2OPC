@@ -386,7 +386,6 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
                                                                 const char* pServerKeyPath,
                                                                 const char* pServerCertPath,
                                                                 SOPC_PKIProvider* pPKIUsr,
-                                                                const SOPC_Certificate_Type usrCertType,
                                                                 const uint32_t maxTrustListSize,
                                                                 SOPC_PushServerConfig_Config** ppConfig)
 {
@@ -415,14 +414,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
     }
     if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
     {
-        if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != usrCertType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != usrCertType)
-        {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
-        }
-    }
-    if (NULL != pPKIUsr && SOPC_STATUS_OK == status)
-    {
-        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, usrCertType, pPKIUsr,
+        status = SOPC_CertificateGroup_GetDefaultConfiguration(SOPC_TRUSTLIST_GROUP_USR, SOPC_CERT_TYPE_UNKNOW, pPKIUsr,
                                                                maxTrustListSize, NULL, NULL, NULL, &pUsrCertGroupCfg);
     }
     if (SOPC_STATUS_OK == status)
@@ -729,9 +721,10 @@ SOPC_StatusCode PushServer_GetRejectedList(SOPC_ByteString** ppBsCertArray, uint
         status = SOPC_ByteString_Copy(&pCertArray[idx], &pBsAppCertArray[idx]);
         stCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
     }
-    for (idx = lenUsr; idx < lenApp + lenUsr && NULL != pBsUsrCertArray && SOPC_IsGoodStatus(stCode); idx++)
+    uint32_t idxStartUsr = lenApp == 0 ? lenApp : lenUsr;
+    for (idx = idxStartUsr; idx < lenApp + lenUsr && NULL != pBsUsrCertArray && SOPC_IsGoodStatus(stCode); idx++)
     {
-        status = SOPC_ByteString_Copy(&pCertArray[idx], &pBsUsrCertArray[idx - lenUsr]);
+        status = SOPC_ByteString_Copy(&pCertArray[idx], &pBsUsrCertArray[idx - idxStartUsr]);
         stCode = SOPC_STATUS_OK == status ? SOPC_GoodGenericStatus : OpcUa_BadUnexpectedError;
     }
     /* Clear */

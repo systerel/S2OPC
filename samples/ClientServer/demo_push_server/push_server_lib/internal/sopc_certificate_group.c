@@ -328,13 +328,13 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != certType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != certType)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
     const CertificateGroup_NodeIds* pNodeIds = NULL;
     if (SOPC_TRUSTLIST_GROUP_APP == groupType)
     {
+        if (SOPC_CERT_TYPE_RSA_MIN_APPLICATION != certType && SOPC_CERT_TYPE_RSA_SHA256_APPLICATION != certType)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
         pNodeIds = &appNodeIds;
     }
     else if (SOPC_TRUSTLIST_GROUP_USR == groupType)
@@ -564,7 +564,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
         pCertGroup->pCertificateTypeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
         status = SOPC_NodeId_Copy(pCertGroup->pCertificateTypeId, pIds->pCertificateTypesId);
     }
-    if (SOPC_STATUS_OK == status)
+    if (SOPC_STATUS_OK == status && SOPC_TRUSTLIST_GROUP_USR != pCfg->groupType)
     {
         status = cert_group_set_cert_type(pCertGroup, pCfg->certType);
     }
