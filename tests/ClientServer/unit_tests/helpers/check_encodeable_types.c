@@ -499,6 +499,7 @@ SOPC_EncodeableType SPDURequest_EncodeableType = {
     OpcUaId_SPDURequest_Encoding_DefaultBinary,
     OpcUaId_SPDURequest_Encoding_DefaultXml,
     NULL,
+    0,
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
@@ -511,6 +512,7 @@ SOPC_EncodeableType SPDURequest_EncodeableType2 = {
     OpcUaId_SPDURequest_Encoding_DefaultBinary,
     OpcUaId_SPDURequest_Encoding_DefaultXml,
     NULL,
+    0,
     sizeof(SPDURequest),
     SPDURequest_Initialize,
     SPDURequest_Clear,
@@ -550,7 +552,7 @@ START_TEST(test_UserEncodeableType)
     };
 
     // Encoder is not known
-    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OPCUA_NAMESPACE_INDEX, OpcUaId_SPDURequest);
     ck_assert(pEncoder == NULL);
 
     // Check default parameters
@@ -574,7 +576,7 @@ START_TEST(test_UserEncodeableType)
     ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
 
     // Encoder is now known
-    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OPCUA_NAMESPACE_INDEX, OpcUaId_SPDURequest);
     ck_assert(pEncoder == &SPDURequest_EncodeableType);
 
     checkEncodeableType(pEncoder, check_SpduRequestDataType, frame, (uint32_t) sizeof frame);
@@ -590,7 +592,7 @@ START_TEST(test_UserEncodeableType)
     ck_assert(res == SOPC_STATUS_INVALID_PARAMETERS);
 
     // Encoder is not known
-    pEncoder = SOPC_EncodeableType_GetEncodeableType(OpcUaId_SPDURequest);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(OPCUA_NAMESPACE_INDEX, OpcUaId_SPDURequest);
     ck_assert(pEncoder == NULL);
 }
 END_TEST

@@ -6034,7 +6034,11 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
             if (var->Value.ExtObject->Encoding == SOPC_ExtObjBodyEncoding_Object &&
                 NULL != var->Value.ExtObject->Body.Object.ObjType)
             {
+                SOPC_ASSERT(NULL == var->Value.ExtObject->Body.Object.ObjType->NamespaceUri &&
+                            "EncType Namespace URI translation unsupported");
                 // Restore the DataType type id if it was the encoding object node
+                var->Value.ExtObject->TypeId.NodeId.Namespace =
+                    var->Value.ExtObject->Body.Object.ObjType->NamespaceIndex;
                 var->Value.ExtObject->TypeId.NodeId.Data.Numeric = var->Value.ExtObject->Body.Object.ObjType->TypeId;
                 return &var->Value.ExtObject->TypeId.NodeId;
             }

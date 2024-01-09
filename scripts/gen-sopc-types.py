@@ -792,6 +792,7 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     OpcUaId_{name}_Encoding_DefaultBinary,
     OpcUaId_{name}_Encoding_DefaultXml,
     NULL,
+    0,
     sizeof({ctype}),
     OpcUa_{name}_Initialize,
     OpcUa_{name}_Clear,

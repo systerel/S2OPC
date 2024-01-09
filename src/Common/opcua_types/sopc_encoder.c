@@ -1839,7 +1839,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Write(const SOPC_ExtensionObject* extObj,
         else
         {
             nodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            nodeId.Namespace = OPCUA_NAMESPACE_INDEX;
+            SOPC_ASSERT(NULL == extObj->Body.Object.ObjType->NamespaceUri &&
+                        "EncType Namespace URI translation unsupported");
+            nodeId.Namespace = extObj->Body.Object.ObjType->NamespaceIndex;
             nodeId.Data.Numeric = extObj->Body.Object.ObjType->BinaryEncodingTypeId;
         }
     }
@@ -1927,10 +1929,10 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         if (encodingByte == SOPC_ExtObjBodyEncoding_ByteString)
         {
             // Object provided as a byte string, check if encoded object is a known type
-            if (extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
-                extObj->TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
+            if (extObj->TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric)
             {
-                encType = SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Data.Numeric);
+                encType = SOPC_EncodeableType_GetEncodeableType(extObj->TypeId.NodeId.Namespace,
+                                                                extObj->TypeId.NodeId.Data.Numeric);
                 if (NULL != encType)
                 {
                     encodingByte = SOPC_ExtObjBodyEncoding_Object;
@@ -3387,9 +3389,9 @@ SOPC_ReturnStatus SOPC_MsgBodyType_Read(SOPC_Buffer* buf, SOPC_EncodeableType** 
     if (SOPC_STATUS_OK == status && nodeId.IdentifierType == SOPC_IdentifierType_Numeric)
     {
         // Must be the case in which we cannot know the type before decoding it
-        if (nodeId.Namespace == OPCUA_NAMESPACE_INDEX)
+        if (OPCUA_NAMESPACE_INDEX == nodeId.Namespace)
         {
-            recEncType = SOPC_EncodeableType_GetEncodeableType(nodeId.Data.Numeric);
+            recEncType = SOPC_EncodeableType_GetEncodeableType(OPCUA_NAMESPACE_INDEX, nodeId.Data.Numeric);
         }
         else
         {

@@ -163,7 +163,8 @@ typedef const struct SOPC_EncodeableType_Struct
     uint32_t TypeId;
     uint32_t BinaryEncodingTypeId;
     uint32_t XmlEncodingTypeId;
-    char* NamespaceUri;
+    char* NamespaceUri;      /**< It shall contain the namespace URI or NULL if defined by namespace index. */
+    uint16_t NamespaceIndex; /**< It shall be ignored when NamespaceUri is set. */
     size_t AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
     SOPC_EncodeableObject_PfnClear* Clear;
@@ -196,19 +197,21 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
 /**
  *  \brief          Retrieve a user-defined encodeable type with the given type Id.
  *
+ *  \param nsIndex        Namespace index of the \p typeId
  *  \param typeId         Type identifier for which corresponding encodeable type must be returned
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
  */
-SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId);
+SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint16_t nsIndex, uint32_t typeId);
 
 /**
  *  \brief          Retrieve a defined encodeable type with the given type Id.
  *                  It can be a internal defined type or user-defined type.
  *
+ *  \param nsIndex        Namespace index of the \p typeId
  *  \param typeId         Type identifier for which corresponding encodeable type must be returned
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
  */
-SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId);
+SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint16_t nsIndex, uint32_t typeId);
 
 /**
  *  \brief          Get the name of the given encodeable type

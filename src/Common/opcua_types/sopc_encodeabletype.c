@@ -21,6 +21,7 @@
 
 #include <string.h>
 
+#include "opcua_identifiers.h"
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_common_constants.h"
@@ -38,6 +39,7 @@ SOPC_Dict* g_UserEncodeableTypes = NULL;
 
 typedef struct
 {
+    uint16_t nsIndex;
     uint32_t typeId;
 } SOPC_EncodeableType_UserTypeKey;
 
@@ -48,12 +50,15 @@ typedef struct
 
 static uint64_t typeId_hash(const uintptr_t data)
 {
-    return ((const SOPC_EncodeableType_UserTypeKey*) data)->typeId;
+    return ((uint64_t)((const SOPC_EncodeableType_UserTypeKey*) data)->typeId) +
+           ((uint64_t)(((const SOPC_EncodeableType_UserTypeKey*) data)->nsIndex) << 32);
 }
 
 static bool typeId_equal(const uintptr_t a, const uintptr_t b)
 {
-    return ((const SOPC_EncodeableType_UserTypeKey*) a)->typeId == ((const SOPC_EncodeableType_UserTypeKey*) b)->typeId;
+    return ((const SOPC_EncodeableType_UserTypeKey*) a)->nsIndex ==
+               ((const SOPC_EncodeableType_UserTypeKey*) b)->nsIndex &&
+           ((const SOPC_EncodeableType_UserTypeKey*) a)->typeId == ((const SOPC_EncodeableType_UserTypeKey*) b)->typeId;
 }
 
 static void type_free(uintptr_t data)
@@ -61,7 +66,9 @@ static void type_free(uintptr_t data)
     SOPC_Free((void*) data);
 }
 
-static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, const uint32_t typeId)
+static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder,
+                                              const uint16_t nsIndex,
+                                              const uint32_t typeId)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_OK;
     SOPC_EncodeableType_UserTypeKey* pKey = NULL;
@@ -79,6 +86,7 @@ static SOPC_ReturnStatus insertKeyInUserTypes(SOPC_EncodeableType* pEncoder, con
         SOPC_Free(pKey);
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
+    pKey->nsIndex = nsIndex;
     pKey->typeId = typeId;
     pValue->encoder = pEncoder;
     inserted = SOPC_Dict_Insert(g_UserEncodeableTypes, (uintptr_t) pKey, (uintptr_t) pValue);
@@ -103,7 +111,8 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    prevEncoder = SOPC_EncodeableType_GetEncodeableType(pEncoder->TypeId);
+    SOPC_ASSERT(NULL == pEncoder->NamespaceUri && "EncType Namespace URI translation unsupported");
+    prevEncoder = SOPC_EncodeableType_GetEncodeableType(pEncoder->NamespaceIndex, pEncoder->TypeId);
     if (prevEncoder != NULL)
     {
         // This TypeId is already used.
@@ -130,11 +139,11 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
     // insert both TypeId and BinaryEncodingTypeId keys to allow decoder to be correctly identified
     if (result == SOPC_STATUS_OK)
     {
-        result = insertKeyInUserTypes(pEncoder, pEncoder->TypeId);
+        result = insertKeyInUserTypes(pEncoder, pEncoder->NamespaceIndex, pEncoder->TypeId);
     }
     if (result == SOPC_STATUS_OK)
     {
-        result = insertKeyInUserTypes(pEncoder, pEncoder->BinaryEncodingTypeId);
+        result = insertKeyInUserTypes(pEncoder, pEncoder->NamespaceIndex, pEncoder->BinaryEncodingTypeId);
     }
     return result;
 }
@@ -152,6 +161,8 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    SOPC_ASSERT(NULL == encoder->NamespaceUri && "EncType Namespace URI translation unsupported");
+    key.nsIndex = encoder->NamespaceIndex;
     key.typeId = encoder->TypeId;
 
     prevEncoder = (SOPC_EncodeableType*) SOPC_Dict_GetKey(g_UserEncodeableTypes, (const uintptr_t) &key, NULL);
@@ -172,7 +183,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
     return SOPC_STATUS_OK;
 }
 
-SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
+SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint16_t nsIndex, uint32_t typeId)
 {
     SOPC_EncodeableType_UserTypeValue* pValue = NULL;
     SOPC_EncodeableType* result = NULL;
@@ -180,7 +191,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
     if (g_UserEncodeableTypes != NULL)
     {
         // search in user defined encodeable types
-        SOPC_EncodeableType_UserTypeKey key = {.typeId = typeId};
+        SOPC_EncodeableType_UserTypeKey key = {.nsIndex = nsIndex, .typeId = typeId};
         pValue = (SOPC_EncodeableType_UserTypeValue*) SOPC_Dict_Get(g_UserEncodeableTypes, (uintptr_t) &key, &found);
         if (found && pValue != NULL)
         {
@@ -191,31 +202,34 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint32_t typeId)
     return result;
 }
 
-SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint32_t typeId)
+SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint16_t nsIndex, uint32_t typeId)
 {
     SOPC_EncodeableType* current = NULL;
     SOPC_EncodeableType* result = NULL;
     uint32_t idx = 0;
-    current = SOPC_KnownEncodeableTypes[idx];
-    while (current != NULL && NULL == result)
+    if (OPCUA_NAMESPACE_INDEX == nsIndex)
     {
-        if (typeId == current->TypeId || typeId == current->BinaryEncodingTypeId)
+        current = SOPC_KnownEncodeableTypes[idx];
+        while (current != NULL && NULL == result)
         {
-            result = current;
-        }
-        if (NULL == result && idx < UINT32_MAX)
-        {
-            idx++;
-            current = SOPC_KnownEncodeableTypes[idx];
-        }
-        else
-        {
-            current = NULL;
+            if (typeId == current->TypeId || typeId == current->BinaryEncodingTypeId)
+            {
+                result = current;
+            }
+            if (NULL == result && idx < UINT32_MAX)
+            {
+                idx++;
+                current = SOPC_KnownEncodeableTypes[idx];
+            }
+            else
+            {
+                current = NULL;
+            }
         }
     }
     if (result == NULL)
     {
-        result = SOPC_EncodeableType_GetUserType(typeId);
+        result = SOPC_EncodeableType_GetUserType(nsIndex, typeId);
     }
     return result;
 }
