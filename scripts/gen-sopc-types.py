@@ -26,6 +26,7 @@ import argparse
 from collections import OrderedDict
 import xml.etree.ElementTree as ET
 import sys
+import os
 
 H_FILE_PATH = 'src/Common/opcua_types/sopc_types.h'
 H_ENUM_FILE_PATH = 'src/Common/opcua_types/sopc_enum_types.h'
@@ -34,46 +35,100 @@ C_FILE_PATH = 'src/Common/opcua_types/sopc_types.c'
 def main():
     """Main program"""
     ns = parse_args()
-    schema = BinarySchema(ns.bsd)
-    gen_header_file(schema)
-    gen_implem_file(schema)
+    if ns.types_prefix is None and (ns.ns_URI is not None or ns.ns_index != 0):
+        raise ValueError("--types_prefix shall be set when namespace is not NS0")
+    schema = BinarySchema(ns.bsd, ns.types_prefix)
+    gen_header_file(ns.h_types_path, ns.h_enum_types_path, schema)
+    gen_implem_file(ns.ns_URI, ns.ns_index, ns.h_types_path, ns.c_types_path, schema)
 
 def parse_args():
     """
     Parse the command line arguments and return a dictionary of arguments.
     """
     parser = argparse.ArgumentParser(
-        description='Generate the sopc_types.h and sopc_types.c files.')
+        description='Generate the NS0 sopc_types.h and sopc_types.c files (or custom types).')
+    parser.add_argument('--types_prefix',
+                        metavar='prefix type name',
+                        required=False,
+                        help='Prefix used to generate global variables (only for custom types in non-NS0 namespace)')
+    parser.add_argument('--ns_index',
+                        metavar='OPC UA namespace index',
+                        type=int,
+                        default=0,
+                        required=False,
+                        help='Local namespace index for the OPC UA types (if index unknown, set namespace URI). Default is NS0.')
+    parser.add_argument('--ns_URI',
+                        metavar='OPC UA namespace URI',
+                        required=False,
+                        help='Namespace URI for the OPC UA types (namespace index is ignored if set)')
     parser.add_argument('bsd',
                         metavar='file.bsd',
                         help='OPC UA type description')
+    parser.add_argument('--h_types_path',
+                        default=H_FILE_PATH,
+                        metavar='types.h',
+                        required=False,
+                        help='Output OPC UA type C header')
+    parser.add_argument('--c_types_path',
+                        default=C_FILE_PATH,
+                        metavar='types.c',
+                        required=False,
+                        help='Output OPC UA type C file')
+    parser.add_argument('--h_enum_types_path',
+                        default=H_ENUM_FILE_PATH,
+                        metavar='enum_types.h',
+                        required=False,
+                        help='Output OPC UA enum type C header')
+
     return parser.parse_args()
 
-def gen_header_file(schema):
+def gen_header_file(h_types_path, h_enum_types_path, schema):
     """
     Generates the sopc_types.h file from the given schema.
     """
-    with open(H_FILE_PATH, "w") as out, open(H_ENUM_FILE_PATH, "w") as out_enum:
-        out.write(H_FILE_START)
-        out_enum.write(H_ENUM_FILE_START)
+    with open(h_types_path, "w") as out, open(h_enum_types_path, "w") as out_enum:
+        if schema.is_ns0_types():
+            out.write(H_FILE_START)
+            out_enum.write(H_ENUM_FILE_START)
+        else:
+            out.write(H_FILE_CUSTOM_START.format(enum_h_file=os.path.basename(h_enum_types_path), prefix=schema.types_prefix))
+            out_enum.write(H_ENUM_FILE_CUSTOM_START.format(prefix=schema.types_prefix))
         schema.gen_header_types(out, out_enum)
-        out.write(H_FILE_ENUM_FUN_DECLS)
+        if schema.is_ns0_types():
+            # Generates only for NS0 types
+            out.write(H_FILE_ENUM_FUN_DECLS)
         schema.gen_type_index_decl(out)
-        out.write(H_FILE_END)
+        if schema.is_ns0_types():
+            out.write(H_FILE_USER_TOKEN_POLICIES)
+        out.write(H_FILE_END.format(prefix=schema.types_prefix))
         out_enum.write(H_ENUM_FILE_END)
 
-def gen_implem_file(schema):
+def gen_implem_file(ns_uri, ns_index, h_types_path, c_types_path, schema):
     """
     Generates the sopc_types.c file from the given schema.
     """
-    with open(C_FILE_PATH, "w") as out:
-        out.write(C_FILE_START)
-        gen_implem_types(out, schema)
+    if ns_uri is None:
+        ns_uri = 'NULL'
+    else:
+        # index will be ignored by code
+        ns_index = 0
+
+    with open(c_types_path, "w") as out:
+        if schema.is_ns0_types():
+            out.write(C_FILE_START)
+        else:
+            out.write(C_FILE_CUSTOM_START.format(prefix=schema.types_prefix, types_h_file=os.path.basename(h_types_path)))
+        gen_implem_types(ns_uri, ns_index, out, schema)
+        out.write(C_FILE_KNOWN_ENC_TYPES.format(prefix=schema.types_prefix))
+        if schema.is_ns0_types():
+            out.write(C_FILE_ENUM_FUN_DEFS)
         out.write(C_FILE_END)
 
-def gen_implem_types(out, schema):
-    schema.gen_encodeable_type_descs(out)
-    schema.gen_user_token_policies_constants(out)
+def gen_implem_types(ns_uri, ns_index, out, schema):
+    schema.gen_encodeable_type_descs(ns_uri, ns_index, out)
+    if schema.is_ns0_types():
+        # Generates only for NS0 types
+        schema.gen_user_token_policies_constants(out)
     schema.gen_encodeable_type_table(out)
 
 
@@ -125,7 +180,7 @@ class BinarySchema:
             'ua:DiagnosticInfo': 'SOPC_DiagnosticInfo',
     }
 
-    def __init__(self, filename):
+    def __init__(self, filename, types_prefix):
         self.tree = ET.parse(filename)
         root = self.tree.getroot()
         if root.tag != self.ROOT_TAG:
@@ -134,6 +189,13 @@ class BinarySchema:
         self.enums = set()
         self.fields = dict()
         self.known_writer = KnownEncodeableTypeWriter()
+        if types_prefix is None:
+            self.types_prefix = ''
+        else:
+            self.types_prefix = types_prefix + '_'
+
+    def is_ns0_types(self):
+        return self.types_prefix == ''
 
     def gen_header_pair(self, out, out_enum, basename):
         """
@@ -163,9 +225,11 @@ class BinarySchema:
 
         barename = typename.split(':')[1]
         node = self._get_node(barename)
+        barename = self.types_prefix + barename
+
         if node.tag == self.STRUC_TAG:
             ctype = self._gen_struct_decl(out, out_enum, node, barename)
-            self.known_writer.encodeable_types.append(typename)
+            self.known_writer.encodeable_types.append((typename, barename))
         elif node.tag == self.ENUM_TAG:
             ctype = self._gen_enum_decl(out_enum, node, barename)
             self.enums.add(typename)
@@ -201,22 +265,22 @@ class BinarySchema:
         these indexes is to access rapidly to the description of a type.
         """
         def writer(typename, barename):
-            out.write(TYPE_INDEX_DECL_ENCODEABLE_TYPE.format(name=barename))
+            out.write(TYPE_INDEX_DECL_ENCODEABLE_TYPE.format(prefix=self.types_prefix, name=barename))
 
-        out.write(TYPE_INDEX_DECL_START)
+        out.write(TYPE_INDEX_DECL_START.format(prefix=self.types_prefix))
         self.known_writer.gen_types(out, writer)
-        out.write(TYPE_INDEX_DECL_END)
+        out.write(TYPE_INDEX_DECL_END.format(prefix=self.types_prefix))
 
-    def gen_encodeable_type_descs(self, out):
+    def gen_encodeable_type_descs(self, ns_uri, ns_index, out):
         """
         Generates the descriptors of all encodeable types.
         """
         def writer(typename, barename):
-            self.gen_encodeable_type_desc(out, typename, barename)
+            self.gen_encodeable_type_desc(ns_uri, ns_index, out, typename, barename)
 
         self.known_writer.gen_types(out, writer)
 
-    def gen_encodeable_type_desc(self, out, typename, barename):
+    def gen_encodeable_type_desc(self, ns_uri, ns_index,  out, typename, barename):
         """
         Generates the field descriptors of an encodeable type.
         """
@@ -244,6 +308,8 @@ class BinarySchema:
             field_desc = 'NULL'
         out.write(ENCODEABLE_TYPE_DESC_END.format(
             name=barename,
+            ns_URI=ns_uri, 
+            ns_index=ns_index,  
             ctype=ctype,
             nof_fields=nof_fields,
             field_desc=field_desc))
@@ -261,6 +327,8 @@ class BinarySchema:
             is_built_in = True
             template = 'SOPC_Int32_Id'
         else:
+            if self.types_prefix is not None:
+                barename = self.types_prefix + barename
             template = 'SOPC_TypeInternalIndex_{name}'
         return is_built_in, template.format(name=barename)
 
@@ -276,8 +344,7 @@ class BinarySchema:
         """
         def writer(typename, barename):
             out.write(TYPE_TABLE_ENTRY.format(name=barename))
-
-        out.write(TYPE_TABLE_START)
+        out.write(TYPE_TABLE_START.format(prefix=self.types_prefix))
         self.known_writer.gen_types(out, writer)
         out.write(TYPE_TABLE_END)
 
@@ -439,8 +506,7 @@ class KnownEncodeableTypeWriter:
         barename of a type and writes the piece of C code appropriate for that
         type.
         """
-        for typename in self.encodeable_types:
-            barename = typename.split(':')[1]
+        for typename, barename in self.encodeable_types:
             blockname = self.block_start.get(barename, None)
             if blockname:
                 out.write(BLOCK_PROTECTION_START.format(name=blockname))
@@ -511,6 +577,40 @@ H_FILE_START = """
 
 """[1:]
 
+H_FILE_CUSTOM_START = """
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+#ifndef SOPC_{prefix}Types_H_
+#define SOPC_{prefix}Types_H_ 1
+
+#include "sopc_buffer.h"
+#include "sopc_builtintypes.h"
+#include "sopc_encodeabletype.h"
+#include "{enum_h_file}"
+
+// s2opc_common_export.h is generated by CMake, when not using CMake, copy and include
+// "src/Common/helpers_platform_dep/<platform>/s2opc_common_export.h_"
+#include "s2opc_common_export.h"
+
+"""[1:]
+
 H_FILE_ENUM_FUN_DECLS = """
 void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue);
 
@@ -523,7 +623,7 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buf, \
 const int32_t* enumerationValue, uint32_t nestedStructLevel);
 """
 
-H_FILE_END = """
+H_FILE_USER_TOKEN_POLICIES="""
 /*============================================================================
  * UserTokenPolicies example constant values
  *===========================================================================*/
@@ -567,11 +667,13 @@ S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509
 S2OPC_COMMON_EXPORT extern const OpcUa_UserTokenPolicy SOPC_UserTokenPolicy_X509_DefaultSecurityPolicy;
 
 #endif
+"""
 
+H_FILE_END ="""
 /*============================================================================
  * Table of known types.
  *===========================================================================*/
-extern SOPC_EncodeableType** SOPC_KnownEncodeableTypes;
+extern SOPC_EncodeableType** SOPC_{prefix}KnownEncodeableTypes;
 
 #endif
 /* This is the last line of an autogenerated file. */
@@ -611,6 +713,34 @@ H_ENUM_FILE_START = """
 
 #ifndef SOPC_Enum_Types_H_
 #define SOPC_Enum_Types_H_ 1
+
+/* DO NOT EDIT. THIS FILE IS GENERATED BY THE SCRIPT gen-sopc-types.py */
+
+#include <stdint.h>
+"""[1:]
+
+H_ENUM_FILE_CUSTOM_START = """
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+#ifndef SOPC_{prefix}Enum_Types_H_
+#define SOPC_{prefix}Enum_Types_H_ 1
 
 /* DO NOT EDIT. THIS FILE IS GENERATED BY THE SCRIPT gen-sopc-types.py */
 
@@ -677,10 +807,10 @@ TYPE_INDEX_DECL_START = """
 /*============================================================================
  * Indexes in the table of known encodeable types.
  *
- * The enumerated values are indexes in the SOPC_KnownEncodeableTypes array.
+ * The enumerated values are indexes in the SOPC_{prefix}KnownEncodeableTypes array.
  *===========================================================================*/
-typedef enum SOPC_TypeInternalIndex
-{"""
+typedef enum SOPC_{prefix}TypeInternalIndex
+{{"""
 
 TYPE_INDEX_DECL_ENCODEABLE_TYPE = """
 #ifndef OPCUA_EXCLUDE_{name}
@@ -688,8 +818,8 @@ TYPE_INDEX_DECL_ENCODEABLE_TYPE = """
 #endif"""
 
 TYPE_INDEX_DECL_END = """
-    SOPC_TypeInternalIndex_SIZE
-} SOPC_TypeInternalIndex;
+    SOPC_{prefix}TypeInternalIndex_SIZE
+}} SOPC_{prefix}TypeInternalIndex;
 """
 
 PREDEFINED_TYPES = [
@@ -730,6 +860,34 @@ C_FILE_START = """
 #include "opcua_identifiers.h"
 #include "sopc_types.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_encoder.h"
+
+/* DO NOT EDIT. THIS FILE IS GENERATED BY THE SCRIPT gen-sopc-types.py */
+
+"""[1:]
+
+C_FILE_CUSTOM_START = """
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+#include "opcua_{prefix}identifiers.h"
+#include "{types_h_file}"
 #include "sopc_encoder.h"
 
 /* DO NOT EDIT. THIS FILE IS GENERATED BY THE SCRIPT gen-sopc-types.py */
@@ -780,7 +938,6 @@ ENCODEABLE_TYPE_NOF_FIELDS = """
 sizeof {name}_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor)
 """[1:-1]
 
-# TODO make encodeable type descriptor const
 ENCODEABLE_TYPE_DESC_END = """
 /*============================================================================
  * Descriptor of the {name} encodeable type.
@@ -791,8 +948,8 @@ SOPC_EncodeableType OpcUa_{name}_EncodeableType =
     OpcUaId_{name},
     OpcUaId_{name}_Encoding_DefaultBinary,
     OpcUaId_{name}_Encoding_DefaultXml,
-    NULL,
-    0,
+    {ns_URI},
+    {ns_index},
     sizeof({ctype}),
     OpcUa_{name}_Initialize,
     OpcUa_{name}_Clear,
@@ -883,8 +1040,8 @@ TYPE_TABLE_START = """
 /*============================================================================
  * Table of known types.
  *===========================================================================*/
-static SOPC_EncodeableType* g_KnownEncodeableTypes[\
-SOPC_TypeInternalIndex_SIZE + 1] = {
+static SOPC_EncodeableType* g_{prefix}KnownEncodeableTypes[\
+SOPC_{prefix}TypeInternalIndex_SIZE + 1] = {{
 """[:-1]
 
 TYPE_TABLE_ENTRY = """
@@ -897,9 +1054,11 @@ TYPE_TABLE_END = """
 };
 """
 
-C_FILE_END = """
-SOPC_EncodeableType** SOPC_KnownEncodeableTypes = g_KnownEncodeableTypes;
+C_FILE_KNOWN_ENC_TYPES = """
+SOPC_EncodeableType** SOPC_{prefix}KnownEncodeableTypes = g_{prefix}KnownEncodeableTypes;
+"""
 
+C_FILE_ENUM_FUN_DEFS = """
 void SOPC_Initialize_EnumeratedType(int32_t* enumerationValue)
 {
     *enumerationValue = 0;
@@ -919,7 +1078,9 @@ SOPC_ReturnStatus SOPC_Write_EnumeratedType(SOPC_Buffer* buffer, const int32_t* 
 {
     return SOPC_Int32_Write(enumerationValue, buffer, nestedStructLevel);
 }
+"""
 
+C_FILE_END = """
 /* This is the last line of an autogenerated file. */
 """
 
