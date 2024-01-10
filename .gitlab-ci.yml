@@ -501,7 +501,7 @@ test-unit:
     when: always
     expire_in: '1 week'
 
-# Test unit for ALL_TESTS variable (add dynamic configuration)
+# Test uactt for ALL_TESTS variable (add dynamic configuration)
 test-uactt-all-tests:
   <<: *test_uactt
   variables:
@@ -512,17 +512,14 @@ test-uactt-all-tests:
            $S2OPC_PUBSUB_ONLY == null && \
            $ALL_BUILDS == null" # + no UACTT tests on PubSub + excludes ALL_BUILDS
 
-# Test unit for NOT ALL_TESTS variable
+# Test uactt for NOT ALL_TESTS variable
 test-uactt:
   <<: *test_uactt
   variables:
     <<: *nominal_test_variables
     LINUX_UACTT: 1
-  rules: # repeat .test-uactt variables exception since overwritten here
-    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
-           # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
+  rules:
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
       when: on_success
 
 ###
