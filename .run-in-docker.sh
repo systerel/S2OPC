@@ -33,4 +33,4 @@ uid=$(id -u $SUDO_USER)
 # Mount point is the path of this script
 mount_point="$PWD/$(dirname "$0")"
 
-docker run -it $network_host --rm $interactive --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
+docker run --ulimit nofile=1024:1024 -it $network_host --rm $interactive --user "$uid" --volume="$mount_point":"$mount_point" --workdir "$PWD" --entrypoint /bin/bash "$IMAGE" -c "$*"
