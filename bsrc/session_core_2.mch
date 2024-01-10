@@ -101,7 +101,7 @@ OPERATIONS
             /* Channel was associated: decrement channel sessions counter */
             (a_channel$0 (p_session) /= c_channel_indet =>
                 {a_channel$0 (p_session)} <<| a_channel_nb_sessions = {a_channel$0 (p_session)} <<| a_channel_nb_sessions$0 &
-                a_channel_nb_sessions (a_channel$0 (p_session)) = a_channel_nb_sessions (a_channel$0 (p_session)) - 1)
+                a_channel_nb_sessions (a_channel$0 (p_session)) = a_channel_nb_sessions$0 (a_channel$0 (p_session)) - 1)
         )
     END
     ;
