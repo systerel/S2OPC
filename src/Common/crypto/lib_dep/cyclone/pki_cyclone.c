@@ -1249,24 +1249,27 @@ static void crt_verify_self_signed(const SOPC_CertificateList* pToValidate,
     // Verify the certificate with the profile.
     crt_verify_profile_in_chain(pToValidate, pProfile, failure_reasons);
 
+    // If the certificate is CA (and self-signed), verify it has the keyUsage keyCertSign
+    if (1 == pToValidate->crt.tbsCert.extensions.basicConstraints.cA)
+    {
+        const X509Extensions* extensions = &pToValidate->crt.tbsCert.extensions;
+        if (0 != extensions->keyUsage.bitmap)
+        {
+            // If the keyUsage extension is present, then the subject public key must
+            // not be used to verify signatures on certificates unless the keyCertSign
+            // bit is set (refer to RFC 5280, section 4.2.1.3)
+            if (0 == (extensions->keyUsage.bitmap & X509_KEY_USAGE_KEY_CERT_SIGN))
+            {
+                *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
+            }
+        }
+    }
+
     // Check validity
     bool bIsValid = crt_check_validity(&pToValidate->crt);
     if (!bIsValid)
     {
         *failure_reasons |= PKI_CYCLONE_X509_BADCERT_EXPIRED;
-    }
-
-    // Check if the keyUsage extension is present
-    const X509Extensions* extensions = &pToValidate->crt.tbsCert.extensions;
-    if (0 != extensions->keyUsage.bitmap)
-    {
-        // If the keyUsage extension is present, then the subject public key must
-        // not be used to verify signatures on certificates unless the keyCertSign
-        // bit is set (refer to RFC 5280, section 4.2.1.3)
-        if (0 == (extensions->keyUsage.bitmap & X509_KEY_USAGE_KEY_CERT_SIGN))
-        {
-            *failure_reasons |= PKI_CYCLONE_X509_BADCERT_NOT_TRUSTED;
-        }
     }
 
     // Check if the certificate is trusted.
