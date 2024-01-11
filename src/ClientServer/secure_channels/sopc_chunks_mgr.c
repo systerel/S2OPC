@@ -2167,6 +2167,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
             if (NULL == chunkCtx->currentChunkInputBuffer)
             {
                 errorStatus = OpcUa_BadOutOfMemory;
+                result = false;
                 // TREATMENT STOPPED HERE
                 break;
             }
