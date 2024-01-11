@@ -29,8 +29,11 @@
 
 #include "check_helpers.h"
 
+#include "custom_types.h"
+#include "opcua_S2OPC_identifiers.h"
 #include "opcua_identifiers.h"
 #include "sopc_encodeable.h"
+#include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_types.h"
 
@@ -597,6 +600,103 @@ START_TEST(test_UserEncodeableType)
 }
 END_TEST
 
+START_TEST(test_UserEncodeableTypeNS1)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_EncodeableType* pEncoder = NULL;
+
+    uint16_t NS_INDEX = 1;
+
+    // Encoder is not registered
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_S2OPC_CustomDataType);
+    ck_assert(pEncoder == NULL);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary);
+    ck_assert(pEncoder == NULL);
+
+    // Create an extension object of an unreferenced encodeable type
+    SOPC_ExtensionObject extObj;
+    SOPC_ExtensionObject_Initialize(&extObj);
+
+    OpcUa_S2OPC_CustomDataType* instCDT = NULL;
+
+    status = SOPC_Encodeable_CreateExtension(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    instCDT->fieldb = true;
+    instCDT->fieldu = 1000;
+
+    // Encode the extension object into a buffer (success since it contains direct reference to encType)
+    SOPC_Buffer* buf = SOPC_Buffer_Create(1024);
+    ck_assert_ptr_nonnull(buf);
+    status = SOPC_ExtensionObject_Write(&extObj, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Clear extension object content
+    SOPC_ExtensionObject_Clear(&extObj);
+
+    // Try to decode an extension object for unregistered encType: undecoded object retrieved (ByteString)
+    status = SOPC_Buffer_SetPosition(buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_ExtensionObject_Read(&extObj, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert(extObj.Encoding == SOPC_ExtObjBodyEncoding_ByteString);
+    // Binary type identifier is the one expected but was not found in known encTypes
+    ck_assert_int_le(extObj.TypeId.NamespaceUri.Length, 0);
+    ck_assert_int_eq(NS_INDEX, extObj.TypeId.NodeId.Namespace);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, extObj.TypeId.NodeId.IdentifierType);
+    ck_assert_int_eq(OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary, extObj.TypeId.NodeId.Data.Numeric);
+
+    // Get_DataType returns the generic structure type
+    SOPC_Variant variant;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_ExtensionObject_Id;
+    variant.Value.ExtObject = &extObj;
+    const SOPC_NodeId* typeId = SOPC_Variant_Get_DataType(&variant);
+    ck_assert_ptr_nonnull(typeId);
+    ck_assert_int_eq(0, typeId->Namespace);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
+    ck_assert_int_eq(OpcUaId_Structure, typeId->Data.Numeric);
+
+    // Record the encodeable type encoder
+    for (uint32_t i = 0; SOPC_STATUS_OK == status && i < SOPC_S2OPC_TypeInternalIndex_SIZE; i++)
+    {
+        SOPC_EncodeableType* userType = SOPC_S2OPC_KnownEncodeableTypes[i];
+        status = SOPC_EncodeableType_AddUserType(userType);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+    }
+
+    // Encoder is registered (both DataType id and binary encoding type id)
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_S2OPC_CustomDataType);
+    ck_assert(pEncoder == &OpcUa_S2OPC_CustomDataType_EncodeableType);
+    pEncoder = SOPC_EncodeableType_GetEncodeableType(NS_INDEX, OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary);
+    ck_assert(pEncoder == &OpcUa_S2OPC_CustomDataType_EncodeableType);
+
+    // Reset the buffer position, clear ExtObj and decode buffer again
+    status = SOPC_Buffer_SetPosition(buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_ExtensionObject_Clear(&extObj);
+    status = SOPC_ExtensionObject_Read(&extObj, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+
+    // Decoded object retrieved
+    ck_assert(extObj.Encoding == SOPC_ExtObjBodyEncoding_Object);
+    ck_assert_ptr_eq(&OpcUa_S2OPC_CustomDataType_EncodeableType, extObj.Body.Object.ObjType);
+    // Get_DataType returns the type id
+    typeId = SOPC_Variant_Get_DataType(&variant);
+    ck_assert_ptr_nonnull(typeId);
+    ck_assert_int_eq(NS_INDEX, typeId->Namespace);
+    ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
+    ck_assert_int_eq(OpcUaId_S2OPC_CustomDataType, typeId->Data.Numeric);
+
+    SOPC_ExtensionObject_Clear(&extObj);
+    SOPC_Buffer_Delete(buf);
+
+    // Remove custom type from recorded encoders
+    status = SOPC_EncodeableType_RemoveUserType(&OpcUa_S2OPC_CustomDataType_EncodeableType);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+}
+END_TEST
+
 Suite* tests_make_suite_encodeable_types(void)
 {
     Suite* s;
@@ -613,6 +713,7 @@ Suite* tests_make_suite_encodeable_types(void)
     tcase_add_test(tc_encodeable_types, test_DeleteSubscriptionsRequest);
     tcase_add_test(tc_encodeable_types, test_TranslateBrowsePathsToNodeIdsRequest);
     tcase_add_test(tc_encodeable_types, test_UserEncodeableType);
+    tcase_add_test(tc_encodeable_types, test_UserEncodeableTypeNS1);
     suite_add_tcase(s, tc_encodeable_types);
 
     return s;

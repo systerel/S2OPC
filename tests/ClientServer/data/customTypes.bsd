@@ -1,0 +1,7 @@
+<opc:TypeDictionary  xmlns:opc="http://opcfoundation.org/BinarySchema/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ua="http://opcfoundation.org/UA/" DefaultByteOrder="LittleEndian" TargetNamespace="urn:S2OPC:localhost">
+<opc:Import Namespace="http://opcfoundation.org/UA/"/>
+  <opc:StructuredType Name="CustomDataType" BaseType="ua:ExtensionObject">
+    <opc:Field Name="fieldb" TypeName="opc:Boolean"/>
+    <opc:Field Name="fieldu" TypeName="opc:UInt16"/>
+  </opc:StructuredType>
+</opc:TypeDictionary>
