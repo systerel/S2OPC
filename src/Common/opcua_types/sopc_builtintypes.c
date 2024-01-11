@@ -3486,12 +3486,12 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             {
                 extObj->Body.Object.ObjType->Clear(extObj->Body.Object.Value);
                 SOPC_Free(extObj->Body.Object.Value);
-                extObj->Body.Object.Value = NULL;
             }
             break;
         default:
             SOPC_ASSERT(false);
         }
+        memset(extObj, 0, sizeof(SOPC_ExtensionObject));
         extObj->Length = -1;
     }
 }
