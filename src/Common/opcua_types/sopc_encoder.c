@@ -29,99 +29,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
-void SOPC_EncodeDecode_Int16(int16_t* intv)
-{
-    uint16_t* twoBytes = (uint16_t*) intv;
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *twoBytes = SWAP_2_BYTES(*twoBytes);
-    }
-}
-
-void SOPC_EncodeDecode_UInt16(uint16_t* uintv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *uintv = SWAP_2_BYTES(*uintv);
-    }
-}
-
-void SOPC_EncodeDecode_Int32(int32_t* intv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    uint32_t* fourBytes = (uint32_t*) intv;
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *fourBytes = SWAP_4_BYTES(*fourBytes);
-    }
-}
-
-void SOPC_EncodeDecode_UInt32(uint32_t* uintv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *uintv = SWAP_4_BYTES(*uintv);
-    }
-}
-
-void SOPC_EncodeDecode_Int64(int64_t* intv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    uint64_t* eightBytes = (uint64_t*) intv;
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *eightBytes = SWAP_8_BYTES(*eightBytes);
-    }
-}
-
-void SOPC_EncodeDecode_UInt64(uint64_t* uintv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetInteger() != SOPC_Endianness_Undefined);
-    if (SOPC_Helper_Endianness_GetInteger() == SOPC_Endianness_BigEndian)
-    {
-        *uintv = SWAP_8_BYTES(*uintv);
-    }
-}
-
-void SOPC_EncodeDecode_Float(float* floatv)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
-    uint32_t* fourBytes = (uint32_t*) floatv;
-
-    switch (SOPC_Helper_Endianness_GetFloat())
-    {
-    case SOPC_Endianness_BigEndian:
-        *fourBytes = SWAP_4_BYTES(*fourBytes);
-        break;
-    case SOPC_Endianness_LittleEndian:
-    case SOPC_Endianness_FloatARMMiddleEndian:
-    default:
-        break;
-    }
-}
-
-void SOPC_EncodeDecode_Double(double* doublev)
-{
-    SOPC_ASSERT(SOPC_Helper_Endianness_GetFloat() != SOPC_Endianness_Undefined);
-    uint64_t* eightBytes = (uint64_t*) doublev;
-
-    switch (SOPC_Helper_Endianness_GetFloat())
-    {
-    case SOPC_Endianness_BigEndian:
-        *eightBytes = SWAP_8_BYTES(*eightBytes);
-        break;
-    case SOPC_Endianness_FloatARMMiddleEndian:
-        *eightBytes = SWAP_2_DWORDS(*eightBytes);
-        break;
-    case SOPC_Endianness_LittleEndian:
-    default:
-        break;
-    }
-}
-
 SOPC_ReturnStatus SOPC_Byte_WriteAux(const void* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
     return SOPC_Byte_Write((const SOPC_Byte*) value, buf, nestedStructLevel);
@@ -305,7 +212,7 @@ SOPC_ReturnStatus SOPC_Int16_Write(const int16_t* value, SOPC_Buffer* buf, uint3
     nestedStructLevel++;
 
     int16_t encodedValue = *value;
-    SOPC_EncodeDecode_Int16(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_16BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
     if (SOPC_STATUS_OK != status)
@@ -322,7 +229,6 @@ SOPC_ReturnStatus SOPC_Int16_ReadAux(void* value, SOPC_Buffer* buf, uint32_t nes
 
 SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf, uint32_t nestedStructLevel)
 {
-    int16_t readValue;
     if (NULL == value || NULL == buf)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -334,11 +240,10 @@ SOPC_ReturnStatus SOPC_Int16_Read(int16_t* value, SOPC_Buffer* buf, uint32_t nes
 
     nestedStructLevel++;
 
-    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) &readValue, buf, 2);
+    SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 2);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_Int16(&readValue);
-        *value = readValue;
+        SOPC_TO_LITTLE_ENDIAN_16BITS(*value);
     }
     else
     {
@@ -365,7 +270,7 @@ SOPC_ReturnStatus SOPC_UInt16_Write(const uint16_t* value, SOPC_Buffer* buf, uin
 
     nestedStructLevel++;
     uint16_t encodedValue = *value;
-    SOPC_EncodeDecode_UInt16(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_16BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 2);
 
     if (SOPC_STATUS_OK != status)
@@ -396,7 +301,7 @@ SOPC_ReturnStatus SOPC_UInt16_Read(uint16_t* value, SOPC_Buffer* buf, uint32_t n
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 2);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_UInt16(value);
+        SOPC_TO_LITTLE_ENDIAN_16BITS(*value);
     }
     else
     {
@@ -422,7 +327,7 @@ SOPC_ReturnStatus SOPC_Int32_Write(const int32_t* value, SOPC_Buffer* buf, uint3
     }
     nestedStructLevel++;
     int32_t encodedValue = *value;
-    SOPC_EncodeDecode_Int32(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_32BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
@@ -453,7 +358,7 @@ SOPC_ReturnStatus SOPC_Int32_Read(int32_t* value, SOPC_Buffer* buf, uint32_t nes
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_Int32(value);
+        SOPC_TO_LITTLE_ENDIAN_32BITS(*value);
     }
     else
     {
@@ -480,7 +385,7 @@ SOPC_ReturnStatus SOPC_UInt32_Write(const uint32_t* value, SOPC_Buffer* buf, uin
     }
     nestedStructLevel++;
     uint32_t encodedValue = *value;
-    SOPC_EncodeDecode_UInt32(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_32BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
@@ -510,7 +415,7 @@ SOPC_ReturnStatus SOPC_UInt32_Read(uint32_t* value, SOPC_Buffer* buf, uint32_t n
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_UInt32(value);
+        SOPC_TO_LITTLE_ENDIAN_32BITS(*value);
     }
     else
     {
@@ -537,7 +442,7 @@ SOPC_ReturnStatus SOPC_Int64_Write(const int64_t* value, SOPC_Buffer* buf, uint3
     }
     nestedStructLevel++;
     int64_t encodedValue = *value;
-    SOPC_EncodeDecode_Int64(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_64BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
@@ -568,7 +473,7 @@ SOPC_ReturnStatus SOPC_Int64_Read(int64_t* value, SOPC_Buffer* buf, uint32_t nes
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_Int64(value);
+        SOPC_TO_LITTLE_ENDIAN_64BITS(*value);
     }
     else
     {
@@ -595,7 +500,7 @@ SOPC_ReturnStatus SOPC_UInt64_Write(const uint64_t* value, SOPC_Buffer* buf, uin
     }
     nestedStructLevel++;
     uint64_t encodedValue = *value;
-    SOPC_EncodeDecode_UInt64(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_64BITS(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
@@ -626,7 +531,7 @@ SOPC_ReturnStatus SOPC_UInt64_Read(uint64_t* value, SOPC_Buffer* buf, uint32_t n
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_UInt64(value);
+        SOPC_TO_LITTLE_ENDIAN_64BITS(*value);
     }
     else
     {
@@ -690,7 +595,7 @@ SOPC_ReturnStatus SOPC_Float_Write(const float* value, SOPC_Buffer* buf, uint32_
     // Normalize NaN value if quiet NaN available
     encodedValue = normalize_float(encodedValue);
 
-    SOPC_EncodeDecode_Float(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_FLOAT(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 4);
 
     if (SOPC_STATUS_OK != status)
@@ -721,7 +626,7 @@ SOPC_ReturnStatus SOPC_Float_Read(float* value, SOPC_Buffer* buf, uint32_t neste
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 4);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_Float(value);
+        SOPC_TO_LITTLE_ENDIAN_FLOAT(*value);
     }
     else
     {
@@ -786,7 +691,7 @@ SOPC_ReturnStatus SOPC_Double_Write(const double* value, SOPC_Buffer* buf, uint3
     double encodedValue = *value;
     // Normalize NaN/denormalized value if quiet NaN available
     encodedValue = normalize_double(encodedValue);
-    SOPC_EncodeDecode_Double(&encodedValue);
+    SOPC_TO_LITTLE_ENDIAN_DOUBLE(encodedValue);
     SOPC_ReturnStatus status = SOPC_Buffer_Write(buf, (SOPC_Byte*) &encodedValue, 8);
 
     if (SOPC_STATUS_OK != status)
@@ -816,7 +721,7 @@ SOPC_ReturnStatus SOPC_Double_Read(double* value, SOPC_Buffer* buf, uint32_t nes
     SOPC_ReturnStatus status = SOPC_Buffer_Read((SOPC_Byte*) value, buf, 8);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeDecode_Double(value);
+        SOPC_TO_LITTLE_ENDIAN_DOUBLE(*value);
     }
     else
     {

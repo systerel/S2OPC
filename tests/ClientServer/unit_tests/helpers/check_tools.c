@@ -2184,195 +2184,82 @@ END_TEST
 
 START_TEST(test_ua_encoder_endianness_mgt)
 {
-    int16_t v16 = 0;
-    uint16_t vu16 = 0;
-    int32_t v32 = 0;
+    int16_t vu16 = 0;
     uint32_t vu32 = 0;
-    int64_t v64 = 0;
     uint64_t vu64 = 0;
     float vfloat = 0.0;
     double vdouble = 0.0;
 
     uint8_t* bytes = NULL;
 
-    // Test encoding with same endianness in machine and UA binary
-    SOPC_Helper_Endianness_SetInteger(SOPC_Endianness_LittleEndian);
-    bytes = (uint8_t*) &v16;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    SOPC_EncodeDecode_Int16(&v16);
-    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
+    if (SOPC_IS_LITTLE_ENDIAN == 1)
+    {
+        // Test with little endian
+        vu16 = 0x1234;
+        SOPC_TO_LITTLE_ENDIAN_16BITS(vu16);
+        bytes = (uint8_t*) &vu16;
+        ck_assert(bytes[0] == 0x34 && bytes[1] == 0x12);
 
-    bytes = (uint8_t*) &vu16;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    SOPC_EncodeDecode_UInt16(&vu16);
-    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC);
+        vu32 = 0x12345678;
+        SOPC_TO_LITTLE_ENDIAN_32BITS(vu32);
+        bytes = (uint8_t*) &vu32;
+        ck_assert(bytes[0] == 0x78 && bytes[1] == 0x56 && bytes[2] == 0x34 && bytes[3] == 0x12);
 
-    bytes = (uint8_t*) &v32;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    bytes[2] = 0xCD;
-    bytes[3] = 0xDE;
-    SOPC_EncodeDecode_Int32(&v32);
-    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC && bytes[2] == 0xCD && bytes[3] == 0xDE);
+        vu64 = 0xDECDBCAB33221100u;
+        SOPC_TO_LITTLE_ENDIAN_64BITS(vu64);
+        bytes = (uint8_t*) &vu64;
+        ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 && bytes[2] == 0x22 && bytes[3] == 0x33 && bytes[4] == 0xAB &&
+                  bytes[5] == 0xBC && bytes[6] == 0xCD && bytes[7] == 0xDE);
 
-    bytes = (uint8_t*) &vu32;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    bytes[2] = 0xCD;
-    bytes[3] = 0xDE;
-    SOPC_EncodeDecode_UInt32(&vu32);
-    ck_assert(bytes[0] == 0xAB && bytes[1] == 0xBC && bytes[2] == 0xCD && bytes[3] == 0xDE);
+        vfloat = 1.0f;
+        bytes = (uint8_t*) &vfloat;
+        SOPC_TO_LITTLE_ENDIAN_FLOAT(vfloat);
+        ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x80 && bytes[3] == 0x3F);
 
-    bytes = (uint8_t*) &v64;
-    bytes[0] = 0x00;
-    bytes[1] = 0x11;
-    bytes[2] = 0x22;
-    bytes[3] = 0x33;
-    bytes[4] = 0xAB;
-    bytes[5] = 0xBC;
-    bytes[6] = 0xCD;
-    bytes[7] = 0xDE;
-    SOPC_EncodeDecode_Int64(&v64);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 && bytes[2] == 0x22 && bytes[3] == 0x33 && bytes[4] == 0xAB &&
-              bytes[5] == 0xBC && bytes[6] == 0xCD && bytes[7] == 0xDE);
+        vdouble = 1.0;
+        bytes = (uint8_t*) &vdouble;
+        SOPC_TO_LITTLE_ENDIAN_DOUBLE(vdouble);
+        if (SOPC_IS_DOUBLE_MIDDLE_ENDIAN == 0)
+        {
+            ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 &&
+                      bytes[4] == 0x00 && bytes[5] == 0x00 && bytes[6] == 0xF0 && bytes[7] == 0x3F);
+        }
+        else
+        {
+            ck_assert(bytes[4] == 0x00 && bytes[5] == 0x00 && bytes[6] == 0x00 && bytes[7] == 0x00 &&
+                      bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xF0 && bytes[3] == 0x3F);
+        }
+    }
+    else
+    {
+        // Test with big endian
+        vu16 = 0x1234;
+        SOPC_TO_LITTLE_ENDIAN_16BITS(vu16);
+        bytes = (uint8_t*) &vu16;
+        ck_assert(bytes[1] == 0x34 && bytes[0] == 0x12);
 
-    bytes = (uint8_t*) &vu64;
-    bytes[0] = 0x00;
-    bytes[1] = 0x11;
-    bytes[2] = 0x22;
-    bytes[3] = 0x33;
-    bytes[4] = 0xAB;
-    bytes[5] = 0xBC;
-    bytes[6] = 0xCD;
-    bytes[7] = 0xDE;
-    SOPC_EncodeDecode_UInt64(&vu64);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x11 && bytes[2] == 0x22 && bytes[3] == 0x33 && bytes[4] == 0xAB &&
-              bytes[5] == 0xBC && bytes[6] == 0xCD && bytes[7] == 0xDE);
+        vu32 = 0x12345678;
+        SOPC_TO_LITTLE_ENDIAN_32BITS(vu32);
+        bytes = (uint8_t*) &vu32;
+        ck_assert(bytes[3] == 0x78 && bytes[2] == 0x56 && bytes[1] == 0x34 && bytes[0] == 0x12);
 
-    SOPC_Helper_Endianness_SetFloat(SOPC_Endianness_LittleEndian);
-    bytes = (uint8_t*) &vfloat;
-    bytes[0] = 0x00;
-    bytes[1] = 0x00;
-    bytes[2] = 0xD0;
-    bytes[3] = 0xC0;
-    SOPC_EncodeDecode_Float(&vfloat);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xD0 && bytes[3] == 0xC0);
+        vu64 = 0xDECDBCAB33221100u;
+        SOPC_TO_LITTLE_ENDIAN_64BITS(vu64);
+        bytes = (uint8_t*) &vu64;
+        ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 && bytes[5] == 0x22 && bytes[4] == 0x33 && bytes[3] == 0xAB &&
+                  bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
 
-    bytes = (uint8_t*) &vdouble;
-    bytes[0] = 0x00;
-    bytes[1] = 0x00;
-    bytes[2] = 0x00;
-    bytes[3] = 0x00;
-    bytes[4] = 0x00;
-    bytes[5] = 0x00;
-    bytes[6] = 0x1A;
-    bytes[7] = 0xC0;
-    SOPC_EncodeDecode_Double(&vdouble);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 && bytes[4] == 0x00 &&
-              bytes[5] == 0x00 && bytes[6] == 0x1A && bytes[7] == 0xC0);
+        vfloat = 1.0f;
+        bytes = (uint8_t*) &vfloat;
+        SOPC_TO_LITTLE_ENDIAN_FLOAT(vfloat);
+        ck_assert(bytes[3] == 0x00 && bytes[2] == 0x00 && bytes[1] == 0x80 && bytes[0] == 0x3F);
 
-    // Test encoding with different endianness in machine and UA binary
-    SOPC_Helper_Endianness_SetInteger(SOPC_Endianness_BigEndian);
-    bytes = (uint8_t*) &v16;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    SOPC_EncodeDecode_Int16(&v16);
-    ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
-
-    bytes = (uint8_t*) &vu16;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    SOPC_EncodeDecode_UInt16(&vu16);
-    ck_assert(bytes[1] == 0xAB && bytes[0] == 0xBC);
-
-    bytes = (uint8_t*) &v32;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    bytes[2] = 0xCD;
-    bytes[3] = 0xDE;
-    SOPC_EncodeDecode_Int32(&v32);
-    ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
-
-    bytes = (uint8_t*) &vu32;
-    bytes[0] = 0xAB;
-    bytes[1] = 0xBC;
-    bytes[2] = 0xCD;
-    bytes[3] = 0xDE;
-    SOPC_EncodeDecode_UInt32(&vu32);
-    ck_assert(bytes[3] == 0xAB && bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
-
-    bytes = (uint8_t*) &v64;
-    bytes[0] = 0x00;
-    bytes[1] = 0x11;
-    bytes[2] = 0x22;
-    bytes[3] = 0x33;
-    bytes[4] = 0xAB;
-    bytes[5] = 0xBC;
-    bytes[6] = 0xCD;
-    bytes[7] = 0xDE;
-    SOPC_EncodeDecode_Int64(&v64);
-    ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 && bytes[5] == 0x22 && bytes[4] == 0x33 && bytes[3] == 0xAB &&
-              bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
-
-    bytes = (uint8_t*) &vu64;
-    bytes[0] = 0x00;
-    bytes[1] = 0x11;
-    bytes[2] = 0x22;
-    bytes[3] = 0x33;
-    bytes[4] = 0xAB;
-    bytes[5] = 0xBC;
-    bytes[6] = 0xCD;
-    bytes[7] = 0xDE;
-    SOPC_EncodeDecode_UInt64(&vu64);
-    ck_assert(bytes[7] == 0x00 && bytes[6] == 0x11 && bytes[5] == 0x22 && bytes[4] == 0x33 && bytes[3] == 0xAB &&
-              bytes[2] == 0xBC && bytes[1] == 0xCD && bytes[0] == 0xDE);
-
-    SOPC_Helper_Endianness_SetFloat(SOPC_Endianness_BigEndian);
-    bytes = (uint8_t*) &vfloat;
-    bytes[0] = 0xC0;
-    bytes[1] = 0xD0;
-    bytes[2] = 0x00;
-    bytes[3] = 0x00;
-    SOPC_EncodeDecode_Float(&vfloat);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xD0 && bytes[3] == 0xC0);
-
-    bytes = (uint8_t*) &vdouble;
-    bytes[0] = 0xC0;
-    bytes[1] = 0x1A;
-    bytes[2] = 0x00;
-    bytes[3] = 0x00;
-    bytes[4] = 0x00;
-    bytes[5] = 0x00;
-    bytes[6] = 0x00;
-    bytes[7] = 0x00;
-    SOPC_EncodeDecode_Double(&vdouble);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 && bytes[4] == 0x00 &&
-              bytes[5] == 0x00 && bytes[6] == 0x1A && bytes[7] == 0xC0);
-
-    // Test encoding of ARM's middle endian doubles
-    SOPC_Helper_Endianness_SetFloat(SOPC_Endianness_FloatARMMiddleEndian);
-    bytes = (uint8_t*) &vfloat;
-    bytes[0] = 0xC0;
-    bytes[1] = 0xD0;
-    bytes[2] = 0x00;
-    bytes[3] = 0x00;
-    SOPC_EncodeDecode_Float(&vfloat);
-    ck_assert(bytes[0] == 0xC0 && bytes[1] == 0xD0 && bytes[2] == 0x00 && bytes[3] == 0x00);
-
-    bytes = (uint8_t*) &vdouble;
-    bytes[0] = 0xC0;
-    bytes[1] = 0x1A;
-    bytes[2] = 0x00;
-    bytes[3] = 0x00;
-    bytes[4] = 0x00;
-    bytes[5] = 0x00;
-    bytes[6] = 0x00;
-    bytes[7] = 0x00;
-    SOPC_EncodeDecode_Double(&vdouble);
-    ck_assert(bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0x00 && bytes[3] == 0x00 && bytes[4] == 0xC0 &&
-              bytes[5] == 0x1A && bytes[6] == 0x00 && bytes[7] == 0x00);
+        vdouble = 1.0;
+        bytes = (uint8_t*) &vdouble;
+        SOPC_TO_LITTLE_ENDIAN_DOUBLE(vdouble);
+        ck_assert(bytes[7] == 0x00 && bytes[6] == 0x00 && bytes[5] == 0x00 && bytes[4] == 0x00 && bytes[3] == 0x00 &&
+                  bytes[2] == 0x00 && bytes[1] == 0xF0 && bytes[0] == 0x3F);
+    }
 }
 END_TEST
 

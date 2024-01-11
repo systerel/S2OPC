@@ -57,6 +57,24 @@ if (USE_STATIC_EXPAT_LIB)
 endif()
 
 #########################
+# Detect endianness
+# After Version 3.2, CMAKE_C_BYTE_ORDER is defined by CMake
+if(${CMAKE_VERSION} VERSION_LESS "3.20")
+  include(TestBigEndian)
+  TEST_BIG_ENDIAN(IS_BIG_ENDIAN)
+  if(IS_BIG_ENDIAN)
+    set(CMAKE_C_BYTE_ORDER BIG_ENDIAN)
+  else()
+    set(CMAKE_C_BYTE_ORDER LITTLE_ENDIAN)
+  endif()
+endif()
+if (${CMAKE_C_BYTE_ORDER} STREQUAL BIG_ENDIAN)
+  add_definitions(-DSOPC_IS_LITTLE_ENDIAN=0)
+elif (${CMAKE_C_BYTE_ORDER} STREQUAL LITTLE_ENDIAN)
+  add_definitions(-DSOPC_IS_LITTLE_ENDIAN=1)
+endif()
+
+#########################
 # Choose crypto option
 option(S2OPC_CRYPTO_MBEDTLS "Use MbedTLS" ON)
 option(S2OPC_CRYPTO_CYCLONE "Use CycloneCRYPTO" OFF)

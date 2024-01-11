@@ -166,6 +166,18 @@ bool SOPC_Common_EncodingConstantsGetInitialized(void);
 #define SOPC_CONSOLE_PRINTF printf
 #endif /* SOPC_CONSOLE_PRINTF */
 
+/** @brief Define Endianness */
+#ifndef SOPC_IS_LITTLE_ENDIAN
+#define SOPC_IS_LITTLE_ENDIAN 1
+#endif /* SOPC_IS_LITTLE_ENDIAN */
+
+/** @brief Define Double Middle-endian option (Used on some old ARM CPUs)
+ * In that case, the double are little-endian but with 4-bytes words reversed.
+ * If Set to 1, it overrides ::SOPC_IS_LITTLE_ENDIAN for double encoding, whatever its value*/
+#ifndef SOPC_IS_DOUBLE_MIDDLE_ENDIAN
+#define SOPC_IS_DOUBLE_MIDDLE_ENDIAN 0
+#endif /* SOPC_IS_DOUBLE_MIDDLE_ENDIAN */
+
 /* Check use of uintptr_t is not an issue on the current platform */
 #if UINTPTR_MAX < UINT32_MAX
 #error "UINTPTR_MAX < UINT32_MAX whereas uintptr_t are used to store uint32_t values"
