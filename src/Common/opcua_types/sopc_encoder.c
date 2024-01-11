@@ -649,8 +649,19 @@ static float normalize_float(float value)
         break;
     }
     // Try to normalize to Quiet NaN value
-    float result = nanf("");
-    if (fpclassify(result) == FP_ZERO)
+    static bool once = true;
+    static bool nanUnsupported = false;
+    static float result;
+    if (once)
+    {
+        once = false;
+        result = nanf("");
+        if (fpclassify(result) == FP_ZERO)
+        {
+            nanUnsupported = true;
+        }
+    }
+    if (nanUnsupported)
     {
         // Quiet NaN unsupported
         return value;
@@ -740,8 +751,19 @@ static double normalize_double(double value)
         break;
     }
     // Try to normalize to Quiet NaN value
-    double result = nan("");
-    if (fpclassify(result) == FP_ZERO)
+    static bool once = true;
+    static bool nanUnsupported = false;
+    static double result;
+    if (once)
+    {
+        once = false;
+        result = nan("");
+        if (fpclassify(result) == FP_ZERO)
+        {
+            nanUnsupported = true;
+        }
+    }
+    if (nanUnsupported)
     {
         // Quiet NaN unsupported
         return value;
