@@ -578,16 +578,6 @@ class PyS2OPC_Server(PyS2OPC):
             PyS2OPC_Server._adds = None
         PyS2OPC_Server._dEpIdx = {}
         if PyS2OPC_Server._config is not None:
-            # Avoid double free during SOPC_EndpointConfig_Clear in case of user XML configuration
-            # Indeed, we use a shared authenticationManager and authorizationManager for all the endpoints (same address)
-            serverCfg = PyS2OPC_Server._config.serverConfig
-            for i in range(serverCfg.nbEndpoints):
-                endpoint = serverCfg.endpoints[i]
-                # Free only the first authenticationManager and authorizationManager
-                # Avoid the others by seting to NULL (avoid the double free)
-                if PyS2OPC_Server._xml_user_manager is not None and i > 0:
-                    endpoint.authenticationManager = NULL
-                    endpoint.authorizationManager = NULL
             libsub.SOPC_S2OPC_Config_Clear(PyS2OPC_Server._config)
             PyS2OPC_Server._config = None
             PyS2OPC_Server._xml_user_manager = None
@@ -752,24 +742,24 @@ class PyS2OPC_Server(PyS2OPC):
             # Methods
             serverCfg.mcm  # Leave NULL
 
-            # Endpoints have the user management
+            # Server configuration have the user management
+            if PyS2OPC_Server._xml_user_manager is None and custom_user_handler is None:
+                # By default, creates user managers that accept all users and allow all operations
+                serverCfg.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
+                serverCfg.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
+            elif PyS2OPC_Server._xml_user_manager is not None :
+                # Use the user authentications and authorizations configured with the user XML file
+                serverCfg.authenticationManager = PyS2OPC_Server._xml_user_manager.authentication
+                serverCfg.authorizationManager = PyS2OPC_Server._xml_user_manager.authorization
+            else:
+                # TODO: For each endpoints create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
+                # Note: BaseUserHandler implem also to be done to have Python API
+                assert False
+            assert serverCfg.authenticationManager != NULL and serverCfg.authorizationManager != NULL
+
+            # Register endpoint
             for i in range(serverCfg.nbEndpoints):
                 endpoint = serverCfg.endpoints[i]
-                if PyS2OPC_Server._xml_user_manager is None and custom_user_handler is None:
-                    # By default, creates user managers that accept all users and allow all operations
-                    endpoint.authenticationManager = libsub.SOPC_UserAuthentication_CreateManager_AllowAll()
-                    endpoint.authorizationManager = libsub.SOPC_UserAuthorization_CreateManager_AllowAll()
-                elif PyS2OPC_Server._xml_user_manager is not None :
-                    # Use the user authentications and authorizations configured with the user XML file
-                    endpoint.authenticationManager = PyS2OPC_Server._xml_user_manager.authentication
-                    endpoint.authorizationManager = PyS2OPC_Server._xml_user_manager.authorization
-                else:
-                    # TODO: For each endpoints create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
-                    # Note: BaseUserHandler implem also to be done to have Python API
-                    assert False
-                assert endpoint.authenticationManager != NULL and endpoint.authorizationManager != NULL
-
-                # Register endpoint
                 epConfigIdx = libsub.SOPC_ToolkitServer_AddEndpointConfig(ffi.addressof(endpoint))
                 assert epConfigIdx,\
                     'Cannot add endpoint configuration. There may be no more endpoint left, or the configuration parameters are incorrect.'
