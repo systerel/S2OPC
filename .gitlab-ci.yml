@@ -521,6 +521,10 @@ test-uactt:
   rules:
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
       when: on_success
+    - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
+           $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
+           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null"
+      when: never
 
 ###
 # Test others jobs

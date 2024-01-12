@@ -46,10 +46,9 @@
 #     - build-freertos
 #   - test-others:
 #     - test-zephyr
-#
 #########################################################
 
-# Ensures job failure whenn intermediate script line fails
+# Ensures job failure when intermediate script line fails
 # (see gitlab issues #25394 and #383355)
 variables:
   FF_ENABLE_BASH_EXIT_CODE_CHECK: "true"
@@ -62,6 +61,7 @@ variables:
   TEST_SERVER_XML_ADDRESS_SPACE: S2OPC_Test_NodeSet.xml
   TEST_SERVER_XML_CONFIG: S2OPC_Server_UACTT_Config.xml
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
+  TEST_CLIENT_XML_CONFIG: S2OPC_Client_Test_Config.xml
   TEST_PASSWORD_PRIVATE_KEY : password
   TEST_PASSWORD_USER : password
 
@@ -286,7 +286,7 @@ build-freertos:
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
-  
+
 ###
 # Test jobs
 ###
@@ -342,6 +342,8 @@ test-check:
     - './.verify-no-git-changes.sh'
     # Check generated demo nodesets are up to date
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
+    - './.verify-no-git-changes.sh'
+    - 'cd samples/PubSub_ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
     - './.verify-no-git-changes.sh'
   variables:
       DOCKER_DIGEST: 'sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8'
@@ -433,10 +435,13 @@ test-uactt:
   variables:
     <<: *nominal_test_variables
     LINUX_UACTT: 1
-  rules: # repeat .test-uactt variables exception since overwritten here
+  rules:
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
       when: on_success
-
+    - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
+           $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
+           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null"
+      when: never
 
 ###
 # Test others jobs
