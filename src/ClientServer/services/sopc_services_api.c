@@ -610,6 +610,10 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         status = SOPC_SecureChannels_EnqueueEvent(SCS_REEVALUATE_SCS, id, params, auxParam);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         break;
+    case APP_TO_SE_EVAL_USR_CRT_SESSIONS:
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ServicesMgr: APP_TO_SE_EVAL_USR_CRT_SESSION");
+        io_dispatch_mgr__internal_server_evaluate_all_session_user_cert();
+        break;
     default:
         SOPC_ASSERT(false);
     }

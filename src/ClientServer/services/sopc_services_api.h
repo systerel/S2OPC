@@ -159,6 +159,11 @@ typedef enum SOPC_Services_Event
                                            auxParam = (bool) flag indicating if it concerns application certificate/key update
                                            (true), otherwise the PKI trust list update (false).
                                       */
+    APP_TO_SE_EVAL_USR_CRT_SESSIONS,  /**< Server side only:<BR/>
+                                           Re-evaluates X509IdentityToken certificates for all active sessions.
+                                           If an user certificate is not valid or trusted anymore,
+                                           the associated session is closed.<BR/>
+                                       */
 
 } SOPC_Services_Event;
 

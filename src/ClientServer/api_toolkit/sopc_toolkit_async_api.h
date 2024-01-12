@@ -104,6 +104,14 @@ void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpoint
  */
 void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert);
 
+/**
+ * \brief Request to re-evaluate X509IdentityToken certificates for all active sessions due to
+ *        user PKI trustlist update.
+ *        If user PKI trustlist changed and user certificate is not valid or trusted anymore,
+ *        the associated session is closed.
+ */
+void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void);
+
 typedef struct SOPC_EndpointConnectionCfg
 {
     SOPC_ReverseEndpointConfigIdx

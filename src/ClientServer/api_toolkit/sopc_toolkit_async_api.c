@@ -53,6 +53,11 @@ void SOPC_ToolkitServer_AsyncReEvalSecureChannels(bool ownCert)
     SOPC_Services_EnqueueEvent(APP_TO_SE_REEVALUATE_SCS, 0, (uintptr_t) true, (uintptr_t) ownCert);
 }
 
+void SOPC_ToolkitServer_AsyncReEvalUserCertSessions(void)
+{
+    SOPC_Services_EnqueueEvent(APP_TO_SE_EVAL_USR_CRT_SESSIONS, 0, (uintptr_t) NULL, (uintptr_t) NULL);
+}
+
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx)
 {
     SOPC_ASSERT(0 != secureChannelConfigIdx && "Invalid secure connection configuration index 0");
