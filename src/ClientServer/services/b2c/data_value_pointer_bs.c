@@ -34,15 +34,6 @@ void data_value_pointer_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
-    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-    constants__t_NodeId_i* const data_value_pointer_bs__p_dt)
-{
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *data_value_pointer_bs__p_dt = (SOPC_NodeId*) SOPC_Variant_Get_DataType(&data_value_pointer_bs__p_dataValue->Value);
-    SOPC_GCC_DIAGNOSTIC_RESTORE
-}
-
 void data_value_pointer_bs__get_conv_DataValue_ServerTimestamp(
     const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
     constants__t_Timestamp* const data_value_pointer_bs__p_st)

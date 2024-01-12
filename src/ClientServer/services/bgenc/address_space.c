@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 05/05/2023 08:10:19
+ Date                 : 12/01/2024 10:17:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -245,7 +245,9 @@ void address_space__treat_write_1(
                   &address_space__l_var_datatype_nid);
                address_space_bs__get_ValueRank(*address_space__node,
                   &address_space__l_var_vr);
-               data_value_pointer_bs__get_conv_DataValue_LocalDataType(address_space__dataValue,
+               data_value_pointer_bs__get_conv_DataValue_Variant(address_space__dataValue,
+                  &address_space__l_variant);
+               address_space_bs__get_conv_Variant_Type(address_space__l_variant,
                   &address_space__l_dv_datatype_nid);
                data_value_pointer_bs__get_conv_DataValue_ValueRank(address_space__dataValue,
                   &address_space__l_dv_datatype_vr);
@@ -262,8 +264,6 @@ void address_space__treat_write_1(
                if ((address_space__l_compatible_type == true) &&
                   (address_space__l_server_ts_null == true)) {
                   address_space_local__is_local_service_treatment(&address_space__l_local_treatment);
-                  data_value_pointer_bs__get_conv_DataValue_Variant(address_space__dataValue,
-                     &address_space__l_variant);
                   data_value_pointer_bs__get_conv_DataValue_SourceTimestamp(address_space__dataValue,
                      &address_space__l_source_ts);
                   data_value_pointer_bs__get_conv_DataValue_Status(address_space__dataValue,

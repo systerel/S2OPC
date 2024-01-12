@@ -21,7 +21,7 @@
 
  File Name            : data_value_pointer_bs.h
 
- Date                 : 04/05/2023 15:36:20
+ Date                 : 12/01/2024 10:18:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,9 +49,6 @@ extern void data_value_pointer_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void data_value_pointer_bs__get_conv_DataValue_LocalDataType(
-   const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
-   constants__t_NodeId_i * const data_value_pointer_bs__p_dt);
 extern void data_value_pointer_bs__get_conv_DataValue_ServerTimestamp(
    const constants__t_DataValue_i data_value_pointer_bs__p_dataValue,
    constants__t_Timestamp * const data_value_pointer_bs__p_st);

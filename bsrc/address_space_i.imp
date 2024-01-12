@@ -535,7 +535,8 @@ OPERATIONS
                 IF aid = e_aid_Value & l_ncl = e_ncl_Variable THEN
                     l_var_datatype_nid <-- get_DataType(node);
                     l_var_vr <-- get_ValueRank(node);
-                    l_dv_datatype_nid <-- get_conv_DataValue_LocalDataType(dataValue);
+                    l_variant <-- get_conv_DataValue_Variant(dataValue);
+                    l_dv_datatype_nid <-- get_conv_Variant_Type(l_variant);
                     l_dv_datatype_vr <-- get_conv_DataValue_ValueRank(dataValue);
                     l_compatible_type, l_compat_with_conv
                       <-- is_variable_compat_type(l_dv_datatype_nid, l_dv_datatype_vr, l_var_datatype_nid, l_var_vr);
@@ -544,7 +545,6 @@ OPERATIONS
                     l_server_ts_null <-- is_Timestamps_Null(l_server_ts);
                     IF l_compatible_type = TRUE & l_server_ts_null = TRUE THEN
                         l_local_treatment <-- is_local_service_treatment;
-                        l_variant <-- get_conv_DataValue_Variant(dataValue);
                         l_source_ts <-- get_conv_DataValue_SourceTimestamp(dataValue);
                         l_raw_sc <-- get_conv_DataValue_Status(dataValue);
                         IF l_local_treatment = TRUE THEN

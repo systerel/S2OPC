@@ -98,15 +98,6 @@ OPERATIONS
     END
     ;
 
-    p_dt <-- get_conv_DataValue_LocalDataType(p_dataValue) =
-    PRE
-        p_dataValue : t_DataValue_i &
-        p_dataValue : t_DataValue
-    THEN
-        p_dt :(p_dt : t_NodeId_i & p_dt = DataValue_LocalDataType(p_dataValue))
-    END
-    ;
-
     p_vr <-- get_conv_DataValue_ValueRank(p_dataValue) =
     PRE
         p_dataValue : t_DataValue_i &
