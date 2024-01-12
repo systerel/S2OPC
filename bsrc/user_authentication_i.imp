@@ -34,7 +34,10 @@ PROMOTES
     deallocate_user,
     get_local_user,
     has_user_token_policy_available,
-    get_user_token_type_from_token
+    get_user_token_type_from_token,
+    set_x509_token_from_user,
+    is_valid_user_x509_authentication,
+    deallocate_user_token
 
 LOCAL_OPERATIONS
 
@@ -125,7 +128,14 @@ OPERATIONS
                     l_sc_user_authentication := e_sc_bad_identity_token_invalid
                 END
             ELSIF l_user_token_type = e_userTokenType_x509 THEN
-                l_sc_user_authentication <-- is_valid_user_x509_authentication (p_endpoint_config_idx, l_user_token_type, p_user_token, p_user_token_signature, p_server_nonce, l_used_security_policy)
+                l_sc_user_authentication <-- is_valid_user_token_signature(p_endpoint_config_idx, l_user_token_type, p_user_token, p_user_token_signature, p_server_nonce, l_used_security_policy);
+                IF l_sc_user_authentication = e_sc_ok THEN
+                    l_sc_user_authentication <-- is_cert_comply_with_security_policy(p_endpoint_config_idx, l_user_token_type, p_user_token, l_used_security_policy)
+                END
+                ;
+                IF l_sc_user_authentication = e_sc_ok THEN
+                    l_sc_user_authentication <-- is_valid_user_x509_authentication (p_endpoint_config_idx, l_user_token_type, p_user_token)
+                END
             ELSIF l_user_token_type = e_userTokenType_anonymous THEN
                 /* It is not necessary to authenticate Anonymous user */
                 l_sc_user_authentication := e_sc_ok

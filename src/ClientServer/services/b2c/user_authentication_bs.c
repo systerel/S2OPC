@@ -335,6 +335,28 @@ static SOPC_ReturnStatus is_cert_comply_with_security_policy(const SOPC_Extensio
     return status;
 }
 
+static void add_user_cert_to_pki_rejected_list(const uint32_t epIdx, const SOPC_ExtensionObject* pUserExt)
+{
+    SOPC_ASSERT(NULL != pUserExt);
+
+    SOPC_Endpoint_Config* epConfig = SOPC_ToolkitServer_GetEndpointConfig(epIdx);
+    SOPC_ASSERT(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr->authenticationManager);
+    SOPC_UserAuthentication_Manager* pAuthenticationManager = epConfig->serverConfigPtr->authenticationManager;
+
+    SOPC_CertificateList* pCrtUser = NULL;
+    OpcUa_X509IdentityToken* pX509Token = pUserExt->Body.Object.Value;
+    SOPC_ReturnStatus pkiStatus = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
+        pX509Token->CertificateData.Data, (uint32_t) pX509Token->CertificateData.Length, &pCrtUser);
+    if (SOPC_STATUS_OK == pkiStatus)
+    {
+        pkiStatus = SOPC_PKIProvider_AddCertToRejectedList(pAuthenticationManager->pUsrPKI, pCrtUser);
+    }
+    SOPC_UNUSED_RESULT(pkiStatus);
+    SOPC_KeyManager_Certificate_Free(pCrtUser);
+}
+
 static void logs_and_set_b_authentication_status_from_c(
     SOPC_UserAuthentication_Status authnStatus,
     constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user,
@@ -410,16 +432,16 @@ void user_authentication_bs__is_valid_username_pwd_authentication(
                                                 user_authentication_bs__p_endpoint_config_idx);
 }
 
-void user_authentication_bs__is_valid_user_x509_authentication(
+void user_authentication_bs__is_valid_user_token_signature(
     const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
     const constants__t_user_token_type_i user_authentication_bs__p_token_type,
     const constants__t_user_token_i user_authentication_bs__p_user_token,
     const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
     const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
     const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
-    constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
+    constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_signature)
 {
-    SOPC_UNUSED_ARG(user_authentication_bs__p_token_type); // Only for B precondition corresponding to asserts:
+    SOPC_UNUSED_ARG(user_authentication_bs__p_token_type);
     SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_x509);
 
     SOPC_Endpoint_Config* epConfig =
@@ -428,65 +450,89 @@ void user_authentication_bs__is_valid_user_x509_authentication(
     SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
     SOPC_ASSERT(NULL != epConfig->serverConfigPtr->serverKeyCertPair);
 
-    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->serverConfigPtr->authenticationManager;
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID;
     SOPC_SerializedCertificate* serverSerCert = NULL;
 
     const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
 
-    status = SOPC_KeyCertPair_GetSerializedCertCopy(epConfig->serverConfigPtr->serverKeyCertPair, &serverSerCert);
-
+    SOPC_ReturnStatus status =
+        SOPC_KeyCertPair_GetSerializedCertCopy(epConfig->serverConfigPtr->serverKeyCertPair, &serverSerCert);
     if (SOPC_STATUS_OK == status)
     {
         status = is_valid_user_token_signature(user_authentication_bs__p_user_token,
                                                user_authentication_bs__p_user_token_signature,
                                                user_authentication_bs__p_server_nonce, serverSerCert, usedSecuPolicy);
-        SOPC_KeyManager_SerializedCertificate_Delete(serverSerCert);
-        serverSerCert = NULL;
+        if (SOPC_STATUS_OK == status)
+        {
+            authnStatus = SOPC_USER_AUTHENTICATION_OK;
+        }
     }
+    if (SOPC_STATUS_OK != status)
+    {
+        add_user_cert_to_pki_rejected_list(user_authentication_bs__p_endpoint_config_idx,
+                                           user_authentication_bs__p_user_token);
+    }
+    SOPC_KeyManager_SerializedCertificate_Delete(serverSerCert);
+
+    logs_and_set_b_authentication_status_from_c(authnStatus, user_authentication_bs__p_sc_valid_signature,
+                                                user_authentication_bs__p_endpoint_config_idx);
+}
+
+void user_authentication_bs__is_cert_comply_with_security_policy(
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+    constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_cert_sec_pol)
+{
+    SOPC_UNUSED_ARG(user_authentication_bs__p_token_type);
+    SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_x509);
+
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
+    const char* usedSecuPolicy = util_channel__SecurityPolicy_B_to_C(user_authentication_bs__p_user_secu_policy);
+    SOPC_ReturnStatus status =
+        is_cert_comply_with_security_policy(user_authentication_bs__p_user_token, usedSecuPolicy);
     if (SOPC_STATUS_OK == status)
     {
-        status = is_cert_comply_with_security_policy(user_authentication_bs__p_user_token, usedSecuPolicy);
-        if (SOPC_STATUS_OK != status)
-        {
-            authnStatus = SOPC_USER_AUTHENTICATION_REJECTED_TOKEN;
-        }
+        authnStatus = SOPC_USER_AUTHENTICATION_OK;
     }
     else
     {
-        authnStatus = SOPC_USER_AUTHENTICATION_SIGNATURE_INVALID;
+        add_user_cert_to_pki_rejected_list(user_authentication_bs__p_endpoint_config_idx,
+                                           user_authentication_bs__p_user_token);
     }
+    logs_and_set_b_authentication_status_from_c(authnStatus, user_authentication_bs__p_sc_valid_cert_sec_pol,
+                                                user_authentication_bs__p_endpoint_config_idx);
+}
 
-    if (SOPC_STATUS_OK == status)
+void user_authentication_bs__is_valid_user_x509_authentication(
+    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+    const constants__t_user_token_i user_authentication_bs__p_user_token,
+    constants_statuscodes_bs__t_StatusCode_i* const user_authentication_bs__p_sc_valid_user)
+{
+    SOPC_UNUSED_ARG(user_authentication_bs__p_token_type);
+    SOPC_ASSERT(user_authentication_bs__p_token_type == constants__e_userTokenType_x509);
+
+    SOPC_Endpoint_Config* epConfig =
+        SOPC_ToolkitServer_GetEndpointConfig(user_authentication_bs__p_endpoint_config_idx);
+    SOPC_ASSERT(NULL != epConfig);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr);
+    SOPC_ASSERT(NULL != epConfig->serverConfigPtr->authenticationManager);
+
+    SOPC_UserAuthentication_Status authnStatus = SOPC_USER_AUTHENTICATION_ACCESS_DENIED;
+    SOPC_UserAuthentication_Manager* authenticationManager = epConfig->serverConfigPtr->authenticationManager;
+
+    SOPC_ReturnStatus status = SOPC_UserAuthentication_IsValidUserIdentity(
+        authenticationManager, user_authentication_bs__p_user_token, &authnStatus);
+    if (SOPC_STATUS_OK != status)
     {
-        status = SOPC_UserAuthentication_IsValidUserIdentity(authenticationManager,
-                                                             user_authentication_bs__p_user_token, &authnStatus);
-
-        if (SOPC_STATUS_OK != status)
-        {
-            /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
-            SOPC_Logger_TraceWarning(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
-                user_authentication_bs__p_endpoint_config_idx);
-        }
+        /* Failure of the authentication manager: we do not know if the token was rejected or user denied */
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "User authentication manager failed to check user validity on endpoint config idx %" PRIu32,
+            user_authentication_bs__p_endpoint_config_idx);
     }
-    else
-    {
-        /* Append to the rejected list if signature or properties are invalid */
-        SOPC_CertificateList* pCrtUser = NULL;
-        OpcUa_X509IdentityToken* x509Token = user_authentication_bs__p_user_token->Body.Object.Value;
-        SOPC_ReturnStatus pkiStatus = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
-            x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
-        if (SOPC_STATUS_OK == pkiStatus)
-        {
-            pkiStatus = SOPC_PKIProvider_AddCertToRejectedList(authenticationManager->pUsrPKI, pCrtUser);
-        }
-        SOPC_UNUSED_RESULT(pkiStatus);
-        SOPC_KeyManager_Certificate_Free(pCrtUser);
-    }
-
     logs_and_set_b_authentication_status_from_c(authnStatus, user_authentication_bs__p_sc_valid_user,
                                                 user_authentication_bs__p_endpoint_config_idx);
 }
@@ -1093,4 +1139,61 @@ void user_authentication_bs__get_local_user(
     SOPC_GCC_DIAGNOSTIC_RESTORE
     user_local.authorizationManager = epConfig->serverConfigPtr->authorizationManager;
     *session_core_bs__p_user = &user_local;
+}
+
+void user_authentication_bs__set_x509_token_from_user(
+    const constants__t_user_i user_authentication_bs__p_user,
+    t_bool* const user_authentication_bs__p_valid_x509_token,
+    constants__t_user_token_i* const user_authentication_bs__p_x509_token)
+{
+    SOPC_ASSERT(NULL != user_authentication_bs__p_user);
+
+    *user_authentication_bs__p_valid_x509_token = false;
+    *user_authentication_bs__p_x509_token = NULL;
+    SOPC_ExtensionObject* x509_user = NULL;
+    OpcUa_X509IdentityToken* x509_token = NULL;
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_UserWithAuthorization* user_app = user_authentication_bs__p_user;
+    if (!SOPC_User_IsCertificate(user_app->user))
+    {
+        return;
+    }
+    const SOPC_ByteString* pCert = SOPC_User_GetCertificate(user_app->user);
+    if (NULL == pCert)
+    {
+        return;
+    }
+
+    x509_user = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
+    if (NULL == x509_user)
+    {
+        return;
+    }
+
+    status = SOPC_Encodeable_CreateExtension(x509_user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &x509_token);
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_ByteString_Initialize(&x509_token->CertificateData);
+        status = SOPC_ByteString_CopyFromBytes(&x509_token->CertificateData, pCert->Data, pCert->Length);
+    }
+    SOPC_String_Initialize(&x509_token->PolicyId);
+    if (SOPC_STATUS_OK == status)
+    {
+        *user_authentication_bs__p_x509_token = x509_user;
+        *user_authentication_bs__p_valid_x509_token = true;
+    }
+    else
+    {
+        SOPC_ExtensionObject_Clear(x509_user);
+        SOPC_Free(x509_user);
+    }
+}
+
+void user_authentication_bs__deallocate_user_token(const constants__t_user_token_i user_authentication_bs__p_user_token)
+{
+    if (NULL != user_authentication_bs__p_user_token)
+    {
+        SOPC_ExtensionObject_Clear(user_authentication_bs__p_user_token);
+        SOPC_Free(user_authentication_bs__p_user_token);
+    }
 }

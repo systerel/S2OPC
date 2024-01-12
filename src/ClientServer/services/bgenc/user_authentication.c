@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.c
 
- Date                 : 16/05/2023 13:04:56
+ Date                 : 12/01/2024 15:45:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -151,13 +151,26 @@ void user_authentication__allocate_valid_and_authenticated_user(
             }
          }
          else if (user_authentication__l_user_token_type == constants__e_userTokenType_x509) {
-            user_authentication_bs__is_valid_user_x509_authentication(user_authentication__p_endpoint_config_idx,
+            user_authentication_bs__is_valid_user_token_signature(user_authentication__p_endpoint_config_idx,
                user_authentication__l_user_token_type,
                user_authentication__p_user_token,
                user_authentication__p_user_token_signature,
                user_authentication__p_server_nonce,
                user_authentication__l_used_security_policy,
                &user_authentication__l_sc_user_authentication);
+            if (user_authentication__l_sc_user_authentication == constants_statuscodes_bs__e_sc_ok) {
+               user_authentication_bs__is_cert_comply_with_security_policy(user_authentication__p_endpoint_config_idx,
+                  user_authentication__l_user_token_type,
+                  user_authentication__p_user_token,
+                  user_authentication__l_used_security_policy,
+                  &user_authentication__l_sc_user_authentication);
+            }
+            if (user_authentication__l_sc_user_authentication == constants_statuscodes_bs__e_sc_ok) {
+               user_authentication_bs__is_valid_user_x509_authentication(user_authentication__p_endpoint_config_idx,
+                  user_authentication__l_user_token_type,
+                  user_authentication__p_user_token,
+                  &user_authentication__l_sc_user_authentication);
+            }
          }
          else if (user_authentication__l_user_token_type == constants__e_userTokenType_anonymous) {
             user_authentication__l_sc_user_authentication = constants_statuscodes_bs__e_sc_ok;

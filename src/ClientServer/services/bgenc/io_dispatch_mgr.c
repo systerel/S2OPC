@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 22/03/2023 13:49:42
+ Date                 : 12/01/2024 15:44:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -847,6 +847,10 @@ void io_dispatch_mgr__internal_client_activate_orphaned_session(
 void io_dispatch_mgr__internal_server_evaluate_session_timeout(
    const constants__t_session_i io_dispatch_mgr__session) {
    service_mgr__server_evaluate_session_timeout(io_dispatch_mgr__session);
+}
+
+void io_dispatch_mgr__internal_server_evaluate_all_session_user_cert(void) {
+   service_mgr__server_evaluate_all_session_user_cert();
 }
 
 void io_dispatch_mgr__secure_channel_lost(

@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.h
 
- Date                 : 24/08/2022 07:50:32
+ Date                 : 12/01/2024 15:44:56
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -125,6 +125,7 @@ extern void io_dispatch_mgr__internal_server_data_changed(
    const constants__t_WriteValuePointer_i io_dispatch_mgr__p_old_write_value_pointer,
    const constants__t_WriteValuePointer_i io_dispatch_mgr__p_new_write_value_pointer,
    t_bool * const io_dispatch_mgr__bres);
+extern void io_dispatch_mgr__internal_server_evaluate_all_session_user_cert(void);
 extern void io_dispatch_mgr__internal_server_evaluate_session_timeout(
    const constants__t_session_i io_dispatch_mgr__session);
 extern void io_dispatch_mgr__internal_server_node_changed(

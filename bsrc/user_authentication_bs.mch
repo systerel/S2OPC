@@ -149,12 +149,12 @@ OPERATIONS
     END
     ;
 
-    p_sc_valid_user <-- is_valid_user_x509_authentication (p_endpoint_config_idx,  p_token_type, p_user_token, p_user_token_signature, p_server_nonce, p_user_secu_policy) =
+    p_sc_valid_signature <-- is_valid_user_token_signature (p_endpoint_config_idx,  p_token_type, p_user_token, p_user_token_signature, p_server_nonce, p_user_secu_policy) =
     PRE
         p_endpoint_config_idx : t_endpoint_config_idx_i &
         p_endpoint_config_idx : t_endpoint_config_idx &
         p_token_type : t_user_token_type_i &
-        p_token_type : t_user_token_type_i - {c_userTokenType_indet, e_userTokenType_anonymous} &
+        p_token_type : t_user_token_type_i - {c_userTokenType_indet, e_userTokenType_anonymous, e_userTokenType_userName} &
         p_user_token : t_user_token_i &
         p_user_token : t_user_token &
         p_user_token_signature : t_SignatureData_i &
@@ -162,7 +162,34 @@ OPERATIONS
         p_server_nonce : t_Nonce &
         p_user_secu_policy : t_SecurityPolicy
     THEN
-        p_sc_valid_user :: {e_sc_ok, e_sc_bad_identity_token_invalid, e_sc_bad_identity_token_rejected, e_sc_bad_user_access_denied, e_sc_bad_user_signature_invalid}
+        p_sc_valid_signature :: {e_sc_ok, e_sc_bad_user_signature_invalid}
+    END
+    ;
+
+    p_sc_valid_cert_sec_pol <-- is_cert_comply_with_security_policy (p_endpoint_config_idx, p_token_type, p_user_token, p_user_secu_policy) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_token_type : t_user_token_type_i &
+        p_token_type : t_user_token_type_i - {c_userTokenType_indet, e_userTokenType_anonymous, e_userTokenType_userName} &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token &
+        p_user_secu_policy : t_SecurityPolicy
+    THEN
+        p_sc_valid_cert_sec_pol :: {e_sc_ok, e_sc_bad_identity_token_rejected}
+    END
+    ;
+
+    p_sc_valid_user <-- is_valid_user_x509_authentication (p_endpoint_config_idx,  p_token_type, p_user_token) =
+    PRE
+        p_endpoint_config_idx : t_endpoint_config_idx_i &
+        p_endpoint_config_idx : t_endpoint_config_idx &
+        p_token_type : t_user_token_type_i &
+        p_token_type : t_user_token_type_i - {c_userTokenType_indet, e_userTokenType_anonymous, e_userTokenType_userName} &
+        p_user_token : t_user_token_i &
+        p_user_token : t_user_token
+    THEN
+        p_sc_valid_user :: {e_sc_ok, e_sc_bad_identity_token_invalid, e_sc_bad_identity_token_rejected, e_sc_bad_user_access_denied}
     END
     ;
 
@@ -201,6 +228,28 @@ OPERATIONS
     THEN
         p_user :( p_user : t_user_i &
                   p_user : t_user )
+    END
+    ;
+
+    p_valid_x509_token, p_x509_token <-- set_x509_token_from_user (p_user) =
+    PRE
+        p_user : t_user_i &
+        p_user : t_user
+    THEN
+        p_valid_x509_token,
+        p_x509_token
+        :(p_valid_x509_token : BOOL &
+          p_x509_token : t_user_token_i &
+          (p_valid_x509_token = TRUE => p_x509_token : t_user_token) &
+          (p_valid_x509_token = FALSE => p_x509_token = c_user_token_indet))
+    END
+    ;
+
+    deallocate_user_token (p_user_token) =
+    PRE
+        p_user_token : t_user_token_i
+    THEN
+        skip
     END
 
 END

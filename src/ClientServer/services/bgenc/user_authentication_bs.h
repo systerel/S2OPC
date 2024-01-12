@@ -21,7 +21,7 @@
 
  File Name            : user_authentication_bs.h
 
- Date                 : 16/05/2023 13:05:26
+ Date                 : 12/01/2024 15:45:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,8 @@ extern void user_authentication_bs__allocate_authenticated_user(
    constants__t_user_i * const user_authentication_bs__p_user);
 extern void user_authentication_bs__deallocate_user(
    const constants__t_user_i user_authentication_bs__p_user);
+extern void user_authentication_bs__deallocate_user_token(
+   const constants__t_user_token_i user_authentication_bs__p_user_token);
 extern void user_authentication_bs__decrypt_user_token(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
@@ -83,6 +85,12 @@ extern void user_authentication_bs__has_user_token_policy_available(
    const constants__t_channel_config_idx_i user_authentication_bs__p_channel_config_idx,
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    t_bool * const user_authentication_bs__p_user_token_policy_available);
+extern void user_authentication_bs__is_cert_comply_with_security_policy(
+   const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+   const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+   const constants__t_user_token_i user_authentication_bs__p_user_token,
+   const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_cert_sec_pol);
 extern void user_authentication_bs__is_user_token_supported(
    const constants__t_user_token_type_i user_authentication_bs__p_user_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
@@ -90,19 +98,28 @@ extern void user_authentication_bs__is_user_token_supported(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    t_bool * const user_authentication_bs__p_supported_user_token_type,
    constants__t_SecurityPolicy * const user_authentication_bs__p_user_security_policy);
-extern void user_authentication_bs__is_valid_user_x509_authentication(
+extern void user_authentication_bs__is_valid_user_token_signature(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
    const constants__t_SignatureData_i user_authentication_bs__p_user_token_signature,
    const constants__t_Nonce_i user_authentication_bs__p_server_nonce,
    const constants__t_SecurityPolicy user_authentication_bs__p_user_secu_policy,
+   constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_signature);
+extern void user_authentication_bs__is_valid_user_x509_authentication(
+   const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
+   const constants__t_user_token_type_i user_authentication_bs__p_token_type,
+   const constants__t_user_token_i user_authentication_bs__p_user_token,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
 extern void user_authentication_bs__is_valid_username_pwd_authentication(
    const constants__t_endpoint_config_idx_i user_authentication_bs__p_endpoint_config_idx,
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,
    constants_statuscodes_bs__t_StatusCode_i * const user_authentication_bs__p_sc_valid_user);
+extern void user_authentication_bs__set_x509_token_from_user(
+   const constants__t_user_i user_authentication_bs__p_user,
+   t_bool * const user_authentication_bs__p_valid_x509_token,
+   constants__t_user_token_i * const user_authentication_bs__p_x509_token);
 extern void user_authentication_bs__shallow_copy_user_token(
    const constants__t_user_token_type_i user_authentication_bs__p_token_type,
    const constants__t_user_token_i user_authentication_bs__p_user_token,

@@ -487,6 +487,12 @@ OPERATIONS
     END
     ;
 
+    server_evaluate_all_session_user_cert =
+    BEGIN
+        skip
+    END
+    ;
+
     bres, sc, buffer_out, channel <-- server_send_publish_response (session, req_handle, statusCode, resp_typ, publish_resp_msg) =
     PRE
         session : t_session_i &

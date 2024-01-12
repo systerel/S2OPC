@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 22/03/2023 10:04:24
+ Date                 : 12/01/2024 15:45:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,6 +68,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__client_gen_create_session_internal_event session_core_1__client_gen_create_session_internal_event
 #define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
 #define session_core__deallocate_user user_authentication__deallocate_user
+#define session_core__deallocate_user_token user_authentication__deallocate_user_token
 #define session_core__drop_user_server session_core_1__drop_user_server
 #define session_core__get_channel_nb_sessions session_core_1__get_channel_nb_sessions
 #define session_core__get_local_user user_authentication__get_local_user
@@ -80,6 +81,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__getall_to_create session_core_1__getall_to_create
 #define session_core__has_user_token_policy_available user_authentication__has_user_token_policy_available
 #define session_core__is_valid_session session_core_1__is_valid_session
+#define session_core__is_valid_user_x509_authentication user_authentication__is_valid_user_x509_authentication
 #define session_core__reset_session_to_create session_core_1__reset_session_to_create
 #define session_core__server_get_session_from_token session_core_1__server_get_session_from_token
 #define session_core__server_session_timeout_evaluation session_core_1__server_session_timeout_evaluation
@@ -88,6 +90,7 @@ extern void session_core__INITIALISATION(void);
 #define session_core__set_session_app_context session_core_1__set_session_app_context
 #define session_core__set_session_to_create session_core_1__set_session_to_create
 #define session_core__set_session_user_client session_core_1__set_session_user_client
+#define session_core__set_x509_token_from_user user_authentication__set_x509_token_from_user
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

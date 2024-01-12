@@ -779,6 +779,12 @@ OPERATIONS
     END
     ;
 
+    internal_server_evaluate_all_session_user_cert =
+    BEGIN
+        server_evaluate_all_session_user_cert
+    END
+    ;
+
     secure_channel_lost (channel) =
     VAR
         l_connected_channel,

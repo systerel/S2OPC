@@ -76,6 +76,7 @@ PROMOTES
     client_close_sessions_on_final_connection_failure,
     client_close_session,
     server_evaluate_session_timeout,
+    server_evaluate_all_session_user_cert,
     get_session_user_server,
     get_local_user,
     find_channel_to_close,

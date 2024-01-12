@@ -67,7 +67,10 @@ PROMOTES
     get_server_session_preferred_locales,
     deallocate_user,
     get_local_user,
-    has_user_token_policy_available
+    has_user_token_policy_available,
+    set_x509_token_from_user,
+    is_valid_user_x509_authentication,
+    deallocate_user_token
 
 LOCAL_OPERATIONS
 

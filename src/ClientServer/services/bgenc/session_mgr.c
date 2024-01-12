@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 22/03/2023 13:49:59
+ Date                 : 12/01/2024 15:45:07
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -915,6 +915,62 @@ void session_mgr__session_get_endpoint_config(
       if (session_mgr__l_continue == true) {
          channel_mgr__server_get_endpoint_config(session_mgr__l_channel,
             session_mgr__endpoint_config_idx);
+      }
+   }
+}
+
+void session_mgr__server_evaluate_all_session_user_cert(void) {
+   {
+      t_bool session_mgr__l_continue;
+      constants__t_session_i session_mgr__l_session;
+      constants__t_endpoint_config_idx_i session_mgr__l_endpoint_config_idx;
+      t_bool session_mgr__l_valid_channel;
+      constants__t_channel_i session_mgr__l_channel;
+      constants__t_user_i session_mgr__l_user;
+      t_bool session_mgr__l_is_client;
+      constants__t_user_token_i session_mgr__l_user_token;
+      t_bool session_mgr__l_valid_token;
+      constants_statuscodes_bs__t_StatusCode_i session_mgr__l_valid_user;
+      
+      session_mgr_it__init_iter_session(&session_mgr__l_continue);
+      if (session_mgr__l_continue == true) {
+         while (session_mgr__l_continue == true) {
+            session_mgr__l_endpoint_config_idx = constants__c_endpoint_config_idx_indet;
+            session_mgr__l_user = constants__c_user_indet;
+            session_mgr__l_user_token = constants__c_user_token_indet;
+            session_mgr__l_valid_token = false;
+            session_mgr__l_valid_user = constants_statuscodes_bs__e_sc_bad_identity_token_invalid;
+            session_mgr_it__continue_iter_session(&session_mgr__l_continue,
+               &session_mgr__l_session);
+            session_core__getall_valid_session_channel(session_mgr__l_session,
+               &session_mgr__l_valid_channel,
+               &session_mgr__l_channel);
+            channel_mgr__is_client_channel(session_mgr__l_channel,
+               &session_mgr__l_is_client);
+            if ((session_mgr__l_valid_channel == true) &&
+               (session_mgr__l_is_client == false)) {
+               channel_mgr__server_get_endpoint_config(session_mgr__l_channel,
+                  &session_mgr__l_endpoint_config_idx);
+            }
+            if (session_mgr__l_endpoint_config_idx != constants__c_endpoint_config_idx_indet) {
+               session_core__get_session_user_server(session_mgr__l_session,
+                  &session_mgr__l_user);
+               session_core__set_x509_token_from_user(session_mgr__l_user,
+                  &session_mgr__l_valid_token,
+                  &session_mgr__l_user_token);
+               if (session_mgr__l_valid_token == true) {
+                  session_core__is_valid_user_x509_authentication(session_mgr__l_endpoint_config_idx,
+                     constants__e_userTokenType_x509,
+                     session_mgr__l_user_token,
+                     &session_mgr__l_valid_user);
+                  if (session_mgr__l_valid_user != constants_statuscodes_bs__e_sc_ok) {
+                     session_core__server_close_session_sm(session_mgr__l_session,
+                        session_mgr__l_valid_user);
+                  }
+                  session_core__deallocate_user_token(session_mgr__l_user_token);
+               }
+            }
+         }
       }
    }
 }

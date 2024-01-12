@@ -21,7 +21,7 @@
 
  File Name            : user_authentication.h
 
- Date                 : 19/01/2023 10:52:26
+ Date                 : 12/01/2024 15:45:13
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,9 +55,12 @@ extern void user_authentication__INITIALISATION(void);
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
 #define user_authentication__deallocate_user user_authentication_bs__deallocate_user
+#define user_authentication__deallocate_user_token user_authentication_bs__deallocate_user_token
 #define user_authentication__get_local_user user_authentication_bs__get_local_user
 #define user_authentication__get_user_token_type_from_token user_authentication_bs__get_user_token_type_from_token
 #define user_authentication__has_user_token_policy_available user_authentication_bs__has_user_token_policy_available
+#define user_authentication__is_valid_user_x509_authentication user_authentication_bs__is_valid_user_x509_authentication
+#define user_authentication__set_x509_token_from_user user_authentication_bs__set_x509_token_from_user
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
