@@ -36,7 +36,7 @@
 
 static void setup(void)
 {
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 }
 
 /**

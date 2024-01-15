@@ -307,7 +307,7 @@ int main(void)
 
     setupConnection();
 
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, NULL, true, true, &sock);
     buffer = SOPC_Buffer_Create(4096);

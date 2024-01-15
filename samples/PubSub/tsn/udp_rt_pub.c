@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
     struct timespec sleepTime;
     struct pollfd sockErrPoll;
 
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, mcastAddr, mcastPort);
     status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
     if (SOPC_STATUS_NOK == status)

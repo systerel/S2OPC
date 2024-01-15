@@ -126,7 +126,7 @@ int LLVMFuzzerInitialize(int* argc, char*** argv)
     (void) argc;
     (void) argv;
     setupConnection();
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
     sopc_buffer = SOPC_Buffer_CreateResizable(BUFFER_INITIAL_LEN, BUFFER_MAX_LEN);
     SOPC_ASSERT(sopc_buffer != NULL);
 

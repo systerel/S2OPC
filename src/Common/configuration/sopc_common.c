@@ -57,8 +57,8 @@ SOPC_ReturnStatus SOPC_Common_Initialize(SOPC_Log_Configuration logConfiguration
         return SOPC_STATUS_NOK;
     }
 
-    /* Initialize endianness */
-    SOPC_Helper_EndiannessCfg_Initialize();
+    /* Check endianness */
+    SOPC_Helper_Endianness_Check();
 
     /* Initialize logs */
     res = SOPC_Logger_Initialize(&logConfiguration);

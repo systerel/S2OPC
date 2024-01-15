@@ -743,7 +743,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
     SOPC_PubScheduler_TransportCtx* transportCtx = NULL;
 
-    SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
+    SOPC_Helper_Endianness_Check();
 
     if (NULL == config || NULL == sourceConfig || threadPriority < 0 || threadPriority > 99)
     {

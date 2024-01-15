@@ -2265,7 +2265,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_basic_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_Endianness_Check();
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -2680,7 +2680,7 @@ END_TEST
 
 START_TEST(test_ua_encoder_other_types)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_Endianness_Check();
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create(100);
 
@@ -3282,7 +3282,7 @@ END_TEST
 
 START_TEST(test_ua_decoder_allocation_limit)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // Necessary to initialize endianness configuration
+    SOPC_Helper_Endianness_Check();
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_String s;
     SOPC_String_Initialize(&s);
@@ -4298,7 +4298,7 @@ END_TEST
 
 START_TEST(test_ua_guid_parse)
 {
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     static const struct
     {

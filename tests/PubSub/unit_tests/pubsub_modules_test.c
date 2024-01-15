@@ -409,8 +409,7 @@ START_TEST(test_tc_tools_test)
 
 START_TEST(test_hl_network_msg_encode_json)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
@@ -476,8 +475,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_encode)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
@@ -541,8 +539,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_decode)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[1];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 1);
@@ -567,8 +564,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_encode_uni_keep_alive_dsm)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_CreateEmpty();
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
@@ -618,8 +614,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_decode_uni_keep_alive_dsm)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[1];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 1);
@@ -652,8 +647,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
      * - DSM4 contains varArr[0..0]
      */
 
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_Dataset_LL_NetworkMessage* nm = SOPC_Dataset_LL_NetworkMessage_Create(NB_DATASET_MSG, 1);
     SOPC_Dataset_LL_NetworkMessage_Header* header = SOPC_Dataset_LL_NetworkMessage_GetHeader(nm);
@@ -833,8 +827,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_decode_multi_dsm)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[5];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 5);
@@ -898,8 +891,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_decode_multi_dsm_nok)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[5];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 5);
@@ -940,8 +932,7 @@ END_TEST
 
 START_TEST(test_hl_network_msg_decode_null_pubid)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[5];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 5);
@@ -1198,8 +1189,7 @@ START_TEST(test_subscriber_reader_layer_multi_dsm)
 {
     // Same test as above, with 2 DSM
     SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Error_Code_None;
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[2];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 2);
@@ -1285,8 +1275,7 @@ END_TEST
 START_TEST(test_subscriber_reader_layer)
 {
     SOPC_UADP_NetworkMessage_Error_Code code = SOPC_UADP_NetworkMessage_Error_Code_None;
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_DataSetReader* dsr[1];
     SOPC_PubSubConfiguration* config = build_Sub_Config(dsr, 1);
@@ -1610,8 +1599,7 @@ static void equal_NetworkMessage(SOPC_Dataset_LL_NetworkMessage* left, SOPC_Data
 
 START_TEST(test_dataset_layer)
 {
-    // Initialize endianess for encoders
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_WriterGroup* group = NULL;
     SOPC_PubSubConfiguration* config = build_PubConfig_From_VarArr(&group);

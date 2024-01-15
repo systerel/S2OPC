@@ -52,7 +52,7 @@ static inline void check_float_endianness(void)
                                               pD[4] == 0x89 && pD[5] == 0xAB && pD[6] == 0xCD && pD[7] == 0xEF)));
 }
 
-void SOPC_Helper_EndiannessCfg_Initialize(void)
+void SOPC_Helper_Endianness_Check(void)
 {
     check_integer_endianness();
     check_float_endianness();

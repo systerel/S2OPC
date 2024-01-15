@@ -40,10 +40,10 @@
 #define SOPC_SWAP_2_DWORDS(x) (((x) &0x00000000FFFFFFFF) << 32 | ((x) &0xFFFFFFFF00000000) >> 32)
 
 /**
- * \brief Initializes machine endianness detection. This function checks that the flags
- * ::SOPC_IS_LITTLE_ENDIAN and ::SOPC_IS_DOUBLE_MIDDLE_ENDIAN are correctly set.
+ * \brief Check that machine endianness configured (:SOPC_IS_LITTLE_ENDIAN and ::SOPC_IS_DOUBLE_MIDDLE_ENDIAN)
+ *  matches actual CPU behavior.
  */
-void SOPC_Helper_EndiannessCfg_Initialize(void);
+void SOPC_Helper_Endianness_Check(void);
 
 /** Define integer swapping operation to encode Integers in buffer (As little endian) */
 #if SOPC_IS_LITTLE_ENDIAN

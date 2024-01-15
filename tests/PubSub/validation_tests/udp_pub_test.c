@@ -120,7 +120,7 @@ int main(void)
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     Socket sock = SOPC_INVALID_SOCKET;
     SOPC_Socket_AddressInfo* multicastAddr = SOPC_UDP_SocketAddress_Create(false, MCAST_ADDR, MCAST_PORT);
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     status = SOPC_UDP_Socket_CreateToSend(multicastAddr, NULL, true, &sock);
     SOPC_Dataset_LL_NetworkMessage* nm = UDP_Pub_Test_Get_NetworkMessage();

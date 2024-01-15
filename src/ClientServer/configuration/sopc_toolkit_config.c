@@ -108,7 +108,7 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
             // Return value is not check as the encoding config could be already set.
             SOPC_Common_EncodingConstants defEncConst = SOPC_Common_GetDefaultEncodingConstants();
             bRet = SOPC_Common_SetEncodingConstants(defEncConst);
-            SOPC_Helper_EndiannessCfg_Initialize();
+            SOPC_Helper_Endianness_Check();
 
             if (SOPC_STATUS_OK == status)
             {

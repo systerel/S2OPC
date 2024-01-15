@@ -36,7 +36,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         return 0;
     }
 
-    SOPC_Helper_EndiannessCfg_Initialize();
+    SOPC_Helper_Endianness_Check();
 
     SOPC_Buffer* sopc_buffer = SOPC_Buffer_Create((uint32_t) len);
     SOPC_ASSERT(sopc_buffer != NULL);

@@ -739,7 +739,7 @@ bool SOPC_SubScheduler_Start(SOPC_PubSubConfiguration* config,
                              SOPC_PubSub_OnFatalError* pSubDisconnectedCb,
                              int threadPriority)
 {
-    SOPC_Helper_EndiannessCfg_Initialize(); // TODO: centralize / avoid recompute in S2OPC !
+    SOPC_Helper_Endianness_Check();
 
     if (NULL == config || NULL == targetConfig)
     {
