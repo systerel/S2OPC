@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 03/10/2023 14:12:15
+ Date                 : 15/01/2024 17:28:10
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -274,7 +274,7 @@ void translate_browse_path_result__treat_browse_result_one_source_1(
             *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
          }
       }
-      else if (translate_browse_path_result__l_res_ExpandedNodeId != constants__c_ExpandedNodeId_indet) {
+      else {
          constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path_result__l_res_ExpandedNodeId,
             &translate_browse_path_result__l_local_server,
             &translate_browse_path_result__l_source_tmp);

@@ -305,14 +305,12 @@ LOCAL_OPERATIONS
                 =>
                 BrowsePathResult = BrowsePathResult$0 &
 
-                ((out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId) or
-                  out_BrowseResult_NodeId(browseResult_index) = c_ExpandedNodeId_indet)
+                (out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId)
                     =>
                     BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
                     BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
                 ) &
-                ((out_BrowseResult_NodeId(browseResult_index) /: dom(conv_ExpandedNodeId_NodeId) &
-                  out_BrowseResult_NodeId(browseResult_index) /= c_ExpandedNodeId_indet)
+                (out_BrowseResult_NodeId(browseResult_index) /: dom(conv_ExpandedNodeId_NodeId)
                     =>
                     (statusCode_operation = e_sc_uncertain_reference_out_of_server
                     =>
@@ -730,8 +728,7 @@ OPERATIONS
             ELSE
                 statusCode_operation := l_translate_statusCode
             END
-        ELSIF l_res_ExpandedNodeId /= c_ExpandedNodeId_indet
-        THEN
+        ELSE
             // check expandedNodeId is local, and get associated nodeId if exists
             l_local_server, l_source_tmp <-- getall_conv_ExpandedNodeId_NodeId(l_res_ExpandedNodeId);
             IF l_local_server = FALSE
