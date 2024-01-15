@@ -5996,8 +5996,60 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
     return false;
 }
 
+static const SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj)
+{
+    if (extObj->Encoding == SOPC_ExtObjBodyEncoding_Object && NULL != extObj->Body.Object.ObjType)
+    {
+        SOPC_ASSERT(NULL == extObj->Body.Object.ObjType->NamespaceUri &&
+                    "EncType Namespace URI translation unsupported");
+        // Restore the DataType type id if it was the encoding object node
+        extObj->TypeId.NodeId.Namespace = extObj->Body.Object.ObjType->NamespaceIndex;
+        extObj->TypeId.NodeId.Data.Numeric = extObj->Body.Object.ObjType->TypeId;
+        return &extObj->TypeId.NodeId;
+    }
+    else if (extObj->Encoding == SOPC_ExtObjBodyEncoding_ByteString ||
+             extObj->Encoding == SOPC_ExtObjBodyEncoding_XMLElement)
+    {
+        // Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it
+        // could be the DefaultEncoding Object instead. Returns the generic Structure type instead
+        return &SOPC_Structure_Type;
+    }
+    else
+    {
+        return NULL; /* Invalid encoding (might be None after decoding) */
+    }
+}
+
+int32_t SOPC_Variant_GetMatrixArrayLength(const SOPC_Variant* var)
+{
+    if (NULL == var || SOPC_VariantArrayType_Matrix == var->ArrayType)
+    {
+        return -1;
+    }
+    bool computed = false;
+    int32_t length = 1;
+    // Compute total length of flattened matrix
+    for (int32_t i = 0; i < var->Value.Matrix.Dimensions; i++)
+    {
+        length *= var->Value.Matrix.ArrayDimensions[i];
+    }
+    if (computed)
+    {
+        return length;
+    }
+    return 0;
+}
+
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
 {
+    if (NULL == var)
+    {
+        return NULL;
+    }
+    const SOPC_NodeId* nextArrayEltTypeId = &SOPC_Null_Type;
+    const SOPC_NodeId* arrayEltTypeId = &SOPC_Null_Type;
+    int32_t extObjArrayLength = 0;
+    SOPC_ExtensionObject* extObjArray = NULL;
     switch (var->BuiltInTypeId)
     {
     case SOPC_Null_Id:
@@ -6027,26 +6079,40 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
     case SOPC_Variant_Id: /* Corresponds to BaseDataType: could only be an array of Variant */
         return SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
     case SOPC_ExtensionObject_Id:
-
-        if (var->ArrayType == SOPC_VariantArrayType_SingleValue && var->Value.ExtObject->TypeId.ServerIndex == 0 &&
-            var->Value.ExtObject->TypeId.NamespaceUri.Length <= 0)
+        if (var->Value.ExtObject->TypeId.ServerIndex == 0 && var->Value.ExtObject->TypeId.NamespaceUri.Length <= 0)
         {
-            if (var->Value.ExtObject->Encoding == SOPC_ExtObjBodyEncoding_Object &&
-                NULL != var->Value.ExtObject->Body.Object.ObjType)
+            if (SOPC_VariantArrayType_SingleValue == var->ArrayType)
             {
-                SOPC_ASSERT(NULL == var->Value.ExtObject->Body.Object.ObjType->NamespaceUri &&
-                            "EncType Namespace URI translation unsupported");
-                // Restore the DataType type id if it was the encoding object node
-                var->Value.ExtObject->TypeId.NodeId.Namespace =
-                    var->Value.ExtObject->Body.Object.ObjType->NamespaceIndex;
-                var->Value.ExtObject->TypeId.NodeId.Data.Numeric = var->Value.ExtObject->Body.Object.ObjType->TypeId;
-                return &var->Value.ExtObject->TypeId.NodeId;
+                return SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject);
+            }
+            else if (SOPC_VariantArrayType_Array == var->ArrayType || SOPC_VariantArrayType_Matrix == var->ArrayType)
+            {
+                // For array/matrix we need to check each element type
+                extObjArrayLength =
+                    (SOPC_VariantArrayType_Array == var->ArrayType ? var->Value.Array.Length
+                                                                   : SOPC_Variant_GetMatrixArrayLength(var));
+                extObjArray = (SOPC_VariantArrayType_Array == var->ArrayType ? var->Value.Array.Content.ExtObjectArr
+                                                                             : var->Value.Matrix.Content.ExtObjectArr);
+
+                for (int32_t i = 0; i < extObjArrayLength; i++)
+                {
+                    nextArrayEltTypeId = SOPC_ExtensionObject_Get_DataType(&extObjArray[i]);
+                    if (i > 0 && !SOPC_NodeId_Equal(arrayEltTypeId, nextArrayEltTypeId))
+                    {
+                        // Note: it would be necessary to find the first common ancestor of both types
+                        // but structure is at least expected to be a common ancestor (loss of type precision)
+                        return &SOPC_Structure_Type;
+                    }
+                    // All previous element types are identical
+                    arrayEltTypeId = nextArrayEltTypeId;
+                }
+                // => Null type id if array empty
+                return arrayEltTypeId;
             }
             else
             {
-                // TODO / Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it
-                // could be the DefaultEncoding Object instead. Returns the generic Structure type instead
-                return &SOPC_Structure_Type;
+                SOPC_ASSERT(false && "Unexpected variant array type");
+                return NULL;
             }
         }
         else
@@ -6057,7 +6123,7 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
         }
     default:
         SOPC_ASSERT(false); // Invalid type
-        return &SOPC_Null_Type;
+        return NULL;
     }
 }
 

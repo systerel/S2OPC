@@ -1111,12 +1111,29 @@ void SOPC_Variant_Delete(SOPC_Variant* variant);
 // Raw function to print a variant on standard output. Do not display array or matrix.
 void SOPC_Variant_Print(SOPC_Variant* variant);
 
+int32_t SOPC_Variant_GetMatrixArrayLength(const SOPC_Variant* var);
 const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId);
 const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index);
 bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
                                         SOPC_BuiltinId builtInTypeId,
                                         int32_t index,
                                         const void* value);
+
+/**
+ * \brief Returns the DataType of the given variant.
+ *        For built-in types except for ExtensionObject variant: built-in type NodeId is returned (single value / array)
+ *        For ExtensionObject built-in type:
+ *        - single value: if the object is decoded returns the NodeId based on the object ::SOPC_EncodeableType content,
+ *                        otherwise returns the Structure abstract DataType NodeId.
+ *        - array/matrix value: if the array is empty, returns the Null NodeId.
+ *                              if all array elements have same type, same behavior as single value.
+ *                              if elements have different types, returns the Structure abstract DataType NodeId.
+ *
+ *
+ * \param var  The Variant for which the DataType is returned
+ *
+ * \return     The DataType NodeId of the given variant or NULL (NULL variant or extension object without body encoded)
+ */
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
