@@ -1352,6 +1352,53 @@ void address_space_bs__get_InputArguments(const constants__t_Node_i address_spac
     *address_space_bs__p_input_arg = result;
 }
 
+static const SOPC_NodeId* getExtObjEncodingId(SOPC_ExtensionObject* extObj)
+{
+    SOPC_ASSERT(NULL != extObj);
+    if (extObj->TypeId.NamespaceUri.Length <= 0)
+    {
+        return &extObj->TypeId.NodeId;
+    }
+    return NULL;
+}
+
+static const SOPC_NodeId* getVariantEncodingId(SOPC_Variant* varExtObj)
+{
+    SOPC_ASSERT(NULL != varExtObj && SOPC_ExtensionObject_Id == varExtObj->BuiltInTypeId);
+    if (SOPC_VariantArrayType_SingleValue == varExtObj->ArrayType)
+    {
+        return getExtObjEncodingId(varExtObj->Value.ExtObject);
+    }
+    else if (SOPC_VariantArrayType_Array == varExtObj->ArrayType ||
+             SOPC_VariantArrayType_Matrix == varExtObj->ArrayType)
+    {
+        // For array/matrix we need to check each element type
+        int32_t extObjArrayLength =
+            (SOPC_VariantArrayType_Array == varExtObj->ArrayType ? varExtObj->Value.Array.Length
+                                                                 : SOPC_Variant_GetMatrixArrayLength(varExtObj));
+        SOPC_ExtensionObject* extObjArray =
+            (SOPC_VariantArrayType_Array == varExtObj->ArrayType ? varExtObj->Value.Array.Content.ExtObjectArr
+                                                                 : varExtObj->Value.Matrix.Content.ExtObjectArr);
+
+        const SOPC_NodeId *nextArrayEltTypeId = NULL, *arrayEltTypeId = NULL;
+
+        for (int32_t i = 0; i < extObjArrayLength; i++)
+        {
+            nextArrayEltTypeId = getExtObjEncodingId(&extObjArray[i]);
+            if (i > 0 && !SOPC_NodeId_Equal(arrayEltTypeId, nextArrayEltTypeId))
+            {
+                // Note: it would be necessary to find the first common ancestor of both types: not supported
+                return NULL;
+            }
+            // All previous element types are identical
+            arrayEltTypeId = nextArrayEltTypeId;
+        }
+        // => Null type id if array empty
+        return arrayEltTypeId;
+    }
+    return NULL;
+}
+
 void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i address_space_bs__p_variant,
                                              constants__t_NodeId_i* const address_space_bs__p_type)
 {
@@ -1359,6 +1406,25 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
     SOPC_ASSERT(NULL != address_space_bs__p_type);
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     *address_space_bs__p_type = (SOPC_NodeId*) SOPC_Variant_Get_DataType(address_space_bs__p_variant);
+
+    // In case resolution was not possible due to unknown encoder, try to retrieve type from address space
+    if (NULL != *address_space_bs__p_type && /* NULL is possible due to ExtensionObject with None encoding mask case */
+        SOPC_ExtensionObject_Id == address_space_bs__p_variant->BuiltInTypeId &&
+        OPCUA_NAMESPACE_INDEX == (*address_space_bs__p_type)->Namespace &&
+        SOPC_IdentifierType_Numeric == (*address_space_bs__p_type)->IdentifierType &&
+        OpcUaId_Structure == (*address_space_bs__p_type)->Data.Numeric)
+    {
+        const SOPC_NodeId* encodingNodeId = getVariantEncodingId(address_space_bs__p_variant);
+        if (NULL != encodingNodeId)
+        {
+            const SOPC_NodeId* resolvedDataTypeId = SOPC_AddressSpaceUtil_GetEncodingDataType(
+                address_space_bs__nodes, &address_space_bs__p_variant->Value.ExtObject->TypeId.NodeId);
+            if (NULL != resolvedDataTypeId)
+            {
+                *address_space_bs__p_type = (SOPC_NodeId*) resolvedDataTypeId;
+            }
+        }
+    }
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 

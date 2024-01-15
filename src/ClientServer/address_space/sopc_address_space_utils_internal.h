@@ -47,4 +47,18 @@ bool SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(SOPC_AddressSpace* addSp
 
 bool SOPC_AddressSpaceUtil_IsValidReferenceTypeId(SOPC_AddressSpace* addSpace, const SOPC_NodeId* nodeId);
 
+/**
+ * \brief Returns the DataType NodeId for the given encoding NodeId (DefaultBinary variable node)
+ *        or NULL in case of failure. The variable S2OPC_DYNAMIC_TYPE_RESOLUTION definition shall be set to true.
+ *
+ * \param addSpace        The address space in which the encoding node is expected to be found.
+ * \param encodingNodeId  The NodeId of a "Default Binary" encoding object expected to have an HasEncoding
+ *                        backward reference to the searched DataType node.
+ *                        If this nodeId directly matches a DataType node, it is returned.
+ *
+ * \return The DataType NodeId or NULL in case of failure.
+ */
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetEncodingDataType(SOPC_AddressSpace* addSpace,
+                                                             const SOPC_NodeId* encodingNodeId);
+
 #endif /* SOPC_ADDRESS_SPACE_UTILS_INTERNAL_H_ */

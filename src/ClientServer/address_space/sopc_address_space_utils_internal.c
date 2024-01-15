@@ -28,7 +28,12 @@
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 
-SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node)
+typedef bool SOPC_AddressSpaceUtil_IsExpectedRefCb(const OpcUa_ReferenceNode* ref);
+
+static SOPC_ExpandedNodeId* SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
+    SOPC_AddressSpaceUtil_IsExpectedRefCb* refEvalCb,
+    SOPC_AddressSpace* addSpace,
+    SOPC_AddressSpace_Node* node)
 {
     SOPC_ASSERT(NULL != node);
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, node);
@@ -38,12 +43,17 @@ SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* 
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (SOPC_AddressSpaceUtil_IsTypeDefinition(ref))
+        if ((*refEvalCb)(ref))
         {
             return &ref->TargetId;
         }
     }
     return NULL;
+}
+
+SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node)
+{
+    return SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsTypeDefinition, addSpace, node);
 }
 
 bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref)
@@ -89,6 +99,17 @@ bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref)
     return ref->ReferenceTypeId.Namespace == OPCUA_NAMESPACE_INDEX &&
            ref->ReferenceTypeId.IdentifierType == SOPC_IdentifierType_Numeric &&
            ref->ReferenceTypeId.Data.Numeric == OpcUaId_HasSubtype;
+}
+
+static bool SOPC_AddressSpaceUtil_IsEncodingOf(const OpcUa_ReferenceNode* ref)
+{
+    if (!ref->IsInverse)
+    {
+        return false;
+    }
+
+    return SOPC_IdentifierType_Numeric == ref->ReferenceTypeId.IdentifierType &&
+           OpcUaId_HasEncoding == ref->ReferenceTypeId.Data.Numeric;
 }
 
 static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* error)
@@ -221,5 +242,39 @@ bool SOPC_AddressSpaceUtil_IsValidReferenceTypeId(SOPC_AddressSpace* addSpace, c
             result = OpcUa_NodeClass_ReferenceType == node->node_class;
         }
     }
+    return result;
+}
+
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetEncodingDataType(SOPC_AddressSpace* addSpace,
+                                                             const SOPC_NodeId* encodingNodeId)
+{
+    const SOPC_NodeId* result = NULL;
+
+    SOPC_AddressSpace_Node* node;
+    bool node_found = false;
+
+    node = SOPC_AddressSpace_Get_Node(addSpace, encodingNodeId, &node_found);
+
+    if (node_found)
+    {
+        if (OpcUa_NodeClass_DataType == node->node_class)
+        {
+            result = encodingNodeId;
+        }
+        else if (OpcUa_NodeClass_Object == node->node_class && S2OPC_DYNAMIC_TYPE_RESOLUTION)
+        {
+            SOPC_ExpandedNodeId* expNodeId =
+                SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsEncodingOf, addSpace, node);
+            if (NULL != expNodeId)
+            {
+                if (expNodeId->NamespaceUri.Length <= 0)
+                {
+                    // We do not need to check if this is a DataType since it is mandatory for this reference
+                    result = &expNodeId->NodeId;
+                }
+            }
+        }
+    }
+
     return result;
 }
