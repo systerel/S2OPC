@@ -88,7 +88,7 @@ DEFINITIONS
         out_BrowseResult_nb_References       : NAT                        &
         out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
         out_BrowseResult_isForward       : seq(BOOL)               &
-        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId_i) &
+        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId)   &
         out_BrowseResult_BrowseName      : seq(t_QualifiedName_i)  &
         out_BrowseResult_DisplayName     : seq(t_LocalizedText_i)  & /* Spec (v1.04) part 4 table 167 indicates it as mandatory
                                                                         (should be t_LocalizedText),

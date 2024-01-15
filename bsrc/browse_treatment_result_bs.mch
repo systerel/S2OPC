@@ -59,7 +59,7 @@ DEFINITIONS
         out_BrowseResultReferences       : t_BrowseResultReferences_i &
         out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
         out_BrowseResult_isForward       : seq(BOOL)               &
-        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId_i) &
+        out_BrowseResult_NodeId          : seq(t_ExpandedNodeId)   &
         out_BrowseResult_BrowseName      : seq(t_QualifiedName_i)  &
         out_BrowseResult_DisplayName     : seq(t_LocalizedText_i)  &
         out_BrowseResult_NodeClass       : seq(t_NodeClass_i)      &
