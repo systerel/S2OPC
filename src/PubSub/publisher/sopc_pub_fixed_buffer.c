@@ -37,10 +37,10 @@ struct SOPC_PubFixedBuffer_DataSetField_Position
     uint32_t position;
 };
 
-struct SOPC_PubFixedBuffer_Buffer_ctx
+struct SOPC_PubFixedBuffer_Buffer_Ctx
 {
     // Array of pointers to dsm_sequence_number stored in SOPC_Dataset_LL_NetworkMessage structure
-    uint16_t** dsm_sequence_numbers;
+    const uint16_t** dsm_sequence_numbers;
     uint32_t* dsm_sequence_number_positions;
     size_t dsm_sequence_numbers_len;
 
@@ -53,11 +53,9 @@ struct SOPC_PubFixedBuffer_Buffer_ctx
     SOPC_Buffer* buffer;
 };
 
-static SOPC_PubFixedBuffer_Buffer_ctx* PubFixedBuffer_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
+static SOPC_PubFixedBuffer_Buffer_Ctx* PubFixedBuffer_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
 {
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode_structure = SOPC_Malloc(sizeof(SOPC_PubFixedBuffer_Buffer_ctx));
-    memset(preencode_structure, 0, sizeof(SOPC_PubFixedBuffer_Buffer_ctx));
-
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode_structure = SOPC_Calloc(1, sizeof(SOPC_PubFixedBuffer_Buffer_Ctx));
     SOPC_ASSERT(NULL != preencode_structure);
 
     uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
@@ -86,7 +84,7 @@ static SOPC_PubFixedBuffer_Buffer_ctx* PubFixedBuffer_Create_Preencode_Buffer(SO
 }
 
 SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_Position_At(
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode,
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
     size_t index)
 {
     if (NULL == preencode || index >= preencode->dataSetFields_len)
@@ -98,7 +96,7 @@ SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_
 
 static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
 {
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode_structure = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode_structure = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
 
     uint8_t nbDsm = SOPC_Dataset_LL_NetworkMessage_Nb_DataSetMsg(nm);
     SOPC_ASSERT(preencode_structure->dsm_sequence_numbers_len == nbDsm);
@@ -106,10 +104,7 @@ static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMe
     for (int i = 0; i < nbDsm; i++)
     {
         SOPC_Dataset_LL_DataSetMessage* dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, i);
-        SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        *(preencode_structure->dsm_sequence_numbers + i) =
-            (uint16_t*) SOPC_Dataset_LL_DataSetMsg_Get_PointerSequenceNumber(dsm);
-        SOPC_GCC_DIAGNOSTIC_RESTORE
+        preencode_structure->dsm_sequence_numbers[i] = SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(dsm);
         uint16_t nbDsf = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
         SOPC_ASSERT(preencode_structure->dataSetFields_len >= nbDsf + index_dsf);
         for (uint16_t j = 0; j < nbDsf; j++)
@@ -125,10 +120,10 @@ static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMe
     }
 }
 
-SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer_ctx(SOPC_Dataset_LL_NetworkMessage* nm)
+SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode = PubFixedBuffer_Create_Preencode_Buffer(nm);
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode = PubFixedBuffer_Create_Preencode_Buffer(nm);
     SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(nm, preencode);
     if (NULL == preencode)
     {
@@ -162,24 +157,20 @@ SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer_ctx(SOP
     return status;
 }
 
-void SOPC_PubFixedBuffer_Delete_Preencode_Buffer_ctx(SOPC_PubFixedBuffer_Buffer_ctx* preencode)
+void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode)
 {
     if (NULL != preencode)
     {
         SOPC_Free(preencode->dataSetFields);
-        preencode->dataSetFields = NULL;
         SOPC_Free(preencode->dsm_sequence_numbers);
-        preencode->dsm_sequence_numbers = NULL;
         SOPC_Free(preencode->dsm_sequence_number_positions);
-        preencode->dsm_sequence_number_positions = NULL;
         SOPC_Buffer_Delete(preencode->buffer);
-        preencode->buffer = NULL;
         SOPC_Free(preencode);
         preencode = NULL;
     }
 }
 
-bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_Buffer_ctx* preencode,
+bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
                                                             uint32_t position,
                                                             size_t index)
 {
@@ -187,7 +178,7 @@ bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_
     {
         return false;
     }
-    memcpy(preencode->dsm_sequence_number_positions + index, &position, sizeof(position));
+    preencode->dsm_sequence_number_positions[index] = position;
     return true;
 }
 
@@ -199,30 +190,31 @@ void SOPC_PubFixedBuffer_DataSetFieldPosition_Set_Position(SOPC_PubFixedBuffer_D
 }
 
 /** Update value in buffer at position gived with data. Length correspond to the number of bytes to update */
-static void update_buffer(SOPC_Buffer* buffer, void* data, uint32_t position, uint32_t length)
+static void update_buffer(SOPC_Buffer* buffer, const void* data, uint32_t position, uint32_t length)
 {
     SOPC_ASSERT(NULL != buffer);
     SOPC_ASSERT(NULL != data);
     SOPC_Buffer_SetPosition(buffer, position);
-    SOPC_Buffer_Write(buffer, (uint8_t*) data, length);
+    SOPC_Buffer_Write(buffer, (const uint8_t*) data, length);
 }
 
-SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffers(SOPC_PubFixedBuffer_Buffer_ctx* preencode)
+SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode)
 {
     SOPC_ASSERT(NULL != preencode);
+    SOPC_ASSERT(NULL != preencode->dsm_sequence_numbers);
+    SOPC_ASSERT(NULL != preencode->dsm_sequence_number_positions);
     for (size_t i = 0; i < preencode->dsm_sequence_numbers_len; i++)
     {
-        SOPC_ASSERT(NULL != (preencode->dsm_sequence_numbers + i));
-        SOPC_ASSERT(NULL != (preencode->dsm_sequence_number_positions + i));
-        update_buffer(preencode->buffer, *(preencode->dsm_sequence_numbers + i),
-                      *(preencode->dsm_sequence_number_positions + i), sizeof(**preencode->dsm_sequence_numbers));
+        update_buffer(preencode->buffer, preencode->dsm_sequence_numbers[i],
+                      preencode->dsm_sequence_number_positions[i], sizeof(**preencode->dsm_sequence_numbers));
     }
     for (size_t i = 0; i < preencode->dataSetFields_len; i++)
     {
         SOPC_PubFixedBuffer_DataSetField_Position* dsfPos =
             SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode, i);
         const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetField_Get_Variant(dsfPos->dataSetField);
-        SOPC_Buffer_SetPosition(preencode->buffer, dsfPos->position);
+        SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(preencode->buffer, dsfPos->position);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_Variant_Write(variant, preencode->buffer, 0);
     }
     return preencode->buffer;

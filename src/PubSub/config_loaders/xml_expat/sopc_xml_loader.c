@@ -165,7 +165,7 @@ struct sopc_xml_pubsub_message_t
     SOPC_Pubsub_MessageEncodingType encoding;
     struct sopc_xml_pubsub_dataset_t* datasetArr;
     double keepAliveTime;
-    bool isPublishFixedSize;
+    bool publisherFixedSize;
 
     /* Array of to define Security Key Servers (SKS) that manage the security keys for the SecurityGroup
        assigned to the PubSubGroup. Null if the SecurityMode is None. */
@@ -640,7 +640,7 @@ static bool parse_message_attributes(const char* attr_name,
     }
     else if (TEXT_EQUALS(ATTR_MESSAGE_FIXED_SIZE, attr_name))
     {
-        result = parse_boolean(attr_val, strlen(attr_val), &msg->isPublishFixedSize);
+        result = parse_boolean(attr_val, strlen(attr_val), &msg->publisherFixedSize);
     }
     else
     {
@@ -657,7 +657,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
     msg->publishing_interval = 0.0;
     msg->publishing_offset = -1;
     msg->keepAliveTime = -1.0;
-    msg->isPublishFixedSize = false;
+    msg->publisherFixedSize = false;
     bool result = parse_attributes(attrs, parse_message_attributes, ctx, (void*) msg);
 
     if (result)
@@ -709,7 +709,7 @@ static bool start_message(struct parse_context_t* ctx, struct sopc_xml_pubsub_me
                 result = false;
             }
         }
-        if (!ctx->connectionArr[ctx->nb_connections - 1].is_publisher && true == msg->isPublishFixedSize)
+        if (!ctx->connectionArr[ctx->nb_connections - 1].is_publisher && true == msg->publisherFixedSize)
         {
             LOG_XML_ERROR("Fixed size buffer is an optimization only available for publisher");
             result = false;
@@ -1275,8 +1275,8 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                 SOPC_WriterGroup_Set_KeepAlive(writerGroup, msg->keepAliveTime);
                 SOPC_WriterGroup_Set_Encoding(writerGroup, msg->encoding);
 
-                const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = msg->isPublishFixedSize};
-                SOPC_WriterGroup_Set_Options(writerGroup, writerGroupOptions);
+                const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = msg->publisherFixedSize};
+                SOPC_WriterGroup_Set_Options(writerGroup, &writerGroupOptions);
 
                 // Associate dataSet with writer
                 SOPC_ASSERT(msg->nb_datasets < 0x100);

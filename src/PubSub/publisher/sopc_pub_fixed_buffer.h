@@ -27,23 +27,34 @@
 #include "sopc_enums.h"
 #include "sopc_pubsub_security.h"
 
-typedef struct SOPC_PubFixedBuffer_Buffer_ctx SOPC_PubFixedBuffer_Buffer_ctx;
+typedef struct SOPC_PubFixedBuffer_Buffer_Ctx SOPC_PubFixedBuffer_Buffer_Ctx;
 typedef struct SOPC_PubFixedBuffer_DataSetField_Position SOPC_PubFixedBuffer_DataSetField_Position;
 
-SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer_ctx(SOPC_Dataset_LL_NetworkMessage* nm);
+/**
+ * @brief Create and initialize preencode context against nm.
+ *
+ * @param nm NetworkMessage used to initialize preencoded buffer context.
+ * @return SOPC_STATUS_OK in case of success.
+ */
+SOPC_ReturnStatus SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm);
 
-void SOPC_PubFixedBuffer_Delete_Preencode_Buffer_ctx(SOPC_PubFixedBuffer_Buffer_ctx* preencode);
+/**
+ * @brief Free memory allocated by ::SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer.
+ *
+ * @param preencode Pointer to preencode buffer context to be freed
+ */
+void SOPC_PubFixedBuffer_Delete_Preencode_Buffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
 
 /* Return pointer to updated preencode buffer stored in preencode. This buffer should'nt be free by user */
-SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffers(SOPC_PubFixedBuffer_Buffer_ctx* preencode);
+SOPC_Buffer* SOPC_PubFixedBuffer_Get_UpdatedBuffer(SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
 
 /* Set position of dataSetMessage sequence number in final buffer */
-bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_Buffer_ctx* preencode,
+bool SOPC_PubFixedBuffer_Set_DSM_SequenceNumber_Position_At(SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
                                                             uint32_t position,
                                                             size_t index);
 
 SOPC_PubFixedBuffer_DataSetField_Position* SOPC_PubFixedBuffer_Get_DataSetField_Position_At(
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode,
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode,
     size_t index);
 
 /* Set position of dataSetField in final buffer */

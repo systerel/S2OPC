@@ -1044,12 +1044,9 @@ typedef SOPC_ReturnStatus(SOPC_VariantValue_PfnCompCustom)(const void* customCon
 SOPC_Variant* SOPC_Variant_Create(void);
 /** \brief Initialize a Variant. Do not initialize existing variants without clearing them first.*/
 void SOPC_Variant_Initialize(SOPC_Variant* variant);
-/** \brief Initialize a Variant with empty value. */
-void SOPC_Variant_Initialize_Empty(SOPC_Variant* var, SOPC_BuiltinId builtInId);
 /** \brief Initialize a Variant as an array of given length. Do not initialize existing variants without clearing them
  * first.*/
 bool SOPC_Variant_Initialize_Array(SOPC_Variant* var, SOPC_BuiltinId builtInId, int32_t length);
-
 void SOPC_Null_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_Null_CompareAux(const void* dest, const void* src, int32_t* comparison);
 SOPC_ReturnStatus SOPC_Null_CopyAux(void* dest, const void* src);

@@ -85,7 +85,7 @@ typedef struct SOPC_DataSet_LL_UadpDataSetMessageContentMask
     bool picoSecondsFlag;
 } SOPC_DataSet_LL_UadpDataSetMessageContentMask;
 
-struct SOPC_PubFixedBuffer_Buffer_ctx;
+struct SOPC_PubFixedBuffer_Buffer_Ctx;
 
 /**
  * Header NetworkMessage
@@ -101,11 +101,11 @@ struct SOPC_PubFixedBuffer_Buffer_ctx;
  */
 SOPC_Dataset_LL_NetworkMessage* SOPC_Dataset_LL_NetworkMessage_Create(uint8_t dsm_nb, uint8_t uadp_version);
 
-bool SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(SOPC_Dataset_LL_NetworkMessage* nm);
+bool SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(SOPC_Dataset_LL_NetworkMessage* nm);
 
 void SOPC_DataSet_LL_NetworkMessage_Set_Preencode_Buffer(SOPC_Dataset_LL_NetworkMessage* nm,
-                                                         struct SOPC_PubFixedBuffer_Buffer_ctx* preencode);
-struct SOPC_PubFixedBuffer_Buffer_ctx* SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(
+                                                         struct SOPC_PubFixedBuffer_Buffer_Ctx* preencode);
+struct SOPC_PubFixedBuffer_Buffer_Ctx* SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(
     SOPC_Dataset_LL_NetworkMessage* nm);
 
 // todo change interface to create nm without dsm
@@ -198,7 +198,7 @@ SOPC_DataSet_LL_DataSetMessageType SOPC_Dataset_LL_DataSetMsg_Get_MessageType(
 // dataset message sequence number
 void SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t sn);
 uint16_t SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm);
-const uint16_t* SOPC_Dataset_LL_DataSetMsg_Get_PointerSequenceNumber(const SOPC_Dataset_LL_DataSetMessage* dsm);
+const uint16_t* SOPC_Dataset_LL_DataSetMsg_Get_SequenceNumberPointer(const SOPC_Dataset_LL_DataSetMessage* dsm);
 /**
  * Header DataSetField
  */

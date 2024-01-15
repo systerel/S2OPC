@@ -334,7 +334,6 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     global IS_DEFINED_C_GROUP
 
     msgContext = MessageContext(cnxContext, message)
-    isFixedBufferSize = getOptionalAttribute(message, ATTRIBUTE_MESSAGE_FIXED_SIZE, 0)
     datasets = message.findall(TAG_DATASET)
 
     if not IS_DEFINED_C_GROUP:
@@ -360,7 +359,7 @@ def handlePubMessage(cnxContext, message, msgIndex, result):
     }
     """% (msgContext.id, msgContext.version, msgContext.interval, msgContext.offset,msgContext.mqttTopic,
         encodingStringToEnum(msgContext.encoding), msgIndex, msgContext.id, msgContext.version, msgContext.interval,
-        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, encodingStringToEnum(msgContext.encoding), isFixedBufferSize))
+        msgContext.offset, getCSecurityMode(msgContext.securityMode), msgContext.mqttTopic, encodingStringToEnum(msgContext.encoding), msgContext.fixedSizeBuffer))
 
     if(msgContext.keepAliveTime > 0. and cnxContext.acyclicPublisher):
         result.add("""
@@ -712,7 +711,7 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     SOPC_WriterGroup_Set_Encoding(group, encoding);
     const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = isFixedBufferSize};
-    SOPC_WriterGroup_Set_Options(group, writerGroupOptions);
+    SOPC_WriterGroup_Set_Options(group, &writerGroupOptions);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);

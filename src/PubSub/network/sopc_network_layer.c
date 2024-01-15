@@ -282,7 +282,10 @@ static SOPC_ReturnStatus Network_DataSetFields_To_UADP(SOPC_Buffer* buffer,
         {
             status = SOPC_Buffer_GetPosition(buffer, &dataSetField_position[i]);
         }
-        status = SOPC_Variant_Write(variant, buffer, 0);
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_Variant_Write(variant, buffer, 0);
+        }
     }
     return status;
 }
@@ -794,8 +797,8 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     bool signedEnabled = false;
     bool encryptedEnabled = false;
 
-    bool preencodedEnabled = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(nm);
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
+    bool preencodedEnabled = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(nm);
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
     SOPC_Dataset_LL_NetworkMessage_Header* header = NULL;
     uint8_t dsm_count = 0;
     uint32_t bufferPosition = 0;
@@ -1109,18 +1112,26 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
             {
                 uint16_t nbVariant = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
                 bufferPayload_dsfPositions = SOPC_Calloc(nbVariant, sizeof(uint32_t));
+                if (NULL == bufferPayload_dsfPositions)
+                {
+                    status = SOPC_STATUS_OUT_OF_MEMORY;
+                }
             }
-            status = Network_DataSetFields_To_UADP(*buffer_payload, dsm, bufferPayload_dsfPositions);
-            res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed);
-            if (preencodedEnabled)
+            if (SOPC_STATUS_OK == status)
+            {
+                status = Network_DataSetFields_To_UADP(*buffer_payload, dsm, bufferPayload_dsfPositions);
+                res = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Write_DsmField_Failed);
+            }
+            if (preencodedEnabled && SOPC_STATUS_OK == status)
             {
                 uint16_t nbVariant = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
                 for (int j = 0; j < nbVariant; j++)
                 {
                     SOPC_PubFixedBuffer_DataSetField_Position* dsfPosition =
                         SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode, indexDataSetField);
+                    SOPC_ASSERT(NULL != dsfPosition);
                     SOPC_PubFixedBuffer_DataSetFieldPosition_Set_Position(
-                        dsfPosition, *(bufferPayload_dsfPositions + j) + bufferPosition);
+                        dsfPosition, bufferPayload_dsfPositions[j] + bufferPosition);
                     indexDataSetField++;
                 }
                 SOPC_Free(bufferPayload_dsfPositions);
@@ -1261,8 +1272,8 @@ SOPC_Buffer* SOPC_UADP_NetworkMessage_Get_PreencodedBuffer(SOPC_Dataset_LL_Netwo
     {
         return NULL;
     }
-    SOPC_PubFixedBuffer_Buffer_ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
-    SOPC_Buffer* buffer = SOPC_PubFixedBuffer_Get_UpdatedBuffers(preencode);
+    SOPC_PubFixedBuffer_Buffer_Ctx* preencode = SOPC_DataSet_LL_NetworkMessage_Get_Preencode_Buffer(nm);
+    SOPC_Buffer* buffer = SOPC_PubFixedBuffer_Get_UpdatedBuffer(preencode);
     SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(buffer, 0);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     return buffer;

@@ -145,8 +145,8 @@ SOPC_NetworkMessage_Error_Code SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_N
  *
  * @param nm is the NetworkMessage to encode
  * @param security is the data use to set security flags. Can be NULL if security is not used
- * @param buffer_header pointer to a newly allocated buffer with header flags encoded. Should point to a NULL buffer
- * @param buffer_payload pointer to a newly allocated buffer with payload data encoded. Should point to a NULL buffer
+ * @param buffer_header [OUT] pointer to a newly allocated buffer with header flags encoded.
+ * @param buffer_payload [OUT] pointer to a newly allocated buffer with payload data encoded.
  * @return ::SOPC_NetworkMessage_Error_Code_None if header and payload buffer are successfully encoded. Appropriate
  * error code otherwise
  */
@@ -170,7 +170,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_P
 /**
  * @brief Get updated preencoded buffer.
  *
- * @param nm NetworkMessage containing preencoded strucure
+ * @param nm NetworkMessage containing preencoded structure
  * @param security the data used to encrypt and sign. Must be NULL, preencode mechanism cannot handle sign and encrypt
  *
  * @return SOPC_Buffer* pointer to updated preencoded buffer, NULL if an error occur.

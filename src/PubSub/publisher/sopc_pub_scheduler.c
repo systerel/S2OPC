@@ -435,16 +435,10 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
             result = (SOPC_STATUS_OK == status);
             if (result)
             {
-                status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer_ctx(context->message);
+                status = SOPC_DataSet_LL_NetworkMessage_Create_Preencode_Buffer(context->message);
                 result = (SOPC_STATUS_OK == status);
             }
         }
-    }
-
-    if (result && NULL != context->security && NULL != context->security->msgNonceRandom)
-    {
-        SOPC_Free(context->security->msgNonceRandom);
-        context->security->msgNonceRandom = NULL;
     }
 
     if (!result)
@@ -523,7 +517,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
     size_t nbDsmCtx = SOPC_Array_Size(context->dataSetMessageCtx);
     SOPC_ASSERT(nDsm == nbDsmCtx);
 
-    bool isPreencoded = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enable(message);
+    const bool isPreencoded = SOPC_DataSet_LL_NetworkMessage_is_Preencode_Buffer_Enabled(message);
 
     for (size_t iDsm = 0; iDsm < nDsm; iDsm++)
     {
@@ -1247,7 +1241,9 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
                 case SOPC_DateTime_Id:
                 case SOPC_Guid_Id:
                 case SOPC_StatusCode_Id:
-                    SOPC_Variant_Initialize_Empty(variant, type);
+                    SOPC_Variant_Initialize(variant);
+                    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+                    variant->BuiltInTypeId = type;
                     SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, variant, metadata);
                     break;
                 default:

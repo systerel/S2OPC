@@ -971,10 +971,10 @@ const SOPC_WriterGroup_Options* SOPC_WriterGroup_Get_Options(const SOPC_WriterGr
     return &group->options;
 }
 
-void SOPC_WriterGroup_Set_Options(SOPC_WriterGroup* group, const SOPC_WriterGroup_Options options)
+void SOPC_WriterGroup_Set_Options(SOPC_WriterGroup* group, const SOPC_WriterGroup_Options* options)
 {
     SOPC_ASSERT(NULL != group);
-    group->options = options;
+    group->options = *options;
 }
 
 uint16_t SOPC_WriterGroup_Get_Id(const SOPC_WriterGroup* group)
