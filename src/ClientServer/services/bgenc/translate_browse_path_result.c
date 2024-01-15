@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 15/01/2024 17:28:10
+ Date                 : 15/01/2024 17:32:03
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -260,29 +260,29 @@ void translate_browse_path_result__treat_browse_result_one_source_1(
          &translate_browse_path_result__l_res_DisplayName,
          &translate_browse_path_result__l_res_NodeClass,
          &translate_browse_path_result__l_res_TypeDefinition);
-      constants__is_QualifiedNames_Equal(translate_browse_path_result__targetName,
-         translate_browse_path_result__l_res_BrowseName,
-         &translate_browse_path_result__l_found);
-      if (translate_browse_path_result__l_found == true) {
-         translate_browse_path_result__checkAndAdd_BrowsePathResult(translate_browse_path_result__l_res_ExpandedNodeId,
-            &translate_browse_path_result__l_translate_statusCode);
-         if ((translate_browse_path_result__l_translate_statusCode == constants_statuscodes_bs__e_sc_ok) &&
-            (*translate_browse_path_result__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
-            ;
-         }
-         else {
-            *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
+      constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path_result__l_res_ExpandedNodeId,
+         &translate_browse_path_result__l_local_server,
+         &translate_browse_path_result__l_source_tmp);
+      if (translate_browse_path_result__l_local_server == true) {
+         constants__is_QualifiedNames_Equal(translate_browse_path_result__targetName,
+            translate_browse_path_result__l_res_BrowseName,
+            &translate_browse_path_result__l_found);
+         if (translate_browse_path_result__l_found == true) {
+            translate_browse_path_result__checkAndAdd_BrowsePathResult(translate_browse_path_result__l_res_ExpandedNodeId,
+               &translate_browse_path_result__l_translate_statusCode);
+            if ((translate_browse_path_result__l_translate_statusCode == constants_statuscodes_bs__e_sc_ok) &&
+               (*translate_browse_path_result__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
+               ;
+            }
+            else {
+               *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
+            }
          }
       }
       else {
-         constants__getall_conv_ExpandedNodeId_NodeId(translate_browse_path_result__l_res_ExpandedNodeId,
-            &translate_browse_path_result__l_local_server,
-            &translate_browse_path_result__l_source_tmp);
-         if (translate_browse_path_result__l_local_server == false) {
-            translate_browse_path_result__checkAndAdd_BrowsePathRemaining(translate_browse_path_result__l_res_ExpandedNodeId,
-               translate_browse_path_result__path_index,
-               translate_browse_path_result__statusCode_operation);
-         }
+         translate_browse_path_result__checkAndAdd_BrowsePathRemaining(translate_browse_path_result__l_res_ExpandedNodeId,
+            translate_browse_path_result__path_index,
+            translate_browse_path_result__statusCode_operation);
       }
    }
 }

@@ -284,46 +284,45 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server} &
 
-            (targetName = out_BrowseResult_BrowseName(browseResult_index)
+            (out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId)
                 =>
                 BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
-                BrowsePathRemainingIndex = BrowsePathRemainingIndex$0   &
+                BrowsePathRemainingIndex = BrowsePathRemainingIndex$0 &
 
-                (statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                (targetName = out_BrowseResult_BrowseName(browseResult_index)
                     =>
-                    /* target in BrowsePathResult has browse name equal to
-                       TargetName and is equal to a browse result */
-                    BrowsePathResult = BrowsePathResult$0
-                        <- out_BrowseResult_NodeId(browseResult_index)
+                    (statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                        =>
+                        /* target in BrowsePathResult has browse name equal to
+                           TargetName and is equal to a browse result */
+                        BrowsePathResult = BrowsePathResult$0
+                            <- out_BrowseResult_NodeId(browseResult_index)
+                    ) &
+                    (statusCode_operation /: {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                        =>
+                        BrowsePathResult = BrowsePathResult$0
+                    )
                 ) &
-                (statusCode_operation /: {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                (targetName /= out_BrowseResult_BrowseName(browseResult_index)
                     =>
                     BrowsePathResult = BrowsePathResult$0
                 )
             ) &
-            (targetName /= out_BrowseResult_BrowseName(browseResult_index)
+            (out_BrowseResult_NodeId(browseResult_index) /: dom(conv_ExpandedNodeId_NodeId)
                 =>
                 BrowsePathResult = BrowsePathResult$0 &
 
-                (out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId)
+                (statusCode_operation = e_sc_uncertain_reference_out_of_server
+                    =>
+                    BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0
+                        <- out_BrowseResult_NodeId(browseResult_index) &
+                    BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
+                        <- path_index
+                ) &
+                (statusCode_operation /= e_sc_uncertain_reference_out_of_server
                     =>
                     BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
                     BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
-                ) &
-                (out_BrowseResult_NodeId(browseResult_index) /: dom(conv_ExpandedNodeId_NodeId)
-                    =>
-                    (statusCode_operation = e_sc_uncertain_reference_out_of_server
-                    =>
-                        BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0
-                            <- out_BrowseResult_NodeId(browseResult_index) &
-                        BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
-                            <- path_index
-                    ) &
-                    (statusCode_operation /= e_sc_uncertain_reference_out_of_server
-                        =>
-                        BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
-                        BrowsePathRemainingIndex = BrowsePathRemainingIndex$0
-                    )
                 )
             )
         )
@@ -717,24 +716,23 @@ OPERATIONS
         l_res_TypeDefinition
         <-- getall_browse_result_reference_at(browseResult_index);
 
-        l_found <-- is_QualifiedNames_Equal(targetName, l_res_BrowseName);
+        // check expandedNodeId is local, and get associated nodeId if exists
+        l_local_server, l_source_tmp <-- getall_conv_ExpandedNodeId_NodeId(l_res_ExpandedNodeId);
+        IF l_local_server = TRUE THEN
+            l_found <-- is_QualifiedNames_Equal(targetName, l_res_BrowseName);
 
-        IF l_found = TRUE THEN
-            /* Add in result if there is enough space */
-            l_translate_statusCode <-- checkAndAdd_BrowsePathResult(l_res_ExpandedNodeId);
-            /* keep old status if operation is OK but get an out of server previoulsy */
-            IF (l_translate_statusCode = e_sc_ok & statusCode_operation = e_sc_uncertain_reference_out_of_server) THEN
-                skip
-            ELSE
-                statusCode_operation := l_translate_statusCode
+            IF l_found = TRUE THEN
+                /* Add in result if there is enough space */
+                l_translate_statusCode <-- checkAndAdd_BrowsePathResult(l_res_ExpandedNodeId);
+                /* keep old status if operation is OK but get an out of server previoulsy */
+                IF (l_translate_statusCode = e_sc_ok & statusCode_operation = e_sc_uncertain_reference_out_of_server) THEN
+                    skip
+                ELSE
+                    statusCode_operation := l_translate_statusCode
+                END
             END
         ELSE
-            // check expandedNodeId is local, and get associated nodeId if exists
-            l_local_server, l_source_tmp <-- getall_conv_ExpandedNodeId_NodeId(l_res_ExpandedNodeId);
-            IF l_local_server = FALSE
-            THEN
-                statusCode_operation <-- checkAndAdd_BrowsePathRemaining(l_res_ExpandedNodeId, path_index)
-            END
+            statusCode_operation <-- checkAndAdd_BrowsePathRemaining(l_res_ExpandedNodeId, path_index)
         END
     END
     ;
