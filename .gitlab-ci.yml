@@ -72,6 +72,7 @@ variables:
 
 .all-tests_build_variables: &all-tests_build_variables
   WITH_PYS2OPC: 1
+  S2OPC_DYNAMIC_TYPE_RESOLUTION: 1
 
 .all-builds_build_variables: &all-builds_build_variables
   WITH_STATIC_SECURITY_DATA: 1
