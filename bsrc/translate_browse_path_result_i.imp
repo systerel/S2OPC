@@ -261,8 +261,6 @@ LOCAL_OPERATIONS
         targetName : t_QualifiedName   &
         browseResult_index : NAT1 &
         browseResult_index : 1..out_BrowseResult_nb_References &
-        size(BrowsePathResult) < k_n_BrowsePathResPerElt_max &
-        size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max &
         isBrowseResultComputed = TRUE
     THEN
         statusCode_operation,
@@ -273,6 +271,8 @@ LOCAL_OPERATIONS
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
             BrowsePathRemainingIndex  : seq(NAT1) &
+            size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
+            size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max &
 
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : {e_sc_ok,
