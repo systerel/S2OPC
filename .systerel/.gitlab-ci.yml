@@ -438,7 +438,7 @@ test-uactt:
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
            $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
-           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null"
+           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
       when: on_success
