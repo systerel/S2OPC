@@ -254,16 +254,13 @@ LOCAL_OPERATIONS
     END
     ;
 
-    statusCode_operation <-- treat_browse_result_one_source_1(path_index, targetName, browseResult_index, in_statusCode) =
+    statusCode_operation <-- treat_browse_result_one_source_1(path_index, targetName, browseResult_index) =
     PRE
         path_index : NAT1 &
         targetName : t_QualifiedName_i &
         targetName : t_QualifiedName   &
         browseResult_index : NAT1 &
         browseResult_index : 1..out_BrowseResult_nb_References &
-        in_statusCode : t_StatusCode_i &
-        in_statusCode : {e_sc_ok, e_sc_bad_no_match,
-            e_sc_uncertain_reference_out_of_server} &
         size(BrowsePathResult) < k_n_BrowsePathResPerElt_max &
         size(BrowsePathRemainingNodeId) < k_n_BrowsePathResPerElt_max &
         isBrowseResultComputed = TRUE
@@ -282,7 +279,8 @@ LOCAL_OPERATIONS
                 e_sc_bad_no_match,
                 e_sc_bad_out_of_memory,
                 e_sc_bad_query_too_complex,
-                e_sc_uncertain_reference_out_of_server} &
+                e_sc_uncertain_reference_out_of_server,
+                c_StatusCode_indet} &
 
             (out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId)
                 =>
@@ -661,10 +659,18 @@ OPERATIONS
 
             l_translate_statusCode <--
                 treat_browse_result_one_source_1(path_index, targetName,
-                                                 l_browseResult_index,
-                                                 statusCode_operation);
-            statusCode_operation := l_translate_statusCode;
+                                                 l_browseResult_index);
 
+            IF l_translate_statusCode /= c_StatusCode_indet THEN
+                /* keep old status if operation is OK but get an out of server previoulsy */
+                IF (l_translate_statusCode = e_sc_ok &
+                    statusCode_operation = e_sc_uncertain_reference_out_of_server) THEN
+                    skip
+                ELSE
+                    statusCode_operation := l_translate_statusCode
+                END
+            END
+            ;
             l_continue := bool(l_continue = TRUE &
                 (statusCode_operation = e_sc_ok or
                     statusCode_operation =  e_sc_uncertain_reference_out_of_server or
@@ -691,7 +697,7 @@ OPERATIONS
     END
     ;
 
-    statusCode_operation <-- treat_browse_result_one_source_1(path_index, targetName, browseResult_index, in_statusCode) =
+    statusCode_operation <-- treat_browse_result_one_source_1(path_index, targetName, browseResult_index) =
     VAR
         l_res_refTypeId,
         l_res_isForward,
@@ -701,12 +707,9 @@ OPERATIONS
         l_res_NodeClass,
         l_res_TypeDefinition,
         l_found,
-        l_translate_statusCode,
         l_local_server,
         l_source_tmp
     IN
-        statusCode_operation := in_statusCode;
-
         l_res_refTypeId,
         l_res_isForward,
         l_res_ExpandedNodeId,
@@ -716,6 +719,8 @@ OPERATIONS
         l_res_TypeDefinition
         <-- getall_browse_result_reference_at(browseResult_index);
 
+        statusCode_operation := c_StatusCode_indet;
+
         // check expandedNodeId is local, and get associated nodeId if exists
         l_local_server, l_source_tmp <-- getall_conv_ExpandedNodeId_NodeId(l_res_ExpandedNodeId);
         IF l_local_server = TRUE THEN
@@ -723,13 +728,7 @@ OPERATIONS
 
             IF l_found = TRUE THEN
                 /* Add in result if there is enough space */
-                l_translate_statusCode <-- checkAndAdd_BrowsePathResult(l_res_ExpandedNodeId);
-                /* keep old status if operation is OK but get an out of server previoulsy */
-                IF (l_translate_statusCode = e_sc_ok & statusCode_operation = e_sc_uncertain_reference_out_of_server) THEN
-                    skip
-                ELSE
-                    statusCode_operation := l_translate_statusCode
-                END
+                statusCode_operation <-- checkAndAdd_BrowsePathResult(l_res_ExpandedNodeId)
             END
         ELSE
             statusCode_operation <-- checkAndAdd_BrowsePathRemaining(l_res_ExpandedNodeId, path_index)
