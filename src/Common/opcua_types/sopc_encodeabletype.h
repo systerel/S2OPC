@@ -163,7 +163,8 @@ typedef const struct SOPC_EncodeableType_Struct
     uint32_t TypeId;
     uint32_t BinaryEncodingTypeId;
     uint32_t XmlEncodingTypeId;
-    char* NamespaceUri;      /**< It shall contain the namespace URI or NULL if defined by namespace index. */
+    char* NamespaceUri;      /**< NOT SUPPORTED: it shall be NULL for now (only NamespaceIndex supported).
+                                  It shall contain the namespace URI or NULL if defined by namespace index. */
     uint16_t NamespaceIndex; /**< It shall be ignored when NamespaceUri is set. */
     size_t AllocationSize;
     SOPC_EncodeableObject_PfnInitialize* Initialize;
