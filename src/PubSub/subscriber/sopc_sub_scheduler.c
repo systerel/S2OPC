@@ -455,17 +455,18 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
             SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos,
                                   SOPC_SubScheduler_Is_Writer_SN_Newer);
 
-        if (SOPC_NetworkMessage_Error_Code_None != errorCode)
+        if (SOPC_NetworkMessage_Error_Code_InvalidParameters == errorCode)
+        {
+            set_new_state(SOPC_PubSubState_Error);
+            result = SOPC_STATUS_NOK;
+        }
+        else if (SOPC_NetworkMessage_Error_Code_None != errorCode)
         {
             const char* name = SOPC_PubSubConnection_Get_Name(pDecoderContext);
             SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_PUBSUB,
                                    "Failed to decode SUB message %s, SOPC_NetworkMessage_Error_Code is : 0x%08X",
                                    name ? name : "<NULL>", (unsigned) errorCode);
             result = SOPC_STATUS_OK;
-        }
-        else if (SOPC_STATUS_OK != result)
-        {
-            set_new_state(SOPC_PubSubState_Error);
         }
     }
 

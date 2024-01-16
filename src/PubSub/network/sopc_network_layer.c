@@ -1184,7 +1184,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_BuildFinalMessage(SOPC_P
         }
     }
 
-    if (NULL != *buffer_payload)
+    if (NULL != buffer_payload && NULL != *buffer_payload)
     {
         SOPC_Buffer_Delete(*buffer_payload);
         *buffer_payload = NULL;
