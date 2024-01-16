@@ -364,7 +364,8 @@ LOCAL_OPERATIONS
     statusCode_operation <-- checkAndAdd_BrowsePathResult(expandedNodeId) =
     PRE
         expandedNodeId : t_ExpandedNodeId_i &
-        expandedNodeId : t_ExpandedNodeId
+        expandedNodeId : t_ExpandedNodeId   &
+        expandedNodeId : dom(conv_ExpandedNodeId_NodeId)
     THEN
         statusCode_operation,
         BrowsePathResult
