@@ -3334,13 +3334,12 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
     switch (event)
     {
     case SOCKET_CREATED:
-    case SOCKET_CONNECTION:
         // CLIENT side (or SERVER side with ReverseHello)
         /* id = secure channel connection index,
            auxParam = socket index */
 
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: %s scIdx=%" PRIu32 " socketIdx=%" PRIuPTR,
-                               (SOCKET_CREATED == event ? "SOCKET_CREATED" : "SOCKET_CONNECTION"), eltId, auxParam);
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SOCKET_CREATED scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
         SOPC_ASSERT(auxParam <= UINT32_MAX);
 
         scConnection = SC_GetConnection(eltId);
@@ -3356,41 +3355,57 @@ void SOPC_SecureConnectionStateMgr_OnSocketEvent(SOPC_Sockets_OutputEvent event,
             return;
         }
 
-        switch (event)
+        // Associate socket to secure channel
+        scConnection->socketIndex = (uint32_t) auxParam;
+        if (scConnection->isServerConnection)
         {
-        case SOCKET_CREATED:
-            // Associate socket to secure channel
-            scConnection->socketIndex = (uint32_t) auxParam;
-            if (scConnection->isServerConnection)
-            {
-                // Add connection into associated EP listener
-                SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
-                                                               (uintptr_t) NULL, (uintptr_t) eltId);
-            }
-            break;
-        case SOCKET_CONNECTION:
-            if (scConnection->isServerConnection)
-            {
-                // Send a Reverse Hello message on TCP connection
-                result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId);
-            }
-            else
-            {
-                // Send an Hello message on TCP connection
-                result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId);
-            }
-            if (!result)
-            {
-                // Error case: close the secure connection if invalid state or unexpected error.
-                //  (client case only on SOCKET_CONNECTION event)
-                SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
-                                         "SecureConnection: closed on SOCKET_CONNECTION");
-            }
-            break;
-        default:
-            SOPC_ASSERT(false);
+            // Add connection into associated EP listener
+            SOPC_SecureChannels_EnqueueInternalEventAsNext(INT_EP_SC_CREATED, scConnection->serverEndpointConfigIdx,
+                                                           (uintptr_t) NULL, (uintptr_t) eltId);
         }
         break;
+
+    case SOCKET_CONNECTION:
+        // CLIENT side (or SERVER side with ReverseHello)
+        /* id = secure channel connection index,
+           auxParam = socket index */
+
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ScStateMgr: SOCKET_CONNECTION scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
+        SOPC_ASSERT(auxParam <= UINT32_MAX);
+
+        scConnection = SC_GetConnection(eltId);
+
+        // Connection shall be in INIT state in case of CLIENT and in REVERSE_INIT state in case of SERVER
+        if (scConnection == NULL ||
+            ((scConnection->state != SECURE_CONNECTION_STATE_TCP_INIT || scConnection->isServerConnection) &&
+             (scConnection->state != SECURE_CONNECTION_STATE_TCP_REVERSE_INIT || !scConnection->isServerConnection)))
+        {
+            // In case of unidentified secure connection problem or wrong state,
+            // close the socket
+            SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, (uint32_t) auxParam, (uintptr_t) NULL, (uintptr_t) eltId);
+            return;
+        }
+
+        if (scConnection->isServerConnection)
+        {
+            // Send a Reverse Hello message on TCP connection
+            result = SC_ServerTransition_TcpReverseInit_To_TcpInit(scConnection, eltId);
+        }
+        else
+        {
+            // Send an Hello message on TCP connection
+            result = SC_ClientTransition_TcpInit_To_TcpNegotiate(scConnection, eltId);
+        }
+        if (!result)
+        {
+            // Error case: close the secure connection if invalid state or unexpected error.
+            //  (client case only on SOCKET_CONNECTION event)
+            SC_CloseSecureConnection(scConnection, eltId, false, false, 0,
+                                     "SecureConnection: closed on SOCKET_CONNECTION");
+        }
+        break;
+
     case SOCKET_FAILURE:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ScStateMgr: SOCKET_FAILURE scIdx=%" PRIu32 " socketIdx=%" PRIuPTR, eltId, auxParam);
