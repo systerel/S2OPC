@@ -150,7 +150,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         varNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421000};
         varNode->NodeClass = OpcUa_NodeClass_Variable;
         varNode->DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType};
-        varNode->ValueRank = -1;
+        varNode->ValueRank = -2; // Any
         status = SOPC_AddressSpace_Append(address_space, varNodeCustomDT);
 
         if (SOPC_STATUS_OK == status)
@@ -246,7 +246,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
             varNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421001};
             varNode->NodeClass = OpcUa_NodeClass_Variable;
             varNode->DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Structure};
-            varNode->ValueRank = -1;
+            varNode->ValueRank = -3; // ScalarOrOneDimension
             status = SOPC_AddressSpace_Append(address_space, varNodeStructDT);
         }
     }
@@ -296,15 +296,13 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace* address_sp
         dataValue.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
         dataValue.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
         dataValue.Value.Value.ExtObject = &extObj;
-        OpcUa_WriteRequest* writeRequest = SOPC_WriteRequest_Create(4);
+        OpcUa_WriteRequest* writeRequest = SOPC_WriteRequest_Create(8);
         SOPC_ASSERT(NULL != writeRequest);
         status = SOPC_WriteRequest_SetWriteValue(writeRequest, 0, &varNodeCustomDT->data.variable.NodeId,
                                                  SOPC_AttributeId_Value, NULL, &dataValue);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-        // Write the custom data type object into a compatible abstract DataType (expecting NOK)
-        // note: type is compatible but since custom DataType node is not present in address space
-        //       we are not able to consider it a subtype of structure
+        // Write the custom data type object into a compatible abstract DataType (expecting OK)
         status = SOPC_WriteRequest_SetWriteValue(writeRequest, 1, &varNodeStructDT->data.variable.NodeId,
                                                  SOPC_AttributeId_Value, NULL, &dataValue);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -324,6 +322,49 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace* address_sp
                                                  SOPC_AttributeId_Value, NULL, &dataValue);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_ExtensionObject_Clear(&extObj);
+        SOPC_DataValue_Initialize(&dataValue);
+
+        dataValue.Value.BuiltInTypeId = SOPC_ExtensionObject_Id;
+        dataValue.Value.ArrayType = SOPC_VariantArrayType_Array;
+        dataValue.Value.Value.Array.Length = 0;
+        // Write an empty array into the node with compatible DataType (expecting OK)
+        status = SOPC_WriteRequest_SetWriteValue(writeRequest, 4, &varNodeCustomDT->data.variable.NodeId,
+                                                 SOPC_AttributeId_Value, NULL, &dataValue);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        dataValue.Value.Value.Array.Length = 2;
+        dataValue.Value.Value.Array.Content.ExtObjectArr = SOPC_Calloc(2, sizeof(SOPC_ExtensionObject));
+        SOPC_ASSERT(NULL != dataValue.Value.Value.Array.Content.ExtObjectArr);
+
+        status = SOPC_Buffer_SetPosition(buf, 0);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status = SOPC_ExtensionObject_Read(&dataValue.Value.Value.Array.Content.ExtObjectArr[0], buf, 0);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status = SOPC_Buffer_SetPosition(buf, 0);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        status = SOPC_ExtensionObject_Read(&dataValue.Value.Value.Array.Content.ExtObjectArr[1], buf, 0);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        // Write an array with 2 elements with expected DataType into the node with compatible DataType (expecting OK)
+        status = SOPC_WriteRequest_SetWriteValue(writeRequest, 5, &varNodeCustomDT->data.variable.NodeId,
+                                                 SOPC_AttributeId_Value, NULL, &dataValue);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        // Modify TypeId for custom 2 DT encoding Default Binary node for second element in array
+        dataValue.Value.Value.Array.Content.ExtObjectArr[1].TypeId.NodeId.Data.Numeric =
+            OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary * 2;
+
+        // Write an array with 2 elements with different DataType into the node with custom DataType (expecting NOK)
+        status = SOPC_WriteRequest_SetWriteValue(writeRequest, 6, &varNodeCustomDT->data.variable.NodeId,
+                                                 SOPC_AttributeId_Value, NULL, &dataValue);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        // Write an array with 2 elements with different DataType into the node with Strucutre DataType (expecting OK)
+        status = SOPC_WriteRequest_SetWriteValue(writeRequest, 7, &varNodeStructDT->data.variable.NodeId,
+                                                 SOPC_AttributeId_Value, NULL, &dataValue);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+
+        SOPC_DataValue_Clear(&dataValue);
 
         OpcUa_WriteResponse* writeResp = NULL;
         status = SOPC_ServerHelper_LocalServiceSync(writeRequest, (void**) &writeResp);
@@ -331,14 +372,20 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace* address_sp
         if (SOPC_STATUS_OK == status)
         {
             // [0]: Write custom object into same custom DataType variable node shall succeed
-            // [1]: Write custom object into abstract DataType Structure will succeed because
-            //      custom DataType node exists and is a subtype of abstract DataType Structure
+            // [1]: Write custom object into abstract Structure DataType will succeed because
+            //      custom DataType node exists and is a subtype of abstract Structure DataType
             // [2]: Write custom object 2 into exact same custom 2 DataType variable node shall succeed
-            // [3]: Write custom object 2 into abstract DataType Structure will fail since we cannot resolve
+            // [3]: Write custom object 2 into abstract Structure DataType will fail since we cannot resolve
             //      it in nodeset (custom 2 DataType node is not present thus type resolution cannot succeed)
+            // [4]: Write empty array into custom DataType variable node shall succeed
+            // [5]: Write array with 2 custom objects into same custom DataType variable node shall succeed
+            // [6]: Write array with 2 different DataType into custom Datatype variable node shall fail
+            // [7]: Write array with 2 different DataType into abstract Structure Datatype variable node shall succeed
             if (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult) &&
                 SOPC_IsGoodStatus(writeResp->Results[0]) && SOPC_IsGoodStatus(writeResp->Results[1]) &&
-                SOPC_IsGoodStatus(writeResp->Results[2]) && !SOPC_IsGoodStatus(writeResp->Results[3]))
+                SOPC_IsGoodStatus(writeResp->Results[2]) && !SOPC_IsGoodStatus(writeResp->Results[3]) &&
+                SOPC_IsGoodStatus(writeResp->Results[4]) && SOPC_IsGoodStatus(writeResp->Results[5]) &&
+                !SOPC_IsGoodStatus(writeResp->Results[6]) && SOPC_IsGoodStatus(writeResp->Results[7]))
             {
                 status = SOPC_STATUS_OK;
             }
