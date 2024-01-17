@@ -2123,136 +2123,78 @@ static SOPC_ReturnStatus WriteVariantNonArrayBuiltInType(SOPC_Buffer* buf,
     return status;
 }
 
+// 0 Means not optimizable and other values represent the size in byte of each element to copy
+static size_t getBuiltinOptimizableSize(SOPC_BuiltinId builtInTypeId)
+{
+    if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
+    {
+        return 0;
+    }
+    switch (builtInTypeId)
+    {
+    case SOPC_Byte_Id:
+    case SOPC_SByte_Id:
+    case SOPC_Boolean_Id:
+    case SOPC_UInt16_Id:
+    case SOPC_Int16_Id:
+    case SOPC_Int32_Id:
+    case SOPC_UInt32_Id:
+    case SOPC_Int64_Id:
+    case SOPC_UInt64_Id:
+    case SOPC_DateTime_Id:
+    case SOPC_StatusCode_Id:
+    case SOPC_Float_Id:
+        return (SOPC_IS_LITTLE_ENDIAN ? SOPC_BuiltInType_HandlingTable[builtInTypeId].size : 0);
+    case SOPC_Double_Id:
+        return (SOPC_IS_LITTLE_ENDIAN && (!SOPC_IS_DOUBLE_MIDDLE_ENDIAN)
+                    ? SOPC_BuiltInType_HandlingTable[builtInTypeId].size
+                    : 0);
+    default:
+        return 0;
+    }
+}
+
 static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
                                                       SOPC_BuiltinId builtInTypeId,
                                                       const SOPC_VariantArrayValue* array,
                                                       int32_t* length,
                                                       uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    const void* arr = NULL;
-
     if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-
-    // nestedStructLevel is incremented by SOPC_Write_Array
-    switch (builtInTypeId)
+    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
     {
-    case SOPC_Boolean_Id:
-        arr = array->BooleanArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_Boolean), SOPC_Boolean_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_SByte_Id:
-        arr = array->SbyteArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_SByte), SOPC_SByte_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Byte_Id:
-        arr = array->ByteArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_Byte), SOPC_Byte_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Int16_Id:
-        arr = array->Int16Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(int16_t), SOPC_Int16_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_UInt16_Id:
-        arr = array->Uint16Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(uint16_t), SOPC_UInt16_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Int32_Id:
-        arr = array->Int32Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(int32_t), SOPC_Int32_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_UInt32_Id:
-        arr = array->Uint32Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(uint32_t), SOPC_UInt32_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Int64_Id:
-        arr = array->Int64Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(int64_t), SOPC_Int64_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_UInt64_Id:
-        arr = array->Uint64Arr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(uint64_t), SOPC_UInt64_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Float_Id:
-        arr = array->FloatvArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(float), SOPC_Float_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Double_Id:
-        arr = array->DoublevArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(double), SOPC_Double_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_String_Id:
-        arr = array->StringArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_String), SOPC_String_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_DateTime_Id:
-        arr = array->DateArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_DateTime), SOPC_DateTime_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_Guid_Id:
-        arr = array->GuidArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_Guid), SOPC_Guid_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_ByteString_Id:
-        arr = array->BstringArr;
-        status =
-            SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_ByteString), SOPC_ByteString_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_XmlElement_Id:
-        arr = array->XmlEltArr;
-        status =
-            SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_XmlElement), SOPC_XmlElement_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_NodeId_Id:
-        arr = array->NodeIdArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_NodeId), SOPC_NodeId_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        arr = array->ExpNodeIdArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_ExpandedNodeId), SOPC_ExpandedNodeId_WriteAux,
-                                  nestedStructLevel);
-        break;
-    case SOPC_StatusCode_Id:
-        arr = array->StatusArr;
-        status =
-            SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_StatusCode), SOPC_StatusCode_WriteAux, nestedStructLevel);
-        break;
-    case SOPC_QualifiedName_Id:
-        arr = array->QnameArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_QualifiedName), SOPC_QualifiedName_WriteAux,
-                                  nestedStructLevel);
-        break;
-    case SOPC_LocalizedText_Id:
-        arr = array->LocalizedTextArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_LocalizedText), SOPC_LocalizedText_WriteAux,
-                                  nestedStructLevel);
-        break;
-    case SOPC_ExtensionObject_Id:
-        arr = array->ExtObjectArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_ExtensionObject), SOPC_ExtensionObject_WriteAux,
-                                  nestedStructLevel);
-        break;
-    case SOPC_DataValue_Id:
-        arr = array->DataValueArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_DataValue), SOPC_DataValue_WriteAux_Nested,
-                                  nestedStructLevel);
-        break;
-    case SOPC_Variant_Id:
-        arr = array->VariantArr;
-        status =
-            SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_Variant), SOPC_Variant_WriteAux_Nested, nestedStructLevel);
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        arr = array->DiagInfoArr;
-        status = SOPC_Write_Array(buf, length, &arr, sizeof(SOPC_DiagnosticInfo), SOPC_DiagnosticInfo_WriteAux,
-                                  nestedStructLevel);
-        break;
-    default:
-        status = SOPC_STATUS_INVALID_PARAMETERS;
-        break;
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    const size_t eltOptimSize = getBuiltinOptimizableSize(builtInTypeId);
+    if (eltOptimSize > 0)
+    {
+        // Note : union fields content are all pointing to the same address.
+        // using array->BooleanArr to point array, but any other field would be possible
+        if (NULL == buf || NULL == length || NULL == array || (*length > 0 && NULL == array->BooleanArr))
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else
+        {
+            nestedStructLevel++;
+            status = SOPC_Int32_Write(length, buf, nestedStructLevel);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_Buffer_Write(buf, array->BooleanArr, (uint32_t)((uint32_t)(*length) * eltOptimSize));
+            }
+        }
+    }
+    else
+    {
+        // Note : union fields content are all pointing to the same address.
+        // using array->BooleanArr to point array, but any other field would be possible
+        status = SOPC_Write_Array(buf, length, (const void* const*) &array->BooleanArr,
+                                  SOPC_BuiltInType_HandlingTable[builtInTypeId].size,
+                                  SOPC_BuiltInType_EncodingTable[builtInTypeId].encode, nestedStructLevel);
     }
     return status;
 }
@@ -2601,122 +2543,74 @@ static SOPC_ReturnStatus ReadVariantArrayBuiltInType(SOPC_Buffer* buf,
                                                      int32_t* length,
                                                      uint32_t nestedStructLevel)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    switch (builtInTypeId)
+    if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
     {
-    case SOPC_Boolean_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->BooleanArr, sizeof(SOPC_Boolean), SOPC_Boolean_ReadAux,
-                                 SOPC_Boolean_InitializeAux, SOPC_Boolean_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_SByte_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->SbyteArr, sizeof(SOPC_SByte), SOPC_SByte_ReadAux,
-                                 SOPC_SByte_InitializeAux, SOPC_SByte_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Byte_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->ByteArr, sizeof(SOPC_Byte), SOPC_Byte_ReadAux,
-                                 SOPC_Byte_InitializeAux, SOPC_Byte_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Int16_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Int16Arr, sizeof(int16_t), SOPC_Int16_ReadAux,
-                                 SOPC_Int16_InitializeAux, SOPC_Int16_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_UInt16_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Uint16Arr, sizeof(uint16_t), SOPC_UInt16_ReadAux,
-                                 SOPC_UInt16_InitializeAux, SOPC_UInt16_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Int32_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Int32Arr, sizeof(int32_t), SOPC_Int32_ReadAux,
-                                 SOPC_Int32_InitializeAux, SOPC_Int32_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_UInt32_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Uint32Arr, sizeof(uint32_t), SOPC_UInt32_ReadAux,
-                                 SOPC_UInt32_InitializeAux, SOPC_UInt32_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Int64_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Int64Arr, sizeof(int64_t), SOPC_Int64_ReadAux,
-                                 SOPC_Int64_InitializeAux, SOPC_Int64_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_UInt64_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->Uint64Arr, sizeof(uint64_t), SOPC_UInt64_ReadAux,
-                                 SOPC_UInt64_InitializeAux, SOPC_UInt64_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Float_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->FloatvArr, sizeof(float), SOPC_Float_ReadAux,
-                                 SOPC_Float_InitializeAux, SOPC_Float_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Double_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->DoublevArr, sizeof(double), SOPC_Double_ReadAux,
-                                 SOPC_Double_InitializeAux, SOPC_Double_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_String_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->StringArr, sizeof(SOPC_String), SOPC_String_ReadAux,
-                                 SOPC_String_InitializeAux, SOPC_String_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_DateTime_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->DateArr, sizeof(SOPC_DateTime), SOPC_DateTime_ReadAux,
-                                 SOPC_DateTime_InitializeAux, SOPC_DateTime_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_Guid_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->GuidArr, sizeof(SOPC_Guid), SOPC_Guid_ReadAux,
-                                 SOPC_Guid_InitializeAux, SOPC_Guid_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_ByteString_Id:
-        status =
-            SOPC_Read_Array(buf, length, (void**) &array->BstringArr, sizeof(SOPC_ByteString), SOPC_ByteString_ReadAux,
-                            SOPC_ByteString_InitializeAux, SOPC_ByteString_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_XmlElement_Id:
-        status =
-            SOPC_Read_Array(buf, length, (void**) &array->XmlEltArr, sizeof(SOPC_XmlElement), SOPC_XmlElement_ReadAux,
-                            SOPC_XmlElement_InitializeAux, SOPC_XmlElement_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_NodeId_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->NodeIdArr, sizeof(SOPC_NodeId), SOPC_NodeId_ReadAux,
-                                 SOPC_NodeId_InitializeAux, SOPC_NodeId_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_ExpandedNodeId_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->ExpNodeIdArr, sizeof(SOPC_ExpandedNodeId),
-                                 SOPC_ExpandedNodeId_ReadAux, SOPC_ExpandedNodeId_InitializeAux,
-                                 SOPC_ExpandedNodeId_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_StatusCode_Id:
-        status =
-            SOPC_Read_Array(buf, length, (void**) &array->StatusArr, sizeof(SOPC_StatusCode), SOPC_StatusCode_ReadAux,
-                            SOPC_StatusCode_InitializeAux, SOPC_StatusCode_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_QualifiedName_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->QnameArr, sizeof(SOPC_QualifiedName),
-                                 SOPC_QualifiedName_ReadAux, SOPC_QualifiedName_InitializeAux,
-                                 SOPC_QualifiedName_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_LocalizedText_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->LocalizedTextArr, sizeof(SOPC_LocalizedText),
-                                 SOPC_LocalizedText_ReadAux, SOPC_LocalizedText_InitializeAux,
-                                 SOPC_LocalizedText_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_ExtensionObject_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->ExtObjectArr, sizeof(SOPC_ExtensionObject),
-                                 SOPC_ExtensionObject_ReadAux, SOPC_ExtensionObject_InitializeAux,
-                                 SOPC_ExtensionObject_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_DataValue_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->DataValueArr, sizeof(SOPC_DataValue),
-                                 SOPC_DataValue_ReadAux_Nested, SOPC_DataValue_InitializeAux, SOPC_DataValue_ClearAux,
-                                 nestedStructLevel);
-        break;
-    case SOPC_Variant_Id:
-        status =
-            SOPC_Read_Array(buf, length, (void**) &array->VariantArr, sizeof(SOPC_Variant), SOPC_Variant_ReadAux_Nested,
-                            SOPC_Variant_InitializeAux, SOPC_Variant_ClearAux, nestedStructLevel);
-        break;
-    case SOPC_DiagnosticInfo_Id:
-        status = SOPC_Read_Array(buf, length, (void**) &array->DiagInfoArr, sizeof(SOPC_DiagnosticInfo),
-                                 SOPC_DiagnosticInfo_ReadAux, SOPC_DiagnosticInfo_InitializeAux,
-                                 SOPC_DiagnosticInfo_ClearAux, nestedStructLevel);
-        break;
-    default:
-        status = SOPC_STATUS_NOK;
-        break;
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    const size_t eltOptimSize = getBuiltinOptimizableSize(builtInTypeId);
+    if (eltOptimSize > 0)
+    {
+        if (NULL == buf || NULL == length || NULL == array || NULL != array->BooleanArr)
+        {
+            return SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        else if (nestedStructLevel >= SOPC_Internal_Common_GetEncodingConstants()->max_nested_struct)
+        {
+            return SOPC_STATUS_INVALID_STATE;
+        }
+
+        nestedStructLevel++;
+        status = SOPC_Int32_Read(length, buf, nestedStructLevel);
+
+        if (SOPC_STATUS_OK == status && *length < 0)
+        {
+            *length = 0;
+        }
+
+        if (SOPC_STATUS_OK == status && *length > SOPC_Internal_Common_GetEncodingConstants()->max_array_length)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+
+        if (SOPC_STATUS_OK == status && *length > 0 && (uint64_t) *length <= SIZE_MAX / eltOptimSize)
+        {
+            array->BooleanArr = SOPC_Calloc((size_t) *length, eltOptimSize);
+
+            if (NULL == array->BooleanArr)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                status = SOPC_Buffer_Read(array->BooleanArr, buf, (uint32_t)((uint32_t)(*length) * eltOptimSize));
+                if (SOPC_STATUS_OK != status)
+                {
+                    status = SOPC_STATUS_ENCODING_ERROR;
+                }
+            }
+
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_Free(array->BooleanArr);
+                array->BooleanArr = NULL;
+                *length = 0;
+            }
+        }
+    }
+    else
+    {
+        // Note : union fields content are all pointing to the same address.
+        // using array->BooleanArr to point array, but any other field would be possible
+        status = SOPC_Read_Array(buf, length, (void**) &array->BooleanArr,
+                                 SOPC_BuiltInType_HandlingTable[builtInTypeId].size,
+                                 SOPC_BuiltInType_EncodingTable[builtInTypeId].decode,
+                                 SOPC_BuiltInType_HandlingTable[builtInTypeId].initialize,
+                                 SOPC_BuiltInType_HandlingTable[builtInTypeId].clear, nestedStructLevel);
     }
     return status;
 }
