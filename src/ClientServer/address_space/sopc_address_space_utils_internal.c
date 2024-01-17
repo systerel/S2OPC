@@ -18,6 +18,7 @@
  */
 
 #include <inttypes.h>
+#include <string.h>
 
 #include "sopc_address_space_utils_internal.h"
 
@@ -29,9 +30,11 @@
 #include "sopc_types.h"
 
 typedef bool SOPC_AddressSpaceUtil_IsExpectedRefCb(const OpcUa_ReferenceNode* ref);
+typedef bool SOPC_AddressSpaceUtil_IsExpectedRefNodeCb(const SOPC_AddressSpace_Node* refNode);
 
 static SOPC_ExpandedNodeId* SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
     SOPC_AddressSpaceUtil_IsExpectedRefCb* refEvalCb,
+    SOPC_AddressSpaceUtil_IsExpectedRefNodeCb* refNodeEvalCb, /* might be NULL if criteria is only on ref */
     SOPC_AddressSpace* addSpace,
     SOPC_AddressSpace_Node* node)
 {
@@ -39,13 +42,31 @@ static SOPC_ExpandedNodeId* SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, node);
     OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(addSpace, node);
 
+    SOPC_AddressSpace_Node* refNode = NULL;
+    bool found = false;
+
     for (int32_t i = 0; i < *n_refs; ++i)
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
         if ((*refEvalCb)(ref))
         {
-            return &ref->TargetId;
+            found = true;
+            if (NULL != *refNodeEvalCb)
+            {
+                if (ref->TargetId.NamespaceUri.Length <= 0 && 0 == ref->TargetId.ServerIndex)
+                {
+                    refNode = SOPC_AddressSpace_Get_Node(addSpace, &ref->TargetId.NodeId, &found);
+                    if (found)
+                    {
+                        found = (*refNodeEvalCb)(refNode);
+                    }
+                }
+            }
+            if (found)
+            {
+                return &ref->TargetId;
+            }
         }
     }
     return NULL;
@@ -53,7 +74,8 @@ static SOPC_ExpandedNodeId* SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
 
 SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node)
 {
-    return SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsTypeDefinition, addSpace, node);
+    return SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsTypeDefinition, NULL, addSpace,
+                                                            node);
 }
 
 bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref)
@@ -112,6 +134,31 @@ static bool SOPC_AddressSpaceUtil_IsEncodingOf(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasEncoding == ref->ReferenceTypeId.Data.Numeric;
 }
 
+static bool SOPC_AddressSpaceUtil_IsHasEncoding(const OpcUa_ReferenceNode* ref)
+{
+    if (ref->IsInverse)
+    {
+        return false;
+    }
+
+    return SOPC_IdentifierType_Numeric == ref->ReferenceTypeId.IdentifierType &&
+           OpcUaId_HasEncoding == ref->ReferenceTypeId.Data.Numeric;
+}
+
+static bool SOPC_AddressSpaceUtil_IsDefaultBinaryNode(const SOPC_AddressSpace_Node* node)
+{
+    if (OpcUa_NodeClass_Object == node->node_class)
+    {
+        const SOPC_QualifiedName* bn = &node->data.object.BrowseName;
+        if (OPCUA_NAMESPACE_INDEX == bn->NamespaceIndex && bn->Name.Length > 0 &&
+            0 == strcmp("Default Binary", SOPC_String_GetRawCString(&bn->Name)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* node_adjective, const char* error)
 {
     if (nodeId->IdentifierType == SOPC_IdentifierType_Numeric)
@@ -133,7 +180,8 @@ static void log_error_for_unknown_node(const SOPC_NodeId* nodeId, const char* no
     }
 }
 
-static const SOPC_NodeId* get_direct_parent_of_node(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* child)
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentTypeOfNode(SOPC_AddressSpace* addSpace,
+                                                                   SOPC_AddressSpace_Node* child)
 {
     SOPC_NodeId* directParent = NULL;
     int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(addSpace, child);
@@ -184,7 +232,7 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentType(SOPC_AddressSpace* 
         if (node_found)
         {
             // Starting to check if direct parent is researched parent
-            result = get_direct_parent_of_node(addSpace, node);
+            result = SOPC_AddressSpaceUtil_GetDirectParentTypeOfNode(addSpace, node);
         }
     }
     return result;
@@ -263,8 +311,38 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetEncodingDataType(SOPC_AddressSpace* 
         }
         else if (OpcUa_NodeClass_Object == node->node_class)
         {
-            SOPC_ExpandedNodeId* expNodeId =
-                SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsEncodingOf, addSpace, node);
+            SOPC_ExpandedNodeId* expNodeId = SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
+                &SOPC_AddressSpaceUtil_IsEncodingOf, NULL, addSpace, node);
+            if (NULL != expNodeId)
+            {
+                if (expNodeId->NamespaceUri.Length <= 0)
+                {
+                    // We do not need to check if this is a DataType since it is mandatory for this reference
+                    result = &expNodeId->NodeId;
+                }
+            }
+        }
+    }
+
+    return result;
+}
+
+const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDataTypeDefaultBinaryEncoding(SOPC_AddressSpace* addSpace,
+                                                                          const SOPC_NodeId* dataTypeId)
+{
+    const SOPC_NodeId* result = NULL;
+
+    SOPC_AddressSpace_Node* node;
+    bool node_found = false;
+
+    node = SOPC_AddressSpace_Get_Node(addSpace, dataTypeId, &node_found);
+
+    if (node_found)
+    {
+        if (OpcUa_NodeClass_DataType == node->node_class)
+        {
+            SOPC_ExpandedNodeId* expNodeId = SOPC_Internal_AddressSpaceUtil_GetReferencedNode(
+                &SOPC_AddressSpaceUtil_IsHasEncoding, &SOPC_AddressSpaceUtil_IsDefaultBinaryNode, addSpace, node);
             if (NULL != expNodeId)
             {
                 if (expNodeId->NamespaceUri.Length <= 0)

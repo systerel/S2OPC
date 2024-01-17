@@ -27,6 +27,7 @@
 
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
+#include "sopc_address_space_utils_internal.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_dict.h"
@@ -56,6 +57,7 @@ typedef enum
     PARSE_NODE_VALUE_SCALAR,         // ... for a scalar type
     PARSE_NODE_VALUE_SCALAR_COMPLEX, //     ... which is a complex value (sub-tags to manage)
     PARSE_NODE_VALUE_ARRAY,          // ... for an array type
+    PARSE_NODE_DEFINITION,           // In the Definition tag of UADataType tag
 } parse_state_t;
 
 typedef struct parse_complex_value_tag_t parse_complex_value_tag_t;
@@ -93,15 +95,24 @@ struct parse_context_t
     SOPC_Dict* aliases;
     char* current_alias_alias;
 
-    // Variable Value management
+    // DataType Definition management (lifetime: 1 node)
+    bool is_struct_with_subtypes;
+    bool is_struct_fields;
+    SOPC_Array* definition_fields;
+    // DataType nodes with StructureDefinition to finalize
+    SOPC_Array* structure_definition_nodeIds;
+
+    // Variable Value management (lifetime: 1 node)
     SOPC_BuiltinId current_value_type;
     SOPC_VariantArrayType current_array_type;
     parse_complex_value_context_t complex_value_ctx;
     SOPC_Array* list_nodes;
 
-    SOPC_AddressSpace_Node node;
-    // Temporary array to store the references.
+    // References management (lifetime: 1 node)
     SOPC_Array* references;
+
+    // Current node parsing
+    SOPC_AddressSpace_Node node;
 };
 
 #define NS_SEPARATOR "|"
@@ -395,6 +406,106 @@ static const char* tag_from_element_id(const uint32_t id)
     return NULL;
 }
 
+static bool parseAliasedNodeId(struct parse_context_t* ctx, const XML_Char* attr_val, SOPC_NodeId* destId)
+{
+    SOPC_ASSERT(NULL != ctx);
+    SOPC_ASSERT(NULL != attr_val);
+
+    if (NULL == destId)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+
+    bool is_aliased;
+    const char* aliased = (const char*) SOPC_Dict_Get(ctx->aliases, (uintptr_t) attr_val, &is_aliased);
+
+    if (is_aliased)
+    {
+        attr_val = aliased;
+    }
+
+    // Attempt to parse a NodeId as a string
+    SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    if (NULL != id)
+    {
+        status = SOPC_NodeId_Copy(destId, id);
+        SOPC_NodeId_Clear(id);
+        SOPC_Free(id);
+    }
+    if (SOPC_STATUS_OUT_OF_MEMORY == status)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    else if (SOPC_STATUS_OK != status)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid NodeId or unknown Alias for a NodeId: %s", attr_val);
+        return false;
+    }
+    return true;
+}
+
+static bool parseArrayDimensions(struct parse_context_t* ctx,
+                                 int32_t valueRank,
+                                 const char* arrayDimensions,
+                                 int32_t* outNbDimensions,
+                                 uint32_t** outArrayDimensions)
+{
+    if (valueRank <= 0)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                       "Invalid ValueRank value '%" PRId32 "' to have an ArrayDimensions value: %s", valueRank,
+                       arrayDimensions);
+        return false;
+    }
+    *outArrayDimensions = SOPC_Calloc((size_t) valueRank, sizeof(uint32_t));
+    if (NULL == *outArrayDimensions)
+    {
+        LOG_MEMORY_ALLOCATION_FAILURE;
+        return false;
+    }
+    const char* arrayDimensionStart = arrayDimensions;
+    const char* arrayDimensionEnd = NULL;
+    bool res = true;
+    for (int32_t i = 0; i < valueRank && res; i++)
+    {
+        if (i < valueRank - 1)
+        {
+            arrayDimensionEnd = strchr(arrayDimensionStart, ',');
+        }
+        else
+        {
+            // Last value is NULL terminated
+            arrayDimensionEnd = strchr(arrayDimensionStart, '\0');
+        }
+        res = (NULL != arrayDimensionEnd);
+        if (res)
+        {
+            res = SOPC_strtouint(arrayDimensions, (size_t)(arrayDimensionEnd - arrayDimensionStart), 32,
+                                 &(*outArrayDimensions)[i]);
+        }
+        if (res)
+        {
+            arrayDimensionStart = arrayDimensionEnd + 1;
+        }
+    }
+    if (res)
+    {
+        *outNbDimensions = valueRank;
+    }
+    else
+    {
+        SOPC_Free(*outArrayDimensions);
+        LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                       "Invalid value '%s' for ArrayDimensions with ValueRank value '%" PRId32 "'", arrayDimensions,
+                       valueRank);
+    }
+    return res;
+}
+
 static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const XML_Char** attrs)
 {
     SOPC_ASSERT(ctx->node.node_class == 0);
@@ -472,31 +583,10 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
                 return false;
             }
 
-            bool is_aliased;
-            const char* aliased = (const char*) SOPC_Dict_Get(ctx->aliases, (uintptr_t) attr_val, &is_aliased);
-
-            if (is_aliased)
-            {
-                attr_val = aliased;
-            }
-
-            // Attempt to parse a NodeId as a string
-            SOPC_NodeId* id = SOPC_NodeId_FromCString(attr_val, (int32_t) strlen(attr_val));
-
-            if (id == NULL)
-            {
-                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid variable NodeId: %s", attr_val);
-                return false;
-            }
-
             SOPC_NodeId* dataType = SOPC_AddressSpace_Get_DataType(ctx->space, &ctx->node);
-            SOPC_ReturnStatus status = SOPC_NodeId_Copy(dataType, id);
-            SOPC_NodeId_Clear(id);
-            SOPC_Free(id);
-
-            if (status != SOPC_STATUS_OK)
+            bool res = parseAliasedNodeId(ctx, attr_val, dataType);
+            if (!res)
             {
-                LOG_MEMORY_ALLOCATION_FAILURE;
                 return false;
             }
         }
@@ -588,29 +678,9 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
         {
             const char* val = attrs[++i];
 
-            bool is_aliased;
-            const char* aliased = (const char*) SOPC_Dict_Get(ctx->aliases, (uintptr_t) val, &is_aliased);
-
-            if (is_aliased)
+            bool res = parseAliasedNodeId(ctx, val, &ref.ReferenceTypeId);
+            if (!res)
             {
-                val = aliased;
-            }
-
-            SOPC_NodeId* nodeid = SOPC_NodeId_FromCString(val, (int32_t) strlen(val));
-
-            if (nodeid == NULL)
-            {
-                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Error while parsing ReferenceType '%s' into a NodeId\n.", val);
-                return false;
-            }
-
-            SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref.ReferenceTypeId, nodeid);
-            SOPC_NodeId_Clear(nodeid);
-            SOPC_Free(nodeid);
-
-            if (status != SOPC_STATUS_OK)
-            {
-                LOG_MEMORY_ALLOCATION_FAILURE;
                 return false;
             }
         }
@@ -638,6 +708,303 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
     SOPC_ASSERT(append);
 
     ctx->state = PARSE_NODE_REFERENCE;
+
+    return true;
+}
+
+static bool start_node_definition(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    SOPC_ASSERT(OpcUa_NodeClass_DataType == ctx->node.node_class);
+    SOPC_ASSERT(NULL == ctx->definition_fields);
+    ctx->is_struct_fields = false;
+    ctx->is_struct_with_subtypes = false;
+
+    bool skip = false;
+    for (size_t i = 0; attrs[i]; ++i)
+    {
+        const char* attr = attrs[i];
+
+        if (strcmp("IsUnion", attr) == 0)
+        {
+            const char* attr_val = attrs[++i];
+
+            if (NULL == attr_val)
+            {
+                LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing value for IsUnion attribute");
+                return false;
+            }
+
+            if (strcmp(attr_val, "true") == 0)
+            {
+                // Union are not managed for now => skip
+                skip = true;
+                SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_NODESET_NS NS_SEPARATOR "Definition");
+            }
+        }
+        else
+        {
+            ++i; // Skip value of unknown attribute
+        }
+    }
+
+    if (!skip)
+    {
+        ctx->state = PARSE_NODE_DEFINITION;
+    }
+
+    return true;
+}
+
+static bool start_node_definition_field_parse_attrs(struct parse_context_t* ctx,
+                                                    const XML_Char** attrs,
+                                                    const char** name,
+                                                    const char** value,
+                                                    const char** dataType,
+                                                    const char** valueRank,
+                                                    const char** arrayDimensions,
+                                                    const char** maxStringLength,
+                                                    const char** allowSubtypes,
+                                                    bool* unsupportedAttrs)
+{
+    for (size_t i = 0; attrs[i]; ++i)
+    {
+        const char* attr = attrs[i];
+        const char* attr_val = attrs[++i];
+
+        if (NULL == attr_val)
+        {
+            LOG_XML_ERRORF(ctx->helper_ctx.parser, "Missing value for %s attribute", attr);
+            return false;
+        }
+
+        if (strcmp("Name", attr) == 0)
+        {
+            *name = attr_val;
+        }
+        else if (strcmp("Value", attr) == 0)
+        {
+            *value = attr_val;
+        }
+        else if (strcmp("DataType", attr) == 0)
+        {
+            *dataType = attr_val;
+        }
+        else if (strcmp("ValueRank", attr) == 0)
+        {
+            *valueRank = attr_val;
+        }
+        else if (strcmp("ArrayDimensions", attr) == 0)
+        {
+            *arrayDimensions = attr_val;
+        }
+        else if (strcmp("MaxStringLength", attr) == 0)
+        {
+            *maxStringLength = attr_val;
+        }
+        else if (strcmp("AllowSubTypes", attr) == 0)
+        {
+            ctx->is_struct_with_subtypes = true;
+            *allowSubtypes = attr_val;
+        }
+        else if (strcmp("IsOptional", attr) == 0)
+        {
+            *unsupportedAttrs = true;
+        } // else skip attribute and value
+    }
+    return true;
+}
+
+static bool start_node_definition_field(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    SOPC_ASSERT(OpcUa_NodeClass_DataType == ctx->node.node_class);
+
+    // Note: tags Description / DisplayName are ignored
+    // Note: attributes SymbolicName / ArrayDimensions / MaxStringLength are ignored
+    const char* name = NULL;
+    const char* value = NULL;
+    const char* dataType = NULL;
+    const char* valueRank = NULL;
+    const char* arrayDimensions = NULL;
+    const char* maxStringLength = NULL;
+    const char* allowSubtypes = NULL;
+    bool unsupportedAttrs = false;
+
+    bool res =
+        start_node_definition_field_parse_attrs(ctx, attrs, &name, &value, &dataType, &valueRank, &arrayDimensions,
+                                                &maxStringLength, &allowSubtypes, &unsupportedAttrs);
+    if (!res)
+    {
+        return false;
+    }
+
+    // Create defintion fields array if needed
+    if (!unsupportedAttrs && NULL == ctx->definition_fields)
+    {
+        if (value == NULL)
+        {
+            ctx->is_struct_fields = true;
+            ctx->definition_fields = SOPC_Array_Create(sizeof(OpcUa_StructureField), 10, &OpcUa_StructureField_Clear);
+        }
+        else
+        {
+            ctx->is_struct_fields = false;
+            ctx->definition_fields = SOPC_Array_Create(sizeof(OpcUa_EnumField), 10, &OpcUa_EnumField_Clear);
+        }
+        if (NULL == ctx->definition_fields)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    if (!unsupportedAttrs && NULL == name)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "Missing Name attribute");
+        return false;
+    }
+
+    if (!unsupportedAttrs)
+    {
+        if (ctx->is_struct_fields)
+        {
+            OpcUa_StructureField sf;
+            OpcUa_StructureField_Initialize(&sf);
+
+            // Fill name
+            SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&sf.Name, name);
+            if (SOPC_STATUS_OK != status)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            // Fill DataType
+            if (NULL != dataType)
+            {
+                res = parseAliasedNodeId(ctx, dataType, &sf.DataType);
+                if (!res)
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                sf.DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
+                                            .Data.Numeric = 24}; // Default value
+            }
+            // Fill ValueRank
+            if (NULL != valueRank)
+            {
+                res = SOPC_strtoint(valueRank, strlen(valueRank), 32, &sf.ValueRank);
+
+                if (!res)
+                {
+                    LOG_XML_ERROR(ctx->helper_ctx.parser, "Invalid value for ValueRank attribute");
+                    return false;
+                }
+                else if (sf.ValueRank != -1 && sf.ValueRank <= 0)
+                {
+                    LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                                   "Unexpected value for ValueRank attribute: '%" PRId32
+                                   "'. It shall be Scalar (-1) or a fixed rank Array (>=1).",
+                                   sf.ValueRank);
+                    return false;
+                }
+            }
+            else
+            {
+                sf.ValueRank = -1; // default value
+            }
+            // Fill ArrayDimensions
+            if (NULL != arrayDimensions)
+            {
+                res = parseArrayDimensions(ctx, sf.ValueRank, arrayDimensions, &sf.NoOfArrayDimensions,
+                                           &sf.ArrayDimensions);
+                if (!res)
+                {
+                    return false;
+                }
+            }
+            // Fill MaxStringLength
+            if (NULL != maxStringLength)
+            {
+                res = SOPC_strtouint(maxStringLength, strlen(maxStringLength), 32, &sf.MaxStringLength);
+                if (!res)
+                {
+                    LOG_XML_ERROR(ctx->helper_ctx.parser, "Invalid value for MaxStringLength attribute");
+                    return false;
+                } // note: it should be verified that datatype is ByteString or String in this case
+            }
+            // Fill AllowSubtypes (IsOptional reuse aka part 3 "Subtyping is allowed when set to TRUE.")
+            if (NULL != allowSubtypes)
+            {
+                if (strcmp(allowSubtypes, "true") == 0)
+                {
+                    sf.IsOptional = true;
+                }
+            }
+
+            res = SOPC_Array_Append(ctx->definition_fields, sf);
+            if (!res)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+        }
+        else
+        {
+            OpcUa_EnumField ef;
+            OpcUa_EnumField_Initialize(&ef);
+            SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&ef.Name, name);
+            if (SOPC_STATUS_OK != status)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            // Note: we do not support empty Value in first Field
+            //       since we use it to detect enum but default value = -1 (see XSD).
+            //       We support it if no other field is defined that let us now it is a struct.
+            if (value != NULL)
+            {
+                res = SOPC_strtoint(value, strlen(value), 64, &ef.Value);
+                if (!res)
+                {
+                    LOG_XML_ERROR(ctx->helper_ctx.parser, "Incorrect value for Value attribute");
+                    return false;
+                }
+            }
+            else if (NULL == dataType && NULL == valueRank && NULL == allowSubtypes)
+            {
+                ef.Value = -1;
+            }
+            else
+            {
+                LOG_XML_ERROR(ctx->helper_ctx.parser,
+                              "Value attribute was expected but found a DataType/ValueRank/AllowSubtypes attribute");
+                return false;
+            }
+
+            res = SOPC_Array_Append(ctx->definition_fields, ef);
+            if (!res)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+        }
+    }
+
+    if (unsupportedAttrs)
+    {
+        SOPC_Array_Delete(ctx->definition_fields);
+        ctx->definition_fields = NULL;
+
+        // ignore tags until end of definition
+        SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_NODESET_NS NS_SEPARATOR "Definition");
+        ctx->state = PARSE_NODE;
+        return true;
+    }
+
+    // ignore possible DisplayName / Description tags in Field tag
+    SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, UA_NODESET_NS NS_SEPARATOR "Field");
 
     return true;
 }
@@ -917,7 +1284,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         ctx->state = PARSE_NODESET;
         return;
     case PARSE_NODESET:
-    {
         element_type = element_id_from_tag(name);
 
         if (element_type > 0)
@@ -937,7 +1303,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
             SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
         }
         break;
-    }
     case PARSE_NODE:
         if (strcmp(NS(UA_NODESET_NS, "DisplayName"), name) == 0)
         {
@@ -954,6 +1319,14 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         else if (current_element_has_value(ctx) && strcmp(NS(UA_NODESET_NS, "Value"), name) == 0)
         {
             ctx->state = PARSE_NODE_VALUE;
+        }
+        else if (OpcUa_NodeClass_DataType == ctx->node.node_class && strcmp(NS(UA_NODESET_NS, "Definition"), name) == 0)
+        {
+            if (!start_node_definition(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
         }
         else
         {
@@ -989,7 +1362,6 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
         break;
     case PARSE_NODE_VALUE:
-    {
         SOPC_ASSERT(current_element_has_value(ctx));
 
         if (!type_id_from_tag(name, &type_id, &array_type, &is_simple_type, &complex_type_tags))
@@ -1031,13 +1403,11 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
 
         break;
-    }
     case PARSE_NODE_VALUE_SCALAR:
         LOG_XML_ERROR(helperCtx->parser, "Unexpected tag while parsing scalar value");
         XML_StopParser(helperCtx->parser, false);
         return;
     case PARSE_NODE_VALUE_ARRAY:
-    {
         SOPC_ASSERT(current_element_has_value(ctx));
         SOPC_ASSERT(ctx->current_array_type == SOPC_VariantArrayType_Array);
 
@@ -1113,7 +1483,20 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         }
 
         break;
-    }
+    case PARSE_NODE_DEFINITION:
+        if (strcmp(NS(UA_NODESET_NS, "Field"), name) == 0)
+        {
+            if (!start_node_definition_field(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
+        }
+        break;
     default:
         return;
     }
@@ -1164,6 +1547,74 @@ static bool finalize_reference(struct parse_context_t* ctx)
     SOPC_Free(target_id);
 
     return status == SOPC_STATUS_OK;
+}
+
+// Note: finalization is to push information in node but we still need to search for parent/encoding NodeIds
+static bool finalize_node_definition(struct parse_context_t* ctx)
+{
+    SOPC_ASSERT(OpcUa_NodeClass_DataType == ctx->node.node_class);
+    size_t n_fields = SOPC_Array_Size(ctx->definition_fields);
+    if (n_fields > 0 && n_fields < (uint32_t) INT32_MAX)
+    {
+        void* definition_fields = SOPC_Array_Into_Raw(ctx->definition_fields);
+        ctx->definition_fields = NULL;
+        if (ctx->is_struct_fields)
+        {
+            OpcUa_StructureDefinition* structure_definition = NULL;
+            SOPC_ReturnStatus status = SOPC_Encodeable_CreateExtension(&ctx->node.data.data_type.DataTypeDefinition,
+                                                                       &OpcUa_StructureDefinition_EncodeableType,
+                                                                       (void**) &structure_definition);
+
+            if (NULL == ctx->structure_definition_nodeIds)
+            {
+                ctx->structure_definition_nodeIds = SOPC_Array_Create(sizeof(SOPC_NodeId), 100, &SOPC_NodeId_ClearAux);
+            }
+            if (NULL == definition_fields || SOPC_STATUS_OK != status || NULL == ctx->structure_definition_nodeIds)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            structure_definition->StructureType =
+                (ctx->is_struct_with_subtypes ? OpcUa_StructureType_StructureWithSubtypedValues
+                                              : OpcUa_StructureType_Structure);
+            structure_definition->NoOfFields = (int32_t) n_fields;
+            structure_definition->Fields = definition_fields;
+            SOPC_NodeId* nodeId = SOPC_Calloc(1, sizeof(*nodeId));
+            bool bres = (nodeId != NULL);
+            if (bres)
+            {
+                SOPC_NodeId_Initialize(nodeId);
+                status = SOPC_NodeId_Copy(nodeId, &ctx->node.data.data_type.NodeId);
+                bres = (SOPC_STATUS_OK == status);
+            }
+            if (bres)
+            {
+                bres = SOPC_Array_Append(ctx->structure_definition_nodeIds, *nodeId);
+            }
+            SOPC_Free(nodeId);
+            if (!bres)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+        }
+        else
+        {
+            OpcUa_EnumDefinition* enum_definition = NULL;
+            SOPC_ReturnStatus status =
+                SOPC_Encodeable_CreateExtension(&ctx->node.data.data_type.DataTypeDefinition,
+                                                &OpcUa_EnumDefinition_EncodeableType, (void**) &enum_definition);
+            if (NULL == definition_fields || SOPC_STATUS_OK != status)
+            {
+                LOG_MEMORY_ALLOCATION_FAILURE;
+                return false;
+            }
+            enum_definition->NoOfFields = (int32_t) n_fields;
+            enum_definition->Fields = definition_fields;
+        }
+    }
+    SOPC_ASSERT(NULL == ctx->definition_fields);
+    return true;
 }
 
 static SOPC_LocalizedText* element_localized_text_for_state(struct parse_context_t* ctx)
@@ -2364,6 +2815,15 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         ctx->state = PARSE_NODE_REFERENCES;
         break;
+    case PARSE_NODE_DEFINITION:
+        if (!finalize_node_definition(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, false);
+            return;
+        }
+
+        ctx->state = PARSE_NODE;
+        break;
     case PARSE_NODESET:
         break;
     case PARSE_START:
@@ -2415,6 +2875,55 @@ static void uintptr_t_free(uintptr_t elt)
     SOPC_Free((void*) elt);
 }
 
+static bool fill_node_structure_definition(SOPC_AddressSpace* nodeSet,
+                                           SOPC_AddressSpace_Node* node,
+                                           OpcUa_StructureDefinition* structDef)
+{
+    const SOPC_NodeId* parentNodeId = SOPC_AddressSpaceUtil_GetDirectParentTypeOfNode(nodeSet, node);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (NULL != parentNodeId)
+    {
+        status = SOPC_NodeId_Copy(&structDef->BaseDataType, parentNodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        const SOPC_NodeId* defaultBinaryId =
+            SOPC_AddressSpaceUtil_GetDataTypeDefaultBinaryEncoding(nodeSet, &node->data.data_type.NodeId);
+        if (NULL != defaultBinaryId)
+        {
+            status = SOPC_NodeId_Copy(&structDef->DefaultEncodingId, defaultBinaryId);
+        }
+    }
+    return (SOPC_STATUS_OK == status);
+}
+
+static bool finalize_node_structure_definitions(SOPC_AddressSpace* nodeSet, SOPC_Array* nodeIds)
+{
+    const size_t arrayLen = SOPC_Array_Size(nodeIds);
+    SOPC_NodeId nodeId;
+    SOPC_AddressSpace_Node* node = NULL;
+    bool found = false;
+    bool res = false;
+    for (size_t i = 0; i < arrayLen; i++)
+    {
+        nodeId = SOPC_Array_Get(nodeIds, SOPC_NodeId, i);
+        node = SOPC_AddressSpace_Get_Node(nodeSet, &nodeId, &found);
+        SOPC_ASSERT(found);
+        SOPC_ASSERT(OpcUa_NodeClass_DataType == node->node_class);
+        SOPC_ASSERT(SOPC_ExtObjBodyEncoding_Object == node->data.data_type.DataTypeDefinition.Encoding);
+        SOPC_ASSERT(&OpcUa_StructureDefinition_EncodeableType ==
+                    node->data.data_type.DataTypeDefinition.Body.Object.ObjType);
+        res = fill_node_structure_definition(
+            nodeSet, node, (OpcUa_StructureDefinition*) node->data.data_type.DataTypeDefinition.Body.Object.Value);
+        if (!res)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+    return true;
+}
+
 SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
 {
     static const size_t char_data_cap_initial = 4096;
@@ -2448,12 +2957,25 @@ SOPC_AddressSpace* SOPC_UANodeSet_Parse(FILE* fd)
     XML_SetCharacterDataHandler(parser, char_data_handler);
 
     SOPC_ReturnStatus res = parse(parser, fd);
+
+    // StructureDefinition in DataType shall be filled using DataType node references
+    if (res == SOPC_STATUS_OK && NULL != ctx.structure_definition_nodeIds)
+    {
+        bool bres = finalize_node_structure_definitions(space, ctx.structure_definition_nodeIds);
+        if (!bres)
+        {
+            res = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+
     XML_ParserFree(parser);
     SOPC_Dict_Delete(aliases);
     SOPC_Free(ctx.current_alias_alias);
     SOPC_Free(ctx.helper_ctx.char_data_buffer);
-    SOPC_Array_Delete(ctx.references);
+    SOPC_Array_Delete(ctx.definition_fields);
+    SOPC_Array_Delete(ctx.structure_definition_nodeIds);
     SOPC_Array_Delete(ctx.list_nodes);
+    SOPC_Array_Delete(ctx.references);
 
     if (res == SOPC_STATUS_OK)
     {
