@@ -6020,24 +6020,49 @@ static const SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject
     }
 }
 
-int32_t SOPC_Variant_GetMatrixArrayLength(const SOPC_Variant* var)
+int32_t SOPC_Variant_GetArrayOrMatrixLength(const SOPC_Variant* var)
 {
-    if (NULL == var || SOPC_VariantArrayType_Matrix == var->ArrayType)
+    if (NULL == var || SOPC_VariantArrayType_SingleValue == var->ArrayType)
     {
         return -1;
     }
-    bool computed = false;
+    int32_t arrayDimension = -1;
+    uint64_t lengthWithOverflow = 1;
     int32_t length = 1;
-    // Compute total length of flattened matrix
-    for (int32_t i = 0; i < var->Value.Matrix.Dimensions; i++)
+
+    switch (var->ArrayType)
     {
-        length *= var->Value.Matrix.ArrayDimensions[i];
+    case SOPC_VariantArrayType_Array:
+        length = var->Value.Array.Length;
+        break;
+    case SOPC_VariantArrayType_Matrix:
+        length = (var->Value.Matrix.Dimensions > 0 ? 1 : 0);
+        // Compute total length of flattened matrix
+        for (int32_t i = 0; i < var->Value.Matrix.Dimensions && length > 0; i++)
+        {
+            arrayDimension = var->Value.Matrix.ArrayDimensions[i];
+            if (arrayDimension > 0)
+            {
+                lengthWithOverflow *= (uint32_t) arrayDimension;
+            }
+            else
+            {
+                length = -1;
+            }
+            if (lengthWithOverflow > INT32_MAX)
+            {
+                length = -1;
+            }
+        }
+        if (length > 0)
+        {
+            length = (int32_t) lengthWithOverflow;
+        }
+        break;
+    default:
+        SOPC_ASSERT(false);
     }
-    if (computed)
-    {
-        return length;
-    }
-    return 0;
+    return length;
 }
 
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
@@ -6079,47 +6104,34 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
     case SOPC_Variant_Id: /* Corresponds to BaseDataType: could only be an array of Variant */
         return SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
     case SOPC_ExtensionObject_Id:
-        if (var->Value.ExtObject->TypeId.ServerIndex == 0 && var->Value.ExtObject->TypeId.NamespaceUri.Length <= 0)
+        if (SOPC_VariantArrayType_SingleValue == var->ArrayType)
         {
-            if (SOPC_VariantArrayType_SingleValue == var->ArrayType)
+            return SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject);
+        } // else Array or Matrix
+        extObjArrayLength = SOPC_Variant_GetArrayOrMatrixLength(var);
+        extObjArray = SOPC_VARIANT_GET_ARRAY_VALUES_PTR(var, ExtObject);
+        SOPC_ASSERT(NULL != extObjArray || extObjArrayLength <= 0);
+        if (extObjArrayLength >= 0)
+        {
+            for (int32_t i = 0; i < extObjArrayLength; i++)
             {
-                return SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject);
-            }
-            else if (SOPC_VariantArrayType_Array == var->ArrayType || SOPC_VariantArrayType_Matrix == var->ArrayType)
-            {
-                // For array/matrix we need to check each element type
-                extObjArrayLength =
-                    (SOPC_VariantArrayType_Array == var->ArrayType ? var->Value.Array.Length
-                                                                   : SOPC_Variant_GetMatrixArrayLength(var));
-                extObjArray = (SOPC_VariantArrayType_Array == var->ArrayType ? var->Value.Array.Content.ExtObjectArr
-                                                                             : var->Value.Matrix.Content.ExtObjectArr);
-
-                for (int32_t i = 0; i < extObjArrayLength; i++)
+                nextArrayEltTypeId = SOPC_ExtensionObject_Get_DataType(&extObjArray[i]);
+                if (i > 0 && !SOPC_NodeId_Equal(arrayEltTypeId, nextArrayEltTypeId))
                 {
-                    nextArrayEltTypeId = SOPC_ExtensionObject_Get_DataType(&extObjArray[i]);
-                    if (i > 0 && !SOPC_NodeId_Equal(arrayEltTypeId, nextArrayEltTypeId))
-                    {
-                        // Note: it would be necessary to find the first common ancestor of both types
-                        // but structure is at least expected to be a common ancestor (loss of type precision)
-                        return &SOPC_Structure_Type;
-                    }
-                    // All previous element types are identical
-                    arrayEltTypeId = nextArrayEltTypeId;
+                    // Note: it would be necessary to find the first common ancestor of both types
+                    // but structure is at least expected to be a common ancestor (loss of type precision)
+                    return &SOPC_Structure_Type;
                 }
-                // => Null type id if array empty
-                return arrayEltTypeId;
+                // All previous element types are identical
+                arrayEltTypeId = nextArrayEltTypeId;
             }
-            else
-            {
-                SOPC_ASSERT(false && "Unexpected variant array type");
-                return NULL;
-            }
+            // => Null type id if array empty
+            return arrayEltTypeId;
         }
         else
         {
-            /* If type defined in another server or variant is an array, no guarantee that all are of same type.
-             * Keep "Structure" generic type. */
-            return &SOPC_Structure_Type;
+            SOPC_ASSERT(false && "Unexpected variant number of values");
+            return NULL;
         }
     default:
         SOPC_ASSERT(false); // Invalid type

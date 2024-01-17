@@ -393,6 +393,14 @@ typedef struct SOPC_DataValue
 
 S2OPC_COMMON_EXPORT extern const SOPC_NodeId* SOPC_BuiltInTypeId_To_DataTypeNodeId[26];
 
+// Macro to retrieve a pointer on the first value in array/matrix for any variant array/matrix content
+// e.g. SOPC_VARIANT_GET_ARRAY_VALUES_PTR(&myVariant, ExtObject)
+// note: BuiltInTypeId shall be consistant with requested type and returns NULL if variant is a single value
+#define SOPC_VARIANT_GET_ARRAY_VALUES_PTR(pVar, eltTypeName) \
+    (SOPC_VariantArrayType_Array == pVar->ArrayType          \
+         ? pVar->Value.Array.Content.eltTypeName##Arr        \
+         : (SOPC_VariantArrayType_Matrix == pVar->ArrayType ? pVar->Value.Matrix.Content.eltTypeName##Arr : NULL))
+
 #define SECURITY_POLICY_NONE "http://opcfoundation.org/UA/SecurityPolicy#None"
 #define SECURITY_POLICY_BASIC128RSA15 "http://opcfoundation.org/UA/SecurityPolicy#Basic128Rsa15"
 #define SECURITY_POLICY_BASIC256 "http://opcfoundation.org/UA/SecurityPolicy#Basic256"
@@ -1111,7 +1119,19 @@ void SOPC_Variant_Delete(SOPC_Variant* variant);
 // Raw function to print a variant on standard output. Do not display array or matrix.
 void SOPC_Variant_Print(SOPC_Variant* variant);
 
-int32_t SOPC_Variant_GetMatrixArrayLength(const SOPC_Variant* var);
+/**
+ * \brief Returns the number of values contained in a Variant with Array or Matrix value type.
+ *        It might be used in combination with SOPC_VARIANT_GET_ARRAY_VALUES_PTR macro to iterate over
+ *        all values in a generic way for array and matrix variants of a known variant type.
+ *
+ * \param var  The Variant with Array or Matrix type for which the number of values is requested
+ *
+ * \return The number of values contained in the given Variant or -1 in case of unexpected error.
+ *         Unexpected errors: \p var is NULL or a single value variant,
+ *                            an ArrayDimension is <= 0,
+ *                            length computation based on ArrayDimensions overflow.
+ */
+int32_t SOPC_Variant_GetArrayOrMatrixLength(const SOPC_Variant* var);
 const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId);
 const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index);
 bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
@@ -1121,18 +1141,20 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
 
 /**
  * \brief Returns the DataType of the given variant.
- *        For built-in types except for ExtensionObject variant: built-in type NodeId is returned (single value / array)
- *        For ExtensionObject built-in type:
- *        - single value: if the object is decoded returns the NodeId based on the object ::SOPC_EncodeableType content,
- *                        otherwise returns the Structure abstract DataType NodeId.
+ *        For built-in types except for ExtensionObject variant: built-in type NodeId is returned (single
+ * value / array) For ExtensionObject built-in type:
+ *        - single value: if the object is decoded returns the NodeId based on the object
+ * ::SOPC_EncodeableType content, otherwise returns the Structure abstract DataType NodeId.
  *        - array/matrix value: if the array is empty, returns the Null NodeId.
  *                              if all array elements have same type, same behavior as single value.
- *                              if elements have different types, returns the Structure abstract DataType NodeId.
+ *                              if elements have different types, returns the Structure abstract DataType
+ * NodeId.
  *
  *
  * \param var  The Variant for which the DataType is returned
  *
- * \return     The DataType NodeId of the given variant or NULL (NULL variant or extension object without body encoded)
+ * \return     The DataType NodeId of the given variant or NULL (NULL variant or extension object without
+ * body encoded)
  */
 const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);

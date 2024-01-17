@@ -1373,14 +1373,13 @@ static const SOPC_NodeId* getVariantEncodingId(SOPC_Variant* varExtObj)
              SOPC_VariantArrayType_Matrix == varExtObj->ArrayType)
     {
         // For array/matrix we need to check each element type
-        int32_t extObjArrayLength =
-            (SOPC_VariantArrayType_Array == varExtObj->ArrayType ? varExtObj->Value.Array.Length
-                                                                 : SOPC_Variant_GetMatrixArrayLength(varExtObj));
-        SOPC_ExtensionObject* extObjArray =
-            (SOPC_VariantArrayType_Array == varExtObj->ArrayType ? varExtObj->Value.Array.Content.ExtObjectArr
-                                                                 : varExtObj->Value.Matrix.Content.ExtObjectArr);
 
-        const SOPC_NodeId *nextArrayEltTypeId = NULL, *arrayEltTypeId = NULL;
+        const SOPC_NodeId* nextArrayEltTypeId = NULL;
+        const SOPC_NodeId* arrayEltTypeId = NULL;
+
+        int32_t extObjArrayLength = SOPC_Variant_GetArrayOrMatrixLength(varExtObj);
+        SOPC_ExtensionObject* extObjArray = SOPC_VARIANT_GET_ARRAY_VALUES_PTR(varExtObj, ExtObject);
+        SOPC_ASSERT(NULL != extObjArray || extObjArrayLength <= 0);
 
         for (int32_t i = 0; i < extObjArrayLength; i++)
         {
@@ -1417,8 +1416,8 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
         const SOPC_NodeId* encodingNodeId = getVariantEncodingId(address_space_bs__p_variant);
         if (NULL != encodingNodeId)
         {
-            const SOPC_NodeId* resolvedDataTypeId = SOPC_AddressSpaceUtil_GetEncodingDataType(
-                address_space_bs__nodes, &address_space_bs__p_variant->Value.ExtObject->TypeId.NodeId);
+            const SOPC_NodeId* resolvedDataTypeId =
+                SOPC_AddressSpaceUtil_GetEncodingDataType(address_space_bs__nodes, encodingNodeId);
             if (NULL != resolvedDataTypeId)
             {
                 *address_space_bs__p_type = (SOPC_NodeId*) resolvedDataTypeId;
