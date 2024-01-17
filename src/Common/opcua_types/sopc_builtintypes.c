@@ -5996,23 +5996,26 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
     return false;
 }
 
-static const SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj)
+static SOPC_NodeId* SOPC_ExtensionObject_Get_DataType(SOPC_ExtensionObject* extObj, SOPC_NodeId* outNodeId)
 {
+    SOPC_ASSERT(NULL != outNodeId);
     if (extObj->Encoding == SOPC_ExtObjBodyEncoding_Object && NULL != extObj->Body.Object.ObjType)
     {
         SOPC_ASSERT(NULL == extObj->Body.Object.ObjType->NamespaceUri &&
                     "EncType Namespace URI translation unsupported");
         // Restore the DataType type id if it was the encoding object node
-        extObj->TypeId.NodeId.Namespace = extObj->Body.Object.ObjType->NamespaceIndex;
-        extObj->TypeId.NodeId.Data.Numeric = extObj->Body.Object.ObjType->TypeId;
-        return &extObj->TypeId.NodeId;
+        outNodeId->IdentifierType = SOPC_IdentifierType_Numeric;
+        outNodeId->Namespace = extObj->Body.Object.ObjType->NamespaceIndex;
+        outNodeId->Data.Numeric = extObj->Body.Object.ObjType->TypeId;
+        return outNodeId;
     }
     else if (extObj->Encoding == SOPC_ExtObjBodyEncoding_ByteString ||
              extObj->Encoding == SOPC_ExtObjBodyEncoding_XMLElement)
     {
         // Note: if the type is unknown we cannot guarantee here the NodeId is a DataType, since it
         // could be the DefaultEncoding Object instead. Returns the generic Structure type instead
-        return &SOPC_Structure_Type;
+        *outNodeId = SOPC_Structure_Type;
+        return outNodeId;
     }
     else
     {
@@ -6065,14 +6068,17 @@ int32_t SOPC_Variant_GetArrayOrMatrixLength(const SOPC_Variant* var)
     return length;
 }
 
-const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
+SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
 {
     if (NULL == var)
     {
         return NULL;
     }
-    const SOPC_NodeId* nextArrayEltTypeId = &SOPC_Null_Type;
-    const SOPC_NodeId* arrayEltTypeId = &SOPC_Null_Type;
+    SOPC_NodeId nextEltTypeId = SOPC_Null_Type;
+    SOPC_NodeId eltTypeId = SOPC_Null_Type;
+    bool resultSet = false;
+    const SOPC_NodeId* resultToCopy = NULL;
+    SOPC_NodeId* result = NULL;
     int32_t extObjArrayLength = 0;
     SOPC_ExtensionObject* extObjArray = NULL;
     switch (var->BuiltInTypeId)
@@ -6102,41 +6108,75 @@ const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var)
     case SOPC_DiagnosticInfo_Id:
     case SOPC_DataValue_Id:
     case SOPC_Variant_Id: /* Corresponds to BaseDataType: could only be an array of Variant */
-        return SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
+        resultToCopy = SOPC_BuiltInTypeId_To_DataTypeNodeId[var->BuiltInTypeId];
+        break;
     case SOPC_ExtensionObject_Id:
         if (SOPC_VariantArrayType_SingleValue == var->ArrayType)
         {
-            return SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject);
-        } // else Array or Matrix
-        extObjArrayLength = SOPC_Variant_GetArrayOrMatrixLength(var);
-        extObjArray = SOPC_VARIANT_GET_ARRAY_VALUES_PTR(var, ExtObject);
-        SOPC_ASSERT(NULL != extObjArray || extObjArrayLength <= 0);
-        if (extObjArrayLength >= 0)
-        {
-            for (int32_t i = 0; i < extObjArrayLength; i++)
-            {
-                nextArrayEltTypeId = SOPC_ExtensionObject_Get_DataType(&extObjArray[i]);
-                if (i > 0 && !SOPC_NodeId_Equal(arrayEltTypeId, nextArrayEltTypeId))
-                {
-                    // Note: it would be necessary to find the first common ancestor of both types
-                    // but structure is at least expected to be a common ancestor (loss of type precision)
-                    return &SOPC_Structure_Type;
-                }
-                // All previous element types are identical
-                arrayEltTypeId = nextArrayEltTypeId;
-            }
-            // => Null type id if array empty
-            return arrayEltTypeId;
+            resultToCopy = SOPC_ExtensionObject_Get_DataType(var->Value.ExtObject, &eltTypeId);
         }
         else
         {
-            SOPC_ASSERT(false && "Unexpected variant number of values");
-            return NULL;
+            // Array or Matrix
+            extObjArrayLength = SOPC_Variant_GetArrayOrMatrixLength(var);
+            extObjArray = SOPC_VARIANT_GET_ARRAY_VALUES_PTR(var, ExtObject);
+            SOPC_ASSERT(NULL != extObjArray || extObjArrayLength <= 0);
+            if (extObjArrayLength > 0)
+            {
+                for (int32_t i = 0; i < extObjArrayLength && !resultSet; i++)
+                {
+                    SOPC_NodeId_Initialize(&nextEltTypeId);
+                    resultToCopy = SOPC_ExtensionObject_Get_DataType(&extObjArray[i], &nextEltTypeId);
+                    if (&nextEltTypeId != resultToCopy)
+                    {
+                        resultSet = true;
+                        resultToCopy = NULL;
+                    }
+                    else if (i > 0 && !SOPC_NodeId_Equal(&eltTypeId, &nextEltTypeId))
+                    {
+                        // Note: it would be necessary to find the first common ancestor of both types
+                        // but structure is at least expected to be a common ancestor (loss of type precision)
+                        SOPC_NodeId_Clear(&nextEltTypeId);
+                        resultSet = true;
+                        resultToCopy = &SOPC_Structure_Type;
+                    }
+                    else
+                    {
+                        // All previous element types are identical
+                        SOPC_NodeId_Clear(&eltTypeId);
+                        eltTypeId = nextEltTypeId;
+                    }
+                }
+            }
+            else if (0 == extObjArrayLength)
+            {
+                // => Null type id if array empty
+                resultToCopy = &eltTypeId;
+            }
+            else
+            {
+                SOPC_ASSERT(false && "Unexpected variant number of values");
+                return NULL;
+            }
         }
+        break;
     default:
         SOPC_ASSERT(false); // Invalid type
         return NULL;
     }
+
+    if (NULL != resultToCopy)
+    {
+        result = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        SOPC_ReturnStatus status = SOPC_NodeId_Copy(result, resultToCopy);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(result);
+            result = NULL;
+        }
+    }
+    SOPC_NodeId_Clear(&eltTypeId);
+    return result;
 }
 
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var)

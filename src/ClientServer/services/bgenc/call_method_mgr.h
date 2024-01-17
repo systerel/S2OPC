@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 22/02/2023 16:16:23
+ Date                 : 17/01/2024 15:10:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -52,6 +52,7 @@
 #include "constants_statuscodes_bs.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "node_id_pointer_bs.h"
 #include "request_handle_bs.h"
 #include "session_mgr.h"
 

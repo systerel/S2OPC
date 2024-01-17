@@ -35,6 +35,7 @@
 #include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
 static void setup(void)
@@ -651,12 +652,13 @@ START_TEST(test_UserEncodeableTypeNS1)
     SOPC_Variant_Initialize(&variant);
     variant.BuiltInTypeId = SOPC_ExtensionObject_Id;
     variant.Value.ExtObject = &extObj;
-    const SOPC_NodeId* typeId = SOPC_Variant_Get_DataType(&variant);
+    SOPC_NodeId* typeId = SOPC_Variant_Get_DataType(&variant);
     ck_assert_ptr_nonnull(typeId);
     ck_assert_int_eq(0, typeId->Namespace);
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
     ck_assert_int_eq(OpcUaId_Structure, typeId->Data.Numeric);
-
+    SOPC_NodeId_Clear(typeId);
+    SOPC_Free(typeId);
     // Record the encodeable type encoder
     for (uint32_t i = 0; SOPC_STATUS_OK == status && i < SOPC_S2OPC_TypeInternalIndex_SIZE; i++)
     {
@@ -687,6 +689,8 @@ START_TEST(test_UserEncodeableTypeNS1)
     ck_assert_int_eq(NS_INDEX, typeId->Namespace);
     ck_assert_int_eq(SOPC_IdentifierType_Numeric, typeId->IdentifierType);
     ck_assert_int_eq(OpcUaId_S2OPC_CustomDataType, typeId->Data.Numeric);
+    SOPC_NodeId_Clear(typeId);
+    SOPC_Free(typeId);
 
     SOPC_ExtensionObject_Clear(&extObj);
     SOPC_Buffer_Delete(buf);

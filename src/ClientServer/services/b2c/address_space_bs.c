@@ -1403,15 +1403,14 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
 {
     SOPC_ASSERT(NULL != address_space_bs__p_variant);
     SOPC_ASSERT(NULL != address_space_bs__p_type);
-    SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    *address_space_bs__p_type = (SOPC_NodeId*) SOPC_Variant_Get_DataType(address_space_bs__p_variant);
+    SOPC_NodeId* result = NULL;
+    result = SOPC_Variant_Get_DataType(address_space_bs__p_variant);
 
     // In case resolution was not possible due to unknown encoder, try to retrieve type from address space
-    if (NULL != *address_space_bs__p_type && /* NULL is possible due to ExtensionObject with None encoding mask case */
+    if (NULL != result && /* NULL is possible due to ExtensionObject with None encoding mask case */
         SOPC_ExtensionObject_Id == address_space_bs__p_variant->BuiltInTypeId &&
-        OPCUA_NAMESPACE_INDEX == (*address_space_bs__p_type)->Namespace &&
-        SOPC_IdentifierType_Numeric == (*address_space_bs__p_type)->IdentifierType &&
-        OpcUaId_Structure == (*address_space_bs__p_type)->Data.Numeric)
+        OPCUA_NAMESPACE_INDEX == result->Namespace && SOPC_IdentifierType_Numeric == result->IdentifierType &&
+        OpcUaId_Structure == result->Data.Numeric)
     {
         const SOPC_NodeId* encodingNodeId = getVariantEncodingId(address_space_bs__p_variant);
         if (NULL != encodingNodeId)
@@ -1420,11 +1419,17 @@ void address_space_bs__get_conv_Variant_Type(const constants__t_Variant_i addres
                 SOPC_AddressSpaceUtil_GetEncodingDataType(address_space_bs__nodes, encodingNodeId);
             if (NULL != resolvedDataTypeId)
             {
-                *address_space_bs__p_type = (SOPC_NodeId*) resolvedDataTypeId;
+                SOPC_NodeId_Clear(result);
+                SOPC_ReturnStatus status = SOPC_NodeId_Copy(result, resolvedDataTypeId);
+                if (SOPC_STATUS_OK != status)
+                {
+                    SOPC_Free(result);
+                    result = NULL;
+                }
             }
         }
     }
-    SOPC_GCC_DIAGNOSTIC_RESTORE
+    *address_space_bs__p_type = result;
 }
 
 void address_space_bs__get_conv_Variant_ValueRank(const constants__t_Variant_i address_space_bs__p_variant,

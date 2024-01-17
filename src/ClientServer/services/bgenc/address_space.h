@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 02/05/2023 14:14:52
+ Date                 : 17/01/2024 15:10:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,6 +50,7 @@
 #include "constants.h"
 #include "constants_statuscodes_bs.h"
 #include "data_value_pointer_bs.h"
+#include "node_id_pointer_bs.h"
 #include "service_response_cb_bs.h"
 #include "service_write_decode_bs.h"
 #include "write_value_pointer_bs.h"

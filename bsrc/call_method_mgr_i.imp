@@ -29,7 +29,8 @@ SEES
     message_in_bs,
     message_out_bs,
     request_handle_bs,
-    session_mgr
+    session_mgr,
+    node_id_pointer_bs
 
 DEFINITIONS
     "definitions.def"
@@ -494,6 +495,7 @@ OPERATIONS
         l_bool, l_compat_with_conv
         <-- read_variable_compat_type(l_value_type, l_value_valueRank, l_arg_type, l_arg_valueRank);
         /* l_compat_with_conv is not used */
+        free_node_id_pointer(l_value_type);
 
         IF l_bool = FALSE THEN
             StatusCode := e_sc_bad_type_mismatch

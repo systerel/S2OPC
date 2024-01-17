@@ -1140,23 +1140,24 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
                                         const void* value);
 
 /**
- * \brief Returns the DataType of the given variant.
+ * \brief Returns the DataType identifier of the given variant as a newly allocated NodeId
  *        For built-in types except for ExtensionObject variant: built-in type NodeId is returned (single
- * value / array) For ExtensionObject built-in type:
+ * value / array)
+ *        For ExtensionObject built-in type:
  *        - single value: if the object is decoded returns the NodeId based on the object
  * ::SOPC_EncodeableType content, otherwise returns the Structure abstract DataType NodeId.
  *        - array/matrix value: if the array is empty, returns the Null NodeId.
  *                              if all array elements have same type, same behavior as single value.
  *                              if elements have different types, returns the Structure abstract DataType
- * NodeId.
+ *                              NodeId.
  *
  *
  * \param var  The Variant for which the DataType is returned
  *
- * \return     The DataType NodeId of the given variant or NULL (NULL variant or extension object without
- * body encoded)
+ * \return     The newly DataType NodeId of the given variant (to be deallocated by caller)
+ *             or NULL (NULL variant or extension object without body encoded or allocation failure)
  */
-const SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
+SOPC_NodeId* SOPC_Variant_Get_DataType(const SOPC_Variant* var);
 int32_t SOPC_Variant_Get_ValueRank(const SOPC_Variant* var);
 bool SOPC_ValueRank_IsAssignableInto(int32_t dest_ValueRank, int32_t src_valueRank);
 

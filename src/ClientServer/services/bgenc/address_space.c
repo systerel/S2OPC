@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 12/01/2024 10:17:28
+ Date                 : 17/01/2024 15:10:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -257,6 +257,7 @@ void address_space__treat_write_1(
                   address_space__l_var_vr,
                   &address_space__l_compatible_type,
                   &address_space__l_compat_with_conv);
+               node_id_pointer_bs__free_node_id_pointer(address_space__l_dv_datatype_nid);
                data_value_pointer_bs__get_conv_DataValue_ServerTimestamp(address_space__dataValue,
                   &address_space__l_server_ts);
                constants__is_Timestamps_Null(address_space__l_server_ts,
