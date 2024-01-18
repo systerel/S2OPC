@@ -276,7 +276,7 @@ bool SOPC_PubSubHelpers_IsCompatibleVariant(const SOPC_FieldMetaData* fieldMetaD
     else if (SOPC_StatusCode_Id == variant->BuiltInTypeId && (0 != (variant->Value.Status & SOPC_BadStatusMask)))
     {
         // Consider Bad status variant compatible with any value
-        // (see spec part 14: Table 16: DataSetMessage field representation options)
+        // (see spec part 14 - 1.05: Table 26: DataSetMessage field representation options)
         if (NULL != out_isBad)
         {
             *out_isBad = true;

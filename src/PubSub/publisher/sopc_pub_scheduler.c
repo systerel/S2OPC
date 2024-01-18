@@ -565,7 +565,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
             if (isCompatible && 0 != (dv->Status & SOPC_BadStatusMask))
             {
                 // If status is bad and value has not status type, set value as a Bad status code
-                // (see spec part 14: Table 16: DataSetMessage field representation options)
+                // (see spec part 14 - 1.05: Table 26: DataSetMessage field representation options)
                 if (SOPC_StatusCode_Id != dv->Value.BuiltInTypeId)
                 {
                     SOPC_Variant_Clear(&dv->Value);
