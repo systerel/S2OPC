@@ -45,14 +45,14 @@ SAMPLE_PTF_DIR=`pwd`
 cd ../../../..
 SOPC_DIR=`pwd`
 
-echo ${SOPC_DIR-}
+echo "SOPC_DIR=${SOPC_DIR-}"
 [[ -z "${SOPC_DIR-}" ]] && echo 'SOPC_DIR must be set!' && exit 1
 ! [[ -d  "${SOPC_DIR-}/src/Common" ]] && echo 'SOPC_DIR is invalid!' && exit 1
 
 . ${SOPC_DIR}/.docker-images.sh
-echo "Using image FREERTOS_IMAGE=${FREERTOS_IMAGE-}"
+echo "Using image FREERTOS_DIGEST=${FREERTOS_DIGEST-}"
 
 rm -rf ${SOPC_DIR}/build_freertos/* 2> /dev/null
 mkdir -p ${SOPC_DIR}/build_freertos && chmod 777 ${SOPC_DIR}/build_freertos || exit 2
 
-docker run --rm -ti -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_IMAGE} ${OPT_EXEC} ${OPT_ADD}
+docker run --rm -ti -v ${SOPC_DIR}:/sopc -u root ${FREERTOS_DIGEST} ${OPT_EXEC} ${OPT_ADD}

@@ -44,7 +44,7 @@ while [[ ! -z $1 ]]; do
 done
 
 source .docker-images.sh
-docker inspect ${ZEPHYR_IMAGE} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_IMAGE}" 
+docker inspect ${ZEPHYR_DIGEST} 2>/dev/null >/dev/null  || fail "Docker image not installed: ${ZEPHYR_DIGEST}" 
 
 rm -rf build_zephyr/* 2>/dev/null
 mkdir -p build_zephyr
@@ -55,8 +55,8 @@ chmod a+rw samples/embedded/cli_client/
 chmod a+rw samples/embedded/cli_pubsub_server/
 
 echo "Mapping ${HOST_DIR} to DOCKER '/workdir'"
-$IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_IMAGE}" && \
-    (docker run -it --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_IMAGE})
+$IS_INTERACTIVE && echo "Running an interactive session on ${ZEPHYR_DIGEST}" && \
+    (docker run -it --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_DIGEST})
 $IS_INTERACTIVE && exit 1
 
 function build() {
@@ -64,7 +64,7 @@ function build() {
   export APP=$2
   echo "Starting docker to build ${APP} for ${BOARD}"
 
-  (docker run --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_IMAGE}\
+  (docker run --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_DIGEST}\
      samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP})&
   wait $!
   echo "Result = $?"
