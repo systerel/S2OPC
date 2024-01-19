@@ -2654,7 +2654,7 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     bool ok = false;
     parse_complex_value_tag_t* currentTagCtx = NULL;
 
-    if (SOPC_HelperExpat_PopSkipTag(&ctx->helper_ctx, name))
+    if (SOPC_HelperExpat_PopSkipTag(&ctx->helper_ctx, name) || SOPC_HelperExpat_IsSkipTagActive(&ctx->helper_ctx))
     {
         return;
     }
