@@ -1134,6 +1134,9 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
                         dsfPosition, bufferPayload_dsfPositions[j] + bufferPosition);
                     indexDataSetField++;
                 }
+            }
+            if (NULL != bufferPayload_dsfPositions)
+            {
                 SOPC_Free(bufferPayload_dsfPositions);
             }
         }
