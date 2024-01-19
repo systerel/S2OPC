@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 02/05/2023 14:15:34
+ Date                 : 19/01/2024 16:41:11
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -152,6 +152,10 @@ extern void address_space_bs__read_AddressSpace_BrowseName_value(
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);
 extern void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
+   constants__t_Variant_i * const address_space_bs__variant);
+extern void address_space_bs__read_AddressSpace_DataTypeDefinition_value(
    const constants__t_Node_i address_space_bs__p_node,
    constants_statuscodes_bs__t_StatusCode_i * const address_space_bs__sc,
    constants__t_Variant_i * const address_space_bs__variant);

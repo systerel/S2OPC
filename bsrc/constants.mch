@@ -316,6 +316,7 @@ SETS
     t_ApplicationDescription_i; /* (OpcUa_ApplicationDescription*) */
     t_MdnsDiscoveryConfig_i; /* (OpcUa_MdnsDiscoveryConfiguration*) */
     t_RegisteredServer2Info_i; /* (SOPC_RegisterServer2Record_Internal*) */
+    t_DataTypeDefinition_i; /* (SOPC_ExtensionObject*) */
     t_ServerUri; /* (SOPC_String*) */
     t_ServerUris; /* (SOPC_String[]) */
     t_ServerCapabilities /* SOPC_ServerCapabilities_Internal */
@@ -430,6 +431,7 @@ CONCRETE_CONSTANTS
     c_ApplicationDescription_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
+    c_DataTypeDefinition_indet,
     c_ServerUri_empty,
 
     t_counter,
@@ -448,6 +450,7 @@ ABSTRACT_CONSTANTS
     conv_NodeId_Variant,
     conv_ValueRank_Variant,
     conv_ArrayDimensions_Variant,
+    conv_DataTypeDefinition_Variant,
 
     conv_AccessLevel_CurrentWrite,
     conv_AccessLevel_CurrentRead,
@@ -545,6 +548,7 @@ ABSTRACT_CONSTANTS
     t_ApplicationDescription,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
+    t_DataTypeDefinition,
 
     s_session_treatment_reqs,
     s_session_treatment_resps,
@@ -931,6 +935,9 @@ PROPERTIES
     c_RegisteredServer2Info_indet : t_RegisteredServer2Info_i &
     t_RegisteredServer2Info = t_RegisteredServer2Info_i - {c_RegisteredServer2Info_indet} &
 
+    c_DataTypeDefinition_indet : t_DataTypeDefinition_i &
+    t_DataTypeDefinition = t_DataTypeDefinition_i - {c_DataTypeDefinition_indet} &
+
     c_ServerUri_empty : t_ServerUri &
 
     t_buffer_in_state = { e_buffer_in_msg_not_read,
@@ -1068,6 +1075,7 @@ PROPERTIES
     conv_NodeId_Variant : t_NodeId --> t_Variant &
     conv_ValueRank_Variant : t_ValueRank --> t_Variant &
     conv_ArrayDimensions_Variant : t_ArrayDimensions --> t_Variant &
+    conv_DataTypeDefinition_Variant : t_DataTypeDefinition --> t_Variant &
 
 
     conv_AccessLevel_CurrentWrite : t_access_level --> BOOL &

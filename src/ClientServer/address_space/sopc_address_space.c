@@ -376,6 +376,20 @@ uint32_t* SOPC_AddressSpace_Get_ArrayDimensions(SOPC_AddressSpace* space, SOPC_A
     }
 }
 
+SOPC_ExtensionObject* SOPC_AddressSpace_Get_DataTypeDefinition(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
+{
+    SOPC_ASSERT(space != NULL);
+
+    switch (node->node_class)
+    {
+    case OpcUa_NodeClass_DataType:
+        return &node->data.data_type.DataTypeDefinition;
+    default:
+        SOPC_ASSERT(false && "Current element has no DataTypeDefinition.");
+        return NULL;
+    }
+}
+
 SOPC_Byte SOPC_AddressSpace_Get_AccessLevel(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node)
 {
     SOPC_ASSERT(space != NULL);

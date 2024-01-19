@@ -21,7 +21,7 @@
 
  File Name            : address_space.c
 
- Date                 : 17/01/2024 15:10:18
+ Date                 : 19/01/2024 16:40:40
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -78,7 +78,8 @@ void address_space__local_is_mandatory_attribute(
             (address_space__p_aid == constants__e_aid_Symmetric));
          break;
       case constants__e_ncl_DataType:
-         *address_space__bres = (address_space__p_aid == constants__e_aid_IsAbstract);
+         *address_space__bres = ((address_space__p_aid == constants__e_aid_IsAbstract) ||
+            (address_space__p_aid == constants__e_aid_DataTypeDefinition));
          break;
       case constants__e_ncl_Method:
          *address_space__bres = ((address_space__p_aid == constants__e_aid_Executable) ||
@@ -579,6 +580,11 @@ void address_space__read_AddressSpace_Attribute_value(
                &address_space__l_user_executable_auth);
             address_space_bs__read_AddressSpace_UserExecutable_value(address_space__p_node,
                address_space__l_user_executable_auth,
+               address_space__sc,
+               address_space__val);
+            break;
+         case constants__e_aid_DataTypeDefinition:
+            address_space_bs__read_AddressSpace_DataTypeDefinition_value(address_space__p_node,
                address_space__sc,
                address_space__val);
             break;

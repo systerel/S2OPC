@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 10/11/2023 17:24:45
+ Date                 : 19/01/2024 16:40:47
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -56,6 +56,7 @@
 #define constants__t_CallMethod_i constants_bs__t_CallMethod_i
 #define constants__t_ContinuationPointId_i constants_bs__t_ContinuationPointId_i
 #define constants__t_ContinuationPoint_i constants_bs__t_ContinuationPoint_i
+#define constants__t_DataTypeDefinition_i constants_bs__t_DataTypeDefinition_i
 #define constants__t_DataValue_i constants_bs__t_DataValue_i
 #define constants__t_ExpandedNodeId_i constants_bs__t_ExpandedNodeId_i
 #define constants__t_IndexRange_i constants_bs__t_IndexRange_i
@@ -340,6 +341,7 @@ typedef enum {
 #define constants__t_CallMethod_i_max constants_bs__t_CallMethod_i_max
 #define constants__t_ContinuationPointId_i_max constants_bs__t_ContinuationPointId_i_max
 #define constants__t_ContinuationPoint_i_max constants_bs__t_ContinuationPoint_i_max
+#define constants__t_DataTypeDefinition_i_max constants_bs__t_DataTypeDefinition_i_max
 #define constants__t_DataValue_i_max constants_bs__t_DataValue_i_max
 #define constants__t_ExpandedNodeId_i_max constants_bs__t_ExpandedNodeId_i_max
 #define constants__t_IndexRange_i_max constants_bs__t_IndexRange_i_max
@@ -422,6 +424,7 @@ typedef enum {
 #define constants__c_CallMethod_indet constants_bs__c_CallMethod_indet
 #define constants__c_ContinuationPointId_indet constants_bs__c_ContinuationPointId_indet
 #define constants__c_ContinuationPoint_indet constants_bs__c_ContinuationPoint_indet
+#define constants__c_DataTypeDefinition_indet constants_bs__c_DataTypeDefinition_indet
 #define constants__c_DataValue_indet constants_bs__c_DataValue_indet
 #define constants__c_ExpandedNodeId_indet constants_bs__c_ExpandedNodeId_indet
 #define constants__c_HierarchicalReferences_Type_NodeId constants_bs__c_HierarchicalReferences_Type_NodeId

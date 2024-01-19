@@ -48,6 +48,7 @@ DEFINITIONS
         a_Historizing,
         a_Executable,
         a_UserExecutable,
+        a_DataTypeDefinition,
         a_ContainsNoLoops,
         a_Symmetric,
 
@@ -134,6 +135,9 @@ DEFINITIONS
 
         a_Symmetric : s_Node +-> BOOL &
         dom(a_Symmetric) = dom(a_NodeClass|>{e_ncl_ReferenceType}) &
+
+        a_DataTypeDefinition : s_Node +-> t_DataTypeDefinition_i &
+        dom(a_DataTypeDefinition) = dom(a_NodeClass|>{e_ncl_DataType}) &
 
         Ref_HasTypeDefinition : s_Node +-> t_ExpandedNodeId &
 
@@ -516,6 +520,29 @@ OPERATIONS
         OR
             variant :(variant : t_Variant_i & variant = conv_Boolean_Variant(a_UserExecutable(p_node))) ||
             sc := e_sc_ok
+        END
+    END
+    ;
+
+    sc, variant <-- read_AddressSpace_DataTypeDefinition_value(p_node) =
+    PRE
+        p_node : t_Node_i         &
+        p_node : s_Node           &
+        p_node : dom(a_NodeId)    &
+        p_node : dom(a_NodeClass) &
+        p_node : dom(a_DataTypeDefinition)
+    THEN
+        CHOICE
+            variant := c_Variant_indet ||
+            sc := e_sc_bad_out_of_memory
+        OR
+            IF a_DataTypeDefinition(p_node) : t_DataTypeDefinition THEN
+                variant :(variant : t_Variant_i & variant = conv_DataTypeDefinition_Variant(a_DataTypeDefinition(p_node))) ||
+                sc := e_sc_ok
+            ELSE
+                variant := c_Variant_indet ||
+                sc := e_sc_bad_attribute_id_invalid
+            END
         END
     END
     ;

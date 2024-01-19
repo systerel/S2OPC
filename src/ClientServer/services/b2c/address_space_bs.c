@@ -442,6 +442,42 @@ void address_space_bs__read_AddressSpace_ContainsNoLoops_value(
     }
 }
 
+void address_space_bs__read_AddressSpace_DataTypeDefinition_value(
+    const constants__t_Node_i address_space_bs__p_node,
+    constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
+    constants__t_Variant_i* const address_space_bs__variant)
+{
+    SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_DataType);
+    *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
+    SOPC_ExtensionObject* extObj =
+        SOPC_AddressSpace_Get_DataTypeDefinition(address_space_bs__nodes, address_space_bs__p_node);
+    SOPC_Variant* variant = SOPC_Variant_Create();
+
+    if (variant == NULL)
+    {
+        *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
+    }
+    else
+    {
+        if (SOPC_ExtObjBodyEncoding_Object == extObj->Encoding &&
+            (&OpcUa_StructureDefinition_EncodeableType == extObj->Body.Object.ObjType ||
+             &OpcUa_EnumDefinition_EncodeableType == extObj->Body.Object.ObjType))
+        {
+            variant->BuiltInTypeId = SOPC_ExtensionObject_Id;
+            variant->ArrayType = SOPC_VariantArrayType_SingleValue;
+            variant->Value.ExtObject = extObj;
+            variant->DoNotClear = true; // It is shallow copy of provided node
+        }
+        else
+        {
+            SOPC_Free(variant);
+            variant = NULL;
+            *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_attribute_id_invalid;
+        }
+    }
+    *address_space_bs__variant = variant;
+}
+
 void address_space_bs__read_AddressSpace_DataType_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,

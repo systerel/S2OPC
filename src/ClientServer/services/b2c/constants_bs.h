@@ -69,6 +69,7 @@ typedef OpcUa_CallMethodRequest* constants_bs__t_CallMethodPointer_i;
 typedef int32_t constants_bs__t_CallMethod_i;
 typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
+typedef SOPC_ExtensionObject* constants_bs__t_DataTypeDefinition_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
@@ -156,6 +157,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId;
 #define constants_bs__c_CallMethodPointer_indet NULL
 #define constants_bs__c_ContinuationPointId_indet 0
 #define constants_bs__c_ContinuationPoint_indet sopc_continuationPointData_empty;
+#define constants_bs__c_DataTypeDefinition_indet NULL
 #define constants_bs__c_DataValue_indet NULL
 #define constants_bs__c_ExpandedNodeId_indet NULL
 extern const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId;

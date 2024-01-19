@@ -278,6 +278,7 @@ LOCAL_OPERATIONS
             e_aid_Symmetric,
             e_aid_UserAccessLevel,
             e_aid_UserExecutable,
+            e_aid_DataTypeDefinition,
             e_aid_Value,
             e_aid_ValueRank,
             e_aid_ArrayDimensions
@@ -298,6 +299,7 @@ LOCAL_OPERATIONS
         (p_aid = e_aid_Symmetric       => p_node : dom(a_Symmetric))       &
         (p_aid = e_aid_UserAccessLevel => p_node : dom(a_UserAccessLevel)) &
         (p_aid = e_aid_UserExecutable  => p_node : dom(a_UserExecutable))  &
+        (p_aid = e_aid_DataTypeDefinition => p_node : dom(a_DataTypeDefinition)) &
         (p_aid = e_aid_Value           => p_node : dom(a_Value))           &
         (p_aid = e_aid_ValueRank       => p_node : dom(a_ValueRank))       &
         (p_aid = e_aid_ArrayDimensions => p_node : dom(a_ArrayDimensions)) &
@@ -370,6 +372,7 @@ LOCAL_OPERATIONS
             (p_aid = e_aid_Symmetric       => val = conv_Boolean_Variant(a_Symmetric(p_node)))               &
             (p_aid = e_aid_UserAccessLevel => val = conv_AccessLevel_Variant(a_UserAccessLevel(p_node)))     &
             (p_aid = e_aid_UserExecutable  => val = conv_Boolean_Variant(a_UserExecutable(p_node)))          &
+            (p_aid = e_aid_DataTypeDefinition => val = conv_DataTypeDefinition_Variant(a_DataTypeDefinition(p_node))) &
             (p_aid = e_aid_Value           => val = a_Value(p_node))                                         &
             (p_aid = e_aid_ValueRank       => val = conv_ValueRank_Variant(a_ValueRank(p_node)))             &
             (p_aid = e_aid_ArrayDimensions => val = conv_ArrayDimensions_Variant(a_ArrayDimensions(p_node))) &
@@ -420,7 +423,7 @@ OPERATIONS
                 OR e_ncl_ReferenceType THEN /* REFERENCE TYPE */
                     bres := bool(p_aid = e_aid_IsAbstract or p_aid = e_aid_Symmetric)
                 OR e_ncl_DataType THEN /* DATA TYPE */
-                    bres := bool(p_aid = e_aid_IsAbstract)
+                    bres := bool(p_aid = e_aid_IsAbstract or p_aid = e_aid_DataTypeDefinition)
                 OR e_ncl_Method THEN /* METHOD */
                     bres := bool(p_aid = e_aid_Executable or p_aid = e_aid_UserExecutable)
                 OR e_ncl_View THEN /* VIEW */
@@ -719,6 +722,8 @@ OPERATIONS
                 OR e_aid_UserExecutable THEN
                     l_user_executable_auth <-- get_user_authorization(e_operation_type_executable, p_nid, e_aid_Executable, p_user);
                     sc, val <-- read_AddressSpace_UserExecutable_value(p_node, l_user_executable_auth)
+                OR e_aid_DataTypeDefinition THEN
+                    sc, val <-- read_AddressSpace_DataTypeDefinition_value(p_node)
                 OR e_aid_Value THEN
                     sc, val, val_sc, val_ts_src <-- read_AddressSpace_Value_value(p_locales, p_node, p_index_range)
                 OR e_aid_ValueRank THEN

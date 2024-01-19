@@ -94,6 +94,7 @@ SETS
     t_ApplicationDescription_i;
     t_MdnsDiscoveryConfig_i;
     t_RegisteredServer2Info_i;
+    t_DataTypeDefinition_i;
     t_ServerUri;
     t_ServerUris;
     t_ServerCapabilities
@@ -196,6 +197,7 @@ CONCRETE_CONSTANTS
     c_ApplicationDescription_indet,
     c_MdnsDiscoveryConfig_indet,
     c_RegisteredServer2Info_indet,
+    c_DataTypeDefinition_indet,
     c_ServerUri_empty
 
 ABSTRACT_CONSTANTS
@@ -265,6 +267,7 @@ ABSTRACT_CONSTANTS
     t_ApplicationDescription,
     t_MdnsDiscoveryConfig,
     t_RegisteredServer2Info,
+    t_DataTypeDefinition,
 
     conv_ExpandedNodeId_NodeId
 
@@ -527,6 +530,9 @@ PROPERTIES
 
     c_RegisteredServer2Info_indet : t_RegisteredServer2Info_i &
     t_RegisteredServer2Info = t_RegisteredServer2Info_i - {c_RegisteredServer2Info_indet} &
+
+    c_DataTypeDefinition_indet : t_DataTypeDefinition_i &
+    t_DataTypeDefinition = t_DataTypeDefinition_i - {c_DataTypeDefinition_indet} &
 
     c_ServerUri_empty : t_ServerUri &
 
