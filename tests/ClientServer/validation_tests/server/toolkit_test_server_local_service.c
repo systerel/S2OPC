@@ -141,7 +141,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
                                                         SOPC_AddressSpace_Node* varNodeStructDT)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (S2OPC_DYNAMIC_TYPE_RESOLUTION && !SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    if (!SOPC_AddressSpace_AreReadOnlyNodes(address_space))
     {
         // Add a variable node with custom DataType
         varNodeCustomDT->node_class = OpcUa_NodeClass_Variable;
@@ -259,7 +259,7 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace* address_sp
                                                    SOPC_AddressSpace_Node* varNodeStructDT)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (S2OPC_DYNAMIC_TYPE_RESOLUTION && !SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    if (!SOPC_AddressSpace_AreReadOnlyNodes(address_space))
     {
         // Create an extension object of an unreferenced encodeable type
         SOPC_ExtensionObject extObj;
@@ -382,12 +382,21 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace* address_sp
             // [6]: Write array with 2 different DataType into custom Datatype variable node shall fail
             // [7]: Write array with 2 different DataType into abstract Structure Datatype variable node shall succeed
             if (SOPC_IsGoodStatus(writeResp->ResponseHeader.ServiceResult) &&
-                SOPC_IsGoodStatus(writeResp->Results[0]) && SOPC_IsGoodStatus(writeResp->Results[1]) &&
-                SOPC_IsGoodStatus(writeResp->Results[2]) && !SOPC_IsGoodStatus(writeResp->Results[3]) &&
-                SOPC_IsGoodStatus(writeResp->Results[4]) && SOPC_IsGoodStatus(writeResp->Results[5]) &&
-                !SOPC_IsGoodStatus(writeResp->Results[6]) && SOPC_IsGoodStatus(writeResp->Results[7]))
+                SOPC_IsGoodStatus(writeResp->Results[0]) && SOPC_IsGoodStatus(writeResp->Results[2]) &&
+                !SOPC_IsGoodStatus(writeResp->Results[3]) && SOPC_IsGoodStatus(writeResp->Results[4]) &&
+                SOPC_IsGoodStatus(writeResp->Results[5]) && !SOPC_IsGoodStatus(writeResp->Results[6]) &&
+                SOPC_IsGoodStatus(writeResp->Results[7]))
             {
-                status = SOPC_STATUS_OK;
+                // [1] shall only succeed if dynamic type resolution is active
+                // otherwise custom data type cannot be resolved to be the subtype of Structure
+                if (S2OPC_DYNAMIC_TYPE_RESOLUTION == SOPC_IsGoodStatus(writeResp->Results[1]))
+                {
+                    status = SOPC_STATUS_OK;
+                }
+                else
+                {
+                    status = SOPC_STATUS_INVALID_STATE;
+                }
             }
             else
             {
@@ -766,7 +775,7 @@ int main(int argc, char* argv[])
     }
 
     // Clear the toolkit configuration and stop toolkit threads
-    if (S2OPC_DYNAMIC_TYPE_RESOLUTION && !SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    if (!SOPC_AddressSpace_AreReadOnlyNodes(address_space))
     {
         SOPC_AddressSpace_Node_Clear(address_space, &varNodeCustomDT);
         SOPC_AddressSpace_Node_Clear(address_space, &customDefaultBinaryNode);

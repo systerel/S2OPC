@@ -49,7 +49,7 @@ bool SOPC_AddressSpaceUtil_IsValidReferenceTypeId(SOPC_AddressSpace* addSpace, c
 
 /**
  * \brief Returns the DataType NodeId for the given encoding NodeId (DefaultBinary variable node)
- *        or NULL in case of failure. The variable S2OPC_DYNAMIC_TYPE_RESOLUTION definition shall be set to true.
+ *        or NULL in case of failure.
  *
  * \param addSpace        The address space in which the encoding node is expected to be found.
  * \param encodingNodeId  The NodeId of a "Default Binary" encoding object expected to have an HasEncoding

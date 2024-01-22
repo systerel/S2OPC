@@ -261,7 +261,7 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetEncodingDataType(SOPC_AddressSpace* 
         {
             result = encodingNodeId;
         }
-        else if (OpcUa_NodeClass_Object == node->node_class && S2OPC_DYNAMIC_TYPE_RESOLUTION)
+        else if (OpcUa_NodeClass_Object == node->node_class)
         {
             SOPC_ExpandedNodeId* expNodeId =
                 SOPC_Internal_AddressSpaceUtil_GetReferencedNode(&SOPC_AddressSpaceUtil_IsEncodingOf, addSpace, node);
