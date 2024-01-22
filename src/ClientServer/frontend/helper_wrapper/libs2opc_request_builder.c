@@ -92,6 +92,11 @@ static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_Att
     case SOPC_AttributeId_Historizing:
     case SOPC_AttributeId_Executable:
     case SOPC_AttributeId_UserExecutable:
+    case SOPC_AttributeId_DataTypeDefinition:
+    case SOPC_AttributeId_RolePermissions:
+    case SOPC_AttributeId_UserRolePermissions:
+    case SOPC_AttributeId_AccessRestrictions:
+    case SOPC_AttributeId_AccessLevelEx:
         return attrId;
     default:
         return SOPC_AttributeId_Invalid;
