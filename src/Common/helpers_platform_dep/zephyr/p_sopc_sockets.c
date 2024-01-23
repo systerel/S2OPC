@@ -78,6 +78,24 @@ static bool priv_Initialized = false;
 
 // *** Public SOCKET API functions definitions ***
 
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+                                                       unsigned int time,
+                                                       unsigned int interval,
+                                                       unsigned int counter)
+{
+    (void) sock;
+    (void) time;
+    (void) interval;
+    (void) counter;
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
+{
+    (void) sock;
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
 // Initialize ethernet and loopback interface
 // Returns true if well configured.
 bool SOPC_Socket_Network_Initialize()

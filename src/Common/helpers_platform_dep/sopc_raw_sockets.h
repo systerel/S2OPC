@@ -41,6 +41,35 @@
 #include "p_sopc_sockets.h"
 
 /**
+ *  \brief Activate the keep alive mechanism. According to RFC1122, this mechanism shall be used with care:
+ *      deactivated by default, ability to enable or disable it run time for each connection.
+ *
+ * \param sock      The socket to activate keep alive probes
+ * \param time      The time (in seconds) the connection needs to remain idle before TCP starts sending keepalive probes
+ * \param interval  The time (in seconds) between individual keepalive probes
+ * \param counter   The maximum number of keepalive probes TCP should send before droping the connection
+ *
+ *  \return            SOPC_STATUS_OK if operation succeeded,
+ *                     SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                     SOPC_STATUS_NOK otherwise.
+ */
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+                                                       unsigned int time,
+                                                       unsigned int interval,
+                                                       unsigned int counter);
+
+/**
+ *  \brief Deactivate the keep alive mechanism.
+ *
+ * \param sock      The socket to activate keep alive probes
+ *
+ *  \return            SOPC_STATUS_OK if operation succeeded,
+ *                     SOPC_INVALID_PARAMETERS if parameters are not valid
+ *                     SOPC_STATUS_NOK otherwise.
+ */
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock);
+
+/**
  *  \brief Initialize the network communication allowing to use sockets
  */
 bool SOPC_Socket_Network_Initialize(void);

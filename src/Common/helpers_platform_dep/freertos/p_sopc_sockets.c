@@ -36,6 +36,24 @@
 #error "LwIP 'SO_REUSE' is required for this sample!"
 #endif
 
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+                                                       unsigned int time,
+                                                       unsigned int interval,
+                                                       unsigned int counter)
+{
+    (void) sock;
+    (void) time;
+    (void) interval;
+    (void) counter;
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
+{
+    (void) sock;
+    return SOPC_STATUS_NOT_SUPPORTED;
+}
+
 bool SOPC_Socket_Network_Initialize()
 {
     return true;

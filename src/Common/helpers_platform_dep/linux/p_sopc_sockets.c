@@ -35,6 +35,75 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_threads.h"
 
+#define SOPC_SECONDS_TO_MILLISECONDS 1000
+
+SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
+                                                       unsigned int time,
+                                                       unsigned int interval,
+                                                       unsigned int counter)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int trueInt = true;
+    int setOptStatus = -1;
+    unsigned int user_timeout = (time + interval * counter) * SOPC_SECONDS_TO_MILLISECONDS;
+
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return status;
+    }
+
+    setOptStatus = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &trueInt, sizeof(int));
+
+    if (setOptStatus != -1)
+    {
+        setOptStatus =
+            setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &user_timeout, sizeof(user_timeout));
+    }
+
+    if (setOptStatus != -1)
+    {
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (const void*) &time, sizeof(time));
+    }
+
+    if (setOptStatus != -1)
+    {
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPINTVL, (const void*) &interval, sizeof(interval));
+    }
+
+    if (setOptStatus != -1)
+    {
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPCNT, (const void*) &counter, sizeof(counter));
+    }
+
+    if (setOptStatus < 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int falseInt = false;
+    int setOptStatus = -1;
+
+    if (SOPC_INVALID_SOCKET == sock)
+    {
+        return status;
+    }
+
+    setOptStatus = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &falseInt, sizeof(int));
+
+    if (setOptStatus < 0)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+
+    return status;
+}
+
 bool SOPC_Socket_Network_Initialize(void)
 {
     return true;
