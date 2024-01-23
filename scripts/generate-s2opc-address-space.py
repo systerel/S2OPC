@@ -47,6 +47,8 @@ UA_DISPLAY_NAME_TAG = UA_NODESET_NS + 'DisplayName'
 UA_REFERENCES_TAG = UA_NODESET_NS + 'References'
 UA_REFERENCE_TAG = UA_NODESET_NS + 'Reference'
 UA_VALUE_TAG = UA_NODESET_NS + 'Value'
+UA_DEFINITION_TAG = UA_NODESET_NS + 'Definition'
+UA_FIELD_TAG = UA_NODESET_NS + 'Field'
 
 ID_TYPE_NUMERIC = 0
 ID_TYPE_STRING = 1
@@ -294,6 +296,12 @@ class QName(object):
 
         return QName(ns, name)
 
+    def __str__(self):
+        if self.ns is None:
+            ns = 0
+        else:
+            ns = self.ns
+        return f'{ns}:{self.name}'
 
 class LocalizedText(object):
     __slots__ = 'locale', 'text'
@@ -314,7 +322,7 @@ class VariableValue(object):
 
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
-                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable'
+                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'definition'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references):
         self.tag = tag
@@ -324,11 +332,12 @@ class Node(object):
         self.display_name = display_name
         self.references = references
         self.idonly = False
-        self.value = None
+        self.value = None # For Variable node class only (next fields included)
         self.data_type = None
         self.value_rank = None
         self.accesslevel = None
-        self.executable = None
+        self.executable = None # For Method node class only
+        self.definition = None #For DataType node class only
 
 
 class Reference(object):
@@ -390,6 +399,100 @@ class Range(ExtensionObject):
         self.low = low
         self.high = high
 
+class DataTypeDefinitionField(object):
+    __slots__ = 'name'
+
+    def __init__(self, name):
+        self.name = name
+        
+class EnumField(DataTypeDefinitionField):
+    __slots__ = 'value'
+
+    def __init__(self, name, value):
+        self.name = name
+        # Set Value default value (based on XSD)
+        self.value = -1
+        if value is not None:
+            self.value = int(value)
+
+class StructureField(DataTypeDefinitionField):
+    # note: 'isoptional' not supported
+    __slots__ = 'datatype', 'valuerank', 'arraydimensions', 'maxstringlength', 'allowsubtypes'
+
+    def __init__(self, name, datatype, valuerank, arraydimensions, maxstringlength, allowsubtypes):
+        self.name = name
+        if datatype is not None:
+            self.datatype = NodeId.parse(datatype)
+        else:
+            self.datatype = NodeId.parse('i=24') # default value
+
+        self.valuerank = -1
+        if valuerank is not None:
+            self.valuerank = int(valuerank)
+            if self.valuerank <= 0 and self.valuerank != -1:
+                raise ParseError('Expected a ValueRank shall be Scalar (-1) or a fixed rank Array (>=1).')
+
+        self.arraydimensions = []
+        if arraydimensions is not None:
+            self.arraydimensions = [int(arraydim) for arraydim in arraydimensions.split(',')]
+            unsigned_dimensions = [arraydim >= 0 for arraydim in self.arraydimensions]
+            assert(False not in unsigned_dimensions)
+            if len(self.arraydimensions) != self.valuerank:
+                raise ParseError(f'Expected ArrayDimensions "{arraydimensions}" length to be equal to ValueRank "{valuerank}"')
+
+        self.maxstringlength = 0
+        if maxstringlength is not None:
+            self.maxstringlength = int(maxstringlength)
+        
+        self.allowsubtypes = False
+        if allowsubtypes is not None:
+            self.allowsubtypes = bool(allowsubtypes)
+
+class DataTypeDefinition(ExtensionObject):
+    __slots__ = 'is_structure', 'structure_with_subtypes', 'default_encoding_id', 'base_data_type_id', 'fields'
+    def __init__(self):
+        self.is_structure = None
+        self.structure_with_subtypes = False
+        self.default_encoding_id = None
+        self.base_data_type_id = None
+        self.fields = []
+    
+    def add_field(self, field : DataTypeDefinitionField):
+        assert (isinstance(field, StructureField) or isinstance(field, EnumField))
+        if self.is_structure is None:
+            self.is_structure = isinstance(field, StructureField)
+
+        if self.is_structure and field.allowsubtypes:
+            self.structure_with_subtypes = True
+
+        self.fields.append(field)
+
+    def finalize(self, dt_node, nodes):
+        if self.is_structure:
+            self.extobj_typeid = NodeId.parse('i=122') # use binary encoding of datatype StructureDefinition
+            self.extobj_objtype = '&OpcUa_StructureDefinition_EncodeableType'
+            hasEncodingId = 'i=38'
+            hasSubtype = 'i=45'
+            for ref in dt_node.references:
+                if str(ref.ty) == hasEncodingId and ref.is_forward:
+                    target_node = nodes.get(str(ref.target), None)
+                    if target_node is not None and str(target_node.browse_name) == '0:Default Binary':
+                        self.default_encoding_id = ref.target
+
+                if str(ref.ty) == hasSubtype and not ref.is_forward:
+                    self.base_data_type_id = ref.target
+
+            if self.default_encoding_id is None:
+                print(f'WARNING: DataType {dt_node.nodeid} StructureDefinition encoding node not found: use null NodeId instead')
+                self.default_encoding_id = NodeId.parse('i=0')
+            if self.base_data_type_id is None:
+                print(f'WARNING: DataType {dt_node.nodeid} StructureDefinition base type node reference not found: use null NodeId instead')
+                self.base_data_type_id = NodeId.parse('i=0')
+        else:
+            self.extobj_typeid = NodeId.parse('i=123') # use binary encoding of datatype EnumDefinition
+            self.extobj_objtype = '&OpcUa_EnumDefinition_EncodeableType'
+
+            
 def expect_element(source, name=None):
     ev, n = next(source)
 
@@ -484,7 +587,7 @@ def collect_node_references(node, aliases):
     return refs
 
 
-def parse_boolean_value(text):
+def parse_boolean_value(text : str) -> bool:
     return text.strip() == 'true'
 
 
@@ -916,7 +1019,7 @@ def generate_variant(type_id, c_type, field, val, is_array, generate_func):
                    {.%s = %s}}''' % (type_id, field, generate_func(val))
 
 # Generic extension object generator
-def generate_extension_object(ext_obj, gen=None, is_array=False):
+def generate_extension_object(ext_obj, gen, is_array=False):
     type_id_field = '{%s, %s, 0}' % (generate_nodeid(ext_obj.extobj_typeid), generate_string(None))
     encoding = 'SOPC_ExtObjBodyEncoding_Object'
     body = '.Body.Object = {%s, %s}' % (gen(ext_obj), ext_obj.extobj_objtype)
@@ -997,6 +1100,96 @@ def generate_range_ext_obj(obj):
             (obj.extobj_objtype,
              obj.low,
              obj.high
+            )
+           )
+
+def gen_definition_enum_field(field):
+    return ('''
+            {%s,
+              %d,
+              %s,
+              %s,
+              %s}
+            ''' %
+            ('&OpcUa_EnumField_EncodeableType',
+             field.value,
+             generate_localized_text(None),
+             generate_localized_text(None),
+             generate_string(field.name)
+            )
+           )
+
+
+def gen_definition_struct_field(field):
+    array_dimensions =('(uint32_t[]){%s}' % ','.join([str(arraydim) for arraydim in field.arraydimensions])
+                       if field.arraydimensions not in (None, []) else 'NULL')
+    return ('''
+            {%s,
+              %s,
+              %s,
+              %s,
+              %d,
+              %d,
+              %s,
+              %d,
+              %s}
+            ''' %
+            ('&OpcUa_StructureField_EncodeableType',
+             generate_string(field.name),
+             generate_localized_text(None),
+             generate_nodeid(field.datatype),
+             field.valuerank,
+             len(field.arraydimensions),
+             array_dimensions,
+             field.maxstringlength,
+             boolean_to_string(field.allowsubtypes))
+           )
+
+def generate_definition_fields(obj):
+    if obj.is_structure:
+        gen_type = 'OpcUa_StructureField'
+        gen_func = gen_definition_struct_field
+    else:
+        gen_type = 'OpcUa_EnumField'
+        gen_func = gen_definition_enum_field
+    
+    c_array = '(%s[]){%s}' % (gen_type, ','.join(map(gen_func, obj.fields))) if obj.fields not in (None, []) else 'NULL'
+    return c_array
+
+def generate_definition_ext_obj(obj):
+    if obj.is_structure:
+        structure_type = 'OpcUa_StructureType_Structure'
+        if obj.structure_with_subtypes:
+            structure_type = 'OpcUa_StructureType_StructureWithSubtypedValues'
+        return ('''
+            (%s[])
+            {{%s,
+             %s,
+             %s,
+             %s,
+             %d,
+             %s}}
+            ''' %
+            ('OpcUa_StructureDefinition',
+             obj.extobj_objtype,
+             generate_nodeid(obj.default_encoding_id),
+             generate_nodeid(obj.base_data_type_id),
+             structure_type,
+             len(obj.fields),
+             generate_definition_fields(obj),
+            )
+           )
+    else:
+        return ('''
+            (%s[])
+            {{%s,
+             %d,
+             %s}}
+            ''' %
+            ('OpcUa_EnumDefinition',
+             obj.extobj_objtype,
+             len(obj.fields),
+             generate_definition_fields(obj),
             )
            )
 
@@ -1176,7 +1369,67 @@ def generate_value_variant(val):
     else:
         raise CodeGenerationError('Unknown value type: %d' % val.ty)
 
-def parse_uanode(xml_node, source, aliases):
+def collect_dt_definition(aliases, dt_node, dt_xml_node):
+
+    definition_node = dt_xml_node.find(UA_DEFINITION_TAG)
+
+    if definition_node is not None:
+        # Union are not managed for now => skip
+        is_union = parse_boolean_value(definition_node.get('IsUnion', 'false'))
+        
+    
+    if definition_node is None or is_union:
+        return None
+
+    definition = DataTypeDefinition()
+    
+    for field_node in definition_node:
+        if field_node.tag != UA_FIELD_TAG:
+            raise ParseError('Unexpected child tag %s instead of Field tag in Definition of DataType node %s' % (field_node.tag, dt_xml_node.attrib['NodeId']))
+        name = field_node.get('Name', None)
+        if name is None:
+             raise ParseError('Name attribute missing in Field tag of Definition of DataType node %s' % (dt_xml_node.attrib['NodeId']))
+        
+        value = field_node.get('Value', None)
+        if definition.is_structure is None:
+            if value is not None:
+                is_struct = False
+            else:
+                is_struct = True
+        else:
+            is_struct = definition.is_structure
+             
+        if is_struct and value is not None:
+            raise ParseError('Value attribute unexpected in structure definition of DataType node %s.'
+                             ' If it is an enum definition the Value attribute is expected in first field.' % (dt_xml_node.attrib['NodeId']))
+        
+        datatype = field_node.get('DataType', None)
+        valuerank = field_node.get('ValueRank', None)
+        arraydimensions = field_node.get('ArrayDimensions', None)
+        maxstringlength = field_node.get('MaxStringLength', None)
+        isoptional = field_node.get('IsOptional', None)
+        allowsubtypes = field_node.get('AllowSubTypes', None)
+        struct_fields = [datatype, valuerank, arraydimensions, maxstringlength, isoptional, allowsubtypes]
+
+        if not is_struct and True in [attr is not None for attr in struct_fields]:
+            raise ParseError('Structure field attributes "%s" staticmethod unexpected in enum definition of DataType node %s.' % (struct_fields, dt_xml_node.attrib['NodeId']))
+
+        if isoptional is not None:
+            # Optional fields are not managed for now => skip
+            return None
+        
+        if is_struct:
+            field = StructureField(name, aliases.get(datatype, datatype), valuerank, arraydimensions, maxstringlength, allowsubtypes)
+        else:
+            field = EnumField(name, value)
+        definition.add_field(field)
+    
+    if len(definition.fields) == 0:
+        definition = None
+
+    return definition    
+
+def parse_uanode(no_dt_definition, xml_node, source, aliases):
     parse_element(source, xml_node.tag)
     nodeid = NodeId.parse(xml_node.attrib['NodeId'])
     browse_name = QName.parse(xml_node.attrib['BrowseName'])
@@ -1199,7 +1452,7 @@ def parse_uanode(xml_node, source, aliases):
         if 'DataType' in xml_node.attrib:
             node.data_type = parse_datatype_attribute(xml_node.attrib['DataType'], aliases)
         else:
-            # TODO: VariableType DataType ?
+            # TODO: DataType = "i=24" (to be done in SOPC_AddressSpace_Node_Initialize too)
             node.data_type = NodeId(0,0,0)
 
         node.value_rank = parse_value_rank_attribute(xml_node)
@@ -1214,6 +1467,9 @@ def parse_uanode(xml_node, source, aliases):
 
     if xml_node.tag == UA_METHOD_TAG:
         node.executable = (parse_boolean_value(xml_node.get('Executable', 'true')))
+
+    if xml_node.tag == UA_DATA_TYPE_TAG and not no_dt_definition:
+        node.definition = collect_dt_definition(aliases, node, xml_node)
 
     return node
 
@@ -1274,7 +1530,7 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
     )
 
 
-def generate_item_object(is_const_addspace, ua_node):
+def generate_item_object(is_const_addspace, nodes, ua_node):
     return generate_item(is_const_addspace, ua_node, 'Object', 'object')
 
 
@@ -1289,7 +1545,7 @@ def default_variable_status(ua_node):
         value_status='OpcUa_UncertainInitialValue'
     return value_status
 
-def generate_item_variable(is_const_addspace, ua_node):
+def generate_item_variable(is_const_addspace, nodes, ua_node):
     value_status = default_variable_status(ua_node)
     return generate_item(is_const_addspace, ua_node, 'Variable', 'variable', value_status,
                          Value=generate_value_variant(ua_node.value),
@@ -1298,26 +1554,34 @@ def generate_item_variable(is_const_addspace, ua_node):
                          AccessLevel=str(number_coalesce(ua_node.accesslevel, 1)))
 
 
-def generate_item_variable_type(is_const_addspace, ua_node):
+def generate_item_variable_type(is_const_addspace, nodes, ua_node):
     value_status = default_variable_status(ua_node)
     return generate_item(is_const_addspace, ua_node, 'VariableType', 'variable_type', value_status,
                          Value=generate_value_variant(ua_node.value),
                          DataType=generate_nodeid(ua_node.data_type),
                          ValueRank="(%d)" % ua_node.value_rank)
 
-def generate_item_object_type(is_const_addspace, ua_node):
+def generate_item_object_type(is_const_addspace, nodes, ua_node):
     return generate_item(is_const_addspace, ua_node, 'ObjectType', 'object_type')
 
 
-def generate_item_reference_type(is_const_addspace, ua_node):
+def generate_item_reference_type(is_const_addspace, nodes, ua_node):
     return generate_item(is_const_addspace, ua_node, 'ReferenceType', 'reference_type')
 
+def generate_item_data_type(is_const_addspace, nodes, ua_node):
+    dt_definition = None
+    if ua_node.definition is not None:
+        ua_node.definition.finalize(ua_node, nodes)
+        is_not_pointer = True
+        dt_definition = generate_extension_object(ua_node.definition, generate_definition_ext_obj, is_array=is_not_pointer)
+    if dt_definition is None:
+        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type')
+    else:
+        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type',                              
+                             DataTypeDefinition = dt_definition)
 
-def generate_item_data_type(is_const_addspace, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type')
 
-
-def generate_item_method(is_const_addspace, ua_node):
+def generate_item_method(is_const_addspace, nodes, ua_node):
     return generate_item(is_const_addspace, ua_node, 'Method', 'method',
                          Executable= 'true' if ua_node.executable else 'false')
 
@@ -1345,9 +1609,10 @@ def no_metadata_write_in_accesslevel(ua_node, access_level):
 
 DEBUG_CURRENT_LINE = None
 # Returns an array of Node objects
-def generate_address_space(is_const_addspace, source, out):
+def generate_address_space(is_const_addspace, no_dt_definition, source, out):
     global DEBUG_CURRENT_LINE
     aliases = {}
+    node_id_to_node = {}
     variables = list()
     n_items = 0
 
@@ -1362,7 +1627,8 @@ def generate_address_space(is_const_addspace, source, out):
 
     expect_element(source, UA_NODESET_TAG).clear()
 
-    while True:
+    end = False
+    while not end:
         try:
             ev, n = next(source)
         except StopIteration:
@@ -1372,6 +1638,44 @@ def generate_address_space(is_const_addspace, source, out):
         except:
             DEBUG_CURRENT_LINE = str(n)
         if ev == 'end' and n.tag == UA_NODESET_TAG:
+            end = True
+            continue
+
+        check_element(n)
+
+        gen_func = GEN_ITEM_FUNCS.get(n.tag, None)
+        if gen_func:
+            ua_node = parse_uanode(no_dt_definition, n, source, aliases)
+            node_id_to_node[str(ua_node.nodeid)] = ua_node
+        elif n.tag == UA_ALIASES_TAG:
+            parse_element(source, n.tag)
+            aliases.update(collect_aliases(n))
+        else:
+            skip_element(source, n.tag)
+
+        n.clear()
+    
+    for ua_node in node_id_to_node.values():
+        gen_func = GEN_ITEM_FUNCS.get(ua_node.tag, None)
+        if is_const_addspace and ua_node.tag == UA_VARIABLE_TAG:
+            # Add specific case for Variables to store the non constant part into array of Variants
+            access_level= no_metadata_write_in_accesslevel(ua_node, number_coalesce(ua_node.accesslevel, 1))
+            out.write(generate_item(is_const_addspace, ua_node, 'Variable', 'variable', '0x00',
+                                    # Set Variant index as Variant value in constant item
+                                    Value=generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', len(variables), False, str),
+                                    DataType=generate_nodeid(ua_node.data_type),
+                                    ValueRank="(%d)" % ua_node.value_rank,
+                                    AccessLevel=str(access_level)))
+            # Set Variant value in variable Variants array
+            variables.append(generate_value_variant(ua_node.value))
+            n_items += 1    
+        elif gen_func:
+            out.write(gen_func(is_const_addspace, node_id_to_node, ua_node))
+            n_items += 1
+        else:
+            assert(False)
+
+    if end:
             out.write('};\n')
             if is_const_addspace:
                 out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
@@ -1389,36 +1693,6 @@ def generate_address_space(is_const_addspace, source, out):
                 out.write('SOPC_Variant* SOPC_Embedded_VariableVariant = NULL;\n')
 
             out.write('const uint32_t SOPC_Embedded_VariableVariant_nb = %d;\n' % len(variables))
-            return
-
-        check_element(n)
-
-        gen_func = GEN_ITEM_FUNCS.get(n.tag, None)
-
-        if is_const_addspace and n.tag == UA_VARIABLE_TAG:
-            ua_node = parse_uanode(n, source, aliases)
-            # Add specific case for Variables to store the non constant part into array of Variants
-            access_level= no_metadata_write_in_accesslevel(ua_node, number_coalesce(ua_node.accesslevel, 1))
-            out.write(generate_item(is_const_addspace, ua_node, 'Variable', 'variable', '0x00',
-                                    # Set Variant index as Variant value in constant item
-                                    Value=generate_variant('SOPC_UInt32_Id', 'uint32_t', 'Uint32', len(variables), False, str),
-                                    DataType=generate_nodeid(ua_node.data_type),
-                                    ValueRank="(%d)" % ua_node.value_rank,
-                                    AccessLevel=str(access_level)))
-            # Set Variant value in variable Variants array
-            variables.append(generate_value_variant(ua_node.value))
-            n_items += 1
-        elif gen_func:
-            out.write(gen_func(is_const_addspace, parse_uanode(n, source, aliases)))
-            n_items += 1
-        elif n.tag == UA_ALIASES_TAG:
-            parse_element(source, n.tag)
-            aliases.update(collect_aliases(n))
-        else:
-            skip_element(source, n.tag)
-
-        n.clear()
-
 
 def main():
     global DEBUG_CURRENT_LINE
@@ -1429,12 +1703,15 @@ def main():
                            help='Path to the generated C file')
     argparser.add_argument('--const_addspace', action='store_true', default=False,
                            help='Flag to set the generated address space as a const (default: False)')
+    argparser.add_argument('--no_dt_definition', action='store_true', default=False,
+                           help='Flag to avoid parsing the DataType definition (default: False)')
+
     args = argparser.parse_args()
 
     print('Generating C address space (const=%s)...' % str(args.const_addspace))
     with open(args.xml_file, 'rb') as xml_fd, open(args.c_file, 'w', encoding='utf8') as out_fd:
         try:
-            generate_address_space(args.const_addspace, iterparse(xml_fd, events=('start', 'end')), out_fd)
+            generate_address_space(args.const_addspace, args.no_dt_definition, iterparse(xml_fd, events=('start', 'end')), out_fd)
         except ParseError as e:
             sys.stderr.write('Woops, an error occurred: %s \n' % str(e))
             if DEBUG_CURRENT_LINE :

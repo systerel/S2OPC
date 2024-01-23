@@ -3131,6 +3131,35 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0, 0, NULL}, 0},
                 }
             },
+            .DataTypeDefinition = {{{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 122}, {0, 0, NULL}, 0},SOPC_ExtObjBodyEncoding_Object,.Body.Object = {
+            (OpcUa_StructureDefinition[])
+            {{&OpcUa_StructureDefinition_EncodeableType,
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},
+             OpcUa_StructureType_Structure,
+             2,
+             (OpcUa_StructureField[]){
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("CertificateData")-1, 1, (SOPC_Byte*) "CertificateData"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("Signature")-1, 1, (SOPC_Byte*) "Signature"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 15},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            }}}
+            , &OpcUa_StructureDefinition_EncodeableType}},
         }}
     },
     {
@@ -3153,6 +3182,75 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0, 0, NULL}, 0},
                 }
             },
+            .DataTypeDefinition = {{{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 122}, {0, 0, NULL}, 0},SOPC_ExtObjBodyEncoding_Object,.Body.Object = {
+            (OpcUa_StructureDefinition[])
+            {{&OpcUa_StructureDefinition_EncodeableType,
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},
+             OpcUa_StructureType_Structure,
+             6,
+             (OpcUa_StructureField[]){
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("ProductUri")-1, 1, (SOPC_Byte*) "ProductUri"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("ManufacturerName")-1, 1, (SOPC_Byte*) "ManufacturerName"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("ProductName")-1, 1, (SOPC_Byte*) "ProductName"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("SoftwareVersion")-1, 1, (SOPC_Byte*) "SoftwareVersion"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("BuildNumber")-1, 1, (SOPC_Byte*) "BuildNumber"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 12},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("BuildDate")-1, 1, (SOPC_Byte*) "BuildDate"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 294},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            }}}
+            , &OpcUa_StructureDefinition_EncodeableType}},
         }}
     },
     {
@@ -3181,6 +3279,48 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0, 0, NULL}, 0},
                 }
             },
+            .DataTypeDefinition = {{{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 123}, {0, 0, NULL}, 0},SOPC_ExtObjBodyEncoding_Object,.Body.Object = {
+            (OpcUa_EnumDefinition[])
+            {{&OpcUa_EnumDefinition_EncodeableType,
+             6,
+             (OpcUa_EnumField[]){
+            {&OpcUa_EnumField_EncodeableType,
+              0,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("None")-1, 1, (SOPC_Byte*) "None"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              1,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Cold")-1, 1, (SOPC_Byte*) "Cold"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              2,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Warm")-1, 1, (SOPC_Byte*) "Warm"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              3,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Hot")-1, 1, (SOPC_Byte*) "Hot"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              4,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Transparent")-1, 1, (SOPC_Byte*) "Transparent"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              5,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("HotAndMirrored")-1, 1, (SOPC_Byte*) "HotAndMirrored"}}
+            }}}
+            , &OpcUa_EnumDefinition_EncodeableType}},
         }}
     },
     {
@@ -3239,6 +3379,60 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 29}, {0, 0, NULL}, 0},
                 }
             },
+            .DataTypeDefinition = {{{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 123}, {0, 0, NULL}, 0},SOPC_ExtObjBodyEncoding_Object,.Body.Object = {
+            (OpcUa_EnumDefinition[])
+            {{&OpcUa_EnumDefinition_EncodeableType,
+             8,
+             (OpcUa_EnumField[]){
+            {&OpcUa_EnumField_EncodeableType,
+              0,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Running")-1, 1, (SOPC_Byte*) "Running"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              1,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Failed")-1, 1, (SOPC_Byte*) "Failed"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              2,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("NoConfiguration")-1, 1, (SOPC_Byte*) "NoConfiguration"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              3,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Suspended")-1, 1, (SOPC_Byte*) "Suspended"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              4,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Shutdown")-1, 1, (SOPC_Byte*) "Shutdown"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              5,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Test")-1, 1, (SOPC_Byte*) "Test"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              6,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("CommunicationFault")-1, 1, (SOPC_Byte*) "CommunicationFault"}}
+            ,
+            {&OpcUa_EnumField_EncodeableType,
+              7,
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {sizeof("Unknown")-1, 1, (SOPC_Byte*) "Unknown"}}
+            }}}
+            , &OpcUa_EnumDefinition_EncodeableType}},
         }}
     },
     {
@@ -3291,6 +3485,75 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22}, {0, 0, NULL}, 0},
                 }
             },
+            .DataTypeDefinition = {{{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 122}, {0, 0, NULL}, 0},SOPC_ExtObjBodyEncoding_Object,.Body.Object = {
+            (OpcUa_StructureDefinition[])
+            {{&OpcUa_StructureDefinition_EncodeableType,
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0},
+             {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 22},
+             OpcUa_StructureType_Structure,
+             6,
+             (OpcUa_StructureField[]){
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("StartTime")-1, 1, (SOPC_Byte*) "StartTime"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 294},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("CurrentTime")-1, 1, (SOPC_Byte*) "CurrentTime"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 294},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("State")-1, 1, (SOPC_Byte*) "State"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 852},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("BuildInfo")-1, 1, (SOPC_Byte*) "BuildInfo"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 338},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("SecondsTillShutdown")-1, 1, (SOPC_Byte*) "SecondsTillShutdown"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 7},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            ,
+            {&OpcUa_StructureField_EncodeableType,
+              {sizeof("ShutdownReason")-1, 1, (SOPC_Byte*) "ShutdownReason"},
+              {{0, 0, NULL}, {0, 0, NULL}},
+              {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 21},
+              -1,
+              0,
+              NULL,
+              0,
+              false}
+            }}}
+            , &OpcUa_StructureDefinition_EncodeableType}},
         }}
     },
     {
