@@ -245,6 +245,11 @@ static void addspace_for_each_equal(const uintptr_t key, const uintptr_t value, 
         break;
     case OpcUa_NodeClass_DataType:
         ck_assert_uint_eq(left->data.data_type.IsAbstract, right->data.data_type.IsAbstract);
+        status = SOPC_ExtensionObject_Compare(&left->data.data_type.DataTypeDefinition,
+                                              &right->data.data_type.DataTypeDefinition, &compare);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(0, compare);
+
         break;
     case OpcUa_NodeClass_View:
         ck_assert_uint_eq(left->data.view.ContainsNoLoops, right->data.view.ContainsNoLoops);
