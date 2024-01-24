@@ -733,11 +733,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
             // Increment to obtain the array content field
             ++i;
             SOPC_ASSERT(i < type->NoOfFields);
-            if (pLeftLength < pRightLength)
+            if (*pLeftLength < *pRightLength)
             {
                 resultComp = -1;
             }
-            else if (pLeftLength > pRightLength)
+            else if (*pLeftLength > *pRightLength)
             {
                 resultComp = 1;
             }
