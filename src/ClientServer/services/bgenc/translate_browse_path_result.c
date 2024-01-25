@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 25/01/2024 00:53:30
+ Date                 : 25/01/2024 01:07:20
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -223,11 +223,10 @@ void translate_browse_path_result__treat_browse_result_one_source(
             translate_browse_path_result__l_browseResult_index,
             &translate_browse_path_result__l_translate_statusCode);
          if (translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__c_StatusCode_indet) {
-            if ((translate_browse_path_result__l_translate_statusCode == constants_statuscodes_bs__e_sc_ok) &&
-               (*translate_browse_path_result__statusCode_operation == constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server)) {
-               ;
+            if (translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__e_sc_ok) {
+               *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
             }
-            else {
+            else if (*translate_browse_path_result__statusCode_operation != constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server) {
                *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
             }
          }
