@@ -52,9 +52,9 @@ HIERARCHICAL_REFERENCE_TYPES = frozenset([
     'HasSubtype',
     'HasProperty',
     'HasComponent',
-    'HasOrderedComponent'
+    'HasOrderedComponent',
+    "HasEncoding" # assimilated as hierarchical reference since target only depends on source node
     ])
-
 
 TYPE_DEFINITION_REFERENCE_TYPE = 'HasTypeDefinition'
 
@@ -99,7 +99,6 @@ def _check_declared_nid(nid, ns_count, matcher):
 def _is_hierarchical_ref(ref: ET.Element):
     ref_type = ref.get('ReferenceType')
     return ref_type in HIERARCHICAL_REFERENCE_TYPES
-
 
 def _is_ns0(nid):
     return not nid.startswith('ns=') or nid.startswith('ns=0;')
@@ -943,6 +942,7 @@ def make_argparser():
                         help='''
                         For each given nodeId, remove the node along with all its descendants,
                         except for those with another ancestry.
+                        Note: HasEncoding is assimilated as a hierarchical link (target node existence depends on source node).
                         This  option forces the creation of reciprocal references (sanitize).
                         ''')
     parser.add_argument('--no-sanitize', action='store_false', dest='sanitize',
@@ -958,7 +958,8 @@ def make_argparser():
     rm_unused.add_argument('--remove-orphans', action='store_true', dest='remove_orphans',
                         help='''
                         Remove all orphan nodes, i.e. nodes with no hierarchical parent, except for Root node "i=84".
-                        This  option forces the creation of reciprocal references (sanitize).
+                        Note: HasEncoding is assimilated as a hierarchical link (target node existence depends on source node).
+                        This option forces the creation of reciprocal references (sanitize).
                         ''')
     rm_unused.add_argument('--remove-unused', action='store_true', dest='remove_unused',
                         help='''

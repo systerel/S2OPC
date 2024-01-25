@@ -36,7 +36,7 @@ cd $(dirname "$0")
 gen_nodeset s2opc_pubsub_nodeset.xml --remove-max-node-management ../../../ClientServer/data/address_space/s2opc_base_nodeset_origin.xml s2opc_pubsub_demo_data_origin.xml
 
 # Generate demo NodeSet with limited base info data
-# "i=92" and "i=93": remove data types XML and Binary descriptions
+# "i=92" and "i=93": remove data types XML and Binary descriptions (deprecated nodes)
 # "i=2004" "i=2013" "i=2020" "i=2033" "i=2034" "i=2138" "i=3051" "i=11645" "i=120" "i=11564": remove types used by Server node (except some DataType and ModellingRuleType)
 # "i=11715" Namespaces node in Server node which is not mandatory
 
