@@ -312,52 +312,6 @@ XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
     </connection>
 </PubSub>"""
 
-XML_PUBSUB_LOOP_SECU_SKS_FALLBACK_SUCCEED = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
-            <!-- no SK server defined => fallback mechanism use local key files -->
-            <dataset writerId="50">
-                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
-            </dataset>
-        </message>
-    </connection>
-    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="signAndEncrypt">
-            <!-- no SK server defined => fallback mechanism use local key files -->
-            <dataset writerId="50">
-                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
-            </dataset>
-        </message>
-    </connection>
-</PubSub>"""
-
-XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
-    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
-        <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
-            <skserver endpointUrl="opc.tcp://localhost:4841" serverCertPath="./server_public/sks_server_2k_cert.der" />
-            <dataset>
-                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
-                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
-                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
-            </dataset>
-        </message>
-    </connection>
-    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
-        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1">
-            <dataset>
-                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
-                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
-                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
-            </dataset>
-        </message>
-    </connection>
-</PubSub>"""
-
-
 XML_PUBSUB_LOOP_SECU_FAIL_1 = """<PubSub>
     <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
         <message groupId="1" publishingInterval="200" groupVersion="1" securityMode="signAndEncrypt">
