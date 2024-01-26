@@ -804,7 +804,7 @@ SOPC_NetworkMessage_Error_Code SOPC_UADP_NetworkMessage_Encode_Buffers(SOPC_Data
     uint32_t bufferPosition = 0;
 
     if (NULL == buffer_header || NULL == buffer_payload || NULL != *buffer_header || NULL != *buffer_payload ||
-        NULL == nm)
+        NULL == nm || (securityEnabled && NULL == security->groupKeys))
     {
         return SOPC_NetworkMessage_Error_Code_InvalidParameters;
     }
