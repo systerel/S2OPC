@@ -28,7 +28,6 @@
  * - initialize S2OPC and logs,
  * - configure the PubSub using an XML file,
  * - setup the PubSub callbacks (GetSourceVariables, SetTargetVariables),
- * - setup some very simple encryption/signature,
  * - start the PubSub,
  * - stop and cleanup.
  *
