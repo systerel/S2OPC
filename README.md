@@ -143,7 +143,8 @@ Note: PubSub is only available on S2OPC Toolkit version > 0.11.0
 
 The S2OPC PubSub implementation properties are the following:
 - the communication layer is Ethernet only, UDP or MQTT (Paho library required),
-- the encoding type is UADP,
+- 2 encoding types: UADP (default) / JSON,
+- JSON encoding only supports the following data types: Boolean, UInt16/32, Int16/32, Float/Double, String,
 - security is available (with helpers to implement SKS),
 - no override management (cf §6.2.10). That means LastUsableValue is used in any cases,
 - variable management only, not events,
