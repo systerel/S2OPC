@@ -380,11 +380,12 @@ SOPC_ExtensionObject* SOPC_AddressSpace_Get_DataTypeDefinition(SOPC_AddressSpace
 {
     SOPC_ASSERT(space != NULL);
 
-    switch (node->node_class)
+    if (OpcUa_NodeClass_DataType == node->node_class)
     {
-    case OpcUa_NodeClass_DataType:
         return &node->data.data_type.DataTypeDefinition;
-    default:
+    }
+    else
+    {
         SOPC_ASSERT(false && "Current element has no DataTypeDefinition.");
         return NULL;
     }

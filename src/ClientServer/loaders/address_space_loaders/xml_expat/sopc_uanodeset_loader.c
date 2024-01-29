@@ -167,7 +167,7 @@ static bool start_alias(struct parse_context_t* ctx, const XML_Char** attrs)
 {
     SOPC_ASSERT(ctx->current_alias_alias == NULL);
 
-    for (size_t i = 0; attrs[i]; i++)
+    for (size_t i = 0; NULL != attrs[i]; i++)
     {
         const char* attr = attrs[i];
 
@@ -513,7 +513,7 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
     SOPC_AddressSpace_Node_Initialize(ctx->space, &ctx->node, element_type);
     // Note: value_status default value set on NodeId parsing
 
-    for (size_t i = 0; attrs[i]; ++i)
+    for (size_t i = 0; NULL != attrs[i]; ++i)
     {
         const char* attr = attrs[i];
 
@@ -670,7 +670,7 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
     OpcUa_ReferenceNode ref;
     OpcUa_ReferenceNode_Initialize(&ref);
 
-    for (size_t i = 0; attrs[i]; ++i)
+    for (size_t i = 0; NULL != attrs[i]; ++i)
     {
         const char* attr = attrs[i];
 
@@ -720,7 +720,7 @@ static bool start_node_definition(struct parse_context_t* ctx, const XML_Char** 
     ctx->is_struct_with_subtypes = false;
 
     bool skip = false;
-    for (size_t i = 0; attrs[i]; ++i)
+    for (size_t i = 0; NULL != attrs[i]; ++i)
     {
         const char* attr = attrs[i];
 
@@ -766,7 +766,7 @@ static bool start_node_definition_field_parse_attrs(struct parse_context_t* ctx,
                                                     const char** allowSubtypes,
                                                     bool* unsupportedAttrs)
 {
-    for (size_t i = 0; attrs[i]; ++i)
+    for (size_t i = 0; NULL != attrs[i]; ++i)
     {
         const char* attr = attrs[i];
         const char* attr_val = attrs[++i];
