@@ -2126,7 +2126,7 @@ static SOPC_ReturnStatus WriteVariantNonArrayBuiltInType(SOPC_Buffer* buf,
 // 0 Means not optimizable and other values represent the size in byte of each element to copy
 static size_t getBuiltinOptimizableSize(SOPC_BuiltinId builtInTypeId)
 {
-    if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
+    if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX)
     {
         return 0;
     }
@@ -2164,7 +2164,7 @@ static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
+    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -2547,7 +2547,7 @@ static SOPC_ReturnStatus ReadVariantArrayBuiltInType(SOPC_Buffer* buf,
     {
         return SOPC_STATUS_INVALID_STATE;
     }
-    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX + 1)
+    else if (builtInTypeId <= 0 || builtInTypeId > SOPC_BUILTINID_MAX)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
