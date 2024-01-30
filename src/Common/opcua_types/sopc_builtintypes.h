@@ -684,7 +684,7 @@ SOPC_ReturnStatus SOPC_String_InitializeFromCString(SOPC_String* string, const c
 
 /**
  * \warning This function allocates new memory, so the return value must be freed after this call function.
- * \brief Retrieve the C-String of a SOPC_String pointer.
+ * \brief Retrieve the C-String of a SOPC_String pointer or '\0' for a SOPC_String with length <= 0.
  * \param string The SOPC_String pointer whose content will be extracted.
  * \return A valid C-String otherwise it returns NULL pointer if allocation failed or there were bad input parameters.
  */
@@ -695,7 +695,7 @@ char* SOPC_String_GetCString(const SOPC_String* string);
  *  - The returned value can only be used while the input object is defined.
  *  - The returned value shall not be freed.
  *
- * \brief Retrieve the raw C-String of a SOPC_String pointer.
+ * \brief Retrieve the raw C-String of a SOPC_String pointer or '\0' for a SOPC_String with length <= 0.
  * \param string The SOPC_String pointer which content will be extracted.
  * \return A valid C-String. Returns NULL if \a string was NULL.
  * \note The presence of a terminated NULL char is ensured by all ::SOPC_String constructors.

@@ -1158,24 +1158,27 @@ SOPC_ReturnStatus SOPC_String_InitializeFromCString(SOPC_String* string, const c
 
 char* SOPC_String_GetCString(const SOPC_String* string)
 {
-    char* cString = NULL;
-    int32_t idx = 0;
-    if (string != NULL && string->Length > 0)
+    if (string == NULL)
     {
-        cString = SOPC_Malloc(sizeof(char) * ((size_t) string->Length + 1));
-        if (cString != NULL)
+        return NULL;
+    }
+    // If SOPC_String length <= 0 we return a copy of an empty C string terminated with '\0'
+    const SOPC_Byte nullByte = '\0';
+    const SOPC_Byte* data = (NULL == string->Data || string->Length <= 0) ? &nullByte : string->Data;
+    size_t length = (string->Length > 0 && NULL != string->Data) ? (size_t) string->Length : 0;
+    char* cString = SOPC_Malloc(sizeof(char) * (length + 1));
+    if (cString != NULL)
+    {
+        if (CHAR_BIT == 8)
         {
-            if (CHAR_BIT == 8)
+            memcpy(cString, data, length + 1);
+        }
+        else
+        {
+            // On systems for which char is not encoded on 1 byte
+            for (size_t idx = 0; idx < length + 1; idx++)
             {
-                memcpy(cString, string->Data, (size_t) string->Length + 1);
-            }
-            else
-            {
-                // On systems for which char is not encoded on 1 byte
-                for (idx = 0; idx < string->Length + 1; idx++)
-                {
-                    cString[idx] = (char) string->Data[idx];
-                }
+                cString[idx] = (char) data[idx];
             }
         }
     }
