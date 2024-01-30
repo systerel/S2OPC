@@ -485,12 +485,10 @@ def handle_arrayDimensions(arrayDimensions, valueRank, index, result):
     for _ in range(valueRank - len(arrayDimensionsTab)):
         arrayDimensionsTab.append("0")
     result.add("""
-        uint32_t* arrayDimensions_%d_alloc = (uint32_t*) SOPC_Calloc(%d, sizeof(uint32_t));
-        const uint32_t arrayDimensions_%d[%d] = {%d""" % (index, valueRank, index, valueRank, int(arrayDimensionsTab.pop(0))))
+        uint32_t arrayDimensions_%d[%d] = {%d""" % (index, valueRank, int(arrayDimensionsTab.pop(0))))
     for dimensions in arrayDimensionsTab:
-        result.add(", %d" %int(dimensions),)
-    result.add("""};
-        memcpy(arrayDimensions_%d_alloc, arrayDimensions_%d, sizeof(arrayDimensions_%d));""" % (index, index, index))
+        result.add(", %d" %int(dimensions))
+    result.add("""};""")
 
 # type is Pub or Sub
 def handleVariable(mode, variable, index, result):
@@ -518,7 +516,7 @@ def handleVariable(mode, variable, index, result):
             arrayDimensions = str(getOptionalAttribute(variable, ATTRIBUTE_VARIABLE_ARRAY_DIMENSIONS,"0"))
             handle_arrayDimensions(arrayDimensions, valueRank, index, result)
             result.add("""
-            SOPC_PubSubConfig_SetSubVariableAt(dataset, %d, "%s", %s, %d, arrayDimensions_%d); // %s""" % (index, nodeId, dataid, valueRank, index, displayName))
+            SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s, %d, arrayDimensions_%d); // %s""" % (index, nodeId, dataid, valueRank, index, displayName))
         else :
             result.add("""
             SOPC_PubSubConfig_SetSubVariableAt(dsReader, %d, "%s", %s, %d, NULL); // %s""" % (index, nodeId, dataid, valueRank, displayName))
@@ -789,8 +787,8 @@ static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint32_t* arrayDimensions)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
-    SOPC_PubSub_ArrayDimension arrayDimension = {.valuerank = valueRank, .arrayDimensions = arrayDimensions};
-    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldmetadata, &arrayDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
@@ -874,8 +872,8 @@ static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
 
     /* fieldmetadata: type the field */
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
-    SOPC_PubSub_ArrayDimension arrayDimension = {.valuerank = valueRank, .arrayDimensions = arrayDimensions};
-    SOPC_FieldMetaData_ArrayDimension_Move(fieldmetadata, &arrayDimension);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldmetadata, &arrayDimension);
     /* FieldTarget: link to the source/target data */
     SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldmetadata);
     SOPC_ASSERT(fieldTarget != NULL);
