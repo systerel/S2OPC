@@ -376,11 +376,15 @@ OPERATIONS
         p_user_token : t_user_token_i &
         p_user_token : t_user_token
     THEN
-        p_sc_valid_user :: {e_sc_ok, e_sc_bad_identity_token_invalid, e_sc_bad_identity_token_rejected, e_sc_bad_user_access_denied}
+        p_sc_valid_user
+        :(
+            p_sc_valid_user : t_StatusCode_i &
+            p_sc_valid_user : t_StatusCode &
+            p_sc_valid_user : {e_sc_ok, e_sc_bad_identity_token_invalid, e_sc_bad_identity_token_rejected, e_sc_bad_user_access_denied})
     END
     ;
 
-    p_valid_x509_token, p_x509_token <-- set_x509_token_from_user (p_user) =
+    p_valid_x509_token, p_x509_token <-- allocate_x509_token_from_user (p_user) =
     PRE
         p_user : t_user_i &
         p_user : t_user
@@ -394,7 +398,7 @@ OPERATIONS
     END
     ;
 
-    deallocate_user_token (p_user_token) =
+    deallocate_x509_token (p_user_token) =
     PRE
         p_user_token : t_user_token_i
     THEN
@@ -418,6 +422,15 @@ OPERATIONS
         p_lost_channel : s_channel_connected
     THEN
         skip
+    END
+    ;
+
+    ret <-- session_has_user_server(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        ret :: BOOL
     END
     ;
 

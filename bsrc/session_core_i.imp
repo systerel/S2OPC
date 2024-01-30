@@ -64,13 +64,14 @@ PROMOTES
     set_session_user_client,
     get_session_user_client,
     get_session_user_server,
+    session_has_user_server,
     get_server_session_preferred_locales,
     deallocate_user,
     get_local_user,
     has_user_token_policy_available,
-    set_x509_token_from_user,
+    allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
-    deallocate_user_token
+    deallocate_x509_token
 
 LOCAL_OPERATIONS
 

@@ -35,9 +35,9 @@ PROMOTES
     get_local_user,
     has_user_token_policy_available,
     get_user_token_type_from_token,
-    set_x509_token_from_user,
+    allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
-    deallocate_user_token
+    deallocate_x509_token
 
 LOCAL_OPERATIONS
 

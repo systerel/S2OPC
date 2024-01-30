@@ -40,14 +40,15 @@ PROMOTES
     is_valid_session,
     client_secure_channel_lost_session_sm,
     server_secure_channel_lost_session_sm,
+    session_has_user_server,
     get_session_user_server,
     get_local_user,
     get_server_session_preferred_locales,
     find_channel_to_close,
     getall_valid_session_channel,
-    set_x509_token_from_user,
+    allocate_x509_token_from_user,
     is_valid_user_x509_authentication,
-    deallocate_user_token
+    deallocate_x509_token
 
 LOCAL_OPERATIONS
 
@@ -158,6 +159,15 @@ LOCAL_OPERATIONS
             sessions_to_iterate /\ sessions_iterated = {}
         )
     END
+    ;
+
+    endpoint_config_idx <-- local_session_get_endpoint_config(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : t_session
+    THEN
+        endpoint_config_idx :: t_endpoint_config_idx_i
+    END
 
 OPERATIONS
 
@@ -240,6 +250,23 @@ OPERATIONS
                 sessions_to_iterate \/ sessions_iterated = t_session
             VARIANT
                 card(sessions_to_iterate)
+            END
+        END
+    END
+    ;
+
+    endpoint_config_idx <-- local_session_get_endpoint_config(p_session) =
+    VAR
+        l_channel,
+        l_continue,
+        l_connected_channel
+    IN
+        endpoint_config_idx := c_endpoint_config_idx_indet;
+        l_continue, l_channel <-- getall_valid_session_channel (p_session);
+        IF l_continue = TRUE THEN
+            l_connected_channel <-- is_connected_channel(l_channel);
+            IF l_connected_channel = TRUE THEN
+                endpoint_config_idx <-- server_get_endpoint_config (l_channel)
             END
         END
     END
@@ -869,15 +896,8 @@ OPERATIONS
 
     /* Get access to server configuration */
     endpoint_config_idx <-- session_get_endpoint_config(p_session) =
-    VAR
-        l_channel,
-        l_continue
-    IN
-        endpoint_config_idx := c_endpoint_config_idx_indet;
-        l_continue, l_channel <-- getall_valid_session_channel (p_session);
-        IF l_continue = TRUE THEN
-            endpoint_config_idx <-- server_get_endpoint_config (l_channel)
-        END
+    BEGIN
+        endpoint_config_idx <-- local_session_get_endpoint_config(p_session)
     END
     ;
 
@@ -885,39 +905,36 @@ OPERATIONS
     VAR
         l_continue,
         l_session,
+        l_valid_session,
+        l_server_side,
         l_endpoint_config_idx,
-        l_valid_channel,
-        l_channel,
+        l_valid_endpoint,
         l_user,
-        l_is_client,
         l_user_token,
         l_valid_token,
         l_valid_user
     IN
         l_continue <-- init_iter_session;
-        IF  l_continue = TRUE THEN
+        IF  l_continue = TRUE THEN /* only for proving */
             WHILE l_continue = TRUE DO
-                l_endpoint_config_idx := c_endpoint_config_idx_indet;
-                l_user := c_user_indet;
-                l_user_token := c_user_token_indet;
-                l_valid_token := FALSE;
-                l_valid_user := e_sc_bad_identity_token_invalid;
                 l_continue, l_session <-- continue_iter_session;
-                l_valid_channel, l_channel <-- getall_valid_session_channel (l_session);
-                l_is_client <-- is_client_channel(l_channel);
-                IF l_valid_channel = TRUE & l_is_client = FALSE THEN
-                    l_endpoint_config_idx <-- server_get_endpoint_config (l_channel)
-                END;
-                IF l_endpoint_config_idx /= c_endpoint_config_idx_indet THEN
-                    l_user <-- get_session_user_server(l_session);
-                    l_valid_token, l_user_token <-- set_x509_token_from_user(l_user);
-                    IF l_valid_token = TRUE THEN
-                        l_valid_user <-- is_valid_user_x509_authentication (l_endpoint_config_idx, e_userTokenType_x509, l_user_token);
-                        IF l_valid_user /= e_sc_ok THEN
-                            server_close_session_sm(l_session, l_valid_user)
+                l_valid_session <-- is_valid_session (l_session);
+                IF l_valid_session = TRUE THEN
+                    l_server_side <-- session_has_user_server(l_session);
+                    IF l_server_side = TRUE THEN
+                        l_endpoint_config_idx <-- local_session_get_endpoint_config(l_session);
+                        l_valid_endpoint <-- is_valid_endpoint_config_idx(l_endpoint_config_idx);
+                        IF l_valid_endpoint = TRUE THEN
+                            l_user <-- get_session_user_server(l_session);
+                            l_valid_token, l_user_token <-- allocate_x509_token_from_user(l_user);
+                            IF l_valid_token = TRUE THEN
+                                l_valid_user <-- is_valid_user_x509_authentication (l_endpoint_config_idx, e_userTokenType_x509, l_user_token);
+                                IF l_valid_user /= e_sc_ok THEN
+                                    server_close_session_sm(l_session, l_valid_user)
+                                END;
+                                deallocate_x509_token(l_user_token)
+                            END
                         END
-                        ;
-                        deallocate_user_token(l_user_token)
                     END
                 END
             INVARIANT

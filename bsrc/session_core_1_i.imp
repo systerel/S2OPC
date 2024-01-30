@@ -56,6 +56,7 @@ PROMOTES
     drop_user_server,
     set_session_user_server,
     set_session_user_client,
+    session_has_user_server,
     get_session_user_server,
     get_session_user_client,
     is_same_user_server,

@@ -425,6 +425,15 @@ OPERATIONS
     END
     ;
 
+    ret <-- session_has_user_server(p_session) =
+    PRE
+        p_session : t_session_i &
+        p_session : s_session
+    THEN
+        ret := bool(p_session : dom(a_user_server))
+    END
+    ;
+
     p_user <-- get_session_user_server (session) =
     PRE
         session : t_session_i &
@@ -432,6 +441,7 @@ OPERATIONS
         session : dom(a_user_server)
     THEN
         p_user :(p_user : t_user_i &
+                 p_user : t_user &
                  p_user = a_user_server (session))
     END
     ;
