@@ -1571,6 +1571,7 @@ static bool finalize_node_definition(struct parse_context_t* ctx)
             }
             if (NULL == definition_fields || SOPC_STATUS_OK != status || NULL == ctx->structure_definition_nodeIds)
             {
+                SOPC_Free(definition_fields);
                 LOG_MEMORY_ALLOCATION_FAILURE;
                 return false;
             }
@@ -1579,21 +1580,17 @@ static bool finalize_node_definition(struct parse_context_t* ctx)
                                               : OpcUa_StructureType_Structure);
             structure_definition->NoOfFields = (int32_t) n_fields;
             structure_definition->Fields = definition_fields;
-            SOPC_NodeId* nodeId = SOPC_Calloc(1, sizeof(*nodeId));
-            bool bres = (nodeId != NULL);
+            SOPC_NodeId nodeId;
+            SOPC_NodeId_Initialize(&nodeId);
+            status = SOPC_NodeId_Copy(&nodeId, &ctx->node.data.data_type.NodeId);
+            bool bres = (SOPC_STATUS_OK == status);
             if (bres)
             {
-                SOPC_NodeId_Initialize(nodeId);
-                status = SOPC_NodeId_Copy(nodeId, &ctx->node.data.data_type.NodeId);
-                bres = (SOPC_STATUS_OK == status);
+                bres = SOPC_Array_Append(ctx->structure_definition_nodeIds, nodeId);
             }
-            if (bres)
-            {
-                bres = SOPC_Array_Append(ctx->structure_definition_nodeIds, *nodeId);
-            }
-            SOPC_Free(nodeId);
             if (!bres)
             {
+                SOPC_NodeId_Clear(&nodeId);
                 LOG_MEMORY_ALLOCATION_FAILURE;
                 return false;
             }
@@ -1606,6 +1603,7 @@ static bool finalize_node_definition(struct parse_context_t* ctx)
                                                 &OpcUa_EnumDefinition_EncodeableType, (void**) &enum_definition);
             if (NULL == definition_fields || SOPC_STATUS_OK != status)
             {
+                SOPC_Free(definition_fields);
                 LOG_MEMORY_ALLOCATION_FAILURE;
                 return false;
             }
