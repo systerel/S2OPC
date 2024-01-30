@@ -479,8 +479,10 @@ void user_authentication_bs__is_valid_user_x509_authentication(
         OpcUa_X509IdentityToken* x509Token = user_authentication_bs__p_user_token->Body.Object.Value;
         SOPC_ReturnStatus pkiStatus = SOPC_KeyManager_Certificate_CreateOrAddFromDER(
             x509Token->CertificateData.Data, (uint32_t) x509Token->CertificateData.Length, &pCrtUser);
-        SOPC_UNUSED_RESULT(pkiStatus);
-        pkiStatus = SOPC_PKIProvider_AddCertToRejectedList(authenticationManager->pUsrPKI, pCrtUser);
+        if (SOPC_STATUS_OK == pkiStatus)
+        {
+            pkiStatus = SOPC_PKIProvider_AddCertToRejectedList(authenticationManager->pUsrPKI, pCrtUser);
+        }
         SOPC_UNUSED_RESULT(pkiStatus);
         SOPC_KeyManager_Certificate_Free(pCrtUser);
     }

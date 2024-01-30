@@ -229,7 +229,7 @@ static bool SOPC_ServerConfigHelper_CheckConfig(void)
             " Default will be permissive whereas UserName or Certificate policy is used in endpoint(s).");
     }
     /* Check that the server define an user PKI */
-    if (NULL != pConfig->serverConfig.authenticationManager)
+    if (hasUserCert && NULL != pConfig->serverConfig.authenticationManager)
     {
         if (NULL == pConfig->serverConfig.authenticationManager->pUsrPKI)
         {

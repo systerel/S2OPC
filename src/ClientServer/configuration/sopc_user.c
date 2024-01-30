@@ -173,8 +173,7 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
     SOPC_ASSERT(NULL != left);
     SOPC_ASSERT(NULL != right);
 
-    bool hash = false;
-    bool der = false;
+    bool sameCert = false;
 
     if (left->type == right->type)
     {
@@ -186,9 +185,12 @@ bool SOPC_User_Equal(const SOPC_User* left, const SOPC_User* right)
         case USER_USERNAME:
             return SOPC_String_Equal(&left->data.username, &right->data.username);
         case USER_CERTIFICATE:
-            hash = SOPC_String_Equal(&left->data.certificate.thumbprint, &right->data.certificate.thumbprint);
-            der = SOPC_ByteString_Equal(&left->data.certificate.der, &right->data.certificate.der);
-            return hash && der;
+            sameCert = SOPC_String_Equal(&left->data.certificate.thumbprint, &right->data.certificate.thumbprint);
+            if (sameCert)
+            {
+                sameCert = SOPC_ByteString_Equal(&left->data.certificate.der, &right->data.certificate.der);
+            }
+            return sameCert;
         default:
             SOPC_ASSERT(false && "Unknown Type");
             break;

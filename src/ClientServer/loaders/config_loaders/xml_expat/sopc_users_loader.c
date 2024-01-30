@@ -85,7 +85,6 @@ typedef struct user_cert
 
 typedef struct _SOPC_UsersConfig
 {
-    SOPC_PKIProvider* pX509_UserIdentity_PKI;
     SOPC_Dict* users;
     SOPC_Dict*
         certificates; // dict{key = hexadecimal certificate thumbprint as SOPC_String; value = user_cert structure}
@@ -1003,7 +1002,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
     if (&OpcUa_X509IdentityToken_EncodeableType == token->Body.Object.ObjType)
     {
-        SOPC_PKIProvider* pkiProvider = config->pX509_UserIdentity_PKI;
+        SOPC_ASSERT(NULL != authn->pUsrPKI);
         SOPC_PKI_Profile* pProfile = NULL;
         OpcUa_X509IdentityToken* x509Token = token->Body.Object.Value;
         SOPC_ByteString* rawCert = &x509Token->CertificateData;
@@ -1019,7 +1018,7 @@ static SOPC_ReturnStatus authentication_fct(SOPC_UserAuthentication_Manager* aut
 
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PKIProvider_ValidateCertificate(pkiProvider, pUserCert, pProfile, &errorStatus);
+            status = SOPC_PKIProvider_ValidateCertificate(authn->pUsrPKI, pUserCert, pProfile, &errorStatus);
             if (SOPC_STATUS_OK == status)
             {
                 *authenticated = SOPC_USER_AUTHENTICATION_OK;
@@ -1170,9 +1169,9 @@ static void UserAuthentication_Free(SOPC_UserAuthentication_Manager* authenticat
             SOPC_Dict_Delete(config->users);
             userpassword_free((uintptr_t) config->rejectedUser);
             SOPC_Dict_Delete(config->certificates);
-            SOPC_PKIProvider_Free(&config->pX509_UserIdentity_PKI);
             SOPC_Free(authentication->pData);
         }
+        SOPC_PKIProvider_Free(&authentication->pUsrPKI);
         SOPC_Free(authentication);
     }
 }
@@ -1286,7 +1285,6 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         }
         else
         {
-            config->pX509_UserIdentity_PKI = pX509_UserIdentity_PKI;
             config->users = users;
             config->rejectedUser = rejectedUser;
             config->certificates = certificates;

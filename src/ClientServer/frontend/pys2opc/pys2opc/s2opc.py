@@ -752,7 +752,7 @@ class PyS2OPC_Server(PyS2OPC):
                 serverCfg.authenticationManager = PyS2OPC_Server._xml_user_manager.authentication
                 serverCfg.authorizationManager = PyS2OPC_Server._xml_user_manager.authorization
             else:
-                # TODO: For each endpoints create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
+                # TODO: Create the 2 managers using _callback_validate_user_identity and _callback_authorize_operation
                 # Note: BaseUserHandler implem also to be done to have Python API
                 assert False
             assert serverCfg.authenticationManager != NULL and serverCfg.authorizationManager != NULL
