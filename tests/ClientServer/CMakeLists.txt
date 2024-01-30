@@ -301,16 +301,24 @@ add_executable(toolkit_test_server_local_service "validation_tests/server/toolki
   "validation_tests/client/testlib_write.c"
   "validation_tests/client/test_results.c"
   "validation_tests/client/testlib_read_response.c"
+  ${TEST_SERVER_ADDRESS_SPACE_C}
   ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
   "unit_tests/helpers/custom_types.c")
+add_dependencies(toolkit_test_server_local_service make-server-address-space)
 target_include_directories(toolkit_test_server_local_service PRIVATE
                            "validation_tests/client"
                            ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES}
                            "unit_tests/helpers")
-target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver)
+target_link_libraries(toolkit_test_server_local_service PRIVATE s2opc_clientserver s2opc_clientserver-loader-embedded)
 target_compile_options(toolkit_test_server_local_service PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(toolkit_test_server_local_service PRIVATE ${S2OPC_DEFINITIONS})
 s2opc_unit_test(toolkit_test_server_local_service GENERATE_TAP)
+
+if (expat_FOUND)
+  target_compile_definitions(toolkit_test_server_local_service PRIVATE "WITH_EXPAT")
+endif()
+
+
 
 # Client scenario
 set(TEST_CLIENT_CONFIG_XML "${CMAKE_CURRENT_SOURCE_DIR}/data/config/S2OPC_Client_Test_Config.xml")

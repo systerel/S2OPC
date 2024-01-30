@@ -41,6 +41,8 @@
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
 
+#include "embedded/sopc_addspace_loader.h"
+
 #include "test_results.h"
 #include "testlib_read_response.h"
 #include "testlib_write.h"
@@ -140,9 +142,21 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
                                                         SOPC_AddressSpace_Node* custom2DefaultBinaryNode,
                                                         SOPC_AddressSpace_Node* varNodeStructDT)
 {
+    // Init is necessary to manage correctly clear in case of read only / not read only address space
+    SOPC_AddressSpace_Node_Initialize(address_space, varNodeCustomDT, OpcUa_NodeClass_Variable);
+    SOPC_AddressSpace_Node_Initialize(address_space, customDefaultBinaryNode, OpcUa_NodeClass_Object);
+    SOPC_AddressSpace_Node_Initialize(address_space, customDTNode, OpcUa_NodeClass_DataType);
+    SOPC_AddressSpace_Node_Initialize(address_space, varNodeCustomDT2, OpcUa_NodeClass_Variable);
+    SOPC_AddressSpace_Node_Initialize(address_space, custom2DefaultBinaryNode, OpcUa_NodeClass_Object);
+    SOPC_AddressSpace_Node_Initialize(address_space, varNodeStructDT, OpcUa_NodeClass_Variable);
+
+    if (SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    {
+        return SOPC_STATUS_OK;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // Add a variable node with custom DataType
-    varNodeCustomDT->node_class = OpcUa_NodeClass_Variable;
     OpcUa_VariableNode* varNode = &varNodeCustomDT->data.variable;
     OpcUa_VariableNode_Initialize(varNode);
     varNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421000};
@@ -154,7 +168,6 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     if (SOPC_STATUS_OK == status)
     {
         // Add the "Default Binary" node that references the custom DataType
-        customDefaultBinaryNode->node_class = OpcUa_NodeClass_Object;
         OpcUa_ObjectNode* objNode = &customDefaultBinaryNode->data.object;
         OpcUa_ObjectNode_Initialize(objNode);
         objNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1,
@@ -176,7 +189,6 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     if (SOPC_STATUS_OK == status)
     {
         // Add the "DataType" node that references the Structure DataType
-        customDTNode->node_class = OpcUa_NodeClass_DataType;
         OpcUa_DataTypeNode* dtNode = &customDTNode->data.data_type;
         OpcUa_DataTypeNode_Initialize(dtNode);
         dtNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType};
@@ -197,7 +209,6 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     if (SOPC_STATUS_OK == status)
     {
         // Add a variable node with custom DataType2
-        varNodeCustomDT2->node_class = OpcUa_NodeClass_Variable;
         OpcUa_VariableNode* varNode2 = &varNodeCustomDT2->data.variable;
         OpcUa_VariableNode_Initialize(varNode2);
         varNode2->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421000 * 2};
@@ -212,7 +223,6 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     {
         // Add the "Default Binary" node that references the custom 2 DataType
         // (without DataType node in nodeset => ok for variable with exact type)
-        custom2DefaultBinaryNode->node_class = OpcUa_NodeClass_Object;
         OpcUa_ObjectNode* objNode = &custom2DefaultBinaryNode->data.object;
         OpcUa_ObjectNode_Initialize(objNode);
         objNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1,
@@ -234,7 +244,6 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     // Add a variable node with abstract Structure DT
     if (SOPC_STATUS_OK == status)
     {
-        varNodeStructDT->node_class = OpcUa_NodeClass_Variable;
         varNode = &varNodeStructDT->data.variable;
         OpcUa_VariableNode_Initialize(varNode);
         varNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421001};
@@ -246,12 +255,16 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     return status;
 }
 
-static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace_Node* varNodeCustomDT,
+static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* address_space,
+                                                   SOPC_AddressSpace_Node* varNodeCustomDT,
                                                    SOPC_AddressSpace_Node* varNodeCustomDT2,
                                                    SOPC_AddressSpace_Node* varNodeStructDT)
 {
+    if (SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    {
+        return SOPC_STATUS_OK;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
     // Create an extension object of an unreferenced encodeable type
     SOPC_ExtensionObject extObj;
     SOPC_ExtensionObject_Initialize(&extObj);
@@ -398,11 +411,17 @@ static SOPC_ReturnStatus check_writeCustomDataType(SOPC_AddressSpace_Node* varNo
         SOPC_Encodeable_Delete(writeResp->encodeableType, (void**) &writeResp);
     }
     SOPC_Buffer_Delete(buf);
+
     return status;
 }
 
-static SOPC_ReturnStatus check_readDataTypeDefinition(void)
+static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* address_space)
 {
+    if (SOPC_AddressSpace_AreReadOnlyNodes(address_space))
+    {
+        return SOPC_STATUS_OK;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(3, OpcUa_TimestampsToReturn_Neither);
     const SOPC_NodeId structureDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
                                        .Data.Numeric = OpcUaId_ComplexNumberType};
@@ -411,7 +430,7 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(void)
     const SOPC_NodeId abstractStructureDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
                                                .Data.Numeric = OpcUaId_Structure};
 
-    SOPC_ReturnStatus status = SOPC_STATUS_OUT_OF_MEMORY;
+    status = SOPC_STATUS_OUT_OF_MEMORY;
     if (NULL != readReq)
     {
         status = SOPC_ReadRequest_SetReadValue(readReq, 0, &structureDTid, SOPC_AttributeId_DataTypeDefinition, NULL);
@@ -427,7 +446,10 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(void)
     }
 
     OpcUa_ReadResponse* readResp = NULL;
-    status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerHelper_LocalServiceSync(readReq, (void**) &readResp);
+    }
 
     OpcUa_StructureDefinition* structureDT = NULL;
     OpcUa_EnumDefinition* enumDT = NULL;
@@ -548,7 +570,6 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(void)
     {
         SOPC_Encodeable_Delete(readResp->encodeableType, (void**) &readResp);
     }
-
     return status;
 }
 
@@ -675,6 +696,8 @@ int main(int argc, char* argv[])
 
     // Address space configuration
     SOPC_AddressSpace* address_space = NULL;
+
+#ifdef WITH_EXPAT
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_ConfigureFromXML(NULL, XML_UA_NODESET_PATH, NULL, NULL);
@@ -684,12 +707,33 @@ int main(int argc, char* argv[])
             status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
         }
     }
+#else
+    if (SOPC_STATUS_OK == status)
+    {
+        address_space = SOPC_Embedded_AddressSpace_Load();
+        status = (NULL != address_space) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ServerConfigHelper_SetAddressSpace(address_space);
+    }
+#endif
 
     // Add nodes for custom DataType with unknown encoder typechecking
     if (SOPC_STATUS_OK == status)
     {
         status = addNodesForCustomDataTypeTests(address_space, varNodeCustomDT, customDefaultBinaryNode, customDTNode,
                                                 varNodeCustomDT2, custom2DefaultBinaryNode, varNodeStructureDT);
+    }
+    else
+    {
+        SOPC_Free(varNodeCustomDT);
+        SOPC_Free(customDefaultBinaryNode);
+        SOPC_Free(customDTNode);
+        SOPC_Free(varNodeCustomDT2);
+        SOPC_Free(custom2DefaultBinaryNode);
+        SOPC_Free(varNodeStructureDT);
     }
 
     // Configure the local service asynchronous response callback
@@ -885,13 +929,13 @@ int main(int argc, char* argv[])
     // Test write of value with known DataType NodeId but unknown encoder
     if (SOPC_STATUS_OK == status)
     {
-        status = check_writeCustomDataType(varNodeCustomDT, varNodeCustomDT2, varNodeStructureDT);
+        status = check_writeCustomDataType(address_space, varNodeCustomDT, varNodeCustomDT2, varNodeStructureDT);
     }
 
     // Check read of DataType node DataTypeDefinition attribute
     if (SOPC_STATUS_OK == status)
     {
-        status = check_readDataTypeDefinition();
+        status = check_readDataTypeDefinition(address_space);
     }
 
     // Asynchronous request to stop the server
@@ -914,7 +958,24 @@ int main(int argc, char* argv[])
     }
 
     // Clear the toolkit configuration and stop toolkit threads
+    bool areNodeReleased = SOPC_AddressSpace_AreNodesReleasable(address_space);
     SOPC_ServerConfigHelper_Clear();
+    if (!areNodeReleased)
+    {
+        // Node variant content was cleared but allocated nodes still need to be released
+        SOPC_AddressSpace_Node_Clear(address_space, varNodeCustomDT);
+        SOPC_Free(varNodeCustomDT);
+        SOPC_AddressSpace_Node_Clear(address_space, customDefaultBinaryNode);
+        SOPC_Free(customDefaultBinaryNode);
+        SOPC_AddressSpace_Node_Clear(address_space, customDTNode);
+        SOPC_Free(customDTNode);
+        SOPC_AddressSpace_Node_Clear(address_space, varNodeCustomDT2);
+        SOPC_Free(varNodeCustomDT2);
+        SOPC_AddressSpace_Node_Clear(address_space, custom2DefaultBinaryNode);
+        SOPC_Free(custom2DefaultBinaryNode);
+        SOPC_AddressSpace_Node_Clear(address_space, varNodeStructureDT);
+        SOPC_Free(varNodeStructureDT);
+    }
     SOPC_CommonHelper_Clear();
 
     if (SOPC_STATUS_OK == status && SOPC_STATUS_OK == stopStatus)
