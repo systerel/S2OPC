@@ -2182,7 +2182,7 @@ static SOPC_ReturnStatus WriteVariantArrayBuiltInType(SOPC_Buffer* buf,
         {
             nestedStructLevel++;
             status = SOPC_Int32_Write(length, buf, nestedStructLevel);
-            if (SOPC_STATUS_OK == status)
+            if (SOPC_STATUS_OK == status && *length > 0)
             {
                 status = SOPC_Buffer_Write(buf, array->BooleanArr, (uint32_t)((uint32_t)(*length) * eltOptimSize));
             }
