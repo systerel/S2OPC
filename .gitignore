@@ -3,7 +3,7 @@
 .*.sw?
 *~
 build/
-build_zephyr/
+build_*/
 install/
 out/
 apidoc/
@@ -15,8 +15,6 @@ __pycache__/
 .pytest_cache/
 genc/
 *.log
-build_zephyr/
-build_freertos/
 build-analyzer
 .vscode
 index*.txt.*
