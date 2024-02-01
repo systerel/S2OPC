@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 22/03/2023 10:04:21
+ Date                 : 01/02/2024 09:39:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -107,6 +107,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__server_session_timeout_start_timer session_core_bs__server_session_timeout_start_timer
 #define session_core_1__server_set_fresh_nonce session_core_bs__server_set_fresh_nonce
 #define session_core_1__session_do_nothing session_core_bs__session_do_nothing
+#define session_core_1__session_has_user_server session_core_bs__session_has_user_server
 #define session_core_1__set_session_app_context session_core_bs__set_session_app_context
 #define session_core_1__set_session_channel session_core_2__set_session_channel
 #define session_core_1__set_session_to_create session_core_2__set_session_to_create

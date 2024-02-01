@@ -1141,7 +1141,7 @@ void user_authentication_bs__get_local_user(
     *session_core_bs__p_user = &user_local;
 }
 
-void user_authentication_bs__set_x509_token_from_user(
+void user_authentication_bs__allocate_x509_token_from_user(
     const constants__t_user_i user_authentication_bs__p_user,
     t_bool* const user_authentication_bs__p_valid_x509_token,
     constants__t_user_token_i* const user_authentication_bs__p_x509_token)
@@ -1189,7 +1189,7 @@ void user_authentication_bs__set_x509_token_from_user(
     }
 }
 
-void user_authentication_bs__deallocate_user_token(const constants__t_user_token_i user_authentication_bs__p_user_token)
+void user_authentication_bs__deallocate_x509_token(const constants__t_user_token_i user_authentication_bs__p_user_token)
 {
     if (NULL != user_authentication_bs__p_user_token)
     {

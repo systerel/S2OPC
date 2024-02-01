@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 12/01/2024 15:45:06
+ Date                 : 01/02/2024 09:39:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,12 +63,13 @@ extern void session_core__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define session_core__allocate_x509_token_from_user user_authentication__allocate_x509_token_from_user
 #define session_core__client_gen_activate_orphaned_session_internal_event session_core_1__client_gen_activate_orphaned_session_internal_event
 #define session_core__client_gen_activate_user_session_internal_event session_core_1__client_gen_activate_user_session_internal_event
 #define session_core__client_gen_create_session_internal_event session_core_1__client_gen_create_session_internal_event
 #define session_core__client_get_token_from_session session_core_1__client_get_token_from_session
 #define session_core__deallocate_user user_authentication__deallocate_user
-#define session_core__deallocate_user_token user_authentication__deallocate_user_token
+#define session_core__deallocate_x509_token user_authentication__deallocate_x509_token
 #define session_core__drop_user_server session_core_1__drop_user_server
 #define session_core__get_channel_nb_sessions session_core_1__get_channel_nb_sessions
 #define session_core__get_local_user user_authentication__get_local_user
@@ -87,10 +88,10 @@ extern void session_core__INITIALISATION(void);
 #define session_core__server_session_timeout_evaluation session_core_1__server_session_timeout_evaluation
 #define session_core__server_session_timeout_msg_received session_core_1__server_session_timeout_msg_received
 #define session_core__server_session_timeout_start_timer session_core_1__server_session_timeout_start_timer
+#define session_core__session_has_user_server session_core_1__session_has_user_server
 #define session_core__set_session_app_context session_core_1__set_session_app_context
 #define session_core__set_session_to_create session_core_1__set_session_to_create
 #define session_core__set_session_user_client session_core_1__set_session_user_client
-#define session_core__set_x509_token_from_user user_authentication__set_x509_token_from_user
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

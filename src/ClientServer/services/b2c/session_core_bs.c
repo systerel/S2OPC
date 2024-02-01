@@ -459,6 +459,27 @@ void session_core_bs__set_session_user_client(const constants__t_session_i sessi
     }
 }
 
+void session_core_bs__session_has_user_server(const constants__t_session_i session_core_bs__p_session,
+                                              t_bool* const session_core_bs__ret)
+{
+    if (constants__c_session_indet != session_core_bs__p_session)
+    {
+        SOPC_UserWithAuthorization* userauthz = serverSessionDataArray[session_core_bs__p_session].user_server;
+        if (NULL != userauthz)
+        {
+            *session_core_bs__ret = true;
+        }
+        else
+        {
+            *session_core_bs__ret = false;
+        }
+    }
+    else
+    {
+        *session_core_bs__ret = false;
+    }
+}
+
 void session_core_bs__get_session_user_server(const constants__t_session_i session_core_bs__session,
                                               constants__t_user_i* const session_core_bs__p_user)
 {

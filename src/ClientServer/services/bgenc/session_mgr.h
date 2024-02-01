@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 12/01/2024 15:45:07
+ Date                 : 01/02/2024 09:39:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -61,8 +61,9 @@ extern void session_mgr__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
+#define session_mgr__allocate_x509_token_from_user session_core__allocate_x509_token_from_user
 #define session_mgr__client_secure_channel_lost_session_sm session_core__client_secure_channel_lost_session_sm
-#define session_mgr__deallocate_user_token session_core__deallocate_user_token
+#define session_mgr__deallocate_x509_token session_core__deallocate_x509_token
 #define session_mgr__find_channel_to_close session_core__find_channel_to_close
 #define session_mgr__get_local_user session_core__get_local_user
 #define session_mgr__get_server_session_preferred_locales session_core__get_server_session_preferred_locales
@@ -71,7 +72,7 @@ extern void session_mgr__INITIALISATION(void);
 #define session_mgr__is_valid_session session_core__is_valid_session
 #define session_mgr__is_valid_user_x509_authentication session_core__is_valid_user_x509_authentication
 #define session_mgr__server_secure_channel_lost_session_sm session_core__server_secure_channel_lost_session_sm
-#define session_mgr__set_x509_token_from_user session_core__set_x509_token_from_user
+#define session_mgr__session_has_user_server session_core__session_has_user_server
 
 /*--------------------------
    LOCAL_OPERATIONS Clause
@@ -87,6 +88,9 @@ extern void session_mgr__local_client_close_session_if_needed(
    const constants_statuscodes_bs__t_StatusCode_i session_mgr__sc_reason);
 extern void session_mgr__local_client_close_sessions_on_SC_final_connection_failure(
    const constants__t_channel_config_idx_i session_mgr__channel_config_idx);
+extern void session_mgr__local_session_get_endpoint_config(
+   const constants__t_session_i session_mgr__p_session,
+   constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);
 
 /*--------------------
    OPERATIONS Clause
