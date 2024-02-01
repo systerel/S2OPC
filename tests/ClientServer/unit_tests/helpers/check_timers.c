@@ -31,8 +31,10 @@
 
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
+#include "sopc_date_time.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_macros.h"
+#include "sopc_threads.h"
 
 #define NB_TIMERS 5
 #define EVENT 1000

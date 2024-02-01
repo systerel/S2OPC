@@ -34,7 +34,7 @@
 
 #include "sopc_atomic.h"
 #include "sopc_mutexes.h"
-#include "sopc_platform_time.h"
+
 #include "sopc_threads.h"
 #include "sopc_time.h"
 

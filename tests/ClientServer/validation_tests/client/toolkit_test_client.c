@@ -38,7 +38,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
-#include "sopc_time.h"
+#include "sopc_threads.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 

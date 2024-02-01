@@ -25,6 +25,7 @@
 #include "sopc_crypto_profiles.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sk_manager.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 
 START_TEST(test_default_manager_create)

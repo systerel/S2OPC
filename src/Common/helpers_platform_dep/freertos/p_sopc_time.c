@@ -246,14 +246,17 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t, SOPC_ClockId clockId)
 {
+    SOPC_UNUSED_ARG(clockId);
     SOPC_ASSERT(NULL != t);
     t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
     return true;
 }
 
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t,
+                                                   uint64_t duration_us,
+                                                   int32_t offset_us)
 {
     SOPC_UNUSED_ARG(offset_us);
     SOPC_ASSERT(NULL != t);
@@ -261,10 +264,10 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
     t->ticksMs += (uint64_t)(duration_us / (uint64_t) MS_TO_US);
 }
 
-int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRef, const SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != tRef);
-    SOPC_RealTime t1;
+    SOPC_HighRes_TimeReference t1;
     if (NULL == t)
     {
         t1.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
@@ -277,10 +280,10 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
     return (((int64_t) t1.ticksMs) - ((int64_t) tRef->ticksMs)) * MS_TO_US;
 }
 
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now)
 {
     SOPC_ASSERT(NULL != t);
-    SOPC_RealTime t1;
+    SOPC_HighRes_TimeReference t1;
 
     if (NULL == now)
     {
@@ -295,10 +298,10 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
     return t->ticksMs <= t1.ticksMs;
 }
 
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_ASSERT(NULL != date);
-    SOPC_RealTime now;
+    SOPC_HighRes_TimeReference now;
 
     now.ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
 

@@ -30,6 +30,8 @@
 
 #include "check_helpers.h"
 
+#include "sopc_date_time.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 
 /*

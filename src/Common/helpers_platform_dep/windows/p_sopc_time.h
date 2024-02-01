@@ -28,13 +28,12 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
 #include <time.h>
 
-/** Definition of SOPC_RealTime */
+/** Definition of SOPC_HighRes_TimeReference */
 typedef struct
 {
     uint64_t ticksMs;
-} SOPC_RealTime;
+} SOPC_HighRes_TimeReference;
 
 #endif /* SOPC_P_TIME_H_ */

@@ -29,7 +29,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
+#include "sopc_date_time.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_scheduler.h"

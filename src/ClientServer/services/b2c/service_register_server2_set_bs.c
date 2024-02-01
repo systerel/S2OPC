@@ -21,6 +21,7 @@
 
 #include "service_discovery_servers_internal.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"

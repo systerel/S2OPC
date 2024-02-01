@@ -38,7 +38,7 @@
 #include "sopc_file_transfer.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
+#include "sopc_threads.h"
 
 // Server endpoints and PKI configuration
 #define XML_SERVER_CFG_PATH "./S2OPC_Server_Demo_Config.xml"

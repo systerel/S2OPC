@@ -30,6 +30,7 @@
 #include "util_b2c.h"
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_encoder.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"

@@ -28,6 +28,7 @@
 #include "sopc_assert.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_encode.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"

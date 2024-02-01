@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_enums.h"
 #include "sopc_helper_string.h"
 #include "sopc_internal_app_dispatcher.h"

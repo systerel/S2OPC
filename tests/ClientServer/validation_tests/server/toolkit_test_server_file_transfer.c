@@ -29,6 +29,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_threads.h"
 
 #define ITEM_1_FILE_NAME "item1File.log"
 #define ITEM_2_FILE_NAME "item2File.log"

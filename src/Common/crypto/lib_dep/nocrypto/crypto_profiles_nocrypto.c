@@ -29,7 +29,7 @@
 
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_platform_time.h"
+#include "sopc_time_reference.h"
 
 #include "crypto_struct_nocrypto.h"
 

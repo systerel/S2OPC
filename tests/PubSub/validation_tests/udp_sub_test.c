@@ -30,6 +30,7 @@
 #include "sopc_network_layer.h"
 #include "sopc_reader_layer.h"
 #include "sopc_sub_sockets_mgr.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_udp_sockets.h"
 

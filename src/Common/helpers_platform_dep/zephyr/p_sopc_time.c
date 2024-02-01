@@ -95,7 +95,7 @@ static uint64_t gUptimeDate_s = 0;
  **************************************************/
 static uint64_t P_TIME_GetBuildDateTime(void);
 /** /brief Get current internal time with 100 ns precision */
-static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetInternal100ns(void);
 
 #if CONFIG_NET_GPTP
 /***************************************************
@@ -111,9 +111,9 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void);
  *          lower than CLOCK_CORRECTION_RANGE, then this correction is accepted and applied to :
  *      - Continue the correction of internal clock deviation in the case the PtP is lost.
  *      - Adjust actual requested ticks in call to SOPC_Sleep
- *      - Adjust actual requested ticks in call to SOPC_RealTime-related features. As they rely on
+ *      - Adjust actual requested ticks in call to SOPC_HighRes_TimeReference-related features. As they rely on
  *          internal clock, and as the time reference is also used by caller, the correction shall be
- *          applied on SOPC_RealTime operations (SOPC_RealTime_AddSynchedDuration).
+ *          applied on SOPC_HighRes_TimeReference operations (SOPC_HighRes_TimeReference_AddSynchedDuration).
  * SOPC_TimeReference-related features are not resynchronized and remain on internal MONOTONIC clock.
  */
 
@@ -131,20 +131,20 @@ static uint64_t gLastLocSyncDate = 0;
  *  */
 static float gLocalClockCorrFactor = 1.0;
 
-/** See \SOPC_RealTime_GetClockImprecision */
+/** See \SOPC_HighRes_TimeReference_GetClockImprecision */
 static float gLocalClockPrecision = 0.0;
 
 /** Next clcock correction synchro point */
 static uint64_t gMeasureNextSynch = 0;
 
 /** \brief Get current internal time with 100 ns precision, corrected by PTP */
-static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void);
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetCorrected100ns(void);
 
 /** \brief Get current PTP time with 100 ns precision
  * \return
  *   - Current time (unit = 100ns, from 1970, Jan. 1st)
  *   - 0 if PtpClock is not ready or provides irrelevant value*/
-static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void);
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetPtp100ns(void);
 
 #else // CONFIG_NET_GPTP
 #define GPTP_SOPC_ASSERT(x)
@@ -258,9 +258,9 @@ static uint64_t uint64_gcd(uint64_t a, uint64_t b)
 }
 
 /***************************************************/
-static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetInternal100ns(void)
 {
-    SOPC_RealTime result;
+    SOPC_HighRes_TimeReference result;
     ePTimeStatus expectedStatus = P_TIME_STATUS_NOT_INITIALIZED;
     ePTimeStatus desiredStatus = P_TIME_STATUS_INITIALIZING;
 
@@ -356,7 +356,7 @@ static SOPC_RealTime P_TIME_TimeReference_GetInternal100ns(void)
 /***************************************************/
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
 {
-    SOPC_RealTime now100ns = P_TIME_TimeReference_GetCorrected100ns();
+    SOPC_HighRes_TimeReference now100ns = P_TIME_TimeReference_GetCorrected100ns();
 
     int64_t datetime = 0;
 
@@ -417,16 +417,18 @@ void SOPC_Sleep(unsigned int milliseconds)
 }
 
 /***************************************************/
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t, SOPC_ClockId clockId)
 {
     SOPC_ASSERT(NULL != t);
-
+    SOPC_UNUSED_ARG(clockId);
     *t = P_TIME_TimeReference_GetInternal100ns();
     return true;
 }
 
 /***************************************************/
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t,
+                                                   uint64_t duration_us,
+                                                   int32_t offset_us)
 {
     SOPC_ASSERT(NULL != t);
     uint32_t increment_us = duration_us;
@@ -475,10 +477,10 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
 }
 
 /***************************************************/
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now)
 {
     SOPC_ASSERT(NULL != t);
-    SOPC_RealTime t1;
+    SOPC_HighRes_TimeReference t1;
 
     if (NULL == now)
     {
@@ -494,10 +496,10 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 }
 
 /***************************************************/
-int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRef, const SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != tRef);
-    SOPC_RealTime t1;
+    SOPC_HighRes_TimeReference t1;
 
     if (NULL == t)
     {
@@ -512,11 +514,11 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 }
 
 /***************************************************/
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_ASSERT(NULL != date);
 
-    SOPC_RealTime now = P_TIME_TimeReference_GetInternal100ns();
+    SOPC_HighRes_TimeReference now = P_TIME_TimeReference_GetInternal100ns();
 
     const int64_t expDateUs = (int64_t) date->tick100ns / US_TO_100NS;
     const int64_t nowDateUs = (int64_t) now.tick100ns / US_TO_100NS;
@@ -543,12 +545,12 @@ bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 static struct gptp_global_ds* globalDs = NULL;
 
 /***************************************************/
-static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetCorrected100ns(void)
 {
     static uint64_t connectionStartLoc = 0;
     static uint64_t connectionStartPtp = 0;
 
-    SOPC_RealTime nowPtp = P_TIME_TimeReference_GetPtp100ns();
+    SOPC_HighRes_TimeReference nowPtp = P_TIME_TimeReference_GetPtp100ns();
     const uint64_t nowPtpInt = nowPtp.tick100ns;
     const uint64_t nowLocInt = P_TIME_TimeReference_GetInternal100ns().tick100ns;
 
@@ -628,9 +630,9 @@ static SOPC_RealTime P_TIME_TimeReference_GetCorrected100ns(void)
 }
 
 /***************************************************/
-static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
+static SOPC_HighRes_TimeReference P_TIME_TimeReference_GetPtp100ns(void)
 {
-    SOPC_RealTime result;
+    SOPC_HighRes_TimeReference result;
     struct net_ptp_time slave_time;
     bool gm_present = false;
     int errCode = gptp_event_capture(&slave_time, &gm_present);
@@ -655,13 +657,13 @@ static SOPC_RealTime P_TIME_TimeReference_GetPtp100ns(void)
 }
 
 /***************************************************/
-float SOPC_RealTime_GetClockCorrection(void)
+float SOPC_HighRes_TimeReference_GetClockCorrection(void)
 {
     return gLocalClockCorrFactor;
 }
 
 /***************************************************/
-float SOPC_RealTime_GetClockPrecision(void)
+float SOPC_HighRes_TimeReference_GetClockPrecision(void)
 {
     return gLocalClockPrecision;
 }

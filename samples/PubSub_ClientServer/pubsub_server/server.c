@@ -28,6 +28,7 @@
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -36,7 +37,6 @@
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
-#include "sopc_time.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 
 #include "libs2opc_common_config.h"

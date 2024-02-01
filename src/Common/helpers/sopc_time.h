@@ -20,11 +20,12 @@
 #ifndef SOPC_TIME_H_
 #define SOPC_TIME_H_
 
-#include "sopc_platform_time.h"
+#include "sopc_time_reference.h"
 
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <time.h>
 
 #include "sopc_enums.h"
 

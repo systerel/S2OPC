@@ -32,7 +32,6 @@
 #include "sopc_common_constants.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_platform_time.h"
 
 #include "freertos_shell.h"
 

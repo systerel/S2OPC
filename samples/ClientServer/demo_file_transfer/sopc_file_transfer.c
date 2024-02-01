@@ -51,7 +51,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
+#include "sopc_threads.h"
 
 /**
  * \brief Number of method per FileType Object

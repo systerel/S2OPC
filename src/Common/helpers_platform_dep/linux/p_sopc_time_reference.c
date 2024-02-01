@@ -18,53 +18,24 @@
  */
 
 #include <errno.h>
-#include <error.h>
-#include <math.h>
 #include <string.h>
+#include <time.h>
 
-#include "linux/p_sopc_time.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
-/*
- * It represents the number of seconds between the OPC-UA (Windows) which starts on 1601/01/01 (supposedly 00:00:00
- * UTC), and Linux times starts on epoch, 1970/01/01 00:00:00 UTC.
- * */
 #define SOPC_SECOND_TO_NANOSECONDS 1000000000
 #define SOPC_MILLISECOND_TO_NANOSECONDS 1000000
 #define SOPC_SECONDS_TO_MICROSECONDS 1000000
 #define SOPC_MICROSECOND_TO_NANOSECONDS 1000
 
-int64_t SOPC_Time_GetCurrentTimeUTC(void)
+struct SOPC_HighRes_TimeReference
 {
-    struct timespec currentTime;
-    int64_t dt = 0;
-
-    /*
-     * Extract from clock_gettime documentation:
-     * All implementations support the system-wide real-time clock, which is identified by CLOCK_REALTIME.  Its time
-     * represents seconds and nanoseconds since the Epoch.  When its time is changed, timers for a relative interval are
-     * unaffected, but timers for an absolute point in time are affected.
-     * */
-    if (clock_gettime(CLOCK_REALTIME, &currentTime) != 0)
-    {
-        return 0;
-    }
-
-    int64_t ns100 = currentTime.tv_nsec / 100;
-
-    if ((SOPC_Time_FromTimeT(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
-    {
-        // Time overflow...
-        return INT64_MAX;
-    }
-
-    dt += ns100;
-
-    return dt;
-}
+    struct timespec tp;
+};
 
 SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 {
@@ -127,56 +98,83 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
     return result;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void)
 {
-    return (localtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    SOPC_HighRes_TimeReference* ret = SOPC_Calloc(1, sizeof(SOPC_HighRes_TimeReference));
+    if (NULL != ret)
+    {
+        bool ok = SOPC_HighRes_TimeReference_GetTime(ret);
+        if (!ok)
+        {
+            SOPC_HighRes_TimeReference_Delete(&ret);
+        }
+    }
+
+    return ret;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+void SOPC_HighRes_TimeReference_Delete(SOPC_HighRes_TimeReference** t)
 {
-    return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
 }
 
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
 {
-    SOPC_ASSERT(NULL != t);
+    if (NULL == from || NULL == to)
+    {
+        return false;
+    }
+    *to = *from;
+    return true;
+}
 
-    int res = clock_gettime(CLOCK_MONOTONIC, t);
+bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
+{
+    if (NULL == t)
+    {
+        return false;
+    }
+    int res = clock_gettime(CLOCK_MONOTONIC, &t->tp);
     if (-1 == res)
     {
         /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
         return false;
     }
-
     return true;
 }
 
-static void SOPC_RealTime_AddDuration(SOPC_RealTime* t, uint64_t duration_us)
+static void SOPC_HighRes_TimeReference_AddDuration(SOPC_HighRes_TimeReference* t, uint64_t duration_us)
 {
     SOPC_ASSERT(NULL != t);
 
     /* TODO: check that tv_sec += duration_ms / 1000 will not make it wrap */
-    t->tv_sec += (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS);
+    t->tp.tv_sec += (time_t)(duration_us / SOPC_SECONDS_TO_MICROSECONDS);
     /* This may add a negative or positive number */
-    t->tv_nsec += (long) ((duration_us % SOPC_SECONDS_TO_MICROSECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
+    t->tp.tv_nsec += (long) ((duration_us % SOPC_SECONDS_TO_MICROSECONDS) * SOPC_MICROSECOND_TO_NANOSECONDS);
 
     /* Normalize */
-    if (t->tv_nsec < 0)
+    if (t->tp.tv_nsec < 0)
     {
         /* This case is technically impossible but makes code robust to invalid inputs */
-        t->tv_sec -= 1;
-        t->tv_nsec += SOPC_SECOND_TO_NANOSECONDS;
+        t->tp.tv_sec -= 1;
+        t->tp.tv_nsec += SOPC_SECOND_TO_NANOSECONDS;
     }
-    else if (t->tv_nsec > SOPC_SECOND_TO_NANOSECONDS)
+    else if (t->tp.tv_nsec > SOPC_SECOND_TO_NANOSECONDS)
     {
-        t->tv_sec += 1;
-        t->tv_nsec -= SOPC_SECOND_TO_NANOSECONDS;
+        t->tp.tv_sec += 1;
+        t->tp.tv_nsec -= SOPC_SECOND_TO_NANOSECONDS;
     }
 }
 
-/***************************************************/
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t,
+                                                   uint64_t duration_us,
+                                                   int32_t offset_us)
 {
     SOPC_ASSERT(NULL != t);
     uint64_t increment_us = duration_us;
@@ -215,17 +213,18 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
             increment_us += duration_us;
         }
     }
-    SOPC_RealTime_AddDuration(t, increment_us);
+    SOPC_HighRes_TimeReference_AddDuration(t, increment_us);
 }
 
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now)
 {
-    struct timespec t1 = {0};
+    SOPC_ASSERT(NULL != t);
+    SOPC_HighRes_TimeReference t1 = {0};
     bool ok = true;
 
     if (NULL == now)
     {
-        ok = SOPC_RealTime_GetTime(&t1);
+        ok = SOPC_HighRes_TimeReference_GetTime(&t1);
     }
     else
     {
@@ -233,33 +232,33 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
     }
 
     /* t <= t1 */
-    return ok && (t->tv_sec < t1.tv_sec || (t->tv_sec == t1.tv_sec && t->tv_nsec <= t1.tv_nsec));
+    return ok && (t->tp.tv_sec < t1.tp.tv_sec || (t->tp.tv_sec == t1.tp.tv_sec && t->tp.tv_nsec <= t1.tp.tv_nsec));
 }
 
-int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRef, const SOPC_HighRes_TimeReference* t)
 {
-    struct timespec t1 = {0};
+    SOPC_HighRes_TimeReference t1 = {0};
 
     if (NULL == t)
     {
-        const bool ok = SOPC_RealTime_GetTime(&t1);
+        const bool ok = SOPC_HighRes_TimeReference_GetTime(&t1);
         SOPC_ASSERT(ok);
     }
     else
     {
         t1 = *t;
     }
-    int64_t delta_sec = (int64_t) t1.tv_sec - (int64_t) tRef->tv_sec;
-    int64_t delta_nsec = (int64_t) t1.tv_nsec - (int64_t) tRef->tv_nsec;
+    int64_t delta_sec = (int64_t) t1.tp.tv_sec - (int64_t) tRef->tp.tv_sec;
+    int64_t delta_nsec = (int64_t) t1.tp.tv_nsec - (int64_t) tRef->tp.tv_nsec;
 
     return delta_sec * SOPC_SECONDS_TO_MICROSECONDS + delta_nsec / SOPC_MICROSECOND_TO_NANOSECONDS;
 }
 
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_ASSERT(NULL != date);
     static bool warned = false;
-    const int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, date, NULL);
+    const int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &date->tp, NULL);
 
     /* TODO: handle the EINTR case more accurately */
     if (0 != res && !warned)

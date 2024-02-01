@@ -33,6 +33,7 @@
  * - \ref SOPC_Thread for threads (e.g. pthread_t for linux)
  */
 #include "p_sopc_threads.h"
+#include "sopc_enums.h"
 
 /**
  *  \brief Function to create a thread
@@ -95,5 +96,12 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
  *                  Each thread can and shall be joined once only when terminating.
  */
 SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread);
+
+/**
+ *  \brief Suspend current thread execution for (at least) a millisecond interval
+ *
+ *  \param milliseconds  The milliseconds interval value for which execution must be suspended
+ */
+void SOPC_Sleep(unsigned int milliseconds);
 
 #endif /* SOPC_THREADS_H_ */

@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 #include "sopc_assert.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 
 // Sleep timeout in milliseconds

@@ -23,7 +23,7 @@
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_macros.h"
-#include "sopc_platform_time.h"
+
 #include "sopc_time.h"
 
 #define US_TO_MS 1000
@@ -79,14 +79,15 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
 }
 
 /***************************************************/
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
+bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t, SOPC_ClockId clockId)
 {
     SOPC_ASSERT(NULL != t);
+    SOPC_UNUSED_ARG(clockId);
     return false; // not implemented in Windows
 }
 
 /***************************************************/
-int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
+int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRef, const SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != tRef);
     SOPC_UNUSED_ARG(t);
@@ -94,7 +95,7 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
 }
 
 /***************************************************/
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
+bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now)
 {
     SOPC_ASSERT(NULL != t);
     SOPC_UNUSED_ARG(now);
@@ -102,7 +103,9 @@ bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
 }
 
 /***************************************************/
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
+void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t,
+                                                   uint64_t duration_us,
+                                                   int32_t offset_us)
 {
     SOPC_UNUSED_ARG(offset_us);
     SOPC_ASSERT(NULL != t);
@@ -111,7 +114,7 @@ void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, in
 }
 
 /***************************************************/
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
+bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_UNUSED_ARG(date);
     return false; // not implemented in Windows

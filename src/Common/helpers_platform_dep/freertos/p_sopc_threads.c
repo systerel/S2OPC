@@ -32,7 +32,6 @@
 #include "sopc_enums.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
 
 #include "p_sopc_synchronisation.h" /* synchronisation include */
 #include "p_sopc_threads.h"         /* private thread include */

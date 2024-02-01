@@ -25,7 +25,7 @@
 #include "sopc_atomic.h"
 #include "sopc_event_handler.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
+#include "sopc_threads.h"
 
 struct Event
 {

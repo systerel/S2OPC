@@ -65,7 +65,6 @@
 #include <string.h> /* strerror */
 #include <time.h>   /* Timestamped csv */
 
-#include "p_sopc_time.h" /* SOPC_RealTime API, for now linux only */
 #include "sopc_assert.h"
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
@@ -76,6 +75,7 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_xml_loader.h"
 
 #include "cache.h"
@@ -108,10 +108,10 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
 static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 
 /* RTT calculations */
-SOPC_RealTime* g_ts_emissions = NULL;
-long* g_rtt = NULL;
+SOPC_HighRes_TimeReference** g_ts_emissions = NULL;
+long* g_rtt = NULL; // array of durations in us
 uint32_t g_n_samples = 0;
-static inline long diff_timespec(struct timespec* a, struct timespec* b);
+SOPC_HighRes_TimeReference* t0 = NULL;
 static void save_rtt_to_csv(void);
 
 int main(int argc, char* const argv[])
@@ -131,6 +131,7 @@ int main(int argc, char* const argv[])
     logConfiguration.logSysConfig.fileSystemLogConfig.logDirPath = log_path;
     logConfiguration.logLevel = SOPC_LOG_LEVEL_INFO;
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
+    t0 = SOPC_HighRes_TimeReference_Create();
 
     if (SOPC_STATUS_OK != status)
     {
@@ -144,7 +145,7 @@ int main(int argc, char* const argv[])
         exit((int) status);
     }
     printf("RTT_SAMPLES: %" PRIu32 "\n", g_n_samples);
-    g_ts_emissions = SOPC_Calloc(g_n_samples, sizeof(struct timespec));
+    g_ts_emissions = (SOPC_HighRes_TimeReference**) SOPC_Calloc(g_n_samples, sizeof(*g_ts_emissions));
     g_rtt = SOPC_Calloc(g_n_samples, sizeof(long));
     if (NULL == g_ts_emissions || NULL == g_rtt)
     {
@@ -289,13 +290,13 @@ int main(int argc, char* const argv[])
     printf("# Info: PubSub stopped\n");
 
     /* Print or save the non-empty RTT */
-    if (sizeof(CSV_PREFIX) == 0)
+    if (SOPC_STATUS_OK == status && getenv_default("CSV_PREFIX", CSV_PREFIX)[0] == 0)
     {
         for (size_t idx = 0; idx < g_n_samples; ++idx)
         {
             if (0 != g_rtt[idx])
             {
-                printf("% 9zd: round-trip time: % 12ld ns\n", idx, g_rtt[idx]);
+                printf("% 9zd: round-trip time: % 12ld us\n", idx, g_rtt[idx]);
             }
         }
     }
@@ -303,6 +304,7 @@ int main(int argc, char* const argv[])
     {
         save_rtt_to_csv();
     }
+    SOPC_HighRes_TimeReference_Delete(&t0);
     SOPC_Free(g_ts_emissions);
     SOPC_Free(g_rtt);
 }
@@ -332,8 +334,15 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
             size_t idx = var->Value.Uint32;
             if (idx < g_n_samples)
             {
-                bool ok = SOPC_RealTime_GetTime(&g_ts_emissions[idx]);
-                SOPC_UNUSED_ARG(ok);
+                if (g_ts_emissions[idx] == NULL)
+                {
+                    g_ts_emissions[idx] = SOPC_HighRes_TimeReference_Create();
+                }
+                else
+                {
+                    SOPC_HighRes_TimeReference_GetTime(g_ts_emissions[idx]);
+                    printf("Multpile sending of index %d\n", (int) idx);
+                }
             }
         }
     }
@@ -357,22 +366,28 @@ static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const i
         SOPC_ReturnStatus status = SOPC_NodeId_Compare(&nid_counter, &nodesToWrite[i].NodeId, &cmp);
         if (SOPC_STATUS_OK == status && 0 == cmp)
         {
-            /* Compute the round-trip time */
-            static SOPC_RealTime now = {0}; /* Requires a static initializer to be abstracted in p_time interface */
-            bool ok = SOPC_RealTime_GetTime(&now);
-            if (ok)
+            const SOPC_Variant* var = &nodesToWrite[i].Value.Value;
+            size_t idx = var->Value.Uint32;
+            if (idx < g_n_samples)
             {
-                const SOPC_Variant* var = &nodesToWrite[i].Value.Value;
-                size_t idx = var->Value.Uint32;
-                if (idx < g_n_samples)
+                bool ok = SOPC_VariantArrayType_SingleValue == var->ArrayType;
+                ok &= SOPC_UInt32_Id == var->BuiltInTypeId;
+                if (ok)
                 {
-                    ok &= SOPC_VariantArrayType_SingleValue == var->ArrayType;
-                    ok &= SOPC_UInt32_Id == var->BuiltInTypeId;
-                    if (ok)
+                    if (g_ts_emissions[idx] == NULL)
                     {
-                        g_rtt[idx] = diff_timespec(&now, &g_ts_emissions[idx]);
+                        g_rtt[idx] = -3;
+                    }
+                    else
+                    {
+                        const long d_us = (long) SOPC_HighRes_TimeReference_DeltaUs(g_ts_emissions[idx], NULL);
+                        g_rtt[idx] = (d_us > 0 ? d_us : -2);
                     }
                 }
+            }
+            else
+            {
+                stopSignal = 1;
             }
         }
     }
@@ -381,54 +396,6 @@ static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const i
     bool processed = Cache_SetTargetVariables(nodesToWrite, nbValues);
     Cache_Unlock();
     return processed;
-}
-
-/* TODO: implement this in a platform independent fashion */
-static inline long diff_timespec(struct timespec* a, struct timespec* b)
-{
-    if (!a || !b)
-    {
-        return LONG_MAX;
-    }
-
-    bool invert = false;
-    if (b->tv_sec > a->tv_sec || (b->tv_sec == a->tv_sec && b->tv_nsec > a->tv_nsec))
-    {
-        invert = true;
-        struct timespec* c = a;
-        a = b;
-        b = c;
-    }
-
-    time_t sec = a->tv_sec - b->tv_sec;
-    long ret = a->tv_nsec - b->tv_nsec;
-    if (ret < 0)
-    {
-        --sec;
-        ret += 1000000000;
-    }
-    if (sec > LONG_MAX / 1000000000 || ret > LONG_MAX - 1000000000 * sec) /* Would overflow */
-    {
-        ret = LONG_MAX;
-    }
-    else
-    {
-        ret += 1000000000 * sec;
-    }
-
-    if (invert)
-    {
-        if (ret < LONG_MAX)
-        {
-            ret *= -1;
-        }
-        else
-        {
-            ret = LONG_MIN; /* This leaves -LONG_MAX undistinguishable from LONG_MIN */
-        }
-    }
-
-    return ret;
 }
 
 static void save_rtt_to_csv(void)
@@ -471,12 +438,13 @@ static void save_rtt_to_csv(void)
     /* Write records */
     if (res > 0)
     {
-        res = fprintf(csv, "\nGetSourceTime (ns since app start);Round-trip time (ns)\n");
+        res = fprintf(csv, "\nGetSourceTime (ns since app start);Round-trip time (us)\n");
     }
     for (size_t idx = 0; res > 0 && idx < g_n_samples; ++idx)
     {
-        int64_t ts = g_ts_emissions[idx].tv_sec * (int64_t)(1000000000) + g_ts_emissions[idx].tv_nsec;
-        res = fprintf(csv, "%" PRIi64 ";%ld\n", ts, g_rtt[idx]);
+        long ts = (long) SOPC_HighRes_TimeReference_DeltaUs(t0, g_ts_emissions[idx]);
+        // Note that PRIu64 is not portable to all embedded OS.
+        res = fprintf(csv, "%ld;%ld\n", ts, g_rtt[idx]);
     }
 
     fclose(csv);

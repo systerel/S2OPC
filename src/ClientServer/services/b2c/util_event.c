@@ -22,6 +22,7 @@
 #include "constants.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_config_internal.h"

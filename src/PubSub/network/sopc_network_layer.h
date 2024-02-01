@@ -35,7 +35,6 @@
 #include <inttypes.h>
 #include "sopc_buffer.h"
 #include "sopc_dataset_ll_layer.h"
-#include "sopc_platform_time.h"
 #include "sopc_pub_fixed_buffer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_security.h"

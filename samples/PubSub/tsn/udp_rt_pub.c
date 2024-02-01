@@ -28,10 +28,10 @@
 #include "p_sopc_udp_sockets_custom.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_network_layer.h"
-#include "sopc_time.h"
 #include "sopc_udp_sockets.h"
 
 /* Publisher cycle time in nano seconds */

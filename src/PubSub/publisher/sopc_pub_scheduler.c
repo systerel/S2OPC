@@ -21,7 +21,6 @@
 #include <inttypes.h>
 
 #include "opcua_statuscodes.h"
-#include "p_sopc_time.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -37,6 +36,7 @@
 #include "sopc_missing_c99.h"
 #include "sopc_mqtt_transport_layer.h"
 #include "sopc_mutexes.h"
+
 #include "sopc_pub_fixed_buffer.h"
 #include "sopc_pub_scheduler.h"
 #include "sopc_pub_source_variable.h"
@@ -108,7 +108,7 @@ typedef struct MessageCtx
     SOPC_Array* dataSetMessageCtx;
     SOPC_PubScheduler_TransportCtx* transport;
     SOPC_PubSub_SecurityType* security;
-    SOPC_RealTime* next_timeout; /**< Next expiration absolute date */
+    SOPC_HighRes_TimeReference* next_timeout; /**< Next expiration absolute date */
     uint64_t publishingIntervalUs;
     int32_t publishingOffsetUs; /**< Negative = not used */
     const char* mqttTopic;
@@ -138,7 +138,7 @@ static void MessageCtx_Array_Clear(void);
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
                                        SOPC_WriterGroup* group,
-                                       const SOPC_RealTime* tRef);
+                                       const SOPC_HighRes_TimeReference* tRef);
 
 /* Finds the message with the smallest next_timeout
    return NULL if every publisher is acyclic */
@@ -294,7 +294,7 @@ static void MessageCtx_Array_Clear(void)
             SOPC_PubSub_Security_Clear(arr[i].security);
             SOPC_Free(arr[i].security);
             arr[i].security = NULL;
-            SOPC_RealTime_Delete(&arr[i].next_timeout);
+            SOPC_HighRes_TimeReference_Delete(&arr[i].next_timeout);
             SOPC_Array_Delete(arr[i].dataSetMessageCtx);
             arr[i].dataSetMessageCtx = NULL;
         }
@@ -317,7 +317,7 @@ static void clear_dataSetMessageCtx_array(void* context)
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
                                        SOPC_WriterGroup* group,
-                                       const SOPC_RealTime* tRef)
+                                       const SOPC_HighRes_TimeReference* tRef)
 {
     SOPC_ASSERT(ctx != NULL);
     SOPC_ASSERT(pubSchedulerCtx.messages.current < pubSchedulerCtx.messages.length);
@@ -349,6 +349,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     }
 
     uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
+    bool result = true;
 
     context->group = group;
     SOPC_SecurityMode_Type smode = SOPC_WriterGroup_Get_SecurityMode(group);
@@ -356,11 +357,12 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->message = SOPC_Create_NetworkMessage_From_WriterGroup(group, false);
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
-    context->next_timeout = SOPC_RealTime_Create(tRef);
+    context->next_timeout = SOPC_HighRes_TimeReference_Create();
+    result = SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
+    SOPC_ASSERT(result);
     context->dataSetMessageCtx =
         SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
     SOPC_ASSERT(NULL != context->dataSetMessageCtx);
-    bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
     {
         context->security = SOPC_Calloc(1, sizeof(SOPC_PubSub_SecurityType));
@@ -392,14 +394,14 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                 return false;
             }
         }
-        SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
-                                         context->publishingOffsetUs);
+        SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
+                                                      context->publishingOffsetUs);
     }
     /* We only use keep alive for acyclic publisher*/
     else
     {
         context->keepAliveTimeUs = (uint64_t)(SOPC_WriterGroup_Get_KeepAlive(group) * 1000);
-        SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
+        SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
         context->messageKeepAlive = SOPC_Create_NetworkMessage_From_WriterGroup(group, true);
     }
     if (NULL == context->message || NULL == context->next_timeout ||
@@ -466,7 +468,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     {
         SOPC_Dataset_LL_NetworkMessage_Delete(context->message);
         context->message = NULL;
-        SOPC_RealTime_Delete(&context->next_timeout);
+        SOPC_HighRes_TimeReference_Delete(&context->next_timeout);
         SOPC_PubSub_Security_Clear(context->security);
         SOPC_Free(context->security);
         context->security = NULL;
@@ -491,7 +493,7 @@ static MessageCtx* MessageCtxArray_FindMostExpired(void)
     for (size_t i = 0; i < messages->length; ++i)
     {
         MessageCtx* cursor = &messages->array[i];
-        if (NULL == worse || SOPC_RealTime_IsExpired(cursor->next_timeout, worse->next_timeout))
+        if (NULL == worse || SOPC_HighRes_TimeReference_IsExpired(cursor->next_timeout, worse->next_timeout))
         {
             worse = cursor;
         }
@@ -790,8 +792,8 @@ static void* thread_start_publish(void* arg)
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread started");
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
-    SOPC_RealTime* nextTimeout = SOPC_RealTime_Create(NULL);
+    SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
+    SOPC_HighRes_TimeReference* nextTimeout = SOPC_HighRes_TimeReference_Create();
     SOPC_ASSERT(NULL != now);
     SOPC_ASSERT(NULL != nextTimeout);
 
@@ -803,28 +805,28 @@ static void* thread_start_publish(void* arg)
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
     {
         /* Wake-up: find which message(s) needs to be sent */
-        ok = SOPC_RealTime_GetTime(now);
+        ok = SOPC_HighRes_TimeReference_GetTime(now);
         SOPC_ASSERT(ok && "Failed GetTime");
 
         /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
-        if (SOPC_RealTime_IsExpired(context->next_timeout, now))
+        if (SOPC_HighRes_TimeReference_IsExpired(context->next_timeout, now))
         {
             if (context->transport->isAcyclic)
             {
                 send_keepAlive_message(context);
                 /* Re-schedule keep alive message */
-                SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
+                SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->keepAliveTimeUs, -1);
             }
             else
             {
                 MessageCtx_send_publish_message(context);
                 /* Re-schedule this message */
-                SOPC_RealTime_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
-                                                 context->publishingOffsetUs);
+                SOPC_HighRes_TimeReference_AddSynchedDuration(context->next_timeout, context->publishingIntervalUs,
+                                                              context->publishingOffsetUs);
             }
 
-            if (SOPC_RealTime_IsExpired(context->next_timeout, now) && !context->warned)
+            if (SOPC_HighRes_TimeReference_IsExpired(context->next_timeout, now) && !context->warned)
             {
                 /* This message next publish cycle was already expired before we encoded the previous one */
                 /* TODO: find other message ID, such as the PublisherId */
@@ -839,11 +841,11 @@ static void* thread_start_publish(void* arg)
         /* Otherwise sleep until there is a message to send */
         else
         {
-            ok = SOPC_RealTime_Copy(nextTimeout, context->next_timeout);
+            ok = SOPC_HighRes_TimeReference_Copy(nextTimeout, context->next_timeout);
             SOPC_ASSERT(ok && "Failed Copy");
             status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
-            ok = SOPC_RealTime_SleepUntil(nextTimeout);
+            ok = SOPC_HighRes_TimeReference_SleepUntil(nextTimeout);
             SOPC_ASSERT(ok && "Failed NanoSleep");
             status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -853,8 +855,8 @@ static void* thread_start_publish(void* arg)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Time-sensitive publisher thread stopped");
-    SOPC_RealTime_Delete(&now);
-    SOPC_RealTime_Delete(&nextTimeout);
+    SOPC_HighRes_TimeReference_Delete(&now);
+    SOPC_HighRes_TimeReference_Delete(&nextTimeout);
 
     return NULL;
 }
@@ -928,7 +930,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
         {
             resultSOPC = SOPC_STATUS_NOK;
         }
-        SOPC_RealTime* t0 = SOPC_RealTime_Create(NULL);
+        SOPC_HighRes_TimeReference* t0 = SOPC_HighRes_TimeReference_Create();
         for (uint16_t j = 0; SOPC_STATUS_OK == resultSOPC && j < nbWriterGroup; j++)
         {
             SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, j);
@@ -938,7 +940,7 @@ bool SOPC_PubScheduler_Start(SOPC_PubSubConfiguration* config,
                 resultSOPC = SOPC_STATUS_NOK;
             }
         }
-        SOPC_RealTime_Delete(&t0);
+        SOPC_HighRes_TimeReference_Delete(&t0);
     }
 
     /* Creation of the thread (time-sensitive or not) */
@@ -1200,9 +1202,9 @@ bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
     }
     status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    result = SOPC_RealTime_GetTime(ctx->next_timeout);
+    result = SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
     SOPC_ASSERT(result);
-    SOPC_RealTime_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
+    SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
     MessageCtx_send_publish_message(ctx);
     status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);

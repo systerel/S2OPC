@@ -24,11 +24,11 @@
 #include "samples_platform_dep.h"
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_time.h"
 
 // project includes
 #include "cache.h"

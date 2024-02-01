@@ -21,11 +21,11 @@
 
 #include <inttypes.h>
 
+#include "sopc_date_time.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api_internal.h"
-#include "sopc_time.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
 

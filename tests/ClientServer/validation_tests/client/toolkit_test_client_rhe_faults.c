@@ -25,6 +25,7 @@
 #include "sopc_common.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
+#include "sopc_threads.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"

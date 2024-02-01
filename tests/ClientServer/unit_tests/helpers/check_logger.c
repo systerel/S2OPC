@@ -34,7 +34,7 @@
 #include "sopc_helper_string.h"
 #include "sopc_log_manager.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
+#include "sopc_threads.h"
 
 #define MAX_LINE_LENGTH 100
 #define LINE_PREFIX_LENGTH 26

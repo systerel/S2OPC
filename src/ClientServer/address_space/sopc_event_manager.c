@@ -33,7 +33,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_types.h"
 
 #define QN_PATH_SEPARATOR_CHAR '~'

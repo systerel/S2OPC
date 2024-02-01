@@ -205,7 +205,7 @@ typedef struct SOPC_SubScheduler_Writer_Ctx
     uint16_t groupId;
     bool dataSetMessageSequenceNumberSet;
     uint16_t dataSetMessageSequenceNumber;
-    SOPC_RealTime* timeout;
+    SOPC_HighRes_TimeReference* timeout;
     uint32_t timeoutInterval;
     SOPC_PubSubState connectionMode;
     SOPC_TargetVariableCtx* targetVariable;
@@ -610,7 +610,7 @@ static void free_writer_ctx(void* data)
     SOPC_SubScheduler_Writer_Ctx* ctx = (SOPC_SubScheduler_Writer_Ctx*) data;
     if (NULL != ctx)
     {
-        SOPC_RealTime_Delete(&ctx->timeout);
+        SOPC_HighRes_TimeReference_Delete(&ctx->timeout);
         SOPC_SubTargetVariable_TargetVariableCtx_Delete(&ctx->targetVariable);
     }
 }
@@ -625,7 +625,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
     SOPC_ASSERT(nb_connections > 0);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+    SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
 
     schedulerCtx.config = config;
     schedulerCtx.targetConfig = targetConfig;
@@ -828,7 +828,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
             }
         }
     }
-    SOPC_RealTime_Delete(&now);
+    SOPC_HighRes_TimeReference_Delete(&now);
 
     if (SOPC_STATUS_OK != status)
     {
@@ -924,7 +924,7 @@ void SOPC_SubScheduler_Stop(void)
 static void SOPC_Sub_TimeoutCheck(void* param)
 {
     SOPC_UNUSED_ARG(param);
-    SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+    SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
 
     const size_t nbCtx = SOPC_Array_Size(schedulerCtx.writerCtx);
     for (size_t i = 0; i < nbCtx && schedulerCtx.state == SOPC_PubSubState_Operational; i++)
@@ -935,7 +935,7 @@ static void SOPC_Sub_TimeoutCheck(void* param)
         if (ctx->connectionMode == SOPC_PubSubState_Operational)
         {
             // Check timeout for this DSM
-            const int64_t delta_us = SOPC_RealTime_DeltaUs(now, ctx->timeout);
+            const int64_t delta_us = SOPC_HighRes_TimeReference_DeltaUs(now, ctx->timeout);
             if (delta_us <= 0)
             {
                 if (ctx->pubId.type == SOPC_UInteger_PublisherId)
@@ -959,7 +959,7 @@ static void SOPC_Sub_TimeoutCheck(void* param)
             }
         }
     }
-    SOPC_RealTime_Delete(&now);
+    SOPC_HighRes_TimeReference_Delete(&now);
 }
 
 /*
@@ -1149,19 +1149,20 @@ static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint
     if (NULL != ctx)
     {
         // Create or restart timeout
-        SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+        SOPC_HighRes_TimeReference* now = SOPC_HighRes_TimeReference_Create();
         SOPC_ASSERT(NULL != now);
-        SOPC_RealTime_AddSynchedDuration(now, ((uint64_t) ctx->timeoutInterval * 1000), -1);
+        SOPC_HighRes_TimeReference_AddSynchedDuration(now, ((uint64_t) ctx->timeoutInterval * 1000), -1);
         if (NULL == ctx->timeout)
         {
-            ctx->timeout = SOPC_RealTime_Create(now);
+            ctx->timeout = SOPC_HighRes_TimeReference_Create();
+            SOPC_HighRes_TimeReference_Copy(ctx->timeout, now);
         }
         else
         {
-            SOPC_RealTime_Copy(ctx->timeout, now);
+            SOPC_HighRes_TimeReference_Copy(ctx->timeout, now);
         }
         SOPC_SubScheduler_UpdateDsmState(ctx, SOPC_PubSubState_Operational);
-        SOPC_RealTime_Delete(&now);
+        SOPC_HighRes_TimeReference_Delete(&now);
     }
 }
 

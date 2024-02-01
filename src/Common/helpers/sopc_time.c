@@ -26,9 +26,9 @@
 #include "sopc_time.h"
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_platform_time.h"
 
 static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
 static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7

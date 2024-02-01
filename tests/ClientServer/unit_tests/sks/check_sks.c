@@ -32,7 +32,7 @@
 #include "check_sks.h"
 
 #include "sopc_atomic.h"
-#include "sopc_time.h"
+#include "sopc_threads.h"
 
 bool wait_value(int32_t* atomic, int32_t val)
 {

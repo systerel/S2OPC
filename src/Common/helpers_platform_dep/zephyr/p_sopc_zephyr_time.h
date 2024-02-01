@@ -23,7 +23,8 @@
  * The OPC UA type *Duration* is a double representing ms delays between publications.
  * It's resolution goes finer than the nanosecond resolution.
  *
- * The SOPC_RealTime type should be defined to be as precise as possible to support sub-milliseconds publications.
+ * The SOPC_HighRes_TimeReference type should be defined to be as precise as possible to support sub-milliseconds
+ * publications.
  *
  * Under Linux, the implementation should use CLOCK_MONOTONIC, as we want to send regular notifications,
  * even if the system time gets back or forth (e.g. because of ntp).
@@ -39,7 +40,7 @@
  *          activating this service, it is mandatory to firstly force this synchronization by calling this
  *          functions explicitly until synchronization is good enough.
  *          A simple way to do that could be calling \a SOPC_Time_GetCurrentTimeUTC function
- *          as long as \a SOPC_RealTime_GetClockPrecision does not return sufficient precision.
+ *          as long as \a SOPC_HighRes_TimeReference_GetClockPrecision does not return sufficient precision.
  */
 
 #ifndef SOPC_ZEPHYR_TIME_H_
@@ -76,7 +77,7 @@ SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void);
  *          and remote PtP time is perfectly synchronized and stable with S2OPC internal clock)
  *  - 0.0 if there is no PtP synchronization (not PtP SLAVE or SLAVE but with clock failed to stabilize)
  */
-float SOPC_RealTime_GetClockPrecision(void);
+float SOPC_HighRes_TimeReference_GetClockPrecision(void);
 
 /**
  * \brief Provides the information about clock discrepancy towards a PtP master
@@ -84,6 +85,6 @@ float SOPC_RealTime_GetClockPrecision(void);
  *  < 1.0 when local clock is faster than actual (PtP) time
  *  > 1.0 when local clock is slower than actual (PtP) time
  */
-float SOPC_RealTime_GetClockCorrection(void);
+float SOPC_HighRes_TimeReference_GetClockCorrection(void);
 
 #endif /* SOPC_ZEPHYR_TIME_H_ */

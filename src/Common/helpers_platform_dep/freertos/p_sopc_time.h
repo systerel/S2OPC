@@ -29,14 +29,14 @@
 #include <stdint.h>
 #include <time.h>
 
-/** Definition of SOPC_RealTime */
+/** Definition of SOPC_HighRes_TimeReference */
 typedef struct
 {
     /* Internal unit is ticks which is user configurable by setting configTICK_RATE_HZ. Note that
      tick frequency cannot be highter than 1 kHz so precision cannot be highter than ms.
      ticksMs represent time from launch in ms */
     uint64_t ticksMs;
-} SOPC_RealTime;
+} SOPC_HighRes_TimeReference;
 
 void P_TIME_SetInitialDateToBuildTime(void);
 

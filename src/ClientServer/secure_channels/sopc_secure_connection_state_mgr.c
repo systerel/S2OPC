@@ -30,6 +30,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"

@@ -31,10 +31,12 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
+#include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
+#include "sopc_threads.h"
 #include "sopc_types.h"
 
 #define SOPC_PKI_PATH "./S2OPC_Demo_PKI"

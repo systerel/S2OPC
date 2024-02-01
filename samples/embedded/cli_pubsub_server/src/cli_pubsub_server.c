@@ -130,7 +130,7 @@ static bool gPubStarted = false;
 static bool gSubStarted = false;
 static SOPC_PubSubState gSubOperational = SOPC_PubSubState_Disabled;
 // Date of last reception on Sub
-static SOPC_RealTime* gLastReceptionDateMs = NULL;
+static SOPC_HighRes_TimeReference* gLastReceptionDateMs = NULL;
 SOPC_SKManager* g_skmanager = NULL;
 
 /***************************************************/
@@ -654,7 +654,7 @@ static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t
         return true;
     }
 
-    SOPC_RealTime_GetTime(gLastReceptionDateMs);
+    SOPC_HighRes_TimeReference_GetTime(gLastReceptionDateMs);
 
     /* Encapsulate the WriteValues in a WriteRequest and send it as a local service,
      * acknowledge before the toolkit answers */
@@ -852,7 +852,7 @@ void SOPC_Platform_Main(void)
     status = SOPC_CommonHelper_Initialize(&logConfig);
     SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_CommonHelper_Initialize failed");
 
-    gLastReceptionDateMs = SOPC_RealTime_Create(NULL);
+    gLastReceptionDateMs = SOPC_HighRes_TimeReference_Create();
 
     setupServer();
     setupPubSub();
@@ -889,7 +889,7 @@ void SOPC_Platform_Main(void)
     LOG_DEBUG("SOPC_CommonHelper_Clear");
     SOPC_CommonHelper_Clear();
 
-    SOPC_RealTime_Delete(&gLastReceptionDateMs);
+    SOPC_HighRes_TimeReference_Delete(&gLastReceptionDateMs);
 
     LOG_INFO("# Info: Server closed.\n");
 
@@ -935,7 +935,7 @@ static int cmd_demo_info(WordList* pList)
     PRINT("Subscriber            : %s : %s\n", CONFIG_SOPC_SUBSCRIBER_ADDRESS, subStateToString(gSubOperational));
     if (gSubOperational == SOPC_PubSubState_Operational)
     {
-        int delta_ms = (int) (SOPC_RealTime_DeltaUs(gLastReceptionDateMs, NULL) / 1000);
+        int delta_ms = (int) (SOPC_HighRes_TimeReference_DeltaUs(gLastReceptionDateMs, NULL) / 1000);
         PRINT(" -> Last Rcp: %d ms\n", delta_ms);
 
         if (pPubSubConfig != NULL)

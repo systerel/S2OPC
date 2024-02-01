@@ -25,7 +25,6 @@
 
 #include "sopc_common_constants.h"
 #include "sopc_logger.h"
-#include "sopc_time.h"
 
 // Note : This indirection aims at avoiding the rule checker to detect the only allowed call to assert
 #define REAL_ASSERT assert
