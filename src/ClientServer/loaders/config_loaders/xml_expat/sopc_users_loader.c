@@ -45,6 +45,11 @@
 /* the value used to fill the memory for the salt and hash */
 #define BYTE_REJECTED_USER 0xA5
 
+/* Default values for reject user configuration when no userpassword tag is defined */
+#define DEFAULT_HASH_ITERATION_COUNT 10000
+#define DEFAULT_HASH_LENGTH 32
+#define DEFAULT_SALT_LENGTH 16
+
 typedef enum
 {
     PARSE_START,                      // Beginning of file
@@ -893,11 +898,15 @@ static SOPC_ReturnStatus set_default_password_hash(user_password** up,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     // Allocate the user password structure
-    user_password* pwd = SOPC_Malloc(sizeof(user_password) * 1);
+    user_password* pwd = SOPC_Calloc(1, sizeof(*pwd));
     if (NULL == pwd)
     {
         return status;
     }
+    SOPC_String_Initialize(&pwd->user);
+    SOPC_ByteString_Initialize(&pwd->hash);
+    SOPC_ByteString_Initialize(&pwd->salt);
+
     // Allocate the default hash
     status = generate_fixed_hash_or_salt(&pwd->hash, hashLength);
     // Allocate the default salt
@@ -1264,7 +1273,15 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         *authorization = SOPC_Calloc(1, sizeof(SOPC_UserAuthorization_Manager));
         SOPC_UsersConfig* config = SOPC_Calloc(1, sizeof(SOPC_UsersConfig));
         user_password* rejectedUser = NULL;
-        res = set_default_password_hash(&rejectedUser, ctx.hashLength, ctx.saltLength, ctx.hashIterationCount);
+        if (ctx.usrPwdCfgSet)
+        {
+            res = set_default_password_hash(&rejectedUser, ctx.hashLength, ctx.saltLength, ctx.hashIterationCount);
+        }
+        else
+        {
+            res = set_default_password_hash(&rejectedUser, DEFAULT_HASH_LENGTH, DEFAULT_SALT_LENGTH,
+                                            DEFAULT_HASH_ITERATION_COUNT);
+        }
         if (ctx.userCertSet)
         {
             pki_status = SOPC_PKIProvider_CreateFromStore(ctx.userPki, &pX509_UserIdentity_PKI);
