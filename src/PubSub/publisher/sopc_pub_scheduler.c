@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <inttypes.h>
 
+#include "opcua_statuscodes.h"
 #include "p_sopc_time.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
@@ -581,6 +582,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
                 if (!isCompatible)
                 {
+                    dv->Status = OpcUa_BadTypeMismatch;
                     SOPC_Logger_TraceError(
                         SOPC_LOG_MODULE_PUBSUB,
                         "GetSourceVariables returned values incompatible with the current PubSub configuration");
