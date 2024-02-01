@@ -556,7 +556,7 @@ static SOPC_ReturnStatus print_publisherId_into_sopc_buffer(const SOPC_Dataset_L
         status = SOPC_STATUS_NOT_SUPPORTED;
         break;
     case DataSet_LL_PubId_String_Id:
-        status = SOPC_STATUS_NOT_SUPPORTED;
+        status = SOPC_Buffer_Write(buffer, pubId->data.string.Data, (uint32_t) pubId->data.string.Length);
         break;
     default:
         break;
