@@ -100,8 +100,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - notification: write notification events are reported through application API
 - Client instantiation: multiple secure channel instances and session instances
 - Client services requests: any discovery service or service on session request. Requests are only forwarded to server (no functional behavior)
-- Address space with all mandatory attributes: AccessLevel, (AccessLevelEx), (ArrayDimensions), BrowseName, ContainsNoLoop, DataType, DisplayName,
-  EvenNotifier, Executable, Historizing, IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value, ValueRank (and References)
+- Address space with all mandatory attributes: AccessLevel, (AccessLevelEx), (ArrayDimensions), BrowseName, ContainsNoLoop, DataType, (DataTypeDefinition),
+  DisplayName, EvenNotifier, Executable, Historizing, IsAbstract, NodeClass, NodeId, Symmetric, UserAccessLevel, UserExecutable, Value, ValueRank (and References)
 
 ### Address space definition and generation
 
@@ -198,7 +198,7 @@ Prerequisites:
 - Make (tested with GNU Make version 4.3)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
 - GCC (tested with GCC version 11.2.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.7)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.7) or  [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.2.4)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
 - [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.5.0 compiled with CMake)
 - Python3 (tested with version 3.10.12)
