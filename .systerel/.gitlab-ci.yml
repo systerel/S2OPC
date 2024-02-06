@@ -113,6 +113,7 @@ generation:
     - ./clean.sh all
     - ./.validates_xml_schemas.sh
     - ./.pre-build-ext.sh
+    - rm ./src/ClientServer/services/bgenc/constants_bs.h_
     - ./.check_generated_code.sh
   artifacts:
     name: 'bgenc-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
