@@ -117,7 +117,6 @@ fi
 
 CHECK_STD_MEM_ALLOC_ABSENCE="(\bfree\b\(|\bmalloc\b\(|\bcalloc\b\(|\brealloc\b\(|=.*\bfree\b|=.*\bmalloc\b|=.*\bcalloc\b|=.*\brealloc\b)"
 EXCLUDE_STD_MEM_IMPLEM="*\/p_sopc_mem_alloc.c"
-EXCLUDED_DEMO="*\/client_wrapper\/*"
 
 find $CSRC -not -path $EXCLUDE_STD_MEM_IMPLEM -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
@@ -131,10 +130,10 @@ if [[ $? != 0 ]]; then
     find $TST -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
-find $DEMO -not -path $EXCLUDED_DEMO -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
+find $DEMO -name "*.c" | xargs grep -E $CHECK_STD_MEM_ALLOC_ABSENCE | grep -Ec ":[^0]+" | xargs test 0 -eq
 if [[ $? != 0 ]]; then
     echo "ERROR: checking absence of std library use for memory allocation in tests" | tee -a $LOGPATH
-    find $DEMO -not -path $EXCLUDED_DEMO -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
+    find $DEMO -name "*.c" | xargs grep -nE $CHECK_STD_MEM_ALLOC_ABSENCE | tee -a $LOGPATH
     EXITCODE=1
 fi
 
