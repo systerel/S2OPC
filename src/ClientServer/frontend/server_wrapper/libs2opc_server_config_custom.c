@@ -345,6 +345,25 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
     {
         return NULL;
     }
+    if (destEndpoint->nbSecuConfigs > 0)
+    {
+        for (size_t i = 0; i < (size_t) destEndpoint->nbSecuConfigs + 1; i++)
+        {
+            char* spCString = SOPC_String_GetCString(&destEndpoint->secuConfigurations[i].securityPolicy);
+            if (strcmp(spCString, sUri) == 0)
+            {
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                       "Error this SOPC_SecurityPolicy has already been added.");
+                SOPC_Free(spCString);
+                return NULL;
+            }
+            else
+            {
+                SOPC_Free(spCString);
+            }
+        }
+    }
+
     SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&sp->securityPolicy, sUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
