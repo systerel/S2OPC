@@ -970,7 +970,7 @@ void SOPC_PubScheduler_Stop(void)
 
     SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Stopping Pub Scheduler...");
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, true); /* TODO: ? -> remove when using an enum */
-    SOPC_PubScheduler_Context_Clear(true);
+    SOPC_PubScheduler_Context_Clear(pubSchedulerCtx.isStarted);
 
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.isStarted, false);
     SOPC_Atomic_Int_Set(&pubSchedulerCtx.processingStartStop, false);
