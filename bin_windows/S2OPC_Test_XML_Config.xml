@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ServerConfiguration>
+    <Namespaces>
+      <Namespace uri="urn:S2OPC:MY_SERVER_HOST"/>
+      <Namespace uri="urn:S2OPC:MY_SERVER_HOST:2"/>
+    </Namespaces>
+    <Locales>
+      <Locale id="en"/>
+      <Locale id="es-ES"/>
+      <Locale id="fr-FR"/>
+    </Locales>
+    <ApplicationCertificates>
+      <ServerCertificate path="/mypath/mycert.der"/>
+      <ServerKey path="/mypath/mykey.pem" encrypted="true"/>
+      <ServerPublicKeyInfrastructure path="/mypath/myPki"/>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:MY_SERVER_HOST:app"/>
+      <ProductURI uri="urn:S2OPC:MY_SERVER_HOST:prod"/>
+      <ApplicationName text="S2OPC toolkit configuration example" locale="en"/>
+      <ApplicationName text="S2OPC toolkit: ejemplo de configuración" locale="es-ES"/>
+      <ApplicationName text="S2OPC toolkit: exemple de configuration" locale="fr-FR"/>
+      <!-- No discovery URL: we only support current endpoint URL as discovery URL for now -->
+    </ApplicationDescription>
+    <Endpoints>
+      <!-- Note: Endpoint no transport URI (only TCP available) and no security level (computed by server) -->
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME" enableListening="false">
+        <ReverseConnections>
+          <ReverseConnection clientUrl="opc.tcp://localhost:4842"/>
+          <ReverseConnection clientAppUri="urn:S2OPC:client" clientUrl="opc.tcp://localhost:4843"/>
+        </ReverseConnections>
+        <SecurityPolicies>
+          <!-- Only None/Basic256/Basic256Sha256 available -->
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon1" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon2" tokenType="anonymous"/>
+              <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon2" tokenType="anonymous"/>
+              <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss">
+            <SecurityModes>
+              <SecurityMode mode="Sign"/>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="anon2" tokenType="anonymous"/>
+              <UserPolicy policyId="user1" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+      <Endpoint url="opc.tcp://MY_SERVER_HOST:4841/MY_ENPOINT_NAME_2">
+        <ReverseConnections/>
+        <SecurityPolicies>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None">
+            <SecurityModes>
+              <SecurityMode mode="None"/>
+            </SecurityModes>
+            <UserPolicies>
+              <UserPolicy policyId="anon" tokenType="anonymous"/>
+            </UserPolicies>
+          </SecurityPolicy>
+          <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256">
+            <SecurityModes>
+              <SecurityMode mode="SignAndEncrypt"/>
+            </SecurityModes>
+            <UserPolicies>
+              <!-- Available token types are only anonymous and username. Security URI available is only None -->
+              <UserPolicy policyId="username" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#None"/>/>
+            </UserPolicies>
+          </SecurityPolicy>
+        </SecurityPolicies>
+      </Endpoint>
+    </Endpoints>
+  </ServerConfiguration>
+  <ClientConfiguration>
+    <PreferredLocales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </PreferredLocales>
+    <ApplicationCertificates>
+      <ClientCertificate path="/mypath/mycert.der"/>
+      <ClientKey path="/mypath/mykey.pem" encrypted="true"/>
+      <ClientPublicKeyInfrastructure path="/mypath/myPki"/>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:MY_CLIENT_HOST:app"/>
+      <ProductURI uri="urn:S2OPC:MY_CLIENT_HOST:prod"/>
+      <ApplicationName text="S2OPC toolkit client example" locale="en-US"/>
+      <ApplicationType type="ClientAndServer"/>
+    </ApplicationDescription>
+    <Connections>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4840" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="FirstConnection">
+        <ServerCertificate path=""/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#None"/>
+        <SecurityMode mode="None"/>
+        <UserPolicy policyId="anon" tokenType="anonymous"/>
+      </Connection>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" serverURI="urn:S2OPC:MY_SERVER_HOST:app" reqLifetimeMs="7200000">
+        <ServerCertificate path="server_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+        <UserPolicy policyId="user" tokenType="username"/>
+      </Connection>
+      <Connection serverURL="opc.tcp://MY_SERVER_HOST:4841/MY_ENDPOINT_NAME" reverseEndpointURL="opc.tcp://MY_CLIENT_HOST:4844" id="ThirdConnection">
+        <ServerCertificate path="server_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="Sign"/>
+        <UserPolicy policyId="x509" tokenType="certificate">
+          <UserX509 cert_path="user_cert.der" key_path="user_key.pem" encrypted="true"/>
+        </UserPolicy>
+      </Connection>
+    </Connections>
+  </ClientConfiguration>
+</S2OPC>

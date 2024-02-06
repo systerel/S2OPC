@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='utf-8'?>
+<S2OPC xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_clientserver_config.xsd">
+  <ClientConfiguration>
+    <PreferredLocales>
+      <Locale id="en-US"/>
+      <Locale id="fr-FR"/>
+    </PreferredLocales>
+    <ApplicationCertificates>
+      <ClientCertificate path="client_public/client_2k_cert.der"/>
+      <ClientKey path="client_private/encrypted_client_2k_key.pem" encrypted="true"/>
+      <ClientPublicKeyInfrastructure path="./S2OPC_Demo_PKI"/>
+    </ApplicationCertificates>
+    <ApplicationDescription>
+      <ApplicationURI uri="urn:S2OPC:localhost"/>
+      <ProductURI uri="urn:S2OPC:localhost"/>
+      <ApplicationName text="S2OPC_TestClient"/>
+    </ApplicationDescription>
+    <Connections>
+      <Connection serverURL="opc.tcp://localhost:4841" id="1">
+        <ServerCertificate path="server_public/server_2k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+      </Connection>
+      <Connection serverURL="opc.tcp://localhost:4841" id="2">
+        <ServerCertificate path="server_public/server_2k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+        <UserPolicy policyId="username_Basic256Sha256" tokenType="username"/>
+      </Connection>
+      <Connection reverseEndpointURL="opc.tcp://localhost:4844" serverURL="opc.tcp://localhost:4841" id="3">
+        <ServerCertificate path="server_public/server_2k_cert.der"/>
+        <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        <SecurityMode mode="SignAndEncrypt"/>
+        <UserPolicy policyId="X509" tokenType="certificate">
+          <UserX509 cert_path="user_public/user_2k_cert.der" key_path="user_private/encrypted_user_2k_key.pem" encrypted="true"/>
+        </UserPolicy>
+      </Connection>
+    </Connections>
+  </ClientConfiguration>
+</S2OPC>
