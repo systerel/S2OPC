@@ -95,7 +95,7 @@ echo "Update to $1 version in $PYS2OPC_VERSION_JSON in $2-update-tagged-version"
 sed -i 's/{"version":"[^"]\+"}/{"version":"'"$1"'"}/' $PYS2OPC_VERSION_JSON || exit 1
 
 for WHEEL_FILE in $PYS2OPC_VERSION_WHEEL_FILES; do
-    sed -i 's/pys2opc-[0-9]\+\.[0-9]\+\.[0-9]\+-/pys2opc-'"$1"'-/' $WHEEL_FILE || exit 1
+    sed -i 's/pys2opc-[0-9]\+\.[0-9]\+\.[0-9]\+/pys2opc-'"$1"'/' $WHEEL_FILE || exit 1
 done
 
 echo "Update to $1 version in src/CMakeLists.txt file"
