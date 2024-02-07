@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.h
 
- Date                 : 08/04/2024 12:58:59
+ Date                 : 27/11/2024 09:15:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -188,7 +188,7 @@ extern void subscription_mgr__server_subscription_publish_timeout(
    const constants__t_subscription_i subscription_mgr__p_subscription);
 extern void subscription_mgr__server_subscription_session_inactive(
    const constants__t_session_i subscription_mgr__p_session,
-   const constants__t_sessionState subscription_mgr__p_newSessionState);
+   const constants__t_sessionState_i subscription_mgr__p_newSessionState);
 extern void subscription_mgr__subscription_mgr_UNINITIALISATION(void);
 extern void subscription_mgr__treat_create_subscription_request(
    const constants__t_session_i subscription_mgr__p_session,

@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.h
 
- Date                 : 24/07/2024 12:50:28
+ Date                 : 27/11/2024 09:15:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,9 +55,8 @@ extern constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[co
 extern constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 extern t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 extern constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
-extern constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
+extern constants__t_sessionState_i session_core_2__a_state_i[constants__t_session_i_max+1];
 extern t_entier4 session_core_2__card_s_session_i;
-extern t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
 /*------------------------
    INITIALISATION Clause
@@ -90,7 +89,7 @@ extern void session_core_2__get_session_channel(
    constants__t_channel_i * const session_core_2__channel);
 extern void session_core_2__get_session_state(
    const constants__t_session_i session_core_2__session,
-   constants__t_sessionState * const session_core_2__state);
+   constants__t_sessionState_i * const session_core_2__state);
 extern void session_core_2__getall_orphaned(
    const constants__t_session_i session_core_2__p_session,
    t_bool * const session_core_2__p_dom,
@@ -134,7 +133,7 @@ extern void session_core_2__set_session_orphaned_1(
    const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);
 extern void session_core_2__set_session_state_1(
    const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionState session_core_2__p_state);
+   const constants__t_sessionState_i session_core_2__p_state);
 extern void session_core_2__set_session_to_create(
    const constants__t_session_i session_core_2__p_session,
    const constants__t_channel_config_idx_i session_core_2__p_channel_config_idx);

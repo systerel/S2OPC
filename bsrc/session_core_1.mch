@@ -191,6 +191,7 @@ OPERATIONS
         session : dom(a_state) &
         channel : t_channel_i  &
         channel : t_channel    &
+        state   : t_sessionState_i &
         state   : {e_session_created, e_session_creating} &
         is_client : BOOL
     THEN
@@ -237,7 +238,8 @@ OPERATIONS
         session : t_session_i &
         session : dom(a_state)
     THEN
-        state := a_state(session)
+        state :(state : t_sessionState_i &
+                state = a_state(session))
     END
     ;
 
@@ -245,8 +247,9 @@ OPERATIONS
     PRE
         session : t_session_i    &
         session : dom(a_state)   &
+        state   : t_sessionState_i &
         state   : t_sessionState &
-        state  /: {e_session_closed} &
+        state /= e_session_init &
         is_client : BOOL
     THEN
         a_state (session) := state

@@ -202,8 +202,8 @@ void session_core_bs__may_validate_server_certificate(
 
 void session_core_bs__notify_set_session_state(
     const constants__t_session_i session_core_bs__session,
-    const constants__t_sessionState session_core_bs__prec_state,
-    const constants__t_sessionState session_core_bs__state,
+    const constants__t_sessionState_i session_core_bs__prec_state,
+    const constants__t_sessionState_i session_core_bs__state,
     const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason,
     const t_bool session_core_bs__is_client)
 {

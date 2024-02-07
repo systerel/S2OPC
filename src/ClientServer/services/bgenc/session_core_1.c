@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 09/07/2024 15:57:06
+ Date                 : 27/11/2024 09:15:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,10 +43,10 @@ void session_core_1__INITIALISATION(void) {
   --------------------*/
 void session_core_1__l_set_session_state(
    const constants__t_session_i session_core_1__p_session,
-   const constants__t_sessionState session_core_1__p_state,
+   const constants__t_sessionState_i session_core_1__p_state,
    const t_bool session_core_1__is_client) {
    {
-      constants__t_sessionState session_core_1__l_prec_state;
+      constants__t_sessionState_i session_core_1__l_prec_state;
       
       session_core_2__get_session_state(session_core_1__p_session,
          &session_core_1__l_prec_state);
@@ -113,7 +113,7 @@ void session_core_1__init_new_session(
 void session_core_1__create_session(
    const constants__t_session_i session_core_1__session,
    const constants__t_channel_i session_core_1__channel,
-   const constants__t_sessionState session_core_1__state,
+   const constants__t_sessionState_i session_core_1__state,
    const t_bool session_core_1__is_client) {
    session_core_2__set_session_channel(session_core_1__session,
       session_core_1__channel);
@@ -128,7 +128,7 @@ void session_core_1__create_session(
 
 void session_core_1__set_session_state(
    const constants__t_session_i session_core_1__session,
-   const constants__t_sessionState session_core_1__state,
+   const constants__t_sessionState_i session_core_1__state,
    const t_bool session_core_1__is_client) {
    session_core_1__l_set_session_state(session_core_1__session,
       session_core_1__state,
@@ -140,7 +140,7 @@ void session_core_1__set_session_state_closed(
    const constants_statuscodes_bs__t_StatusCode_i session_core_1__sc_reason,
    const t_bool session_core_1__is_client) {
    {
-      constants__t_sessionState session_core_1__l_prec_state;
+      constants__t_sessionState_i session_core_1__l_prec_state;
       
       session_core_2__get_session_state(session_core_1__session,
          &session_core_1__l_prec_state);
@@ -232,7 +232,7 @@ void session_core_1__find_session_to_close(
       t_bool session_core_1__l_continue;
       constants__t_session_i session_core_1__l_session;
       t_bool session_core_1__l_valid_session;
-      constants__t_sessionState session_core_1__l_state;
+      constants__t_sessionState_i session_core_1__l_state;
       constants__t_timeref_i session_core_1__l_timeref;
       t_bool session_core_1__l_is_older_than;
       constants__t_session_i session_core_1__l_oldest_session;

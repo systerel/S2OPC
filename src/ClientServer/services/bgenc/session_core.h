@@ -21,7 +21,7 @@
 
  File Name            : session_core.h
 
- Date                 : 30/05/2024 08:36:01
+ Date                 : 27/11/2024 09:15:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -110,7 +110,7 @@ extern void session_core__l_server_secure_channel_lost_session_sm(
 extern void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_sessionState session_core__transitoryState,
+   const constants__t_sessionState_i session_core__transitoryState,
    const constants__t_user_i session_core__p_user,
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,
@@ -178,7 +178,7 @@ extern void session_core__find_channel_to_close(
    constants__t_channel_i * const session_core__p_channel_to_close);
 extern void session_core__get_session_state_or_closed(
    const constants__t_session_i session_core__session,
-   constants__t_sessionState * const session_core__state);
+   constants__t_sessionState_i * const session_core__state);
 extern void session_core__getall_valid_session_channel(
    const constants__t_session_i session_core__session,
    t_bool * const session_core__bres,

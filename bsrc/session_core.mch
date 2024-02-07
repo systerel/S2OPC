@@ -80,7 +80,7 @@ DEFINITIONS
     a_user_client := {session} <<| a_user_client         || // If session had a user, remove this relation
     a_client_token := {session} <<| a_client_token       || // If session had a token, remove this relation
     a_server_token := a_server_token |>> {session}       || // If session had a token, remove this relation
-    a_state(session) := e_session_closed                 || // keep session token as used
+    a_state := {session} <<| a_state                     ||
     a_NonceServer := {session} <<| a_NonceServer         || /* If session had a server nonce, remove it */
     a_NonceClient := {session} <<| a_NonceClient            /* If session had a client nonce, remove it */
 

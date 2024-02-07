@@ -343,7 +343,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                id, auxParam);
 
         io_dispatch_mgr__internal_server_inactive_session_prio_event((constants__t_session_i) id,
-                                                                     (constants__t_sessionState) auxParam, &bres);
+                                                                     (constants__t_sessionState_i) auxParam, &bres);
 
         if (bres == false)
         {

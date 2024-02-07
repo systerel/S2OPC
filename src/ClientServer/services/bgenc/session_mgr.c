@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 19/11/2024 16:41:27
+ Date                 : 27/11/2024 09:15:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -159,7 +159,7 @@ void session_mgr__local_client_validate_and_drop_session_req_session_handle(
    {
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       
       *session_mgr__session = constants__c_session_indet;
@@ -200,7 +200,7 @@ void session_mgr__client_receive_session_resp(
    constants__t_session_i * const session_mgr__session) {
    {
       constants__t_session_token_i session_mgr__l_session_token;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_resp_status;
       constants__t_user_token_i session_mgr__l_session_user_token;
@@ -330,7 +330,7 @@ void session_mgr__server_receive_session_req(
    t_bool * const session_mgr__security_failed) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       t_bool session_mgr__l_is_valid_user_token;
       constants__t_user_token_i session_mgr__l_user_token;
@@ -495,7 +495,7 @@ void session_mgr__client_validate_session_service_req(
    constants__t_channel_i * const session_mgr__channel,
    constants__t_session_token_i * const session_mgr__session_token) {
    {
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
       
       *session_mgr__session_token = constants__c_session_token_indet;
@@ -524,7 +524,7 @@ void session_mgr__client_validate_session_service_req_failed(
    t_bool * const session_mgr__bres) {
    {
       constants__t_session_i session_mgr__l_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       
       session_mgr__local_client_validate_and_drop_session_req_session_handle(session_mgr__channel,
          session_mgr__req_handle,
@@ -546,7 +546,7 @@ void session_mgr__client_validate_session_service_resp(
    {
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       
       *session_mgr__session = constants__c_session_indet;
       session_mgr__local_client_validate_and_drop_session_req_session_handle(session_mgr__channel,
@@ -584,7 +584,7 @@ void session_mgr__server_validate_session_service_req(
    {
       constants__t_session_i session_mgr__l_session;
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       constants__t_user_i session_mgr__l_user;
       
@@ -643,7 +643,7 @@ void session_mgr__server_validate_async_session_service_resp(
    constants__t_channel_i * const session_mgr__channel) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants__t_channel_i session_mgr__l_session_channel;
       
       *session_mgr__channel = constants__c_channel_indet;
@@ -681,7 +681,7 @@ void session_mgr__client_create_session_req(
    t_bool * const session_mgr__bret) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       t_bool session_mgr__l_valid;
       t_bool session_mgr__l_bret;
       
@@ -723,7 +723,7 @@ void session_mgr__client_async_activate_new_session_without_channel(
    t_bool * const session_mgr__bres) {
    {
       constants__t_session_i session_mgr__l_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       
       session_core__client_init_session_sm(&session_mgr__l_session);
       session_core__get_session_state_or_closed(session_mgr__l_session,
@@ -751,7 +751,7 @@ void session_mgr__client_async_activate_new_session_with_channel(
    t_bool * const session_mgr__bres) {
    {
       constants__t_session_i session_mgr__l_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       
       channel_mgr__channel_do_nothing(session_mgr__channel);
       session_core__client_init_session_sm(&session_mgr__l_session);
@@ -782,7 +782,7 @@ void session_mgr__client_user_activate_session_req(
    constants__t_session_token_i * const session_mgr__session_token) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,
@@ -827,7 +827,7 @@ void session_mgr__client_sc_activate_session_req(
    constants__t_session_token_i * const session_mgr__session_token) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,
@@ -874,7 +874,7 @@ void session_mgr__client_close_session_req(
    constants__t_session_token_i * const session_mgr__session_token) {
    {
       t_bool session_mgr__l_valid_session;
-      constants__t_sessionState session_mgr__l_session_state;
+      constants__t_sessionState_i session_mgr__l_session_state;
       constants_statuscodes_bs__t_StatusCode_i session_mgr__l_ret;
       
       session_core__is_valid_session(session_mgr__session,

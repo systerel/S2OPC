@@ -138,7 +138,7 @@ SETS
     t_endpoint_config_idx_i;
     t_reverse_endpoint_config_idx_i;
 
-    t_sessionState = {
+    t_sessionState_i = {
         e_session_init,
         e_session_creating,
         e_session_created,
@@ -519,6 +519,7 @@ ABSTRACT_CONSTANTS
     t_user_token,
     t_Nonce,
     t_SignatureData,
+    t_sessionState,
     t_subscription,
     t_subscriptionState,
     t_notif_msg,
@@ -831,6 +832,8 @@ PROPERTIES
     t_user_token <: t_user_token_i &
     c_user_token_indet : t_user_token_i &
     c_user_token_indet /: t_user_token &
+
+    t_sessionState = t_sessionState_i - {e_session_closed} &
 
     t_subscription <: t_subscription_i &
     c_subscription_indet : t_subscription_i &

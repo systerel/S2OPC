@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 24/07/2024 12:50:28
+ Date                 : 27/11/2024 09:15:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -43,20 +43,13 @@ constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
 constants__t_timeref_i session_core_2__a_session_init_time_i[constants__t_session_i_max+1];
-constants__t_sessionState session_core_2__a_state_i[constants__t_session_i_max+1];
+constants__t_sessionState_i session_core_2__a_state_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__card_s_session_i;
-t_bool session_core_2__s_session_i[constants__t_session_i_max+1];
 
 /*------------------------
    INITIALISATION Clause
   ------------------------*/
 void session_core_2__INITIALISATION(void) {
-   {
-      t_entier4 i;
-      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
-         session_core_2__s_session_i[i] = false;
-      }
-   }
    {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
@@ -121,7 +114,6 @@ void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
    const t_bool session_core_2__p_is_client,
    const constants__t_timeref_i session_core_2__p_timeref) {
-   session_core_2__s_session_i[session_core_2__p_session] = true;
    session_core_2__card_s_session_i = session_core_2__card_s_session_i +
       1;
    session_core_2__a_state_i[session_core_2__p_session] = constants__e_session_init;
@@ -131,9 +123,9 @@ void session_core_2__add_session(
 
 void session_core_2__remove_session(
    const constants__t_session_i session_core_2__p_session) {
-   session_core_2__s_session_i[session_core_2__p_session] = false;
    session_core_2__card_s_session_i = session_core_2__card_s_session_i -
       1;
+   session_core_2__a_state_i[session_core_2__p_session] = constants__e_session_closed;
    session_core_2__a_session_init_time_i[session_core_2__p_session] = constants__c_timeref_indet;
 }
 
@@ -164,7 +156,12 @@ void session_core_2__reset_session_orphaned(
 void session_core_2__is_valid_session(
    const constants__t_session_i session_core_2__session,
    t_bool * const session_core_2__ret) {
-   *session_core_2__ret = session_core_2__s_session_i[session_core_2__session];
+   {
+      constants__t_sessionState_i session_core_2__l_state;
+      
+      session_core_2__l_state = session_core_2__a_state_i[session_core_2__session];
+      *session_core_2__ret = (session_core_2__l_state != constants__e_session_closed);
+   }
 }
 
 void session_core_2__is_client_session(
@@ -175,13 +172,13 @@ void session_core_2__is_client_session(
 
 void session_core_2__get_session_state(
    const constants__t_session_i session_core_2__session,
-   constants__t_sessionState * const session_core_2__state) {
+   constants__t_sessionState_i * const session_core_2__state) {
    *session_core_2__state = session_core_2__a_state_i[session_core_2__session];
 }
 
 void session_core_2__set_session_state_1(
    const constants__t_session_i session_core_2__p_session,
-   const constants__t_sessionState session_core_2__p_state) {
+   const constants__t_sessionState_i session_core_2__p_state) {
    session_core_2__a_state_i[session_core_2__p_session] = session_core_2__p_state;
 }
 

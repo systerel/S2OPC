@@ -853,7 +853,7 @@ OPERATIONS
     PRE
         p_session : t_session_i &
         p_session : t_session &
-        p_newSessionState : t_sessionState
+        p_newSessionState : t_sessionState_i
     THEN
         bres :: BOOL
     END

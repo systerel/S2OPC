@@ -21,7 +21,7 @@
 
  File Name            : session_core_bs.h
 
- Date                 : 01/02/2024 09:39:43
+ Date                 : 27/11/2024 09:16:09
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -147,8 +147,8 @@ extern void session_core_bs__may_validate_server_certificate(
    t_bool * const session_core_bs__valid_cert);
 extern void session_core_bs__notify_set_session_state(
    const constants__t_session_i session_core_bs__session,
-   const constants__t_sessionState session_core_bs__prec_state,
-   const constants__t_sessionState session_core_bs__state,
+   const constants__t_sessionState_i session_core_bs__prec_state,
+   const constants__t_sessionState_i session_core_bs__state,
    const constants_statuscodes_bs__t_StatusCode_i session_core_bs__sc_reason,
    const t_bool session_core_bs__is_client);
 extern void session_core_bs__remove_NonceServer(

@@ -31,7 +31,6 @@ SEES
     channel_mgr
 
 CONCRETE_VARIABLES
-    s_session_i,
     a_client_session_i,
     card_s_session_i,
     a_state_i,
@@ -44,10 +43,9 @@ CONCRETE_VARIABLES
     a_server_client_locales_i
 
 INVARIANT
-    s_session_i          : t_session_i --> BOOL                                      &
     a_client_session_i   : t_session_i --> BOOL                                      &
     card_s_session_i     : NAT                                                       &
-    a_state_i            : t_session_i --> t_sessionState                            &
+    a_state_i            : t_session_i --> t_sessionState_i                          &
     a_session_init_time_i : t_session_i --> t_timeref_i                              &
     a_channel_i          : t_session_i --> t_channel_i                               &
     a_channel_nb_sessions_i : t_channel_i --> NAT                                    &
@@ -55,9 +53,8 @@ INVARIANT
     a_client_orphaned_i  : t_session_i --> t_channel_config_idx_i                    &
     a_server_user_auth_attempts_i : t_session_i --> NAT                              &
     a_server_client_locales_i : t_session_i --> t_LocaleIds_i                        &
-    s_session            = s_session_i~[{TRUE}]                                      &
-    dom(a_state)         = s_session                                                 &
     a_state             <: a_state_i                                                 &
+    a_state              = a_state_i |>> {e_session_closed}                          &
     a_session_init_time  = t_session <| a_session_init_time_i |> t_timeref           &
     a_channel            = t_session <| a_channel_i |> t_channel                     &
     a_client_to_create   = t_session <| a_client_to_create_i |> t_channel_config_idx &
@@ -66,7 +63,6 @@ INVARIANT
     a_server_client_locales = t_session <| a_server_client_locales_i
 
 INITIALISATION
-    s_session_i  := t_session_i * {FALSE};
     a_client_session_i := t_session_i * {FALSE};
     card_s_session_i := 0;
     a_state_i    := t_session_i * {e_session_closed};
@@ -82,7 +78,6 @@ OPERATIONS
 
     add_session(p_session, p_is_client, p_timeref) =
     BEGIN
-        s_session_i(p_session) := TRUE;
         card_s_session_i := card_s_session_i + 1;
         a_state_i  (p_session) := e_session_init;
         a_client_session_i(p_session) := p_is_client;
@@ -92,8 +87,8 @@ OPERATIONS
 
     remove_session(p_session) =
     BEGIN
-        s_session_i(p_session) := FALSE;
         card_s_session_i := card_s_session_i - 1;
+        a_state_i  (p_session) := e_session_closed;
         a_session_init_time_i (p_session) := c_timeref_indet
     END
     ;
@@ -125,8 +120,11 @@ OPERATIONS
     ;
 
     ret <-- is_valid_session (session) =
-    BEGIN
-        ret := s_session_i(session)
+    VAR
+        l_state
+    IN
+        l_state := a_state_i(session);
+        ret := bool(l_state /= e_session_closed)
     END
     ;
 

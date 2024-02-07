@@ -162,6 +162,7 @@ OPERATIONS
     PRE
         p_session : t_session_i  &
         p_session : dom(a_state) &
+        p_state   : t_sessionState_i &
         p_state   : t_sessionState
     THEN
         a_state(p_session) := p_state

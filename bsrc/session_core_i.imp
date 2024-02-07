@@ -81,6 +81,7 @@ LOCAL_OPERATIONS
         channel       : s_channel_connected &
         session       : t_session_i &
         session       : s_session &
+        transitoryState : t_sessionState_i &
         transitoryState : t_sessionState & /* used to differentiate transitions externally */
         p_user          : t_user_i &
         p_user          : t_user &

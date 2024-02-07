@@ -158,8 +158,8 @@ OPERATIONS
     PRE
         session    : t_session_i    &
         session    : t_session      &
-        prec_state : t_sessionState &
-        state      : t_sessionState &
+        prec_state : t_sessionState_i &
+        state      : t_sessionState_i &
         sc_reason : t_StatusCode_i  &
         (state = e_session_closed => sc_reason : t_StatusCode) &
         is_client : BOOL

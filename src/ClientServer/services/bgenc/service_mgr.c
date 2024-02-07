@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 19/11/2024 16:41:23
+ Date                 : 27/11/2024 09:15:46
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -1898,7 +1898,7 @@ void service_mgr__server_send_publish_response(
 
 void service_mgr__internal_server_inactive_session_prio_event(
    const constants__t_session_i service_mgr__p_session,
-   const constants__t_sessionState service_mgr__p_newSessionState,
+   const constants__t_sessionState_i service_mgr__p_newSessionState,
    t_bool * const service_mgr__bres) {
    if (service_mgr__p_session != constants__c_session_indet) {
       *service_mgr__bres = true;

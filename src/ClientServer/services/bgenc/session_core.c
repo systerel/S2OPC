@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 09/07/2024 15:57:06
+ Date                 : 27/11/2024 09:15:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -44,7 +44,7 @@ void session_core__INITIALISATION(void) {
 void session_core__server_internal_activate_req_and_resp(
    const constants__t_channel_i session_core__channel,
    const constants__t_session_i session_core__session,
-   const constants__t_sessionState session_core__transitoryState,
+   const constants__t_sessionState_i session_core__transitoryState,
    const constants__t_user_i session_core__p_user,
    const constants__t_msg_i session_core__activate_req_msg,
    const constants__t_msg_i session_core__activate_resp_msg,
@@ -560,7 +560,7 @@ void session_core__server_activate_session_req_and_resp_sm(
    constants_statuscodes_bs__t_StatusCode_i * const session_core__ret) {
    {
       constants__t_channel_i session_core__l_channel;
-      constants__t_sessionState session_core__l_state;
+      constants__t_sessionState_i session_core__l_state;
       constants__t_user_i session_core__l_user;
       t_bool session_core__l_is_same_user;
       t_bool session_core__l_valid;
@@ -702,7 +702,7 @@ void session_core__l_client_secure_channel_lost_session_sm(
    const constants__t_session_i session_core__p_session,
    const constants__t_channel_config_idx_i session_core__p_channel_config_idx) {
    {
-      constants__t_sessionState session_core__l_state;
+      constants__t_sessionState_i session_core__l_state;
       
       if ((session_core__p_dom == true) &&
          (session_core__p_channel == session_core__p_lost_channel)) {
@@ -757,7 +757,7 @@ void session_core__l_server_secure_channel_lost_session_sm(
    const constants__t_channel_i session_core__p_lost_channel,
    const constants__t_session_i session_core__p_session) {
    {
-      constants__t_sessionState session_core__l_state;
+      constants__t_sessionState_i session_core__l_state;
       
       if ((session_core__p_dom == true) &&
          (session_core__p_channel == session_core__p_lost_channel)) {
@@ -887,7 +887,7 @@ void session_core__is_session_valid_for_service(
 
 void session_core__get_session_state_or_closed(
    const constants__t_session_i session_core__session,
-   constants__t_sessionState * const session_core__state) {
+   constants__t_sessionState_i * const session_core__state) {
    {
       t_bool session_core__l_valid_session;
       
