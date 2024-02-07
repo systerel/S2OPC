@@ -25,7 +25,7 @@ CSRCDIR=src/ClientServer/services/bgenc
 LOGPATH=$CURDIR/pre-build.log
 ifs_save=$IFS
 IFS=$'\n'
-GENERATED_FILES=`find $CSRCDIR -maxdepth 1 -name "*.[hc]" -or -name "*.h_"`
+GENERATED_FILES=`find $CSRCDIR -maxdepth 1 -name "*.[hc]"`
 
 EXITCODE=0
 
