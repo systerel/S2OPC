@@ -541,7 +541,7 @@ test-uactt:
     LINUX_UACTT: 1
   rules:
     - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
-           $TEST_NETWORK_FUZZ != null && $WITH_COVERITY != null || \
+           $TEST_NETWORK_FUZZ != null || $WITH_COVERITY != null || \
            $WITH_COVERAGE != null || $WITH_DOC != null || \
            $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
       when: never
