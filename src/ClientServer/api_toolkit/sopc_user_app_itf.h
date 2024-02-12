@@ -64,7 +64,7 @@ typedef struct SOPC_SecureChannel_Config
                                 on ReverseHello reception. */
     const char* url;       /**< The endpoint URL used for connection. It shall always be defined. */
 
-    SOPC_CertHolder* peerAppCert;              /*< Peer application certificate:
+    SOPC_CertHolder* peerAppCert;              /**< Peer application certificate:
                                                                     isClientSc => serverCertificate (configuration data)
                                                                     !isClientSc => clientCertificate (runtime data) */
     const char* reqSecuPolicyUri;              /**< Requested Security Policy URI */
