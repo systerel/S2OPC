@@ -405,6 +405,8 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
     {
         methodFunc = &SOPC_Method_Func_IncCounter;
         status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, no output", NULL);
+        SOPC_NodeId_Clear(methodId);
+        SOPC_Free(methodId);
     }
     else
     {
@@ -419,6 +421,8 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         {
             methodFunc = &SOPC_Method_Func_AddToCounter;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Only input, no output", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
         }
         else
         {
@@ -435,6 +439,8 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         {
             methodFunc = &SOPC_Method_Func_GetCounterValue;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "No input, only output", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
         }
         else
         {
@@ -451,6 +457,8 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         {
             methodFunc = &SOPC_Method_Func_UpdateAndGetPreviousHello;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "Input, output", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
         }
         else
         {
@@ -466,6 +474,8 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         {
             methodFunc = &SOPC_Method_Func_AddVariable;
             status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "AddVariable", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
         }
         else
         {

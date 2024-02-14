@@ -1095,11 +1095,15 @@ static void FileTransfer_FileType_Clear(SOPC_FileType* filetype)
     {
         SOPC_String_Delete(filetype->path);
         SOPC_String_Delete(filetype->tmp_path);
-        // filetype->methodIds[i] Free by the MethodCallManager
         for (int i = 0; i < NB_VARIABLE; i++)
         {
             SOPC_NodeId_Clear(filetype->variableIds[i]);
             SOPC_Free(filetype->variableIds[i]);
+        }
+        for (int i = 0; i < NB_FILE_TYPE_METHOD; i++)
+        {
+            SOPC_NodeId_Clear(filetype->methodIds[i]);
+            SOPC_Free(filetype->methodIds[i]);
         }
         FileTransfer_FileType_Initialize(filetype);
     }
