@@ -145,3 +145,24 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
     }
     return status;
 }
+
+SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManager* mcm,
+                                                           const SOPC_NodeId* methodInstanceId,
+                                                           const SOPC_NodeId* methodTypeId,
+                                                           SOPC_MethodCallFunc_Ptr* methodFunc,
+                                                           void* param,
+                                                           SOPC_MethodCallFunc_Free_Func* fnFree)
+{
+    SOPC_ReturnStatus status = SOPC_MethodCallManager_AddMethod(mcm, methodTypeId, methodFunc, param, fnFree);
+    if (SOPC_STATUS_OK != status)
+    {
+        return status;
+    }
+    status = SOPC_MethodCallManager_AddMethod(mcm, methodInstanceId, methodFunc, param, fnFree);
+    if (SOPC_STATUS_OK != status)
+    {
+        // remove already inserted method
+        SOPC_Dict_Remove((SOPC_Dict*) mcm->pUserData, (uintptr_t) methodTypeId);
+    }
+    return status;
+}

@@ -167,4 +167,28 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
                                                    void* param,
                                                    SOPC_MethodCallFunc_Free_Func* fnFree);
 
+/**
+ * \brief Associates a C function to two NodeId of a Method (one for method instance and one for method in object type)
+ * This function should only be used with the basic implementation of SOPC_MethodCallManager provided by the toolkit.
+ *
+ * \note It is a common pattern to use the well known NodeId of the method instance declaration of the object type
+ *       instead of using the method instance NodeId. This function provides an easy way to register both at same time.
+ *
+ * \param mcm              a valid pointer on a SOPC_MethodCallManager returned by SOPC_MethodCallManager_Create().
+ * \param methodInstanceId a valid pointer on a SOPC_NodeId of the method instance, content will be copied.
+ * \param methodTypeId     a valid pointer on a SOPC_NodeId of the method instance declaration in type,
+ *                         content will be copied.
+ * \param methodFunc       a valid pointer on a C function to associate with the given methodId.
+ * \param param            a pointer on data to give as parameter when call methodFunc. Can be NULL.
+ * \param fnFree           a pointer on a C function to free param. Can be NULL.
+ *
+ * \return SOPC_STATUS_OK when the function succeed, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_OUT_OF_MEMORY.
+ */
+SOPC_ReturnStatus SOPC_MethodCallManager_AddMethodWithType(SOPC_MethodCallManager* mcm,
+                                                           const SOPC_NodeId* methodInstanceId,
+                                                           const SOPC_NodeId* methodTypeId,
+                                                           SOPC_MethodCallFunc_Ptr* methodFunc,
+                                                           void* param,
+                                                           SOPC_MethodCallFunc_Free_Func* fnFree);
+
 #endif /* SOPC_CALL_METHOD_MANAGER_H_ */
