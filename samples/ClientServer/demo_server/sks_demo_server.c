@@ -187,8 +187,12 @@ static SOPC_ReturnStatus Server_SKS_Start(void)
 
 static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
 {
-    SOPC_NodeId* methodId;
-    SOPC_MethodCallFunc_Ptr* methodFunc;
+    SOPC_NodeId methodTypeId;
+    SOPC_NodeId methodId;
+    SOPC_NodeId_Initialize(&methodTypeId);
+    SOPC_NodeId_Initialize(&methodId);
+    methodTypeId.Data.Numeric = OpcUaId_PubSubKeyServiceType_GetSecurityKeys;
+    methodId.Data.Numeric = OpcUaId_PublishSubscribe_GetSecurityKeys;
     /* Create and define the method call manager the server will use*/
     SOPC_MethodCallManager* mcm = SOPC_MethodCallManager_Create();
     SOPC_ReturnStatus status = (NULL != mcm) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
@@ -200,32 +204,8 @@ static SOPC_ReturnStatus Server_InitSKScallMethodService(SOPC_SKManager* skm)
     /* Add methods implementation in the method call manager used */
     if (SOPC_STATUS_OK == status)
     {
-        // getSecurityKeys method node
-        methodId = SOPC_Calloc(1, sizeof(*methodId));
-        if (NULL != methodId)
-        {
-            methodId->Data.Numeric = OpcUaId_PublishSubscribe_GetSecurityKeys;
-            methodFunc = &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys;
-            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, skm, NULL);
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            methodId = SOPC_Calloc(1, sizeof(*methodId));
-            if (NULL != methodId)
-            {
-                methodId->Data.Numeric = OpcUaId_PubSubKeyServiceType_GetSecurityKeys;
-                methodFunc = &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys;
-                status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, skm, NULL);
-            }
-            else
-            {
-                status = SOPC_STATUS_NOK;
-            }
-        }
+        status = SOPC_MethodCallManager_AddMethodWithType(
+            mcm, &methodId, &methodTypeId, &SOPC_Method_Func_PublishSubscribe_GetSecurityKeys, skm, NULL);
     }
 
     return status;
