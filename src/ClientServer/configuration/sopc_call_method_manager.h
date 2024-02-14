@@ -150,12 +150,11 @@ SOPC_MethodCallManager* SOPC_MethodCallManager_Create(void);
 void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
 
 /**
- * \brief Associate a C function to a NodeId of a Method.
+ * \brief Associates a C function to a NodeId of a Method.
  * This function should be used only with the basic implementation of SOPC_MethodCallManager provided by the toolkit.
  *
  * \param mcm   a valid pointer on a SOPC_MethodCallManager returned by SOPC_MethodCallManager_Create().
- * \param methodId        a valid pointer on a SOPC_NodeId of the method
- *                        (\p mcm will manage its deallocation, do not reuse this nodeId after call)
+ * \param methodId        a valid pointer on a SOPC_NodeId of the method, content will be copied.
  * \param methodFunc      a valid pointer on a C function to associate with the given methodId.
  * \param param           a pointer on data to give as parameter when call methodFunc. Can be NULL.
  * \param fnFree          a pointer on a C function to free param. Can be NULL.
@@ -163,7 +162,7 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm);
  * \return SOPC_STATUS_OK when the function succeed, SOPC_STATUS_INVALID_PARAMETERS or SOPC_STATUS_OUT_OF_MEMORY.
  */
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
-                                                   SOPC_NodeId* methodId,
+                                                   const SOPC_NodeId* methodId,
                                                    SOPC_MethodCallFunc_Ptr* methodFunc,
                                                    void* param,
                                                    SOPC_MethodCallFunc_Free_Func* fnFree);

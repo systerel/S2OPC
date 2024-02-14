@@ -109,7 +109,7 @@ void SOPC_MethodCallManager_Free(SOPC_MethodCallManager* mcm)
 }
 
 SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
-                                                   SOPC_NodeId* methodId,
+                                                   const SOPC_NodeId* methodId,
                                                    SOPC_MethodCallFunc_Ptr* methodFunc,
                                                    void* param,
                                                    SOPC_MethodCallFunc_Free_Func* fnFree)
@@ -119,25 +119,29 @@ SOPC_ReturnStatus SOPC_MethodCallManager_AddMethod(SOPC_MethodCallManager* mcm,
     SOPC_ASSERT(NULL != dict);
 
     SOPC_MethodCallFunc* wrapper = SOPC_Calloc(1, sizeof(SOPC_MethodCallFunc));
-    if (NULL == wrapper)
+    SOPC_NodeId* methodIdCopy = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+    if (NULL == wrapper || NULL == methodIdCopy)
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
-    else
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_NodeId_Copy(methodIdCopy, methodId);
+    }
+    if (SOPC_STATUS_OK == status)
     {
         wrapper->pFnFree = fnFree;
         wrapper->pMethodFunc = methodFunc;
         wrapper->pParam = param;
 
-        bool b = SOPC_Dict_Insert(dict, (uintptr_t) methodId, (uintptr_t) wrapper);
-        if (false == b)
-        {
-            wrapper->pFnFree = NULL;
-            wrapper->pMethodFunc = NULL;
-            wrapper->pParam = NULL;
-            SOPC_Free(wrapper);
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
+        bool bres = SOPC_Dict_Insert(dict, (uintptr_t) methodIdCopy, (uintptr_t) wrapper);
+        status = bres ? SOPC_STATUS_OK : SOPC_STATUS_OUT_OF_MEMORY;
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_NodeId_Clear(methodIdCopy);
+        SOPC_Free(methodIdCopy);
+        SOPC_Free(wrapper);
     }
     return status;
 }
