@@ -20,6 +20,7 @@
 #include "sopc_logger.h"
 
 #include <stdio.h>
+#include "sopc_array.h"
 #include "sopc_common_constants.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
@@ -29,6 +30,17 @@ static SOPC_Log_Instance* clientServerTrace = NULL;
 static SOPC_Log_Instance* pubSubTrace = NULL;
 static SOPC_Log_Instance* secuAudit = NULL;
 static SOPC_Log_Instance* opcUaAudit = NULL;
+
+// User section logs:
+typedef SOPC_Log_Instance* UserLogElement;
+
+// Array containing all user log sections managed by toolkit.
+static SOPC_Array* userLogArray = NULL;
+static void userLogArray_Free_Func(void* data)
+{
+    UserLogElement elt = (UserLogElement)data;
+    SOPC_Log_ClearInstance(&elt);
+}
 
 static const char* SOPC_Log_SecuAuditCategory = "SecuAudit";
 
@@ -116,6 +128,29 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
         {
             /* Status stays OK given that we don't have other alternatives for now */
             fprintf(stderr, "ERROR: S2OPC Logs initialization failed!\n");
+        }
+    }
+    return result;
+}
+
+SOPC_Log_Instance* SOPC_Logger_AddUserInstance(const char* category)
+{
+    SOPC_Log_Instance* result = NULL;
+    if (NULL == userLogArray)
+    {
+        userLogArray = SOPC_Array_Create(sizeof(UserLogElement), 1, &userLogArray_Free_Func);
+    }
+    if (NULL != userLogArray)
+    {
+        result = SOPC_Log_CreateInstanceAssociation(secuAudit, category);
+    }
+    if (result != NULL)
+    {
+        const bool appendOk = SOPC_Array_Append_Values(userLogArray, result, 1);
+        if (!appendOk)
+        {
+            SOPC_Log_ClearInstance(&result);
+            result = NULL;
         }
     }
     return result;
@@ -321,6 +356,11 @@ void SOPC_Logger_TraceOpcUaAuditWarning(const char* format, ...)
 
 void SOPC_Logger_Clear(void)
 {
+    if (userLogArray == NULL)
+    {
+        SOPC_Array_Delete(userLogArray);
+        userLogArray = NULL;
+    }
     if (secuAudit != NULL)
     {
         SOPC_Log_ClearInstance(&secuAudit);

@@ -59,6 +59,15 @@ typedef enum SOPC_Log_Module
 bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration);
 
 /**
+ * \brief Add a user instance in the existing Toolkit log. The new created instance is
+ * managed by SOPC_Logger and does not need to be deleted by caller.
+ * \param category The new user category name.
+ * \post Caller can use SOPC_Log_xxx features with returned object. In particular the level
+ * is filtered out by ::SOPC_Log_SetLogLevel and not ::SOPC_Logger_SetTraceLogLevel
+ */
+SOPC_Log_Instance* SOPC_Logger_AddUserInstance(const char* category);
+
+/**
  * \brief Defines the active log level for the given log instance (default: ERROR):
  * - ERROR: display only ERROR level
  * - WARNING: display ERROR + WARNING levels
