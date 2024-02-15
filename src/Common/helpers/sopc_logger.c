@@ -38,7 +38,7 @@ typedef SOPC_Log_Instance* UserLogElement;
 static SOPC_Array* userLogArray = NULL;
 static void userLogArray_Free_Func(void* data)
 {
-    UserLogElement elt = (UserLogElement)data;
+    UserLogElement elt = (UserLogElement) data;
     SOPC_Log_ClearInstance(&elt);
 }
 
@@ -64,48 +64,17 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     switch (logSystem)
     {
     case SOPC_LOG_SYSTEM_FILE:
-#if SOPC_HAS_FILESYSTEM
     {
-        int cmpRes = 0;
-        SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_Creation_Error_UnknownIssue;
-        const SOPC_LogSystem_File_Configuration* pFileConfig = NULL;
-        const char* logPath = NULL;
-        pFileConfig = &logConfiguration->logSysConfig.fileSystemLogConfig;
-        logPath = pFileConfig->logDirPath;
-        if (NULL != logPath)
-        {
-            cmpRes = SOPC_strcmp_ignore_case("", logPath);
-        }
-        else
-        {
-            logPath = "";
-        }
-        if (0 == cmpRes)
-        {
-            // Nothing to create (Current folder is used)
-            mkdirRes = SOPC_FileSystem_Creation_OK;
-        }
-        else
-        {
-            mkdirRes = SOPC_FileSystem_mkdir(logPath);
-        }
-        if (SOPC_FileSystem_Creation_OK != mkdirRes && SOPC_FileSystem_Creation_Error_PathAlreadyExists != mkdirRes)
-        {
-            fprintf(stderr, "WARNING: Cannot create log directory ('%d'), defaulting to current directory\n", mkdirRes);
-            logPath = "";
-        }
-
-        secuAudit = SOPC_Log_CreateFileInstance(logPath, "Trace", SOPC_Log_SecuAuditCategory, pFileConfig->logMaxBytes,
-                                                pFileConfig->logMaxFiles);
+        const SOPC_LogSystem_File_Configuration* logCfg = &logConfiguration->logSysConfig.fileSystemLogConfig;
+        SOPC_CircularLogFile_Configuration conf = {.logDirPath = logCfg->logDirPath,
+                                                   .logFileName = "Trace",
+                                                   .logMaxBytes = logCfg->logMaxBytes,
+                                                   .logMaxFiles = logCfg->logMaxFiles};
+        secuAudit = SOPC_Log_CreateFileInstance(&conf, SOPC_Log_SecuAuditCategory);
         result = SOPC_Logger_AuditInitialize();
+
+        break;
     }
-
-#else /* SOPC_HAS_FILESYSTEM */
-        fprintf(stderr, "ERROR: Cannot use SOPC_LOG_SYSTEM_FILE with SOPC_HAS_FILESYSTEM not set to true \n");
-        result = SOPC_STATUS_NOT_SUPPORTED;
-#endif
-    break;
-
     case SOPC_LOG_SYSTEM_USER:
         secuAudit = SOPC_Log_CreateUserInstance(SOPC_Log_SecuAuditCategory,
                                                 logConfiguration->logSysConfig.userSystemLogConfig.doLog);
@@ -361,10 +330,6 @@ void SOPC_Logger_Clear(void)
         SOPC_Array_Delete(userLogArray);
         userLogArray = NULL;
     }
-    if (secuAudit != NULL)
-    {
-        SOPC_Log_ClearInstance(&secuAudit);
-    }
     if (commonTrace != NULL)
     {
         SOPC_Log_ClearInstance(&commonTrace);
@@ -380,6 +345,11 @@ void SOPC_Logger_Clear(void)
     if (opcUaAudit != NULL)
     {
         SOPC_Log_ClearInstance(&opcUaAudit);
+    }
+    // secuAudit is the "actual" instance and must be deleted last.
+    if (secuAudit != NULL)
+    {
+        SOPC_Log_ClearInstance(&secuAudit);
     }
     SOPC_Log_Clear();
 }

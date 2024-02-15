@@ -30,6 +30,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "sopc_circular_log_file.h"
+
 typedef struct SOPC_Log_Instance SOPC_Log_Instance;
 
 typedef enum
@@ -42,18 +44,23 @@ typedef enum
 
 /**
  * \brief Log event callback.
+ * \param[in] timestampUtc  String pointer containing the event timestamp (UTC time)
  * \param[in] category  String pointer containing the category. Can be NULL, when
  *                      not related to any category,
+ * \param[in] level     The level of the log (Already filtered out if below current log level),
  * \param[in] line      Non-null string pointer, containing the full log line,
  *                      including NULL-terminating character but excluding any newline character,
  *                      so that it can be specificly defined for each platform.
  *                      The line has already been filtered (level) and formatted by logger core.
  *                      In all cases, the line is truncated to SOPC_Log_UserMaxLogLen characters.
  * */
-typedef void SOPC_Log_UserDoLog(const char* category, const char* const line);
+typedef void SOPC_Log_UserDoLog(const char* timestampUtc,
+                                const char* category,
+                                const SOPC_Log_Level level,
+                                const char* const line);
 
 /**
- * \brief structure containing the file system log configuration
+ * \brief structure containing the file log configuration
  */
 typedef struct SOPC_LogSystem_File_Configuration
 {
@@ -110,27 +117,15 @@ void SOPC_Log_Initialize(void);
 /**
  * \brief Creates a new log file and log instance and prints the starting timestamp
  *
- * \param logDirPath   Absolute or relative path of the directory to be used for logs (shall exist and terminate with
- * directory separator)
- * \param logFileName  The file name to be used without extension. A prefix, an integer suffix and extension will be
- * added automatically.
+ * \param pConf        A non-NULL pointer to the file instance configuration
  * \param category     A category name if the log file is used for several categories or NULL. Truncated if more than 9
  * characters.
- * \param maxBytes     A maximum amount of bytes by log file before opening a new file incrementing the integer suffix.
- * It is a best effort value (amount verified after each print).
- * \param maxFiles     A maximum number of files to be used, when reached the older log file is overwritten
- * (starting with *_00001.log)
  *
  * \return             The log instance to be used to add traces
  * */
-SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
-    const char* logDirPath,
-    const char* logFileName,
-    const char* category,
-    uint32_t maxBytes,  // New file created when maxBytes reached (after printing latest trace)
-    uint16_t maxFiles); // Old logs overwritten when maxFiles reached
+SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const SOPC_CircularLogFile_Configuration* pConf, const char* category);
 
-/*
+/**
  * \brief Creates a new log instance for user mode
  *
  * \param category     A category name if the log file is used for several categories or NULL. Truncated if more than 9
@@ -141,7 +136,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(
  * */
 SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_UserDoLog* logCallback);
 
-/*
+/**
  * \brief Creates a new log instance using the same log file than existing log instance and prints the starting
  * timestamp. It provides the way to have several categories with different levels of log in the same log file.
  *
@@ -149,6 +144,7 @@ SOPC_Log_Instance* SOPC_Log_CreateUserInstance(const char* category, SOPC_Log_Us
  * \param category  Category for the new log instance in the log file (should be unique in log file)
  *
  * \return          The log instance to be used to add traces
+ * \note            The new instance must always be cleared before the parent reference instance.
  */
 SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogInst, const char* category);
 
@@ -164,7 +160,7 @@ SOPC_Log_Instance* SOPC_Log_CreateInstanceAssociation(SOPC_Log_Instance* pLogIns
  */
 bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level);
 
-/*
+/**
  * \brief getter for the log level of an instance
  *
  * \param pLogInst  An existing log instance
@@ -173,7 +169,7 @@ bool SOPC_Log_SetLogLevel(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level);
  */
 SOPC_Log_Level SOPC_Log_GetLogLevel(SOPC_Log_Instance* pLogInst);
 
-/*
+/**
  * \brief Activates the console output for logged traces (same active level as log file)
  *
  * \param pLogInst  An existing log instance
@@ -181,20 +177,15 @@ SOPC_Log_Level SOPC_Log_GetLogLevel(SOPC_Log_Instance* pLogInst);
  */
 bool SOPC_Log_SetConsoleOutput(SOPC_Log_Instance* pLogInst, bool activate);
 
-/*
- * \brief Returns the file path prefix for the given log instance.
- * It complies with the following format: <logDirPath><startExecutionDate><logFileName>_
- * - <logDirPath>: the path provided to SOPC_Log_CreateInstance
- * - <startExecutionDate>: the starting execution date set by SOPC_Log_Initialize (or UNINIT_LOG if not initialized)
- * - <logFileName>: the log file name provided to SOPC_Log_CreateInstance
- * Note: the complete file path is then the returned prefix followed by <NNNNN>.log with N digits starting to 00001
- *
+/**
+ * \brief Get the name of the current log file.
  * \param pLogInst  An existing log instance
- * \return          The generic file path prefix of the log files for the given instance (to be deallocated by caller)
+ * \return Name of current output log file or NULL if not applicable.
+ * The returned value must be deallocated be caller.
  */
-char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst);
+char* SOPC_Log_GetCurrentFilename(const SOPC_Log_Instance* pLogInst);
 
-/*
+/**
  * \brief Logs a trace with the given level
  *
  * \param pLogInst  An existing log instance already started
@@ -203,7 +194,7 @@ char* SOPC_Log_GetFilePathPrefix(SOPC_Log_Instance* pLogInst);
  */
 void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, ...);
 
-/*
+/**
  * \brief Logs a trace with the given level
  *
  * \param pLogInst  An existing log instance already started
@@ -213,14 +204,14 @@ void SOPC_Log_Trace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const cha
  */
 void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const char* format, va_list args);
 
-/*
+/**
  * \brief Stops allowing to log traces in the given log instance. Log file is closed when last log instance is stopped.
  *
  * \param ppLogInst  An existing log instance already started. Pointer set to NULL after call.
  */
 void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst);
 
-/*
+/**
  * \brief Clears the logger manager: clear unique file name prefix for execution
  * */
 void SOPC_Log_Clear(void);

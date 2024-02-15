@@ -145,12 +145,17 @@ static void assert_UserCallback(const char* context)
 }
 
 /***************************************************/
-static void log_UserCallback(const char* context, const char* text)
+static void log_UserCallback(const char* timestampUtc,
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line)
 {
-    (void) context;
-    if (NULL != text)
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    SOPC_UNUSED_ARG(timestampUtc);
+    if (line != NULL)
     {
-        PRINT("%s\n", text);
+        PRINT("%s\n", line);
     }
 }
 

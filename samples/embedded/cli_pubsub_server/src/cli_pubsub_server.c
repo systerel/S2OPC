@@ -74,7 +74,10 @@
 /***************************************************/
 /**               MISC FUNCTIONS                   */
 /***************************************************/
-static void log_UserCallback(const char* context, const char* text);
+static void log_UserCallback(const char* timestampUtc,
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line);
 
 /***************************************************/
 /**               SERVER CONFIGURATION             */
@@ -241,12 +244,17 @@ static void serverStopped_cb(SOPC_ReturnStatus status)
 static char logCategory[10];
 
 /***************************************************/
-static void log_UserCallback(const char* context, const char* text)
+static void log_UserCallback(const char* timestampUtc,
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line)
 {
-    SOPC_UNUSED_ARG(context);
-    if (context == NULL || logCategory[0] == 0 || strcmp(logCategory, context) == 0)
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    SOPC_UNUSED_ARG(timestampUtc);
+    if (line != NULL && (category == NULL || logCategory[0] == 0 || strcmp(logCategory, category) == 0))
     {
-        PRINT("%s\n", text);
+        PRINT("%s\n", line);
     }
 }
 
@@ -475,7 +483,7 @@ static void setupServer(void)
     status = SOPC_ServerConfigHelper_Initialize();
     SOPC_ASSERT(status == SOPC_STATUS_OK && "SOPC_ServerConfigHelper_Initialize failed");
 
-    log_UserCallback(NULL, "S2OPC initialization OK");
+    PRINT("S2OPC initialization OK\n");
 
     //////////////////////////////////
     // Namespaces initialization
@@ -499,7 +507,7 @@ static void setupServer(void)
     g_epConfig = SOPC_ServerConfigHelper_CreateEndpoint(CONFIG_SOPC_ENDPOINT_ADDRESS, true);
     SOPC_ASSERT(NULL != g_epConfig && "SOPC_ServerConfigHelper_CreateEndpoint failed");
 
-    log_UserCallback(NULL, "Setting up security...");
+    PRINT("Setting up security...\n");
 
     /* 1st Security policy is None without user (users on unsecure channel shall be forbidden) */
     sp = SOPC_EndpointConfig_AddSecurityConfig(g_epConfig, SOPC_SecurityPolicy_None);
@@ -564,7 +572,7 @@ static void setupServer(void)
         status = SOPC_ServerConfigHelper_SetPKIprovider(pkiProvider);
         SOPC_ASSERT(SOPC_STATUS_OK == status && "SOPC_ServerConfigHelper_SetPKIprovider failed");
 
-        log_UserCallback(NULL, "Test_Server_Client: Certificates and key loaded");
+        PRINT("Test_Server_Client: Certificates and key loaded\n");
     }
 
     //////////////////////////////////

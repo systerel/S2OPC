@@ -39,6 +39,8 @@
 #define MAX_LINE_LENGTH 100
 #define LINE_PREFIX_LENGTH 26
 
+static const char* continuationText = "LOG CONTINUE IN NEXT FILE: ";
+
 START_TEST(test_logger_levels)
 {
     SOPC_Log_Instance* otherLog = NULL;
@@ -46,7 +48,6 @@ START_TEST(test_logger_levels)
     FILE* refLogFile = NULL;
     FILE* genLogFile = NULL;
     int ires = 0;
-    char* filePathPrefix = NULL;
     char* filePath = NULL;
     char refFilePath[17];
     char refLogLine[MAX_LINE_LENGTH];
@@ -54,7 +55,9 @@ START_TEST(test_logger_levels)
     char genLogLine[MAX_LINE_LENGTH];
     char* genLogLineBis = NULL;
 
-    otherLog = SOPC_Log_CreateFileInstance("", "AnotherLogFile", "Other", 10000, 2); // Another testLog file
+    SOPC_CircularLogFile_Configuration logConf = {
+        .logDirPath = "", .logFileName = "AnotherLogFile", .logMaxBytes = 10000, .logMaxFiles = 2};
+    otherLog = SOPC_Log_CreateFileInstance(&logConf, "Other"); // Another testLog file
     ck_assert(otherLog != NULL);
 
     res = SOPC_Log_SetConsoleOutput(otherLog, true);
@@ -98,19 +101,14 @@ START_TEST(test_logger_levels)
     SOPC_Log_Trace(otherLog, SOPC_LOG_LEVEL_DEBUG, "Debug printed !");
     SOPC_Log_Trace(otherLog, SOPC_LOG_LEVEL_ERROR, "Error in the end");
 
-    filePathPrefix = SOPC_Log_GetFilePathPrefix(otherLog);
-    ck_assert(filePathPrefix != NULL);
-    ck_assert(strlen(filePathPrefix) > 0);
+    filePath = SOPC_Log_GetCurrentFilename(otherLog);
+    ck_assert(filePath != NULL);
+    ck_assert(strlen(filePath) > 0);
 
     // Close the otherLog instance
     SOPC_Log_ClearInstance(&otherLog);
 
     // Check testLog log file content is the expected content
-    SOPC_Free(filePath);
-    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
-    ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
-    ck_assert(ires > 0);
     strcpy(refFilePath, "logAnother.ref");
     // Open the generated log and reference log files
     refLogFile = fopen(refFilePath, "r");
@@ -130,6 +128,8 @@ START_TEST(test_logger_levels)
         if (refLogLineBis != NULL && genLogLineBis != NULL)
         {
             // Compare logs excluding the timestamp prefix
+            ck_assert(strlen(refLogLine) > LINE_PREFIX_LENGTH);
+            ck_assert(strlen(genLogLine) > LINE_PREFIX_LENGTH);
             ires = strcmp(&refLogLine[LINE_PREFIX_LENGTH], &genLogLine[LINE_PREFIX_LENGTH]);
             printf("Comparing (result == %d):\n- %s- %s", ires, &refLogLine[LINE_PREFIX_LENGTH],
                    &genLogLine[LINE_PREFIX_LENGTH]);
@@ -144,7 +144,6 @@ START_TEST(test_logger_levels)
     fclose(refLogFile);
     fclose(genLogFile);
 
-    SOPC_Free(filePathPrefix);
     SOPC_Free(filePath);
 }
 END_TEST
@@ -166,7 +165,6 @@ START_TEST(test_logger_categories_and_files)
     FILE* refLogFile = NULL;
     FILE* genLogFile = NULL;
     int ires = 0;
-    char* filePathPrefix = NULL;
     char* filePath = NULL;
     char refFilePath[17];
     char refLogLine[MAX_LINE_LENGTH];
@@ -175,17 +173,37 @@ START_TEST(test_logger_categories_and_files)
     char* genLogLineBis = NULL;
     char idx = 0;
 
-    testLog = SOPC_Log_CreateFileInstance("./not_existing_path/", "testLogFile", "Category1", 340, 3);
-    ck_assert(testLog == NULL);
-    testLog = SOPC_Log_CreateFileInstance("", "testLogFile", "Category1", 0, 3);
-    ck_assert(testLog == NULL);
-    testLog = SOPC_Log_CreateFileInstance("", "testLogFile", "Category1", 340, 0);
+    SOPC_CircularLogFile_Configuration logConf = {
+        .logDirPath = "./not_existing_path", .logFileName = "TestLogFile", .logMaxBytes = 340, .logMaxFiles = 3};
+
+    // Check that missing folder are crated automatically
+    testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
+    ck_assert(testLog != NULL);
+    char* tmp_name = SOPC_Log_GetCurrentFilename(testLog);
+    // delete created file and folder
+    ires = remove(tmp_name);
+    SOPC_Free(tmp_name);
+    ck_assert(ires == 0);
+    ires = remove("not_existing_path");
+    ck_assert(ires == 0);
+    SOPC_Log_ClearInstance(&testLog);
+
+    logConf.logDirPath = "";
+    logConf.logMaxBytes = 0;
+    logConf.logMaxFiles = 3;
+    testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
     ck_assert(testLog == NULL);
 
-    testLog =
-        SOPC_Log_CreateFileInstance("", "TestLogFile", "Category1",
-                                    340, // 100 bytes reserved for final line (indicating next file) => 240 of trace
-                                    3);  // 3 files => generate enough content to have 3 files
+    logConf.logDirPath = "";
+    logConf.logMaxBytes = 340;
+    logConf.logMaxFiles = 0;
+    testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
+    ck_assert(testLog == NULL);
+
+    logConf.logDirPath = "";
+    logConf.logMaxBytes = 340;
+    logConf.logMaxFiles = 3;
+    testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
     ck_assert(testLog != NULL);
 
     testLog2 = SOPC_Log_CreateInstanceAssociation(testLog, "Category2");
@@ -212,21 +230,16 @@ START_TEST(test_logger_categories_and_files)
 
     SOPC_Log_Trace(testLog3, SOPC_LOG_LEVEL_ERROR, "This is the end"); // last message of first testLog
 
-    // Retrieve the prefix file path of testLog files
-    filePathPrefix = SOPC_Log_GetFilePathPrefix(testLog);
-    ck_assert(filePathPrefix != NULL);
-    ck_assert(strlen(filePathPrefix) > 0);
+    // Check testLog log file content is the expected content
+    filePath = SOPC_Log_GetCurrentFilename(testLog);
+    ck_assert(filePath != NULL);
+    ck_assert(strlen(filePath) > 10);
 
     // Close the testLog instances
-    SOPC_Log_ClearInstance(&testLog);
     SOPC_Log_ClearInstance(&testLog2);
     SOPC_Log_ClearInstance(&testLog3);
+    SOPC_Log_ClearInstance(&testLog);
 
-    // Check testLog log file content is the expected content
-    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
-    ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
-    ck_assert(ires > 0);
     strcpy(refFilePath, "logTest.ref1");
 
     for (idx = 1; idx <= 3; idx++)
@@ -235,7 +248,7 @@ START_TEST(test_logger_categories_and_files)
         refFilePath[11] = (char) (48 + idx); // 48 => '0'
         refLogFile = fopen(refFilePath, "r");
         ck_assert(refLogFile != NULL);
-        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx - 1); // 48 => '0'
+        filePath[strlen(filePath) - 5] = (char) (48 + idx - 1); // 48 => '0'
         genLogFile = fopen(filePath, "r");
         ck_assert(genLogFile != NULL);
 
@@ -255,10 +268,10 @@ START_TEST(test_logger_categories_and_files)
                 if (ires != 0)
                 {
                     // It shall be the continue in next file line
-                    ires = memcmp(&refLogLine[LINE_PREFIX_LENGTH], "LOG CONTINUE IN NEXT FILE: ", 27);
+                    ires = memcmp(refLogLine, continuationText, strlen(continuationText));
                     if (ires == 0)
                     {
-                        ires = memcmp(&genLogLine[LINE_PREFIX_LENGTH], "LOG CONTINUE IN NEXT FILE: ", 27);
+                        ires = memcmp(genLogLine, continuationText, strlen(continuationText));
                     }
                 }
                 printf("Comparing (result == %d):\n- %s- %s", ires, &refLogLine[LINE_PREFIX_LENGTH],
@@ -272,9 +285,9 @@ START_TEST(test_logger_categories_and_files)
         }
         fclose(refLogFile);
         fclose(genLogFile);
+        printf("\n");
     }
 
-    SOPC_Free(filePathPrefix);
     SOPC_Free(filePath);
 }
 END_TEST
@@ -295,7 +308,6 @@ START_TEST(test_logger_circular)
     FILE* refLogFile = NULL;
     FILE* genLogFile = NULL;
     int ires = 0;
-    char* filePathPrefix = NULL;
     char* filePath = NULL;
     char refFilePath[17];
     char refLogLine[MAX_LINE_LENGTH];
@@ -304,9 +316,10 @@ START_TEST(test_logger_circular)
     char* genLogLineBis = NULL;
     char idx = 0;
 
-    circularLog = SOPC_Log_CreateFileInstance("", "CircularLogFile", "Circular1",
-                                              340, // Same as testLog
-                                              2);  // TestLog - 1 => first log file overwritten
+    SOPC_CircularLogFile_Configuration logConf = {
+        .logDirPath = "", .logFileName = "CircularLogFile", .logMaxBytes = 340, .logMaxFiles = 2};
+
+    circularLog = SOPC_Log_CreateFileInstance(&logConf, "Circular1"); // TestLog - 1 => first log file overwritten
 
     // Start circular log
     res = SOPC_Log_SetLogLevel(circularLog, SOPC_LOG_LEVEL_INFO);
@@ -340,20 +353,16 @@ START_TEST(test_logger_circular)
 
     SOPC_Log_Trace(circularLog, SOPC_LOG_LEVEL_ERROR, "This is the end"); // last message of circularLog
 
-    // Check circularLog log file content is the expected content
-    filePathPrefix = SOPC_Log_GetFilePathPrefix(circularLog);
-    ck_assert(filePathPrefix != NULL);
-    ck_assert(strlen(filePathPrefix) > 0);
-
     // Close the circular log instance
+    SOPC_Free(filePath);
+    filePath = SOPC_Log_GetCurrentFilename(circularLog);
+    ck_assert(filePath != NULL);
+    ck_assert(strlen(filePath) > 10);
+
     SOPC_Log_ClearInstance(&circularLog);
 
     // Check testLog log file content is the expected content
-    SOPC_Free(filePath);
-    filePath = SOPC_Malloc((strlen(filePathPrefix) + 10) * sizeof(char)); // 9 + '\0'
-    ck_assert(filePath != NULL);
-    ires = sprintf(filePath, "%s00000.log", filePathPrefix);
-    ck_assert(ires > 0);
+
     strcpy(refFilePath, "logCircular.ref1");
 
     for (idx = 0; idx <= 2; idx++)
@@ -362,7 +371,7 @@ START_TEST(test_logger_circular)
         refFilePath[15] = (char) (48 + idx); // 48 => '0'
         refLogFile = fopen(refFilePath, "r");
         ck_assert(refLogFile != NULL);
-        filePath[strlen(filePathPrefix) + 4] = (char) (48 + idx); // 48 => '0'
+        filePath[strlen(filePath) - 5] = (char) (48 + idx); // 48 => '0'
         genLogFile = fopen(filePath, "r");
         ck_assert(genLogFile != NULL);
 
@@ -382,14 +391,13 @@ START_TEST(test_logger_circular)
                 if (ires != 0)
                 {
                     // It shall be the continue in next file line
-                    ires = memcmp(&refLogLine[LINE_PREFIX_LENGTH], "LOG CONTINUE IN NEXT FILE: ", 27);
+                    ires = memcmp(refLogLine, continuationText, strlen(continuationText));
                     if (ires == 0)
                     {
-                        ires = memcmp(&genLogLine[LINE_PREFIX_LENGTH], "LOG CONTINUE IN NEXT FILE: ", 27);
+                        ires = memcmp(genLogLine, continuationText, strlen(continuationText));
                     }
                 }
-                printf("Comparing (result == %d):\n- %s- %s", ires, &refLogLine[LINE_PREFIX_LENGTH],
-                       &genLogLine[LINE_PREFIX_LENGTH]);
+                printf("Comparing (result == %d):\n- %s- %s", ires, refLogLine, genLogLine);
                 ck_assert(ires == 0);
             }
             else
@@ -401,20 +409,22 @@ START_TEST(test_logger_circular)
         fclose(genLogFile);
     }
 
-    SOPC_Free(filePathPrefix);
     SOPC_Free(filePath);
 }
 END_TEST
 
 static char* SOPC_Check_Logger_lastUserCategory = NULL;
+static SOPC_Log_Level SOPC_Check_Logger_lastUserLevel = SOPC_LOG_LEVEL_ERROR;
 static char* SOPC_Check_Logger_lastUserLog_Dated = NULL;
 static char* SOPC_Check_Logger_lastUserLog = NULL;
 static bool SOPC_Check_Logger_userLogCalled = false;
 static FILE* SOPC_Check_Logger_userFile = NULL;
-static const char* SOPC_Check_Logger_dateSample = "[YYYY/MM/DD HH:MM:SS.mmm] ";
-static void SOPC_Check_Logger_UserDoLog(const char* category, const char* const line)
+static void SOPC_Check_Logger_UserDoLog(const char* timestampUtc,
+                                        const char* category,
+                                        const SOPC_Log_Level level,
+                                        const char* const line)
 {
-    static const char* lineToShort = "Line too short!";
+    (void) timestampUtc;
     if (SOPC_Check_Logger_userFile == NULL)
     {
         SOPC_Check_Logger_userFile = fopen("check_logger_user.log", "w");
@@ -424,30 +434,23 @@ static void SOPC_Check_Logger_UserDoLog(const char* category, const char* const 
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
     SOPC_Free(SOPC_Check_Logger_lastUserLog_Dated);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);
+    SOPC_Check_Logger_lastUserLevel = level;
     SOPC_Check_Logger_lastUserCategory = SOPC_strdup(category);
     SOPC_Check_Logger_lastUserLog_Dated = SOPC_strdup(line);
-    if (strlen(line) > strlen(SOPC_Check_Logger_dateSample))
-    {
-        SOPC_Check_Logger_lastUserLog = SOPC_strdup(&line[strlen(SOPC_Check_Logger_dateSample)]);
-    }
-    else
-    {
-        SOPC_Check_Logger_lastUserLog = SOPC_strdup(lineToShort);
-    }
+    SOPC_Check_Logger_lastUserLog = SOPC_strdup(line);
     SOPC_Check_Logger_userLogCalled = true;
 }
 
 START_TEST(test_logger_user)
 {
-    char* filePathPrefix = NULL;
     SOPC_Log_Level readLogLevel = SOPC_LOG_LEVEL_ERROR;
     static const char* userlogLine1 = "First user log line";
     static const char* userlogLine2 = "Second user log line - filtered out";
     char* userLongLine3 = NULL;
     static const char* userlogLine4 = "4th line";
-    static const char* userlogLine4b = "(Warning) 4th line";
+    static const char* userlogLine4b = "4th line";
     static const char* userlogLine5 = "5th line";
-    static const char* userlogLine5b = "(Warning) 5th line";
+    static const char* userlogLine5b = "5th line";
     static const char* category = "U-LOG";
     static const char* category2 = "CATEGORY2";
     char aChar = 'A';
@@ -461,10 +464,6 @@ START_TEST(test_logger_user)
     userLog = SOPC_Log_CreateUserInstance(category, &SOPC_Check_Logger_UserDoLog);
     ck_assert(userLog != NULL);
 
-    // Check that there is no associated log file
-    filePathPrefix = SOPC_Log_GetFilePathPrefix(userLog);
-    ck_assert(filePathPrefix == NULL);
-
     // Start user log
     res = SOPC_Log_SetLogLevel(userLog, SOPC_LOG_LEVEL_INFO);
     ck_assert(res != false);
@@ -475,6 +474,8 @@ START_TEST(test_logger_user)
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog, SOPC_LOG_LEVEL_INFO, userlogLine1);
     ck_assert(SOPC_Check_Logger_userLogCalled);
+    ck_assert_msg(SOPC_LOG_LEVEL_INFO == SOPC_Check_Logger_lastUserLevel,
+                  "Was expecting LEVEL <SOPC_LOG_LEVEL_INFO>, but found <%d>", (int) SOPC_Check_Logger_lastUserLevel);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category),
                   "Was expecting CATEGORY <%s>, but found <%s>", category, SOPC_Check_Logger_lastUserCategory);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine1),
@@ -498,9 +499,15 @@ START_TEST(test_logger_user)
     {
         userLongLine3[index] = aChar;
         aChar++;
+        // loop
         if (aChar >= 127)
         {
             aChar = ' ';
+        }
+        // .. and avoid invalid format with "%"
+        if (aChar == '%')
+        {
+            aChar++;
         }
     }
     userLongLine3[SOPC_LOG_MAX_USER_LINE_LENGTH + 9] = 0;
@@ -520,6 +527,9 @@ START_TEST(test_logger_user)
     SOPC_Check_Logger_userLogCalled = false;
     SOPC_Log_Trace(userLog2, SOPC_LOG_LEVEL_WARNING, userlogLine4);
     ck_assert(SOPC_Check_Logger_userLogCalled);
+    ck_assert_msg(SOPC_LOG_LEVEL_WARNING == SOPC_Check_Logger_lastUserLevel,
+                  "Was expecting LEVEL <SOPC_LOG_LEVEL_WARNING>, but found <%d>",
+                  (int) SOPC_Check_Logger_lastUserLevel);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine4b),
                   "Was expecting LOG LINE %s, but found %s", userlogLine4b, SOPC_Check_Logger_lastUserLog);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category2),
@@ -531,6 +541,8 @@ START_TEST(test_logger_user)
     SOPC_Log_Trace(userLog2, SOPC_LOG_LEVEL_WARNING, userlogLine5);
     ck_assert(SOPC_Check_Logger_userLogCalled);
     ck_assert(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserCategory, category2));
+    ck_assert_msg(SOPC_Check_Logger_lastUserLevel == SOPC_LOG_LEVEL_WARNING,
+                  "Was expecting SOPC_LOG_LEVEL_WARNING, but found ENUM=%d", (int) SOPC_Check_Logger_lastUserLevel);
     ck_assert_msg(0 == SOPC_strcmp_ignore_case(SOPC_Check_Logger_lastUserLog, userlogLine5b),
                   "Was expecting LOG LINE %s, but found %s", userlogLine5b, SOPC_Check_Logger_lastUserLog);
 

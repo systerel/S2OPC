@@ -100,9 +100,13 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
     return dataValues;
 }
 
-static void userDoLog(const char* category, const char* const line)
+static void userDoLog(const char* timestampUtc,
+                      const char* category,
+                      const SOPC_Log_Level level,
+                      const char* const line)
 {
-    printf("[%s] %s\n", category, line);
+    SOPC_UNUSED_ARG(level);
+    printf("[%s] <%s> %s\n", timestampUtc, category, line);
 }
 /* Give XML file name as unique parameter
    If there is no parameter, default file name is config_pub_scheduler.xml

@@ -27,16 +27,24 @@
 
 /**
  * \brief Log event callback.
+ * \param[in] timestampUtc  String pointer containing the event timestamp (UTC time)
  * \param[in] category  String pointer containing the category. Can be NULL, when
  *                      not related to any category,
+ * \param[in] level     The level of the log (Already filtered out if below current log level),
  * \param[in] line      Non-null string pointer, containing the full log line,
  *                      including NULL-terminating character but excluding any newline character,
  *                      so that it can be specificly defined for each platform.
  *                      The line has already been filtered (level) and formatted by logger core.
  *                      In all cases, the line is truncated to SOPC_Log_UserMaxLogLen characters.
  * */
-typedef void SOPC_Log_UserDoLog(const char* category, const char* const line);
+typedef void SOPC_Log_UserDoLog(const char* timestampUtc,
+                                const char* category,
+                                const SOPC_Log_Level level,
+                                const char* const line);
 
+/**
+ * \brief structure containing the file log configuration
+ */
 typedef struct SOPC_LogSystem_File_Configuration
 {
     const char* logDirPath; /**< path of the log directory ending with directory separator if not empty */
