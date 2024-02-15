@@ -228,6 +228,10 @@ build-linux64-pys2opc:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
+  script: # build and install shared libs, then build static libs and binaries
+      - 'ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
+      - 'cd .. && ./clean.sh || exit $?'
+      - *build_command_line
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
     - if: "$ALL_TESTS != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE != '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
       when: on_success
