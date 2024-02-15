@@ -339,7 +339,7 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
     {
         return NULL;
     }
-    SOPC_SecurityConfig* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
+
     const char* sUri = SOPC_SecurityPolicyUriToCstring(uri);
     if (NULL == sUri)
     {
@@ -347,23 +347,21 @@ SOPC_SecurityConfig* SOPC_EndpointConfig_AddSecurityConfig(SOPC_Endpoint_Config*
     }
     if (destEndpoint->nbSecuConfigs > 0)
     {
-        for (size_t i = 0; i < (size_t) destEndpoint->nbSecuConfigs + 1; i++)
+        for (size_t i = 0; i < (size_t) destEndpoint->nbSecuConfigs; i++)
         {
-            char* spCString = SOPC_String_GetCString(&destEndpoint->secuConfigurations[i].securityPolicy);
-            if (strcmp(spCString, sUri) == 0)
+            const char* spCString = SOPC_String_GetRawCString(&destEndpoint->secuConfigurations[i].securityPolicy);
+
+            if (NULL != spCString && strcmp(spCString, sUri) == 0)
             {
-                SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                       "Error this SOPC_SecurityPolicy has already been added.");
-                SOPC_Free(spCString);
+                SOPC_Logger_TraceError(
+                    SOPC_LOG_MODULE_CLIENTSERVER,
+                    "SOPC_EndpointConfig_AddSecurityConfig: %s security policy URI has already been added", sUri);
                 return NULL;
-            }
-            else
-            {
-                SOPC_Free(spCString);
             }
         }
     }
 
+    SOPC_SecurityConfig* sp = &destEndpoint->secuConfigurations[destEndpoint->nbSecuConfigs];
     SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
     SOPC_ReturnStatus status = SOPC_String_AttachFromCstring(&sp->securityPolicy, sUri);
     SOPC_GCC_DIAGNOSTIC_RESTORE
