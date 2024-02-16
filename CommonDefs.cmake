@@ -169,8 +169,17 @@ list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-Wl,-z,relr
 # If PIE explicitly requested, activate it for binaries linking
 option(POSITION_INDEPENDENT_EXECUTABLE "Build position independent executable (-pie) which is a security good practice, but requires dependencies to be compiled with position independent code (-fPIC)" OFF)
 if (POSITION_INDEPENDENT_EXECUTABLE)
-  # necessary to build binaries as PIE (see CMake CMP0083)
-  list(APPEND S2OPC_LINKER_FLAGS $<$<AND:${IS_GNU},$<NOT:${IS_MINGW}>>:-pie>)
+  if(${CMAKE_VERSION} VERSION_LESS "3.14")
+    # necessary to build binaries as PIE (see CMake CMP0083 / CMake issue #14983)
+    if (DEFINED IS_GNU AND NOT DEFINED MINGW)
+      set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pie")
+    endif()
+  else()
+    cmake_policy(SET CMP0083 NEW)
+    include(CheckPIESupported)
+    check_pie_supported()
+    # it will then be automatically activated due to POSITION_INDEPENDENT_CODE property which is set for S2OPC common library
+  endif()
 endif()
 
 # Set Clang compiler flags
