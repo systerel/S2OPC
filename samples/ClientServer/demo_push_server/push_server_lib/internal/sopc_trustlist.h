@@ -30,7 +30,9 @@
 #include "sopc_event_timer_manager.h"
 #include "sopc_trustlist_itf.h"
 
+#ifndef SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS
 #define SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS 60000u // 1 minute
+#endif
 
 #define SOPC_TRUSTLIST_INVALID_HANDLE 0u
 
@@ -67,13 +69,16 @@ typedef uint32_t SOPC_TrLst_Mask;
  */
 typedef struct SOPC_TrLst_VarCfg
 {
-    SOPC_NodeId* pSizeId;
-    SOPC_NodeId* pWritableId;
-    SOPC_NodeId* pUserWritableId;
-    SOPC_NodeId* pOpenCountId;
-    SOPC_NodeId* pLastUpdateTimeId;
+    const SOPC_NodeId* pSizeId;
+    const SOPC_NodeId* pWritableId;
+    const SOPC_NodeId* pUserWritableId;
+    const SOPC_NodeId* pOpenCountId;
+    const SOPC_NodeId* pLastUpdateTimeId;
 } SOPC_TrLst_VarCfg;
 
+/**
+ * \brief Structure to manage the trustlist activity timeout.
+ */
 typedef struct SOPC_TrLst_TimeEvent
 {
     SOPC_Looper* pLooper;
@@ -83,69 +88,100 @@ typedef struct SOPC_TrLst_TimeEvent
 } SOPC_TrLst_TimeEvent;
 
 /**
+ * \brief Structure which gather the current data of an opened trustlist
+ */
+typedef struct SOPC_TrLst_OpeningCtx
+{
+    SOPC_Buffer* pTrustListEncoded;      /*!< The buffer holding the instance of the TrustListDataType
+                                              encoded in a UA Binary stream */
+    SOPC_TrLst_Handle handle;            /*!< Defines the TrustList handle */
+    SOPC_TrLst_OpenMode openingMode;     /*!< Defines the opening mode (read or write + erase if existing) */
+    SOPC_TrLst_Mask openingMask;         /*!< Defines the opening mask to read only part of the TrustList */
+    SOPC_TrLst_Mask specifiedLists;      /*!< The parts of the TrustList to update with CloseAndUpdate */
+    SOPC_CertificateList* pTrustedCerts; /*!< The trusted certificates list to be updated */
+    SOPC_CertificateList* pIssuerCerts;  /*!< The issuer certificates list to be updated */
+    SOPC_CRLList* pTrustedCRLs;          /*!< The trusted CRL list to be updated */
+    SOPC_CRLList* pIssuerCRLs;           /*!< The issuer CRL list to be updated */
+} SOPC_TrLst_OpeningCtx;
+
+/**
  * \brief Internal context for the TrustList
  */
 typedef struct SOPC_TrustListContext
 {
-    uint32_t maxTrustListSize;           /*!< Defines the maximum size in byte for the TrustList */
-    SOPC_NodeId* pObjectId;              /*!< The nodeId of the the TrustList */
-    char* cStrObjectId;                  /*!< The C string nodeId of the the TrustList (it is used for logs) */
-    SOPC_TrLst_Handle handle;            /*!< Defines the TrustList handle */
-    SOPC_TrLst_OpenMode openingMode;     /*!< Defines the opening mode (read or write + erase if existing) */
-    SOPC_TrLst_Mask openingMask;         /*!< Defines the opening mask to read only part of the TrustList */
-    SOPC_TrustList_Type groupType;       /*!< Defines the TrustList type (associated to user or application) */
-    SOPC_TrLst_VarCfg varIds;            /*!< The structure which gather all the variable nodIds
-                                              belonging to the TrustList */
-    SOPC_Buffer* pTrustListEncoded;      /*!< The buffer holding the instance of the TrustListDataType
-                                              encoded in a UA Binary stream */
-    SOPC_PKIProvider* pPKI;              /*!< A valid pointer to the PKI that belongs to the TrustList */
-    SOPC_TrLst_Mask specifiedLists;      /*!< The parts of the TrustList to update with CloseAndUpdate */
-    SOPC_CertificateList* pTrustedCerts; /*!< The trusted certificate list to be updated */
-    SOPC_CertificateList* pIssuerCerts;  /*!< The issuer certificate list to be updated */
-    SOPC_CRLList* pTrustedCRLs;          /*!< The trusted CRL list to be updated */
-    SOPC_CRLList* pIssuerCRLs;           /*!< The issuer CRL list to be updated */
-    SOPC_TrLst_TimeEvent event;
+    uint32_t maxTrustListSize;     /*!< Defines the maximum size in byte for the TrustList */
+    const SOPC_NodeId* pObjectId;  /*!< The nodeId of the the TrustList */
+    char* cStrObjectId;            /*!< The C string nodeId of the the TrustList (it is used for logs) */
+    SOPC_TrustList_Type groupType; /*!< Defines the TrustList type (associated to user or application) */
+    SOPC_TrLst_VarCfg varIds;      /*!< The structure which gather all the variable nodIds
+                                        belonging to the TrustList */
+    SOPC_TrLst_TimeEvent eventMgr; /*!< Structure to manage the trustlist activity timeout. */
     SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted; /*!< Calls when a new valid update has occurred */
-    bool bDoNotDelete; /*!< Defined whatever the TrustList context shall be deleted */
+    SOPC_PKIProvider* pPKI;       /*!< A valid pointer to the PKI that belongs to the TrustList */
+    SOPC_TrLst_OpeningCtx opnCtx; /*!< The current data of an open trustlist */
 } SOPC_TrustListContext;
 
 /**
- * \brief Insert a new objectId key and TrustList context value.
- *
- * \param pObjectId The objectId of the TrustList.
- * \param pContext  A valid pointer on the TrustList context.
- *
- * \return \c TRUE in case of success.
+ * \brief Internal structure to gather nodeIds.
  */
-bool TrustList_DictInsert(SOPC_NodeId* pObjectId, SOPC_TrustListContext* pContext);
+typedef struct TrustList_NodeIds
+{
+    const SOPC_NodeId* pTrustListId;         /*!< The nodeId of the FileType object. */
+    const SOPC_NodeId* pOpenId;              /*!< The nodeId of the Open method. */
+    const SOPC_NodeId* pOpenWithMasksId;     /*!< The nodeId of the OpenWithMasks method. */
+    const SOPC_NodeId* pCloseAndUpdateId;    /*!< The nodeId of the CloseAndUpdate method. */
+    const SOPC_NodeId* pAddCertificateId;    /*!< The nodeId of the AddCertificate method. */
+    const SOPC_NodeId* pRemoveCertificateId; /*!< The nodeId of the RemoveCertificate method. */
+    const SOPC_NodeId* pCloseId;             /*!< The nodeId of the Close method. */
+    const SOPC_NodeId* pReadId;              /*!< The nodeId of the Read method. */
+    const SOPC_NodeId* pWriteId;             /*!< The nodeId of the Write method. */
+    const SOPC_NodeId* pGetPosId;            /*!< The nodeId of the GetPosition method. */
+    const SOPC_NodeId* pSetPosId;            /*!< The nodeId of the SetPosition method. */
+    const SOPC_NodeId* pSizeId;              /*!< The nodeId of the Size variable. */
+    const SOPC_NodeId* pOpenCountId;         /*!< The nodeId of the OpenCount variable. */
+    const SOPC_NodeId* pUserWritableId;      /*!< The nodeId of the UserWritable variable. */
+    const SOPC_NodeId* pWritableId;          /*!< The nodeId of the Writable variable. */
+    const SOPC_NodeId* pLastUpdateTimeId;    /*!< The nodeId of the LastUpdateTime variable */
+} TrustList_NodeIds;
 
 /**
- * \brief Get the TrustList context from the nodeId.
+ * \brief Structure to gather TrustList configuration data.
+ */
+struct SOPC_TrustList_Config
+{
+    const TrustList_NodeIds* pIds;                          /*!< Define all the nodeId of the TrustList. */
+    SOPC_TrustList_Type groupType;                          /*!< Define the certificate group type of the TrustList. */
+    SOPC_PKIProvider* pPKI;                                 /*!< A valid pointer to the PKI of the TrustList. */
+    uint32_t maxTrustListSize;                              /*!< Define the maximum size in byte for the TrustList. */
+    SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted; /*!< Calls when a new valid update has occurred */
+};
+
+/**
+ * \brief Get the TrustList context from a nodeId.
  *
  * \param pObjectId  The objectId of the TrustList.
- * \param bCheckActivityTimeout Defined whatever the activity timeout shall be check.
+ * \param bCheckActivityTimeout Define whatever the activity timeout shall be check.
  * \param callContextPtr The method call context to set if \p bCheckActivityTimeout is TRUE (NULL if not used)
- * \param[out] bFound Defined whatever the TrustList is found that belongs to \p objectId .
+ * \param[out] bFound Define whatever the TrustList is found that belongs to \p objectId .
  *
  * \return Return a valid ::SOPC_TrustListContext or NULL if error.
  */
-SOPC_TrustListContext* TrustList_DictGet(const SOPC_NodeId* pObjectId,
-                                         bool bCheckActivityTimeout,
-                                         const SOPC_CallContext* callContextPtr,
-                                         bool* bFound);
-
+SOPC_TrustListContext* TrustList_GetFromNodeId(const SOPC_NodeId* pObjectId,
+                                               bool bCheckActivityTimeout,
+                                               const SOPC_CallContext* callContextPtr,
+                                               bool* bFound);
 /**
- * \brief Removes a TrustList context from the nodeId.
+ * \brief Removes a TrustList context from a nodeId.
  *
  * \param pObjectId The objectId of the TrustList.
  */
-void TrustList_DictRemove(const SOPC_NodeId* pObjectId);
+void TrustList_RemoveFromNodeId(const SOPC_NodeId* pObjectId);
 
 /**
  * \brief Start the activity timeout.
  *
  * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
- *       ::TrustList_DictGet )
+ *       ::TrustList_GetFromNodeId )
  *
  * \param pTrustList The TrustList context.
  *
@@ -157,7 +193,7 @@ void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext);
  * \brief Reset the activity timeout.
  *
  * \note If the period \c SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS has elapsed then the trustlist is closed when calling
- *       ::TrustList_DictGet )
+ *       ::TrustList_GetFromNodeId )
  *
  * \param pTrustList The TrustList context.
  *
@@ -201,10 +237,10 @@ bool TrustList_SetOpenMode(SOPC_TrustListContext* pTrustList, SOPC_TrLst_OpenMod
 bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask masks);
 
 /**
- * \brief Set the TrustList position.
+ * \brief Set the position in the encoded trustlist buffer.
  *
  * \param pTrustList The TrustList context.
- * \param[out] pos  The TrustList position.
+ * \param pos        The TrustList position.
  *
  * \warning \p pTrustList shall be valid (!= NULL)
  *
@@ -213,18 +249,19 @@ bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask m
 SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint64_t pos);
 
 /**
- * \brief Get the TrustList handle.
+ * \brief Get the current handle returned when calling open
+ *        and openWithMasks methods.
  *
  * \param pTrustList The TrustList context.
  *
  * \warning \p pTrustList shall be valid (!= NULL)
  *
- * \return The TrustList handle
+ * \return The TrustList handle (or \c SOPC_TRUSTLIST_INVALID_HANDLE if not opened)
  */
 uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList);
 
 /**
- * \brief Get the TrustList position.
+ * \brief Get the current position of the encoded trustlist buffer.
  *
  * \param pTrustList The TrustList context.
  *
@@ -235,7 +272,7 @@ uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList);
 uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList);
 
 /**
- * \brief Get the TrustList length.
+ * \brief Get the length of the encoded trustlist buffer.
  *
  * \param pTrustList The TrustList context.
  *
@@ -268,7 +305,7 @@ SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTr
  *
  * \return True if the server is in TOFU state.
  */
-bool TrustList_isInTofuSate(const SOPC_TrustListContext* pTrustList);
+bool TrustList_isInTOFUSate(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Check the TrustList handle.
@@ -297,15 +334,15 @@ bool TrustList_CheckHandle(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_H
 bool TrustList_CheckOpenMode(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_OpenMode expected, const char* msg);
 
 /**
- * \brief Check if the TrustList is open.
+ * \brief Check if the TrustList is opened.
  *
  * \param pTrustList The TrustList context.
  *
  * \warning \p pTrustList shall be valid (!= NULL)
  *
- * \return True if open.
+ * \return True if opened.
  */
-bool TrustList_CheckIsOpen(const SOPC_TrustListContext* pTrustList);
+bool TrustList_CheckIsOpened(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Get the TrustList nodeId
@@ -336,13 +373,13 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList);
  * \brief Read \p reqLength bytes from the current position of the encoded TrustListDataType.
  *        If \p reqLength is greater than the encoded data then
  *        the whole TrustListDataType is read otherwise the position is incremented by \p reqLength .
- *        The part read depends on the OpeningMask.
+ *        The trustList part read (trusted certs/CRL, issuers certs/CRL) depends on the OpeningMask.
  *
  * \param pTrustList The TrustList context.
  * \param length     The length byte to read (!= 0)
  * \param[out] pDest A valid byte string to store the result.
  *
- * \warning \p pTrustList shall be valid (!= NULL) and open in read mode.
+ * \warning \p pTrustList shall be valid (!= NULL) and opened in read mode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -350,12 +387,12 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
 
 /**
  * \brief Read and decode the buffer containing the TrustListDataType.
- *        The Certificate and CRL list result are append in \p pTrustList for later updates.
+ *        The Certificate and CRL list result are appended in \p pTrustList for later updates.
  *
  * \param pTrustList The TrustList context.
  * \param pSrc       The TrustListDataType to decode.
  *
- * \warning \p pTrustList shall be valid (!= NULL) and open in write mode.
+ * \warning \p pTrustList shall be valid (!= NULL) and opened in write mode.
  *
  * \return SOPC_STATUS_OK if successful.
  */
@@ -369,18 +406,16 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
  * \param pThumbprint     The thumbprint of the certificate to remove formatted as a hexadecimal string.
  * \param bIsTrustedCert  If TRUE the certificate is removed from the trusted certificates list otherwise
  *                        the certificate is removed from the issuer certificates list.
- * \param secPolUri       The security policy.
  * \param[out] pbIsRemove A valid pointer indicating whether the certificate has been found and deleted.
  * \param[out] pbIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
  *
- * \warning \p pTrustList shall be valid (!= NULL) and not open.
+ * \warning \p pTrustList shall be valid (!= NULL) and not opened.
  *
  * \return SOPC_GoodGenericStatus if successful.
  */
 SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
                                      const SOPC_String* pThumbprint,
                                      const bool bIsTrustedCert,
-                                     const char* secPolUri,
                                      bool* pbIsRemove,
                                      bool* pbIsIssuer);
 
@@ -390,9 +425,9 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
  *
  * \param pTrustList The TrustList context.
  * \param pBsCert    The ByteString certificate to update.
- * \param secPolUri  The security policy.
+ * \param secPolUri  The security policy of the secure channel used for this operation.
  *
- * \warning \p pTrustList shall be valid (!= NULL) and not open.
+ * \warning \p pTrustList shall be valid (!= NULL) and not opened.
  *
  * \return SOPC_GoodGenericStatus if successful or a validation error.
  */
@@ -405,7 +440,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
  *        (CLoseAndUpdate method)
  *
  * \param pTrustList The TrustList context.
- * \param secPolUri  The security policy.
+ * \param secPolUri  The security policy of the secure channel used for this operation.
  *
  * \warning \p pTrustList shall be valid (!= NULL).
  *
@@ -414,11 +449,12 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
 SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustList, const char* secPolUri);
 
 /**
- * \brief Export the update
+ * \brief Exports the updated trustList to the file system,
+ *        through the PKI attached to \p pTrustList .
  *
  * \param pTrustList The TrustList context.
- * \param bEraseExiting Define if the existing certificate shall be deleted or include with the update.
- * \param bForcePush Force the export in case \p pTrustList is not open.
+ * \param bEraseExiting Define if the existing certificates shall be deleted or included with the update.
+ * \param bForcePush Force the export in case \p pTrustList is not opened.
  *                   (cases of AddCertificate and RemoveCertificate)
  *
  * \warning \p pTrustList shall be valid (!= NULL).
@@ -430,10 +466,10 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
                                    const bool bForcePush);
 
 /**
- * \brief Raise an event to re-evaluate the certificate.
+ * \brief Raise an event to re-evaluate the currently used certificates (application or user).
  *        The event depends on the certificate Group.
- *        Close all the secure channels for application group (SC layer).
- *        Make sessions orphaned for user group (Services layer).
+ *        Application group: Close secure channels for invalid certificates (SC layer).
+ *        User group: Close sessions for invalid certificates (Services layer).
  *
  * \param pTrustList The TrustList context.
  *
@@ -459,7 +495,7 @@ void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList);
  * \param pTrustList The TrustList context.
  * \param pAddSpAccess The address space access.
  *
- * \note If \p pTrustList is open in write mode then StatusCode of Bad_NotSupported is written.
+ * \note If \p pTrustList is opened in write mode then StatusCode of Bad_NotSupported is written.
  *
  * \warning \p pTrustList shall be valid (!= NULL).
  *
@@ -490,6 +526,8 @@ void Trustlist_WriteVarLastUpdateTime(const SOPC_TrustListContext* pTrustList, S
 
 /**
  * \brief Reset the context of the TrustList but keep the user configuration.
+ *
+ * \note Function used when close method is called.
  *
  * \param pTrustList The TrustList context.
  * \param pAddSpAccess The address space access to reset the value of variables (NULL if not used).

@@ -26,54 +26,69 @@
 #define SOPC_CERTIFICATE_GROUP_
 
 #include "sopc_builtintypes.h"
+#include "sopc_certificate_group_itf.h"
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
+#include "sopc_trustlist.h"
+
+#define SOPC_CERT_GRP_MIN_KEY_SIZE 2048
+#define SOPC_CERT_GRP_MIN_MD_ALG "SHA256"
+#define SOPC_CERT_GRP_MAX_KEY_SIZE 4096
+#define SOPC_CERT_GRP_MAX_MD_ALG "SHA256"
 
 /**
  * \brief Internal context for the CertificateGroup
  */
 typedef struct SOPC_CertGroupContext
 {
-    SOPC_NodeId* pObjectId;               /*!< The nodeId of the the CertificateGroup */
-    char* cStrId;                         /*!< The C string nodeId of the CertificateGroup (it is used for logs) */
-    SOPC_KeyCertPair* pKeyCertPair;       /*!< A valid pointer to the private key and certificate that belongs to the
+    const SOPC_NodeId* pObjectId;          /*!< The nodeId of the the CertificateGroup */
+    char* cStrId;                          /*!< The C string nodeId of the CertificateGroup (it is used for logs) */
+    SOPC_KeyCertPair* pKeyCertPair;        /*!< A valid pointer to the private key and certificate that belongs to the
+                                                CertificateGroup object. */
+    SOPC_AsymmetricKey* pNewKeyPair;       /*!< Pointer to the new generated key */
+    char* pKeyPath;                        /*!< Path to the private key that belongs to the CertificateGroup object */
+    char* pCertPath;                       /*!< Path to the certificate that belongs to the CertificateGroup object */
+    const SOPC_NodeId* pCertificateTypeId; /*!< The nodeId of the certificateType variable that belongs to the
                                                CertificateGroup object. */
-    SOPC_AsymmetricKey* pNewKey;          /*!< Pointer to the new generated key */
-    char* pKeyPath;                       /*!< Path to the private key that belongs to the CertificateGroup object */
-    char* pCertPath;                      /*!< Path to the certificate that belongs to the CertificateGroup object */
-    SOPC_NodeId* pCertificateTypeId;      /*!< The nodeId of the certificateType variable that belongs to the
-                                              CertificateGroup object. */
-    SOPC_NodeId* pCertificateTypeValueId; /*!< The value of the certificateType variable. */
-    SOPC_NodeId* pTrustListId;            /*!< The TrustList nodeId that belongs to the CertificateGroup object */
-    bool bDoNotDelete;                    /*!< Defined whatever the CertificateGroup context shall be deleted */
+    const SOPC_NodeId* pCertificateTypeValueId; /*!< The value of the certificateType variable. */
+    const SOPC_NodeId* pTrustListId;            /*!< The TrustList nodeId that belongs to the CertificateGroup object */
 } SOPC_CertGroupContext;
 
 /**
- * \brief Insert a new objectId key and CertificateGroup context value.
- *
- * \param pObjectId The objectId of the CertificateGroup.
- * \param pContext  A valid pointer on the CertificateGroup context.
- *
- * \return \c TRUE in case of success.
+ * \brief Internal structure to gather nodeIds.
  */
-bool CertificateGroup_DictInsert(SOPC_NodeId* pObjectId, SOPC_CertGroupContext* pContext);
+typedef struct CertificateGroup_NodeIds
+{
+    const SOPC_NodeId* pCertificateGroupId; /*!< The NodeId of the Certificate Group Object. */
+    const SOPC_NodeId* pCertificateTypesId; /*!< The nodeId of the CertificateTypes variable. */
+    const SOPC_NodeId* pTrustListId;        /*!< The nodeId of the TrustList that belongs to the group */
+} CertificateGroup_NodeIds;
 
 /**
- * \brief Get the CertificateGroupe context from the nodeId.
+ * \brief Structure to gather CertificateGroup configuration data.
+ */
+struct SOPC_CertificateGroup_Config
+{
+    const CertificateGroup_NodeIds* pIds; /*!< Define all the nodeId of the CertificateGroup. */
+    SOPC_TrustList_Config* pTrustListCfg; /*!< the TrustList configuration that belongs to the CertificateGroup. */
+    SOPC_Certificate_Type certType;       /*!< The CertificateType. */
+    const SOPC_PKIProvider* pPKI;         /*!< The PKI that belongs to the group. */
+    SOPC_TrustList_Type groupType;        /*!< Define the group type (user or app) */
+    SOPC_KeyCertPair* pKeyCertPair;       /*!< The private key and certificate that belongs to the group.*/
+    char* pKeyPath;                       /*!< Path to the private key that belongs to the group */
+    char* pCertPath;                      /*!< Path to the certificate that belongs to the group */
+    bool bIsTOFUSate;                     /*!< When flag is set, the TOFU state is enabled. */
+};
+
+/**
+ * \brief Get the CertificateGroupe context from a nodeId.
  *
  * \param pObjectId  The objectId of the CertificateGroup.
- * \param[out] bFound Defined whatever the CertificateGroup is found that belongs to \p objectId .
+ * \param[out] bFound Define whatever the CertificateGroup is found that belongs to \p objectId .
  *
  * \return Return a valid ::SOPC_CertGroupContext or NULL if error.
  */
-SOPC_CertGroupContext* CertificateGroup_DictGet(const SOPC_NodeId* pObjectId, bool* bFound);
-
-/**
- * \brief Removes a CertificateGroup context from the nodeId.
- *
- * \param pObjectId The objectId of the CertificateGroup.
- */
-void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId);
+SOPC_CertGroupContext* CertificateGroup_GetFromNodeId(const SOPC_NodeId* pObjectId, bool* bFound);
 
 /**
  * \brief Get the C string of the CertificateGroup nodeId
@@ -87,13 +102,13 @@ void CertificateGroup_DictRemove(const SOPC_NodeId* pObjectId);
 const char* CertificateGroup_GetStrNodeId(const SOPC_CertGroupContext* pGroupCtx);
 
 /**
- * \brief Check if the give certificate group nodeId is valid (!= DefaultUserTokenGroup)
+ * \brief Check if the given certificate group nodeId is valid (!= DefaultUserTokenGroup)
  *
  * \param pGroupId  The nodeId of the group to check.
  *
  * \return True if valid.
  */
-bool CertificateGroup_CheckGroup(const SOPC_NodeId* pGroupId);
+bool CertificateGroup_CheckIsApplicationGroup(const SOPC_NodeId* pGroupId);
 
 /**
  * \brief Check the certificate type that belongs to the group.
@@ -120,7 +135,8 @@ bool CertificateGroup_CheckType(const SOPC_CertGroupContext* pGroupCtx, const SO
 bool CertificateGroup_CheckSubjectName(SOPC_CertGroupContext* pGroupCtx, const SOPC_String* pSubjectName);
 
 /**
- * \brief Get the rejected list
+ * \brief Get the list of certificates that have been rejected by the server,
+ *        through the PKI attached to \p pGroupCtx .
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  * \param[out] ppBsCertArray A valid pointer to the newly created ByteString array.
@@ -133,16 +149,6 @@ bool CertificateGroup_CheckSubjectName(SOPC_CertGroupContext* pGroupCtx, const S
 SOPC_StatusCode CertificateGroup_GetRejectedList(const SOPC_CertGroupContext* pGroupCtx,
                                                  SOPC_ByteString** ppBsCertArray,
                                                  uint32_t* pLength);
-/**
- * \brief Regenerates the server’s private key.
- *
- * \param pGroupCtx A valid pointer to the CertificateGroup context.
- *
- * \warning \p pGroupCtx shall be valid (!= NULL)
- *
- * \return Return SOPC_STATUS_OK if successful.
- */
-SOPC_ReturnStatus CertificateGroup_RegeneratePrivateKey(SOPC_CertGroupContext* pGroupCtx);
 
 /**
  * \brief Create a PKCS #10 DER encoded Certificate Request that is signed with the Server’s private key
@@ -164,17 +170,14 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
                                                         const uint32_t endpointConfigIdx);
 
 /**
- * \brief Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
- * certificates)
+ * \brief Update the new key-cert pair (TrustList is used to validate the new certificate instead
+ *        of using the given issuers, see mantis #0009247 - https://mantis.opcfoundation.org/view.php?id=9247)
  *
  * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context
- *       \p pGroupCtx . If the update succeeded then a request is send to re-evaluate the current server
- *       secure channels due to server certificate / key update (force SC re-establishment).
+ *       \p pGroupCtx .
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  * \param pCertificate A valid pointer to the new certificate.
- * \param pIssuerArray An array of issuer certificates needed to verify the signature on the new certificate.
- * \param arrayLength The length of the array \p pIssuerArray
  * \param endpointConfigIdx The index associated to the configuration endpoint.
  *
  * \warning \p pGroupCtx shall be valid (!= NULL).
@@ -183,12 +186,10 @@ SOPC_ReturnStatus CertificateGroup_CreateSigningRequest(SOPC_CertGroupContext* p
  */
 SOPC_StatusCode CertificateGroup_UpdateCertificate(SOPC_CertGroupContext* pGroupCtx,
                                                    const SOPC_ByteString* pCertificate,
-                                                   const SOPC_ByteString* pIssuerArray,
-                                                   const int32_t arrayLength,
                                                    const uint32_t endpointConfigIdx);
 
 /**
- * \brief Export the new key-cert pair.
+ * \brief Export the new key-cert pair to the file system.
  *
  * \note If the key is new, it has been generated using the CreateSigningRequest method and stored in context \p
  * pGroupCtx .
@@ -213,7 +214,8 @@ SOPC_ReturnStatus CertificateGroup_Export(const SOPC_CertGroupContext* pGroupCtx
 void CertificateGroup_DiscardNewKey(SOPC_CertGroupContext* pGroupCtx);
 
 /**
- * \brief Export the rejected list.
+ * \brief Export the list of certificates that have been rejected by the server to the file system
+ *        through the PKI attached to \p pGroupCtx
  *
  * \param pGroupCtx A valid pointer to the CertificateGroup context.
  *

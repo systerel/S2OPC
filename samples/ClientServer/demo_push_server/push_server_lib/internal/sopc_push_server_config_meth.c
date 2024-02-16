@@ -43,10 +43,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                                     void* param)
 {
     SOPC_UNUSED_ARG(objectId);
-    SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
-
-    printf("Method UpdateCertificate Call\n");
 
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
@@ -78,7 +75,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
         return OpcUa_BadInvalidArgument;
     }
     /* Check the certificate group */
-    bIsValidGroup = CertificateGroup_CheckGroup(inputArgs[0].Value.NodeId);
+    bIsValidGroup = CertificateGroup_CheckIsApplicationGroup(inputArgs[0].Value.NodeId);
     if (!bIsValidGroup)
     {
         char* pCStrGrpId = SOPC_NodeId_ToCString(inputArgs[0].Value.NodeId);
@@ -89,7 +86,7 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
         return OpcUa_BadInvalidArgument;
     }
     /* Retrieve the Certificate Group  */
-    pGroupCtx = CertificateGroup_DictGet(inputArgs[0].Value.NodeId, &bFound);
+    pGroupCtx = CertificateGroup_GetFromNodeId(inputArgs[0].Value.NodeId, &bFound);
     if (NULL == pGroupCtx && !bFound)
     {
         return OpcUa_BadInvalidArgument;
@@ -116,30 +113,6 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                cStrId);
         return OpcUa_BadNotSupported;
     }
-    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
-    /* Update the new key-cert pair (Do all normal integrity checks on the certificate and all of the issuer
-     * certificates) */
-    statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring,
-                                                    inputArgs[3].Value.Array.Content.BstringArr,
-                                                    inputArgs[3].Value.Array.Length, endpointConfigIdx);
-    if (!SOPC_IsGoodStatus(statusCode))
-    {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: update of the new key-cert pair failed", cStrId);
-        return statusCode;
-    }
-    /* Export the update */
-    status = CertificateGroup_Export(pGroupCtx);
-    if (SOPC_STATUS_OK != status)
-    {
-        SOPC_Logger_TraceError(
-            SOPC_LOG_MODULE_CLIENTSERVER,
-            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: export of the new key-cert pair failed", cStrId);
-        return OpcUa_BadUnexpectedError;
-    }
-    /* Remove the internal new key from the context */
-    CertificateGroup_DiscardNewKey(pGroupCtx);
     /* Create the output variant */
     pVariant = SOPC_Variant_Create();
     if (NULL == pVariant)
@@ -148,6 +121,30 @@ SOPC_StatusCode PushSrvCfg_Method_UpdateCertificate(const SOPC_CallContext* call
                                "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: unable to create a variant", cStrId);
         return OpcUa_BadUnexpectedError;
     }
+    const uint32_t endpointConfigIdx = SOPC_CallContext_GetEndpointConfigIdx(callContextPtr);
+    /* Update the new key-cert pair (TrustList is used to validate the new certificate instead of using the given
+     * issuers, see mantis #0009247 - https://mantis.opcfoundation.org/view.php?id=9247)*/
+    statusCode = CertificateGroup_UpdateCertificate(pGroupCtx, &inputArgs[2].Value.Bstring, endpointConfigIdx);
+    if (!SOPC_IsGoodStatus(statusCode))
+    {
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: update of the new key-cert pair failed", cStrId);
+
+        SOPC_Variant_Delete(pVariant);
+        return statusCode;
+    }
+    /* Export the update */
+    status = CertificateGroup_Export(pGroupCtx);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Logger_TraceWarning(
+            SOPC_LOG_MODULE_CLIENTSERVER,
+            "PushSrvCfg:Method_UpdateCertificate:CertGroup:%s: export of the new key-cert pair failed", cStrId);
+    }
+    /* Remove the internal new key from the context */
+    CertificateGroup_DiscardNewKey(pGroupCtx);
+
     /* Set applyChangesRequired to false as S2OPC do not support transaction */
     pVariant->ArrayType = SOPC_VariantArrayType_SingleValue;
     pVariant->BuiltInTypeId = SOPC_Boolean_Id;
@@ -173,8 +170,6 @@ SOPC_StatusCode PushSrvCfg_Method_ApplyChanges(const SOPC_CallContext* callConte
     SOPC_UNUSED_ARG(nbInputArgs);
     SOPC_UNUSED_ARG(param);
 
-    printf("Method ApplyChanges Call\n");
-
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
     *nbOutputArgs = 0;
@@ -193,8 +188,6 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
 {
     SOPC_UNUSED_ARG(objectId);
     SOPC_UNUSED_ARG(param);
-
-    printf("Method CreateSigningRequest Call\n");
 
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
@@ -237,7 +230,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
     pSubjectName = &inputArgs[2].Value.String;
     bRegeneratePrivateKey = inputArgs[3].Value.Boolean;
     /* Check the certificate group */
-    bIsValidGroup = CertificateGroup_CheckGroup(pCertificateGroupId);
+    bIsValidGroup = CertificateGroup_CheckIsApplicationGroup(pCertificateGroupId);
     if (!bIsValidGroup)
     {
         char* pCStrGrpId = SOPC_NodeId_ToCString(pCertificateGroupId);
@@ -248,7 +241,7 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         return OpcUa_BadInvalidArgument;
     }
     /* Retrieve the Certificate Group  */
-    pGroupCtx = CertificateGroup_DictGet(pCertificateGroupId, &bFound);
+    pGroupCtx = CertificateGroup_GetFromNodeId(pCertificateGroupId, &bFound);
     if (NULL == pGroupCtx && !bFound)
     {
         return OpcUa_BadInvalidArgument;
@@ -268,13 +261,6 @@ SOPC_StatusCode PushSrvCfg_Method_CreateSigningRequest(const SOPC_CallContext* c
         return OpcUa_BadInvalidArgument;
     }
     /* TODO: Check the given subjectName (cf public issue #1289)*/
-    if (NULL != pSubjectName->Data || -1 != pSubjectName->Length)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "PushSrvCfg:Method_CreateSigningRequest:CertGroup:%s: custom subjectName is not allowed",
-                               cStrId);
-        return OpcUa_BadNotSupported;
-    }
     bIsValidSubject = CertificateGroup_CheckSubjectName(pGroupCtx, pSubjectName);
     if (!bIsValidSubject)
     {
@@ -335,8 +321,6 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     SOPC_UNUSED_ARG(inputArgs);
     SOPC_UNUSED_ARG(param);
 
-    printf("Method GetRejectedList Call\n");
-
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
     *nbOutputArgs = 0;
@@ -369,8 +353,9 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
         stCode = PushServer_ExportRejectedList();
         if (!SOPC_IsGoodStatus(stCode))
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "PushSrvCfg:GetRejectedList: unable to export the rejected list");
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "PushSrvCfg:GetRejectedList: unable to export the rejected list");
+            stCode = SOPC_GoodGenericStatus;
         }
     }
     /* Set the output */
@@ -396,7 +381,7 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
     return stCode;
 }
 
-SOPC_StatusCode PushSrvCfg_Method_TofuNotSuported(const SOPC_CallContext* callContextPtr,
+SOPC_StatusCode PushSrvCfg_Method_TOFUNotSuported(const SOPC_CallContext* callContextPtr,
                                                   const SOPC_NodeId* objectId,
                                                   uint32_t nbInputArgs,
                                                   const SOPC_Variant* inputArgs,

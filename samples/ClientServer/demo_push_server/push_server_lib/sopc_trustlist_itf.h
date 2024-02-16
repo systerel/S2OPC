@@ -30,10 +30,15 @@
 #include "sopc_call_method_manager.h"
 #include "sopc_pki_stack.h"
 
+#ifndef SOPC_TRUSTLIST_DEFAULT_MAX_SIZE
 /**
- * \brief Defined the default maximum size in byte of the trustList certificate
+ * \brief Define the default maximum size in byte of the trustList certificates.
+ *
+ * @note  This value shall match the value of MaxTrustListSize
+ *        (ServerConfiguration node variable) from the address space.
  */
 #define SOPC_TRUSTLIST_DEFAULT_MAX_SIZE 65535u
+#endif
 
 /**
  * \brief The TrustList type
@@ -46,10 +51,8 @@ typedef enum
 
 /**
  * \brief Calls when a new valid update of the TrustList has occurred.
- *
- * \param userContext Context reserved for future use
  */
-typedef void SOPC_TrustList_UpdateCompleted_Fct(uintptr_t context);
+typedef void SOPC_TrustList_UpdateCompleted_Fct(void);
 
 /**
  * \brief Structure to gather TrustList configuration data
@@ -69,9 +72,9 @@ SOPC_ReturnStatus SOPC_TrustList_Initialize(void);
 /**
  * \brief Get the TrustList configuration with the default values.
  *
- * \param groupType        Defined the certificate group type of the TrustList.
+ * \param groupType        Define the certificate group type of the TrustList.
  * \param pPKI             A valid pointer to the PKI of the TrustList.
- * \param maxTrustListSize Defined the maximum size in byte of the TrustList.
+ * \param maxTrustListSize Define the maximum size in byte of the TrustList.
  * \param[out] ppConfig    A newly created configuration. You should delete it with
  *                         ::SOPC_TrustList_DeleteConfiguration .
  *
@@ -85,9 +88,9 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
 /**
  * \brief Get the TrustList configuration for the TOFU state.
  *
- * \param groupType        Defined the certificate group type of the TrustList.
+ * \param groupType        Define the certificate group type of the TrustList.
  * \param pPKI             A valid pointer to the PKI of the TrustList.
- * \param maxTrustListSize Defined the maximum size in byte of the TrustList.
+ * \param maxTrustListSize Define the maximum size in byte of the TrustList.
  * \param pFnUpdateCompleted The callback when a new valid update of the TrustList has occurred.
  * \param[out] ppConfig    A newly created configuration. You should delete it with
  *                         ::SOPC_TrustList_DeleteConfiguration .
@@ -120,7 +123,8 @@ void SOPC_TrustList_DeleteConfiguration(SOPC_TrustList_Config** ppConfig);
 SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the TrustList API
+ * \brief Clear the TrustList API.
+ *        Call to ::SOPC_TrustList_Clear shall be done after a call to ::SOPC_CommonHelper_Clear.
  */
 void SOPC_TrustList_Clear(void);
 

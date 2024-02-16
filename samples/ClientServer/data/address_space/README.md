@@ -15,6 +15,6 @@ s2opc.xml: merge OPCUA base nodeset and demo application nodeset and generate re
 `<S2OPC_root>/scripts/nodeset_address_space_utils.py --output s2opc_sks.xml s2opc_base_nodeset_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml`
 
 `s2opc_push.xml`: merge OPCUA base nodeset, push base nodeset (extract) and demo application nodeset, generate reciprocal references
-`<S2OPC_root>/scripts/nodeset-address-space-utils.py s2opc_push.xml s2opc_base_nodeset_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml`
+`<S2OPC_root>/scripts/nodeset-address-space-utils.py --output s2opc_push.xml s2opc_base_nodeset_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml`
 
 See `./generate_demo_nodesets.sh` for exact command lines for each XML NodeSet generated in this directory.

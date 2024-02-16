@@ -45,8 +45,6 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(param);
 
-    printf("Method OpenWithMasks Call\n");
-
     /* The list of output argument shall be empty if the statusCode Severity is Bad (Table 65 – Call Service Parameters
      * / spec V1.05)*/
     *nbOutputArgs = 0;
@@ -60,15 +58,15 @@ SOPC_StatusCode TrustList_Method_OpenWithMasks(const SOPC_CallContext* callConte
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
-    if (NULL == pTrustList && !bFound)
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
+    if (NULL == pTrustList || !bFound)
     {
         return OpcUa_BadNotFound;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* TrustList already open ? */
-    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
-    if (bIsOpen)
+    bool bIsOpened = TrustList_CheckIsOpened(pTrustList);
+    if (bIsOpened)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:OpenWithMasks: already open", cStrId);
         return OpcUa_BadInvalidState;
@@ -154,8 +152,6 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
                                       SOPC_Variant** outputArgs,
                                       void* param)
 {
-    printf("Method Open Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -171,15 +167,15 @@ SOPC_StatusCode TrustList_Method_Open(const SOPC_CallContext* callContextPtr,
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadNotFound;
     }
     cStrId = TrustList_GetStrNodeId(pTrustList);
     /* TrustList already open ? */
-    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
-    if (bIsOpen)
+    bool bIsOpened = TrustList_CheckIsOpened(pTrustList);
+    if (bIsOpened)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Open: already open", cStrId);
         /* Deviation from the OPC UA specification: an opening followed by a closing, otherwise the file is deleted.*/
@@ -262,8 +258,6 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
                                        SOPC_Variant** outputArgs,
                                        void* param)
 {
-    printf("Method Close Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -277,8 +271,8 @@ SOPC_StatusCode TrustList_Method_Close(const SOPC_CallContext* callContextPtr,
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
-    if (NULL == pTrustList && !bFound)
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
+    if (NULL == pTrustList || !bFound)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -318,8 +312,6 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
                                                 SOPC_Variant** outputArgs,
                                                 void* param)
 {
-    printf("Method CloseAndUpdate Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -335,8 +327,8 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
-    if (NULL == pTrustList && !bFound)
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
+    if (NULL == pTrustList || !bFound)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -385,12 +377,11 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
     /* Export the update (certificate files) */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        status = TrustList_Export(pTrustList, TrustList_isInTofuSate(pTrustList), false);
+        status = TrustList_Export(pTrustList, TrustList_isInTOFUSate(pTrustList), false);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:CloseAndUpdate: failed to export the new TrustList", cStrId);
-            statusCode = OpcUa_BadUnexpectedError;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "TrustList:%s:CloseAndUpdate: failed to export the new TrustList", cStrId);
         }
     }
     SOPC_TrLst_Mask mask = TrustList_GetSpecifiedListsMask(pTrustList);
@@ -400,8 +391,7 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         status = TrustList_RaiseEvent(pTrustList);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: event failed", cStrId);
-            statusCode = OpcUa_BadUnexpectedError;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: event failed", cStrId);
         }
     }
 
@@ -435,8 +425,6 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
                                                 SOPC_Variant** outputArgs,
                                                 void* param)
 {
-    printf("Method AddCertificate Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -451,7 +439,7 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     SOPC_TrustListContext* pTrustList = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -463,6 +451,20 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: bad inputs arguments",
                                cStrId);
         return OpcUa_BadInvalidArgument;
+    }
+    /* Check type of input arguments */
+    if (SOPC_ByteString_Id != inputArgs[0].BuiltInTypeId || SOPC_Boolean_Id != inputArgs[1].BuiltInTypeId)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: bad BuiltInTypeId arguments",
+                               cStrId);
+        return OpcUa_BadInvalidArgument;
+    }
+    /* This Method cannot provide CRLs so issuer Certificates cannot be added with this Method */
+    if (false == inputArgs[1].Value.Boolean)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "TrustList:%s:AddCertificate: issuer certificates cannot be added", cStrId);
+        return OpcUa_BadCertificateInvalid;
     }
     /* This Method returns Bad_NotWritable if the TrustList Object is read only */
     bool isReadMode = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
@@ -481,38 +483,22 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
             "TrustList:%s:AddCertificate: is open in write mode and the CloseAndUpdate has not been called", cStrId);
         return OpcUa_BadInvalidState;
     }
-    /* Check type of input arguments */
-    if (SOPC_ByteString_Id != inputArgs[0].BuiltInTypeId || SOPC_Boolean_Id != inputArgs[1].BuiltInTypeId)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:AddCertificate: bad BuiltInTypeId arguments",
-                               cStrId);
-        return OpcUa_BadInvalidArgument;
-    }
-    /* This Method cannot provide CRLs so issuer Certificates cannot be added with this Method */
-    if (false == inputArgs[1].Value.Boolean)
-    {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:%s:AddCertificate: issuer certificates cannot be added", cStrId);
-        return OpcUa_BadCertificateInvalid;
-    }
     /* Validate the certificate and update the PKI that belongs to the TrustList */
     const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_UpdateWithAddCertificateMethod(pTrustList, &inputArgs[0].Value.Bstring, secPolUri);
     /* Export the update (certificate files) */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        SOPC_ReturnStatus status = TrustList_Export(pTrustList, TrustList_isInTofuSate(pTrustList), true);
+        SOPC_ReturnStatus status = TrustList_Export(pTrustList, TrustList_isInTOFUSate(pTrustList), true);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:AddCertificate: failed to export the new TrustList", cStrId);
-            statusCode = OpcUa_BadUnexpectedError;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "TrustList:%s:AddCertificate: failed to export the new TrustList", cStrId);
         }
     }
-    /* Reset the activity timeout */
+    /* Update address space variable */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        TrustList_ResetActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
         TrustList_UpdateCompleted(pTrustList);
@@ -529,8 +515,6 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
                                                    SOPC_Variant** outputArgs,
                                                    void* param)
 {
-    printf("Method RemoveCertificate Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(param);
     /* The list of output argument shall be empty if the statusCode Severity is Bad
@@ -548,7 +532,7 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
     bool bIsIssuer = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -586,9 +570,8 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         return OpcUa_BadInvalidState;
     }
     /* Finally remove the certificate with its thumbprint */
-    const char* secPolUri = SOPC_CallContext_GetSecurityPolicy(callContextPtr);
     statusCode = TrustList_RemoveCert(pTrustList, (const SOPC_String*) &inputArgs[0].Value.Bstring,
-                                      inputArgs[1].Value.Boolean, secPolUri, &bIsRemove, &bIsIssuer);
+                                      inputArgs[1].Value.Boolean, &bIsRemove, &bIsIssuer);
     SOPC_UNUSED_ARG(bIsIssuer);
     if (SOPC_IsGoodStatus(statusCode))
     {
@@ -603,9 +586,8 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         status = TrustList_Export(pTrustList, true, true);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:RemoveCertificate: failed to export the new TrustList", cStrId);
-            statusCode = OpcUa_BadUnexpectedError;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                     "TrustList:%s:RemoveCertificate: failed to export the new TrustList", cStrId);
         }
     }
     if (SOPC_IsGoodStatus(statusCode))
@@ -614,15 +596,13 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         status = TrustList_RaiseEvent(pTrustList);
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: event failed",
-                                   cStrId);
-            statusCode = OpcUa_BadUnexpectedError;
+            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: event failed",
+                                     cStrId);
         }
     }
-    /* Reset the activity timeout */
+    /* Update address space variable */
     if (SOPC_IsGoodStatus(statusCode))
     {
-        TrustList_ResetActivityTimeout(pTrustList);
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
     }
@@ -637,8 +617,6 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
                                       SOPC_Variant** outputArgs,
                                       void* param)
 {
-    printf("Method Read Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -658,7 +636,7 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -727,9 +705,6 @@ SOPC_StatusCode TrustList_Method_Read(const SOPC_CallContext* callContextPtr,
     else
     {
         /* Clear */
-        pVariant->Value.Bstring.Data = NULL;
-        pVariant->Value.Bstring.Length = -1;
-        pVariant->Value.Bstring.DoNotClear = false;
         SOPC_Variant_Delete(pVariant);
     }
     return statusCode;
@@ -743,8 +718,6 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
                                        SOPC_Variant** outputArgs,
                                        void* param)
 {
-    printf("Method Write Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -761,7 +734,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -800,7 +773,7 @@ SOPC_StatusCode TrustList_Method_Write(const SOPC_CallContext* callContextPtr,
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Write: failed to decode the trustList",
                                cStrId);
-        return OpcUa_BadUnexpectedError;
+        return OpcUa_BadInvalidArgument;
     }
 
     TrustList_ResetActivityTimeout(pTrustList);
@@ -815,8 +788,6 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
                                              SOPC_Variant** outputArgs,
                                              void* param)
 {
-    printf("Method GetPosition Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -833,7 +804,7 @@ SOPC_StatusCode TrustList_Method_GetPosition(const SOPC_CallContext* callContext
     SOPC_Variant* pVariant = NULL;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;
@@ -895,8 +866,6 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
                                              SOPC_Variant** outputArgs,
                                              void* param)
 {
-    printf("Method SetPosition Call\n");
-
     SOPC_ASSERT(NULL != objectId);
     SOPC_UNUSED_ARG(callContextPtr);
     SOPC_UNUSED_ARG(param);
@@ -913,7 +882,7 @@ SOPC_StatusCode TrustList_Method_SetPosition(const SOPC_CallContext* callContext
     bool bFound = false;
 
     /* Retrieve the TrustList */
-    pTrustList = TrustList_DictGet(objectId, true, callContextPtr, &bFound);
+    pTrustList = TrustList_GetFromNodeId(objectId, true, callContextPtr, &bFound);
     if (!bFound || NULL == pTrustList)
     {
         return OpcUa_BadUnexpectedError;

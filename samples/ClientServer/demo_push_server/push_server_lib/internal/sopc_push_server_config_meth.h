@@ -60,7 +60,7 @@ SOPC_StatusCode PushSrvCfg_Method_GetRejectedList(const SOPC_CallContext* callCo
                                                   SOPC_Variant** outputArgs,
                                                   void* param);
 
-SOPC_StatusCode PushSrvCfg_Method_TofuNotSuported(const SOPC_CallContext* callContextPtr,
+SOPC_StatusCode PushSrvCfg_Method_TOFUNotSuported(const SOPC_CallContext* callContextPtr,
                                                   const SOPC_NodeId* objectId,
                                                   uint32_t nbInputArgs,
                                                   const SOPC_Variant* inputArgs,

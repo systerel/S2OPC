@@ -53,7 +53,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_Initialize(void);
  * \param pServerKeyPath      Path to the server private key (NULL if the platform has no file system).
  * \param pServerCertPath     Path to the server certificate (NULL if the platform has no file system).
  * \param pPKIUsr             A valid pointer to the PKI of the users TrustList (NULL if not used).
- * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
+ * \param maxTrustListSize    Define the maximum size in byte of the TrustList.
  * \param[out] ppConfig       A newly created configuration. You should delete it with
  *                            ::SOPC_PushServerConfig_DeleteConfiguration .
  *
@@ -72,7 +72,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
  *
  * \param pPKIApp             A valid pointer to the PKI of the application TrustList.
  * \param appCertType         The application certificate type.
- * \param maxTrustListSize    Defined the maximum size in byte of the TrustList.
+ * \param maxTrustListSize    Define the maximum size in byte of the TrustList.
  * \param pFnUpdateCompleted  The callback when a new valid update of the TrustList has occurred.
  * \param[out] ppConfig       A newly created configuration. You should delete it with
  *                            ::SOPC_PushServerConfig_DeleteConfiguration .
@@ -106,7 +106,8 @@ void SOPC_PushServerConfig_DeleteConfiguration(SOPC_PushServerConfig_Config** pp
 SOPC_ReturnStatus SOPC_PushServerConfig_Configure(SOPC_PushServerConfig_Config* pCfg, SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the whole API (CertificateGroup and TrustList)
+ * \brief Clear the whole API (CertificateGroup and TrustList).
+ *        Call to ::SOPC_PushServerConfig_Clear shall be done after a call to ::SOPC_CommonHelper_Clear .
  */
 void SOPC_PushServerConfig_Clear(void);
 

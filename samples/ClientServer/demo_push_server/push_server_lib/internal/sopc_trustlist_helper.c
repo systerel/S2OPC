@@ -22,6 +22,7 @@
  * \brief Interface implementation to manage the TrustListType.
  */
 #include <inttypes.h>
+#include <string.h>
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
@@ -42,6 +43,7 @@
 
 #define SOPC_EMPTY_TRUSTLIST_ENCODED_BYTE_SIZE 20u
 #define SOPC_LENGTH_BSTRING_ENCODED_BYTE_SIZE 4u
+#define THUMBPRINT_LENGTH 40u
 
 /*---------------------------------------------------------------------------
  *                             Internal types
@@ -103,7 +105,7 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
                                                       SOPC_CRLList** ppIssuerCrls);
 
 static bool trustlist_is_valid_masks(SOPC_TrLst_Mask mask);
-static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t* deep);
+static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t depth);
 
 /*---------------------------------------------------------------------------
  *                       Static functions (implementation)
@@ -193,7 +195,7 @@ static SOPC_ReturnStatus trustlist_attach_raw_array_to_bs_array(const void* pGen
                                                                 bool bIsCRL,
                                                                 uint32_t* pByteLenTot)
 {
-    if (NULL == pGenArray || 0 == lenArray || NULL == pByteStringArray)
+    if (NULL == pGenArray || 0 == lenArray || NULL == pByteStringArray || NULL == pByteLenTot)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -287,7 +289,7 @@ static SOPC_ReturnStatus trustlist_attach_raw_arrays_to_bs_arrays(
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     if (NULL == pBsTrustedCertArray || NULL == pBsTrustedCrlArray || NULL == pBsIssuerCertArray ||
-        NULL == pBsIssuerCrlArray)
+        NULL == pBsIssuerCrlArray || NULL == pByteLenTot)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -349,14 +351,7 @@ static SOPC_ReturnStatus trustList_write_bs_array_to_cert_list(SOPC_ByteString* 
     for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
     {
         pBsCert = &pArray[idx];
-        if (NULL == pBsCert)
-        {
-            status = SOPC_STATUS_INVALID_STATE;
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
-        }
+        status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCert);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -384,14 +379,7 @@ static SOPC_ReturnStatus trustList_write_bs_array_to_crl_list(SOPC_ByteString* p
     for (idx = 0; idx < length && SOPC_STATUS_OK == status; idx++)
     {
         pBsCert = &pArray[idx];
-        if (NULL == pBsCert)
-        {
-            status = SOPC_STATUS_INVALID_STATE;
-        }
-        if (SOPC_STATUS_OK == status)
-        {
-            status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCrl);
-        }
+        status = SOPC_KeyManager_CRL_CreateOrAddFromDER(pBsCert->Data, (uint32_t) pBsCert->Length, &pCrl);
     }
     if (SOPC_STATUS_OK != status)
     {
@@ -475,24 +463,20 @@ static SOPC_ReturnStatus trustlist_write_decoded_data(const OpcUa_TrustListDataT
 
 static bool trustlist_is_valid_masks(SOPC_TrLst_Mask masks)
 {
-    if (masks & ~SOPC_TL_MASK_ALL)
-    {
-        return false;
-    }
-    return true;
+    return 0 == (masks & ~SOPC_TL_MASK_ALL);
 }
 
-static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t* deep)
+static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustList, uint8_t depth)
 {
     SOPC_ASSERT(NULL != pTrustList);
 
-    if (0 == *deep)
+    if (0 == depth)
     {
         return SOPC_STATUS_NOK;
     }
     else
     {
-        *deep = (uint8_t)(*deep - 1);
+        depth = (uint8_t)(depth - 1);
     }
     SOPC_TrLst_Handle genHandle = SOPC_TRUSTLIST_INVALID_HANDLE;
     SOPC_ExposedBuffer* pBuff = NULL;
@@ -503,11 +487,11 @@ static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustLi
         genHandle = (uint32_t) pBuff[0] + (((uint32_t) pBuff[1]) << 8);
         if (SOPC_TRUSTLIST_INVALID_HANDLE == genHandle)
         {
-            status = gen_handle_with_retries(pTrustList, deep);
+            status = gen_handle_with_retries(pTrustList, depth);
         }
         else
         {
-            pTrustList->handle = genHandle;
+            pTrustList->opnCtx.handle = genHandle;
         }
     }
     SOPC_Free(pBuff);
@@ -519,11 +503,12 @@ static SOPC_ReturnStatus gen_handle_with_retries(SOPC_TrustListContext* pTrustLi
 void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext)
 {
     SOPC_ASSERT(NULL != pContext);
-    SOPC_Event activityTimeoutEvent = {0};
+    SOPC_ASSERT(0 == pContext->eventMgr.activityTimeoutTimId);
+    SOPC_LooperEvent activityTimeoutEvent = {0};
     activityTimeoutEvent.params = (uintptr_t) pContext;
-    pContext->event.activityTimeoutTimId =
-        SOPC_EventTimer_Create(pContext->event.pHandler, activityTimeoutEvent, SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS);
-    if (0 == pContext->event.activityTimeoutTimId)
+    pContext->eventMgr.activityTimeoutTimId =
+        SOPC_EventTimer_Create(pContext->eventMgr.pHandler, activityTimeoutEvent, SOPC_TRUSTLIST_ACTIVITY_TIMEOUT_MS);
+    if (0 == pContext->eventMgr.activityTimeoutTimId)
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: failed to start the activity timeout",
                                  pContext->cStrObjectId);
@@ -534,8 +519,9 @@ void TrustList_StartActivityTimeout(SOPC_TrustListContext* pContext)
 void TrustList_ResetActivityTimeout(SOPC_TrustListContext* pContext)
 {
     SOPC_ASSERT(NULL != pContext);
-    SOPC_EventTimer_Cancel(pContext->event.activityTimeoutTimId);
-    SOPC_Atomic_Int_Set(&pContext->event.timeoutElapsed, 0);
+    SOPC_EventTimer_Cancel(pContext->eventMgr.activityTimeoutTimId);
+    pContext->eventMgr.activityTimeoutTimId = 0;
+    SOPC_Atomic_Int_Set(&pContext->eventMgr.timeoutElapsed, 0);
     TrustList_StartActivityTimeout(pContext);
 }
 
@@ -545,7 +531,7 @@ SOPC_ReturnStatus TrustList_GenRandHandle(SOPC_TrustListContext* pTrustList)
     SOPC_ASSERT(NULL != pTrustList);
 
     uint8_t retry = 2;
-    SOPC_ReturnStatus status = gen_handle_with_retries(pTrustList, &retry);
+    SOPC_ReturnStatus status = gen_handle_with_retries(pTrustList, retry);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -566,10 +552,10 @@ bool TrustList_SetOpenMode(SOPC_TrustListContext* pTrustList, SOPC_TrLst_OpenMod
     case SOPC_TL_OPEN_MODE_READ:
     case SOPC_TL_OPEN_MODE_WRITE_ERASE_EXISTING:
         res = true;
-        pTrustList->openingMode = mode;
+        pTrustList->opnCtx.openingMode = mode;
         break;
     default:
-        pTrustList->openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
+        pTrustList->opnCtx.openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
         break;
     }
     return res;
@@ -580,11 +566,11 @@ bool TrustList_SetOpenMasks(SOPC_TrustListContext* pTrustList, SOPC_TrLst_Mask m
 {
     SOPC_ASSERT(NULL != pTrustList);
 
-    pTrustList->openingMask = SOPC_TL_MASK_NONE;
+    pTrustList->opnCtx.openingMask = SOPC_TL_MASK_NONE;
     bool isValid = trustlist_is_valid_masks(masks);
     if (isValid)
     {
-        pTrustList->openingMask = masks;
+        pTrustList->opnCtx.openingMask = masks;
     }
     return isValid;
 }
@@ -595,26 +581,26 @@ SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint6
     SOPC_ASSERT(NULL != pTrustList);
 
     /* TrustList is not yet encode */
-    if (NULL == pTrustList->pTrustListEncoded)
+    if (NULL == pTrustList->opnCtx.pTrustListEncoded)
     {
         return SOPC_STATUS_INVALID_STATE;
     }
     /* Check before casting */
-    uint64_t position = pos;
-    if (UINT32_MAX < position)
+    if (UINT32_MAX < pos)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "TrustList:%s:SetPosition: position (%" PRIu64 ") is too large for buffer",
-                               pTrustList->cStrObjectId, position);
+                               pTrustList->cStrObjectId, pos);
         return SOPC_STATUS_INVALID_STATE;
     }
+    uint32_t position = (uint32_t) pos;
     uint32_t bufLength = TrustList_GetLength(pTrustList);
     /* if the position is higher than the file size the position is set to the end of the file*/
     if (position > bufLength)
     {
         position = bufLength;
     }
-    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pTrustList->pTrustListEncoded, (uint32_t) position);
+    SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pTrustList->opnCtx.pTrustListEncoded, position);
     return status;
 }
 
@@ -622,7 +608,7 @@ SOPC_ReturnStatus TrustList_SetPosition(SOPC_TrustListContext* pTrustList, uint6
 uint32_t TrustList_GetHandle(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    return (uint32_t) pTrustList->handle;
+    return (uint32_t) pTrustList->opnCtx.handle;
 }
 
 /* Get the TrustList position */
@@ -631,9 +617,9 @@ uint64_t TrustList_GetPosition(const SOPC_TrustListContext* pTrustList)
     SOPC_ASSERT(NULL != pTrustList);
 
     uint64_t pos = 0;
-    if (NULL != pTrustList->pTrustListEncoded)
+    if (NULL != pTrustList->opnCtx.pTrustListEncoded)
     {
-        SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, (uint32_t*) &pos);
+        SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->opnCtx.pTrustListEncoded, (uint32_t*) &pos);
         SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     return pos;
@@ -644,14 +630,9 @@ uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
     uint32_t bufLength = 0;
-    uint32_t bufRemaining = 0;
-    uint32_t bufPos = 0;
-    if (NULL != pTrustList->pTrustListEncoded)
+    if (NULL != pTrustList->opnCtx.pTrustListEncoded)
     {
-        bufRemaining = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
-        SOPC_ReturnStatus status = SOPC_Buffer_GetPosition(pTrustList->pTrustListEncoded, &bufPos);
-        SOPC_ASSERT(SOPC_STATUS_OK == status);
-        bufLength = bufPos + bufRemaining;
+        bufLength = pTrustList->opnCtx.pTrustListEncoded->length;
     }
     return bufLength;
 }
@@ -660,11 +641,11 @@ uint32_t TrustList_GetLength(const SOPC_TrustListContext* pTrustList)
 SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    return pTrustList->specifiedLists;
+    return pTrustList->opnCtx.specifiedLists;
 }
 
 /* Get the TOFU state status */
-bool TrustList_isInTofuSate(const SOPC_TrustListContext* pTrustList)
+bool TrustList_isInTOFUSate(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
     return NULL != pTrustList->pFnUpdateCompleted;
@@ -674,10 +655,10 @@ bool TrustList_isInTofuSate(const SOPC_TrustListContext* pTrustList)
 bool TrustList_CheckHandle(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_Handle expected, const char* msg)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    bool match = expected == pTrustList->handle;
+    bool match = expected == pTrustList->opnCtx.handle;
     if (!match && NULL != msg)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s: %s", pTrustList->cStrObjectId, msg);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:(handle):%s", pTrustList->cStrObjectId, msg);
     }
     return match;
 }
@@ -686,20 +667,21 @@ bool TrustList_CheckHandle(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_H
 bool TrustList_CheckOpenMode(const SOPC_TrustListContext* pTrustList, SOPC_TrLst_OpenMode expected, const char* msg)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    bool match = expected == pTrustList->openingMode;
+    bool match = expected == pTrustList->opnCtx.openingMode;
     if (!match && NULL != msg)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:%s", pTrustList->cStrObjectId, msg);
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:(mode):%s", pTrustList->cStrObjectId, msg);
     }
     return match;
 }
 
-/* Check if the TrustList is open */
-bool TrustList_CheckIsOpen(const SOPC_TrustListContext* pTrustList)
+/* Check if the TrustList is opened */
+bool TrustList_CheckIsOpened(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    bool isOpen = SOPC_TL_OPEN_MODE_UNKNOWN != pTrustList->openingMode && SOPC_TL_MASK_NONE != pTrustList->openingMask;
-    return isOpen;
+    bool isOpened = SOPC_TL_OPEN_MODE_UNKNOWN != pTrustList->opnCtx.openingMode &&
+                    SOPC_TL_MASK_NONE != pTrustList->opnCtx.openingMask;
+    return isOpened;
 }
 
 /* Get the TrustList nodeId */
@@ -715,7 +697,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     /* Check parameters.
        The PKI, the encoded result buffer and the opening mask are consider valid here. */
     SOPC_ASSERT(NULL != pTrustList);
-    SOPC_ASSERT(NULL == pTrustList->pTrustListEncoded);
+    SOPC_ASSERT(NULL == pTrustList->opnCtx.pTrustListEncoded);
     SOPC_ASSERT(NULL != pTrustList->pPKI);
 
     bool bIsRead = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
@@ -779,10 +761,10 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
            The ownership of the memory area for each data of the array is the CertificateList and CRLList
            copied from the PKI */
 
-        status = trustlist_attach_certs_to_raw_arrays(pTrustList->openingMask, pTrustedCerts, &pRawTrustedCertArray,
-                                                      &nbTrustedCerts, pTrustedCrls, &pRawTrustedCrlArray,
-                                                      &nbTrustedCrls, pIssuerCerts, &pRawIssuerCertArray,
-                                                      &nbIssuerCerts, pIssuerCrls, &pRawIssuerCrlArray, &nbIssuerCrls);
+        status = trustlist_attach_certs_to_raw_arrays(
+            pTrustList->opnCtx.openingMask, pTrustedCerts, &pRawTrustedCertArray, &nbTrustedCerts, pTrustedCrls,
+            &pRawTrustedCrlArray, &nbTrustedCrls, pIssuerCerts, &pRawIssuerCertArray, &nbIssuerCerts, pIssuerCrls,
+            &pRawIssuerCrlArray, &nbIssuerCrls);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -841,7 +823,7 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
     /* Fill the instance of the TrustListDataType */
     if (SOPC_STATUS_OK == status)
     {
-        pTrustListDataType.SpecifiedLists = pTrustList->openingMask;
+        pTrustListDataType.SpecifiedLists = pTrustList->opnCtx.openingMask;
         pTrustListDataType.TrustedCertificates = pBsTrustedCertArray;
         pTrustListDataType.NoOfTrustedCertificates = (int32_t) nbTrustedCerts;
         pTrustListDataType.TrustedCrls = pBsTrustedCrlArray;
@@ -894,18 +876,18 @@ SOPC_ReturnStatus TrustList_Encode(SOPC_TrustListContext* pTrustList)
         pBufferTrustListDataType = NULL;
     }
     /* Return Result */
-    pTrustList->pTrustListEncoded = pBufferTrustListDataType;
+    pTrustList->opnCtx.pTrustListEncoded = pBufferTrustListDataType;
     return status;
 }
 
 /* Read bytes from the current position of the encoded TrustListDataType */
 SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqLength, SOPC_ByteString* pDest)
 {
-    if (NULL == pTrustList || NULL == pDest || 0 == reqLength)
+    if (NULL == pTrustList || NULL == pDest || reqLength <= 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (NULL == pTrustList->pTrustListEncoded || NULL != pDest->Data || -1 != pDest->Length)
+    if (NULL == pTrustList->opnCtx.pTrustListEncoded || NULL != pDest->Data || pDest->Length > 0)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -913,7 +895,7 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
     uint32_t sizeAvailable = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     /* Get the remaining length */
-    sizeAvailable = SOPC_Buffer_Remaining(pTrustList->pTrustListEncoded);
+    sizeAvailable = SOPC_Buffer_Remaining(pTrustList->opnCtx.pTrustListEncoded);
     /* Check before casting */
     if (INT32_MAX < sizeAvailable)
     {
@@ -930,12 +912,13 @@ SOPC_ReturnStatus TrustList_Read(SOPC_TrustListContext* pTrustList, int32_t reqL
     {
         pDest->Length = (int32_t) lengthToWrite;
         pDest->Data = SOPC_Malloc(lengthToWrite * sizeof(SOPC_Byte));
-        status = SOPC_Buffer_Read(pDest->Data, pTrustList->pTrustListEncoded, lengthToWrite);
+        status = SOPC_Buffer_Read(pDest->Data, pTrustList->opnCtx.pTrustListEncoded, lengthToWrite);
     }
 
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Free(pDest->Data);
+        SOPC_ByteString_Initialize(pDest);
     }
     return status;
 }
@@ -958,68 +941,50 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    OpcUa_TrustListDataType* pTrustListDataType = NULL;
+    OpcUa_TrustListDataType trustListDataType = {0};
+    OpcUa_TrustListDataType_Initialize(&trustListDataType);
     SOPC_EncodeableType* type = &OpcUa_TrustListDataType_EncodeableType;
-    void* pValue = NULL;
     SOPC_ReturnStatus status = SOPC_Buffer_SetPosition(pToDecode, 0);
-    if (SOPC_STATUS_OK == status)
-    {
-        pValue = SOPC_Calloc(1, type->AllocationSize);
-        if (NULL == pValue)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
+
     /* Decode the byteString */
-    if (SOPC_STATUS_OK == status)
+    status = SOPC_EncodeableObject_Decode(type, (void*) &trustListDataType, pToDecode, 0);
+    if (SOPC_STATUS_OK != status)
     {
-        SOPC_EncodeableObject_Initialize(type, pValue);
-        status = SOPC_EncodeableObject_Decode(type, pValue, pToDecode, 1);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                   "TrustList:%s:Decode: EncodeableObject function failed", pTrustList->cStrObjectId);
-        }
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Decode: EncodeableObject function failed",
+                               pTrustList->cStrObjectId);
     }
-    if (SOPC_STATUS_OK == status)
-    {
-        pTrustListDataType = (OpcUa_TrustListDataType*) pValue;
-        if (NULL == pTrustListDataType)
-        {
-            status = SOPC_STATUS_INVALID_STATE;
-        }
-    }
+
     /* check the mask (SpecifiedLists) */
     if (SOPC_STATUS_OK == status)
     {
-        bool isValid = trustlist_is_valid_masks(pTrustListDataType->SpecifiedLists);
+        bool isValid = trustlist_is_valid_masks(trustListDataType.SpecifiedLists);
         if (!isValid)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:Decode: invalid SpecifiedLists:%" PRIX32,
-                                   pTrustList->cStrObjectId, pTrustListDataType->SpecifiedLists);
+                                   pTrustList->cStrObjectId, trustListDataType.SpecifiedLists);
             status = SOPC_STATUS_INVALID_STATE;
         }
     }
     if (SOPC_STATUS_OK == status)
     {
         /* TrustList support only the write mode with the EraseExisting option */
-        SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
-        SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
-        SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
-        SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
+        SOPC_KeyManager_Certificate_Free(pTrustList->opnCtx.pTrustedCerts);
+        SOPC_KeyManager_Certificate_Free(pTrustList->opnCtx.pIssuerCerts);
+        SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pTrustedCRLs);
+        SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pIssuerCRLs);
 
-        status = trustlist_write_decoded_data(pTrustListDataType, &pTrustList->pTrustedCerts, &pTrustList->pTrustedCRLs,
-                                              &pTrustList->pIssuerCerts, &pTrustList->pIssuerCRLs);
+        status = trustlist_write_decoded_data(&trustListDataType, &pTrustList->opnCtx.pTrustedCerts,
+                                              &pTrustList->opnCtx.pTrustedCRLs, &pTrustList->opnCtx.pIssuerCerts,
+                                              &pTrustList->opnCtx.pIssuerCRLs);
     }
     /* Register the part of the TrustList to update with CloseAndUpdate */
     if (SOPC_STATUS_OK == status)
     {
-        pTrustList->specifiedLists = pTrustListDataType->SpecifiedLists;
+        pTrustList->opnCtx.specifiedLists = trustListDataType.SpecifiedLists;
     }
 
     /* Clear */
-    SOPC_EncodeableObject_Clear(type, pValue);
-    SOPC_Free(pValue);
+    SOPC_EncodeableObject_Clear(type, &trustListDataType);
     SOPC_Free(pToDecode);
 
     return status;
@@ -1029,7 +994,6 @@ SOPC_ReturnStatus TrustList_Decode(SOPC_TrustListContext* pTrustList, const SOPC
 SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
                                      const SOPC_String* pThumbprint,
                                      const bool bIsTrustedCert,
-                                     const char* secPolUri,
                                      bool* pbIsRemove,
                                      bool* pbIsIssuer)
 {
@@ -1041,7 +1005,7 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
     SOPC_ASSERT(NULL != pbIsRemove);
     SOPC_ASSERT(NULL != pbIsIssuer);
 
-    if (NULL == pThumbprint || NULL == secPolUri)
+    if (NULL == pThumbprint)
     {
         return OpcUa_BadUnexpectedError;
     }
@@ -1053,7 +1017,7 @@ SOPC_StatusCode TrustList_RemoveCert(SOPC_TrustListContext* pTrustList,
 
     uint32_t lenThumb = (uint32_t) pThumbprint->Length;
 
-    if (40 != lenThumb)
+    if (THUMBPRINT_LENGTH != lenThumb)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                "TrustList:%s:RemoveCertificate: rcv invalid thumbprint length : %" PRId32
@@ -1112,7 +1076,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
     {
         return OpcUa_BadCertificateInvalid;
     }
-    if (NULL == pBsCert->Data || -1 == pBsCert->Length)
+    if (NULL == pBsCert->Data || 0 >= pBsCert->Length)
     {
         return OpcUa_BadCertificateInvalid;
     }
@@ -1187,7 +1151,7 @@ SOPC_StatusCode TrustList_UpdateWithAddCertificateMethod(SOPC_TrustListContext* 
         SOPC_PKI_Profile profile = {.leafProfile = NULL,
                                     .chainProfile = &chainProfile,
                                     .bApplyLeafProfile = true,
-                                    .bBackwardInteroperability = pTrustList->pPKI};
+                                    .bBackwardInteroperability = true};
         status = SOPC_PKIProvider_CreateLeafProfile(NULL, &profile.leafProfile);
         if (SOPC_STATUS_OK == status)
         {
@@ -1257,9 +1221,9 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
         return OpcUa_BadUnexpectedError;
     }
     /* No fields are provided or the write method has not yet been called */
-    if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists ||
-        (NULL == pTrustList->pTrustedCerts && NULL == pTrustList->pTrustedCRLs && NULL == pTrustList->pIssuerCerts &&
-         NULL == pTrustList->pIssuerCRLs))
+    if (SOPC_TL_MASK_NONE == pTrustList->opnCtx.specifiedLists ||
+        (NULL == pTrustList->opnCtx.pTrustedCerts && NULL == pTrustList->opnCtx.pTrustedCRLs &&
+         NULL == pTrustList->opnCtx.pIssuerCerts && NULL == pTrustList->opnCtx.pIssuerCRLs))
     {
         return SOPC_GoodGenericStatus;
     }
@@ -1278,21 +1242,21 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
 
     /* TODO: we should optimize by adding VerifyEveryCertificate inside the UpdateFromList (avoid copies and tmp PKI, cf
      * public issue #1262) */
-    if (NULL != pTrustList->pTrustedCerts)
+    if (NULL != pTrustList->opnCtx.pTrustedCerts)
     {
-        status = SOPC_KeyManager_Certificate_Copy(pTrustList->pTrustedCerts, &pToUpdateTrustedCerts);
+        status = SOPC_KeyManager_Certificate_Copy(pTrustList->opnCtx.pTrustedCerts, &pToUpdateTrustedCerts);
     }
-    if (NULL != pTrustList->pTrustedCRLs && SOPC_STATUS_OK == status)
+    if (NULL != pTrustList->opnCtx.pTrustedCRLs && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_Copy(pTrustList->pTrustedCRLs, &pToUpdateTrustedCRLs);
+        status = SOPC_KeyManager_CRL_Copy(pTrustList->opnCtx.pTrustedCRLs, &pToUpdateTrustedCRLs);
     }
-    if (NULL != pTrustList->pIssuerCerts && SOPC_STATUS_OK == status)
+    if (NULL != pTrustList->opnCtx.pIssuerCerts && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_Certificate_Copy(pTrustList->pIssuerCerts, &pToUpdateIssuerCerts);
+        status = SOPC_KeyManager_Certificate_Copy(pTrustList->opnCtx.pIssuerCerts, &pToUpdateIssuerCerts);
     }
-    if (NULL != pTrustList->pIssuerCRLs && SOPC_STATUS_OK == status)
+    if (NULL != pTrustList->opnCtx.pIssuerCRLs && SOPC_STATUS_OK == status)
     {
-        status = SOPC_KeyManager_CRL_Copy(pTrustList->pIssuerCRLs, &pToUpdateIssuerCRLs);
+        status = SOPC_KeyManager_CRL_Copy(pTrustList->opnCtx.pIssuerCRLs, &pToUpdateIssuerCRLs);
     }
 
     if (SOPC_STATUS_OK != status)
@@ -1304,13 +1268,13 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
 
     /* If only part of the TrustList is being updated the Server creates a new TrustList that includes
        the existing TrustList plus any updates and validates the new TrustList. */
-    if (SOPC_TL_MASK_ALL != pTrustList->specifiedLists && SOPC_STATUS_OK == status)
+    if (SOPC_TL_MASK_ALL != pTrustList->opnCtx.specifiedLists && SOPC_STATUS_OK == status)
     {
         bIncludeExistingList = true;
 
-        status = SOPC_PKIProvider_WriteOrAppendToList(pTrustList->pPKI, &pTrustList->pTrustedCerts,
-                                                      &pTrustList->pTrustedCRLs, &pTrustList->pIssuerCerts,
-                                                      &pTrustList->pIssuerCRLs);
+        status = SOPC_PKIProvider_WriteOrAppendToList(
+            pTrustList->pPKI, &pTrustList->opnCtx.pTrustedCerts, &pTrustList->opnCtx.pTrustedCRLs,
+            &pTrustList->opnCtx.pIssuerCerts, &pTrustList->opnCtx.pIssuerCRLs);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -1322,8 +1286,9 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
     /* Create a temporary PKI to verify every certificate */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_PKIProvider_CreateFromList(pTrustList->pTrustedCerts, pTrustList->pTrustedCRLs,
-                                                 pTrustList->pIssuerCerts, pTrustList->pIssuerCRLs, &pTmpPKI);
+        status =
+            SOPC_PKIProvider_CreateFromList(pTrustList->opnCtx.pTrustedCerts, pTrustList->opnCtx.pTrustedCRLs,
+                                            pTrustList->opnCtx.pIssuerCerts, pTrustList->opnCtx.pIssuerCRLs, &pTmpPKI);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: PKI creation failed",
@@ -1391,23 +1356,23 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
     if (!bForcePush)
     {
         /* No fields are provided => Do nothing */
-        if (SOPC_TL_MASK_NONE == pTrustList->specifiedLists)
+        if (SOPC_TL_MASK_NONE == pTrustList->opnCtx.specifiedLists)
         {
             return SOPC_STATUS_OK;
         }
     }
-    bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->specifiedLists || bEraseExiting;
+    bool bNotIncludeExitingFile = SOPC_TL_MASK_ALL == pTrustList->opnCtx.specifiedLists || bEraseExiting;
     SOPC_ReturnStatus status = SOPC_PKIProvider_WriteToStore(pTrustList->pPKI, bNotIncludeExitingFile);
     if (SOPC_STATUS_OK != status)
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:%s:CloseAndUpdate: PKI WriteToStore function failed",
-                               pTrustList->cStrObjectId);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:CloseAndUpdate: PKI WriteToStore function failed",
+                                 pTrustList->cStrObjectId);
     }
     return status;
 }
 
-/* Raise an event to re-evaluate the certificate. */
+/* Raise an event to re-evaluate the certificates. */
 SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
@@ -1422,9 +1387,9 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
     }
     else
     {
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "TrustList:%s:RaiseEvent: unexpected certificate group type : %d",
-                               pTrustList->cStrObjectId, (const int) pTrustList->groupType);
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "TrustList:%s:RaiseEvent: unexpected certificate group type : %d",
+                                 pTrustList->cStrObjectId, (const int) pTrustList->groupType);
         status = SOPC_STATUS_NOK;
     }
     return status;
@@ -1434,9 +1399,9 @@ SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
 void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    if (TrustList_isInTofuSate(pTrustList))
+    if (TrustList_isInTOFUSate(pTrustList))
     {
-        pTrustList->pFnUpdateCompleted(0);
+        pTrustList->pFnUpdateCompleted();
     }
 }
 
@@ -1452,16 +1417,11 @@ void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_Addres
         return;
     }
 
-    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
-    if (NULL == dv)
-    {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "TrustList:%s:SizeVariable: unable to create the dataValue", pTrustList->cStrObjectId);
-        return;
-    }
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
     SOPC_StatusCode varSizeStCode = SOPC_GoodGenericStatus;
-    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
-    if (bIsOpen)
+    bool bIsOpened = TrustList_CheckIsOpened(pTrustList);
+    if (bIsOpened)
     {
         bool bIsRead = TrustList_CheckOpenMode(pTrustList, SOPC_TL_OPEN_MODE_READ, NULL);
         if (!bIsRead)
@@ -1469,20 +1429,18 @@ void Trustlist_WriteVarSize(const SOPC_TrustListContext* pTrustList, SOPC_Addres
             varSizeStCode = OpcUa_BadNotSupported;
         }
     }
-    dv->Value.BuiltInTypeId = SOPC_UInt64_Id;
-    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-    dv->Value.Value.Uint64 = TrustList_GetLength(pTrustList);
+    dv.Value.BuiltInTypeId = SOPC_UInt64_Id;
+    dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv.Value.Value.Uint64 = TrustList_GetLength(pTrustList);
     SOPC_DateTime ts = 0; // will set current time as source TS
     SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pSizeId, NULL,
-                                                                &dv->Value, &varSizeStCode, &ts, NULL);
+                                                                &dv.Value, &varSizeStCode, &ts, NULL);
     if (!SOPC_IsGoodStatus(stCode))
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                  "TrustList:%s:SizeVariable: unable to write the size %" PRId64,
-                                 pTrustList->cStrObjectId, dv->Value.Value.Uint64);
+                                 pTrustList->cStrObjectId, dv.Value.Value.Uint64);
     }
-    SOPC_DataValue_Clear(dv);
-    SOPC_Free(dv);
 }
 
 /* Write the value of the OpenCount variable */
@@ -1497,34 +1455,26 @@ void Trustlist_WriteVarOpenCount(const SOPC_TrustListContext* pTrustList, SOPC_A
         return;
     }
 
-    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
-    if (NULL == dv)
-    {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "TrustList:%s:OpenCountVariable: unable to create the dataValue",
-                                 pTrustList->cStrObjectId);
-        return;
-    }
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
     uint16_t openCount = 0;
-    bool bIsOpen = TrustList_CheckIsOpen(pTrustList);
-    if (bIsOpen)
+    bool bIsOpened = TrustList_CheckIsOpened(pTrustList);
+    if (bIsOpened)
     {
         openCount = 1;
     }
-    dv->Value.BuiltInTypeId = SOPC_UInt16_Id;
-    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-    dv->Value.Value.Uint16 = openCount;
+    dv.Value.BuiltInTypeId = SOPC_UInt16_Id;
+    dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv.Value.Value.Uint16 = openCount;
     SOPC_DateTime ts = 0; // will set current time as source TS
     SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pOpenCountId, NULL,
-                                                                &dv->Value, NULL, &ts, NULL);
+                                                                &dv.Value, NULL, &ts, NULL);
     if (!SOPC_IsGoodStatus(stCode))
     {
         SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                  "TrustList:%s:OpenCountVariable: unable to write the opencount %" PRId16,
-                                 pTrustList->cStrObjectId, dv->Value.Value.Uint16);
+                                 pTrustList->cStrObjectId, dv.Value.Value.Uint16);
     }
-    SOPC_DataValue_Clear(dv);
-    SOPC_Free(dv);
 }
 
 /* Write the value of the LastUpdateTime variable */
@@ -1539,21 +1489,14 @@ void Trustlist_WriteVarLastUpdateTime(const SOPC_TrustListContext* pTrustList, S
         return;
     }
 
-    SOPC_DataValue* dv = SOPC_Calloc(1, sizeof(SOPC_DataValue));
-    if (NULL == dv)
-    {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "TrustList:%s:LastUpdateTime: unable to create the dataValue",
-                                 pTrustList->cStrObjectId);
-        return;
-    }
-
-    dv->Value.BuiltInTypeId = SOPC_DateTime_Id;
-    dv->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
-    dv->Value.Value.Date = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_DataValue dv;
+    SOPC_DataValue_Initialize(&dv);
+    dv.Value.BuiltInTypeId = SOPC_DateTime_Id;
+    dv.Value.ArrayType = SOPC_VariantArrayType_SingleValue;
+    dv.Value.Value.Date = SOPC_Time_GetCurrentTimeUTC();
     SOPC_DateTime ts = 0; // will set current time as source TS
     SOPC_StatusCode stCode = SOPC_AddressSpaceAccess_WriteValue(pAddSpAccess, pTrustList->varIds.pLastUpdateTimeId,
-                                                                NULL, &dv->Value, NULL, &ts, NULL);
+                                                                NULL, &dv.Value, NULL, &ts, NULL);
     if (!SOPC_IsGoodStatus(stCode))
     {
         SOPC_Logger_TraceWarning(
@@ -1561,8 +1504,6 @@ void Trustlist_WriteVarLastUpdateTime(const SOPC_TrustListContext* pTrustList, S
             "TrustList:%s:LastUpdateTime: unable to write the current time to the LastUpdateTime variable",
             pTrustList->cStrObjectId);
     }
-    SOPC_DataValue_Clear(dv);
-    SOPC_Free(dv);
 }
 
 /* Reset the TrustList context when close method is call */
@@ -1570,25 +1511,16 @@ void TrustList_Reset(SOPC_TrustListContext* pTrustList, SOPC_AddressSpaceAccess*
 {
     SOPC_ASSERT(NULL != pTrustList);
 
-    SOPC_EventTimer_Cancel(pTrustList->event.activityTimeoutTimId);
-    pTrustList->event.activityTimeoutTimId = 0;
-    SOPC_Atomic_Int_Set(&pTrustList->event.timeoutElapsed, 0);
-    SOPC_Buffer_Delete(pTrustList->pTrustListEncoded);
-    SOPC_KeyManager_Certificate_Free(pTrustList->pTrustedCerts);
-    SOPC_KeyManager_Certificate_Free(pTrustList->pIssuerCerts);
-    SOPC_KeyManager_CRL_Free(pTrustList->pTrustedCRLs);
-    SOPC_KeyManager_CRL_Free(pTrustList->pIssuerCRLs);
+    SOPC_EventTimer_Cancel(pTrustList->eventMgr.activityTimeoutTimId);
+    pTrustList->eventMgr.activityTimeoutTimId = 0;
+    SOPC_Atomic_Int_Set(&pTrustList->eventMgr.timeoutElapsed, 0);
+    SOPC_Buffer_Delete(pTrustList->opnCtx.pTrustListEncoded);
+    SOPC_KeyManager_Certificate_Free(pTrustList->opnCtx.pTrustedCerts);
+    SOPC_KeyManager_Certificate_Free(pTrustList->opnCtx.pIssuerCerts);
+    SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pTrustedCRLs);
+    SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pIssuerCRLs);
 
-    pTrustList->handle = SOPC_TRUSTLIST_INVALID_HANDLE;
-    pTrustList->openingMode = SOPC_TL_OPEN_MODE_UNKNOWN;
-    pTrustList->openingMask = SOPC_TL_MASK_NONE;
-    pTrustList->pTrustListEncoded = NULL;
-    pTrustList->specifiedLists = SOPC_TL_MASK_NONE;
-    pTrustList->pTrustedCerts = NULL;
-    pTrustList->pIssuerCerts = NULL;
-    pTrustList->pTrustedCRLs = NULL;
-    pTrustList->pIssuerCRLs = NULL;
-    pTrustList->bDoNotDelete = false;
+    memset(&pTrustList->opnCtx, 0, sizeof(SOPC_TrLst_OpeningCtx));
 
     if (NULL != pAddSpAccess)
     {

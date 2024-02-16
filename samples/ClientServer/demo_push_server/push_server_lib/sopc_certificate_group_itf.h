@@ -58,10 +58,10 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Initialize(void);
 /**
  * \brief Get the CertificateGroup object configuration with the default address space.
  *
- * \param groupType        Defined the certificate group type of the TrustList (application or user).
- * \param certType         Defined the certificate type (certificate properties).
+ * \param groupType        Define the certificate group type of the TrustList (application or user).
+ * \param certType         Define the certificate type (certificate properties).
  * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
- * \param maxTrustListSize Defined the maximum size in byte of the TrustList that belongs to the
+ * \param maxTrustListSize Define the maximum size in byte of the TrustList that belongs to the
  *                         CertificateGroup object.
  * \param pKeyCertPair A valid pointer to the private key and certificate that belongs to the CertificateGroup object
  *                     (NULL if \p certType is \c SOPC_TRUSTLIST_GROUP_USR ).
@@ -85,9 +85,9 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
 /**
  * \brief Get the address space configuration of the default application group in TOFU state.
  *
- * \param certType         Defined the certificate type (certificate properties).
+ * \param certType         Define the certificate type (certificate properties).
  * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
- * \param maxTrustListSize Defined the maximum size in byte of the TrustList that belongs to the
+ * \param maxTrustListSize Define the maximum size in byte of the TrustList that belongs to the
  *                         CertificateGroup object.
  * \param pFnUpdateCompleted The callback when a new valid update of the TrustList has occurred.
  * \param[out] ppConfig A newly created configuration. You should delete it with
@@ -123,7 +123,8 @@ SOPC_ReturnStatus SOPC_CertificateGroup_Configure(const SOPC_CertificateGroup_Co
                                                   SOPC_MethodCallManager* pMcm);
 
 /**
- * \brief Uninitialized the Certificate Group API
+ * \brief Clear the Certificate Group API.
+ *        Call to ::SOPC_CertificateGroup_Clear shall be done after a call to ::SOPC_CommonHelper_Clear .
  */
 void SOPC_CertificateGroup_Clear(void);
 
