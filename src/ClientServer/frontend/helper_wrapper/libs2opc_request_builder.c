@@ -1493,8 +1493,15 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCall(OpcUa_CallRequest* callReques
     }
     if (SOPC_STATUS_OK == status)
     {
-        callMethod->InputArguments = SOPC_Calloc((size_t) nbOfInputArguments, sizeof(*callMethod->InputArguments));
-        status = (NULL != callMethod->InputArguments ? status : SOPC_STATUS_OUT_OF_MEMORY);
+        if (0 != nbOfInputArguments)
+        {
+            callMethod->InputArguments = SOPC_Calloc((size_t) nbOfInputArguments, sizeof(*callMethod->InputArguments));
+            status = (NULL != callMethod->InputArguments ? status : SOPC_STATUS_OUT_OF_MEMORY);
+        }
+        else
+        {
+            callMethod->InputArguments = NULL;
+        }
     }
     if (SOPC_STATUS_OK == status)
     {
