@@ -63,6 +63,7 @@ else
     echo "- Run CMake" | tee -a $CURDIR/build.log
     append_cmake_option S2OPC_NANO_PROFILE
     append_cmake_option S2OPC_NODE_MANAGEMENT
+    append_cmake_option S2OPC_EVENT_MANAGEMENT
     append_cmake_option S2OPC_DYNAMIC_TYPE_RESOLUTION
     append_cmake_option CMAKE_TOOLCHAIN_FILE
     append_cmake_option BUILD_SHARED_LIBS

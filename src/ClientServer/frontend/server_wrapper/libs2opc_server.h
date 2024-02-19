@@ -188,4 +188,38 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
  */
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** response);
 
+/**
+ *  \brief Create an event instance for the given event type referenced.
+ *         The EventId value is set to a unique value by this function prior to returning the new event instance.
+ *         Caller is responsible for event deallocation.
+ *
+ *  \param eventTypeId  The NodeId of the event type to instantiate
+ *  \param[out] event   A pointer set to the newly allocated event instance
+ *
+ *  \return SOPC_STATUS_OK in case of success,
+ *          SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or
+ *          SOPC_STATUS_NOT_SUPPORTED otherwise.
+ *
+ */
+SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, SOPC_Event** event);
+
+/**
+ * \brief Trigger the given event from the given node as notifier
+ *
+ * \param notifierNodeId      NodeId of the node notifier for the triggered event
+ * \param event               The event to be triggered
+ * \param optSubscriptionId   (optional) The subscriptionId for which the event is triggered or 0.
+ * \param optMonitoredItemId  (optional) The monitored item Id for which the event is triggered or 0.
+ *
+ * Note: the provided event and its content is automatically deallocated by callee
+ *
+ *  \return SOPC_STATUS_OK in case of success,
+ *          SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or
+ *          SOPC_STATUS_NOT_SUPPORTED otherwise.
+ */
+SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNodeId,
+                                                 SOPC_Event* event,
+                                                 uint32_t optSubscriptionId,
+                                                 uint32_t optMonitoredItemId);
+
 #endif

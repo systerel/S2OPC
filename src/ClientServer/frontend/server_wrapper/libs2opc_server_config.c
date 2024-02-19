@@ -580,7 +580,6 @@ void SOPC_ServerConfigHelper_Clear(void)
 
     SOPC_Free(sopc_server_helper_config.endpointIndexes);
     SOPC_Free(sopc_server_helper_config.endpointClosed);
-
     SOPC_Atomic_Int_Set(&sopc_server_helper_config.initialized, (int32_t) false);
     SOPC_Mutex_Clear(&sopc_server_helper_config.stateMutex);
 }

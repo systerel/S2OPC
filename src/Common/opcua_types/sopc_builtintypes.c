@@ -2595,6 +2595,37 @@ SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, con
     return status;
 }
 
+char* SOPC_QualifiedName_ToCString(const SOPC_QualifiedName* qname)
+{
+    SOPC_StatusCode status = SOPC_STATUS_OK;
+    char* result = NULL;
+
+    if (NULL == qname || qname->Name.Length <= 0)
+    {
+        status = SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    else
+    {
+        // max = 5 digits (16 bits uint) + separator + name length + NULL character
+        result = SOPC_Calloc(6 + (size_t) qname->Name.Length + 1, sizeof(char));
+        status = (NULL == result ? SOPC_STATUS_OUT_OF_MEMORY : status);
+    }
+
+    if (status == SOPC_STATUS_OK)
+    {
+        int res = sprintf(result, "%" PRIu16 ":%s", qname->NamespaceIndex, SOPC_String_GetRawCString(&qname->Name));
+        status = res < 0 ? SOPC_STATUS_NOK : status;
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(result);
+        result = NULL;
+    }
+
+    return result;
+}
+
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname)
 {
     if (qname != NULL)
@@ -2976,7 +3007,7 @@ static SOPC_ReturnStatus SOPC_LocalizedText_AddOrSetLocale_Internal_SetSupported
         if (SOPC_STATUS_OK == status)
         {
             void* appended = (void*) SOPC_SLinkedList_Append(destSetOfLt->localizedTextList, 0, (uintptr_t) newLT);
-            status = NULL == appended ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
+            status = (NULL == appended ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
         }
         if (SOPC_STATUS_OK != status)
         {

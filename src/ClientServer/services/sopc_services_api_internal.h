@@ -26,6 +26,7 @@
 #ifndef SOPC_SERVICES_API_INTERNAL_H
 #define SOPC_SERVICES_API_INTERNAL_H
 
+#include "sopc_event.h"
 #include "sopc_key_manager.h"
 #include "sopc_services_api.h"
 
@@ -49,5 +50,13 @@ typedef struct SOPC_Internal_DiscoveryContext
     void* opcuaMessage;            /**< (OpcUa_<MessageStruct>*) OPC UA message payload structure (header ignored)*/
     uintptr_t discoveryAppContext; /**< User application request context */
 } SOPC_Internal_DiscoveryContext;
+
+typedef struct SOPC_Internal_EventContext
+{
+    SOPC_NodeId notifierNodeId;
+    SOPC_Event* event;
+    uint32_t optSubscriptionId;
+    uint32_t optMonitoredItemId;
+} SOPC_Internal_EventContext;
 
 #endif /* SOPC_SERVICES_API_INTERNAL_H */

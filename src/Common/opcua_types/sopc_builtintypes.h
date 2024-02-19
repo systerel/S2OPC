@@ -906,6 +906,7 @@ SOPC_ReturnStatus SOPC_QualifiedName_CompareAux(const void* left, const void* ri
 void SOPC_QualifiedName_Clear(SOPC_QualifiedName* qname);
 void SOPC_QualifiedName_ClearAux(void* value);
 SOPC_ReturnStatus SOPC_QualifiedName_ParseCString(SOPC_QualifiedName* qname, const char* str);
+char* SOPC_QualifiedName_ToCString(const SOPC_QualifiedName* qname);
 
 /**** LocalizedText ****/
 /** \see description in similar function SOPC_Boolean_xxxx */

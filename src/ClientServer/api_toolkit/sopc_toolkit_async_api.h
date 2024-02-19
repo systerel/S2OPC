@@ -39,7 +39,7 @@
 #include "sopc_user_app_itf.h"
 
 /**
- * \brief Request to open a connection listener for the given endpoint description configuration as a server.
+ * \brief Requests to open a connection listener for the given endpoint description configuration as a server.
  *
  *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to SOPC_ComEvent_Fct(),
  *   otherwise the listener could be considered as opened.
@@ -51,7 +51,7 @@
 void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
- * \brief Request to close a connection listener for the given endpoint description configuration.
+ * \brief Requests to close a connection listener for the given endpoint description configuration.
  *
  *   In any case the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct(),
  *   once triggered if the listener was opened it could be now considered closed.
@@ -63,7 +63,7 @@ void SOPC_ToolkitServer_AsyncOpenEndpoint(SOPC_EndpointConfigIdx endpointConfigI
 void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfigIdx);
 
 /**
- * \brief Request to execute locally the given service request on server and receive response.
+ * \brief Requests to execute locally the given service request on server and receive response.
  *
  *   The SE_LOCAL_SERVICE_RESPONSE event will be triggered to SOPC_ComEvent_Fct(),
  *   once service request evaluated.
@@ -78,17 +78,26 @@ void SOPC_ToolkitServer_AsyncCloseEndpoint(SOPC_EndpointConfigIdx endpointConfig
 void SOPC_ToolkitServer_AsyncLocalServiceRequest(SOPC_EndpointConfigIdx endpointConfigIdx,
                                                  void* requestStruct,
                                                  uintptr_t requestContext);
-/**
- * \brief Configuration parameters for a connection to a server endpoint.
- *        The connection is either initiated by the client (classic) or by the server (reverse).
- *
- * \note reverseEndpointConfigIdx != 0 => reverse connection
- *       reverseEndpointConfigIdx == 0 => classic connection
- *
- */
 
 /**
- * \brief Request to re-evaluate the current server secure channels due to server certificate / key update (force SC
+ * \brief Triggers the given event from the given node as notifier
+ *
+ * \param endpointConfigIdx   Endpoint description configuration index provided to
+ * \param notifierNodeId      NodeId of the node notifier for the triggered event
+ * \param event               The event to be triggered
+ * \param optSubscriptionId   (optional) The subscriptionId for which the event is triggered or 0.
+ * \param optMonitoredItemId  (optional) The monitored item Id for which the event is triggered or 0.
+ *
+ * Note: the provided event and its content is automatically deallocated by the toolkit
+ */
+void SOPC_ToolkitServer_TriggerEvent(SOPC_EndpointConfigIdx endpointConfigIdx,
+                                     const SOPC_NodeId* notifierNodeId,
+                                     SOPC_Event* event,
+                                     uint32_t optSubscriptionId,
+                                     uint32_t optMonitoredItemId);
+
+/**
+ * \brief Requests to re-evaluate the current server secure channels due to server certificate / key update (force SC
  * re-establishment) or server PKI trust list update (client certificate re-validation necessary) When \p ownCert is set
  * it concerns a certificate / key application update, otherwise it concerns a PKI trust list update.
  *
@@ -125,7 +134,7 @@ typedef struct SOPC_EndpointConnectionCfg
 } SOPC_EndpointConnectionCfg;
 
 /**
- * \brief Create an endpoint connection configuration for a classic connection (initiated by client)
+ * \brief Creates an endpoint connection configuration for a classic connection (initiated by client)
  *
  * \param secureChannelConfigIdx  Index of the Secure Channel configuration for endpoint connection
  *                                     returned by ::SOPC_ToolkitClient_AddSecureChannelConfig()
@@ -133,7 +142,7 @@ typedef struct SOPC_EndpointConnectionCfg
 SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateClassic(SOPC_SecureChannelConfigIdx secureChannelConfigIdx);
 
 /**
- * \brief Create an endpoint connection configuration for a reverse connection (initiated by server)
+ * \brief Creates an endpoint connection configuration for a reverse connection (initiated by server)
  *
  * \param reverseEndpointConfigIdx     Index of the Reverse Endpoint configuration to listen for server connection
  *                                     returned by ::SOPC_ToolkitClient_AddReverseEndpointConfig()
@@ -145,7 +154,7 @@ SOPC_EndpointConnectionCfg SOPC_EndpointConnectionCfg_CreateReverse(
     SOPC_SecureChannelConfigIdx secureChannelConfigIdx);
 
 /**
- * \brief Request to activate a new session for the given endpoint connection configuration as client.
+ * \brief Requests to activate a new session for the given endpoint connection configuration as client.
  *
  *   When requesting activation of a session the following steps are automatically done:
  *   - Establish a new secure channel for the endpoint connection configuration provided if not existing
@@ -183,7 +192,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession(SOPC_EndpointConnectio
                                                           void* userTokenCtx);
 
 /**
- * \brief Request to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()
+ * \brief Requests to activate an anonymous session. See SOPC_ToolkitClient_AsyncActivateSession()
  *
  * \param endpointConnectionCfg  Endpoint connection configuration.
  * \param sessionName            (Optional) Human readable string that identifies the session (NULL terminated C string)
@@ -200,7 +209,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
                                                                     const char* policyId);
 
 /**
- * \brief Request to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
+ * \brief Requests to activate a session with a UserNameIdentityToken. See SOPC_ToolkitClient_AsyncActivateSession().
  *
  * \note The password will be encrypted, or not, depending on the user token security policy associated to the policyId
  *       or if it is empty depending on the SecureChannel security policy.
@@ -232,7 +241,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
     int32_t length_password);
 
 /**
- * \brief Request to activate a session with a x509IdentityToken. See ::SOPC_ToolkitClient_AsyncActivateSession().
+ * \brief Requests to activate a session with a x509IdentityToken. See ::SOPC_ToolkitClient_AsyncActivateSession().
  *
  *
  * \param endpointConnectionCfg  Endpoint connection configuration.
@@ -271,7 +280,7 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(SOPC_SessionId sessionId,
                                                   uintptr_t requestContext);
 
 /**
- * \brief Request to close the given session.
+ * \brief Requests to close the given session.
  *
  *   When the session is closed, the SE_CLOSED_SESSION event will be triggered to SOPC_ComEvent_Fct().
  *
@@ -280,7 +289,7 @@ void SOPC_ToolkitClient_AsyncSendRequestOnSession(SOPC_SessionId sessionId,
 void SOPC_ToolkitClient_AsyncCloseSession(SOPC_SessionId sessionId);
 
 /**
- * \brief Request to send a discovery service request without using session.
+ * \brief Requests to send a discovery service request without using session.
  *
  *   In case of service response received, the SE_RCV_DISCOVERY_RESPONSE event will be triggered to SOPC_ComEvent_Fct().
  *
@@ -298,7 +307,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConn
                                                                void* discoveryReqStruct,
                                                                uintptr_t requestContext);
 /**
- * \brief Request to open a connection listener for the given reverse endpoint description configuration as a client.
+ * \brief Requests to open a connection listener for the given reverse endpoint description configuration as a client.
  *
  *   In case of failure the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct,
  *   otherwise the listener must be considered as opened.
@@ -310,7 +319,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncSendDiscoveryRequest(SOPC_EndpointConn
 void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
 
 /**
- * \brief Request to close a connection listener for the given endpoint description configuration.
+ * \brief Requests to close a connection listener for the given endpoint description configuration.
  *
  *   In any case the SE_CLOSED_ENDPOINT event will be triggered to ::SOPC_ComEvent_Fct,
  *   once triggered if the listener was opened it must be considered closed.
@@ -322,7 +331,7 @@ void SOPC_ToolkitClient_AsyncOpenReverseEndpoint(SOPC_ReverseEndpointConfigIdx r
 void SOPC_ToolkitClient_AsyncCloseReverseEndpoint(SOPC_ReverseEndpointConfigIdx reverseEndpointConfigIdx);
 
 /**
- * \brief Request to re-evaluate the client secure channels due to client certificate / key update (force SC
+ * \brief Requests to re-evaluate the client secure channels due to client certificate / key update (force SC
  * re-establishment) or client PKI trust list update (server certificate re-validation necessary) When \p ownCert is set
  * it concerns a certificate / key application update, otherwise it concerns a PKI trust list update.
  *

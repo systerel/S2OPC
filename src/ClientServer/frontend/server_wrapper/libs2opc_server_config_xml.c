@@ -26,6 +26,7 @@
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
 #include "libs2opc_server_config.h"
+#include "libs2opc_server_config_custom.h"
 #include "libs2opc_server_internal.h"
 
 #include "sopc_assert.h"
@@ -147,7 +148,7 @@ static bool SOPC_HelperInternal_LoadAddressSpaceConfigFromFile(const char* filen
         return false;
     }
 
-    SOPC_ReturnStatus status = SOPC_ToolkitServer_SetAddressSpaceConfig(space);
+    SOPC_ReturnStatus status = SOPC_ServerConfigHelper_SetAddressSpace(space);
     if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
@@ -156,8 +157,6 @@ static bool SOPC_HelperInternal_LoadAddressSpaceConfigFromFile(const char* filen
         SOPC_AddressSpace_Delete(space);
         return false;
     }
-    // Keep address space instance reference for deallocation
-    sopc_server_helper_config.addressSpace = space;
 
     return true;
 }

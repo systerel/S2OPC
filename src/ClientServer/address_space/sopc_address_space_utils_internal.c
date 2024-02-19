@@ -111,9 +111,9 @@ bool SOPC_AddressSpaceUtil_IsProperty(const OpcUa_ReferenceNode* ref)
            OpcUaId_HasProperty == ref->ReferenceTypeId.Data.Numeric;
 }
 
-bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref)
+bool SOPC_AddressSpaceUtil_IsHasSubtype(const OpcUa_ReferenceNode* ref, bool isReverse)
 {
-    if (false == ref->IsInverse)
+    if (isReverse != ref->IsInverse)
     {
         return false;
     }
@@ -190,7 +190,7 @@ const SOPC_NodeId* SOPC_AddressSpaceUtil_GetDirectParentTypeOfNode(SOPC_AddressS
     {
         OpcUa_ReferenceNode* ref = &(*refs)[i];
 
-        if (SOPC_AddressSpaceUtil_IsReversedHasChild(ref))
+        if (SOPC_AddressSpaceUtil_IsHasSubtype(ref, true))
         {
             if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
             { // Shall be on same server and shall use only NodeId

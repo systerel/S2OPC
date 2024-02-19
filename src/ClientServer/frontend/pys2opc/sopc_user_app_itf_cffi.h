@@ -334,6 +334,9 @@ struct SOPC_Server_Config
         authenticationManager; /**< The user authentication manager: user authentication on session activation */
     SOPC_UserAuthorization_Manager*
         authorizationManager; /**< The user authorization manager: user access level evaluation */
+
+    void* eventTypes; /**< The server events types configuration based on address space content
+                           (S2OPC_NODE_MANAGEMENT needed to be set) */
 };
 
 /**

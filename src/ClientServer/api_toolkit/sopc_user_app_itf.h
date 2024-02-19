@@ -31,6 +31,8 @@
 #include "sopc_call_method_manager.h"
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles.h"
+#include "sopc_event.h"
+#include "sopc_event_manager.h"
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"
 #include "sopc_pki_decl.h"
@@ -358,6 +360,9 @@ struct SOPC_Server_Config
         authenticationManager; /**< The user authentication manager: user authentication on session activation */
     SOPC_UserAuthorization_Manager*
         authorizationManager; /**< The user authorization manager: user access level evaluation */
+
+    SOPC_Server_Event_Types* eventTypes; /**< The server events types configuration based on address space content
+                                            (S2OPC_NODE_MANAGEMENT needed to be set) */
 };
 
 /**
@@ -483,7 +488,7 @@ typedef struct
 } SOPC_Toolkit_Build_Info;
 
 /**
- * \brief Initialize the content of the SOPC_S2OPC_Config.
+ * \brief Initializes the content of the SOPC_S2OPC_Config.
  *        Calls both ::SOPC_ServerConfig_Initialize and ::SOPC_ClientConfig_Initialize
  *
  * \param config  The s2opc client/server configuration to initialize
@@ -491,7 +496,7 @@ typedef struct
 void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 
 /**
- * \brief Clear the content of the SOPC_S2OPC_Config
+ * \brief Clears the content of the SOPC_S2OPC_Config
  *        Calls both ::SOPC_ServerConfig_Clear and ::SOPC_ClientConfig_Clear
  *
  * \param config  The s2opc client/server configuration to clear
@@ -499,28 +504,28 @@ void SOPC_S2OPC_Config_Initialize(SOPC_S2OPC_Config* config);
 void SOPC_S2OPC_Config_Clear(SOPC_S2OPC_Config* config);
 
 /**
- * \brief Initialize the content of the SOPC_Server_Config
+ * \brief Initializes the content of the SOPC_Server_Config
  *
  * \param config  The s2opc server configuration to initialize
  */
 void SOPC_ServerConfig_Initialize(SOPC_Server_Config* config);
 
 /**
- * \brief Clear the content of the SOPC_Server_Config
+ * \brief Clears the content of the SOPC_Server_Config
  *
  * \param config  The s2opc server configuration to clear
  */
 void SOPC_ServerConfig_Clear(SOPC_Server_Config* config);
 
 /**
- * \brief Initialize the content of the SOPC_Client_Config
+ * \brief Initializes the content of the SOPC_Client_Config
  *
  * \param config  The s2opc client configuration to initialize
  */
 void SOPC_ClientConfig_Initialize(SOPC_Client_Config* config);
 
 /**
- * \brief Clear the content of the SOPC_Client_Config
+ * \brief Clears the content of the SOPC_Client_Config
  *
  * \param config  The s2opc client configuration to clear
  */

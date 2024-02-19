@@ -107,6 +107,9 @@ void SOPC_ServerConfig_Clear(SOPC_Server_Config* config)
     SOPC_KeyCertPair_Delete(&config->serverKeyCertPair);
     SOPC_PKIProvider_Free(&config->pki);
     SOPC_MethodCallManager_Free(config->mcm);
+#if S2OPC_EVENT_MANAGEMENT
+    SOPC_EventManager_Delete(&config->eventTypes);
+#endif
 
     memset(config, 0, sizeof(*config));
 }

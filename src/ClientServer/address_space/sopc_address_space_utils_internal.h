@@ -32,7 +32,7 @@
 bool SOPC_AddressSpaceUtil_IsTypeDefinition(const OpcUa_ReferenceNode* ref);
 bool SOPC_AddressSpaceUtil_IsComponent(const OpcUa_ReferenceNode* ref);
 bool SOPC_AddressSpaceUtil_IsProperty(const OpcUa_ReferenceNode* ref);
-bool SOPC_AddressSpaceUtil_IsReversedHasChild(const OpcUa_ReferenceNode* ref);
+bool SOPC_AddressSpaceUtil_IsHasSubtype(const OpcUa_ReferenceNode* ref, bool isReverse);
 
 SOPC_ExpandedNodeId* SOPC_AddressSpaceUtil_GetTypeDefinition(SOPC_AddressSpace* addSpace, SOPC_AddressSpace_Node* node);
 

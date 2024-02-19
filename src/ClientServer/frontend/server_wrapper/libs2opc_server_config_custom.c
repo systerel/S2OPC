@@ -457,7 +457,16 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    SOPC_ReturnStatus status = SOPC_ToolkitServer_SetAddressSpaceConfig(addressSpaceConfig);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+#if S2OPC_EVENT_MANAGEMENT
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    SOPC_EventManager_CreateEventTypes(addressSpaceConfig, &pConfig->serverConfig.eventTypes);
+#endif
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_ToolkitServer_SetAddressSpaceConfig(addressSpaceConfig);
+    }
     if (SOPC_STATUS_OK == status)
     {
         // Keep address space instance reference for deallocation

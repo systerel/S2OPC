@@ -33,6 +33,7 @@
 #include <stdbool.h>
 
 #include "sopc_address_space.h"
+#include "sopc_event_manager.h"
 #include "sopc_mutexes.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_user_app_itf.h"
@@ -132,6 +133,7 @@ typedef struct SOPC_ServerHelper_Config
 
     // Runtime variables
     SOPC_Server_RuntimeVariables runtimeVariables;
+
 } SOPC_ServerHelper_Config;
 
 // Define the structure used as context for asynchronous calls

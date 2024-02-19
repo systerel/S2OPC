@@ -32,17 +32,15 @@
 
 #include "sopc_address_space_utils_internal.h"
 
-static const SOPC_NodeId DataVariable_Type = {SOPC_IdentifierType_Numeric, 0,
-                                              .Data.Numeric = OpcUaId_BaseDataVariableType};
-static const SOPC_NodeId Property_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_PropertyType};
+static const SOPC_NodeId DataVariable_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataVariableType);
+static const SOPC_NodeId Property_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_PropertyType);
 
-static const SOPC_NodeId Organizes_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Organizes};
-static const SOPC_NodeId Aggregates_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Aggregates};
-static const SOPC_NodeId HasComponent_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasComponent};
-static const SOPC_NodeId HasProperty_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasProperty};
+static const SOPC_NodeId Organizes_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Organizes);
+static const SOPC_NodeId Aggregates_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Aggregates);
+static const SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
+static const SOPC_NodeId HasProperty_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasProperty);
 
-static const SOPC_NodeId HierarchicalReferences_Type_NodeId = {SOPC_IdentifierType_Numeric, 0,
-                                                               .Data.Numeric = OpcUaId_HierarchicalReferences};
+static const SOPC_NodeId HierarchicalReferences_Type_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HierarchicalReferences);
 
 static bool is_type_or_subtype(SOPC_AddressSpace* addSpace,
                                const SOPC_NodeId* actualType,

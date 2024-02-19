@@ -238,11 +238,15 @@ static void onServiceEvent(SOPC_EventHandler* handler,
     OpcUa_WriteValue* new_value = NULL;
     SOPC_Internal_AsyncSendMsgData* msg_data;
     SOPC_NodeId* nodeId = NULL;
+    const SOPC_NodeId* nodeId2 = NULL;
     char* nodeIdStr = NULL;
+    char* nodeIdStr2 = NULL;
     const char* reverseEndpointURL = NULL;
     SOPC_Internal_SessionAppContext* sessionContext = NULL;
     SOPC_ExtensionObject* userToken = NULL;
     SOPC_Internal_DiscoveryContext* discoveryContext = NULL;
+    SOPC_Internal_EventContext* eventContext = NULL;
+    SOPC_DateTime currentTime = 0;
 
     switch (event)
     {
@@ -463,6 +467,45 @@ static void onServiceEvent(SOPC_EventHandler* handler,
                                      " msgType=%s ctx=%" PRIuPTR,
                                      id, SOPC_EncodeableType_GetName(encType), auxParam);
         }
+        break;
+    case APP_TO_SE_TRIGGER_EVENT:
+        // id =  endpoint configuration index
+        // params =  (SOPC_Internal_EventContext*)
+        eventContext = (SOPC_Internal_EventContext*) params;
+        SOPC_ASSERT(NULL != eventContext);
+        nodeIdStr = SOPC_NodeId_ToCString(&eventContext->notifierNodeId);
+        nodeId2 = SOPC_Event_GetEventTypeId(eventContext->event);
+        nodeIdStr2 = (NULL == nodeId2 ? "" : SOPC_NodeId_ToCString(nodeId2));
+        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ServicesMgr: APP_TO_SE_TRIGGER_EVENT epCfgIdx=%" PRIu32
+                               " eventTypeId=%s, notifierId=%s",
+                               id, nodeIdStr2, nodeIdStr);
+
+        // Update the receiveTime variable (and time variable if not set)
+        currentTime = SOPC_Time_GetCurrentTimeUTC();
+        status = SOPC_Event_SetReceiveTime(eventContext->event, currentTime);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+        if (0 == SOPC_Event_GetTime(eventContext->event))
+        {
+            status = SOPC_Event_SetTime(eventContext->event, currentTime);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+        }
+
+        SOPC_ASSERT(id <= INT32_MAX);
+        io_dispatch_mgr__internal_server_event_triggered(&eventContext->notifierNodeId, eventContext->event, &bres);
+        if (!bres)
+        {
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ServicesMgr: failure in treatment of APP_TO_SE_TRIGGER_EVENT epCfgIdx=%" PRIu32
+                                   " eventTypeId=%s, notifierId=%s",
+                                   id, nodeIdStr2, nodeIdStr);
+        }
+        SOPC_Free(nodeIdStr);
+        SOPC_Free(nodeIdStr2);
+
+        SOPC_NodeId_Clear(&eventContext->notifierNodeId);
+        SOPC_Event_Delete(&eventContext->event);
+        SOPC_Free(eventContext);
         break;
     case APP_TO_SE_OPEN_REVERSE_ENDPOINT:
         /* id = reverse endpoint description config index */

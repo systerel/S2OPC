@@ -730,3 +730,40 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
 
     return SOPC_STATUS_OK;
 }
+
+SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, SOPC_Event** event)
+{
+    if (NULL == eventTypeId || NULL == event)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (!SOPC_ServerInternal_IsStarted())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+#if S2OPC_EVENT_MANAGEMENT
+    SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
+    SOPC_ASSERT(NULL != pConfig);
+    *event = SOPC_EventManager_CreateEventInstance(pConfig->serverConfig.eventTypes, eventTypeId);
+    status = (NULL == *event ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+#else
+    status = SOPC_STATUS_NOT_SUPPORTED;
+#endif
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_ServerHelper_TriggerEvent(const SOPC_NodeId* notifierNodeId,
+                                                 SOPC_Event* event,
+                                                 uint32_t optSubscriptionId,
+                                                 uint32_t optMonitoredItemId)
+{
+    if (!SOPC_ServerInternal_IsStarted())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ToolkitServer_TriggerEvent(sopc_server_helper_config.endpointIndexes[0], notifierNodeId, event,
+                                    optSubscriptionId, optMonitoredItemId);
+
+    return SOPC_STATUS_OK;
+}
