@@ -1506,6 +1506,8 @@ SOPC_ReturnStatus SOPC_FileTransfer_Add_MethodItems(SOPC_MethodCallFunc_Ptr meth
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "FileTransfer:Add_MethodItems: unable to register method '%s'", methodName);
         }
+        SOPC_NodeId_Clear(node_id);
+        SOPC_Free(node_id);
     }
     return status;
 }
