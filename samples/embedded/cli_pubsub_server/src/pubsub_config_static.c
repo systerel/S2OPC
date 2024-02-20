@@ -277,7 +277,7 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID, MESSAGE_VERSION, 1000,
+        reader = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, PUBLISHER_ID, MESSAGE_ID, MESSAGE_VERSION, 100,
                                                    security_Mode);
         alloc = NULL != reader;
     }

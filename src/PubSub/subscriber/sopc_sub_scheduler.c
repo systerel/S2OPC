@@ -240,6 +240,9 @@ static struct
      * (only when received is newer regarding part 14 definition)*/
     SOPC_SubscriberDataSetMessageSNGap_Func* dsmSnGapCallback;
 
+    /* Minimum timeout over all Subscriber DSM */
+    uint32_t minTimeoutSub;
+
 } schedulerCtx = {.isStarted = false,
                   .processingStartStop = false,
 
@@ -261,7 +264,8 @@ static struct
 
                   .securityCtx = NULL,
                   .writerCtx = NULL,
-                  .dsmSnGapCallback = NULL};
+                  .dsmSnGapCallback = NULL,
+                  .minTimeoutSub = 0};
 /**
  * @brief Compare type and value of two SOPC_Conf_PublisherId. The two SOPC_Conf_PublisherId are considered as equal if
  * they have the same type and the same value. In case both SOPC_Conf_PublisherId have type SOPC_Null_PublisherId they
@@ -542,6 +546,7 @@ static void uninit_sub_scheduler_ctx(void)
     SOPC_Array_Delete(schedulerCtx.writerCtx);
     schedulerCtx.writerCtx = NULL;
     schedulerCtx.dsmSnGapCallback = NULL;
+    schedulerCtx.minTimeoutSub = 0;
 }
 
 // Free Arrays of SOPC_SubScheduler_Writer_Ctx
@@ -737,6 +742,7 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
             if (SOPC_STATUS_OK == status)
             {
+                double minTimeout = 500.0; // Use at least 500ms
                 // add security context
                 uint16_t nbGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
                 for (uint16_t rg_i = 0; rg_i < nbGroup; rg_i++)
@@ -749,7 +755,17 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     {
                         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, r_i);
                         SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, SOPC_DataSetReader_Get_DataSetWriterId(reader));
+                        const double timeout = SOPC_DataSetReader_Get_ReceiveTimeout(reader);
+                        minTimeout = (timeout < minTimeout ? timeout : minTimeout);
                     }
+                }
+                if (minTimeout > 1)
+                {
+                    schedulerCtx.minTimeoutSub = (uint32_t)(minTimeout);
+                }
+                else
+                {
+                    schedulerCtx.minTimeoutSub = 1;
                 }
             }
         }
@@ -842,7 +858,12 @@ void SOPC_SubScheduler_Stop(void)
     SOPC_Atomic_Int_Set(&schedulerCtx.processingStartStop, false);
 }
 
-static void SOPC_Sub_PeriodicTick(void* param)
+/**
+ *  This function is called periodically by subscriber reception thread to
+ * check if some DSM are in timeout.
+ * @param param Not used.
+ */
+static void SOPC_Sub_TimeoutCheck(void* param)
 {
     SOPC_UNUSED_ARG(param);
     SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
@@ -917,9 +938,11 @@ static bool SOPC_SubScheduler_Start_Sockets(int threadPriority)
     }
 
     SOPC_ASSERT(nb_socket == sockIdx);
+    SOPC_Sub_Sockets_Timeout timeout = {
+        .callback = &SOPC_Sub_TimeoutCheck, .pContext = NULL, .period_ms = schedulerCtx.minTimeoutSub};
     SOPC_Sub_SocketsMgr_Initialize((void*) schedulerCtx.transport, sizeof(*schedulerCtx.transport),
-                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received,
-                                   &SOPC_Sub_PeriodicTick, NULL, threadPriority);
+                                   schedulerCtx.sockArray, nb_socket, on_socket_message_received, &timeout,
+                                   threadPriority);
 
     return true;
 }

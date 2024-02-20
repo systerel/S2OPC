@@ -97,7 +97,7 @@
     <xs:attribute name="writerId" use="required">
       <xs:simpleType>
         <xs:restriction base="xs:integer">
-           <xs:minInclusive value="-1"/>
+           <xs:minInclusive value="1"/>
            <xs:maxInclusive value="65535"/>
         </xs:restriction>
       </xs:simpleType>

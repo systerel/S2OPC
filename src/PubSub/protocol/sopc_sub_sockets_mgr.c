@@ -21,12 +21,14 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
 #include "sopc_time.h"
 
-#define TIMEOUT_MS 10
+// Default time for socket set timeout if no timeout event is provided
+#define DEFAULT_SOCKET_SET_TIMEOUT_MS 500
 
 static struct
 {
@@ -39,8 +41,7 @@ static struct
     uint16_t nbSockets;
     SOPC_ReadyToReceive* pCallback;
     void* callbackCtx;
-    SOPC_PeriodicTick* pTickCb;
-    void* tickCbCtx;
+    SOPC_Sub_Sockets_Timeout timeout;
 
 } receptionThread = {.initDone = false,
                      .stopFlag = 0,
@@ -49,21 +50,34 @@ static struct
                      .socketArray = NULL,
                      .nbSockets = 0,
                      .pCallback = NULL,
-                     .pTickCb = NULL,
-                     .tickCbCtx = NULL,
+                     .timeout.callback = NULL,
+                     .timeout.pContext = NULL,
+                     .timeout.period_ms = 0,
                      .thread = 0};
 
 static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
     SOPC_UNUSED_ARG(nullData);
-    SOPC_SocketSet readSet, writeSet, exceptSet;
     SOPC_TimeReference lastTick = SOPC_TimeReference_GetCurrent();
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_PUBSUB, "Starting SOPC_Sub_SocketsMgr_ThreadLoop with %d sockets",
+                          receptionThread.nbSockets);
 
     while (SOPC_Atomic_Int_Get(&receptionThread.stopFlag) == false)
     {
-        int32_t nbReady = 0;
+        bool isTimeout = false;
+        /*
+         * This thread reads from all sockets in a socketSet.
+         * However, in the case of specific protocols, there may be no sockets to read from
+         * (e.g. MQTT). In this case, socket reading is replaced by a single Sleep to simulate
+         * reception timeout (actual reading will anyway be provided by protocol callbacks.).
+         * Then the thread must ensure that the 'timeout' event is called periodically (even in case of
+         * reception), since the called event is responsible for checking the actual timeout of each
+         * DSM.
+         */
         if (receptionThread.nbSockets > 0)
         {
+            int32_t nbReady = 0;
+            SOPC_SocketSet readSet, writeSet, exceptSet;
             SOPC_SocketSet_Clear(&readSet);
             SOPC_SocketSet_Clear(&writeSet);
             SOPC_SocketSet_Clear(&exceptSet);
@@ -74,55 +88,56 @@ static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
             }
 
             // Returns number of ready descriptor or -1 in case of error
-            nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, TIMEOUT_MS);
-        }
-        else
-        {
-            SOPC_Sleep(TIMEOUT_MS);
-        }
+            nbReady = SOPC_Socket_WaitSocketEvents(&readSet, &writeSet, &exceptSet, receptionThread.timeout.period_ms);
 
-        if (nbReady < 0)
-        {
-            SOPC_ASSERT(false);
-        }
-        else if (nbReady == 0)
-        {
-            // Timeout: tick shall be called
-            if (receptionThread.pTickCb != NULL)
+            if (nbReady < 0)
             {
-                lastTick = SOPC_TimeReference_GetCurrent();
-                (*receptionThread.pTickCb)(receptionThread.tickCbCtx);
+                // This will happen if SOPC_Socket_WaitSocketEvents fails. In this case switch to non
+                // socket mode to avoid infinite loop
+                SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB, "SOPC_Socket_WaitSocketEvents failed.");
+                receptionThread.nbSockets = 0;
             }
-        }
-        else
-        {
-            if (receptionThread.pTickCb != NULL)
+            else if (nbReady == 0)
+            {
+                isTimeout = true;
+            }
+            else
             {
                 // Evaluate if tick shall be called regarding time elapsed since last call
-                SOPC_TimeReference current = SOPC_TimeReference_GetCurrent();
-                if (current - lastTick >= TIMEOUT_MS)
+                SOPC_TimeReference now = SOPC_TimeReference_GetCurrent();
+                if (now - lastTick >= receptionThread.timeout.period_ms)
                 {
-                    lastTick = current;
-                    (*receptionThread.pTickCb)(receptionThread.tickCbCtx);
+                    isTimeout = true;
                 }
-            }
 
-            for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
-            {
-                if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], &readSet) != false)
+                for (uint16_t i = 0; i < receptionThread.nbSockets; i++)
                 {
-                    if (receptionThread.pCallback != NULL)
+                    if (SOPC_SocketSet_IsPresent(receptionThread.socketArray[i], &readSet) != false)
                     {
-                        void* sockContext = NULL;
-                        if (receptionThread.sockContextArray != NULL)
+                        if (receptionThread.pCallback != NULL)
                         {
-                            sockContext = (void*) ((char*) receptionThread.sockContextArray +
-                                                   i * receptionThread.sizeOfSockContextElt);
+                            void* sockContext = NULL;
+                            if (receptionThread.sockContextArray != NULL)
+                            {
+                                sockContext = (void*) ((char*) receptionThread.sockContextArray +
+                                                       i * receptionThread.sizeOfSockContextElt);
+                            }
+                            (*receptionThread.pCallback)(sockContext, receptionThread.socketArray[i]);
                         }
-                        (*receptionThread.pCallback)(sockContext, receptionThread.socketArray[i]);
                     }
                 }
             }
+        }
+        else
+        {
+            // No socket to read.
+            SOPC_Sleep(receptionThread.timeout.period_ms);
+            isTimeout = true;
+        }
+        if (isTimeout && NULL != receptionThread.timeout.callback)
+        {
+            lastTick = SOPC_TimeReference_GetCurrent();
+            (*receptionThread.timeout.callback)(receptionThread.timeout.pContext);
         }
     }
     return NULL;
@@ -133,10 +148,11 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
                                                 Socket* socketArray,
                                                 uint16_t nbSockets,
                                                 SOPC_ReadyToReceive* pCallback,
-                                                SOPC_PeriodicTick* pTickCb,
-                                                void* tickCbCtx,
+                                                const SOPC_Sub_Sockets_Timeout* pTimeout,
                                                 int threadPriority)
 {
+    SOPC_ASSERT(NULL != pCallback);
+
     if (SOPC_Atomic_Int_Get(&receptionThread.initDone))
     {
         return false;
@@ -147,8 +163,16 @@ static bool SOPC_Sub_SocketsMgr_LoopThreadStart(void* sockContextArray,
     receptionThread.socketArray = socketArray;
     receptionThread.nbSockets = nbSockets;
     receptionThread.pCallback = pCallback;
-    receptionThread.pTickCb = pTickCb;
-    receptionThread.tickCbCtx = tickCbCtx;
+    if (NULL != pTimeout)
+    {
+        receptionThread.timeout = *pTimeout;
+    }
+    else
+    {
+        receptionThread.timeout.callback = NULL;
+        receptionThread.timeout.pContext = NULL;
+        receptionThread.timeout.period_ms = DEFAULT_SOCKET_SET_TIMEOUT_MS;
+    }
 
     receptionThread.stopFlag = 0;
 
@@ -196,14 +220,12 @@ void SOPC_Sub_SocketsMgr_Initialize(void* sockContextArray,
                                     Socket* socketArray,
                                     uint16_t nbSockets,
                                     SOPC_ReadyToReceive* pCallback,
-                                    SOPC_PeriodicTick* pTickCb,
-                                    void* tickCbCtx,
+                                    const SOPC_Sub_Sockets_Timeout* pTimeout,
                                     int threadPriority)
 {
     SOPC_ASSERT(NULL != socketArray);
-    SOPC_ASSERT(NULL != pCallback);
     bool result = SOPC_Sub_SocketsMgr_LoopThreadStart(sockContextArray, sizeOfSockContextElt, socketArray, nbSockets,
-                                                      pCallback, pTickCb, tickCbCtx, threadPriority);
+                                                      pCallback, pTimeout, threadPriority);
     SOPC_ASSERT(result);
 }
 

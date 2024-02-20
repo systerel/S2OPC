@@ -454,9 +454,10 @@ int main(int argc, char** argv)
     SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(listenAddr, NULL, true, true, &sock);
     buffer = SOPC_Buffer_Create(4096);
 
+    SOPC_Sub_Sockets_Timeout timeout = {.callback = &tick, .pContext = (void*) CTX_VALUE, .period_ms = 50};
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Sub_SocketsMgr_Initialize(NULL, 0, &sock, 1, readyToReceive, tick, (void*) CTX_VALUE, 0);
+        SOPC_Sub_SocketsMgr_Initialize(NULL, 0, &sock, 1, readyToReceive, &timeout, 0);
     }
 
     while (SOPC_STATUS_OK == status && false == SOPC_Atomic_Int_Get(&stop) && sleepCount > 0)
