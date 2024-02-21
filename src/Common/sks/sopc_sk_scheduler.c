@@ -101,7 +101,7 @@ static void SOPC_SKscheduler_EventHandler_Callback_Default(SOPC_EventHandler* ha
     // Replace the timer by a new one with expiration time updated ( half the Keys Life Time )
     if (task->run)
     {
-        SOPC_Event timerEvent = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
+        SOPC_LooperEvent timerEvent = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
         uint32_t timerId = SOPC_EventTimer_Create(handler, timerEvent, halfAllKeysLifeTime);
         if (0 != timerId)
         {
@@ -225,7 +225,7 @@ static SOPC_ReturnStatus SOPC_SKscheduler_Start_Default(SOPC_SKscheduler* sko)
     SOPC_ReturnStatus status = SOPC_SKscheduler_Initialize_Default(sko);
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_Event event = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
+        SOPC_LooperEvent event = {.event = 0, .eltId = 0, .params = (uintptr_t) data};
         data->task.timerId = SOPC_EventTimer_Create(data->handler, event, data->task.msPeriod);
         data->task.run = (0 != data->task.timerId);
         if (!data->task.run)

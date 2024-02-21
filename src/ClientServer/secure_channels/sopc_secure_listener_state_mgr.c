@@ -302,7 +302,7 @@ static SOPC_ReturnStatus SOPC_SecureListenerStateMgr_SC_Token_ReverseHelloTimer(
     SOPC_ASSERT(NULL != timerId);
     SOPC_ASSERT(connectionIdx > 0);
     SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_RHE_RECEPTION_TIMEOUT;

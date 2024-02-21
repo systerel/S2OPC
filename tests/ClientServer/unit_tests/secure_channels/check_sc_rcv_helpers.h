@@ -30,11 +30,13 @@ extern SOPC_EventRecorder* servicesEvents;
 
 void Check_SC_Init(void);
 void Check_SC_Clear(void);
-SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, uint32_t eltId, uintptr_t auxParam);
-SOPC_Event* Check_Service_Event_Received_AllParams(SOPC_SecureChannels_OutputEvent event,
-                                                   uint32_t eltId,
-                                                   uintptr_t param,
-                                                   uintptr_t auxParam);
+SOPC_LooperEvent* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event,
+                                               uint32_t eltId,
+                                               uintptr_t auxParam);
+SOPC_LooperEvent* Check_Service_Event_Received_AllParams(SOPC_SecureChannels_OutputEvent event,
+                                                         uint32_t eltId,
+                                                         uintptr_t param,
+                                                         uintptr_t auxParam);
 SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
                                          uint32_t socketIdx,
                                          uint32_t scConfigIdx,

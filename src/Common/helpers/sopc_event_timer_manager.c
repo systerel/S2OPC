@@ -37,7 +37,7 @@ typedef struct SOPC_EventTimer
 {
     uint32_t id;
     SOPC_EventHandler* eventHandler;
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_TimeReference endTime;
     /* Rest is used only for periodic timers */
     bool isPeriodicTimer;
@@ -351,7 +351,7 @@ void SOPC_EventTimer_Clear(void)
 }
 
 static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
-                                               SOPC_Event event,
+                                               SOPC_LooperEvent event,
                                                uint64_t msDelay,
                                                bool isPeriodic)
 {
@@ -422,12 +422,12 @@ static uint32_t SOPC_InternalEventTimer_Create(SOPC_EventHandler* eventHandler,
     return result;
 }
 
-uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msDelay)
+uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_LooperEvent event, uint64_t msDelay)
 {
     return SOPC_InternalEventTimer_Create(eventHandler, event, msDelay, false);
 }
 
-uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msPeriod)
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_LooperEvent event, uint64_t msPeriod)
 {
     return SOPC_InternalEventTimer_Create(eventHandler, event, msPeriod, true);
 }

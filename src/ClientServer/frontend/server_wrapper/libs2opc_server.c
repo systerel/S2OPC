@@ -357,8 +357,8 @@ static SOPC_ReturnStatus SOPC_HelperInternal_OpenEndpoints(void)
             SOPC_Looper* appLooper = SOPC_App_GetLooper();
             SOPC_EventHandler* currentTimeHandler =
                 SOPC_EventHandler_Create(appLooper, SOPC_UpdateCurrentTime_EventHandler_Callback);
-            SOPC_Event currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
-                                           OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
+            SOPC_LooperEvent currentTimeEvent = {OpcUaId_Server_ServerStatus_CurrentTime,
+                                                 OpcUaId_Server_ServerStatus_CurrentTime, 0, 0};
             uint32_t currentTimeTimerId = SOPC_EventTimer_CreatePeriodic(
                 currentTimeHandler, currentTimeEvent, sopc_server_helper_config.configuredCurrentTimeRefreshIntervalMs);
             if (0 == currentTimeTimerId)

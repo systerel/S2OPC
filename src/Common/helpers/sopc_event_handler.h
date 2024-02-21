@@ -51,7 +51,7 @@ typedef struct
     uint32_t eltId;
     uintptr_t params;
     uintptr_t auxParam;
-} SOPC_Event;
+} SOPC_LooperEvent;
 
 /**
  * \brief Function prototype for connecting an event emitter to a listener.

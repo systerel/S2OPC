@@ -89,8 +89,8 @@ static void establishSC(void)
     printf("\nSTART UNIT TEST\n");
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Event* serviceEvent = NULL;
-    SOPC_Event* socketEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
     int res = 0;
     SOPC_Buffer* buffer = NULL;
     char hexOutput[512];

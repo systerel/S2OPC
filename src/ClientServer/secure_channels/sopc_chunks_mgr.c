@@ -113,7 +113,7 @@ static uint32_t SC_Client_StartRequestTimeout(uint32_t connectionIdx, uint32_t r
         return 0;
     }
 
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     event.event = TIMER_SC_REQUEST_TIMEOUT;
     event.eltId = connectionIdx;
     event.params = requestHandle;
@@ -2153,7 +2153,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     bool ignoreExpiredMessage = false; // Set to true if message is response to expired request
     SOPC_SecureConnection_ChunkMgrCtx* chunkCtx = &scConnection->chunksCtx;
     SOPC_SLinkedList* intEventsLIFO = SOPC_SLinkedList_Create(0);
-    SOPC_Event* intEvent = NULL;
+    SOPC_LooperEvent* intEvent = NULL;
     bool result = (NULL != intEventsLIFO);
     SOPC_StatusCode errorStatus = (result ? SOPC_GoodGenericStatus : OpcUa_BadOutOfMemory);
 
@@ -2258,13 +2258,13 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
     }
 
     // Transmit OPC UA message to secure connection state manager by keeping order (LIFO + AsNext)
-    intEvent = (SOPC_Event*) SOPC_SLinkedList_PopLast(intEventsLIFO);
+    intEvent = (SOPC_LooperEvent*) SOPC_SLinkedList_PopLast(intEventsLIFO);
     while (result && NULL != intEvent)
     {
         SOPC_SecureChannels_EnqueueInternalEventAsNext((SOPC_SecureChannels_InternalEvent) intEvent->event,
                                                        intEvent->eltId, intEvent->params, intEvent->auxParam);
         SOPC_Free(intEvent);
-        intEvent = (SOPC_Event*) SOPC_SLinkedList_PopLast(intEventsLIFO);
+        intEvent = (SOPC_LooperEvent*) SOPC_SLinkedList_PopLast(intEventsLIFO);
     }
 
     if (!result)

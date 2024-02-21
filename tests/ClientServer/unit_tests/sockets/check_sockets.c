@@ -51,7 +51,7 @@ static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id
 {
     SOPC_UNUSED_ARG(handler);
 
-    SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
+    SOPC_LooperEvent* ev = SOPC_Calloc(1, sizeof(SOPC_LooperEvent));
     ck_assert_ptr_nonnull(ev);
 
     ev->event = event;
@@ -62,9 +62,9 @@ static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(socketEvents, ev));
 }
 
-static SOPC_Event* expect_event(int32_t event, uint32_t id)
+static SOPC_LooperEvent* expect_event(int32_t event, uint32_t id)
 {
-    SOPC_Event* ev = NULL;
+    SOPC_LooperEvent* ev = NULL;
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
     ck_assert_int_eq(event, ev->event);
     ck_assert_uint_eq(id, ev->eltId);
@@ -73,14 +73,14 @@ static SOPC_Event* expect_event(int32_t event, uint32_t id)
 
 static void expect_events(int32_t event1,
                           uint32_t id1,
-                          SOPC_Event** ev1,
+                          SOPC_LooperEvent** ev1,
                           int32_t event2,
                           uint32_t id2,
-                          SOPC_Event** ev2)
+                          SOPC_LooperEvent** ev2)
 {
     bool event1_received = false;
     bool event2_received = false;
-    SOPC_Event* ev = NULL;
+    SOPC_LooperEvent* ev = NULL;
     while (!event1_received || !event2_received)
     {
         ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
@@ -171,8 +171,8 @@ START_TEST(test_sockets)
      * Note: both events can occur first, therefore check both at same time
      * */
     {
-        SOPC_Event* ev1 = NULL;
-        SOPC_Event* ev2 = NULL;
+        SOPC_LooperEvent* ev1 = NULL;
+        SOPC_LooperEvent* ev2 = NULL;
         expect_events(SOCKET_LISTENER_CONNECTION, endpointDescConfigId, &ev1, SOCKET_CONNECTION,
                       clientSecureChannelConnectionId, &ev2);
         serverSocketIdx = (uint32_t) ev1->auxParam;
@@ -204,7 +204,7 @@ START_TEST(test_sockets)
 
     while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -248,7 +248,7 @@ START_TEST(test_sockets)
     receivedBytes = 1;
     while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -301,7 +301,7 @@ START_TEST(test_sockets)
     receivedBytes = 1;
     while (totalReceivedBytes < 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -331,7 +331,7 @@ START_TEST(test_sockets)
 
     /* SERVER SIDE: accepted connection (socket level only) */
     {
-        SOPC_Event* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
         ck_assert_uint_eq(serverSocketIdx, ev->auxParam);
         SOPC_Free(ev);
     }

@@ -80,7 +80,7 @@ START_TEST(test_timers)
     uint8_t i = 0;
     uint32_t timerId = 0;
     uint64_t elapsedMs = 0;
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_Looper* looper = SOPC_Looper_Create("timers");
     ck_assert_ptr_nonnull(looper);
 
@@ -90,7 +90,7 @@ START_TEST(test_timers)
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
-    memset(&event, 0, sizeof(SOPC_Event));
+    memset(&event, 0, sizeof(SOPC_LooperEvent));
     event.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();
@@ -148,7 +148,7 @@ START_TEST(test_timers_with_cancellation)
 {
     uint8_t i = 0;
     uint64_t elapsedMs = 0;
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_Looper* looper = SOPC_Looper_Create("timers");
     ck_assert_ptr_nonnull(looper);
 
@@ -158,7 +158,7 @@ START_TEST(test_timers_with_cancellation)
     // Initialize event timers
     SOPC_EventTimer_Initialize();
     // Set event value
-    memset(&event, 0, sizeof(SOPC_Event));
+    memset(&event, 0, sizeof(SOPC_LooperEvent));
     event.event = EVENT;
     // Set start time reference
     startTime = SOPC_Time_GetCurrentTimeUTC();

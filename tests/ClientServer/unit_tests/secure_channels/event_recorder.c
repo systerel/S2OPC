@@ -53,7 +53,7 @@ static void on_event(SOPC_EventHandler* handler, int32_t event, uint32_t id, uin
     SOPC_ASSERT(found);
     SOPC_ReturnStatus status;
 
-    SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
+    SOPC_LooperEvent* ev = SOPC_Calloc(1, sizeof(SOPC_LooperEvent));
     SOPC_ASSERT(ev != NULL);
 
     ev->event = event;

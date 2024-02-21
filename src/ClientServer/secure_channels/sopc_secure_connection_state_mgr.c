@@ -222,7 +222,7 @@ static SOPC_ReturnStatus SC_StartConnectionEstablishTimer(uint32_t* timerId, uin
     SOPC_ASSERT(NULL != timerId);
     SOPC_ASSERT(connectionIdx > 0);
     SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CONNECTION_TIMEOUT;
@@ -249,7 +249,7 @@ static void SC_Server_StartReverseConnRetryTimer(uint32_t* timerId, uint32_t end
     SOPC_ASSERT(NULL != timerId);
     SOPC_ASSERT(SOPC_IS_VALID_CLASSIC_EP_CONFIGURATION(endpointConfigIdx)); // Server EP (classic)
     SOPC_ASSERT(reverseConnIdx < SOPC_MAX_REVERSE_CLIENT_CONNECTIONS);
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     event.eltId = endpointConfigIdx;
     event.event = TIMER_SC_SERVER_REVERSE_CONN_RETRY;
     event.params = (uintptr_t) reverseConnIdx;
@@ -272,7 +272,7 @@ static SOPC_ReturnStatus SC_Client_StartOPNrenewTimer(uint32_t* timerId, uint32_
     SOPC_ASSERT(NULL != timerId);
     SOPC_ASSERT(connectionIdx > 0);
     SOPC_ASSERT(connectionIdx <= SOPC_MAX_SECURE_CONNECTIONS_PLUS_BUFFERED);
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     event.eltId = connectionIdx;
     event.event = TIMER_SC_CLIENT_OPN_RENEW;

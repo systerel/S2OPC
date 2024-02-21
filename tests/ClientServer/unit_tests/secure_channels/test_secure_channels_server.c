@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
     uint32_t epConfigIdx = 0;
     uint32_t scConfigIdx = 0;
     uint32_t scConnectionId = 0;
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     SOPC_EventRecorder* servicesEvents = NULL;
 
     // Endpoint URL

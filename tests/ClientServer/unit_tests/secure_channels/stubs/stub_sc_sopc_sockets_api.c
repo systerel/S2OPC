@@ -34,7 +34,7 @@ SOPC_EventHandler* socketsEventHandler = NULL;
 void SOPC_Sockets_EnqueueEvent(SOPC_Sockets_InputEvent scEvent, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Event* scParams = SOPC_Calloc(1, sizeof(SOPC_Event));
+    SOPC_LooperEvent* scParams = SOPC_Calloc(1, sizeof(SOPC_LooperEvent));
     SOPC_ASSERT(scParams != NULL && socketsInputEvents != NULL);
     scParams->event = (int32_t) scEvent;
     scParams->eltId = id;
@@ -64,9 +64,9 @@ void SOPC_Sockets_SetEventHandler(SOPC_EventHandler* handler)
     socketsEventHandler = handler;
 }
 
-SOPC_Event* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam)
+SOPC_LooperEvent* Check_Socket_Event_Received(SOPC_Sockets_InputEvent event, uint32_t eltId, uintptr_t auxParam)
 {
-    SOPC_Event* socketEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
     WaitEvent(socketsInputEvents, (void**) &socketEvent);
 
     if (CheckEvent("Sockets", socketEvent, (int32_t) event, eltId, auxParam))
@@ -123,7 +123,7 @@ SOPC_ReturnStatus Check_Expected_Sent_Message(uint32_t socketIdx,
                                               uint16_t length)
 {
     // Retrieve socket event to write message
-    SOPC_Event* socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, socketIdx, 0);
+    SOPC_LooperEvent* socketEvent = Check_Socket_Event_Received(SOCKET_WRITE, socketIdx, 0);
 
     if (socketEvent == NULL)
     {

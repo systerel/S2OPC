@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
     SOPC_SecureChannel_Config scConfig;
     SOPC_Client_Config clientConfig;
     uint32_t scConfigIdx = 0;
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     SOPC_EventRecorder* servicesEvents = NULL;
     uint32_t scConnectionId = 0;
 

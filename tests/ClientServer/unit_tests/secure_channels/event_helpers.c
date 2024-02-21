@@ -56,7 +56,7 @@ void WaitEvent(SOPC_AsyncQueue* queue, void** event)
 }
 
 bool CheckEvent(const char* event_type,
-                SOPC_Event* event,
+                SOPC_LooperEvent* event,
                 int32_t expected_event,
                 uint32_t expected_id,
                 uintptr_t expected_aux)
@@ -76,7 +76,7 @@ bool CheckEvent(const char* event_type,
 }
 
 bool CheckEventAllParams(const char* event_type,
-                         SOPC_Event* event,
+                         SOPC_LooperEvent* event,
                          int32_t expected_event,
                          uint32_t expected_id,
                          uintptr_t expected_param,

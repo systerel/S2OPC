@@ -51,9 +51,11 @@ void Check_SC_Clear(void)
     SOPC_EventRecorder_Delete(servicesEvents);
 }
 
-SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, uint32_t eltId, uintptr_t auxParam)
+SOPC_LooperEvent* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event,
+                                               uint32_t eltId,
+                                               uintptr_t auxParam)
 {
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
     if (CheckEvent("Services", serviceEvent, (int32_t) event, eltId, auxParam))
@@ -67,12 +69,12 @@ SOPC_Event* Check_Service_Event_Received(SOPC_SecureChannels_OutputEvent event, 
     }
 }
 
-SOPC_Event* Check_Service_Event_Received_AllParams(SOPC_SecureChannels_OutputEvent event,
-                                                   uint32_t eltId,
-                                                   uintptr_t param,
-                                                   uintptr_t auxParam)
+SOPC_LooperEvent* Check_Service_Event_Received_AllParams(SOPC_SecureChannels_OutputEvent event,
+                                                         uint32_t eltId,
+                                                         uintptr_t param,
+                                                         uintptr_t auxParam)
 {
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     WaitEvent(servicesEvents->events, (void**) &serviceEvent);
 
     if (CheckEventAllParams("Services", serviceEvent, (int32_t) event, eltId, param, auxParam))
@@ -98,7 +100,7 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
     char hexOutput[512];
 
     printf("               - CLO message requested to be sent\n");
-    SOPC_Event* event = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
+    SOPC_LooperEvent* event = Check_Socket_Event_Received(SOCKET_WRITE, scConfigIdx, 0);
 
     if (event == NULL || (void*) event->params == NULL)
     {

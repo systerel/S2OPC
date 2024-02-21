@@ -82,8 +82,8 @@ static void establishSC(void)
     printf("\nSTART UNIT TEST\n");
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Event* serviceEvent = NULL;
-    SOPC_Event* socketEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
     int res = 0;
     SOPC_Buffer* buffer = NULL;
     char hexOutput[512];
@@ -426,7 +426,7 @@ static void simulate_N_chunks(const char isFinal, uint8_t initialSN, uint8_t nbC
 
 START_TEST(test_expected_receive_multi_chunks)
 {
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     SOPC_Buffer* buffer = NULL;
 
     printf("SC_Rcv_Buffer: Simulate expected intermediate chunks message received\n");
@@ -487,7 +487,7 @@ END_TEST
 
 START_TEST(test_receive_intermediary_and_abort_chunk)
 {
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
 
     printf("SC_Rcv_Buffer: Simulate intermediary and abort chunk message received as response\n");
 
@@ -513,7 +513,7 @@ END_TEST
 
 START_TEST(test_receive_only_abort_chunk)
 {
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
 
     // Only since we are not managing multi chunk messages
     printf("SC_Rcv_Buffer: Simulate only an abort chunk message received as response\n");
@@ -536,7 +536,7 @@ END_TEST
 
 START_TEST(test_expected_send_multi_chunks)
 {
-    SOPC_Event* socketEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
@@ -596,8 +596,8 @@ START_TEST(test_expected_send_abort_chunk)
     // In this test we send a message too large to be sent, an abort message shall be sent instead
     // and error returned to services layer
 
-    SOPC_Event* socketEvent = NULL;
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
@@ -656,7 +656,7 @@ START_TEST(test_expected_forced_send_err)
     secureConnectionsArray[scConfigIdx + 1].isServerConnection = true;
 
     // In this test the service layer explicitly requests to send an abort message because encoding failed earlier
-    SOPC_Event* socketEvent = NULL;
+    SOPC_LooperEvent* socketEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     int res = 0;
@@ -817,7 +817,7 @@ START_TEST(test_valid_sc_request_id)
 {
     char msg[57];
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    SOPC_Event* serviceEvent = NULL;
+    SOPC_LooperEvent* serviceEvent = NULL;
     SOPC_Buffer* buffer = NULL;
     int res = 0;
 

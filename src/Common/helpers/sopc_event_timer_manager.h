@@ -75,7 +75,7 @@ void SOPC_EventTimer_Clear(void);
  * \return the timer identifier (or value 0 if operation failed)
  *
  * */
-uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msDelay);
+uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_LooperEvent event, uint64_t msDelay);
 
 /**
  * \brief Creates a periodic timer raising an event on a dispatch manager every msPeriod milliseconds.
@@ -87,7 +87,7 @@ uint32_t SOPC_EventTimer_Create(SOPC_EventHandler* eventHandler, SOPC_Event even
  * \return the timer identifier (or value 0 if operation failed)
  *
  * */
-uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_Event event, uint64_t msPeriod);
+uint32_t SOPC_EventTimer_CreatePeriodic(SOPC_EventHandler* eventHandler, SOPC_LooperEvent event, uint64_t msPeriod);
 
 /**
  * \brief Modifies an existing periodic timer period

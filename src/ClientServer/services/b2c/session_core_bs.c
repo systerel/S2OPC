@@ -1575,7 +1575,7 @@ void session_core_bs__server_session_timeout_evaluation(const constants__t_sessi
     SOPC_TimeReference current = 0;
     SOPC_TimeReference latestMsg = 0;
     SOPC_TimeReference elapsedSinceLatestMsg = 0;
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     uint32_t timerId = 0;
 
     if (constants__c_session_indet != session_core_bs__session)
@@ -1636,7 +1636,7 @@ void session_core_bs__server_session_timeout_start_timer(const constants__t_sess
 {
     const OpcUa_CreateSessionResponse* pResp = (OpcUa_CreateSessionResponse*) session_core_bs__resp_msg;
     uint32_t timerId = 0;
-    SOPC_Event event;
+    SOPC_LooperEvent event;
     *session_core_bs__timer_created = false;
     if (constants__c_session_indet != session_core_bs__session)
     {

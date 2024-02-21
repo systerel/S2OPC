@@ -209,7 +209,7 @@ void subscription_core_bs__create_periodic_publish_timer(
     *subscription_core_bs__bres = false;
 
     uint64_t msCycle = getPublishCycle(subscription_core_bs__p_publishInterval);
-    SOPC_Event event;
+    SOPC_LooperEvent event;
 
     event.eltId = (uint32_t) subscription_core_bs__p_subscription;
     event.event = TIMER_SE_PUBLISH_CYCLE_TIMEOUT;
