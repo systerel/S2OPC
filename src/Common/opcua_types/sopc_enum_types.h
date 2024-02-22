@@ -124,7 +124,7 @@ typedef enum _OpcUa_DataSetFieldFlags
 {
     OpcUa_DataSetFieldFlags_None = 0,
     OpcUa_DataSetFieldFlags_PromotedField = 1,
-    OpcUa_DataSetFieldFlags_SizeOf = INT32_MAX
+    OpcUa_DataSetFieldFlags_SizeOf = UINT16_MAX
 } OpcUa_DataSetFieldFlags;
 
 #endif
@@ -519,7 +519,7 @@ typedef enum _OpcUa_AccessLevelType
     OpcUa_AccessLevelType_SemanticChange = 16,
     OpcUa_AccessLevelType_StatusWrite = 32,
     OpcUa_AccessLevelType_TimestampWrite = 64,
-    OpcUa_AccessLevelType_SizeOf = INT32_MAX
+    OpcUa_AccessLevelType_SizeOf = UINT8_MAX
 } OpcUa_AccessLevelType;
 
 #endif
@@ -557,7 +557,7 @@ typedef enum _OpcUa_EventNotifierType
     OpcUa_EventNotifierType_SubscribeToEvents = 1,
     OpcUa_EventNotifierType_HistoryRead = 4,
     OpcUa_EventNotifierType_HistoryWrite = 8,
-    OpcUa_EventNotifierType_SizeOf = INT32_MAX
+    OpcUa_EventNotifierType_SizeOf = UINT8_MAX
 } OpcUa_EventNotifierType;
 
 #endif
@@ -573,7 +573,7 @@ typedef enum _OpcUa_AccessRestrictionType
     OpcUa_AccessRestrictionType_EncryptionRequired = 2,
     OpcUa_AccessRestrictionType_SessionRequired = 4,
     OpcUa_AccessRestrictionType_ApplyRestrictionsToBrowse = 8,
-    OpcUa_AccessRestrictionType_SizeOf = INT32_MAX
+    OpcUa_AccessRestrictionType_SizeOf = UINT16_MAX
 } OpcUa_AccessRestrictionType;
 
 #endif
