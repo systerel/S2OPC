@@ -1903,6 +1903,17 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     return status;
 }
 
+static bool ignore_filtered_file(const char* pFilePath)
+{
+    char* lastSep = strrchr(pFilePath, '/');
+    if (NULL != lastSep && '.' == lastSep[1])
+    {
+        // Ignore file if first file character is a dot '.'
+        return true;
+    }
+    return false;
+}
+
 static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
                                                       SOPC_CertificateList** ppCerts,
                                                       SOPC_CRLList** ppCrl,
@@ -1944,16 +1955,24 @@ static SOPC_ReturnStatus load_certificate_or_crl_list(const char* basePath,
     for (size_t idx = 0; idx < nbFiles && SOPC_STATUS_OK == status; idx++)
     {
         pFilePath = SOPC_Array_Get(pFilePaths, char*, idx);
-        SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "> PKI loading file <%s>", pFilePath);
-        if (bIscrl)
+        if (ignore_filtered_file(pFilePath))
         {
-            /* Load CRL */
-            status = SOPC_KeyManager_CRL_CreateOrAddFromFile(pFilePath, &pCrl);
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "> PKI ignoring file <%s>", pFilePath);
         }
         else
         {
-            /* Load CERT */
-            status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(pFilePath, &pCerts);
+            SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_COMMON, "> PKI loading file <%s>", pFilePath);
+
+            if (bIscrl)
+            {
+                /* Load CRL */
+                status = SOPC_KeyManager_CRL_CreateOrAddFromFile(pFilePath, &pCrl);
+            }
+            else
+            {
+                /* Load CERT */
+                status = SOPC_KeyManager_Certificate_CreateOrAddFromFile(pFilePath, &pCerts);
+            }
         }
     }
     /* Clear in case of error */

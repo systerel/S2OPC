@@ -54,6 +54,9 @@ TODO :
  * - \<Directory_store_name\>/updatedTrustList/issuers/certs (.DER or .PEM files)
  * - \<Directory_store_name\>/updatedTrustList/issuers/crl (.DER or .PEM files)
  *
+ * \note: file extension names are not checked and all files are considered valid certificates or CRL
+ *        except for file names starting with a '.' in order to allow placeholders for empty directories.
+ *
  * The function attempts to build the PKI from the updatedTrustList directory
  * and in case of error (missing, empty or malformed), it switches to the root trusted and issuers directories.
  *
