@@ -486,9 +486,13 @@ add_custom_command(
   # Add S2OPC application certs in S2OPC_Demo_PKI
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/certs
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/trusted/crl
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/.placeholder ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/issuers/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/.placeholder ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Demo_PKI/issuers/crl/
   # Add S2OPC application certs in S2OPC_Users_PKI
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Users_PKI/trusted/certs
   COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/user_cacrl.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Users_PKI/trusted/crl
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/.placeholder ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Users_PKI/issuers/certs/
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/.placeholder ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_Users_PKI/issuers/crl/
   # Add UaCTT user certs in S2OPC_UACTT_Users_PKI
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/certs/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_UACTT_Users_PKI/trusted/certs/
   COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/data/cert/uactt/X509UserIdentity_PKI/trusted/crl/ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/S2OPC_UACTT_Users_PKI/trusted/crl/
