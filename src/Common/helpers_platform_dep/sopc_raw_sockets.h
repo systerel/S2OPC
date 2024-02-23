@@ -42,19 +42,21 @@
 
 /**
  *  \brief Activate the keep alive mechanism. According to RFC1122, this mechanism shall be used with care:
- *      deactivated by default, ability to enable or disable it run time for each connection.
+ *      deactivated by default, ability to enable or disable it run time for each connection at runtime.
  *
  * \param sock      The socket to activate keep alive probes
- * \param time      The time (in seconds) the connection needs to remain idle before TCP starts sending keepalive probes
- * \param interval  The time (in seconds) between individual keepalive probes
- * \param counter   The maximum number of keepalive probes TCP should send before droping the connection
+ * \param firstProbeDelay      The time (in seconds) the connection needs to remain idle
+ * before TCP starts sendingkeepalive probes
+ * \param interval      The time (in seconds) between individual keepalive probes
+ * \param counter      The maximum number of keepalive probes TCP should send
+ * before dropping the connection
  *
  *  \return            SOPC_STATUS_OK if operation succeeded,
  *                     SOPC_INVALID_PARAMETERS if parameters are not valid
  *                     SOPC_STATUS_NOK otherwise.
  */
 SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
-                                                       unsigned int time,
+                                                       unsigned int firstProbeDelay,
                                                        unsigned int interval,
                                                        unsigned int counter);
 

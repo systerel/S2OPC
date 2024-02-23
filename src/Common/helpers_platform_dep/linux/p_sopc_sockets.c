@@ -38,14 +38,16 @@
 #define SOPC_SECONDS_TO_MILLISECONDS 1000
 
 SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
-                                                       unsigned int time,
+                                                       unsigned int firstProbeDelay,
                                                        unsigned int interval,
                                                        unsigned int counter)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int trueInt = true;
     int setOptStatus = -1;
-    unsigned int user_timeout = (time + interval * counter) * SOPC_SECONDS_TO_MILLISECONDS;
+    /* Set to a value slightly lower than last keep alive transmission delay
+        to avoid potential cancellation */
+    unsigned int user_timeout = (firstProbeDelay + interval * counter - 1) * SOPC_SECONDS_TO_MILLISECONDS;
 
     if (SOPC_INVALID_SOCKET == sock)
     {
@@ -62,7 +64,8 @@ SOPC_ReturnStatus SOPC_Socket_Network_Enable_Keepalive(Socket sock,
 
     if (setOptStatus != -1)
     {
-        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (const void*) &time, sizeof(time));
+        setOptStatus =
+            setsockopt(sock, IPPROTO_TCP, TCP_KEEPIDLE, (const void*) &firstProbeDelay, sizeof(firstProbeDelay));
     }
 
     if (setOptStatus != -1)
@@ -87,6 +90,7 @@ SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     const int falseInt = false;
+    const int zeroInt = 0;
     int setOptStatus = -1;
 
     if (SOPC_INVALID_SOCKET == sock)
@@ -95,6 +99,11 @@ SOPC_ReturnStatus SOPC_Socket_Network_Disable_Keepalive(Socket sock)
     }
 
     setOptStatus = setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (const void*) &falseInt, sizeof(int));
+
+    if (setOptStatus != -1)
+    {
+        setOptStatus = setsockopt(sock, IPPROTO_TCP, TCP_USER_TIMEOUT, (const void*) &zeroInt, sizeof(zeroInt));
+    }
 
     if (setOptStatus < 0)
     {
