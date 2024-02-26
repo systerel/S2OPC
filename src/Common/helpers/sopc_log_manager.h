@@ -107,14 +107,6 @@ typedef struct SOPC_Log_Configuration
 } SOPC_Log_Configuration;
 
 /**
- * \brief Initializes the logger manager: generate unique file name prefix for execution.
- * This prefix is only relevant when the logging feature is set to default file logging.
- * Only the first call is taken into account. Further call will be ignored until next call to
- * :: SOPC_Log_Clear
- */
-void SOPC_Log_Initialize(void);
-
-/**
  * \brief Creates a new log file and log instance and prints the starting timestamp
  *
  * \param pConf        A non-NULL pointer to the file instance configuration
@@ -210,10 +202,5 @@ void SOPC_Log_VTrace(SOPC_Log_Instance* pLogInst, SOPC_Log_Level level, const ch
  * \param ppLogInst  An existing log instance already started. Pointer set to NULL after call.
  */
 void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst);
-
-/**
- * \brief Clears the logger manager: clear unique file name prefix for execution
- * */
-void SOPC_Log_Clear(void);
 
 #endif /* SOPC_LOG_MANAGER_H_ */

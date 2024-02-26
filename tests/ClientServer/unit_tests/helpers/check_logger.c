@@ -176,7 +176,7 @@ START_TEST(test_logger_categories_and_files)
     SOPC_CircularLogFile_Configuration logConf = {
         .logDirPath = "./not_existing_path", .logFileName = "TestLogFile", .logMaxBytes = 340, .logMaxFiles = 3};
 
-    // Check that missing folder are crated automatically
+    // Check that missing folder are created automatically
     testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
     ck_assert(testLog != NULL);
     char* tmp_name = SOPC_Log_GetCurrentFilename(testLog);
@@ -574,14 +574,10 @@ START_TEST(test_logger_user)
 }
 END_TEST
 
-static void init(void)
-{
-    SOPC_Log_Initialize();
-}
+static void init(void) {}
 
 static void clear(void)
 {
-    SOPC_Log_Clear();
     SOPC_Free(SOPC_Check_Logger_lastUserCategory);
     SOPC_Free(SOPC_Check_Logger_lastUserLog_Dated);
     SOPC_Free(SOPC_Check_Logger_lastUserLog);

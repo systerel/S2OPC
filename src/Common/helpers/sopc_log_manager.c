@@ -49,12 +49,6 @@ const char* SOPC_CSTRING_LEVEL_INFO = "";
 const char* SOPC_CSTRING_LEVEL_DEBUG = "(Debug) ";
 const char* SOPC_CSTRING_LEVEL_UNKNOWN = "(?) ";
 
-static bool uniquePrefixSet = false;
-
-SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
-static char* SOPC_CSTRING_UNIQUE_LOG_PREFIX = "UNINIT_LOG";
-SOPC_GCC_DIAGNOSTIC_RESTORE
-
 struct SOPC_Log_Instance
 {
     // 'actual' points to the actual instance. If not NULL, only category, started and level are relevant
@@ -87,14 +81,6 @@ static const char* levelToString(const SOPC_Log_Level level)
     default:
         return SOPC_CSTRING_LEVEL_UNKNOWN;
     }
-}
-void SOPC_Log_Initialize(void)
-{
-    if (!uniquePrefixSet)
-    {
-        SOPC_CSTRING_UNIQUE_LOG_PREFIX = SOPC_Time_GetStringOfCurrentTimeUTC(true);
-    }
-    uniquePrefixSet = true;
 }
 
 // Print starting timestamp
@@ -201,7 +187,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const SOPC_CircularLogFile_Config
     if (NULL == pFile)
     {
         SOPC_Free(result);
-        SOPC_CircularLogFile_Clear(&pFile);
+        SOPC_CircularLogFile_Delete(&pFile);
         return NULL;
     }
 
@@ -219,7 +205,7 @@ SOPC_Log_Instance* SOPC_Log_CreateFileInstance(const SOPC_CircularLogFile_Config
     bool started = SOPC_Log_Start(result);
     if (!started)
     {
-        SOPC_CircularLogFile_Clear(&pFile);
+        SOPC_CircularLogFile_Delete(&pFile);
         SOPC_Free(result);
         result = NULL;
     }
@@ -369,6 +355,8 @@ static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
         int pos = 0;
         if (isFile)
         {
+            // In files, the log line is as follow (<LEVEL> skipped for INFO level):
+            // [YYYY/MM/DD HH:MM:SS.sss] <Category> <LEVEL > <Log>
             pos = snprintf(actual->printBuffer, SOPC_LOG_MAX_USER_LINE_LENGTH + 1, "[%s] %s %s", timestamp,
                            pLogInst->category, levelToString(level));
             remain -= pos;
@@ -381,7 +369,7 @@ static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
         actual->printBuffer[SOPC_LOG_MAX_USER_LINE_LENGTH] = 0;
 
         // File
-        if (NULL != actual->pFile)
+        if (isFile)
         {
             SOPC_CircularLogFile_PutLine(actual->pFile, actual->printBuffer);
 
@@ -395,6 +383,7 @@ static void vTrace_Internal(SOPC_Log_Instance* pLogInst,
         // User
         if (NULL != actual->logCallback)
         {
+            // In user log system, there is no "\n" added.
             actual->logCallback(timestamp, pLogInst->category, level, actual->printBuffer);
         }
 
@@ -434,7 +423,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
             trace_Internal(pLogInst, SOPC_LOG_LEVEL_INFO, true, "LOG STOP");
         }
 
-        // Only allow to delete "actual" session is there are no remaining references
+        // Only allow to delete "actual" session if there are no remaining references
         SOPC_ASSERT(pLogInst->actual != NULL || actual->nbRefs == 1);
 
         if (actual->nbRefs <= 1)
@@ -450,7 +439,7 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
             // There are no more instances.
             if (NULL != pLogInst->pFile)
             {
-                SOPC_CircularLogFile_Clear(&pLogInst->pFile);
+                SOPC_CircularLogFile_Delete(&pLogInst->pFile);
             }
 
             SOPC_Free(pLogInst->printBuffer);
@@ -465,14 +454,5 @@ void SOPC_Log_ClearInstance(SOPC_Log_Instance** ppLogInst)
         }
         SOPC_Free(pLogInst);
         *ppLogInst = NULL;
-    }
-}
-
-void SOPC_Log_Clear(void)
-{
-    if (uniquePrefixSet)
-    {
-        SOPC_Free(SOPC_CSTRING_UNIQUE_LOG_PREFIX);
-        uniquePrefixSet = false;
     }
 }

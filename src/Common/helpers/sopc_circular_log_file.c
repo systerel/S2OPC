@@ -107,11 +107,11 @@ SOPC_CircularLogFile* SOPC_CircularLogFile_Create(const SOPC_CircularLogFile_Con
         {
             file->pFile = NULL;
             file->nbFiles = 0;
-            // + 2 for the 2 '_'
+            // Filename: <path>/<name>_12345.log :  digits start at filename end -9, but
+            // filenameLen is 1 + strlen(Filename). So first digits position is strlen(Filename) - 9 - 1
             file->fileNumberPos = (uint8_t)(filenameLen - 10); // See above
             // Attempt to create first log file:
-            // 5 for file number + 4 for file extension +1 for '\0' terminating character => 10
-            char* filePath = SOPC_Calloc(filenameLen + 1, sizeof(char));
+            char* filePath = SOPC_Calloc(filenameLen, sizeof(char));
             if (filePath != NULL)
             {
                 int res = sprintf(filePath, "%s/%s_%05u.log", logDirPath, config->logFileName, file->nbFiles);
@@ -203,7 +203,7 @@ void SOPC_CircularLogFile_PutLine(SOPC_CircularLogFile* pFile, const char* line)
     }
 }
 
-void SOPC_CircularLogFile_Clear(SOPC_CircularLogFile** ppFile)
+void SOPC_CircularLogFile_Delete(SOPC_CircularLogFile** ppFile)
 {
     if (NULL != ppFile && *ppFile != NULL)
     {

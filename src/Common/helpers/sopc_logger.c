@@ -20,10 +20,18 @@
 #include "sopc_logger.h"
 
 #include <stdio.h>
+#include <string.h>
+
 #include "sopc_array.h"
+#include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_time.h"
+
+static const char* traceName = "Trace";
+static char* filePath = NULL;
 
 static SOPC_Log_Instance* commonTrace = NULL;
 static SOPC_Log_Instance* clientServerTrace = NULL;
@@ -55,11 +63,24 @@ static bool SOPC_Logger_AuditInitialize(void);
 
 bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration)
 {
+    if (NULL != filePath)
+    {
+        // Already configured.
+        return false;
+    }
+
     const SOPC_Log_System logSystem = (NULL == logConfiguration) ? SOPC_LOG_SYSTEM_NO_LOG : logConfiguration->logSystem;
 
     bool result = false;
 
-    SOPC_Log_Initialize();
+    char* uniqueLogPrefix = SOPC_Time_GetStringOfCurrentTimeUTC(true);
+    SOPC_ASSERT(NULL != uniqueLogPrefix);
+
+    // Format is <date>_<traceName> : +2 = '_' and '\0'
+    filePath = (char*) SOPC_Malloc(strlen(traceName) + strlen(uniqueLogPrefix) + 2);
+    SOPC_ASSERT(NULL != filePath);
+    sprintf(filePath, "%s_%s", traceName, uniqueLogPrefix);
+    SOPC_Free(uniqueLogPrefix);
 
     switch (logSystem)
     {
@@ -67,7 +88,7 @@ bool SOPC_Logger_Initialize(const SOPC_Log_Configuration* const logConfiguration
     {
         const SOPC_LogSystem_File_Configuration* logCfg = &logConfiguration->logSysConfig.fileSystemLogConfig;
         SOPC_CircularLogFile_Configuration conf = {.logDirPath = logCfg->logDirPath,
-                                                   .logFileName = "Trace",
+                                                   .logFileName = filePath,
                                                    .logMaxBytes = logCfg->logMaxBytes,
                                                    .logMaxFiles = logCfg->logMaxFiles};
         secuAudit = SOPC_Log_CreateFileInstance(&conf, SOPC_Log_SecuAuditCategory);
@@ -351,5 +372,6 @@ void SOPC_Logger_Clear(void)
     {
         SOPC_Log_ClearInstance(&secuAudit);
     }
-    SOPC_Log_Clear();
+    SOPC_Free(filePath);
+    filePath = NULL;
 }

@@ -46,7 +46,7 @@ typedef struct SOPC_CircularLogFile_Configuration
 /**
  * Create a circular output text file.
  * @param config The files configuration
- * @return A new allocated object, that must be freed by caller using ::SOPC_CircularLogFile_Clear after use
+ * @return A new allocated object, that must be freed by caller using ::SOPC_CircularLogFile_Delete after use
  */
 SOPC_CircularLogFile* SOPC_CircularLogFile_Create(const SOPC_CircularLogFile_Configuration* config);
 
@@ -54,12 +54,12 @@ SOPC_CircularLogFile* SOPC_CircularLogFile_Create(const SOPC_CircularLogFile_Con
  * \brief Get the name of the current log file.
  * \param pFile  An existing circular file
  * \return Name of current output log file or NULL if not applicable.
- * The returned value must be deallocated be caller.
+ * The returned value must be deallocated by the caller.
  */
 char* SOPC_CircularLogFile_GetFileName(const SOPC_CircularLogFile* pFile);
 
 /**
- * Writes a line in the circular files, and if the limit size is rached:
+ * Writes a line in the circular files, and if the limit size is reached:
  * - close current file
  * - creates and prepare next file
  * @param pFile The circular file to write into
@@ -71,6 +71,6 @@ void SOPC_CircularLogFile_PutLine(SOPC_CircularLogFile* pFile, const char* line)
  * Clears a circular log file object, previously created by ::SOPC_CircularLogFile_Create
  * @param ppFile The file to clear
  */
-void SOPC_CircularLogFile_Clear(SOPC_CircularLogFile** ppFile);
+void SOPC_CircularLogFile_Delete(SOPC_CircularLogFile** ppFile);
 
 #endif /* SOPC_CIRCULAR_LOG_FILE_H_ */
