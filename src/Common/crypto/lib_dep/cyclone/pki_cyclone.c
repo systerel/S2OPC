@@ -745,6 +745,28 @@ static SOPC_ReturnStatus crt_check_key_usage(const SOPC_CertificateList* pToVali
     return SOPC_STATUS_OK;
 }
 
+static SOPC_ReturnStatus check_common_name(const SOPC_CertificateList* pToValidate)
+{
+    SOPC_ASSERT(NULL != pToValidate);
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    if (0 == pToValidate->crt.tbsCert.subject.commonNameLen)
+    {
+        char* pThumb = SOPC_KeyManager_Certificate_GetCstring_SHA1(pToValidate);
+        const char* thumb = NULL != pThumb ? pThumb : "NULL";
+
+        SOPC_Logger_TraceError(
+            SOPC_LOG_MODULE_COMMON,
+            "> PKI validation failed : The Common Name attribute is not specified for certificate thumbprint %s",
+            thumb);
+
+        status = SOPC_STATUS_NOK;
+        SOPC_Free(pThumb);
+    }
+
+    return status;
+}
+
 static SOPC_ReturnStatus check_certificate_usage(const SOPC_CertificateList* pToValidate,
                                                  const SOPC_PKI_LeafProfile* pProfile)
 {
@@ -1845,14 +1867,23 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     uint32_t firstError = SOPC_CertificateValidationError_Unknown;
     uint32_t currentError = SOPC_CertificateValidationError_Unknown;
     bool bErrorFound = false;
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus status = check_common_name(pToValidate);
+    if (SOPC_STATUS_OK != status)
+    {
+        firstError = SOPC_CertificateValidationError_Invalid;
+        bErrorFound = true;
+    }
     if (pProfile->bApplySecurityPolicy)
     {
         status = check_security_policy(pToValidate, pProfile);
         if (SOPC_STATUS_OK != status)
         {
-            firstError = SOPC_CertificateValidationError_PolicyCheckFailed;
-            bErrorFound = true;
+            currentError = SOPC_CertificateValidationError_PolicyCheckFailed;
+            if (!bErrorFound)
+            {
+                firstError = currentError;
+                bErrorFound = true;
+            }
         }
     }
 
