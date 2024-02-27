@@ -131,18 +131,18 @@ def gen_implem_types(ns_uri, ns_index, out, schema):
         schema.gen_user_token_policies_constants(out)
     schema.gen_encodeable_type_table(out)
 
-def get_enumerated_opcua_unsigned_type_id(enum_node):
+def get_enumerated_opcua_unsigned_type_and_id(enum_node):
     unsignedIntLength = enum_node.attrib['LengthInBits']
     assert unsignedIntLength is not None
     unsignedIntLength = int(unsignedIntLength)
     if 8 == unsignedIntLength:
-        return 'SOPC_Byte_Id'
+        return ('SOPC_Byte', 'SOPC_Byte_Id')
     elif 16 == unsignedIntLength:
-        return 'SOPC_UInt16_Id'
+        return ('uint16_t', 'SOPC_UInt16_Id')
     elif 32 == unsignedIntLength:
-        return 'SOPC_UInt32_Id'
+        return ('uint32_t', 'SOPC_UInt32_Id')
     elif 64 == unsignedIntLength:
-        return 'SOPC_UInt64_Id'
+        return ('uint64_t', 'SOPC_UInt64_Id')
     assert False
 
 class BinarySchema:
@@ -244,8 +244,10 @@ class BinarySchema:
             ctype = self._gen_struct_decl(out, out_enum, node, barename)
             self.known_writer.encodeable_types.append((typename, barename))
         elif node.tag == self.ENUM_TAG:
+            utype, utype_id = get_enumerated_opcua_unsigned_type_and_id(node)
+            self.enums[barename] = utype
+            self.enums[typename] = utype_id
             ctype = self._gen_enum_decl(out_enum, node, barename)
-            self.enums[typename] = get_enumerated_opcua_unsigned_type_id(node)
         else:
             fatal("Unknown node kind: %s" % node.tag)
         self.bsd2c[typename] = ctype
@@ -450,6 +452,10 @@ class BinarySchema:
         else:
             raise Exception('Unexpected attribute LengthInBits value "%d" missing in EnumeratedType %s' % (unsignedIntLength, name))
 
+        # If optionSet is active the type is not an enum but a mask
+        optionSet = node.attrib.get('IsOptionSet', False)
+
+
         elem_decls = [
                 ENUM_DECL_ELEM.format(name=name,
                                       elem=child.attrib['Name'],
@@ -462,7 +468,12 @@ class BinarySchema:
         out.write(",\n".join(elem_decls) + '\n')
 
         out.write(ENUM_DECL_END.format(name=name))
-        return 'OpcUa_' + name
+
+        if optionSet:
+            # If the type is not an enum, keep the built it type
+            return '/* ::OpcUa_' + name + ' */ ' + self.enums[name]
+        else:
+            return 'OpcUa_' + name
 
     def _get_node(self, barename):
         """Returns the node describing the given type name."""

@@ -607,7 +607,7 @@ typedef struct _OpcUa_FieldMetaData
      */
     SOPC_String Name;
     SOPC_LocalizedText Description;
-    OpcUa_DataSetFieldFlags FieldFlags;
+    /* ::OpcUa_DataSetFieldFlags */ uint16_t FieldFlags;
     SOPC_Byte BuiltInType;
     SOPC_NodeId DataType;
     int32_t ValueRank;
@@ -868,7 +868,7 @@ typedef struct _OpcUa_DataSetWriterDataType
     SOPC_String Name;
     SOPC_Boolean Enabled;
     uint16_t DataSetWriterId;
-    OpcUa_DataSetFieldContentMask DataSetFieldContentMask;
+    /* ::OpcUa_DataSetFieldContentMask */ uint32_t DataSetFieldContentMask;
     uint32_t KeyFrameCount;
     SOPC_String DataSetName;
     int32_t NoOfDataSetWriterProperties;
@@ -1052,7 +1052,7 @@ typedef struct _OpcUa_DataSetReaderDataType
     uint16_t WriterGroupId;
     uint16_t DataSetWriterId;
     OpcUa_DataSetMetaDataType DataSetMetaData;
-    OpcUa_DataSetFieldContentMask DataSetFieldContentMask;
+    /* ::OpcUa_DataSetFieldContentMask */ uint32_t DataSetFieldContentMask;
     double MessageReceiveTimeout;
     uint32_t KeyFrameCount;
     SOPC_String HeaderLayoutUri;
@@ -1243,7 +1243,7 @@ typedef struct _OpcUa_RolePermissionType
      *  for giving a copy of the header to application.
      */
     SOPC_NodeId RoleId;
-    OpcUa_PermissionType Permissions;
+    /* ::OpcUa_PermissionType */ uint32_t Permissions;
 } OpcUa_RolePermissionType;
 
 void OpcUa_RolePermissionType_Initialize(void* pValue);
@@ -1314,7 +1314,7 @@ typedef struct _OpcUa_UadpWriterGroupMessageDataType
      */
     uint32_t GroupVersion;
     OpcUa_DataSetOrderingType DataSetOrdering;
-    OpcUa_UadpNetworkMessageContentMask NetworkMessageContentMask;
+    /* ::OpcUa_UadpNetworkMessageContentMask */ uint32_t NetworkMessageContentMask;
     double SamplingOffset;
     int32_t NoOfPublishingOffset;
     double* PublishingOffset;
@@ -1338,7 +1338,7 @@ typedef struct _OpcUa_UadpDataSetWriterMessageDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_UadpDataSetMessageContentMask DataSetMessageContentMask;
+    /* ::OpcUa_UadpDataSetMessageContentMask */ uint32_t DataSetMessageContentMask;
     uint16_t ConfiguredSize;
     uint16_t NetworkMessageNumber;
     uint16_t DataSetOffset;
@@ -1366,8 +1366,8 @@ typedef struct _OpcUa_UadpDataSetReaderMessageDataType
     uint16_t NetworkMessageNumber;
     uint16_t DataSetOffset;
     SOPC_Guid DataSetClassId;
-    OpcUa_UadpNetworkMessageContentMask NetworkMessageContentMask;
-    OpcUa_UadpDataSetMessageContentMask DataSetMessageContentMask;
+    /* ::OpcUa_UadpNetworkMessageContentMask */ uint32_t NetworkMessageContentMask;
+    /* ::OpcUa_UadpDataSetMessageContentMask */ uint32_t DataSetMessageContentMask;
     double PublishingInterval;
     double ReceiveOffset;
     double ProcessingOffset;
@@ -1391,7 +1391,7 @@ typedef struct _OpcUa_JsonWriterGroupMessageDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_JsonNetworkMessageContentMask NetworkMessageContentMask;
+    /* ::OpcUa_JsonNetworkMessageContentMask */ uint32_t NetworkMessageContentMask;
 } OpcUa_JsonWriterGroupMessageDataType;
 
 void OpcUa_JsonWriterGroupMessageDataType_Initialize(void* pValue);
@@ -1412,7 +1412,7 @@ typedef struct _OpcUa_JsonDataSetWriterMessageDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_JsonDataSetMessageContentMask DataSetMessageContentMask;
+    /* ::OpcUa_JsonDataSetMessageContentMask */ uint32_t DataSetMessageContentMask;
 } OpcUa_JsonDataSetWriterMessageDataType;
 
 void OpcUa_JsonDataSetWriterMessageDataType_Initialize(void* pValue);
@@ -1433,8 +1433,8 @@ typedef struct _OpcUa_JsonDataSetReaderMessageDataType
     /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
      *  for giving a copy of the header to application.
      */
-    OpcUa_JsonNetworkMessageContentMask NetworkMessageContentMask;
-    OpcUa_JsonDataSetMessageContentMask DataSetMessageContentMask;
+    /* ::OpcUa_JsonNetworkMessageContentMask */ uint32_t NetworkMessageContentMask;
+    /* ::OpcUa_JsonDataSetMessageContentMask */ uint32_t DataSetMessageContentMask;
 } OpcUa_JsonDataSetReaderMessageDataType;
 
 void OpcUa_JsonDataSetReaderMessageDataType_Initialize(void* pValue);
