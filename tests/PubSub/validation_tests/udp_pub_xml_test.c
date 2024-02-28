@@ -96,7 +96,7 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     SOPC_DataSetWriter* conf_writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
 
     SOPC_FieldMetaData* metadata;
-    SOPC_Variant* variant;
+    SOPC_Variant variant;
 
     // First DSM has a single boolean value
 
@@ -119,13 +119,13 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
 
     // variant 1
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_Boolean_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Boolean = true;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_Boolean_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Boolean = true;
     const SOPC_PublishedDataSet* conf_dataset = SOPC_DataSetWriter_Get_DataSet(conf_writer);
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, dsfIdx);
-    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, &variant, metadata);
 
     // Second DSM has 2 values (
 
@@ -138,20 +138,20 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     dsm = SOPC_Dataset_LL_NetworkMessage_Get_DataSetMsg_At(nm, dswIdx);
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
 
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt32_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint32 = 0x12345678;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt32_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint32 = 0x12345678;
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, dsfIdx);
-    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, &variant, metadata);
 
     dsfIdx++;
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt16_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint16 = 17;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt16_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint16 = 17;
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, dsfIdx);
-    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, dswIdx, dsfIdx, &variant, metadata);
     printNmDebug(nm);
 }
 

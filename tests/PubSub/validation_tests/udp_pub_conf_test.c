@@ -136,38 +136,38 @@ static void UDP_Pub_Test_Fill_NetworkMessage(SOPC_WriterGroup* group, SOPC_Datas
     SOPC_DataSetWriter* conf_writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, 0);
 
     SOPC_FieldMetaData* metadata;
-    SOPC_Variant* variant;
+    SOPC_Variant variant;
     // variant 1
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt16_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint16 = 1402;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt16_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint16 = 1402;
     const SOPC_PublishedDataSet* conf_dataset = SOPC_DataSetWriter_Get_DataSet(conf_writer);
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 0);
-    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 0, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 0, &variant, metadata);
     // variant 2
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_DateTime_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Date = SOPC_Time_GetCurrentTimeUTC();
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_DateTime_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Date = SOPC_Time_GetCurrentTimeUTC();
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 1);
-    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 1, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 1, &variant, metadata);
     // variant 3
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt32_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint32 = 64852;
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt32_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint32 = 64852;
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 2);
-    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 2, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 2, &variant, metadata);
     // variant 4
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_String_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    SOPC_String_Initialize(&(variant->Value.String));
-    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&(variant->Value.String), "Ma chaine de caractère");
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_String_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    SOPC_String_Initialize(&(variant.Value.String));
+    SOPC_ReturnStatus status = SOPC_String_CopyFromCString(&(variant.Value.String), "Ma chaine de caractère");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     metadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(conf_dataset, 3);
-    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 3, variant, metadata);
+    SOPC_NetworkMessage_Set_Variant_At(nm, 0, 3, &variant, metadata);
 }
 
 int main(void)

@@ -589,14 +589,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
                 }
                 typeCheckingSuccess = false;
             }
-
-            /* TODO: avoid the creation of a Variant to delete it immediately,
-             *  or change the behavior of Set_Variant_At because it is its sole use */
-            SOPC_Variant* variant = SOPC_Variant_Create();
-            SOPC_ASSERT(NULL != variant);
-            SOPC_Variant_Move(variant, &dv->Value);
-            /* TODO: this function should take a size_t */
-            SOPC_NetworkMessage_Set_Variant_At(message, (uint8_t) iDsm, (uint16_t) iField, variant, fieldData);
+            SOPC_NetworkMessage_Set_Variant_At(message, (uint8_t) iDsm, (uint16_t) iField, &dv->Value, fieldData);
         }
 
         /* Always destroy the created DataValues */
@@ -1203,6 +1196,7 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
     }
     const uint8_t nbDataset = SOPC_WriterGroup_Nb_DataSetWriter(group);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    bool res = true;
     for (uint8_t iWg = 0; iWg < nbDataset; iWg++)
     {
         const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, iWg);
@@ -1216,10 +1210,10 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
             SOPC_ASSERT(NULL != metadata);
             const SOPC_BuiltinId type = SOPC_FieldMetaData_Get_BuiltinType(metadata);
             const SOPC_PubSub_ArrayDimension* arrDimension = SOPC_FieldMetaData_Get_ArrayDimension(metadata);
+            SOPC_Variant variant;
+            SOPC_Variant_Initialize(&variant);
             if (-1 == arrDimension->valueRank)
             {
-                SOPC_Variant* variant = SOPC_Variant_Create();
-                SOPC_ASSERT(NULL != variant);
                 switch (type)
                 {
                 case SOPC_Null_Id:
@@ -1237,9 +1231,8 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
                 case SOPC_DateTime_Id:
                 case SOPC_Guid_Id:
                 case SOPC_StatusCode_Id:
-                    SOPC_Variant_Initialize(variant);
-                    variant->BuiltInTypeId = type;
-                    SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, variant, metadata);
+                    variant.BuiltInTypeId = type;
+                    SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, &variant, metadata);
                     break;
                 default:
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
@@ -1247,15 +1240,9 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
                     status = SOPC_STATUS_NOK;
                     break;
                 }
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Variant_Delete(variant);
-                }
             }
             else if (1 == arrDimension->valueRank)
             {
-                SOPC_Variant* variant = SOPC_Variant_Create();
-                SOPC_ASSERT(NULL != variant);
                 switch (type)
                 {
                 case SOPC_Null_Id:
@@ -1274,18 +1261,21 @@ SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_Netwo
                 case SOPC_Guid_Id:
                 case SOPC_StatusCode_Id:
                     SOPC_ASSERT(NULL != arrDimension->arrayDimensions);
-                    SOPC_Variant_Initialize_Array(variant, type, (int32_t) *arrDimension->arrayDimensions);
-                    SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, variant, metadata);
+                    res = SOPC_Variant_Initialize_Array(&variant, type, (int32_t) *arrDimension->arrayDimensions);
+                    if (res)
+                    {
+                        SOPC_NetworkMessage_Set_Variant_At(networkMessage, iWg, iField, &variant, metadata);
+                    }
+                    else
+                    {
+                        status = SOPC_STATUS_OUT_OF_MEMORY;
+                    }
                     break;
                 default:
                     SOPC_Logger_TraceError(SOPC_LOG_MODULE_PUBSUB,
                                            "Invalid type %d when using preencoding buffer optimization", type);
                     status = SOPC_STATUS_NOK;
                     break;
-                }
-                if (SOPC_STATUS_OK != status)
-                {
-                    SOPC_Variant_Delete(variant);
                 }
             }
             else

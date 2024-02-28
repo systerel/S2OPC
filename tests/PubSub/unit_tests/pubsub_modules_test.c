@@ -45,11 +45,12 @@
 
 #define NB_VARS 5
 
-SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12071982}},
-                                {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 239}},
-                                {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 64852}},
-                                {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
-                                {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
+static SOPC_Variant varArr[NB_VARS] = {
+    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12071982}},
+    {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 239}},
+    {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 64852}},
+    {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
+    {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
 
 /* Test network message layer JSON encoded */
 
@@ -57,7 +58,7 @@ SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_Sin
 #define NB_VARS_JSON 9
 
 static SOPC_Byte gSampleText[] = "This is a text !";
-static const SOPC_Variant varArrJSON[NB_VARS_JSON] = {
+static SOPC_Variant varArrJSON[NB_VARS_JSON] = {
     {true, SOPC_Boolean_Id, SOPC_VariantArrayType_SingleValue, {.Boolean = true}},
     {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 64839}},
     {true, SOPC_Int32_Id, SOPC_VariantArrayType_SingleValue, {.Int32 = -65133}},
@@ -460,11 +461,7 @@ START_TEST(test_hl_network_msg_encode_json)
     // Fill in variants of 1st Dataset Message
     for (uint16_t i = 0; i < NB_VARS_JSON; i++)
     {
-        SOPC_Variant* var = SOPC_Variant_Create();
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArrJSON[i]);
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
-
-        res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm0, var, i);
+        res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm0, &varArrJSON[i], i);
         ck_assert_int_eq(true, res);
     }
 
@@ -473,11 +470,7 @@ START_TEST(test_hl_network_msg_encode_json)
     res = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(msg_dsm1, 1);
 
     // Fill in variant of 2nd Dataset Message
-    SOPC_Variant* var = SOPC_Variant_Create();
-    SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArrJSON[0]);
-    ck_assert_int_eq(SOPC_STATUS_OK, status);
-
-    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm1, var, 0);
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm1, &varArrJSON[0], 0);
     ck_assert_int_eq(true, res);
 
     /* Encode */
@@ -541,11 +534,7 @@ START_TEST(test_hl_network_msg_encode)
 
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
-        SOPC_Variant* var = SOPC_Variant_Create();
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArr[i]);
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
-
-        res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm, var, i);
+        res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm, &varArr[i], i);
         ck_assert_int_eq(true, res);
     }
 
@@ -736,11 +725,7 @@ START_TEST(test_hl_network_msg_encode_multi_dsm)
 
         for (uint16_t i = 0; i < nb_vars; i++)
         {
-            SOPC_Variant* var = SOPC_Variant_Create();
-            SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArr[i]);
-            ck_assert_int_eq(SOPC_STATUS_OK, status);
-
-            res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm, var, i);
+            res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(msg_dsm, &varArr[i], i);
             ck_assert_int_eq(true, res);
         }
     }
@@ -1171,15 +1156,9 @@ static SOPC_Dataset_LL_NetworkMessage* build_NetworkMessage_From_VarArr(void)
     bool alloc = SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(dsm, NB_VARS);
     ck_assert_int_eq(true, alloc);
 
-    SOPC_Variant* variant;
-
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
-        variant = SOPC_Variant_Create();
-        ck_assert_ptr_nonnull(variant);
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(variant, &varArr[i]);
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
-        bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, i);
+        bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &varArr[i], i);
         ck_assert_int_eq(true, res);
     }
     return nm;
@@ -1678,10 +1657,7 @@ START_TEST(test_dataset_layer)
     for (uint16_t i = 0; i < NB_VARS; i++)
     {
         SOPC_FieldMetaData* field = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, i);
-        SOPC_Variant* var = SOPC_Variant_Create();
-        SOPC_ReturnStatus status = SOPC_Variant_Copy(var, &varArr[i]);
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
-        SOPC_NetworkMessage_Set_Variant_At(nm, 0, i, var, field);
+        SOPC_NetworkMessage_Set_Variant_At(nm, 0, i, &varArr[i], field);
     }
 
     SOPC_Dataset_LL_NetworkMessage* expectedNm = build_NetworkMessage_From_VarArr();

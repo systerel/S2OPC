@@ -310,16 +310,13 @@ static SOPC_ReturnStatus UADP_To_DataSetFields(SOPC_Buffer* buffer, SOPC_Dataset
 
     for (uint16_t i = 0; i < length && SOPC_STATUS_OK == status; i++)
     {
-        SOPC_Variant* variant = SOPC_Variant_Create();
-        if (NULL == variant)
+        SOPC_Variant variant;
+        SOPC_Variant_Initialize(&variant);
+        status = SOPC_Variant_Read(&variant, buffer, 0);
+        if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-        else
-        {
-            bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, i);
+            bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, i);
             SOPC_ASSERT(res); // valid index
-            status = SOPC_Variant_Read(variant, buffer, 0);
         }
     }
 

@@ -29,7 +29,7 @@
 
 struct SOPC_Dataset_LL_DataSetField
 {
-    SOPC_Variant* variant;
+    SOPC_Variant variant;
 };
 
 struct SOPC_Dataset_LL_DataSetMessage
@@ -279,16 +279,18 @@ SOPC_DataSet_LL_PublisherIdType SOPC_Dataset_LL_NetworkMessage_Get_PublisherIdTy
 bool SOPC_Dataset_LL_DataSetMsg_Allocate_DataSetField_Array(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t dsf_nb)
 {
     SOPC_ASSERT(NULL != dsm);
+    bool res = true;
     if (dsf_nb > 0)
     {
         dsm->dataset_fields = SOPC_Calloc(dsf_nb, sizeof(SOPC_Dataset_LL_DataSetField));
-        if (NULL == dsm->dataset_fields)
+        res = (NULL != dsm->dataset_fields);
+        for (int index = 0; res && index < dsf_nb; index++)
         {
-            return false;
+            SOPC_Variant_Initialize(&dsm->dataset_fields[index].variant);
         }
     }
     dsm->dataset_fields_length = dsf_nb;
-    return true;
+    return res;
 }
 
 uint16_t SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(const SOPC_Dataset_LL_DataSetMessage* dsm)
@@ -382,9 +384,9 @@ bool SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(SOPC_Dataset_LL_Data
     }
     else
     {
-        SOPC_Variant_Delete(dsm->dataset_fields[index].variant);
+        SOPC_Variant_Clear(&dsm->dataset_fields[index].variant);
+        SOPC_Variant_Move(&dsm->dataset_fields[index].variant, variant);
     }
-    dsm->dataset_fields[index].variant = variant;
     return true;
 }
 
@@ -399,7 +401,7 @@ const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(const SOPC_Dataset
     {
         return NULL;
     }
-    return dsf->variant;
+    return &dsf->variant;
 }
 
 /**
@@ -479,10 +481,9 @@ void Dataset_LL_Delete_DataSetMessages_Array(SOPC_Dataset_LL_NetworkMessage* nm)
 
 void Dataset_LL_Delete_DataSetFieldAttributes(SOPC_Dataset_LL_DataSetField* field)
 {
-    if (NULL != field && NULL != field->variant)
+    if (NULL != field)
     {
-        SOPC_Variant_Delete(field->variant);
-        field->variant = NULL;
+        SOPC_Variant_Clear(&field->variant);
     }
 }
 
@@ -546,5 +547,5 @@ bool SOPC_Dataset_LL_NetworkMessage_Allocate_DataSetMsg_Array(SOPC_Dataset_LL_Ne
 const SOPC_Variant* SOPC_Dataset_LL_DataSetField_Get_Variant(const SOPC_Dataset_LL_DataSetField* dsf)
 {
     SOPC_ASSERT(NULL != dsf);
-    return dsf->variant;
+    return &dsf->variant;
 }

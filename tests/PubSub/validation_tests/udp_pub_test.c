@@ -71,41 +71,42 @@ static SOPC_Dataset_LL_NetworkMessage* UDP_Pub_Test_Get_NetworkMessage(void)
     };
 
     SOPC_Dataset_LL_DataSetMsg_Set_ContentMask(dsm, &conf);
-    SOPC_Variant* variant;
+    SOPC_Variant variant;
     // variant 1
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt32_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint32 = 12071982;
-    bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 0);
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt32_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint32 = 12071982;
+    bool res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, 0);
     SOPC_ASSERT(res);
+
     // variant 2
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_Byte_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Byte = 239;
-    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 1);
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_Byte_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Byte = 239;
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, 1);
     SOPC_ASSERT(res);
     // variant 3
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt16_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint16 = 64852;
-    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 2);
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt16_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint16 = 64852;
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, 2);
     SOPC_ASSERT(res);
     // variant 4
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_DateTime_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Date = SOPC_Time_GetCurrentTimeUTC();
-    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 3);
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_DateTime_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Date = SOPC_Time_GetCurrentTimeUTC();
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, 3);
     SOPC_ASSERT(res);
     // variant 5
-    variant = SOPC_Variant_Create();
-    variant->BuiltInTypeId = SOPC_UInt32_Id;
-    variant->ArrayType = SOPC_VariantArrayType_SingleValue;
-    variant->Value.Uint32 = 369852;
-    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, variant, 4);
+    SOPC_Variant_Initialize(&variant);
+    variant.BuiltInTypeId = SOPC_UInt32_Id;
+    variant.ArrayType = SOPC_VariantArrayType_SingleValue;
+    variant.Value.Uint32 = 369852;
+    res = SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(dsm, &variant, 4);
     SOPC_ASSERT(res);
 
     return nm;
