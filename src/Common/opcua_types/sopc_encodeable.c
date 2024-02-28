@@ -71,7 +71,7 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
             SOPC_ExpandedNodeId_Initialize(&extObject->TypeId);
             /* extObject->TypeId.NamespaceUri is left empty, as it is the case for default OPC-UA types */
             extObject->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            extObject->TypeId.NodeId.Namespace = OPCUA_NAMESPACE_INDEX;
+            extObject->TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
             extObject->TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
             extObject->Encoding = SOPC_ExtObjBodyEncoding_Object;
             extObject->Body.Object.ObjType = encTyp;
