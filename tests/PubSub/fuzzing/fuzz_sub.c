@@ -19,6 +19,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "sopc_assert.h"
 #include "sopc_helper_endianness_cfg.h"
@@ -176,7 +177,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
-        .checkDataSetMessageSN_Func = NULL,
+        .dsmSnGapCallback = NULL,
         .getReaderCtx_Func = get_Reader_Ctx,
         .targetConfig = NULL};
 
