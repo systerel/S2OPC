@@ -254,9 +254,8 @@ add_test(NAME "validation::ll_multi_pub_sub_test"
   $<TARGET_FILE:udp_multi_sub_test>)
 set_tests_properties("validation::ll_multi_pub_sub_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=ll_multi_pub_sub_test.tap")
 
-if(S2OPC_PUBSUB_ONLY OR S2OPC_CLIENTSERVER_ONLY)
+if(NOT S2OPC_PUBSUB_ONLY)
   # This test requires both PubSub and ClientServer libraries
-else()
   s2opc_pubsub_server_validation_test("pubsub_server_test.py")
 endif()
 
@@ -297,12 +296,15 @@ if(UNIX)
   $<TARGET_FILE:interop_sub_test> "encrypted")
   set_tests_properties("interop::open62541_pub_encrypted" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=interop_pub_encrypted_interop.tap")
 
-  # PubSub only for linux
-  add_test(NAME "validation::cli_self_test"
-    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-    COMMAND
-    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/validation_tools/cli_autotest.py")
-  set_tests_properties("validation::cli_self_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=cli_self_test.tap")
+  if(NOT S2OPC_PUBSUB_ONLY)
+  # This test requires both PubSub and ClientServer libraries
+    # PubSub only for linux
+    add_test(NAME "validation::cli_self_test"
+      WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+      COMMAND
+      "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/PubSub/validation_tools/cli_autotest.py")
+    set_tests_properties("validation::cli_self_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=cli_self_test.tap")
+  endif()
 
 endif()
 
