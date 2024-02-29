@@ -65,10 +65,9 @@ SOPC_Variant varArr[NB_VARS] = {
     {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 17}}           // 7
 };
 
-SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
 
-SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
-
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues)
 {
     SOPC_ASSERT(nbValues <= NB_VARS);
     SOPC_ASSERT(0 < nbValues);
@@ -81,7 +80,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
 
         SOPC_DataValue_Initialize(dataValue);
 
-        OpcUa_ReadValueId* readValue = &nodesToRead[i];
+        const OpcUa_ReadValueId* readValue = &nodesToRead[i];
 
         uint32_t index = readValue->NodeId.Data.Numeric;
         SOPC_ASSERT(13 == readValue->AttributeId); // Value => AttributeId=13
@@ -92,11 +91,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
         dataValue->Value.ArrayType = varArr[index].ArrayType;
         dataValue->Value.BuiltInTypeId = varArr[index].BuiltInTypeId;
         dataValue->Value.Value = varArr[index].Value;
-
-        OpcUa_ReadValueId_Clear(nodesToRead);
     }
-    SOPC_Free(nodesToRead);
-
     return dataValues;
 }
 

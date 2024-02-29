@@ -353,8 +353,8 @@ bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv)
     return SOPC_Dict_Insert(g_cache, (uintptr_t) nid, (uintptr_t) dv);
 }
 
-/* nodesToRead shall be freed by the callee, and returned DataValues will be freed by the caller */
-SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
+/* Returned DataValues will be freed by the caller */
+SOPC_DataValue* Cache_GetSourceVariables(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues)
 {
     SOPC_ASSERT(NULL != nodesToRead && nbValues > 0);
     SOPC_ASSERT(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
@@ -369,7 +369,7 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
     Cache_Lock();
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < nbValues; ++i)
     {
-        OpcUa_ReadValueId* rv = &nodesToRead[i];
+        const OpcUa_ReadValueId* rv = &nodesToRead[i];
         SOPC_DataValue* dv = &dvs[i];
 
         /* IndexRange and DataEncoding are not supported in this cache and should be empty */
@@ -382,10 +382,8 @@ SOPC_DataValue* Cache_GetSourceVariables(OpcUa_ReadValueId* nodesToRead, int32_t
         status = SOPC_DataValue_Copy(dv, src);
 
         /* As we have ownership of the rv, clear it */
-        OpcUa_ReadValueId_Clear(rv);
     }
     Cache_Unlock();
-    SOPC_Free(nodesToRead);
 
     if (SOPC_STATUS_OK != status)
     {

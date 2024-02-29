@@ -95,7 +95,9 @@ struct SOPC_PubScheduler_TransportCtx
 /* Context for each DataSetMessage in a NetworkMessage */
 typedef struct SOPC_DataSetMessageCtx_t
 {
-    uint16_t sequenceNumber; // DataSetMessage Sequence Number
+    OpcUa_ReadValueId* readValues; // Context to retrieve variable from user
+    const uint16_t nbReadValue;    //
+    uint16_t sequenceNumber;       // DataSetMessage Sequence Number
 } SOPC_DataSetMessageCtx_t;
 
 typedef struct MessageCtx
@@ -306,6 +308,70 @@ static void MessageCtx_Array_Clear(void)
     SOPC_Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
 }
 
+static void clear_dataSetMessageCtx_array(void* context)
+{
+    SOPC_DataSetMessageCtx_t* dataSetMessageCtx = (SOPC_DataSetMessageCtx_t*) context;
+    for (int i = 0; i < dataSetMessageCtx->nbReadValue; i++)
+    {
+        OpcUa_ReadValueId_Clear(&dataSetMessageCtx->readValues[i]);
+    }
+    SOPC_Free(dataSetMessageCtx->readValues);
+    dataSetMessageCtx->readValues = NULL;
+}
+
+static OpcUa_ReadValueId* create_readValues(const SOPC_PublishedDataSet* pubDataset)
+{
+    uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataset);
+
+    OpcUa_ReadValueId* readValues = SOPC_Calloc(nbFieldsMetadata, sizeof(*readValues));
+    if (NULL == readValues)
+    {
+        return NULL;
+    }
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+
+    // Build the Read request using PublishedVariable property of each FieldMetaData
+    for (uint16_t i = 0; i < nbFieldsMetadata && SOPC_STATUS_OK == status; i++)
+    {
+        OpcUa_ReadValueId* readValue = &readValues[i];
+        OpcUa_ReadValueId_Initialize(readValue);
+
+        SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataset, i);
+        SOPC_ASSERT(NULL != fieldData);
+
+        SOPC_PublishedVariable* sourceData = SOPC_FieldMetaData_Get_PublishedVariable(fieldData);
+        SOPC_ASSERT(NULL != sourceData);
+
+        readValue->AttributeId = SOPC_PublishedVariable_Get_AttributeId(sourceData);
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_NodeId_Copy(&readValue->NodeId, SOPC_PublishedVariable_Get_NodeId(sourceData));
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            const char* indexRange = SOPC_PublishedVariable_Get_IndexRange(sourceData);
+            if (NULL != indexRange)
+            {
+                status = SOPC_String_CopyFromCString(&readValue->IndexRange, indexRange);
+            }
+        }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        for (uint16_t i = 0; i < nbFieldsMetadata; i++)
+        {
+            OpcUa_ReadValueId_Clear(&readValues[i]);
+        }
+        SOPC_Free(readValues);
+        readValues = NULL;
+    }
+    return readValues;
+}
+
 static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
                                        SOPC_Conf_PublisherId pubId,
                                        SOPC_WriterGroup* group,
@@ -349,7 +415,8 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
     context->next_timeout = SOPC_RealTime_Create(tRef);
-    context->dataSetMessageCtx = SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, NULL);
+    context->dataSetMessageCtx =
+        SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
     SOPC_ASSERT(NULL != context->dataSetMessageCtx);
     bool result = true;
     if (SOPC_SecurityMode_Sign == smode || SOPC_SecurityMode_SignAndEncrypt == smode)
@@ -404,7 +471,12 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     /* Fill in dataSetMessage context */
     for (uint8_t i = 0; result && i < nbDataset; i++)
     {
-        SOPC_DataSetMessageCtx_t dataSetMsgCtx = {.sequenceNumber = 1};
+        const SOPC_DataSetWriter* writer = SOPC_WriterGroup_Get_DataSetWriter_At(group, i);
+        const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
+        OpcUa_ReadValueId* readValues = create_readValues(dataset);
+        const uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(dataset);
+        SOPC_DataSetMessageCtx_t dataSetMsgCtx = {
+            .sequenceNumber = 1, .readValues = readValues, .nbReadValue = nbFieldsMetadata};
         result = SOPC_Array_Append(context->dataSetMessageCtx, dataSetMsgCtx);
     }
 
@@ -507,6 +579,7 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
 
     SOPC_ASSERT(NULL != context);
     SOPC_Dataset_NetworkMessage* message = context->message;
+
     SOPC_WriterGroup* group = context->group;
     SOPC_ASSERT(NULL != message && NULL != group);
 
@@ -538,7 +611,9 @@ static void MessageCtx_send_publish_message(MessageCtx* context)
         const SOPC_PublishedDataSet* dataset = SOPC_DataSetWriter_Get_DataSet(writer);
         SOPC_ASSERT(SOPC_PublishedDataSet_Nb_FieldMetaData(dataset) == nbFields);
 
-        SOPC_DataValue* values = SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dataset);
+        const uint16_t nbValues = SOPC_PublishedDataSet_Nb_FieldMetaData(dataset);
+        SOPC_DataValue* values =
+            SOPC_PubSourceVariable_GetVariables(pubSchedulerCtx.sourceConfig, dsmCtx->readValues, (int32_t) nbValues);
         SOPC_ASSERT(NULL != values);
 
         /* Check value-type compatibility and encode */

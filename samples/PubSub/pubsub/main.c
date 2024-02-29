@@ -104,7 +104,7 @@ static const char* getenv_default(const char* name, const char* default_value)
 }
 
 /* PubSub callbacks (for the emitter) */
-static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
 static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
 
 /* RTT calculations */
@@ -307,7 +307,7 @@ int main(int argc, char* const argv[])
     SOPC_Free(g_rtt);
 }
 
-static SOPC_DataValue* get_source_increment(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
+static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues)
 {
     /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_SEND,
      * increments its value */

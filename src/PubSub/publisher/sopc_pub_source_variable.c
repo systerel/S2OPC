@@ -48,63 +48,13 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
     SOPC_Free(sourceConfig);
 }
 
-SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig, //
-                                                    const SOPC_PublishedDataSet* pubDataset)          //
+SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig, //.
+                                                    const OpcUa_ReadValueId* readValues,
+                                                    const int32_t nbValues) //
 {
-    if (NULL == sourceConfig || NULL == pubDataset)
+    if (NULL == sourceConfig || NULL == readValues)
     {
         return NULL;
     }
-
-    uint16_t nbFieldsMetadata = SOPC_PublishedDataSet_Nb_FieldMetaData(pubDataset);
-
-    OpcUa_ReadValueId* readValues = SOPC_Calloc(nbFieldsMetadata, sizeof(*readValues));
-    if (NULL == readValues)
-    {
-        return NULL;
-    }
-
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-
-    // Build the Read request using PublishedVariable property of each FieldMetaData
-    for (uint16_t i = 0; i < nbFieldsMetadata; i++)
-    {
-        OpcUa_ReadValueId* readValue = &readValues[i];
-        OpcUa_ReadValueId_Initialize(readValue);
-
-        SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataset, i);
-        SOPC_ASSERT(NULL != fieldData);
-
-        SOPC_PublishedVariable* sourceData = SOPC_FieldMetaData_Get_PublishedVariable(fieldData);
-        SOPC_ASSERT(NULL != sourceData);
-
-        readValue->AttributeId = SOPC_PublishedVariable_Get_AttributeId(sourceData);
-
-        if (SOPC_STATUS_OK == status) // possibly set to NOK in previous iteration
-        {
-            status = SOPC_NodeId_Copy(&readValue->NodeId, SOPC_PublishedVariable_Get_NodeId(sourceData));
-        }
-
-        if (SOPC_STATUS_OK == status)
-        {
-            const char* indexRange = SOPC_PublishedVariable_Get_IndexRange(sourceData);
-            if (NULL != indexRange)
-            {
-                status = SOPC_String_CopyFromCString(&readValue->IndexRange, indexRange);
-            }
-        }
-    }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        for (uint16_t i = 0; i < nbFieldsMetadata; i++)
-        {
-            OpcUa_ReadValueId_Clear(&readValues[i]);
-        }
-        SOPC_Free(readValues);
-
-        return NULL;
-    }
-
-    return sourceConfig->callback(readValues, nbFieldsMetadata);
+    return sourceConfig->callback(readValues, nbValues);
 }

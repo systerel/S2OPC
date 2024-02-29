@@ -49,13 +49,11 @@ typedef struct SOPC_PubSourceVariableConfig SOPC_PubSourceVariableConfig;
  *
  * Given the \p nodesToRead, it should produce an array of DataValues of length \p nbValues.
  *
- * \note Ownership of the ReadValue array and its elements is transferred to the callback code which must free them.
- *
  * \note Ownership of the returned DataValue array and its elements is transferred to the publisher library.
  *
  * \return  An array of DataValue of length \p nbValues or NULL in case of error
  */
-typedef SOPC_DataValue* SOPC_GetSourceVariables_Func(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+typedef SOPC_DataValue* SOPC_GetSourceVariables_Func(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
 
 SOPC_PubSourceVariableConfig* SOPC_PubSourceVariableConfig_Create(SOPC_GetSourceVariables_Func* callback);
 
@@ -68,6 +66,7 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
  */
 
 SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig,
-                                                    const SOPC_PublishedDataSet* pubDataset);
+                                                    const OpcUa_ReadValueId* readValue,
+                                                    const int32_t nbValues);
 
 #endif /* SOPC_PUB_SOURCE_VARIABLE_H_ */

@@ -927,7 +927,7 @@ bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
     return true;
 }
 
-SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValues)
+SOPC_DataValue* Server_GetSourceVariables(const OpcUa_ReadValueId* lrv, const int32_t nbValues)
 {
     if (!Server_IsRunning())
     {
@@ -963,11 +963,19 @@ SOPC_DataValue* Server_GetSourceVariables(OpcUa_ReadValueId* lrv, int32_t nbValu
     request->MaxAge = 0.;
     request->TimestampsToReturn = OpcUa_TimestampsToReturn_Both;
     request->NoOfNodesToRead = nbValues;
-    request->NodesToRead = lrv;
+    request->NodesToRead = SOPC_Calloc((size_t) request->NoOfNodesToRead, sizeof(*request->NodesToRead));
+    SOPC_ASSERT(NULL != request->NodesToRead);
+    for (int i = 0; i < request->NoOfNodesToRead; i++)
+    {
+        SOPC_EncodeableObject_Initialize(lrv->encodeableType, &request->NodesToRead[i]);
+        status = SOPC_EncodeableObject_Copy(lrv->encodeableType, &request->NodesToRead[i], &lrv[i]);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
 
     SOPC_Mutex_Lock(&requestContext->mut);
 
     status = SOPC_ServerHelper_LocalServiceAsync(request, (uintptr_t) requestContext);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_Mutex_UnlockAndWaitCond(&requestContext->cond, &requestContext->mut);
 
