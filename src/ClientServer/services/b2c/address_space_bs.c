@@ -514,6 +514,18 @@ void address_space_bs__read_AddressSpace_DisplayName_value(
     }
 }
 
+#if S2OPC_EVENT_MANAGEMENT
+static SOPC_Byte SOPC_Internal_ComputeEventNotifier_Value(const SOPC_AddressSpace_Node* node)
+{
+    SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Object || node->node_class == OpcUa_NodeClass_View);
+    SOPC_Byte eventNotifier =
+        (node->node_class == OpcUa_NodeClass_Object ? node->data.object.EventNotifier : node->data.view.EventNotifier);
+    SOPC_Byte supportedFlags = (OpcUa_EventNotifierType_SubscribeToEvents);
+    // Note: keep only supported event notifier flags in final value
+    return (eventNotifier & supportedFlags);
+}
+#endif
+
 void address_space_bs__read_AddressSpace_EventNotifier_value(
     const constants__t_Node_i address_space_bs__p_node,
     constants_statuscodes_bs__t_StatusCode_i* const address_space_bs__sc,
@@ -522,8 +534,12 @@ void address_space_bs__read_AddressSpace_EventNotifier_value(
     SOPC_ASSERT(address_space_bs__p_node->node_class == OpcUa_NodeClass_View ||
                 address_space_bs__p_node->node_class == OpcUa_NodeClass_Object);
     *address_space_bs__sc = constants_statuscodes_bs__e_sc_ok;
-    // Note: always returns 0 since we do not implement events
+#if S2OPC_EVENT_MANAGEMENT
+    SOPC_Byte eventNotifier = SOPC_Internal_ComputeEventNotifier_Value(address_space_bs__p_node);
+    *address_space_bs__variant = util_variant__new_Variant_from_Byte(eventNotifier);
+#else
     *address_space_bs__variant = util_variant__new_Variant_from_Byte(0);
+#endif
     if (NULL == *address_space_bs__variant)
     {
         *address_space_bs__sc = constants_statuscodes_bs__e_sc_bad_out_of_memory;
