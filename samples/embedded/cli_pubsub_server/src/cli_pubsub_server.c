@@ -1130,10 +1130,13 @@ static SOPC_ReturnStatus createNodeIdFromInput(SOPC_NodeId* pNid, const char* in
         static const char* prefix = "ns=1;s=";
         const size_t len2 = strlen(prefix) + len + 1;
         char* nodeId = (char*) SOPC_Calloc(1, len2);
-        sprintf(nodeId, "%s%s", prefix, input);
-        PRINT("Could not find nodeId '%s', trying with '%s'\n", input, nodeId);
-        status = SOPC_NodeId_InitializeFromCString(pNid, nodeId, (int32_t) len2);
-        SOPC_Free(nodeId);
+        if (NULL != nodeId)
+        {
+            sprintf(nodeId, "%s%s", prefix, input);
+            PRINT("Could not find nodeId '%s', trying with '%s'\n", input, nodeId);
+            status = SOPC_NodeId_InitializeFromCString(pNid, nodeId, (int32_t) len2);
+            SOPC_Free(nodeId);
+        }
     }
     return status;
 }
