@@ -1090,6 +1090,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 112}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1148,6 +1149,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 113}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1206,6 +1208,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11509}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1264,6 +1267,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11511}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1334,6 +1338,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 87}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1374,6 +1379,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_String, 1, .Data.String = {sizeof("SubVars")-1, 1, (SOPC_Byte*) "SubVars"}}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1432,6 +1438,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 17708}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1454,6 +1461,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1482,6 +1490,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1510,6 +1519,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1538,6 +1548,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1566,6 +1577,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1588,6 +1600,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -1658,6 +1671,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2296}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 1,
         }}
     },
     {
@@ -2322,6 +2336,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2997}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -2680,6 +2695,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11714}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -2936,6 +2952,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 11510}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -2958,6 +2975,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -2980,6 +2998,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 2294}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3025,6 +3044,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
             .Description = {{0, 0, NULL}, {0, 0, NULL}},
             .NoOfReferences = 0,
             .References = NULL,
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3047,6 +3067,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 3709}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3099,6 +3120,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 61}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3686,6 +3708,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3708,6 +3731,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3730,6 +3754,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3752,6 +3777,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3774,6 +3800,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3796,6 +3823,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3818,6 +3846,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3840,6 +3869,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -3862,6 +3892,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 76}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -4100,6 +4131,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_String, 1, .Data.String = {sizeof("PubStatusCode")-1, 1, (SOPC_Byte*) "PubStatusCode"}}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
     {
@@ -4338,6 +4370,7 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
                     {{SOPC_IdentifierType_String, 1, .Data.String = {sizeof("SubStatusCode")-1, 1, (SOPC_Byte*) "SubStatusCode"}}, {0, 0, NULL}, 0},
                 }
             },
+            .EventNotifier = 0,
         }}
     },
 };

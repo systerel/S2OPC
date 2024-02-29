@@ -622,7 +622,6 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         }
         else if (strcmp("AccessLevel", attr) == 0)
         {
-            SOPC_ASSERT(OpcUa_NodeClass_Variable == element_type);
             if (OpcUa_NodeClass_Variable != element_type)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser,
@@ -641,7 +640,6 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
         }
         else if (strcmp("Executable", attr) == 0)
         {
-            SOPC_ASSERT(OpcUa_NodeClass_Method == element_type);
             if (OpcUa_NodeClass_Method != element_type)
             {
                 LOG_XML_ERRORF(ctx->helper_ctx.parser,
@@ -653,6 +651,28 @@ static bool start_node(struct parse_context_t* ctx, uint32_t element_type, const
             const char* attr_val = attrs[++i];
 
             ctx->node.data.method.Executable = (strcmp(attr_val, "true") == 0);
+        }
+        else if (strcmp("EventNotifier", attr) == 0)
+        {
+            if (OpcUa_NodeClass_Object != element_type && OpcUa_NodeClass_View != element_type)
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser,
+                               "Unexpected EventNotifier attribute (value '%s') on node of class = %s", attrs[++i],
+                               tag_from_element_id(element_type));
+                return false;
+            }
+
+            const char* attr_val = attrs[++i];
+
+            SOPC_Byte parsedEventNotifier = 0;
+            if (!SOPC_strtouint(attr_val, strlen(attr_val), 8, &parsedEventNotifier))
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid EventNotifier on node value: '%s", attr_val);
+                return false;
+            }
+            SOPC_Byte* eventNotifier = (OpcUa_NodeClass_Object == element_type ? &ctx->node.data.object.EventNotifier
+                                                                               : &ctx->node.data.view.EventNotifier);
+            *eventNotifier = parsedEventNotifier;
         }
         else
         {

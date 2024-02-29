@@ -322,7 +322,8 @@ class VariableValue(object):
 
 class Node(object):
     __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
-                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'definition'
+                'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'definition',\
+                'event_notifier'
 
     def __init__(self, tag, nodeid, browse_name, description, display_name, references):
         self.tag = tag
@@ -337,7 +338,8 @@ class Node(object):
         self.value_rank = None
         self.accesslevel = None
         self.executable = None # For Method node class only
-        self.definition = None #For DataType node class only
+        self.definition = None # For DataType node class only
+        self.event_notifier = None # For Object or View node class only
 
 
 class Reference(object):
@@ -1471,6 +1473,14 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
     if xml_node.tag == UA_DATA_TYPE_TAG and not no_dt_definition:
         node.definition = collect_dt_definition(aliases, node, xml_node)
 
+    if xml_node.tag == UA_OBJECT_TAG or xml_node.tag == UA_VIEW_TAG:
+        event_notifier = xml_node.get('EventNotifier', None)
+        if event_notifier is not None:
+            try:
+                node.event_notifier = int(event_notifier)
+            except ValueError:
+                raise ParseError('Non integer EventNotifier for node %s' % xml_node['NodeId'])
+
     return node
 
 
@@ -1529,13 +1539,12 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
         extra
     )
 
-
-def generate_item_object(is_const_addspace, nodes, ua_node):
-    return generate_item(is_const_addspace, ua_node, 'Object', 'object')
-
-
 def number_coalesce(n, default):
     return n if n is not None else default
+
+def generate_item_object(is_const_addspace, nodes, ua_node):
+    return generate_item(is_const_addspace, ua_node, 'Object', 'object',
+                         EventNotifier=str(number_coalesce(ua_node.event_notifier, 0)))
 
 def default_variable_status(ua_node):
     value_status = '0x00' # Good status
