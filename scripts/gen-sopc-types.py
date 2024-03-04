@@ -304,6 +304,8 @@ class BinarySchema:
             out.write(ENCODEABLE_TYPE_FIELD_DESC_START.format(name=barename))
         for field in fields:
             is_built_in, type_index = self.get_type_index(field.type_name)
+            if not is_built_in and ns_index != 0:
+                raise Exception('Non-built-in type fields are not supported in non-NS0 for now in EncodeableTypes: field %s in %s type' % (field.name, barename))
             out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
                 name=barename,
                 is_built_in=c_bool_value(is_built_in),
