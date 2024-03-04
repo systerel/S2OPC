@@ -45,6 +45,11 @@ typedef struct SOPC_PubSheduler_GetVariableRequestContext
 typedef struct SOPC_PubSourceVariableConfig SOPC_PubSourceVariableConfig;
 
 /**
+ * Data transfered by scheduler to user callback
+ */
+typedef struct SOPC_SourceVariableCtx SOPC_SourceVariableCtx;
+
+/**
  * \brief The publisher calls this callback cyclically to get the values to publish.
  *
  * Given the \p nodesToRead, it should produce an array of DataValues of length \p nbValues.
@@ -66,7 +71,18 @@ void SOPC_PubSourceVariableConfig_Delete(SOPC_PubSourceVariableConfig* sourceCon
  */
 
 SOPC_DataValue* SOPC_PubSourceVariable_GetVariables(const SOPC_PubSourceVariableConfig* sourceConfig,
-                                                    const OpcUa_ReadValueId* readValue,
-                                                    const int32_t nbValues);
+                                                    const SOPC_SourceVariableCtx* sourceVariable);
+
+/**
+ * @brief Create and Initialize Source Variable context for the user to get source variables
+ *
+ * @param pubDataset published dataset of the dataSetMessage which field we update
+ *
+ * @return An initialize source variable context and NULL in case of error
+ */
+SOPC_SourceVariableCtx* SOPC_PubSourceVariable_SourceVariablesCtx_Create(const SOPC_PublishedDataSet* pubDataset);
+
+/* Delete SourceVariableCtx */
+void SOPC_PubSourceVariable_SourceVariableCtx_Delete(SOPC_SourceVariableCtx** pubSourceVariable);
 
 #endif /* SOPC_PUB_SOURCE_VARIABLE_H_ */

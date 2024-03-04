@@ -52,13 +52,6 @@ static SOPC_Variant varArr[NB_VARS] = {
     {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 64852}},
     {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
     {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
-static OpcUa_ReadValueId readValues[NB_VARS] = {0};
-
-SOPC_Variant varArr[NB_VARS] = {{true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 12071982}},
-                                {true, SOPC_Byte_Id, SOPC_VariantArrayType_SingleValue, {.Byte = 239}},
-                                {true, SOPC_UInt16_Id, SOPC_VariantArrayType_SingleValue, {.Uint16 = 64852}},
-                                {true, SOPC_Float_Id, SOPC_VariantArrayType_SingleValue, {.Floatv = (float) 0.12}},
-                                {true, SOPC_UInt32_Id, SOPC_VariantArrayType_SingleValue, {.Uint32 = 369852}}};
 
 /* Test network message layer JSON encoded */
 
@@ -1494,25 +1487,6 @@ static SOPC_DataValue* getSourceVariablesCb(const OpcUa_ReadValueId* nodesToRead
     return dataValues;
 }
 
-static void initialize_ReadValues(SOPC_PublishedDataSet* pubDataSet)
-{
-    for (uint16_t i = 0; i < NB_VARS; i++)
-    {
-        OpcUa_ReadValueId* readValue = &readValues[i];
-        OpcUa_ReadValueId_Initialize(readValue);
-
-        SOPC_FieldMetaData* fieldData = SOPC_PublishedDataSet_Get_FieldMetaData_At(pubDataSet, i);
-        ck_assert_ptr_nonnull(fieldData);
-
-        SOPC_PublishedVariable* sourceData = SOPC_FieldMetaData_Get_PublishedVariable(fieldData);
-        ck_assert_ptr_nonnull(sourceData);
-
-        readValue->AttributeId = SOPC_PublishedVariable_Get_AttributeId(sourceData);
-        SOPC_ReturnStatus status = SOPC_NodeId_Copy(&readValue->NodeId, SOPC_PublishedVariable_Get_NodeId(sourceData));
-        ck_assert_int_eq(SOPC_STATUS_OK, status);
-    }
-}
-
 static void check_returned_DataValues(SOPC_DataValue* dataValues)
 {
     ck_assert_ptr_nonnull(dataValues);
@@ -1538,12 +1512,14 @@ START_TEST(test_source_variable_layer)
     SOPC_PublishedDataSet* pds = NULL;
     SOPC_PubSubConfiguration* config = build_Pub_Config(&pds);
 
-    initialize_ReadValues(pds);
+    SOPC_SourceVariableCtx* sourceVariable = SOPC_PubSourceVariable_SourceVariablesCtx_Create(pds);
+    ck_assert_ptr_nonnull(sourceVariable);
 
     SOPC_PubSourceVariableConfig* sourceConfig = SOPC_PubSourceVariableConfig_Create(&getSourceVariablesCb);
-    SOPC_DataValue* dataValues = SOPC_PubSourceVariable_GetVariables(sourceConfig, readValues, NB_VARS);
+    SOPC_DataValue* dataValues = SOPC_PubSourceVariable_GetVariables(sourceConfig, sourceVariable);
     check_returned_DataValues(dataValues);
 
+    SOPC_PubSourceVariable_SourceVariableCtx_Delete(&sourceVariable);
     SOPC_PubSourceVariableConfig_Delete(sourceConfig);
     SOPC_PubSubConfiguration_Delete(config);
 }
