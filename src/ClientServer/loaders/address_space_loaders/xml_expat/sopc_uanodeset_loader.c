@@ -1689,14 +1689,14 @@ static uint8_t type_width(SOPC_BuiltinId ty)
  * Base64 ByteString shall be null terminated. Otherwise, the result is undefined. */
 static bool set_variant_value_bstring(SOPC_Variant* var, const char* bstring_str)
 {
-    size_t length = strlen(bstring_str);
+    size_t length = 0;
     SOPC_ReturnStatus status;
+    unsigned char* str = NULL;
 
-    /* By definition, ByteString base64 length is greater than its corresponding string length */
-    unsigned char* str = SOPC_Calloc(1, length);
-
-    status = SOPC_HelperDecode_Base64(bstring_str, str, &length);
+    status = SOPC_HelperDecode_Base64(bstring_str, &str, &length);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
+    SOPC_ASSERT(NULL != str);
+    SOPC_ASSERT(0 != length);
 
     status = SOPC_String_CopyFromCString(&var->Value.Bstring, (char*) str);
     SOPC_Free(str);

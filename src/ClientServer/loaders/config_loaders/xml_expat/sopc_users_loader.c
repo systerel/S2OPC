@@ -229,61 +229,70 @@ static bool get_decode_buffer(const char* buffer,
 {
     SOPC_ASSERT(NULL != buffer);
     size_t outLen = 0;
+    SOPC_ByteString_Initialize(out);
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    outLen = strlen(buffer);
 
-    // Get and check the output length from the encoding input format
     if (!base64)
     {
-        outLen = strlen(buffer);
         if (0 != outLen % 2)
         {
             LOG_XML_ERROR(parser, "Hash hex format must be a multiple of 2 bytes");
             return false;
         }
         outLen = outLen / 2;
+        if (expected_length != outLen)
+        {
+            LOG_XML_ERROR(parser, "Hash length is not the same as the global configuration");
+            return false;
+        }
+
+        // Check if outLen can be casted to int32_t to define out->Length
+        if (INT32_MAX < outLen)
+        {
+            return false;
+        }
+
+        out->Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
+        out->Length = (int32_t) outLen;
+        if (NULL == out->Data)
+        {
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+
+        // Decode hexadicimal C string
+        status = SOPC_HelperDecode_Hex(buffer, out->Data, outLen);
     }
     else
     {
-        outLen = strlen(buffer);
         if (0 != outLen % 4)
         {
             LOG_XML_ERROR(parser, "Hash base64 format must be a multiple of 4 bytes");
             return false;
         }
-        size_t paddingLength = 0;
-        status = SOPC_HelperDecode_Base64_GetPaddingLength(buffer, &paddingLength);
-        if (SOPC_STATUS_OK != status)
+
+        // Decode base64 C string
+        status = SOPC_HelperDecode_Base64(buffer, &out->Data, &outLen);
+
+        // Check if outLen can be casted to int32_t to define out->Length
+        if (INT32_MAX < outLen)
         {
-            LOG_XML_ERROR(parser, "Invalid padding for base64 encoding");
+            status = SOPC_STATUS_NOK;
+        }
+
+        if (SOPC_STATUS_OK == status && expected_length != outLen)
+        {
+            LOG_XML_ERROR(parser, "Hash length is not the same as the global configuration");
             return false;
         }
-        outLen = (3 * (outLen / 4)) - paddingLength;
-    }
-    if (expected_length != outLen)
-    {
-        LOG_XML_ERROR(parser, "Hash length is not the same as the global configuration");
-        return false;
-    }
-    // Decode
-    SOPC_ByteString_Initialize(out);
-    out->Data = SOPC_Malloc(sizeof(SOPC_Byte) * outLen);
-    out->Length = (int32_t) outLen;
-    if (NULL == out->Data)
-    {
-        LOG_MEMORY_ALLOCATION_FAILURE;
-        return false;
-    }
-    if (base64)
-    {
-        // TODO: Update SOPC_HelperDecode_Base64. This feature is disable for now (see ticket #1057)
-        status = SOPC_HelperDecode_Base64(buffer, out->Data, &outLen);
-    }
-    else
-    {
-        status = SOPC_HelperDecode_Hex(buffer, out->Data, outLen);
+        if (SOPC_STATUS_OK == status)
+        {
+            out->Length = (int32_t) outLen;
+        }
     }
 
-    if (SOPC_STATUS_OK != status)
+    if (SOPC_STATUS_OK != status && NULL != out->Data)
     {
         SOPC_Free(out->Data);
     }

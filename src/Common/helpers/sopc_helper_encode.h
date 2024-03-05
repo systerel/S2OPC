@@ -24,45 +24,43 @@
 #include "sopc_enums.h"
 
 /**
- * \brief  Get the number of padding characters for base64 ('=').
- *         Starting from the end until the first base64 characters.
+ * \brief  This function decodes a null-terminated base64 C string.
  *
- * \param input     A valid pointer to the input.
+ * \param pInput     A valid pointer to the null-terminated base64 C string.
  *
- * \param outLen    the number of padding characters (0, 1 or 2)
+ * \param[out] ppOut       A valid pointer poiting to NULL. It will be set to the buffer containing the newly decoded
+ * data. The allocated buffer must be freed by the caller.
  *
- * \return   SOPC_STATUS_OK when successful otherwise SOPC_STATUS_INVALID_PARAMETERS if
- *           \p input is NULL or has not a number of padding characters equal to 0, 1 or 2.
- */
-SOPC_ReturnStatus SOPC_HelperDecode_Base64_GetPaddingLength(const char* input, size_t* outLen);
-
-/**
- * \brief  This function decodes a base64 ByteString. Base64 ByteString shall be null terminated.
- *         Otherwise, the result is undefined.
- *
- * \param input     A valid pointer to the input.
- *
- * \param out       A valid pointer to the output (you should allocate
- *                  (3 * (strlen( \p input )/ 4)) - paddingLength)
- *
- * \param outLen    The size of the \p out comptuted during the function execution.
+ * \param pOutLen    The size of the \p ppOut comptuted during the function execution.
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* input, unsigned char* out, size_t* outLen);
+SOPC_ReturnStatus SOPC_HelperDecode_Base64(const char* pInput, unsigned char** ppOut, size_t* pOutLen);
 
 /**
- * \brief  Unhexlify a ByteString.
+ * \brief  Decodes a hexadecimal ByteString.
  *
- * \param input     A valid pointer to the input.
+ * \param pInput     A valid pointer to the hexadecimal ByteString.
  *
- * \param out       A valid pointer to the output (you should allocate strlen( \p input )/2 in \p out . \p outputLen is
- *                  strlen( \p input ) / 2 )
+ * \param[out] pOut       A valid pointer to the output (you should allocate strlen( \p pInput )/2 in \p pOut .
  *
- * \param outputLen    The size of the \p input divided by two.
+ * \param outputLen    The size of the \p pInput divided by two.
  *
  * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
  */
-SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* input, unsigned char* out, size_t outputLen);
+SOPC_ReturnStatus SOPC_HelperDecode_Hex(const char* pInput, unsigned char* pOut, size_t outputLen);
+
+/**
+ * \brief  Encodes a ByteString to a hexadecimal ByteString.
+ *
+ * \param pInput     A valid pointer to a ByteString.
+ *
+ * \param[out] pOut       A valid pointer to the output (you should allocate strlen( \p pInput )*2 in \p pOut .
+ *
+ * \param inputLen    The size of the \p pInput .
+ *
+ * \return  SOPC_STATUS_OK when successful otherwise SOPC_STATUS_NOK.
+ */
+SOPC_ReturnStatus SOPC_HelperEncode_Hex(const unsigned char* pInput, char* pOut, size_t inputLen);
 
 #endif /* SOPC_HELPER_ENCODE_H_ */
