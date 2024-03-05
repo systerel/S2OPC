@@ -24,7 +24,6 @@
 #include <string.h>
 
 #include "check_crypto_certificates.h"
-#include "hexlify.h"
 
 #include "sopc_key_cert_pair.h"
 #include "sopc_key_manager.h"

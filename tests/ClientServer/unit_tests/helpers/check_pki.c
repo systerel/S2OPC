@@ -29,7 +29,6 @@
 #include <stdio.h>
 
 #include "check_helpers.h"
-#include "hexlify.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"

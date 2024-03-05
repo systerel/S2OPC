@@ -100,7 +100,6 @@ add_custom_target(make-server-address-space DEPENDS ${TEST_SERVER_ADDRESS_SPACE_
 file(GLOB INTERNAL_TESTS_SRCS "unit_tests/helpers/check_*.c")
 add_executable(check_helpers ${INTERNAL_TESTS_SRCS}
                              unit_tests/helpers/custom_types.c
-                             unit_tests/helpers/hexlify.c
                              ${TEST_SERVER_ADDRESS_SPACE_C})
 add_dependencies(check_helpers make-server-address-space)
 target_include_directories(check_helpers PRIVATE ${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}
@@ -189,7 +188,7 @@ file(GLOB SECURE_CHANNELS_BUFFER_TEST
   "unit_tests/secure_channels/check_sc_rcv_buffer.c"
   "unit_tests/secure_channels/check_sc_rcv_helpers.c"
   "unit_tests/secure_channels/event_helpers.c"
-  "unit_tests/helpers/hexlify.c"
+  "${S2OPC_ROOT_PATH}/src/Common/helpers/sopc_helper_encode.c"
   "unit_tests/secure_channels/stubs/*.c")
 
 add_executable(check_sc_rcv_buffer ${SECURE_CHANNELS_SRC}
@@ -209,7 +208,7 @@ file(GLOB SECURE_CHANNELS_ENCRYPTED_BUFFER_TEST
   "unit_tests/secure_channels/check_sc_rcv_helpers.c"
   "unit_tests/secure_channels/check_sc_rcv_encrypted_buffer.c"
   "unit_tests/secure_channels/event_helpers.c"
-  "unit_tests/helpers/hexlify.c"
+  "${S2OPC_ROOT_PATH}/src/Common/helpers/sopc_helper_encode.c"
   "unit_tests/secure_channels/stubs/*.c")
 
 add_executable(check_sc_rcv_encrypted_buffer ${SECURE_CHANNELS_SRC}

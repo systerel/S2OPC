@@ -29,10 +29,10 @@
 
 #include "check_crypto_certificates.h"
 #include "check_helpers.h"
-#include "hexlify.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
+#include "sopc_helper_encode.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -102,26 +102,31 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
 
     // Encrypt
     memset(key, 0, sizeof(key));
-    ck_assert(unhexlify("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32) == 32);
+    SOPC_ReturnStatus status =
+        SOPC_HelperDecode_Hex("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(nonce, 0, sizeof(nonce));
-    ck_assert(unhexlify("8c764a8a", nonce, 4) == 4);
+    status = SOPC_HelperDecode_Hex("8c764a8a", nonce, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecNonce = SOPC_SecretBuffer_NewFromExposedBuffer(nonce, sizeof(nonce));
     ck_assert(NULL != pSecNonce);
     memset(random, 0, sizeof(random));
-    ck_assert(unhexlify("844af35b", random, 4) == 4);
+    status = SOPC_HelperDecode_Hex("844af35b", random, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     uSeqNum = 42;
     memset(input, 0, sizeof(input));
-    ck_assert(
-        unhexlify(
-            "409fd257c571803a36ac2c36469e31601d171c585a3ade3ad2619fc5733027c6a0b91a1013301c57769c8f87cd1a75ac70c2995904"
-            "4b86721335e6d9225807a32b4af3e7a89b5d3b04d119b11d1a664677ed0e24892e0f9e94267aaf9fe850bf6cc85d34",
-            input, 100) == 100);
+    status = SOPC_HelperDecode_Hex(
+        "409fd257c571803a36ac2c36469e31601d171c585a3ade3ad2619fc5733027c6a0b91a1013301c57769c8f87cd1a75ac70c2995904"
+        "4b86721335e6d9225807a32b4af3e7a89b5d3b04d119b11d1a664677ed0e24892e0f9e94267aaf9fe850bf6cc85d34",
+        input, 100);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     memset(output, 0, sizeof(output));
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, input, 100, pSecKey, pSecNonce, random, 4, uSeqNum, output,
                                               100) == SOPC_STATUS_OK);
-    ck_assert(hexlify(output, hexoutput, 100) == 100);
+    status = SOPC_HelperEncode_Hex(output, hexoutput, 100);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(
         memcmp(hexoutput,
                "0fb8a1a62b4935cdcac7f842c0a216291f9fe56e28de1f911fecc5c8e4e515219f305066c2f67db529577c3bed31e991ea2156"
@@ -132,26 +137,30 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
 
     // Decrypt
     memset(key, 0, sizeof(key));
-    ck_assert(unhexlify("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32) == 32);
+    status = SOPC_HelperDecode_Hex("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(nonce, 0, sizeof(nonce));
-    ck_assert(unhexlify("8c764a8a", nonce, 4) == 4);
+    status = SOPC_HelperDecode_Hex("8c764a8a", nonce, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecNonce = SOPC_SecretBuffer_NewFromExposedBuffer(nonce, sizeof(nonce));
     ck_assert(NULL != pSecNonce);
     memset(random, 0, sizeof(random));
-    ck_assert(unhexlify("844af35b", random, 4) == 4);
+    status = SOPC_HelperDecode_Hex("844af35b", random, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     uSeqNum = 42;
     memset(input, 0, sizeof(input));
-    ck_assert(
-        unhexlify(
-            "0fb8a1a62b4935cdcac7f842c0a216291f9fe56e28de1f911fecc5c8e4e515219f305066c2f67db529577c3bed31e991ea2156"
-            "8fb325053a221149be586f183885d55d3683b06286f760ee7a00ed85ad17b2b3a37b25fd5034af8862a09080a656a6d9ca",
-            input, 100) == 100);
+    status = SOPC_HelperDecode_Hex(
+        "0fb8a1a62b4935cdcac7f842c0a216291f9fe56e28de1f911fecc5c8e4e515219f305066c2f67db529577c3bed31e991ea2156"
+        "8fb325053a221149be586f183885d55d3683b06286f760ee7a00ed85ad17b2b3a37b25fd5034af8862a09080a656a6d9ca",
+        input, 100);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     memset(output, 0, sizeof(output));
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, input, 100, pSecKey, pSecNonce, random, 4, uSeqNum, output,
                                               100) == SOPC_STATUS_OK);
-    ck_assert(hexlify(output, hexoutput, 100) == 100);
+    status = SOPC_HelperEncode_Hex(output, hexoutput, 100);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(
         memcmp(hexoutput,
                "409fd257c571803a36ac2c36469e31601d171c585a3ade3ad2619fc5733027c6a0b91a1013301c57769c8f87cd1a75ac70c2995"
@@ -162,26 +171,33 @@ START_TEST(test_crypto_symm_crypt_PubSub256)
 
     // Encrypt + Decrypt
     memset(key, 0, sizeof(key));
-    ck_assert(unhexlify("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32) == 32);
+    status = SOPC_HelperDecode_Hex("3f8679a793b2f2845bc7b796eb8ede23d663a77d145fb297f4859beef7b43025", key, 32);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, sizeof(key));
     ck_assert(NULL != pSecKey);
     memset(nonce, 0, sizeof(nonce));
-    ck_assert(unhexlify("8c764a8a", nonce, 4) == 4);
+    status = SOPC_HelperDecode_Hex("8c764a8a", nonce, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecNonce = SOPC_SecretBuffer_NewFromExposedBuffer(nonce, sizeof(nonce));
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(NULL != pSecNonce);
     memset(random, 0, sizeof(random));
-    ck_assert(unhexlify("844af35b", random, 4) == 4);
+    status = SOPC_HelperDecode_Hex("844af35b", random, 4);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     uSeqNum = 42;
     memset(input, 0, sizeof(input));
-    ck_assert(unhexlify("5cc73098fb26543f64fbc0b4d200bf739b1047f7", input, 20) == 20);
+    status = SOPC_HelperDecode_Hex("5cc73098fb26543f64fbc0b4d200bf739b1047f7", input, 20);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     memset(output, 0, sizeof(output));
-    ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output, 20) ==
-              SOPC_STATUS_OK);
-    ck_assert(hexlify(output, hexoutput, 20) == 20);
+    status = SOPC_CryptoProvider_PubSubCrypt(crypto, input, 20, pSecKey, pSecNonce, random, 4, uSeqNum, output, 20);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperEncode_Hex(output, hexoutput, 20);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hexoutput, "13e04369151ee1c8989014c0543c983a9998bec1", 40) == 0);
     ck_assert(SOPC_CryptoProvider_PubSubCrypt(crypto, output, 20, pSecKey, pSecNonce, random, 4, uSeqNum, input, 20) ==
               SOPC_STATUS_OK);
-    ck_assert(hexlify(input, hexoutput, 20) == 20);
+    status = SOPC_HelperEncode_Hex(input, hexoutput, 20);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hexoutput, "5cc73098fb26543f64fbc0b4d200bf739b1047f7", 40) == 0);
     // Here we keep the SecretBuffers of key and iv for the following tests
 
@@ -229,16 +245,20 @@ START_TEST(test_crypto_symm_sign_PubSub256)
 
     memset(input, 0, sizeof(input));
     memset(key, 0, sizeof(key));
-    ck_assert(unhexlify("ec7b07fb4f3a6b87ca8cff06ba9e0ec619a34a2d9618dc2a02bde67709ded8b4e7069d582665f23a361324d1f84807"
-                        "e30d2227b266c287cc342980d62cb53017",
-                        input, 64) == 64);
-    ck_assert(unhexlify("7203d5e504eafe00e5dd77519eb640de3bbac660ec781166c4d460362a94c372", key, 32) == 32);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(
+        "ec7b07fb4f3a6b87ca8cff06ba9e0ec619a34a2d9618dc2a02bde67709ded8b4e7069d582665f23a361324d1f84807"
+        "e30d2227b266c287cc342980d62cb53017",
+        input, 64);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperDecode_Hex("7203d5e504eafe00e5dd77519eb640de3bbac660ec781166c4d460362a94c372", key, 32);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     pSecKey = SOPC_SecretBuffer_NewFromExposedBuffer(key, 32);
     ck_assert(NULL != pSecKey);
     memset(output, 0, sizeof(output));
     memset(hexoutput, 0, sizeof(hexoutput));
     ck_assert(SOPC_CryptoProvider_SymmetricSign(crypto, input, 64, pSecKey, output, 32) == SOPC_STATUS_OK);
-    ck_assert(hexlify(output, hexoutput, 32) == 32);
+    status = SOPC_HelperEncode_Hex(output, hexoutput, 32);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hexoutput, "e4185b6d49f06e8b94a552ad950983852ef20b58ee75f2c448fea587728d94db", 64) == 0);
 
     // Check verify

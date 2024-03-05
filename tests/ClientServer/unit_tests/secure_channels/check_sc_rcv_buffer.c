@@ -34,10 +34,10 @@
 #include <string.h>
 
 #include "check_sc_rcv_helpers.h"
-#include "hexlify.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
+#include "sopc_helper_encode.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_protocol_constants.h"
@@ -226,9 +226,8 @@ static void establishSC(void)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
-
-    ck_assert((uint32_t) res == buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Check typ = MSG final = F
     res = memcmp(hexOutput, "4d534746", 8);
@@ -559,9 +558,8 @@ START_TEST(test_expected_send_multi_chunks)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
-
-    ck_assert((uint32_t) res == buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Check expected length is maximum sending buffer size
     ck_assert_uint_eq(buffer->length, maxSendingBufferSize);
@@ -578,9 +576,8 @@ START_TEST(test_expected_send_multi_chunks)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
-
-    ck_assert((uint32_t) res == buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Check expected length is maximum sending buffer size
     ck_assert_uint_eq(buffer->length, 1 + SOPC_UA_SYMMETRIC_SECURE_MESSAGE_HEADERS_LENGTH);
@@ -624,9 +621,8 @@ START_TEST(test_expected_send_abort_chunk)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
-
-    ck_assert((uint32_t) res == buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Check typ = MSG final = A
     res = memcmp(hexOutput, "4d534741", 8);
@@ -680,9 +676,8 @@ START_TEST(test_expected_forced_send_err)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
-
-    ck_assert((uint32_t) res == buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Check typ = ERR final = F
     res = memcmp(hexOutput, "45525246", 8);
@@ -840,10 +835,8 @@ START_TEST(test_valid_sc_request_id)
 
     // msg[57] max size but strlen("89abcdef") == 8 <=> buffer->length - buffer->position == 4
     ck_assert((buffer->length - buffer->position) * 2 <= 57);
-    res = hexlify(&buffer->data[buffer->position], msg, buffer->length - buffer->position);
-
-    ck_assert((uint32_t) res == buffer->length - buffer->position);
-    ck_assert(2 * res == strlen("89abcdef"));
+    status = SOPC_HelperEncode_Hex(&buffer->data[buffer->position], msg, buffer->length - buffer->position);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     res = memcmp(msg, "89abcdef", strlen("89abcdef"));
     ck_assert(res == 0);

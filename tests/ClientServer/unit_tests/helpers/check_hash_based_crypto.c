@@ -28,8 +28,8 @@
 #include <stdio.h>
 
 #include "check_helpers.h"
-#include "hexlify.h"
 #include "sopc_hash_based_crypto.h"
+#include "sopc_helper_encode.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secret_buffer.h"
 
@@ -98,7 +98,8 @@ START_TEST(test_pbkdf2_hmac_sha256)
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
     hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1);
-    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    status = SOPC_HelperEncode_Hex(hash->Data, (char*) hashHex.Data, lenHash);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hashHex.Data,
                      "55ac046e56e3089fec1691c22544b605f94185216dde0465e68b9d57c20dacbc49ca9cccf179b645991664b39d77ef317"
                      "c71b845b1e30bd509112041d3a19783",
@@ -127,7 +128,8 @@ START_TEST(test_pbkdf2_hmac_sha256)
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
     hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1); // need '\0' to hexlify
-    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    status = SOPC_HelperEncode_Hex(hash->Data, (char*) hashHex.Data, lenHash);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hashHex.Data,
                      "4ddcd8f60b98be21830cee5ef22701f9641a4418d04c0414aeff08876b34ab56a1d425a1225833549adb841b51c9b3176"
                      "a272bdebba1d078478f62b397f33c8d",
@@ -146,7 +148,8 @@ START_TEST(test_pbkdf2_hmac_sha256)
     password.Length = 14;
     salt.Length = 16;
     salt.Data = SOPC_Malloc(sizeof(SOPC_Byte) * (size_t) salt.Length);
-    ck_assert(unhexlify("f595e6284725a66b07c3575d9dfa95b9", salt.Data, (size_t) salt.Length) == salt.Length);
+    ck_assert(SOPC_HelperDecode_Hex("f595e6284725a66b07c3575d9dfa95b9", salt.Data, (size_t) salt.Length) ==
+              SOPC_STATUS_OK);
     lenHash = 32;
     iteration_count = 10000;
 
@@ -158,7 +161,8 @@ START_TEST(test_pbkdf2_hmac_sha256)
     ck_assert(SOPC_STATUS_OK == status);
     ck_assert_ptr_nonnull(hash);
     hashHex.Data = SOPC_Malloc(sizeof(SOPC_Byte) * lenHash * 2 + 1); // need '\0' to hexlify
-    ck_assert(hexlify(hash->Data, (char*) hashHex.Data, lenHash) == (int32_t) lenHash);
+    status = SOPC_HelperEncode_Hex(hash->Data, (char*) hashHex.Data, lenHash);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(memcmp(hashHex.Data, "797968c54e66bb8334571fb1b0f2edd014baf19dfb8a423f5352d6c13514f4d8", 2 * lenHash) ==
               0);
 

@@ -29,11 +29,11 @@
 
 #include "check_crypto_certificates.h"
 #include "check_helpers.h"
-#include "hexlify.h"
 #include "sopc_crypto_decl.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
 #include "sopc_crypto_provider_lib_itf.h"
+#include "sopc_helper_encode.h"
 #include "sopc_key_manager.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -356,10 +356,12 @@ START_TEST(test_crypto_derive_keysets_None)
 
     // These come from a stub_client working with OPC foundation code (e.g. commit "Bugfix: used CryptoKey instead of
     // SignKey")
-    ck_assert(unhexlify("26353d1e608669d81dcc1ca7ca1f7e2b0aac53166d512a6f09527fbe54b114b5", clientNonce, lenCliNonce) ==
-              (int32_t) lenCliNonce);
-    ck_assert(unhexlify("0928c7fe64e3bfcfb99ffd396f1fb6d6048778a9ec70114c400753ee9af66ec6", serverNonce, lenSerNonce) ==
-              (int32_t) lenSerNonce);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex("26353d1e608669d81dcc1ca7ca1f7e2b0aac53166d512a6f09527fbe54b114b5",
+                                                     clientNonce, lenCliNonce);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_HelperDecode_Hex("0928c7fe64e3bfcfb99ffd396f1fb6d6048778a9ec70114c400753ee9af66ec6", serverNonce,
+                                   lenSerNonce);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(SOPC_CryptoProvider_DeriveKeySets(crypto, clientNonce, lenCliNonce, serverNonce, lenSerNonce, &cliKS,
                                                 &serKS) == SOPC_STATUS_NOK);
 
@@ -383,45 +385,47 @@ static inline void setup_certificate(void)
     setup_crypto();
 
     // Loads a certificate. This is the server/server.der.
-    ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
-                        "310c300a06035504080c03494446310e30"
-                        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50"
-                        "43533113301106035504030c0a494e474f"
-                        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31"
-                        "36313030333038313333385a170d313731"
-                        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504"
-                        "070c0550415249533111300f060355040a"
-                        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886"
-                        "f70d01010105000382010f003082010a02"
-                        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc"
-                        "449bca6edfe11e1e6d71207c33e2250f3c"
-                        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a6"
-                        "9435bc3aab1a23982f531ec763f494ef8b"
-                        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0"
-                        "ef2fd0d2b126eb8fc00f00411f362cd4e3"
-                        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7"
-                        "b62f202c7bab7df08ee2241a0f08dffdb6"
-                        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f06"
-                        "03551d23041830168014db180c557814e7"
-                        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d0609"
-                        "2a864886f70d01010b0500038202010039"
-                        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092"
-                        "a25316f296d342df15ccb443392fa914d5"
-                        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae884537"
-                        "3f9eea33d9148125815ac472f4ab1fe601"
-                        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be8361517"
-                        "6df11d347a1e291602a66b248578c2648b"
-                        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca23"
-                        "65fcda670921180939e011b195f1190565"
-                        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc"
-                        "8005080c803c4935a82d762877b9513584"
-                        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb7"
-                        "6f6bd1c4ab1f0eaa71f48296d88a9950ce"
-                        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f2"
-                        "6f71264fd7962eb513030d14b5262b220b"
-                        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5b"
-                        "e2bf893c1299380675e82455cbef6ccc",
-                        der_cert, 1215) == 1215);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(
+        "308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
+        "310c300a06035504080c03494446310e30"
+        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50"
+        "43533113301106035504030c0a494e474f"
+        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31"
+        "36313030333038313333385a170d313731"
+        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504"
+        "070c0550415249533111300f060355040a"
+        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886"
+        "f70d01010105000382010f003082010a02"
+        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc"
+        "449bca6edfe11e1e6d71207c33e2250f3c"
+        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a6"
+        "9435bc3aab1a23982f531ec763f494ef8b"
+        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0"
+        "ef2fd0d2b126eb8fc00f00411f362cd4e3"
+        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7"
+        "b62f202c7bab7df08ee2241a0f08dffdb6"
+        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f06"
+        "03551d23041830168014db180c557814e7"
+        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d0609"
+        "2a864886f70d01010b0500038202010039"
+        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092"
+        "a25316f296d342df15ccb443392fa914d5"
+        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae884537"
+        "3f9eea33d9148125815ac472f4ab1fe601"
+        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be8361517"
+        "6df11d347a1e291602a66b248578c2648b"
+        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca23"
+        "65fcda670921180939e011b195f1190565"
+        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc"
+        "8005080c803c4935a82d762877b9513584"
+        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb7"
+        "6f6bd1c4ab1f0eaa71f48296d88a9950ce"
+        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f2"
+        "6f71264fd7962eb513030d14b5262b220b"
+        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5b"
+        "e2bf893c1299380675e82455cbef6ccc",
+        der_cert, 1215);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_cert, 1215, &crt_pub) == SOPC_STATUS_OK);
 }
 
@@ -515,7 +519,8 @@ static inline void setup_asym_keys(void)
     setup_crypto();
 
     // Loads certificate from DER
-    ck_assert(unhexlify(DER_ASYM_PUB_HEXA, der_cert, DER_ASYM_PUB_LENG) == DER_ASYM_PUB_LENG);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(DER_ASYM_PUB_HEXA, der_cert, DER_ASYM_PUB_LENG);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_cert, DER_ASYM_PUB_LENG, &crt_pub) ==
               SOPC_STATUS_OK); //*/
 
@@ -523,7 +528,8 @@ static inline void setup_asym_keys(void)
     ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromCertificate(crt_pub, &key_pub) == SOPC_STATUS_OK);
 
     // Loads the corresponding private key
-    ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
+    status = SOPC_HelperDecode_Hex(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(der_priv, DER_ASYM_PRIV_LENG, false, &key_priv) ==
               SOPC_STATUS_OK);
 }
@@ -620,7 +626,8 @@ START_TEST(test_crypto_asym_copykey_None)
     ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_priv, false, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
 
     // Loads DER of key
-    ck_assert(unhexlify(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG) == DER_ASYM_PRIV_LENG);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(DER_ASYM_PRIV_HEXA, der_priv, DER_ASYM_PRIV_LENG);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Verifies
     ck_assert(lenDER == DER_ASYM_PRIV_LENG);
@@ -631,8 +638,8 @@ START_TEST(test_crypto_asym_copykey_None)
     ck_assert(SOPC_KeyManager_AsymmetricKey_ToDER(key_pub, true, buffer, 2048, &lenDER) == SOPC_STATUS_OK);
 
     // The produced DER is the key only, not the whole cert
-    ck_assert(unhexlify(DER_ASYM_PUB_KEYONLY_HEXA, der_pub_key, DER_ASYM_PUB_KEYONLY_LENG) ==
-              DER_ASYM_PUB_KEYONLY_LENG);
+    status = SOPC_HelperDecode_Hex(DER_ASYM_PUB_KEYONLY_HEXA, der_pub_key, DER_ASYM_PUB_KEYONLY_LENG);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Verifies
     ck_assert(lenDER == DER_ASYM_PUB_KEYONLY_LENG);
@@ -664,7 +671,8 @@ static inline void setup_pki_stack(void)
     setup_certificate();
 
     // Loads CA cert which signed server.der. This is trusted/cacert.der.
-    ck_assert(unhexlify(CA_CRT, der_ca, CA_CRT_LEN) == (int) (CA_CRT_LEN));
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(CA_CRT, der_ca, CA_CRT_LEN);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(SOPC_KeyManager_Certificate_CreateOrAddFromDER(der_ca, (uint32_t)(CA_CRT_LEN), &crt_ca) ==
               SOPC_STATUS_OK);
 
@@ -701,45 +709,47 @@ START_TEST(test_cert_copyder_None)
     uint32_t lenAlloc0 = 0, lenAlloc1 = 0;
 
     // Reference certificate, this is server.der
-    ck_assert(unhexlify("308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
-                        "310c300a06035504080c03494446310e30"
-                        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50"
-                        "43533113301106035504030c0a494e474f"
-                        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31"
-                        "36313030333038313333385a170d313731"
-                        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504"
-                        "070c0550415249533111300f060355040a"
-                        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886"
-                        "f70d01010105000382010f003082010a02"
-                        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc"
-                        "449bca6edfe11e1e6d71207c33e2250f3c"
-                        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a6"
-                        "9435bc3aab1a23982f531ec763f494ef8b"
-                        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0"
-                        "ef2fd0d2b126eb8fc00f00411f362cd4e3"
-                        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7"
-                        "b62f202c7bab7df08ee2241a0f08dffdb6"
-                        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f06"
-                        "03551d23041830168014db180c557814e7"
-                        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d0609"
-                        "2a864886f70d01010b0500038202010039"
-                        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092"
-                        "a25316f296d342df15ccb443392fa914d5"
-                        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae884537"
-                        "3f9eea33d9148125815ac472f4ab1fe601"
-                        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be8361517"
-                        "6df11d347a1e291602a66b248578c2648b"
-                        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca23"
-                        "65fcda670921180939e011b195f1190565"
-                        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc"
-                        "8005080c803c4935a82d762877b9513584"
-                        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb7"
-                        "6f6bd1c4ab1f0eaa71f48296d88a9950ce"
-                        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f2"
-                        "6f71264fd7962eb513030d14b5262b220b"
-                        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5b"
-                        "e2bf893c1299380675e82455cbef6ccc",
-                        der_cert, 1215) == 1215);
+    SOPC_ReturnStatus status = SOPC_HelperDecode_Hex(
+        "308204bb308202a3a003020102020106300d06092a864886f70d01010b0500308188310b3009060355040613024652"
+        "310c300a06035504080c03494446310e30"
+        "0c06035504070c0550415249533110300e060355040a0c07494e474f5043533110300e060355040b0c07494e474f50"
+        "43533113301106035504030c0a494e474f"
+        "5043532043413122302006092a864886f70d0109011613696e676f70637340737973746572656c2e6672301e170d31"
+        "36313030333038313333385a170d313731"
+        "3030333038313333385a3057310b3009060355040613024652310c300a06035504080c03494446310e300c06035504"
+        "070c0550415249533111300f060355040a"
+        "0c08535953544552454c3117301506035504030c0e494e474f5043535f53455256455230820122300d06092a864886"
+        "f70d01010105000382010f003082010a02"
+        "82010100ad9921f924639e125c0cde520755f44028d65eaecaf16867823be446b977e0631d64509953b7fe467d1afc"
+        "449bca6edfe11e1e6d71207c33e2250f3c"
+        "66875d369a1cda02efc661e73bdf01c517470f2a09ea500b56842fcb125779917b8deb58dc6f2f9511e66c29ba57a6"
+        "9435bc3aab1a23982f531ec763f494ef8b"
+        "6c6360ea194d7ca2efd777b9a32c295809cf39d2c2ed0dbfc4bfd6fbd24bf782f8d83795cb51964e1dd0a8cdd8f2a0"
+        "ef2fd0d2b126eb8fc00f00411f362cd4e3"
+        "0a0a20cde108efa69faede8d9f756838306569c6ea27f1ba5aefac790ff18bcbcc81d7acaa1fac2acede3acd2a61d7"
+        "b62f202c7bab7df08ee2241a0f08dffdb6"
+        "2914cf210203010001a360305e301d0603551d0e04160414a3f8e031d1f6f412bace4ddf0eeb62da209d3c79301f06"
+        "03551d23041830168014db180c557814e7"
+        "cffd868827b7b00d28f572abb2300f0603551d130101ff040530030101ff300b0603551d0f040403020106300d0609"
+        "2a864886f70d01010b0500038202010039"
+        "ce25d423f265c38a6df573c1027c6997cc4e5d44db3135ac782180253c6bbdc5017464630d8b17853b214a7866f092"
+        "a25316f296d342df15ccb443392fa914d5"
+        "513a91ddc6112cdb70806e9f89898e911c1928ff5ce9139649a8ae11cef04ec645f2f4aef6187c1f044de6ae884537"
+        "3f9eea33d9148125815ac472f4ab1fe601"
+        "b99ca01cb683005728ef2f588339f33d433db7afbf1e0695ca5fa5ee5fcd5324a41eadf1ef717c90f2920be8361517"
+        "6df11d347a1e291602a66b248578c2648b"
+        "f77009f28c3e0bfdceb7acf2f248939bcb260357db378de10eabcf30432952fb9c5a717fcf75884c697253ff6dca23"
+        "65fcda670921180939e011b195f1190565"
+        "efa25daefe393d8a67261abe881e98264258fef473423d15c3fc5fa87bce0b8c22dff409017842e0c60dfeb5c88ccc"
+        "8005080c803c4935a82d762877b9513584"
+        "6dfd407d49fc3faa523169bfdbbeb5fc5880fed2fa518ee017e42edfa872e781052a47e294c8d82c9858877496dfb7"
+        "6f6bd1c4ab1f0eaa71f48296d88a9950ce"
+        "cc2937b32eaf54eb14fabf84d4519c3e9d5f3434570a24a16f19efa5a7df4a6fc76f317021188b2e39421bb36289f2"
+        "6f71264fd7962eb513030d14b5262b220b"
+        "fa067ba9c1255458d6d570a15f715bc00c2d405809652ac372e2cbc2fdfd7b20681310829ca88ef844ccd8c89a8c5b"
+        "e2bf893c1299380675e82455cbef6ccc",
+        der_cert, 1215);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     // Extract 2 copies from loaded certificate
     ck_assert(SOPC_KeyManager_Certificate_ToDER(crt_pub, &buffer0, &lenAlloc0) == SOPC_STATUS_OK);

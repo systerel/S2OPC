@@ -33,11 +33,11 @@
 #include <stdlib.h> /* EXIT_* */
 
 #include "check_sc_rcv_helpers.h"
-#include "hexlify.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_askpass.h"
+#include "sopc_helper_encode.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -396,9 +396,10 @@ static void establishSC(void)
     ck_assert_ptr_nonnull((void*) socketEvent->params);
 
     buffer = (SOPC_Buffer*) socketEvent->params;
-    res = hexlify(buffer->data, hexOutput, buffer->length);
+    status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    ck_assert((uint32_t) res == buffer->length);
+    ck_assert(SOPC_STATUS_OK == status);
 
     // Check typ = MSG final = F
     res = memcmp(hexOutput, "4d534746", 8);

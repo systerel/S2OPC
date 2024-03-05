@@ -26,9 +26,9 @@
 #include <check.h>
 
 #include "event_helpers.h"
-#include "hexlify.h"
 #include "opcua_statuscodes.h"
 #include "sopc_buffer.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_ieee_check.h"
 #include "sopc_mem_alloc.h"
@@ -95,7 +95,6 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
     printf("SC_Rcv_Buffer: Checking client closed SC with status %X\n", errorStatus);
 
     SOPC_Buffer* buffer = NULL;
-    int res = 0;
     char hexOutput[512];
 
     printf("               - CLO message requested to be sent\n");
@@ -113,10 +112,11 @@ SOPC_ReturnStatus Check_Client_Closed_SC(uint32_t scIdx,
 
     uint32_t buffer_len = buffer->length;
 
-    res = hexlify(buffer->data, hexOutput, buffer_len);
+    SOPC_ReturnStatus status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer_len);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_Buffer_Delete(buffer);
 
-    if ((uint32_t) res != buffer_len)
+    if (SOPC_STATUS_OK != status)
     {
         return SOPC_STATUS_NOK;
     }

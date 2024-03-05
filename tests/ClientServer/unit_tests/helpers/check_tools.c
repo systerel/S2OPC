@@ -30,7 +30,6 @@
 #include <stdio.h>
 
 #include "check_helpers.h"
-#include "hexlify.h"
 
 #include "opcua_statuscodes.h"
 
@@ -40,6 +39,7 @@
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
+#include "sopc_helper_encode.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
 #include "sopc_helper_uri.h"
@@ -69,26 +69,34 @@ START_TEST(test_hexlify)
     // Init
     memset(buf, 0, 33);
 
+    SOPC_ReturnStatus status = 0;
+
     // Test single chars
     for (i = 0; i < 256; ++i)
     {
         c = (unsigned char) i;
-        ck_assert(hexlify(&c, (char*) buf, 1) == 1);
-        ck_assert(unhexlify((char*) buf, &d, 1) == 1);
+        status = SOPC_HelperEncode_Hex(&c, (char*) buf, 1);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        status = SOPC_HelperDecode_Hex((char*) buf, &d, 1);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
         ck_assert(c == d);
     }
 
     // Test vector
-    ck_assert(hexlify((unsigned char*) "\x00 Test \xFF", (char*) buf, 8) == 8);
+    status = SOPC_HelperEncode_Hex((unsigned char*) "\x00 Test \xFF", (char*) buf, 8);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(strncmp((char*) buf, "00205465737420ff", 16) == 0);
-    ck_assert(unhexlify((char*) buf, buf + 16, 8) == 8);
+    status = SOPC_HelperDecode_Hex((char*) buf, buf + 16, 8);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(strncmp((char*) (buf + 16), "\x00 Test \xFF", 8) == 0);
 
     // Test overflow
     buf[32] = 0xDD;
-    ck_assert(hexlify((unsigned char*) "\x00 Test \xFF\x00 Test \xFF", (char*) buf, 16) == 16);
+    status = SOPC_HelperEncode_Hex((unsigned char*) "\x00 Test \xFF\x00 Test \xFF", (char*) buf, 16);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(buf[32] == 0xDD);
-    ck_assert(unhexlify("00205465737420ff00205465737420ff", buf, 16) == 16);
+    status = SOPC_HelperDecode_Hex("00205465737420ff00205465737420ff", buf, 16);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(buf[32] == 0xDD);
 }
 END_TEST
@@ -4980,7 +4988,7 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_linkedlist, test_sorted_linked_list);
     suite_add_tcase(s, tc_linkedlist);
 
-    tc_hexlify = tcase_create("Hexlify (tests only)");
+    tc_hexlify = tcase_create("SOPC_HelperEncode_Hex (tests only)");
     tcase_add_test(tc_hexlify, test_hexlify);
     suite_add_tcase(s, tc_hexlify);
 

@@ -72,4 +72,6 @@ Suite* tests_make_suite_encodeable_types(void);
 
 Suite* tests_make_suite_XML_parsers(void);
 
+Suite* tests_make_suite_base64(void);
+
 #endif // CHECK_HELPERS_H

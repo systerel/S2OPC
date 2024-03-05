@@ -23,8 +23,8 @@
 #include <string.h>
 
 #include "event_helpers.h"
-#include "hexlify.h"
 #include "sopc_assert.h"
+#include "sopc_helper_encode.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -96,9 +96,9 @@ SOPC_ReturnStatus check_expected_message_helper(const char* hexExpMsg,
         memset(buffer->data + start, 0, (size_t) length);
     }
 
-    res = hexlify(buffer->data, hexOutput, buffer->length);
+    SOPC_ReturnStatus status = SOPC_HelperEncode_Hex(buffer->data, hexOutput, buffer->length);
 
-    if ((uint32_t) res != buffer->length || strlen(hexExpMsg) != 2 * buffer->length)
+    if (SOPC_STATUS_OK != status || strlen(hexExpMsg) != 2 * buffer->length)
     {
         printf("SC_Rcv_Buffer: ERROR invalid message length\n");
         return SOPC_STATUS_NOK;
@@ -155,19 +155,17 @@ SOPC_ReturnStatus Simulate_Received_Message(uint32_t scIdx, char* hexInputMsg)
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_Buffer* buffer = SOPC_Buffer_Create((uint32_t) strlen(hexInputMsg) / 2);
 
-    int res = 0;
-
     if (buffer != NULL)
     {
         status = SOPC_Buffer_SetDataLength(buffer, (uint32_t) strlen(hexInputMsg) / 2);
 
         if (SOPC_STATUS_OK == status)
         {
-            res = unhexlify(hexInputMsg, buffer->data, buffer->length);
+            status = SOPC_HelperDecode_Hex(hexInputMsg, buffer->data, buffer->length);
 
-            if ((uint32_t) res != buffer->length)
+            if (SOPC_STATUS_OK != status)
             {
-                printf("SC_Rcv_Buffer: ERROR: unhexlify received message error\n");
+                printf("SC_Rcv_Buffer: ERROR: SOPC_HelperDecode_Hex received message error\n");
                 status = SOPC_STATUS_NOK;
             }
         }
