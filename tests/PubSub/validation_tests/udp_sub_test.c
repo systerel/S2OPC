@@ -49,15 +49,6 @@ static const uint32_t subGroupId = 1245;
 static SOPC_PubSubConfiguration* configuration = NULL;
 static SOPC_PubSubConnection* subConnection = NULL;
 
-static SOPC_SubScheduler_Writer_Ctx writerCtx1;
-static SOPC_SubScheduler_Writer_Ctx writerCtx2;
-
-static SOPC_SubScheduler_Writer_Ctx* get_Reader_Ctx(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
-{
-    (void) pubId;
-    return (writerId == writerCtx1.writerId ? &writerCtx1 : &writerCtx2);
-}
-
 // Create connection, group and setup metadata so that message is accepted
 // There are 2 groups created (one for "udp_pub_test" and the second for "udp_pub_conf_test")
 static void setupConnection(void)
@@ -111,11 +102,6 @@ static void setupConnection(void)
     SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_UInt32_Id);
 
-    // Create Writer related context
-    memset(&writerCtx1, 0, sizeof(writerCtx1));
-    writerCtx1.writerId = SOPC_DataSetReader_Get_DataSetWriterId(dsReader);
-    writerCtx1.pubId = *(SOPC_ReaderGroup_Get_PublisherId(subReader));
-
     // Configuration for "udp_pub_conf_test"
     subReader = SOPC_PubSubConnection_Get_ReaderGroup_At(subConnection, 1);
 
@@ -149,11 +135,6 @@ static void setupConnection(void)
     SOPC_ASSERT(NULL != meta);
     SOPC_FieldMetaData_ArrayDimension_Move(meta, &arrDimension);
     SOPC_FieldMetaData_Set_BuiltinType(meta, SOPC_String_Id);
-
-    // Create Writer related context
-    memset(&writerCtx2, 0, sizeof(writerCtx2));
-    writerCtx2.writerId = SOPC_DataSetReader_Get_DataSetWriterId(dsReader);
-    writerCtx2.pubId = *(SOPC_ReaderGroup_Get_PublisherId(subReader));
 }
 
 static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuffer)
@@ -162,8 +143,8 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuff
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = NULL,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
-        .dsmSnGapCallback = NULL,
-        .getReaderCtx_Func = get_Reader_Ctx,
+        .checkDataSetMessageSN_Func = NULL,
+        .updateTimeout_Func = NULL,
         .targetConfig = NULL};
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;
     SOPC_NetworkMessage_Error_Code code =

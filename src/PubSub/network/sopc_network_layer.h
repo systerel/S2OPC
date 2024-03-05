@@ -115,27 +115,35 @@ typedef struct SOPC_UADP_Network_Message
     SOPC_Dataset_LL_NetworkMessage* nm;
 } SOPC_UADP_NetworkMessage;
 
-/** The dynamic context of a reader */
-typedef struct SOPC_SubScheduler_Writer_Ctx
-{
-    SOPC_Conf_PublisherId pubId;
-    uint16_t writerId;
-    bool dataSetMessageSequenceNumberSet;
-    uint16_t dataSetMessageSequenceNumber;
-    SOPC_RealTime* timeout;
-    SOPC_PubSubState connectionMode;
-} SOPC_SubScheduler_Writer_Ctx;
-
-void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new);
-
-/** Get the dynamic context for a Reader
+/** \brief Function used to check if a DataSetMessage sequence number is newer for the identified DataSetWriter
  *
  * \param pubId       the publisher id associated to the DataSetWriter
  * \param writerId    the DataSetWriter id
+ * \param receivedSN  the dataset message sequence number
  *
- * \return The associated writer context or NULL if not found */
-typedef SOPC_SubScheduler_Writer_Ctx* SOPC_Nextwork_Layer_Get_Reader_Ctx_Func(const SOPC_Conf_PublisherId* pubId,
-                                                                              const uint16_t writerId);
+ * \return True if \a receivedSn is newer (valid) for this dataSetWriter. False otherwise
+ */
+typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_PublisherId* pubId,
+                                                        const uint16_t writerId,
+                                                        const uint16_t receivedSN);
+
+/**
+ * @brief Function used to update timeout state of an identified dataSetWriter. This function should be call if decode
+ * process was succesfull
+ *
+ * @param pubId the publisher id associated to the DataSetWriter
+ * @param writerId the DataSetWriter id
+ */
+typedef void SOPC_UADP_UpdateTimeout_Func(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId);
+
+/**
+ * @brief check if received sequence number is newer than processsed sequence number following part 14 rules
+ *
+ * @param received  received sequence number
+ * @param processed sequence number already processed
+ * @return true in case received sequence number is newer than processed, false otherwise
+ */
+bool SOPC_Is_UInt16_Sequence_Number_Newer(uint16_t received, uint16_t processed);
 
 /**
  * \brief Encode a NetworkMessage with JSON Mapping
@@ -253,9 +261,9 @@ typedef struct
 {
     SOPC_UADP_NetworkMessage_Reader_Callbacks callbacks;
     SOPC_UADP_GetSecurity_Func* pGetSecurity_Func;
-    SOPC_Nextwork_Layer_Get_Reader_Ctx_Func* getReaderCtx_Func;
+    SOPC_UADP_IsWriterSequenceNumberNewer_Func* checkDataSetMessageSN_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
-    SOPC_SubscriberDataSetMessageSNGap_Func* dsmSnGapCallback;
+    SOPC_UADP_UpdateTimeout_Func* updateTimeout_Func;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 
 /**

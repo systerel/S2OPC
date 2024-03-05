@@ -154,14 +154,44 @@ static SOPC_SubScheduler_Security_Reader_Ctx* SOPC_SubScheduler_Pub_Ctx_Get_Read
  *
  * @param pubId PublisherId attach to a networkMessage
  * @param writerId DataSetWriterId attach to a dataSetMessage
+ * @param timeoutInterval Message Receive timeout between two dataSetMessage
  */
-static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId);
+static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId,
+                                              uint16_t writerId,
+                                              uint32_t timeoutInterval);
 
 /**
- * See ::SOPC_Nextwork_Layer_Get_Reader_Ctx_Func
+ * @brief Function called to update DataSetMessage timeout when decoded
+ *
+ * @param pubId PublisherId attach to a networkMessage
+ * @param writerId DataSetWriterId attach to a dataSetMessage
  */
-static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_PublisherId* pubId,
-                                                            const uint16_t writerId);
+static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId);
+
+/**
+ * @brief Check if sequence number is newer for the given tuple (PublisherId, DataSetWriterId) and
+ * received sequence number.
+ *
+ * @param pubId PublisherId attach to a networkMessage
+ * @param writerId DataSetW attach to a dataSetMessage
+ * @param receivedSN received sequence number
+ * @return true if sequence number received is newer and valid
+ * @return false if sequence number received is older or invalid
+ */
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
+                                                 const uint16_t writerId,
+                                                 const uint16_t receivedSN);
+typedef struct SOPC_SubScheduler_Writer_Ctx
+{
+    SOPC_Conf_PublisherId pubId;
+    uint16_t writerId;
+    bool dataSetMessageSequenceNumberSet;
+    uint16_t dataSetMessageSequenceNumber;
+    SOPC_RealTime* timeout;
+    uint32_t timeoutInterval;
+    SOPC_PubSubState connectionMode;
+} SOPC_SubScheduler_Writer_Ctx;
+
 // End of data set writer context
 
 static bool SOPC_SubScheduler_Start_Sockets(int threadPriority);
@@ -231,7 +261,7 @@ static struct
     // TODO future version, it should contain one element per (publisherid, tokenid)
     SOPC_Array* securityCtx;
 
-    /* DataSetWriters context (current sequence number).
+    /* DataSetWriters context (current sequence number, timeout).
      * DataSetWriter is uniquely identified by PublisherId + DataSetWriterId (see §6.2.4.1)
      * It is an array of SOPC_PUBSUB_MAX_PUBLISHER_PER_SCHEDULER element of type SOPC_SubScheduler_Writer_Ctx */
     SOPC_Array* writerCtx;
@@ -305,7 +335,7 @@ static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SO
 }
 
 // Update the state of a single DSM
-void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
+static void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
 {
     SOPC_ASSERT(NULL != ctx);
     if (new != ctx->connectionMode)
@@ -476,7 +506,7 @@ static SOPC_ReturnStatus on_message_received(SOPC_PubSubConnection* pDecoderCont
          *  random bytes found on the network */
         SOPC_NetworkMessage_Error_Code errorCode =
             SOPC_Reader_Read_UADP(pDecoderContext, buffer, config, SOPC_SubScheduler_Get_Security_Infos,
-                                  Sub_Get_Writer_Context, schedulerCtx.dsmSnGapCallback);
+                                  SOPC_UpdateDSMTimeout, SOPC_SubScheduler_Is_Writer_SN_Newer);
 
         if (SOPC_NetworkMessage_Error_Code_InvalidParameters == errorCode)
         {
@@ -742,7 +772,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
 
             if (SOPC_STATUS_OK == status)
             {
-                double minTimeout = 500.0; // Use at least 500ms
+                // Timeout can take values between [1, 500] ms.
+                // This time will define the maximum time sub socket manager thread could take to stop
+                double minTimeout = 500.0;
                 // add security context
                 uint16_t nbGroup = SOPC_PubSubConnection_Nb_ReaderGroup(connection);
                 for (uint16_t rg_i = 0; rg_i < nbGroup; rg_i++)
@@ -754,8 +786,9 @@ static SOPC_ReturnStatus init_sub_scheduler_ctx(SOPC_PubSubConfiguration* config
                     for (uint8_t r_i = 0; r_i < nbReaders; r_i++)
                     {
                         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, r_i);
-                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, SOPC_DataSetReader_Get_DataSetWriterId(reader));
                         const double timeout = SOPC_DataSetReader_Get_ReceiveTimeout(reader);
+                        SOPC_SubScheduler_Init_Writer_Ctx(dsmPubId, SOPC_DataSetReader_Get_DataSetWriterId(reader),
+                                                          (uint32_t) timeout);
                         minTimeout = (timeout < minTimeout ? timeout : minTimeout);
                     }
                 }
@@ -964,6 +997,119 @@ static void SOPC_SubScheduler_CtxEth_Clear(SOPC_SubScheduler_TransportCtx* ctx)
     SOPC_ETH_Socket_Close(&(ctx->sock));
     SOPC_Free(ctx->ethAddr);
     ctx->ethAddr = NULL;
+}
+
+static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId,
+                                              uint16_t writerId,
+                                              uint32_t timeoutInterval)
+{
+    SOPC_ASSERT(NULL != pubId);
+
+    bool found = false;
+    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
+    for (size_t i = 0; i < size && !found; i++)
+    {
+        const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        // Note that if writerId is zero, we want to store all elements since the order is used
+        // for the same PubId in that case.
+        found = compare_publisherId(&ctx->pubId, pubId) && writerId != 0 && ctx->writerId == writerId;
+    }
+
+    if (!found)
+    {
+        SOPC_SubScheduler_Writer_Ctx ctx;
+        // set at least 1ms of interval
+        timeoutInterval = (timeoutInterval != 0) ? timeoutInterval : 1;
+
+        ctx.pubId = *pubId;
+        ctx.writerId = writerId;
+        ctx.dataSetMessageSequenceNumberSet = false;
+        ctx.dataSetMessageSequenceNumber = 0;
+        ctx.connectionMode = SOPC_PubSubState_Disabled;
+        ctx.timeout = NULL; // Initially null to allow distinction between "timeout" and "NoCommunication"
+        ctx.timeoutInterval = timeoutInterval;
+        bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
+        SOPC_ASSERT(res);
+    }
+}
+
+/* Return writer context identified by tuple [pubId, writerId], NULL if no writerContext has been found */
+static SOPC_SubScheduler_Writer_Ctx* findWriterContext(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+{
+    SOPC_ASSERT(NULL != pubId);
+    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
+    SOPC_SubScheduler_Writer_Ctx* ctx = NULL;
+    for (size_t i = 0; i < size; i++)
+    {
+        ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
+        if (ctx->pubId.type == pubId->type && ctx->writerId == writerId)
+        {
+            if (compare_publisherId(&ctx->pubId, pubId))
+            {
+                return ctx;
+            }
+        }
+    }
+    return NULL;
+}
+
+// Returns true if the sequence number is newer
+static bool SOPC_SubScheduler_Is_Writer_SN_Newer(const SOPC_Conf_PublisherId* pubId,
+                                                 const uint16_t writerId,
+                                                 const uint16_t receivedSN)
+{
+    SOPC_ASSERT(NULL != pubId);
+    SOPC_SubScheduler_Writer_Ctx* ctx = findWriterContext(pubId, writerId);
+    if (NULL != ctx)
+    {
+        if (ctx->dataSetMessageSequenceNumberSet)
+        {
+            if (SOPC_Is_UInt16_Sequence_Number_Newer(receivedSN, ctx->dataSetMessageSequenceNumber))
+            {
+                ctx->dataSetMessageSequenceNumber = receivedSN;
+                return true;
+            }
+            else
+            {
+                if (NULL != schedulerCtx.dsmSnGapCallback)
+                {
+                    schedulerCtx.dsmSnGapCallback(*pubId, writerId, ctx->dataSetMessageSequenceNumber, receivedSN);
+                }
+                return false;
+            }
+        }
+        else
+        {
+            ctx->dataSetMessageSequenceNumber = receivedSN;
+            ctx->dataSetMessageSequenceNumberSet = true;
+            return true;
+        }
+    }
+    // (PubId, WriterId) tuple not configured as expected in Subscriber
+    return false;
+}
+
+static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+{
+    SOPC_ASSERT(NULL != pubId);
+    SOPC_SubScheduler_Writer_Ctx* ctx = findWriterContext(pubId, writerId);
+    if (NULL != ctx)
+    {
+        // Create or restart timeout
+        SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
+        SOPC_ASSERT(NULL != now);
+        SOPC_RealTime_AddSynchedDuration(now, (uint64_t)(ctx->timeoutInterval * 1000), -1);
+        if (NULL == ctx->timeout)
+        {
+            ctx->timeout = SOPC_RealTime_Create(now);
+        }
+        else
+        {
+            SOPC_RealTime_Copy(ctx->timeout, now);
+        }
+        SOPC_SubScheduler_SetDsmState(ctx, SOPC_PubSubState_Operational);
+        SOPC_RealTime_Delete(&now);
+    }
 }
 
 /********************************************************************************************************
@@ -1178,56 +1324,4 @@ static SOPC_SubScheduler_Security_Pub_Ctx* SOPC_SubScheduler_Pub_Ctx_Create(cons
         ctx = NULL;
     }
     return ctx;
-}
-
-static void SOPC_SubScheduler_Init_Writer_Ctx(const SOPC_Conf_PublisherId* pubId, uint16_t writerId)
-{
-    SOPC_ASSERT(NULL != pubId);
-
-    bool found = false;
-    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
-    for (size_t i = 0; i < size && !found; i++)
-    {
-        const SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        // Note that if writerId is zero, we want to store all elements since the order is used
-        // for the same PubId in that case.
-        found = compare_publisherId(&ctx->pubId, pubId) && writerId != 0 && ctx->writerId == writerId;
-    }
-
-    if (!found)
-    {
-        SOPC_SubScheduler_Writer_Ctx ctx;
-        ctx.pubId = *pubId;
-        ctx.writerId = writerId;
-        ctx.dataSetMessageSequenceNumberSet = false;
-        ctx.dataSetMessageSequenceNumber = 0;
-        ctx.connectionMode = SOPC_PubSubState_Disabled;
-        ctx.timeout = NULL; // Initially null to allow distinction between "timeout" and "NoCommunication"
-        bool res = SOPC_Array_Append(schedulerCtx.writerCtx, ctx);
-        SOPC_ASSERT(res);
-    }
-}
-
-static SOPC_SubScheduler_Writer_Ctx* Sub_Get_Writer_Context(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
-{
-    if (NULL == pubId)
-    {
-        return NULL;
-    }
-    SOPC_SubScheduler_Writer_Ctx* result = NULL;
-
-    size_t size = SOPC_Array_Size(schedulerCtx.writerCtx);
-    for (size_t i = 0; i < size && NULL == result; i++)
-    {
-        SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
-        SOPC_ASSERT(ctx != NULL);
-        if (compare_publisherId(&ctx->pubId, pubId))
-        {
-            if (ctx->writerId == writerId)
-            {
-                result = ctx;
-            }
-        }
-    }
-    return result;
 }

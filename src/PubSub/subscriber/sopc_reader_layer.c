@@ -84,15 +84,15 @@ SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection
                                                      SOPC_Buffer* buffer,
                                                      SOPC_SubTargetVariableConfig* config,
                                                      SOPC_UADP_GetSecurity_Func securityCBck,
-                                                     SOPC_Nextwork_Layer_Get_Reader_Ctx_Func getCtxFunc,
-                                                     SOPC_SubscriberDataSetMessageSNGap_Func snCBck)
+                                                     SOPC_UADP_UpdateTimeout_Func updateTimeoutCBck,
+                                                     SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck)
 {
     SOPC_NetworkMessage_Error_Code errorCode = SOPC_NetworkMessage_Error_Code_None;
     const SOPC_UADP_NetworkMessage_Reader_Configuration readerConf = {
         .pGetSecurity_Func = securityCBck,
-        .getReaderCtx_Func = getCtxFunc,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
-        .dsmSnGapCallback = snCBck,
+        .updateTimeout_Func = updateTimeoutCBck,
+        .checkDataSetMessageSN_Func = snCBck,
         .targetConfig = config};
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;
     errorCode = SOPC_UADP_NetworkMessage_Decode(buffer, &readerConf, connection, &uadp_nm);

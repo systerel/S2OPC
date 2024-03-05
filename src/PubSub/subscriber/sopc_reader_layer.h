@@ -32,15 +32,16 @@
  * \param buffer : data to decode
  * \param config : configuration to provide to the target module which consumes the decoded data
  * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
- * \param getCtxFunc : function to retrieve dynamic context of a writerGroup
- * \param snCBck : User-defined callback: called when a DSM number gap is detected.
+ * \param updateTimeoutCBck : callback to update timeout of a dataSetMessage well decoded
+ * \param snCBck : callback to check if DSM sequence number received is newer. Can be NULL then sequence number will not
+ * be checked.
  */
 SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                                      SOPC_Buffer* buffer,
                                                      SOPC_SubTargetVariableConfig* config,
                                                      SOPC_UADP_GetSecurity_Func securityCBck,
-                                                     SOPC_Nextwork_Layer_Get_Reader_Ctx_Func getCtxFunc,
-                                                     SOPC_SubscriberDataSetMessageSNGap_Func snCBck);
+                                                     SOPC_UADP_UpdateTimeout_Func updateTimeoutCBck,
+                                                     SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck);
 
 /**
  * Return default reception filtering functions.
