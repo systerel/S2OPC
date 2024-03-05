@@ -61,6 +61,7 @@ PROMOTES
     set_local_service_treatment,
     get_user_authorization ,
     get_Executable,
+    get_EventNotifier,
     get_InputArguments,
     get_conv_Variant_ValueRank,
     get_conv_Variant_Type,

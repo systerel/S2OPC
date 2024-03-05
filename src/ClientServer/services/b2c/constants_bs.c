@@ -33,16 +33,19 @@
 #include "sopc_toolkit_config_internal.h"
 #include "sopc_types.h"
 
-static SOPC_NodeId ByteString_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_ByteString};
-static SOPC_NodeId Byte_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Byte};
-static SOPC_NodeId Null_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = 0};
-static SOPC_NodeId HierarchicalReferences_Type = {SOPC_IdentifierType_Numeric, 0,
-                                                  .Data.Numeric = OpcUaId_HierarchicalReferences};
+static SOPC_NodeId ByteString_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ByteString);
+static SOPC_NodeId Byte_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Byte);
+static SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
+static SOPC_NodeId HierarchicalReferences_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HierarchicalReferences);
+static SOPC_NodeId Server_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Server);
+static SOPC_NodeId BaseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
 
 const constants_bs__t_NodeId_i constants_bs__c_ByteString_Type_NodeId = &ByteString_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Byte_Type_NodeId = &Byte_Type;
 const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId = &Null_Type;
 const constants_bs__t_NodeId_i constants_bs__c_HierarchicalReferences_Type_NodeId = &HierarchicalReferences_Type;
+const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId = &Server_NodeId;
+const constants_bs__t_NodeId_i constants_bs__c_BaseEventType_NodeId = &BaseEventType_NodeId;
 
 static char* EmptyLocaleIds[] = {NULL};
 constants_bs__t_LocaleIds_i constants_bs__c_LocaleIds_empty = EmptyLocaleIds;
@@ -84,6 +87,12 @@ void constants_bs__getall_conv_ExpandedNodeId_NodeId(const constants_bs__t_Expan
 void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bres)
 {
     *constants_bs__bres = S2OPC_NODE_MANAGEMENT;
+}
+
+void constants_bs__is_EventNotifier_SubscribeToEvents(const constants_bs__t_Byte constants_bs__p_eventNotifierByte,
+                                                      t_bool* const constants_bs__bres)
+{
+    *constants_bs__bres = (0 != (OpcUa_EventNotifierType_SubscribeToEvents & constants_bs__p_eventNotifierByte));
 }
 
 void constants_bs__is_t_access_level_currentRead(const constants_bs__t_access_level constants_bs__p_access_lvl,

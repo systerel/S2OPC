@@ -44,6 +44,7 @@ PROMOTES
     get_NodeClass,
     get_BrowseName,
     get_DisplayName,
+    get_EventNotifier,
     is_transitive_subtype,
     is_valid_ReferenceTypeId,
     is_NodeId_equal,

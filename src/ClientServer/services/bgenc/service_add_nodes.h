@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 22/02/2023 16:16:30
+ Date                 : 22/03/2024 14:58:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -63,6 +63,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__check_object_has_method service_add_nodes_1__check_object_has_method
 #define service_add_nodes__get_BrowseName service_add_nodes_1__get_BrowseName
 #define service_add_nodes__get_DisplayName service_add_nodes_1__get_DisplayName
+#define service_add_nodes__get_EventNotifier service_add_nodes_1__get_EventNotifier
 #define service_add_nodes__get_Executable service_add_nodes_1__get_Executable
 #define service_add_nodes__get_InputArguments service_add_nodes_1__get_InputArguments
 #define service_add_nodes__get_NodeClass service_add_nodes_1__get_NodeClass

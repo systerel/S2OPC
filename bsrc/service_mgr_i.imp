@@ -84,6 +84,7 @@ PROMOTES
 
     /* subscription_mgr */
     is_valid_subscription,
+    server_subscription_event_triggered,
     server_subscription_data_changed,
     server_subscription_node_changed,
     server_subscription_publish_timeout

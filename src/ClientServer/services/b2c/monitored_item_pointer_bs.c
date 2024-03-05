@@ -36,7 +36,32 @@
 #include "util_b2c.h"
 #include "util_variant.h"
 
-static const SOPC_NodeId Number_DataType = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_Number};
+static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
+{
+    if (NULL != filterCtx)
+    {
+        if (filterCtx->isDataFilter)
+        {
+            SOPC_Variant_Delete(filterCtx->Filter.Data.lastCachedValueForFilter);
+            filterCtx->Filter.Data.lastCachedValueForFilter = NULL;
+        }
+        else
+        {
+            for (int32_t i = 0; i < filterCtx->Filter.Event.eventFilter->NoOfSelectClauses; i++)
+            {
+                SOPC_NumericRange_Delete(filterCtx->Filter.Event.indexRangeSelectClauses[i]);
+                SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses[i]);
+            }
+            SOPC_Free(filterCtx->Filter.Event.indexRangeSelectClauses);
+            SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses);
+            SOPC_NodeId_Clear(&filterCtx->Filter.Event.whereClauseTypeId);
+            SOPC_ReturnStatus status = SOPC_Encodeable_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
+                                                              (void**) &filterCtx->Filter.Event.eventFilter);
+            SOPC_UNUSED_RESULT(status);
+        }
+        SOPC_Free(filterCtx);
+    }
+}
 
 static void SOPC_InternalMonitoredItem_Free(uintptr_t data)
 {
@@ -48,9 +73,7 @@ static void SOPC_InternalMonitoredItem_Free(uintptr_t data)
         SOPC_Free(mi->nid);
         SOPC_String_Clear(mi->indexRangeString);
         SOPC_Free(mi->indexRangeString);
-        OpcUa_DataChangeFilter_Clear(mi->filter);
-        SOPC_Free(mi->filter);
-        SOPC_Variant_Delete(mi->lastCachedValueForFilter);
+        SOPC_InternalMonitoredFilter_Free(mi->filterCtx);
         SOPC_Free(mi);
     }
 }
@@ -112,127 +135,6 @@ void monitored_item_pointer_bs__monitored_item_pointer_bs_UNINITIALISATION(void)
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-#define InputArguments_BrowseName "EURange"
-
-static bool is_EURange(const OpcUa_VariableNode* node)
-{
-    if (NULL == node || &OpcUa_VariableNode_EncodeableType != node->encodeableType)
-    {
-        return false;
-    }
-
-    /* Type shall be Range */
-    if (!(SOPC_IdentifierType_Numeric == node->DataType.IdentifierType && OpcUaId_Range == node->DataType.Data.Numeric))
-    {
-        return false;
-    }
-
-    /* Browse shall be EURange (and should be in NS=O but we don't check it) */
-    return (strcmp(SOPC_String_GetRawCString(&node->BrowseName.Name), InputArguments_BrowseName) == 0);
-}
-
-static bool check_percent_deadband_filter_allowed(SOPC_AddressSpace_Node* variableNode, OpcUa_Range** range)
-{
-    SOPC_AddressSpace_Node* targetNode = NULL;
-    bool found = false;
-    int32_t* n_refs = SOPC_AddressSpace_Get_NoOfReferences(address_space_bs__nodes, variableNode);
-    OpcUa_ReferenceNode** refs = SOPC_AddressSpace_Get_References(address_space_bs__nodes, variableNode);
-    SOPC_Variant* euRangeVariant = NULL;
-    OpcUa_Range* euRangeValue = NULL;
-    for (int32_t i = 0; i < *n_refs && NULL == euRangeVariant; ++i)
-    { /* stop when input argument is found */
-        OpcUa_ReferenceNode* ref = &(*refs)[i];
-        if (SOPC_AddressSpaceUtil_IsProperty(ref))
-        {
-            if (ref->TargetId.ServerIndex == 0 && ref->TargetId.NamespaceUri.Length <= 0)
-            { // Shall be on same server and shall use only NodeId
-                targetNode = SOPC_AddressSpace_Get_Node(address_space_bs__nodes, &ref->TargetId.NodeId, &found);
-                if (found && NULL != targetNode && OpcUa_NodeClass_Variable == targetNode->node_class)
-                {
-                    if (is_EURange(&targetNode->data.variable))
-                    {
-                        euRangeVariant = SOPC_AddressSpace_Get_Value(address_space_bs__nodes, targetNode);
-                    }
-                }
-            }
-        }
-    }
-    if (euRangeVariant != NULL && SOPC_VariantArrayType_SingleValue == euRangeVariant->ArrayType &&
-        SOPC_ExtensionObject_Id == euRangeVariant->BuiltInTypeId &&
-        SOPC_ExtObjBodyEncoding_Object == euRangeVariant->Value.ExtObject->Encoding &&
-        &OpcUa_Range_EncodeableType == euRangeVariant->Value.ExtObject->Body.Object.ObjType)
-    {
-        /* Important note: here we make the choice that the EURange for the MI is the one during MI
-         * creation/modification, the EURange value / node might be changed in the future but we will ignore it. */
-        euRangeValue = (OpcUa_Range*) euRangeVariant->Value.ExtObject->Body.Object.Value;
-        if (euRangeValue->High >= euRangeValue->Low)
-        {
-            *range = euRangeValue;
-            return true;
-        }
-    }
-    return false;
-}
-
-void monitored_item_pointer_bs__check_monitored_item_filter_valid(
-    const constants__t_Node_i monitored_item_pointer_bs__p_node,
-    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-    constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
-    constants__t_monitoringFilterCtx_i* const monitored_item_pointer_bs__filterAbsDeadbandCtx)
-{
-    *monitored_item_pointer_bs__filterAbsDeadbandCtx = constants_bs__c_monitoringFilterCtx_indet;
-    *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
-    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_filter);
-    OpcUa_NodeClass* ncl = NULL;
-    SOPC_NodeId* dataTypeId = NULL;
-    bool result = false;
-    OpcUa_Range* euRange = NULL;
-    switch (monitored_item_pointer_bs__p_filter->DeadbandType)
-    {
-    case OpcUa_DeadbandType_None:
-        *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
-        break;
-    case OpcUa_DeadbandType_Absolute:
-        ncl = SOPC_AddressSpace_Get_NodeClass(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-        SOPC_ASSERT(NULL != ncl);
-        if (OpcUa_NodeClass_Variable == *ncl)
-        {
-            dataTypeId = SOPC_AddressSpace_Get_DataType(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-            result = SOPC_NodeId_Equal(dataTypeId, &Number_DataType);
-            if (!result)
-            {
-                result = SOPC_AddressSpaceUtil_RecursiveIsTransitiveSubtype(address_space_bs__nodes, RECURSION_LIMIT,
-                                                                            dataTypeId, dataTypeId, &Number_DataType);
-            }
-            /* Keep the absolute deadband value as context */
-            *monitored_item_pointer_bs__filterAbsDeadbandCtx = monitored_item_pointer_bs__p_filter->DeadbandValue;
-            if (result)
-            {
-                *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
-            }
-        }
-        break;
-    case OpcUa_DeadbandType_Percent:
-        ncl = SOPC_AddressSpace_Get_NodeClass(address_space_bs__nodes, monitored_item_pointer_bs__p_node);
-        SOPC_ASSERT(NULL != ncl);
-        if (OpcUa_NodeClass_Variable == *ncl)
-        {
-            result = check_percent_deadband_filter_allowed(monitored_item_pointer_bs__p_node, &euRange);
-            if (result)
-            {
-                /* Pre-compute the deadband as an absolute value using formula from Part 8 */
-                *monitored_item_pointer_bs__filterAbsDeadbandCtx =
-                    (monitored_item_pointer_bs__p_filter->DeadbandValue / 100.0) * (euRange->High - euRange->Low);
-                *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
-            }
-        }
-        break;
-    default:
-        // Already checked when retrieved in message
-        SOPC_ASSERT(false && "invalid deadband type");
-    }
-}
-
 void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_subscription_i monitored_item_pointer_bs__p_subscription,
     const constants__t_NodeId_i monitored_item_pointer_bs__p_nid,
@@ -241,14 +143,16 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
+    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode,
     constants__t_monitoredItemPointer_i* const monitored_item_pointer_bs__monitoredItemPointer,
     constants__t_monitoredItemId_i* const monitored_item_pointer_bs__monitoredItemId)
 {
+    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_filterCtx ||
+                constants__e_aid_EventNotifier != monitored_item_pointer_bs__p_aid);
+
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
     uint32_t freshId = 0;
     SOPC_InternalMonitoredItem* monitItem = SOPC_Calloc(1, sizeof(SOPC_InternalMonitoredItem));
@@ -260,12 +164,14 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     }
     SOPC_NumericRange* range = NULL;
     SOPC_ReturnStatus retStatus = SOPC_STATUS_NOK;
-
+    SOPC_InternalMonitoredItemFilterCtx* filterCtx =
+        (SOPC_InternalMonitoredItemFilterCtx*) monitored_item_pointer_bs__p_filterCtx;
     if (NULL == monitItem || NULL == nid || (NULL == rangeStr && NULL != monitored_item_pointer_bs__p_indexRange))
     {
         SOPC_Free(monitItem);
         SOPC_Free(nid);
         SOPC_Free(rangeStr);
+        SOPC_Free(filterCtx);
         return;
     }
 
@@ -288,21 +194,10 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     }
     if (SOPC_STATUS_OK == retStatus)
     {
-        if (NULL != monitored_item_pointer_bs__p_filter)
-        {
-            monitItem->filter = SOPC_Malloc(sizeof(*monitored_item_pointer_bs__p_filter));
-            if (NULL == monitItem->filter)
-            {
-                retStatus = SOPC_STATUS_OUT_OF_MEMORY;
-            }
-            else
-            {
-                *monitItem->filter = *monitored_item_pointer_bs__p_filter;
-            }
-        }
-    }
-    if (SOPC_STATUS_OK == retStatus)
-    {
+        SOPC_ASSERT((constants__e_aid_EventNotifier != monitored_item_pointer_bs__p_aid &&
+                     (NULL == filterCtx || filterCtx->isDataFilter)) ||
+                    (constants__e_aid_EventNotifier == monitored_item_pointer_bs__p_aid && !filterCtx->isDataFilter));
+
         bool dictInsertionOK = false;
 
         monitItem->subId = monitored_item_pointer_bs__p_subscription;
@@ -313,8 +208,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
         monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoringMode;
         monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
         monitItem->indexRange = range;
-        monitItem->filterAbsoluteDeadbandContext = monitored_item_pointer_bs__p_filterAbsDeadbandCtx;
-        monitItem->lastCachedValueForFilter = NULL;
+        monitItem->filterCtx = filterCtx;
         monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
         monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
 
@@ -362,7 +256,7 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     else
     {
         SOPC_NumericRange_Delete(range);
-        SOPC_Free(monitItem->filter);
+        SOPC_Free(filterCtx);
         SOPC_Free(monitItem);
         SOPC_NodeId_Clear(nid);
         SOPC_Free(nid);
@@ -375,8 +269,7 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
     const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-    const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
+    const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
     const t_bool monitored_item_pointer_bs__p_discardOldest,
     const t_entier4 monitored_item_pointer_bs__p_queueSize,
     constants_statuscodes_bs__t_StatusCode_i* const monitored_item_pointer_bs__StatusCode)
@@ -384,34 +277,18 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
     *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_ok;
     SOPC_InternalMonitoredItem* monitItem =
         (SOPC_InternalMonitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    SOPC_ASSERT(NULL != monitored_item_pointer_bs__p_filterCtx || constants__e_aid_EventNotifier != monitItem->aid);
+    SOPC_ASSERT(NULL != monitItem->filterCtx || constants__e_aid_EventNotifier != monitItem->aid);
+
     monitItem->timestampToReturn = monitored_item_pointer_bs__p_timestampToReturn;
     monitItem->clientHandle = monitored_item_pointer_bs__p_clientHandle;
-    OpcUa_DataChangeFilter_Clear(monitItem->filter);
-    SOPC_Free(monitItem->filter);
-    monitItem->filter = NULL;
-    if (NULL != monitored_item_pointer_bs__p_filter)
-    {
-        monitItem->filter = SOPC_Malloc(sizeof(*monitored_item_pointer_bs__p_filter));
-        if (NULL == monitItem->filter)
-        {
-            *monitored_item_pointer_bs__StatusCode = constants_statuscodes_bs__e_sc_bad_out_of_memory;
-        }
-        else
-        {
-            *monitItem->filter = *monitored_item_pointer_bs__p_filter;
-        }
-    }
-    monitItem->filterAbsoluteDeadbandContext = monitored_item_pointer_bs__p_filterAbsDeadbandCtx;
+
+    SOPC_InternalMonitoredItemFilterCtx* newFilterCtx =
+        (SOPC_InternalMonitoredItemFilterCtx*) monitored_item_pointer_bs__p_filterCtx;
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
-
-    // If a cached value exists and no filter defined, reset the last cache value for filter
-    if (NULL != monitItem->lastCachedValueForFilter &&
-        (NULL == monitItem->filter || OpcUa_DeadbandType_None == monitItem->filter->DeadbandType))
-    {
-        SOPC_Variant_Delete(monitItem->lastCachedValueForFilter);
-        monitItem->lastCachedValueForFilter = NULL;
-    }
+    SOPC_InternalMonitoredFilter_Free(monitItem->filterCtx);
+    monitItem->filterCtx = newFilterCtx;
 }
 
 void monitored_item_pointer_bs__delete_monitored_item_pointer(
@@ -455,6 +332,15 @@ void monitored_item_pointer_bs__set_monit_mode_monitored_item_pointer(
     SOPC_InternalMonitoredItem* monitItem =
         (SOPC_InternalMonitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
     monitItem->monitoringMode = monitored_item_pointer_bs__p_monitoring_mode;
+}
+
+void monitored_item_pointer_bs__get_monitoredItemFilter(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    constants__t_monitoringFilterCtx_i* const monitored_item_pointer_bs__p_filter)
+{
+    SOPC_InternalMonitoredItem* monitItem =
+        (SOPC_InternalMonitoredItem*) monitored_item_pointer_bs__p_monitoredItemPointer;
+    *monitored_item_pointer_bs__p_filter = monitItem->filterCtx;
 }
 
 void monitored_item_pointer_bs__getall_monitoredItemId(
@@ -664,26 +550,30 @@ static SOPC_ReturnStatus monitored_item_update_last_cached_value(SOPC_InternalMo
 {
     // See part 4 DataChangeFilterDataChangeFilter definition for cache necessity:
     // The last cached value is defined as the last value pushed to the queue [of notification]
+    SOPC_ASSERT(NULL == monitItem->filterCtx || monitItem->filterCtx->isDataFilter);
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     // Cache the last notified value when filter are active (needed for next comparison)
-    if (NULL != monitItem->filter && OpcUa_DeadbandType_None != monitItem->filter->DeadbandType)
+    if (NULL != monitItem->filterCtx &&
+        OpcUa_DeadbandType_None != monitItem->filterCtx->Filter.Data.dataFilter.DeadbandType)
     {
-        SOPC_Variant_Clear(monitItem->lastCachedValueForFilter);
-        if (NULL == monitItem->lastCachedValueForFilter)
+        SOPC_Variant* lastValue = monitItem->filterCtx->Filter.Data.lastCachedValueForFilter;
+        SOPC_Variant_Clear(lastValue);
+        if (NULL == lastValue)
         {
-            monitItem->lastCachedValueForFilter = SOPC_Variant_Create();
-            status = (NULL == monitItem->lastCachedValueForFilter) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
+            lastValue = SOPC_Variant_Create();
+            status = (NULL == lastValue) ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK;
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Variant_Copy(monitItem->lastCachedValueForFilter, lastNotifiedValue);
+            status = SOPC_Variant_Copy(lastValue, lastNotifiedValue);
             if (SOPC_STATUS_OK != status)
             {
-                SOPC_Free(monitItem->lastCachedValueForFilter);
-                monitItem->lastCachedValueForFilter = NULL;
+                SOPC_Free(lastValue);
+                lastValue = NULL;
             }
         }
+        monitItem->filterCtx->Filter.Data.lastCachedValueForFilter = lastValue;
     }
     return status;
 }
@@ -691,16 +581,29 @@ static SOPC_ReturnStatus monitored_item_update_last_cached_value(SOPC_InternalMo
 static const SOPC_Variant* monitored_item_get_last_cached_value(const SOPC_InternalMonitoredItem* monitItem,
                                                                 const SOPC_Variant* oldAddressSpaceValue)
 {
-    if (monitItem->filter != NULL && OpcUa_DeadbandType_None != monitItem->filter->DeadbandType)
+    if (monitItem->filterCtx != NULL && monitItem->filterCtx->isDataFilter &&
+        OpcUa_DeadbandType_None != monitItem->filterCtx->Filter.Data.dataFilter.DeadbandType)
     {
         // We shall use the last cached value if available
-        if (NULL != monitItem->lastCachedValueForFilter)
+        if (NULL != monitItem->filterCtx->Filter.Data.lastCachedValueForFilter)
         {
-            return monitItem->lastCachedValueForFilter;
+            return monitItem->filterCtx->Filter.Data.lastCachedValueForFilter;
         }
     }
     // Previous address space value <=> cached value
     return oldAddressSpaceValue;
+}
+
+void monitored_item_pointer_bs__is_event_monitoredItem(
+    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+    t_bool* const monitored_item_pointer_bs__p_isEvent)
+{
+    SOPC_InternalMonitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
+    *monitored_item_pointer_bs__p_isEvent = false;
+    if (NULL != monitItem->filterCtx)
+    {
+        *monitored_item_pointer_bs__p_isEvent = !monitItem->filterCtx->isDataFilter;
+    }
 }
 
 void monitored_item_pointer_bs__is_notification_triggered(
@@ -714,7 +617,11 @@ void monitored_item_pointer_bs__is_notification_triggered(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     int32_t dtCompare = 0;
     SOPC_InternalMonitoredItem* monitItem = monitored_item_pointer_bs__p_monitoredItemPointer;
-    OpcUa_DataChangeFilter* filter = monitItem->filter;
+    SOPC_ASSERT(NULL == monitItem->filterCtx || monitItem->filterCtx->isDataFilter);
+    OpcUa_DataChangeFilter* filter =
+        (NULL == monitItem->filterCtx) ? NULL : &monitItem->filterCtx->Filter.Data.dataFilter;
+    const void* filterAbsDeadandCtx =
+        (NULL == monitItem->filterCtx) ? NULL : &monitItem->filterCtx->Filter.Data.filterAbsoluteDeadbandContext;
     const SOPC_Variant* lastCachedValue = NULL;
 
     if (monitItem->aid != constants__c_AttributeId_indet &&
@@ -744,9 +651,8 @@ void monitored_item_pointer_bs__is_notification_triggered(
                 lastCachedValue = monitored_item_get_last_cached_value(
                     monitItem, &monitored_item_pointer_bs__p_old_wv_pointer->Value.Value);
                 status = compare_monitored_item_values(
-                    monitored_item_pointer_bs__p_localeIds, monitItem->indexRange, filter,
-                    &monitItem->filterAbsoluteDeadbandContext, lastCachedValue,
-                    &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
+                    monitored_item_pointer_bs__p_localeIds, monitItem->indexRange, filter, filterAbsDeadandCtx,
+                    lastCachedValue, &monitored_item_pointer_bs__p_new_wv_pointer->Value.Value, &dtCompare);
             }
         }
         else
@@ -767,14 +673,15 @@ void monitored_item_pointer_bs__is_notification_triggered(
         }
         else
         {
-            SOPC_Logger_TraceError(
-                SOPC_LOG_MODULE_CLIENTSERVER,
-                "MonitoredItem notification trigger: comparison of MI id=%" PRIu32
-                " data values failed with (deadband, type, array type)=(%" PRIu32 ", %d, %d)",
-                monitItem->monitoredItemId,
-                NULL == monitItem->filter ? OpcUa_DeadbandType_None : monitItem->filter->DeadbandType,
-                (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
-                (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "MonitoredItem notification trigger: comparison of MI id=%" PRIu32
+                                   " data values failed with (deadband, type, array type)=(%" PRIu32 ", %d, %d)",
+                                   monitItem->monitoredItemId,
+                                   NULL == monitItem->filterCtx
+                                       ? OpcUa_DeadbandType_None
+                                       : monitItem->filterCtx->Filter.Data.dataFilter.DeadbandType,
+                                   (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.BuiltInTypeId,
+                                   (int) monitored_item_pointer_bs__p_new_wv_pointer->Value.Value.ArrayType);
         }
     }
 }

@@ -192,7 +192,7 @@ LOCAL_OPERATIONS
           a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
           a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
           a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
-          a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+          a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
           a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
 
           CreateMonitoredItemResp_Id : t_monitoredItemReqIndex +-> t_monitoredItemId_i &
@@ -281,7 +281,7 @@ LOCAL_OPERATIONS
           a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
           a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
           a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
-          a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+          a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
           a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
 
           CreateMonitoredItemResp_Id : 1..nb_monitored_items --> t_monitoredItemId_i &
@@ -289,6 +289,62 @@ LOCAL_OPERATIONS
         )
     END
     ;
+
+    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_sub_to_filter, p_opt_mi_to_fitler, p_sub, p_mi) =
+    PRE
+        p_opt_sub_to_filter : t_subscription_i &
+        p_opt_mi_to_fitler : t_monitoredItemId_i &
+        p_sub : t_subscription_i &
+        p_mi : t_monitoredItemId_i &
+        p_mi : t_monitoredItemId
+    THEN
+        bres := bool((p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
+                    (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
+    END
+    ;
+
+    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_sub_id, p_mi_id) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
+        p_monitoredItemPointer : dom(a_monitored_item_notification_queue) &
+        p_event : t_Event_i &
+        p_event : t_Event &
+        p_sub_id : t_subscription_i &
+        p_mi_id : t_monitoredItemId_i
+    THEN
+        LET l_MI_notif_queue BE
+            l_MI_notif_queue = a_monitored_item_notification_queue(p_monitoredItemPointer)
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
+                {l_MI_notif_queue} <| a_notification_queue_notifications$0 <: {l_MI_notif_queue} <| a_notification_queue_notifications &
+                {l_MI_notif_queue} <<| a_notification_queue_notifications$0 = {l_MI_notif_queue} <<| a_notification_queue_notifications)
+        END
+    END
+    ;
+
+    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_sub_id, p_mi_id) =
+    PRE
+        p_monitoredItemQueue : t_monitoredItemQueue_i &
+        p_monitoredItemQueue : s_monitoredItemQueue &
+        p_event : t_Event_i &
+        p_event : t_Event &
+        p_sub_id : t_subscription_i &
+        p_mi_id : t_monitoredItemId_i
+    THEN
+        LET l_MI_notif_queues BE
+            l_MI_notif_queues = a_monitored_item_notification_queue[a_defined_monitored_items[{p_monitoredItemQueue}]]
+        IN
+            /* notifications may have been triggered */
+            a_notification_queue_notifications
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
+                l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
+                l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
+        END
+   END
+   ;
 
     local_create_notification_on_monitored_items_if_data_changed (p_monitoredItemPointer, p_old_wv_pointer, p_new_wv_pointer) =
     PRE
@@ -305,7 +361,7 @@ LOCAL_OPERATIONS
         IN
             /* notifications may have been triggered */
             a_notification_queue_notifications
-            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
                 {l_MI_notif_queue} <| a_notification_queue_notifications$0 <: {l_MI_notif_queue} <| a_notification_queue_notifications &
                 {l_MI_notif_queue} <<| a_notification_queue_notifications$0 = {l_MI_notif_queue} <<| a_notification_queue_notifications)
         END
@@ -326,7 +382,7 @@ LOCAL_OPERATIONS
         IN
             /* notifications may have been triggered */
             a_notification_queue_notifications
-            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
                 l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
                 l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
         END
@@ -349,7 +405,7 @@ LOCAL_OPERATIONS
         IN
             /* notifications may have been triggered */
             a_notification_queue_notifications
-            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
                 {l_MI_notif_queue} <| a_notification_queue_notifications$0 <: {l_MI_notif_queue} <| a_notification_queue_notifications &
                 {l_MI_notif_queue} <<| a_notification_queue_notifications$0 = {l_MI_notif_queue} <<| a_notification_queue_notifications)
         END
@@ -367,16 +423,18 @@ LOCAL_OPERATIONS
         IN
             /* notifications may have been triggered */
             a_notification_queue_notifications
-            :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+            :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
                 l_MI_notif_queues <| a_notification_queue_notifications$0 <: l_MI_notif_queues <| a_notification_queue_notifications &
                 l_MI_notif_queues <<| a_notification_queue_notifications$0 = l_MI_notif_queues <<| a_notification_queue_notifications)
         END
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     PRE
         ModifyMonitoredItemResp_Allocated = TRUE &
+        p_endpoint_idx : t_endpoint_config_idx_i &
+        p_endpoint_idx : t_endpoint_config_idx &
         p_tsToReturn : t_TimestampsToReturn_i &
         p_tsToReturn : t_TimestampsToReturn &
         p_req_msg : t_msg_i &
@@ -391,33 +449,22 @@ LOCAL_OPERATIONS
         p_nb_monitored_items : t_monitoredItemReqIndex &
         p_nb_monitored_items = nb_monitored_items
     THEN
-        LET l_modifyMonitoredItemResp_StatusCode BE
-            l_modifyMonitoredItemResp_StatusCode =
-            %mi_index.(mi_index : t_monitoredItemReqIndex &
-                mi_index : 1..nb_monitored_items &
-                mi_index : dom(ModifyMonitoredItemReq_Id)
-                |
-                {TRUE |-> e_sc_bad_monitored_item_id_invalid,
-                 FALSE |-> {TRUE |-> e_sc_bad_monitored_item_filter_unsupported,
-                            FALSE |-> e_sc_ok
-                           }(bool(ModifyMonitoredItemReq_Filter(mi_index) = c_monitoringFilter_indet or
-                                  ModifyMonitoredItemReq_Filter(mi_index) : t_monitoringFilter))
-                }(bool(ModifyMonitoredItemReq_Id(mi_index) /: s_monitoredItemId))
-            )
+
+        /* Define the queues of monitored items that will be modified */
+        LET l_MonitoredItemIds, l_MonitoredItemPointers BE
+            l_MonitoredItemIds = ran(ModifyMonitoredItemReq_Id) /\ s_monitoredItemId &
+            l_MonitoredItemPointers = a_monitoredItemId~[l_MonitoredItemIds]
         IN
-            /* Define the queues of monitored items that will be modified */
-            LET l_MonitoredItemIds, l_MonitoredItemPointers BE
-                l_MonitoredItemIds = ModifyMonitoredItemReq_Id[dom(l_modifyMonitoredItemResp_StatusCode |> {e_sc_ok})] &
-                l_MonitoredItemPointers = a_monitoredItemId~[l_MonitoredItemIds]
-            IN
-                /* Set response variables */
-                ModifyMonitoredItemResp_StatusCode := l_modifyMonitoredItemResp_StatusCode ||
-                /* Notifications of concerned monitored items might be modified (queue size modification might lead to drop some) */
-                a_notification_queue_notifications
-                :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
-                    a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications$0 =
-                    a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications)
-            END
+            /* Notifications of concerned monitored items might be modified (queue size modification might lead to drop some) */
+            a_notification_queue_notifications,
+            /* Set response variables */
+            ModifyMonitoredItemResp_StatusCode
+            :(
+                a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
+                a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications$0 =
+                a_monitored_item_notification_queue[l_MonitoredItemPointers] <<| a_notification_queue_notifications &
+                ModifyMonitoredItemResp_StatusCode : 1..nb_monitored_items --> t_StatusCode
+            )
         END
     END
     ;
@@ -488,7 +535,7 @@ LOCAL_OPERATIONS
             IF p_prevMonitMode = e_monitoringMode_disabled & p_newMonitMode /= e_monitoringMode_disabled
             THEN
                 ANY l_notif WHERE
-                    l_notif : t_WriteValuePointer &
+                    l_notif : t_notificationData &
                     l_notif /: ran(a_notification_queue_notifications)
                 THEN
                     a_notification_queue_notifications :=
@@ -497,7 +544,7 @@ LOCAL_OPERATIONS
             ELSIF p_prevMonitMode /= e_monitoringMode_disabled & p_newMonitMode = e_monitoringMode_disabled
             THEN
                 a_notification_queue_notifications
-                :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+                :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
                    a_notification_queue_notifications = {l_MI_notif_queue} <<| a_notification_queue_notifications$0)
             END
         END
@@ -800,7 +847,8 @@ OPERATIONS
         l_valueSc,
         l_val_ts_src,
         l_val_ts_srv,
-        l_monitoredItemPointer
+        l_monitoredItemPointer,
+        l_filterResult
     IN
         l_monitoredItemId := c_monitoredItemId_indet;
         l_revSamplingItv := c_opcua_duration_indet;
@@ -808,6 +856,7 @@ OPERATIONS
         l_node := c_Node_indet;
         l_value := c_Variant_indet;
         l_sc := e_sc_bad_unexpected_error;
+        l_filterResult := c_filterResult_indet;
 
         l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
         l_bres <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
@@ -851,8 +900,11 @@ OPERATIONS
                     END;
                     IF l_sc = e_sc_ok
                     THEN
-                        l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
-                        l_sc, l_monitoredItemPointer, l_monitoredItemId <-- create_monitored_item (p_subscription,
+                        l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_aid, l_queueSize);
+                        l_sc, l_monitoredItemPointer, l_monitoredItemId, l_filterResult
+                           <-- create_monitored_item
+                           (l_endpoint_config_idx,
+                            p_subscription,
                             l_nid,
                             l_aid,
                             l_indexRange,
@@ -873,7 +925,7 @@ OPERATIONS
         END
         ;
 
-        setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize)
+        setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, l_sc, l_monitoredItemId, l_revSamplingItv, l_revQueueSize, l_filterResult)
     END
     ;
 
@@ -896,6 +948,98 @@ OPERATIONS
         VARIANT
             card(rreqs_to_iterate)
         END
+    END
+    ;
+
+    bres <-- local_check_filtered_subscription_and_monitored_item (p_opt_sub_to_filter, p_opt_mi_to_fitler, p_sub, p_mi) =
+    BEGIN
+        bres := bool((p_opt_sub_to_filter = c_subscription_indet or p_opt_sub_to_filter = p_sub) &
+                    (p_opt_mi_to_fitler = c_monitoredItemId_indet or p_opt_mi_to_fitler = p_mi))
+    END
+    ;
+
+    local_create_notification_on_monitored_item_if_event_selected (p_monitoredItemPointer, p_event, p_sub_id, p_mi_id) =
+    VAR
+        l_notification_with_locales_triggered,
+        l_monitoredItemId,
+        l_subscription,
+        l_valid_subscription,
+        l_filter_sub_and_mi,
+        l_session,
+        l_session_valid,
+        l_user,
+        l_valid_user_access,
+        l_locales,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle
+    IN
+        l_monitoredItemId,
+        l_subscription,
+        l_nid,
+        l_aid,
+        l_indexRange,
+        l_timestampToReturn,
+        l_monitoringMode,
+        l_clientHandle <--getall_monitoredItemPointer (p_monitoredItemPointer);
+        l_valid_subscription <-- is_valid_subscription (l_subscription);
+        l_filter_sub_and_mi <-- local_check_filtered_subscription_and_monitored_item (p_sub_id, p_mi_id, l_subscription, l_monitoredItemId);
+        l_session_valid := FALSE;
+        l_valid_user_access := FALSE;
+        l_locales := c_LocaleIds_empty;
+        IF l_valid_subscription = TRUE & l_filter_sub_and_mi = TRUE & l_aid = e_aid_EventNotifier
+        THEN
+            /* Note: AccessLevel not checked here, it is a condition to generate a DataChange event (inhibition if read forbidden)*/
+            l_session <-- getall_session (l_subscription);
+            l_session_valid <-- is_valid_session (l_session);
+            IF l_session_valid = TRUE
+            THEN
+                l_user <-- get_session_user_server(l_session);
+                /* Note: provide a way to restrict event notification to user here through event notifier attribute of notifier
+                         but the specification seems to only concern the case in which event
+                         is visible in address space (part 4 (v1.05) §7.22.3):
+                         "For example, the Server shall set the event field to Bad_UserAccessDenied
+                          if the value is not accessible to the user associated with the Session."
+                */
+                l_valid_user_access <-- get_user_authorization (e_operation_type_read, l_nid, l_aid, l_user);
+                l_locales <-- get_server_session_preferred_locales(l_session)
+            END
+        END
+        ;
+        IF l_session_valid = TRUE & l_monitoringMode = e_monitoringMode_reporting & l_aid = e_aid_EventNotifier
+        THEN
+            server_subscription_add_notification_on_event_if_triggered
+              (l_valid_user_access, l_locales, p_monitoredItemPointer, l_clientHandle, l_timestampToReturn, p_event)
+        END
+    END
+    ;
+
+    local_create_notification_on_monitored_items_if_event_selected (p_monitoredItemQueue, p_event, p_sub_id, p_mi_id) =
+    VAR
+        l_continue,
+        l_iterator,
+        l_monitoredItemPointer,
+        l_isEventMI
+    IN
+        l_continue, l_iterator <-- init_iter_monitored_item (p_monitoredItemQueue);
+        WHILE l_continue = TRUE DO
+            l_continue, l_monitoredItemPointer <-- continue_iter_monitored_item (l_iterator, p_monitoredItemQueue);
+            local_create_notification_on_monitored_item_if_event_selected (l_monitoredItemPointer, p_event, p_sub_id, p_mi_id)
+        INVARIANT
+            s_mi_to_iterate_it <: t_monitoredItemPointer &
+            s_mi_iterated_it   <: t_monitoredItemPointer &
+
+            s_mi_to_iterate_it /\ s_mi_iterated_it = {} &
+            card(s_mi_to_iterate_it \/ s_mi_iterated_it) = nb_monitored_items_it &
+            l_continue = bool(s_mi_to_iterate_it /= {})
+
+        VARIANT
+            card(s_mi_to_iterate_it)
+        END;
+        clear_iter_monitored_item (l_iterator)
     END
     ;
 
@@ -1104,7 +1248,7 @@ OPERATIONS
     END
     ;
 
-    fill_response_subscription_modify_monitored_items (p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
+    fill_response_subscription_modify_monitored_items (p_endpoint_idx, p_tsToReturn, p_req_msg, p_resp_msg, p_nb_monitored_items) =
     VAR
         l_continue,
         l_index,
@@ -1116,11 +1260,13 @@ OPERATIONS
         l_filter,
         l_discardOldest,
         l_queueSize,
+        l_revQueueSize,
         l_revSamplingItv,
-        l_revQueueSize
+        l_filterResult
     IN
         l_revSamplingItv := c_opcua_duration_indet;
         l_revQueueSize := 0;
+        l_filterResult := c_filterResult_indet;
         l_continue <-- init_iter_monitored_item_request(p_nb_monitored_items);
         WHILE l_continue = TRUE DO
             l_continue, l_index <-- continue_iter_monitored_item_request;
@@ -1128,11 +1274,11 @@ OPERATIONS
               <-- getall_modify_monitored_item_req_params (p_req_msg, l_index);
             IF l_bres = TRUE
             THEN
-                l_revSamplingItv, l_revQueueSize <-- compute_create_monitored_item_revised_params(l_queueSize);
-                l_sc <-- modify_monitored_item (l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_revQueueSize)
+                l_sc, l_filterResult, l_revSamplingItv, l_revQueueSize
+                  <-- modify_monitored_item (p_endpoint_idx, l_id, p_tsToReturn, l_clientHandle, l_filter, l_discardOldest, l_queueSize)
             END
             ;
-            setall_msg_modify_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_revSamplingItv, l_revQueueSize)
+            setall_msg_modify_monitored_item_resp_params (p_resp_msg, l_index, l_sc, l_revSamplingItv, l_revQueueSize, l_filterResult)
 
         INVARIANT
             rreqs_to_iterate <: t_monitoredItemReqIndex &
@@ -1586,6 +1732,7 @@ OPERATIONS
         l_sc,
         l_subscription,
         l_valid_subscription,
+        l_endpoint_config_idx,
         l_timestampToRet,
         l_nb_monitored_items,
         l_bres
@@ -1594,13 +1741,16 @@ OPERATIONS
         IF l_sc = e_sc_ok
         THEN
             l_valid_subscription <-- is_valid_subscription_on_session (p_session, l_subscription);
-            IF l_valid_subscription = TRUE
+            l_endpoint_config_idx <-- session_get_endpoint_config(p_session);
+            l_bres <-- is_valid_endpoint_config_idx (l_endpoint_config_idx);
+            IF l_valid_subscription = TRUE & l_bres = TRUE
             THEN
                 reset_subscription_LifetimeCounter (l_subscription);
                 l_bres <-- alloc_msg_modify_monitored_items_resp_results (p_resp_msg, l_nb_monitored_items);
                 IF l_bres = TRUE
                 THEN
-                    fill_response_subscription_modify_monitored_items (l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
+                    fill_response_subscription_modify_monitored_items
+                      (l_endpoint_config_idx, l_timestampToRet, p_req_msg, p_resp_msg, l_nb_monitored_items);
                     StatusCode_service := e_sc_ok
                 ELSE
                     StatusCode_service := e_sc_bad_out_of_memory
@@ -1679,6 +1829,65 @@ OPERATIONS
     END
     ;
 
+    bres <-- server_subscription_event_triggered (p_notifierId, p_event, p_sub_id, p_mi_id) =
+    VAR
+        l_nid_valid,
+        l_node,
+        l_nodeClass,
+        l_eventNotifierByte,
+        l_bres,
+        l_monitoredItemQueue
+    IN
+        /* For each MI in queue:
+        - If event MI
+        - If where clause empty or 1 where clause elt matches
+        - create event notif with select clauses number of elements
+        */
+
+        /* Trigger event for notifier node */
+        l_bres := FALSE;
+        l_nid_valid, l_node <-- readall_AddressSpace_Node (p_notifierId);
+        IF l_nid_valid = TRUE
+        THEN
+            l_nodeClass <-- get_NodeClass(l_node);
+            IF l_nodeClass = e_ncl_Object or l_nodeClass = e_ncl_View
+            THEN
+                l_eventNotifierByte <-- get_EventNotifier(l_node);
+                l_bres <-- is_EventNotifier_SubscribeToEvents(l_eventNotifierByte)
+            END
+            ;
+            IF l_bres = TRUE
+            THEN
+                l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (p_notifierId);
+                IF l_bres = TRUE
+                THEN
+                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_sub_id, p_mi_id)
+                END
+            END  // ELSE: no MI queue (none created)
+        END
+        ;
+        /* Trigger event for Server node (if not already the notifier node) */
+        IF l_bres = TRUE
+        THEN
+            l_bres <-- is_NodeId_equal(c_Server_NodeId, p_notifierId);
+            /* Always notifies through standard Server node (if not already the notifier)*/
+            l_nid_valid, l_node <-- readall_AddressSpace_Node (c_Server_NodeId);
+            IF l_bres = FALSE & l_nid_valid = TRUE
+            THEN
+                l_bres, l_monitoredItemQueue <-- get_nodeToMonitoredItemQueue (c_Server_NodeId);
+                IF l_bres = TRUE
+                THEN
+                    local_create_notification_on_monitored_items_if_event_selected (l_monitoredItemQueue, p_event, p_sub_id, p_mi_id)
+                END
+            END
+            ;
+            l_bres := TRUE // Do not fail in case of directly targeted Server node or unexpected invalid properties on Server node
+        END
+        ;
+        bres := l_bres
+    END
+    ;
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     VAR
         l_nid,
@@ -1697,7 +1906,7 @@ OPERATIONS
             THEN
                 create_notification_on_monitored_items_if_data_changed
                 (l_monitoredItemQueue, p_old_write_value_pointer, p_new_write_value_pointer)
-            END // TODO: log error
+            END
         END;
         free_write_value_pointer (p_old_write_value_pointer);
         free_write_value_pointer (p_new_write_value_pointer)

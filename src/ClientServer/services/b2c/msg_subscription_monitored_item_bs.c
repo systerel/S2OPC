@@ -108,19 +108,19 @@ void msg_subscription_monitored_item_bs__get_msg_create_monitored_items_req_time
         util_TimestampsToReturn__C_to_B(createReq->TimestampsToReturn);
 }
 
-static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* filter,
-                                                         SOPC_AttributeId attributeId,
-                                                         constants_statuscodes_bs__t_StatusCode_i* sc,
-                                                         constants__t_monitoringFilter_i* dataFilter)
+static bool check_monitored_item_filter_param(SOPC_ExtensionObject* filter,
+                                              SOPC_AttributeId attributeId,
+                                              constants_statuscodes_bs__t_StatusCode_i* sc,
+                                              constants__t_monitoringFilter_i* outFilter)
 {
     SOPC_ASSERT(NULL != filter);
     SOPC_ASSERT(NULL != sc);
-    SOPC_ASSERT(NULL != dataFilter);
-    *dataFilter = constants__c_monitoringFilter_indet;
+    SOPC_ASSERT(NULL != filter);
+    *outFilter = constants__c_monitoringFilter_indet;
 
     if (filter->Encoding != SOPC_ExtObjBodyEncoding_None)
     {
-        if (attributeId != SOPC_AttributeId_Value)
+        if (attributeId != SOPC_AttributeId_Value && attributeId != SOPC_AttributeId_EventNotifier)
         {
             *sc = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
         }
@@ -129,18 +129,29 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             // Filter was not decoded as an object => unknown type
             *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
         }
-        else if (&OpcUa_AggregateFilter_EncodeableType == filter->Body.Object.ObjType ||
-                 &OpcUa_EventFilter_EncodeableType == filter->Body.Object.ObjType)
+        else if (&OpcUa_AggregateFilter_EncodeableType == filter->Body.Object.ObjType)
         {
             // AggregateFilter or EventFilter are not supported
             *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_unsupported;
         }
-        else if (&OpcUa_DataChangeFilter_EncodeableType != filter->Body.Object.ObjType)
+        else if (&OpcUa_DataChangeFilter_EncodeableType != filter->Body.Object.ObjType &&
+                 &OpcUa_EventFilter_EncodeableType != filter->Body.Object.ObjType)
         {
             // Filter type is unexpected
             *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
         }
-        else
+        else if (&OpcUa_DataChangeFilter_EncodeableType == filter->Body.Object.ObjType &&
+                 attributeId != SOPC_AttributeId_Value)
+        {
+            *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+        }
+        else if (&OpcUa_EventFilter_EncodeableType == filter->Body.Object.ObjType &&
+                 attributeId != SOPC_AttributeId_EventNotifier)
+        {
+            /* Based on UACTT expectation */
+            *sc = constants_statuscodes_bs__e_sc_bad_filter_not_allowed;
+        }
+        else if (&OpcUa_DataChangeFilter_EncodeableType == filter->Body.Object.ObjType)
         {
             // Note: DataChangeFilter does not have result and thus does not provide revised value in response
             OpcUa_DataChangeFilter* dcf = filter->Body.Object.Value;
@@ -171,7 +182,7 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
                                            dcf->DeadbandValue);
                 }
                 break;
-            case OpcUa_DeadbandType_Percent: // Not supported for now
+            case OpcUa_DeadbandType_Percent:
                 // Check deadband value is between 0.0 and 100.0 (percent expected)
                 if (dcf->DeadbandValue < 0.0 || dcf->DeadbandValue > 100.0)
                 {
@@ -200,7 +211,20 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             }
             else
             {
-                *dataFilter = (OpcUa_DataChangeFilter*) filter->Body.Object.Value;
+                *outFilter = filter;
+                return true;
+            }
+        }
+        else if (&OpcUa_EventFilter_EncodeableType == filter->Body.Object.ObjType)
+        {
+            OpcUa_EventFilter* ef = filter->Body.Object.Value;
+            if (ef->NoOfSelectClauses <= 0)
+            {
+                *sc = constants_statuscodes_bs__e_sc_bad_monitored_item_filter_invalid;
+            }
+            else
+            {
+                *outFilter = filter;
                 return true;
             }
         }
@@ -292,8 +316,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
         {
             *msg_subscription_monitored_item_bs__p_queueSize = INT32_MAX;
         }
-
-        *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
+        *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_filter_param(
             &monitReq->RequestedParameters.Filter, monitReq->ItemToMonitor.AttributeId,
             msg_subscription_monitored_item_bs__p_sc, msg_subscription_monitored_item_bs__p_filter);
     }
@@ -310,7 +333,8 @@ void msg_subscription_monitored_item_bs__setall_msg_create_monitored_item_resp_p
     const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc,
     const constants__t_monitoredItemId_i msg_subscription_monitored_item_bs__p_monitored_item_id,
     const constants__t_opcua_duration_i msg_subscription_monitored_item_bs__p_revSamplingItv,
-    const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize)
+    const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize,
+    const constants__t_filterResult_i msg_subscription_monitored_item_bs__p_filterResult)
 {
     OpcUa_CreateMonitoredItemsResponse* createResp =
         (OpcUa_CreateMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
@@ -319,6 +343,17 @@ void msg_subscription_monitored_item_bs__setall_msg_create_monitored_item_resp_p
     monitResp->MonitoredItemId = msg_subscription_monitored_item_bs__p_monitored_item_id;
     monitResp->RevisedSamplingInterval = msg_subscription_monitored_item_bs__p_revSamplingItv;
     monitResp->RevisedQueueSize = (uint32_t) msg_subscription_monitored_item_bs__p_revQueueSize;
+    if (NULL != msg_subscription_monitored_item_bs__p_filterResult)
+    {
+        SOPC_EncodeableType* encTyp = msg_subscription_monitored_item_bs__p_filterResult->encodeableType;
+        SOPC_ASSERT(NULL != encTyp);
+        monitResp->FilterResult.TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        monitResp->FilterResult.TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
+        monitResp->FilterResult.TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
+        monitResp->FilterResult.Encoding = SOPC_ExtObjBodyEncoding_Object;
+        monitResp->FilterResult.Body.Object.ObjType = encTyp;
+        monitResp->FilterResult.Body.Object.Value = (void*) msg_subscription_monitored_item_bs__p_filterResult;
+    }
 }
 
 void msg_subscription_monitored_item_bs__alloc_msg_modify_monitored_items_resp_results(
@@ -407,12 +442,25 @@ void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
         (OpcUa_ModifyMonitoredItemsRequest*) msg_subscription_monitored_item_bs__p_req_msg;
     OpcUa_MonitoredItemModifyRequest* monitReq =
         &modifyReq->ItemsToModify[msg_subscription_monitored_item_bs__p_index - 1];
+    *msg_subscription_monitored_item_bs__p_filter = constants_bs__c_monitoringFilter_indet;
 
-    // Note: we have to consider attribute is a Value attribute since we have no access to information here.
-    //       Its validity is checked later.
-    *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
-        &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc,
-        msg_subscription_monitored_item_bs__p_filter);
+    if (SOPC_ExtObjBodyEncoding_Object == monitReq->RequestedParameters.Filter.Encoding &&
+        &OpcUa_EventFilter_EncodeableType == monitReq->RequestedParameters.Filter.Body.Object.ObjType)
+    {
+        // Note: we have to consider attribute is a EventNotifier attribute since we have no access to information here.
+        //       Its validity is checked later.
+        *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_filter_param(
+            &monitReq->RequestedParameters.Filter, SOPC_AttributeId_EventNotifier,
+            msg_subscription_monitored_item_bs__p_sc, msg_subscription_monitored_item_bs__p_filter);
+    }
+    else
+    {
+        // Note: we have to consider attribute is a Value attribute since we have no access to information here.
+        //       Its validity is checked later.
+        *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_filter_param(
+            &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc,
+            msg_subscription_monitored_item_bs__p_filter);
+    }
 
     // Check active filter is valid type
     if (*msg_subscription_monitored_item_bs__p_bres)
@@ -440,7 +488,8 @@ void msg_subscription_monitored_item_bs__setall_msg_modify_monitored_item_resp_p
     const t_entier4 msg_subscription_monitored_item_bs__p_index,
     const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc,
     const constants__t_opcua_duration_i msg_subscription_monitored_item_bs__p_revSamplingItv,
-    const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize)
+    const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize,
+    const constants__t_filterResult_i msg_subscription_monitored_item_bs__p_filterResult)
 {
     OpcUa_ModifyMonitoredItemsResponse* modifyResp =
         (OpcUa_ModifyMonitoredItemsResponse*) msg_subscription_monitored_item_bs__p_resp_msg;
@@ -448,6 +497,17 @@ void msg_subscription_monitored_item_bs__setall_msg_modify_monitored_item_resp_p
     util_status_code__B_to_C(msg_subscription_monitored_item_bs__p_sc, &monitResp->StatusCode);
     monitResp->RevisedSamplingInterval = msg_subscription_monitored_item_bs__p_revSamplingItv;
     monitResp->RevisedQueueSize = (uint32_t) msg_subscription_monitored_item_bs__p_revQueueSize;
+    if (NULL != msg_subscription_monitored_item_bs__p_filterResult)
+    {
+        SOPC_EncodeableType* encTyp = msg_subscription_monitored_item_bs__p_filterResult->encodeableType;
+        SOPC_ASSERT(NULL != encTyp);
+        monitResp->FilterResult.TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        monitResp->FilterResult.TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
+        monitResp->FilterResult.TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
+        monitResp->FilterResult.Encoding = SOPC_ExtObjBodyEncoding_Object;
+        monitResp->FilterResult.Body.Object.ObjType = encTyp;
+        monitResp->FilterResult.Body.Object.Value = (void*) msg_subscription_monitored_item_bs__p_filterResult;
+    }
 }
 
 void msg_subscription_monitored_item_bs__alloc_msg_delete_monitored_items_resp_results(

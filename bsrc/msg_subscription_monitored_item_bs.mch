@@ -113,7 +113,7 @@ OPERATIONS
     END
     ;
 
-    setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize) =
+    setall_msg_create_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_monitored_item_id, p_revSamplingItv, p_revQueueSize, p_filterResult) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
@@ -126,7 +126,8 @@ OPERATIONS
         p_monitored_item_id : t_monitoredItemId_i &
         p_monitored_item_id : t_monitoredItemId &
         p_revSamplingItv : t_opcua_duration_i &
-        p_revQueueSize : t_counter
+        p_revQueueSize : t_counter &
+        p_filterResult : t_filterResult_i
     THEN
         skip
     END
@@ -208,7 +209,7 @@ OPERATIONS
     END
     ;
 
-    setall_msg_modify_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_revSamplingItv, p_revQueueSize) =
+    setall_msg_modify_monitored_item_resp_params (p_resp_msg, p_index, p_sc, p_revSamplingItv, p_revQueueSize, p_filterResult) =
     PRE
         p_resp_msg : t_msg_i &
         p_resp_msg : t_msg &
@@ -219,7 +220,8 @@ OPERATIONS
         p_sc : t_StatusCode_i &
         p_sc : t_StatusCode &
         p_revSamplingItv : t_opcua_duration_i &
-        p_revQueueSize : t_counter
+        p_revQueueSize : t_counter &
+        p_filterResult : t_filterResult_i
     THEN
         skip
     END

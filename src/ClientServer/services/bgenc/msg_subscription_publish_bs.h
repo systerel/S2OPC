@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_publish_bs.h
 
- Date                 : 04/08/2022 14:53:41
+ Date                 : 29/03/2024 15:47:29
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -54,7 +54,8 @@ extern void msg_subscription_publish_bs__INITIALISATION(void);
   --------------------*/
 extern void msg_subscription_publish_bs__alloc_notification_message_items(
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg,
-   const t_entier4 msg_subscription_publish_bs__p_nb_monitored_item_notifications,
+   const t_entier4 msg_subscription_publish_bs__p_nb_data_notifications,
+   const t_entier4 msg_subscription_publish_bs__p_nb_event_notifications,
    t_bool * const msg_subscription_publish_bs__bres,
    constants__t_notif_msg_i * const msg_subscription_publish_bs__p_notifMsg);
 extern void msg_subscription_publish_bs__generate_internal_send_publish_response_event(
@@ -77,11 +78,16 @@ extern void msg_subscription_publish_bs__set_notification_message_sequence_numbe
    const constants__t_sub_seq_num_i msg_subscription_publish_bs__p_seq_num);
 extern void msg_subscription_publish_bs__set_publish_response_msg(
    const constants__t_msg_i msg_subscription_publish_bs__p_publish_resp_msg);
-extern void msg_subscription_publish_bs__setall_notification_msg_monitored_item_notif(
+extern void msg_subscription_publish_bs__setall_notification_msg_monitored_item_data_notif(
    const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
    const t_entier4 msg_subscription_publish_bs__p_index,
    const constants__t_monitoredItemId_i msg_subscription_publish_bs__p_monitored_item_id,
    const constants__t_client_handle_i msg_subscription_publish_bs__p_clientHandle,
    const constants__t_WriteValuePointer_i msg_subscription_publish_bs__p_wv_pointer);
+extern void msg_subscription_publish_bs__setall_notification_msg_monitored_item_event_notif(
+   const constants__t_notif_msg_i msg_subscription_publish_bs__p_notifMsg,
+   const t_entier4 msg_subscription_publish_bs__p_index,
+   const constants__t_monitoredItemId_i msg_subscription_publish_bs__p_monitored_item_id,
+   const constants__t_eventFieldList_i msg_subscription_publish_bs__p_event_field_list);
 
 #endif

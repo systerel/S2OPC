@@ -864,6 +864,19 @@ OPERATIONS
     END
     ;
 
+    bres <-- server_subscription_event_triggered (p_notifierId, p_event, p_sub_id, p_mi_id) =
+    PRE
+        p_notifierId : t_NodeId_i &
+        p_notifierId : t_NodeId &
+        p_event : t_Event_i &
+        p_event : t_Event &
+        p_sub_id : t_subscription_i &
+        p_mi_id : t_monitoredItemId_i
+    THEN
+        bres :: BOOL
+    END
+    ;
+
     server_subscription_data_changed (p_old_write_value_pointer, p_new_write_value_pointer) =
     PRE
         p_old_write_value_pointer : t_WriteValuePointer_i &

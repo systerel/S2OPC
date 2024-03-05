@@ -65,6 +65,7 @@ SETS
     t_Reference_i;
     t_LocalizedText_i;
     t_QualifiedName_i;
+    t_Event_i;
     t_session_application_context_i;
     t_application_context_i;
     t_subscription_i;
@@ -81,8 +82,11 @@ SETS
     t_monitoredItemQueueIterator_i;
     t_monitoringFilter_i;
     t_monitoringFilterCtx_i;
+    t_filterResult_i;
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
+    t_eventFieldList_i;
+    t_notificationData;
     t_client_handle_i;
     t_timer_id_i;
     t_IndexRange_i;
@@ -110,6 +114,8 @@ CONCRETE_CONSTANTS
     k_n_BrowsePathResPerPath_max,
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
+    k_n_notifEventQueueSize_min,
+    k_n_notifEventQueueSize_default,
     k_n_notifQueueSize_max,
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
@@ -124,6 +130,8 @@ CONCRETE_CONSTANTS
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
     c_HierarchicalReferences_Type_NodeId,
+    c_Server_NodeId,
+    c_BaseEventType_NodeId,
 
     c_Variant_indet,
     c_DataValue_indet,
@@ -155,6 +163,7 @@ CONCRETE_CONSTANTS
     c_Reference_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
+    c_Event_indet,
     c_Timestamp_null,
     c_subscription_indet,
     c_notif_msg_indet,
@@ -171,8 +180,10 @@ CONCRETE_CONSTANTS
     c_monitoredItemQueueIterator_indet,
     c_monitoringFilter_indet,
     c_monitoringFilterCtx_indet,
+    c_filterResult_indet,
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
+    c_eventFieldList_indet,
     c_WriteValuePointer_indet,
     c_BrowseResultReferences_indet,
     c_BrowseNodeClassMask_indet,
@@ -240,6 +251,7 @@ ABSTRACT_CONSTANTS
     t_Reference,
     t_LocalizedText,
     t_QualifiedName,
+    t_Event,
     t_subscription,
     cast_t_subscription,
     t_notif_msg,
@@ -253,8 +265,10 @@ ABSTRACT_CONSTANTS
     t_monitoredItemQueueIterator,
     t_monitoringFilter,
     t_monitoringFilterCtx,
+    t_filterResult,
     t_monitoredItemPointer,
     t_monitoredItemId,
+    t_eventFieldList,
     t_WriteValuePointer,
     t_BrowseResultReferences,
     t_timer_id,
@@ -282,6 +296,10 @@ PROPERTIES
     k_n_BrowsePathResPerPath_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
+    k_n_notifEventQueueSize_min : NAT &
+    k_n_notifEventQueueSize_min > 0 &
+    k_n_notifEventQueueSize_default : NAT &
+    k_n_notifEventQueueSize_default > 0 &
     k_n_notifQueueSize_max : NAT &
     k_n_notifQueueSize_max > 0 &
     k_n_publishRequestPerSub_max : NAT &
@@ -321,6 +339,12 @@ PROPERTIES
 
     c_HierarchicalReferences_Type_NodeId : t_NodeId_i &
     c_HierarchicalReferences_Type_NodeId : t_NodeId &
+
+    c_Server_NodeId : t_NodeId_i &
+    c_Server_NodeId : t_NodeId &
+
+    c_BaseEventType_NodeId : t_NodeId_i &
+    c_BaseEventType_NodeId : t_NodeId &
 
     t_byte_buffer <: t_byte_buffer_i &
     c_byte_buffer_indet : t_byte_buffer_i &
@@ -420,6 +444,10 @@ PROPERTIES
     c_monitoringFilterCtx_indet : t_monitoringFilterCtx_i &
     c_monitoringFilterCtx_indet /: t_monitoringFilterCtx &
 
+    t_filterResult <: t_filterResult_i &
+    c_filterResult_indet : t_filterResult_i &
+    c_filterResult_indet /: t_filterResult &
+
     t_monitoredItemPointer <: t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet /: t_monitoredItemPointer &
@@ -428,6 +456,9 @@ PROPERTIES
     c_monitoredItemId_indet : t_monitoredItemId_i &
     c_monitoredItemId_indet /: t_monitoredItemId &
 
+    t_eventFieldList <: t_eventFieldList_i &
+    c_eventFieldList_indet : t_eventFieldList_i &
+    c_eventFieldList_indet /: t_eventFieldList &
 
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
@@ -480,6 +511,10 @@ PROPERTIES
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
+
+    t_Event <: t_Event_i &
+    c_Event_indet : t_Event_i &
+    c_Event_indet /: t_Event &
 
     c_Timestamp_null : t_Timestamp &
 
@@ -703,6 +738,14 @@ OPERATIONS
     bres <-- is_t_access_level_timestampWrite(p_access_lvl) =
     PRE
         p_access_lvl : t_access_level
+    THEN
+        bres :: BOOL
+    END
+    ;
+
+    bres <-- is_EventNotifier_SubscribeToEvents(p_eventNotifierByte) =
+    PRE
+        p_eventNotifierByte : t_Byte
     THEN
         bres :: BOOL
     END

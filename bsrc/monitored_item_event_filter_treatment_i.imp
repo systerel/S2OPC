@@ -1,0 +1,172 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   monitored_item_event_filter_treatment_i
+REFINES
+   monitored_item_event_filter_treatment
+
+SEES
+   constants ,
+   constants_statuscodes_bs,
+   monitored_item_pointer_bs
+
+IMPORTS
+    monitored_item_event_filter_treatment_bs,
+    monitored_item_event_filter_where_clause,
+    monitored_item_event_filter_select_clauses
+
+PROMOTES
+    delete_event_filter_context
+
+OPERATIONS
+
+    statusCode, filterCtx , filterResult <-- check_monitored_item_event_filter_valid (p_endpoint_idx, p_aid, p_filter, p_value) =
+    VAR
+        l_StatusCode,
+        l_filterCtx,
+        l_filterResult,
+        l_nbSelectClauses,
+        l_nbWhereElts,
+        l_WhereClauseSc,
+        l_oneInvalidWhereClause,
+        l_scSelectClauses,
+        l_oneInvalidSelectClause,
+        l_selectClauseIdx,
+        l_selectStatusCode
+    IN
+        filterCtx := c_monitoringFilterCtx_indet;
+        filterResult := c_filterResult_indet;
+        l_filterCtx := c_monitoringFilterCtx_indet;
+        l_filterResult := c_filterResult_indet;
+        l_nbSelectClauses := 0;
+        l_nbWhereElts := 0;
+        l_scSelectClauses := e_sc_ok;
+        l_oneInvalidSelectClause := FALSE;
+        l_WhereClauseSc := e_sc_ok;
+        l_StatusCode := e_sc_ok;
+
+        l_StatusCode <-- check_events_supported(p_endpoint_idx);
+
+        IF l_StatusCode = e_sc_ok & p_value /= c_Variant_indet
+        THEN
+            l_StatusCode <-- check_is_event_notifier(p_value)
+        END /* ELSE: modify MI case, otherwise value is always defined for EventNotifier attribute */
+        ;
+
+        IF l_StatusCode = e_sc_ok
+        THEN
+            l_StatusCode <-- init_and_check_is_event_filter(p_filter, p_aid)
+        END
+        ;
+
+        IF l_StatusCode = e_sc_ok
+        THEN
+            l_StatusCode, l_filterCtx, l_filterResult, l_nbSelectClauses, l_nbWhereElts <-- init_event_filter_ctx_and_result (p_filter)
+        END
+        ;
+        /* Check where clause */
+        IF l_StatusCode = e_sc_ok
+        THEN
+            l_WhereClauseSc
+              <-- check_where_clause_and_fill_ctx_and_result(l_filterCtx, l_filterResult, l_nbWhereElts)
+        END
+        ;
+        /* Check select clauses */
+        IF l_StatusCode = e_sc_ok
+        THEN
+            l_scSelectClauses, l_oneInvalidSelectClause
+              <-- check_select_clauses_and_fill_ctx_and_result (l_filterCtx, l_filterResult, l_nbSelectClauses)
+        END
+        ;
+        /* Remove context and result in case of global failure */
+        IF l_StatusCode /= e_sc_ok
+        THEN
+            delete_event_filter_context(l_filterCtx);
+            l_filterCtx := c_monitoringFilterCtx_indet;
+            delete_event_filter_result(l_filterResult);
+            l_filterResult := c_filterResult_indet
+        END
+        ;
+        /* Remove context but keep result for diagnostic in case of where clause failure (all invalid) */
+        IF l_StatusCode = e_sc_ok & l_WhereClauseSc /= e_sc_ok
+        THEN
+            l_StatusCode := l_WhereClauseSc;
+            delete_event_filter_context(l_filterCtx);
+            l_filterCtx := c_monitoringFilterCtx_indet
+        END
+        ;
+        /* Remove context but keep result for diagnostic in case of select clauses failure (none valid) */
+        IF l_StatusCode = e_sc_ok & l_scSelectClauses /= e_sc_ok
+        THEN
+            l_StatusCode := l_scSelectClauses;
+            delete_event_filter_context(l_filterCtx);
+            l_filterCtx := c_monitoringFilterCtx_indet
+        END
+        ;
+        /* Remove result in case no failure at all: it can be NULL in this case */
+        IF l_StatusCode = e_sc_ok & l_oneInvalidSelectClause = FALSE
+        THEN
+            delete_event_filter_result(l_filterResult);
+            l_filterResult := c_filterResult_indet
+        END
+        ;
+        statusCode := l_StatusCode;
+        filterResult := l_filterResult;
+        IF l_StatusCode = e_sc_ok
+        THEN
+            filterCtx := l_filterCtx
+        END
+    END
+    ;
+
+
+    notifTriggered, eventNotif
+      <-- server_subscription_get_notification_on_event (p_clientHandle, p_localeIds,
+                                                         p_timestampToReturn, p_userAccessGranted,
+                                                         p_filterCtx, p_event) =
+    VAR
+        l_bres,
+        l_nbSelectClauses,
+        l_nbWhereClauseElements,
+        l_oneValidWhereClause
+    IN
+
+        notifTriggered := FALSE;
+        eventNotif := c_eventFieldList_indet;
+        /* Check filter is not NULL and an EventFilter and init where clause elts counter */
+        l_bres, l_nbSelectClauses, l_nbWhereClauseElements <-- init_and_check_filter_ctx (p_filterCtx, p_event);
+        IF l_bres = TRUE
+        THEN
+            /* Evaluate event type to be a subtype of where clause OfType elements if any:
+            if no elt or at least 1 matching the event type => notif triggered ! */
+            l_bres <-- evaluate_where_clause(p_filterCtx, l_nbWhereClauseElements, p_event)
+        END
+        ;
+        IF l_bres = TRUE
+        THEN
+            /* TODO: allocate event field list here and avoid need of select_clauses_bs */
+            notifTriggered, eventNotif <-- apply_select_clauses_and_build_event_field_list
+            (p_clientHandle, p_localeIds,
+                p_timestampToReturn, p_userAccessGranted,
+                p_filterCtx, l_nbSelectClauses, p_event)
+        END
+    END
+
+END

@@ -21,8 +21,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "constants_statuscodes_bs.h"
+#include "opcua_statuscodes.h"
 #include "sopc_assert.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "util_b2c.h"
 #include "util_variant.h"
 
 #include "sopc_missing_c99.h"
@@ -90,6 +94,39 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
     return pvar;
 }
 
+bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* dest,
+                                                                          const SOPC_Variant* src,
+                                                                          char** preferredLocales)
+{
+    SOPC_ASSERT(NULL != src);
+    SOPC_ASSERT(NULL != dest);
+    SOPC_ASSERT(NULL != preferredLocales);
+
+    SOPC_ASSERT(SOPC_LocalizedText_Id == src->BuiltInTypeId);
+
+    // Note: we need a copy of src because it might be deallocated by
+    // util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant
+    SOPC_Variant* srcCopy = SOPC_Variant_Create();
+    if (NULL == srcCopy)
+    {
+        return false;
+    }
+    SOPC_ReturnStatus status = SOPC_Variant_ShallowCopy(srcCopy, src);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        srcCopy = util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(&srcCopy, preferredLocales);
+        // If the destination is still a shallow copy, the operation failed
+        status = (srcCopy->DoNotClear ? SOPC_STATUS_NOK : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *dest = *srcCopy;
+    }
+    SOPC_Free(srcCopy);
+    return (SOPC_STATUS_OK == status);
+}
+
 SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
                                                                                   char** preferredLocales)
 {
@@ -126,31 +163,18 @@ SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Varian
 
         if (SOPC_STATUS_OK == status)
         {
-            int32_t length = -1;
-            SOPC_LocalizedText* srcLtArray = NULL;
-            SOPC_LocalizedText* destLtArray = NULL;
-            if (SOPC_VariantArrayType_Matrix == value->ArrayType)
-            {
-                length = 1;
-                // Compute total length of flattened matrix
-                for (int32_t i = 0; i < value->Value.Matrix.Dimensions; i++)
-                {
-                    length *= value->Value.Matrix.ArrayDimensions[i];
-                }
-                srcLtArray = value->Value.Matrix.Content.LocalizedTextArr;
-                destLtArray = result->Value.Matrix.Content.LocalizedTextArr;
-            }
-            else
-            {
-                length = value->Value.Array.Length;
-                srcLtArray = value->Value.Array.Content.LocalizedTextArr;
-                destLtArray = result->Value.Array.Content.LocalizedTextArr;
-            }
-
+            int32_t length = SOPC_Variant_GetArrayOrMatrixLength(value);
+            const SOPC_LocalizedText* dest = NULL;
+            const SOPC_LocalizedText* src = NULL;
             for (int32_t i = 0; SOPC_STATUS_OK == status && i < length; i++)
             {
-                SOPC_LocalizedText_Clear(&destLtArray[i]); // Clear the initial copy and retrieved preferred locale
-                status = SOPC_LocalizedText_GetPreferredLocale(&destLtArray[i], preferredLocales, &srcLtArray[i]);
+                dest = SOPC_Variant_Get_ArrayValue(result, SOPC_LocalizedText_Id, i);
+                src = SOPC_Variant_Get_ArrayValue(value, SOPC_LocalizedText_Id, i);
+                SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
+                SOPC_LocalizedText_Clear(
+                    (SOPC_LocalizedText*) dest); // Clear the initial copy and retrieved preferred locale
+                status = SOPC_LocalizedText_GetPreferredLocale((SOPC_LocalizedText*) dest, preferredLocales, src);
+                SOPC_GCC_DIAGNOSTIC_RESTORE
             }
         }
 
@@ -320,4 +344,69 @@ SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf)
     pvar->DoNotClear = true; // It is shallow copy of provided node
 
     return pvar;
+}
+
+SOPC_ReturnStatus util_variant__copy_and_apply_locales_and_index_range(SOPC_Variant* destVal,
+                                                                       const SOPC_Variant* source,
+                                                                       char** preferredLocalesIds,
+                                                                       const SOPC_NumericRange* indexRange)
+{
+    SOPC_ASSERT(NULL != destVal);
+    SOPC_ASSERT(NULL != source);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_Variant ltEventVar;
+    SOPC_Variant_Initialize(&ltEventVar);
+    SOPC_StatusCode valueStatus = SOPC_GoodGenericStatus;
+
+    /* Set the preferred locale in case of LT value */
+    if (SOPC_LocalizedText_Id == source->BuiltInTypeId && NULL != preferredLocalesIds)
+    {
+        bool res = util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(&ltEventVar, source,
+                                                                                        preferredLocalesIds);
+        if (!res)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+            valueStatus = OpcUa_BadOutOfMemory;
+        }
+        source = &ltEventVar;
+    }
+
+    /* IndexRange filtering */
+    constants_statuscodes_bs__t_StatusCode_i readSC = constants_statuscodes_bs__c_StatusCode_indet;
+    if (SOPC_STATUS_OK == status)
+    {
+        if (NULL != indexRange)
+        {
+            readSC = util_read_value_indexed_helper(destVal, source, indexRange);
+            if (constants_statuscodes_bs__e_sc_ok != readSC)
+            {
+                /* note: index range syntax error shall have occurred on createMI but the specification state any error
+                 * might be returned as value:
+                 * "Servers should return all other errors as CreateMonitoredItems results
+                 *  but all possible errors are allowed to be returned in the Publish response."
+                 */
+                util_status_code__B_to_C(readSC, &valueStatus);
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        else
+        {
+            status = SOPC_Variant_Copy(destVal, source);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_ASSERT(SOPC_STATUS_OUT_OF_MEMORY == status);
+                valueStatus = OpcUa_BadOutOfMemory;
+            }
+        }
+    }
+
+    SOPC_Variant_Clear(&ltEventVar);
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_ASSERT(!SOPC_IsGoodStatus(valueStatus));
+        SOPC_Variant_Clear(destVal);
+        destVal->BuiltInTypeId = SOPC_StatusCode_Id;
+        destVal->Value.Status = valueStatus;
+    }
+    return status;
 }

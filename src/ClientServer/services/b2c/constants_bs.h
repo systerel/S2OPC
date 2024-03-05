@@ -71,6 +71,7 @@ typedef uint64_t constants_bs__t_ContinuationPointId_i;
 typedef SOPC_ContinuationPointData constants_bs__t_ContinuationPoint_i;
 typedef SOPC_ExtensionObject* constants_bs__t_DataTypeDefinition_i;
 typedef SOPC_DataValue* constants_bs__t_DataValue_i;
+typedef SOPC_Event* constants_bs__t_Event_i;
 typedef SOPC_ExpandedNodeId* constants_bs__t_ExpandedNodeId_i;
 typedef SOPC_String* constants_bs__t_IndexRange_i;
 typedef int32_t constants_bs__t_Int32;
@@ -97,7 +98,6 @@ typedef SOPC_Variant* constants_bs__t_Variant_i;
 typedef OpcUa_WriteValue* constants_bs__t_WriteValuePointer_i;
 typedef SOPC_Byte constants_bs__t_access_level;
 typedef uintptr_t constants_bs__t_application_context_i;
-typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_Buffer* constants_bs__t_byte_buffer_i;
 typedef SOPC_SecureChannelConfigIdx constants_bs__t_channel_config_idx_i;
 typedef uint32_t constants_bs__t_channel_i;
@@ -105,23 +105,27 @@ typedef uint32_t constants_bs__t_client_handle_i;
 typedef uint32_t constants_bs__t_client_request_handle_i;
 #define constants_bs__t_counter_i t_entier4
 typedef SOPC_EndpointConfigIdx constants_bs__t_endpoint_config_idx_i;
+typedef OpcUa_EventFieldList* constants_bs__t_eventFieldList_i;
+typedef OpcUa_EventFilterResult* constants_bs__t_filterResult_i;
 typedef uint32_t constants_bs__t_monitoredItemId_i;
 typedef void* constants_bs__t_monitoredItemPointer_i;
 typedef SOPC_SLinkedListIterator* constants_bs__t_monitoredItemQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_monitoredItemQueue_i;
-typedef double constants_bs__t_monitoringFilterCtx_i;
-typedef OpcUa_DataChangeFilter* constants_bs__t_monitoringFilter_i;
+typedef void* constants_bs__t_monitoringFilterCtx_i;
+typedef SOPC_ExtensionObject* constants_bs__t_monitoringFilter_i;
 typedef void* constants_bs__t_msg_header_i; /* OpcUa_RequestHeader OR OpcUa_ResponseHeader */
 typedef void* constants_bs__t_msg_i;        /* OpcUa_* message */
 typedef SOPC_SLinkedListIterator* constants_bs__t_notifRepublishQueueIterator_i;
 typedef SOPC_SLinkedList* constants_bs__t_notifRepublishQueue_i;
 typedef OpcUa_NotificationMessage* constants_bs__t_notif_msg_i;
+typedef void* constants_bs__t_notificationData;
 typedef SOPC_SLinkedList* constants_bs__t_notificationQueue_i;
 typedef double constants_bs__t_opcua_duration_i;
 typedef SOPC_SLinkedList* constants_bs__t_publishReqQueue_i;
 typedef uint32_t constants_bs__t_request_context_i;
 typedef SOPC_ReverseEndpointConfigIdx constants_bs__t_reverse_endpoint_config_idx_i;
 typedef uint32_t constants_bs__t_server_request_handle_i;
+typedef SOPC_Internal_SessionAppContext* constants_bs__t_session_application_context_i;
 typedef SOPC_SessionId constants_bs__t_session_i;
 typedef SOPC_NodeId* constants_bs__t_session_token_i;
 typedef uint32_t constants_bs__t_sub_seq_num_i;
@@ -147,6 +151,7 @@ typedef SOPC_ExtensionObject* constants_bs__t_user_token_i;
 #define constants_bs__c_Argument_indet NULL
 #define constants_bs__c_ArgumentsPointer_indet NULL
 #define constants_bs__c_ArrayDimensions_indet 0
+extern const constants_bs__t_NodeId_i constants_bs__c_BaseEventType_NodeId;
 #define constants_bs__c_BrowseNodeClassMask_indet 0
 #define constants_bs__c_BrowseResultMask_all 63
 #define constants_bs__c_BrowseResultMask_indet 0
@@ -183,6 +188,7 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #else
 #define constants_bs__c_Server_Nano_Extended true
 #endif
+extern const constants_bs__t_NodeId_i constants_bs__c_Server_NodeId;
 
 #define constants_bs__c_SignatureData_indet NULL
 #define constants_bs__c_Timestamp_null \
@@ -196,13 +202,15 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__c_channel_lock_create_session_delay SOPC_CREATE_SESSION_LOCK_DELAY_SECS
 #define constants_bs__c_client_request_handle_indet 0
 #define constants_bs__c_endpoint_config_idx_indet 0
+#define constants_bs__c_eventFieldList_indet NULL
+#define constants_bs__c_filterResult_indet NULL
 #define constants_bs__c_max_channels_connected SOPC_MAX_SECURE_CONNECTIONS
 #define constants_bs__c_max_sessions_per_channel SOPC_MAX_SESSIONS_PER_SECURE_CONNECTION
 #define constants_bs__c_monitoredItemId_indet 0
 #define constants_bs__c_monitoredItemPointer_indet 0
 #define constants_bs__c_monitoredItemQueueIterator_indet 0
 #define constants_bs__c_monitoredItemQueue_indet 0
-#define constants_bs__c_monitoringFilterCtx_indet 0.0
+#define constants_bs__c_monitoringFilterCtx_indet NULL
 #define constants_bs__c_monitoringFilter_indet NULL
 #define constants_bs__c_msg_header_indet 0
 #define constants_bs__c_msg_indet 0
@@ -238,6 +246,8 @@ extern const constants_bs__t_NodeId_i constants_bs__c_Null_Type_NodeId;
 #define constants_bs__k_n_monitoredItemNotif_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_monitoredItem_max SOPC_MAX_OPERATIONS_PER_MSG
 #define constants_bs__k_n_nodesToAdd_max SOPC_MAX_HEAVY_OPERATIONS_PER_MSG
+#define constants_bs__k_n_notifEventQueueSize_default SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE
+#define constants_bs__k_n_notifEventQueueSize_min SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE
 #define constants_bs__k_n_notifQueueSize_max SOPC_MAX_NOTIFICATION_QUEUE_SIZE
 #define constants_bs__k_n_publishRequestPerSub_max SOPC_MAX_SUBSCRIPTION_PUBLISH_REQUESTS
 #define constants_bs__k_n_read_resp_max SOPC_MAX_OPERATIONS_PER_MSG
@@ -283,6 +293,9 @@ extern void constants_bs__getall_conv_ExpandedNodeId_NodeId(
     t_bool* const constants_bs__p_local_server,
     constants_bs__t_NodeId_i* const constants_bs__p_nid);
 extern void constants_bs__is_ClientNodeManagementActive(t_bool* const constants_bs__bres);
+extern void constants_bs__is_EventNotifier_SubscribeToEvents(
+    const constants_bs__t_Byte constants_bs__p_eventNotifierByte,
+    t_bool* const constants_bs__bres);
 extern void constants_bs__is_QualifiedNames_Empty(const constants_bs__t_QualifiedName_i constants_bs__name,
                                                   t_bool* const constants_bs__p_bool);
 extern void constants_bs__is_QualifiedNames_Equal(const constants_bs__t_QualifiedName_i constants_bs__name1,

@@ -860,6 +860,15 @@ OPERATIONS
     END
     ;
 
+    p_byte <-- get_EventNotifier(p_node) =
+    PRE
+        p_node : t_Node_i &
+        p_node : dom(a_EventNotifier)
+    THEN
+        p_byte := a_EventNotifier(p_node)
+    END
+    ;
+
     p_type_def <-- get_TypeDefinition(p_node) =
     PRE
         p_node : t_Node_i &

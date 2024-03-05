@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_notification_queue_bs.h
 
- Date                 : 02/05/2023 12:42:44
+ Date                 : 02/04/2024 08:17:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -59,15 +59,21 @@ extern void monitored_item_notification_queue_bs__add_first_monitored_item_notif
    const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_src,
    const constants__t_Timestamp monitored_item_notification_queue_bs__p_val_ts_srv,
    t_bool * const monitored_item_notification_queue_bs__bres);
-extern void monitored_item_notification_queue_bs__add_monitored_item_notification_to_queue(
+extern void monitored_item_notification_queue_bs__add_monitored_item_data_notification_to_queue(
    const constants__t_LocaleIds_i monitored_item_notification_queue_bs__p_localeIds,
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    const constants__t_TimestampsToReturn_i monitored_item_notification_queue_bs__p_timestampToReturn,
    const constants__t_WriteValuePointer_i monitored_item_notification_queue_bs__p_writeValuePointer,
    t_bool * const monitored_item_notification_queue_bs__bres);
+extern void monitored_item_notification_queue_bs__add_monitored_item_event_notification_to_queue(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
+   const constants__t_eventFieldList_i monitored_item_notification_queue_bs__p_eventFieldList,
+   t_bool * const monitored_item_notification_queue_bs__bres);
 extern void monitored_item_notification_queue_bs__allocate_new_monitored_item_notification_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+   const t_bool monitored_item_notification_queue_bs__p_isEvent,
    t_bool * const monitored_item_notification_queue_bs__bres,
    constants__t_notificationQueue_i * const monitored_item_notification_queue_bs__queue);
 extern void monitored_item_notification_queue_bs__clear_and_deallocate_monitored_item_notification_queue(
@@ -76,10 +82,16 @@ extern void monitored_item_notification_queue_bs__clear_and_deallocate_monitored
 extern void monitored_item_notification_queue_bs__clear_monitored_item_notification_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue);
-extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_notification(
+extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_data_notification(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
    t_bool * const monitored_item_notification_queue_bs__p_continue,
    constants__t_WriteValuePointer_i * const monitored_item_notification_queue_bs__p_writeValuePointer);
+extern void monitored_item_notification_queue_bs__continue_pop_iter_monitor_item_event_notification(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
+   t_bool * const monitored_item_notification_queue_bs__p_continue,
+   constants__t_eventFieldList_i * const monitored_item_notification_queue_bs__p_eventFieldList);
 extern void monitored_item_notification_queue_bs__free_first_monitored_item_notification_value(
    const constants__t_Variant_i monitored_item_notification_queue_bs__p_VariantValuePointer);
 extern void monitored_item_notification_queue_bs__get_length_monitored_item_notification_queue(
@@ -90,8 +102,14 @@ extern void monitored_item_notification_queue_bs__get_monitored_item_notificatio
    t_bool * const monitored_item_notification_queue_bs__bres,
    constants__t_notificationQueue_i * const monitored_item_notification_queue_bs__queue);
 extern void monitored_item_notification_queue_bs__init_iter_monitored_item_notification(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
    const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_queue,
-   t_bool * const monitored_item_notification_queue_bs__p_continue);
+   t_bool * const monitored_item_notification_queue_bs__p_continue,
+   t_bool * const monitored_item_notification_queue_bs__p_isEvent);
+extern void monitored_item_notification_queue_bs__is_event_monitored_item_notification_queue(
+   const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem,
+   const constants__t_notificationQueue_i monitored_item_notification_queue_bs__p_mi_notif_queue,
+   t_bool * const monitored_item_notification_queue_bs__p_is_event_queue);
 extern void monitored_item_notification_queue_bs__resize_monitored_item_notification_queue(
    const constants__t_monitoredItemPointer_i monitored_item_notification_queue_bs__p_monitoredItem);
 

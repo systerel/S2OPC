@@ -47,6 +47,12 @@ SOPC_Variant* util_variant__new_Variant_from_LocalizedText(SOPC_LocalizedText* l
  */
 SOPC_Variant* util_variant__set_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant** v,
                                                                                   char** preferredLocales);
+
+// Same function as previous one but source variant is not modified and destination already allocated
+bool util_variant__copy_PreferredLocalizedText_from_LocalizedText_Variant(SOPC_Variant* dest,
+                                                                          const SOPC_Variant* src,
+                                                                          char** preferredLocales);
+
 /**
  * The returned Variant is malloced and shall be freed by the consumer.
  */
@@ -92,5 +98,20 @@ SOPC_Variant* util_variant__new_Variant_from_double(double f);
  * The string is not copied.
  */
 SOPC_Variant* util_variant__new_Variant_from_ByteString(SOPC_ByteString buf);
+
+/**
+ * The \p source variant content is copied into \p dest applying:
+ * - the preferred LocalIds if defined and source is a LocalizedText value
+ * - the index range if defined and applicable to source value
+ *
+ * Note: in case an error occurred, the \p dest value is cleared abd set to a StatusCode value indicating the error.
+ *
+ * The returned status is either SOPC_STATUS_OK when \p dest value has been set from \p source value successfully,
+ * otherwise the \p dest value has been set to an OPC UA Bad status indicating the error that occured.
+ */
+SOPC_ReturnStatus util_variant__copy_and_apply_locales_and_index_range(SOPC_Variant* destVal,
+                                                                       const SOPC_Variant* source,
+                                                                       char** preferredLocalesIds,
+                                                                       const SOPC_NumericRange* indexRange);
 
 #endif /* UTIL_VARIANT_H_ */

@@ -23,6 +23,28 @@
 #include "constants.h"
 #include "sopc_numeric_range.h"
 
+typedef struct SOPC_InternalMonitoredItemFilterCtx
+{
+    bool isDataFilter;
+    union
+    {
+        struct
+        {
+            OpcUa_DataChangeFilter dataFilter;
+            double filterAbsoluteDeadbandContext;
+            SOPC_Variant* lastCachedValueForFilter;
+        } Data;
+        struct
+        {
+            OpcUa_EventFilter* eventFilter;
+            char** qnPathStrSelectClauses;               // eventFilter->NoOfSelectClauses clauses
+            SOPC_NumericRange** indexRangeSelectClauses; // eventFilter->NoOfSelectClauses clauses
+            SOPC_NodeId whereClauseTypeId; // Set to non-NULL id if eventFilter->WhereClause.Element[0] was a valid of
+                                           // OfType expression
+        } Event;
+    } Filter;
+} SOPC_InternalMonitoredItemFilterCtx;
+
 typedef struct SOPC_InternalMonitoredItem
 {
     uint32_t monitoredItemId;
@@ -34,12 +56,11 @@ typedef struct SOPC_InternalMonitoredItem
     constants__t_monitoringMode_i monitoringMode;
     constants__t_client_handle_i clientHandle;
     SOPC_NumericRange* indexRange;
-    OpcUa_DataChangeFilter* filter;
-    double filterAbsoluteDeadbandContext;
-    SOPC_Variant* lastCachedValueForFilter;
+    SOPC_InternalMonitoredItemFilterCtx* filterCtx;
     bool discardOldest;
     int32_t queueSize;
     SOPC_SLinkedList* notifQueue;
+    bool queueOverflowEventTriggered;
 } SOPC_InternalMonitoredItem;
 
 #endif /* SOPC_MONITORED_ITEM_POINTER_IMPL_H_ */

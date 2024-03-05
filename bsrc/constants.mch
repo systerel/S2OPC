@@ -103,6 +103,8 @@ SETS
     t_Byte; /* uint8_t */
     t_RawStatusCode; /* uint32_t */
 
+    t_Event_i; /* (SOPC_Event*) */
+
     t_access_level; /* SOPC_Byte */
     t_access_level_ex; /* uint32_t */
 
@@ -181,9 +183,12 @@ SETS
 
     t_monitoringFilter_i;
     t_monitoringFilterCtx_i;
+    t_filterResult_i;
 
     t_monitoredItemPointer_i;
     t_monitoredItemId_i;
+    t_notificationData;
+    t_eventFieldList_i;
 
     t_client_handle_i; /* uint32_t */
 
@@ -334,6 +339,8 @@ CONCRETE_CONSTANTS
     k_n_BrowsePathResPerPath_max, /* max result per path in service response */
     k_n_monitoredItem_max,
     k_n_monitoredItemNotif_max,
+    k_n_notifEventQueueSize_min,
+    k_n_notifEventQueueSize_default,
     k_n_notifQueueSize_max,
     k_n_publishRequestPerSub_max,
     k_n_republishNotifPerSub_max,
@@ -349,8 +356,9 @@ CONCRETE_CONSTANTS
     c_Null_Type_NodeId,
     c_ByteString_Type_NodeId,
     c_Byte_Type_NodeId,
-
     c_HierarchicalReferences_Type_NodeId,
+    c_Server_NodeId,
+    c_BaseEventType_NodeId,
 
     c_Variant_indet,
     c_DataValue_indet,
@@ -368,6 +376,7 @@ CONCRETE_CONSTANTS
     c_byte_buffer_indet,
     c_LocalizedText_indet,
     c_QualifiedName_indet,
+    c_Event_indet,
 
     c_Timestamp_null,
     c_endpoint_config_idx_indet,
@@ -401,8 +410,10 @@ CONCRETE_CONSTANTS
     c_monitoredItemQueueIterator_indet,
     c_monitoringFilter_indet,
     c_monitoringFilterCtx_indet,
+    c_filterResult_indet,
     c_monitoredItemPointer_indet,
     c_monitoredItemId_indet,
+    c_eventFieldList_indet,
     c_msg_header_indet,
     c_msg_indet,
     c_request_context_indet,
@@ -480,6 +491,7 @@ ABSTRACT_CONSTANTS
     t_byte_buffer,
     t_LocalizedText,
     t_QualifiedName,
+    t_Event,
 
     cast_t_session,
     cast_t_BrowsePath,
@@ -521,9 +533,11 @@ ABSTRACT_CONSTANTS
     t_monitoringMode,
     t_monitoringFilter,
     t_monitoringFilterCtx,
+    t_filterResult,
     t_monitoredItemReqIndex,
     t_monitoredItemPointer,
     t_monitoredItemId,
+    t_eventFieldList,
     t_monitoredItemNotifIndex,
     t_buffer_in_state,
     t_msg_header,
@@ -602,6 +616,23 @@ PROPERTIES
     c_HierarchicalReferences_Type_NodeId /= c_ByteString_Type_NodeId &
     c_HierarchicalReferences_Type_NodeId /= c_Byte_Type_NodeId &
 
+    c_Server_NodeId : t_NodeId_i &
+    c_Server_NodeId : t_NodeId &
+
+    c_Server_NodeId /= c_Null_Type_NodeId &
+    c_Server_NodeId /= c_ByteString_Type_NodeId &
+    c_Server_NodeId /= c_Byte_Type_NodeId &
+    c_Server_NodeId /= c_HierarchicalReferences_Type_NodeId &
+
+    c_BaseEventType_NodeId : t_NodeId_i &
+    c_BaseEventType_NodeId : t_NodeId &
+
+    c_BaseEventType_NodeId /= c_Null_Type_NodeId &
+    c_BaseEventType_NodeId /= c_ByteString_Type_NodeId &
+    c_BaseEventType_NodeId /= c_Byte_Type_NodeId &
+    c_BaseEventType_NodeId /= c_HierarchicalReferences_Type_NodeId &
+    c_BaseEventType_NodeId /= c_Server_NodeId &
+
     t_ExpandedNodeId <: t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet : t_ExpandedNodeId_i &
     c_ExpandedNodeId_indet /: t_ExpandedNodeId &
@@ -632,6 +663,10 @@ PROPERTIES
     k_n_BrowsePathResPerPath_max : NAT &
     k_n_monitoredItem_max : NAT &
     k_n_monitoredItemNotif_max : NAT &
+    k_n_notifEventQueueSize_min : NAT &
+    k_n_notifEventQueueSize_min > 0 &
+    k_n_notifEventQueueSize_default : NAT &
+    k_n_notifEventQueueSize_default > 0 &
     k_n_notifQueueSize_max : NAT &
     k_n_notifQueueSize_max > 0 &
     k_n_publishRequestPerSub_max : NAT &
@@ -705,6 +740,10 @@ PROPERTIES
     t_QualifiedName <: t_QualifiedName_i &
     c_QualifiedName_indet : t_QualifiedName_i &
     c_QualifiedName_indet /: t_QualifiedName &
+
+    t_Event <: t_Event_i &
+    c_Event_indet : t_Event_i &
+    c_Event_indet /: t_Event &
 
     c_Timestamp_null : t_Timestamp &
 
@@ -867,6 +906,10 @@ PROPERTIES
     c_monitoringFilterCtx_indet : t_monitoringFilterCtx_i &
     c_monitoringFilterCtx_indet /: t_monitoringFilterCtx &
 
+    t_filterResult <: t_filterResult_i &
+    c_filterResult_indet : t_filterResult_i &
+    c_filterResult_indet /: t_filterResult &
+
     t_monitoredItemPointer <: t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet : t_monitoredItemPointer_i &
     c_monitoredItemPointer_indet /: t_monitoredItemPointer &
@@ -874,6 +917,10 @@ PROPERTIES
     t_monitoredItemId <: t_monitoredItemId_i &
     c_monitoredItemId_indet : t_monitoredItemId_i &
     c_monitoredItemId_indet /: t_monitoredItemId &
+
+    t_eventFieldList <: t_eventFieldList_i &
+    c_eventFieldList_indet : t_eventFieldList_i &
+    c_eventFieldList_indet /: t_eventFieldList &
 
     t_msg_header <: t_msg_header_i &
     c_msg_header_indet : t_msg_header_i &
@@ -1305,6 +1352,14 @@ OPERATIONS
         p_access_lvl : t_access_level
     THEN
         bres := conv_AccessLevel_TimestampWrite(p_access_lvl)
+    END
+    ;
+
+    bres <-- is_EventNotifier_SubscribeToEvents(p_eventNotifierByte) =
+    PRE
+        p_eventNotifierByte : t_Byte
+    THEN
+        bres :: BOOL
     END
     ;
 

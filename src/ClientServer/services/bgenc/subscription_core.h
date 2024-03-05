@@ -21,7 +21,7 @@
 
  File Name            : subscription_core.h
 
- Date                 : 02/05/2023 12:42:26
+ Date                 : 03/04/2024 16:26:34
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,6 +38,7 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
+#include "monitored_item_filter_treatment.h"
 #include "monitored_item_notification_queue_bs.h"
 #include "monitored_item_pointer_bs.h"
 #include "monitored_item_queue_bs.h"
@@ -100,19 +101,35 @@ extern void subscription_core__INITIALISATION(void);
 extern void subscription_core__get_fresh_subscription(
    t_bool * const subscription_core__bres,
    constants__t_subscription_i * const subscription_core__p_subscription);
-extern void subscription_core__local_check_monitored_item_filter_valid(
-   const constants__t_NodeId_i subscription_core__p_nid,
-   const constants__t_AttributeId_i subscription_core__p_aid,
-   const constants__t_monitoringFilter_i subscription_core__p_filter,
-   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode,
-   constants__t_monitoringFilterCtx_i * const subscription_core__filterAbsDeadbandCtx);
 extern void subscription_core__local_close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
-extern void subscription_core__local_fill_notification_message(
+extern void subscription_core__local_compute_create_monitored_item_revised_params(
+   const constants__t_AttributeId_i subscription_core__p_aid,
+   const t_entier4 subscription_core__p_reqQueueSize,
+   constants__t_opcua_duration_i * const subscription_core__revisedSamplingItv,
+   t_entier4 * const subscription_core__revisedQueueSize);
+extern void subscription_core__local_compute_msg_nb_notifs(
+   const t_entier4 subscription_core__p_max_notifs,
+   const t_entier4 subscription_core__p_avail_data_notifs,
+   const t_entier4 subscription_core__p_avail_event_notifs,
+   t_entier4 * const subscription_core__nb_data_notifs,
+   t_entier4 * const subscription_core__nb_event_notifs,
+   t_bool * const subscription_core__moreNotifs);
+extern void subscription_core__local_fill_data_notification_message(
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_notif_msg_i subscription_core__p_notif_msg,
-   const t_entier4 subscription_core__nb_notif_to_dequeue);
-extern void subscription_core__local_fill_notification_message_for_monitored_item(
+   const t_entier4 subscription_core__p_nb_data_notifs);
+extern void subscription_core__local_fill_event_notification_message(
+   const constants__t_subscription_i subscription_core__p_subscription,
+   const constants__t_notif_msg_i subscription_core__p_notif_msg,
+   const t_entier4 subscription_core__p_nb_event_notifs);
+extern void subscription_core__local_fill_notification_message_for_data_monitored_item(
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const constants__t_notif_msg_i subscription_core__p_notif_msg,
+   const t_entier4 subscription_core__p_cur_index,
+   const t_entier4 subscription_core__nb_notif_to_dequeue,
+   t_entier4 * const subscription_core__p_next_index);
+extern void subscription_core__local_fill_notification_message_for_event_monitored_item(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_notif_msg_i subscription_core__p_notif_msg,
    const t_entier4 subscription_core__p_cur_index,
@@ -120,10 +137,12 @@ extern void subscription_core__local_fill_notification_message_for_monitored_ite
    t_entier4 * const subscription_core__p_next_index);
 extern void subscription_core__local_monitored_item_nb_available_notifications(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
-   t_entier4 * const subscription_core__p_nb_available_notifs);
+   t_entier4 * const subscription_core__p_nb_available_notifs,
+   t_bool * const subscription_core__p_isEvent);
 extern void subscription_core__local_subscription_nb_available_notifications(
    const constants__t_subscription_i subscription_core__p_subscription,
-   t_entier4 * const subscription_core__p_nb_available_notifs);
+   t_entier4 * const subscription_core__p_nb_available_data_notifs,
+   t_entier4 * const subscription_core__p_nb_available_event_notifs);
 extern void subscription_core__pop_invalid_and_check_valid_publishReqQueued(
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__p_validPubReqQueued);
@@ -136,10 +155,12 @@ extern void subscription_core__clear_monitored_item_notifications(
 extern void subscription_core__close_subscription(
    const constants__t_subscription_i subscription_core__p_subscription);
 extern void subscription_core__compute_create_monitored_item_revised_params(
+   const constants__t_AttributeId_i subscription_core__p_aid,
    const t_entier4 subscription_core__p_reqQueueSize,
    constants__t_opcua_duration_i * const subscription_core__revisedSamplingItv,
    t_entier4 * const subscription_core__revisedQueueSize);
 extern void subscription_core__create_monitored_item(
+   const constants__t_endpoint_config_idx_i subscription_core__p_endpoint_idx,
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_NodeId_i subscription_core__p_nid,
    const constants__t_AttributeId_i subscription_core__p_aid,
@@ -156,7 +177,8 @@ extern void subscription_core__create_monitored_item(
    const t_entier4 subscription_core__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const subscription_core__StatusCode_service,
    constants__t_monitoredItemPointer_i * const subscription_core__monitoredItemPointer,
-   constants__t_monitoredItemId_i * const subscription_core__monitoredItemId);
+   constants__t_monitoredItemId_i * const subscription_core__monitoredItemId,
+   constants__t_filterResult_i * const subscription_core__filterResult);
 extern void subscription_core__create_subscription(
    const constants__t_session_i subscription_core__p_session,
    const constants__t_opcua_duration_i subscription_core__p_revPublishInterval,
@@ -177,13 +199,17 @@ extern void subscription_core__is_valid_subscription_on_session(
    const constants__t_subscription_i subscription_core__p_subscription,
    t_bool * const subscription_core__is_valid);
 extern void subscription_core__modify_monitored_item(
+   const constants__t_endpoint_config_idx_i subscription_core__p_endpoint_idx,
    const constants__t_monitoredItemId_i subscription_core__p_mi_id,
    const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
    const constants__t_client_handle_i subscription_core__p_clientHandle,
    const constants__t_monitoringFilter_i subscription_core__p_filter,
    const t_bool subscription_core__p_discardOldest,
    const t_entier4 subscription_core__p_queueSize,
-   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc);
+   constants_statuscodes_bs__t_StatusCode_i * const subscription_core__p_sc,
+   constants__t_filterResult_i * const subscription_core__p_filterResult,
+   constants__t_opcua_duration_i * const subscription_core__p_revSamplingItv,
+   t_entier4 * const subscription_core__p_revQueueSize);
 extern void subscription_core__modify_subscription(
    const constants__t_subscription_i subscription_core__p_subscription,
    const constants__t_opcua_duration_i subscription_core__p_revPublishInterval,
@@ -200,6 +226,13 @@ extern void subscription_core__receive_publish_request(
    t_bool * const subscription_core__async_resp_msg,
    constants__t_subscription_i * const subscription_core__subscription,
    t_bool * const subscription_core__moreNotifs);
+extern void subscription_core__server_subscription_add_notification_on_event_if_triggered(
+   const t_bool subscription_core__p_userAccessGranted,
+   const constants__t_LocaleIds_i subscription_core__p_localeIds,
+   const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
+   const constants__t_client_handle_i subscription_core__p_clientHandle,
+   const constants__t_TimestampsToReturn_i subscription_core__p_timestampToReturn,
+   const constants__t_Event_i subscription_core__p_event);
 extern void subscription_core__server_subscription_add_notification_on_node_or_monitMode_change(
    const constants__t_monitoredItemPointer_i subscription_core__p_monitoredItemPointer,
    const constants__t_NodeId_i subscription_core__p_nid,

@@ -23,6 +23,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_enums.h"
+#include "sopc_helper_string.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -475,7 +476,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         SOPC_ASSERT(NULL != eventContext);
         nodeIdStr = SOPC_NodeId_ToCString(&eventContext->notifierNodeId);
         nodeId2 = SOPC_Event_GetEventTypeId(eventContext->event);
-        nodeIdStr2 = (NULL == nodeId2 ? "" : SOPC_NodeId_ToCString(nodeId2));
+        nodeIdStr2 = (NULL == nodeId2 ? SOPC_strdup("") : SOPC_NodeId_ToCString(nodeId2));
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER,
                                "ServicesMgr: APP_TO_SE_TRIGGER_EVENT epCfgIdx=%" PRIu32
                                " eventTypeId=%s, notifierId=%s",
@@ -492,7 +493,9 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         }
 
         SOPC_ASSERT(id <= INT32_MAX);
-        io_dispatch_mgr__internal_server_event_triggered(&eventContext->notifierNodeId, eventContext->event, &bres);
+        io_dispatch_mgr__internal_server_event_triggered(&eventContext->notifierNodeId, eventContext->event,
+                                                         eventContext->optSubscriptionId,
+                                                         eventContext->optMonitoredItemId, &bres);
         if (!bres)
         {
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,

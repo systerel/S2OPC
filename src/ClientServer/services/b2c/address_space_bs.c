@@ -520,7 +520,7 @@ static SOPC_Byte SOPC_Internal_ComputeEventNotifier_Value(const SOPC_AddressSpac
     SOPC_ASSERT(node->node_class == OpcUa_NodeClass_Object || node->node_class == OpcUa_NodeClass_View);
     SOPC_Byte eventNotifier =
         (node->node_class == OpcUa_NodeClass_Object ? node->data.object.EventNotifier : node->data.view.EventNotifier);
-    SOPC_Byte supportedFlags = (OpcUa_EventNotifierType_SubscribeToEvents);
+    SOPC_Byte supportedFlags = OpcUa_EventNotifierType_SubscribeToEvents;
     // Note: keep only supported event notifier flags in final value
     return (eventNotifier & supportedFlags);
 }
@@ -1265,6 +1265,17 @@ void address_space_bs__get_DisplayName(const constants__t_Node_i address_space_b
 {
     SOPC_AddressSpace_Node* node = address_space_bs__p_node;
     *address_space_bs__p_display_name = SOPC_AddressSpace_Get_DisplayName(address_space_bs__nodes, node);
+}
+
+void address_space_bs__get_EventNotifier(const constants__t_Node_i address_space_bs__p_node,
+                                         constants__t_Byte* const address_space_bs__p_byte)
+{
+    SOPC_UNUSED_ARG(address_space_bs__p_node);
+    *address_space_bs__p_byte = 0;
+
+#if S2OPC_EVENT_MANAGEMENT
+    *address_space_bs__p_byte = SOPC_Internal_ComputeEventNotifier_Value(address_space_bs__p_node);
+#endif
 }
 
 void address_space_bs__get_Executable(const constants__t_Node_i address_space_bs__p_node,

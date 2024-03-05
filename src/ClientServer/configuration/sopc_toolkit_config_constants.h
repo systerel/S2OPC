@@ -214,6 +214,16 @@
 #define SOPC_MAX_NOTIFICATION_QUEUE_SIZE 1000
 #endif
 
+/** @brief Minimum size of a MonitoredItem event notification queue */
+#ifndef SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE
+#define SOPC_MIN_EVENT_NOTIFICATION_QUEUE_SIZE 10
+#endif
+
+/** @brief Default size of a MonitoredItem event notification queue */
+#ifndef SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE
+#define SOPC_DEFAULT_EVENT_NOTIFICATION_QUEUE_SIZE (SOPC_MAX_NOTIFICATION_QUEUE_SIZE / 2)
+#endif
+
 /* TRANSLATE BROWSE PATH MANAGEMENT */
 
 /** @brief Maximum number of matches to return for a given relative path

@@ -1,0 +1,98 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   monitored_item_event_filter_where_clause_i
+REFINES
+   monitored_item_event_filter_where_clause
+
+SEES
+   constants ,
+   constants_statuscodes_bs,
+   monitored_item_event_filter_treatment_bs,
+   address_space_itf
+
+IMPORTS
+    monitored_item_event_filter_where_it,
+    monitored_item_event_filter_where_clause_bs
+
+OPERATIONS
+
+    scWhereClause <-- check_where_clause_and_fill_ctx_and_result (p_filterCtx, p_filterResult, p_nbWhereElts) =
+    VAR
+        l_continue,
+        l_whereStatusCode,
+        l_whereOperatorResult,
+        l_whereOperandResult,
+        l_whereEltIdx
+    IN
+        scWhereClause := e_sc_ok;
+        init_where_elt_results (p_filterResult);
+        l_continue <-- init_iter_eventFilterWhereElt (p_nbWhereElts);
+        IF l_continue = TRUE
+        THEN
+            WHILE
+                l_continue   = TRUE
+            DO
+                l_continue, l_whereEltIdx <-- continue_iter_eventFilterWhereEltIdx;
+                l_whereStatusCode, l_whereOperatorResult, l_whereOperandResult <-- check_where_elt_and_fill_ctx (l_whereEltIdx, p_filterCtx);
+                set_where_element_result (p_filterResult, l_whereEltIdx, l_whereOperatorResult, l_whereOperandResult);
+                IF l_whereStatusCode /= e_sc_ok & scWhereClause = e_sc_ok
+                THEN
+                    /* Change global cause of first failure cause */
+                    scWhereClause := l_whereStatusCode
+                END
+            INVARIANT
+                l_continue = bool(eventFilterWhereEltIdx_to_iterate /= {}) &
+                eventFilterWhereEltIdx_to_iterate /\ eventFilterWhereEltIdx_iterated = {} &
+                eventFilterWhereEltIdx_to_iterate \/ eventFilterWhereEltIdx_iterated = 1..a_filter_NbWhereClauseElements &
+                a_whereElementResultSet = eventFilterWhereEltIdx_iterated
+            VARIANT
+                card(eventFilterWhereEltIdx_to_iterate)
+            END
+        END // ELSE: no clause => where clause always TRUE
+    END
+    ;
+
+    notifTriggered <-- evaluate_where_clause (p_filterCtx, p_nbWhereElts, p_event) =
+    VAR
+        l_eventTypeId,
+        l_continue,
+        l_whereEltIdx,
+        l_whereOfTypeId,
+        l_nodeIdsEqual,
+        l_isEventTypeRetained
+    IN
+        l_isEventTypeRetained := bool(p_nbWhereElts = 0);
+        IF l_isEventTypeRetained = FALSE
+        THEN
+            l_eventTypeId <-- get_event_type_id(p_event);
+            l_whereOfTypeId <-- get_where_elt_of_type_id(p_filterCtx);
+            l_nodeIdsEqual <-- is_NodeId_equal(l_eventTypeId, l_whereOfTypeId);
+            IF  l_nodeIdsEqual = TRUE THEN
+                l_isEventTypeRetained := TRUE
+            ELSE
+                l_isEventTypeRetained <-- is_transitive_subtype(l_eventTypeId, l_whereOfTypeId)
+            END
+        END
+        ;
+        notifTriggered := l_isEventTypeRetained
+    END
+
+END

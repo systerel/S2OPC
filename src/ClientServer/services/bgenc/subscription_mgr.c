@@ -21,7 +21,7 @@
 
  File Name            : subscription_mgr.c
 
- Date                 : 03/05/2023 13:04:48
+ Date                 : 08/04/2024 12:58:59
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -185,6 +185,7 @@ void subscription_mgr__local_treat_create_monitored_item_index(
       constants__t_Timestamp subscription_mgr__l_val_ts_src;
       constants__t_Timestamp subscription_mgr__l_val_ts_srv;
       constants__t_monitoredItemPointer_i subscription_mgr__l_monitoredItemPointer;
+      constants__t_filterResult_i subscription_mgr__l_filterResult;
       
       subscription_mgr__l_monitoredItemId = constants__c_monitoredItemId_indet;
       subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
@@ -192,6 +193,7 @@ void subscription_mgr__local_treat_create_monitored_item_index(
       subscription_mgr__l_node = constants__c_Node_indet;
       subscription_mgr__l_value = constants__c_Variant_indet;
       subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_bad_unexpected_error;
+      subscription_mgr__l_filterResult = constants__c_filterResult_indet;
       session_mgr__session_get_endpoint_config(subscription_mgr__p_session,
          &subscription_mgr__l_endpoint_config_idx);
       channel_mgr__is_valid_endpoint_config_idx(subscription_mgr__l_endpoint_config_idx,
@@ -257,10 +259,12 @@ void subscription_mgr__local_treat_create_monitored_item_index(
                   subscription_mgr__l_sc = constants_statuscodes_bs__e_sc_ok;
                }
                if (subscription_mgr__l_sc == constants_statuscodes_bs__e_sc_ok) {
-                  subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
+                  subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_aid,
+                     subscription_mgr__l_queueSize,
                      &subscription_mgr__l_revSamplingItv,
                      &subscription_mgr__l_revQueueSize);
-                  subscription_core__create_monitored_item(subscription_mgr__p_subscription,
+                  subscription_core__create_monitored_item(subscription_mgr__l_endpoint_config_idx,
+                     subscription_mgr__p_subscription,
                      subscription_mgr__l_nid,
                      subscription_mgr__l_aid,
                      subscription_mgr__l_indexRange,
@@ -276,7 +280,8 @@ void subscription_mgr__local_treat_create_monitored_item_index(
                      subscription_mgr__l_revQueueSize,
                      &subscription_mgr__l_sc,
                      &subscription_mgr__l_monitoredItemPointer,
-                     &subscription_mgr__l_monitoredItemId);
+                     &subscription_mgr__l_monitoredItemId,
+                     &subscription_mgr__l_filterResult);
                   address_space_itf__read_AddressSpace_free_variant(subscription_mgr__l_value);
                }
             }
@@ -287,7 +292,8 @@ void subscription_mgr__local_treat_create_monitored_item_index(
          subscription_mgr__l_sc,
          subscription_mgr__l_monitoredItemId,
          subscription_mgr__l_revSamplingItv,
-         subscription_mgr__l_revQueueSize);
+         subscription_mgr__l_revQueueSize,
+         subscription_mgr__l_filterResult);
    }
 }
 
@@ -318,6 +324,118 @@ void subscription_mgr__local_treat_create_monitored_items(
             subscription_mgr__p_resp_msg,
             subscription_mgr__l_index);
       }
+   }
+}
+
+void subscription_mgr__local_check_filtered_subscription_and_monitored_item(
+   const constants__t_subscription_i subscription_mgr__p_opt_sub_to_filter,
+   const constants__t_monitoredItemId_i subscription_mgr__p_opt_mi_to_fitler,
+   const constants__t_subscription_i subscription_mgr__p_sub,
+   const constants__t_monitoredItemId_i subscription_mgr__p_mi,
+   t_bool * const subscription_mgr__bres) {
+   *subscription_mgr__bres = (((subscription_mgr__p_opt_sub_to_filter == constants__c_subscription_indet) ||
+      (subscription_mgr__p_opt_sub_to_filter == subscription_mgr__p_sub)) &&
+      ((subscription_mgr__p_opt_mi_to_fitler == constants__c_monitoredItemId_indet) ||
+      (subscription_mgr__p_opt_mi_to_fitler == subscription_mgr__p_mi)));
+}
+
+void subscription_mgr__local_create_notification_on_monitored_item_if_event_selected(
+   const constants__t_monitoredItemPointer_i subscription_mgr__p_monitoredItemPointer,
+   const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_subscription_i subscription_mgr__p_sub_id,
+   const constants__t_monitoredItemId_i subscription_mgr__p_mi_id) {
+   {
+      constants__t_monitoredItemId_i subscription_mgr__l_monitoredItemId;
+      constants__t_subscription_i subscription_mgr__l_subscription;
+      t_bool subscription_mgr__l_valid_subscription;
+      t_bool subscription_mgr__l_filter_sub_and_mi;
+      constants__t_session_i subscription_mgr__l_session;
+      t_bool subscription_mgr__l_session_valid;
+      constants__t_user_i subscription_mgr__l_user;
+      t_bool subscription_mgr__l_valid_user_access;
+      constants__t_LocaleIds_i subscription_mgr__l_locales;
+      constants__t_NodeId_i subscription_mgr__l_nid;
+      constants__t_AttributeId_i subscription_mgr__l_aid;
+      constants__t_IndexRange_i subscription_mgr__l_indexRange;
+      constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToReturn;
+      constants__t_monitoringMode_i subscription_mgr__l_monitoringMode;
+      constants__t_client_handle_i subscription_mgr__l_clientHandle;
+      
+      subscription_core__getall_monitoredItemPointer(subscription_mgr__p_monitoredItemPointer,
+         &subscription_mgr__l_monitoredItemId,
+         &subscription_mgr__l_subscription,
+         &subscription_mgr__l_nid,
+         &subscription_mgr__l_aid,
+         &subscription_mgr__l_indexRange,
+         &subscription_mgr__l_timestampToReturn,
+         &subscription_mgr__l_monitoringMode,
+         &subscription_mgr__l_clientHandle);
+      subscription_core__is_valid_subscription(subscription_mgr__l_subscription,
+         &subscription_mgr__l_valid_subscription);
+      subscription_mgr__local_check_filtered_subscription_and_monitored_item(subscription_mgr__p_sub_id,
+         subscription_mgr__p_mi_id,
+         subscription_mgr__l_subscription,
+         subscription_mgr__l_monitoredItemId,
+         &subscription_mgr__l_filter_sub_and_mi);
+      subscription_mgr__l_session_valid = false;
+      subscription_mgr__l_valid_user_access = false;
+      subscription_mgr__l_locales = constants__c_LocaleIds_empty;
+      if (((subscription_mgr__l_valid_subscription == true) &&
+         (subscription_mgr__l_filter_sub_and_mi == true)) &&
+         (subscription_mgr__l_aid == constants__e_aid_EventNotifier)) {
+         subscription_core__getall_session(subscription_mgr__l_subscription,
+            &subscription_mgr__l_session);
+         session_mgr__is_valid_session(subscription_mgr__l_session,
+            &subscription_mgr__l_session_valid);
+         if (subscription_mgr__l_session_valid == true) {
+            session_mgr__get_session_user_server(subscription_mgr__l_session,
+               &subscription_mgr__l_user);
+            address_space_itf__get_user_authorization(constants__e_operation_type_read,
+               subscription_mgr__l_nid,
+               subscription_mgr__l_aid,
+               subscription_mgr__l_user,
+               &subscription_mgr__l_valid_user_access);
+            session_mgr__get_server_session_preferred_locales(subscription_mgr__l_session,
+               &subscription_mgr__l_locales);
+         }
+      }
+      if (((subscription_mgr__l_session_valid == true) &&
+         (subscription_mgr__l_monitoringMode == constants__e_monitoringMode_reporting)) &&
+         (subscription_mgr__l_aid == constants__e_aid_EventNotifier)) {
+         subscription_core__server_subscription_add_notification_on_event_if_triggered(subscription_mgr__l_valid_user_access,
+            subscription_mgr__l_locales,
+            subscription_mgr__p_monitoredItemPointer,
+            subscription_mgr__l_clientHandle,
+            subscription_mgr__l_timestampToReturn,
+            subscription_mgr__p_event);
+      }
+   }
+}
+
+void subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(
+   const constants__t_monitoredItemQueue_i subscription_mgr__p_monitoredItemQueue,
+   const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_subscription_i subscription_mgr__p_sub_id,
+   const constants__t_monitoredItemId_i subscription_mgr__p_mi_id) {
+   {
+      t_bool subscription_mgr__l_continue;
+      constants__t_monitoredItemQueueIterator_i subscription_mgr__l_iterator;
+      constants__t_monitoredItemPointer_i subscription_mgr__l_monitoredItemPointer;
+      
+      subscription_core__init_iter_monitored_item(subscription_mgr__p_monitoredItemQueue,
+         &subscription_mgr__l_continue,
+         &subscription_mgr__l_iterator);
+      while (subscription_mgr__l_continue == true) {
+         subscription_core__continue_iter_monitored_item(subscription_mgr__l_iterator,
+            subscription_mgr__p_monitoredItemQueue,
+            &subscription_mgr__l_continue,
+            &subscription_mgr__l_monitoredItemPointer);
+         subscription_mgr__local_create_notification_on_monitored_item_if_event_selected(subscription_mgr__l_monitoredItemPointer,
+            subscription_mgr__p_event,
+            subscription_mgr__p_sub_id,
+            subscription_mgr__p_mi_id);
+      }
+      subscription_core__clear_iter_monitored_item(subscription_mgr__l_iterator);
    }
 }
 
@@ -545,6 +663,7 @@ void subscription_mgr__create_notification_on_monitored_items_if_node_changed(
 }
 
 void subscription_mgr__fill_response_subscription_modify_monitored_items(
+   const constants__t_endpoint_config_idx_i subscription_mgr__p_endpoint_idx,
    const constants__t_TimestampsToReturn_i subscription_mgr__p_tsToReturn,
    const constants__t_msg_i subscription_mgr__p_req_msg,
    const constants__t_msg_i subscription_mgr__p_resp_msg,
@@ -560,11 +679,13 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
       constants__t_monitoringFilter_i subscription_mgr__l_filter;
       t_bool subscription_mgr__l_discardOldest;
       t_entier4 subscription_mgr__l_queueSize;
-      constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
       t_entier4 subscription_mgr__l_revQueueSize;
+      constants__t_opcua_duration_i subscription_mgr__l_revSamplingItv;
+      constants__t_filterResult_i subscription_mgr__l_filterResult;
       
       subscription_mgr__l_revSamplingItv = constants__c_opcua_duration_indet;
       subscription_mgr__l_revQueueSize = 0;
+      subscription_mgr__l_filterResult = constants__c_filterResult_indet;
       subscription_create_monitored_item_it__init_iter_monitored_item_request(subscription_mgr__p_nb_monitored_items,
          &subscription_mgr__l_continue);
       while (subscription_mgr__l_continue == true) {
@@ -581,22 +702,24 @@ void subscription_mgr__fill_response_subscription_modify_monitored_items(
             &subscription_mgr__l_discardOldest,
             &subscription_mgr__l_queueSize);
          if (subscription_mgr__l_bres == true) {
-            subscription_core__compute_create_monitored_item_revised_params(subscription_mgr__l_queueSize,
-               &subscription_mgr__l_revSamplingItv,
-               &subscription_mgr__l_revQueueSize);
-            subscription_core__modify_monitored_item(subscription_mgr__l_id,
+            subscription_core__modify_monitored_item(subscription_mgr__p_endpoint_idx,
+               subscription_mgr__l_id,
                subscription_mgr__p_tsToReturn,
                subscription_mgr__l_clientHandle,
                subscription_mgr__l_filter,
                subscription_mgr__l_discardOldest,
-               subscription_mgr__l_revQueueSize,
-               &subscription_mgr__l_sc);
+               subscription_mgr__l_queueSize,
+               &subscription_mgr__l_sc,
+               &subscription_mgr__l_filterResult,
+               &subscription_mgr__l_revSamplingItv,
+               &subscription_mgr__l_revQueueSize);
          }
          msg_subscription_monitored_item__setall_msg_modify_monitored_item_resp_params(subscription_mgr__p_resp_msg,
             subscription_mgr__l_index,
             subscription_mgr__l_sc,
             subscription_mgr__l_revSamplingItv,
-            subscription_mgr__l_revQueueSize);
+            subscription_mgr__l_revQueueSize,
+            subscription_mgr__l_filterResult);
       }
    }
 }
@@ -1144,6 +1267,7 @@ void subscription_mgr__treat_subscription_modify_monitored_items_req(
       constants_statuscodes_bs__t_StatusCode_i subscription_mgr__l_sc;
       constants__t_subscription_i subscription_mgr__l_subscription;
       t_bool subscription_mgr__l_valid_subscription;
+      constants__t_endpoint_config_idx_i subscription_mgr__l_endpoint_config_idx;
       constants__t_TimestampsToReturn_i subscription_mgr__l_timestampToRet;
       t_entier4 subscription_mgr__l_nb_monitored_items;
       t_bool subscription_mgr__l_bres;
@@ -1157,13 +1281,19 @@ void subscription_mgr__treat_subscription_modify_monitored_items_req(
          subscription_core__is_valid_subscription_on_session(subscription_mgr__p_session,
             subscription_mgr__l_subscription,
             &subscription_mgr__l_valid_subscription);
-         if (subscription_mgr__l_valid_subscription == true) {
+         session_mgr__session_get_endpoint_config(subscription_mgr__p_session,
+            &subscription_mgr__l_endpoint_config_idx);
+         channel_mgr__is_valid_endpoint_config_idx(subscription_mgr__l_endpoint_config_idx,
+            &subscription_mgr__l_bres);
+         if ((subscription_mgr__l_valid_subscription == true) &&
+            (subscription_mgr__l_bres == true)) {
             subscription_core__reset_subscription_LifetimeCounter(subscription_mgr__l_subscription);
             msg_subscription_monitored_item__alloc_msg_modify_monitored_items_resp_results(subscription_mgr__p_resp_msg,
                subscription_mgr__l_nb_monitored_items,
                &subscription_mgr__l_bres);
             if (subscription_mgr__l_bres == true) {
-               subscription_mgr__fill_response_subscription_modify_monitored_items(subscription_mgr__l_timestampToRet,
+               subscription_mgr__fill_response_subscription_modify_monitored_items(subscription_mgr__l_endpoint_config_idx,
+                  subscription_mgr__l_timestampToRet,
                   subscription_mgr__p_req_msg,
                   subscription_mgr__p_resp_msg,
                   subscription_mgr__l_nb_monitored_items);
@@ -1274,6 +1404,71 @@ void subscription_mgr__treat_subscription_set_monit_mode_monitored_items_req(
       else {
          *subscription_mgr__StatusCode_service = subscription_mgr__l_sc;
       }
+   }
+}
+
+void subscription_mgr__server_subscription_event_triggered(
+   const constants__t_NodeId_i subscription_mgr__p_notifierId,
+   const constants__t_Event_i subscription_mgr__p_event,
+   const constants__t_subscription_i subscription_mgr__p_sub_id,
+   const constants__t_monitoredItemId_i subscription_mgr__p_mi_id,
+   t_bool * const subscription_mgr__bres) {
+   {
+      t_bool subscription_mgr__l_nid_valid;
+      constants__t_Node_i subscription_mgr__l_node;
+      constants__t_NodeClass_i subscription_mgr__l_nodeClass;
+      constants__t_Byte subscription_mgr__l_eventNotifierByte;
+      t_bool subscription_mgr__l_bres;
+      constants__t_monitoredItemQueue_i subscription_mgr__l_monitoredItemQueue;
+      
+      subscription_mgr__l_bres = false;
+      address_space_itf__readall_AddressSpace_Node(subscription_mgr__p_notifierId,
+         &subscription_mgr__l_nid_valid,
+         &subscription_mgr__l_node);
+      if (subscription_mgr__l_nid_valid == true) {
+         address_space_itf__get_NodeClass(subscription_mgr__l_node,
+            &subscription_mgr__l_nodeClass);
+         if ((subscription_mgr__l_nodeClass == constants__e_ncl_Object) ||
+            (subscription_mgr__l_nodeClass == constants__e_ncl_View)) {
+            address_space_itf__get_EventNotifier(subscription_mgr__l_node,
+               &subscription_mgr__l_eventNotifierByte);
+            constants__is_EventNotifier_SubscribeToEvents(subscription_mgr__l_eventNotifierByte,
+               &subscription_mgr__l_bres);
+         }
+         if (subscription_mgr__l_bres == true) {
+            subscription_core__get_nodeToMonitoredItemQueue(subscription_mgr__p_notifierId,
+               &subscription_mgr__l_bres,
+               &subscription_mgr__l_monitoredItemQueue);
+            if (subscription_mgr__l_bres == true) {
+               subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
+                  subscription_mgr__p_event,
+                  subscription_mgr__p_sub_id,
+                  subscription_mgr__p_mi_id);
+            }
+         }
+      }
+      if (subscription_mgr__l_bres == true) {
+         address_space_itf__is_NodeId_equal(constants__c_Server_NodeId,
+            subscription_mgr__p_notifierId,
+            &subscription_mgr__l_bres);
+         address_space_itf__readall_AddressSpace_Node(constants__c_Server_NodeId,
+            &subscription_mgr__l_nid_valid,
+            &subscription_mgr__l_node);
+         if ((subscription_mgr__l_bres == false) &&
+            (subscription_mgr__l_nid_valid == true)) {
+            subscription_core__get_nodeToMonitoredItemQueue(constants__c_Server_NodeId,
+               &subscription_mgr__l_bres,
+               &subscription_mgr__l_monitoredItemQueue);
+            if (subscription_mgr__l_bres == true) {
+               subscription_mgr__local_create_notification_on_monitored_items_if_event_selected(subscription_mgr__l_monitoredItemQueue,
+                  subscription_mgr__p_event,
+                  subscription_mgr__p_sub_id,
+                  subscription_mgr__p_mi_id);
+            }
+         }
+         subscription_mgr__l_bres = true;
+      }
+      *subscription_mgr__bres = subscription_mgr__l_bres;
    }
 }
 

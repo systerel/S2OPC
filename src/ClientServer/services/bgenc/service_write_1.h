@@ -21,7 +21,7 @@
 
  File Name            : service_write_1.h
 
- Date                 : 22/02/2023 16:16:36
+ Date                 : 22/03/2024 14:58:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -72,6 +72,7 @@ extern void service_write_1__INITIALISATION(void);
 #define service_write_1__exec_callMethod address_space__exec_callMethod
 #define service_write_1__get_BrowseName address_space__get_BrowseName
 #define service_write_1__get_DisplayName address_space__get_DisplayName
+#define service_write_1__get_EventNotifier address_space__get_EventNotifier
 #define service_write_1__get_Executable address_space__get_Executable
 #define service_write_1__get_InputArguments address_space__get_InputArguments
 #define service_write_1__get_NodeClass address_space__get_NodeClass

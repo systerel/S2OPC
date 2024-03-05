@@ -32,29 +32,43 @@ ABSTRACT_VARIABLES
     publish_response_message,
     notification_message,
     notification_message_seq_num,
-    nb_monitored_item_notifications,
-    MonitoredItemNotification_MonitoredItemId,
-    MonitoredItemNotification_MonitoredItemNotif
+
+    nb_data_notifications,
+    DataNotification_MonitoredItemId,
+    DataNotification_MonitoredItemNotif,
+
+    nb_event_notifications,
+    EventNotification_MonitoredItemId,
+    EventNotification_MonitoredItemNotif
 
 INVARIANT
 
     publish_response_message : t_msg_i &
     notification_message : t_notif_msg_i &
     notification_message_seq_num : t_sub_seq_num_i &
-    nb_monitored_item_notifications : NAT &
-    nb_monitored_item_notifications <= k_n_monitoredItemNotif_max &
 
-    MonitoredItemNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
-    MonitoredItemNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer
+    nb_data_notifications : NAT &
+    nb_data_notifications <= k_n_monitoredItemNotif_max &
+    DataNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
+    DataNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_WriteValuePointer &
+
+    nb_event_notifications : NAT &
+    nb_event_notifications  <= k_n_monitoredItemNotif_max &
+    EventNotification_MonitoredItemId : t_monitoredItemNotifIndex +-> t_monitoredItemId &
+    EventNotification_MonitoredItemNotif : t_monitoredItemNotifIndex +-> t_eventFieldList
 
 INITIALISATION
 
     publish_response_message := c_msg_indet ||
     notification_message := c_notif_msg_indet ||
     notification_message_seq_num := c_sub_seq_num_indet ||
-    nb_monitored_item_notifications := 0 ||
-    MonitoredItemNotification_MonitoredItemId :(MonitoredItemNotification_MonitoredItemId = {}) ||
-    MonitoredItemNotification_MonitoredItemNotif :(MonitoredItemNotification_MonitoredItemNotif = {})
+
+    nb_data_notifications := 0 ||
+    DataNotification_MonitoredItemId :(DataNotification_MonitoredItemId = {}) ||
+    DataNotification_MonitoredItemNotif :(DataNotification_MonitoredItemNotif = {}) ||
+    nb_event_notifications := 0 ||
+    EventNotification_MonitoredItemId :(EventNotification_MonitoredItemId = {}) ||
+    EventNotification_MonitoredItemNotif :(EventNotification_MonitoredItemNotif = {})
 
 OPERATIONS
 
@@ -117,21 +131,25 @@ OPERATIONS
     END
     ;
 
-    bres, p_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, p_nb_monitored_item_notifications) =
+    bres, p_notifMsg <-- alloc_notification_message_items (p_publish_resp_msg, p_nb_data_notifications, p_nb_event_notifications) =
     PRE
         p_publish_resp_msg : t_msg_i & p_publish_resp_msg : t_msg &
         publish_response_message = p_publish_resp_msg &
-        p_nb_monitored_item_notifications : NAT &
-        p_nb_monitored_item_notifications > 0 &
-        p_nb_monitored_item_notifications <= k_n_monitoredItemNotif_max
+        p_nb_data_notifications : NAT &
+        p_nb_data_notifications <= k_n_monitoredItemNotif_max &
+        p_nb_event_notifications : NAT &
+        p_nb_event_notifications <= k_n_monitoredItemNotif_max &
+        p_nb_data_notifications + p_nb_event_notifications > 0
     THEN
         CHOICE
             bres := FALSE ||
-            nb_monitored_item_notifications := 0 ||
+            nb_data_notifications := 0 ||
+            nb_event_notifications := 0 ||
             p_notifMsg := c_notif_msg_indet
         OR
             bres := TRUE ||
-            nb_monitored_item_notifications := p_nb_monitored_item_notifications ||
+            nb_data_notifications := p_nb_data_notifications ||
+            nb_event_notifications := p_nb_event_notifications ||
             notification_message, p_notifMsg
             :(p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
               notification_message = p_notifMsg)
@@ -149,23 +167,42 @@ OPERATIONS
     END
     ;
 
-    setall_notification_msg_monitored_item_notif (p_notifMsg, p_index, p_monitored_item_id, p_clientHandle, p_wv_pointer) =
+    setall_notification_msg_monitored_item_data_notif (p_notifMsg, p_index, p_monitored_item_id, p_clientHandle, p_wv_pointer) =
     PRE
         p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
         p_notifMsg = notification_message &
-        nb_monitored_item_notifications > 0 &
+        nb_data_notifications > 0 &
         p_index : NAT &
         p_index : t_monitoredItemNotifIndex &
         p_index > 0 &
-        p_index <= nb_monitored_item_notifications &
+        p_index <= nb_data_notifications &
         p_monitored_item_id : t_monitoredItemId_i &
         p_monitored_item_id : t_monitoredItemId &
         p_clientHandle : t_client_handle_i &
         p_wv_pointer : t_WriteValuePointer_i &
         p_wv_pointer : t_WriteValuePointer
     THEN
-        MonitoredItemNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
-        MonitoredItemNotification_MonitoredItemNotif(p_index) := p_wv_pointer
+        DataNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
+        DataNotification_MonitoredItemNotif(p_index) := p_wv_pointer
+    END
+    ;
+
+    setall_notification_msg_monitored_item_event_notif (p_notifMsg, p_index, p_monitored_item_id, p_event_field_list) =
+    PRE
+        p_notifMsg : t_notif_msg_i & p_notifMsg : t_notif_msg &
+        p_notifMsg = notification_message &
+        nb_event_notifications > 0 &
+        p_index : NAT &
+        p_index : t_monitoredItemNotifIndex &
+        p_index > 0 &
+        p_index <= nb_event_notifications &
+        p_monitored_item_id : t_monitoredItemId_i &
+        p_monitored_item_id : t_monitoredItemId &
+        p_event_field_list : t_eventFieldList_i &
+        p_event_field_list : t_eventFieldList
+    THEN
+        EventNotification_MonitoredItemId(p_index) := p_monitored_item_id ||
+        EventNotification_MonitoredItemNotif(p_index) := p_event_field_list
     END
 
 END

@@ -30,7 +30,6 @@ ABSTRACT_VARIABLES
     a_monitoredItemId,
     a_monitoredItemSubs,
     a_monitoredItemNodeId,
-    a_monitoredItemNodeFilterValid,
     a_monitoredItemAttributeId,
     a_monitoredItemMonitMode,
     a_monitoredItemQueueSize
@@ -42,7 +41,6 @@ INVARIANT
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
-    a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i &
     a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
     a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
     a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter
@@ -54,7 +52,6 @@ INITIALISATION
     a_monitoredItemId :(a_monitoredItemId : s_monitoredItemPointer <-> s_monitoredItemId & a_monitoredItemId = {}) ||
     a_monitoredItemSubs :(a_monitoredItemSubs : s_monitoredItemPointer <-> t_subscription & a_monitoredItemSubs = {}) ||
     a_monitoredItemNodeId :(a_monitoredItemNodeId : s_monitoredItemPointer <-> t_NodeId & a_monitoredItemNodeId = {}) ||
-    a_monitoredItemNodeFilterValid :(a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i) ||
     a_monitoredItemAttributeId :(a_monitoredItemAttributeId : s_monitoredItemPointer <-> t_AttributeId & a_monitoredItemAttributeId = {}) ||
     a_monitoredItemMonitMode :(a_monitoredItemMonitMode : s_monitoredItemPointer <-> t_monitoringMode & a_monitoredItemMonitMode = {}) ||
     a_monitoredItemQueueSize :(a_monitoredItemQueueSize : s_monitoredItemPointer <-> t_counter & a_monitoredItemQueueSize = {})
@@ -68,27 +65,6 @@ OPERATIONS
     END
     ;
 
-    StatusCode, filterAbsDeadbandCtx <-- check_monitored_item_filter_valid (p_node, p_filter) =
-    PRE
-        p_node : t_Node_i &
-        p_node : t_Node &
-        p_filter : t_monitoringFilter_i &
-        p_filter : t_monitoringFilter
-    THEN
-        /* Check filter validity regarding node DataType is Number (absolute) / Variable AnalogItem type EU range (percent)
-           and returns an absolute deadband context for any deadband type (pre-computed from EURange if PercentDeadband) */
-        IF (p_node |-> p_filter) : a_monitoredItemNodeFilterValid
-        THEN
-            filterAbsDeadbandCtx :(filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
-                                   (filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or filterAbsDeadbandCtx : t_monitoringFilterCtx)) ||
-            StatusCode := e_sc_ok
-        ELSE
-            filterAbsDeadbandCtx := c_monitoringFilterCtx_indet ||
-            StatusCode := e_sc_bad_filter_not_allowed
-        END
-    END
-    ;
-
     StatusCode, monitoredItemPointer, monitoredItemId <-- create_monitored_item_pointer (p_subscription,
                                                                                          p_nid,
                                                                                          p_aid,
@@ -96,8 +72,7 @@ OPERATIONS
                                                                                          p_timestampToReturn,
                                                                                          p_monitoringMode,
                                                                                          p_clientHandle,
-                                                                                         p_filter,
-                                                                                         p_filterAbsDeadbandCtx,
+                                                                                         p_filterCtx,
                                                                                          p_discardOldest,
                                                                                          p_queueSize) =
     PRE
@@ -113,11 +88,9 @@ OPERATIONS
         p_monitoringMode : t_monitoringMode_i &
         p_monitoringMode : t_monitoringMode &
         p_clientHandle : t_client_handle_i &
-        p_filter : t_monitoringFilter_i &
-        (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
-        p_filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
-        (p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or p_filterAbsDeadbandCtx : t_monitoringFilterCtx) &
-        (p_filter = c_monitoringFilter_indet => p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet) &
+        p_filterCtx : t_monitoringFilterCtx_i &
+        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
+        (p_filterCtx = c_monitoringFilterCtx_indet => p_aid /= e_aid_EventNotifier) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -156,8 +129,7 @@ OPERATIONS
     StatusCode <-- modify_monitored_item_pointer(p_monitoredItemPointer,
                                                  p_timestampToReturn,
                                                  p_clientHandle,
-                                                 p_filter,
-                                                 p_filterAbsDeadbandCtx,
+                                                 p_filterCtx,
                                                  p_discardOldest,
                                                  p_queueSize) =
     PRE
@@ -166,11 +138,8 @@ OPERATIONS
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
         p_clientHandle : t_client_handle_i &
-        p_filter : t_monitoringFilter_i &
-        (p_filter = c_monitoringFilter_indet or p_filter : t_monitoringFilter) &
-        p_filterAbsDeadbandCtx : t_monitoringFilterCtx_i &
-        (p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet or p_filterAbsDeadbandCtx : t_monitoringFilterCtx) &
-        (p_filter = c_monitoringFilter_indet => p_filterAbsDeadbandCtx = c_monitoringFilterCtx_indet) &
+        p_filterCtx : t_monitoringFilterCtx_i &
+        (p_filterCtx = c_monitoringFilterCtx_indet or p_filterCtx : t_monitoringFilterCtx) &
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
@@ -217,7 +186,7 @@ OPERATIONS
     p_timestampToReturn,
     p_monitoringMode,
     p_clientHandle
-      <--getall_monitoredItemPointer (p_monitoredItemPointer) =
+      <-- getall_monitoredItemPointer (p_monitoredItemPointer) =
     PRE
         p_monitoredItemPointer : t_monitoredItemPointer_i &
         p_monitoredItemPointer : s_monitoredItemPointer
@@ -245,6 +214,24 @@ OPERATIONS
           p_monitoringMode = a_monitoredItemMonitMode(p_monitoredItemPointer) &
           p_clientHandle : t_client_handle_i
         )
+    END
+    ;
+
+    p_filter <--get_monitoredItemFilter (p_monitoredItemPointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer
+    THEN
+        p_filter :: t_monitoringFilterCtx_i
+    END
+    ;
+
+    p_isEvent <--is_event_monitoredItem (p_monitoredItemPointer) =
+    PRE
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer
+    THEN
+        p_isEvent :: BOOL
     END
     ;
 

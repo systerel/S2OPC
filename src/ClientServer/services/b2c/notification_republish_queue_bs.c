@@ -33,46 +33,18 @@ void notification_republish_queue_bs__INITIALISATION(void) {}
    OPERATIONS Clause
   --------------------*/
 
-static bool notification_message_copy(OpcUa_NotificationMessage* dst, const OpcUa_NotificationMessage* src)
-{
-    SOPC_ASSERT(dst != NULL && src != NULL);
-    SOPC_ASSERT(src->NoOfNotificationData == 1); // Restricted support for now
-
-    SOPC_ExtensionObject* notification_data = SOPC_Calloc(1, sizeof(SOPC_ExtensionObject));
-
-    if (notification_data == NULL)
-    {
-        return false;
-    }
-
-    SOPC_ExtensionObject_Initialize(notification_data);
-
-    if (SOPC_ExtensionObject_Copy(notification_data, src->NotificationData) != SOPC_STATUS_OK)
-    {
-        SOPC_ExtensionObject_Clear(notification_data);
-        SOPC_Free(notification_data);
-        return false;
-    }
-
-    OpcUa_NotificationMessage_Initialize(dst);
-    dst->NotificationData = notification_data;
-    dst->NoOfNotificationData = 1;
-    dst->PublishTime = src->PublishTime;
-    dst->SequenceNumber = src->SequenceNumber;
-
-    return true;
-}
-
 void notification_republish_queue_bs__add_republish_notif_to_queue(
     const constants__t_notifRepublishQueue_i notification_republish_queue_bs__p_queue,
     const constants__t_sub_seq_num_i notification_republish_queue_bs__p_seq_num,
     const constants__t_notif_msg_i notification_republish_queue_bs__p_notif_msg,
     t_bool* const notification_republish_queue_bs__bres)
 {
-    SOPC_ASSERT(notification_republish_queue_bs__p_notif_msg->NoOfNotificationData == 1);
     *notification_republish_queue_bs__bres = false;
     OpcUa_NotificationMessage* notifMsgCpy = SOPC_Malloc(sizeof(OpcUa_NotificationMessage));
-    if (notifMsgCpy == NULL || !notification_message_copy(notifMsgCpy, notification_republish_queue_bs__p_notif_msg))
+    OpcUa_NotificationMessage_Initialize(notifMsgCpy);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Copy(&OpcUa_NotificationMessage_EncodeableType, notifMsgCpy,
+                                                          notification_republish_queue_bs__p_notif_msg);
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_Logger_TraceError(
             SOPC_LOG_MODULE_CLIENTSERVER,

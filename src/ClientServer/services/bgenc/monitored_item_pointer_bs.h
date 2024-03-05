@@ -21,7 +21,7 @@
 
  File Name            : monitored_item_pointer_bs.h
 
- Date                 : 02/05/2023 12:42:44
+ Date                 : 27/03/2024 13:26:18
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -49,11 +49,6 @@ extern void monitored_item_pointer_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void monitored_item_pointer_bs__check_monitored_item_filter_valid(
-   const constants__t_Node_i monitored_item_pointer_bs__p_node,
-   const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-   constants_statuscodes_bs__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode,
-   constants__t_monitoringFilterCtx_i * const monitored_item_pointer_bs__filterAbsDeadbandCtx);
 extern void monitored_item_pointer_bs__create_monitored_item_pointer(
    const constants__t_subscription_i monitored_item_pointer_bs__p_subscription,
    const constants__t_NodeId_i monitored_item_pointer_bs__p_nid,
@@ -62,8 +57,7 @@ extern void monitored_item_pointer_bs__create_monitored_item_pointer(
    const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
    const constants__t_monitoringMode_i monitored_item_pointer_bs__p_monitoringMode,
    const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-   const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-   const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
+   const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
    const t_bool monitored_item_pointer_bs__p_discardOldest,
    const t_entier4 monitored_item_pointer_bs__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode,
@@ -71,6 +65,9 @@ extern void monitored_item_pointer_bs__create_monitored_item_pointer(
    constants__t_monitoredItemId_i * const monitored_item_pointer_bs__monitoredItemId);
 extern void monitored_item_pointer_bs__delete_monitored_item_pointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer);
+extern void monitored_item_pointer_bs__get_monitoredItemFilter(
+   const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+   constants__t_monitoringFilterCtx_i * const monitored_item_pointer_bs__p_filter);
 extern void monitored_item_pointer_bs__getall_monitoredItemId(
    const constants__t_monitoredItemId_i monitored_item_pointer_bs__p_monitoredItemId,
    t_bool * const monitored_item_pointer_bs__bres,
@@ -85,6 +82,9 @@ extern void monitored_item_pointer_bs__getall_monitoredItemPointer(
    constants__t_TimestampsToReturn_i * const monitored_item_pointer_bs__p_timestampToReturn,
    constants__t_monitoringMode_i * const monitored_item_pointer_bs__p_monitoringMode,
    constants__t_client_handle_i * const monitored_item_pointer_bs__p_clientHandle);
+extern void monitored_item_pointer_bs__is_event_monitoredItem(
+   const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
+   t_bool * const monitored_item_pointer_bs__p_isEvent);
 extern void monitored_item_pointer_bs__is_notification_triggered(
    const constants__t_LocaleIds_i monitored_item_pointer_bs__p_localeIds,
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
@@ -95,8 +95,7 @@ extern void monitored_item_pointer_bs__modify_monitored_item_pointer(
    const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
    const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
    const constants__t_client_handle_i monitored_item_pointer_bs__p_clientHandle,
-   const constants__t_monitoringFilter_i monitored_item_pointer_bs__p_filter,
-   const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterAbsDeadbandCtx,
+   const constants__t_monitoringFilterCtx_i monitored_item_pointer_bs__p_filterCtx,
    const t_bool monitored_item_pointer_bs__p_discardOldest,
    const t_entier4 monitored_item_pointer_bs__p_queueSize,
    constants_statuscodes_bs__t_StatusCode_i * const monitored_item_pointer_bs__StatusCode);

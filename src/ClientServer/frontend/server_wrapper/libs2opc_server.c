@@ -737,7 +737,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, 
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    if (!SOPC_ServerInternal_IsStarted())
+    if (!SOPC_ServerInternal_IsConfiguring() && !SOPC_ServerInternal_IsStarted())
     {
         return SOPC_STATUS_INVALID_STATE;
     }
@@ -745,6 +745,10 @@ SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, 
 #if S2OPC_EVENT_MANAGEMENT
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
     SOPC_ASSERT(NULL != pConfig);
+    if (NULL == pConfig->serverConfig.eventTypes)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
     *event = SOPC_EventManager_CreateEventInstance(pConfig->serverConfig.eventTypes, eventTypeId);
     status = (NULL == *event ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
 #else

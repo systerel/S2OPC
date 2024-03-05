@@ -21,7 +21,7 @@
 
  File Name            : msg_subscription_monitored_item_bs.h
 
- Date                 : 21/10/2022 14:37:48
+ Date                 : 08/03/2024 10:44:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -133,7 +133,8 @@ extern void msg_subscription_monitored_item_bs__setall_msg_create_monitored_item
    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc,
    const constants__t_monitoredItemId_i msg_subscription_monitored_item_bs__p_monitored_item_id,
    const constants__t_opcua_duration_i msg_subscription_monitored_item_bs__p_revSamplingItv,
-   const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize);
+   const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize,
+   const constants__t_filterResult_i msg_subscription_monitored_item_bs__p_filterResult);
 extern void msg_subscription_monitored_item_bs__setall_msg_delete_monitored_item_resp_params(
    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
    const t_entier4 msg_subscription_monitored_item_bs__p_index,
@@ -143,7 +144,8 @@ extern void msg_subscription_monitored_item_bs__setall_msg_modify_monitored_item
    const t_entier4 msg_subscription_monitored_item_bs__p_index,
    const constants_statuscodes_bs__t_StatusCode_i msg_subscription_monitored_item_bs__p_sc,
    const constants__t_opcua_duration_i msg_subscription_monitored_item_bs__p_revSamplingItv,
-   const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize);
+   const t_entier4 msg_subscription_monitored_item_bs__p_revQueueSize,
+   const constants__t_filterResult_i msg_subscription_monitored_item_bs__p_filterResult);
 extern void msg_subscription_monitored_item_bs__setall_msg_set_monit_mode_monitored_item_resp_params(
    const constants__t_msg_i msg_subscription_monitored_item_bs__p_resp_msg,
    const t_entier4 msg_subscription_monitored_item_bs__p_index,

@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 17/01/2024 15:12:00
+ Date                 : 10/04/2024 15:56:17
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -68,6 +68,16 @@
 #include "io_dispatch_mgr.h"
 #include "message_in_bs.h"
 #include "message_out_bs.h"
+#include "monitored_item_data_filter_treatment_bs.h"
+#include "monitored_item_event_filter_select_clauses.h"
+#include "monitored_item_event_filter_select_clauses_bs.h"
+#include "monitored_item_event_filter_select_it.h"
+#include "monitored_item_event_filter_treatment.h"
+#include "monitored_item_event_filter_treatment_bs.h"
+#include "monitored_item_event_filter_where_clause.h"
+#include "monitored_item_event_filter_where_clause_bs.h"
+#include "monitored_item_event_filter_where_it.h"
+#include "monitored_item_filter_treatment.h"
 #include "monitored_item_notification_queue_bs.h"
 #include "monitored_item_pointer_bs.h"
 #include "monitored_item_queue_bs.h"
@@ -262,6 +272,16 @@ void INITIALISATION(void) {
    publish_request_queue_bs__INITIALISATION();
    notification_republish_queue_bs__INITIALISATION();
    msg_subscription_publish_bs__INITIALISATION();
+   monitored_item_event_filter_treatment_bs__INITIALISATION();
+   monitored_item_event_filter_where_it__INITIALISATION();
+   monitored_item_event_filter_where_clause_bs__INITIALISATION();
+   monitored_item_event_filter_where_clause__INITIALISATION();
+   monitored_item_event_filter_select_it__INITIALISATION();
+   monitored_item_event_filter_select_clauses_bs__INITIALISATION();
+   monitored_item_event_filter_select_clauses__INITIALISATION();
+   monitored_item_event_filter_treatment__INITIALISATION();
+   monitored_item_data_filter_treatment_bs__INITIALISATION();
+   monitored_item_filter_treatment__INITIALISATION();
    notification_republish_queue_it_bs__INITIALISATION();
    monitored_item_queue_it_bs__INITIALISATION();
    subscription_core__INITIALISATION();

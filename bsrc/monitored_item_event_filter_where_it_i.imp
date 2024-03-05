@@ -1,0 +1,71 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    monitored_item_event_filter_where_it_i
+
+REFINES
+    monitored_item_event_filter_where_it
+
+SEES
+    constants
+
+CONCRETE_VARIABLES
+
+    currentEventFilterWhereEltIdx_i,
+    nb_eventFilterWhereElts_i
+
+INVARIANT
+    currentEventFilterWhereEltIdx_i : NAT &
+    nb_eventFilterWhereElts_i : NAT &
+
+    nb_eventFilterWhereElts_i = nb_eventFilterWhereElts_i &
+    currentEventFilterWhereEltIdx_i : 0..nb_eventFilterWhereElts_i &
+
+    (nb_eventFilterWhereElts_i = 0 =>
+        eventFilterWhereEltIdx_to_iterate = {} &
+        eventFilterWhereEltIdx_iterated = {}) &
+
+    (nb_eventFilterWhereElts_i /= 0 =>
+        eventFilterWhereEltIdx_to_iterate = currentEventFilterWhereEltIdx_i+1..nb_eventFilterWhereElts_i &
+        eventFilterWhereEltIdx_iterated = 1..currentEventFilterWhereEltIdx_i)
+
+INITIALISATION
+    currentEventFilterWhereEltIdx_i := 0;
+    nb_eventFilterWhereElts_i := 0
+
+OPERATIONS
+
+
+    p_continue <-- init_iter_eventFilterWhereElt(p_nb_eventFilterWhereElts) =
+    BEGIN
+        nb_eventFilterWhereElts_i := p_nb_eventFilterWhereElts;
+        currentEventFilterWhereEltIdx_i := 0;
+        p_continue := bool (0 < p_nb_eventFilterWhereElts)
+    END
+    ;
+
+    p_continue, p_eventFilterWhereEltIdx <-- continue_iter_eventFilterWhereEltIdx =
+    BEGIN
+        currentEventFilterWhereEltIdx_i := currentEventFilterWhereEltIdx_i + 1;
+        p_eventFilterWhereEltIdx := currentEventFilterWhereEltIdx_i;
+        p_continue := bool (currentEventFilterWhereEltIdx_i < nb_eventFilterWhereElts_i)
+    END
+
+END

@@ -1,0 +1,140 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+   monitored_item_event_filter_select_clauses_i
+REFINES
+   monitored_item_event_filter_select_clauses
+
+SEES
+   constants,
+   constants_statuscodes_bs,
+   monitored_item_event_filter_treatment_bs,
+   address_space_itf
+
+IMPORTS
+    monitored_item_event_filter_select_it,
+    monitored_item_event_filter_select_clauses_bs
+
+OPERATIONS
+
+    scSelectClauses, hasInvalidClause <-- check_select_clauses_and_fill_ctx_and_result (p_filterCtx, p_filterResult, p_nbSelectClauses) =
+    VAR
+        l_continue,
+        l_selectStatusCode,
+        l_clauseResult,
+        l_selectClauseIdx,
+        l_selectClauseTypeId,
+        l_oneValidSelectClause
+    IN
+        l_oneValidSelectClause := FALSE;
+        hasInvalidClause := FALSE;
+        scSelectClauses := e_sc_bad_monitored_item_filter_invalid;
+        init_select_clause_results (p_filterResult);
+        l_continue <-- init_iter_eventFilterSelectClause(p_nbSelectClauses);
+        WHILE
+            l_continue   = TRUE
+        DO
+            l_continue, l_selectClauseIdx <-- continue_iter_eventFilterSelectClauseIdx;
+            l_selectStatusCode, l_clauseResult <-- check_select_clause_and_fill_ctx (l_selectClauseIdx, p_filterCtx);
+            set_select_clause_result (p_filterResult, l_selectClauseIdx, l_clauseResult);
+            IF l_selectStatusCode = e_sc_ok
+            THEN
+                l_oneValidSelectClause := TRUE
+            ELSE
+                scSelectClauses := l_selectStatusCode;
+                hasInvalidClause := TRUE
+            END
+        INVARIANT
+            l_continue = bool(eventFilterSelectClauseIdx_to_iterate /= {}) &
+            eventFilterSelectClauseIdx_to_iterate /\ eventFilterSelectClauseIdx_iterated = {} &
+            eventFilterSelectClauseIdx_to_iterate \/ eventFilterSelectClauseIdx_iterated = 1..a_filter_NbSelectClauses &
+            a_selectClauseResultSet = eventFilterSelectClauseIdx_iterated &
+            l_oneValidSelectClause = bool(TRUE : a_eventSelectClauseValid[eventFilterSelectClauseIdx_iterated]) &
+            hasInvalidClause = bool(FALSE : a_eventSelectClauseValid[eventFilterSelectClauseIdx_iterated])
+        VARIANT
+            card(eventFilterSelectClauseIdx_to_iterate)
+        END
+        ;
+
+        IF l_oneValidSelectClause = TRUE
+        THEN
+            scSelectClauses := e_sc_ok
+        END
+    END
+    ;
+
+    notifTriggered, eventNotif
+      <-- apply_select_clauses_and_build_event_field_list
+                                             (p_clientHandle, p_localeIds,
+                                              p_timestampToReturn, p_userAccessGranted,
+                                              p_filterCtx, p_nbSelectClauses, p_event) =
+    VAR
+        l_continue,
+        l_selectClauseIdx,
+        l_selectClauseTypeId,
+        l_eventTypeId,
+        l_nodeIdsEqual,
+        l_isEventTypeRetained
+    IN
+        notifTriggered, eventNotif <-- alloc_event_field_list (p_clientHandle, p_nbSelectClauses);
+        l_isEventTypeRetained := FALSE;
+        l_eventTypeId <-- get_event_type_id(p_event);
+        l_continue <-- init_iter_eventFilterSelectClause(p_nbSelectClauses);
+        WHILE
+            notifTriggered = TRUE & l_continue = TRUE
+        DO
+            l_continue, l_selectClauseIdx <-- continue_iter_eventFilterSelectClauseIdx;
+            l_selectClauseTypeId <-- get_select_clause_type_id(l_selectClauseIdx, p_filterCtx);
+            /* If TypeDefinitionId is BaseEventType the Server shall evaluate the browsePath
+               without considering the typeDefinitionId. */
+            l_nodeIdsEqual <-- is_NodeId_equal(l_selectClauseTypeId, c_BaseEventType_NodeId);
+            /* Otherwise restricts [...] to instances of the TypeDefinitionNode or one of its subtypes. */
+            IF l_nodeIdsEqual = FALSE
+            THEN
+
+                l_nodeIdsEqual <-- is_NodeId_equal(l_eventTypeId, l_selectClauseTypeId)
+            END
+            ;
+            IF l_nodeIdsEqual = TRUE THEN
+                l_isEventTypeRetained := TRUE
+            ELSE
+                l_isEventTypeRetained <-- is_transitive_subtype(l_eventTypeId, l_selectClauseTypeId)
+            END
+            ;
+            IF l_isEventTypeRetained = TRUE
+            THEN
+                set_event_field_list_elt (p_localeIds,
+                    p_timestampToReturn, p_userAccessGranted,
+                    l_selectClauseIdx, p_filterCtx,
+                    eventNotif, p_event)
+            ELSE
+                set_event_field_list_elt_null(l_selectClauseIdx, eventNotif)
+            END
+        INVARIANT
+            l_continue = bool(eventFilterSelectClauseIdx_to_iterate /= {}) &
+            eventFilterSelectClauseIdx_to_iterate /\ eventFilterSelectClauseIdx_iterated = {} &
+            eventFilterSelectClauseIdx_to_iterate \/ eventFilterSelectClauseIdx_iterated = 1..a_filterCtx_NbSelectClauses &
+            a_eventFieldListFilled = eventFilterSelectClauseIdx_iterated
+        VARIANT
+            card(eventFilterSelectClauseIdx_to_iterate)
+        END
+    END
+
+END

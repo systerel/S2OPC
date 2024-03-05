@@ -21,7 +21,7 @@
 
  File Name            : address_space_bs.h
 
- Date                 : 19/01/2024 16:41:11
+ Date                 : 22/03/2024 14:58:38
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -85,6 +85,9 @@ extern void address_space_bs__get_DataType(
 extern void address_space_bs__get_DisplayName(
    const constants__t_Node_i address_space_bs__p_node,
    constants__t_LocalizedText_i * const address_space_bs__p_display_name);
+extern void address_space_bs__get_EventNotifier(
+   const constants__t_Node_i address_space_bs__p_node,
+   constants__t_Byte * const address_space_bs__p_byte);
 extern void address_space_bs__get_Executable(
    const constants__t_Node_i address_space_bs__p_node,
    t_bool * const address_space_bs__p_bool);

@@ -118,7 +118,7 @@ DEFINITIONS
     a_monitoredItemId := {} ||
     a_monitoredItemSubs := {} ||
     a_monitoredItemNodeId := {} ||
-    a_monitoredItemNodeFilterValid :(a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i) ||
+    a_monitoredItemNodeFilterValid :(a_monitoredItemNodeFilterValid : t_NodeId <-> t_monitoringFilter_i) ||
     a_monitoredItemAttributeId := {} ||
     a_monitoredItemMonitMode := {} ||
     a_monitoredItemQueueSize := {} ||
@@ -185,7 +185,7 @@ DEFINITIONS
     a_monitoredItemId : s_monitoredItemPointer >->> s_monitoredItemId &
     a_monitoredItemSubs : s_monitoredItemPointer --> t_subscription &
     a_monitoredItemNodeId : s_monitoredItemPointer --> t_NodeId &
-    a_monitoredItemNodeFilterValid : t_Node --> t_monitoringFilter_i &
+    a_monitoredItemNodeFilterValid : t_NodeId <-> t_monitoringFilter_i &
     a_monitoredItemAttributeId : s_monitoredItemPointer --> t_AttributeId &
     a_monitoredItemMonitMode : s_monitoredItemPointer --> t_monitoringMode &
     a_monitoredItemQueueSize : s_monitoredItemPointer --> t_counter &
@@ -224,7 +224,7 @@ DEFINITIONS
     a_notification_seq_num : t_notif_msg --> t_sub_seq_num &
 
     a_monitored_item_notification_queue : t_monitoredItemPointer >+> t_notificationQueue &
-    a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+    a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
 
     a_defined_monitored_items : s_monitoredItemQueue <-> s_monitoredItemPointer &
     mi_queue_it : t_monitoredItemQueue_i &
@@ -297,7 +297,7 @@ DEFINITIONS
       a_SeqNum : s_subscription --> t_sub_seq_num &
       notification_message : t_notif_msg_i &
       notification_message_seq_num : t_sub_seq_num_i &
-      a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+      a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
       a_notification_queue_notifications <: a_notification_queue_notifications$0 &
       l_notifQueues <<| a_notification_queue_notifications = l_notifQueues <<| a_notification_queue_notifications$0 &
       p_moreNotifs : BOOL &
@@ -836,8 +836,10 @@ OPERATIONS
     END
     ;
 
-    revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_reqQueueSize) =
+    revisedSamplingItv, revisedQueueSize <-- compute_create_monitored_item_revised_params (p_aid, p_reqQueueSize) =
     PRE
+        p_aid : t_AttributeId_i &
+        p_aid : t_AttributeId &
         p_reqQueueSize : t_counter
     THEN
         revisedSamplingItv :: t_opcua_duration_i ||
@@ -845,21 +847,25 @@ OPERATIONS
     END
     ;
 
-    StatusCode_service, monitoredItemPointer, monitoredItemId <-- create_monitored_item (p_subscription,
-                                                                                         p_nid,
-                                                                                         p_aid,
-                                                                                         p_indexRange,
-                                                                                         p_value,
-                                                                                         p_valueSc,
-                                                                                         p_val_ts_src,
-                                                                                         p_val_ts_srv,
-                                                                                         p_timestampToReturn,
-                                                                                         p_monitoringMode,
-                                                                                         p_clientHandle,
-                                                                                         p_filter,
-                                                                                         p_discardOldest,
-                                                                                         p_queueSize) =
+    StatusCode_service, monitoredItemPointer, monitoredItemId, filterResult <-- create_monitored_item
+       (p_endpoint_idx,
+        p_subscription,
+        p_nid,
+        p_aid,
+        p_indexRange,
+        p_value,
+        p_valueSc,
+        p_val_ts_src,
+        p_val_ts_srv,
+        p_timestampToReturn,
+        p_monitoringMode,
+        p_clientHandle,
+        p_filter,
+        p_discardOldest,
+        p_queueSize) =
     PRE
+        p_endpoint_idx : t_endpoint_config_idx_i &
+        p_endpoint_idx : t_endpoint_config_idx &
         p_subscription : t_subscription_i &
         p_subscription : s_subscription &
         p_nid : t_NodeId_i &
@@ -881,19 +887,23 @@ OPERATIONS
         p_discardOldest : BOOL &
         p_queueSize : t_counter
     THEN
-        IF p_filter : t_monitoringFilter &
-           not (p_nid : ran(a_NodeId) & p_aid = e_aid_Value & (a_NodeId~(p_nid) |-> p_filter) : a_monitoredItemNodeFilterValid)
+        IF not (p_nid |-> p_filter : a_monitoredItemNodeFilterValid)
         THEN
-            StatusCode_service := e_sc_bad_filter_not_allowed ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
-            monitoredItemId := c_monitoredItemId_indet
+            monitoredItemId := c_monitoredItemId_indet ||
+            StatusCode_service :(StatusCode_service : t_StatusCode_i &
+                                 StatusCode_service : {e_sc_bad_out_of_memory, e_sc_bad_filter_not_allowed,
+                                                       e_sc_bad_monitored_item_filter_invalid,
+                                                       e_sc_bad_monitored_item_filter_unsupported }) ||
+            filterResult :: t_filterResult_i
         ELSIF t_monitoredItemPointer = s_monitoredItemPointer or
             t_monitoredItemId = s_monitoredItemId
         THEN
             /* We do not limit the number of MI in C code, so it means we do not have enough memory if it fails */
             StatusCode_service := e_sc_bad_out_of_memory ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
-            monitoredItemId := c_monitoredItemId_indet
+            monitoredItemId := c_monitoredItemId_indet ||
+            filterResult :: t_filterResult_i
         ELSIF p_indexRange : t_IndexRange /* It means it is null or it can be parsed */
         THEN
             CHOICE
@@ -902,10 +912,11 @@ OPERATIONS
                     l_monitoredItemId : t_monitoredItemId - s_monitoredItemId &
                     l_notifQueue : t_notificationQueue &
                     l_notifQueue /: ran(a_monitored_item_notification_queue) &
-                    l_notif : t_WriteValuePointer &
+                    l_notif : t_notificationData &
                     l_notif /: ran(a_notification_queue_notifications)
                 THEN
                     StatusCode_service := e_sc_ok ||
+                    filterResult :: t_filterResult_i ||
                     s_monitoredItemPointer := s_monitoredItemPointer \/ {l_monitoredItem} ||
                     s_monitoredItemId := s_monitoredItemId \/ {l_monitoredItemId} ||
                     a_monitoredItemId(l_monitoredItem) := l_monitoredItemId ||
@@ -928,19 +939,24 @@ OPERATIONS
                 END
             OR
                 StatusCode_service := e_sc_bad_out_of_memory ||
+                filterResult :: t_filterResult_i ||
                 monitoredItemPointer := c_monitoredItemPointer_indet ||
                 monitoredItemId := c_monitoredItemId_indet
             END
         ELSE
             StatusCode_service := e_sc_bad_index_range_invalid ||
+            filterResult :: t_filterResult_i ||
             monitoredItemPointer := c_monitoredItemPointer_indet ||
             monitoredItemId := c_monitoredItemId_indet
         END
     END
     ;
 
-    p_sc <-- modify_monitored_item (p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
+    p_sc, p_filterResult, p_revSamplingItv, p_revQueueSize
+      <-- modify_monitored_item (p_endpoint_idx, p_mi_id, p_timestampToReturn, p_clientHandle, p_filter, p_discardOldest, p_queueSize) =
     PRE
+        p_endpoint_idx : t_endpoint_config_idx_i &
+        p_endpoint_idx : t_endpoint_config_idx &
         p_mi_id : t_monitoredItemId_i &
         p_timestampToReturn : t_TimestampsToReturn_i &
         p_timestampToReturn : t_TimestampsToReturn &
@@ -951,9 +967,15 @@ OPERATIONS
         p_queueSize : t_counter
     THEN
         p_sc,
+        p_filterResult,
+        p_revSamplingItv,
+        p_revQueueSize,
         a_notification_queue_notifications
         :( p_sc : t_StatusCode_i &
-            a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer &
+           p_filterResult : t_filterResult_i &
+           p_revSamplingItv : t_opcua_duration_i &
+           p_revQueueSize : t_counter &
+            a_notification_queue_notifications : t_notificationQueue <-> t_notificationData &
             {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications =
             {a_monitored_item_notification_queue(a_monitoredItemId~(p_mi_id))} <<| a_notification_queue_notifications$0 &
             (p_sc /= e_sc_ok =>
@@ -961,14 +983,15 @@ OPERATIONS
             ) &
             (p_mi_id /: ran(a_monitoredItemId) => p_sc = e_sc_bad_monitored_item_id_invalid) &
             (p_mi_id : ran(a_monitoredItemId) &
-                (p_filter : t_monitoringFilter &
-                 not (a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) : ran(a_NodeId) &
-                      a_monitoredItemAttributeId(a_monitoredItemId~(p_mi_id)) = e_aid_Value &
-                     (a_NodeId~(a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id))) |-> p_filter) : a_monitoredItemNodeFilterValid)
-                    => p_sc = e_sc_bad_filter_not_allowed) &
-                (not (p_filter : t_monitoringFilter & a_monitoredItemAttributeId(a_monitoredItemId~(p_mi_id)) /= e_aid_Value)
-                    =>  p_sc = e_sc_ok
-                )
+                ((a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) : ran(a_NodeId) &
+                 (a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) |-> p_filter) : a_monitoredItemNodeFilterValid)
+                  => p_sc = e_sc_ok) &
+                 (not ((a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) : ran(a_NodeId) &
+                      (a_monitoredItemNodeId(a_monitoredItemId~(p_mi_id)) |-> p_filter) : a_monitoredItemNodeFilterValid))
+                  => p_sc : {e_sc_bad_out_of_memory,
+                             e_sc_bad_filter_not_allowed,
+                             e_sc_bad_monitored_item_filter_invalid,
+                             e_sc_bad_monitored_item_filter_unsupported })
             )
         )
     END
@@ -1262,6 +1285,24 @@ OPERATIONS
     END
     ;
 
+    server_subscription_add_notification_on_event_if_triggered
+     (p_userAccessGranted, p_localeIds, p_monitoredItemPointer, p_clientHandle, p_timestampToReturn, p_event) =
+    PRE
+        p_userAccessGranted : BOOL &
+        p_localeIds : t_LocaleIds_i &
+        p_localeIds : t_LocaleIds &
+        p_monitoredItemPointer : t_monitoredItemPointer_i &
+        p_monitoredItemPointer : s_monitoredItemPointer &
+        p_clientHandle : t_client_handle_i &
+        p_timestampToReturn : t_TimestampsToReturn_i &
+        p_timestampToReturn : t_TimestampsToReturn &
+        p_event : t_Event_i &
+        p_event : t_Event
+    THEN
+        a_notification_queue_notifications :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData)
+    END
+    ;
+
     server_subscription_add_notification_on_value_change (p_localeIds, p_monitoredItemPointer, p_timestampToReturn, p_writeValuePointer) =
     PRE
         p_localeIds : t_LocaleIds_i &
@@ -1274,7 +1315,7 @@ OPERATIONS
         p_writeValuePointer : t_WriteValuePointer
     THEN
         /* Note: we cannot be more precise, in case of memory issue it might be unchanged */
-        a_notification_queue_notifications :(a_notification_queue_notifications : t_notificationQueue <-> t_WriteValuePointer)
+        a_notification_queue_notifications :(a_notification_queue_notifications : t_notificationQueue <-> t_notificationData)
     END
     ;
 
@@ -1302,8 +1343,7 @@ OPERATIONS
             bres := FALSE
         OR
             ANY l_notif WHERE
-                l_notif : t_WriteValuePointer_i &
-                l_notif : t_WriteValuePointer
+                l_notif : t_notificationData
             THEN
                 bres := TRUE ||
                 a_notification_queue_notifications :=
