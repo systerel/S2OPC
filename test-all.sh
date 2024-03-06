@@ -49,6 +49,13 @@ client_service_faults_test.tap
 check_file_transfer.tap
 sc_establish_timeout.tap
 sc_renew.tap
+push_server_csr_invalid.tap
+push_server_csr_valid_newKey.tap
+push_server_csr_valid_noNewKey.tap
+push_server_revoke.tap
+push_server_self_signed.tap
+push_server_trusted_int.tap
+push_server_untrusted.tap
 secure_channel_level_None.tap
 secure_channel_level_SignAndEncrypt_B256Sha256_2048bit.tap
 secure_channel_level_SignAndEncrypt_B256Sha256_2048bit_server_vs_4096bit_client.tap

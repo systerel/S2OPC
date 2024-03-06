@@ -379,7 +379,7 @@ target_compile_options(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_COMPILER_F
 target_compile_definitions(toolkit_test_client_rhe_faults PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(toolkit_test_client_rhe_faults PRIVATE s2opc_clientserver)
 
-# Client scenario with file transfer
+# Client scenario with file transfer and demo push server
 if (NOT WIN32 AND expat_FOUND)
   add_executable(check_file_transfer "validation_tests/client/file_transfer/check_file_transfer.c"
                                                   "validation_tests/client/file_transfer/check_file_transfer_method.c")
@@ -750,3 +750,115 @@ if(ENABLE_FUZZING)
   s2opc_fuzzer(parse_tcp_uri_fuzzer "${FUZZING_PATH}/fuzz_parse_tcp_uri.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
   s2opc_fuzzer(decode_fuzzer "${FUZZING_PATH}/fuzz_decoder.c" s2opc_clientserver "${S2OPC_CLIENTSERVER_INTERNAL_INCLUDES}")
 endif(ENABLE_FUZZING)
+
+### Push server tests ###
+
+# These validations tests will temporaly modify the server PKI folder: S2OPC_Demo_PKI/.
+# They use the toolkit_demo_push_server executable, made when compiling the samples.
+
+## Make executables
+# Push client, useful for scenarios
+add_executable(push_client "validation_tests/client/push_client/push_client.c"
+                                                "validation_tests/client/push_client/push_client_connection_helper.c"
+                                                "validation_tests/client/push_client/push_server_methods.c"
+                                                "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_push_server/push_server_lib/sopc_trustlist_helper.c"
+                                                ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
+                                                "unit_tests/helpers/check_crypto_certificates.c"
+                                                "unit_tests/helpers/hexlify.c")
+target_include_directories(push_client PRIVATE "validation_tests/client/push_client" "unit_tests/helpers" ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES} "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_push_server/push_server_lib")
+target_link_libraries(push_client PRIVATE s2opc_clientserver Check::check)
+target_compile_options(push_client PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
+target_compile_definitions(push_client PRIVATE ${S2OPC_DEFINITIONS})
+
+## Copy data to build
+add_custom_command(
+  TARGET push_client POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/data/cacrl_with_revoked_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/selfsigned/ca_selfsigned_pathLen0key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/server_4k_cert.der ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/encrypted_server_4k_key.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data
+  COMMAND ${CMAKE_COMMAND} -E copy ${S2OPC_ROOT_PATH}/samples/ClientServer/data/cert/cakey.pem ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/push_data)
+
+## Tests.
+# Test the different scenarios (with multiple clients)
+add_test(NAME "validation::push_server_self_signed"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 7
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_tl_self_signed.py")
+set_tests_properties("validation::push_server_self_signed" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_self_signed.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+
+add_test(NAME "validation::push_server_revoke"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 7
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_tl_revoke_client.py")
+set_tests_properties("validation::push_server_revoke" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_revoke.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+
+add_test(NAME "validation::push_server_untrusted"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 12
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_tl_untrusted.py")
+set_tests_properties("validation::push_server_untrusted" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_untrusted.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+
+add_test(NAME "validation::push_server_trusted_int"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 8
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_tl_trusted_int.py")
+set_tests_properties("validation::push_server_trusted_int" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_trusted_int.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+
+## CSR tests
+# Success UpdateCertificate and 3 invalid CSR
+add_test(NAME "validation::push_server_csr_invalid"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 5
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_csr_invalid.py")
+set_tests_properties("validation::push_server_csr_invalid" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_csr_invalid.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+
+# Success scenarios: do only one test? But without losing discriminatory nature.
+# These two tests need to set up the env variable TEST_PASSWORD_CACERT which is the password of the private key of cacert
+# and TEST_PASSWORD_USER_ME which is the password of the user "me" (because the client user uses a connection by username/password)
+add_test(NAME "validation::push_server_csr_valid_noNewKey"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 6
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_csr_valid.py" "noNewKey")
+set_tests_properties("validation::push_server_csr_valid_noNewKey" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_csr_valid_noNewKey.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")
+add_test(NAME "validation::push_server_csr_valid_newKey"
+  WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  COMMAND
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/samples/ClientServer/scripts/run_with_pwd.py" "--nb-passwords" 6
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+  "--server-wd" $<TARGET_FILE_DIR:toolkit_demo_push_server>
+  "--server-cmd" $<TARGET_FILE:toolkit_demo_push_server>
+  "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/validation_tests/client/push_client/scenarios/test_csr_valid.py" "newKey")
+set_tests_properties("validation::push_server_csr_valid_newKey" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=push_server_csr_valid_newKey.tap;TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml;TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_Push_AddSpace.xml;TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml")

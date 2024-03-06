@@ -68,6 +68,8 @@ variables:
   TEST_USERS_XML_CONFIG: S2OPC_UACTT_Users.xml
   TEST_CLIENT_XML_CONFIG: S2OPC_Client_Test_Config.xml
   TEST_PASSWORD_PRIVATE_KEY : password
+  TEST_PASSWORD_CACERT : S2OPC
+  TEST_PASSWORD_USER_ME : 1234
   TEST_PASSWORD_USER : password
 
 # Variables for ALL_BUILDS and ALL_TESTS manual pipelines
@@ -202,6 +204,7 @@ build-linux64-ASan:
   variables:
     <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
+    S2OPC_DYNAMIC_TYPE_RESOLUTION: 1
     WITH_UBSAN: 1
   needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build

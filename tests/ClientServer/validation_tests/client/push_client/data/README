@@ -1,0 +1,2 @@
+This folder contains a CRL which is the same as cacrl but with client_4k_cert revoked.
+Update this CRL when cacert and/or client_4k_cert are updated. 
