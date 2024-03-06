@@ -27,7 +27,7 @@ DURATION=730
 
 # CA generation: generate key, generate self signed certificate
 # /!\ CA key encrypted with AES-256-CBC, these commands require the password.
-openssl genrsa -out $CA_KEY -aes-256-cbc 4096
+openssl genrsa -traditional -out $CA_KEY -aes-256-cbc 4096
 openssl req -config $CONF_FILE -new -x509 -key $CA_KEY -out $CA_CERT -days $DURATION
 
 # Convert the certificate to DER format

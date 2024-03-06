@@ -45,3 +45,8 @@ authorityKeyIdentifier = keyid:always,issuer
 basicConstraints = critical, CA:true, pathlen:0
 keyUsage = critical, nonRepudiation, digitalSignature, keyCertSign, keyEncipherment, dataEncipherment
 extendedKeyUsage = clientAuth, serverAuth
+subjectAltName = @alternate_names
+
+[ alternate_names ]
+URI     = urn:S2OPC:localhost  # ApplicationUri
+DNS.1   = localhost
