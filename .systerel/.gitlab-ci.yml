@@ -163,6 +163,7 @@ build-linux64-ASan:
     <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
+    BUILD_SHARED_LIBS: 'true' # build shared version to limit binaries size
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
