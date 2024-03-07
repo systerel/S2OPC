@@ -180,13 +180,14 @@ START_TEST(test_logger_categories_and_files)
     testLog = SOPC_Log_CreateFileInstance(&logConf, "Category1");
     ck_assert(testLog != NULL);
     char* tmp_name = SOPC_Log_GetCurrentFilename(testLog);
-    // delete created file and folder
-    ires = remove(tmp_name);
-    SOPC_Free(tmp_name);
-    ck_assert(ires == 0);
-    ires = remove("not_existing_path");
-    ck_assert(ires == 0);
     SOPC_Log_ClearInstance(&testLog);
+    // Check that file was created
+    genLogFile = fopen(tmp_name, "r");
+    ck_assert(genLogFile != NULL);
+    fclose(genLogFile);
+    genLogFile = NULL;
+
+    SOPC_Free(tmp_name);
 
     logConf.logDirPath = "";
     logConf.logMaxBytes = 0;
