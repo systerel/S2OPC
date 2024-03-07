@@ -65,22 +65,30 @@ struct SOPC_CircularLogFile
 
 /** Create the directory if not existent.
  * @return true in case of success*/
-static void checkOrCreateDirectory(const char* path)
+static const char* checkOrCreateDirectory(const char* path)
 {
+    const char* result = NULL;
     if (NULL != path)
     {
         if (path[0] == 0)
         {
             // Use current folder
             path = "./";
+            result = ".";
         }
         const SOPC_FileSystem_CreationResult mkdirRes = SOPC_FileSystem_mkdir(path);
         if (!(mkdirRes == SOPC_FileSystem_Creation_OK || mkdirRes == SOPC_FileSystem_Creation_Error_PathAlreadyExists))
         {
-            fprintf(stderr, "WARNING: Cannot create log directory ('%d'), defaulting to current directory\n", mkdirRes);
-            SOPC_ASSERT(false);
+            fprintf(stderr, "WARNING: Cannot create log directory '%s' (res=%d), defaulting to current directory\n",
+                    path, mkdirRes);
+            result = ".";
         }
     }
+    if (NULL == result)
+    {
+        result = path;
+    }
+    return result;
 }
 
 SOPC_CircularLogFile* SOPC_CircularLogFile_Create(const SOPC_CircularLogFile_Configuration* config)
@@ -92,8 +100,7 @@ SOPC_CircularLogFile* SOPC_CircularLogFile_Create(const SOPC_CircularLogFile_Con
         config->logMaxFiles > 0)
     {
         // First, create path if not existent
-        checkOrCreateDirectory(config->logDirPath);
-        const char* logDirPath = (*config->logDirPath != 0) ? config->logDirPath : ".";
+        const char* logDirPath = checkOrCreateDirectory(config->logDirPath);
 
         // filenames are <path>/<name>_XXXXX.log
         const size_t filenameLen = strlen(logDirPath) + strlen(config->logFileName) +
