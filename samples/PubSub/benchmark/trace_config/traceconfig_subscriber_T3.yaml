@@ -1,0 +1,5 @@
+filepath: "trace_subscriber_T3.dat"
+program: "SubSocketMgr"
+probes_pair:
+  - probe1: "on_socket_message_received__return"
+    probe2: "on_socket_message_received"

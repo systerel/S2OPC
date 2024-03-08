@@ -1,0 +1,5 @@
+filepath: "trace_publisher_T4.dat"
+program: "Publisher"
+probes_pair:
+  - probe1: "sendto"
+    probe2: "MessageCtx_send_publish_message"

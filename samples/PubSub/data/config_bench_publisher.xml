@@ -1,0 +1,79 @@
+<PubSub xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="s2opc_pubsub_config.xsd">
+    <connection address="opc.udp://232.1.2.100:4840" interfaceName="lo" mode="publisher" publisherId="i=42">
+        <message groupId="15" groupVersion="1" publishingInterval="10." publisherFixedSize="true">
+          <dataset writerId="1">
+            <variable nodeId="ns=1;s=PubVal0Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm1" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm1" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="2">
+            <variable nodeId="ns=1;s=PubVal0Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm2" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm2" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="3">
+            <variable nodeId="ns=1;s=PubVal0Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm3" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm3" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="4">
+            <variable nodeId="ns=1;s=PubVal0Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm4" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm4" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="5">
+            <variable nodeId="ns=1;s=PubVal0Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm5" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm5" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="6">
+            <variable nodeId="ns=1;s=PubVal0Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm6" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm6" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="7">
+            <variable nodeId="ns=1;s=PubVal0Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm7" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm7" displayName="varInt" dataType="Int32"/>
+          </dataset>
+          <dataset writerId="8">
+            <variable nodeId="ns=1;s=PubVal0Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal1Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal2Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal3Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal4Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal5Dsm8" displayName="varInt" dataType="Int32"/>
+            <variable nodeId="ns=1;s=PubVal6Dsm8" displayName="varInt" dataType="Int32"/>
+          </dataset>
+
+        </message>
+    </connection>
+</PubSub>

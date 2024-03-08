@@ -1,0 +1,5 @@
+filepath: "trace_publisher_T3.dat"
+program: "Publisher"
+probes_pair:
+  - probe1: "sendto"
+    probe2: "SOPC_UADP_NetworkMessage_Get_PreencodedBuffer"

@@ -1,0 +1,5 @@
+filepath: "trace_subscriber_T2.dat"
+program: "SubSocketMgr"
+probes_pair:
+  - probe1: "SOPC_Reader_Read_UADP__return"
+    probe2: "SOPC_Reader_Read_UADP"

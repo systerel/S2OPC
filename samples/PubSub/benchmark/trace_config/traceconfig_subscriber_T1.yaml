@@ -1,0 +1,5 @@
+filepath: "trace_subscriber_T1.dat"
+program: "SubSocketMgr"
+probes_pair:
+  - probe1: "Cache_SetTargetVariables__return"
+    probe2: "Cache_SetTargetVariables"

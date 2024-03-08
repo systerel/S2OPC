@@ -1,0 +1,5 @@
+filepath: "trace_publisher_T1.dat"
+program: "Publisher"
+probes_pair:
+  - probe1: "SOPC_UADP_NetworkMessage_Get_PreencodedBuffer"
+    probe2: "MessageCtx_send_publish_message"

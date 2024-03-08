@@ -32,6 +32,15 @@ target_compile_options(udp_rt_pub PRIVATE ${S2OPC_COMPILER_FLAGS})
 target_compile_definitions(udp_rt_pub PRIVATE ${S2OPC_DEFINITIONS})
 target_link_libraries(udp_rt_pub PRIVATE s2opc_pubsub)
 
+# Benchmark Pubsub
+add_executable(bench_pubsub "benchmark/main.c"
+                            "benchmark/pubsub.c"
+                            "benchmark/cache.c")
+
+target_compile_options(bench_pubsub PRIVATE ${S2OPC_COMPILER_FLAGS})
+target_compile_definitions(bench_pubsub PRIVATE ${S2OPC_DEFINITIONS})
+target_link_libraries(bench_pubsub PRIVATE s2opc_pubsub)
+
 # Copy data
 add_custom_command(
   TARGET pubsub POST_BUILD
@@ -46,4 +55,6 @@ add_custom_command(
   # Configurations
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_rtt_emitter.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_rtt_loopback.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_bench_publisher.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
+  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/data/config_bench_subscriber.xml ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/
   )

@@ -1,0 +1,5 @@
+filepath: "trace_publisher_T2.dat"
+program: "Publisher"
+probes_pair:
+  - probe1: "SOPC_PubSourceVariable_GetVariables__return"
+    probe2: "SOPC_PubSourceVariable_GetVariables"
