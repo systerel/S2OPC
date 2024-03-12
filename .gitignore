@@ -19,6 +19,7 @@ build-analyzer
 .vscode
 index*.txt.*
 serial*.txt.*
+*.dat*
 
 # Temporary directories for B to C translation
 pre-build/
