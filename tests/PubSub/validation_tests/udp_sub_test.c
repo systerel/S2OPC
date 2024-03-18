@@ -145,7 +145,8 @@ static SOPC_UADP_NetworkMessage* Decode_NetworkMessage_NoSecu(SOPC_Buffer* pBuff
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .checkDataSetMessageSN_Func = NULL,
         .updateTimeout_Func = NULL,
-        .targetConfig = NULL};
+        .targetConfig = NULL,
+        .targetVariable_Func = NULL};
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;
     SOPC_NetworkMessage_Error_Code code =
         SOPC_UADP_NetworkMessage_Decode(pBuffer, &readerConf, subConnection, &uadp_nm);
@@ -249,7 +250,7 @@ static void printNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
             printf(" - Nb DataSetField %d\n", nbDsf);
             for (uint16_t j = 0; j < nbDsf; j++)
             {
-                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, j);
+                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, j);
                 printf(" - DataSetField %" PRIu16 "\n", j);
                 printVariant(variant);
             }

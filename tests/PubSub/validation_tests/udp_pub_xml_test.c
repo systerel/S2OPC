@@ -76,7 +76,7 @@ static void printNmDebug(SOPC_Dataset_LL_NetworkMessage* nm)
         for (uint16_t iFields = 0; iFields < nbFields; iFields++)
         {
             SOPC_CONSOLE_PRINTF("  - FIELD #%u/%u\n", (unsigned) iFields, (unsigned) nbFields);
-            const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, iFields);
+            const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, iFields);
             if (var)
             {
                 SOPC_CONSOLE_PRINTF("    - VAR array=%u, type=%u\n", (unsigned) var->ArrayType,

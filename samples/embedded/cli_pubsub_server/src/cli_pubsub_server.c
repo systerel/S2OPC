@@ -646,7 +646,7 @@ static void clearPubSub(void)
 }
 
 /***************************************************/
-static bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
+static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t nbValues)
 {
     if (SOPC_Atomic_Int_Get(&gStopped) != 0)
     {
@@ -666,7 +666,14 @@ static bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
     }
 
     request->NoOfNodesToWrite = nbValues;
-    request->NodesToWrite = lwv;
+    request->NodesToWrite = SOPC_Calloc((size_t) request->NoOfNodesToWrite, sizeof(*request->NodesToWrite));
+    SOPC_ASSERT(NULL != request->NodesToWrite);
+    for (int i = 0; i < request->NoOfNodesToWrite; i++)
+    {
+        SOPC_EncodeableObject_Initialize(lwv->encodeableType, &request->NodesToWrite[i]);
+        status = SOPC_EncodeableObject_Copy(lwv->encodeableType, &request->NodesToWrite[i], &lwv[i]);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
     SOPC_ServerHelper_LocalServiceAsync(request, ASYNCH_CONTEXT_CACHE_SYNC);
 
     return true;

@@ -903,7 +903,7 @@ void Server_SetSubStatusSync(SOPC_PubSubState state)
     Server_SetSubStatus(true, state);
 }
 
-bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
+bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t nbValues)
 {
     if (!Server_IsRunning())
     {
@@ -921,7 +921,14 @@ bool Server_SetTargetVariables(OpcUa_WriteValue* lwv, int32_t nbValues)
     }
 
     request->NoOfNodesToWrite = nbValues;
-    request->NodesToWrite = lwv;
+    request->NodesToWrite = SOPC_Calloc((size_t) request->NoOfNodesToWrite, sizeof(*request->NodesToWrite));
+    SOPC_ASSERT(NULL != request->NodesToWrite);
+    for (int i = 0; i < request->NoOfNodesToWrite; i++)
+    {
+        SOPC_EncodeableObject_Initialize(lwv->encodeableType, &request->NodesToWrite[i]);
+        status = SOPC_EncodeableObject_Copy(lwv->encodeableType, &request->NodesToWrite[i], &lwv[i]);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
+    }
     status = SOPC_ServerHelper_LocalServiceAsync(request, 0);
 
     return true;

@@ -30,6 +30,12 @@ struct _SOPC_SubTargetVariableConfig
     SOPC_SetTargetVariables_Func* callback;
 };
 
+struct SOPC_TargetVariableCtx
+{
+    OpcUa_WriteValue* writeValues;
+    uint16_t nbValues;
+};
+
 SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func* callback)
 {
     SOPC_SubTargetVariableConfig* targetConfig = SOPC_Calloc(1, sizeof(*targetConfig));
@@ -46,18 +52,18 @@ void SOPC_SubTargetVariableConfig_Delete(SOPC_SubTargetVariableConfig* targetCon
 }
 
 bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetConfig,
+                                         SOPC_TargetVariableCtx* targetVariable,
                                          const SOPC_DataSetReader* reader,
-                                         const SOPC_Dataset_LL_DataSetMessage* dsm)
+                                         SOPC_Dataset_LL_DataSetMessage* dsm)
 {
-    if (NULL == targetConfig || NULL == reader || NULL == dsm)
+    if (NULL == targetConfig || NULL == targetVariable || NULL == dsm)
     {
         return false;
     }
 
     uint16_t nbFields = SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(dsm);
-    uint16_t nbFieldsMetadata = SOPC_DataSetReader_Nb_FieldMetaData(reader);
 
-    if (nbFields != nbFieldsMetadata)
+    if (nbFields != targetVariable->nbValues)
     {
         return false; // Incoherent parameters
     }
@@ -67,26 +73,76 @@ bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetCon
         return true; // Nothing to do since there is no callback to call
     }
 
-    OpcUa_WriteValue* writeValues = SOPC_Calloc(nbFields, sizeof(*writeValues));
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    for (uint16_t i = 0; SOPC_STATUS_OK == status && i < nbFields; i++)
+    {
+        OpcUa_WriteValue* value = &targetVariable->writeValues[i];
+
+        SOPC_Variant* variant = NULL;
+        SOPC_FieldMetaData* fieldMetaData = NULL;
+
+        variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
+        SOPC_ASSERT(NULL != variant);
+        fieldMetaData = SOPC_DataSetReader_Get_FieldMetaData_At(reader, i);
+        SOPC_ASSERT(NULL != fieldMetaData);
+
+        bool isBad = false;
+        bool isCompatibleType = SOPC_PubSubHelpers_IsCompatibleVariant(fieldMetaData, variant, &isBad);
+
+        if (isCompatibleType)
+        {
+            if (isBad)
+            {
+                // Bad status code received instead of value, set it as status and keep value Null (default)
+                value->Value.Status = variant->Value.Status;
+            }
+            else
+            {
+                // Nominal case
+                SOPC_Variant_Move(&value->Value.Value, variant);
+            }
+        }
+        else
+        {
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+    }
+
+    bool res = false;
+    if (SOPC_STATUS_OK == status)
+    {
+        res = targetConfig->callback(targetVariable->writeValues, nbFields);
+    }
+
+    for (uint16_t i = 0; i < nbFields; i++)
+    {
+        OpcUa_WriteValue* value = &targetVariable->writeValues[i];
+        SOPC_Variant_Clear(&value->Value.Value);
+    }
+
+    return res;
+}
+
+/* Return a list of initialized writeValues. In case of error return NULL */
+static OpcUa_WriteValue* createAndInitialize_writeValues(const SOPC_DataSetReader* reader, uint16_t nbValues)
+{
+    OpcUa_WriteValue* writeValues = SOPC_Calloc(nbValues, sizeof(*writeValues));
     if (NULL == writeValues)
     {
-        return false;
+        return NULL;
     }
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    for (uint16_t i = 0; i < nbFields; i++)
+    for (uint16_t i = 0; i < nbValues; i++)
     {
         OpcUa_WriteValue* value = &writeValues[i];
         OpcUa_WriteValue_Initialize(value);
 
-        const SOPC_Variant* variant = NULL;
         SOPC_FieldTarget* targetData = NULL;
         SOPC_FieldMetaData* fieldMetaData = NULL;
 
         if (SOPC_STATUS_OK == status)
         {
-            variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
-            SOPC_ASSERT(NULL != variant);
             fieldMetaData = SOPC_DataSetReader_Get_FieldMetaData_At(reader, i);
             SOPC_ASSERT(NULL != fieldMetaData);
             targetData = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
@@ -113,43 +169,56 @@ bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetCon
                                                      targetIndexRange); // But server will manage it on written data
             }
         }
-
-        // Fill value
-        if (SOPC_STATUS_OK == status)
-        {
-            bool isBad = false;
-            bool isCompatibleType = SOPC_PubSubHelpers_IsCompatibleVariant(fieldMetaData, variant, &isBad);
-
-            if (isCompatibleType)
-            {
-                if (isBad)
-                {
-                    // Bad status code received instead of value, set it as status and keep value Null (default)
-                    value->Value.Status = variant->Value.Status;
-                }
-                else
-                {
-                    // Nominal case
-                    status = SOPC_Variant_Copy(&value->Value.Value, variant);
-                }
-            }
-            else
-            {
-                status = SOPC_STATUS_INVALID_PARAMETERS;
-            }
-        }
     }
-
     if (SOPC_STATUS_OK != status)
     {
-        for (uint16_t i = 0; i < nbFields; i++)
+        for (uint16_t i = 0; i < nbValues; i++)
         {
             OpcUa_WriteValue_Clear(&writeValues[i]);
         }
         SOPC_Free(writeValues);
+        writeValues = NULL;
+    }
+    return writeValues;
+}
 
-        return false;
+SOPC_TargetVariableCtx* SOPC_SubTargetVariable_TargetVariablesCtx_Create(const SOPC_DataSetReader* reader)
+{
+    SOPC_TargetVariableCtx* variableCtx = SOPC_Malloc(sizeof(*variableCtx));
+    if (NULL == variableCtx)
+    {
+        return NULL;
     }
 
-    return targetConfig->callback(writeValues, nbFields);
+    uint16_t nbFields = SOPC_DataSetReader_Nb_FieldMetaData(reader);
+
+    OpcUa_WriteValue* writeValues = createAndInitialize_writeValues(reader, nbFields);
+    if (NULL == writeValues)
+    {
+        SOPC_Free(variableCtx);
+        variableCtx = NULL;
+    }
+    else
+    {
+        variableCtx->writeValues = writeValues;
+        variableCtx->nbValues = nbFields;
+    }
+    return variableCtx;
+}
+
+void SOPC_SubTargetVariable_TargetVariableCtx_Delete(SOPC_TargetVariableCtx** subTargetVariable)
+{
+    if (NULL != subTargetVariable && NULL != *subTargetVariable)
+    {
+        if (NULL != (*subTargetVariable)->writeValues)
+        {
+            for (uint16_t i = 0; i < (*subTargetVariable)->nbValues; i++)
+            {
+                OpcUa_WriteValue_Clear(&(*subTargetVariable)->writeValues[i]);
+            }
+            SOPC_Free((*subTargetVariable)->writeValues);
+        }
+        SOPC_Free(*subTargetVariable);
+        *subTargetVariable = NULL;
+    }
 }

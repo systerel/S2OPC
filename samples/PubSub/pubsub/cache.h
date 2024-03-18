@@ -61,7 +61,7 @@ bool Cache_Set(SOPC_NodeId* nid, SOPC_DataValue* dv);
 SOPC_DataValue* Cache_GetSourceVariables(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
 
 /** The SOPC_SetTargetVariables_Func-compatible implementation that copies the values to the cache */
-bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
+bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 
 /** Prints on console a human-readable representation of a nid and a Datavalue
 

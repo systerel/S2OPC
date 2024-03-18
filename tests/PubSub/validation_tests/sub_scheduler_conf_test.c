@@ -35,7 +35,7 @@ static int32_t stateChanged = 0;
 static int returnCode = 0;
 static int callIndex = 0;
 
-static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
+static bool SOPC_SetTargetVariables_Test(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues)
 {
     SOPC_ASSERT(NULL != nodesToWrite);
 
@@ -47,7 +47,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
             // Only one value in first DSM
             SOPC_ASSERT(1 == nbValues);
 
-            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            const SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_Boolean_Id != variant->BuiltInTypeId)
             {
                 return false;
@@ -66,7 +66,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
             // Two variables in second DSM
             SOPC_ASSERT(2 == nbValues);
 
-            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            const SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_UInt32_Id != variant->BuiltInTypeId)
             {
                 return false;
@@ -101,13 +101,6 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
             returnCode = 0;
         }
     }
-
-    for (int32_t i = 0; i < nbValues; i++)
-    {
-        OpcUa_WriteValue_Clear(&(nodesToWrite[i]));
-    }
-    SOPC_Free(nodesToWrite);
-
     return true;
 }
 

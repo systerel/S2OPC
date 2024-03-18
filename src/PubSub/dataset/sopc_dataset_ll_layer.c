@@ -302,7 +302,17 @@ uint16_t SOPC_Dataset_LL_DataSetMsg_Nb_DataSetField(const SOPC_Dataset_LL_DataSe
     return dsm->dataset_fields_length;
 }
 
-const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(
+SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                                             uint16_t index)
+{
+    if (NULL == dsm || index >= dsm->dataset_fields_length)
+    {
+        return NULL;
+    }
+    return &dsm->dataset_fields[index];
+}
+
+const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(
     const SOPC_Dataset_LL_DataSetMessage* dsm,
     uint16_t index)
 {
@@ -390,13 +400,28 @@ bool SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(SOPC_Dataset_LL_Data
     return true;
 }
 
-const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(const SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t index)
+SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t index)
 {
     if (NULL == dsm)
     {
         return NULL;
     }
-    const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(dsm, index);
+    SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(dsm, index);
+    if (NULL == dsf)
+    {
+        return NULL;
+    }
+    return &dsf->variant;
+}
+
+const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                                   uint16_t index)
+{
+    if (NULL == dsm)
+    {
+        return NULL;
+    }
+    const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(dsm, index);
     if (NULL == dsf)
     {
         return NULL;

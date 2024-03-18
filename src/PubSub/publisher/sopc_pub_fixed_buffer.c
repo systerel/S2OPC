@@ -109,7 +109,7 @@ static void PubFixedBuffer_Initialize_Preencode_Buffer(SOPC_Dataset_LL_NetworkMe
         SOPC_ASSERT(preencode_structure->dataSetFields_len >= nbDsf + index_dsf);
         for (uint16_t j = 0; j < nbDsf; j++)
         {
-            const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(dsm, j);
+            const SOPC_Dataset_LL_DataSetField* dsf = SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(dsm, j);
             SOPC_ASSERT(NULL != dsf);
             SOPC_PubFixedBuffer_DataSetField_Position* dsfPosition =
                 SOPC_PubFixedBuffer_Get_DataSetField_Position_At(preencode_structure, index_dsf);

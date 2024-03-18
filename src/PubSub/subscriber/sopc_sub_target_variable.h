@@ -29,14 +29,17 @@
 typedef struct _SOPC_SubTargetVariableConfig SOPC_SubTargetVariableConfig;
 
 /**
+ * Data transfered by scheduler to user callback
+ */
+typedef struct SOPC_TargetVariableCtx SOPC_TargetVariableCtx;
+
+/**
  * \brief The subscriber scheduler calls this callback cyclically to pass the values received by the subscriber.
- *
- * \note Ownership of the WriteValue array and its elements is transferred to the callback code which must free them.
  *
  * \note This function is called once per configured DataSet, with all the values of the DataSet in a single call.
  *
- * \return   true if processed, false otherwise (array must still be freed) */
-typedef bool SOPC_SetTargetVariables_Func(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
+ * \return   true if processed, false otherwise */
+typedef bool SOPC_SetTargetVariables_Func(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 
 /* If callback NULL, creation succeeds and SetVariables will only check input parameters on call */
 SOPC_SubTargetVariableConfig* SOPC_SubTargetVariableConfig_Create(SOPC_SetTargetVariables_Func* callback);
@@ -45,7 +48,20 @@ void SOPC_SubTargetVariableConfig_Delete(SOPC_SubTargetVariableConfig* targetCon
 
 /* Function used by subscriber scheduler to set target variables */
 bool SOPC_SubTargetVariable_SetVariables(SOPC_SubTargetVariableConfig* targetConfig,
+                                         SOPC_TargetVariableCtx* targetVariable,
                                          const SOPC_DataSetReader* reader,
-                                         const SOPC_Dataset_LL_DataSetMessage* dsm);
+                                         SOPC_Dataset_LL_DataSetMessage* dsm);
+
+/**
+ * @brief Create and Initialize Target Variable context for the user to get target variables
+ *
+ * @param reader DataSetReader of the associated TargetVariable
+ *
+ * @return An initialized target variable context and NULL in case of error
+ */
+SOPC_TargetVariableCtx* SOPC_SubTargetVariable_TargetVariablesCtx_Create(const SOPC_DataSetReader* reader);
+
+/* Delete TargetVariableCtx */
+void SOPC_SubTargetVariable_TargetVariableCtx_Delete(SOPC_TargetVariableCtx** subTargetVariable);
 
 #endif /* SOPC_SUB_TARGET_VARIABLE_H_ */

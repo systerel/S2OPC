@@ -105,7 +105,7 @@ static const char* getenv_default(const char* name, const char* default_value)
 
 /* PubSub callbacks (for the emitter) */
 static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
-static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
+static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 
 /* RTT calculations */
 SOPC_RealTime* g_ts_emissions = NULL;
@@ -344,7 +344,7 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
     return dvs;
 }
 
-static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
+static bool set_target_compute_rtt(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues)
 {
     /* When called by the PubSub library, if the library is publishing the NODEID_COUNTER_RECV,
      * use the new counter value to compute the round trip time */
@@ -362,7 +362,7 @@ static bool set_target_compute_rtt(OpcUa_WriteValue* nodesToWrite, int32_t nbVal
             bool ok = SOPC_RealTime_GetTime(&now);
             if (ok)
             {
-                SOPC_Variant* var = &nodesToWrite[i].Value.Value;
+                const SOPC_Variant* var = &nodesToWrite[i].Value.Value;
                 size_t idx = var->Value.Uint32;
                 if (idx < g_n_samples)
                 {

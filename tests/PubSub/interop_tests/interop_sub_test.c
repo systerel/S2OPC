@@ -300,7 +300,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
         else
         {
             {
-                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, 0);
+                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, 0);
                 if (SOPC_String_Id != variant->BuiltInTypeId ||
                     0 != strcmp("The Ultimate Question of Life, the Universe and Everything",
                                 SOPC_String_GetRawCString(&(variant->Value.String))))
@@ -310,7 +310,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
                 }
             }
             {
-                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, 1);
+                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, 1);
                 if (SOPC_UInt32_Id != variant->BuiltInTypeId || 42 != (variant->Value.Uint32))
                 {
                     printVariant(variant);
@@ -318,7 +318,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
                 }
             }
             {
-                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, 2);
+                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, 2);
                 if (SOPC_Int16_Id != variant->BuiltInTypeId || -314 != (variant->Value.Int16))
                 {
                     printVariant(variant);
@@ -327,7 +327,7 @@ static int TestNetworkMessage(const SOPC_UADP_NetworkMessage* uadp_nm)
             }
 
             {
-                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, 3);
+                const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, 3);
                 if (SOPC_Boolean_Id != variant->BuiltInTypeId || true != (variant->Value.Boolean))
                 {
                     printVariant(variant);
@@ -370,7 +370,8 @@ static void readyToReceive(void* sockContext, Socket sock)
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .checkDataSetMessageSN_Func = NULL,
         .updateTimeout_Func = NULL,
-        .targetConfig = NULL};
+        .targetConfig = NULL,
+        .targetVariable_Func = NULL};
 
     SOPC_ReturnStatus status = SOPC_UDP_Socket_ReceiveFrom(sock, buffer);
     SOPC_NetworkMessage_Error_Code code = SOPC_NetworkMessage_Error_Code_None;

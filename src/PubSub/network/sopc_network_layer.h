@@ -240,15 +240,30 @@ typedef const SOPC_DataSetReader* SOPC_UADP_NetworkMessage_GetReader(const SOPC_
  * \param dsm The received \c DataSetMessage
  * \param targetConfig Configuration of the Subscriber receive event
  * \param reader The matching reader.
+ * \param targetVariable Object containing the data provided to user
  *
  * \return - ::SOPC_STATUS_OK if all variables were written
  *         - ::SOPC_STATUS_ENCODING_ERROR if the received DataSetMessage does not match expected \a reader
  * configuration.
  *         - ::SOPC_STATUS_ENCODING_ERROR if the user-level ::SOPC_SubTargetVariable_SetVariables fails.
  */
-typedef SOPC_ReturnStatus SOPC_UADP_NetworkMessage_SetDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+typedef SOPC_ReturnStatus SOPC_UADP_NetworkMessage_SetDsm(SOPC_Dataset_LL_DataSetMessage* dsm,
                                                           SOPC_SubTargetVariableConfig* targetConfig,
-                                                          const SOPC_DataSetReader* reader);
+                                                          const SOPC_DataSetReader* reader,
+                                                          SOPC_TargetVariableCtx* targetVariable);
+
+/**
+ * @brief A callback to retrieve a ::SOPC_TargetVariableCtx provided to user. The ::SOPC_TargetVariableCtx
+ *      provided to the user cannot be modified. Ideally a ::SOPC_TargetVariableCtx has been created per
+ * dataSetMessage and can be identify by the tuple PublisherId, WriterId
+ *
+ * @param pubId Publisher Id of the networkMessage received
+ * @param writerId  DataSetWriter Id of the received message
+ * @return An initialized and fill ::SOPC_TargetVariableCtx object associated to this dataSetMessage. NULL in case of
+ * error
+ */
+typedef SOPC_TargetVariableCtx* SOPC_UADP_GetTargetVariable_Func(const SOPC_Conf_PublisherId* pubId,
+                                                                 const uint16_t writerId);
 
 typedef struct
 {
@@ -264,6 +279,7 @@ typedef struct
     SOPC_UADP_IsWriterSequenceNumberNewer_Func* checkDataSetMessageSN_Func;
     SOPC_SubTargetVariableConfig* targetConfig;
     SOPC_UADP_UpdateTimeout_Func* updateTimeout_Func;
+    SOPC_UADP_GetTargetVariable_Func* targetVariable_Func;
 } SOPC_UADP_NetworkMessage_Reader_Configuration;
 
 /**

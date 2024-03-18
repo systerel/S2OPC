@@ -33,14 +33,17 @@
  * \param config : configuration to provide to the target module which consumes the decoded data
  * \param securityCBck : function to retrieve security information needed to decrypt Payload and check signature
  * \param updateTimeoutCBck : callback to update timeout of a dataSetMessage well decoded
- * \param snCBck : callback to check if DSM sequence number received is newer. Can be NULL then sequence number will not
- * be checked.
+ * \param targetVariableCBck : callback to retrieve ::SOPC_TargetVariableCtx of a dataSetMessage well decoded, can be
+ * NULL.
+ * \param snCBck : callback to check if DSM sequence number received is newer. Can be NULL then sequence number
+ * will not be checked.
  */
 SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection* connection,
                                                      SOPC_Buffer* buffer,
                                                      SOPC_SubTargetVariableConfig* config,
                                                      SOPC_UADP_GetSecurity_Func securityCBck,
                                                      SOPC_UADP_UpdateTimeout_Func updateTimeoutCBck,
+                                                     SOPC_UADP_GetTargetVariable_Func targetVariableCBck,
                                                      SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck);
 
 /**

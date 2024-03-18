@@ -399,7 +399,7 @@ SOPC_DataValue* Cache_GetSourceVariables(const OpcUa_ReadValueId* nodesToRead, c
 }
 
 /* nodesToWrite shall be freed by the callee */
-bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
+bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues)
 {
     SOPC_ASSERT(NULL != nodesToWrite && nbValues > 0);
     SOPC_ASSERT(INT32_MAX < SIZE_MAX || nbValues <= SIZE_MAX);
@@ -409,24 +409,21 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
     for (int32_t i = 0; ok && i < nbValues; ++i)
     {
         /* Note: the cache frees both the key and the value, so we have to give it new ones */
-        OpcUa_WriteValue* wv = &nodesToWrite[i];
-        SOPC_NodeId* nid = &wv->NodeId;
-        SOPC_DataValue* dv = &wv->Value;
+        const OpcUa_WriteValue* wv = &nodesToWrite[i];
+        const SOPC_NodeId* nid = &wv->NodeId;
+        const SOPC_DataValue* dv = &wv->Value;
 
         /* IndexRange is not supported in this cache and should be empty */
         SOPC_ASSERT(wv->IndexRange.Length <= 0 && "IndexRange not supported");
 
-        /* Divert the NodeId and the DataValue (avoid a complete copy) from the OpcUa_WriteValue and give them to our
-         * dict */
+        /* Copy the NodeId and the DataValue from the OpcUa_WriteValue and give them to our dict */
         SOPC_NodeId* key = SOPC_Malloc(sizeof(SOPC_NodeId));
         SOPC_DataValue* item = SOPC_Malloc(sizeof(SOPC_DataValue));
         ok &= NULL != key && NULL != item;
         if (ok)
         {
-            *key = *nid;
-            SOPC_NodeId_Initialize(nid);
-            *item = *dv;
-            SOPC_DataValue_Initialize(dv);
+            SOPC_NodeId_Copy(key, nid);
+            SOPC_DataValue_Copy(item, dv);
 
             ok = Cache_Set(key, item);
         }
@@ -435,12 +432,8 @@ bool Cache_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
             SOPC_Free(key);
             SOPC_Free(item);
         }
-
-        /* As we have ownership of the wv, clear it */
-        OpcUa_WriteValue_Clear(wv);
     }
     Cache_Unlock();
-    SOPC_Free(nodesToWrite);
 
     return ok;
 }

@@ -67,13 +67,15 @@ static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* grou
  * \pre Groups & Writer Id must have been checked prior to call.
  * \param dsm The received DataSetMesasge
  * \param uadp_conf The received message configuration
- * \param writerId The received dataset writerId
+ * \param reader DataSetReader associated to this dsm
+ * \param targetVariable ::SOPC_TargetVariableCtx to provide to user
  *
- * \return the dataset reader, or NULL if no matching reader found
+ * \return ::SOPC_STATUS_OK if success, ::SOPC_STATUS_ENCODING otherwise
  */
-static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(SOPC_Dataset_LL_DataSetMessage* dsm,
                                              SOPC_SubTargetVariableConfig* config,
-                                             const SOPC_DataSetReader* reader);
+                                             const SOPC_DataSetReader* reader,
+                                             SOPC_TargetVariableCtx* targetVariable);
 
 const SOPC_UADP_NetworkMessage_Reader_Callbacks SOPC_Reader_NetworkMessage_Default_Readers = {
     .pGetGroup_Func = &SOPC_Sub_GetReaderGroup,
@@ -85,6 +87,7 @@ SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection
                                                      SOPC_SubTargetVariableConfig* config,
                                                      SOPC_UADP_GetSecurity_Func securityCBck,
                                                      SOPC_UADP_UpdateTimeout_Func updateTimeoutCBck,
+                                                     SOPC_UADP_GetTargetVariable_Func targetVariableCBck,
                                                      SOPC_UADP_IsWriterSequenceNumberNewer_Func snCBck)
 {
     SOPC_NetworkMessage_Error_Code errorCode = SOPC_NetworkMessage_Error_Code_None;
@@ -92,6 +95,7 @@ SOPC_NetworkMessage_Error_Code SOPC_Reader_Read_UADP(const SOPC_PubSubConnection
         .pGetSecurity_Func = securityCBck,
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .updateTimeout_Func = updateTimeoutCBck,
+        .targetVariable_Func = targetVariableCBck,
         .checkDataSetMessageSN_Func = snCBck,
         .targetConfig = config};
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;
@@ -179,9 +183,10 @@ static const SOPC_DataSetReader* SOPC_Sub_GetReader(const SOPC_ReaderGroup* grou
     return result;
 }
 
-static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessage* dsm,
+static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(SOPC_Dataset_LL_DataSetMessage* dsm,
                                              SOPC_SubTargetVariableConfig* targetConfig,
-                                             const SOPC_DataSetReader* reader)
+                                             const SOPC_DataSetReader* reader,
+                                             SOPC_TargetVariableCtx* targetVariable)
 {
     SOPC_ASSERT(NULL != dsm && NULL != reader);
     SOPC_ReturnStatus result = SOPC_STATUS_ENCODING_ERROR;
@@ -196,8 +201,8 @@ static SOPC_ReturnStatus SOPC_Sub_ReceiveDsm(const SOPC_Dataset_LL_DataSetMessag
     {
         if (SOPC_Sub_Filter_Reader_FieldMetaData(reader, dsm))
         {
-            bool write_succes =
-                (targetConfig == NULL || SOPC_SubTargetVariable_SetVariables(targetConfig, reader, dsm));
+            bool write_succes = (targetConfig == NULL ||
+                                 SOPC_SubTargetVariable_SetVariables(targetConfig, targetVariable, reader, dsm));
             if (write_succes)
             {
                 result = SOPC_STATUS_OK;
@@ -267,7 +272,7 @@ static bool SOPC_Sub_Filter_Reader_FieldMetaData(const SOPC_DataSetReader* reade
         // Get field config
         SOPC_FieldMetaData* fmd = SOPC_DataSetReader_Get_FieldMetaData_At(reader, i);
         // Get field value in message
-        const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
+        const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, i);
 
         result = SOPC_PubSubHelpers_IsCompatibleVariant(fmd, variant, NULL);
     }

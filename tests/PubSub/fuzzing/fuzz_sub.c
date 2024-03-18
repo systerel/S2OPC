@@ -160,6 +160,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
         .callbacks = SOPC_Reader_NetworkMessage_Default_Readers,
         .checkDataSetMessageSN_Func = NULL,
         .updateTimeout_Func = NULL,
+        .targetVariable_Func = NULL,
         .targetConfig = NULL};
 
     SOPC_UADP_NetworkMessage* uadp_nm = NULL;

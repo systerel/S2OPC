@@ -63,7 +63,7 @@ SOPC_Array* Server_GetConfigurationPaths(void); /* Returns an array of char* */
 void Server_SetSubStatusAsync(SOPC_PubSubState state);
 void Server_SetSubStatusSync(SOPC_PubSubState state);
 
-bool Server_SetTargetVariables(OpcUa_WriteValue* nodesToWrite, int32_t nbValues);
+bool Server_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues);
 SOPC_DataValue* Server_GetSourceVariables(const OpcUa_ReadValueId* lrv, const int32_t nbValues);
 
 #endif /* SERVER_H_ */

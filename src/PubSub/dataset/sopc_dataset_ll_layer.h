@@ -220,11 +220,14 @@ bool SOPC_Dataset_LL_DataSetMsg_Set_DataSetField_Variant_At(SOPC_Dataset_LL_Data
  * Get the variant of a dataset field
  * This variant shall not be removed.
  */
-const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(const SOPC_Dataset_LL_DataSetMessage* dsm,
-                                                              uint16_t index);
-const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(
+const SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(const SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                                   uint16_t index);
+SOPC_Variant* SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(SOPC_Dataset_LL_DataSetMessage* dsm, uint16_t index);
+const SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_ConstDataSetField_At(
     const SOPC_Dataset_LL_DataSetMessage* dsm,
     uint16_t index);
+SOPC_Dataset_LL_DataSetField* SOPC_Dataset_LL_DataSetMsg_Get_DataSetField_At(SOPC_Dataset_LL_DataSetMessage* dsm,
+                                                                             uint16_t index);
 
 const SOPC_Variant* SOPC_Dataset_LL_DataSetField_Get_Variant(const SOPC_Dataset_LL_DataSetField* dsf);
 

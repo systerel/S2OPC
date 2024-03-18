@@ -277,7 +277,7 @@ static SOPC_ReturnStatus Network_DataSetFields_To_UADP(SOPC_Buffer* buffer,
 
     for (uint16_t i = 0; i < length && SOPC_STATUS_OK == status; i++)
     {
-        const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, i);
+        const SOPC_Variant* variant = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, i);
         if (NULL != dataSetField_position)
         {
             status = SOPC_Buffer_GetPosition(buffer, &dataSetField_position[i]);
@@ -748,7 +748,7 @@ SOPC_NetworkMessage_Error_Code SOPC_JSON_NetworkMessage_Encode(SOPC_Dataset_LL_N
             code = checkAndGetErrorCode(status, SOPC_JSON_NetworkMessage_Error_Generate_Unique_VariantName);
             if (SOPC_STATUS_OK == status)
             {
-                const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_Variant_At(dsm, iField);
+                const SOPC_Variant* var = SOPC_Dataset_LL_DataSetMsg_Get_ConstVariant_At(dsm, iField);
                 status = SOPC_JSON_Encode_Variant(*buffer, var, messageId);
                 code = checkAndGetErrorCode(status, SOPC_JSON_NetworkMessage_Error_Variant_Encode);
             }
@@ -1985,14 +1985,41 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
             code = decode_dataSetMessage(dsm, buffer_payload, pubId, size, readerConf);
             status = (SOPC_NetworkMessage_Error_Code_None == code) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
+            const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
+            SOPC_TargetVariableCtx* targetVariable = NULL;
+            // If function to retrieve targetVariable is not set create it dynamically and delete it.
+            bool clearTargetVariable = true;
             if (SOPC_STATUS_OK == status)
             {
-                status = readerConf->callbacks.pSetDsm_Func(dsm, readerConf->targetConfig, reader);
+                const SOPC_DataSet_LL_UadpDataSetMessageContentMask* dsm_conf =
+                    SOPC_Dataset_LL_DataSetMsg_Get_ContentMask(dsm);
+                if (DataSet_LL_MessageType_KeepAlive != dsm_conf->dataSetMessageType)
+                {
+                    if (NULL != readerConf->targetVariable_Func)
+                    {
+                        targetVariable = readerConf->targetVariable_Func(&pubId, writerId);
+                        status = (targetVariable != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+                        code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
+                        clearTargetVariable = false;
+                    }
+                    else
+                    {
+                        targetVariable = SOPC_SubTargetVariable_TargetVariablesCtx_Create(reader);
+                    }
+                }
+            }
+            if (SOPC_STATUS_OK == status)
+            {
+                status = readerConf->callbacks.pSetDsm_Func(dsm, readerConf->targetConfig, reader, targetVariable);
                 code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
             }
             if (SOPC_STATUS_OK == status && NULL != readerConf->updateTimeout_Func)
             {
-                readerConf->updateTimeout_Func(&pubId, SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm));
+                readerConf->updateTimeout_Func(&pubId, writerId);
+            }
+            if (NULL != targetVariable && clearTargetVariable)
+            {
+                SOPC_SubTargetVariable_TargetVariableCtx_Delete(&targetVariable);
             }
         }
         else
