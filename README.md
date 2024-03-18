@@ -1,41 +1,50 @@
 ## S2OPC OPC UA Toolkit
 
 - Safe: IEC61508 and EN50128 integration ready,
-- Secure: ongoing CSPN certification, IEC62443 targeted,
+- Secure: CSPN certification, IEC62443 targeted,
 - Open-source: Apache 2.0 (non contaminating, no copy-left, no paid version),
 - Embedded: multiplatform (Linux, Windows, FreeRTOS, Zephyr), optimized footprint, real-time capable,
 - Industrial support by Systerel: support, training, specific integration and developments, certification support.
 
-For more information about support pricing, please contact us at `s2opc@systerel.fr`
+For more information about support pricing, please contact us at `s2opc@systerel.fr`.
 
-Its demo server is certified by the OPC Foundation (see Certification).
+Please follow us on LinkedIn (https://www.linkedin.com/showcase/safe-secure-opc/).
+
+Its demo server is certified by the OPC Foundation (see OPC UA Certification).
 
 ### S2OPC technical overview
 
 S2OPC OPC UA Toolkit project provides a Client/Server C source code implementation
 including an OPC UA communication stack, B model and C source code
-implementation for a minimal set of services and a cryptographic
-library adaptation for OPC UA needs (using mbedtls).
+implementation for services and a cryptographic
+library adaptation for OPC UA needs (using mbedtls or cyclonecrypto).
 This OPC UA Toolkit project also provides a PubSub C source code implementation,
 it shares some components with Client/Server part (cryptographic services, OPC UA types, etc.).
 
 ### About Systerel
 Systerel has been creating, designing, and implementing innovative solutions for over 20 years in the area
-of real-time and safety-critical systems.
+of real-time and safety-critical systems (see https://www.systerel.fr/).
 
-## Certification
+## CSPN certification
 
-The sample nano server application (toolkit_test_nano_server) created using S2OPC toolkit has been certified by OPC Foundation independent test lab according to the following OPC UA profiles:
-- Nano Embedded Device Server
-- SecurityPolicy - Basic256
-- SecurityPolicy - Basic256Sha256
+S2OPC has been awarded a CSPN certification by ANSSI (see https://cyber.gouv.fr/produits-certifies/s2opc-version-131).
+This certification is equivalent to a BSZ certification by BSI thanks to a mutual recognition agreement (see https://cyber.gouv.fr/sites/default/files/document/bsz_cspn_mutual_recognition_agreement_v1.0_0.pdf).
+
+## OPC UA Certification
+
+The sample server application (toolkit_demo_server) created using S2OPC toolkit has been certified by OPC Foundation independent test lab according to the following OPC UA profiles:
+- Micro Embedded Device 2017 Server Profile
+- Method Server Facet
+- SecurityPolicy – Basic256
+- SecurityPolicy – Basic256Sha256
+- SecurityPolicy – Aes128-Sha256-RsaOaep
+- SecurityPolicy – Aes256-Sha256-RsaPss
 - User Token-Anonymous Facet
-- User Token - User Name
-- Password Server Facet
+- User Token – User Name Password Server Facet
+- User Token – X509 Certificate Server Facet
 
 For details, see:
 - https://opcfoundation.org/products/view/safe-and-secure-opc
-- https://www.s2opc.com/wp-content/uploads/2020/07/comm-systerel-s2opc-certifopc-en-a.pdf
 
 ## S2OPC Client/Server Toolkit features
 
@@ -48,7 +57,7 @@ For details, see:
     - http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256,
     - http://opcfoundation.org/UA/SecurityPolicy#Aes128_Sha256_RsaOaep,
     - http://opcfoundation.org/UA/SecurityPolicy#Aes256_Sha256_RsaPss.
-- UserNameIdentity token password encryption for the available security policies
+- UserNameIdentity token password encryption or X.509 for the available security policies
 
 Client side (e.g.: `samples/ClientServer/demo_client`):
 
@@ -56,8 +65,8 @@ Client side (e.g.: `samples/ClientServer/demo_client`):
 - Activate a session with an anonymous use or user identified by username/password
 - Send a service on session request (read, write, browse, subscribe, etc.)
 - Send a discovery service request (getEndpoints, findServer, registerServer, etc.)
-- Automated client libraries wrapper and LibSub (simplified interface, automated subscription):
-  see `src/ClientServer/frontend/client_wrapper/libs2opc_client_cmds.h` (e.g. `samples/ClientServer/client_wrapper`) for wrapper or `src/ClientServer/frontend/client_wrapper/libs2opc_client.h` for the LibSub
+- Automated client libraries wrapper (simplified interface, automated subscription):
+  see `src/ClientServer/frontend/client_wrapper/libs2opc_client_config.h` and `src/ClientServer/frontend/client_wrapper/libs2opc_new_client.h` (e.g. `samples/ClientServer/client_wrapper`) 
 - Python wrapper PyS2OPC for a client: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
@@ -80,8 +89,8 @@ Server side (e.g.: `samples/ClientServer/demo_server/toolkit_demo_server.c`):
   - Only if NOT compiled with S2OPC_NANO_PROFILE set to 1:
     - Subscription and MonitoredItem services (except TransferSubscriptions and SetTriggering)
   - Only if compiled with S2OPC_NODE_MANAGEMENT set to 1:
-    - AddNodes service (simplified: variable node only, no NodeId generation, simplified checks on ReferenceType/Type definition,
-                                    single node added only without automated generation based on type)
+    - AddNodes service (simplified: variable node only, no NodeId generation, simplified checks on ReferenceType/Type definition, single node added only without automated generation based on type)
+  - Python wrapper PyS2OPC for a server: see  `src/ClientServer/frontend/pys2opc/README.md`
 
 ### Current status
 
