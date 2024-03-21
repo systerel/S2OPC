@@ -54,6 +54,7 @@
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles_lib_itf.h"
 #include "sopc_encodeable.h"
+#include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -1136,13 +1137,13 @@ static SOPC_ReturnStatus createNodeIdFromInput(SOPC_NodeId* pNid, const char* in
     if (SOPC_STATUS_OK != status)
     {
         static const char* prefix = "ns=1;s=";
-        const size_t len2 = strlen(prefix) + len + 1;
-        char* nodeId = (char*) SOPC_Calloc(1, len2);
-        if (NULL != nodeId)
+        char* nodeId = NULL;
+
+        status = SOPC_StrConcat(prefix, input, &nodeId);
+        if (SOPC_STATUS_OK == status)
         {
-            sprintf(nodeId, "%s%s", prefix, input);
             PRINT("Could not find nodeId '%s', trying with '%s'\n", input, nodeId);
-            status = SOPC_NodeId_InitializeFromCString(pNid, nodeId, (int32_t) len2);
+            status = SOPC_NodeId_InitializeFromCString(pNid, nodeId, (int32_t) strlen(nodeId));
             SOPC_Free(nodeId);
         }
     }
