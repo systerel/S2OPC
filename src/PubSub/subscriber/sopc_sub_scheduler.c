@@ -1098,7 +1098,7 @@ static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint
         // Create or restart timeout
         SOPC_RealTime* now = SOPC_RealTime_Create(NULL);
         SOPC_ASSERT(NULL != now);
-        SOPC_RealTime_AddSynchedDuration(now, (uint64_t)(ctx->timeoutInterval * 1000), -1);
+        SOPC_RealTime_AddSynchedDuration(now, ((uint64_t) ctx->timeoutInterval * 1000), -1);
         if (NULL == ctx->timeout)
         {
             ctx->timeout = SOPC_RealTime_Create(now);
