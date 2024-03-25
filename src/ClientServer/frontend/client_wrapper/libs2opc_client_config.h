@@ -70,6 +70,7 @@ typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
  *
  *
  * \return     SOPC_STATUS_OK in case of success,
+ *             SOPC_STATUS_NOK in case of parsing error,
  *             otherwise SOPC_STATUS_INVALID_PARAMETERS if a path is invalid or all paths are NULL or
  *             SOPC_STATUS_INVALID_STATE if the configuration is not possible
  *             (toolkit not initialized, server already started).

@@ -305,24 +305,25 @@ static bool start_connection(struct parse_context_t* ctx, const XML_Char** attrs
 
 static bool end_connection(struct parse_context_t* ctx)
 {
+    bool res = true;
     if (NULL == ctx->currentSecConnConfig->scConfig.reqSecuPolicyUri)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no security policy defined for the connection");
-        return false;
+        res = false;
     }
     if (OpcUa_MessageSecurityMode_Invalid == ctx->currentSecConnConfig->scConfig.msgSecurityMode)
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser, "no security mode defined for the connection");
-        return false;
+        res = false;
     }
-    if (NULL == ctx->currentSecConnConfig->serverCertPath &&
-        (OpcUa_MessageSecurityMode_None != ctx->currentSecConnConfig->scConfig.msgSecurityMode ||
-         OpcUa_UserTokenType_UserName == ctx->currentSecConnConfig->sessionConfig.userTokenType))
+    else if (NULL == ctx->currentSecConnConfig->serverCertPath &&
+             (OpcUa_MessageSecurityMode_None != ctx->currentSecConnConfig->scConfig.msgSecurityMode ||
+              OpcUa_UserTokenType_UserName == ctx->currentSecConnConfig->sessionConfig.userTokenType))
     {
         LOG_XML_ERROR(ctx->helper_ctx.parser,
                       "no server certificate path defined for the connection when security mode is not None or user "
                       "policy is UserName (certificate needed for password encryption)");
-        return false;
+        res = false;
     }
 
     ctx->currentSecConnConfig->scConfig.isClientSc = true;
@@ -331,7 +332,7 @@ static bool end_connection(struct parse_context_t* ctx)
 
     ctx->nbConnections++;
 
-    return true;
+    return res;
 }
 
 static bool SOPC_end_app_certs(struct parse_context_t* ctx)
@@ -429,21 +430,22 @@ static bool start_user_policy(struct parse_context_t* ctx, const XML_Char** attr
         return false;
     }
 
-    if (strcmp(attr_val, "anonymous") == 0)
+    if (SOPC_strcmp_ignore_case(attr_val, "anonymous") == 0)
     {
         ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Anonymous;
     }
-    else if (strcmp(attr_val, "username") == 0)
+    else if (SOPC_strcmp_ignore_case(attr_val, "username") == 0)
     {
         ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_UserName;
     }
-    else if (strcmp(attr_val, "certificate") == 0)
+    else if (SOPC_strcmp_ignore_case(attr_val, "certificate") == 0)
     {
         ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_Certificate;
     }
     else
     {
         LOG_XML_ERRORF(ctx->helper_ctx.parser, "tokenType attribute value %s not supported", attr_val);
+        ctx->currentSecConnConfig->sessionConfig.userTokenType = OpcUa_UserTokenType_SizeOf;
         return false;
     }
 
@@ -956,28 +958,31 @@ bool SOPC_ConfigClient_Parse(FILE* fd, SOPC_Client_Config* clientConfig)
     XML_ParserFree(parser);
     SOPC_Array_Delete(ctx.preferredLocaleIds);
 
+    clientConfig->nbSecureConnections = ctx.nbConnections;
+    clientConfig->nbReverseEndpointURLs = ctx.nbReverseUrls;
+    if (clientConfig->isConfigFromPathsNeeded && NULL != clientConfig->configFromPaths)
+    {
+        clientConfig->configFromPaths->clientCertPath = ctx.clientCertificate;
+        clientConfig->configFromPaths->clientKeyPath = ctx.clientKey;
+        clientConfig->configFromPaths->clientKeyEncrypted = ctx.clientKeyEncrypted;
+        clientConfig->configFromPaths->clientPkiPath = ctx.clientPki;
+    }
+    else if (res == SOPC_STATUS_OK)
+    {
+        SOPC_ASSERT(NULL == ctx.clientCertificate);
+        SOPC_ASSERT(NULL == ctx.clientKey);
+        SOPC_ASSERT(NULL == ctx.clientPki);
+    }
+    clientConfig->clientDescription = ctx.appDesc;
+
     if (res == SOPC_STATUS_OK)
     {
-        clientConfig->nbSecureConnections = ctx.nbConnections;
-        clientConfig->nbReverseEndpointURLs = ctx.nbReverseUrls;
-        if (clientConfig->isConfigFromPathsNeeded && NULL != clientConfig->configFromPaths)
-        {
-            clientConfig->configFromPaths->clientCertPath = ctx.clientCertificate;
-            clientConfig->configFromPaths->clientKeyPath = ctx.clientKey;
-            clientConfig->configFromPaths->clientKeyEncrypted = ctx.clientKeyEncrypted;
-            clientConfig->configFromPaths->clientPkiPath = ctx.clientPki;
-        }
-        else
-        {
-            SOPC_ASSERT(NULL == ctx.clientCertificate);
-            SOPC_ASSERT(NULL == ctx.clientKey);
-            SOPC_ASSERT(NULL == ctx.clientPki);
-        }
-        clientConfig->clientDescription = ctx.appDesc;
         return true;
     }
     else
     {
+        // clear previously allocated context if the parsing was unsuccessful
+        SOPC_ClientConfig_Clear(clientConfig);
         return false;
     }
 }

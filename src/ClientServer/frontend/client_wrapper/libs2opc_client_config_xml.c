@@ -83,5 +83,5 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientCon
     *nbScConfigs = pConfig->clientConfig.nbSecureConnections;
     *scConfigArray = pConfig->clientConfig.secureConnections;
 
-    return SOPC_STATUS_OK;
+    return (res ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 }

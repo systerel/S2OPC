@@ -414,6 +414,26 @@ static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnec
 static SOPC_ReturnStatus SOPC_ClientConfigHelper_CheckConfig(SOPC_Client_Config* cConfig,
                                                              SOPC_SecureConnection_Config* secConnConfig)
 {
+    if (secConnConfig->sessionConfig.userTokenType < OpcUa_UserTokenType_Anonymous ||
+        secConnConfig->sessionConfig.userTokenType > OpcUa_UserTokenType_Certificate)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Connection %s [%" PRIu16 "]: Invalid UserTokenType : %" PRIi32 " ",
+                               secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx,
+                               (int32_t) secConnConfig->sessionConfig.userTokenType);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    if (secConnConfig->scConfig.msgSecurityMode < OpcUa_MessageSecurityMode_None ||
+        secConnConfig->scConfig.msgSecurityMode > OpcUa_MessageSecurityMode_SignAndEncrypt)
+    {
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "Connection %s [%" PRIu16 "]: Invalid MessageSecurityMode : %" PRIi32 " ",
+                               secConnConfig->userDefinedId, secConnConfig->secureConnectionIdx,
+                               (int32_t) secConnConfig->scConfig.msgSecurityMode);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
     bool securityNeeded = false;
     if (secConnConfig->scConfig.msgSecurityMode != OpcUa_MessageSecurityMode_None ||
         OpcUa_UserTokenType_UserName == secConnConfig->sessionConfig.userTokenType)
