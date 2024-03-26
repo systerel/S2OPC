@@ -135,7 +135,6 @@ LOCAL_OPERATIONS
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
-        referenceTypeId : t_NodeId &
         includedSubtypes : BOOL &
         path_index : NAT1 &
         targetName : t_QualifiedName_i &
@@ -176,7 +175,6 @@ LOCAL_OPERATIONS
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
-        referenceTypeId : t_NodeId &
         includedSubtypes : BOOL &
         path_index : NAT1 &
         targetName : t_QualifiedName_i &
@@ -337,7 +335,6 @@ LOCAL_OPERATIONS
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
-        referenceTypeId : t_NodeId &
         includedSubtypes : BOOL
     THEN
         statusCode_operation,
