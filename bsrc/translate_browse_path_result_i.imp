@@ -170,6 +170,9 @@ LOCAL_OPERATIONS
         isBrowseValueContextDefined = FALSE &
         statusCode_init : t_StatusCode_i &
         loop_index : NAT1 &
+        /* Target elements in the BrowsePathResult are computed from a source
+           that is an element of BrowsePathSource */
+        loop_index <= size(BrowsePathSource) &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
