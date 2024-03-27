@@ -335,7 +335,7 @@ static bool compare_publisherId(const SOPC_Conf_PublisherId* pubIdLeft, const SO
 }
 
 // Update the state of a single DSM
-static void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
+static void SOPC_SubScheduler_UpdateDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOPC_PubSubState new)
 {
     SOPC_ASSERT(NULL != ctx);
     if (new != ctx->connectionMode)
@@ -344,6 +344,12 @@ static void SOPC_SubScheduler_SetDsmState(SOPC_SubScheduler_Writer_Ctx* ctx, SOP
         if (NULL != schedulerCtx.pStateCallback)
         {
             schedulerCtx.pStateCallback(&ctx->pubId, ctx->writerId, new);
+        }
+        if (SOPC_PubSubState_Error == new || SOPC_PubSubState_Disabled == new)
+        {
+            // Update dsm context
+            ctx->dataSetMessageSequenceNumberSet = false;
+            ctx->dataSetMessageSequenceNumber = 0;
         }
     }
 }
@@ -373,7 +379,7 @@ static void set_new_state(SOPC_PubSubState new)
     {
         SOPC_SubScheduler_Writer_Ctx* ctx = SOPC_Array_Get_Ptr(schedulerCtx.writerCtx, i);
         SOPC_ASSERT(NULL != ctx);
-        SOPC_SubScheduler_SetDsmState(ctx, dsmState);
+        SOPC_SubScheduler_UpdateDsmState(ctx, dsmState);
     }
 }
 
@@ -930,7 +936,7 @@ static void SOPC_Sub_TimeoutCheck(void* param)
                     SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_PUBSUB,
                                              "# Timeout on Sub (pubId=<NULL>, writerId=%" PRIu16 ")", ctx->writerId);
                 }
-                SOPC_SubScheduler_SetDsmState(ctx, SOPC_PubSubState_Error);
+                SOPC_SubScheduler_UpdateDsmState(ctx, SOPC_PubSubState_Error);
             }
         }
     }
@@ -1107,7 +1113,7 @@ static void SOPC_UpdateDSMTimeout(const SOPC_Conf_PublisherId* pubId, const uint
         {
             SOPC_RealTime_Copy(ctx->timeout, now);
         }
-        SOPC_SubScheduler_SetDsmState(ctx, SOPC_PubSubState_Operational);
+        SOPC_SubScheduler_UpdateDsmState(ctx, SOPC_PubSubState_Operational);
         SOPC_RealTime_Delete(&now);
     }
 }
