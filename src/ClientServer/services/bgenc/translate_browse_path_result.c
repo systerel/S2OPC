@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 25/01/2024 01:07:20
+ Date                 : 27/03/2024 10:00:26
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -150,21 +150,21 @@ void translate_browse_path_result__treat_one_relative_path_element_1(
       while (translate_browse_path_result__l_continue_source == true) {
          translate_browse_path_result_1_it__continue_iter_browsePathIdx(&translate_browse_path_result__l_continue_source,
             &translate_browse_path_result__l_index);
-         translate_browse_path_result__treat_one_relative_path_element_2(translate_browse_path_result__l_translate_statusCode,
-            translate_browse_path_result__l_index,
+         translate_browse_path_result__treat_one_relative_path_element_2(translate_browse_path_result__l_index,
             translate_browse_path_result__browseDirection,
             translate_browse_path_result__referenceTypeId,
             translate_browse_path_result__includedSubtypes,
             translate_browse_path_result__path_index,
             translate_browse_path_result__targetName,
-            translate_browse_path_result__statusCode_operation);
-         translate_browse_path_result__l_translate_statusCode = *translate_browse_path_result__statusCode_operation;
+            &translate_browse_path_result__l_translate_statusCode);
+         if (*translate_browse_path_result__statusCode_operation != constants_statuscodes_bs__e_sc_ok) {
+            *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
+         }
       }
    }
 }
 
 void translate_browse_path_result__treat_one_relative_path_element_2(
-   const constants_statuscodes_bs__t_StatusCode_i translate_browse_path_result__statusCode_init,
    const t_entier4 translate_browse_path_result__loop_index,
    const constants__t_BrowseDirection_i translate_browse_path_result__browseDirection,
    const constants__t_NodeId_i translate_browse_path_result__referenceTypeId,
@@ -174,29 +174,21 @@ void translate_browse_path_result__treat_one_relative_path_element_2(
    constants_statuscodes_bs__t_StatusCode_i * const translate_browse_path_result__statusCode_operation) {
    {
       constants__t_NodeId_i translate_browse_path_result__l_source;
-      constants_statuscodes_bs__t_StatusCode_i translate_browse_path_result__l_translate_statusCode;
       t_entier4 translate_browse_path_result__l_nbReferences;
       
-      *translate_browse_path_result__statusCode_operation = translate_browse_path_result__statusCode_init;
       translate_browse_path_source__get_BrowsePathSource(translate_browse_path_result__loop_index,
          &translate_browse_path_result__l_source);
       translate_browse_path_result__compute_browse_result_from_source(translate_browse_path_result__l_source,
          translate_browse_path_result__browseDirection,
          translate_browse_path_result__referenceTypeId,
          translate_browse_path_result__includedSubtypes,
-         &translate_browse_path_result__l_translate_statusCode,
+         translate_browse_path_result__statusCode_operation,
          &translate_browse_path_result__l_nbReferences);
-      if (translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__e_sc_ok) {
-         *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
-      }
-      else {
+      if (*translate_browse_path_result__statusCode_operation == constants_statuscodes_bs__e_sc_ok) {
          translate_browse_path_result__treat_browse_result_one_source(translate_browse_path_result__path_index,
             translate_browse_path_result__targetName,
             translate_browse_path_result__l_nbReferences,
-            &translate_browse_path_result__l_translate_statusCode);
-         if (*translate_browse_path_result__statusCode_operation != constants_statuscodes_bs__e_sc_ok) {
-            *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
-         }
+            translate_browse_path_result__statusCode_operation);
          browse_treatment__clear_browse_result();
       }
    }

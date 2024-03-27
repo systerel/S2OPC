@@ -164,10 +164,9 @@ LOCAL_OPERATIONS
     END
     ;
 
-    statusCode_operation <-- treat_one_relative_path_element_2(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
+    statusCode_operation <-- treat_one_relative_path_element_2(loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     PRE
         isBrowseValueContextDefined = FALSE &
-        statusCode_init : t_StatusCode_i &
         loop_index : NAT1 &
         /* Target elements in the BrowsePathResult are computed from a source
            that is an element of BrowsePathSource */
@@ -587,13 +586,16 @@ OPERATIONS
         DO
             l_continue_source, l_index <-- continue_iter_browsePathIdx;
 
-            statusCode_operation <--
-                treat_one_relative_path_element_2(l_translate_statusCode,
-                                                  l_index, browseDirection,
+            l_translate_statusCode <--
+                treat_one_relative_path_element_2(l_index, browseDirection,
                                                   referenceTypeId,
                                                   includedSubtypes,
                                                   path_index, targetName);
-            l_translate_statusCode := statusCode_operation
+            /* keep e_sc_ok status code for operation since it succeeded for at least one source */
+            IF statusCode_operation /= e_sc_ok THEN
+                statusCode_operation := l_translate_statusCode
+            END
+
         INVARIANT
             l_index : NAT     &
             l_index <= l_size &
@@ -613,32 +615,21 @@ OPERATIONS
     END
     ;
 
-    statusCode_operation <-- treat_one_relative_path_element_2(statusCode_init, loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
+    statusCode_operation <-- treat_one_relative_path_element_2(loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     VAR
         l_source,
-        l_translate_statusCode,
         l_nbReferences
     IN
-        /* Status code before this operation is called */
-        statusCode_operation := statusCode_init;
-
         l_source <-- get_BrowsePathSource(loop_index);
 
-        l_translate_statusCode, l_nbReferences
+        statusCode_operation, l_nbReferences
         <-- compute_browse_result_from_source(l_source,
                                               browseDirection,
                                               referenceTypeId,
                                               includedSubtypes);
-        ASSERT l_translate_statusCode /= c_StatusCode_indet THEN
-            /* Check browse result status */
-            IF l_translate_statusCode /= e_sc_ok THEN
-                statusCode_operation := l_translate_statusCode
-            ELSE
-                l_translate_statusCode <-- treat_browse_result_one_source(path_index, targetName, l_nbReferences);
-                IF statusCode_operation /= e_sc_ok THEN
-                    statusCode_operation := l_translate_statusCode
-                END /* ELSE keep e_sc_ok status code for operation since it succeeded for at least one source */
-                ;
+        ASSERT statusCode_operation /= c_StatusCode_indet THEN
+            IF statusCode_operation = e_sc_ok THEN
+                statusCode_operation <-- treat_browse_result_one_source(path_index, targetName, l_nbReferences);
                 clear_browse_result
             END
         END
