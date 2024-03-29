@@ -93,7 +93,6 @@ OPERATIONS
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         :(
-
             BrowsePathResult : seq(t_ExpandedNodeId_i) &
             c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
             BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
@@ -111,32 +110,7 @@ OPERATIONS
                 e_sc_bad_nothing_to_do,
                 e_sc_bad_out_of_memory,
                 e_sc_bad_query_too_complex,
-                e_sc_uncertain_reference_out_of_server} &
-
-            ( statusCode_operation : { e_sc_ok, e_sc_uncertain_reference_out_of_server }
-                =>
-                /* all target in BrowsePathResult has browse name equal to TargetName and
-                   there is a relation between this target and at least one source through Reference_TargetNode/RefIndex_Reference */
-                !(target).( target :ran(BrowsePathResult) =>
-                    /* 1. TargetName in relativePathElt is equals to Browse name of target */
-                    RelativePathElt_TargetName(relativePathElt) = a_BrowseName(a_NodeId~(conv_ExpandedNodeId_NodeId(target))) &
-                    /* 2. there is a source which is related to target */
-                    #(source).(source : ran(BrowsePathSource) & card ( { lnode, lind | lnode = a_NodeId~(source) &
-                        lind : 1..Node_RefIndexEnd(a_NodeId~(source)) &
-                        target = Reference_TargetNode(RefIndex_Reference(lnode |-> lind)) &
-                        ( RelativePathElt_ReferenceTypeId(relativePathElt) /= c_NodeId_indet
-                          =>
-                          /* TODO: use isReverse */
-                          RelativePathElt_ReferenceTypeId(relativePathElt) = Reference_ReferenceType(RefIndex_Reference(lnode |-> lind))
-                        ) &
-                        RelativePathElt_IsInverse(relativePathElt) /= Reference_IsForward(RefIndex_Reference(lnode |-> lind))
-                    } ) > 0 )
-                )
-            ) &
-            ( statusCode_operation = e_sc_uncertain_reference_out_of_server
-                =>
-                size(BrowsePathRemainingNodeId) > 0
-            )
+                e_sc_uncertain_reference_out_of_server}
         )
     END
     ;

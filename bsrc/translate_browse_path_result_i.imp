@@ -138,7 +138,20 @@ LOCAL_OPERATIONS
         includedSubtypes : BOOL &
         path_index : NAT1 &
         targetName : t_QualifiedName_i &
-        targetName : t_QualifiedName
+        targetName : t_QualifiedName &
+        /* targetName is the taget name of an relative path element.
+           Other parameters are obtained from the same relative path element. */
+        targetName : ran(RelativePathElt_TargetName) &
+        (RelativePathElt_ReferenceTypeId~[{referenceTypeId}] /\
+            RelativePathElt_TargetName~ [{targetName}] /= {}) &
+        (referenceTypeId = c_NodeId_indet => includedSubtypes = FALSE) &
+        (referenceTypeId /= c_NodeId_indet =>
+            (RelativePathElt_IncludedSubtypes~[{includedSubtypes}] /\
+                RelativePathElt_TargetName~[{targetName}] /= {})) &
+        (browseDirection = e_bd_inverse =>
+            (RelativePathElt_IsInverse~[{TRUE}] /\ RelativePathElt_TargetName~[{targetName}] /= {})) &
+        (browseDirection = e_bd_forward =>
+            (RelativePathElt_IsInverse~[{FALSE}] /\ RelativePathElt_TargetName~[{targetName}] /= {}))
     THEN
         statusCode_operation,
         BrowsePathResult,
@@ -211,7 +224,7 @@ LOCAL_OPERATIONS
     PRE
         path_index : NAT1 &
         nbReferences : NAT &
-        nbReferences : 1..out_BrowseResult_nb_References &
+        nbReferences = out_BrowseResult_nb_References &
         targetName : t_QualifiedName_i &
         targetName : t_QualifiedName &
         isBrowseResultComputed = TRUE
@@ -331,6 +344,8 @@ LOCAL_OPERATIONS
     PRE
         isBrowseValueContextDefined = FALSE &
         source : t_NodeId_i &
+        /* the source is taken from BrowsePathSource */
+        source : ran(BrowsePathSource) &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
