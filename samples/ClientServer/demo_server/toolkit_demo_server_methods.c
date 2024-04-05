@@ -46,9 +46,8 @@ static const SOPC_NodeId TestObject_Counter = {
     .Namespace = 1,
     .Data.String = {sizeof("TestObject_Counter") - 1, 1, (SOPC_Byte*) "TestObject_Counter"}};
 
-static const SOPC_NodeId HasComponent_Type = {SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasComponent};
-static const SOPC_NodeId DataVariable_Type = {SOPC_IdentifierType_Numeric, 0,
-                                              .Data.Numeric = OpcUaId_BaseDataVariableType};
+static const SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
+static const SOPC_NodeId DataVariable_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataVariableType);
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,

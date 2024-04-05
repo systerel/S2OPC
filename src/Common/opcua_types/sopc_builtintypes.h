@@ -855,6 +855,11 @@ SOPC_NodeId* SOPC_NodeId_FromCString(const char* cString, int32_t len);
  */
 SOPC_Dict* SOPC_NodeId_Dict_Create(bool free_keys, SOPC_Dict_Free_Fct value_free);
 
+#define SOPC_NS0_NUMERIC_NODEID(opcUaId)                        \
+    {                                                           \
+        SOPC_IdentifierType_Numeric, 0, .Data.Numeric = opcUaId \
+    }
+
 /**** ExpandedNodeId ****/
 /** \see description in similar function SOPC_Boolean_xxxx */
 void SOPC_ExpandedNodeId_Initialize(SOPC_ExpandedNodeId* expNodeId);

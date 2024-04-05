@@ -423,12 +423,9 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* a
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     OpcUa_ReadRequest* readReq = SOPC_ReadRequest_Create(3, OpcUa_TimestampsToReturn_Neither);
-    const SOPC_NodeId structureDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
-                                       .Data.Numeric = OpcUaId_ComplexNumberType};
-    const SOPC_NodeId enumDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
-                                  .Data.Numeric = OpcUaId_SecurityTokenRequestType};
-    const SOPC_NodeId abstractStructureDTid = {SOPC_IdentifierType_Numeric, OPCUA_NAMESPACE_INDEX,
-                                               .Data.Numeric = OpcUaId_Structure};
+    const SOPC_NodeId structureDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_ComplexNumberType);
+    const SOPC_NodeId enumDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_SecurityTokenRequestType);
+    const SOPC_NodeId abstractStructureDTid = SOPC_NS0_NUMERIC_NODEID(OpcUaId_Structure);
 
     status = SOPC_STATUS_OUT_OF_MEMORY;
     if (NULL != readReq)
