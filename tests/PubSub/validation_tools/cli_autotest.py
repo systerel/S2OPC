@@ -51,7 +51,7 @@ class CLI_Tester(threading.Thread):
         self.waitRe = s
         sleep(t)
         if self.waitRe != None:
-            self.tap.write (f"nok {self.step} - Not found: {line}\n")
+            self.tap.write (f"nok {self.step} - Not found: {self.waitRe}\n")
             raise Exception(f"Expression not found : {self.waitRe}")
     def write(self, s):
         print ("<<< %s"%s)
