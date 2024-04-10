@@ -555,7 +555,8 @@ OPERATIONS
         l_size,
         l_continue,
         l_index,
-        l_expandedNodeId
+        l_expandedNodeId,
+        l_remainingIdx
     IN
         l_size <-- get_BrowsePathRemainingSize;
         l_continue <-- init_iter_browsePathIdx(l_size);
@@ -564,7 +565,7 @@ OPERATIONS
         WHILE l_continue = TRUE
         DO
             l_continue, l_index <-- continue_iter_browsePathIdx;
-            l_expandedNodeId <-- get_BrowsePathResult(l_index);
+            l_expandedNodeId, l_remainingIdx <-- get_BrowsePathRemaining(l_index);
             free_ExpandedNodeId(l_expandedNodeId)
         INVARIANT
             l_index : NAT     &

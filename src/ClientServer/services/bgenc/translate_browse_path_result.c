@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 27/03/2024 10:00:26
+ Date                 : 10/04/2024 09:42:23
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -112,6 +112,7 @@ void translate_browse_path_result__free_BrowsePathRemaining(void) {
       t_bool translate_browse_path_result__l_continue;
       t_entier4 translate_browse_path_result__l_index;
       constants__t_ExpandedNodeId_i translate_browse_path_result__l_expandedNodeId;
+      t_entier4 translate_browse_path_result__l_remainingIdx;
       
       translate_browse_path_result_1__get_BrowsePathRemainingSize(&translate_browse_path_result__l_size);
       translate_browse_path_result_1_it__init_iter_browsePathIdx(translate_browse_path_result__l_size,
@@ -120,8 +121,9 @@ void translate_browse_path_result__free_BrowsePathRemaining(void) {
       while (translate_browse_path_result__l_continue == true) {
          translate_browse_path_result_1_it__continue_iter_browsePathIdx(&translate_browse_path_result__l_continue,
             &translate_browse_path_result__l_index);
-         translate_browse_path_result_1__get_BrowsePathResult(translate_browse_path_result__l_index,
-            &translate_browse_path_result__l_expandedNodeId);
+         translate_browse_path_result_1__get_BrowsePathRemaining(translate_browse_path_result__l_index,
+            &translate_browse_path_result__l_expandedNodeId,
+            &translate_browse_path_result__l_remainingIdx);
          constants__free_ExpandedNodeId(translate_browse_path_result__l_expandedNodeId);
       }
       translate_browse_path_result_1__init_BrowsePathRemaining();
