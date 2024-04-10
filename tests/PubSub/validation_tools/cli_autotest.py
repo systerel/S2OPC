@@ -23,7 +23,7 @@ import re
 from subprocess import Popen, PIPE, STDOUT
 from time import sleep
 import threading 
-
+import tap_logger
 class CLI_Tester(threading.Thread):
     """
     This class starts a process (Process under test). It also starts a thread that captures output (see reader()).
@@ -38,8 +38,7 @@ class CLI_Tester(threading.Thread):
         self.FAILED = []
         self.waitRe=None
         tapName = os.getenv("CK_TAP_LOG_FILE_NAME", default = "cli_self_test.tap")
-        self.tap = open(tapName, "w")
-        self.step = 0
+        self.tap = tap_logger.TapLogger(tapName, verbose=False)
         # Start the process and capture both stdout and stderr into a PIPE
         # "stdbuf -oL" option is used to prevent OS from buffering input in PIPE
         self.proc= Popen( ["stdbuf", "-oL"] + [exeName], stdin=PIPE, stdout=PIPE, stderr=STDOUT, text=True, universal_newlines=True)
@@ -51,26 +50,25 @@ class CLI_Tester(threading.Thread):
         self.waitRe = s
         sleep(t)
         if self.waitRe != None:
-            self.tap.write (f"nok {self.step} - Not found: {self.waitRe}\n")
+            self.tap.add_test(f"Not found: {self.waitRe}", False)
             raise Exception(f"Expression not found : {self.waitRe}")
     def write(self, s):
         print ("<<< %s"%s)
         self.proc.stdin.write(f"{s}\n")
         self.proc.stdin.flush()
-        self.tap.write (f"ok {self.step} - write <{s}>\n")
+        self.tap.add_test(f"write <{s}>", True)
     def sleep(self,t):
         print (f"--- Sleep {t}")
         sleep(t)
-        self.tap.write (f"ok {self.step} - sleep({t})\n")
+        self.tap.add_test(f"sleep({t})", True)
     def readInfoCheck(self, param):
         s,t=param
         print(f"---Wait for {s}")
         self.waitRe = s
         self.write("info")
-        self.step += 1
         sleep(t)
         if self.waitRe != None:
-            self.tap.write (f"nok {self.step} - Not found: {self.waitRe}\n")
+            self.tap.add_test(f"Not found: {self.waitRe}", False)
             raise Exception(f"Expression not found : {self.waitRe}")
     def reader(self):
         """
@@ -93,7 +91,7 @@ class CLI_Tester(threading.Thread):
                             # Result found.
                             line = line.replace("\n","")
                             print("!!! " + line.rstrip())
-                            self.tap.write (f"ok {self.step} - Found {line}\n")
+                            self.tap.add_test(f"Found {line}",True)
                         else:
                             # Still waiting for result
                             print("??? " + line.rstrip())
@@ -116,11 +114,9 @@ class CLI_Tester(threading.Thread):
               PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if 
               'exp' is not found within 'timeout' seconds.
         """
-        self.tap.write(f"1..{len(scenario)}\n")
         stat=None
         for cmd, param in scenario:
-            self.step += 1
-            testName = "STEP %d: %s(%s)"%(self.step, cmd,param)
+            testName = "STEP %d: %s(%s)"%(self.tap.nb_tests, cmd,param)
             stat = self.proc.poll()
             
             if stat is not None:
@@ -136,7 +132,7 @@ class CLI_Tester(threading.Thread):
                 self.FAILED.append(f"{testName} failed")
         if stat == None:
             stat = self.proc.poll()
-        self.tap.flush()
+        self.tap.finalize_report()
         return stat
     
 if __name__=='__main__':
@@ -146,24 +142,24 @@ if __name__=='__main__':
         print(e, file =sys.stderr)
         
     scenario=[("sleep",2), 
-              ("readInfo",(r"Publisher running *: *NO",1.0)),
-              ("readInfo",(r"Subscriber *:.*DISABLED",1.0)),
+              ("readInfo",(r"Publisher running *: *NO",2.0)),
+              ("readInfo",(r"Subscriber *:.*DISABLED",2.0)),
               
               ("write","sub start"), 
-              ("readInfo",(r"Subscriber *:.*OPERATIONAL",1.0)),
+              ("readInfo",(r"Subscriber *:.*OPERATIONAL",2.0)),
               ("sleep",2), 
-              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",2.0)),
               
               ("write","pub start"), 
-              ("readInfo",(r"Publisher running *: *YES",1.0)),
+              ("readInfo",(r"Publisher running *: *YES",2.0)),
               ("sleep",2), 
-              ("readInfo",(r".*Group.*WriterId *= *20.*: *OPERATIONAL",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *OPERATIONAL",2.0)),
               
               ("write","pub stop"), 
               ("sleep",2), 
-              ("readInfo",(r"Subscriber *:.*OPERATIONAL",1.0)),
+              ("readInfo",(r"Subscriber *:.*OPERATIONAL",2.0)),
               ("sleep",2), 
-              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",2.0)),
               
               ("write","quit"),
               ("sleep",2)
