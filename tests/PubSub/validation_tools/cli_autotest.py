@@ -62,6 +62,16 @@ class CLI_Tester(threading.Thread):
         print (f"--- Sleep {t}")
         sleep(t)
         self.tap.write (f"ok {self.step} - sleep({t})\n")
+    def readInfoCheck(self, param):
+        s,t=param
+        print(f"---Wait for {s}")
+        self.waitRe = s
+        self.write("info")
+        self.step += 1
+        sleep(t)
+        if self.waitRe != None:
+            self.tap.write (f"nok {self.step} - Not found: {self.waitRe}\n")
+            raise Exception(f"Expression not found : {self.waitRe}")
     def reader(self):
         """
         This function is run in a dedicated thread and polls the output(stdout & stderr) of process under test.
@@ -102,6 +112,9 @@ class CLI_Tester(threading.Thread):
               - 'read': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in 
               PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if 
               'exp' is not found within 'timeout' seconds
+              - 'readInfo': param is a (exp:re, timeout:int) with: exp= regular expression (the expected output in 
+              PUT output PIPE) and timeout the timeout for reception (in second). An exception is raised if 
+              'exp' is not found within 'timeout' seconds.
         """
         self.tap.write(f"1..{len(scenario)}\n")
         stat=None
@@ -117,6 +130,7 @@ class CLI_Tester(threading.Thread):
                 if cmd == "sleep": cmd = self.sleep
                 if cmd == "write": cmd = self.write
                 if cmd == "read": cmd = self.readCheck
+                if cmd == "readInfo": cmd = self.readInfoCheck
                 cmd(param)
             except:
                 self.FAILED.append(f"{testName} failed")
@@ -132,32 +146,24 @@ if __name__=='__main__':
         print(e, file =sys.stderr)
         
     scenario=[("sleep",2), 
-              ("write","info"), 
-              ("read",(r"Publisher running *: *NO",1.0)),
-              ("write","info"), 
-              ("read",(r"Subscriber *:.*DISABLED",1.0)),
+              ("readInfo",(r"Publisher running *: *NO",1.0)),
+              ("readInfo",(r"Subscriber *:.*DISABLED",1.0)),
               
               ("write","sub start"), 
-              ("write","info"), 
-              ("read",(r"Subscriber *:.*OPERATIONAL",1.0)),
+              ("readInfo",(r"Subscriber *:.*OPERATIONAL",1.0)),
               ("sleep",2), 
-              ("write","info"), 
-              ("read",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
               
               ("write","pub start"), 
-              ("write","info"), 
-              ("read",(r"Publisher running *: *YES",1.0)),
+              ("readInfo",(r"Publisher running *: *YES",1.0)),
               ("sleep",2), 
-              ("write","info"), 
-              ("read",(r".*Group.*WriterId *= *20.*: *OPERATIONAL",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *OPERATIONAL",1.0)),
               
               ("write","pub stop"), 
               ("sleep",2), 
-              ("write","info"), 
-              ("read",(r"Subscriber *:.*OPERATIONAL",1.0)),
+              ("readInfo",(r"Subscriber *:.*OPERATIONAL",1.0)),
               ("sleep",2), 
-              ("write","info"), 
-              ("read",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
+              ("readInfo",(r".*Group.*WriterId *= *20.*: *ERROR",1.0)),
               
               ("write","quit"),
               ("sleep",2)
