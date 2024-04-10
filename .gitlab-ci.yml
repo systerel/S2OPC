@@ -541,6 +541,59 @@ test-uactt:
     - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
       when: on_success
 
+
+# Generate the Software Bill Of Materials according to the conan.lock file.
+generate_sbom:
+  stage: test
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  script: 
+    - python3 -m pip install conan==1.62.0
+    - apt install sqlite3 -y
+    - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
+    - conan user ci_user -r gitlab -p ${CI_JOB_TOKEN}
+    - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:/usr/local/bin
+    - conan lock create conanfile.py -s compiler='gcc' -s compiler.version=12 -s compiler.libcxx=libstdc++
+    - if [ ! -e sbom.json ]; then touch sbom.json; fi
+    - trivy fs --format cyclonedx --output sbom.json --insecure .
+  artifacts:
+    when: on_success
+    expire_in: "1 week"
+    paths:
+      - "sbom.json"
+  rules:
+    - changes:
+        - conanfile.py
+
+# Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
+scan_sbom:
+  stage: test
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  needs: 
+    - job: generate_sbom
+  dependencies:
+    - "generate_sbom"
+  script:
+    - trivy sbom sbom.json --severity HIGH,CRITICAL  --exit-code 1 --insecure --output vulnerabilities_table.txt
+  artifacts:
+    when: on_failure
+    expire_in: "1 month"
+    paths:
+      - "vulnerabilities_table.txt"
+  rules:
+    - changes:
+        - conanfile.py
+    - if: "$SCAN_SBOM != null"
+
+
+#Look for exposed secrets as well as vulnerabilities in the dependencies.
+scan_repository:
+  stage: test
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  script:
+    - trivy --severity HIGH,CRITICAL  --exit-code 1 --insecure repo . --skip-dirs samples #ignore due to the use of PKCS#8 format for keys
+  rules:
+    - if: "$SCAN_SBOM != null"
+
 ###
 # Test others jobs
 ###

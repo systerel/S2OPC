@@ -25,21 +25,18 @@ class CompressorRecipe(ConanFile):
     generators = "CMakeToolchain", "CMakeDeps"
 
     def requirements(self):
-        self.requires("binutils/2.36.1@eloise/binutils") 
+        self.requires("binutils/2.36.1@Systerel+S2OPC/beta") 
         self.requires("expat/2.6.0")
-        self.requires("gcc/11.2.0@eloise/gcc")
+        self.requires("gcc/11.2.0@Systerel+S2OPC/beta") 
         self.requires("make/4.3")
-        self.requires("mbedtls/2.28.7@eloise/mbedtls")
+        self.requires("mbedtls/2.28.7@Systerel+S2OPC/beta") 
         self.requires("paho-mqtt-c/1.3.4") 
-        self.requires("libcheck/0.14.0@eloise/libcheck") 
-        self.requires("libcurl/7.74.0")
+        self.requires("libcheck/0.14.0@Systerel+S2OPC/beta") 
         self.requires("doxygen/1.8.18")
         self.requires("gmp/6.2.1",override=True)
         self.requires("mpfr/4.1.0",override=True)
         self.requires("zlib/1.2.13",override=True)
         self.requires("isl/0.24",override=True)
-        self.requires("openssl/1.1.1t",override=True)
-
-    def build_requirements(self):
-        self.tool_requires("cmake/3.9.4@eloise/cmake") 
+        self.requires("openssl/3.2.0",override=True)
+        self.requires("cmake/3.9.4@Systerel+S2OPC/beta")         
         

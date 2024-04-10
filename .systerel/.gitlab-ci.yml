@@ -448,19 +448,18 @@ test-uactt:
            $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
            $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
            # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
-      when: on_success
-
-# Scan the S2OPC build docker image.
-container_scanning:
-  variables:
-    CS_IMAGE: registry.gitlab.com/systerel/s2opc/build:1.38
+      when: on_success 
 
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:e0697acb81048c809234c4f531509b0dfc005563ee5dfe958892f73bc18e1818
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
   script: 
-    - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+    - python3 -m pip install conan==1.62.0
+    - apt install sqlite3 -y
+    - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
+    - conan user ci_user -r gitlab -p ${CI_JOB_TOKEN}
+    - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:/usr/local/bin
     - conan lock create conanfile.py -s compiler='gcc' -s compiler.version=12 -s compiler.libcxx=libstdc++
     - if [ ! -e sbom.json ]; then touch sbom.json; fi
     - trivy fs --format cyclonedx --output sbom.json --insecure .
@@ -476,13 +475,13 @@ generate_sbom:
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:e0697acb81048c809234c4f531509b0dfc005563ee5dfe958892f73bc18e1818
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
   needs: 
     - job: generate_sbom
   dependencies:
     - "generate_sbom"
   script:
-    - trivy sbom sbom.json
+    - trivy sbom sbom.json --insecure
   rules:
     - changes:
         - conanfile.py
@@ -491,9 +490,11 @@ scan_sbom:
 #Look for exposed secrets as well as vulnerabilities in the dependencies.
 scan_repository:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:e0697acb81048c809234c4f531509b0dfc005563ee5dfe958892f73bc18e1818
+  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
   script:
     - trivy --insecure repo .
+  rules:
+    - if: "$SCAN_SBOM != null"
 
 ###
 # Test others jobs
