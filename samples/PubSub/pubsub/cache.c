@@ -422,8 +422,10 @@ bool Cache_SetTargetVariables(const OpcUa_WriteValue* nodesToWrite, const int32_
         ok &= NULL != key && NULL != item;
         if (ok)
         {
-            SOPC_NodeId_Copy(key, nid);
-            SOPC_DataValue_Copy(item, dv);
+            SOPC_ReturnStatus status = SOPC_NodeId_Copy(key, nid);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
+            status = SOPC_DataValue_Copy(item, dv);
+            SOPC_ASSERT(SOPC_STATUS_OK == status);
 
             ok = Cache_Set(key, item);
         }
