@@ -191,13 +191,15 @@ OPERATIONS
         BrowseContext_MaxNbTargets,
         p_service_StatusCode,
         isBrowseValueContextDefined
-        :(
-                p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
-                (p_service_StatusCode = e_sc_ok =>
-                 BrowseContext_MaxNbTargets = p_maxTargetRef &
-                 isBrowseValueContextDefined = TRUE) &
-                (p_service_StatusCode /= e_sc_ok =>
-                 isBrowseValueContextDefined = FALSE)
+        :(  BrowseContext_MaxNbTargets : NAT &
+            isBrowseValueContextDefined : BOOL &
+
+            p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
+            (p_service_StatusCode = e_sc_ok =>
+                BrowseContext_MaxNbTargets = p_maxTargetRef &
+                isBrowseValueContextDefined = TRUE) &
+            (p_service_StatusCode /= e_sc_ok =>
+                isBrowseValueContextDefined = FALSE)
         )
     END
     ;
