@@ -235,8 +235,13 @@ OPERATIONS
     THEN
         p_serviceStatusCode,
         p_continuationPointId,
-        p_nbReferences
+        p_nbReferences,
+        isBrowseResultAllocated,
+        isBrowseResultComputed
         :(
+          isBrowseResultAllocated : BOOL &
+          isBrowseResultComputed  : BOOL &
+
           p_serviceStatusCode : t_StatusCode_i &
           p_serviceStatusCode : t_StatusCode   &
           p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
