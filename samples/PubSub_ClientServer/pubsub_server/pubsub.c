@@ -125,19 +125,23 @@ static void pubSub_OnFatalError(void* userContext, const char* message)
     Server_PubSubStop_RequestRestart();
 }
 
-static void Server_GapInDsmSnCb(SOPC_Conf_PublisherId pubId, uint16_t writerId, uint16_t prevSN, uint16_t receivedSN)
+static void Server_GapInDsmSnCb(SOPC_Conf_PublisherId pubId,
+                                uint16_t groupId,
+                                uint16_t writerId,
+                                uint16_t prevSN,
+                                uint16_t receivedSN)
 {
     if (SOPC_UInteger_PublisherId == pubId.type)
     {
-        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu16
-               ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-               pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " GroupId =%" PRIu16
+               "  DataSetWriterId=%" PRIu16 ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+               pubId.data.uint, groupId, writerId, prevSN + 1, receivedSN - 1);
     }
     else
     {
-        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s DataSetWriterId=%" PRIu16
-               ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-               SOPC_String_GetRawCString(&pubId.data.string), writerId, prevSN + 1, receivedSN - 1);
+        printf("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s GroupId =%" PRIu16
+               "  DataSetWriterId=%" PRIu16 ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+               SOPC_String_GetRawCString(&pubId.data.string), groupId, writerId, prevSN + 1, receivedSN - 1);
     }
 }
 
@@ -432,9 +436,13 @@ static bool PubSub_SKS_Start(void)
     return sksOK;
 }
 
-static void setSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
+static void setSubStatus(const SOPC_Conf_PublisherId* pubId,
+                         uint16_t groupId,
+                         uint16_t writerId,
+                         SOPC_PubSubState state)
 {
     SOPC_UNUSED_ARG(writerId);
+    SOPC_UNUSED_ARG(groupId);
     // Only consider Global changes.
     if (NULL == pubId)
     {

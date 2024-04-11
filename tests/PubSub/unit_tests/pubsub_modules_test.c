@@ -1220,13 +1220,17 @@ static bool setTargetVariablesCb_ReaderTest_Multi(const OpcUa_WriteValue* nodesT
     return setTargetVariablesCb(nodesToWrite, nbValues, 0);
 }
 
-static SOPC_TargetVariableCtx* getGlobalTargetVariable(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId)
+static SOPC_TargetVariableCtx* getGlobalTargetVariable(const SOPC_Conf_PublisherId* pubId,
+                                                       const uint16_t groupId,
+                                                       const uint16_t writerId)
 {
-    if (NETWORK_MSG_PUBLISHER_ID == pubId->data.uint && writerId == DATASET_MSG_WRITER_ID_BASE)
+    if (NETWORK_MSG_PUBLISHER_ID == pubId->data.uint && NETWORK_MSG_GROUP_ID == groupId &&
+        writerId == DATASET_MSG_WRITER_ID_BASE)
     {
         return gTargetVariable_dsm1;
     }
-    else if (NETWORK_MSG_PUBLISHER_ID == pubId->data.uint && writerId == (DATASET_MSG_WRITER_ID_BASE + 1))
+    else if (NETWORK_MSG_PUBLISHER_ID == pubId->data.uint && NETWORK_MSG_GROUP_ID == groupId &&
+             writerId == (DATASET_MSG_WRITER_ID_BASE + 1))
     {
         return gTargetVariable_dsm2;
     }

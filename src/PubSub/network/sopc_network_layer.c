@@ -1311,6 +1311,7 @@ static SOPC_NetworkMessage_Error_Code decode_dataSetMessage(
     SOPC_Dataset_LL_DataSetMessage* dsm,
     SOPC_Buffer* buffer_payload,
     SOPC_Conf_PublisherId pubId,
+    const uint16_t groupId,
     uint16_t dsmSize,
     const SOPC_UADP_NetworkMessage_Reader_Configuration* readerConf)
 {
@@ -1403,7 +1404,7 @@ static SOPC_NetworkMessage_Error_Code decode_dataSetMessage(
                 if (0 != writerId)
                 {
                     /* If subscriber doesn't meet configuration or is not newer still decode dataSetMessage */
-                    if (readerConf->checkDataSetMessageSN_Func(&pubId, writerId, dsmSN))
+                    if (readerConf->checkDataSetMessageSN_Func(&pubId, groupId, writerId, dsmSN))
                     {
                         SOPC_Dataset_LL_DataSetMsg_Set_SequenceNumber(dsm, dsmSN);
                     }
@@ -1982,7 +1983,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
         {
             SOPC_Conf_PublisherId pubId =
                 Network_Layer_Convert_PublisherId(SOPC_Dataset_LL_NetworkMessage_Get_PublisherId(header));
-            code = decode_dataSetMessage(dsm, buffer_payload, pubId, size, readerConf);
+            code = decode_dataSetMessage(dsm, buffer_payload, pubId, group_id, size, readerConf);
             status = (SOPC_NetworkMessage_Error_Code_None == code) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
             const uint16_t writerId = SOPC_Dataset_LL_DataSetMsg_Get_WriterId(dsm);
@@ -1997,7 +1998,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
                 {
                     if (NULL != readerConf->targetVariable_Func)
                     {
-                        targetVariable = readerConf->targetVariable_Func(&pubId, writerId);
+                        targetVariable = readerConf->targetVariable_Func(&pubId, group_id, writerId);
                         status = (targetVariable != NULL) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
                         code = checkAndGetErrorCode(status, SOPC_UADP_NetworkMessage_Error_Read_BadMetaData);
                         clearTargetVariable = false;
@@ -2015,7 +2016,7 @@ static inline SOPC_NetworkMessage_Error_Code Decode_Message_V1(
             }
             if (SOPC_STATUS_OK == status && NULL != readerConf->updateTimeout_Func)
             {
-                readerConf->updateTimeout_Func(&pubId, writerId);
+                readerConf->updateTimeout_Func(&pubId, group_id, writerId);
             }
             if (NULL != targetVariable && clearTargetVariable)
             {

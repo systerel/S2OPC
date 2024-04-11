@@ -754,6 +754,36 @@ XML_PUBSUB_LOOP_FIXED_SIZE_BAD_DATASET = """<PubSub>
     </connection>
 </PubSub>
 """
+XML_PUBSUB_GROUP_ID_FILTER="""<PubSub>
+    <connection address="opc.udp://232.1.2.100:4840" mode="publisher" publisherId="i=1">
+        <message publishingInterval="200" groupId="1" groupVersion="1" securityMode="none">
+            <dataset writerId="1">
+                <variable nodeId="ns=1;s=PubBool" displayName="pubVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=PubUInt16" displayName="pubVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=PubInt" displayName="pubVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+        <message publishingInterval="200" groupId="2" groupVersion="1" securityMode="none">
+            <dataset writerId="1">
+                <variable nodeId="ns=1;s=PubString" displayName="pubVarString" dataType="String" />
+            </dataset>
+        </message>
+    </connection>
+    <connection address="opc.udp://232.1.2.100:4840" mode="subscriber">
+        <message groupId="1" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="1">
+                <variable nodeId="ns=1;s=SubBool" displayName="subVarBool" dataType="Boolean" />
+                <variable nodeId="ns=1;s=SubUInt16" displayName="subVarUInt16" dataType="UInt16" />
+                <variable nodeId="ns=1;s=SubInt" displayName="subVarInt" dataType="Int64" />
+            </dataset>
+        </message>
+        <message groupId="2" publishingInterval="200" groupVersion="1" publisherId="i=1" securityMode="none">
+            <dataset writerId="1">
+                <variable nodeId="ns=1;s=SubString" displayName="subVarString" dataType="String" />
+            </dataset>
+        </message>
+    </connection>
+</PubSub>"""
 
 def waitForEvent(res_fcn, maxWait_s=2.0, period_s=0.05):
     """
@@ -1328,6 +1358,31 @@ def testPubSubDynamicConf(logger):
 
         waitForEvent(lambda: 3 == pubsubserver.getValue(NID_STATUS))
 
+        pubsubserver.stop()
+        helpTestStopStart(pubsubserver, False, logger)
+
+        # TC 32 : Test Writer Group Id filtering
+        logger.begin_section("TC 32 : Writer Group Id filtering")
+        # Init Publisher variables
+        helpTestSetValue(pubsubserver, NID_PUB_BOOL, False, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_UINT16, 8500, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_INT, -300, logger)
+        helpTestSetValue(pubsubserver, NID_PUB_STRING, "Test from Publisher", logger)
+
+        # Init Subscriber variables
+        helpTestSetValue(pubsubserver, NID_SUB_BOOL, True, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_UINT16, 500, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_INT, 100, logger)
+        helpTestSetValue(pubsubserver, NID_SUB_STRING, "Test not set", logger)
+
+        helpConfigurationChangeAndStart(pubsubserver, XML_PUBSUB_GROUP_ID_FILTER, logger, possibleFail=False)
+
+        waitForEvent(lSubBoolIsFalse)
+
+        logger.add_test('Subscriber bool is changed', False == pubsubserver.getValue(NID_SUB_BOOL))
+        logger.add_test('Subscriber uint16 is changed', 8500 == pubsubserver.getValue(NID_SUB_UINT16))
+        logger.add_test('Subscriber int is changed', -300 == pubsubserver.getValue(NID_SUB_INT))
+        logger.add_test('Subscriber string is changed', "Test from Publisher" == pubsubserver.getValue(NID_SUB_STRING))
         pubsubserver.stop()
         helpTestStopStart(pubsubserver, False, logger)
 

@@ -34,23 +34,27 @@ typedef enum SOPC_PubSubState
 
 /* Notification of DSM state change
  * \param pubId    the publisher Id of changed DSM. NULL for a global state change.
+ * \param groupId  the writer group Id of the changed DSM. 0 for a global state change.
  * \param writerId the writer Id of changed DSM. 0 for a global state change.
  * \param state    the new DSM subscriber state
  *  */
 typedef void SOPC_SubscriberStateChanged_Func(const SOPC_Conf_PublisherId* pubId,
+                                              uint16_t groupId,
                                               uint16_t writerId,
                                               SOPC_PubSubState state);
 
 /**
  * @brief Callback to notify gaps in received DataSetMessage sequence number.
- * DataSetMessage is identified by tuple [pubId,writerId] describe below.
+ * DataSetMessage is identified by tuple [pubId, groupId, writerId] describe below.
  *
  * @param pubId Publisher Id of the networkMessage
+ * @param groupId WriterGroupId to filter dataSetMessage
  * @param writerId dataSetWriterId to filter dataSetMessage
  * @param prevSN previous DataSetMessage sequence number received
  * @param receivedSN current DataSetMessage sequence number received
  */
 typedef void SOPC_SubscriberDataSetMessageSNGap_Func(SOPC_Conf_PublisherId pubId,
+                                                     uint16_t groupId,
                                                      uint16_t writerId,
                                                      uint16_t prevSN,
                                                      uint16_t receivedSN);

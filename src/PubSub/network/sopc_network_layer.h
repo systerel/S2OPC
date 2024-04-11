@@ -118,12 +118,14 @@ typedef struct SOPC_UADP_Network_Message
 /** \brief Function used to check if a DataSetMessage sequence number is newer for the identified DataSetWriter
  *
  * \param pubId       the publisher id associated to the DataSetWriter
+ * \param groupId     the WriterGroupId
  * \param writerId    the DataSetWriter id
  * \param receivedSN  the dataset message sequence number
  *
  * \return True if \a receivedSn is newer (valid) for this dataSetWriter. False otherwise
  */
 typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_PublisherId* pubId,
+                                                        const uint16_t groupId,
                                                         const uint16_t writerId,
                                                         const uint16_t receivedSN);
 
@@ -132,9 +134,12 @@ typedef bool SOPC_UADP_IsWriterSequenceNumberNewer_Func(const SOPC_Conf_Publishe
  * process was succesfull
  *
  * @param pubId the publisher id associated to the DataSetWriter
+ * @param groupId the WriterGroupId
  * @param writerId the DataSetWriter id
  */
-typedef void SOPC_UADP_UpdateTimeout_Func(const SOPC_Conf_PublisherId* pubId, const uint16_t writerId);
+typedef void SOPC_UADP_UpdateTimeout_Func(const SOPC_Conf_PublisherId* pubId,
+                                          const uint16_t groupId,
+                                          const uint16_t writerId);
 
 /**
  * @brief check if received sequence number is newer than processsed sequence number following part 14 rules
@@ -258,11 +263,13 @@ typedef SOPC_ReturnStatus SOPC_UADP_NetworkMessage_SetDsm(SOPC_Dataset_LL_DataSe
  * dataSetMessage and can be identify by the tuple PublisherId, WriterId
  *
  * @param pubId Publisher Id of the networkMessage received
+ * @param groupId WriterGroup Id of the received message
  * @param writerId  DataSetWriter Id of the received message
  * @return An initialized and fill ::SOPC_TargetVariableCtx object associated to this dataSetMessage. NULL in case of
  * error
  */
 typedef SOPC_TargetVariableCtx* SOPC_UADP_GetTargetVariable_Func(const SOPC_Conf_PublisherId* pubId,
+                                                                 const uint16_t groupId,
                                                                  const uint16_t writerId);
 
 typedef struct

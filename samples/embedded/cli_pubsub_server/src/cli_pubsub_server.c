@@ -185,6 +185,7 @@ static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"
 typedef struct WriterIdState
 {
     uint16_t writerId;
+    uint16_t groupId;
     SOPC_PubSubState state;
 } WriterIdState;
 static WriterIdState writerIdStates[NB_MAX_SUB_WRITERS] = {0};
@@ -207,12 +208,12 @@ static const char* subStateToString(SOPC_PubSubState state)
     }
 }
 /***************************************************/
-static const char* subWriterIdStateToString(uint16_t writerId)
+static const char* subWriterIdStateToString(uint16_t groupId, uint16_t writerId)
 {
     SOPC_PubSubState state = SOPC_PubSubState_Error;
     for (int i = 0; i < NB_MAX_SUB_WRITERS; i++)
     {
-        if (writerIdStates[i].writerId == writerId)
+        if (writerIdStates[i].writerId == writerId && writerIdStates[i].groupId == groupId)
         {
             state = writerIdStates[i].state;
         }
@@ -947,12 +948,14 @@ static int cmd_demo_info(WordList* pList)
                 for (uint16_t iReader = 0; iReader < nbReader; iReader++)
                 {
                     SOPC_ReaderGroup* group = SOPC_PubSubConnection_Get_ReaderGroup_At(cnx, iReader);
+                    uint16_t groupId = SOPC_ReaderGroup_Get_GroupId(group);
                     uint8_t nbDsm = SOPC_ReaderGroup_Nb_DataSetReader(group);
                     for (uint8_t iDsm = 0; iDsm < nbDsm; iDsm++)
                     {
                         SOPC_DataSetReader* reader = SOPC_ReaderGroup_Get_DataSetReader_At(group, iDsm);
                         uint16_t writerId = SOPC_DataSetReader_Get_DataSetWriterId(reader);
-                        PRINT(" -> Group (WriterId= %" PRIu16 ") : %s\n", writerId, subWriterIdStateToString(writerId));
+                        PRINT(" -> GroupId= %" PRIu16 " (WriterId= %" PRIu16 ") : %s\n", groupId, writerId,
+                              subWriterIdStateToString(groupId, writerId));
                     }
                 }
             }
@@ -1045,7 +1048,10 @@ static int cmd_demo_pub(WordList* pList)
 }
 
 /***************************************************/
-static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerId, SOPC_PubSubState state)
+static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId,
+                            uint16_t groupId,
+                            uint16_t writerId,
+                            SOPC_PubSubState state)
 {
     if (pubId == NULL)
     {
@@ -1057,11 +1063,11 @@ static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerI
         int freeIndex = -1;
         for (int i = 0; i < NB_MAX_SUB_WRITERS; i++)
         {
-            if (freeIndex == -1 && writerIdStates[i].writerId == 0)
+            if (freeIndex == -1 && writerIdStates[i].writerId == 0 && writerIdStates[i].groupId == 0)
             {
                 freeIndex = i;
             }
-            if (writerIdStates[i].writerId == writerId)
+            if (writerIdStates[i].writerId == writerId && writerIdStates[i].groupId == groupId)
             {
                 writerIdStates[i].state = state;
                 freeIndex = -2;
@@ -1071,28 +1077,30 @@ static void cb_SetSubStatus(const SOPC_Conf_PublisherId* pubId, uint16_t writerI
         {
             writerIdStates[freeIndex].state = state;
             writerIdStates[freeIndex].writerId = writerId;
+            writerIdStates[freeIndex].groupId = groupId;
         }
-        PRINT("New Sub state for WriterId %d: %d\n", (int) writerId, (int) state);
+        PRINT("New Sub state for GroupId %d WriterId %d: %d\n", (int) groupId, (int) writerId, (int) state);
     }
 }
 
 /***************************************************/
 static void cb_ReceiveGapDsmSequenceNumber(SOPC_Conf_PublisherId pubId,
+                                           uint16_t groupId,
                                            uint16_t writerId,
                                            uint16_t prevSN,
                                            uint16_t receivedSN)
 {
     if (SOPC_UInteger_PublisherId == pubId.type)
     {
-        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " DataSetWriterId=%" PRIu16
-              ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-              pubId.data.uint, writerId, prevSN + 1, receivedSN - 1);
+        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%" PRIu64 " GroupId =%" PRIu16
+              " DataSetWriterId=%" PRIu16 ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+              pubId.data.uint, groupId, writerId, prevSN + 1, receivedSN - 1);
     }
     else
     {
-        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s DataSetWriterId=%" PRIu16
-              ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
-              SOPC_String_GetRawCString(&pubId.data.string), writerId, prevSN + 1, receivedSN - 1);
+        PRINT("Gap detected in sequence numbers of DataSetMessage for PublisherId=%s GroupId =%" PRIu16
+              " DataSetWriterId=%" PRIu16 ", missing SNs: [%" PRIu16 ", %" PRIu16 "]\n",
+              SOPC_String_GetRawCString(&pubId.data.string), groupId, writerId, prevSN + 1, receivedSN - 1);
     }
 }
 
