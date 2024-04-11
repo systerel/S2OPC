@@ -107,7 +107,8 @@ DEFINITIONS
 
     d_inv_out_status ==
         isBrowseResultComputed             : BOOL &
-        isBrowseResultAllocated            : BOOL
+        isBrowseResultAllocated            : BOOL &
+        (isBrowseResultComputed = TRUE => isBrowseResultAllocated = TRUE)
     ;
 
     d_init_in ==
