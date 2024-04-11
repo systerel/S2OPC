@@ -37,6 +37,7 @@ DEFINITIONS
     d_var_browse ==
         BrowseContext_MaxNbTargets,
         isBrowseValueContextDefined,
+        isBrowseResultAllocated,
         isBrowseResultComputed
         ;
 
@@ -48,14 +49,16 @@ DEFINITIONS
 
     d_inv_browse ==
         BrowseContext_MaxNbTargets : NAT &
-        isBrowseValueContextDefined   : BOOL &
-        isBrowseResultComputed        : BOOL
+        isBrowseValueContextDefined : BOOL &
+        isBrowseResultAllocated     : BOOL &
+        isBrowseResultComputed      : BOOL
         ;
 
     d_init_browse ==
         d_var_browse:(
             BrowseContext_MaxNbTargets = 0 &
             isBrowseValueContextDefined = FALSE &
+            isBrowseResultAllocated     = FALSE &
             isBrowseResultComputed      = FALSE
         )
 
@@ -227,6 +230,7 @@ OPERATIONS
     p_serviceStatusCode, p_continuationPointId, p_nbReferences <-- compute_browse_result =
     PRE
         isBrowseValueContextDefined = TRUE &
+        isBrowseResultAllocated = FALSE &
         isBrowseResultComputed = FALSE
     THEN
         p_serviceStatusCode,
@@ -277,11 +281,17 @@ OPERATIONS
         isBrowseResultComputed = TRUE
     THEN
         isBrowseResultComputed,
-        p_nb_references
+        isBrowseResultAllocated,
+        p_nb_references,
+        p_browseResult
         :(  isBrowseResultComputed = FALSE &
+            isBrowseResultAllocated = FALSE &
+
             p_nb_references : NAT &
-            p_nb_references <= k_n_BrowseTarget_max) ||
-        p_browseResult :: t_BrowseResultReferences_i
+            p_nb_references <= k_n_BrowseTarget_max &
+
+            p_browseResult : t_BrowseResultReferences_i
+        )
     END
 
 END
