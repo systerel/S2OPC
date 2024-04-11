@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "libs2opc_server.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
@@ -48,6 +49,11 @@ static const SOPC_NodeId TestObject_Counter = {
 
 static const SOPC_NodeId HasComponent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_HasComponent);
 static const SOPC_NodeId DataVariable_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseDataVariableType);
+
+#ifdef S2OPC_EVENT_MANAGEMENT
+static const SOPC_NodeId BaseEvent_Type = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
+static const SOPC_NodeId Null_Type = SOPC_NS0_NUMERIC_NODEID(0);
+#endif
 
 SOPC_StatusCode SOPC_Method_Func_IncCounter(const SOPC_CallContext* callContextPtr,
                                             const SOPC_NodeId* objectId,
@@ -384,6 +390,239 @@ SOPC_StatusCode SOPC_Method_Func_AddVariable(const SOPC_CallContext* callContext
     return sc;
 }
 
+#ifdef S2OPC_EVENT_MANAGEMENT
+
+static void forEachEventVar(const char* qnPath,
+                            SOPC_Variant* var,
+                            const SOPC_NodeId* dataType,
+                            int32_t valueRank,
+                            uintptr_t user_data)
+{
+    SOPC_UNUSED_ARG(user_data);
+    SOPC_UNUSED_ARG(qnPath);
+    if (SOPC_Null_Id == var->BuiltInTypeId && valueRank < 0 && OPCUA_NAMESPACE_INDEX == dataType->Namespace &&
+        SOPC_IdentifierType_Numeric == dataType->IdentifierType && dataType->Data.Numeric <= SOPC_LocalizedText_Id &&
+        dataType->Data.Numeric > SOPC_Null_Id)
+    {
+        bool res = true;
+        SOPC_ReturnStatus status = SOPC_STATUS_OK;
+        switch (dataType->Data.Numeric)
+        {
+        case SOPC_Boolean_Id:
+            var->Value.Boolean = true;
+            break;
+        case SOPC_SByte_Id:
+            var->Value.Sbyte = INT8_MAX;
+            break;
+        case SOPC_Byte_Id:
+            var->Value.Byte = UINT8_MAX;
+            break;
+        case SOPC_Int16_Id:
+            var->Value.Int16 = INT16_MAX;
+            break;
+        case SOPC_UInt16_Id:
+            var->Value.Uint16 = UINT16_MAX;
+            break;
+        case SOPC_Int32_Id:
+            var->Value.Int32 = INT32_MAX;
+            break;
+        case SOPC_UInt32_Id:
+            var->Value.Uint32 = UINT32_MAX;
+            break;
+        case SOPC_Int64_Id:
+            var->Value.Int64 = INT64_MAX;
+            break;
+        case SOPC_UInt64_Id:
+            var->Value.Uint64 = UINT64_MAX;
+            break;
+        case SOPC_Float_Id:
+            var->Value.Floatv = (float) 3.14;
+            break;
+        case SOPC_Double_Id:
+            var->Value.Doublev = 2.0 / 3.0;
+            break;
+        case SOPC_String_Id:
+            status = SOPC_String_AttachFromCstring(&var->Value.String, "An event string variable content !");
+            res = (SOPC_STATUS_OK == status);
+            break;
+        case SOPC_DateTime_Id:
+            var->Value.Date = SOPC_Time_GetCurrentTimeUTC();
+            break;
+        case SOPC_Guid_Id:
+            var->Value.Guid = SOPC_Calloc(1, sizeof(*var->Value.Guid));
+            res = false;
+            if (NULL != var->Value.Guid)
+            {
+                status = SOPC_Guid_FromCString(var->Value.Guid, "53f474c1-c9bd-4b5d-803a-767c3a45e4e0",
+                                               strlen("53f474c1-c9bd-4b5d-803a-767c3a45e4e0"));
+                res = (SOPC_STATUS_OK == status);
+            }
+            break;
+        case SOPC_ByteString_Id:
+            status = SOPC_String_AttachFromCstring(&var->Value.String, "An event BYTESTRING variable content !");
+            res = (SOPC_STATUS_OK == status);
+            break;
+        case SOPC_XmlElement_Id:
+            status =
+                SOPC_String_AttachFromCstring(&var->Value.String, "<xml>An event XML Element variable content !</xml>");
+            res = (SOPC_STATUS_OK == status);
+            break;
+        case SOPC_NodeId_Id:
+            var->Value.NodeId =
+                SOPC_NodeId_FromCString("ns=42;s=Example of NodeId", (int32_t) strlen("ns=42;s=Example of NodeId"));
+            res = (NULL != var->Value.Guid);
+            break;
+        case SOPC_ExpandedNodeId_Id:
+            var->Value.ExpNodeId = SOPC_Calloc(1, sizeof(*var->Value.ExpNodeId));
+            res = false;
+            if (NULL != var->Value.ExpNodeId)
+            {
+                SOPC_ExpandedNodeId_Initialize(var->Value.ExpNodeId);
+                var->Value.ExpNodeId->NodeId.Namespace = 42;
+                var->Value.ExpNodeId->NodeId.IdentifierType = SOPC_IdentifierType_String;
+                status =
+                    SOPC_String_AttachFromCstring(&var->Value.ExpNodeId->NodeId.Data.String, "Example of ExpNodeId");
+                res = (SOPC_STATUS_OK == status);
+            }
+            break;
+        case SOPC_StatusCode_Id:
+            var->Value.Status = OpcUa_UncertainSimulatedValue;
+            break;
+        case SOPC_QualifiedName_Id:
+            var->Value.Qname = SOPC_Calloc(1, sizeof(*var->Value.Qname));
+            res = false;
+            if (NULL != var->Value.Qname)
+            {
+                status = SOPC_QualifiedName_ParseCString(var->Value.Qname, "42:Example of event QName");
+                res = (SOPC_STATUS_OK == status);
+            }
+            break;
+        case SOPC_LocalizedText_Id:
+            var->Value.LocalizedText = SOPC_Calloc(1, sizeof(*var->Value.LocalizedText));
+            res = false;
+            if (NULL != var->Value.LocalizedText)
+            {
+                SOPC_LocalizedText_Initialize(var->Value.LocalizedText);
+                status =
+                    SOPC_String_AttachFromCstring(&var->Value.LocalizedText->defaultText, "Example of event LText");
+                res = (SOPC_STATUS_OK == status);
+            }
+            break;
+        default:
+            res = false;
+            break;
+        }
+        if (res)
+        {
+            var->BuiltInTypeId = dataType->Data.Numeric;
+        }
+    } // else: variant already set/initialized
+}
+
+SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr,
+                                          const SOPC_NodeId* objectId,
+                                          uint32_t nbInputArgs,
+                                          const SOPC_Variant* inputArgs,
+                                          uint32_t* nbOutputArgs,
+                                          SOPC_Variant** outputArgs,
+                                          void* param)
+{
+    SOPC_UNUSED_ARG(param);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != inputArgs);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    if (4 != nbInputArgs || SOPC_UInt32_Id != inputArgs[0].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[0].ArrayType || SOPC_NodeId_Id != inputArgs[1].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[1].ArrayType || SOPC_UInt32_Id != inputArgs[2].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[2].ArrayType || SOPC_UInt32_Id != inputArgs[3].BuiltInTypeId ||
+        SOPC_VariantArrayType_SingleValue != inputArgs[3].ArrayType)
+    {
+        return OpcUa_BadInvalidArgument;
+    }
+
+    if (!SOPC_NodeId_Equal(&TestObject, objectId))
+    {
+        // Unexpected NodeId to apply method
+        return OpcUa_BadNodeIdInvalid;
+    }
+
+    const SOPC_NodeId* eventTypeId = inputArgs[1].Value.NodeId;
+    bool isNullId = SOPC_NodeId_Equal(&Null_Type, inputArgs[1].Value.NodeId);
+    if (isNullId)
+    {
+        eventTypeId = &BaseEvent_Type;
+    }
+
+    SOPC_Event* eventInst = NULL;
+    SOPC_ReturnStatus status = SOPC_ServerHelper_CreateEvent(eventTypeId, &eventInst);
+    if (SOPC_STATUS_OK != status)
+    {
+        // Accepts only built in types
+        return OpcUa_BadInvalidArgument;
+    }
+
+    SOPC_Event_ForEachVar(eventInst, forEachEventVar, 0);
+
+    SOPC_LocalizedText lt;
+    SOPC_LocalizedText_Initialize(&lt);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_CopyFromCString(&lt.defaultText, "Manually generated event with GenEvent method");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Event_SetMessage(eventInst, &lt);
+    }
+    SOPC_String sourceName;
+    SOPC_String_Initialize(&sourceName);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_String_AttachFromCstring(&sourceName, "GenEvent method");
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Event_SetSourceName(eventInst, &sourceName);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_Event_SetTime(eventInst, SOPC_Time_GetCurrentTimeUTC());
+    }
+
+    uint32_t nbEvents = 1;
+    if (inputArgs[0].Value.Uint32 > 1)
+    {
+        nbEvents = inputArgs[0].Value.Uint32;
+    }
+
+    for (uint32_t i = 1; i <= nbEvents; i++)
+    {
+        SOPC_Event* eventInstCopy = eventInst;
+        if (i != nbEvents)
+        {
+            eventInstCopy = SOPC_Event_CreateCopy(eventInst, true);
+            SOPC_ASSERT(NULL != eventInstCopy);
+        }
+        status = SOPC_ServerHelper_TriggerEvent(&TestObject, eventInstCopy, inputArgs[2].Value.Uint32,
+                                                inputArgs[3].Value.Uint32);
+    }
+
+    SOPC_LocalizedText_Clear(&lt);
+    SOPC_String_Clear(&sourceName);
+
+    if (SOPC_STATUS_OK != status)
+    {
+        return OpcUa_BadUnexpectedError;
+    }
+    return SOPC_GoodGenericStatus;
+}
+#endif
+
 SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
 {
     char* sNodeId;
@@ -481,6 +720,25 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
             status = SOPC_STATUS_NOK;
         }
     }
+
+#ifdef S2OPC_EVENT_MANAGEMENT
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "ns=1;s=GenEventMethod";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_GenEvent;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, "GenEvent", NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+#endif
 
     return status;
 }

@@ -1836,7 +1836,7 @@
   </UAVariable>
   
   <!-- Test Object -->
-  <UAObject NodeId="ns=1;s=TestObject" BrowseName="TestObject" ParentNodeId="i=85">
+  <UAObject NodeId="ns=1;s=TestObject" BrowseName="TestObject" ParentNodeId="i=85" EventNotifier="1">
     <DisplayName>TestObject</DisplayName>
     <Description>TestObject</Description>
     <Description Locale="en">TestObject</Description>
@@ -1846,6 +1846,7 @@
       <Reference ReferenceType="HasComponent">ns=1;s=MethodO</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=MethodI</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=AddVariableMethod</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;s=GenEventMethod</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_HelloNextArg</Reference>
       <Reference ReferenceType="HasComponent">ns=1;s=TestObject_Counter</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=58</Reference>
@@ -2053,6 +2054,89 @@
               <Name>DataType</Name>
               <DataType>
                 <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+      </ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="ns=1;s=GenEventMethod" BrowseName="GenEventMethod" ParentNodeId="ns=1;s=TestObject">
+    <DisplayName>GenEvent</DisplayName>
+    <Description>GenEvent</Description>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;s=GenEventMethod_Input</Reference>
+      <Reference ReferenceType="HasComponent" IsForward="false">ns=1;s=TestObject</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="ns=1;s=GenEventMethod_Input" BrowseName="InputArguments" DataType="i=296" ValueRank="1">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasProperty" IsForward="false">ns=1;s=GenEventMethod</Reference>
+    </References>
+    <Value>
+      <ListOfExtensionObject xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>OptNbEvents</Name>
+              <DataType>
+                <Identifier>i=288</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>OptEventTypeId</Name>
+              <DataType>
+                <Identifier>i=17</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>OptSubscriptionId</Name>
+              <DataType>
+                <Identifier>i=288</Identifier>
+              </DataType>
+              <ValueRank>-1</ValueRank>
+              <ArrayDimensions />
+              <Description p5:nil="true" xmlns:p5="http://www.w3.org/2001/XMLSchema-instance" />
+            </Argument>
+          </Body>
+        </ExtensionObject>
+        <ExtensionObject>
+          <TypeId>
+            <Identifier>i=297</Identifier>
+          </TypeId>
+          <Body>
+            <Argument>
+              <Name>OptMonitoredItemId</Name>
+              <DataType>
+                <Identifier>i=288</Identifier>
               </DataType>
               <ValueRank>-1</ValueRank>
               <ArrayDimensions />
