@@ -448,7 +448,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                 status = SOPC_STATUS_NOK;
                 libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
             }
-            SOPC_ClientInternal_EventCbk(cc->secureConnectionIdx, libsubEvent, status, param,
+            SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
                                          (uintptr_t) serviceReqCtx);
             SOPC_Free((void*) appContext);
         }
@@ -1141,8 +1141,10 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     if (SOPC_STATUS_OK == status)
     {
         pSM = secureConnection->stateMachine;
-        SOPC_ASSERT(!SOPC_StaMac_HasSubscription(pSM));
-
+        status = SOPC_StaMac_HasSubscription(pSM) ? SOPC_STATUS_INVALID_STATE : SOPC_STATUS_OK;
+    }
+    if (SOPC_STATUS_OK == status)
+    {
         status = SOPC_StaMac_NewConfigureNotificationCallback(pSM, SOPC_StaMacNotification_Cbk);
     }
     /* Create the unified context for client helper layer */

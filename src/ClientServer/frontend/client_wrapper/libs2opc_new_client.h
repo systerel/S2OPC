@@ -182,8 +182,12 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Connect(SOPC_SecureConnection_Config* sec
 /**
  * \brief Disconnects the connection established with SOPC_ClientHelperNew_Connect in a blocking way (synchronously).
  *
+ * \warning This function shall not be called if pointed \p secureConnection is currently in use
+ *          for any other operation and shall be prevented to be used for other operation.
+ *          Internal references to \p secureConnection should have been cleared prior to this call.
+ *
  * \param secureConnection  Pointer to the secure connection reference to stop, set to NULL during successful call.
- * *
+ *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the connection is already disconnected
  */

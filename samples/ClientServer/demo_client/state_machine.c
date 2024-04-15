@@ -559,28 +559,30 @@ SOPC_ReturnStatus StateMachine_SendRequest(StateMachine_Machine* pSM, void* requ
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     StateMachine_RequestContext* ctx = SOPC_Calloc(1, sizeof(StateMachine_RequestContext));
-
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL != pSM->pCtxSession || stActivated != pSM->state || ctx == NULL)
     {
         pSM->state = stError;
         SOPC_Free(ctx);
         SOPC_Free(pSM->pCtxRequest);
         pSM->pCtxRequest = NULL;
-        return SOPC_STATUS_NOK;
+        status = SOPC_STATUS_NOK;
     }
+    else
+    {
+        pSM->pCtxSession = ctx;
 
-    pSM->pCtxSession = ctx;
-
-    /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending requests */
-    ++nReqSent;
-    pSM->pCtxRequest->uid = nReqSent;
-    pSM->pCtxRequest->appCtx = appCtx;
-    SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pSM->pCtxRequest);
+        /* Overflow will not cause a problem, as it shall not be possible to have UINTPTR_MAX pending requests */
+        ++nReqSent;
+        pSM->pCtxRequest->uid = nReqSent;
+        pSM->pCtxRequest->appCtx = appCtx;
+        SOPC_ToolkitClient_AsyncSendRequestOnSession(pSM->iSessionID, requestStruct, (uintptr_t) pSM->pCtxRequest);
+    }
 
     mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 bool StateMachine_IsConnectable(StateMachine_Machine* pSM)
