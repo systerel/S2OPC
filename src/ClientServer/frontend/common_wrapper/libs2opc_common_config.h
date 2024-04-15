@@ -52,6 +52,9 @@ typedef enum
  *        and define a custom log configuration.
  *        Call to ::SOPC_CommonHelper_Initialize is required before any other operation.
  *
+ * \note This function and ::SOPC_CommonHelper_Clear function are not thread-safe and shall be called in the same
+ * thread.
+ *
  * \param optLogConfig the custom log configuration or NULL to keep default configuration
  *
  * \result SOPC_STATUS_OK in case of success, otherwise SOPC_STATUS_INVALID_STATE in case of double initialization.
@@ -61,6 +64,9 @@ SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogCon
 /**
  * \brief Clear the S2OPC Client/Server frontend library (stop threads, clear common configuration, etc.)
  *        Call to ::SOPC_CommonHelper_Clear shall be done after any Client/Server wrapper Clear operations.
+ *
+ * \note This function and ::SOPC_CommonHelper_Initialize function are not thread-safe and shall be called in the same
+ * thread.
  */
 void SOPC_CommonHelper_Clear(void);
 

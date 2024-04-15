@@ -42,6 +42,9 @@
 /**
  *  \brief  Initialize the toolkit configuration, libraries and threads
  *
+ * \note This function and ::SOPC_Toolkit_Clear function are not thread-safe and shall be called in the same
+ * thread.
+ *
  *  \param pAppFct  Pointer to applicative code function in charge of toolkit communication events
  *
  *  \return SOPC_STATUS_OK if initialization succeeded,
@@ -66,6 +69,9 @@ SOPC_ReturnStatus SOPC_ToolkitServer_Configured(void);
 
 /**
  *  \brief  Clear the stack configuration
+ *
+ * \note This function and ::SOPC_Toolkit_Initialize function are not thread-safe and shall be called in the same
+ * thread.
  */
 void SOPC_Toolkit_Clear(void);
 

@@ -92,15 +92,20 @@ static bool SOPC_Log_Start(SOPC_Log_Instance* pLogInst)
         SOPC_Log_Instance* actual = (pLogInst->actual == NULL ? pLogInst : pLogInst->actual);
 
         SOPC_Mutex_Lock(&actual->mutex);
-        if ((NULL != actual->pFile) || (NULL != actual->logCallback))
+        // Note: check again the flag to avoid possible concurrent assignment detection by static analysis.
+        //       Nevertheless since caller is logInst creation function, it should never occur.
+        if (!pLogInst->started)
         {
-            pLogInst->started = true;
-            trace_Internal(pLogInst, SOPC_LOG_LEVEL_INFO, true, "LOG START");
-            result = true;
-        }
-        else
-        {
-            SOPC_CONSOLE_PRINTF("Log error: impossible to write in NULL stream.\n");
+            if ((NULL != actual->pFile) || (NULL != actual->logCallback))
+            {
+                pLogInst->started = true;
+                trace_Internal(pLogInst, SOPC_LOG_LEVEL_INFO, true, "LOG START");
+                result = true;
+            }
+            else
+            {
+                SOPC_CONSOLE_PRINTF("Log error: impossible to write in NULL stream.\n");
+            }
         }
         SOPC_Mutex_Unlock(&actual->mutex);
     }

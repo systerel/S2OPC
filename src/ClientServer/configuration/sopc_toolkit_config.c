@@ -100,46 +100,54 @@ SOPC_ReturnStatus SOPC_Toolkit_Initialize(SOPC_ComEvent_Fct* pAppFct)
         {
             SOPC_Mutex_Initialization(&tConfig.mut);
             SOPC_Mutex_Lock(&tConfig.mut);
-            tConfig.initDone = true;
-
-            sopc_appEventCallback = pAppFct;
-
-            // Ensure constants cannot be modified later
-            // Return value is not check as the encoding config could be already set.
-            SOPC_Common_EncodingConstants defEncConst = SOPC_Common_GetDefaultEncodingConstants();
-            bRet = SOPC_Common_SetEncodingConstants(defEncConst);
-            SOPC_Helper_Endianness_Check();
-
-            if (SOPC_STATUS_OK == status)
+            // Note: check again the flag to avoid possible concurrency issue detection by static analysis.
+            //       Nevertheless this function shall never be called concurrently since the mutex is created during
+            //       call
+            if (!tConfig.initDone)
             {
-                memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
-                memset((void*) tConfig.reverseEpConfigs, 0, sizeof(tConfig.reverseEpConfigs));
-                memset(tConfig.serverScConfigs, 0, sizeof(tConfig.serverScConfigs));
-                memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
-                SOPC_App_Initialize();
-                SOPC_EventTimer_Initialize();
-                SOPC_Sockets_Initialize();
-                SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
-                SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
+                tConfig.initDone = true;
 
-                SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+                sopc_appEventCallback = pAppFct;
 
-                /* set log level to INFO for version logging, then restore it */
-                SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
-                SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
-                SOPC_Logger_TraceInfo(
-                    SOPC_LOG_MODULE_CLIENTSERVER, "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                    toolkitBuildInfo.commonBuildInfo.buildBuildDate, toolkitBuildInfo.commonBuildInfo.buildVersion,
-                    toolkitBuildInfo.commonBuildInfo.buildSrcCommit, toolkitBuildInfo.commonBuildInfo.buildDockerId);
-                SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                                      "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
-                                      toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildVersion,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
-                                      toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
-                SOPC_Logger_SetTraceLogLevel(level);
+                // Ensure constants cannot be modified later
+                // Return value is not check as the encoding config could be already set.
+                SOPC_Common_EncodingConstants defEncConst = SOPC_Common_GetDefaultEncodingConstants();
+                bRet = SOPC_Common_SetEncodingConstants(defEncConst);
+                SOPC_Helper_Endianness_Check();
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    memset(tConfig.scConfigs, 0, sizeof(tConfig.scConfigs));
+                    memset((void*) tConfig.reverseEpConfigs, 0, sizeof(tConfig.reverseEpConfigs));
+                    memset(tConfig.serverScConfigs, 0, sizeof(tConfig.serverScConfigs));
+                    memset(tConfig.epConfigs, 0, sizeof(tConfig.epConfigs));
+                    SOPC_App_Initialize();
+                    SOPC_EventTimer_Initialize();
+                    SOPC_Sockets_Initialize();
+                    SOPC_SecureChannels_Initialize(SOPC_Sockets_SetEventHandler);
+                    SOPC_Services_Initialize(SOPC_SecureChannels_SetEventHandler);
+
+                    SOPC_Toolkit_Build_Info toolkitBuildInfo = SOPC_ToolkitConfig_GetBuildInfo();
+
+                    /* set log level to INFO for version logging, then restore it */
+                    SOPC_Log_Level level = SOPC_Logger_GetTraceLogLevel();
+                    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+                    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
+                                          "Common library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                                          toolkitBuildInfo.commonBuildInfo.buildBuildDate,
+                                          toolkitBuildInfo.commonBuildInfo.buildVersion,
+                                          toolkitBuildInfo.commonBuildInfo.buildSrcCommit,
+                                          toolkitBuildInfo.commonBuildInfo.buildDockerId);
+                    SOPC_Logger_TraceInfo(
+                        SOPC_LOG_MODULE_CLIENTSERVER,
+                        "Client/Server toolkit library DATE='%s' VERSION='%s' SIGNATURE='%s' DOCKER='%s'",
+                        toolkitBuildInfo.clientServerBuildInfo.buildBuildDate,
+                        toolkitBuildInfo.clientServerBuildInfo.buildVersion,
+                        toolkitBuildInfo.clientServerBuildInfo.buildSrcCommit,
+                        toolkitBuildInfo.clientServerBuildInfo.buildDockerId);
+                    SOPC_Logger_SetTraceLogLevel(level);
+                }
             }
-
             SOPC_Mutex_Unlock(&tConfig.mut);
         }
     }
@@ -303,19 +311,23 @@ void SOPC_Toolkit_Clear(void)
         SOPC_EventTimer_Clear();
 
         SOPC_Mutex_Lock(&tConfig.mut);
-
-        SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
-        sopc_appEventCallback = NULL;
-        sopc_appAddressSpaceNotificationCallback = NULL;
-        address_space_bs__nodes = NULL;
-        sopc_addressSpace_configured = false;
-        // Reset values to init value
-        tConfig.initDone = false;
-        tConfig.serverConfigLocked = false;
-        tConfig.scConfigIdxMax = 0;
-        tConfig.reverseEpConfigIdxMax = 0;
-        tConfig.serverScLastConfigIdx = 0;
-        tConfig.epConfigIdxMax = 0;
+        // Note: check again the flag to avoid possible concurrency issue detection by static analysis.
+        //       Nevertheless this function shall never be called concurrently since the mutex is destroyed after call.
+        if (tConfig.initDone)
+        {
+            SOPC_Toolkit_ClearServerScConfigs_WithoutLock();
+            sopc_appEventCallback = NULL;
+            sopc_appAddressSpaceNotificationCallback = NULL;
+            address_space_bs__nodes = NULL;
+            sopc_addressSpace_configured = false;
+            // Reset values to init value
+            tConfig.initDone = false;
+            tConfig.serverConfigLocked = false;
+            tConfig.scConfigIdxMax = 0;
+            tConfig.reverseEpConfigIdxMax = 0;
+            tConfig.serverScLastConfigIdx = 0;
+            tConfig.epConfigIdxMax = 0;
+        }
         SOPC_Mutex_Unlock(&tConfig.mut);
         SOPC_Mutex_Clear(&tConfig.mut);
     }
