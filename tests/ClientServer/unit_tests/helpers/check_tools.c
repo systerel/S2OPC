@@ -39,6 +39,7 @@
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encoder.h"
+#include "sopc_event_manager.h"
 #include "sopc_helper_encode.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_helper_string.h"
@@ -4936,6 +4937,62 @@ START_TEST(test_ua_variant_set_range_matrix)
 }
 END_TEST
 
+START_TEST(test_parse_event_qn_path)
+{
+    static const struct
+    {
+        const char sep;
+        const char* input;
+        const int32_t nbElts;
+    } test_data[] = {{'~', "0:EnabledState~0:Id", 2},
+                     {'~', "0:EnabledState~Id", 2},
+                     {'~', "0:EnabledState\\~~0:Id", 2},
+                     {'?', "0:EnabledState?0:Id", 2},
+                     {'\0', NULL, 0}};
+
+    static const char* results[4][2] = {{"0:EnabledState", "0:Id"},
+                                        {"0:EnabledState", "0:Id"},
+                                        {"0:EnabledState~", "0:Id"},
+                                        {"0:EnabledState", "0:Id"}};
+
+    int32_t nbElts = 0;
+    SOPC_QualifiedName* qnPaths = NULL;
+    for (size_t i = 0; test_data[i].input != NULL; ++i)
+    {
+        SOPC_ReturnStatus status =
+            SOPC_EventManagerUtil_cStringPathToQnPath(test_data[i].sep, test_data[i].input, &nbElts, &qnPaths);
+        ck_assert_uint_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(test_data[i].nbElts, nbElts);
+        ck_assert_ptr_nonnull(qnPaths);
+        SOPC_QualifiedName qn;
+        SOPC_QualifiedName_Initialize(&qn);
+        int32_t compare = 0;
+        for (int32_t j = 0; j < nbElts; j++)
+        {
+            status = SOPC_QualifiedName_ParseCString(&qn, results[i][j]);
+            ck_assert_uint_eq(SOPC_STATUS_OK, status);
+            status = SOPC_QualifiedName_Compare(&qn, &qnPaths[j], &compare);
+            ck_assert_uint_eq(SOPC_STATUS_OK, status);
+            ck_assert_int_eq(0, compare);
+            SOPC_QualifiedName_Clear(&qnPaths[j]);
+            SOPC_QualifiedName_Clear(&qn);
+        }
+        SOPC_Free(qnPaths);
+        qnPaths = NULL;
+    }
+
+    SOPC_ReturnStatus status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', test_data[0].input, &nbElts, &qnPaths);
+    ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert_ptr_null(qnPaths);
+    status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', "~0:EnabledState~0:Id~", &nbElts, &qnPaths);
+    ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert_ptr_null(qnPaths);
+    status = SOPC_EventManagerUtil_cStringPathToQnPath('\0', test_data[0].input, &nbElts, &qnPaths);
+    ck_assert_uint_eq(SOPC_STATUS_INVALID_PARAMETERS, status);
+    ck_assert_ptr_null(qnPaths);
+}
+END_TEST
+
 #ifndef _WIN32
 START_TEST(test_get_random)
 {
@@ -4959,7 +5016,8 @@ END_TEST
 Suite* tests_make_suite_tools(void)
 {
     Suite* s;
-    TCase *tc_hexlify, *tc_basetools, *tc_encoder, *tc_ua_types, *tc_buffer, *tc_linkedlist, *tc_async_queue;
+    TCase *tc_hexlify, *tc_basetools, *tc_encoder, *tc_ua_types, *tc_buffer, *tc_linkedlist, *tc_async_queue,
+        *tc_events;
 
     s = suite_create("Tools");
     tc_basetools = tcase_create("String tools");
@@ -5016,6 +5074,10 @@ Suite* tests_make_suite_tools(void)
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_array);
     tcase_add_test(tc_ua_types, test_ua_variant_set_range_matrix);
     suite_add_tcase(s, tc_ua_types);
+
+    tc_events = tcase_create("Events");
+    tcase_add_test(tc_events, test_parse_event_qn_path);
+    suite_add_tcase(s, tc_events);
 
 #ifndef _WIN32
     TCase* tc_get_random = tcase_create("Get Random");

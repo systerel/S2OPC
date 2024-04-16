@@ -125,4 +125,26 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
                                                         const SOPC_QualifiedName* qNamePath,
                                                         char** qnPathStr);
 
+/**
+ * \brief Utility function to parse a C string version of a browse path composed of qualified names
+ *        and separated by '~':
+ *        "<SOPC_QualifiedName_ToCString(qNamePath[0])>~<SOPC_QualifiedName_ToCString(qNamePath[1])>~[...]<SOPC_QualifiedName_ToCString(qNamePath[nbQnPath-1])>"
+ *
+ * \param qnPathSep       The character to use as separator between path elements in \p qnPathStr, '\0' is forbidden
+ * \param qnPathStr       The qualified name path separated by \p qnPathSep separator as a string.
+ *                        E.g. with sep='~' for path qn0=(nsIdx=0,"EnabledState"), qn1=(0,"Id"):
+ *                        "0:EnabledState~0:Id".
+ *                        The escape character '\' might be used to un-specialize separator
+ * \param[out] nbQnPath   Number of qualified names in the browse path contained in \p qNamePath
+ * \param[out] qNamePath  Array of qualified names of length \p qNamePath representing the browse path
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS (invalid path size or NULL input, etc.)
+ *         or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ */
+SOPC_ReturnStatus SOPC_EventManagerUtil_cStringPathToQnPath(char qnPathSep,
+                                                            const char* qnPathStr,
+                                                            int32_t* nbQnPath,
+                                                            SOPC_QualifiedName** qNamePath);
+
 #endif // SOPC_EVENT_MANAGER_H_

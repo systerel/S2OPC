@@ -604,6 +604,110 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
     return status;
 }
 
+SOPC_ReturnStatus SOPC_EventManagerUtil_cStringPathToQnPath(char qnPathSep,
+                                                            const char* qnPathStr,
+                                                            int32_t* nbQnPath,
+                                                            SOPC_QualifiedName** qNamePath)
+{
+    if ('\0' == qnPathSep || NULL == qnPathStr || NULL == nbQnPath || NULL == qNamePath || NULL != *qNamePath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    size_t nbElts = 1;
+    SOPC_QualifiedName* resultPath = NULL;
+    char* pathCopy = NULL;
+    const size_t pathLength = strlen(qnPathStr);
+    if (0 == pathLength)
+    {
+        // Empty path
+        *nbQnPath = 0;
+        return SOPC_STATUS_OK;
+    }
+    // Compute the number of elements if no error occurs
+    for (size_t i = 0; i < pathLength; i++)
+    {
+        if (qnPathSep == qnPathStr[i] && i != 0 && i != pathLength - 1 && qnPathStr[i - 1] != '\\')
+        {
+            // Note: i=0 and i=pathLength cases considered invalid since it means empty element
+            //       and will lead to parsing failure anyway.
+            nbElts++;
+        }
+    }
+    if (nbElts > INT32_MAX)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    // Allocate the result qualified name array
+    resultPath = SOPC_Calloc(nbElts, sizeof(*resultPath));
+    SOPC_ReturnStatus status = (NULL == resultPath ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+
+    // Make a copy of input string to manage removal of escape characters
+    if (SOPC_STATUS_OK == status)
+    {
+        pathCopy = SOPC_strdup(qnPathStr);
+        status = (NULL == pathCopy ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    char* pathEltStart = pathCopy;
+    char* pathEltCurrent = pathCopy;
+    char* pathEltEnd = pathCopy;
+    bool foundEnd = false;
+    size_t eltIdx = 0;
+    while (SOPC_STATUS_OK == status && NULL != pathEltEnd)
+    {
+        if (foundEnd)
+        {
+            // Prepare parsing of next path element
+            pathEltStart = pathEltEnd + 1;
+            pathEltCurrent = pathEltStart;
+            foundEnd = false;
+        }
+        // Search for next separator
+        pathEltEnd = strchr(pathEltCurrent, qnPathSep);
+
+        if (pathEltStart == pathEltEnd)
+        {
+            // Empty element is not allowed
+            status = SOPC_STATUS_INVALID_PARAMETERS;
+        }
+        // End of element: end of full path string reached (NULL) or non-escaped separator
+        else if (NULL == pathEltEnd || *(pathEltEnd - 1) != '\\')
+        {
+            if (NULL != pathEltEnd)
+            {
+                *pathEltEnd = '\0'; // terminate element as a C string for QN parsing
+            }                       // else: end of element is already end of full path string
+            // Parse the qualified name
+            status = SOPC_QualifiedName_ParseCString(&resultPath[eltIdx], pathEltStart);
+            eltIdx++;
+            foundEnd = true;
+        }
+        // escaped character found before the separator => do not consider as separator
+        else
+        {
+            // Remove escape character by shifting characters to the left
+            memmove(pathEltEnd - 1, pathEltEnd, strlen(pathEltEnd) + 1);
+            pathEltCurrent = pathEltEnd;
+        }
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // In case of success the number of elements shall be the
+        SOPC_ASSERT(eltIdx == nbElts);
+        *qNamePath = resultPath;
+        *nbQnPath = (int32_t) nbElts;
+    }
+    else
+    {
+        for (size_t i = 0; i < eltIdx; i++)
+        {
+            SOPC_QualifiedName_Clear(&resultPath[i]);
+        }
+        SOPC_Free(resultPath);
+    }
+    SOPC_Free(pathCopy);
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_Event_SetVariable(SOPC_Event* pEvent,
                                          uint16_t nbQnPath,
                                          SOPC_QualifiedName* qualifiedNamePathArray,
