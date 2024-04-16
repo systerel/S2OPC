@@ -23,6 +23,7 @@
 #include "libs2opc_common_internal.h"
 #include "libs2opc_request_builder.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_assert.h"
 #include "sopc_encodeable.h"
 #include "sopc_macros.h"
@@ -64,6 +65,8 @@
 // Macro used to check if msgPtr is valid and element index is valid in this message
 #define CHECK_ELEMENT_EXISTS(msgPtr, fieldNoOf, index) \
     (NULL != (msgPtr) && ((msgPtr)->fieldNoOf) > 0 && (index) < (size_t)((msgPtr)->fieldNoOf))
+
+static const SOPC_NodeId baseEventType_NodeId = SOPC_NS0_NUMERIC_NODEID(OpcUaId_BaseEventType);
 
 static inline SOPC_AttributeId SOPC_TypeHelperInternal_CheckAttributeId(SOPC_AttributeId attrId)
 {
@@ -1302,6 +1305,232 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigge
     return filterExt;
 }
 
+OpcUa_EventFilter* SOPC_MonitoredItem_CreateEventFilter(size_t noOfSelectClauses, size_t noOfWhereClauseElt)
+{
+    OpcUa_EventFilter* result = NULL;
+    if (noOfSelectClauses <= 0 || noOfSelectClauses > INT32_MAX || noOfWhereClauseElt > INT32_MAX)
+    {
+        return NULL;
+    }
+    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_EventFilter_EncodeableType, (void**) &result);
+    if (SOPC_STATUS_OK == status)
+    {
+        result->SelectClauses = SOPC_Calloc(noOfSelectClauses, sizeof(*result->SelectClauses));
+        if (NULL != result->SelectClauses)
+        {
+            for (size_t i = 0; i < noOfSelectClauses; i++)
+            {
+                OpcUa_SimpleAttributeOperand_Initialize(&result->SelectClauses[i]);
+            }
+            result->NoOfSelectClauses = (int32_t) noOfSelectClauses;
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK == status && noOfWhereClauseElt > 0)
+    {
+        result->WhereClause.Elements = SOPC_Calloc(noOfWhereClauseElt, sizeof(*result->WhereClause.Elements));
+        if (NULL != result->WhereClause.Elements)
+        {
+            for (size_t i = 0; i < noOfWhereClauseElt; i++)
+            {
+                OpcUa_ContentFilterElement_Initialize(&result->WhereClause.Elements[i]);
+            }
+            result->WhereClause.NoOfElements = (int32_t) noOfWhereClauseElt;
+        }
+        else
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        status = SOPC_Encodeable_Delete(&OpcUa_EventFilter_EncodeableType, (void**) &result);
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_Free(result);
+            result = NULL;
+        }
+    }
+    return result;
+}
+
+SOPC_ReturnStatus SOPC_EventFilter_SetOfTypeWhereClause(OpcUa_EventFilter* eventFilter,
+                                                        size_t whereClauseEltIdx,
+                                                        const SOPC_NodeId* typeNodeId)
+{
+    if (NULL == eventFilter || (int64_t) whereClauseEltIdx >= (int64_t) eventFilter->WhereClause.NoOfElements ||
+        NULL == typeNodeId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_ContentFilterElement* element = &eventFilter->WhereClause.Elements[whereClauseEltIdx];
+    OpcUa_LiteralOperand* nodeIdOp = NULL;
+
+    element->FilterOperands = SOPC_Calloc(1, sizeof(*element->FilterOperands));
+    SOPC_ReturnStatus status = (NULL == element->FilterOperands ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    if (SOPC_STATUS_OK == status)
+    {
+        element->NoOfFilterOperands = 1;
+        status = SOPC_Encodeable_CreateExtension(element->FilterOperands, &OpcUa_LiteralOperand_EncodeableType,
+                                                 (void**) &nodeIdOp);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        nodeIdOp->Value.Value.NodeId = SOPC_Calloc(1, sizeof(SOPC_NodeId));
+        status = (NULL == nodeIdOp->Value.Value.NodeId ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        element->FilterOperator = OpcUa_FilterOperator_OfType;
+        nodeIdOp->Value.BuiltInTypeId = SOPC_NodeId_Id;
+        if (typeNodeId != NULL)
+        {
+            status = SOPC_NodeId_Copy(nodeIdOp->Value.Value.NodeId, typeNodeId);
+        }
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_ContentFilterElement_Clear(element);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EventFilter_SetGenericWhereClause(OpcUa_EventFilter* eventFilter,
+                                                         size_t whereClauseEltIdx,
+                                                         OpcUa_ContentFilterElement** filterElt)
+{
+    if (NULL == eventFilter || (int64_t) whereClauseEltIdx >= (int64_t) eventFilter->WhereClause.NoOfElements ||
+        NULL == filterElt || NULL == *filterElt)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    eventFilter->WhereClause.Elements[whereClauseEltIdx] = **filterElt;
+    OpcUa_ContentFilterElement_Initialize(*filterElt);
+    SOPC_Free(*filterElt);
+    *filterElt = NULL;
+
+    return SOPC_STATUS_OK;
+}
+
+SOPC_ReturnStatus SOPC_EventFilter_SetSelectClause(OpcUa_EventFilter* eventFilter,
+                                                   size_t selectClauseIdx,
+                                                   const SOPC_NodeId* typeId,
+                                                   size_t noOfBrowsePath,
+                                                   const SOPC_QualifiedName* browsePaths,
+                                                   SOPC_AttributeId attributeId,
+                                                   const SOPC_String* indexRange)
+{
+    if (NULL == eventFilter || !CHECK_ELEMENT_EXISTS(eventFilter, NoOfSelectClauses, selectClauseIdx) ||
+        0 == noOfBrowsePath || NULL == browsePaths ||
+        SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attributeId))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_SimpleAttributeOperand* selectClause = &eventFilter->SelectClauses[selectClauseIdx];
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    selectClause->AttributeId = attributeId;
+    if (NULL != typeId)
+    {
+        status = SOPC_NodeId_Copy(&selectClause->TypeDefinitionId, typeId);
+    }
+    else
+    {
+        status = SOPC_NodeId_Copy(&selectClause->TypeDefinitionId, &baseEventType_NodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        selectClause->BrowsePath = SOPC_Calloc(noOfBrowsePath, sizeof(*selectClause->BrowsePath));
+        status = (NULL == selectClause->BrowsePath ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        selectClause->NoOfBrowsePath = (int32_t) noOfBrowsePath;
+        for (size_t i = 0; i < noOfBrowsePath; i++)
+        {
+            SOPC_QualifiedName_Initialize(&selectClause->BrowsePath[i]);
+            if (SOPC_STATUS_OK == status)
+            {
+                status = SOPC_QualifiedName_Copy(&selectClause->BrowsePath[i], &browsePaths[i]);
+            }
+        }
+    }
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_Copy(&selectClause->IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_SimpleAttributeOperand_Clear(selectClause);
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EventFilter_SetSelectClauseFromStringPath(OpcUa_EventFilter* eventFilter,
+                                                                 size_t selectClauseIdx,
+                                                                 const char* typeId,
+                                                                 char qnPathSep,
+                                                                 const char* strQnPath,
+                                                                 SOPC_AttributeId attributeId,
+                                                                 const char* indexRange)
+{
+    if (NULL == eventFilter || !CHECK_ELEMENT_EXISTS(eventFilter, NoOfSelectClauses, selectClauseIdx) ||
+        NULL == strQnPath || SOPC_AttributeId_Invalid == SOPC_TypeHelperInternal_CheckAttributeId(attributeId))
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    OpcUa_SimpleAttributeOperand* selectClause = &eventFilter->SelectClauses[selectClauseIdx];
+
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    selectClause->AttributeId = attributeId;
+    if (NULL != typeId)
+    {
+        status = SOPC_NodeId_InitializeFromCString(&selectClause->TypeDefinitionId, typeId, (int32_t) strlen(typeId));
+    }
+    else
+    {
+        status = SOPC_NodeId_Copy(&selectClause->TypeDefinitionId, &baseEventType_NodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EventManagerUtil_cStringPathToQnPath(qnPathSep, strQnPath, &selectClause->NoOfBrowsePath,
+                                                           &selectClause->BrowsePath);
+    }
+    if (SOPC_STATUS_OK == status && NULL != indexRange)
+    {
+        status = SOPC_String_CopyFromCString(&selectClause->IndexRange, indexRange);
+    }
+    if (SOPC_STATUS_OK != status)
+    {
+        OpcUa_SimpleAttributeOperand_Clear(selectClause);
+    }
+    return status;
+}
+
+SOPC_ExtensionObject* SOPC_MonitoredItem_EventFilter(OpcUa_EventFilter* eventFilterObj)
+{
+    if (NULL == eventFilterObj || &OpcUa_EventFilter_EncodeableType != eventFilterObj->encodeableType)
+    {
+        return NULL;
+    }
+    SOPC_ExtensionObject* result = SOPC_Calloc(1, sizeof(*result));
+    if (NULL != result)
+    {
+        SOPC_EncodeableType* encTyp = &OpcUa_EventFilter_EncodeableType;
+        SOPC_ExtensionObject_Initialize(result);
+        result->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        result->TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
+        result->TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
+        result->Encoding = SOPC_ExtObjBodyEncoding_Object;
+        result->Body.Object.ObjType = encTyp;
+        result->Body.Object.Value = eventFilterObj;
+    }
+    return result;
+}
+
 SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
     OpcUa_CreateMonitoredItemsRequest* createMIrequest,
     size_t index,
@@ -1448,7 +1677,7 @@ SOPC_ReturnStatus SOPC_DeleteMonitoredItemsRequest_SetMonitoredItemId(
 OpcUa_CallRequest* SOPC_CallRequest_Create(size_t nbMethodsToCalls)
 {
     OpcUa_CallRequest* req = NULL;
-    if (nbMethodsToCalls > INT32_MAX)
+    if (nbMethodsToCalls > INT32_MAX || 0 == nbMethodsToCalls)
     {
         return req;
     }
@@ -1515,6 +1744,28 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCall(OpcUa_CallRequest* callReques
     {
         OpcUa_CallMethodRequest_Clear(callMethod);
     }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCallFromStrings(OpcUa_CallRequest* callRequest,
+                                                              size_t index,
+                                                              const char* objectId,
+                                                              const char* methodId,
+                                                              int32_t nbOfInputArguments,
+                                                              const SOPC_Variant* inputArguments)
+{
+    SOPC_NodeId* objNodeId = SOPC_NodeId_FromCString(objectId, (int32_t) strlen(objectId));
+    SOPC_NodeId* methodNodeId = SOPC_NodeId_FromCString(methodId, (int32_t) strlen(methodId));
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != objNodeId && NULL != methodNodeId)
+    {
+        status = SOPC_CallRequest_SetMethodToCall(callRequest, index, objNodeId, methodNodeId, nbOfInputArguments,
+                                                  inputArguments);
+    }
+    SOPC_NodeId_Clear(objNodeId);
+    SOPC_Free(objNodeId);
+    SOPC_NodeId_Clear(methodNodeId);
+    SOPC_Free(methodNodeId);
     return status;
 }
 

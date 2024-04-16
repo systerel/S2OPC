@@ -769,9 +769,11 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
  * \param nodeId       The id of the node to monitor.
  *                     \p nodeId shall not be NULL
  *
- * \param attribute    The attribute to monitor in the node (usually ::SOPC_AttributeId_Value).
+ * \param attribute    The attribute to monitor in the node (usually ::SOPC_AttributeId_Value for data monitoring).
  *                     \p attribute shall be in the range of ::SOPC_AttributeId and not ::SOPC_AttributeId_Invalid.
- *
+ *                     For event monitoring ::SOPC_AttributeId_EventNotifier shall be used and
+ *                     ::OpcUa_EventFilter shall be provided to
+ *                      ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams.
  *
  * \param indexRange   The index range used to identify a single element of an array,
  *                     or a single range of indexes for arrays.
@@ -834,7 +836,7 @@ SOPC_ReturnStatus SOPC_CreateMonitoredItemsRequest_SetMonitoredItemIdFromStrings
 /**
  * \brief Creates and allocates a DataChangeFilter filter parameter to be provided to
  *        ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams.
- *        See part 4 §7.17.2 for detailed DataChangeFilter documentation.
+ *        See part 4 (v1.04) §7.17.2 for detailed DataChangeFilter documentation.
  *
  * \param trigger         The condition on which a data change notification is triggered:
  *                        Status, Status & Value or Status, Value and Timestamp.
@@ -849,10 +851,134 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigge
                                                           double deadbandValue);
 
 /**
+ * \brief Creates and allocates a EventFilter filter parameter.
+ *
+ *        It shall be filled using ::SOPC_EventFilter_SetOfTypeWhereClause
+ *        or ::SOPC_EventFilter_SetGenericWhereClause if where clause is not empty.
+ *        Then it shall be filled using ::SOPC_EventFilter_SetSelectClause or
+ *        ::SOPC_EventFilter_SetSelectClauseFromStringPath for each select clause.
+ *
+ *        Finally it shall be packaged into an extension object with
+ *        ::SOPC_MonitoredItem_EventFilter and finally configured with
+ *        ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams.
+ *        See part 4 (v1.04) §7.17.3 for detailed EventFilter documentation.
+ *
+ * \param noOfSelectClauses   The number of select clauses in the event filter (> 0)
+ * \param noOfWhereClauseElt  The number of where clause elements in the event filter (>=0)
+ *
+ * \return An ::OpcUa_EventFilter instance in case of success, NULL otherwise
+ */
+OpcUa_EventFilter* SOPC_MonitoredItem_CreateEventFilter(size_t noOfSelectClauses, size_t noOfWhereClauseElt);
+
+/**
+ * \brief Set an OfType operator where clause element with the given type id
+ *
+ * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
+ * \param whereClauseEltIdx  The where clause element index to set (in range of the size on creation)
+ * \param typeNodeId         The type nodeId to set as operand for the OfType operand. Content is copied.
+ *
+ * \return SOPC_STATUS_OK in case of success, the reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EventFilter_SetOfTypeWhereClause(OpcUa_EventFilter* eventFilter,
+                                                        size_t whereClauseEltIdx,
+                                                        const SOPC_NodeId* typeNodeId);
+
+/**
+ * \brief Set a generic content filter element for the given where clause element index
+ *
+ * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
+ * \param whereClauseEltIdx  The where clause element index to set (in range of the size on creation)
+ * \param filterElt          The filter element to set, its content is set
+ *                           and provided parameter deallocated in case of success.
+ *
+ * \return SOPC_STATUS_OK in case of success, the reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EventFilter_SetGenericWhereClause(OpcUa_EventFilter* eventFilter,
+                                                         size_t whereClauseEltIdx,
+                                                         OpcUa_ContentFilterElement** filterElt);
+
+/**
+ * \brief Set select clause parameters for given select clause index
+ *
+ *        See part 4 (v1.04) §7.17.3 and §7.4.4.5 for detailed select clause documentation
+ *
+ * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
+ * \param selectClauseIdx    The where clause element index to set (in range of the size on creation)
+ * \param typeId             The NodeId of an EventType supported by the Server, if NULL the BaseEventType is used
+ * \param noOfBrowsePath     The number of browse path elements in \p browsePaths
+ * \param browsePaths        The array of browse paths filled with \p noOfBrowsePath elements to select an event node
+ * \param attributeId        The id of the attribute to retrieve, it should be ::SOPC_AttributeId_Value
+ *                           (eventually ::SOPC_AttributeId_NodeId)
+ * \param indexRange         The index range used to identify a single element of an array,
+ *                           or a single range of indexes for arrays.
+ *                           If not used for the select clause it should be NULL.
+ *                           Format is described in
+ *                           <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                           OPC UA specification</a>.
+ * *
+ * \return SOPC_STATUS_OK in case of success, the reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EventFilter_SetSelectClause(OpcUa_EventFilter* eventFilter,
+                                                   size_t selectClauseIdx,
+                                                   const SOPC_NodeId* typeId,
+                                                   size_t noOfBrowsePath,
+                                                   const SOPC_QualifiedName* browsePaths,
+                                                   SOPC_AttributeId attributeId,
+                                                   const SOPC_String* indexRange);
+
+/**
+ * \brief Set select clause parameters for given select clause index
+ *
+ *        See part 4 (v1.04) §7.17.3 and §7.4.4.5 for detailed select clause documentation
+ *
+ * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
+ * \param selectClauseIdx    The where clause element index to set (in range of the size on creation)
+ * \param typeId             The NodeId of an EventType supported by the Server as a C string,
+ *                           if NULL the BaseEventType is used.
+ *                           Format is described in
+ *                           <a href=https://reference.opcfoundation.org/v104/Core/docs/Part6/5.3.1/#5.3.1.10>
+ *                           OPC UA specification</a>.
+ * \param qnPathSep          The character to use as separator between path elements in \p strQnPath
+ *
+ * \param strQnPath          The qualified name path separated by \p qnPathSep separator as a string.
+ *                           E.g. with sep='~' for path qn0=(nsIdx=0,"EnabledState"), qn1=(0,"Id"):
+ *                           "0:EnabledState~0:Id".
+ *                           The escape character '\' might be used to un-specialize separator
+ *
+ * \param attributeId        The id of the attribute to retrieve, it should be ::SOPC_AttributeId_Value
+ *                           (eventually ::SOPC_AttributeId_NodeId)
+ * \param indexRange         The index range used to identify a single element of an array,
+ *                           or a single range of indexes for arrays.
+ *                           If not used for the select clause it should be NULL.
+ *                           Format is described in
+ *                           <a href=https://reference.opcfoundation.org/v104/Core/docs/Part4/7.22>
+ *                           OPC UA specification</a>.
+ *
+ * \return SOPC_STATUS_OK in case of success, the reason of failure otherwise.
+ */
+SOPC_ReturnStatus SOPC_EventFilter_SetSelectClauseFromStringPath(OpcUa_EventFilter* eventFilter,
+                                                                 size_t selectClauseIdx,
+                                                                 const char* typeId,
+                                                                 char qnPathSep,
+                                                                 const char* strQnPath,
+                                                                 SOPC_AttributeId attributeId,
+                                                                 const char* indexRange);
+
+/**
+ * \brief Packages a built event filter into an extension object to be provided as filter to
+ *        ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams function.
+ *
+ * \param eventFilterObj  The event filter object to package, ownership is transfered to extension object on success.
+ *
+ * \return the extension object packaging the event filter in case of success, NULL otherwise.
+ */
+SOPC_ExtensionObject* SOPC_MonitoredItem_EventFilter(OpcUa_EventFilter* eventFilterObj);
+
+/**
  * \brief Sets the monitored item monitoring parameters.
  *        It shall be completed by a call to ::SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId
  *        for the same index to configure monitored item identification.
- *        See part 4 §7.16 for detailed MonitoringParameters documentation.
+ *        See part 4 (v1.04) §7.16 for detailed MonitoringParameters documentation.
  *
  * \param createMIrequest  The create monitored item request to configure
  *
@@ -1038,5 +1164,36 @@ SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCall(OpcUa_CallRequest* callReques
                                                    const SOPC_NodeId* methodId,
                                                    int32_t nbOfInputArguments,
                                                    const SOPC_Variant* inputArguments);
+
+/**
+ * \brief Sets the method call parameters for the given index in the the call request.
+ *
+ * \param callRequest  The call request to configure
+ *
+ * \param index        Index of the method call to configure in the request.
+ *                     \p index < number of method calls configured in ::SOPC_CallRequest_Create
+ *
+ * \param objectId     The nodeId of the object node as C string on which method call will be executed.
+ *                     \p objectId shall not be NULL
+ *
+ * \param methodId     The nodeId of the method node to execute as C string
+ *                     (it might be object's method node instance or method node of its ObjectType).
+ *                     \p methodId shall not be NULL
+ *
+ * \param nbOfInputArguments  The number of input arguments provided as a Variant array in \p inputArguments .
+ *                            It shall be compliant with the number of arguments expected by the method \p methodId .
+ *
+ * \param inputArguments      The Variant array containing the \p nbOfInputArguments input arguments
+ *                            for the method call.
+ *
+ * \return SOPC_STATUS_OK in case of success,
+ *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid request, index, nodeId or number of input arguments.
+ */
+SOPC_ReturnStatus SOPC_CallRequest_SetMethodToCallFromStrings(OpcUa_CallRequest* callRequest,
+                                                              size_t index,
+                                                              const char* objectId,
+                                                              const char* methodId,
+                                                              int32_t nbOfInputArguments,
+                                                              const SOPC_Variant* inputArguments);
 
 #endif /* LIBS2OPC_REQUEST_BUILDER_H_ */
