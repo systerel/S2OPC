@@ -349,6 +349,20 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
 )
 
+# Client test for events subscription
+if (expat_FOUND)
+  add_executable(toolkit_test_client_events "validation_tests/client/toolkit_test_client_events.c"
+                 ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES})
+  target_link_libraries(toolkit_test_client_events PRIVATE s2opc_clientserver)
+  target_include_directories(toolkit_test_client_events PRIVATE ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES})
+  target_compile_options(toolkit_test_client_events PRIVATE ${S2OPC_COMPILER_FLAGS})
+  target_compile_definitions(toolkit_test_client_events PRIVATE ${S2OPC_DEFINITIONS})
+
+  add_custom_command(
+  TARGET toolkit_test_client_events POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy ${TEST_CLIENT_CONFIG_XML} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+  )
+endif()
 
 # Client scenario with service faults
 add_executable(toolkit_test_client_service_faults "validation_tests/client/toolkit_test_client_service_faults.c")
@@ -547,6 +561,18 @@ add_test(NAME "validation::client_server_test"
   "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
   $<TARGET_FILE:toolkit_test_client>)
 set_tests_properties("validation::client_server_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_test.tap")
+
+if(S2OPC_EVENT_MANAGEMENT AND S2OPC_DYNAMIC_TYPE_RESOLUTION)
+  add_test(NAME "validation::client_server_events_test"
+    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    COMMAND
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
+    "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
+    "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
+    "--server-cmd" $<TARGET_FILE:${TOOLKIT_TEST_SERVER}>
+    $<TARGET_FILE:toolkit_test_client_events>)
+  set_tests_properties("validation::client_server_events_test" PROPERTIES ENVIRONMENT "CK_TAP_LOG_FILE_NAME=client_server_events_test.tap")
+endif()
 
 add_test(NAME "validation::client_service_faults_test"
   WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
