@@ -1488,6 +1488,7 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pSM->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    bool unlockedMutex = false;
     bProcess = StaMac_IsEventTargeted(pSM, &appCtx, &requestScope, &requestType, event, arg, pParam, toolkitCtx);
 
     if (bProcess)
@@ -1647,20 +1648,30 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         else
         {
             SOPC_ASSERT(SOPC_REQUEST_SCOPE_APPLICATION == requestScope);
+            uint32_t cliId = pSM->iCliId;
             if (SE_SND_REQUEST_FAILED == event)
             {
                 pSM->state = stClosing;
                 Helpers_Log(SOPC_LOG_LEVEL_ERROR, "Applicative message could not be sent, closing the connection.");
+
                 if (NULL != pSM->pCbkGenericEvent)
                 {
-                    (*pSM->pCbkGenericEvent)(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, appCtx);
+                    // Release mutex to avoid possible deadlock in user callback
+                    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+                    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                    unlockedMutex = true;
+                    (*pSM->pCbkGenericEvent)(cliId, SOPC_LibSub_ApplicativeEvent_SendFailed, arg, NULL, appCtx);
                 }
             }
             else
             {
                 if (NULL != pSM->pCbkGenericEvent)
                 {
-                    (*pSM->pCbkGenericEvent)(pSM->iCliId, SOPC_LibSub_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
+                    // Release mutex to avoid possible deadlock in user callback
+                    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+                    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                    unlockedMutex = true;
+                    (*pSM->pCbkGenericEvent)(cliId, SOPC_LibSub_ApplicativeEvent_Response, SOPC_STATUS_OK, pParam,
                                              appCtx);
                 }
             }
@@ -1669,8 +1680,11 @@ bool SOPC_StaMac_EventDispatcher(SOPC_StaMac_Machine* pSM,
         StaMac_PostProcessActions(pSM, oldState);
     }
 
-    mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (!unlockedMutex)
+    {
+        mutStatus = SOPC_Mutex_Unlock(&pSM->mutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
 
     return bProcess;
 }

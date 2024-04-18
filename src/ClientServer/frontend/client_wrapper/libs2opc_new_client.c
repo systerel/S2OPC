@@ -331,6 +331,10 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
     if (SE_CLOSED_SESSION == event || SE_SESSION_ACTIVATION_FAILURE == event || SE_SESSION_REACTIVATING == event ||
         SE_ACTIVATED_SESSION == event)
     {
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        bool unlockedMutex = false;
+
         bool isSyncConn = false;
         SOPC_ReturnStatus statusMutex = SOPC_Mutex_Lock(&cc->syncConnMutex);
         SOPC_ASSERT(SOPC_STATUS_OK == statusMutex);
@@ -376,7 +380,16 @@ static void SOPC_ClientInternal_ConnectionStateCallback(SOPC_App_Com_Event event
                 SOPC_ASSERT(false);
                 return;
             }
+            // Release mutex to avoid possible deadlock in user callback
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            unlockedMutex = true;
             cc->connCb(cc, connEvent, serviceStatus);
+        }
+        if (!unlockedMutex)
+        {
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
         }
     }
 }
@@ -396,6 +409,7 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
 
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    bool unlockedMutex = false;
 
     SOPC_StaMac_ReqCtx* staMacCtx = NULL;
     SOPC_ClientHelper_ReqCtx* serviceReqCtx = NULL;
@@ -448,6 +462,10 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
                 status = SOPC_STATUS_NOK;
                 libsubEvent = SOPC_LibSub_ApplicativeEvent_SendFailed;
             }
+            // Release mutex to avoid possible deadlock in user callback
+            mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+            unlockedMutex = true;
             SOPC_ClientInternal_EventCbk(serviceReqCtx->secureConnectionIdx, libsubEvent, status, param,
                                          (uintptr_t) serviceReqCtx);
             SOPC_Free((void*) appContext);
@@ -467,6 +485,10 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
             }
             if (NULL != pSM)
             {
+                // Release mutex to avoid possible deadlock in user callback
+                mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+                SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+                unlockedMutex = true;
                 // Call state machine callback for event treatment
                 if (SOPC_StaMac_EventDispatcher(pSM, NULL, event, IdOrStatus, param, appContext) && NULL != cc)
                 {
@@ -483,8 +505,11 @@ void SOPC_ClientInternal_ToolkitEventCallback(SOPC_App_Com_Event event,
         }
     }
 
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (!unlockedMutex)
+    {
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
 }
 
 static SOPC_ReturnStatus SOPC_ClientHelperInternal_CreateClientConnection(
