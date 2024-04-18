@@ -26,6 +26,7 @@
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
+#include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_types.h"
 
@@ -1906,6 +1907,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
 {
     SOPC_EncodeableType* encType = NULL;
     SOPC_Byte encodingByte = 0;
+    int32_t length = 0;
     if (NULL == extObj)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -1953,7 +1955,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
         switch (encodingByte)
         {
         case SOPC_ExtObjBodyEncoding_None:
-            extObj->Length = -1;
             break;
         case SOPC_ExtObjBodyEncoding_XMLElement:
             status = SOPC_XmlElement_Read(&extObj->Body.Xml, buf, nestedStructLevel);
@@ -1962,7 +1963,9 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Read(SOPC_ExtensionObject* extObj, SOPC_B
             status = SOPC_ByteString_Read(&extObj->Body.Bstring, buf, nestedStructLevel);
             break;
         case SOPC_ExtObjBodyEncoding_Object:
-            status = SOPC_Int32_Read(&extObj->Length, buf, nestedStructLevel);
+            // Decode length only to move forward the current position in buffer
+            status = SOPC_Int32_Read(&length, buf, nestedStructLevel);
+            SOPC_UNUSED_RESULT(length);
             if (SOPC_STATUS_OK == status)
             {
                 /* Allocation size value comes from types defined in Toolkit and is considered as not excessive

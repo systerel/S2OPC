@@ -3295,7 +3295,6 @@ void SOPC_ExtensionObject_Initialize(SOPC_ExtensionObject* extObj)
     {
         memset(extObj, 0, sizeof(SOPC_ExtensionObject));
         SOPC_ExpandedNodeId_Initialize(&extObj->TypeId);
-        extObj->Length = -1;
     }
 }
 
@@ -3349,7 +3348,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     if (SOPC_STATUS_OK == status)
     {
         dest->Encoding = src->Encoding;
-        dest->Length = src->Length;
     }
     else
     {
@@ -3367,7 +3365,6 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Move(SOPC_ExtensionObject* dest, SOPC_Ext
     }
 
     dest->Encoding = src->Encoding;
-    dest->Length = src->Length;
     dest->TypeId = src->TypeId;
     switch (src->Encoding)
     {
@@ -3495,7 +3492,6 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
             SOPC_ASSERT(false);
         }
         memset(extObj, 0, sizeof(SOPC_ExtensionObject));
-        extObj->Length = -1;
     }
 }
 

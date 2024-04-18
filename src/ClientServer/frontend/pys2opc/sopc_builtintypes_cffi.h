@@ -161,8 +161,6 @@ typedef struct SOPC_ExtensionObject
 
     } Body;
 
-    int32_t Length;
-
 } SOPC_ExtensionObject;
 
 typedef enum SOPC_VariantArrayTypeFlag

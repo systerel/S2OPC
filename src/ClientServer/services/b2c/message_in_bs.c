@@ -242,7 +242,7 @@ void message_in_bs__read_activate_req_msg_identity_token(
     *message_in_bs__user_token_signature = constants__c_SignatureData_indet;
     OpcUa_ActivateSessionRequest* activateSessionReq = (OpcUa_ActivateSessionRequest*) message_in_bs__p_msg;
 
-    if (activateSessionReq->UserIdentityToken.Length > 0)
+    if (SOPC_ExtObjBodyEncoding_Object == activateSessionReq->UserIdentityToken.Encoding)
     {
         if (activateSessionReq->UserIdentityToken.TypeId.NodeId.IdentifierType == SOPC_IdentifierType_Numeric &&
             activateSessionReq->UserIdentityToken.TypeId.NodeId.Namespace == OPCUA_NAMESPACE_INDEX)
