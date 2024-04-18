@@ -110,12 +110,15 @@ void msg_subscription_monitored_item_bs__get_msg_create_monitored_items_req_time
 
 static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* filter,
                                                          SOPC_AttributeId attributeId,
-                                                         constants_statuscodes_bs__t_StatusCode_i* sc)
+                                                         constants_statuscodes_bs__t_StatusCode_i* sc,
+                                                         constants__t_monitoringFilter_i* dataFilter)
 {
     SOPC_ASSERT(NULL != filter);
     SOPC_ASSERT(NULL != sc);
+    SOPC_ASSERT(NULL != dataFilter);
+    *dataFilter = constants__c_monitoringFilter_indet;
 
-    if (filter->Length > 0)
+    if (filter->Encoding != SOPC_ExtObjBodyEncoding_None)
     {
         if (attributeId != SOPC_AttributeId_Value)
         {
@@ -197,6 +200,7 @@ static bool check_monitored_item_datachange_filter_param(SOPC_ExtensionObject* f
             }
             else
             {
+                *dataFilter = (OpcUa_DataChangeFilter*) filter->Body.Object.Value;
                 return true;
             }
         }
@@ -291,13 +295,7 @@ void msg_subscription_monitored_item_bs__getall_create_monitored_item_req_params
 
         *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
             &monitReq->RequestedParameters.Filter, monitReq->ItemToMonitor.AttributeId,
-            msg_subscription_monitored_item_bs__p_sc);
-
-        if (*msg_subscription_monitored_item_bs__p_bres)
-        {
-            *msg_subscription_monitored_item_bs__p_filter =
-                (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
-        }
+            msg_subscription_monitored_item_bs__p_sc, msg_subscription_monitored_item_bs__p_filter);
     }
 
     if (*msg_subscription_monitored_item_bs__p_bres)
@@ -413,15 +411,13 @@ void msg_subscription_monitored_item_bs__getall_modify_monitored_item_req_params
     // Note: we have to consider attribute is a Value attribute since we have no access to information here.
     //       Its validity is checked later.
     *msg_subscription_monitored_item_bs__p_bres = check_monitored_item_datachange_filter_param(
-        &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc);
+        &monitReq->RequestedParameters.Filter, SOPC_AttributeId_Value, msg_subscription_monitored_item_bs__p_sc,
+        msg_subscription_monitored_item_bs__p_filter);
 
     // Check active filter is valid type
     if (*msg_subscription_monitored_item_bs__p_bres)
     {
         *msg_subscription_monitored_item_bs__p_sc = constants_statuscodes_bs__e_sc_ok;
-
-        *msg_subscription_monitored_item_bs__p_filter =
-            (OpcUa_DataChangeFilter*) monitReq->RequestedParameters.Filter.Body.Object.Value;
 
         *msg_subscription_monitored_item_bs__p_monitored_item_id = monitReq->MonitoredItemId;
         *msg_subscription_monitored_item_bs__p_clientHandle = monitReq->RequestedParameters.ClientHandle;
