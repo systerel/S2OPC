@@ -1886,7 +1886,7 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
                                                      OpcUa_PublishResponse* pPubResp,
                                                      OpcUa_EventNotificationList* pEventNotif)
 {
-    SOPC_ASSERT(NULL != pSM->pCbkLibSubDataChanged);
+    SOPC_ASSERT(NULL == pSM->pCbkLibSubDataChanged);
     uintptr_t* newAPImonitoredItemCtxArray = NULL;
     if (NULL != pSM->pCbkNotification && pEventNotif->NoOfEvents > 0)
     {
@@ -1915,6 +1915,7 @@ static void StaMac_ProcessMsg_PubResp_EventNotifList(SOPC_StaMac_Machine* pSM,
         pSM->pCbkNotification(pSM->subscriptionAppCtx, pPubResp->ResponseHeader.ServiceResult,
                               &OpcUa_EventNotificationList_EncodeableType, (uint32_t) pEventNotif->NoOfEvents,
                               pEventNotif, newAPImonitoredItemCtxArray);
+        SOPC_Free(newAPImonitoredItemCtxArray);
     }
 }
 
