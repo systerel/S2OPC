@@ -211,4 +211,61 @@ SOPC_ReturnStatus SOPC_Event_SetVariableFromStrPath(SOPC_Event* pEvent, const ch
  */
 const SOPC_Variant* SOPC_Event_GetVariableFromStrPath(const SOPC_Event* pEvent, const char* qnPath);
 
+/**
+ * \brief Gets the variable value and type information for the given browse path in the given event
+ *
+ * \param pEvent                  pointer to the event for which variable value shall be set
+ * \param nbQnPath                number of qualified name in the browse path
+ * \param qualifiedNamePathArray  qualified name path array containing the \p nbQnPath path elements
+ *                                (e.g.: ['0:EnabledState', '0:Id'])
+ * \param[out] outDataType  (optional) the pointer is set with the data type of the returned value (if pointer provided)
+ * \param[out] outValueRank (optional) the pointer is set with the value rank of the returned value
+ *             (if pointer provided)
+ *
+ * \return The variable value for the given browse path in case of success, NULL otherwise
+ */
+const SOPC_Variant* SOPC_Event_GetVariableAndType(const SOPC_Event* pEvent,
+                                                  uint16_t nbQnPath,
+                                                  SOPC_QualifiedName* qualifiedNamePathArray,
+                                                  const SOPC_NodeId** outDataType,
+                                                  int32_t* outValueRank);
+
+/**
+ * \brief Gets the variable value and type information for the given browse path (as a string) in the given event
+ *
+ * \param pEvent  pointer to the event for which variable value shall be set
+ * \param qnPath  qualified name path separated by '~' as a string (e.g.: '0:EnabledState~0:Id')
+ * \param[out] outDataType  (optional) the pointer is set with the data type of the returned value (if pointer provided)
+ * \param[out] outValueRank (optional) the pointer is set with the value rank of the returned value
+ *             (if pointer provided)
+ *
+ * \return The variable value for the given browse path in case of success, NULL otherwise
+ */
+const SOPC_Variant* SOPC_Event_GetVariableAndTypeFromStrPath(const SOPC_Event* pEvent,
+                                                             const char* qnPath,
+                                                             const SOPC_NodeId** outDataType,
+                                                             int32_t* outValueRank);
+
+/**
+ * \brief Type of callback functions for \ref SOPC_Event.
+ * The value of \p user_data is set when calling \ref SOPC_Event_ForEachVar.
+ */
+typedef void SOPC_Event_ForEachVar_Fct(const char* qnPath,
+                                       SOPC_Variant* var,
+                                       const SOPC_NodeId* dataType,
+                                       int32_t valueRank,
+                                       uintptr_t user_data);
+
+/**
+ * \brief Iterates over the even variables, calling the given function for each event variable.
+ *
+ * \param event     The event to iterate on
+ * \param func      The function to call on each event variable
+ * \param user_data A user chose pointer to pass as last parameter to the
+ *                  callback function.
+ *
+ * \note The order of the iteration is implementation defined, and should not be relied on
+ */
+void SOPC_Event_ForEachVar(SOPC_Event* event, SOPC_Event_ForEachVar_Fct* func, uintptr_t user_data);
+
 #endif // SOPC_EVENT_H_
