@@ -401,6 +401,20 @@ uintptr_t SOPC_ClientHelperNew_Subscription_GetUserParam(const SOPC_ClientHelper
 SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_ClientHelper_Subscription* subscription);
 
 /**
+ * \brief Gets the subscription Id associated to the subscription.
+ *        It should only be used in the context of server method calls (ConditionRefresh, etc.)
+ *        and is not referenced by the rest of this client API.
+ *
+ * \param subscription          The subscription instance
+ * \param[out] pSubscriptionId  The subscription Id associated to the subscription by server
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid subscription pointer,
+ *         SOPC_STATUS_INVALID_STATE if the client or connection is not running.
+ */
+SOPC_ReturnStatus SOPC_ClientHelperNew_GetSubscriptionId(const SOPC_ClientHelper_Subscription* subscription,
+                                                         uint32_t* pSubscriptionId);
+
+/**
  * \brief Creates new monitored items on the given subscription.
  *        A context array might be provided and context will be provided
  *        on notification for corresponding monitored item in notification callback.

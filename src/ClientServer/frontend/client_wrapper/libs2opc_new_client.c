@@ -1349,6 +1349,28 @@ SOPC_ClientConnection* SOPC_ClientHelperNew_GetSecureConnection(const SOPC_Clien
     return subscription->secureConnection;
 }
 
+SOPC_ReturnStatus SOPC_ClientHelperNew_GetSubscriptionId(const SOPC_ClientHelper_Subscription* subscription,
+                                                         uint32_t* pSubscriptionId)
+{
+    if (NULL == subscription || NULL == pSubscriptionId)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (!SOPC_ClientInternal_IsInitialized())
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    *pSubscriptionId = subscription->subscriptionId;
+
+    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+
+    return SOPC_STATUS_OK;
+}
+
 SOPC_ReturnStatus SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
     const SOPC_ClientHelper_Subscription* subscription,
     OpcUa_CreateMonitoredItemsRequest* monitoredItemsReq,
