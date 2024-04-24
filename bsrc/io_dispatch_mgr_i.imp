@@ -382,7 +382,7 @@ OPERATIONS
                             END
                         END;
                         /* Send the response message on secure channel if available */
-                        IF l_valid_req = TRUE & l_buffer_out /= c_byte_buffer_indet
+                        IF l_buffer_out /= c_byte_buffer_indet
                         THEN
                             send_channel_msg_buffer (channel, l_buffer_out, request_context);
                             IF l_sc = e_sc_bad_security_checks_failed

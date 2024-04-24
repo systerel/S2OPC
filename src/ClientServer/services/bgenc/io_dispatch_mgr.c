@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 12/01/2024 15:44:56
+ Date                 : 24/04/2024 15:53:30
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -337,8 +337,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                   io_dispatch_mgr__l_sc = constants_statuscodes_bs__c_StatusCode_indet;
                   break;
                }
-               if ((io_dispatch_mgr__l_valid_req == true) &&
-                  (io_dispatch_mgr__l_buffer_out != constants__c_byte_buffer_indet)) {
+               if (io_dispatch_mgr__l_buffer_out != constants__c_byte_buffer_indet) {
                   service_mgr__send_channel_msg_buffer(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_buffer_out,
                      io_dispatch_mgr__request_context);

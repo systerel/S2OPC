@@ -325,6 +325,34 @@ LOCAL_OPERATIONS
         )
     END;
 
+    p_sc, p_buffer_out <-- alloc_and_encode_session_service_fault_resp (p_request_handle, p_channel, p_msg_sc) =
+    PRE
+        p_request_handle : t_server_request_handle_i &
+        p_channel : t_channel_i &
+        p_channel : t_channel &
+        p_msg_sc : t_StatusCode_i &
+        p_msg_sc : t_StatusCode &
+        p_msg_sc /= e_sc_ok &
+        p_buffer_out : t_byte_buffer_i &
+        p_buffer_out = c_byte_buffer_indet &
+        a_buffer_out_state = c_buffer_out_state_indet
+    THEN
+        p_sc, p_buffer_out, a_buffer_out_state :(
+            p_sc : t_StatusCode_i &
+            p_sc : {c_StatusCode_indet, e_sc_ok, e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory} &
+            p_buffer_out : t_byte_buffer_i &
+            a_buffer_out_state : t_buffer_out_state_i &
+
+            (p_sc = e_sc_ok =>
+                p_buffer_out : t_byte_buffer &
+                a_buffer_out_state = e_buffer_out_msg_written) &
+
+            (p_sc /= e_sc_ok =>
+                p_buffer_out = c_byte_buffer_indet &
+                a_buffer_out_state = c_buffer_out_state_indet)
+        )
+    END;
+
     StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     PRE
         endpoint_config_idx : t_endpoint_config_idx_i &
@@ -722,6 +750,27 @@ OPERATIONS
         END
     END;
 
+    p_sc, p_buffer_out <-- alloc_and_encode_session_service_fault_resp (p_request_handle, p_channel, p_msg_sc) =
+    VAR
+        l_resp_msg_header,
+        l_resp_msg,
+        l_resp_msg_typ
+    IN
+        p_buffer_out := c_byte_buffer_indet;
+        /* Allocate error response message if not allocated (degraded case) */
+        l_resp_msg_typ := e_msg_service_fault_resp;
+        l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ);
+        IF l_resp_msg /= c_msg_indet
+        THEN
+            p_sc, p_buffer_out <-- encode_session_service_resp (p_request_handle, p_channel, p_msg_sc, l_resp_msg_typ,
+                                                                l_resp_msg_header, l_resp_msg, FALSE)
+        ELSE
+            /* Failed to allocate the response */
+            p_sc := e_sc_bad_out_of_memory
+        END
+    END
+    ;
+
     StatusCode_service <-- treat_discovery_service_req (endpoint_config_idx, req_typ, req_msg, resp_msg) =
     VAR
         l_ret,
@@ -865,29 +914,29 @@ OPERATIONS
                         /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
                         l_resp_msg_typ := e_msg_service_fault_resp
                     END;
-                    write_msg_resp_header_service_status (l_resp_msg_header, l_ret);
-                    server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-                    l_channel_cfg <-- get_channel_info (channel);
-                    sc, l_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
+                    sc, l_buffer_out <-- encode_session_service_resp (l_request_handle, channel, l_ret, l_resp_msg_typ,
+                                                                    l_resp_msg_header, l_resp_msg, FALSE);
                     IF sc /= e_sc_ok
                     THEN
                         /* invalid encoding => close session */
                         server_close_session (l_session, e_sc_bad_encoding_error)
-                    END;
-                    IF l_secu_failed = TRUE THEN
+                    END
+                    ;
+                    IF l_secu_failed = TRUE
+                    THEN
                         /* Counter measure in case of repeated user authentication failures */
                         sc := e_sc_bad_security_checks_failed
                     END
-                    ;
-                    /* response message structures not necessary anymore */
-                    dealloc_msg_header_out (l_resp_msg_header);
-                    dealloc_msg_out (l_resp_msg)
                 ELSE
                     /* In other cases than out of memory, request shall have been discarded previously */
                     sc := e_sc_bad_out_of_memory
-                END;
+                END
+                ;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
+            ELSE
+                /* decoding error: a ServiceFault shall be sent (see Part 4 §5.3) */
+                sc, l_buffer_out <-- alloc_and_encode_session_service_fault_resp (l_request_handle, channel, e_sc_bad_decoding_error)
             END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
         END; /* DECODE REQ HEADER CHECK */
@@ -957,20 +1006,14 @@ OPERATIONS
             l_ret, valid_req, async_resp, l_resp_msg_typ, l_resp_msg_header, l_resp_msg
                 <-- decode_and_treat_session_service_req (channel, req_typ, req_context, msg_buffer,
                                                           l_req_msg_header, l_request_handle);
-            IF l_resp_msg = c_msg_indet
-            THEN
-                /* Allocate error response message if not allocated (degraded case) */
-                l_resp_msg_typ := e_msg_service_fault_resp;
-                l_resp_msg_header, l_resp_msg <-- alloc_resp_msg (l_resp_msg_typ)
-            END;
             IF l_resp_msg /= c_msg_indet
             THEN
                 sc, buffer_out <-- encode_session_service_resp (l_request_handle, channel, l_ret, l_resp_msg_typ,
-                                                                  l_resp_msg_header, l_resp_msg, async_resp)
+                                                                l_resp_msg_header, l_resp_msg, async_resp)
             ELSE
-                /* Failed to allocate the response */
-                sc := e_sc_bad_out_of_memory
-            END;
+                sc, buffer_out <-- alloc_and_encode_session_service_fault_resp (l_request_handle, channel, l_ret)
+            END
+            ;
             dealloc_msg_in_header (l_req_msg_header)
         END; /* DECODE REQ HEADER CHECK */
         /* In any case buffer will not be used anymore after this operation */
@@ -1062,21 +1105,18 @@ OPERATIONS
                         /* Part 4 §5.3: if the Service itself failed [...] a ServiceFault is returned. */
                         l_resp_msg_typ := e_msg_service_fault_resp
                     END;
-                    server_write_msg_out_header_req_handle (l_resp_msg_header, l_request_handle);
-
                     /* Response message encoded */
-                    l_channel_cfg <-- get_channel_info (channel);
-                    sc, l_buffer_out <-- encode_msg (l_channel_cfg, e_msg_response_type, l_resp_msg_typ, l_resp_msg_header, l_resp_msg);
-
-                    /* response message structures not necessary anymore */
-                    dealloc_msg_header_out (l_resp_msg_header);
-                    dealloc_msg_out (l_resp_msg)
+                    sc, l_buffer_out <-- encode_session_service_resp (l_request_handle, channel, l_ret, l_resp_msg_typ,
+                                                                      l_resp_msg_header, l_resp_msg, FALSE)
                 ELSE
                     /* In other cases than out of memory, request shall have been discarded previously */
                     sc := e_sc_bad_out_of_memory
-                END;
+                END
+                ;
                 /* request message not necessary anymore */
                 dealloc_msg_in (l_req_msg)
+            ELSE
+                sc, l_buffer_out <-- alloc_and_encode_session_service_fault_resp (l_request_handle, channel, e_sc_bad_decoding_error)
             END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
         END; /* DECODE REQ HEADER CHECK */
