@@ -545,7 +545,7 @@ test-uactt:
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
   stage: test
-  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   script: 
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
@@ -567,7 +567,7 @@ generate_sbom:
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
   stage: test
-  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   needs: 
     - job: generate_sbom
   dependencies:
@@ -588,11 +588,12 @@ scan_sbom:
 #Look for exposed secrets as well as vulnerabilities in the dependencies.
 scan_repository:
   stage: test
-  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   script:
     - trivy --severity HIGH,CRITICAL  --exit-code 1 --insecure repo . --skip-dirs samples #ignore due to the use of PKCS#8 format for keys
   rules:
     - if: "$SCAN_SBOM != null"
+
 
 ###
 # Test others jobs

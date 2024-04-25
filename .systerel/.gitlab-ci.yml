@@ -102,9 +102,6 @@ workflow:
     - docker
     - linux
 
-include:
-  - template: Security/Container-Scanning.gitlab-ci.yml
-
 ###
 # Generation jobs
 ###

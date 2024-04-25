@@ -33,10 +33,10 @@ class CompressorRecipe(ConanFile):
         self.requires("paho-mqtt-c/1.3.4") 
         self.requires("libcheck/0.14.0@Systerel+S2OPC/beta") 
         self.requires("doxygen/1.8.18")
-        self.requires("gmp/6.2.1",override=True)
-        self.requires("mpfr/4.1.0",override=True)
-        self.requires("zlib/1.2.13",override=True)
-        self.requires("isl/0.24",override=True)
-        self.requires("openssl/3.2.0",override=True)
-        self.requires("cmake/3.9.4@Systerel+S2OPC/beta")         
+        self.requires("gmp/6.2.1",override=True) #Sub-depency of mpfr, gcc and isl
+        self.requires("mpfr/4.1.0",override=True) #Sub-depency of gcc
+        self.requires("zlib/1.2.13",override=True) #Sub-depency of gcc, binutils, doxygen, mbedtls and openssl
+        self.requires("isl/0.24",override=True) #Sub-depency of gcc
+        self.requires("openssl/3.2.0",override=True) #Sub-depency of paho-mqtt-c and cmake
+        self.requires("cmake/3.9.4@Systerel+S2OPC/beta")          
         
