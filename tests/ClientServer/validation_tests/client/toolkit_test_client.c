@@ -524,6 +524,70 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     return status;
 }
 
+static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Subscription* subscription)
+{
+    SOPC_ASSERT(NULL != subscription);
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    OpcUa_CreateMonitoredItemsRequest* createMonItReq =
+        SOPC_CreateMonitoredItemsRequest_Create(0, 1, OpcUa_TimestampsToReturn_Both);
+    if (NULL == createMonItReq)
+    {
+        status = SOPC_STATUS_NOK;
+    }
+    // 1st MI (with NodeId + some params with deadband filter)
+    if (SOPC_STATUS_OK == status)
+    {
+        SOPC_NodeId* nodeId = SOPC_NodeId_FromCString(monitoredNodeIds[0], (int32_t) strlen(monitoredNodeIds[0]));
+        status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemId(createMonItReq, 0, nodeId, SOPC_AttributeId_Value,
+                                                                     NULL);
+        SOPC_NodeId_Clear(nodeId);
+        SOPC_Free(nodeId);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        // Create an invalid/unknown filter type
+        SOPC_ExtensionObject* extObj = SOPC_Calloc(1, sizeof(*extObj));
+        SOPC_ASSERT(NULL != extObj);
+        extObj->Encoding = SOPC_ExtObjBodyEncoding_ByteString;
+        extObj->TypeId.NodeId.Namespace = 42;
+        extObj->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+        extObj->TypeId.NodeId.Data.Numeric = 1000;
+        status =
+            SOPC_String_AttachFromCstring((SOPC_String*) &extObj->Body.Bstring, "<<<I am unique kind of filter !>>>");
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
+                createMonItReq, 0, OpcUa_MonitoringMode_Reporting, 0, -1, extObj, 1, true);
+        }
+    }
+
+    // Create the monitored items
+    OpcUa_CreateMonitoredItemsResponse createMonItResp;
+    if (SOPC_STATUS_OK == status)
+    {
+        OpcUa_CreateMonitoredItemsResponse_Initialize(&createMonItResp);
+        status = SOPC_ClientHelperNew_Subscription_CreateMonitoredItems(
+            subscription, createMonItReq, (const uintptr_t*) monitoredItemIndexes, &createMonItResp);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        if (!SOPC_IsGoodStatus(createMonItResp.ResponseHeader.ServiceResult) || 1 != createMonItResp.NoOfResults ||
+            OpcUa_BadMonitoredItemFilterInvalid != createMonItResp.Results[0].StatusCode)
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    else
+    {
+        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &createMonItReq);
+    }
+
+    OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);
+
+    return status;
+}
+
 static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -657,6 +721,12 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
                 }
             }
             OpcUa_DeleteMonitoredItemsResponse_Clear(&delMonItResp);
+        }
+
+        /* NON REGRESSSION TEST FOR ISSUE #1428: server fail due to buffer overflow without fix */
+        if (SOPC_STATUS_OK == status)
+        {
+            status = test_non_reg_issue_1428_create_MI(subscription);
         }
 
         SOPC_ReturnStatus delSubStatus = SOPC_ClientHelperNew_DeleteSubscription(&subscription);
