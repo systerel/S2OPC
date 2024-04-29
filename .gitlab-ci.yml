@@ -100,10 +100,6 @@ workflow:
       when: never
     - if: '$CI_COMMIT_BRANCH'
 
-.docker-job: &docker_job
-  tags:
-    - docker
-    - linux
 .zephyr-job: &zephyr_job
   tags:
     - zephyr
@@ -113,7 +109,6 @@ workflow:
 ###
 
 generation:
-  <<: *docker_job
   stage: gen
   image: com.systerel.fr:5000/c838/gen-ext@sha256:66cadeb219f3904e78ade14ef85e57aa0309eff4416e9625b0fd4bea8e976cd7 # digest of gen-ext:1.4
   script:
@@ -163,7 +158,6 @@ check_commit_validity:
 ###
 
 .build-linux: &build_linux
-  <<: *docker_job
   stage: build
   image: registry.gitlab.com/systerel/s2opc/build@sha256:14c9a28afc61ebe7b413798735f4a70989d36b155b720782ddb95f9db02d3a0e # digest of build:1.40
   script:
@@ -254,7 +248,6 @@ build-linux64-NoASan-NoPyS2OPC:
       when: on_success
 
 build-win64: &build_win64
-  <<: *docker_job
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # digest of mingw_build:1.14
   script:
@@ -295,7 +288,6 @@ build-win32:
      when: always # run even if previous job in pipeline failed
 
 build-rpi:
-  <<: *docker_job
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # digest of rpi-build:1.6
   script:
@@ -318,7 +310,6 @@ build-rpi:
 
 # Used by coverity, also starts the analysis
 build-linux64-coverity:
-  <<: *docker_job
   stage: build
   image: registry.gitlab.com/systerel/s2opc/coverity@sha256:a830bfdc9ea465e26607a5e2d9585139f1f65fbfd2681a139469c5ea0d341b6f # digest of coverity:1.10
   script: |-
@@ -351,7 +342,6 @@ build-zephyr:
       when: always
 
 build-freertos:
-  <<: *docker_job
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
   script:
@@ -429,7 +419,6 @@ test-build-from-export:
       when: on_success
 
 .test-linux: &test_linux
-  <<: *docker_job
   stage: test
 
 # Test check belongs to the test part, however it does not depend on linux build.
@@ -611,7 +600,6 @@ windows-appveyor-artifacts:
 ###
 
 coverage-analysis:
-  <<: *docker_job
   stage: analyses
   image: registry.gitlab.com/systerel/s2opc/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5  # digest of test:2.15
   script:
