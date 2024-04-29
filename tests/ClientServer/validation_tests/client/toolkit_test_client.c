@@ -620,6 +620,11 @@ static SOPC_ReturnStatus test_subscription(SOPC_ClientConnection* connection)
             SOPC_ASSERT(NULL != extObj);
             status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
                 createMonItReq, 0, OpcUa_MonitoringMode_Reporting, 0, -1, extObj, 1, true);
+            if (SOPC_STATUS_OK != status)
+            {
+                SOPC_ExtensionObject_Clear(extObj);
+                SOPC_Free(extObj);
+            }
         }
         // 2nd MI (with NodeId  as C string + some params without deadband filter)
         if (SOPC_STATUS_OK == status)
