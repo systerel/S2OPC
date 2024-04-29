@@ -296,9 +296,9 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
  *
  * \param pProvider An initialized cryptographic context.
  * \param pCert     A valid pointer to the signed public key to thumbprint.
- * \param[out] pDest  A valid pointer pointing to NULL which will be set
+ * \param[out] ppDest  A valid pointer pointing to NULL which will be set
  *                    to the newly allocated buffer containing the thumbprint.
- * \param[out] lenDest The length in bytes of \p pDest.
+ * \param[out] lenDest A valid pointer (!= NULL) to store the length in bytes allocated in \p ppDest .
  *
  * \note            Content of the output is unspecified when return value is not SOPC_STATUS_OK.
  *
@@ -310,8 +310,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER_Files(SOPC_CertificateList* 
  */
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
                                                             const SOPC_CertificateList* pCert,
-                                                            uint8_t* pDest,
-                                                            uint32_t lenDest);
+                                                            uint8_t** ppDest,
+                                                            uint32_t* lenDest);
 
 /**
  * \brief           Verify the application URI embedded in a certificate.
