@@ -901,13 +901,16 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
                                                             const SOPC_CertificateList* pCert,
-                                                            uint8_t* pDest,
-                                                            uint32_t lenDest)
+                                                            uint8_t** ppDest,
+                                                            uint32_t* pLenDest)
 {
-    if (NULL == pProvider || NULL == pCert || NULL == pDest || 0 == lenDest)
+    if (NULL == pProvider || NULL == pCert || NULL == ppDest || NULL != *ppDest || NULL == pLenDest)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    uint8_t* pDest = NULL;
+    uint32_t lenAllocated = 0;
 
     const SOPC_CryptoProfile* pProfile = SOPC_CryptoProvider_GetProfileServices(pProvider);
     if (NULL == pProfile)
@@ -918,16 +921,16 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
     SOPC_ReturnStatus status = certificate_check_single(pCert);
 
     /* Assert allocation length */
-    uint32_t lenSupposed = 0;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenSupposed);
+        status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenAllocated);
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (lenDest != lenSupposed)
+        pDest = SOPC_Calloc(lenAllocated, sizeof(uint8_t));
+        if (NULL == pDest)
         {
-            status = SOPC_STATUS_INVALID_PARAMETERS;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
     }
 
@@ -965,6 +968,17 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
         {
             status = SOPC_STATUS_NOK;
         }
+    }
+
+    if (SOPC_STATUS_OK != status)
+    {
+        SOPC_Free(pDest);
+        *ppDest = NULL;
+    }
+    else
+    {
+        *ppDest = pDest;
+        *pLenDest = lenAllocated;
     }
 
     SOPC_Free(pDER);
