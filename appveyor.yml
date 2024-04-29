@@ -38,6 +38,7 @@ test_script:
     - set EXPAT_INSTALL_DIR=%EXPAT_DIR%\install
     - set S2OPC_CLIENTSERVER_ONLY=1
     - set S2OPC_DYNAMIC_TYPE_RESOLUTION=1
+    - set S2OPC_EVENT_MANAGEMENT=1
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
     - set PYS2OPC_VERSION=pys2opc-1.5.1
@@ -46,6 +47,7 @@ test_script:
     - set ENABLE_SAMPLES=on
     - set TEST_PASSWORD_PRIVATE_KEY=password
     - set TEST_PASSWORD_USER=password
+    - set TEST_CLIENT_XML_CONFIG=S2OPC_Client_Test_Config.xml
 
     # download and extract libcheck
     - cd %ROOT_DIR%
