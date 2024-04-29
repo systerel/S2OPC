@@ -453,13 +453,14 @@ END_TEST
 
 START_TEST(test_cert_thumbprint_None)
 {
-    uint8_t thumb[20];
+    uint8_t* thumb = NULL;
+    uint32_t len = 0;
 
     // ck_assert(KeyManager_Certificate_CreateFromFile(keyman, (int8_t *)"./server_public/server.der", &crt_pub) ==
     // SOPC_STATUS_OK);
 
     // Compute thumbprint
-    ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == SOPC_STATUS_NOK);
+    ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, &thumb, &len) == SOPC_STATUS_NOK);
 }
 END_TEST
 

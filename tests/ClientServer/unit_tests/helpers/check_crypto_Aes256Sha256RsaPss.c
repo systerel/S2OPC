@@ -780,15 +780,18 @@ END_TEST
 
 START_TEST(test_cert_thumbprint_Aes256Sha256RsaPss)
 {
-    uint8_t thumb[20];
+    uint8_t* thumb = NULL;
+    uint32_t len = 0;
     char hexoutput[40];
 
     // Compute thumbprint
-    ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, thumb, 20) == SOPC_STATUS_OK);
-    SOPC_ReturnStatus status = SOPC_HelperEncode_Hex(thumb, hexoutput, 20);
+    ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, &thumb, &len) == SOPC_STATUS_OK);
+    SOPC_ReturnStatus status = SOPC_HelperEncode_Hex(thumb, hexoutput, len);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.
     ck_assert(memcmp(hexoutput, SRV_CRT_THUMB, strlen(SRV_CRT_THUMB) / 2) == 0);
+
+    SOPC_Free(thumb);
 }
 END_TEST
 

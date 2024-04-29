@@ -210,34 +210,27 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                 }
                 else
                 {
-                    if (SOPC_CryptoProvider_CertificateGetLength_Thumbprint(pProvider, &lenThmb) != SOPC_STATUS_OK)
+                    pThmb = NULL;
+                    if (NULL == pThmb || SOPC_KeyManager_Certificate_GetThumbprint(pProvider, pCert, (uint8_t**) &pThmb,
+                                                                                   &lenThmb) != SOPC_STATUS_OK)
                     {
-                        printf("<error calculating certificate thumbprint length>\n");
+                        printf("<failed to compute certificate thumbprint>\n");
                     }
                     else
                     {
-                        pThmb = SOPC_Calloc(lenThmb + 1, sizeof(char));
-                        if (NULL == pThmb || SOPC_KeyManager_Certificate_GetThumbprint(
-                                                 pProvider, pCert, (uint8_t*) pThmb, lenThmb) != SOPC_STATUS_OK)
+                        for (k = 0; k < lenThmb; ++k)
                         {
-                            printf("<failed to compute certificate thumbprint>\n");
-                        }
-                        else
-                        {
-                            for (k = 0; k < lenThmb; ++k)
-                            {
-                                nbCharThmb = printf("%02" SCNx8, pThmb[k]);
-                                SOPC_ASSERT(2 == nbCharThmb);
+                            nbCharThmb = printf("%02" SCNx8, pThmb[k]);
+                            SOPC_ASSERT(2 == nbCharThmb);
 
-                                if (k < lenThmb - 1)
-                                {
-                                    printf(":");
-                                }
+                            if (k < lenThmb - 1)
+                            {
+                                printf(":");
                             }
-                            printf("\n");
-                            SOPC_Free(pThmb);
-                            pThmb = NULL;
                         }
+                        printf("\n");
+                        SOPC_Free(pThmb);
+                        pThmb = NULL;
                     }
                     SOPC_KeyManager_Certificate_Free(pCert);
                     pCert = NULL;

@@ -549,74 +549,50 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 uint32_t thumbprintLength = 0;
                 int32_t runningAppCertComparison = 0;
 
-                status = SOPC_CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider,
-                                                                             &thumbprintLength);
-
-                if (SOPC_STATUS_OK == status && thumbprintLength > INT32_MAX)
-                {
-                    status = SOPC_STATUS_NOK;
-                    *errorStatus = OpcUa_BadCertificateInvalid;
-                }
-                else if (SOPC_STATUS_OK != status)
-                {
-                    *errorStatus = OpcUa_BadTcpInternalError;
-                }
-
+                status = SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider, runningAppCert,
+                                                                   &curAppCertThumbprint.Data, &thumbprintLength);
                 if (SOPC_STATUS_OK == status)
                 {
-                    if ((int32_t) thumbprintLength == receiverCertThumb.Length)
-                    {
-                        status = SOPC_ByteString_InitializeFixedSize(&curAppCertThumbprint, thumbprintLength);
-                        if (SOPC_STATUS_OK == status)
-                        {
-                            status =
-                                SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider, runningAppCert,
-                                                                          curAppCertThumbprint.Data, thumbprintLength);
-
-                            if (SOPC_STATUS_OK == status)
-                            {
-                                status = SOPC_ByteString_Compare(&curAppCertThumbprint, &receiverCertThumb,
-                                                                 &runningAppCertComparison);
-
-                                if (status != SOPC_STATUS_OK || runningAppCertComparison != 0)
-                                {
-                                    status = SOPC_STATUS_NOK;
-                                    *errorStatus = OpcUa_BadCertificateInvalid;
-
-                                    SOPC_Logger_TraceError(
-                                        SOPC_LOG_MODULE_CLIENTSERVER,
-                                        "ChunksMgr (asym cert): invalid receiver thumbprint (epCfgIdx=%" PRIu32
-                                        " scCfgIdx=%" PRIu32 ")",
-                                        epConfigIdx, scConfigIdx);
-                                }
-                            }
-                            else
-                            {
-                                *errorStatus = OpcUa_BadTcpInternalError;
-
-                                SOPC_Logger_TraceError(
-                                    SOPC_LOG_MODULE_CLIENTSERVER,
-                                    "ChunksMgr (asym cert): thumbprint computation failed (epCfgIdx=%" PRIu32
-                                    " scCfgIdx=%" PRIu32 ")",
-                                    epConfigIdx, scConfigIdx);
-                            }
-                        }
-                        else
-                        {
-                            *errorStatus = OpcUa_BadTcpInternalError;
-                        }
-                    }
-                    else
+                    if (thumbprintLength > INT32_MAX)
                     {
                         status = SOPC_STATUS_NOK;
                         *errorStatus = OpcUa_BadCertificateInvalid;
-
                         SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                                "ChunksMgr (asym cert): invalid thumbprint size (epCfgIdx=%" PRIu32
                                                " scCfgIdx=%" PRIu32 ")",
                                                epConfigIdx, scConfigIdx);
                     }
-                } // if thumbprint length correctly computed
+                    else
+                    {
+                        curAppCertThumbprint.Length = (int32_t) thumbprintLength;
+                    }
+                }
+
+                if (SOPC_STATUS_OK == status)
+                {
+                    status =
+                        SOPC_ByteString_Compare(&curAppCertThumbprint, &receiverCertThumb, &runningAppCertComparison);
+
+                    if (status != SOPC_STATUS_OK || runningAppCertComparison != 0)
+                    {
+                        status = SOPC_STATUS_NOK;
+                        *errorStatus = OpcUa_BadCertificateInvalid;
+
+                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                               "ChunksMgr (asym cert): invalid receiver thumbprint (epCfgIdx=%" PRIu32
+                                               " scCfgIdx=%" PRIu32 ")",
+                                               epConfigIdx, scConfigIdx);
+                    }
+                }
+                else
+                {
+                    *errorStatus = OpcUa_BadTcpInternalError;
+
+                    SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                           "ChunksMgr (asym cert): thumbprint computation failed (epCfgIdx=%" PRIu32
+                                           " scCfgIdx=%" PRIu32 ")",
+                                           epConfigIdx, scConfigIdx);
+                }
 
                 SOPC_ByteString_Clear(&curAppCertThumbprint);
             }
@@ -2500,37 +2476,26 @@ static bool SC_Chunks_EncodeAsymSecurityHeader(uint32_t scConnectionIdx,
             SOPC_ByteString recCertThumbprint;
             SOPC_ByteString_Initialize(&recCertThumbprint);
             uint32_t thumbprintLength = 0;
-            status =
-                SOPC_CryptoProvider_CertificateGetLength_Thumbprint(scConnection->cryptoProvider, &thumbprintLength);
+
+            status = SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider, receiverCertCrypto,
+                                                               &recCertThumbprint.Data, &thumbprintLength);
+            if (SOPC_STATUS_OK == status)
+            {
+                if (thumbprintLength > INT32_MAX)
+                {
+                    status = SOPC_STATUS_NOK;
+                }
+                else
+                {
+                    recCertThumbprint.Length = (int32_t) thumbprintLength;
+                }
+            }
             if (SOPC_STATUS_OK != status)
             {
                 result = false;
                 *errorStatus = OpcUa_BadTcpInternalError;
             }
 
-            if (result)
-            {
-                status = SOPC_ByteString_InitializeFixedSize(&recCertThumbprint, thumbprintLength);
-                if (thumbprintLength <= INT32_MAX && SOPC_STATUS_OK == status)
-                {
-                    // OK
-                }
-                else
-                {
-                    result = false;
-                    *errorStatus = OpcUa_BadTcpInternalError;
-                }
-            }
-            if (result)
-            {
-                status = SOPC_KeyManager_Certificate_GetThumbprint(scConnection->cryptoProvider, receiverCertCrypto,
-                                                                   recCertThumbprint.Data, thumbprintLength);
-                if (SOPC_STATUS_OK != status)
-                {
-                    result = false;
-                    *errorStatus = OpcUa_BadTcpInternalError;
-                }
-            }
             if (result)
             {
                 status = SOPC_ByteString_Write(&recCertThumbprint, buffer, 0);
