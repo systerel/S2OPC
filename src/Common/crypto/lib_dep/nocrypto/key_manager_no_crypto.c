@@ -146,13 +146,13 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_ToDER(const SOPC_CertificateList* 
 
 SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoProvider* pProvider,
                                                             const SOPC_CertificateList* pCert,
-                                                            uint8_t* pDest,
-                                                            uint32_t lenDest)
+                                                            uint8_t** pDest,
+                                                            uint32_t* lenDest)
 {
     SOPC_UNUSED_ARG(pCert);
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(pDest);
-    SOPC_UNUSED_ARG(lenDest);
+    SOPC_UNUSED_ARG(&pDest);
+    SOPC_UNUSED_ARG(&lenDest);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
