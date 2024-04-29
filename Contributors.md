@@ -38,3 +38,4 @@ the legal rights to contribute.
 * Eloïse Rotondo <eloise.rotondo@systerel.fr>
 * Nicolas Beauger <nicolas.beauger@systerel.fr>
 * Paul Chabas <paul.chabas@systerel.fr>
+* Darrys Abdelkrim <darrys.abdelkrim-stg@systerel.fr>
