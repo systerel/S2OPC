@@ -559,6 +559,11 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
             status = SOPC_CreateMonitoredItemsRequest_SetMonitoredItemParams(
                 createMonItReq, 0, OpcUa_MonitoringMode_Reporting, 0, -1, extObj, 1, true);
         }
+        if (SOPC_STATUS_OK != status)
+        {
+            SOPC_ExtensionObject_Clear(extObj);
+            SOPC_Free(extObj);
+        }
     }
 
     // Create the monitored items
