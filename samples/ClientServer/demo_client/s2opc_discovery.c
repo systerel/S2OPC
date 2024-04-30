@@ -211,8 +211,9 @@ static void PrintEndpoints(OpcUa_GetEndpointsResponse* pResp)
                 else
                 {
                     pThmb = NULL;
-                    if (NULL == pThmb || SOPC_KeyManager_Certificate_GetThumbprint(pProvider, pCert, (uint8_t**) &pThmb,
-                                                                                   &lenThmb) != SOPC_STATUS_OK)
+                    SOPC_ReturnStatus status =
+                        SOPC_KeyManager_Certificate_GetThumbprint(pProvider, pCert, (uint8_t**) &pThmb, &lenThmb);
+                    if (NULL == pThmb || SOPC_STATUS_OK != status)
                     {
                         printf("<failed to compute certificate thumbprint>\n");
                     }

@@ -39,6 +39,8 @@
 #include "sopc_pki_stack.h"
 #include "sopc_secret_buffer.h"
 
+#define SHA1_LEN 20u
+
 // Using fixtures
 static SOPC_CryptoProvider* crypto = NULL;
 
@@ -782,10 +784,11 @@ START_TEST(test_cert_thumbprint_Aes256Sha256RsaPss)
 {
     uint8_t* thumb = NULL;
     uint32_t len = 0;
-    char hexoutput[40];
+    char hexoutput[SHA1_LEN * 2];
 
     // Compute thumbprint
     ck_assert(SOPC_KeyManager_Certificate_GetThumbprint(crypto, crt_pub, &thumb, &len) == SOPC_STATUS_OK);
+    ck_assert_uint_eq(SHA1_LEN, len);
     SOPC_ReturnStatus status = SOPC_HelperEncode_Hex(thumb, hexoutput, len);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     // The expected thumbprint for this certificate was calculated with openssl tool, and mbedtls API.

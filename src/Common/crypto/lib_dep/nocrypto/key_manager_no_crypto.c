@@ -151,8 +151,8 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
 {
     SOPC_UNUSED_ARG(pCert);
     SOPC_UNUSED_ARG(pProvider);
-    SOPC_UNUSED_ARG(&pDest);
-    SOPC_UNUSED_ARG(&lenDest);
+    SOPC_UNUSED_ARG(pDest);
+    SOPC_UNUSED_ARG(lenDest);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
