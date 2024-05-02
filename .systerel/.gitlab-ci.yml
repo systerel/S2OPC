@@ -440,12 +440,13 @@ test-uactt:
   variables:
     <<: *nominal_test_variables
     LINUX_UACTT: 1
-  rules: # repeat .test-uactt variables exception since overwritten here
-    - if: "$NO_TESTS == null && $WINDOWS_TEST == null && $CROSS_COMPILE == null && \
-           $WITH_COVERITY == null && $WITH_COVERAGE == null && $WITH_DOC == null && \
-           $S2OPC_PUBSUB_ONLY == null && $ALL_BUILDS == null && $ALL_TESTS == null"
-           # + no UACTT tests on PubSub + excludes ALL_BUILDS + excludes ALL_TESTS
-      when: on_success 
+  rules:
+    - if: "$NO_TESTS != null || $WINDOWS_TEST != null || $CROSS_COMPILE != null || \
+           $WITH_COVERITY != null || $WITH_COVERAGE != null || $WITH_DOC != null || \
+           $S2OPC_PUBSUB_ONLY != null || $ALL_BUILDS != null || $ALL_TESTS != null"
+      when: never
+    - if: "$CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_BRANCH == 'master' || $CI_COMMIT_TAG"
+      when: on_success
 
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
