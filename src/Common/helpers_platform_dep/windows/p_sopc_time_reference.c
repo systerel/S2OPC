@@ -17,39 +17,22 @@
  * under the License.
  */
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <windows.h>
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_time_reference.h"
 
-#include "sopc_time.h"
-
-#define US_TO_MS 1000
-
-/***************************************************/
-int64_t SOPC_Time_GetCurrentTimeUTC(void)
+#define US_TO_MS (1000)
+/** Definition of SOPC_HighRes_TimeReference */
+struct SOPC_HighRes_TimeReference
 {
-    int64_t result = 0;
-    FILETIME fileCurrentTime;
-    ULARGE_INTEGER currentTime;
-
-    GetSystemTimeAsFileTime(&fileCurrentTime);
-    currentTime.LowPart = fileCurrentTime.dwLowDateTime;
-    currentTime.HighPart = fileCurrentTime.dwHighDateTime;
-
-    if (currentTime.QuadPart < INT64_MAX)
-    {
-        result = (int64_t) currentTime.QuadPart;
-    }
-    else
-    {
-        result = INT64_MAX;
-    }
-
-    return result;
-}
+    uint64_t ticksMs;
+};
 
 /***************************************************/
 SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
@@ -67,22 +50,9 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 }
 
 /***************************************************/
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
-{
-    return (localtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-}
-
-/***************************************************/
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
-{
-    return (gmtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
-}
-
-/***************************************************/
-bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t, SOPC_ClockId clockId)
+bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != t);
-    SOPC_UNUSED_ARG(clockId);
     return false; // not implemented in Windows
 }
 
@@ -118,4 +88,42 @@ bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* dat
 {
     SOPC_UNUSED_ARG(date);
     return false; // not implemented in Windows
+}
+
+/***************************************************/
+SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void)
+{
+    SOPC_HighRes_TimeReference* ret = SOPC_Calloc(1, sizeof(SOPC_HighRes_TimeReference));
+    if (NULL != ret)
+    {
+        bool ok = SOPC_HighRes_TimeReference_GetTime(ret);
+        if (!ok)
+        {
+            SOPC_HighRes_TimeReference_Delete(&ret);
+        }
+    }
+
+    return ret;
+}
+
+/***************************************************/
+void SOPC_HighRes_TimeReference_Delete(SOPC_HighRes_TimeReference** t)
+{
+    if (NULL == t)
+    {
+        return;
+    }
+    SOPC_Free(*t);
+    *t = NULL;
+}
+
+/***************************************************/
+bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
+{
+    if (NULL == from || NULL == to)
+    {
+        return false;
+    }
+    *to = *from;
+    return true;
 }

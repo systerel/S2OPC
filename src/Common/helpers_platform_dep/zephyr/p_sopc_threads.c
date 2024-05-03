@@ -469,3 +469,17 @@ SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 
     return resultSOPC;
 }
+
+/***************************************************/
+void SOPC_Sleep(unsigned int milliseconds)
+{
+    if (milliseconds > 0)
+    {
+        k_sleep(K_MSEC(milliseconds));
+    }
+    else
+    {
+        k_yield();
+    }
+    return;
+}

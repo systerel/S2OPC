@@ -17,24 +17,19 @@
  * under the License.
  */
 
-/** \file
- *
- * Zephyr specific implementation of "sopc_platform_time.h"
- */
+#ifndef P_SOPC_COMMON_TIME_H
+#define P_SOPC_COMMON_TIME_H
 
-#ifndef SOPC_P_TIME_H_
-#define SOPC_P_TIME_H_
-
-#include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
-/** Definition of SOPC_HighRes_TimeReference */
-typedef struct
-{
-    /* Internal unit is 100ns. 64 bits are enough to store more than 1000 years.
-       Reference is boot time*/
-    uint64_t tick100ns;
-} SOPC_HighRes_TimeReference;
+/* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
+ * There are configTICK_RATE_HZ per second.
+ */
+uint64_t P_SOPC_COMMON_TIME_get_tick(void);
 
-#endif /* SOPC_P_TIME_H_ */
+/* Appy an offset in second to internal reference
+ */
+void P_SOPC_COMMON_TIME_SetDateOffset(int64_t nbSecOffset);
+
+#endif

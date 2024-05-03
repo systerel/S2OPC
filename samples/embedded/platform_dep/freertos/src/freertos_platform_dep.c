@@ -57,6 +57,7 @@
 #include "mbedtls/entropy_poll.h"
 
 #include "freertos_shell.h"
+#include "p_sopc_common_time.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
@@ -265,6 +266,6 @@ void SOPC_Platform_Target_Debug(const char* param)
     }
     else if (0 == strncmp(param, "date", 4))
     {
-        P_TIME_SetDateOffset(atoi(param + 4));
+        P_SOPC_COMMON_TIME_SetDateOffset(atoi(param + 4));
     }
 }

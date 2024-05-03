@@ -49,8 +49,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "p_sopc_time.h"
-
 /**
  * \brief Possible time sources
  */
@@ -77,7 +75,7 @@ SOPC_Time_TimeSource SOPC_Time_GetTimeSource(void);
  *          and remote PtP time is perfectly synchronized and stable with S2OPC internal clock)
  *  - 0.0 if there is no PtP synchronization (not PtP SLAVE or SLAVE but with clock failed to stabilize)
  */
-float SOPC_HighRes_TimeReference_GetClockPrecision(void);
+float SOPC_Time_GetClockPrecision(void);
 
 /**
  * \brief Provides the information about clock discrepancy towards a PtP master
@@ -85,6 +83,6 @@ float SOPC_HighRes_TimeReference_GetClockPrecision(void);
  *  < 1.0 when local clock is faster than actual (PtP) time
  *  > 1.0 when local clock is slower than actual (PtP) time
  */
-float SOPC_HighRes_TimeReference_GetClockCorrection(void);
+float SOPC_Time_GetClockCorrection(void);
 
 #endif /* SOPC_ZEPHYR_TIME_H_ */
