@@ -198,7 +198,8 @@ SETS
         e_buffer_in_msg_not_read,
         e_buffer_in_msg_type_read,
         e_buffer_in_msg_header_read,
-        e_buffer_in_msg_read};
+        e_buffer_in_msg_read,
+        e_buffer_in_msg_error};
 
     t_buffer_out_state_i = {c_buffer_out_state_indet,
         e_buffer_out_msg_written};

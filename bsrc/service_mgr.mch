@@ -75,7 +75,7 @@ OPERATIONS
             valid := FALSE ||
             resp_typ := c_msg_type_indet ||
             /* The input buffer may become invalid */
-            a_buffer_in_state :: {a_buffer_in_state, c_buffer_in_state_indet}
+            a_buffer_in_state :: {a_buffer_in_state, e_buffer_in_msg_error}
         END
     END
     ;
@@ -99,8 +99,7 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet ||
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
@@ -132,8 +131,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
     END
     ;
 
@@ -158,9 +156,7 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        /* The input buffer and associated types have been freed */
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet ||
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         valid_req, async_resp, sc, buffer_out, a_buffer_out_state :(
             valid_req : BOOL &
             async_resp : BOOL &
@@ -198,8 +194,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
     END
     ;
 
@@ -222,8 +217,7 @@ OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet ||
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
             sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
@@ -255,8 +249,7 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state := c_buffer_in_state_indet ||
-        a_msg_in_type := c_msg_type_indet
+        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
     END
     ;
 
@@ -685,10 +678,31 @@ OPERATIONS
             :(a_msg_in_type : t_msg_type_i & a_msg_in_type : t_msg_type &
               msg_typ = a_msg_in_type)
         OR
-            a_buffer_in_state := c_buffer_in_state_indet ||
+            a_buffer_in_state := e_buffer_in_msg_error ||
             bres := FALSE ||
             msg_typ := c_msg_type_indet
         END
+    END
+    ;
+
+    dealloc_msg_in (msg) =
+    PRE
+        msg : t_msg_i &
+        msg = c_msg_in &
+        c_msg_in : t_msg &
+        a_msg_in_type : t_msg_type
+    THEN
+        c_msg_in := c_msg_indet
+    END
+    ;
+
+    dealloc_msg_in_buffer (msg_buffer) =
+    PRE
+        msg_buffer : t_byte_buffer_i &
+        msg_buffer : t_byte_buffer
+    THEN
+        a_buffer_in_state := c_buffer_in_state_indet ||
+        a_msg_in_type := c_msg_type_indet
     END
     ;
 
@@ -706,18 +720,6 @@ OPERATIONS
         OR
             msg_typ := c_msg_type_indet
         END
-    END
-    ;
-
-    dealloc_msg_in (msg) =
-    PRE
-        msg : t_msg_i &
-        msg = c_msg_in &
-        c_msg_in : t_msg &
-        a_msg_in_type : t_msg_type
-    THEN
-        c_msg_in := c_msg_indet ||
-        a_msg_in_type := c_msg_type_indet
     END
     ;
 

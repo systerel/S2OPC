@@ -409,7 +409,10 @@ OPERATIONS
                         THEN
                             /* Retrieve expected response type in case of service fault */
                             l_valid_resp, l_exp_msg_type <-- client_service_fault_to_resp_type (buffer);
-                            l_msg_service_class <-- get_msg_service_class (l_exp_msg_type)
+                            IF l_valid_resp = TRUE
+                            THEN
+                                l_msg_service_class <-- get_msg_service_class (l_exp_msg_type)
+                            END
                         ELSE
                             l_valid_resp := TRUE
                         END
@@ -442,6 +445,8 @@ OPERATIONS
             END
         END
         ;
+        /* In any case buffer dealloc the buffer before end of operation */
+        dealloc_msg_in_buffer (buffer);
         clear_app_call_context
     END
     ;

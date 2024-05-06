@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 25/04/2024 09:37:49
+ Date                 : 06/05/2024 15:32:33
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -847,7 +847,6 @@ void service_mgr__server_receive_session_treatment_req(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
       *service_mgr__buffer_out = service_mgr__l_buffer_out;
       *service_mgr__valid_req = ((service_mgr__l_valid_req_header == true) &&
          (service_mgr__l_valid_req == true));
@@ -896,7 +895,6 @@ void service_mgr__client_receive_session_treatment_resp(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
 }
 
@@ -964,7 +962,6 @@ void service_mgr__server_receive_session_service_req(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
 }
 
@@ -1022,7 +1019,6 @@ void service_mgr__client_receive_session_service_resp(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
 }
 
@@ -1103,7 +1099,6 @@ void service_mgr__server_receive_discovery_service_req(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
       *service_mgr__buffer_out = service_mgr__l_buffer_out;
       *service_mgr__valid_req = ((service_mgr__l_valid_req_header == true) &&
          (service_mgr__l_valid_req == true));
@@ -1156,7 +1151,6 @@ void service_mgr__client_receive_discovery_service_resp(
          }
          message_in_bs__dealloc_msg_in_header(service_mgr__l_resp_msg_header);
       }
-      message_in_bs__dealloc_msg_in_buffer(service_mgr__msg_buffer);
    }
 }
 

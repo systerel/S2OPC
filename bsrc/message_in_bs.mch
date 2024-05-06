@@ -85,7 +85,7 @@ OPERATIONS
             req_handle :: t_client_request_handle_i
         OR
             // Buffer not valid anymore
-            a_buffer_in_state := c_buffer_in_state_indet ||
+            a_buffer_in_state := e_buffer_in_msg_error ||
             req_handle := c_client_request_handle_indet
         END
     END
@@ -110,7 +110,7 @@ OPERATIONS
               c_msg_in_header : t_msg_header &
               msg_header = c_msg_in_header)
         OR
-            a_buffer_in_state := c_buffer_in_state_indet ||
+            a_buffer_in_state := e_buffer_in_msg_error ||
             bres := FALSE ||
             msg_header := c_msg_header_indet
         END
@@ -132,7 +132,6 @@ OPERATIONS
         a_msg_in_type : t_msg_type
     THEN
         CHOICE
-            // TODO: free the msg buffer ! (except if lazy decoding linked to buffer)
             a_buffer_in_state := e_buffer_in_msg_read ||
             bres := TRUE ||
             c_msg_in, msg
@@ -140,7 +139,7 @@ OPERATIONS
               c_msg_in : t_msg &
               msg = c_msg_in)
         OR
-            a_buffer_in_state := c_buffer_in_state_indet ||
+            a_buffer_in_state := e_buffer_in_msg_error ||
             bres := FALSE ||
             msg := c_msg_indet
         END
@@ -164,8 +163,7 @@ OPERATIONS
         c_msg_in : t_msg &
         a_msg_in_type : t_msg_type
     THEN
-        c_msg_in := c_msg_indet ||
-        a_msg_in_type := c_msg_type_indet
+        c_msg_in := c_msg_indet
     END
     ;
 
@@ -208,8 +206,7 @@ OPERATIONS
         msg = c_msg_in &
         c_msg_in : t_msg
     THEN
-        c_msg_in := c_msg_indet ||
-        a_msg_in_type := c_msg_type_indet
+        c_msg_in := c_msg_indet
     END
     ;
 

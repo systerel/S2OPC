@@ -49,6 +49,7 @@ PROMOTES
     is_valid_request_context,
     bless_msg_in,
     dealloc_msg_in,
+    dealloc_msg_in_buffer,
 
     /* message_out_bs */
     bless_msg_out,
@@ -220,9 +221,8 @@ LOCAL_OPERATIONS
         a_msg_out_type = c_msg_type_indet &
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
-        a_buffer_in_state :: {a_buffer_in_state, e_buffer_in_msg_read, c_buffer_in_state_indet} ||
+        a_buffer_in_state :: {a_buffer_in_state, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         c_msg_in := c_msg_indet ||
-        a_msg_in_type :: {a_msg_in_type, c_msg_type_indet} ||
         d_adsp_nodes_variables :( d_adsp_nodes_invariant ) ||
         p_sc, p_valid_req, p_async, p_resp_typ, p_resp_header, p_resp_msg,
         a_msg_out_type, c_msg_out_header, c_msg_out :(
@@ -940,8 +940,6 @@ OPERATIONS
             END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
         END; /* DECODE REQ HEADER CHECK */
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
         valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
     END
@@ -974,10 +972,7 @@ OPERATIONS
                 client_remove_req_handle (l_request_handle)
             END; /* VALID RESP HEADER CHECK */
             dealloc_msg_in_header (l_resp_msg_header)
-        END; /* DECODE RESP HEADER CHECK */
-
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer)
+        END /* DECODE RESP HEADER CHECK */
     END
     ;
 
@@ -1015,9 +1010,7 @@ OPERATIONS
             END
             ;
             dealloc_msg_in_header (l_req_msg_header)
-        END; /* DECODE REQ HEADER CHECK */
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer)
+        END /* DECODE REQ HEADER CHECK */
     END
     ;
 
@@ -1058,10 +1051,7 @@ OPERATIONS
                 client_remove_req_handle (l_request_handle)
             END; /* VALID REQ HANDLE */
             dealloc_msg_in_header (l_resp_msg_header)
-        END; /* DECODE RESP HEADER CHECK */
-
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer)
+        END /* DECODE RESP HEADER CHECK */
     END
     ;
 
@@ -1120,8 +1110,6 @@ OPERATIONS
             END; /* DECODE REQ CHECK */
             dealloc_msg_in_header (l_req_msg_header)
         END; /* DECODE REQ HEADER CHECK */
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer);
         buffer_out := l_buffer_out;
         valid_req := bool(l_valid_req_header = TRUE & l_valid_req = TRUE)
     END
@@ -1158,9 +1146,7 @@ OPERATIONS
                 client_remove_req_handle (l_request_handle)
             END; /* VALID REQ HANDLE */
             dealloc_msg_in_header (l_resp_msg_header)
-        END; /* DECODE RESP HEADER CHECK */
-        /* In any case buffer will not be used anymore after this operation */
-        dealloc_msg_in_buffer (msg_buffer)
+        END /* DECODE RESP HEADER CHECK */
     END
     ;
 

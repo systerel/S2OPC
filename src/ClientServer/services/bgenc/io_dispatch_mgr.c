@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 24/04/2024 15:53:30
+ Date                 : 06/05/2024 15:32:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -364,8 +364,10 @@ void io_dispatch_mgr__receive_msg_buffer(
                   service_mgr__client_service_fault_to_resp_type(io_dispatch_mgr__buffer,
                      &io_dispatch_mgr__l_valid_resp,
                      &io_dispatch_mgr__l_exp_msg_type);
-                  io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_exp_msg_type,
-                     &io_dispatch_mgr__l_msg_service_class);
+                  if (io_dispatch_mgr__l_valid_resp == true) {
+                     io_dispatch_mgr__get_msg_service_class(io_dispatch_mgr__l_exp_msg_type,
+                        &io_dispatch_mgr__l_msg_service_class);
+                  }
                }
                else {
                   io_dispatch_mgr__l_valid_resp = true;
@@ -406,6 +408,7 @@ void io_dispatch_mgr__receive_msg_buffer(
             break;
          }
       }
+      service_mgr__dealloc_msg_in_buffer(io_dispatch_mgr__buffer);
       app_cb_call_context_bs__clear_app_call_context();
    }
 }

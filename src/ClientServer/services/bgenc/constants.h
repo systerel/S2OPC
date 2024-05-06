@@ -21,7 +21,7 @@
 
  File Name            : constants.h
 
- Date                 : 19/01/2024 16:40:47
+ Date                 : 06/05/2024 15:32:27
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -191,7 +191,8 @@ typedef enum {
    constants__e_buffer_in_msg_not_read,
    constants__e_buffer_in_msg_type_read,
    constants__e_buffer_in_msg_header_read,
-   constants__e_buffer_in_msg_read
+   constants__e_buffer_in_msg_read,
+   constants__e_buffer_in_msg_error
 } constants__t_buffer_in_state_i;
 typedef enum {
    constants__c_buffer_out_state_indet,
