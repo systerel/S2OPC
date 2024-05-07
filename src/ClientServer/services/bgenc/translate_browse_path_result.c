@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 10/04/2024 09:42:23
+ Date                 : 07/05/2024 09:45:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -216,13 +216,10 @@ void translate_browse_path_result__treat_browse_result_one_source(
             translate_browse_path_result__targetName,
             translate_browse_path_result__l_browseResult_index,
             &translate_browse_path_result__l_translate_statusCode);
-         if (translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__c_StatusCode_indet) {
-            if (translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__e_sc_ok) {
-               *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
-            }
-            else if (*translate_browse_path_result__statusCode_operation != constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server) {
-               *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
-            }
+         if ((translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__c_StatusCode_indet) &&
+            ((translate_browse_path_result__l_translate_statusCode != constants_statuscodes_bs__e_sc_ok) ||
+            (*translate_browse_path_result__statusCode_operation != constants_statuscodes_bs__e_sc_uncertain_reference_out_of_server))) {
+            *translate_browse_path_result__statusCode_operation = translate_browse_path_result__l_translate_statusCode;
          }
          translate_browse_path_result__l_continue = ((translate_browse_path_result__l_continue == true) &&
             (((*translate_browse_path_result__statusCode_operation == constants_statuscodes_bs__e_sc_ok) ||

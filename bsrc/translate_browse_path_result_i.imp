@@ -669,15 +669,13 @@ OPERATIONS
                 treat_browse_result_one_source_1(path_index, targetName,
                                                  l_browseResult_index);
 
-            IF l_translate_statusCode /= c_StatusCode_indet THEN
-                /* keep old status if operation is OK but get an out of server previoulsy */
-                /* therefore new status code is registered only if it is different from e_sc_ok
-                   or current status code is different from e_sc_uncertain_reference_out_of_server */
-                IF l_translate_statusCode /= e_sc_ok THEN
-                    statusCode_operation := l_translate_statusCode
-                ELSIF statusCode_operation /= e_sc_uncertain_reference_out_of_server THEN
-                    statusCode_operation := l_translate_statusCode
-                END
+            /* keep old status if operation is OK but get an out of server previoulsy */
+            /* therefore new status code is registered only if it is different from e_sc_ok
+               or current status code is different from e_sc_uncertain_reference_out_of_server */
+            IF (l_translate_statusCode /= c_StatusCode_indet &
+                (l_translate_statusCode /= e_sc_ok or
+                 statusCode_operation /= e_sc_uncertain_reference_out_of_server)) THEN
+                statusCode_operation := l_translate_statusCode
             END
             ;
             l_continue := bool(l_continue = TRUE &
