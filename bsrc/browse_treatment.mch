@@ -353,7 +353,6 @@ OPERATIONS
 
     p_nb_references, p_browseResult <-- getall_and_move_browse_result =
     PRE
-        isBrowseValueContextDefined = FALSE &
         isBrowseResultComputed = TRUE
     THEN
         p_nb_references := out_BrowseResult_nb_References ||
