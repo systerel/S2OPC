@@ -108,7 +108,8 @@ DEFINITIONS
 
     d_inv_browse_result_status ==
         isBrowseResultComputed             : BOOL &
-        isBrowseResultAllocated            : BOOL
+        isBrowseResultAllocated            : BOOL &
+        (isBrowseResultComputed = TRUE => isBrowseResultAllocated = TRUE)
     ;
 
     d_inv_iter_browse_path_idx ==
