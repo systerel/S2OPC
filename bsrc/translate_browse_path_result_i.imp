@@ -352,7 +352,9 @@ LOCAL_OPERATIONS
         includedSubtypes : BOOL
     THEN
         statusCode_operation,
-        nbReferences
+        nbReferences,
+        d_var_browse_result_out,
+        d_var_browse_result_status
         :(
             statusCode_operation : t_StatusCode_i &
             statusCode_operation :  {e_sc_ok,
@@ -364,11 +366,8 @@ LOCAL_OPERATIONS
             nbReferences : NAT &
             nbReferences <= k_n_BrowseTarget_max &
 
-            (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE)
-        ) ||
+            (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE) &
 
-        d_var_browse_result_out,
-        d_var_browse_result_status:(
             d_inv_browse_result_out &
             d_inv_browse_result_status
         )
