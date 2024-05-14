@@ -204,12 +204,6 @@ OPERATIONS
                 e_sc_bad_query_too_complex, e_sc_bad_no_match, e_sc_bad_too_many_matches,
                 e_sc_bad_node_id_invalid, e_sc_bad_out_of_memory,
                 e_sc_bad_unexpected_error}
-        ) ||
-
-        isBrowseValueContextDefined,
-        isBrowseResultComputed
-        :(  isBrowseValueContextDefined : BOOL &
-            isBrowseResultComputed : BOOL
         )
     END
     ;
