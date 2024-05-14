@@ -645,9 +645,9 @@ OPERATIONS
                                               includedSubtypes);
         ASSERT statusCode_operation /= c_StatusCode_indet THEN
             IF statusCode_operation = e_sc_ok THEN
-                statusCode_operation <-- treat_browse_result_one_source(path_index, targetName, l_nbReferences);
-                clear_browse_result
-            END
+                statusCode_operation <-- treat_browse_result_one_source(path_index, targetName, l_nbReferences)
+            END;
+            clear_browse_result
         END
     END
     ;

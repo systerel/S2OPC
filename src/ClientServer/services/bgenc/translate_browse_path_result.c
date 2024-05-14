@@ -21,7 +21,7 @@
 
  File Name            : translate_browse_path_result.c
 
- Date                 : 07/05/2024 09:45:49
+ Date                 : 04/06/2024 15:10:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -191,8 +191,8 @@ void translate_browse_path_result__treat_one_relative_path_element_2(
             translate_browse_path_result__targetName,
             translate_browse_path_result__l_nbReferences,
             translate_browse_path_result__statusCode_operation);
-         browse_treatment__clear_browse_result();
       }
+      browse_treatment__clear_browse_result();
    }
 }
 
