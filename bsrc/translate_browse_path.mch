@@ -50,10 +50,11 @@ DEFINITIONS
         ;
 
     d_variables_browse ==
-    BrowseContext_MaxNbTargets,
-    isBrowseValueContextDefined,
-    isBrowseResultComputed
-    ;
+        BrowseContext_MaxNbTargets,
+        isBrowseValueContextDefined,
+        isBrowseResultAllocated,
+        isBrowseResultComputed
+        ;
 
     d_inv_in ==
         IsDecoded                      : BOOL                                 &
@@ -98,9 +99,10 @@ DEFINITIONS
 
 
     d_inv_browse ==
-    BrowseContext_MaxNbTargets : NAT &
-    isBrowseValueContextDefined   : BOOL &
-    isBrowseResultComputed        : BOOL
+        BrowseContext_MaxNbTargets  : NAT &
+        isBrowseValueContextDefined : BOOL &
+        isBrowseResultAllocated     : BOOL &
+        isBrowseResultComputed      : BOOL
     ;
 
     d_init ==
@@ -135,6 +137,7 @@ DEFINITIONS
     :(
         BrowseContext_MaxNbTargets = 0 &
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated     = FALSE &
         isBrowseResultComputed      = FALSE
     )
 
@@ -291,12 +294,18 @@ OPERATIONS
     p_serviceStatusCode, p_continuationPointId, p_nbReferences <-- compute_browse_result =
     PRE
         isBrowseValueContextDefined = TRUE &
+        isBrowseResultAllocated = FALSE &
         isBrowseResultComputed = FALSE
     THEN
         p_serviceStatusCode,
         p_continuationPointId,
-        p_nbReferences
+        p_nbReferences,
+        isBrowseResultAllocated,
+        isBrowseResultComputed
         :(
+          isBrowseResultAllocated : BOOL &
+          isBrowseResultComputed  : BOOL &
+
           p_serviceStatusCode : t_StatusCode_i &
           p_serviceStatusCode : t_StatusCode   &
           p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
