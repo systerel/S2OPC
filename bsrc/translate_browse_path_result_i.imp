@@ -133,6 +133,8 @@ LOCAL_OPERATIONS
     statusCode_operation <-- treat_one_relative_path_element_1(browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     PRE
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         browseDirection : t_BrowseDirection_i &
         browseDirection : t_BrowseDirection &
         referenceTypeId : t_NodeId_i &
@@ -181,6 +183,8 @@ LOCAL_OPERATIONS
     statusCode_operation <-- treat_one_relative_path_element_2(loop_index, browseDirection, referenceTypeId, includedSubtypes, path_index, targetName) =
     PRE
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         loop_index : NAT1 &
         /* Target elements in the BrowsePathResult are computed from a source
            that is an element of BrowsePathSource */
@@ -344,6 +348,8 @@ LOCAL_OPERATIONS
     statusCode_operation, nbReferences <-- compute_browse_result_from_source(source, browseDirection, referenceTypeId, includedSubtypes) =
     PRE
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         source : t_NodeId_i &
         /* the source is taken from BrowsePathSource */
         source : ran(BrowsePathSource) &

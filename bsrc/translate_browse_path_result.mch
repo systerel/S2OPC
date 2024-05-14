@@ -86,6 +86,8 @@ OPERATIONS
     PRE
         IsDecoded = TRUE &
         isBrowseValueContextDefined = FALSE   &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         relativePathElt : t_RelativePathElt_i &
         relativePathElt : t_RelativePathElt   &
         relativePathElt : s_RelativePathElt   &

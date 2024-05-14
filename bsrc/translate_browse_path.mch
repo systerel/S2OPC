@@ -190,6 +190,8 @@ OPERATIONS
     PRE
         IsDecoded = TRUE &
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         browsePath : t_BrowsePath_i &
         browsePath : BrowsePaths &
         dom(BrowsePath_Res_NbTargetMax) = BrowsePaths

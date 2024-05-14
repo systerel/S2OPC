@@ -259,6 +259,8 @@ LOCAL_OPERATIONS
     PRE
         IsDecoded = TRUE &
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         source : t_NodeId_i &
         source : t_NodeId   &
         rel_path : t_RelativePath_i &
@@ -296,6 +298,8 @@ LOCAL_OPERATIONS
     PRE
         IsDecoded = TRUE &
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated = FALSE &
+        isBrowseResultComputed = FALSE  &
         rel_path_elt : t_RelativePathElt_i &
         rel_path_elt : t_RelativePathElt   &
         rel_path_elt : s_RelativePathElt   &
