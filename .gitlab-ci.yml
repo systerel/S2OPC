@@ -560,7 +560,10 @@ generate_sbom:
       - "sbom.json"
   rules:
     - changes:
-        - conanfile.py
+        compare_to: master
+        paths: 
+          - conanfile.py
+    - if: "$SCAN_SBOM != null"
 
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
@@ -579,7 +582,9 @@ scan_sbom:
       - "vulnerabilities_table.txt"
   rules:
     - changes:
-        - conanfile.py
+        compare_to: master
+        paths: 
+          - conanfile.py
     - if: "$SCAN_SBOM != null"
 
 
