@@ -17,7 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-set -o errexit                                                                                          
+set -o errexit  
 set -o nounset                                                                                          
 set -o pipefail 
 
@@ -40,16 +40,28 @@ sed -i -e 's/encrypted_server_4k_key.pem/server_4k_key.pem/' -e 's/\(encrypted=\
 #Change the type of server of the demo server.
 sed -i '\,</ApplicationDescription>,i <ApplicationType type="DiscoveryServer"/>' S2OPC_Server_Demo_Config.xml
 
-#Change fuzzer's logger to output into txt file and download opcua_network_fuzzer requirements
-sed -i -e '\~#\ index_end=1\ for\ only\ one\ session~a\        txt_logs\ =\ open("/dev/null", "w")' -e 's/\(index_end=None\)\([)]\)/\1,fuzz_loggers=[FuzzLoggerText(file_handle=txt_logs)])/' /work/opcua_network_fuzzer/fuzzer.py
-python3 -m pip install -r /work/opcua_network_fuzzer/requirements.txt
+#Download opcua_network_fuzzer requirements
+python3 -m pip install -r /work/opcua_network_fuzzer-main/requirements.txt
 
 # Fuzz all possible requests 
 export TEST_SERVER_XML_CONFIG=./S2OPC_Server_Demo_Config.xml TEST_SERVER_XML_ADDRESS_SPACE=./S2OPC_Demo_NodeSet.xml TEST_USERS_XML_CONFIG=./S2OPC_Users_Demo_Config.xml
-request_list=("read_request browse_request create_subscription_request browse_next_request add_nodes_request")
+request_list=(read_request browse_request create_subscription_request browse_next_request add_nodes_request)
 cd ../..
-for request in $request_list
+for request in "${request_list[@]}"
 do 
-echo FUZZING $request
-python3 tests/ClientServer/scripts/with-opc-server.py --server-wd build/bin --server-cmd ./toolkit_demo_server "python3" /work/opcua_network_fuzzer/opcua_fuzzer.py --target_host_ip localhost --target_host_port 4841 --target_app_name s2opc --r $request
+    echo FUZZING "$request"
+    if !  timeout --preserve-status --verbose -k 30s 4h python3 tests/ClientServer/scripts/with-opc-server.py --server-wd build/bin --server-cmd ./toolkit_demo_server "python3" /work/opcua_network_fuzzer-main/opcua_fuzzer.py --target_host_ip localhost --target_host_port 4841 --target_app_name s2opc --r "$request" ; then
+        exit_status=$?
+        echo fuzzing of "$request" ended with SUCCESS! 
+        echo Exit status : $exit_status
+        
+    else
+        crash_status=$?
+        echo "$request" ended with an ERROR!
+        echo Exit status : $crash_status
+        exit $crash_status
+    fi
+    
 done
+
+    

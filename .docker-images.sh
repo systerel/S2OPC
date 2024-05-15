@@ -32,3 +32,4 @@ FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09
 GEN_DIGEST=docker.aix.systerel.fr/c838/gen@sha256:e7c7f0427d49d162c66410e05eb04a5859ec5e87a04d2ee82bbf25772acf7adf # docker.aix.systerel.fr/c838/gen:1.4
 UACTT_WIN_DIGEST=com.systerel.fr:5000/c838/uactt-win@sha256:98b4488aa85310d1e668af8f42be4973e2e7494fe9f44adbaf81896f794db794 # com.systerel.fr:5000/c838/uactt-win:2.3
 UACTT_LINUX_DIGEST=com.systerel.fr:5000/c838/uactt-linux@sha256:e63916a03bf824d9d9f1f5b16479605c663507ab829b2fbc131f2b6b4666935f # com.systerel.fr:5000/c838/uactt-linux:1.4
+NETWORK_FUZZING_DIGEST=com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #com.systerel.fr:5000/c838/opcua-network-fuzzer:3.0

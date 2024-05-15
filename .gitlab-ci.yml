@@ -364,7 +364,7 @@ build-freertos:
 
 build-fuzz:
   stage: build
-  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:2e8688172d2b87d5eac892ec5b3ed08bb2083f5bc3ef66ae0bcca2936ed3b40f #2.0 digest
+  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
   script:
@@ -374,7 +374,6 @@ build-fuzz:
     name: 'fuzzing-results_job${CI_JOB_ID}'
     paths:
       - "./boofuzz-results"
-      - "./logs"
     when: on_failure
     expire_in: "30 days"
   timeout: 24 hours
@@ -383,7 +382,6 @@ build-fuzz:
   rules: 
     - if: "$TEST_NETWORK_FUZZ != null"
       when: always
-
 
 ###
 # Test jobs
