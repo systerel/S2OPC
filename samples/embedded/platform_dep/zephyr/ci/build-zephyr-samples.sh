@@ -61,15 +61,19 @@ $IS_INTERACTIVE && exit 1
 
 function build() {
   export BOARD=$1
-  export APP=$2
+  shift
+  export APP=$1
+  shift
+  export ADD_CONF=$*
   echo "Starting docker to build ${APP} for ${BOARD}"
 
   (docker run --rm -v ${HOST_DIR}:/zephyrproject/s2opc -w /zephyrproject/s2opc ${ZEPHYR_DIGEST}\
-     samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP})&
+     samples/embedded/platform_dep/zephyr/ci/${SCRIPT} ${BOARD} ${APP} ${ADD_CONF})&
   wait $!
   echo "Result = $?"
 }
 build stm32h735g_disco cli_client
+build stm32h735g_disco cli_client -DCONFIG_NET_GPTP=y
 build mimxrt1064_evk cli_pubsub_server
 build native_posix_64 cli_pubsub_server  -DCONFIG_SOPC_CRYPTO_LIB_NAME=\"nocrypto\" -DCONFIG_MBEDTLS=n
 build native_posix_64 cli_pubsub_server

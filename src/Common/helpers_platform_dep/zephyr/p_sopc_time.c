@@ -33,9 +33,9 @@
 #include <zephyr/net/gptp.h>
 #include <zephyr/net/net_core.h>
 // Include MUST follow this order
-#include <zephyr/ethernet/gptp/gptp_messages.h>
+#include <ethernet/gptp/gptp_messages.h>
 // Include MUST follow this order
-#include <zephyr/ethernet/gptp/gptp_data_set.h>
+#include <ethernet/gptp/gptp_data_set.h>
 #endif
 
 #ifndef __INT32_MAX__
