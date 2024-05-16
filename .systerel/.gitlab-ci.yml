@@ -290,6 +290,27 @@ build-freertos:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
+build-fuzz:
+  stage: build
+  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
+  variables:
+    TEST_PASSWORD_PRIVATE_KEY : password
+  script:
+    - apt-get update -y && apt-get install -y openssl
+    - ./.network_fuzzing.sh
+  artifacts:
+    name: 'fuzzing-results_job${CI_JOB_ID}'
+    paths:
+      - "./boofuzz-results"
+    when: on_failure
+    expire_in: "30 days"
+  timeout: 24 hours
+  tags:
+    - fuzzing
+  rules: 
+    - if: "$TEST_NETWORK_FUZZ != null"
+      when: always
+
 ###
 # Test jobs
 ###
@@ -451,7 +472,7 @@ test-uactt:
 # Generate the Software Bill Of Materials according to the conan.lock file.
 generate_sbom:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   script: 
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
@@ -463,26 +484,36 @@ generate_sbom:
     - trivy fs --format cyclonedx --output sbom.json --insecure .
   artifacts:
     when: on_success
-    expire_in: "never"
+    expire_in: "1 week"
     paths:
       - "sbom.json"
   rules:
     - changes:
-        - conanfile.py
+        compare_to: master
+        paths: 
+          - conanfile.py
+    - if: "$SCAN_SBOM != null"
 
 # Look for vulnerabilities in the dependencies of the SBOM generated in the generate_sbom job.
 scan_sbom:
   stage: test
-  image: docker.aix.systerel.fr/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c
+  image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
   needs: 
     - job: generate_sbom
   dependencies:
     - "generate_sbom"
   script:
-    - trivy sbom sbom.json --insecure
+    - trivy sbom sbom.json --severity HIGH,CRITICAL  --exit-code 1 --insecure --output vulnerabilities_table.txt
+  artifacts:
+    when: on_failure
+    expire_in: "1 month"
+    paths:
+      - "vulnerabilities_table.txt"
   rules:
     - changes:
-        - conanfile.py
+        compare_to: master
+        paths: 
+          - conanfile.py
     - if: "$SCAN_SBOM != null"
 
 #Look for exposed secrets as well as vulnerabilities in the dependencies.
