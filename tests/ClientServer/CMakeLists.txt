@@ -763,8 +763,7 @@ add_executable(push_client "validation_tests/client/push_client/push_client.c"
                                                 "validation_tests/client/push_client/push_server_methods.c"
                                                 "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_push_server/push_server_lib/sopc_trustlist_helper.c"
                                                 ${S2OPC_TEST_CLIENTSERVER_HELPER_SOURCES}
-                                                "unit_tests/helpers/check_crypto_certificates.c"
-                                                "unit_tests/helpers/hexlify.c")
+                                                "unit_tests/helpers/check_crypto_certificates.c")
 target_include_directories(push_client PRIVATE "validation_tests/client/push_client" "unit_tests/helpers" ${S2OPC_TEST_CLIENTSERVER_HELPER_INCLUDES} "${S2OPC_ROOT_PATH}/samples/ClientServer/demo_push_server/push_server_lib")
 target_link_libraries(push_client PRIVATE s2opc_clientserver Check::check)
 target_compile_options(push_client PRIVATE ${S2OPC_COMPILER_FLAGS} -D_GNU_SOURCE) # GNU_SOURCE for fileno function.
