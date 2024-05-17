@@ -40,14 +40,17 @@ DEFINITIONS
         size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
         size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
 
-        c_ExpandedNodeId_indet /: ran(BrowsePathResult) &
-        ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId)
+        ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId) &
+        ran(BrowsePathRemainingNodeId) <: t_ExpandedNodeId
 
 ABSTRACT_VARIABLES
     d_variables
 
 INVARIANT
     d_invariant
+
+ASSERTIONS
+    ran(BrowsePathResult) <: t_ExpandedNodeId
 
 INITIALISATION
     BrowsePathResult := {} ||
