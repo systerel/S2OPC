@@ -127,6 +127,17 @@ DEFINITIONS
         translate_browseResult_iterated   <: NAT1 &
         translate_browseResult_to_iterate /\ translate_browseResult_iterated = {} &
         nb_translate_browseResult_max_refs = card(translate_browseResult_to_iterate \/ translate_browseResult_iterated)
+    ;
+
+    d_inv_browse_path ==
+        BrowsePathResult : seq(t_ExpandedNodeId_i) &
+        BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
+        BrowsePathRemainingIndex  : seq(NAT1) &
+        size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
+        size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
+        size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
+        ran(BrowsePathResult) <: dom(conv_ExpandedNodeId_NodeId) &
+        ran(BrowsePathRemainingNodeId) <: t_ExpandedNodeId
 
 LOCAL_OPERATIONS
 
@@ -169,10 +180,7 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server} &
 
-            BrowsePathResult : seq(t_ExpandedNodeId_i)          &
-            c_ExpandedNodeId_indet /: ran(BrowsePathResult)     &
-            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingIndex  : seq(NAT1)
+            d_inv_browse_path
         ) ||
 
         d_var_iter_browse_path_idx :(d_inv_iter_browse_path_idx) ||
@@ -209,10 +217,7 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server} &
 
-            BrowsePathResult : seq(t_ExpandedNodeId_i)          &
-            c_ExpandedNodeId_indet /: ran(BrowsePathResult)     &
-            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingIndex  : seq(NAT1)
+            d_inv_browse_path
         ) ||
 
         d_var_iter_browse_result :(d_inv_iter_browse_result)
@@ -233,21 +238,14 @@ LOCAL_OPERATIONS
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         :(
-
-            BrowsePathResult : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingIndex  : seq(NAT1) &
-            size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
-            size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max  &
-            size(BrowsePathRemainingIndex)  <= k_n_BrowsePathResPerElt_max  &
-            size(BrowsePathRemainingNodeId)  = size(BrowsePathRemainingIndex) &
-
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : {e_sc_ok,
                 e_sc_bad_no_match,
                 e_sc_bad_out_of_memory,
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server} &
+
+            d_inv_browse_path &
 
             dom(BrowsePathResult$0) <| BrowsePathResult = BrowsePathResult$0 &
             dom(BrowsePathRemainingNodeId$0) <| BrowsePathRemainingNodeId = BrowsePathRemainingNodeId$0 &
@@ -280,12 +278,6 @@ LOCAL_OPERATIONS
         BrowsePathRemainingNodeId,
         BrowsePathRemainingIndex
         :(
-            BrowsePathResult : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingNodeId : seq(t_ExpandedNodeId_i) &
-            BrowsePathRemainingIndex  : seq(NAT1) &
-            size(BrowsePathResult) <= k_n_BrowsePathResPerElt_max &
-            size(BrowsePathRemainingNodeId) <= k_n_BrowsePathResPerElt_max &
-
             statusCode_operation : t_StatusCode_i &
             statusCode_operation : {e_sc_ok,
                 e_sc_bad_no_match,
@@ -293,6 +285,8 @@ LOCAL_OPERATIONS
                 e_sc_bad_query_too_complex,
                 e_sc_uncertain_reference_out_of_server,
                 c_StatusCode_indet} &
+
+            d_inv_browse_path &
 
             (out_BrowseResult_NodeId(browseResult_index) : dom(conv_ExpandedNodeId_NodeId)
                 =>
