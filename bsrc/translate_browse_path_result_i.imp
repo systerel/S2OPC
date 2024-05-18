@@ -112,6 +112,22 @@ DEFINITIONS
         (isBrowseResultComputed = TRUE => isBrowseResultAllocated = TRUE)
     ;
 
+    d_inv_browse_result_coherence ==
+        (isBrowseResultComputed = FALSE =>
+            out_BrowseResult_BrowseStatus        = c_StatusCode_indet             &
+            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet    &
+            out_BrowseResultReferences           = c_BrowseResultReferences_indet &
+            out_BrowseResult_nb_References     = 0                          &
+            out_BrowseResult_ReferenceTypeId   = {}                         &
+            out_BrowseResult_isForward         = {}                         &
+            out_BrowseResult_NodeId            = {}                         &
+            out_BrowseResult_BrowseName        = {}                         &
+            out_BrowseResult_DisplayName       = {}                         &
+            out_BrowseResult_NodeClass         = {}                         &
+            out_BrowseResult_TypeDefinition    = {}
+        )
+    ;
+
     d_inv_iter_browse_path_idx ==
         nb_browsePathIdx_max_refs : NAT &
         browsePathIdx_to_iterate <: NAT1 &
@@ -364,7 +380,8 @@ LOCAL_OPERATIONS
             (statusCode_operation = e_sc_ok => isBrowseResultComputed = TRUE) &
 
             d_inv_browse_result_out &
-            d_inv_browse_result_status
+            d_inv_browse_result_status &
+            d_inv_browse_result_coherence
         )
     END
     ;

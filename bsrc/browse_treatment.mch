@@ -111,6 +111,22 @@ DEFINITIONS
         (isBrowseResultComputed = TRUE => isBrowseResultAllocated = TRUE)
     ;
 
+    d_inv_out_coherence ==
+        (isBrowseResultComputed = FALSE =>
+            out_BrowseResult_BrowseStatus        = c_StatusCode_indet             &
+            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet    &
+            out_BrowseResultReferences           = c_BrowseResultReferences_indet &
+            out_BrowseResult_nb_References     = 0                          &
+            out_BrowseResult_ReferenceTypeId   = {}                         &
+            out_BrowseResult_isForward         = {}                         &
+            out_BrowseResult_NodeId            = {}                         &
+            out_BrowseResult_BrowseName        = {}                         &
+            out_BrowseResult_DisplayName       = {}                         &
+            out_BrowseResult_NodeClass         = {}                         &
+            out_BrowseResult_TypeDefinition    = {}
+        )
+    ;
+
     d_init_in ==
         d_variables_in
         :(
@@ -168,7 +184,8 @@ INVARIANT
     d_inv_in &
     d_inv_persist &
     d_inv_out &
-    d_inv_out_status
+    d_inv_out_status &
+    d_inv_out_coherence
 
 INITIALISATION
     d_init_in ||
@@ -273,6 +290,7 @@ OPERATIONS
         ContinuationPoint_session
         :(  d_inv_out &
             d_inv_out_status &
+            d_inv_out_coherence &
 
             p_serviceStatusCode : t_StatusCode_i &
             p_serviceStatusCode : t_StatusCode   &
