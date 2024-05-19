@@ -59,6 +59,22 @@ DEFINITIONS
         (isBrowseValueContextDefined = TRUE =>
             in_BrowseValue_BrowseDirection : t_BrowseDirection)
     ;
+
+    d_inv_in_coherence ==
+        (isBrowseValueContextDefined = FALSE =>
+            in_session                      = c_session_indet            &
+            in_maxReferencesPerNode         = 0                          &
+            in_BrowseView                   = c_NodeId_indet             &
+            in_BrowseValue_NodeId           = c_NodeId_indet             &
+            in_BrowseValue_BrowseDirection  = e_bd_indet                 &
+            in_BrowseValue_ReferenceTypeId  = c_NodeId_indet             &
+            in_BrowseValue_IncludeSubtypes  = FALSE                      &
+            in_BrowseValue_NodeClassMask    = c_BrowseNodeClassMask_indet &
+            in_BrowseValue_ResultMask       = c_BrowseResultMask_indet   &
+            in_ReleasePrevContinuationPoint = FALSE
+        )
+    ;
+
     d_init_in ==
         d_variables_in
         :(
@@ -81,7 +97,8 @@ ABSTRACT_VARIABLES
     d_variables_in
 
 INVARIANT
-    d_inv_in
+    d_inv_in &
+    d_inv_in_coherence
 
 INITIALISATION
     d_init_in
@@ -113,6 +130,8 @@ OPERATIONS
         :(
             p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
             d_inv_in &
+            d_inv_in_coherence &
+
             (p_service_StatusCode = e_sc_ok =>
                 in_startIndex                    = p_startIndex      &
                 in_session                       = p_session         &

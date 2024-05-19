@@ -76,6 +76,22 @@ DEFINITIONS
         in_ReleasePrevContinuationPoint  : BOOL                  &
         isBrowseValueContextDefined      : BOOL
     ;
+
+    d_inv_in_coherence ==
+        (isBrowseValueContextDefined = FALSE =>
+            in_session                      = c_session_indet            &
+            in_maxReferencesPerNode         = 0                          &
+            in_BrowseView                   = c_NodeId_indet             &
+            in_BrowseValue_NodeId           = c_NodeId_indet             &
+            in_BrowseValue_BrowseDirection  = e_bd_indet                 &
+            in_BrowseValue_ReferenceTypeId  = c_NodeId_indet             &
+            in_BrowseValue_IncludeSubtypes  = FALSE                      &
+            in_BrowseValue_NodeClassMask    = c_BrowseNodeClassMask_indet &
+            in_BrowseValue_ResultMask       = c_BrowseResultMask_indet   &
+            in_ReleasePrevContinuationPoint = FALSE
+        )
+    ;
+
     d_inv_persist ==
         s_ContinuationPoints <: t_ContinuationPoint &
         id_ContinuationPoint : s_ContinuationPoints >-> t_ContinuationPointId & // Each continuation has a unique Id
@@ -182,6 +198,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     d_inv_in &
+    d_inv_in_coherence &
     d_inv_persist &
     d_inv_out &
     d_inv_out_status &
@@ -216,23 +233,26 @@ OPERATIONS
         /* Set new input context */
         p_service_StatusCode,
         d_variables_in
-        :(      p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
-                d_inv_in &
-                (p_service_StatusCode = e_sc_ok =>
-                 in_session                       = p_session         &
-                 in_maxReferencesPerNode          = p_maxTargetRef    &
-                 in_BrowseView                    = p_browseView      &
-                 in_BrowseValue_NodeId            = p_nodeId          &
-                 in_BrowseValue_BrowseDirection   = p_browseDirection &
-                 in_BrowseValue_ReferenceTypeId   = p_referenceType   &
-                 in_BrowseValue_IncludeSubtypes   = p_includeSubtypes &
-                 in_BrowseValue_NodeClassMask     = p_nodeClassMask   &
-                 in_BrowseValue_ResultMask        = p_resultMask      &
-                 in_ReleasePrevContinuationPoint  = p_autoReleaseCP   &
+        :(
+            p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory} &
+            d_inv_in &
+            d_inv_in_coherence &
 
-                 isBrowseValueContextDefined = TRUE) &
-                (p_service_StatusCode /= e_sc_ok =>
-                 isBrowseValueContextDefined = FALSE)
+            (p_service_StatusCode = e_sc_ok =>
+                in_session                       = p_session         &
+                in_maxReferencesPerNode          = p_maxTargetRef    &
+                in_BrowseView                    = p_browseView      &
+                in_BrowseValue_NodeId            = p_nodeId          &
+                in_BrowseValue_BrowseDirection   = p_browseDirection &
+                in_BrowseValue_ReferenceTypeId   = p_referenceType   &
+                in_BrowseValue_IncludeSubtypes   = p_includeSubtypes &
+                in_BrowseValue_NodeClassMask     = p_nodeClassMask   &
+                in_BrowseValue_ResultMask        = p_resultMask      &
+                in_ReleasePrevContinuationPoint  = p_autoReleaseCP   &
+
+                isBrowseValueContextDefined = TRUE) &
+            (p_service_StatusCode /= e_sc_ok =>
+                isBrowseValueContextDefined = FALSE)
         )
     END
     ;
@@ -250,6 +270,7 @@ OPERATIONS
         p_service_StatusCode
         :(  p_service_StatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_continuation_point_invalid} &
             d_inv_in &
+            d_inv_in_coherence &
 
             isBrowseValueContextDefined = bool(p_service_StatusCode = e_sc_ok) &
             /* If context is set then the continuation point is released */
