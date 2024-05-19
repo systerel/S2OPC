@@ -21,7 +21,7 @@
 
  File Name            : browse_treatment.c
 
- Date                 : 04/08/2022 14:53:02
+ Date                 : 19/05/2024 23:40:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -462,6 +462,9 @@ void browse_treatment__compute_browse_result(
                      *browse_treatment__p_serviceStatusCode = constants_statuscodes_bs__e_sc_bad_no_continuation_points;
                   }
                }
+            }
+            else {
+               browse_treatment_result_bs__clear_browse_result();
             }
          }
          else {

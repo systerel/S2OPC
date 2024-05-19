@@ -634,6 +634,11 @@ OPERATIONS
                             p_serviceStatusCode := e_sc_bad_no_continuation_points
                         END
                     END
+                ELSE
+                    // Free memory in cases where fill_browse_result not OK
+                    // In other words, memory is allocated in cases where the operation
+                    // compute_browse_result returns e_sc_ok or e_sc_bad_no_continuation_points
+                    clear_browse_result
                 END
             ELSE
                 p_serviceStatusCode := e_sc_bad_out_of_memory
