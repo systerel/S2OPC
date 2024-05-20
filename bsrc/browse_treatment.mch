@@ -312,12 +312,11 @@ OPERATIONS
             p_serviceStatusCode : t_StatusCode_i &
             p_serviceStatusCode : t_StatusCode   &
             p_serviceStatusCode : {e_sc_ok, e_sc_bad_out_of_memory, e_sc_bad_node_id_unknown,
-                                   e_sc_bad_reference_type_id_invalid, e_sc_bad_no_continuation_points,
-                                   e_sc_bad_view_id_unknown} & /* Add other bad view statuses when treated */
-          p_nbReferences : NAT &
-          p_continuationPointId : t_ContinuationPointId_i &
-          isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or p_serviceStatusCode = e_sc_bad_no_continuation_points) &
-          (isBrowseResultComputed = TRUE => isBrowseResultAllocated = TRUE) &
+                                   e_sc_bad_reference_type_id_invalid, e_sc_bad_no_continuation_points} &
+            p_nbReferences : NAT &
+            p_continuationPointId : t_ContinuationPointId_i &
+            isBrowseResultComputed = bool(p_serviceStatusCode = e_sc_ok or
+                                          p_serviceStatusCode = e_sc_bad_no_continuation_points) &
 
           d_inv_persist
         )
