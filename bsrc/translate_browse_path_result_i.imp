@@ -55,7 +55,6 @@ DEFINITIONS
 
     d_var_browse_result_out ==
         out_BrowseResult_BrowseStatus,
-        out_BrowseResult_ContinuationPointId,
         out_BrowseResult_nb_References,
         out_BrowseResult_ReferenceTypeId,
         out_BrowseResult_isForward,
@@ -87,7 +86,6 @@ DEFINITIONS
 
     d_inv_browse_result_out ==
         out_BrowseResult_BrowseStatus        : t_StatusCode_i             &
-        out_BrowseResult_ContinuationPointId : t_ContinuationPointId_i    &
         out_BrowseResultReferences           : t_BrowseResultReferences_i &
         out_BrowseResult_nb_References   : NAT                     &
         out_BrowseResult_ReferenceTypeId : seq(t_NodeId_i)         &
@@ -115,7 +113,6 @@ DEFINITIONS
     d_inv_browse_result_coherence ==
         (isBrowseResultComputed = FALSE =>
             out_BrowseResult_BrowseStatus        = c_StatusCode_indet             &
-            out_BrowseResult_ContinuationPointId = c_ContinuationPointId_indet    &
             out_BrowseResultReferences           = c_BrowseResultReferences_indet &
             out_BrowseResult_nb_References     = 0                          &
             out_BrowseResult_ReferenceTypeId   = {}                         &
