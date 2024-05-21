@@ -591,8 +591,10 @@ OPERATIONS
                 browsePaths_to_iterate <: t_BrowsePath &
                 browsePaths_iterated   <: t_BrowsePath &
                 browsePaths_to_iterate /\ browsePaths_iterated = {} &
-                l_continue = bool(browsePaths_to_iterate /= {})
+                l_continue = bool(browsePaths_to_iterate /= {}) &
 
+                browsePaths_to_iterate <: BrowsePaths &
+                dom(BrowsePath_Res_NbTargetMax) = BrowsePaths
             VARIANT
                 card(browsePaths_to_iterate)
             END
