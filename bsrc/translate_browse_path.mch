@@ -173,7 +173,7 @@ OPERATIONS
                 =>
                 IsDecoded = TRUE &
                 card(BrowsePaths) > 0 &
-                card(BrowsePath_Res_NbTargetMax) = card(BrowsePaths)
+                dom(BrowsePath_Res_NbTargetMax) = BrowsePaths
             ) &
             ( StatusCode_service = e_sc_bad_nothing_to_do
                 =>
