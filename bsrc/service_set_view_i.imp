@@ -38,6 +38,7 @@ SEES
 
 INVARIANT
     isBrowseValueContextDefined = FALSE &
+    isBrowseResultAllocated     = FALSE &
     isBrowseResultComputed      = FALSE
 
 
@@ -46,6 +47,7 @@ LOCAL_OPERATIONS
     StatusCode_service <-- treat_browse_request_BrowseValues(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_nb_browse_value) =
     PRE
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated     = FALSE &
         isBrowseResultComputed      = FALSE &
 
         p_session : t_session_i &
@@ -106,6 +108,7 @@ LOCAL_OPERATIONS
     treat_browse_request_BrowseValue_1(p_session, p_req_msg, p_resp_msg, p_nid_view, p_nb_target_max, p_bvi, p_autoReleaseCP) =
     PRE
         isBrowseValueContextDefined = FALSE &
+        isBrowseResultAllocated     = FALSE &
         isBrowseResultComputed      = FALSE &
         isBrowseResponseAllocated   = TRUE &
 
