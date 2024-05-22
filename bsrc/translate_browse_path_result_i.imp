@@ -308,14 +308,14 @@ LOCAL_OPERATIONS
 
                 (targetName = out_BrowseResult_BrowseName(browseResult_index)
                     =>
-                    (statusCode_operation : {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                    (statusCode_operation = e_sc_ok
                         =>
                         /* target in BrowsePathResult has browse name equal to
                            TargetName and is equal to a browse result */
                         BrowsePathResult = BrowsePathResult$0
                             <- out_BrowseResult_NodeId(browseResult_index)
                     ) &
-                    (statusCode_operation /: {e_sc_ok, e_sc_uncertain_reference_out_of_server}
+                    (statusCode_operation /= e_sc_ok
                         =>
                         BrowsePathResult = BrowsePathResult$0
                     )
