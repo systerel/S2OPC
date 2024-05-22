@@ -187,9 +187,11 @@ OPERATIONS
         p_nb_bvi : NAT1 &
         p_nb_bvi = RequestBrowse_nb_BrowseValue
     THEN
-        p_isallocated :: BOOL ||
+        p_isallocated,
         d_variables_resp
         :(d_inv_resp &
+          p_isallocated : BOOL &
+
           isBrowseResponseAllocated = p_isallocated &
           ResponseBrowse = p_resp_msg &
           ResponseBrowse_BrowseStatus        = {} &
