@@ -195,7 +195,8 @@ OPERATIONS
         p_bvi : dom(RequestBrowseNext_ContinuationPointId) &
         p_nb_targets   : NAT &
         p_nb_targets  <= k_n_BrowseTarget_max &
-        p_browseResultReferences : t_BrowseResultReferences_i
+        p_browseResultReferences : t_BrowseResultReferences_i &
+        p_browseResultReferences : t_BrowseResultReferences
     THEN
         ResponseBrowseNext_ResultReferences (p_bvi) := p_browseResultReferences
     END
