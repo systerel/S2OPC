@@ -54,7 +54,7 @@ mkdir -p ${SRC_DIR-}/sample_inc
 # copy source files to Core/Src
 cp -ur ${S2OPC_SAMPLE-}/${FREERTOS_SAMPLE-}/src/* "${SRC_DIR-}/sample_src" || exit 10
 cp -ur ${S2OPC_SAMPLE-}/platform_dep/freertos/src/* "${SRC_DIR-}/sample_src" || exit 10
-cp -ur ${S2OPC_SAMPLE-}/platform_dep/mbedtls_config "${SRC_DIR-}" || exit 11
+test ${OPT_CRYPTO} = "mbedtls" && (cp -ur ${S2OPC_SAMPLE-}/platform_dep/mbedtls_config "${SRC_DIR-}" || exit 11)
 cp -ur ${S2OPC_SRC-}/Common "${SRC_DIR-}" || exit 12
 cp -ur ${S2OPC_SRC-}/PubSub "${SRC_DIR-}" || exit 13
 cp -ur ${S2OPC_SRC-}/ClientServer "${SRC_DIR-}" || exit 14
@@ -90,14 +90,18 @@ sed -i 's/\bvApplicationStackOverflowHook\b/__vApplicationStackOverflowHook__/g'
 # unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
 echo "[II] FreeRTOS hooks patched for 'vApplicationStackOverflowHook'"
 
-# Patch mbedtls_hardware_poll
-# Patch:
-# -      memset(&(Output[index * 4]), (int)randomValue, 4);
-# +      memcpy(&(Output[index * 4]), &(int)randomValue, 4);
-FILE=${FREERTOS_CORE_DIR-}/../MBEDTLS/Target/hardware_rng.c
-sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FILE-}
-# unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
-echo "[II] '`basename ${FILE-}`' bug patched for 'mbedtls_hardware_poll'"
+if [ ${OPT_CRYPTO} == "mbedtls" ]; then
+
+    # Patch mbedtls_hardware_poll
+    # Patch:
+    # -      memset(&(Output[index * 4]), (int)randomValue, 4);
+    # +      memcpy(&(Output[index * 4]), &(int)randomValue, 4);
+    FILE=${FREERTOS_CORE_DIR-}/../MBEDTLS/Target/hardware_rng.c
+    sed -i 's/memset\((&(Output\[index[^,]*, *\)(int)\(randomValue\)/memcpy\1\&\2/g' ${FILE-}
+    # unix2dos.exe ${FILE-} >/dev/null 2>/dev/null  ## Only used to avoid EOL issue if needed on Windows
+    echo "[II] '`basename ${FILE-}`' bug patched for 'mbedtls_hardware_poll'"
+
+fi
 
 # Patch ETH MAC filter
 # Replace 

@@ -50,19 +50,24 @@
 
 #include "freertos_platform_dep.h"
 #include "samples_platform_dep.h"
+
+#if S2OPC_CRYPTO_MBEDTLS
 #include "sopc_mbedtls_config.h"
 
 #include "mbedtls.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/entropy_poll.h"
+#endif
 
 #include "freertos_shell.h"
 #include "p_sopc_common_time.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
+#include "sopc_time.h"
 
 #define MAIN_STACK_SIZE ((unsigned short) 2048)
 
@@ -76,6 +81,9 @@
  ******************************************************************************/
 #if defined(USE_FreeRTOS_HEAP_5)
 #ifdef STM32H723xx
+#define HEAP_REGION2_SIZE (128 * 1024)
+#define HEAP_REGION2_BASE 0x20000000
+#elif defined(STM32H735xx)
 #define HEAP_REGION2_SIZE (128 * 1024)
 #define HEAP_REGION2_BASE 0x20000000
 #else
@@ -95,6 +103,8 @@ HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_S
 /*************************************************/
 static void rng_self_test(void)
 {
+    SOPC_Shell_Printf("Mbedtls not used\n");
+#if S2OPC_CRYPTO_MBEDTLS
     unsigned char buff[32];
     size_t oLen = 0;
     int res = mbedtls_hardware_poll(NULL, buff, sizeof(buff), &oLen);
@@ -106,6 +116,7 @@ static void rng_self_test(void)
         SOPC_Shell_Printf("%02X ", buff[i]);
     }
     SOPC_Shell_Printf("]\n");
+#endif
 }
 
 /*************************************************/
@@ -136,10 +147,21 @@ const char* get_EP_str(void)
 }
 
 /*************************************************/
+// True if lwip stack was already initialized, False otherwise
+static bool IslwipInitialized(void)
+{
+    extern struct netif gnetif;
+    return NULL != gnetif.next;
+}
+
+/*************************************************/
 void SOPC_Platform_Setup(void)
 {
-    PRINTF("Initializing LwIP\n");
-    MX_LWIP_Init();
+    if (!IslwipInitialized())
+    {
+        PRINTF("Initializing LwIP\n");
+        MX_LWIP_Init();
+    }
     extern uint8_t IP_ADDRESS[4];
     extern uint8_t NETMASK_ADDRESS[4];
     PRINTF("\r\n************************************************\n");
@@ -153,9 +175,6 @@ void SOPC_Platform_Setup(void)
 
     PRINTF("Initializing MbedTLS\n");
     //    MX_MBEDTLS_Init(); / Already done by generated main
-
-    // Init tick to UTC time (build date)
-    P_TIME_SetInitialDateToBuildTime();
 
     PRINTF(" Call command \"help\" to get help about usage of this sample \n");
 }
@@ -269,3 +288,20 @@ void SOPC_Platform_Target_Debug(const char* param)
         P_SOPC_COMMON_TIME_SetDateOffset(atoi(param + 4));
     }
 }
+
+#if S2OPC_CRYPTO_MBEDTLS
+// MBEDTLS Platform specific declarations
+/*************************************************/
+#warning "Following function should return time since 1970 à 00:00:00 of 1st january"
+time_t sopc_time_alt(time_t* timer)
+{
+    time_t t;
+    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(SOPC_Time_GetCurrentTimeUTC(), &t);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
+    if (NULL != timer)
+    {
+        *timer = t;
+    }
+    return t;
+}
+#endif
