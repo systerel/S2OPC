@@ -165,6 +165,7 @@ static bool end_client_config(struct parse_context_t* ctx)
                     LOG_XML_ERROR(
                         ctx->helper_ctx.parser,
                         "client certificate and key are not defined whereas security mode is not always None");
+                    return false;
                 }
             }
         }
