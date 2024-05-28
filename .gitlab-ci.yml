@@ -112,7 +112,7 @@ generation:
   stage: gen
   image: com.systerel.fr:5000/c838/gen-ext@sha256:66cadeb219f3904e78ade14ef85e57aa0309eff4416e9625b0fd4bea8e976cd7 # digest of gen-ext:1.4
   script:
-    - ./clean.sh all
+    - ./clean.sh gen
     - ./.validates_xml_schemas.sh
     - ./.pre-build-ext.sh
     - rm ./src/ClientServer/services/bgenc/constants_bs.h_

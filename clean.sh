@@ -20,7 +20,7 @@
 
 # Script to clean the S2OPC toolkit project:
 # - clean the build logs and build directories (build and bin)
-# - if first argument is all it also clean the generated code
+# - if first argument is 'gen' it also cleans the generated code
 set -e
 
 ISALL=$1
@@ -31,7 +31,7 @@ echo "Cleaning pre-build/, build/ and bin/ directories"
 \rm -f pre-build-check.log pre-build.log build.log clang_tidy.log
 \rm -fr pre-build build build_toolchain build-analyzer
 
-if [[ -z $ISALL || $ISALL != "all" ]]; then
+if [[ -z $ISALL || $ISALL != "gen" ]]; then
     echo "Do not clean generated source files"
 else
     echo "Clean generated source files from B model"
