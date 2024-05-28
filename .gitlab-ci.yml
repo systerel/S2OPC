@@ -374,6 +374,7 @@ build-fuzz:
     name: 'fuzzing-results_job${CI_JOB_ID}'
     paths:
       - "./boofuzz-results"
+      - "./build/bin/toolkit_demo_server_logs"
     when: on_failure
     expire_in: "30 days"
   timeout: 24 hours
