@@ -1805,7 +1805,12 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
     if (result && hasSecureChannelId)
     {
         // Decode secure channel id
-        result = (SOPC_UInt32_Read(&secureChannelId, chunkCtx->currentChunkInputBuffer, 0) == SOPC_STATUS_OK);
+        SOPC_ReturnStatus retStatus = SOPC_UInt32_Read(&secureChannelId, chunkCtx->currentChunkInputBuffer, 0);
+        if (SOPC_STATUS_OK != retStatus)
+        {
+            result = false;
+            *errorStatus = OpcUa_BadDecodingError;
+        }
     }
 
     if (result && hasSecureChannelId)
