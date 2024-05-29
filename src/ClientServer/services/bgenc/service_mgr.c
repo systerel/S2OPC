@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.c
 
- Date                 : 06/05/2024 15:32:33
+ Date                 : 30/05/2024 16:22:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -764,14 +764,13 @@ void service_mgr__server_receive_session_treatment_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
-      t_bool service_mgr__l_valid_req_header;
       constants__t_msg_i service_mgr__l_req_msg;
-      t_bool service_mgr__l_valid_req;
       constants__t_server_request_handle_i service_mgr__l_request_handle;
       constants__t_session_token_i service_mgr__l_session_token;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
@@ -782,23 +781,23 @@ void service_mgr__server_receive_session_treatment_req(
       t_bool service_mgr__l_secu_failed;
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       
-      service_mgr__l_valid_req = false;
-      *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
+      *service_mgr__valid_req = false;
+      *service_mgr__sc = constants_statuscodes_bs__e_sc_bad_decoding_error;
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
-         &service_mgr__l_valid_req_header,
+         service_mgr__valid_req_header,
          &service_mgr__l_req_msg_header);
-      if (service_mgr__l_valid_req_header == true) {
+      if (*service_mgr__valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
          message_in_bs__read_msg_req_header_session_token(service_mgr__l_req_msg_header,
             &service_mgr__l_session_token);
          message_in_bs__decode_msg(service_mgr__req_typ,
             service_mgr__msg_buffer,
-            &service_mgr__l_valid_req,
+            service_mgr__valid_req,
             &service_mgr__l_req_msg);
-         if (service_mgr__l_valid_req == true) {
+         if (*service_mgr__valid_req == true) {
             service_mgr__get_response_type(service_mgr__req_typ,
                &service_mgr__l_resp_msg_typ);
             message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
@@ -848,24 +847,23 @@ void service_mgr__server_receive_session_treatment_req(
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       *service_mgr__buffer_out = service_mgr__l_buffer_out;
-      *service_mgr__valid_req = ((service_mgr__l_valid_req_header == true) &&
-         (service_mgr__l_valid_req == true));
    }
 }
 
 void service_mgr__client_receive_session_treatment_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp) {
    {
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       t_bool service_mgr__l_valid_resp_header;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_resp;
       constants__t_client_request_handle_i service_mgr__l_request_handle;
       t_bool service_mgr__l_validated_req_handle;
       constants__t_session_i service_mgr__l_session;
       
+      *service_mgr__valid_resp = false;
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
          &service_mgr__l_valid_resp_header,
@@ -880,9 +878,9 @@ void service_mgr__client_receive_session_treatment_resp(
          if (service_mgr__l_validated_req_handle == true) {
             message_in_bs__decode_msg(service_mgr__resp_typ,
                service_mgr__msg_buffer,
-               &service_mgr__l_valid_resp,
+               service_mgr__valid_resp,
                &service_mgr__l_resp_msg);
-            if (service_mgr__l_valid_resp == true) {
+            if (*service_mgr__valid_resp == true) {
                session_mgr__client_receive_session_resp(service_mgr__channel,
                   service_mgr__l_request_handle,
                   service_mgr__resp_typ,
@@ -903,13 +901,13 @@ void service_mgr__server_receive_session_service_req(
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_request_context_i service_mgr__req_context,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    t_bool * const service_mgr__async_resp,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
-      t_bool service_mgr__l_valid_req_header;
       constants__t_server_request_handle_i service_mgr__l_request_handle;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
@@ -925,9 +923,9 @@ void service_mgr__server_receive_session_service_req(
       *service_mgr__buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
-         &service_mgr__l_valid_req_header,
+         service_mgr__valid_req_header,
          &service_mgr__l_req_msg_header);
-      if (service_mgr__l_valid_req_header == true) {
+      if (*service_mgr__valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
          service_mgr__decode_and_treat_session_service_req(service_mgr__channel,
@@ -968,7 +966,8 @@ void service_mgr__server_receive_session_service_req(
 void service_mgr__client_receive_session_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp) {
    {
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       t_bool service_mgr__l_valid_resp_header;
@@ -979,8 +978,8 @@ void service_mgr__client_receive_session_service_resp(
       t_bool service_mgr__l_is_valid_session_resp;
       constants__t_session_i service_mgr__l_session;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_resp_msg;
       
+      *service_mgr__valid_resp = false;
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
          &service_mgr__l_valid_resp_header,
@@ -1003,9 +1002,9 @@ void service_mgr__client_receive_session_service_resp(
             if (service_mgr__l_is_valid_session_resp == true) {
                message_in_bs__decode_msg(service_mgr__resp_typ,
                   service_mgr__msg_buffer,
-                  &service_mgr__l_valid_resp_msg,
+                  service_mgr__valid_resp,
                   &service_mgr__l_resp_msg);
-               if ((service_mgr__l_valid_resp_msg == true) &&
+               if ((*service_mgr__valid_resp == true) &&
                   (service_mgr__l_is_applicative_response == true)) {
                   message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
                      service_mgr__l_resp_msg);
@@ -1026,15 +1025,14 @@ void service_mgr__server_receive_discovery_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out) {
    {
       constants__t_msg_header_i service_mgr__l_req_msg_header;
-      t_bool service_mgr__l_valid_req_header;
       constants__t_server_request_handle_i service_mgr__l_request_handle;
       constants__t_msg_i service_mgr__l_req_msg;
-      t_bool service_mgr__l_valid_req;
       constants__t_msg_type_i service_mgr__l_resp_msg_typ;
       constants__t_msg_i service_mgr__l_resp_msg;
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
@@ -1043,20 +1041,20 @@ void service_mgr__server_receive_discovery_service_req(
       constants__t_byte_buffer_i service_mgr__l_buffer_out;
       
       *service_mgr__sc = constants_statuscodes_bs__c_StatusCode_indet;
-      service_mgr__l_valid_req = false;
+      *service_mgr__valid_req = false;
       service_mgr__l_buffer_out = constants__c_byte_buffer_indet;
       message_in_bs__decode_msg_header(true,
          service_mgr__msg_buffer,
-         &service_mgr__l_valid_req_header,
+         service_mgr__valid_req_header,
          &service_mgr__l_req_msg_header);
-      if (service_mgr__l_valid_req_header == true) {
+      if (*service_mgr__valid_req_header == true) {
          message_in_bs__server_read_msg_header_req_handle(service_mgr__l_req_msg_header,
             &service_mgr__l_request_handle);
          message_in_bs__decode_msg(service_mgr__req_typ,
             service_mgr__msg_buffer,
-            &service_mgr__l_valid_req,
+            service_mgr__valid_req,
             &service_mgr__l_req_msg);
-         if (service_mgr__l_valid_req == true) {
+         if (*service_mgr__valid_req == true) {
             service_mgr__get_response_type(service_mgr__req_typ,
                &service_mgr__l_resp_msg_typ);
             message_out_bs__alloc_resp_msg(service_mgr__l_resp_msg_typ,
@@ -1100,15 +1098,14 @@ void service_mgr__server_receive_discovery_service_req(
          message_in_bs__dealloc_msg_in_header(service_mgr__l_req_msg_header);
       }
       *service_mgr__buffer_out = service_mgr__l_buffer_out;
-      *service_mgr__valid_req = ((service_mgr__l_valid_req_header == true) &&
-         (service_mgr__l_valid_req == true));
    }
 }
 
 void service_mgr__client_receive_discovery_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer) {
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp) {
    {
       constants__t_msg_header_i service_mgr__l_resp_msg_header;
       t_bool service_mgr__l_valid_resp_header;
@@ -1117,8 +1114,8 @@ void service_mgr__client_receive_discovery_service_resp(
       t_bool service_mgr__l_is_applicative_response;
       constants__t_application_context_i service_mgr__l_user_app_context;
       constants__t_msg_i service_mgr__l_resp_msg;
-      t_bool service_mgr__l_valid_resp_msg;
       
+      *service_mgr__valid_resp = false;
       message_in_bs__decode_msg_header(false,
          service_mgr__msg_buffer,
          &service_mgr__l_valid_resp_header,
@@ -1136,9 +1133,9 @@ void service_mgr__client_receive_discovery_service_resp(
                &service_mgr__l_user_app_context);
             message_in_bs__decode_msg(service_mgr__resp_typ,
                service_mgr__msg_buffer,
-               &service_mgr__l_valid_resp_msg,
+               service_mgr__valid_resp,
                &service_mgr__l_resp_msg);
-            if ((service_mgr__l_valid_resp_msg == true) &&
+            if ((*service_mgr__valid_resp == true) &&
                (service_mgr__l_is_applicative_response == true)) {
                message_in_bs__copy_msg_resp_header_into_msg(service_mgr__l_resp_msg_header,
                   service_mgr__l_resp_msg);

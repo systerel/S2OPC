@@ -80,7 +80,7 @@ OPERATIONS
     END
     ;
 
-    valid_req, sc, buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
+    valid_req_header, valid_req, sc, buffer_out <-- server_receive_session_treatment_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -102,18 +102,20 @@ OPERATIONS
         a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
-                            (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
+            sc, valid_req_header, valid_req
+            :(sc : t_StatusCode_i & valid_req : BOOL & valid_req_header : BOOL &
+              (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             sc := e_sc_ok ||
+            valid_req_header := TRUE ||
             valid_req := TRUE
         END
     END
     ;
 
-    client_receive_session_treatment_resp (channel, resp_typ, msg_buffer) =
+    valid_resp <-- client_receive_session_treatment_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -131,11 +133,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
+        a_buffer_in_state, valid_resp
+        :(a_buffer_in_state : t_buffer_in_state_i & valid_resp : BOOL &
+          a_buffer_in_state : {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} &
+          valid_resp =  bool(a_buffer_in_state = e_buffer_in_msg_read))
     END
     ;
 
-    valid_req, async_resp, sc, buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
+    valid_req_header, valid_req, async_resp, sc, buffer_out <-- server_receive_session_service_req (channel, req_typ, req_context, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -157,7 +162,8 @@ OPERATIONS
         a_buffer_out_state = c_buffer_out_state_indet
     THEN
         a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
-        valid_req, async_resp, sc, buffer_out, a_buffer_out_state :(
+        valid_req_header, valid_req, async_resp, sc, buffer_out, a_buffer_out_state :(
+            valid_req_header : BOOL &
             valid_req : BOOL &
             async_resp : BOOL &
             sc : t_StatusCode_i &
@@ -176,7 +182,7 @@ OPERATIONS
     END
     ;
 
-    client_receive_session_service_resp (channel, resp_typ, msg_buffer) =
+    valid_resp <-- client_receive_session_service_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -194,11 +200,14 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
+        a_buffer_in_state, valid_resp
+        :(a_buffer_in_state : t_buffer_in_state_i & valid_resp : BOOL &
+          a_buffer_in_state : {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} &
+          valid_resp =  bool(a_buffer_in_state = e_buffer_in_msg_read))
     END
     ;
 
-    valid_req, sc, buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
+    valid_req_header, valid_req, sc, buffer_out <-- server_receive_discovery_service_req (channel, req_typ, msg_buffer) =
     PRE
         channel : t_channel_i &
         channel : s_channel_connected &
@@ -220,18 +229,20 @@ OPERATIONS
         a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} ||
         CHOICE
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out = c_byte_buffer_indet) ||
-            sc, valid_req :(sc : t_StatusCode_i & valid_req : BOOL &
-                            (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
+            sc, valid_req_header, valid_req
+            :(sc : t_StatusCode_i & valid_req : BOOL & valid_req_header : BOOL &
+              (valid_req = TRUE => sc :{e_sc_bad_request_too_large, e_sc_bad_response_too_large, e_sc_bad_out_of_memory}))
         OR
             a_buffer_out_state := e_buffer_out_msg_written ||
             buffer_out :(buffer_out : t_byte_buffer_i & buffer_out : t_byte_buffer) ||
             sc := e_sc_ok ||
+            valid_req_header := TRUE ||
             valid_req := TRUE
         END
     END
     ;
 
-    client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
+    valid_resp <-- client_receive_discovery_service_resp (channel, resp_typ, msg_buffer) =
     PRE
         channel  : t_channel_i &
         channel  : t_channel &
@@ -249,7 +260,10 @@ OPERATIONS
         c_msg_out_header = c_msg_header_indet &
         a_msg_out_type = c_msg_type_indet
     THEN
-        a_buffer_in_state :: {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error}
+        a_buffer_in_state, valid_resp
+        :(a_buffer_in_state : t_buffer_in_state_i & valid_resp : BOOL &
+          a_buffer_in_state : {e_buffer_in_msg_header_read, e_buffer_in_msg_read, e_buffer_in_msg_error} &
+          valid_resp =  bool(a_buffer_in_state = e_buffer_in_msg_read))
     END
     ;
 

@@ -21,7 +21,7 @@
 
  File Name            : service_mgr.h
 
- Date                 : 06/05/2024 15:32:33
+ Date                 : 30/05/2024 16:22:41
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -200,15 +200,18 @@ extern void service_mgr__client_discovery_service_request(
 extern void service_mgr__client_receive_discovery_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer);
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp);
 extern void service_mgr__client_receive_session_service_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer);
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp);
 extern void service_mgr__client_receive_session_treatment_resp(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__resp_typ,
-   const constants__t_byte_buffer_i service_mgr__msg_buffer);
+   const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_resp);
 extern void service_mgr__client_service_activate_orphaned_session(
    const constants__t_session_i service_mgr__session,
    const constants__t_channel_i service_mgr__channel,
@@ -257,6 +260,7 @@ extern void service_mgr__server_receive_discovery_service_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);
@@ -272,6 +276,7 @@ extern void service_mgr__server_receive_session_service_req(
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_request_context_i service_mgr__req_context,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    t_bool * const service_mgr__async_resp,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
@@ -280,6 +285,7 @@ extern void service_mgr__server_receive_session_treatment_req(
    const constants__t_channel_i service_mgr__channel,
    const constants__t_msg_type_i service_mgr__req_typ,
    const constants__t_byte_buffer_i service_mgr__msg_buffer,
+   t_bool * const service_mgr__valid_req_header,
    t_bool * const service_mgr__valid_req,
    constants_statuscodes_bs__t_StatusCode_i * const service_mgr__sc,
    constants__t_byte_buffer_i * const service_mgr__buffer_out);

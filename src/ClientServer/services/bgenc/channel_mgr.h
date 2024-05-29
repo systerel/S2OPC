@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.h
 
- Date                 : 19/09/2023 15:00:44
+ Date                 : 29/05/2024 08:51:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -81,7 +81,8 @@ extern void channel_mgr__INITIALISATION(void);
   --------------------------*/
 extern void channel_mgr__l_check_all_channel_lost(void);
 extern void channel_mgr__l_close_secure_channel(
-   const constants__t_channel_i channel_mgr__p_channel);
+   const constants__t_channel_i channel_mgr__p_channel,
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__p_statusCode);
 extern void channel_mgr__l_is_new_sc_connection_allowed(
    const t_bool channel_mgr__is_one_sc_auto_closing,
    t_bool * const channel_mgr__l_allowed_new_sc);
@@ -108,7 +109,8 @@ extern void channel_mgr__close_all_channel(
    const t_bool channel_mgr__p_clientOnly,
    t_bool * const channel_mgr__bres);
 extern void channel_mgr__close_secure_channel(
-   const constants__t_channel_i channel_mgr__channel);
+   const constants__t_channel_i channel_mgr__channel,
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__statusCode);
 extern void channel_mgr__is_auto_close_channel_active(
    t_bool * const channel_mgr__p_auto_closed_active);
 extern void channel_mgr__is_create_session_locked(

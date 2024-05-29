@@ -120,9 +120,13 @@ void channel_mgr_bs__prepare_cli_open_secure_channel(
     // else: will be checked in B model in next instruction and open avoided
 }
 
-void channel_mgr_bs__finalize_close_secure_channel(const constants__t_channel_i channel_mgr_bs__channel)
+void channel_mgr_bs__finalize_close_secure_channel(
+    const constants__t_channel_i channel_mgr_bs__p_channel,
+    const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__p_statusCode)
 {
-    SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, channel_mgr_bs__channel, (uintptr_t) NULL, 0);
+    SOPC_StatusCode statusCode = SOPC_GoodGenericStatus;
+    util_status_code__B_to_C(channel_mgr_bs__p_statusCode, &statusCode);
+    SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, channel_mgr_bs__p_channel, (uintptr_t) statusCode, 0);
 }
 
 void channel_mgr_bs__last_connected_channel_lost(const t_bool channel_mgr_bs__p_clientOnly)

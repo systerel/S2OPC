@@ -306,7 +306,7 @@ OPERATIONS
             l_has_channel_to_close, l_channel_to_close <-- find_channel_to_close;
             IF l_has_channel_to_close = TRUE
             THEN
-                close_secure_channel(l_channel_to_close);
+                close_secure_channel(l_channel_to_close, e_sc_bad_session_not_activated);
                 l_is_one_sc_closing := TRUE
             END
         END
@@ -342,6 +342,7 @@ OPERATIONS
         l_msg_service_class,
         l_buffer_out,
         l_valid_req_context,
+        l_valid_req_header,
         l_valid_req,
         l_async_resp,
         l_valid_resp,
@@ -365,15 +366,16 @@ OPERATIONS
                     IF l_is_client = FALSE &
                         l_valid_req_context = TRUE
                     THEN
+                        l_valid_req_header := FALSE;
                         /* Server receiving a request: OK */
                         CASE l_msg_service_class OF
                             EITHER e_msg_session_treatment_class THEN
                                 update_create_session_locked(channel);
-                                l_valid_req, l_sc, l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
+                                l_valid_req_header, l_valid_req, l_sc, l_buffer_out <-- server_receive_session_treatment_req (channel, l_msg_type, buffer)
                             OR e_msg_session_service_class THEN
-                                l_valid_req, l_async_resp, l_sc, l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
+                                l_valid_req_header, l_valid_req, l_async_resp, l_sc, l_buffer_out <-- server_receive_session_service_req (channel, l_msg_type, request_context, buffer)
                             OR e_msg_discovery_service_class THEN
-                                l_valid_req, l_sc, l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
+                                l_valid_req_header, l_valid_req, l_sc, l_buffer_out <-- server_receive_discovery_service_req (channel, l_msg_type, buffer)
                             ELSE /* INCLUDES e_msg_service_fault_class => unexpected response type */
                                 /* indet class */
                                 l_valid_req := FALSE;
@@ -395,10 +397,14 @@ OPERATIONS
                         THEN
                             /* Unexpected invalid buffer, it should lead to an Abort chunk */
                             send_channel_error_msg(channel, l_sc, request_context)
+                        ELSIF l_valid_req_header = FALSE
+                        THEN
+                            /* Request header decoding error occurred: impossible to return a service fault since request handle not available => close SC */
+                            close_secure_channel (channel, e_sc_bad_decoding_error)
                         END
                     ELSE
                         /* Server receiving a response: close secure channel since it is not expected from client */
-                        close_secure_channel (channel)
+                        close_secure_channel (channel, e_sc_bad_type_mismatch)
                     END;
                     valid_msg := l_valid_req
                 OR e_msg_response_type THEN
@@ -422,11 +428,11 @@ OPERATIONS
                             /* Client receiving a response: OK */
                             CASE l_msg_service_class OF
                                 EITHER e_msg_session_treatment_class THEN
-                                    client_receive_session_treatment_resp (channel, l_msg_type, buffer)
+                                    l_valid_resp <-- client_receive_session_treatment_resp (channel, l_msg_type, buffer)
                                 OR e_msg_session_service_class THEN
-                                    client_receive_session_service_resp (channel, l_msg_type, buffer)
+                                    l_valid_resp <-- client_receive_session_service_resp (channel, l_msg_type, buffer)
                                 OR e_msg_discovery_service_class THEN
-                                    client_receive_discovery_service_resp (channel, l_msg_type, buffer)
+                                    l_valid_resp <-- client_receive_discovery_service_resp (channel, l_msg_type, buffer)
                                 OR e_msg_service_fault_class THEN
                                     skip /* Already treated to be one of the previous cases */
                                 END
@@ -434,15 +440,18 @@ OPERATIONS
                         END
                     ELSE
                         /* Client receiving a request: close secure channel since it is not expected from server */
-                        close_secure_channel (channel)
+                        close_secure_channel (channel, e_sc_bad_type_mismatch)
                     END;
                     valid_msg := l_valid_resp
                 ELSE
-                    valid_msg := FALSE;
-                    /* Unknown message type: close the secure channel since it is not expected */
-                    close_secure_channel (channel)
+                    valid_msg := FALSE
                 END
             END
+        ELSIF l_connected_channel = TRUE &
+              l_valid_msg_type = FALSE
+        THEN
+            /* Unknown message type: close the secure channel since it is not expected */
+            close_secure_channel (channel, e_sc_bad_decoding_error)
         END
         ;
         /* In any case buffer dealloc the buffer before end of operation */

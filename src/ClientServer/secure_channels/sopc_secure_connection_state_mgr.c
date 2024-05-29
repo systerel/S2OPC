@@ -3706,6 +3706,25 @@ static void SOPC_Internal_SC_ReEvaluate(SOPC_SecureConnection* conn,
     }
 }
 
+static const char* SC_DISCONNECT_status_code_to_reason(SOPC_StatusCode errorStatus)
+{
+    switch (errorStatus)
+    {
+    case OpcUa_BadSecureChannelClosed:
+        return "Closing secure channel on application request";
+    case OpcUa_BadSessionNotActivated:
+        return "Closing secure channel due to maximum reached (last attempt or oldest without session)";
+    case OpcUa_BadTypeMismatch:
+        return "Closing secure channel on reception of unexpected OPC UA message type";
+    case OpcUa_BadDecodingError:
+        return "Closing secure channel on reception of unknown or invalid OPC UA message type";
+    default:
+        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
+                                 "Unexpected status code reason for SC_DISCONNECT params: %" PRIX32, errorStatus);
+        return "Unexpected SecureChannel disconnection event reason";
+    }
+}
+
 void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent event,
                                               uint32_t eltId,
                                               uintptr_t params,
@@ -3820,8 +3839,10 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
     case SC_DISCONNECT:
         SOPC_Logger_TraceDebug(SOPC_LOG_MODULE_CLIENTSERVER, "ScStateMgr: SC_DISCONNECT scIdx=%" PRIu32, eltId);
 
-        /* id = secure channel connection index */
+        /* id = secure channel connection index
+         * params = status code reason */
         scConnection = SC_GetConnection(eltId);
+        errorStatus = (SOPC_StatusCode) params;
         if (scConnection != NULL)
         {
             if (scConnection->state == SECURE_CONNECTION_STATE_SC_CONNECTED ||
@@ -3830,10 +3851,8 @@ void SOPC_SecureConnectionStateMgr_Dispatcher(SOPC_SecureChannels_InputEvent eve
                 if (scConnection->isServerConnection)
                 {
                     // Server side
-                    // Too many channels connected to accept a new one or closing the oldest without session
-                    SC_CloseSecureConnection(
-                        scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
-                        "Closing secure channel due to maximum reached (last attempt or oldest without session)");
+                    SC_CloseSecureConnection(scConnection, eltId, false, false, OpcUa_BadSecureChannelClosed,
+                                             SC_DISCONNECT_status_code_to_reason(errorStatus));
                 }
                 else
                 {

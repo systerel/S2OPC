@@ -62,10 +62,12 @@ OPERATIONS
     END
     ;
 
-    finalize_close_secure_channel(p_channel) =
+    finalize_close_secure_channel(p_channel, p_statusCode) =
     PRE
         p_channel : t_channel_i &
-        p_channel : t_channel
+        p_channel : t_channel &
+        p_statusCode : t_StatusCode_i &
+        p_statusCode : t_StatusCode
     THEN
         skip
     END

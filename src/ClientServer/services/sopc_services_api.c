@@ -109,7 +109,8 @@ static void onSecureChannelEvent(SOPC_EventHandler* handler,
                                    " scIdx=%" PRIuPTR,
                                    id, auxParam);
 
-            SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) auxParam, (uintptr_t) NULL, 0);
+            SOPC_SecureChannels_EnqueueEvent(SC_DISCONNECT, (uint32_t) auxParam,
+                                             (uintptr_t) OpcUa_BadSecureChannelClosed, 0);
         }
 
         break;

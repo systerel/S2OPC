@@ -21,7 +21,7 @@
 
  File Name            : io_dispatch_mgr.c
 
- Date                 : 06/05/2024 15:32:28
+ Date                 : 30/05/2024 16:22:36
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -233,7 +233,8 @@ void io_dispatch_mgr__l_may_close_secure_channel_without_session(
          service_mgr__find_channel_to_close(&io_dispatch_mgr__l_has_channel_to_close,
             &io_dispatch_mgr__l_channel_to_close);
          if (io_dispatch_mgr__l_has_channel_to_close == true) {
-            channel_mgr__close_secure_channel(io_dispatch_mgr__l_channel_to_close);
+            channel_mgr__close_secure_channel(io_dispatch_mgr__l_channel_to_close,
+               constants_statuscodes_bs__e_sc_bad_session_not_activated);
             *io_dispatch_mgr__l_is_one_sc_closing = true;
          }
       }
@@ -275,6 +276,7 @@ void io_dispatch_mgr__receive_msg_buffer(
       constants__t_msg_service_class_i io_dispatch_mgr__l_msg_service_class;
       constants__t_byte_buffer_i io_dispatch_mgr__l_buffer_out;
       t_bool io_dispatch_mgr__l_valid_req_context;
+      t_bool io_dispatch_mgr__l_valid_req_header;
       t_bool io_dispatch_mgr__l_valid_req;
       t_bool io_dispatch_mgr__l_async_resp;
       t_bool io_dispatch_mgr__l_valid_resp;
@@ -303,12 +305,14 @@ void io_dispatch_mgr__receive_msg_buffer(
                &io_dispatch_mgr__l_valid_req_context);
             if ((io_dispatch_mgr__l_is_client == false) &&
                (io_dispatch_mgr__l_valid_req_context == true)) {
+               io_dispatch_mgr__l_valid_req_header = false;
                switch (io_dispatch_mgr__l_msg_service_class) {
                case constants__e_msg_session_treatment_class:
                   channel_mgr__update_create_session_locked(io_dispatch_mgr__channel);
                   service_mgr__server_receive_session_treatment_req(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer,
+                     &io_dispatch_mgr__l_valid_req_header,
                      &io_dispatch_mgr__l_valid_req,
                      &io_dispatch_mgr__l_sc,
                      &io_dispatch_mgr__l_buffer_out);
@@ -318,6 +322,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__request_context,
                      io_dispatch_mgr__buffer,
+                     &io_dispatch_mgr__l_valid_req_header,
                      &io_dispatch_mgr__l_valid_req,
                      &io_dispatch_mgr__l_async_resp,
                      &io_dispatch_mgr__l_sc,
@@ -327,6 +332,7 @@ void io_dispatch_mgr__receive_msg_buffer(
                   service_mgr__server_receive_discovery_service_req(io_dispatch_mgr__channel,
                      io_dispatch_mgr__l_msg_type,
                      io_dispatch_mgr__buffer,
+                     &io_dispatch_mgr__l_valid_req_header,
                      &io_dispatch_mgr__l_valid_req,
                      &io_dispatch_mgr__l_sc,
                      &io_dispatch_mgr__l_buffer_out);
@@ -351,9 +357,14 @@ void io_dispatch_mgr__receive_msg_buffer(
                      io_dispatch_mgr__l_sc,
                      io_dispatch_mgr__request_context);
                }
+               else if (io_dispatch_mgr__l_valid_req_header == false) {
+                  channel_mgr__close_secure_channel(io_dispatch_mgr__channel,
+                     constants_statuscodes_bs__e_sc_bad_decoding_error);
+               }
             }
             else {
-               channel_mgr__close_secure_channel(io_dispatch_mgr__channel);
+               channel_mgr__close_secure_channel(io_dispatch_mgr__channel,
+                  constants_statuscodes_bs__e_sc_bad_type_mismatch);
             }
             *io_dispatch_mgr__valid_msg = io_dispatch_mgr__l_valid_req;
             break;
@@ -377,17 +388,20 @@ void io_dispatch_mgr__receive_msg_buffer(
                   case constants__e_msg_session_treatment_class:
                      service_mgr__client_receive_session_treatment_resp(io_dispatch_mgr__channel,
                         io_dispatch_mgr__l_msg_type,
-                        io_dispatch_mgr__buffer);
+                        io_dispatch_mgr__buffer,
+                        &io_dispatch_mgr__l_valid_resp);
                      break;
                   case constants__e_msg_session_service_class:
                      service_mgr__client_receive_session_service_resp(io_dispatch_mgr__channel,
                         io_dispatch_mgr__l_msg_type,
-                        io_dispatch_mgr__buffer);
+                        io_dispatch_mgr__buffer,
+                        &io_dispatch_mgr__l_valid_resp);
                      break;
                   case constants__e_msg_discovery_service_class:
                      service_mgr__client_receive_discovery_service_resp(io_dispatch_mgr__channel,
                         io_dispatch_mgr__l_msg_type,
-                        io_dispatch_mgr__buffer);
+                        io_dispatch_mgr__buffer,
+                        &io_dispatch_mgr__l_valid_resp);
                      break;
                   case constants__e_msg_service_fault_class:
                      ;
@@ -398,15 +412,20 @@ void io_dispatch_mgr__receive_msg_buffer(
                }
             }
             else {
-               channel_mgr__close_secure_channel(io_dispatch_mgr__channel);
+               channel_mgr__close_secure_channel(io_dispatch_mgr__channel,
+                  constants_statuscodes_bs__e_sc_bad_type_mismatch);
             }
             *io_dispatch_mgr__valid_msg = io_dispatch_mgr__l_valid_resp;
             break;
          default:
             *io_dispatch_mgr__valid_msg = false;
-            channel_mgr__close_secure_channel(io_dispatch_mgr__channel);
             break;
          }
+      }
+      else if ((io_dispatch_mgr__l_connected_channel == true) &&
+         (io_dispatch_mgr__l_valid_msg_type == false)) {
+         channel_mgr__close_secure_channel(io_dispatch_mgr__channel,
+            constants_statuscodes_bs__e_sc_bad_decoding_error);
       }
       service_mgr__dealloc_msg_in_buffer(io_dispatch_mgr__buffer);
       app_cb_call_context_bs__clear_app_call_context();

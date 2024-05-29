@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr.c
 
- Date                 : 14/11/2023 17:01:39
+ Date                 : 29/05/2024 08:51:39
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -50,7 +50,8 @@ void channel_mgr__INITIALISATION(void) {
    OPERATIONS Clause
   --------------------*/
 void channel_mgr__l_close_secure_channel(
-   const constants__t_channel_i channel_mgr__p_channel) {
+   const constants__t_channel_i channel_mgr__p_channel,
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__p_statusCode) {
    {
       t_bool channel_mgr__l_res;
       constants__t_channel_config_idx_i channel_mgr__l_channel_conf;
@@ -65,7 +66,8 @@ void channel_mgr__l_close_secure_channel(
          if (channel_mgr__l_is_client_channel == true) {
             channel_mgr_1__add_cli_channel_disconnecting(channel_mgr__l_channel_conf);
          }
-         channel_mgr_bs__finalize_close_secure_channel(channel_mgr__p_channel);
+         channel_mgr_bs__finalize_close_secure_channel(channel_mgr__p_channel,
+            channel_mgr__p_statusCode);
       }
    }
 }
@@ -212,8 +214,10 @@ void channel_mgr__srv_new_secure_channel(
 }
 
 void channel_mgr__close_secure_channel(
-   const constants__t_channel_i channel_mgr__channel) {
-   channel_mgr__l_close_secure_channel(channel_mgr__channel);
+   const constants__t_channel_i channel_mgr__channel,
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr__statusCode) {
+   channel_mgr__l_close_secure_channel(channel_mgr__channel,
+      channel_mgr__statusCode);
 }
 
 void channel_mgr__close_all_channel(
@@ -241,7 +245,8 @@ void channel_mgr__close_all_channel(
             ((channel_mgr__p_clientOnly == false) ||
             (channel_mgr__l_cli_con == true))) {
             channel_mgr__l_any_channel_closing_or_connecting = true;
-            channel_mgr__l_close_secure_channel(channel_mgr__l_channel);
+            channel_mgr__l_close_secure_channel(channel_mgr__l_channel,
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
          }
       }
       channel_mgr_it__init_iter_channel_config_idx(&channel_mgr__l_continue);
@@ -311,7 +316,8 @@ void channel_mgr__cli_set_connected_channel(
             channel_mgr__reverse_endpoint_config_idx);
          channel_mgr_bs__define_SecurityPolicy(channel_mgr__channel);
          if (channel_mgr__l_is_channel_disconnecting == true) {
-            channel_mgr__l_close_secure_channel(channel_mgr__channel);
+            channel_mgr__l_close_secure_channel(channel_mgr__channel,
+               constants_statuscodes_bs__e_sc_bad_secure_channel_closed);
          }
          *channel_mgr__bres = true;
       }

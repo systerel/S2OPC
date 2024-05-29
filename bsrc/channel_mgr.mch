@@ -106,10 +106,12 @@ OPERATIONS
         )
     END;
 
-    close_secure_channel (channel) =
+    close_secure_channel (channel, statusCode) =
     PRE
         channel : t_channel_i &
-        channel : t_channel
+        channel : t_channel &
+        statusCode : t_StatusCode_i &
+        statusCode : t_StatusCode
     THEN
         s_cli_channel_disconnecting
         :(  s_cli_channel_disconnecting <: t_channel_config_idx

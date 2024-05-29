@@ -61,10 +61,12 @@ PROMOTES
 
 LOCAL_OPERATIONS
 
-    l_close_secure_channel(p_channel) =
+    l_close_secure_channel(p_channel, p_statusCode) =
     PRE
         p_channel : t_channel_i &
-        p_channel : t_channel
+        p_channel : t_channel &
+        p_statusCode : t_StatusCode_i &
+        p_statusCode : t_StatusCode
     THEN
         IF  p_channel : s_channel_connected &
             p_channel /: dom(a_endpoint) /* Client side only: */
@@ -106,7 +108,7 @@ OPERATIONS
 
     /* Local operations */
 
-    l_close_secure_channel(p_channel) =
+    l_close_secure_channel(p_channel, p_statusCode) =
     VAR
         l_res,
         l_channel_conf,
@@ -120,7 +122,7 @@ OPERATIONS
                 add_cli_channel_disconnecting(l_channel_conf)
             END
             ;
-            finalize_close_secure_channel(p_channel)
+            finalize_close_secure_channel(p_channel, p_statusCode)
         END
     END
     ;
@@ -257,9 +259,9 @@ OPERATIONS
     END
     ;
 
-    close_secure_channel(channel) =
+    close_secure_channel(channel, statusCode) =
     BEGIN
-        l_close_secure_channel(channel)
+        l_close_secure_channel(channel, statusCode)
     END
     ;
 
@@ -284,7 +286,7 @@ OPERATIONS
                 (p_clientOnly = FALSE or l_cli_con = TRUE)
             THEN
                 l_any_channel_closing_or_connecting := TRUE;
-                l_close_secure_channel(l_channel)
+                l_close_secure_channel(l_channel, e_sc_bad_secure_channel_closed)
             END
         INVARIANT
             channels_to_iterate <: t_channel &
@@ -358,7 +360,7 @@ OPERATIONS
             /* If channel was tagged for disconnection, close it now it is connected */
             IF l_is_channel_disconnecting = TRUE
             THEN
-                l_close_secure_channel(channel)
+                l_close_secure_channel(channel, e_sc_bad_secure_channel_closed)
             END
             ;
             bres := TRUE

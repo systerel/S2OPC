@@ -57,7 +57,8 @@ typedef enum
                             params = (uint32_t) secure channel configuration index */
     SC_DISCONNECT,       /**< Disconnects and clears the secure channel identified by the given secure channel index
                               (provided on connected event).<br/>
-                              id = secure channel connection index */
+                              id = secure channel connection index
+                              params = (SOPC_StatusCode) reasonCode */
     SC_SERVICE_SND_MSG,  /**< Sends a message on a secure channel.<br/>
                            id = secure channel connection index<br/>
                            params = (SOPC_Buffer*) buffer to send containing empty space for TCP UA header (24 bytes)

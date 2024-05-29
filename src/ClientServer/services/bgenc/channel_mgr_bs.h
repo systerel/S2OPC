@@ -21,7 +21,7 @@
 
  File Name            : channel_mgr_bs.h
 
- Date                 : 04/11/2022 14:14:47
+ Date                 : 29/05/2024 08:52:50
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -55,7 +55,8 @@ extern void channel_mgr_bs__channel_do_nothing(
 extern void channel_mgr_bs__define_SecurityPolicy(
    const constants__t_channel_i channel_mgr_bs__p_channel);
 extern void channel_mgr_bs__finalize_close_secure_channel(
-   const constants__t_channel_i channel_mgr_bs__p_channel);
+   const constants__t_channel_i channel_mgr_bs__p_channel,
+   const constants_statuscodes_bs__t_StatusCode_i channel_mgr_bs__p_statusCode);
 extern void channel_mgr_bs__get_SecurityPolicy(
    const constants__t_channel_i channel_mgr_bs__channel,
    constants__t_SecurityPolicy * const channel_mgr_bs__secpol);
