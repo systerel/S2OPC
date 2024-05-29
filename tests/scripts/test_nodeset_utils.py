@@ -187,6 +187,10 @@ class MergeTests(unittest.TestCase):
         self.run_test('test_orphans.xml', ['--remove-orphans'],
                       'ns0.xml', 'Orphans.xml')
 
+    def test_reassign_namespace_index(self):
+        self.run_test('test_reassign_namespace_index.xml', ['--remove-max-node-management'],
+                      'ns0.xml', 'adresse_space_ns1.xml', 'adresse_space_ns2.xml')
+
         
 
 if __name__ == '__main__':

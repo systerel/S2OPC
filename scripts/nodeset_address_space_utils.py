@@ -167,6 +167,8 @@ class NSIndexReassigner(NSFinder):
         # Reassign namespace index for:
         #   @NodeId, @BrowseName, @ParentNodeId, @DataType,
         #   References/Reference/@ReferenceType and References/Reference/text
+        #   TypeId/Identifier/text
+        #   DataType/Identifier/text
         for attr in ['NodeId', 'ParentNodeId', 'DataType']:
             self.__reassign_elem_attr(node, attr, self.__reassigned_ns_index)
         self.__reassign_elem_attr(node, 'BrowseName', self.__reassigned_prefix_index)
@@ -174,6 +176,12 @@ class NSIndexReassigner(NSFinder):
         for ref in self._iterfind(node, 'uanodeset:References/uanodeset:Reference'):
             self.__reassign_elem_attr(ref, 'ReferenceType', self.__reassigned_ns_index)
             ref.text = self.__reassigned_ns_index(ref.text)
+
+        for typeId in self._iterfind(node, f'.//{{{UA_TYPES_URI}}}TypeId/{{{UA_TYPES_URI}}}Identifier'):
+            typeId.text = self.__reassigned_ns_index(typeId.text)
+
+        for dataType in self._iterfind(node, f'.//{{{UA_TYPES_URI}}}DataType/{{{UA_TYPES_URI}}}Identifier'):
+            dataType.text = self.__reassigned_ns_index(dataType.text)
 
     def __get_reassigned_expr(self, expr: str, matcher, formatter):
         m = matcher.match(expr)
