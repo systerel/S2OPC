@@ -463,7 +463,8 @@ int main(int argc, char* const argv[])
     }
 
     // Create connection and connect the user/client to the server
-    status = create_custom_secure_connection(argv[1], argv[2], true, "./S2OPC_Demo_PKI", server_certificate, &scConfig);
+    status = create_custom_secure_connection(argv[1], argv[2], true, "./S2OPC_Demo_PKI_Client", server_certificate,
+                                             &scConfig);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ClientHelperNew_Connect(scConfig, SOPC_Client_ConnEventCb, &secureConnection);
