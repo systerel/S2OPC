@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.c
 
- Date                 : 01/02/2024 09:39:28
+ Date                 : 30/05/2024 08:36:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -982,5 +982,9 @@ void session_mgr__server_evaluate_all_session_user_cert(void) {
          }
       }
    }
+}
+
+void session_mgr__session_mgr_UNINITIALISATION(void) {
+   session_core__session_core_UNINITIALISATION();
 }
 

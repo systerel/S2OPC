@@ -948,5 +948,11 @@ OPERATIONS
             END
         END
     END
+    ;
+
+    session_mgr_UNINITIALISATION =
+    BEGIN
+        session_core_UNINITIALISATION
+    END
 
 END

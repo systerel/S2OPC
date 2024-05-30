@@ -1070,5 +1070,53 @@ OPERATIONS
             END
         END
     END
+    ;
+
+    session_core_UNINITIALISATION =
+    VAR
+        l_continue,
+        l_session,
+        l_valid_session,
+        l_channel,
+        l_is_client
+    IN
+        l_continue <-- init_iter_session;
+        IF  l_continue = TRUE THEN  /* Only for proving */
+            WHILE l_continue = TRUE DO
+                l_continue, l_session <-- continue_iter_session;
+                l_valid_session <-- is_valid_session(l_session);
+
+                IF l_valid_session = TRUE
+                THEN
+                    l_channel <-- get_session_channel (l_session);
+                    l_is_client <-- is_client_channel (l_channel);
+                    set_session_state_closed (l_session, e_sc_ok, l_is_client)
+                END
+            INVARIANT
+                sessions_to_iterate <: t_session &
+                sessions_iterated   <: t_session &
+                sessions_to_iterate /\ sessions_iterated = {} &
+                sessions_to_iterate \/ sessions_iterated = t_session &
+                l_continue = bool(sessions_to_iterate /= {}) &
+                dom(a_channel) <: dom(a_state) &
+                s_session                    = s_session - sessions_iterated &
+                a_state                      = sessions_iterated <<| a_state        &
+                a_channel                    = sessions_iterated <<| a_channel      &
+                a_client_to_create           = sessions_iterated <<| a_client_to_create &
+                a_client_app_context         = sessions_iterated <<| a_client_app_context &
+                a_client_orphaned            = sessions_iterated <<| a_client_orphaned &
+                a_user_server                = sessions_iterated <<| a_user_server &
+                a_server_user_auth_attempts  = sessions_iterated <<| a_server_user_auth_attempts &
+                a_user_client                = sessions_iterated <<| a_user_client &
+                a_server_token               = a_server_token |>> sessions_iterated &
+                a_client_token               = sessions_iterated <<| a_client_token &
+                a_NonceServer                = sessions_iterated <<| a_NonceServer &
+                a_NonceClient                = sessions_iterated <<| a_NonceClient &
+                sessions_iterated <| a_server_client_locales = sessions_iterated * {c_LocaleIds_empty}
+            VARIANT
+                card(sessions_to_iterate)
+            END
+        END
+    END
 
 END

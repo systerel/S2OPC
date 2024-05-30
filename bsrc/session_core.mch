@@ -58,6 +58,20 @@ DEFINITIONS
     /* The NonceClient is remembered by the client in Sess_Creating */
     a_NonceClient : s_session +-> t_Nonce;
 
+    d_init ==
+    s_session                    := {} ||
+    a_state                      := {} ||
+    a_channel                    := {} ||
+    a_client_to_create           := {} ||
+    a_client_app_context         := {} ||
+    a_client_orphaned            := {} ||
+    a_client_token               := {} ||
+    a_server_token               := {} ||
+    a_user_server                := {} ||
+    a_user_client                := {} ||
+    a_NonceServer                := {} ||
+    a_NonceClient                := {};
+
     d_close_session (session) ==
     s_session := s_session - {session}                   || // If session was valid session, remove it
     a_channel := {session} <<| a_channel                 || // If session had a channel, remove this relation
@@ -69,7 +83,6 @@ DEFINITIONS
     a_state(session) := e_session_closed                 || // keep session token as used
     a_NonceServer := {session} <<| a_NonceServer         || /* If session had a server nonce, remove it */
     a_NonceClient := {session} <<| a_NonceClient            /* If session had a client nonce, remove it */
-
 
 ABSTRACT_VARIABLES
     d_variables
@@ -108,18 +121,7 @@ INVARIANT
 
 
 INITIALISATION
-    s_session                    := {} ||
-    a_state                      := {} ||
-    a_channel                    := {} ||
-    a_client_to_create           := {} ||
-    a_client_app_context         := {} ||
-    a_client_orphaned            := {} ||
-    a_client_token               := {} ||
-    a_server_token               := {} ||
-    a_user_server                := {} ||
-    a_user_client                := {} ||
-    a_NonceServer                := {} ||
-    a_NonceClient                := {}
+    d_init
 
 OPERATIONS
 
@@ -970,5 +972,10 @@ OPERATIONS
     THEN
         skip
     END
+    ;
 
+    session_core_UNINITIALISATION =
+    BEGIN
+        d_init
+    END
 END

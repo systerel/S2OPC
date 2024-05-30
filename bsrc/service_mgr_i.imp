@@ -1616,6 +1616,7 @@ OPERATIONS
     service_mgr_UNINITIALISATION =
     BEGIN
         subscription_mgr_UNINITIALISATION;
+        session_mgr_UNINITIALISATION;
         service_set_view_UNINITIALISATION;
         service_set_discovery_server_UNINITIALISATION;
         service_mgr_bs_UNINITIALISATION;

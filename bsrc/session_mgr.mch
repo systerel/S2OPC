@@ -482,5 +482,11 @@ OPERATIONS
     THEN
         endpoint_config_idx :: t_endpoint_config_idx_i
     END
+    ;
+
+    session_mgr_UNINITIALISATION =
+    BEGIN
+        skip
+    END
 
 END

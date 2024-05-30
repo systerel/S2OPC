@@ -21,7 +21,7 @@
 
  File Name            : session_mgr.h
 
- Date                 : 01/02/2024 09:39:27
+ Date                 : 30/05/2024 08:36:02
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -189,5 +189,6 @@ extern void session_mgr__server_validate_session_service_req(
 extern void session_mgr__session_get_endpoint_config(
    const constants__t_session_i session_mgr__p_session,
    constants__t_endpoint_config_idx_i * const session_mgr__endpoint_config_idx);
+extern void session_mgr__session_mgr_UNINITIALISATION(void);
 
 #endif
