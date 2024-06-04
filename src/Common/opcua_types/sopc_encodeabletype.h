@@ -137,7 +137,8 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const
  * The \c isToEncode field indicates whether this field shall be encoded and
  * decoded.  When false, the field is only initialized and cleared.
  *
- * The \c typeIndex field indicates the index of type in internal types array.
+ * The \c typeIndex field indicates the index of type in internal types array
+ * (namespaceTypesArray of encodeable type containing the field descriptor)
  * It shall be a valid value of ::SOPC_TypeInternalIndex enum type.
  * Note: fields can only be of internal defined types for user-defined types.
  *
@@ -156,6 +157,8 @@ typedef struct SOPC_EncodeableType_FieldDescriptor
 /**
  *  \brief Encodeable object type structure definition. It provides all the services
  *  functions associated with the encodeable object for encoding needs.
+ *
+ *  The \c namespaceTypeArray is the internal namespace types array for the current encodeable type.
  */
 typedef const struct SOPC_EncodeableType_Struct
 {
@@ -171,6 +174,8 @@ typedef const struct SOPC_EncodeableType_Struct
     SOPC_EncodeableObject_PfnClear* Clear;
     int32_t NoOfFields;
     const SOPC_EncodeableType_FieldDescriptor* Fields;
+
+    const struct SOPC_EncodeableType_Struct** namespaceTypesArray;
 } SOPC_EncodeableType;
 
 /**

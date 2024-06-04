@@ -40,7 +40,7 @@ int LLVMFuzzerTestOneInput(const uint8_t* buf, size_t len)
     const size_t type_index = buf[0] % SOPC_TypeInternalIndex_SIZE;
 
     /* get an encodeable type by looking in encodeableType array */
-    SOPC_EncodeableType* type = SOPC_KnownEncodeableTypes[type_index];
+    SOPC_EncodeableType* type = sopc_KnownEncodeableTypes[type_index];
 
     void* pValue = SOPC_Calloc(1, type->AllocationSize);
     if (NULL == pValue)

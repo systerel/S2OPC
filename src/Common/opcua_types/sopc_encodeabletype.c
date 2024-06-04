@@ -209,7 +209,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint16_t nsIndex, uin
     uint32_t idx = 0;
     if (OPCUA_NAMESPACE_INDEX == nsIndex)
     {
-        current = SOPC_KnownEncodeableTypes[idx];
+        current = sopc_KnownEncodeableTypes[idx];
         while (current != NULL && NULL == result)
         {
             if (typeId == current->TypeId || typeId == current->BinaryEncodingTypeId)
@@ -219,7 +219,7 @@ SOPC_EncodeableType* SOPC_EncodeableType_GetEncodeableType(uint16_t nsIndex, uin
             if (NULL == result && idx < UINT32_MAX)
             {
                 idx++;
-                current = SOPC_KnownEncodeableTypes[idx];
+                current = sopc_KnownEncodeableTypes[idx];
             }
             else
             {
@@ -252,39 +252,42 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
     return result;
 }
 
-static SOPC_EncodeableType* getKnownEncodeableType(const SOPC_EncodeableType_FieldDescriptor* desc)
+static SOPC_EncodeableType* getKnownEncodeableType(SOPC_EncodeableType* encType,
+                                                   const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     const uint32_t typeIndex = desc->typeIndex;
     SOPC_ASSERT(typeIndex < SOPC_TypeInternalIndex_SIZE &&
                 "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
-    return SOPC_KnownEncodeableTypes[typeIndex];
+    return encType->namespaceTypesArray[typeIndex];
 }
 
-static size_t getAllocationSize(const SOPC_EncodeableType_FieldDescriptor* desc)
+static size_t getAllocationSize(SOPC_EncodeableType* encType, const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn)
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].size;
     }
-    return getKnownEncodeableType(desc)->AllocationSize;
+    return getKnownEncodeableType(encType, desc)->AllocationSize;
 }
 
-static SOPC_EncodeableObject_PfnInitialize* getPfnInitialize(const SOPC_EncodeableType_FieldDescriptor* desc)
+static SOPC_EncodeableObject_PfnInitialize* getPfnInitialize(SOPC_EncodeableType* encType,
+                                                             const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn)
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].initialize;
     }
-    return getKnownEncodeableType(desc)->Initialize;
+    return getKnownEncodeableType(encType, desc)->Initialize;
 }
 
-static SOPC_EncodeableObject_PfnClear* getPfnClear(const SOPC_EncodeableType_FieldDescriptor* desc)
+static SOPC_EncodeableObject_PfnClear* getPfnClear(SOPC_EncodeableType* encType,
+                                                   const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     if (desc->isBuiltIn)
     {
         return SOPC_BuiltInType_HandlingTable[desc->typeIndex].clear;
     }
-    return getKnownEncodeableType(desc)->Clear;
+    return getKnownEncodeableType(encType, desc)->Clear;
 }
 
 static SOPC_ReturnStatus SOPC_EncodeableType_PfnEncode(const void* value,
@@ -425,7 +428,7 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            initFunction = getPfnInitialize(arrayDesc);
+            initFunction = getPfnInitialize(type, arrayDesc);
 
             // Initialize array fields to 0, array is not allocated by init (unknown length)
             *pLength = 0;
@@ -433,7 +436,7 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
         }
         else
         {
-            initFunction = getPfnInitialize(desc);
+            initFunction = getPfnInitialize(type, desc);
             initFunction(pField);
         }
     }
@@ -469,14 +472,14 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
             SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(arrayDesc);
-            clearFunction = getPfnClear(arrayDesc);
+            size = getAllocationSize(type, arrayDesc);
+            clearFunction = getPfnClear(type, arrayDesc);
 
             SOPC_Clear_Array(pLength, pArray, size, clearFunction);
         }
         else
         {
-            clearFunction = getPfnClear(desc);
+            clearFunction = getPfnClear(type, desc);
             clearFunction(pField);
         }
     }
@@ -527,7 +530,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
             SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveConstArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(arrayDesc);
+            size = getAllocationSize(type, arrayDesc);
             encodeFunction = getPfnEncode(arrayDesc);
 
             status = SOPC_Write_Array(buf, pLength, pArray, size, encodeFunction, nestedStructLevel);
@@ -594,10 +597,10 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
             SOPC_ASSERT(i < type->NoOfFields);
             arrayDesc = &type->Fields[i];
             pArray = retrieveArrayAddressPtr(pValue, arrayDesc);
-            size = getAllocationSize(arrayDesc);
+            size = getAllocationSize(type, arrayDesc);
             decodeFunction = getPfnDecode(arrayDesc);
-            initFunction = getPfnInitialize(arrayDesc);
-            clearFunction = getPfnClear(arrayDesc);
+            initFunction = getPfnInitialize(type, arrayDesc);
+            clearFunction = getPfnClear(type, arrayDesc);
 
             status = SOPC_Read_Array(buf, pLength, pArray, size, decodeFunction, initFunction, clearFunction,
                                      nestedStructLevel);
@@ -657,7 +660,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
                 arrayDesc = &type->Fields[i];
                 pArrayDest = retrieveArrayAddressPtr(destValue, arrayDesc);
                 pArraySource = retrieveConstArrayAddressPtr(srcValue, arrayDesc);
-                size = getAllocationSize(arrayDesc);
+                size = getAllocationSize(type, arrayDesc);
                 copyFunction = getPfnCopy(arrayDesc, true);
 
                 // Allocate array of source length with source elements size
@@ -746,7 +749,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
                 arrayDesc = &type->Fields[i];
                 pArrayLeft = retrieveConstArrayAddressPtr(leftValue, arrayDesc);
                 pArrayRight = retrieveConstArrayAddressPtr(rightValue, arrayDesc);
-                size = getAllocationSize(arrayDesc);
+                size = getAllocationSize(type, arrayDesc);
                 compFunction = getPfnCompare(arrayDesc);
 
                 status = SOPC_Comp_Array(*pLeftLength, *pArrayLeft, *pArrayRight, size, compFunction, &resultComp);

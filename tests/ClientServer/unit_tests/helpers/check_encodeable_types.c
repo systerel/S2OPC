@@ -508,7 +508,8 @@ SOPC_EncodeableType SPDURequest_EncodeableType = {
     SPDURequest_Initialize,
     SPDURequest_Clear,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SPDURequest_Fields};
+    SPDURequest_Fields,
+    NULL};
 
 SOPC_EncodeableType SPDURequest_EncodeableType2 = {
     "SPDURequest",
@@ -521,7 +522,8 @@ SOPC_EncodeableType SPDURequest_EncodeableType2 = {
     SPDURequest_Initialize,
     SPDURequest_Clear,
     sizeof SPDURequest_Fields / sizeof(SOPC_EncodeableType_FieldDescriptor),
-    SPDURequest_Fields};
+    SPDURequest_Fields,
+    NULL};
 
 /*===========================================================================*/
 static void SPDURequest_Initialize(void* pValue)
@@ -662,7 +664,7 @@ START_TEST(test_UserEncodeableTypeNS1)
     // Record the encodeable type encoder
     for (uint32_t i = 0; SOPC_STATUS_OK == status && i < SOPC_S2OPC_TypeInternalIndex_SIZE; i++)
     {
-        SOPC_EncodeableType* userType = SOPC_S2OPC_KnownEncodeableTypes[i];
+        SOPC_EncodeableType* userType = sopc_S2OPC_KnownEncodeableTypes[i];
         status = SOPC_EncodeableType_AddUserType(userType);
         ck_assert_int_eq(SOPC_STATUS_OK, status);
     }
@@ -692,12 +694,37 @@ START_TEST(test_UserEncodeableTypeNS1)
     SOPC_NodeId_Clear(typeId);
     SOPC_Free(typeId);
 
-    SOPC_ExtensionObject_Clear(&extObj);
-    SOPC_Buffer_Delete(buf);
-
     // Remove custom type from recorded encoders
     status = SOPC_EncodeableType_RemoveUserType(&OpcUa_S2OPC_CustomDataType_EncodeableType);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    SOPC_ExtensionObject_Clear(&extObj);
+
+    /* TC 2 : CustomDataType2 which references CustomDataType (ok since in same NS / custom type file) */
+    OpcUa_S2OPC_CustomDataType2 instCDT2;
+    OpcUa_S2OPC_CustomDataType2_Initialize(&instCDT2);
+
+    instCDT2.fieldb = false;
+    instCDT2.fieldcdt.fieldb = true;
+    instCDT2.fieldcdt.fieldu = 1000;
+
+    // Reset the buffer position and encode into buffer
+    status = SOPC_Buffer_SetPosition(buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_EncodeableObject_Encode(&OpcUa_S2OPC_CustomDataType2_EncodeableType, &instCDT2, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    // Reset the buffer position and type instance, then decode from buffer
+    status = SOPC_Buffer_SetPosition(buf, 0);
+    OpcUa_S2OPC_CustomDataType2_Clear(&instCDT2);
+    ck_assert_uint_eq(0, instCDT2.fieldcdt.fieldu);
+
+    status = SOPC_EncodeableObject_Decode(&OpcUa_S2OPC_CustomDataType2_EncodeableType, &instCDT2, buf, 0);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_uint_eq(1000, instCDT2.fieldcdt.fieldu);
+    ck_assert(true == instCDT2.fieldcdt.fieldb);
+    ck_assert(false == instCDT2.fieldb);
+
+    OpcUa_S2OPC_CustomDataType2_Clear(&instCDT2);
+    SOPC_Buffer_Delete(buf);
 }
 END_TEST
 

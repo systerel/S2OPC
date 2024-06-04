@@ -24,4 +24,8 @@
 #define OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary 10021
 #define OpcUaId_S2OPC_CustomDataType_Encoding_DefaultXml 10022
 
+#define OpcUaId_S2OPC_CustomDataType2 20020
+#define OpcUaId_S2OPC_CustomDataType2_Encoding_DefaultBinary 20021
+#define OpcUaId_S2OPC_CustomDataType2_Encoding_DefaultXml 20022
+
 #endif
