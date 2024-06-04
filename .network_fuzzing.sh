@@ -50,7 +50,8 @@ cd ../..
 for request in "${request_list[@]}"
 do 
     echo FUZZING "$request"
-    if !  timeout --preserve-status --verbose -k 30s 4h python3 tests/ClientServer/scripts/with-opc-server.py --server-wd build/bin --server-cmd ./toolkit_demo_server "python3" /work/opcua_network_fuzzer-main/opcua_fuzzer.py --target_host_ip localhost --target_host_port 4841 --target_app_name s2opc --r "$request" ; then
+    # Timeout is set to 4 hours for every request
+    if python3 tests/ClientServer/scripts/with-opc-server.py --server-wd build/bin --server-cmd ./toolkit_demo_server --wait-timeout 14400 "python3" /work/opcua_network_fuzzer-main/opcua_fuzzer.py --target_host_ip localhost --target_host_port 4841 --target_app_name s2opc --r "$request" ; then
         exit_status=$?
         echo fuzzing of "$request" ended with SUCCESS! 
         echo Exit status : $exit_status

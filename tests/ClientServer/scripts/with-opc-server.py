@@ -41,6 +41,8 @@ if __name__ == '__main__':
     parser.add_argument('--server-wd', metavar='DIR', help='The directory to run the server in')
     parser.add_argument('--wait-server', action='store_true', default=False,
                         help='Wait for the server to exit instead of killing it when the client is done')
+    parser.add_argument('--wait-timeout',
+                        help='Timeout duration expressed as a float in seconds. Return code of the function is 0 in this case.')
     parser.add_argument('cmd', metavar='CMD', help='The command to run')
     parser.add_argument('args', metavar='ARGS', nargs=argparse.REMAINDER,
                         help='Parameters to pass to the command')
@@ -67,7 +69,15 @@ if __name__ == '__main__':
     log('Starting test %s' % ' '.join(cmd))
 
     try:
-        subprocess.check_call(cmd)
+        if not args.wait_timeout:
+            subprocess.check_call(cmd)
+        else:
+            log('Launch command with timeout of %f seconds \n' % float(args.wait_timeout))
+            subprocess.check_call(cmd, timeout=float(args.wait_timeout))
+        test_ret = 0
+    except subprocess.TimeoutExpired as e:
+        # Nominal exit
+        log('Test time out')  
         test_ret = 0
     except subprocess.CalledProcessError as e:
         test_ret = e.returncode
