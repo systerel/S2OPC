@@ -26,6 +26,21 @@
 #
 # This generation script uses the free AtelierB
 
+function usage() {
+    echo  "Build B model project and generate C sources files from B model."
+    echo "Usage:"
+    echo "  $0 : build B model project and generate C sources files"
+    echo "  $0 POs: build B model, generate POs, use prove force 1 and display result"
+    echo "  $0 -h : This help"
+    exit $1
+}
+
+
+[ "$1" == "-h" ] && usage 0
+[ "$1" ] && [ "$1" != "POs" ] && usage 1
+
+POs=$1
+
 BMODEL_DIR=bsrc
 PREBUILD=pre-build
 PROJET=s2opc_genc
@@ -49,7 +64,8 @@ mkdir -p "$BASE" >> "$LOGPATH"
 # Configure "m" script environment
 export liste_projet="$BASE/liste_projets.txt"
 echo $PROJET . > "$liste_projet"
-export TOOLING_DIR=/home/tooling
+: ${TOOLING_DIR:=/home/tooling}
+export TOOLING_DIR
 export TRAD_JAVA="java -jar $TOOLING_DIR/bin/trad/b2c.jar"
 export ROOT="toolkit_header"
 # Make symbolic link to all files in bsrc/
@@ -58,12 +74,21 @@ find ../$BMODEL_DIR -maxdepth 1 -type f -exec ln -f -s {} . \; >> "$LOGPATH" || 
 cd - || exit 1
 PATH="$TOOLING_DIR"/bin/m:"$TOOLING_DIR"/bin/trad:"$PATH"
 
-echo "Generate C sources files from B model" | tee -a "$LOGPATH"
-if ! make VERBOSE=1 -C "$BASE" >> "$LOGPATH";
+if [[ $POs != "POs" ]]
 then
-    echo "ERROR: generating C source files from B model" | tee -a "$LOGPATH"
-    EXITCODE=1
+    echo "Generate C sources files from B model" | tee -a "$LOGPATH"
+    if ! make VERBOSE=1 -C "$BASE" >> "$LOGPATH";
+    then
+        echo "ERROR: generating C source files from B model" | tee -a "$LOGPATH"
+        EXITCODE=1
+    fi
+else
+    echo "Generate POs" | tee -a "$LOGPATH"
+    make VERBOSE=1 -C "$BASE" POs >> "$LOGPATH"
+    cp "$BASE/po_status.log" ./
+    EXITCODE=$?
 fi
+
 # Remove pre-build directory in any case
 rm -rf ./$PREBUILD
 

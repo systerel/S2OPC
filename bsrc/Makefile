@@ -24,13 +24,13 @@ SOURCE_FILES=$(BMODEL_MCH_PATH_SRCS) $(BMODEL_IMP_PATH_SRCS) $(BMODEL_IMP_PATH_S
 # Generated C files list
 TARGET_GENERATED_FILES=$(BMODEL_C_FILES) $(BMODEL_H_FILES) $(ADDITIONAL_FILES)
 
-all: $(TARGET_GENERATED_FILES)
+all: PROJECT TC $(TARGET_GENERATED_FILES)
 
 ifndef VERBOSE
 .SILENT:
 endif
 
-$(TARGET_GENERATED_FILES): $(SOURCE_FILES)
+PROJECT: $(SOURCE_FILES)
 	if [ "x$$NO_PREBUILD_RM" = x ]; then \
 	    echo "Creating fresh project"; \
 	    m -remove || true; \
@@ -40,8 +40,14 @@ $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	    echo "Reusing project if possible"; \
 	    m -c -a; \
 	fi
+
+TC: $(SOURCE_FILES)
 	m -lonely -incomplete -pchk -tc -b0 | tee tc.log
 	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
+
+$(TARGET_GENERATED_FILES): $(SOURCE_FILES)
+	mkdir $(PATHTRAD)
+	touch $(TARGET_GENERATED_FILES)
 	$(RM) tc.log
 	$(RM) -fr ./$(PATHTRAD)
 	$(RM) -fr ./$(PATHGENTRAD)
@@ -55,3 +61,7 @@ $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
 	for i in constants_bs.h; do \
 	    mv $(PATHTRAD)/"$$i" $(PATHTRAD)/"$$i"_; \
 	done
+
+POs: PROJECT
+	m -fpo -p0 | tee po.log
+	m -s | tee po_status.log
