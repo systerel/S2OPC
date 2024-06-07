@@ -2122,6 +2122,14 @@ static bool SC_Chunks_CheckMultiChunkContext(SOPC_SecureConnection_ChunkMgrCtx* 
     return true;
 }
 
+static void SOPC_LooperEvent_FreeOperation(uint32_t id, uintptr_t val)
+{
+    SOPC_UNUSED_ARG(id);
+    SOPC_LooperEvent* intEvent = (SOPC_LooperEvent*) val;
+    SOPC_Buffer_Delete((SOPC_Buffer*) intEvent->params);
+    SOPC_Free(intEvent);
+}
+
 static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                                           uint32_t scConnectionIdx,
                                           SOPC_Buffer* receivedBuffer)
@@ -2204,7 +2212,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
                             SOPC_SLinkedList_Append(intEventsLIFO, requestIdOrHandle, (uintptr_t) intEvent);
                         if (addedEvent != (uintptr_t) intEvent)
                         {
-                            SOPC_Free(intEvent);
+                            SOPC_LooperEvent_FreeOperation(0, (uintptr_t) intEvent);
                             errorStatus = OpcUa_BadOutOfMemory;
                             result = false;
                         }
@@ -2261,6 +2269,7 @@ static void SC_Chunks_TreatReceivedBuffer(SOPC_SecureConnection* scConnection,
         SOPC_ScInternalContext_ClearInputChunksContext(chunkCtx);
     }
 
+    SOPC_SLinkedList_Apply(intEventsLIFO, &SOPC_LooperEvent_FreeOperation);
     SOPC_SLinkedList_Delete(intEventsLIFO);
     SOPC_Buffer_Delete(receivedBuffer);
 }
