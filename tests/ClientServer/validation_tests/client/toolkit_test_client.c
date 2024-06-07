@@ -442,8 +442,23 @@ static SOPC_ReturnStatus Client_SetDefaultConfiguration(size_t* nbSecConnCfgs,
     return status;
 }
 
-static bool SOPC_GetClientUser1Password(char** outUserName, char** outPassword)
+#ifndef WITH_STATIC_SECURITY_DATA
+
+static bool SOPC_GetClientUserKeyPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                          const char* cert1Sha1,
+                                          char** outPassword)
 {
+    SOPC_UNUSED_ARG(secConnConfig);
+    bool res = SOPC_TestHelper_AskPassWithContext_FromEnv(cert1Sha1, outPassword);
+    return res;
+}
+#endif // WITH_STATIC_SECURITY_DATA
+
+static bool SOPC_GetClientUser1Password(const SOPC_SecureConnection_Config* secConnConfig,
+                                        char** outUserName,
+                                        char** outPassword)
+{
+    SOPC_UNUSED_ARG(secConnConfig);
     const char* user1 = "user1";
     char* userName = SOPC_Calloc(strlen(user1) + 1, sizeof(*userName));
     if (NULL == userName)
@@ -497,7 +512,7 @@ static SOPC_ReturnStatus Client_LoadClientConfiguration(size_t* nbSecConnCfgs,
     // Set callback necessary to retrieve user key password (from environment variable)
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+        status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_GetClientUserKeyPassword);
     }
 #endif // WITH_STATIC_SECURITY_DATA
 

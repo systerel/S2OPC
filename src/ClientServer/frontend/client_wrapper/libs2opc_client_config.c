@@ -349,7 +349,7 @@ static SOPC_ReturnStatus SOPC_Internal_ConfigUserX509FromPaths(SOPC_SecureConnec
                     SOPC_KeyManager_Certificate_Free(cert);
                     cert = NULL;
 
-                    bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
+                    bool res = SOPC_ClientInternal_GetUserKeyPassword(secConnConfig, certSha1, &password);
                     if (!res)
                     {
                         SOPC_Logger_TraceError(
@@ -609,9 +609,9 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_Finalize_SecureConnectionConfig(SOPC_C
             NULL == secConnConfig->sessionConfig.userToken.userName.userName &&
             NULL == secConnConfig->sessionConfig.userToken.userName.userPwd)
         {
-            bool res =
-                SOPC_ClientInternal_GetUserNamePassword(&secConnConfig->sessionConfig.userToken.userName.userName,
-                                                        &secConnConfig->sessionConfig.userToken.userName.userPwd);
+            bool res = SOPC_ClientInternal_GetUserNamePassword(
+                secConnConfig, &secConnConfig->sessionConfig.userToken.userName.userName,
+                &secConnConfig->sessionConfig.userToken.userName.userPwd);
             if (!res)
             {
                 status = SOPC_STATUS_INVALID_PARAMETERS;
@@ -678,6 +678,15 @@ SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_GetConfigFromId(const char
         }
     }
     return res;
+}
+
+const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnection_Config* secConnConfig)
+{
+    if (NULL == secConnConfig)
+    {
+        return NULL;
+    }
+    return secConnConfig->userDefinedId;
 }
 
 SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAsyncResp_Fct* asyncRespCb)
@@ -802,7 +811,9 @@ bool SOPC_ClientInternal_GetClientKeyPassword(char** outPassword)
 }
 
 // Get password to decrypt user private key from internal callback
-bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPassword)
+bool SOPC_ClientInternal_GetUserKeyPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                            const char* certSha1,
+                                            char** outPassword)
 {
     // TODO: uncomment when only new API available
     /*
@@ -812,7 +823,7 @@ bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPass
         return false;
     }
     */
-    if (NULL == outPassword)
+    if (NULL == outPassword || NULL == secConnConfig)
     {
         return false;
     }
@@ -823,11 +834,13 @@ bool SOPC_ClientInternal_GetUserKeyPassword(const char* certSha1, char** outPass
             "The callback UserKeyPasswordCallback isn't configured and is necessary to decrypt user key");
         return false;
     }
-    return sopc_client_helper_config.getUserKeyPasswordCb(certSha1, outPassword);
+    return sopc_client_helper_config.getUserKeyPasswordCb(secConnConfig, certSha1, outPassword);
 }
 
 // Get password associated to username from internal callback
-bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassword)
+bool SOPC_ClientInternal_GetUserNamePassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                             char** outUserName,
+                                             char** outPassword)
 {
     // TODO: uncomment when only new API available
     /*
@@ -837,7 +850,7 @@ bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassw
         return false;
     }
     */
-    if (NULL == outPassword)
+    if (NULL == outPassword || NULL == secConnConfig)
     {
         return false;
     }
@@ -848,7 +861,7 @@ bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassw
             "The callback UserNamePasswordCallback isn't configured and is necessary to decrypt user key");
         return false;
     }
-    return sopc_client_helper_config.getUserNamePasswordCb(outUserName, outPassword);
+    return sopc_client_helper_config.getUserNamePasswordCb(secConnConfig, outUserName, outPassword);
 }
 
 bool SOPC_ClientInternal_IsEncryptedClientKey(void)

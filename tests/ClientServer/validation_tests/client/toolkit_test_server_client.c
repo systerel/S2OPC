@@ -103,6 +103,18 @@ static void SOPC_ServerStoppedCallback(SOPC_ReturnStatus status)
     SOPC_Atomic_Int_Set(&endpointClosed, true);
 }
 
+/**
+ * Callback to retrieve username and password for session activation
+ */
+static bool SOPC_GetClientUserKeyPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                          const char* cert1Sha1,
+                                          char** outPassword)
+{
+    SOPC_UNUSED_ARG(secConnConfig);
+    bool res = SOPC_TestHelper_AskPassWithContext_FromEnv(cert1Sha1, outPassword);
+    return res;
+}
+
 /*---------------------------------------------------------------------------
  *                          Client initialization
  *---------------------------------------------------------------------------*/
@@ -162,7 +174,7 @@ static SOPC_ReturnStatus client_create_configuration(SOPC_SecureConnection_Confi
         printf("<Test_Server_Client: Failed to configure the client key password callback\n");
     }
 
-    status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_TestHelper_AskPassWithContext_FromEnv);
+    status = SOPC_ClientConfigHelper_SetUserKeyPasswordCallback(&SOPC_GetClientUserKeyPassword);
     if (SOPC_STATUS_OK != status)
     {
         printf("<Test_Server_Client: Failed to configure the user key password callback\n");

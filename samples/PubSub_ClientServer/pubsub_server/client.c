@@ -101,8 +101,12 @@ static bool SOPC_TestHelper_AskUserPass_FromEnv(char** outPassword)
     return true;
 }
 
-static bool SOPC_GetClientUserPassword(char** outUserName, char** outPassword)
+static bool SOPC_GetClientUserPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                       char** outUserName,
+                                       char** outPassword)
 {
+    SOPC_UNUSED_ARG(secConnConfig);
+
     char* userName = SOPC_Calloc(strlen(CLIENT_SKS_USERNAME) + 1, sizeof(*userName));
     if (NULL == userName)
     {

@@ -601,7 +601,7 @@ SOPC_ReturnStatus SOPC_ClientCommon_Connect(const SOPC_LibSub_ConfigurationId cf
                     SOPC_KeyManager_Certificate_Free(cert);
                     cert = NULL;
 
-                    bool res = SOPC_ClientInternal_GetUserKeyPassword(certSha1, &password);
+                    bool res = SOPC_ClientInternal_GetUserKeyPassword(NULL, certSha1, &password);
                     if (!res)
                     {
                         Helpers_Log(SOPC_LOG_LEVEL_ERROR,

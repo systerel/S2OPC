@@ -211,8 +211,11 @@ static SOPC_ReturnStatus ReadPreviousValue(SOPC_ClientConnection* secureConnecti
     return status;
 }
 
-static bool AskUserKeyPass_FromTerminal(const char* userCertThumb, char** outPassword)
+static bool AskUserKeyPass_FromTerminal(const SOPC_SecureConnection_Config* secConnConfig,
+                                        const char* userCertThumb,
+                                        char** outPassword)
 {
+    SOPC_UNUSED_ARG(secConnConfig);
     const char* promptPrefix = "Password for user certificate thumbprint ";
     size_t promptPrefixLen = strlen(promptPrefix);
     size_t userLen = strlen(userCertThumb);
@@ -226,8 +229,11 @@ static bool AskUserKeyPass_FromTerminal(const char* userCertThumb, char** outPas
     return res;
 }
 
-static bool AskUserNamePass_FromTerminal(char** userName, char** outPassword)
+static bool AskUserNamePass_FromTerminal(const SOPC_SecureConnection_Config* secConnConfig,
+                                         char** userName,
+                                         char** outPassword)
 {
+    SOPC_UNUSED_ARG(secConnConfig);
     const char* prompt1 = "UserName of user (e.g.: 'user1') : ";
     const char* prompt2 = "Password for user : ";
 

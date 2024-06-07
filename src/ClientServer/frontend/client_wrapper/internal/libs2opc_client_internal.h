@@ -100,23 +100,30 @@ bool SOPC_ClientInternal_IsEncryptedClientKey(void);
  * \brief Function to call the callback to retrieve password for decryption of the user private key associated to given
  *        cert Sha1.
  *
+ * \param secConnConfig      the secure connection configuration for the session to activate.
+ *                           (NULL if the old client API is used, old API will be removed in version 1.6.0)
  * \param[out] outPassword   the newly allocated password.
  *
  * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_GetUserKeyPassword(const char* cert1Sha1, char** outPassword);
+bool SOPC_ClientInternal_GetUserKeyPassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                            const char* cert1Sha1,
+                                            char** outPassword);
 
 /**
  * \brief Function to call the callback to retrieve the username and password for the session to activate
  *
+ * \param secConnConfig      the secure connection configuration for the session to activate
  * \param[out] outUserName   the newly allocated user name.
  * \param[out] outPassword   the newly allocated password.
  *
  * \return                   true in case of success, otherwise false.
  *
  */
-bool SOPC_ClientInternal_GetUserNamePassword(char** outUserName, char** outPassword);
+bool SOPC_ClientInternal_GetUserNamePassword(const SOPC_SecureConnection_Config* secConnConfig,
+                                             char** outUserName,
+                                             char** outPassword);
 
 uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConfigIdx rEPcfgIdx);
 

@@ -95,6 +95,17 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_ConfigureFromXML(const char* clientCon
 SOPC_SecureConnection_Config* SOPC_ClientConfigHelper_GetConfigFromId(const char* userDefinedId);
 
 /**
+ * \brief Returns the user defined identifier attached to a secure connection configuration.
+ *        The user defined identifier is the id attribute of the connection in XML configuration.
+ *
+ * \param secConnConfig The secure connection configuration
+ *
+ * \return The user defined identifier of \p secConnConfig or NULL if it is not defined for this secure connection
+ * configuration.
+ */
+const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnection_Config* secConnConfig);
+
+/**
  * \brief Type of callback to provide asynchronous service response
  *
  * \param response     An asynchronous response to a local service request sent using
@@ -141,6 +152,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAs
 /**
  * \brief Type of callback to retrieve username and password for session activation
  *
+ * \param secConnConfig      the secure connection configuration for the session to activate
  * \param[out] outUserName   the newly allocated username which shall be used for session activation, it shall be a
  *                           zero-terminated string in case of success.
  * \param[out] outPassword   the newly allocated password which shall be a zero-terminated string in case
@@ -151,7 +163,9 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetServiceAsyncResponse(SOPC_ServiceAs
  * \warning The implementation of the user callback must free the \p outUserName and  \p outPassword
  *          and set them it back to NULL in case of failure.
  */
-typedef bool SOPC_GetClientUserNamePassword_Fct(char** outUserName, char** outPassword);
+typedef bool SOPC_GetClientUserNamePassword_Fct(const SOPC_SecureConnection_Config* secConnConfig,
+                                                char** outUserName,
+                                                char** outPassword);
 
 /**
  * \brief Defines the callback to retrieve the username and password to activate the client session.
@@ -170,6 +184,8 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserNamePasswordCallback(
 /**
  * \brief Type of callback to retrieve password for decryption of the user private key
  *
+ * \param      secConnConfig the secure connection configuration for the session to activate
+ *                           (NULL if the old client API is used, old API will be removed in version 1.6.0)
  * \param      userCertThumb user certificate thumbprint containing the public key paired
  *                           with the private key to decrypt
  * \param[out] outPassword   the newly allocated password which shall be a zero-terminated string in case
@@ -179,7 +195,9 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetUserNamePasswordCallback(
  *
  * \warning The implementation of the callback must free the \p outPassword and set it back to NULL in case of failure.
  */
-typedef bool SOPC_GetClientUserKeyPassword_Fct(const char* userCertThumb, char** outPassword);
+typedef bool SOPC_GetClientUserKeyPassword_Fct(const SOPC_SecureConnection_Config* secConnConfig,
+                                               const char* userCertThumb,
+                                               char** outPassword);
 
 /**
  * \brief Defines the callback to retrieve password for decryption of the user X509 token private key.

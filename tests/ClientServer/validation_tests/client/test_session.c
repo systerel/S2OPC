@@ -58,8 +58,11 @@ static void SOPC_ClientConnectionEventCb(SOPC_ClientConnection* config,
     ck_assert(false);
 }
 
-static bool SOPC_GetClientUser1Password(char** outUserName, char** outPassword)
+static bool SOPC_GetClientUser1Password(const SOPC_SecureConnection_Config* secConnConfig,
+                                        char** outUserName,
+                                        char** outPassword)
 {
+    SOPC_UNUSED_ARG(secConnConfig);
     const char* user1 = "user";
     char* userName = SOPC_Calloc(strlen(user1) + 1, sizeof(*userName));
     if (NULL == userName)
