@@ -1246,7 +1246,7 @@ const SOPC_PubSub_ArrayDimension* SOPC_FieldMetaData_Get_ArrayDimension(const SO
     return &metadata->arrDimension;
 }
 
-bool SOPC_FiledMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
+bool SOPC_FieldMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
                                                const SOPC_PubSub_ArrayDimension* arrayDimensions)
 {
     SOPC_ASSERT(NULL != metadata);

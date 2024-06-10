@@ -1416,7 +1416,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_ASSERT(fieldMetaData != NULL);
                         SOPC_PubSub_ArrayDimension arrDimension = {
                             .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
-                        allocSuccess = SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
+                        allocSuccess = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
                         SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldMetaData);
                         SOPC_ASSERT(publishedVar != NULL);
@@ -1502,7 +1502,7 @@ static SOPC_PubSubConfiguration* build_pubsub_config(struct parse_context_t* ctx
                         SOPC_FieldMetaData_Set_BuiltinType(fieldMetaData, var->dataType);
                         SOPC_PubSub_ArrayDimension arrDimension = {
                             .valueRank = var->valueRank, .arrayDimensions = var->arrayDimensions.arrayDimensions};
-                        allocSuccess = SOPC_FiledMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
+                        allocSuccess = SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldMetaData, &arrDimension);
                         /* FieldTarget: link to the source/target data */
                         SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldMetaData);
                         SOPC_ASSERT(fieldTarget != NULL);

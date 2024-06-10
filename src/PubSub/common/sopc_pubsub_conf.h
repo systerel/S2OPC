@@ -402,7 +402,7 @@ void SOPC_FieldMetaData_Set_BuiltinType(SOPC_FieldMetaData* metadata, SOPC_Built
 /* ValueRank define dimension of the array ArrayDimensions. ValueRank should be set before allocating ArrayDimensions */
 const SOPC_PubSub_ArrayDimension* SOPC_FieldMetaData_Get_ArrayDimension(const SOPC_FieldMetaData* metadata);
 void SOPC_FieldMetaData_ArrayDimension_Move(SOPC_FieldMetaData* metadata, SOPC_PubSub_ArrayDimension* arrayDimension);
-bool SOPC_FiledMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
+bool SOPC_FieldMetaDeta_SetCopy_ArrayDimension(SOPC_FieldMetaData* metadata,
                                                const SOPC_PubSub_ArrayDimension* arrayDimensions);
 
 // only for Subscriber
