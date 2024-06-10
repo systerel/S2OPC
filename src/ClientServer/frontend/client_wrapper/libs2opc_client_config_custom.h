@@ -124,7 +124,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
                                                                   const unsigned char* clientPrivateKey);
 
 /**
- * \brief Create a new secure channel configuration in client be completed by using the functions below
+ * \brief Create a new secure channel configuration in client to be completed by using the functions below
  * (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath or
  *  ::SOPC_SecureConnectionConfig_SetServerCertificateFromBytes, etc.)
  *
@@ -137,6 +137,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
  * \param secuPolicy     Security policy URI required for this SecureConnection.
  *                       If value different from None, SOPC_SecureConnectionConfig_AddServerCertificate* shall be
  *                       called.
+ * \note Returned ::SOPC_SecureConnection_Config is owned by library and shall not be freed.
  *
  * \return SOPC_SecureConnectionConfig pointer to configuration structure to be filled
  *         with SOPC_SecureConnectionConfig_Set* functions
