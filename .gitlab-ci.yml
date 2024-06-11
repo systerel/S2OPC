@@ -570,7 +570,7 @@ generate_sbom:
   script: 
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
-    - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
+    - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan
     - conan user ci_user -r gitlab -p ${CI_JOB_TOKEN}
     - export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib:/usr/local/bin
     - conan lock create conanfile.py -s compiler='gcc' -s compiler.version=12 -s compiler.libcxx=libstdc++
