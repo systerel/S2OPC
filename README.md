@@ -206,10 +206,10 @@ Tested under Debian 11.
 Prerequisites:
 - Make (tested with GNU Make version 4.3)
 - CMake (>= 3.5, tested with CMake version 3.9.4)
-- GCC (tested with GCC version 11.2.0)
-- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.7) or  [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.2.4)
+- GCC (tested with GCC version 13.3.0)
+- [Mbedtls](https://tls.mbed.org/)(tested with mbedtls version 2.28.8) or  [CycloneCRYPTO](https://gitlab.com/systerel/S2OPC/-/wikis/compilation/Compilation-of-CycloneCRYPTO-(Linux)) (tested with patched version 2.2.4)
 - [Check](https://libcheck.github.io/check/)(tested with libcheck version 0.14 compiled with CMake)
-- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.5.0 compiled with CMake)
+- [expat](https://github.com/libexpat/libexpat)(tested with libexpat version 2.6.2 compiled with CMake)
 - Python3 (tested with version 3.10.12)
 - [Paho](https://github.com/eclipse/paho.mqtt.c) only needed for PubSub with MQTT (tested with version 1.3.4 compiled with CMake)
 
@@ -245,8 +245,8 @@ Prerequisites:
 - Visual Studio (tested with Visual Studio 2017)
 - CMake (tested with CMake version 3.16.2 and 3.22.2)
 - Python3 (tested with Python version >= 3.6.3)
-- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.28.7)
-- [expat](https://libexpat.github.io/) (tested with expat version 2.5.0)
+- [mbedtls](https://tls.mbed.org/) (tested with mbedtls version 2.28.8)
+- [expat](https://libexpat.github.io/) (tested with expat version 2.6.2)
 - [check](https://libcheck.github.io/check/) (tested with libcheck version 0.14 compiled with CMake)
 
 To build S2OPC libraries and tests with default configuration on current stable release, you can use the build_s2opc.bat script by adapting few parameters through environment variables:
