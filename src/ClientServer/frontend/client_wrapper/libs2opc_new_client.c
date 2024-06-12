@@ -578,72 +578,84 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
                                                                     void** response,
                                                                     uintptr_t userContext)
 {
+    bool requestSentToServices = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
+    SOPC_StaMac_ReqCtx* smReqCtx = NULL;
+
     if (NULL == secConnConfig || NULL == request || (isSynchronous && NULL == response))
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    if (!SOPC_ClientInternal_IsInitialized())
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
-        return SOPC_STATUS_INVALID_STATE;
+        status = SOPC_STATUS_INVALID_STATE;
     }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    // Check connection is valid and is not already created
-    if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
-        (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
-    {
-        SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
-
-    SOPC_ClientConnection* res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
-    if (SOPC_STATUS_OK == status && NULL == res)
-    {
-        status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, true, &res);
-        if (SOPC_STATUS_OK == status)
-        {
-            sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx] = res;
-        }
-    }
-
-    /* Call discovery service */
-    SOPC_StaMac_ReqCtx* smReqCtx = NULL;
-    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        /* create a context wrapper (use SOPC_StaMac_ReqCtx for unicity with other responses but SM not called) */
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-        smReqCtx = SOPC_Calloc(1, sizeof(*smReqCtx));
-        if (isSynchronous)
+        // Check connection is valid and is not already created
+        if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
+            (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
         {
-            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateSync(res->secureConnectionIdx, response, true);
+            SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+            status = SOPC_STATUS_INVALID_STATE;
         }
-        else
+
+        SOPC_ClientConnection* res = NULL;
+        if (SOPC_STATUS_OK == status)
         {
-            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
-                res->secureConnectionIdx, true, sopc_client_helper_config.asyncRespCb, userContext);
+            status = SOPC_ClientHelperInternal_MayFinalizeSecureConnection(pConfig, secConnConfig);
         }
-        if (NULL == smReqCtx || NULL == reqCtx)
+        if (SOPC_STATUS_OK == status)
         {
-            SOPC_Free(smReqCtx);
-            SOPC_Free(reqCtx);
-            status = SOPC_STATUS_OUT_OF_MEMORY;
+            res = sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx];
         }
-        else
+        if (SOPC_STATUS_OK == status && NULL == res)
         {
-            smReqCtx->appCtx = (uintptr_t) reqCtx;
-            smReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
-            smReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
+            status = SOPC_ClientHelperInternal_CreateClientConnection(secConnConfig, true, &res);
+            if (SOPC_STATUS_OK == status)
+            {
+                sopc_client_helper_config.secureConnections[secConnConfig->secureConnectionIdx] = res;
+            }
         }
+
+        /* Call discovery service */
+        if (SOPC_STATUS_OK == status)
+        {
+            /* create a context wrapper (use SOPC_StaMac_ReqCtx for unicity with other responses but SM not called) */
+
+            smReqCtx = SOPC_Calloc(1, sizeof(*smReqCtx));
+            if (isSynchronous)
+            {
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateSync(res->secureConnectionIdx, response, true);
+            }
+            else
+            {
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
+                    res->secureConnectionIdx, true, sopc_client_helper_config.asyncRespCb, userContext);
+            }
+            if (NULL == smReqCtx || NULL == reqCtx)
+            {
+                SOPC_Free(smReqCtx);
+                SOPC_Free(reqCtx);
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+            else
+            {
+                smReqCtx->appCtx = (uintptr_t) reqCtx;
+                smReqCtx->requestScope = SOPC_REQUEST_SCOPE_DISCOVERY;
+                smReqCtx->requestType = SOPC_REQUEST_TYPE_GET_ENDPOINTS;
+            }
+        }
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     }
-
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     /* send the request and wait for the result if sync operation */
     if (SOPC_STATUS_OK == status)
@@ -659,6 +671,10 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
                 .secureChannelConfigIdx = secConnConfig->secureChannelConfigIdx};
 
             status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, request, (uintptr_t) smReqCtx);
+            if (SOPC_STATUS_OK == status)
+            {
+                requestSentToServices = true;
+            }
         }
 
         if (isSynchronous && SOPC_STATUS_OK == status)
@@ -679,6 +695,10 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         {
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
+    }
+    if (!requestSentToServices)
+    {
+        SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
     }
 
     return status;
@@ -994,56 +1014,63 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
                                                            void** response,
                                                            uintptr_t userContext)
 {
+    SOPC_StaMac_Machine* pSM = NULL;
+    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
+
+    bool requestSentToServices = false;
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == secureConnection || NULL == request)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
     if (isSynchronous && NULL == response)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        status = SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (!SOPC_ClientInternal_IsInitialized())
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-
-    SOPC_ReturnStatus status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
-    SOPC_StaMac_Machine* pSM = NULL;
-    SOPC_ClientHelper_ReqCtx* reqCtx = NULL;
-
-    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
-        (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
+    if (SOPC_STATUS_OK == status && !SOPC_ClientInternal_IsInitialized())
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Call service */
     if (SOPC_STATUS_OK == status)
     {
-        pSM = secureConnection->stateMachine;
-        /* create a request context */
-        if (isSynchronous)
-        {
-            reqCtx =
-                SOPC_ClientHelperInternal_GenReqCtx_CreateSync(secureConnection->secureConnectionIdx, response, false);
-        }
-        else
-        {
-            reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
-                secureConnection->secureConnectionIdx, false, sopc_client_helper_config.asyncRespCb, userContext);
-        }
-        if (NULL == reqCtx)
-        {
-            status = SOPC_STATUS_OUT_OF_MEMORY;
-        }
-    }
+        SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
-    mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
-    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+        status = SOPC_ClientHelperInternal_FilterService(secureConnection, request);
+
+        if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
+            (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
+        {
+            status = SOPC_STATUS_INVALID_STATE;
+        }
+
+        /* Call service */
+        if (SOPC_STATUS_OK == status)
+        {
+            pSM = secureConnection->stateMachine;
+            /* create a request context */
+            if (isSynchronous)
+            {
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateSync(secureConnection->secureConnectionIdx, response,
+                                                                        false);
+            }
+            else
+            {
+                reqCtx = SOPC_ClientHelperInternal_GenReqCtx_CreateAsync(
+                    secureConnection->secureConnectionIdx, false, sopc_client_helper_config.asyncRespCb, userContext);
+            }
+            if (NULL == reqCtx)
+            {
+                status = SOPC_STATUS_OUT_OF_MEMORY;
+            }
+        }
+
+        mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
+        SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    }
 
     /* send the request and wait for the result if sync operation */
     if (SOPC_STATUS_OK == status)
@@ -1058,6 +1085,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
         {
             status = SOPC_StaMac_SendRequest(pSM, request, (uintptr_t) reqCtx, SOPC_REQUEST_SCOPE_APPLICATION,
                                              SOPC_REQUEST_TYPE_USER);
+            requestSentToServices = (SOPC_STATUS_OK == status);
         }
 
         if (isSynchronous && SOPC_STATUS_OK == status)
@@ -1079,7 +1107,10 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
     }
-
+    if (!requestSentToServices)
+    {
+        SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
+    }
     return status;
 }
 

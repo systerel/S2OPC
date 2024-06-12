@@ -403,6 +403,11 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
     {
         status = SOPC_ClientHelperNew_ServiceSync(secureConnection, (void*) addNodesReq, (void**) &addNodesResp);
     }
+    else
+    {
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
+    }
 
     if (SOPC_STATUS_OK == status)
     {
@@ -414,11 +419,6 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
         }
 
         SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
-        SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
-    }
-    else
-    {
-        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
         SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
 

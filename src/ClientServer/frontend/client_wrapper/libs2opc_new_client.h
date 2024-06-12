@@ -101,11 +101,16 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
  *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
  *                  (e.g.: ::SOPC_GetEndpointsRequest_Create, ::SOPC_GetEndpointsRequest_SetPreferredLocales, etc.).
  *
+ *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
+ *
+ * \note The provided \p request memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  *
  * \warning If the server endpoint is not a discovery endpoint, or an activated session is expected,
  *          usual connection and generic services functions shall be used.
@@ -132,6 +137,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
  *                  (e.g.: ::SOPC_GetEndpointsRequest_Create, ::SOPC_GetEndpointsRequest_SetPreferredLocales, etc.).
  *
+ *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param[out] response  Pointer into which instance of response complying with the OPC UA request is provided:
  *                     \li ::OpcUa_FindServersResponse
  *                     \li ::OpcUa_FindServersOnNetworkResponse
@@ -148,8 +155,9 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
- * \note Request memory is managed by the client after a successful return or in case of timeout
- * \note Caller is responsible of output response memory after successful call
+ * \note The provided \p request memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
+ * \note Caller is responsible of output \p response memory after successful call
  *
  * \warning If the server endpoint is not a discovery endpoint, or an activated session is expected,
  *          usual connection and generic services functions shall be used.
@@ -215,13 +223,16 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_Disconnect(SOPC_ClientConnection** secure
  *                  The request messages can be built using the helper functions of libs2opc_request_builder.h
  *                  (e.g.: ::SOPC_ReadRequest_Create, ::SOPC_ReadRequest_SetReadValue, etc.).
  *
+ *                  Note: it shall be allocated on heap since it will be freed by S2OPC library during treatment.
+ *
  * \param userContext  User defined context that will be provided with the corresponding response in
  *                     ::SOPC_LocalServiceAsyncResp_Fct
  *
  * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         otherwise SOPC_STATUS_INVALID_STATE if the client is not running.
  *
- * \note Request memory is managed by the client after a successful return
+ * \note The provided \p request memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  *
  * \warning Caller of this API should wait at least ::SOPC_REQUEST_TIMEOUT_MS milliseconds after calling this function
  *          and prior to call ::SOPC_ClientConfigHelper_Clear.
@@ -273,7 +284,8 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_ServiceAsync(SOPC_ClientConnection* secur
  *         SOPC_STATUS_INVALID_PARAMETERS in case of invalid parameters,
  *         SOPC_STATUS_INVALID_STATE if the client is not running. And dedicated status if request sending failed.
  *
- * \note Request memory is managed by the client after a successful return or in case of timeout.
+ * \note The provided \p request memory is managed by the function after this call (even in case of error)
+ *       and shall not be accessed nor freed after call.
  * \note Caller is responsible of output response memory after successful call. E.g. use ::SOPC_EncodeableObject_Delete.
  *
  * \warning service synchronous call shall only be called from the application thread and shall not be called from
