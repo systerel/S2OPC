@@ -181,6 +181,7 @@ OPERATIONS
      * Accept a message that was allocated by another part of the program.  We
      * consider the message as correct if the pointer is not NULL, and contains
      * a valid encodeable type.
+     * In case of failure due to unknown type, the message is deallocated by operation.
      */
     msg_typ <-- bless_msg_in (msg) =
     PRE

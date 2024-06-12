@@ -208,12 +208,6 @@ void message_in_bs__decode_msg(const constants__t_msg_type_i message_in_bs__msg_
     }
 }
 
-static void get_msg_in_type(const constants__t_msg_i msg, constants__t_msg_type_i* const msgtype)
-{
-    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) msg;
-    util_message__get_message_type(encType, msgtype);
-}
-
 void message_in_bs__is_valid_request_context(const constants__t_request_context_i message_in_bs__req_context,
                                              t_bool* const message_in_bs__bres)
 {
@@ -228,7 +222,13 @@ void message_in_bs__bless_msg_in(const constants__t_msg_i message_in_bs__msg,
     *message_in_bs__msg_typ = constants__c_msg_type_indet;
     if (message_in_bs__msg != constants__c_msg_indet)
     {
-        get_msg_in_type(message_in_bs__msg, message_in_bs__msg_typ);
+        SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) message_in_bs__msg;
+        util_message__get_message_type(encType, message_in_bs__msg_typ);
+        if (NULL != encType && constants__c_msg_type_indet == *message_in_bs__msg_typ)
+        {
+            // In case of unrecognized type, deallocate here since B calling operation cannot manage it (msg not set)
+            SOPC_EncodeableObject_Delete(encType, message_in_bs__msg);
+        }
     }
 }
 

@@ -157,6 +157,11 @@ void message_out_bs__bless_msg_out(const constants__t_msg_i message_out_bs__msg,
         return;
     }
     util_message__get_message_type(encType, message_out_bs__msg_typ);
+    if (NULL != encType && constants__c_msg_type_indet == *message_out_bs__msg_typ)
+    {
+        // In case of unrecognized type, deallocate here since B calling operation cannot manage it (msg not set)
+        SOPC_EncodeableObject_Delete(encType, message_out_bs__msg);
+    }
 }
 
 void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i message_out_bs__msg_header)
