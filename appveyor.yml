@@ -40,7 +40,7 @@ test_script:
     - set S2OPC_DYNAMIC_TYPE_RESOLUTION=1
     - set CONFIG=RelWithDebInfo
     - set LIBS_DIRS=%CHECK_BUILD_DIR%;%EXPAT_INSTALL_DIR%
-    - set PYS2OPC_VERSION=pys2opc-1.5.0
+    - set PYS2OPC_VERSION=pys2opc-1.5.1
     - set PYS2OPC_WHEEL_NAME=%PYS2OPC_VERSION%-cp36-cp36m-win_amd64.whl
     - set VS_VERSION="Visual Studio 15 2017 Win64"
     - set ENABLE_SAMPLES=on
