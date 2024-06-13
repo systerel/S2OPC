@@ -311,9 +311,8 @@ SOPC_DataValue* get_source_value(const OpcUa_ReadValueId* nodesToRead, const int
 
     SOPC_DataValue* dvs = SOPC_Calloc((size_t) nbValues, sizeof(SOPC_DataValue));
     SOPC_ASSERT(dvs != NULL);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
 
-    for (int32_t i = 0; SOPC_STATUS_OK == status && i < nbValues; ++i)
+    for (int32_t i = 0; i < nbValues; ++i)
     {
         SOPC_DataValue* dv = &dvs[i];
 
@@ -326,18 +325,6 @@ SOPC_DataValue* get_source_value(const OpcUa_ReadValueId* nodesToRead, const int
         var->Value.Int32 = gDsmValues[i];
         SOPC_Mutex_Unlock(&globalValue_lock);
     }
-
-    if (SOPC_STATUS_OK != status)
-    {
-        for (int32_t i = 0; i < nbValues; ++i)
-        {
-            SOPC_DataValue_Clear(&dvs[i]);
-        }
-        SOPC_Free(dvs);
-        dvs = NULL;
-    }
-
-    SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     return dvs;
 }

@@ -42,6 +42,7 @@
 #include <unistd.h>
 
 #include "pubsub.h"
+#include "sopc_assert.h"
 
 #define KIND_BENCHMARK_DEFAULT PUBLISHER_BENCH
 #define MAX_BUFFER_SIZE 1024
@@ -60,19 +61,23 @@ char benchKindBuff[64] = {0};
 
 static char* enum_bench_type_to_char(benchmark_kind_t var)
 {
+    int res = 0;
     if (var == PUBLISHER_BENCH)
     {
-        sprintf(benchKindBuff, "PUBLISHER_BENCH");
+        res = sprintf(benchKindBuff, "PUBLISHER_BENCH");
+        SOPC_ASSERT(res == strlen("PUBLISHER_BENCH"));
         return benchKindBuff;
     }
     else if (var == SUBSCRIBER_BENCH)
     {
-        sprintf(benchKindBuff, "SUBSCRIBER_BENCH");
+        res = sprintf(benchKindBuff, "SUBSCRIBER_BENCH");
+        SOPC_ASSERT(res == strlen("SUBSCRIBER_BENCH"));
         return benchKindBuff;
     }
     else
     {
-        sprintf(benchKindBuff, "UNKNOWN");
+        res = sprintf(benchKindBuff, "UNKNOWN");
+        SOPC_ASSERT(res == strlen("UNKNOWN"));
         return benchKindBuff;
     }
 }
