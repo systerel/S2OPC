@@ -479,7 +479,7 @@ test-check:
 
 .test-unit: &test_unit
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5 # digest of test:2.15
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   script:
     - './.set-bin-root.sh'
     - './test-all.sh'
@@ -627,7 +627,7 @@ scan_repository:
 test-zephyr:
   <<: *zephyr_job
   stage: test-others
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:8367f584bd4e3eeb7735ea9b2c3c5b4ede7198f4eb3ea5729078ed5db4dcae31 # digest of test:2.14
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
   dependencies:
@@ -681,7 +681,7 @@ windows-appveyor-artifacts:
 
 coverage-analysis:
   stage: analyses
-  image: registry.gitlab.com/systerel/s2opc/test@sha256:e3c19732d00406b8ae894d2d75f814a17358ff3728a4f9c78343e9a7048a36d5  # digest of test:2.15
+  image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d  # digest of test:2.16
   script:
     - ./.gen_coverage.sh
   artifacts:
