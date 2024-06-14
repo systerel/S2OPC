@@ -588,7 +588,7 @@ SOPC_ReturnStatus SOPC_Time_FromXsdDateTime(const char* dateTime, size_t len, in
 
     // Compute seconds fraction if significant
     double sec_fraction = tm_res.secondAndFrac - (double) tm_res.second;
-    int64_t hundredOfNanoseconds = (int64_t)(sec_fraction / sec_fraction_100ns);
+    int64_t hundredOfNanoseconds = (int64_t)(sec_fraction / (double) sec_fraction_100ns);
 
     // Note: no overflow possible for 1601 <= year <= 10000
     *res = secsSince1601 * SOPC_SECOND_TO_100_NANOSECONDS + hundredOfNanoseconds;

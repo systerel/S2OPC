@@ -371,7 +371,7 @@ bool SOPC_strtodouble(const char* data, size_t len, uint8_t width, void* dest)
     }
 
     bool res = true;
-    if (width == 32 && val >= -FLT_MAX && val <= FLT_MAX && ERANGE != errno)
+    if (width == 32 && val >= (double) -FLT_MAX && val <= (double) FLT_MAX && ERANGE != errno)
     {
         *((float*) dest) = (float) val;
     }

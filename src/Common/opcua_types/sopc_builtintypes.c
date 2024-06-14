@@ -4569,7 +4569,7 @@ void SOPC_Variant_Print(SOPC_Variant* pvar)
         SOPC_CONSOLE_PRINTF("UInt64\n  Value: %" PRIu64 "\n", pvar->Value.Uint64);
         break;
     case SOPC_Float_Id:
-        SOPC_CONSOLE_PRINTF("Float\n  Value: %g\n", pvar->Value.Floatv);
+        SOPC_CONSOLE_PRINTF("Float\n  Value: %g\n", (double) pvar->Value.Floatv);
         break;
     case SOPC_Double_Id:
         SOPC_CONSOLE_PRINTF("Double\n  Value: %g\n", pvar->Value.Doublev);
