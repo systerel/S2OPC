@@ -8,7 +8,7 @@ include(../platform_dep/CMake/CMakeLists.txt)
 
 project (${SAMPLE_PROJECT_NAME} LANGUAGES C)
 
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 COMPONENTS Interpreter)
 
 ######################################################
 # Generate test_address_space.c from s2opc_pubsub_embedded_nodeset.xml

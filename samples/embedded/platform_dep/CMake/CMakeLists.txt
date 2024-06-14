@@ -30,7 +30,7 @@ endif()
 find_package(s2opc)
 
 # Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 COMPONENTS Interpreter)
 
 #### Samples for S2OPC PubSub library ####
 

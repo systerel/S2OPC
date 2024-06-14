@@ -25,7 +25,7 @@ if(WITH_PYS2OPC)
   # use find_package onto s2opc in case we build s2opc and PyS2OPC separately
   find_package(s2opc)
   # Python3 is mandatory for compilation
-  find_package(PythonInterp 3 REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter)
 
   # TODO:
   # - find how to predict the wheel name and remove the PYS2OPC_WHEEL_NAME option

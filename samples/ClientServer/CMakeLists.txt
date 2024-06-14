@@ -15,7 +15,7 @@ endif()
 # use find_package onto s2opc in case we built s2opc and sample separately
 find_package(s2opc)
 # Python3 is mandatory for compilation
-find_package(PythonInterp 3 REQUIRED)
+find_package(Python3 COMPONENTS Interpreter)
 
 enable_testing()
 
