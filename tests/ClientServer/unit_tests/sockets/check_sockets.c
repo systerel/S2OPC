@@ -338,6 +338,7 @@ START_TEST(test_sockets)
 
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();
+    SOPC_Logger_Clear();
 }
 END_TEST
 
