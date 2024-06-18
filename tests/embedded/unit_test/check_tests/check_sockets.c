@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <vm.h>
 
 #include "../unit_test_include.h"
 
@@ -43,18 +42,17 @@ const uint32_t clientSecureChannelConnectionId = 200;
 
 static SOPC_AsyncQueue* socketEvents = NULL;
 
-
 static void log_UserCallback(const char* timestampUtc,
-                            const char* category,
-                            const SOPC_Log_Level level,
-                            const char* const line)
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line)
 {
     SOPC_UNUSED_ARG(timestampUtc);
     SOPC_UNUSED_ARG(category);
     SOPC_UNUSED_ARG(level);
     if (NULL != line)
     {
-        vm_cprintf("%s\r\n", line);
+        PRINT("%s\r\n", line);
     }
 }
 
@@ -110,8 +108,8 @@ static void expect_events(int32_t event1,
         }
         else
         {
-            vm_cprintf("Expected event %d, effective event %d\n", event1, ev->event);
-            vm_cprintf("Expected Id %d, effective id %d\n", id1, ev->eltId);
+            PRINT("Expected event %d, effective event %d\n", event1, ev->event);
+            PRINT("Expected Id %d, effective id %d\n", id1, ev->eltId);
             SOPC_ASSERT(event1 == ev->event);
             SOPC_ASSERT(id1 == ev->eltId);
         }
@@ -120,7 +118,7 @@ static void expect_events(int32_t event1,
 
 void suite_test_check_sockets(int* index)
 {
-    vm_cprintf("\nTEST: %d check sockets\n", *index);
+    PRINT("\nTEST: %d check sockets\n", *index);
     uint32_t serverSocketIdx = 0;
     uint32_t clientSocketIdx = 0;
 
@@ -134,9 +132,10 @@ void suite_test_check_sockets(int* index)
     uint32_t receivedBytes = 0;
     uint32_t totalReceivedBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
-                                               .logSystem = SOPC_LOG_SYSTEM_USER,
-                                               .logSysConfig = {.userSystemLogConfig = {.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback}}};
+    SOPC_Log_Configuration logConfiguration = {
+        .logLevel = SOPC_LOG_LEVEL_DEBUG,
+        .logSystem = SOPC_LOG_SYSTEM_USER,
+        .logSysConfig = {.userSystemLogConfig = {.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback}}};
 
     SOPC_EventTimer_Initialize();
     SOPC_Sockets_Initialize();
@@ -195,7 +194,7 @@ void suite_test_check_sockets(int* index)
     //       must be recorded by the socket as the connection Id
     SOPC_Sockets_EnqueueEvent(SOCKET_ACCEPTED_CONNECTION, serverSocketIdx, (uintptr_t) NULL,
                               serverSecureChannelConnectionId);
-    vm_cprintf("Test 1: ok\n");
+    PRINT("Test 1: ok\n");
 
     /* CLIENT SIDE: send a msg buffer through connection */
     for (idx = 0; idx < 1000; idx++)
@@ -205,7 +204,7 @@ void suite_test_check_sockets(int* index)
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
-    vm_cprintf("Test 2: ok\n");
+    PRINT("Test 2: ok\n");
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
@@ -231,7 +230,7 @@ void suite_test_check_sockets(int* index)
     receivedBuffer = NULL;
     status = SOPC_Buffer_SetPosition(accBuffer, 0);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test 3: ok\n");
+    PRINT("Test 3: ok\n");
 
     // Check acc buffer content
     for (idx = 0; idx < 1000; idx++)
@@ -240,7 +239,7 @@ void suite_test_check_sockets(int* index)
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_ASSERT(byte == (idx % 256));
     }
-    vm_cprintf("Test 4: ok\n");
+    PRINT("Test 4: ok\n");
 
     /* SERVER SIDE: send a msg buffer through connection */
     sendBuffer = SOPC_Buffer_Create(1000);
@@ -254,7 +253,7 @@ void suite_test_check_sockets(int* index)
     }
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, serverSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
-    vm_cprintf("Test 5: ok\n");
+    PRINT("Test 5: ok\n");
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
@@ -277,7 +276,7 @@ void suite_test_check_sockets(int* index)
     SOPC_ASSERT(totalReceivedBytes == 1000 && accBuffer->length == 1000);
     receivedBuffer = NULL;
     SOPC_Buffer_SetPosition(accBuffer, 0);
-    vm_cprintf("Test 6: ok\n");
+    PRINT("Test 6: ok\n");
 
     // Check acc buffer content
     for (idx = 0; idx < 1000; idx++)
@@ -286,7 +285,7 @@ void suite_test_check_sockets(int* index)
         SOPC_ASSERT(SOPC_STATUS_OK == status);
         SOPC_ASSERT(byte == (idx % 256));
     }
-    vm_cprintf("Test 7: ok\n");
+    PRINT("Test 7: ok\n");
     SOPC_Buffer_Delete(accBuffer);
 
     /* CLIENT SIDE: send a msg buffer through connection with a length greater than maximum buffer size for socket
@@ -309,7 +308,7 @@ void suite_test_check_sockets(int* index)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_Sockets_EnqueueEvent(SOCKET_WRITE, clientSocketIdx, (uintptr_t) sendBuffer, 0);
     sendBuffer = NULL; // deallocated by Socket event manager
-    vm_cprintf("Test 8: ok\n");
+    PRINT("Test 8: ok\n");
 
     /* SERVER SIDE: receive a msg buffer through connection */
     // Accumulate received bytes in a unique buffer
@@ -335,7 +334,7 @@ void suite_test_check_sockets(int* index)
     receivedBuffer = NULL;
     status = SOPC_Buffer_SetPosition(accBuffer, 0);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test 9: ok\n");
+    PRINT("Test 9: ok\n");
 
     // Check acc buffer content
     int compareResult = memcmp(sendBufferCopy->data, accBuffer->data, 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE);
@@ -345,7 +344,7 @@ void suite_test_check_sockets(int* index)
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, (uintptr_t) NULL, clientSecureChannelConnectionId);
-    vm_cprintf("Test 10: ok\n");
+    PRINT("Test 10: ok\n");
 
     /* SERVER SIDE: accepted connection (socket level only) */
     {
@@ -357,7 +356,7 @@ void suite_test_check_sockets(int* index)
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();
     SOPC_Logger_Clear();
-    vm_cprintf("Test 11: ok\n");
+    PRINT("Test 11: ok\n");
 
     *index += 1;
 }

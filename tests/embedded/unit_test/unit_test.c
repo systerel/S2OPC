@@ -32,8 +32,8 @@
 
 #include <assert.h>
 
-#include "unit_test_include.h"
 #include "sopc_assert.h"
+#include "unit_test_include.h"
 
 #include <lwipopts.h>
 
@@ -44,7 +44,7 @@ static bool lwip_init(void)
 {
     if (0 != _lwip_init())
     {
-        vm_cprintf("Failed to initialized lwip \n");
+        PRINT("Failed to initialized lwip \n");
         return false;
     }
     return true;
@@ -53,17 +53,16 @@ static bool lwip_init(void)
 /***************************************************/
 static void userAssertCallback(const char* context)
 {
-
     if (context != NULL)
     {
-        vm_cprintf("%s\n", context);
+        PRINT("%s\n", context);
     }
     assert(false);
 }
 
 extern int main(void)
 {
-    vm_cprintf("\n ------ Starting Platform Unit Test ------ \n");
+    PRINT("\n ------ Starting Platform Unit Test ------ \n");
     int index = 1;
 #ifdef PIKEOSDEBUG
     gdb_breakpoint();
@@ -91,7 +90,7 @@ extern int main(void)
         suite_test_publisher_subscriber(&index);
     }
 
-    vm_cprintf("\n ------ END Unit Test ------ \n");
+    PRINT("\n ------ END Unit Test ------ \n");
     for (;;)
     {
         p4_sleep(P4_MSEC(1));

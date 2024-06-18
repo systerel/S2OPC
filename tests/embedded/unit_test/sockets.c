@@ -18,7 +18,6 @@
  */
 
 #include <string.h>
-#include <vm.h>
 
 #include "unit_test_include.h"
 
@@ -207,7 +206,8 @@ static void cb_multicast_receiver(void)
     SOPC_Socket_AddressInfo* addrMulticast = SOPC_UDP_SocketAddress_Create(useIPv6, multicastGroup, port);
     SOPC_ASSERT(NULL != addrMulticast);
 
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addrMulticast, NULL, reuseAddr, nonBlockingSocket, &sock);
+    SOPC_ReturnStatus status =
+        SOPC_UDP_Socket_CreateToReceive(addrMulticast, NULL, reuseAddr, nonBlockingSocket, &sock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_UDP_Socket_Set_MulticastTTL(sock, ttlScope);
@@ -232,7 +232,7 @@ static void cb_multicast_receiver(void)
 
 void suite_test_raw_sockets(int* index)
 {
-    vm_cprintf("\n TEST %d: sopc_raw_sockets.h \n", *index);
+    PRINT("\n TEST %d: sopc_raw_sockets.h \n", *index);
     SOPC_Thread p0, p1 = 0;
     const char* node = "192.168.8.3";
     const char* port = "80";
@@ -248,7 +248,7 @@ void suite_test_raw_sockets(int* index)
 
     SOPC_Thread_Join(p0);
     SOPC_Thread_Join(p1);
-    vm_cprintf("Test 1 : ok\n");
+    PRINT("Test 1 : ok\n");
 
     SOPC_Socket_AddressInfo* addrinfo = SOPC_UDP_SocketAddress_Create(useIPv6, node, port);
     status = SOPC_SocketAddress_GetNameInfo(addrinfo, nodeRes, portRes);
@@ -257,14 +257,14 @@ void suite_test_raw_sockets(int* index)
     SOPC_ASSERT(0 == strcmp(port, *portRes));
     SOPC_Free(nodeRes);
     SOPC_Free(portRes);
-    vm_cprintf("Test 2 : ok\n");
+    PRINT("Test 2 : ok\n");
 
     *index += 1;
 }
 
 void suite_test_udp_sockets(int* index)
 {
-    vm_cprintf("\n TEST %d: sopc_udp_socket.h \n", *index);
+    PRINT("\n TEST %d: sopc_udp_socket.h \n", *index);
 
     SOPC_Thread p0, p1, p2, p3 = 0;
 
@@ -276,7 +276,7 @@ void suite_test_udp_sockets(int* index)
 
     SOPC_Thread_Join(p0);
     SOPC_Thread_Join(p1);
-    vm_cprintf("Test 1 : ok\n");
+    PRINT("Test 1 : ok\n");
 
     status = SOPC_Thread_CreatePrioritized(&p2, (void*) cb_multicast_receiver, NULL, 60, "Multicast_Receiver");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -286,7 +286,7 @@ void suite_test_udp_sockets(int* index)
 
     SOPC_Thread_Join(p2);
     SOPC_Thread_Join(p3);
-    vm_cprintf("Test 2 : ok\n");
+    PRINT("Test 2 : ok\n");
 
     *index += 1;
 }

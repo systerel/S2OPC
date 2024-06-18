@@ -31,8 +31,10 @@
 #     - build-win32
 #     - build-win64
 #     - build-zephyr
+#     - build-pikeos
 #   - test-others:
 #     - test-zephyr
+#     - test-pikeos
 #
 # CI pipeline manual run with 'CROSS_COMPILE = 1':
 # - jobs run in stages:
@@ -42,8 +44,10 @@
 #     - build-rpi
 #     - build-zephyr
 #     - build-freertos
+#     - build-pikeos
 #   - test-others:
 #     - test-zephyr
+#     - test-pikeos
 #########################################################
 
 # Ensures job failure when intermediate script line fails
@@ -104,6 +108,10 @@ workflow:
   tags:
     - docker
     - linux
+
+.pikeos-job: &pikeos_job
+  tags:
+    - pikeos
 
 ###
 # Generation jobs
@@ -293,6 +301,22 @@ build-freertos:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: always
 
+build-pikeos:
+  <<: *pikeos_job
+  stage: build-others
+  image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
+  script:
+    - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh build'
+  artifacts:
+    name: 'bin-pikeos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
+    paths:
+      - 'build_pikeos/'
+    when: always
+    expire_in: '1 week'
+  rules:
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always
+
 build-fuzz:
   stage: build
   image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
@@ -311,7 +335,7 @@ build-fuzz:
   timeout: 24 hours
   tags:
     - fuzzing
-  rules: 
+  rules:
     - if: "$TEST_NETWORK_FUZZ != null"
       when: always
 
@@ -477,7 +501,7 @@ test-uactt:
 generate_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
-  script: 
+  script:
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
     - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan False
@@ -494,7 +518,7 @@ generate_sbom:
   rules:
     - changes:
         compare_to: master
-        paths: 
+        paths:
           - conanfile.py
     - if: "$SCAN_SBOM != null"
 
@@ -502,7 +526,7 @@ generate_sbom:
 scan_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
-  needs: 
+  needs:
     - job: generate_sbom
   dependencies:
     - "generate_sbom"
@@ -516,7 +540,7 @@ scan_sbom:
   rules:
     - changes:
         compare_to: master
-        paths: 
+        paths:
           - conanfile.py
     - if: "$SCAN_SBOM != null"
 
@@ -544,6 +568,20 @@ test-zephyr:
   rules: # run the task only if Zephyr samples have been compiled
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
       when: on_success
+
+test-pikeos:
+  <<: *pikeos_job
+  stage: test-others
+  image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
+  script:
+    - samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh exec unit_test
+  dependencies:
+    - build-pikeos
+  variables:
+    <<: *nominal_test_variables
+  rules:
+    - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
+      when: always
 
 ###
 # Analysis jobs

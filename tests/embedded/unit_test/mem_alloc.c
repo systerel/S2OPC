@@ -17,8 +17,6 @@
  * under the License.
  */
 
-#include <vm.h>
-
 #include "unit_test_include.h"
 
 #include "sopc_assert.h"
@@ -27,25 +25,25 @@
 
 void suite_test_alloc_memory(int* index)
 {
-    vm_cprintf("\nTEST %d: sopc_mem_alloc \n", *index);
+    PRINT("\nTEST %d: sopc_mem_alloc \n", *index);
     int* allocatedMemory = NULL;
     allocatedMemory = SOPC_Malloc(sizeof(int));
     SOPC_ASSERT(NULL != allocatedMemory);
     SOPC_Free(allocatedMemory);
-    vm_cprintf("Test1 : ok\n");
+    PRINT("Test1 : ok\n");
 
     allocatedMemory = NULL;
     allocatedMemory = SOPC_Malloc(0);
     SOPC_ASSERT(NULL != allocatedMemory);
     SOPC_Free(allocatedMemory);
-    vm_cprintf("Test2 : ok\n");
+    PRINT("Test2 : ok\n");
 
     allocatedMemory = NULL;
     const int nbMembers = 10;
     allocatedMemory = SOPC_Calloc(nbMembers, sizeof(int));
     SOPC_ASSERT(NULL != allocatedMemory);
     SOPC_Free(allocatedMemory);
-    vm_cprintf("Test3 : ok\n");
+    PRINT("Test3 : ok\n");
 
     *index += 1;
 }

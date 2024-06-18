@@ -20,6 +20,12 @@
 #ifndef UNIT_TEST_INCLUDE_H_
 #define UNIT_TEST_INCLUDE_H_
 
+#if SOPC_PIKEOS
+#include <vm.h>
+
+#define PRINT vm_cprintf
+#endif
+
 void suite_test_alloc_memory(int* index);
 
 void suite_test_thread_mutexes(int* index);

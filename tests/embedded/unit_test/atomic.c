@@ -27,31 +27,31 @@
 
 void suite_test_atomic(int* index)
 {
-    vm_cprintf("\nTEST %d: sopc_atomic.h \n", *index);
+    PRINT("\nTEST %d: sopc_atomic.h \n", *index);
     int32_t atomicCounter = 5;
     int32_t counter = 0;
     counter = SOPC_Atomic_Int_Get(&atomicCounter);
     SOPC_ASSERT(counter == atomicCounter);
-    vm_cprintf("Test1 : ok\n");
+    PRINT("Test1 : ok\n");
 
     counter = 2;
     SOPC_Atomic_Int_Set(&atomicCounter, counter);
     SOPC_ASSERT(atomicCounter == counter);
-    vm_cprintf("Test2 : ok\n");
+    PRINT("Test2 : ok\n");
 
     SOPC_Atomic_Int_Add(&atomicCounter, counter);
     counter += counter;
     SOPC_ASSERT(atomicCounter == counter);
-    vm_cprintf("Test3 : ok\n");
+    PRINT("Test3 : ok\n");
 
     int32_t* pAtomicCounter = &counter;
     int32_t* pCounter = NULL;
     pCounter = (int32_t*) SOPC_Atomic_Ptr_Get((void**) &pAtomicCounter);
     SOPC_ASSERT(pCounter == pAtomicCounter);
-    vm_cprintf("Test4 : ok\n");
+    PRINT("Test4 : ok\n");
 
     SOPC_Atomic_Ptr_Set((void**) &pAtomicCounter, &atomicCounter);
     SOPC_ASSERT(pAtomicCounter == &atomicCounter);
-    vm_cprintf("Test5 : ok\n");
+    PRINT("Test5 : ok\n");
     *index += 1;
 }

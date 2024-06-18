@@ -18,9 +18,9 @@
 -include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtls.defs
 -include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtlsUserConfig.defs
 
-S2OPC_UNIT_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/unit_test
+S2OPC_UNIT_TEST_DIR = ${S2OPC_PRJ_DIR}/tests/embedded/unit_test
 S2OPC_CHECK_UNIT_TEST_DIR = $(S2OPC_UNIT_TEST_DIR)/check_tests
-S2OPC_VALIDATION_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/validation_test
+S2OPC_VALIDATION_TEST_DIR = ${S2OPC_PRJ_DIR}/tests/embedded/validation_test
 MBEDTLS_CONFIG_USER_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/pikeos/mbedtls
 STATIC_SECURITY_KEY_PATH= ${S2OPC_PRJ_DIR}/samples/embedded/cli_pubsub_server/src
 

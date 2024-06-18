@@ -403,7 +403,7 @@ build-fuzz:
   timeout: 24 hours
   tags:
     - fuzzing
-  rules: 
+  rules:
     - if: "$TEST_NETWORK_FUZZ != null"
       when: always
 
@@ -572,7 +572,7 @@ test-uactt:
 generate_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
-  script: 
+  script:
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
     - conan remote add gitlab ${CI_API_V4_URL}/projects/$CI_PROJECT_ID/packages/conan
@@ -589,7 +589,7 @@ generate_sbom:
   rules:
     - changes:
         compare_to: master
-        paths: 
+        paths:
           - conanfile.py
     - if: "$SCAN_SBOM != null"
 
@@ -597,7 +597,7 @@ generate_sbom:
 scan_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
-  needs: 
+  needs:
     - job: generate_sbom
   dependencies:
     - "generate_sbom"
@@ -611,7 +611,7 @@ scan_sbom:
   rules:
     - changes:
         compare_to: master
-        paths: 
+        paths:
           - conanfile.py
     - if: "$SCAN_SBOM != null"
 

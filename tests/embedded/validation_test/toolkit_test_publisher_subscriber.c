@@ -57,16 +57,16 @@ static int32_t gStopAtomic = 0;
  *---------------------------------------------------------------------------*/
 
 static void log_UserCallback(const char* timestampUtc,
-                            const char* category,
-                            const SOPC_Log_Level level,
-                            const char* const line)
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line)
 {
     SOPC_UNUSED_ARG(timestampUtc);
     SOPC_UNUSED_ARG(category);
     SOPC_UNUSED_ARG(level);
     if (NULL != line)
     {
-        vm_cprintf("%s\r\n", line);
+        PRINT("%s\r\n", line);
     }
 }
 
@@ -232,7 +232,7 @@ static bool SOPC_SetTargetVariables_Test(const OpcUa_WriteValue* nodesToWrite, c
 
 void suite_test_publisher_subscriber(int* index)
 {
-    vm_cprintf("\nTEST %d: validation publisher subscriber\n", *index);
+    PRINT("\nTEST %d: validation publisher subscriber\n", *index);
 
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
@@ -271,21 +271,21 @@ void suite_test_publisher_subscriber(int* index)
     bool res = SOPC_PubScheduler_Start(config, sourceConfig, threadPrio);
     if (res)
     {
-        vm_cprintf("Pub scheduler start\n");
+        PRINT("Pub scheduler start\n");
     }
     else
     {
-        vm_cprintf("Pub scheduler failed start\n");
+        PRINT("Pub scheduler failed start\n");
     }
     SOPC_ASSERT(res);
     res = SOPC_SubScheduler_Start(config, targetConfig, NULL, NULL, NULL, threadPrio);
     if (res)
     {
-        vm_cprintf("Sub scheduler start\n");
+        PRINT("Sub scheduler start\n");
     }
     else
     {
-        vm_cprintf("Sub scheduler failed start\n");
+        PRINT("Sub scheduler failed start\n");
     }
     SOPC_ASSERT(res);
 
@@ -307,5 +307,5 @@ void suite_test_publisher_subscriber(int* index)
     config = NULL;
     SOPC_Common_Clear();
     *index += 1;
-    vm_cprintf("Test 1: ok\n");
+    PRINT("Test 1: ok\n");
 }

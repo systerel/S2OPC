@@ -25,10 +25,10 @@ $(info S2OPC_PRJ_DIR set to $(S2OPC_PRJ_DIR))
 $(info MBEDTLS_PRJ_DIR set to $(MBEDTLS_PRJ_DIR))
 
 S2OPC_SRCS_DIR = $(S2OPC_PRJ_DIR)/src
-S2OPC_PIKEOS_MAKEFILE_DIR = $(S2OPC_PRJ_DIR)/pikeos/makefiles_libgen
+S2OPC_PIKEOS_MAKEFILE_DIR = $(S2OPC_PRJ_DIR)/samples/embedded/platform_dep/pikeos/makefiles
 
 CPPFLAGS += -I$(PIKEOS_INSTALL_DIRECTORY)/include/
-CPPFLAGS += -I$(S2OPC_PRJ_DIR)/pikeos/common/mbedtls -Werror -Wno-error=suggest-attribute=format -Wno-suggest-attribute=format
+CPPFLAGS += -I$(S2OPC_PRJ_DIR)/samples/embedded/platform_dep/pikeos/mbedtls -Werror -Wno-error=suggest-attribute=format -Wno-suggest-attribute=format
 CFLAGS += -DMBEDTLS_USER_CONFIG_FILE='"mbedtls_pikeos_config.h"'
 
 -include $(S2OPC_PIKEOS_MAKEFILE_DIR)/makefileMbedtlsUserConfig

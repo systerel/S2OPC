@@ -26,7 +26,6 @@
  */
 
 #include <inttypes.h>
-#include <vm.h>
 
 #include "../unit_test_include.h"
 #include "opcua_statuscodes.h"
@@ -368,13 +367,13 @@ static void test_thread_condvar(void)
 
 void suite_test_check_threads(int* index)
 {
-    vm_cprintf("\nTEST: %d check threads\n", *index);
+    PRINT("\nTEST: %d check threads\n", *index);
     test_thread_exec();
-    vm_cprintf("test 1: ok\n");
+    PRINT("test 1: ok\n");
     test_thread_mutex();
-    vm_cprintf("test 2: ok\n");
+    PRINT("test 2: ok\n");
     test_thread_mutex_recursive();
-    vm_cprintf("test 3: ok\n");
+    PRINT("test 3: ok\n");
     test_thread_condvar();
-    vm_cprintf("test 4: ok\n");
+    PRINT("test 4: ok\n");
 }

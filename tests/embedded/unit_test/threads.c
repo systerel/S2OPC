@@ -17,8 +17,6 @@
  * under the License.
  */
 
-#include <vm.h>
-
 #include "unit_test_include.h"
 
 #include "sopc_assert.h"
@@ -37,7 +35,7 @@ static void test_thread_fct(int* counter)
         *counter += 1;
     }
     SOPC_ASSERT(*counter == resultExpected);
-    vm_cprintf("End of test_thread_fct \n");
+    PRINT("End of test_thread_fct \n");
 }
 
 static void test_thread_fct_mutexes(SOPC_Mutex* pMut)
@@ -57,44 +55,44 @@ static void test_thread_fct_mutexes(SOPC_Mutex* pMut)
 
 void suite_test_thread_mutexes(int* index)
 {
-    vm_cprintf("\nTEST %d: threads and mutexes \n", *index);
+    PRINT("\nTEST %d: threads and mutexes \n", *index);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     SOPC_Condition cond;
     status = SOPC_Condition_Init(&cond);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test1 : ok\n");
+    PRINT("Test1 : ok\n");
 
     status = SOPC_Condition_SignalAll(&cond);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test2 : ok\n");
+    PRINT("Test2 : ok\n");
 
     SOPC_Mutex mutex;
     status = SOPC_Mutex_Initialization(&mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test3 : ok\n");
+    PRINT("Test3 : ok\n");
 
     status = SOPC_Mutex_Lock(&mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test4 : ok\n");
+    PRINT("Test4 : ok\n");
 
     status = SOPC_Mutex_Unlock(&mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test5 : ok\n");
+    PRINT("Test5 : ok\n");
 
     SOPC_Thread p1 = 0;
     int count = 2;
     status = SOPC_Thread_CreatePrioritized(&p1, (void*) test_thread_fct, &count, 40, "Test_Thread1");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test6 : ok\n");
+    PRINT("Test6 : ok\n");
 
     status = SOPC_Thread_Join(p1);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    vm_cprintf("Test7 : ok\n");
+    PRINT("Test7 : ok\n");
 
     SOPC_Thread p2 = 0;
     status = SOPC_Thread_Join(p2);
     SOPC_ASSERT(status != SOPC_STATUS_OK);
-    vm_cprintf("Test8 : ok\n");
+    PRINT("Test8 : ok\n");
 
     SOPC_Thread p3, p4 = 0;
     int count3 = 2;
@@ -105,7 +103,7 @@ void suite_test_thread_mutexes(int* index)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_Thread_Join(p3);
     SOPC_Thread_Join(p4);
-    vm_cprintf("Test9 : ok\n");
+    PRINT("Test9 : ok\n");
 
     SOPC_Thread p5, p6;
     SOPC_Mutex mut;
@@ -117,6 +115,6 @@ void suite_test_thread_mutexes(int* index)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     SOPC_Thread_Join(p5);
     SOPC_Thread_Join(p6);
-    vm_cprintf("Test10 : ok\n");
+    PRINT("Test10 : ok\n");
     *index += 1;
 }

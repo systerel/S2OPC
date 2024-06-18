@@ -20,19 +20,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Pikeos Specific
-#include <vm.h>
-
 // Server wrapper
 #include "libs2opc_client_config.h"
+#include "libs2opc_client_config_custom.h"
 #include "libs2opc_common_config.h"
+#include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
 #include "libs2opc_server_config_custom.h"
-#include "libs2opc_client_config_custom.h"
-#include "libs2opc_new_client.h"
 
+#include "opcua_identifiers.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
@@ -45,7 +43,6 @@
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
-#include "opcua_identifiers.h"
 
 #include "embedded/sopc_addspace_loader.h"
 #include "static_security_data.h"
@@ -85,18 +82,17 @@ extern SOPC_Variant SOPC_Embedded_VariableVariant[];
  *                          Common Utilities
  *---------------------------------------------------------------------------*/
 
-
 static void log_UserCallback(const char* timestampUtc,
-                            const char* category,
-                            const SOPC_Log_Level level,
-                            const char* const line)
+                             const char* category,
+                             const SOPC_Log_Level level,
+                             const char* const line)
 {
     SOPC_UNUSED_ARG(timestampUtc);
     SOPC_UNUSED_ARG(category);
     SOPC_UNUSED_ARG(level);
     if (NULL != line)
     {
-        vm_cprintf("%s\r\n", line);
+        PRINT("%s\r\n", line);
     }
 }
 
@@ -129,8 +125,8 @@ static SOPC_SecureConnection_Config* client_create_configuration(void)
     }
 
     /* configure the connection */
-    SOPC_SecureConnection_Config* configuration = SOPC_ClientConfigHelper_CreateSecureConnection("CLI_Client", epURL, OpcUa_MessageSecurityMode_None,
-                                                                    SOPC_SecurityPolicy_None);
+    SOPC_SecureConnection_Config* configuration = SOPC_ClientConfigHelper_CreateSecureConnection(
+        "CLI_Client", epURL, OpcUa_MessageSecurityMode_None, SOPC_SecurityPolicy_None);
     return configuration;
 }
 
@@ -141,7 +137,7 @@ static void client_ConnectionEventCallback(SOPC_ClientConnection* config,
                                            SOPC_StatusCode status)
 {
     SOPC_UNUSED_ARG(config);
-    vm_cprintf("UNEXPECTED CONNECTION EVENT %d with status 0x%08" PRIX32 "\n", event, status);
+    PRINT("UNEXPECTED CONNECTION EVENT %d with status 0x%08" PRIX32 "\n", event, status);
 }
 
 /*---------------------------------------------------------------------------
@@ -194,7 +190,7 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
         {
             if (1 == writeResponse->NoOfResults && SOPC_IsGoodStatus(writeResponse->Results[0]))
             {
-                vm_cprintf("Write of value %d succeeded\n", write_value);
+                PRINT("Write of value %d succeeded\n", write_value);
             }
             else
             {
@@ -203,12 +199,12 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
         }
         else
         {
-            vm_cprintf("Write service failed with status: 0x%08" PRIX32 "\n", writeResponse->ResponseHeader.ServiceResult);
+            PRINT("Write service failed with status: 0x%08" PRIX32 "\n", writeResponse->ResponseHeader.ServiceResult);
 
             status = SOPC_STATUS_NOK;
         }
     }
-    if(NULL != writeResponse)
+    if (NULL != writeResponse)
     {
         OpcUa_WriteResponse_Clear(writeResponse);
     }
@@ -225,7 +221,8 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
     readRequest = SOPC_ReadRequest_Create(nbReadValue, OpcUa_TimestampsToReturn_Both);
     if (NULL != readRequest)
     {
-        status = SOPC_ReadRequest_SetReadValueFromStrings(readRequest, nbReadValue - 1, node_id_str, SOPC_AttributeId_Value, NULL);
+        status = SOPC_ReadRequest_SetReadValueFromStrings(readRequest, nbReadValue - 1, node_id_str,
+                                                          SOPC_AttributeId_Value, NULL);
     }
     else
     {
@@ -241,18 +238,18 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
     {
         if (SOPC_IsGoodStatus(readResponse->ResponseHeader.ServiceResult) && nbReadValue == readResponse->NoOfResults)
         {
-            if(write_value == readResponse->Results->Value.Value.Uint16)
+            if (write_value == readResponse->Results->Value.Value.Uint16)
             {
-                vm_cprintf("<Test_Client_Toolkit: Read Value succeed\n");
+                PRINT("<Test_Client_Toolkit: Read Value succeed\n");
             }
             else
             {
-                vm_cprintf("<Test_Client_Toolkit: Read Value Failed\n");
+                PRINT("<Test_Client_Toolkit: Read Value Failed\n");
             }
         }
         else
         {
-            vm_cprintf("Read failed with status: 0x%08" PRIX32 "\n", readResponse->ResponseHeader.ServiceResult);
+            PRINT("Read failed with status: 0x%08" PRIX32 "\n", readResponse->ResponseHeader.ServiceResult);
 
             status = SOPC_STATUS_NOK;
         }
@@ -310,11 +307,11 @@ static SOPC_ReturnStatus Server_SetDefaultCryptographicConfig(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        vm_cprintf("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
+        PRINT("<Test_Server_Toolkit: Failed loading certificates and key (check paths are valid)\n");
     }
     else
     {
-        vm_cprintf("<Test_Server_Toolkit: Certificates and key loaded\n");
+        PRINT("<Test_Server_Toolkit: Certificates and key loaded\n");
     }
 
     return status;
@@ -338,8 +335,8 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_SetApplicationDescription(DEFAULT_APPLICATION_URI, DEFAULT_PRODUCT_URI,
-                                                          "S2OPC toolkit server example", "en-US",
-                                                          OpcUa_ApplicationType_Server);
+                                                                   "S2OPC toolkit server example", "en-US",
+                                                                   OpcUa_ApplicationType_Server);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -518,7 +515,7 @@ static SOPC_ReturnStatus Server_SetDefaultConfiguration(void)
 
 static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 {
-        /* Load embedded default server address space:
+    /* Load embedded default server address space:
      * Use the embedded address space (already defined as C code) loader.
      * The address space C structure shall have been generated prior to compilation.
      * This should be done using the script ./scripts/generate-s2opc-address-space.py
@@ -530,8 +527,8 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
     if (sopc_embedded_is_const_addspace)
     {
         SOPC_AddressSpace* addSpace =
-        SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
-                                              SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
+            SOPC_AddressSpace_CreateReadOnlyNodes(SOPC_Embedded_AddressSpace_nNodes, SOPC_Embedded_AddressSpace_Nodes,
+                                                  SOPC_Embedded_VariableVariant_nb, SOPC_Embedded_VariableVariant);
         status = (NULL != addSpace) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 
         if (SOPC_STATUS_OK == status)
@@ -542,11 +539,11 @@ static SOPC_ReturnStatus Server_SetDefaultAddressSpace(void)
 
     if (SOPC_STATUS_OK != status)
     {
-        vm_cprintf("<Test_Server_Toolkit: Failed to configure the @ space\n");
+        PRINT("<Test_Server_Toolkit: Failed to configure the @ space\n");
     }
     else
     {
-        vm_cprintf("<Test_Server_Toolkit: @ space configured\n");
+        PRINT("<Test_Server_Toolkit: @ space configured\n");
     }
 
     return status;
@@ -574,16 +571,16 @@ static SOPC_ReturnStatus Server_SetServerConfiguration(void)
 
 void suite_test_server_client(int* index)
 {
-    vm_cprintf("\nTEST %d: validation server client\n", *index);
+    PRINT("\nTEST %d: validation server client\n", *index);
 
     /* Get the toolkit build information and print it */
     SOPC_Toolkit_Build_Info build_info = SOPC_CommonHelper_GetBuildInfo();
-    vm_cprintf("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
-               build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
-               build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
-    vm_cprintf("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
-               build_info.clientServerBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildSrcCommit,
-               build_info.clientServerBuildInfo.buildDockerId, build_info.clientServerBuildInfo.buildBuildDate);
+    PRINT("S2OPC_Common       - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+          build_info.commonBuildInfo.buildVersion, build_info.commonBuildInfo.buildSrcCommit,
+          build_info.commonBuildInfo.buildDockerId, build_info.commonBuildInfo.buildBuildDate);
+    PRINT("S2OPC_ClientServer - Version: %s, SrcCommit: %s, DockerId: %s, BuildDate: %s\n",
+          build_info.clientServerBuildInfo.buildVersion, build_info.clientServerBuildInfo.buildSrcCommit,
+          build_info.clientServerBuildInfo.buildDockerId, build_info.clientServerBuildInfo.buildBuildDate);
 
     /* Initialize the server library (start library threads) */
 
@@ -595,7 +592,7 @@ void suite_test_server_client(int* index)
 
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
-    vm_cprintf("status = %d\n", status);
+    PRINT("status = %d\n", status);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (SOPC_STATUS_OK == status)
     {
@@ -603,11 +600,11 @@ void suite_test_server_client(int* index)
     }
     if (SOPC_STATUS_OK != status)
     {
-        vm_cprintf("<Test_Server_Client: Failed initializing\n");
+        PRINT("<Test_Server_Client: Failed initializing\n");
     }
     else
     {
-        vm_cprintf("<Test_Server_Client: initialized\n");
+        PRINT("<Test_Server_Client: initialized\n");
     }
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
@@ -633,11 +630,11 @@ void suite_test_server_client(int* index)
 
         if (SOPC_STATUS_OK != status)
         {
-            vm_cprintf("<Test_Server_Client: Failed to configure the endpoint\n");
+            PRINT("<Test_Server_Client: Failed to configure the endpoint\n");
         }
         else
         {
-            vm_cprintf("<Test_Server_Client: Endpoint configured\n");
+            PRINT("<Test_Server_Client: Endpoint configured\n");
         }
     }
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -651,11 +648,11 @@ void suite_test_server_client(int* index)
         if (NULL == clientConfiguration)
         {
             status = SOPC_STATUS_NOK;
-            vm_cprintf(">>Client: Failed to create configuration\n");
+            PRINT(">>Client: Failed to create configuration\n");
         }
         else
         {
-            vm_cprintf(">>Client: Successfully created configuration\n");
+            PRINT(">>Client: Successfully created configuration\n");
         }
     }
 
@@ -665,17 +662,17 @@ void suite_test_server_client(int* index)
         status = SOPC_ClientHelperNew_Connect(clientConfiguration, client_ConnectionEventCallback, &secureConnection);
     }
 
-/* Run a write service test */
+    /* Run a write service test */
     if (SOPC_STATUS_OK == status)
     {
         status = client_send_write_test(secureConnection);
         if (SOPC_STATUS_OK == status)
         {
-            vm_cprintf(">>Client: Test Write Success\n");
+            PRINT(">>Client: Test Write Success\n");
         }
         else
         {
-            vm_cprintf(">>Client: Test Write Failed\n");
+            PRINT(">>Client: Test Write Failed\n");
         }
     }
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -686,11 +683,11 @@ void suite_test_server_client(int* index)
         status = client_send_read_req_test(secureConnection);
         if (SOPC_STATUS_OK == status)
         {
-            vm_cprintf(">>Client: Test Read Success\n");
+            PRINT(">>Client: Test Read Success\n");
         }
         else
         {
-            vm_cprintf(">>Client: Test Read Failed\n");
+            PRINT(">>Client: Test Read Failed\n");
         }
     }
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -722,12 +719,12 @@ void suite_test_server_client(int* index)
 
     if (SOPC_STATUS_OK == status)
     {
-        vm_cprintf("<Test_Server_Client final result: OK\n");
+        PRINT("<Test_Server_Client final result: OK\n");
     }
     else
     {
-        vm_cprintf("<Test_Server_Client final result: NOK with status = '%d'\n", status);
+        PRINT("<Test_Server_Client final result: NOK with status = '%d'\n", status);
     }
-    vm_cprintf("Test 1: ok\n");
+    PRINT("Test 1: ok\n");
     *index += 1;
 }
