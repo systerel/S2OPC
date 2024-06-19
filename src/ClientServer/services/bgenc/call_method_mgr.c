@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 17/01/2024 15:10:28
+ Date                 : 19/06/2024 08:24:40
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -201,7 +201,7 @@ void call_method_mgr__check_method_call_inputs(
                   }
                }
                else {
-                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_user_access_denied;
+                  *call_method_mgr__StatusCode = constants_statuscodes_bs__e_sc_bad_not_executable;
                }
             }
             else {

@@ -366,7 +366,7 @@ OPERATIONS
                 IF l_nodeClass = e_ncl_Method THEN
                     /* method is executable by user */
                     l_user <-- get_session_user_server(p_session);
-                    l_valid_executable <-- get_Executable(l_method);  /* TODO change by e_sc_bad_not_executable when update to Spec 1.04 */
+                    l_valid_executable <-- get_Executable(l_method);
                     l_valid_user_executable <-- get_user_authorization (e_operation_type_executable, l_methodid, e_aid_UserExecutable, l_user);
                     IF l_valid_executable = TRUE &
                         l_valid_user_executable = TRUE
@@ -379,7 +379,7 @@ OPERATIONS
                             StatusCode := e_sc_bad_method_invalid
                         END
                     ELSE
-                        StatusCode := e_sc_bad_user_access_denied
+                        StatusCode := e_sc_bad_not_executable
                     END
                 ELSE
                     /* Node has not method class */
