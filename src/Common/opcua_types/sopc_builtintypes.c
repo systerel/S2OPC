@@ -5940,14 +5940,14 @@ const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId 
     }
 }
 
-bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
+bool SOPC_Variant_CopyInto_ArrayValueAt(SOPC_Variant* dest,
                                         SOPC_BuiltinId builtInTypeId,
                                         int32_t index,
                                         const void* value)
 {
-    SOPC_ASSERT(SOPC_VariantArrayType_Array == var->ArrayType);
-    SOPC_ASSERT(builtInTypeId == var->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
-    SOPC_ASSERT(var->Value.Array.Length > index);
+    SOPC_ASSERT(SOPC_VariantArrayType_Array == dest->ArrayType);
+    SOPC_ASSERT(builtInTypeId == dest->BuiltInTypeId && SOPC_Null_Id != builtInTypeId);
+    SOPC_ASSERT(dest->Value.Array.Length > index);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (index < 0 || (uint64_t) index > (uint64_t) SIZE_MAX)
     {
@@ -5982,7 +5982,7 @@ bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
     case SOPC_DataValue_Id:
     case SOPC_Variant_Id:
     case SOPC_DiagnosticInfo_Id:
-        status = copyFct((char*) var->Value.Array.Content.BooleanArr +
+        status = copyFct((char*) dest->Value.Array.Content.BooleanArr +
                              SOPC_BuiltInType_HandlingTable[builtInTypeId].size * (size_t) index,
                          value);
         break;

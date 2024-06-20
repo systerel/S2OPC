@@ -1137,7 +1137,7 @@ void SOPC_Variant_Print(SOPC_Variant* variant);
 int32_t SOPC_Variant_GetArrayOrMatrixLength(const SOPC_Variant* var);
 const void* SOPC_Variant_Get_SingleValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId);
 const void* SOPC_Variant_Get_ArrayValue(const SOPC_Variant* var, SOPC_BuiltinId builtInTypeId, int32_t index);
-bool SOPC_Variant_CopyInto_ArrayValueAt(const SOPC_Variant* var,
+bool SOPC_Variant_CopyInto_ArrayValueAt(SOPC_Variant* dest,
                                         SOPC_BuiltinId builtInTypeId,
                                         int32_t index,
                                         const void* value);
