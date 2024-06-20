@@ -306,7 +306,7 @@ build-pikeos:
   stage: build-others
   image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
   script:
-    - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh build'
+    - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
   artifacts:
     name: 'bin-pikeos-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -574,14 +574,14 @@ test-pikeos:
   stage: test-others
   image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
   script:
-    - samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh exec unit_test
+    - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh
   dependencies:
     - build-pikeos
   variables:
     <<: *nominal_test_variables
   rules:
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-      when: always
+      when: on_success
 
 ###
 # Analysis jobs

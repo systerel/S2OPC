@@ -33,11 +33,6 @@ class TestParserLog:
         if self.verbose:
             self.fd.write(msg + '\n')
 
-def log(verbose, msg):
-    if verbose:
-        print(msg)
-        sys.stdout.flush()
-
 def check_line(line):
     # check if there is an assertion
     if re.match("Assertion failed", line):
@@ -48,11 +43,24 @@ def watch_output(file, logger):
     breakLine = " ------ END Unit Test ------ "
     line = ""
     ret = 0
+    # If there is an error in QEMU simulation the process doesn't stop but the output file was cleaned.
+    # Check that something is written in the expected file and exit if not after timeoutExpectedOutput
+    firstLineTriggered = False
+    timeoutExpectedOutput=1.0
+    sleepTimeBetweenOutput=0.01
+    countTimeout=0
     while line != breakLine and ret == 0:
         line = file.readline().strip('\n')
+        # If no new output
         if (line == '') :
-            time.sleep(0.01)
+            time.sleep(sleepTimeBetweenOutput)
+            if not firstLineTriggered:
+                countTimeout += sleepTimeBetweenOutput
+                if countTimeout >= timeoutExpectedOutput:
+                    logger.log("[Test parser] No output from QEMU")
+                    ret = 2
         else :
+            firstLineTriggered = True
             logger.log("[Test parser] check line >>> %s" %(line))
             ret = check_line(line)
     return ret
@@ -74,5 +82,6 @@ if __name__ == "__main__":
         ret = watch_output(qemu_out, logger)
         exit(ret)
     except FileNotFoundError:
-        log(True, "File %s not found" %(args.qemu_out))
+        print("File %s not found" %(args.qemu_out))
+        sys.stdout.flush()
         exit(2)
