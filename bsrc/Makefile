@@ -46,8 +46,6 @@ TC: $(SOURCE_FILES)
 	grep -iEc '(\bwarning|\berror|\bfailed\b|\berrno\b)' tc.log | xargs test 0 -eq
 
 $(TARGET_GENERATED_FILES): $(SOURCE_FILES)
-	mkdir $(PATHTRAD)
-	touch $(TARGET_GENERATED_FILES)
 	$(RM) tc.log
 	$(RM) -fr ./$(PATHTRAD)
 	$(RM) -fr ./$(PATHGENTRAD)
