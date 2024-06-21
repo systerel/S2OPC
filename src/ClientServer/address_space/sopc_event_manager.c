@@ -208,8 +208,8 @@ const SOPC_NodeId* SOPC_Event_GetEventTypeId(const SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* eventIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventType], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_NodeId_Id == eventIdVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_NodeId_Id == eventIdVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == eventIdVarInfo->data.ArrayType)
     {
         return eventIdVarInfo->data.Value.NodeId;
@@ -223,8 +223,8 @@ static SOPC_ByteString* SOPC_Event_GetEventId(SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* eventIdVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_EventId], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_ByteString_Id == eventIdVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_ByteString_Id == eventIdVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == eventIdVarInfo->data.ArrayType)
     {
         return &eventIdVarInfo->data.Value.Bstring;
@@ -254,8 +254,8 @@ static SOPC_String* SOPC_Event_GetSourceName(SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* sourceNameVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceName], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_String_Id == sourceNameVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_String_Id == sourceNameVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == sourceNameVarInfo->data.ArrayType)
     {
         return &sourceNameVarInfo->data.Value.Bstring;
@@ -285,8 +285,8 @@ static SOPC_NodeId* SOPC_Event_GetSourceNode(SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* sourceNodeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_SourceNode], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_NodeId_Id == sourceNodeVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_NodeId_Id == sourceNodeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == sourceNodeVarInfo->data.ArrayType)
     {
         return sourceNodeVarInfo->data.Value.NodeId;
@@ -316,8 +316,8 @@ SOPC_DateTime SOPC_Event_GetTime(const SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* timeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Time], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_DateTime_Id == timeVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_DateTime_Id == timeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == timeVarInfo->data.ArrayType)
     {
         return timeVarInfo->data.Value.Date;
@@ -334,10 +334,12 @@ static SOPC_ReturnStatus event_set_date(SOPC_Event* pEvent, SOPC_BaseEventVarian
     bool found = false;
     SOPC_Event_Variable* dateVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[dateIdx], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_DateTime_Id == dateVarInfo->data.BuiltInTypeId &&
+
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (found && SOPC_DateTime_Id == dateVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == dateVarInfo->data.ArrayType)
     {
+        status = SOPC_STATUS_OK;
         dateVarInfo->data.Value.Date = date;
     }
     return status;
@@ -359,8 +361,8 @@ static OpcUa_TimeZoneDataType* SOPC_Event_GetLocalTime(SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* localTimeVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_LocalTime], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_ExtensionObject_Id == localTimeVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_ExtensionObject_Id == localTimeVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == localTimeVarInfo->data.ArrayType &&
         SOPC_ExtObjBodyEncoding_Object == localTimeVarInfo->data.Value.ExtObject->Encoding &&
         &OpcUa_TimeZoneDataType_EncodeableType == localTimeVarInfo->data.Value.ExtObject->Body.Object.ObjType)
@@ -393,8 +395,8 @@ static SOPC_LocalizedText* SOPC_Event_GetMessage(SOPC_Event* pEvent)
     bool found = false;
     SOPC_Event_Variable* messageVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Message], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_LocalizedText_Id == messageVarInfo->data.BuiltInTypeId &&
+
+    if (found && SOPC_LocalizedText_Id == messageVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == messageVarInfo->data.ArrayType)
     {
         return messageVarInfo->data.Value.LocalizedText;
@@ -427,11 +429,13 @@ SOPC_ReturnStatus SOPC_Event_SetSeverity(SOPC_Event* pEvent, uint16_t severity)
     bool found = false;
     SOPC_Event_Variable* severityVarInfo = (SOPC_Event_Variable*) SOPC_Dict_Get(
         pEvent->qnPathToEventVar, (uintptr_t) sopc_baseEventVariantsPaths[SOPC_BaseEventVariantIdx_Severity], &found);
-    SOPC_ReturnStatus status = found ? SOPC_STATUS_OK : SOPC_STATUS_INVALID_STATE;
-    if (SOPC_STATUS_OK == status && SOPC_UInt16_Id == severityVarInfo->data.BuiltInTypeId &&
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+
+    if (found && SOPC_UInt16_Id == severityVarInfo->data.BuiltInTypeId &&
         SOPC_VariantArrayType_SingleValue == severityVarInfo->data.ArrayType)
     {
         severityVarInfo->data.Value.Uint16 = severity;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
@@ -467,6 +471,7 @@ const SOPC_Variant* SOPC_Event_GetVariableAndTypeFromStrPath(const SOPC_Event* p
     bool found = false;
     SOPC_Event_Variable* eventVarInfo =
         (SOPC_Event_Variable*) SOPC_Dict_Get(pEvent->qnPathToEventVar, (uintptr_t) qnPath, &found);
+
     if (found && NULL != outDataType)
     {
         *outDataType = &eventVarInfo->dataType;
@@ -531,9 +536,10 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
                                                         const SOPC_QualifiedName* qualifiedNamePathArray,
                                                         char** qnPathStr)
 {
-    SOPC_ASSERT(NULL != qnPathStr);
-    SOPC_ASSERT(NULL != qualifiedNamePathArray);
-    SOPC_ASSERT(nbQnPath > 0);
+    if (NULL == qnPathStr || NULL == qualifiedNamePathArray || 0 == nbQnPath)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     char* prevStr = SOPC_strdup("");
     if (NULL == prevStr)
     {
@@ -691,7 +697,7 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_cStringPathToQnPath(char qnPathSep,
     }
     if (SOPC_STATUS_OK == status)
     {
-        // In case of success the number of elements shall be the
+        // In case of success the number of elements shall be equal to the index value
         SOPC_ASSERT(eltIdx == nbElts);
         *qNamePath = resultPath;
         *nbQnPath = (int32_t) nbElts;
@@ -751,7 +757,7 @@ static SOPC_Event* SOPC_EventBuilder_CreateCtx(void)
 {
     SOPC_Event* result = SOPC_Calloc(1, sizeof(*result));
 
-    bool failed = NULL == result;
+    bool failed = (NULL == result);
     if (!failed)
     {
         result->qnPathToEventVar =
@@ -820,12 +826,12 @@ static void SOPC_Event_Dict_CopyForEach(const uintptr_t key, uintptr_t value, ui
     if (NULL != eventDest->qnPathToEventVar)
     {
         char* keyCopy = SOPC_strdup((const char*) key);
-        bool failed = NULL == keyCopy;
+        bool failed = (NULL == keyCopy);
         SOPC_Event_Variable* eventVarCopy = NULL;
         if (!failed)
         {
             eventVarCopy = SOPC_EventVariable_CreateCopy((const SOPC_Event_Variable*) value);
-            failed = NULL == eventVarCopy;
+            failed = (NULL == eventVarCopy);
         }
         if (!failed)
         {
@@ -847,19 +853,19 @@ SOPC_Event* SOPC_Event_CreateCopy(const SOPC_Event* pEvent, bool genNewId)
     if (!failed)
     {
         eventCopy = SOPC_Calloc(1, sizeof(*eventCopy));
-        failed = NULL == eventCopy;
+        failed = (NULL == eventCopy);
     }
     if (!failed)
     {
         eventCopy->qnPathToEventVar =
             SOPC_Dict_Create((uintptr_t) NULL, str_hash, str_equal, uintptr_t_free, event_var_uintptr_t_free);
-        failed = NULL == eventCopy->qnPathToEventVar;
+        failed = (NULL == eventCopy->qnPathToEventVar);
     }
     if (!failed)
     {
         SOPC_Dict_SetTombstoneKey(eventCopy->qnPathToEventVar, DICT_TOMBSTONE);
         SOPC_Dict_ForEach(pEvent->qnPathToEventVar, SOPC_Event_Dict_CopyForEach, (uintptr_t) eventCopy);
-        failed = NULL == eventCopy->qnPathToEventVar;
+        failed = (NULL == eventCopy->qnPathToEventVar);
     }
     if (!failed)
     {

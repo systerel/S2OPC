@@ -55,7 +55,7 @@
 typedef void SOPC_ServerStopped_Fct(SOPC_ReturnStatus status);
 
 /**
- * \brief Start the server asynchronously.
+ * \brief Starts the server asynchronously.
  *        Server information node is updated and endpoints are asynchronously requested to be opened.
  *
  * \param stoppedCb  callback called when server will stop (on purpose or due to endpoint opening isssue), it is
@@ -82,7 +82,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_StartServer(SOPC_ServerStopped_Fct* stoppedC
 SOPC_ReturnStatus SOPC_ServerHelper_StopServer(void);
 
 /**
- * \brief Run the server synchronously (alternative to ::SOPC_ServerHelper_StartServer)
+ * \brief Runs the server synchronously (alternative to ::SOPC_ServerHelper_StartServer)
  *        Server information node is updated and endpoints are opened.
  *        Run until requested to stop (call to ::SOPC_ServerHelper_StopServer or signal stop if active) or on endpoint
  *        opening error.
@@ -189,7 +189,7 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceAsync(void* request, uintptr_t u
 SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** response);
 
 /**
- *  \brief Create an event instance for the given event type referenced.
+ *  \brief Creates an event instance for the given event type referenced.
  *         The EventId value is set to a unique value by this function prior to returning the new event instance.
  *         Caller is responsible for event deallocation.
  *
@@ -204,14 +204,14 @@ SOPC_ReturnStatus SOPC_ServerHelper_LocalServiceSync(void* request, void** respo
 SOPC_ReturnStatus SOPC_ServerHelper_CreateEvent(const SOPC_NodeId* eventTypeId, SOPC_Event** event);
 
 /**
- * \brief Trigger the given event from the given node as notifier
+ * \brief Triggers the given event from the given node as notifier
  *
  * \param notifierNodeId      NodeId of the node notifier for the triggered event
  * \param event               The event to be triggered
  * \param optSubscriptionId   (optional) The subscriptionId for which the event is triggered or 0.
  * \param optMonitoredItemId  (optional) The monitored item Id for which the event is triggered or 0.
  *
- * Note: the provided event and its content is automatically deallocated by callee
+ * Note: the provided event and its content are automatically deallocated by callee
  *
  *  \return SOPC_STATUS_OK in case of success,
  *          SOPC_STATUS_INVALID_PARAMETERS, SOPC_STATUS_INVALID_STATE or

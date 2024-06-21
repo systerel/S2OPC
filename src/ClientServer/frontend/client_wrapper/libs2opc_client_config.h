@@ -30,7 +30,7 @@
 #include "sopc_enums.h"
 #include "sopc_user_app_itf.h"
 /**
- * \brief Initialize the S2OPC client frontend configuration
+ * \brief Initializes the S2OPC client frontend configuration
  *        Call to ::SOPC_ClientConfigHelper_Initialize is required before any other operation
  *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
@@ -45,7 +45,7 @@
 SOPC_ReturnStatus SOPC_ClientConfigHelper_Initialize(void);
 
 /**
- * \brief Clear the S2OPC client frontend configuration
+ * \brief Clears the S2OPC client frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  */
 void SOPC_ClientConfigHelper_Clear(void);
@@ -58,7 +58,7 @@ void SOPC_ClientConfigHelper_Clear(void);
 typedef struct SOPC_ConfigClientXML_Custom SOPC_ConfigClientXML_Custom;
 
 /**
- * \brief Configure client from XML configuration files for: client connections
+ * \brief Configures client from XML configuration files for: client connections
  *
  * If not used or used partially, see libs2opc_client_config_custom.h to manually configure through API.
  *
@@ -133,7 +133,7 @@ const char* SOPC_ClientConfigHelper_GetUserIdFromConfig(const SOPC_SecureConnect
 typedef void SOPC_ServiceAsyncResp_Fct(SOPC_EncodeableType* type, const void* response, uintptr_t userContext);
 
 /**
- * \brief Define the service response callback to be used.
+ * \brief Defines the service response callback to be used.
  *
  * This is optional if not used or only synchronous version used.
  * This shall be defined before starting the server and using ::SOPC_ClientHelperNew_ServiceAsync.

@@ -230,12 +230,6 @@ SOPC_ReturnStatus SOPC_WriteRequest_SetWriteValue(OpcUa_WriteRequest* writeReque
                                                   const SOPC_DataValue* value);
 
 /**
- * \brief Enumerated result fields mask values authorized for use with ::SOPC_BrowseRequest_SetBrowseDescription.
- *        Those values are masks which means they might be used with OR bitwise operation to
- *        select several result fields.
- */
-
-/**
  * \brief Creates a browse request
  *
  * \param nbNodesToBrowse       Number of nodes to browse with this browse request.
@@ -367,7 +361,7 @@ SOPC_ReturnStatus SOPC_BrowseRequest_SetBrowseDescription(OpcUa_BrowseRequest* b
 OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationPoints, size_t nbContinuationPoints);
 
 /**
- * \brief Create a translate browse paths request
+ * \brief Creates a translate browse paths request
  *
  * \param nbTranslateBrowsePaths   Number of nodes to browse with this browse request.
  *                                 \p nbTranslateBrowsePaths <= INT32_MAX.
@@ -871,7 +865,7 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigge
 OpcUa_EventFilter* SOPC_MonitoredItem_CreateEventFilter(size_t noOfSelectClauses, size_t noOfWhereClauseElt);
 
 /**
- * \brief Set an OfType operator where clause element with the given type id
+ * \brief Sets an OfType operator where clause element with the given type id
  *
  * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
  * \param whereClauseEltIdx  The where clause element index to set (in range of the size on creation)
@@ -884,7 +878,7 @@ SOPC_ReturnStatus SOPC_EventFilter_SetOfTypeWhereClause(OpcUa_EventFilter* event
                                                         const SOPC_NodeId* typeNodeId);
 
 /**
- * \brief Set a generic content filter element for the given where clause element index
+ * \brief Sets a generic content filter element for the given where clause element index
  *
  * \param eventFilter        An event filter created with ::SOPC_MonitoredItem_CreateEventFilter
  * \param whereClauseEltIdx  The where clause element index to set (in range of the size on creation)
@@ -898,7 +892,7 @@ SOPC_ReturnStatus SOPC_EventFilter_SetGenericWhereClause(OpcUa_EventFilter* even
                                                          OpcUa_ContentFilterElement** filterElt);
 
 /**
- * \brief Set select clause parameters for given select clause index
+ * \brief Sets select clause parameters for given select clause index
  *
  *        See part 4 (v1.04) §7.17.3 and §7.4.4.5 for detailed select clause documentation
  *
@@ -927,7 +921,7 @@ SOPC_ReturnStatus SOPC_EventFilter_SetSelectClause(OpcUa_EventFilter* eventFilte
                                                    const SOPC_String* indexRange);
 
 /**
- * \brief Set select clause parameters for given select clause index
+ * \brief Sets select clause parameters for given select clause index
  *
  *        See part 4 (v1.04) §7.17.3 and §7.4.4.5 for detailed select clause documentation
  *

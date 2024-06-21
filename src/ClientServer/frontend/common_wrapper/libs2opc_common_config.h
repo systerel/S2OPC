@@ -48,7 +48,7 @@ typedef enum
 } SOPC_SecurityPolicy_URI;
 
 /**
- * \brief Initialize the S2OPC Client/Server frontend library (start threads, initialize configuration, etc.)
+ * \brief Initializes the S2OPC Client/Server frontend library (start threads, initialize configuration, etc.)
  *        and define a custom log configuration.
  *        Call to ::SOPC_CommonHelper_Initialize is required before any other operation.
  *
@@ -62,7 +62,7 @@ typedef enum
 SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogConfig);
 
 /**
- * \brief Clear the S2OPC Client/Server frontend library (stop threads, clear common configuration, etc.)
+ * \brief Clears the S2OPC Client/Server frontend library (stop threads, clear common configuration, etc.)
  *        Call to ::SOPC_CommonHelper_Clear shall be done after any Client/Server wrapper Clear operations.
  *
  * \note This function and ::SOPC_CommonHelper_Initialize function are not thread-safe and shall be called in the same
@@ -71,7 +71,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogCon
 void SOPC_CommonHelper_Clear(void);
 
 /**
- * \brief Retrieve the S2OPC Client/Server frontend library build info (version, date, etc.).
+ * \brief Retrieves the S2OPC Client/Server frontend library build info (version, date, etc.).
  *        Shortcut to ::SOPC_ToolkitConfig_GetBuildInfo.
  *
  * \return Toolkit build information
@@ -80,7 +80,7 @@ void SOPC_CommonHelper_Clear(void);
 SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
 
 /**
- * \brief Retrieve the S2OPC Client/Server configuration.
+ * \brief Retrieves the S2OPC Client/Server configuration.
  *        It should be called after call to ::SOPC_CommonHelper_Initialize and before call to ::SOPC_CommonHelper_Clear
  *
  * \return The returned value is ensured to be a non-NULL pointer to Helper configuration
@@ -89,7 +89,7 @@ SOPC_Toolkit_Build_Info SOPC_CommonHelper_GetBuildInfo(void);
 SOPC_S2OPC_Config* SOPC_CommonHelper_GetConfiguration(void);
 
 /**
- * \brief Retrieve the S2OPC Client/Server frontend "initialized" state
+ * \brief Retrieves the S2OPC Client/Server frontend "initialized" state
  *
  * \return True if the Helper is initialized (when ::SOPC_CommonHelper_Initialize is called)
  *

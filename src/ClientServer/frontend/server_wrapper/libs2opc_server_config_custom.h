@@ -37,7 +37,7 @@
 /** \brief Server configuration without XML */
 
 /**
- * \brief Define server namespaces from an array of strings.
+ * \brief Defines server namespaces from an array of strings.
  *        Index in array is the namespace index starting to 1 for first element,
  *        namespace 0 is reserved for OPC UA namespace and is implicitely declared.
  *
@@ -52,7 +52,7 @@
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces);
 
 /**
- * \brief Define server locales ids supported from an array of locale strings.
+ * \brief Defines server locales ids supported from an array of locale strings.
  *
  * \warning The application name shall be defined for each supported locale defined here
  *          (use ::SOPC_ServerConfigHelper_AddApplicationNameLocale when more than one locale supported)
@@ -68,7 +68,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, con
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocaleIds(size_t nbLocales, const char** localeIds);
 
 /**
- * \brief Define server application description
+ * \brief Defines server application description
  *
  * \param applicationUri        The globally unique identifier for the application instance.
  *                              This URI is used as ServerUri in Services if the application is a Server.
@@ -93,7 +93,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetApplicationDescription(const char* 
                                                                     OpcUa_ApplicationType applicationType);
 
 /**
- * \brief Define server additional application name with given locale id
+ * \brief Defines server additional application name with given locale id
  *
  * \param additionalAppName        The name of the application using the additional locale language.
  * \param additionalAppNameLocale  Locale used for the application name, it shall exists in supported locales of the
@@ -112,7 +112,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_AddApplicationNameLocale(const char* a
                                                                    const char* additionalAppNameLocale);
 
 /**
- * \brief Define the PKI provider that will be in charge of validating certificates received by server.
+ * \brief Defines the PKI provider that will be in charge of validating certificates received by server.
  *
  * \param pki  The PKI provider to be used.
  *             It will be automatically deallocated using ::SOPC_PKIProvider_Free on call to
@@ -128,7 +128,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_AddApplicationNameLocale(const char* a
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki);
 
 /**
- * \brief Set asymmetrical certificate and key of server from file paths.
+ * \brief Sets asymmetrical certificate and key of server from file paths.
  *        Certificate files shall use DER format, key file shall use DER or PEM format.
  *
  * \param serverCertPath  Path to server certificate file at DER format
@@ -145,7 +145,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* ser
                                                                  bool encrypted);
 
 /**
- * \brief Set asymmetrical certificate and key of server from byte arrays.
+ * \brief Sets asymmetrical certificate and key of server from byte arrays.
  *        Certificate shall be in DER format, key file shall be in DER or PEM format.
  *
  * \param certificateNbBytes Number of bytes in \p serverCertificate array
@@ -164,7 +164,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromBytes(size_t certifi
                                                                   const unsigned char* serverPrivateKey);
 
 /**
- * \brief Create a new endpoint configuration in server to be completed by using the functions below
+ * \brief Creates a new endpoint configuration in server to be completed by using the functions below
  * (::SOPC_EndpointConfig_AddSecurityConfig, etc.)
  *
  * \param url           URL of the endpoint: \verbatim opc.tcp://<host>:<port>[/<name>] \endverbatim
@@ -189,7 +189,7 @@ SOPC_Endpoint_Config* SOPC_ServerConfigHelper_CreateEndpoint(const char* url, bo
 typedef SOPC_SecurityPolicy SOPC_SecurityConfig;
 
 /**
- * \brief Add a security policy to the endpoint configuration
+ * \brief Adds a security policy to the endpoint configuration
  *
  * \param destEndpoint Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
  * \param uri          Security policy ::SOPC_SecurityPolicy_URI supported by \p destEndpoint
@@ -218,7 +218,7 @@ typedef enum
 } SOPC_SecurityModeMask;
 
 /**
- * \brief Set a security mode mask to the security configuration
+ * \brief Sets a security mode mask to the security configuration
  *
  * \param destSecuConfig Pointer to security configuration added with ::SOPC_EndpointConfig_AddSecurityConfig
  * \param modes          Mask of security modes to be supported using a bitwise OR of ::SOPC_SecurityModeMask
@@ -237,7 +237,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_SetSecurityModes(SOPC_SecurityConfig* dest
 typedef OpcUa_UserTokenPolicy SOPC_UserTokenPolicy;
 
 /**
- * \brief Add a user token policy to the security policy
+ * \brief Adds a user token policy to the security policy
  *
  * \param destSecuConfig   Pointer to security policy added with ::SOPC_EndpointConfig_AddSecurityConfig
  * \param userTokenPolicy  User token policy to use for this security policy.
@@ -256,7 +256,7 @@ SOPC_ReturnStatus SOPC_SecurityConfig_AddUserTokenPolicy(SOPC_SecurityConfig* de
                                                          const SOPC_UserTokenPolicy* userTokenPolicy);
 
 /**
- * \brief Add a reverse connection configuration for a client to the server endpoint configuration
+ * \brief Adds a reverse connection configuration for a client to the server endpoint configuration
  *
  * \param destEndpoint       Pointer to endpoint created with ::SOPC_ServerConfigHelper_CreateEndpoint
  * \param clientAppUri       The client ApplicationUri. It might be empty since it is not checked for now.
@@ -269,7 +269,7 @@ bool SOPC_EndpointConfig_AddClientToConnect(SOPC_Endpoint_Config* destEndpoint,
                                             const char* clientAppUri,
                                             const char* clientEndpointUrl);
 /**
- * \brief Configure the endpoint to not listen to incoming connections
+ * \brief Configures the endpoint to not listen to incoming connections
  *        in case only reverse connections shall be possible.
  *        It will fail if no reverse connection is configured.
  *
@@ -284,7 +284,7 @@ bool SOPC_EndpointConfig_StopListening(SOPC_Endpoint_Config* destEndpoint);
 /* Address space configuration without XML */
 
 /**
- * \brief Configure the server with the given address space
+ * \brief Configures the server with the given address space
  *
  * \param addressSpaceConfig  the address space definition, in case of successful operation
  *                            it is then deallocated on call to ::SOPC_ServerConfigHelper_Clear
@@ -301,7 +301,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetAddressSpace(SOPC_AddressSpace* add
 /* User authentication and authorization managers configuration without XML */
 
 /**
- * \brief Configure the server user authentication manager in charge to check user credentials
+ * \brief Configures the server user authentication manager in charge to check user credentials
  *
  * \param authenticationMgr  Pointer to the user authentication manager in charge to check user credentials
  *
@@ -316,7 +316,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthenticationManager(
     SOPC_UserAuthentication_Manager* authenticationMgr);
 
 /**
- * \brief Configure the server user authorization manager to check user access rights
+ * \brief Configures the server user authorization manager to check user access rights
  *
  * \param authorizationMgr   Pointer to the user authorization manager in charge to check user access rights
  *
@@ -330,7 +330,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthenticationManager(
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthorizationManager(SOPC_UserAuthorization_Manager* authorizationMgr);
 
 /**
- * \brief Change the software build information to be displayed in the server build info node
+ * \brief Changes the software build information to be displayed in the server build info node
  *
  * \param buildInfo  the build information name to display in server build info node.
  *                   Content is copied and can be cleared after call.
@@ -343,7 +343,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetUserAuthorizationManager(SOPC_UserA
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSoftwareBuildInfo(OpcUa_BuildInfo* buildInfo);
 
 /**
- * \brief Get the server configured address space.
+ * \brief Gets the server configured address space.
  *        Note: it might be used after base NodeSet XML parsing to modify / extend it before server starts
  *
  *  \return NULL if toolkit is not initialized,

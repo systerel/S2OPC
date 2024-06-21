@@ -86,7 +86,7 @@ typedef void SOPC_ClientConnectionEvent_Fct(SOPC_ClientConnection* config,
                                             SOPC_StatusCode status);
 
 /**
- * \brief Send a discovery request without user session creation and activation and retrieve response asynchronously.
+ * \brief Sends a discovery request without user session creation and activation and retrieve response asynchronously.
  *        Service response callback configured through ::SOPC_ClientConfigHelper_SetServiceAsyncResponse will be
  *        called on service response or in case of service request sending failure.
  *
@@ -119,7 +119,7 @@ SOPC_ReturnStatus SOPC_ClientHelperNew_DiscoveryServiceAsync(SOPC_SecureConnecti
                                                              uintptr_t userContext);
 
 /**
- * \brief Send a discovery request without user session creation and activation and retrieve response synchronously.
+ * \brief Sends a discovery request without user session creation and activation and retrieve response synchronously.
  *
  * \param secConnConfig  The secure connection configuration.
  * \param request   An instance of one of the following OPC UA request:

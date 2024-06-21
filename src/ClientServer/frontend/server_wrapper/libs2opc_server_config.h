@@ -40,7 +40,7 @@
 #endif
 
 /**
- * \brief Initialize the S2OPC Server frontend configuration
+ * \brief Initializes the S2OPC Server frontend configuration
  *        Call to ::SOPC_ServerConfigHelper_Initialize is required before any other operation
  *        and shall be done after a call to ::SOPC_CommonHelper_Initialize
  *
@@ -55,7 +55,7 @@
 SOPC_ReturnStatus SOPC_ServerConfigHelper_Initialize(void);
 
 /**
- * \brief Clear the S2OPC Server frontend configuration
+ * \brief Clears the S2OPC Server frontend configuration
  *        It shall be done before a call to ::SOPC_CommonHelper_Clear
  */
 void SOPC_ServerConfigHelper_Clear(void);
@@ -68,7 +68,7 @@ void SOPC_ServerConfigHelper_Clear(void);
 typedef struct SOPC_ConfigServerXML_Custom SOPC_ConfigServerXML_Custom;
 
 /**
- * \brief Configure server from XML configuration files for: server endpoints, address space
+ * \brief Configures server from XML configuration files for: server endpoints, address space
  *        and users credential and rights.
  *
  * If not used or used partially, see libs2opc_server_config_custom.h to manually configure through API.
@@ -107,7 +107,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_ConfigureFromXML(const char* serverCon
 typedef bool SOPC_GetServerKeyPassword_Fct(char** outPassword);
 
 /**
- * \brief Define the callback to retrieve password for decryption of the server private key.
+ * \brief Defines the callback to retrieve password for decryption of the server private key.
  *
  * This is optional but if used it shall be defined before starting server and loading its configuration.
  *
@@ -160,7 +160,7 @@ typedef void SOPC_WriteNotif_Fct(const SOPC_CallContext* callCtxPtr,
                                  SOPC_StatusCode writeStatus);
 
 /**
- * \brief Define the write notification callback to be used.
+ * \brief Defines the write notification callback to be used.
  *
  * This is optional but if used it shall be defined before starting server.
  *
@@ -205,7 +205,7 @@ typedef bool SOPC_CreateMI_NodeAvail_Fct(const SOPC_NodeId* nodeId,
                                          SOPC_StatusCode* outUnavailabilityStatus);
 
 /**
- * \brief Define the callback called by CreateMonitoredItem service when a NodeId is not already part of server.
+ * \brief Defines the callback called by CreateMonitoredItem service when a NodeId is not already part of server.
  *        The callback result indicates if it shall be considered known by server (see ::SOPC_CreateMI_NodeAvail_Fct).
  *
  * This is optional but if used it shall be defined before starting server.
@@ -247,7 +247,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetMonitItemNodeAvailCallback(SOPC_Cre
 typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* response, uintptr_t userContext);
 
 /**
- * \brief Define the local service response callback to be used.
+ * \brief Defines the local service response callback to be used.
  *
  * This is optional if not used or only synchronous version used.
  * This shall be defined before starting the server and using ::SOPC_ServerHelper_LocalServiceAsync.
@@ -264,7 +264,7 @@ typedef void SOPC_LocalServiceAsyncResp_Fct(SOPC_EncodeableType* type, void* res
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_LocalServiceAsyncResp_Fct* asyncRespCb);
 
 /**
- * \brief Define duration of the shutdown phase when stopping the server.
+ * \brief Defines duration of the shutdown phase when stopping the server.
  *
  * According to OPC UA standard the server shall indicate state change and
  * seconds remaining until shutdown during shutdown phase and before actually stopping.
@@ -280,7 +280,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetLocalServiceAsyncResponse(SOPC_Loca
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetShutdownCountdown(uint16_t secondsTillShutdown);
 
 /**
- * \brief Define interval in milliseconds used to refresh the server status current time information.
+ * \brief Defines interval in milliseconds used to refresh the server status current time information.
  *
  * \param intervalMs  The frequency used to refresh the server status current time information.
  *                    It might be set to 0 to deactivate the Server.ServerStatus.CurrentTime value update.

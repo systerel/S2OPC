@@ -124,7 +124,7 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetKeyCertPairFromBytes(size_t certifi
                                                                   const unsigned char* clientPrivateKey);
 
 /**
- * \brief Create a new secure channel configuration in client to be completed by using the functions below
+ * \brief Creates a new secure channel configuration in client be completed by using the functions below
  * (::SOPC_SecureConnectionConfig_SetServerCertificateFromPath or
  *  ::SOPC_SecureConnectionConfig_SetServerCertificateFromBytes, etc.)
  *
@@ -313,7 +313,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetUserX509FromBytes(SOPC_SecureCo
                                                                    const unsigned char* userPrivateKey);
 
 /**
- * \brief Set the callback to be called if the server certificate held by ::SOPC_CertHolder is updated at runtime using
+ * \brief Sets the callback to be called if the server certificate held by ::SOPC_CertHolder is updated at runtime using
  *        ::SOPC_KeyCertPair_UpdateFromBytes (manually called by application code).
  *        The callback content shall implement the consequence of an update on the secure connection at runtime.
  *

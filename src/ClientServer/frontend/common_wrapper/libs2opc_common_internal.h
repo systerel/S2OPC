@@ -39,7 +39,7 @@
 #include "sopc_user_app_itf.h"
 
 /**
- * \brief Define a function to be called for client side communication events.
+ * \brief Defines a function to be called for client side communication events.
  *        It should be called by a client wrapper to be record/unrecord its events callback
  *        (automatically done by ::SOPC_ClientHelperNew_Initialize)
  *
@@ -56,7 +56,7 @@
 SOPC_ReturnStatus SOPC_CommonHelper_SetClientComEvent(SOPC_ComEvent_Fct* clientComEvtCb);
 
 /**
- * \brief Define a function to be called for server side communication events.
+ * \brief Defines a function to be called for server side communication events.
  *        It should be called by a server wrapper to be record/unrecord its events callback
  *        (automatically done by ::SOPC_ServerConfigHelper_Initialize)
  *
@@ -73,7 +73,7 @@ SOPC_ReturnStatus SOPC_CommonHelper_SetClientComEvent(SOPC_ComEvent_Fct* clientC
 SOPC_ReturnStatus SOPC_CommonHelper_SetServerComEvent(SOPC_ComEvent_Fct* serverComEvtCb);
 
 /**
- * \brief Copy the provided C string array of known size into a new NULL terminated C string array
+ * \brief Copies the provided C string array of known size into a new NULL terminated C string array
  *
  *  \param nbElts Number of element in the provided C string array
  *  \param src    Array of C string to copy

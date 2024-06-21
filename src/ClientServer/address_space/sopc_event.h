@@ -51,7 +51,7 @@ void SOPC_Event_Delete(SOPC_Event** ppEvent);
  * \brief Copies the provided event in a newly created event
  *
  * \param pEvent    pointer to the event to copy
- * \param genNewId  flag to set to indicate shall have a new eventId generated
+ * \param genNewId  flag to set to indicate a new eventId shall be generated
  *
  * \return a newly allocated event which is a copy of the provided \p pEvent
  *         or NULL in case of invalid parameter or allocation failure.
@@ -61,7 +61,7 @@ SOPC_Event* SOPC_Event_CreateCopy(const SOPC_Event* pEvent, bool genNewId);
 /**
  * \brief Get the EventTypeId for the given event
  *
- * \param pEvent pointer to the event for which EventTypeId shall be retrieved
+ * \param pEvent pointer to the event from which EventTypeId shall be retrieved
  *
  * \return the event type NodeId or NULL in case of error
  */
@@ -76,7 +76,7 @@ const SOPC_NodeId* SOPC_Event_GetEventTypeId(const SOPC_Event* pEvent);
  * \param pEvent pointer to the event for which EventId shall be set
  * \param pEventId pointer to the byte string to set as EventId content
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetEventId(SOPC_Event* pEvent, const SOPC_ByteString* pEventId);
 
@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_Event_SetEventId(SOPC_Event* pEvent, const SOPC_ByteStrin
  * \param pEvent      pointer to the event for which SourceName shall be set
  * \param pSourceName pointer to the string to set as source name
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetSourceName(SOPC_Event* pEvent, const SOPC_String* pSourceName);
 
@@ -96,14 +96,14 @@ SOPC_ReturnStatus SOPC_Event_SetSourceName(SOPC_Event* pEvent, const SOPC_String
  * \param pEvent      pointer to the event for which SourceNode shall be set
  * \param pSourceNode pointer to the node id to set as source node
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetSourceNode(SOPC_Event* pEvent, const SOPC_NodeId* pSourceNode);
 
 /**
  * \brief Get the Time for the given event
  *
- * \param pEvent pointer to the event for which Time shall be retrieved
+ * \param pEvent pointer to the event from which Time shall be retrieved
  *
  * \return the event type Time or -1 in case of error
  */
@@ -118,7 +118,7 @@ SOPC_DateTime SOPC_Event_GetTime(const SOPC_Event* pEvent);
  * \param pEvent  pointer to the event for which Time shall be set
  * \param time    time value of the event to set
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetTime(SOPC_Event* pEvent, SOPC_DateTime time);
 
@@ -132,7 +132,7 @@ SOPC_ReturnStatus SOPC_Event_SetTime(SOPC_Event* pEvent, SOPC_DateTime time);
  * \param pEvent       pointer to the event for which Time shall be set
  * \param receiveTime  receive time value of the event by the server
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetReceiveTime(SOPC_Event* pEvent, SOPC_DateTime receiveTime);
 
@@ -143,7 +143,7 @@ SOPC_ReturnStatus SOPC_Event_SetReceiveTime(SOPC_Event* pEvent, SOPC_DateTime re
  * \param pEvent      pointer to the event for which SourceNode shall be set
  * \param pLocalTime  pointer to the time zone data to set as local time
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetLocalTime(SOPC_Event* pEvent, const OpcUa_TimeZoneDataType* pLocalTime);
 
@@ -154,7 +154,7 @@ SOPC_ReturnStatus SOPC_Event_SetLocalTime(SOPC_Event* pEvent, const OpcUa_TimeZo
  * \param pEvent      pointer to the event for which Message shall be set
  * \param pMessage    pointer to the message to set as message description
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetMessage(SOPC_Event* pEvent, const SOPC_LocalizedText* pMessage);
 
@@ -164,7 +164,7 @@ SOPC_ReturnStatus SOPC_Event_SetMessage(SOPC_Event* pEvent, const SOPC_Localized
  * \param pEvent    pointer to the event for which SourceNode shall be set
  * \param severity  severity value to set for the given event
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetSeverity(SOPC_Event* pEvent, uint16_t severity);
 
@@ -180,7 +180,7 @@ SOPC_ReturnStatus SOPC_Event_SetSeverity(SOPC_Event* pEvent, uint16_t severity);
  *                                (e.g.: ['0:EnabledState', '0:Id'])
  * \param var                     variable to set in the given event for the given browse path
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetVariable(SOPC_Event* pEvent,
                                          uint16_t nbQnPath,
@@ -197,7 +197,7 @@ SOPC_ReturnStatus SOPC_Event_SetVariable(SOPC_Event* pEvent,
  * \param qnPath  qualified name path separated by '~' as a string (e.g.: '0:EnabledState~0:Id')
  * \param var     variable to set in the given event for the given browse path
  *
- * \return SOPC_STATUS_OK in case of failure, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID parameter or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_Event_SetVariableFromStrPath(SOPC_Event* pEvent, const char* qnPath, const SOPC_Variant* var);
 
@@ -257,7 +257,7 @@ typedef void SOPC_Event_ForEachVar_Fct(const char* qnPath,
                                        uintptr_t user_data);
 
 /**
- * \brief Iterates over the even variables, calling the given function for each event variable.
+ * \brief Iterates over the event variables, calling the given function for each event variable.
  *
  * \param event     The event to iterate on
  * \param func      The function to call on each event variable

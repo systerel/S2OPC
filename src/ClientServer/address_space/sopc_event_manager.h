@@ -35,7 +35,7 @@
 typedef SOPC_Dict SOPC_Server_Event_Types;
 
 /**
- * \brief Create the server event types based on given server address space.
+ * \brief Creates the server event types based on given server address space.
  *        The BaseEventType is used to find and create reference event types that will be allowed to
  *        be instantiated using ::SOPC_EventManager_CreateEventInstance.
  *        BaseEventTypes and all subtypes of BaseEventTypes are then instantiable.
@@ -54,7 +54,7 @@ SOPC_ReturnStatus SOPC_EventManager_CreateEventTypes(SOPC_AddressSpace* addSpace
                                                      SOPC_Server_Event_Types** outEventTypes);
 
 /**
- *  \brief Check if the given event type id is configured in the server event types provided
+ *  \brief Checks if the given event type id is configured in the server event types provided
  *
  *  \param eventTypes   The reference event types that might contain the event type corresponding to the given \p
  *                      eventTypeId
@@ -65,7 +65,7 @@ SOPC_ReturnStatus SOPC_EventManager_CreateEventTypes(SOPC_AddressSpace* addSpace
 bool SOPC_EventManager_HasEventType(const SOPC_Server_Event_Types* eventTypes, const SOPC_NodeId* eventTypeId);
 
 /**
- *  \brief Check both if the given event type id is configured in the server event types
+ *  \brief Checks both if the given event type id is configured in the server event types
  *         and if the associated browse path is valid for this event type
  *
  *  \param eventTypes   The reference event types that might contain the event type corresponding to the given \p
@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_EventManager_HasEventTypeAndBrowsePath(const SOPC_Server_
                                                               const SOPC_QualifiedName* qNamePath);
 
 /**
- *  \brief Create an event instance based on the given reference event types.
+ *  \brief Creates an event instance based on the given reference event types.
  *         The EventId value is set to a unique value by this function prior to returning the new event instance.
  *         Caller is responsible for event deallocation.
  *
@@ -101,7 +101,7 @@ SOPC_Event* SOPC_EventManager_CreateEventInstance(const SOPC_Server_Event_Types*
                                                   const SOPC_NodeId* eventTypeId);
 
 /**
- * \brief Clear the given event types content, the pointed configuration is deallocated and pointer is set to NULL.
+ * \brief Clears the given event types content, the pointed configuration is deallocated and pointer is set to NULL.
  *
  * \param eventTypes  The event types configuration to delete
  */
@@ -113,12 +113,12 @@ void SOPC_EventManager_Delete(SOPC_Server_Event_Types** eventTypes);
  *        "<SOPC_QualifiedName_ToCString(qNamePath[0])>~<SOPC_QualifiedName_ToCString(qNamePath[1])>~[...]<SOPC_QualifiedName_ToCString(qNamePath[nbQnPath-1])>"
  *
  *
- * \param      nbQnPath   Number of qualified names in the browse path contained in \p qNamePath
+ * \param      nbQnPath   Number of qualified names in the browse path contained in \p qNamePath, it shall be > 0.
  * \param      qNamePath  Array of qualified names of length \p qNamePath representing the browse path
  * \param[out] qnPathStr  The resulting C string representing the browse path as a string
  *
  * \return SOPC_STATUS_OK in case of success,
- *         SOPC_STATUS_INVALID_PARAMETERS (invalid path size or empty QualifiedName, etc.)
+ *         SOPC_STATUS_INVALID_PARAMETERS (invalid path size or empty QualifiedName path, etc.)
  *         or SOPC_STATUS_OUT_OF_MEMORY otherwise.
  */
 SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
@@ -127,11 +127,11 @@ SOPC_ReturnStatus SOPC_EventManagerUtil_QnPathToCString(uint16_t nbQnPath,
 
 /**
  * \brief Utility function to parse a C string version of a browse path composed of qualified names
- *        and separated by '~':
+ *        and separated by \p qnPathSep character, e.g. '~':
  *        "<SOPC_QualifiedName_ToCString(qNamePath[0])>~<SOPC_QualifiedName_ToCString(qNamePath[1])>~[...]<SOPC_QualifiedName_ToCString(qNamePath[nbQnPath-1])>"
  *
  * \param qnPathSep       The character to use as separator between path elements in \p qnPathStr, '\0' is forbidden
- * \param qnPathStr       The qualified name path separated by \p qnPathSep separator as a string.
+ * \param qnPathStr       The qualified name path separated by \p qnPathSep separator as a string. It might be empty.
  *                        E.g. with sep='~' for path qn0=(nsIdx=0,"EnabledState"), qn1=(0,"Id"):
  *                        "0:EnabledState~0:Id".
  *                        The escape character '\' might be used to un-specialize separator
