@@ -37,6 +37,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_common_constants.h"
 #include "sopc_macros.h"
+#include "sopc_missing_c99.h"
 #include "sopc_protocol_constants.h"
 
 bool SOPC_IsGoodStatus(SOPC_StatusCode status)
