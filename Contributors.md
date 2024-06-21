@@ -39,3 +39,4 @@ the legal rights to contribute.
 * Nicolas Beauger <nicolas.beauger@systerel.fr>
 * Paul Chabas <paul.chabas@systerel.fr>
 * Darrys Abdelkrim <darrys.abdelkrim-stg@systerel.fr>
+* Thomas Bouston <thomas.bouston-stg@systerel.fr>
