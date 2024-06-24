@@ -179,7 +179,7 @@ build-linux64-pys2opc:
   variables:
     <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
   rules: # do not repeat .build-linux: due to disjunction + need only those 2 conditions
-    - if: "$ALL_TESTS != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE != '1'" # if ASAN is deactivated build PyS2OPC by default (exclude nano scope: see TODO below)
+    - if: "$ALL_TESTS != null || $WITH_COVERAGE == null && $NO_ASAN != null" # if ASAN is deactivated build PyS2OPC by default (except for coverage)
       when: on_success
 
 # Used when ALL_BUILDS set (tests use static configuration)
@@ -194,9 +194,9 @@ build-linux64-static-conf:
 build-linux64-NoASan-NoPyS2OPC:
   <<: *build_linux
   variables:
-    <<: *build_linux_variables
+    <<: [*build_linux_variables,*nominal_build_variables]
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
-    - if: "$WITH_COVERAGE != null || $NO_ASAN != null && $S2OPC_NANO_PROFILE == '1'"
+    - if: "$WITH_COVERAGE != null"
       when: on_success
 
 build-win64: &build_win64
