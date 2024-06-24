@@ -48,15 +48,11 @@ class PrintSubs(BaseClientConnectionHandler):
 
 if __name__ == '__main__':
     with PyS2OPC.initialize():
-        config_unsec_nosub = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
         config_sec_nosub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_no_subscription, configuration_parameters_security))
-        config_unsec_sub = PyS2OPC.add_configuration_unsecured(**configuration_parameters_subscription)
         config_sec_sub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_subscription, configuration_parameters_security))
         PyS2OPC.mark_configured()
-        connections = [PyS2OPC.connect(config, PrintSubs) for config in (config_unsec_nosub, config_sec_nosub,
-                                                                         config_unsec_sub, config_sec_sub)]
-        conn_unsec_nosub, conn_sec_nosub, conn_unsec_sub, conn_sec_sub = connections
-        conn_unsec_sub.tag = 'unsecure'
+        connections = [PyS2OPC.connect(config, PrintSubs) for config in (config_sec_nosub, config_sec_sub)]
+        conn_sec_nosub, conn_sec_sub = connections
         conn_sec_sub.tag = 'secure'
 
         try:
@@ -64,15 +60,13 @@ if __name__ == '__main__':
             # On secured connection, call the function twice.
             conn_sec_sub.add_nodes_to_subscription(NODES_A)
             conn_sec_sub.add_nodes_to_subscription(NODES_B)
-            # On unsecured connection, calls it once.
-            conn_unsec_sub.add_nodes_to_subscription(NODES_A + NODES_B)
 
             # Reads
             # On secured connection, make two "simultaneous" asynchronous reads.
             readA = conn_sec_nosub.read_nodes(NODES_A, bWaitResponse=False)
             readB = conn_sec_nosub.read_nodes(NODES_B, bWaitResponse=False)
-            # On unsecured connection, make a synchronous read.
-            respRead = conn_unsec_nosub.read_nodes(NODES_A + NODES_B)
+            # On secured connection, make a synchronous read.
+            respRead = conn_sec_sub.read_nodes(NODES_A + NODES_B)
 
             # readA and readB are Requests. Manually wait on the responses and display them.
             t0 = time.time()
@@ -88,7 +82,7 @@ if __name__ == '__main__':
                     break
             assert respA is not None and respB is not None
             for node, dvAsynch, dvSynch in zip(NODES_A+NODES_B, readA.response.results+readB.response.results, respRead.results):
-                assert dvAsynch.variant == dvSynch.variant, 'Read on secured and unsecured connection yielded different values.'
+                assert dvAsynch.variant == dvSynch.variant, 'Read on secured connection yielded different values.'
                 print('  Value of {} is {}, timestamp is {}'.format(node, str(dvAsynch.variant), time.ctime(dvAsynch.timestampSource)))
 
             # Waits at least a publish cycle before quitting, otherwise the callback may never be called

@@ -445,7 +445,7 @@ if(WITH_PYS2OPC)
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/scripts/tap-wrap.py"
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
-      "--server-cmd" "${PYTHON_EXECUTABLE} ${PYS2OPC_TEST_PATH}/server/server.py --config-path ./S2OPC_Server_UACTT_Config.xml --users-path ./S2OPC_UACTT_Users.xml"
+      "--server-cmd" "${PYTHON_EXECUTABLE} ${PYS2OPC_TEST_PATH}/server/server.py --config-path ./S2OPC_Server_Demo_Config.xml --users-path ./S2OPC_UACTT_Users.xml"
       "${PYTHON_EXECUTABLE}" "${PYS2OPC_TEST_PATH}/client/${name}"
       )
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.

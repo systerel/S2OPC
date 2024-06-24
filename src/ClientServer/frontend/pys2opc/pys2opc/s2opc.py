@@ -306,7 +306,7 @@ class PyS2OPC_Client(PyS2OPC):
                                   sc_lifetime = 3600000,
                                   token_target = 3,
                                   security_mode = SecurityMode.Sign,
-                                  security_policy = SecurityPolicy.Basic256,
+                                  security_policy = SecurityPolicy.Basic256Sha256,
                                   path_cert_auth = '../../../build/bin/S2OPC_Demo_PKI/trusted/certs/cacert.der',
                                   path_crl = '../../../build/bin/S2OPC_Demo_PKI/trusted/crl/cacrl.der',
                                   path_cert_srv = '../../../build/bin/server_public/server_2k_cert.der',
