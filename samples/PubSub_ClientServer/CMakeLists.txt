@@ -16,7 +16,10 @@ endif()
 find_package(s2opc)
 
 # Python3 is mandatory for compilation
-find_package(Python3 COMPONENTS Interpreter)
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 OLD)
+endif()
+find_package(PythonInterp 3 REQUIRED)
 
 #### Samples for S2OPC PubSub library ####
 

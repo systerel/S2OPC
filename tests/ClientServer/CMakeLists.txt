@@ -17,7 +17,10 @@ endif()
 # use find_package onto s2opc in case we built s2opc and tests separately
 
 # Python3 is mandatory for compilation
-find_package(Python3 COMPONENTS Interpreter)
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 OLD)
+endif()
+find_package(PythonInterp 3 REQUIRED)
 
 find_package(check REQUIRED)
 

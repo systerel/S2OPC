@@ -15,7 +15,10 @@ endif()
 # use find_package onto s2opc in case we built s2opc and tests separately
 
 # Python3 is mandatory for compilation
-find_package(Python3 COMPONENTS Interpreter)
+if(POLICY CMP0148)
+  cmake_policy(SET CMP0148 OLD)
+endif()
+find_package(PythonInterp 3 REQUIRED)
 
 # We always link check statically, so that our test binaries are standalone
 find_package(check REQUIRED)
@@ -315,4 +318,3 @@ if(ENABLE_FUZZING)
 
   s2opc_fuzzer(sub_fuzzer "${FUZZING_PATH}/fuzz_sub.c" s2opc_pubsub "")
 endif(ENABLE_FUZZING)
-
