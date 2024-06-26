@@ -1,0 +1,29 @@
+/* STM32H573-specific overlay to the standard DeviceTree
+ *
+ * SRAM1, SRAM2 and SRAM3 are contiguous so they are clustered
+ * together to take advantage of the space they have to offer.
+ */
+
+/delete-node/ &sram1;
+/delete-node/ &sram2;
+/delete-node/ &sram3;
+
+
+/ {
+    chosen {
+        zephyr,sram = &sram123;
+    };
+
+    sram123: memory@20000000 {
+        compatible = "mmio-sram";
+        //compatible = "zephyr,memory-region", "mmio-sram";
+        reg = <0x20000000 DT_SIZE_K(576)>;
+        //zephyr,memory-region = "SRAM123";
+    };
+
+    sram3_res_ecc: memory@20090000 {
+        compatible = "zephyr,memory-region", "mmio-sram";
+        reg = <0x20090000 DT_SIZE_K(64)>;
+        zephyr,memory-region = "SRAM3_RES_ECC";
+    };
+};

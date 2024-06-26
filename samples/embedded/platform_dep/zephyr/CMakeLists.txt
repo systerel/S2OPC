@@ -9,6 +9,10 @@ endif()
 
 set(ENV{CONF_FILE} "${CMAKE_CURRENT_LIST_DIR}/prj.conf;${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.conf")
 
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.overlay")
+set(ENV{DTC_OVERLAY_FILE} "${CMAKE_CURRENT_LIST_DIR}/boards/$ENV{BOARD}.overlay")
+endif()
+
 set(S2OPC_ROOT_PATH ${SAMPLE_SRC_DIR}/../../..)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
@@ -53,6 +57,9 @@ add_definitions (-DBUILD_BUILD_DATE=__DATE__\"\ \"__TIME__)
 
 SET(mbedtls_config ${CMAKE_CURRENT_LIST_DIR}/../mbedtls_config)
 zephyr_include_directories(${mbedtls_config})
+
+SET(mbedtls ${ZEPHYR_MBEDTLS_MODULE_DIR}/include)
+zephyr_include_directories(${mbedtls})
 
 # =====================
 # APP INCLUDES

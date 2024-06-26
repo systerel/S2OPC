@@ -144,7 +144,7 @@ SOPC_ReturnStatus P_MULTICAST_AddIpV4Membership(SOPC_Socket sock, const SOPC_Soc
             }
             else
             {
-                net_if_ipv4_maddr_join(mcAddr);
+                net_if_ipv4_maddr_join(ptrNetIf, mcAddr);
                 // The link between "sock" and "mcAddr" must be stored to allow further Droping membership
                 linkSockToMCast(sock, mcAddr);
             }
@@ -175,7 +175,7 @@ SOPC_ReturnStatus P_MULTICAST_DropIpV4Membership(SOPC_Socket sock, const SOPC_So
         multiAddr = &mcAddr->address.in_addr;
     }
 
-    net_if_ipv4_maddr_leave(mcAddr);
+    net_if_ipv4_maddr_leave(ptrNetIf, mcAddr);
     bool ret = net_if_ipv4_maddr_rm(ptrNetIf, multiAddr);
     return (ret ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
 }

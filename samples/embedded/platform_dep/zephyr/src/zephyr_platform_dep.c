@@ -185,7 +185,8 @@ void SOPC_Platform_Target_Debug(const char* param)
 }
 
 /***************************************************/
-void main(void)
+int main(void)
 {
     SOPC_Platform_Main();
+    return 0;
 }

@@ -2,6 +2,9 @@ if (CONFIG_S2OPC)
 
 zephyr_interface_library_named(S2OPC)
 
+# This macro is only available for MbedTLS versions 3.5.0 and higher
+add_definitions (-DMBEDTLS_CONFIG_FILE="${ZEPHYR_BASE}/modules/mbedtls/configs/config-tls-generic.h")
+
 add_definitions (-DWITH_STATIC_SECURITY_DATA=1)
 add_definitions (-DPUBSUB_STATIC_CONFIG=1)
 add_definitions (-DWITH_CONST_ADDSPACE=1)
