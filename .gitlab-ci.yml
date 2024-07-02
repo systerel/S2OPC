@@ -641,7 +641,7 @@ test-zephyr:
     <<: *nominal_test_variables
   rules: # run the task only if Zephyr samples have been compiled
     - if: "$CROSS_COMPILE != null || $ALL_BUILDS != null || $CI_PIPELINE_SOURCE == 'merge_request_event' || $CI_COMMIT_TAG"
-      when: always
+      when: on_success
 
 ##
 # Windows native build and tests (done in "build-others" stage)
