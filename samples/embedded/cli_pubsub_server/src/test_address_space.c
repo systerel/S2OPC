@@ -4374,7 +4374,6 @@ const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
         }}
     },
 };
-SOPC_GCC_DIAGNOSTIC_RESTORE
 const uint32_t SOPC_Embedded_AddressSpace_nNodes = 131;
 
 // Index is provided by the corresponding Variable UInt32 Variant in SOPC_Embedded_AddressSpace_Nodes
@@ -4515,4 +4514,6 @@ SOPC_Variant SOPC_Embedded_VariableVariant[55] = {
                    SOPC_VariantArrayType_SingleValue,
                    {.Uint32 = 1}},
 };
+SOPC_GCC_DIAGNOSTIC_RESTORE
+SOPC_GCC_DIAGNOSTIC_RESTORE
 const uint32_t SOPC_Embedded_VariableVariant_nb = 55;

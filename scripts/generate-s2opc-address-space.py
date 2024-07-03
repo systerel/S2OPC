@@ -1630,6 +1630,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
     out.write("const bool sopc_embedded_is_const_addspace = %s;\n\n" % ("true" if is_const_addspace else "false"))
     if is_const_addspace:
         out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER\n')
+        out.write('SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST\n')
         out.write('const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
     else:
         out.write('SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {\n')
@@ -1686,8 +1687,6 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
 
     if end:
             out.write('};\n')
-            if is_const_addspace:
-                out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
             out.write('const uint32_t SOPC_Embedded_AddressSpace_nNodes = %d;\n' % n_items)
             out.write('\n');
             if len(variables) > 0:
@@ -1700,6 +1699,10 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
             else:
                 out.write('// Unused variable but it is still necessary to link the loader of embedded address space\n')
                 out.write('SOPC_Variant* SOPC_Embedded_VariableVariant = NULL;\n')
+
+            if is_const_addspace :
+                out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
+                out.write('SOPC_GCC_DIAGNOSTIC_RESTORE\n')
 
             out.write('const uint32_t SOPC_Embedded_VariableVariant_nb = %d;\n' % len(variables))
 
