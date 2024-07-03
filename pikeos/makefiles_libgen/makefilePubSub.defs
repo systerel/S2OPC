@@ -17,7 +17,7 @@
 
 ifeq ($(S2OPC_PRJ_DIR),)
 $(error S2OPC_PRJ_DIR and should be set to S2OPC project path)
-else
+endif
 
 # S2OPC paths
 S2OPC_SRC_DIR = ${S2OPC_PRJ_DIR}/src
@@ -65,5 +65,3 @@ S2OPC_MODLISTPUBSUB += ${SOPC_PUBSUB_COMMON_OBJ} \
 		${SOPC_PUBSUB_PUBLISHER_OBJ} \
 		${SOPC_PUBSUB_SECURITY_OBJ} \
 		${SOPC_PUBSUB_SUBSCRIBER_OBJ}
-
-endif

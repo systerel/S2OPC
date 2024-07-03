@@ -75,11 +75,4 @@
 #define CONFIG_SOPC_SUBSCRIBER_PERIOD_US 10000
 #endif
 
-
-#ifndef PRINT
-#include <vm.h>
-
-#define PRINT vm_cprintf
-#endif
-
 #endif /* TEST_CONFIG_H_ */

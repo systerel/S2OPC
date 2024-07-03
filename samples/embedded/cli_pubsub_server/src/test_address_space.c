@@ -32,6 +32,7 @@
 const bool sopc_embedded_is_const_addspace = true;
 
 SOPC_GCC_DIAGNOSTIC_IGNORE_DISCARD_QUALIFIER
+SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
 const SOPC_AddressSpace_Node SOPC_Embedded_AddressSpace_Nodes[] = {
     {
         OpcUa_NodeClass_DataType,

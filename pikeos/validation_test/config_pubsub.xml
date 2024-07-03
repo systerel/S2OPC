@@ -6,7 +6,7 @@
             </dataset>
             <dataset writerId="51">
                 <variable nodeId="ns=1;i=6" displayName="PubUInt32" dataType="UInt32"/>
-                <variable nodeId="ns=1;i=7" displayName="PubUInt16" dataType="UInt16"/>
+                <variable nodeId="ns=1;i=2" displayName="PubInt16" dataType="Int16"/>
             </dataset>
         </message>
         <message publishingInterval="100." groupId="15" groupVersion="1">
@@ -22,7 +22,7 @@
             </dataset>
             <dataset writerId="51">
                 <variable nodeId="ns=1;i=6" displayName="SubUInt32" dataType="UInt32"/>
-                <variable nodeId="ns=1;i=7" displayName="SubUInt16" dataType="UInt16"/>
+                <variable nodeId="ns=1;i=2" displayName="SubInt16" dataType="Int16"/>
             </dataset>
         </message>
     </connection>

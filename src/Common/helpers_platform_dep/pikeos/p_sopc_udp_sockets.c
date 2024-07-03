@@ -22,6 +22,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_udp_sockets.h"
 
 static SOPC_ReturnStatus SOPC_UDP_Socket_AddrInfo_Get(bool IPv6,
@@ -71,9 +72,9 @@ SOPC_ReturnStatus SOPC_UDP_Socket_Set_MulticastTTL(Socket sock, uint8_t TTL_scop
 {
     int setOptStatus = -1;
 
-    if (SOPC_INVALID_SOCKET != sock)
+    if (SOPC_PIKEOS_SOCKET_IS_VALID(sock))
     {
-        setOptStatus = setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL, &TTL_scope, sizeof(TTL_scope));
+        setOptStatus = setsockopt(sock->sock, IPPROTO_IP, IP_MULTICAST_TTL, &TTL_scope, sizeof(TTL_scope));
 
         if (setOptStatus < 0)
         {
@@ -92,43 +93,22 @@ static void* get_ai_addr(const SOPC_Socket_AddressInfo* addr)
     return addr->ai_addr;
 }
 
-static void SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr,
-                                       struct ip_mreq* membership,
-                                       const SOPC_Socket_AddressInfo* localAddr)
+static struct ip_mreq SOPC_Internal_Fill_IP_mreq(const SOPC_Socket_AddressInfo* multiCastAddr)
 {
     SOPC_ASSERT(multiCastAddr != NULL);
-
-    membership->imr_multiaddr.s_addr = ((struct sockaddr_in*) get_ai_addr(multiCastAddr))->sin_addr.s_addr;
-
-    if (NULL == localAddr)
-    {
-        membership->imr_interface.s_addr = htonl(INADDR_ANY);
-    }
-    else
-    {
-        membership->imr_interface.s_addr = ((struct sockaddr_in*) get_ai_addr(localAddr))->sin_addr.s_addr;
-    }
+    struct ip_mreq membership;
+    membership.imr_multiaddr.s_addr = ((struct sockaddr_in*) get_ai_addr(multiCastAddr))->sin_addr.s_addr;
+    membership.imr_interface.s_addr = htonl(INADDR_ANY);
+    return membership;
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
-                                                const char* interfaceName,
-                                                const SOPC_Socket_AddressInfo* multicast,
-                                                const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus socket_AddMembership(Socket sock, const SOPC_Socket_AddressInfo* multicast)
 {
-    SOPC_UNUSED_ARG(interfaceName);
-
     int setOptStatus = -1;
-    if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
+
+    if (NULL == multicast || !SOPC_PIKEOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (local != NULL)
-    {
-        if (multicast->ai_family != local->ai_family)
-        {
-            return SOPC_STATUS_INVALID_PARAMETERS;
-        }
     }
 
     if (AF_INET6 == multicast->ai_family)
@@ -136,12 +116,17 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
         return SOPC_STATUS_NOT_SUPPORTED;
     }
 
-    struct ip_mreq membership;
-    SOPC_Internal_Fill_IP_mreq(multicast, &membership, local);
-    setOptStatus = setsockopt(sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, &membership, sizeof(struct ip_mreq));
+    SOPC_ASSERT(NULL == sock->membership);
+    sock->membership = (struct ip_mreq*) SOPC_Malloc(sizeof(struct ip_mreq));
+    SOPC_ASSERT(NULL != sock->membership);
+
+    *sock->membership = SOPC_Internal_Fill_IP_mreq(multicast);
+    setOptStatus = setsockopt(sock->sock, IPPROTO_IP, IP_ADD_MEMBERSHIP, sock->membership, sizeof(struct ip_mreq));
 
     if (setOptStatus < 0)
     {
+        SOPC_Free(sock->membership);
+        sock->membership = NULL;
         return SOPC_STATUS_NOK;
     }
     else
@@ -150,28 +135,22 @@ SOPC_ReturnStatus SOPC_UDP_Socket_AddMembership(Socket sock,
     }
 }
 
-SOPC_ReturnStatus SOPC_UDP_Socket_DropMembership(Socket sock,
-                                                 const char* interfaceName,
-                                                 const SOPC_Socket_AddressInfo* multicast,
-                                                 const SOPC_Socket_AddressInfo* local)
+static SOPC_ReturnStatus socket_DropMembership(Socket sock)
 {
-    SOPC_UNUSED_ARG(interfaceName);
-
     int setOptStatus = -1;
 
-    if (NULL == multicast || SOPC_INVALID_SOCKET == sock)
+    if (!SOPC_PIKEOS_SOCKET_IS_VALID(sock))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (AF_INET6 == multicast->ai_family)
+    if (NULL != sock->membership)
     {
-        return SOPC_STATUS_NOT_SUPPORTED;
-    }
+        setOptStatus = setsockopt(sock->sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, sock->membership, sizeof(struct ip_mreq));
 
-    struct ip_mreq membership;
-    SOPC_Internal_Fill_IP_mreq(multicast, &membership, local);
-    setOptStatus = setsockopt(sock, IPPROTO_IP, IP_DROP_MEMBERSHIP, &membership, sizeof(struct ip_mreq));
+        SOPC_Free(sock->membership);
+        sock->membership = NULL;
+    }
 
     if (setOptStatus < 0)
     {
@@ -187,49 +166,64 @@ static SOPC_ReturnStatus SOPC_UDP_Socket_CreateNew(const SOPC_Socket_AddressInfo
                                                    const char* interfaceName,
                                                    bool setReuseAddr,
                                                    bool setNonBlocking,
-                                                   Socket* sock)
+                                                   Socket* pSock)
 {
     SOPC_UNUSED_ARG(interfaceName);
-    if (NULL == addr || NULL == sock)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    int setOptStatus = 0;
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    const int trueInt = true;
+    int setOptStatus = -1;
 
-    *sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
-    if (SOPC_INVALID_SOCKET == *sock)
+    if (NULL != addr && NULL != pSock)
     {
-        status = SOPC_STATUS_NOK;
-    }
-    if (SOPC_STATUS_OK == status && false != setNonBlocking)
-    {
-        setOptStatus = fcntl(*sock, F_SETFL, O_NONBLOCK);
-        if (0 != setOptStatus)
+        Socket result = (Socket_t*) SOPC_Malloc(sizeof(Socket_t));
+        SOPC_ASSERT(NULL != result);
+        result->sock = socket(addr->ai_family, addr->ai_socktype, addr->ai_protocol);
+        result->membership = NULL;
+        if (SOPC_PIKEOS_INVALID_SOCKET_ID == result->sock)
         {
             status = SOPC_STATUS_NOK;
         }
-    }
-    if (SOPC_STATUS_OK == status && false != setReuseAddr)
-    {
-        const int trueInt = true;
-        setOptStatus = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
-        if (0 != setOptStatus)
+        else
         {
-            status = SOPC_STATUS_NOK;
+            status = SOPC_STATUS_OK;
+            setOptStatus = 0;
         }
-    }
-    // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
-    if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
-    {
-        const int falseInt = false;
-        setOptStatus = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
-        if (0 != setOptStatus)
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
 
+        if (SOPC_STATUS_OK == status && setReuseAddr)
+        {
+            setOptStatus = setsockopt(result->sock, SOL_SOCKET, SO_REUSEADDR, (const void*) &trueInt, sizeof(int));
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status && setNonBlocking)
+        {
+            setOptStatus = fcntl(result->sock, F_SETFL, O_NONBLOCK);
+            if (setOptStatus < 0)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        // Enforce IPV6 sockets can be used for IPV4 connections (if socket is IPV6)
+        if (SOPC_STATUS_OK == status && AF_INET6 == addr->ai_family)
+        {
+            const int falseInt = false;
+            setOptStatus = setsockopt(result->sock, IPPROTO_IPV6, IPV6_V6ONLY, (const void*) &falseInt, sizeof(int));
+            if (0 != setOptStatus)
+            {
+                status = SOPC_STATUS_NOK;
+            }
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            *pSock = result;
+        }
+        else
+        {
+            SOPC_Free(result);
+        }
+    }
     return status;
 }
 
@@ -237,17 +231,38 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
                                                   const char* interfaceName,
                                                   bool setReuseAddr,
                                                   bool setNonBlocking,
-                                                  Socket* sock)
+                                                  Socket* pSock)
 {
+    *pSock = NULL;
     SOPC_ReturnStatus status =
-        SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, sock);
+        SOPC_UDP_Socket_CreateNew(listenAddress, interfaceName, setReuseAddr, setNonBlocking, pSock);
     if (SOPC_STATUS_OK == status)
     {
-        int res = bind(*sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
+        int res = bind((*pSock)->sock, listenAddress->ai_addr, listenAddress->ai_addrlen);
         if (res == -1)
         {
-            SOPC_UDP_Socket_Close(sock);
             status = SOPC_STATUS_NOK;
+        }
+        else
+        {
+            bool isMC = false;
+            if (listenAddress->ai_family == AF_INET)
+            {
+                // IPV4: first address byte indicates if this is a multicast address
+                struct sockaddr_in* sAddr = (struct sockaddr_in*) listenAddress->ai_addr;
+                const uint32_t ip = htonl(sAddr->sin_addr.s_addr);
+                isMC = ((ip >> 28) & 0xF) == 0xE; // Multicast mask on 4 first bytes;
+            }
+
+            // If address is multicast, then add membership
+            if (isMC)
+            {
+                status = socket_AddMembership(*pSock, listenAddress);
+            }
+        }
+        if (SOPC_STATUS_OK != status && NULL != *pSock)
+        {
+            SOPC_UDP_Socket_Close(pSock);
         }
     }
     return status;
@@ -256,13 +271,13 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToReceive(SOPC_Socket_AddressInfo* liste
 SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddress,
                                                const char* interfaceName,
                                                bool setNonBlocking,
-                                               Socket* sock)
+                                               Socket* pSock)
 {
     int ret, trueInt = 1;
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, sock);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateNew(destAddress, interfaceName, false, setNonBlocking, pSock);
     if (SOPC_STATUS_OK == status)
     {
-        ret = setsockopt(*sock, IPPROTO_IP, IP_MULTICAST_LOOP, &trueInt, sizeof(int));
+        ret = setsockopt((*pSock)->sock, IPPROTO_IP, IP_MULTICAST_LOOP, &trueInt, sizeof(int));
         if (ret < 0)
         {
             status = SOPC_STATUS_NOK;
@@ -274,12 +289,12 @@ SOPC_ReturnStatus SOPC_UDP_Socket_CreateToSend(SOPC_Socket_AddressInfo* destAddr
 SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressInfo* destAddr, SOPC_Buffer* buffer)
 {
     SOPC_ASSERT(buffer->position == 0);
-    if (SOPC_INVALID_SOCKET == sock || NULL == destAddr || NULL == buffer)
+    if (!SOPC_PIKEOS_SOCKET_IS_VALID(sock) || NULL == destAddr || NULL == buffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    ssize_t res = sendto(sock, buffer->data, buffer->length, 0, destAddr->ai_addr, destAddr->ai_addrlen);
+    ssize_t res = sendto(sock->sock, buffer->data, buffer->length, 0, destAddr->ai_addr, destAddr->ai_addrlen);
 
     if (-1 == res || (uint32_t) res != buffer->length)
     {
@@ -291,7 +306,7 @@ SOPC_ReturnStatus SOPC_UDP_Socket_SendTo(Socket sock, const SOPC_Socket_AddressI
 
 SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
 {
-    if (SOPC_INVALID_SOCKET == sock || NULL == buffer)
+    if (!SOPC_PIKEOS_SOCKET_IS_VALID(sock) || NULL == buffer)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -299,7 +314,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
     struct sockaddr_in si_client;
     socklen_t slen = sizeof(si_client);
 
-    ssize_t recv_len = recvfrom(sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &si_client, &slen);
+    ssize_t recv_len =
+        recvfrom(sock->sock, buffer->data, buffer->maximum_size, 0, (struct sockaddr*) &si_client, &slen);
     if (-1 == recv_len)
     {
         return SOPC_STATUS_NOK;
@@ -315,7 +331,8 @@ SOPC_ReturnStatus SOPC_UDP_Socket_ReceiveFrom(Socket sock, SOPC_Buffer* buffer)
     return SOPC_STATUS_OK;
 }
 
-void SOPC_UDP_Socket_Close(Socket* sock)
+void SOPC_UDP_Socket_Close(Socket* pSock)
 {
-    SOPC_Socket_Close(sock);
+    socket_DropMembership(*pSock);
+    SOPC_Socket_Close(pSock);
 }

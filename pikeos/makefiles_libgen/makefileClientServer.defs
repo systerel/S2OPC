@@ -17,7 +17,7 @@
 
 ifeq ($(S2OPC_PRJ_DIR),)
 $(error S2OPC_PRJ_DIR and should be set to S2OPC project path)
-else
+endif
 
 # S2OPC client server paths
 S2OPC_SRC_DIR = ${S2OPC_PRJ_DIR}/src
@@ -105,5 +105,3 @@ S2OPC_MODLISTCLIENTSERVER += ${S2OPC_CLIENTSERVER_APITOOLKIT_OBJ} \
 		${S2OPC_CLIENTSERVER_SERVICES_OBJ} \
 		${S2OPC_CLIENTSERVER_SOCKETS_OBJ} \
 		${S2OPC_ADDRESSSPACE_OBJ}
-
-endif

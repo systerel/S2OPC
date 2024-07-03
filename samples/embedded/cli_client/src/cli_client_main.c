@@ -336,7 +336,7 @@ static int cmd_demo_configure(WordList* pList)
         char* wordList = overwriteBuffer;
 
         const char* word = CLI_GetNextWord(&wordList);
-        if(word != NULL && word[0] != 0)
+        if (word != NULL && word[0] != 0)
         {
             if (0 == strcmp(word, "y"))
             {

@@ -16,16 +16,16 @@
 # under the License.
 
 # Add your mbedtls configuration file and path here
-CPPFLAGS += -I$(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+CPPFLAGS += -I$(S2OPC_PRJ_DIR)/samples/embedded/platform_dep/pikeos/mbedtls
 CFLAGS += -DMBEDTLS_USER_CONFIG_FILE='"mbedtls_pikeos_config.h"'
 
 
 # Add implementation of posix function time() and gmtime_r()
-USER_TIME_IMPLEMENTATION_DIR = $(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+USER_TIME_IMPLEMENTATION_DIR = $(S2OPC_PRJ_DIR)/samples/embedded/platform_dep/pikeos/mbedtls
 USER_TIME_IMPLEMENTATION_SRC = $(USER_TIME_IMPLEMENTATION_DIR)/p_time_mbedtls
 
 # Add implementation of function mbedtls_hardware_poll() needed to furnish source of randomness
-USER_CUSTOM_ENTROPY_SOURCE_DIR = $(S2OPC_PRJ_DIR)/pikeos/common/mbedtls
+USER_CUSTOM_ENTROPY_SOURCE_DIR = $(S2OPC_PRJ_DIR)/samples/embedded/platform_dep/pikeos/mbedtls
 USER_CUSTOM_ENTROPY_SOURCE_SRC = $(USER_CUSTOM_ENTROPY_SOURCE_DIR)/p_entropy_source
 
 MBEDTLS_MODLIST_USERCUSTOM_IMP = $(USER_CUSTOM_ENTROPY_SOURCE_SRC) $(USER_TIME_IMPLEMENTATION_SRC)

@@ -66,7 +66,7 @@ static const char* default_locale_ids[] = {"en-US", "fr-FR"};
 
 static int32_t endpointClosed = false;
 
-static const char* node_id_str = "ns=1;s=PubUInt16";
+static const char* node_id_str = "ns=1;s=PubInt16";
 static const uint16_t write_value = 12;
 
 // Sleep timeout in milliseconds
@@ -85,12 +85,18 @@ extern SOPC_Variant SOPC_Embedded_VariableVariant[];
  *                          Common Utilities
  *---------------------------------------------------------------------------*/
 
-static void log_UserCallback(const char* context, const char* text)
+
+static void log_UserCallback(const char* timestampUtc,
+                            const char* category,
+                            const SOPC_Log_Level level,
+                            const char* const line)
 {
-    SOPC_UNUSED_ARG(context);
-    if (NULL != text)
+    SOPC_UNUSED_ARG(timestampUtc);
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    if (NULL != line)
     {
-        vm_cprintf("%s\r\n", text);
+        vm_cprintf("%s\r\n", line);
     }
 }
 
@@ -153,7 +159,7 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
     writeDataValue = SOPC_Malloc(sizeof(SOPC_DataValue));
     SOPC_ASSERT(NULL != writeDataValue);
     SOPC_DataValue_Initialize(writeDataValue);
-    writeDataValue->Value.BuiltInTypeId = SOPC_UInt16_Id;
+    writeDataValue->Value.BuiltInTypeId = SOPC_Int16_Id;
     writeDataValue->Value.ArrayType = SOPC_VariantArrayType_SingleValue;
     writeDataValue->Value.Value.Uint16 = write_value;
 
@@ -585,10 +591,12 @@ void suite_test_server_client(int* index)
     SOPC_Log_Configuration log_config = SOPC_Common_GetDefaultLogConfiguration();
     log_config.logLevel = SOPC_LOG_LEVEL_WARNING;
     log_config.logSystem = SOPC_LOG_SYSTEM_USER;
-    log_config.logSysConfig.userSystemLogConfig.doLog = &log_UserCallback;
+    log_config.logSysConfig.userSystemLogConfig.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback;
 
     // Initialize the toolkit library and define the log configuration
     SOPC_ReturnStatus status = SOPC_CommonHelper_Initialize(&log_config);
+    vm_cprintf("status = %d\n", status);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_ServerConfigHelper_Initialize();

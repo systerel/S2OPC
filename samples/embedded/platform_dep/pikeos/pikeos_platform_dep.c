@@ -28,10 +28,10 @@
 #include <lwip/netif.h>
 #include <vm.h>
 
-#include "sopc_mem_alloc.h"
-#include "sopc_mutexes.h"
 #include "sopc_assert.h"
 #include "sopc_macros.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 #include "sopc_platform_time.h"
 
 #define SHELL_COMMAND_SIZE 256u
@@ -75,7 +75,6 @@ void SOPC_Platform_Setup(void)
         vm_cprintf("Failed to open %s with result : %d\n", FILE_NAME_SERIAL, result);
     }
 }
-
 
 void SOPC_Platform_Shutdown(const bool reboot)
 {
@@ -254,7 +253,6 @@ char* SOPC_Shell_ReadLine(void)
     return buffer;
 }
 
-
 void SOPC_Platform_Target_Debug(const char* param)
 {
     SOPC_UNUSED_ARG(param);
@@ -262,8 +260,8 @@ void SOPC_Platform_Target_Debug(const char* param)
 
 extern int main(void)
 {
-    #ifdef PIKEOSDEBUG
-        gdb_breakpoint();
-    #endif
+#ifdef PIKEOSDEBUG
+    gdb_breakpoint();
+#endif
     SOPC_Platform_Main();
 }

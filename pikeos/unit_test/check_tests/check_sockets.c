@@ -36,26 +36,32 @@
 #include "sopc_sockets_api.h"
 #include "sopc_toolkit_config_constants.h"
 
-const char* uri = "opc.tcp://localhost:4841/myEndPoint";
+const char* uri = "opc.tcp://192.168.8.3:4841/myEndPoint";
 const uint32_t endpointDescConfigId = 10;
 const uint32_t serverSecureChannelConnectionId = 100;
 const uint32_t clientSecureChannelConnectionId = 200;
 
 static SOPC_AsyncQueue* socketEvents = NULL;
 
-static void log_UserCallback(const char* context, const char* text)
+
+static void log_UserCallback(const char* timestampUtc,
+                            const char* category,
+                            const SOPC_Log_Level level,
+                            const char* const line)
 {
-    SOPC_UNUSED_ARG(context);
-    if (NULL != text)
+    SOPC_UNUSED_ARG(timestampUtc);
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    if (NULL != line)
     {
-        vm_cprintf("%s\r\n", text);
+        vm_cprintf("%s\r\n", line);
     }
 }
 
 static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, uintptr_t params, uintptr_t auxParam)
 {
     SOPC_UNUSED_ARG(handler);
-    SOPC_Event* ev = SOPC_Calloc(1, sizeof(SOPC_Event));
+    SOPC_LooperEvent* ev = SOPC_Calloc(1, sizeof(SOPC_LooperEvent));
     SOPC_ASSERT(NULL != ev);
 
     ev->event = event;
@@ -66,9 +72,9 @@ static void onSocketEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingEnqueue(socketEvents, ev));
 }
 
-static SOPC_Event* expect_event(int32_t event, uint32_t id)
+static SOPC_LooperEvent* expect_event(int32_t event, uint32_t id)
 {
-    SOPC_Event* ev = NULL;
+    SOPC_LooperEvent* ev = NULL;
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
     SOPC_ASSERT(event == ev->event);
     SOPC_ASSERT(id == ev->eltId);
@@ -77,14 +83,14 @@ static SOPC_Event* expect_event(int32_t event, uint32_t id)
 
 static void expect_events(int32_t event1,
                           uint32_t id1,
-                          SOPC_Event** ev1,
+                          SOPC_LooperEvent** ev1,
                           int32_t event2,
                           uint32_t id2,
-                          SOPC_Event** ev2)
+                          SOPC_LooperEvent** ev2)
 {
     bool event1_received = false;
     bool event2_received = false;
-    SOPC_Event* ev = NULL;
+    SOPC_LooperEvent* ev = NULL;
     while (!event1_received || !event2_received)
     {
         SOPC_ASSERT(SOPC_STATUS_OK == SOPC_AsyncQueue_BlockingDequeue(socketEvents, (void**) &ev));
@@ -104,6 +110,8 @@ static void expect_events(int32_t event1,
         }
         else
         {
+            vm_cprintf("Expected event %d, effective event %d\n", event1, ev->event);
+            vm_cprintf("Expected Id %d, effective id %d\n", id1, ev->eltId);
             SOPC_ASSERT(event1 == ev->event);
             SOPC_ASSERT(id1 == ev->eltId);
         }
@@ -126,15 +134,15 @@ void suite_test_check_sockets(int* index)
     uint32_t receivedBytes = 0;
     uint32_t totalReceivedBytes = 0;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_INFO,
+    SOPC_Log_Configuration logConfiguration = {.logLevel = SOPC_LOG_LEVEL_DEBUG,
                                                .logSystem = SOPC_LOG_SYSTEM_USER,
-                                               .logSysConfig = {.userSystemLogConfig = {.doLog = &log_UserCallback}}};
+                                               .logSysConfig = {.userSystemLogConfig = {.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback}}};
 
     SOPC_EventTimer_Initialize();
     SOPC_Sockets_Initialize();
 
     SOPC_ASSERT(true == SOPC_Logger_Initialize(&logConfiguration));
-    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_INFO);
+    SOPC_Logger_SetTraceLogLevel(SOPC_LOG_LEVEL_DEBUG);
 
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_AsyncQueue_Init(&socketEvents, ""));
 
@@ -162,13 +170,18 @@ void suite_test_check_sockets(int* index)
     SOPC_Sockets_EnqueueEvent(SOCKET_CREATE_CONNECTION, clientSecureChannelConnectionId, (uintptr_t) uri, 0);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 
+    /*
+     * CLIENT SIDE: socket created event
+     */
+    SOPC_Free(expect_event(SOCKET_CREATED, clientSecureChannelConnectionId));
+
     /* SERVER SIDE: accepted connection (socket level only)
      * CLIENT SIDE: socket connection done (it does not mean accepted)
      * Note: both events can occur first, therefore check both at same time
      * */
     {
-        SOPC_Event* ev1 = NULL;
-        SOPC_Event* ev2 = NULL;
+        SOPC_LooperEvent* ev1 = NULL;
+        SOPC_LooperEvent* ev2 = NULL;
         expect_events(SOCKET_LISTENER_CONNECTION, endpointDescConfigId, &ev1, SOCKET_CONNECTION,
                       clientSecureChannelConnectionId, &ev2);
         serverSocketIdx = (uint32_t) ev1->auxParam;
@@ -202,7 +215,7 @@ void suite_test_check_sockets(int* index)
 
     while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -249,7 +262,7 @@ void suite_test_check_sockets(int* index)
     receivedBytes = 1;
     while (totalReceivedBytes < 1000 && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, clientSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -304,7 +317,7 @@ void suite_test_check_sockets(int* index)
     receivedBytes = 1;
     while (totalReceivedBytes < 2 * SOPC_DEFAULT_TCP_UA_MAX_BUFFER_SIZE && receivedBytes != 0)
     {
-        SOPC_Event* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_RCV_BYTES, serverSecureChannelConnectionId);
         receivedBuffer = (SOPC_Buffer*) ev->params;
         SOPC_Free(ev);
 
@@ -332,18 +345,19 @@ void suite_test_check_sockets(int* index)
 
     /* CLIENT SIDE: receive a msg buffer through connection */
     SOPC_Sockets_EnqueueEvent(SOCKET_CLOSE, clientSocketIdx, (uintptr_t) NULL, clientSecureChannelConnectionId);
-    vm_cprintf("Test 9: ok\n");
+    vm_cprintf("Test 10: ok\n");
 
     /* SERVER SIDE: accepted connection (socket level only) */
     {
-        SOPC_Event* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
+        SOPC_LooperEvent* ev = expect_event(SOCKET_FAILURE, serverSecureChannelConnectionId);
         SOPC_ASSERT(serverSocketIdx == ev->auxParam);
         SOPC_Free(ev);
     }
 
     SOPC_Sockets_Clear();
     SOPC_EventTimer_Clear();
-    vm_cprintf("Test 10: ok\n");
+    SOPC_Logger_Clear();
+    vm_cprintf("Test 11: ok\n");
 
     *index += 1;
 }

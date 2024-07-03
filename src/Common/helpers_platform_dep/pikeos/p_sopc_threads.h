@@ -32,6 +32,6 @@
 #include "sopc_enums.h"
 
 typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
-typedef tThreadWks* SOPC_Thread;             // Handle workspace
+typedef tThreadWks* SOPC_Thread;        // Handle workspace
 
 #endif // SOPC_PIKEOS_P_THREADS_H_

@@ -56,12 +56,17 @@ static int32_t gStopAtomic = 0;
  *                            Common utililities
  *---------------------------------------------------------------------------*/
 
-static void log_UserCallback(const char* context, const char* text)
+static void log_UserCallback(const char* timestampUtc,
+                            const char* category,
+                            const SOPC_Log_Level level,
+                            const char* const line)
 {
-    SOPC_UNUSED_ARG(context);
-    if (NULL != text)
+    SOPC_UNUSED_ARG(timestampUtc);
+    SOPC_UNUSED_ARG(category);
+    SOPC_UNUSED_ARG(level);
+    if (NULL != line)
     {
-        vm_cprintf("%s\r\n", text);
+        vm_cprintf("%s\r\n", line);
     }
 }
 
@@ -128,9 +133,9 @@ static SOPC_SKManager* createSKmanager(void)
  *                             Publisher Callback
  *---------------------------------------------------------------------------*/
 
-SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues);
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues);
 
-SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead, int32_t nbValues)
+SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(const OpcUa_ReadValueId* nodesToRead, const int32_t nbValues)
 
 {
     SOPC_ASSERT(nbValues <= NB_VARS);
@@ -144,7 +149,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
 
         SOPC_DataValue_Initialize(dataValue);
 
-        OpcUa_ReadValueId* readValue = &nodesToRead[i];
+        const OpcUa_ReadValueId* readValue = &nodesToRead[i];
 
         uint32_t index = readValue->NodeId.Data.Numeric;
         SOPC_ASSERT(13 == readValue->AttributeId); // Value => AttributeId=13
@@ -155,11 +160,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
         dataValue->Value.ArrayType = varArr[index].ArrayType;
         dataValue->Value.BuiltInTypeId = varArr[index].BuiltInTypeId;
         dataValue->Value.Value = varArr[index].Value;
-
-        OpcUa_ReadValueId_Clear(nodesToRead);
     }
-    SOPC_Free(nodesToRead);
-
     return dataValues;
 }
 
@@ -167,7 +168,7 @@ SOPC_DataValue* SOPC_GetSourceVariables_TestFunc(OpcUa_ReadValueId* nodesToRead,
  *                             Subscriber Callback
  *---------------------------------------------------------------------------*/
 
-static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t nbValues)
+static bool SOPC_SetTargetVariables_Test(const OpcUa_WriteValue* nodesToWrite, const int32_t nbValues)
 {
     SOPC_ASSERT(NULL != nodesToWrite);
 
@@ -175,7 +176,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
     {
         if (1 == nbValues)
         {
-            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            const SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_Boolean_Id != variant->BuiltInTypeId)
             {
                 return false;
@@ -191,7 +192,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
         }
         else if (2 == nbValues)
         {
-            SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
+            const SOPC_Variant* variant = &(nodesToWrite[0].Value.Value);
             if (SOPC_UInt32_Id != variant->BuiltInTypeId)
             {
                 return false;
@@ -205,7 +206,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
                 return false;
             }
             variant = &(nodesToWrite[1].Value.Value);
-            if (SOPC_UInt16_Id != variant->BuiltInTypeId)
+            if (SOPC_Int16_Id != variant->BuiltInTypeId)
             {
                 return false;
             }
@@ -213,7 +214,7 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
             {
                 return false;
             }
-            if (17 != variant->Value.Uint16)
+            if (5462 != variant->Value.Int16)
             {
                 return false;
             }
@@ -221,12 +222,6 @@ static bool SOPC_SetTargetVariables_Test(OpcUa_WriteValue* nodesToWrite, int32_t
             SOPC_Atomic_Int_Set(&gStopAtomic, true);
         }
     }
-
-    for (int32_t i = 0; i < nbValues; i++)
-    {
-        OpcUa_WriteValue_Clear(&(nodesToWrite[i]));
-    }
-    SOPC_Free(nodesToWrite);
 
     return true;
 }
@@ -242,7 +237,7 @@ void suite_test_publisher_subscriber(int* index)
     SOPC_Log_Configuration logConfiguration = SOPC_Common_GetDefaultLogConfiguration();
     logConfiguration.logLevel = SOPC_LOG_LEVEL_ERROR;
     logConfiguration.logSystem = SOPC_LOG_SYSTEM_USER;
-    logConfiguration.logSysConfig.userSystemLogConfig.doLog = &log_UserCallback;
+    logConfiguration.logSysConfig.userSystemLogConfig.doLog = (SOPC_Log_UserDoLog*) &log_UserCallback;
 
     SOPC_ReturnStatus status = SOPC_Common_Initialize(logConfiguration);
     SOPC_ASSERT(SOPC_STATUS_OK == status);

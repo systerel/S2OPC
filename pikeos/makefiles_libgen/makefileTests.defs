@@ -21,9 +21,10 @@
 S2OPC_UNIT_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/unit_test
 S2OPC_CHECK_UNIT_TEST_DIR = $(S2OPC_UNIT_TEST_DIR)/check_tests
 S2OPC_VALIDATION_TEST_DIR = ${S2OPC_PRJ_DIR}/pikeos/validation_test
-MBEDTLS_CONFIG_USER_DIR = ${S2OPC_PRJ_DIR}/pikeos/common/mbedtls
+MBEDTLS_CONFIG_USER_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/pikeos/mbedtls
+STATIC_SECURITY_KEY_PATH= ${S2OPC_PRJ_DIR}/samples/embedded/cli_pubsub_server/src
 
-CPPFLAGS += -I${S2OPC_PRJ_DIR}/pikeos/common -I$(MBEDTLS_CONFIG_USER_DIR)
+CPPFLAGS += -I${STATIC_SECURITY_KEY_PATH} -I$(MBEDTLS_CONFIG_USER_DIR)
 
 S2OPC_UNIT_TEST_OBJ = $(patsubst %.c,%,$(wildcard ${S2OPC_UNIT_TEST_DIR}/*.c))
 S2OPC_CHECK_UNIT_TEST_OBJ = $(patsubst %.c,%,$(wildcard ${S2OPC_CHECK_UNIT_TEST_DIR}/*.c))
@@ -36,7 +37,7 @@ MODLIST_S2OPC_TESTS = $(MBEDTLS_MODLIST) $(MBEDTLS_MODLIST_USERCUSTOM_IMP) $(S2O
 
 APPLIST_S2OPC_TEST = unit_test.elf
 
-# Discard Warning on generated files
+# Discard missing field initializers warnings from address space
 $(ODIR)/${S2OPC_VALIDATION_TEST_DIR}/address_space.o: ${S2OPC_VALIDATION_TEST_DIR}/address_space.c $(MAKEFILE_LIST)
 	@test -d "$(@D)" || mkdir -p "$(@D)"
 ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)

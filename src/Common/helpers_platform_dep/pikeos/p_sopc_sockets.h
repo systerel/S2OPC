@@ -24,13 +24,20 @@
 #include <lwip/netdb.h>
 #include <lwip/sockets.h>
 
-#define SOPC_INVALID_SOCKET (-1)
+#define SOPC_INVALID_SOCKET (NULL)
+#define SOPC_PIKEOS_INVALID_SOCKET_ID (-1)
 #define SOPC_MAX_PENDING_CONNECTIONS (2)
+
+typedef struct
+{
+    int sock;
+    struct ip_mreq* membership; // NULL if not used
+} Socket_t;
 
 /**
  *  \brief Socket base type
  */
-typedef int Socket;
+typedef Socket_t* Socket;
 
 /**
  *  \brief Socket addressing information for listening or connecting operation type
@@ -51,5 +58,7 @@ typedef struct
     fd_set set; /**< set */
     uint8_t rfu[2];
 } SOPC_SocketSet;
+
+#define SOPC_PIKEOS_SOCKET_IS_VALID(pSock) (NULL != (pSock) && SOPC_PIKEOS_INVALID_SOCKET_ID != (pSock)->sock)
 
 #endif // SOPC_P_SOCKETS_H_

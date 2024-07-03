@@ -29,6 +29,16 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#ifndef PRINT
+#if SOPC_PIKEOS
+#include <vm.h>
+
+#define PRINT vm_cprintf
+#else
+#define PRINT printf
+#endif
+#endif
+
 /**
  * Specific platform must provide the software entry point
  * that will call the applicative ::SOPC_Platform_Main function.

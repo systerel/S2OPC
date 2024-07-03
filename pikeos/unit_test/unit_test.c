@@ -30,7 +30,10 @@
 
 #include <stdbool.h>
 
+#include <assert.h>
+
 #include "unit_test_include.h"
+#include "sopc_assert.h"
 
 #include <lwipopts.h>
 
@@ -47,6 +50,17 @@ static bool lwip_init(void)
     return true;
 }
 
+/***************************************************/
+static void userAssertCallback(const char* context)
+{
+
+    if (context != NULL)
+    {
+        vm_cprintf("%s\n", context);
+    }
+    assert(false);
+}
+
 extern int main(void)
 {
     vm_cprintf("\n ------ Starting Platform Unit Test ------ \n");
@@ -54,9 +68,11 @@ extern int main(void)
 #ifdef PIKEOSDEBUG
     gdb_breakpoint();
 #endif
-
     bool isLwipInit = false;
     isLwipInit = lwip_init();
+
+    SOPC_Assert_Set_UserCallback(&userAssertCallback);
+
     suite_test_alloc_memory(&index);
 
     suite_test_thread_mutexes(&index);

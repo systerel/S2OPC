@@ -126,4 +126,16 @@ MBEDTLS_MODLIST += $(addprefix ${MBEDTLS_LIB_DIR}/,${MBEDTLS_OBJS_CRYPTO}) \
 
 CPPFLAGS += -I$(MBEDTLS_PRJ_DIR)/include
 
+# Discard warnings from Mbedtls library
+$(ODIR)/${MBEDTLS_LIB_DIR}/%.o: ${MBEDTLS_LIB_DIR}/%.c $(MAKEFILE_LIST)
+	@test -d "$(@D)" || mkdir -p "$(@D)"
+ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
+	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
+endif
+ifneq ($(ARTIFACT_FLAGS_C),)
+	$(CC) $(ARTIFACT_FLAGS_C) -w -o $@ $<
+else
+	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS) -w $(DEP_FLAGS) -o $@ -c $<)
+endif
+
 # END of MbedTLS part

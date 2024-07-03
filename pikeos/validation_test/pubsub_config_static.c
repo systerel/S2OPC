@@ -36,7 +36,8 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
                                                            int32_t offsetUs,
                                                            SOPC_SecurityMode_Type securityMode,
                                                            const char* mqttTopic,
-                                                           const SOPC_Pubsub_MessageEncodingType encoding)
+                                                           const SOPC_Pubsub_MessageEncodingType encoding,
+                                                           const bool isFixedBufferSize)
 {
     SOPC_WriterGroup* group = SOPC_PubSubConnection_Get_WriterGroup_At(connection, index);
     SOPC_WriterGroup_Set_Id(group, groupId);
@@ -45,6 +46,8 @@ static SOPC_WriterGroup* SOPC_PubSubConfig_SetPubMessageAt(SOPC_PubSubConnection
     SOPC_WriterGroup_Set_SecurityMode(group, securityMode);
     SOPC_WriterGroup_Set_MqttTopic(group, mqttTopic);
     SOPC_WriterGroup_Set_Encoding(group, encoding);
+    const SOPC_WriterGroup_Options writerGroupOptions = {.useFixedSizeBuffer = isFixedBufferSize};
+    SOPC_WriterGroup_Set_Options(group, &writerGroupOptions);
     if (offsetUs >=0)
     {
         SOPC_WriterGroup_Set_PublishingOffset(group, offsetUs / 1000);
@@ -84,10 +87,13 @@ static SOPC_PublishedDataSet* SOPC_PubSubConfig_InitDataSet(SOPC_PubSubConfigura
 static void SOPC_PubSubConfig_SetPubVariableAt(SOPC_PublishedDataSet* dataset,
                                                uint16_t index,
                                                const char* strNodeId,
-                                               SOPC_BuiltinId builtinType)
+                                               SOPC_BuiltinId builtinType,
+                                               int32_t valueRank,
+                                               uint32_t* arrayDimensions)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_PublishedDataSet_Get_FieldMetaData_At(dataset, index);
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldmetadata, &arrayDimension);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
     SOPC_PublishedVariable* publishedVar = SOPC_FieldMetaData_Get_PublishedVariable(fieldmetadata);
     SOPC_ASSERT(NULL != publishedVar);
@@ -152,15 +158,17 @@ static bool SOPC_PubSubConfig_SetSubNbVariables(SOPC_DataSetReader* reader, uint
 static void SOPC_PubSubConfig_SetSubVariableAt(SOPC_DataSetReader* reader,
                                                uint16_t index,
                                                const char* strNodeId,
-                                               SOPC_BuiltinId builtinType)
+                                               SOPC_BuiltinId builtinType,
+                                               int32_t valueRank,
+                                               uint32_t* arrayDimensions)
 {
     SOPC_FieldMetaData* fieldmetadata = SOPC_DataSetReader_Get_FieldMetaData_At(reader, index);
     SOPC_ASSERT(fieldmetadata != NULL);
 
     /* fieldmetadata: type the field */
-    SOPC_FieldMetaData_Set_ValueRank(fieldmetadata, -1);
     SOPC_FieldMetaData_Set_BuiltinType(fieldmetadata, builtinType);
-
+    SOPC_PubSub_ArrayDimension arrayDimension = {.valueRank = valueRank, .arrayDimensions = arrayDimensions};
+    SOPC_FieldMetaDeta_SetCopy_ArrayDimension(fieldmetadata, &arrayDimension);
     /* FieldTarget: link to the source/target data */
     SOPC_FieldTarget* fieldTarget = SOPC_FieldMetaData_Get_TargetVariable(fieldmetadata);
     SOPC_ASSERT(fieldTarget != NULL);
@@ -173,17 +181,17 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 {
     bool alloc = true;
     SOPC_PubSubConfiguration* config = SOPC_PubSubConfiguration_Create();
-
+    
     SOPC_PubSubConnection* connection = NULL;
 
     /* 1 publisher connection */
     alloc = SOPC_PubSubConfiguration_Allocate_PubConnection_Array(config, 1);
-
+    
     /* 3 Published Datasets */
     alloc = SOPC_PubSubConfiguration_Allocate_PublishedDataSet_Array(config, 3);
-
+    
     /** Publisher connection 0 **/
-
+    
     if (alloc)
     {
         // Set address
@@ -191,26 +199,26 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         SOPC_ASSERT(NULL != connection);
         alloc = SOPC_PubSubConnection_Set_Address(connection, "opc.udp://232.1.2.100:4840");
     }
-
+    
         if (alloc)
         {
             // Set publisher id
             SOPC_PubSubConnection_Set_PublisherId_UInteger(connection, 123);
         }
-
+        
     // Set acyclic publisher mode
     SOPC_PubSubConnection_Set_AcyclicPublisher(connection, 0);
-
+    
     if (alloc)
     {
         // Allocate 2 writer groups (messages)
         alloc = SOPC_PubSubConnection_Allocate_WriterGroup_Array(connection, 2);
     }
 
-
+    
     SOPC_WriterGroup* writerGroup = NULL;
     /*** Pub Message 14 ***/
-
+    
     if (alloc)
     {
         // GroupId = 14
@@ -219,19 +227,19 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
         // mqttTopic = NULL
         // encoding = SOPC_MessageEncodeUADP
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 200.000000, -1, SOPC_SecurityMode_None, NULL, SOPC_MessageEncodeUADP);
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 0, 14, 1, 200.000000, -1, SOPC_SecurityMode_None, NULL, SOPC_MessageEncodeUADP, 0);
         alloc = NULL != writerGroup;
     }
-
+    
     if (alloc)
     {
        // 2 data sets for message 14
        alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 2);
     }
 
-
+    
     /*** DataSetMessage No 1 of message 14 ***/
-
+    
     SOPC_DataSetWriter* writer = NULL;
     SOPC_PublishedDataSet* dataset = NULL;
     if (alloc)
@@ -244,11 +252,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=5", SOPC_Boolean_Id); // PubBool
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=5", SOPC_Boolean_Id, -1, NULL); // PubBool
     }
-
+    
     /*** DataSetMessage No 2 of message 14 ***/
-
+    
     if (alloc)
     {
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 1);
@@ -259,12 +267,12 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=6", SOPC_UInt32_Id); // PubUInt32
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;i=7", SOPC_UInt16_Id); // PubUInt16
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=6", SOPC_UInt32_Id, -1, NULL); // PubUInt32
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 1, "ns=1;i=2", SOPC_Int16_Id, -1, NULL); // PubInt16
     }
-
+    
     /*** Pub Message 15 ***/
-
+    
     if (alloc)
     {
         // GroupId = 15
@@ -273,19 +281,19 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         // Offest = -1 us
         // mqttTopic = NULL
         // encoding = SOPC_MessageEncodeUADP
-        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 100.000000, -1, SOPC_SecurityMode_None, NULL, SOPC_MessageEncodeUADP);
+        writerGroup = SOPC_PubSubConfig_SetPubMessageAt(connection, 1, 15, 1, 100.000000, -1, SOPC_SecurityMode_None, NULL, SOPC_MessageEncodeUADP, 0);
         alloc = NULL != writerGroup;
     }
-
+    
     if (alloc)
     {
        // 1 data sets for message 15
        alloc = SOPC_WriterGroup_Allocate_DataSetWriter_Array(writerGroup, 1);
     }
 
-
+    
     /*** DataSetMessage No 1 of message 15 ***/
-
+    
     if (alloc)
     {
         writer = SOPC_WriterGroup_Get_DataSetWriter_At(writerGroup, 0);
@@ -296,15 +304,15 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
     }
     if (alloc)
     {
-        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=3", SOPC_Float_Id); // PubFloat
+        SOPC_PubSubConfig_SetPubVariableAt(dataset, 0, "ns=1;i=3", SOPC_Float_Id, -1, NULL); // PubFloat
     }
-
+    
 
     /* 1 connection Sub */
     alloc = SOPC_PubSubConfiguration_Allocate_SubConnection_Array(config, 1);
-
+    
     /** Subscriber connection 0 **/
-
+    
     if (alloc)
     {
         // Set subscriber id and address
@@ -318,11 +326,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         alloc = SOPC_PubSubConnection_Allocate_ReaderGroup_Array(connection, 1);
     }
 
-
+        
     SOPC_DataSetReader* dsReader = NULL;
     SOPC_ReaderGroup* readerGroup = NULL;
     /*** Sub Message 14 ***/
-
+    
     if (alloc)
     {
         // Allocate 2 datasets
@@ -334,16 +342,16 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
         readerGroup = SOPC_PubSubConfig_SetSubMessageAt(connection, 0, SOPC_SecurityMode_None, 14, 1, pubId, 2, NULL);
         alloc = NULL != readerGroup;
     }
-
+    
     /*** DataSetMessage No 1 of message 14 ***/
-
+    
     if (alloc)
     {
         // Interval = 200.000000 ms
         dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 0, 50, 200.000000);
         alloc = NULL != dsReader;
     }
-
+    
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, 1);
@@ -351,19 +359,19 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-
-        SOPC_PubSubConfig_SetSubVariableAt(dsReader, 0, "ns=1;i=5", SOPC_Boolean_Id); // SubBool
+    
+            SOPC_PubSubConfig_SetSubVariableAt(dsReader, 0, "ns=1;i=5", SOPC_Boolean_Id, -1, NULL); // SubBool
     }
-
+    
     /*** DataSetMessage No 2 of message 14 ***/
-
+    
     if (alloc)
     {
         // Interval = 200.000000 ms
         dsReader = SOPC_PubSubConfig_SetReaderAt(readerGroup, 1, 51, 200.000000);
         alloc = NULL != dsReader;
     }
-
+    
     if (alloc)
     {
         alloc = SOPC_PubSubConfig_SetSubNbVariables(dsReader, 2);
@@ -371,11 +379,11 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     if (alloc)
     {
-
-        SOPC_PubSubConfig_SetSubVariableAt(dsReader, 0, "ns=1;i=6", SOPC_UInt32_Id); // SubUInt32
-        SOPC_PubSubConfig_SetSubVariableAt(dsReader, 1, "ns=1;i=7", SOPC_UInt16_Id); // SubUInt16
+    
+            SOPC_PubSubConfig_SetSubVariableAt(dsReader, 0, "ns=1;i=6", SOPC_UInt32_Id, -1, NULL); // SubUInt32
+            SOPC_PubSubConfig_SetSubVariableAt(dsReader, 1, "ns=1;i=2", SOPC_Int16_Id, -1, NULL); // SubInt16
     }
-
+    
 
     if (!alloc)
     {
@@ -385,3 +393,4 @@ SOPC_PubSubConfiguration* SOPC_PubSubConfig_GetStatic(void)
 
     return config;
 }
+    

@@ -256,7 +256,6 @@ int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
     return (int64_t) t1 - *tRef;
 }
 
-
 bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
 {
     P4_time_t currentTime = p4_get_time();

@@ -17,10 +17,10 @@
 
 ifeq ($(S2OPC_PRJ_DIR),)
 $(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
-else
+endif
 ifeq ($(MBEDTLS_PRJ_DIR),)
 $(error S2OPC_PRJ_DIR and MBEDTLS_PRJ_DIR should be respectively set to S2OPC project path and MBEDTLS project path)
-else
+endif
 
 # S2OPC common paths
 S2OPC_SRC_DIR = ${S2OPC_PRJ_DIR}/src
@@ -104,20 +104,4 @@ ifneq ($(ARTIFACT_FLAGS_C),)
 	$(CC) $(ARTIFACT_FLAGS_C)  -Wno-discarded-qualifiers -Wno-cast-qual -o $@ $<
 else
 	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS)  -Wno-discarded-qualifiers -Wno-cast-qual  $(DEP_FLAGS) -o $@ -c $<)
-endif
-
-
-# Discard Warning "might be a candidate for 'gnu_printf'"
-$(ODIR)/${S2OPC_COMMON_HELPERS_DIR}/sopc_log_manager.o: ${S2OPC_COMMON_HELPERS_DIR}/sopc_log_manager.c $(MAKEFILE_LIST)
-	@test -d "$(@D)" || mkdir -p "$(@D)"
-ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
-	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
-endif
-ifneq ($(ARTIFACT_FLAGS_C),)
-	$(CC) $(ARTIFACT_FLAGS_C)  -Wno-suggest-attribute=format -o $@ $<
-else
-	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS)  -Wno-suggest-attribute=format  $(DEP_FLAGS) -o $@ -c $<)
-endif
-
-endif
 endif

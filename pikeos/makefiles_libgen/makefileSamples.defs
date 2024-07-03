@@ -24,7 +24,7 @@ S2OPC_CLI_PUBSUB_SERVER_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/cli_pubsub_serve
 
 S2OPC_CLI_CLIENT_DIR = ${S2OPC_PRJ_DIR}/samples/embedded/cli_client
 
-CPPFLAGS += -I${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/include -DWITH_USER_ASSERT=1
+CPPFLAGS += -I${S2OPC_PRJ_DIR}/samples/embedded/platform_dep/include -DWITH_USER_ASSERT=1 -DSOPC_PIKEOS=1
 
 S2OPC_SAMPLES_PLATFORMDEP_PIKEOS_OBJ = $(patsubst %.c,%,${wildcard $(S2OPC_SAMPLES_PLATFORMDEP_PIKEOS_DIR)/*.c})
 
@@ -48,3 +48,15 @@ APPLIST_CLIENT = cli_client.elf
 $(APPLIST_CLIENT):  $(addprefix $(ODIR)/, $(addsuffix .o, $(MODLIST_S2OPC_SAMPLES_CLIENT)))
 
 $(APPLIST_PUBSUB_SERVER): $(addprefix $(ODIR)/, $(addsuffix .o, $(MODLIST_S2OPC_SAMPLES_PUBSUB_SERVER)))
+
+# Discard missing field initializers warnings from address space
+$(ODIR)/${S2OPC_CLI_PUBSUB_SERVER_DIR}/src/test_address_space.o: ${S2OPC_CLI_PUBSUB_SERVER_DIR}/src/test_address_space.c $(MAKEFILE_LIST)
+	@test -d "$(@D)" || mkdir -p "$(@D)"
+ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
+	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"
+endif
+ifneq ($(ARTIFACT_FLAGS_C),)
+	$(CC) $(ARTIFACT_FLAGS_C) -Wno-missing-field-initializers -Wno-discarded-qualifiers -o $@ $<
+else
+	$(call run_cmd,CC $@,$(CC) $(CPPFLAGS) $(CFLAGS) -Wno-missing-field-initializers -Wno-discarded-qualifiers $(DEP_FLAGS) -o $@ -c $<)
+endif

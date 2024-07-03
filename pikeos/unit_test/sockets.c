@@ -37,7 +37,7 @@ static void cb_client_tcp(void)
     const char* portServ = "80";
     const char* nodeClient = "192.168.8.3";
     const char* portClient = "81";
-    Socket sockClient = 0;
+    Socket sockClient = NULL;
     const bool reuseAddr = false;
     const bool nonBlockingSock = false;
 
@@ -63,7 +63,7 @@ static void cb_server_tcp(void)
     SOPC_Socket_AddressInfo* addr = SOPC_Malloc(sizeof(SOPC_Socket_AddressInfo));
     const char* node = "192.168.8.3";
     const char* port = "80";
-    Socket sockClient, sockServer = 0;
+    Socket sockClient, sockServer = NULL;
     const bool reuseAddr = false;
     const bool nonBlockingSock = false;
 
@@ -158,7 +158,6 @@ static void cb_multicast_sender(void)
     const bool useIPv6 = false;
     const bool nonBlockingSocket = true;
     const uint32_t bufferSize = 1000;
-    const char* node = "192.168.8.3";
     const char* multicastGroup = "232.1.2.100";
     const char* portReceiver = "80";
     Socket sock = 0;
@@ -173,26 +172,19 @@ static void cb_multicast_sender(void)
     status = SOPC_Buffer_SetPosition(buff, 0);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_Socket_AddressInfo* addrLocal = SOPC_UDP_SocketAddress_Create(useIPv6, node, portReceiver);
-    SOPC_ASSERT(NULL != addrLocal);
-
     SOPC_Socket_AddressInfo* addrMulticast = SOPC_UDP_SocketAddress_Create(useIPv6, multicastGroup, portReceiver);
     SOPC_ASSERT(NULL != addrMulticast);
 
-    status = SOPC_UDP_Socket_CreateToSend(addrLocal, NULL, nonBlockingSocket, &sock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-
-    status = SOPC_UDP_Socket_AddMembership(sock, NULL, addrMulticast, addrLocal);
+    status = SOPC_UDP_Socket_CreateToSend(addrMulticast, NULL, nonBlockingSocket, &sock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_UDP_Socket_Set_MulticastTTL(sock, ttlScope);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    status = SOPC_UDP_Socket_SendTo(sock, addrLocal, buff);
+    status = SOPC_UDP_Socket_SendTo(sock, addrMulticast, buff);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_UDP_SocketAddress_Delete(&addrMulticast);
-    SOPC_UDP_SocketAddress_Delete(&addrLocal);
     SOPC_UDP_Socket_Close(&sock);
     SOPC_Buffer_Delete(buff);
 }
@@ -203,7 +195,6 @@ static void cb_multicast_receiver(void)
     const bool reuseAddr = false;
     const bool nonBlockingSocket = true;
     const uint32_t bufferSize = 1500;
-    const char* node = "192.168.8.3";
     const char* multicastGroup = "232.1.2.100";
     const char* port = "80";
     int nbReady = 0;
@@ -213,16 +204,10 @@ static void cb_multicast_receiver(void)
 
     SOPC_Buffer* buff = SOPC_Buffer_Create(bufferSize);
 
-    SOPC_Socket_AddressInfo* addrLocal = SOPC_UDP_SocketAddress_Create(useIPv6, node, port);
-    SOPC_ASSERT(NULL != addrLocal);
-
     SOPC_Socket_AddressInfo* addrMulticast = SOPC_UDP_SocketAddress_Create(useIPv6, multicastGroup, port);
     SOPC_ASSERT(NULL != addrMulticast);
 
-    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addrLocal, NULL, reuseAddr, nonBlockingSocket, &sock);
-    SOPC_ASSERT(SOPC_STATUS_OK == status);
-
-    status = SOPC_UDP_Socket_AddMembership(sock, NULL, addrMulticast, addrLocal);
+    SOPC_ReturnStatus status = SOPC_UDP_Socket_CreateToReceive(addrMulticast, NULL, reuseAddr, nonBlockingSocket, &sock);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_UDP_Socket_Set_MulticastTTL(sock, ttlScope);
@@ -240,7 +225,6 @@ static void cb_multicast_receiver(void)
     status = SOPC_UDP_Socket_ReceiveFrom(sock, buff);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_UDP_SocketAddress_Delete(&addrLocal);
     SOPC_UDP_SocketAddress_Delete(&addrMulticast);
     SOPC_UDP_Socket_Close(&sock);
     SOPC_Buffer_Delete(buff);

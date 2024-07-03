@@ -98,7 +98,10 @@ static tThreadWks* init_thread(int priority, pFct* pStartFct, void* pStartArgs, 
     return pThreadContext;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread, void* (*startFct)(void*), void* startArgs, const char* taskName)
+SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
+                                     void* (*startFct)(void*),
+                                     void* startArgs,
+                                     const char* taskName)
 {
     /* Create a thread with priority of actual thread divided by 2 */
     P4_prio_t priority = 0;

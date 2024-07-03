@@ -41,4 +41,5 @@ gen_nodeset s2opc_pubsub_nodeset.xml --remove-max-node-management ../../../Clien
 # "i=11715" Namespaces node in Server node which is not mandatory
 
 gen_nodeset s2opc_pubsub_embedded_nodeset.xml --remove-subtree "i=92" "i=93" "i=2004" "i=2013" "i=2020" "i=2033" "i=2034" "i=2138" "i=3051" "i=11645" "i=120" "i=11564" "i=11715" --remove-unused --remove-backward-refs --remove-methods ../../../ClientServer/data/address_space/s2opc_base_nodeset_origin.xml s2opc_pubsub_embedded_data_origin.xml
+cp s2opc_pubsub_embedded_nodeset.xml ../../../../tests/embedded/validation_test/xml
 mv s2opc_pubsub_embedded_nodeset.xml ../../../embedded/cli_pubsub_server/xml/

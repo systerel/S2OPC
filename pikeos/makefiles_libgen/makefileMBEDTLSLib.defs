@@ -22,7 +22,7 @@
 CPPFLAGS += -I$(USER_TIME_IMPLEMENTATION_DIR)
 USER_MODTIME = $(addprefix $(USER_TIME_IMPLEMENTATION_DIR)/, $(USER_TIME_IMPLEMENTATION_SRC))
 
-APPLIST = libmbedtls.a
+APPLIST += libmbedtls.a
 
 libmbedtls.a: $(addprefix $(ODIR)/, $(addsuffix .o, $(MBEDTLS_MODLIST))) \
     $(addprefix $(ODIR)/, $(addsuffix .o, $(S2OPC_MODLISTTIME))) \
