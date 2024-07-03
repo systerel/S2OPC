@@ -29,10 +29,12 @@ and prints the new results.
 import time
 import tempfile
 import random
+import os
 
-import utils
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, DataValue, StatusCode, Variant, VariantType
-from _connection_configuration import configuration_parameters_security
+# overload the default client method to get key password and username with environment variable
+import utils 
+
+from pys2opc import PyS2OPC, PyS2OPC_Client, SOPC_Log_Level, VariantType, DataValue, Variant
 
 # All those nodes are Variable nodes. They are demo nodes which have the name of the type it contains.
 NODES_TO_READ = ['ns=1;s=Int32_007',
@@ -42,50 +44,37 @@ NODES_TO_READ = ['ns=1;s=Int32_007',
                  'ns=1;i=1003',  # A Double that is R/W and TimestampWrite
                 ]
 
-
 if __name__ == '__main__':
     print(PyS2OPC.get_version())
-    print()
-
-    # Initialize the toolkit and automatically clean it when the script finishes
     # Set the path for logs to a new temp dir
     pathLog = tempfile.mkdtemp() + "/"
     print('Log saved to', pathLog)
-    with PyS2OPC.initialize(logLevel=0, logPath=pathLog):
+    # Initialize the toolkit and automatically clean it when the script finishes
+    with PyS2OPC_Client.initialize(logLevel=SOPC_Log_Level.SOPC_LOG_LEVEL_ERROR, logPath=pathLog):
         # Configure a connection and freeze the S2OPC configurations.
-        # See the documentation of this function for all the parameters.
-        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
-        PyS2OPC.mark_configured()
-        # Use the configuration to create a new connection.
+        configs = PyS2OPC_Client.load_client_configuration_from_file(os.path.join('S2OPC_Client_Wrapper_Config.xml'))
+        # Create a new connection by retrieving configuration from ID in the previous XML.
         # The connection is automatically closed when reaching out of the with context.
-        # The default BaseClientConnectionHandler is used, as we do not intent to use subscription.
-        with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
+        with PyS2OPC_Client.connect(configs["write"]) as connection:
             # Make a read. Responses are in the same order. By default, reads the Value attribute.
-            respRead = connection.read_nodes(NODES_TO_READ)
+            respRead = connection.read_nodes(nodeIds=NODES_TO_READ)
             for node, datavalue in zip(NODES_TO_READ, respRead.results):
-                print('  Value of {} is {}, status code is {} (0x{:08X}), timestamp is {}'.format(node, str(datavalue.variant), StatusCode.get_name_from_id(datavalue.statusCode), datavalue.statusCode, time.ctime(datavalue.timestampSource)))
+                print('Value of {} is {}, status code is 0x{:08X}, timestamp server is {}, timestamp source is {}'.format(
+                    node, str(datavalue.variant), datavalue.statusCode, time.ctime(datavalue.timestampServer), time.ctime(datavalue.timestampSource)))
             # Make a write. Choose random values for doubles.
             nodes = [node for node,dv in zip(NODES_TO_READ, respRead.results) if dv.variantType == VariantType.Double]
             newValues = [DataValue.from_python(Variant(10*random.random(), variantType=VariantType.Double))
-                         for dv in respRead.results if dv.variantType == VariantType.Double]
+                            for dv in respRead.results if dv.variantType == VariantType.Double]
             for dv in newValues:
                 dv.timestampSource = 0
-
-            # It is also possible to change the source timestamp manually, ot the status code
-            #for dv in newValues:
-            #    dv.timestampSource = 0
-            #    dv.statusCode = StatusCode.Bad
-
             respWrite = connection.write_nodes(nodes, newValues)
-            print('Written.')
-            try:
-                assert respWrite.is_ok()
-            except AssertionError:
-                print(', '.join(map(lambda sc: '{} (0x{:08X})'.format(StatusCode.get_name_from_id(sc), sc), respWrite.results)))
-                raise
+            if respWrite.is_ok():
+                print("Node : {} successfully written !".format(nodes))
+            else:
+                print("Write fail !")
             # Make a new read, expect the values to have changed.
             respRead = connection.read_nodes(nodes)
             for node, datavalue, expected in zip(nodes, respRead.results, newValues):
-                assert expected.variant == datavalue.variant, expected.variant - datavalue.variant
-                print('  Value of {} is {}, timestamp is {}'.format(node, str(datavalue.variant), time.ctime(datavalue.timestampSource)))
-
+                assert expected.variant == datavalue.variant
+                print('Value of {} is {}, status code is 0x{:08X}, expected value is {}'.format(
+                    node, str(datavalue.variant), datavalue.statusCode, expected.variant))

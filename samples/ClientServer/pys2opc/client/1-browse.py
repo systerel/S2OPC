@@ -25,17 +25,19 @@ Skips Types and Views subtrees. Skip inverse references.
 Only displays the following reference types: "Organizes", "HasComponent", and "HasProperty".
 """
 
+import os
+import traceback
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, AttributeId
-from _connection_configuration import configuration_parameters_security
+# overload the default client method to get key password and username with environment variable
+import utils 
 
+from pys2opc import PyS2OPC_Client, AttributeId
 
 ROOT_ID = 'i=84'
 
 if __name__ == '__main__':
-    with PyS2OPC.initialize():
-        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
-        PyS2OPC.mark_configured()
+    with PyS2OPC_Client.initialize():
+        configs = PyS2OPC_Client.load_client_configuration_from_file(os.path.join('S2OPC_Client_Wrapper_Config.xml'))
         # The tree structure: stores explored nodes
         dNodes = {}  # {parent_node_id: [sub_node_id for each sub_node]}
         # The browse names are stored in a different structure
@@ -45,7 +47,7 @@ if __name__ == '__main__':
         dNodes['i=87'] = []  # Views
         # The structure to store known-but-yet-to-be-explored nodes
         sCandidates = {ROOT_ID}  # The Root node
-        with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
+        with PyS2OPC_Client.connect(configs["write"]) as connection:
             try:
                 while sCandidates:
                     lToBrowse = list(sCandidates)[:50]  # Make a request of max 50 nodes
@@ -62,8 +64,8 @@ if __name__ == '__main__':
                             if not ref.isForward:
                                 continue
                             if ref.referenceTypeId not in ('i=47',  # HasComponent
-                                                           'i=46',  # HasProperty
-                                                           'i=35'):  # Organizes
+                                                            'i=46',  # HasProperty
+                                                            'i=35'):  # Organizes
                                 continue
                             b = ref.nodeId
                             dNodes[a].append(b)
@@ -74,9 +76,9 @@ if __name__ == '__main__':
                                 sCandidates.add(b)
                 # Finds missing names (mostly, the root node)
                 lToName = [node for node in dNodes if node not in dNames]
-                respRead = connection.read_nodes(lToName, [AttributeId.BrowseName]*len(lToName))
+                respRead = connection.read_nodes(lToName, attributes=[AttributeId.BrowseName]*len(lToName))
                 for node, dvName in zip(lToName, respRead.results):
-                    dNames[node] = dvName.variant[1]
+                    dNames[node] = dvName.variant
             except:
                 print('Connection failed, printing partial Address Space')
 
@@ -86,7 +88,7 @@ if __name__ == '__main__':
         Prints subnodes indented, and keep in memory which nodes were printed, hence avoiding loops.
         """
         if node in dNames and node in dNodes:
-            print('  '*iIndent + dNames[node] + ('   ({})'.format(node) if not dNodes[node] else ''))
+            print('  '*iIndent + ('{}   ({})'.format(dNames[node], node) if not dNodes[node] else ''))
         else:
             print('  '*iIndent + node)
         for subnode in dNodes.get(node, []):

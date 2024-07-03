@@ -27,7 +27,7 @@
 #define SOPC_ENUMS_H_
 
 /* SOPC return statuses */
-typedef enum SOPC_ReturnStatus
+typedef enum _SOPC_ReturnStatus
 {
     SOPC_STATUS_OK = 0,
     SOPC_STATUS_NOK,

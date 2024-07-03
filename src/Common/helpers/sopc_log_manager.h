@@ -34,7 +34,7 @@
 
 typedef struct SOPC_Log_Instance SOPC_Log_Instance;
 
-typedef enum
+typedef enum SOPC_Log_Level
 {
     SOPC_LOG_LEVEL_ERROR = 0,
     SOPC_LOG_LEVEL_WARNING = 1,

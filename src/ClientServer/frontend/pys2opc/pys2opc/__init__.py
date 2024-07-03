@@ -19,62 +19,112 @@
 # under the License.
 
 """
-The `pys2opc` module is a Python3 wrapper of the library `s2opc_clientserver`, based on `s2opc`.
-It uses CFFI to bind Python with C.
+The pys2opc package is a Python3 wrapper of the library `s2opc_clientserver`, based on S2OPC.
+It uses Cython to bind Python with C.
 The wrapper provides Python classes for OPC UA concepts.
 
-The `pys2opc.s2opc.PyS2OPC` represents the `SOPC_Toolkit*_*` API and gathers its top level functionalities,
-which are split in `pys2opc.s2opc.PyS2OPC_Client` and `pys2opc.s2opc.PyS2OPC_Server`.
+The `pys2opc.PyS2OPC` represents the `SOPC_CommonHelper_*` API and gathers its top level functionalities,
+which are split in `pys2opc.PyS2OPC_Client` represents the `SOPC_Client*Helper*`,
+and `pys2opc.PyS2OPC_Server` represents the `SOPC_Server*Helper*`.
 
-For now, the module can be used exclusively either as a Server or one or more Clients.
+The module can be used simultaneously as a server and as a client, both with several connection configurations.
 
 
 ### Client use
 
-Once a configuration is created and the toolkit is `pys2opc.s2opc.PyS2OPC.mark_configured`,
-new connections are created with `pys2opc.s2opc.PyS2OPC_Client.connect`.
-Connection objects are instances of the `pys2opc.connection.BaseClientConnectionHandler`.
+First initialize the client with `PyS2OPC_Client.initialize`.
+Then, configure it by passing an XML configuration file to `PyS2OPC_Client.load_client_configuration_from_file`.   
+For more details on XML configuration file, see [s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads)
+Finally, the client can establish a connection to a server using the (`PyS2OPC_Client.connect`) function by selecting the user to be used in the previous XML file.
 
-With connections, you can `pys2opc.connection.BaseClientConnectionHandler.read_nodes`,
-`pys2opc.connection.BaseClientConnectionHandler.write_nodes` and `pys2opc.connection.BaseClientConnectionHandler.browse_nodes`.
-You can also `pys2opc.connection.BaseClientConnectionHandler.add_nodes_to_subscription`,
-and receive notifications through `pys2opc.connection.BaseClientConnectionHandler.on_datachanged`.
+With connection, you can `pys2opc.BaseClientConnectionHandler.read_nodes`,
+`pys2opc.BaseClientConnectionHandler.write_nodes` and `pys2opc.BaseClientConnectionHandler.browse_nodes`.
+You can also `pys2opc.BaseClientConnectionHandler.add_nodes_to_subscription`,
+and receive notifications through `pys2opc.BaseClientConnectionHandler.on_datachanged`.
 
->>> from pys2opc import PyS2OPC_Client as PyS2OPC
->>> PyS2OPC.get_version()
->>> with PyS2OPC.initialize():
->>>     config = PyS2OPC.add_configuration_unsecured()
->>>     PyS2OPC.mark_configured()
->>>     with PyS2OPC.connect(config, BaseClientConnectionHandler) as connection:
->>>         connection.read_nodes()
+>>> from pys2opc import PyS2OPC_Client
+>>> PyS2OPC_Client.get_version()
+>>> with PyS2OPC_Client.initialize():
+>>>     configs = PyS2OPC_Client.load_client_configuration_from_file('client_config.xml')
+>>>     with PyS2OPC_Client.connect(configs["read"]) as connection:
+>>>         ReadReponse = connection.read_nodes(nodeIds=NODES_TO_READ)
 
+*client_config.xml* extract: connection example with id = "read"
+```
+<Connection serverURL="opc.tcp://localhost:4841" id="read">
+  <ServerCertificate path="server_public/server_4k_cert.der"/>
+  <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+  <SecurityMode mode="Sign"/>
+</Connection>
+```
 
 ### Server use
 
-Servers are mainly configured by XML files: one for the structure and content of the address space,
-the other for the endpoint configuration, which specifies who can connect, and which security keys are used.
-The configuration is also the place to register callbacks
-(see `pys2opc.server_callbacks.BaseAddressSpaceHandler`).
+Server is mainly configured by XML files: the first for the server endpoints configuration,
+which specifies security parameter, session and users parameters,
+the next file is the NodeSet describing the structure and content of the address space,
+the last file to define allowed users and their authorization (read, write, ..).   
+The configuration function migh also register callback to be notified on server (see `BaseAddressSpaceHandler`).
+
+For more details on XML server endpoint configuration file, see [s2opc_clientserver_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_config.xsd?ref_type=heads).
+For more details on XML address space configuration file, see [UANodeSet.xsd](https://github.com/OPCFoundation/UA-Nodeset/blob/v1.04/Schema/UANodeSet.xsd).
+For more details on XML user authorization file, see [s2opc_clientserver_users_config.xsd](https://gitlab.com/systerel/S2OPC/-/blob/master/schemas/s2opc_clientserver_users_config.xsd?ref_type=heads).
 
 There are two main ways to start the server once configured.
-An "all-in-one" `pys2opc.s2opc.PyS2OPC_Server.serve_forever`,
-and a more permissive one using a `with` statement `pys2opc.s2opc.PyS2OPC_Server.serve`.
+An "all-in-one" `PyS2OPC_Server.serve_forever`,
+and a more permissive one using a `with` statement `PyS2OPC_Server.serve`.
 In the `with` statement, the application code can be started alongside the S2OPC server.
 
->>> from pys2opc import PyS2OPC_Server as PyS2OPC
->>> PyS2OPC.get_version()
->>> with PyS2OPC.initialize():
->>>     PyS2OPC.load_address_space('address_space.xml')
->>>     PyS2OPC.load_configuration('server_configuration.xml')
->>>     PyS2OPC.mark_configured()
->>>     with PyS2OPC.serve():
+>>> from pys2opc import PyS2OPC_Server
+>>> PyS2OPC_Server.get_version()
+>>> with PyS2OPC_Server.initialize():
+>>>     PyS2OPC.load_server_configuration_from_files('server_config.xml', 'address_space.xml', 'user_config.xml')
+>>>     with PyS2OPC_Server.serve():
 >>>         # The main loop of the application
->>>         while PyS2OPC.serving(): pass
 
+*server_config.xml* extract: endpoint configuration example
+```
+  <Endpoint url="opc.tcp://localhost:4841">
+    <SecurityPolicies>
+      <SecurityPolicy uri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256">
+        <SecurityModes>
+          <SecurityMode mode="Sign"/>
+        </SecurityModes>
+        <UserPolicies>
+          <UserPolicy policyId="username_Basic256Sha256" tokenType="username" securityUri="http://opcfoundation.org/UA/SecurityPolicy#Basic256Sha256"/>
+        </UserPolicies>
+      </SecurityPolicy>
+  </Endpoint>
+```
+
+*address_space.xml* extract: variable definition example
+```
+  <UAVariable AccessLevel="99" BrowseName="1:LK" DataType="Boolean" NodeId="ns=1;s=BALA_RDLS_W1.RM.LK">
+    <DisplayName>LK</DisplayName>
+    <Description>Switch Locally Locked</Description>
+    <References>
+      <Reference IsForward="false" ReferenceType="HasComponent">ns=1;s=BALA_RDLS_W1.RM</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
+    </References>
+    <Value>
+      <uax:Boolean>false</uax:Boolean>
+    </Value>
+  </UAVariable>
+```
+
+*user_config.xml* extract: user authorizatoin configuration example
+```
+  <UserPasswordConfiguration hash_iteration_count="10000" hash_length="32" salt_length="16">
+    <!-- "me" pwd=1234 has all right accesses. -->
+    <UserPassword user="me" hash="847d892ffaccb9822d417866f9d491389b29134b3c73c3a429ac95c627f9d40a" salt="17faf802f81c2503d3043042e79004b4">
+      <UserAuthorization write="true" read="true" execute="true" addnode="true"/>
+    </UserPassword>
+  </UserPasswordConfiguration>
+```
 
 ### NodeId concept
 
-Throughout the module (e.g. `pys2opc.connection.BaseClientConnectionHandler.read_nodes`),
+Throughout the module (e.g. `pys2opc.BaseClientConnectionHandler.read_nodes`),
 when the interface requires a NodeId, the following syntax is used:
 
 >>> node_id = 'ns=1;x=qualifier'
@@ -100,26 +150,18 @@ Also, arrays are handled at the value level, and values can be array of integers
 
 However, values in Python are more flexible.
 Integers are unbound, floating point are always double, arrays may contain different types of values.
-The class `pys2opc.types.Variant` represent objects that have the properties of python values (e.g. addition/difference/multiplication/division of numbers),
-but the types of OPC UA values (see `pys2opc.types.VariantType`).
+The class `pys2opc.Variant` represent objects that have the properties of python values (e.g. addition/difference/multiplication/division of numbers),
+but the types of OPC UA values (see `pys2opc.SOPC_BuiltinId`).
 
 When creating `Variant`, there is no need to specify its type.
 It can be changed later, and will be checked only when encoding the value.
 
-DataValue is another OPC UA concept that encapsulates `Variant` to add timestamps and a quality (see `pys2opc.types.DataValue`).
+DataValue is another OPC UA concept that encapsulates `Variant` to add timestamps and a quality (see `pys2opc.DataValue`).
 It is DataValues that are used to store values (when reading or writing values).
-There are helpers to convert Python values to OPC UA values (`pys2opc.types.DataValue.from_python`).
-The other way around is simpler (just use the `pys2opc.types.DataValue` variant field as if it was a Python value).
-
-When writing nodes to a server, PyS2OPC is able to compute the type of a Variant by making a read beforehand
-(see `pys2opc.connection.BaseClientConnectionHandler.write_nodes`) and deducing the right types.
-Once the types are deduced, values may be modified and they will keep their type, so that it is not necessary to make the deduction again.
+There are helpers to convert Python values to OPC UA values (`pys2opc.DataValue.from_python`).
+The other way around is simpler (just use the `pys2opc.DataValue` variant field as if it was a Python value).
 """
 
-from _pys2opc import ffi, lib as libsub
-from .s2opc import VERSION, PyS2OPC_Client, PyS2OPC_Server, ClientConfiguration, ServerConfiguration, BaseAddressSpaceHandler
-from .connection import BaseClientConnectionHandler
-from .types import Variant, VariantType, DataValue, AttributeId, ReturnStatus, StatusCode, SecurityPolicy, SecurityMode, NodeClass, LogLevel
-from .request import Request
+import pys2opc
 
-#del ffi, libsub  # This makes pdoc bug
+from .pys2opc import *

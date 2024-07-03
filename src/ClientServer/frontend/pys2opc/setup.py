@@ -18,19 +18,25 @@
 # specific language governing permissions and limitations
 # under the License.
 
+from setuptools import Distribution, setup
 
-from setuptools import setup
 import json
-import os
+import sys
+
+class BinaryDistribution(Distribution):
+    def has_ext_modules(pys2opc):
+        return True
+    def is_pure(self):
+        return False
+
+library_extension = {
+    'linux': 'so',
+    'win32': 'pyd'
+}.get(sys.platform, 'so')
 
 setup(
-    setup_requires=['cffi>=1.4.0'],
-    install_requires=['cffi>=1.4.0'],
-    cffi_modules=['pys2opc_build.py:ffibuilder'],
     packages=['pys2opc'],
-    package_dir={'pys2opc': 'pys2opc'},
-    package_data={'pys2opc': ['version.json']},
-
+    package_data={'pys2opc': ['pys2opc.'+library_extension, 'version.json', 'pys2opc.pyx'] },
     name='pys2opc',
     version=json.load(open('pys2opc/version.json'))['version'],
     author='Systerel S2OPC',
@@ -45,5 +51,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Development Status :: 4 - Beta',
-    ]
+    ],
+    distclass=BinaryDistribution
 )

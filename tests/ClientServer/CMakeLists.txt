@@ -727,12 +727,12 @@ if(WITH_PYS2OPC)
     get_filename_component(no_ext_name ${name} NAME_WE) # remove extension to use name for log directory
     set(test_name "validation::${name}")
     add_test(NAME "${test_name}"
-      WORKING_DIRECTORY "${PYS2OPC_TEST_PATH}"
+      WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
       COMMAND
       "${PYTHON_EXECUTABLE}" "${S2OPC_ROOT_PATH}/tests/ClientServer/scripts/with-opc-server.py"
       "--server-wd" $<TARGET_FILE_DIR:${TOOLKIT_TEST_SERVER}>
       "--server-cmd" "$<TARGET_FILE:${TOOLKIT_TEST_SERVER}> ${no_ext_name}"
-      "${PYTHON_EXECUTABLE}" "${name}"
+      "${PYTHON_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/validation_tests/pys2opc/${name}"
       )
     # ASan requires to be the first dynamically linked library to be loaded. This is done with LD_PRELOAD.
     set(new_env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}${ENV_PATH_SEP}${PYS2OPC_SRC_PATH}${ENV_PATH_SEP}${S2OPC_ROOT_PATH}/tests/ClientServer/interop_tools"

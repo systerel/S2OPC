@@ -26,10 +26,12 @@ Some connections are secured and some unsecured. A subscription is made on the s
 
 
 import time
+import os
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
-from _connection_configuration import configuration_parameters_no_subscription, configuration_parameters_subscription, configuration_parameters_security, join_configs
+# overload the default client method to get key password and username with environment variable
+import utils 
 
+from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler, AsyncResponse
 
 NODES_A = ['ns=1;s=Int32_007',
            'ns=1;s=UInt64_099']
@@ -38,57 +40,51 @@ NODES_B = ['ns=1;s=Double_032',
            'ns=1;i=1003']
 
 class PrintSubs(BaseClientConnectionHandler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.tag = ''  # Will use this tag to differentiate connections with subscriptions
 
     def on_datachanged(self, nodeId, dataValue):
-        print('  Data changed on connection "{}", "{}" -> {}, '.format(self.tag, nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
+        print('  Data changed "{}" -> {}, '.format(nodeId, dataValue.variant) + time.ctime(dataValue.timestampServer))
 
 
 if __name__ == '__main__':
-    with PyS2OPC.initialize():
-        config_sec_nosub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_no_subscription, configuration_parameters_security))
-        config_sec_sub = PyS2OPC.add_configuration_secured(**join_configs(configuration_parameters_subscription, configuration_parameters_security))
-        PyS2OPC.mark_configured()
-        connections = [PyS2OPC.connect(config, PrintSubs) for config in (config_sec_nosub, config_sec_sub)]
-        conn_sec_nosub, conn_sec_sub = connections
-        conn_sec_sub.tag = 'secure'
+    with PyS2OPC_Client.initialize():
+        configs = PyS2OPC_Client.load_client_configuration_from_file(os.path.join('S2OPC_Client_Wrapper_Config.xml'))
+        connections = [PyS2OPC_Client.connect(configs[ID], PrintSubs) for ID in ("read", "write")]
+        conn_1, conn_2 = connections
 
         try:
             # Add node to subscriptions. This is always synchronous.
             # On secured connection, call the function twice.
-            conn_sec_sub.add_nodes_to_subscription(NODES_A)
-            conn_sec_sub.add_nodes_to_subscription(NODES_B)
+            conn_2.add_nodes_to_subscription(NODES_A)
+            conn_2.add_nodes_to_subscription(NODES_B)
 
             # Reads
             # On secured connection, make two "simultaneous" asynchronous reads.
-            readA = conn_sec_nosub.read_nodes(NODES_A, bWaitResponse=False)
-            readB = conn_sec_nosub.read_nodes(NODES_B, bWaitResponse=False)
+            readA: AsyncResponse = conn_1.read_nodes(nodeIds=NODES_A, bWaitResponse=False)
+            readB: AsyncResponse = conn_1.read_nodes(nodeIds=NODES_B, bWaitResponse=False)
             # On secured connection, make a synchronous read.
-            respRead = conn_sec_sub.read_nodes(NODES_A + NODES_B)
+            respRead = conn_2.read_nodes(NODES_A + NODES_B)
 
             # readA and readB are Requests. Manually wait on the responses and display them.
             t0 = time.time()
-            respA = conn_sec_nosub.get_response(readA)
+            respA = readA.get_response()
             while respA is None:
-                respA = conn_sec_nosub.get_response(readA)
+                respA = readA.get_response()
                 if time.time() - t0 > 1.:  # Wait at most 1 second
                     break
-            respB = conn_sec_nosub.get_response(readB)
+            respB = readB.get_response()
             while respB is None:
-                respB = conn_sec_nosub.get_response(readB)
+                respB = readB.get_response()
                 if time.time() - t0 > 1.:
                     break
             assert respA is not None and respB is not None
-            for node, dvAsynch, dvSynch in zip(NODES_A+NODES_B, readA.response.results+readB.response.results, respRead.results):
+            for node, dvAsynch, dvSynch in zip(NODES_A+NODES_B, respA.results+respB.results, respRead.results):
                 assert dvAsynch.variant == dvSynch.variant, 'Read on secured connection yielded different values.'
                 print('  Value of {} is {}, timestamp is {}'.format(node, str(dvAsynch.variant), time.ctime(dvAsynch.timestampSource)))
 
             # Waits at least a publish cycle before quitting, otherwise the callback may never be called
-            time.sleep(configuration_parameters_subscription['publish_period']/1000)
+            time.sleep(5)
         finally:
-            # Always clean all connections, even when there is a problem
+            # Always clean all subscritions and connections, even when there is a problem
             for connection in connections:
+                connection.close_subscription()
                 connection.disconnect()
-

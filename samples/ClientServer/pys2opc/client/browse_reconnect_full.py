@@ -30,10 +30,9 @@ from collections import Counter
 import random
 import argparse
 import re
-import pickle
+import os
 
 from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler, AttributeId, NodeClass
-from _connection_configuration import configuration_parameters_no_subscription
 from utils import ReconnectingContext
 
 
@@ -48,8 +47,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     with PyS2OPC.initialize():
-        config = PyS2OPC.add_configuration_unsecured(**configuration_parameters_no_subscription)
-        PyS2OPC.mark_configured()
+        configs = PyS2OPC.load_client_configuration_from_file(os.path.join('S2OPC_Client_Wrapper_Config.xml'))
         # The tree structure: stores explored nodes
         dNodes = {}  # {parent_node_id: [sub_node_id for each sub_node]}
         # The browse names are stored in a different structure
@@ -99,7 +97,7 @@ if __name__ == '__main__':
                         dCls[b] = ref.nodeClass
                     # Compute node depth
 
-        context = ReconnectingContext(config, BaseClientConnectionHandler)
+        context = ReconnectingContext(configs["write"], BaseClientConnectionHandler)
         while sCandidates and nRetry:
             connection = context.get_connection()
             lToBrowse = list(random.sample(sCandidates, min(len(sCandidates), [3, 6, 12, 25, 50][nRetry-1])))  # Make a request of max 50 nodes
@@ -130,9 +128,6 @@ if __name__ == '__main__':
         # print('x')
         # for node, dvName in zip(lToName, respRead.results):
         #     dNames[node] = dvName.variant[1]
-
-        # Saves the content to somewhere
-        pickle.dump({'dCls': dCls, 'dNodes': dNodes, 'dNames': dNames}, open('browse_dump', 'wb'))
 
         if args.analyze:
             patterns = Counter()

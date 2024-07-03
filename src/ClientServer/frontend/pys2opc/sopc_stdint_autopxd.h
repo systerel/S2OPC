@@ -18,13 +18,25 @@
  */
 
 /**
- * This file is an excerpt from sopc_toolkit_async_api_cffi.h.
- * It should not be included in a generic project.
- * See s2opc_headers.h
+ * This file is an excerpt from stdint.h.
+ * The objective is to define symbols required by autopxd.
+ *
+ * It should not be included in a generic project (not required by cython).
+ * See s2opc_includes_pys2opc.h
  */
 
-void SOPC_ToolkitServer_AsyncOpenEndpoint(uint32_t endpointConfigIdx);
-void SOPC_ToolkitServer_AsyncCloseEndpoint(uint32_t endpointConfigIdx);
-void SOPC_ToolkitServer_AsyncLocalServiceRequest(uint32_t endpointConfigIdx,
-                                                 void* requestStruct,
-                                                 uintptr_t requestContext);
+#define INT8_MIN (-127 - 1)
+#define INT16_MIN (-32767 - 1)
+#define INT32_MIN (-2147483647 - 1)
+#define INT64_MIN (-9223372036854775807LL - 1)
+#define INT8_MAX 127
+#define INT16_MAX 32767
+#define INT32_MAX 2147483647
+#define INT64_MAX 9223372036854775807LL
+#define UINT8_MAX 0xff
+#define UINT16_MAX 0xffff
+#define UINT32_MAX 0xffffffffU
+#define UINT64_MAX 0xffffffffffffffffULL
+
+#define UINTPTR_MAX (18446744073709551615UL)
+#define SIZE_MAX (18446744073709551615UL)

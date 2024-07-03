@@ -14,9 +14,6 @@ endif()
 set(PYS2OPC_WHEEL_NAME "pys2opc-1.5.1-cp310-cp310-linux_x86_64.whl" CACHE STRING
     "The guessed name of the produced Python 3 Wheel. It must be set to the correct name of the wheel that will be produced in build/lib for tests to run.")
 
-# The library is built by python. It may use the shared library but it must not be built with ASan.
-# The problem with ASan is to embed a dynamic library compiled with ASan into Python, which is not compiled with ASan.
-# The compilation is not done with clang-analyzer either, as this would analyze CFFI-generated code.
 if(WITH_PYS2OPC)
 
   ### Dependencies ###
@@ -29,57 +26,126 @@ if(WITH_PYS2OPC)
     cmake_policy(SET CMP0148 OLD)
   endif()
   find_package(PythonInterp 3 REQUIRED)
+  find_package(PythonLibs) # To get : PYTHON_INCLUDE_DIRS needed for `#include "Python.h"`
 
-  # TODO:
-  # - find how to predict the wheel name and remove the PYS2OPC_WHEEL_NAME option
-  # - do a pys2opc_build.py.in to configure the lib through CMake, remove manual copy of pys2opc
-  # - check library presence from s2opc's exports and not from flags defined in CommonDefs
-  # - make this file really independent from the rest of the project, but this requires more properties to be exported from clientwrapper.
+  # Check requirements : autopxd + cython
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c "import autopxd"
+    RESULT_VARIABLE EXIT_CODE_AUTOPXD
+    OUTPUT_QUIET
+  )
+  execute_process(
+    COMMAND "${PYTHON_EXECUTABLE}" -c "import cython"
+    RESULT_VARIABLE EXIT_CODE_CYTHON
+    OUTPUT_QUIET
+  )
+  if (NOT ${EXIT_CODE_AUTOPXD} EQUAL 0)
+    message(FATAL_ERROR
+            "The \"autopxd\" Python3 package is not installed. Please install it using the following command: \"pip install autopxd2\"."
+           )
+  endif()
+  if(NOT ${EXIT_CODE_CYTHON} EQUAL 0)
+    message(FATAL_ERROR
+            "The \"cython\" Python3 package is not installed. Please install it using the following command: \"pip install Cython\"."
+           )
+  endif()
 
-  # Check requirements
   # No ASan and other were already checked in CommonDefs
   if(S2OPC_NANO_PROFILE)
     message(SEND_ERROR "-- PyS2OPC requires S2OPC_NANO_PROFILE=0")
   endif()
-  if(NOT expat_FOUND)
-    message(SEND_ERROR "-- PyS2OPC requires the S2OPC xml loaders with Expat")
+
+  set(PYS2OPC_PXD "pys2opc.pxd")
+  set(PYS2OPC_PYX "pys2opc.pyx")
+  set(PYS2OPC_C "pys2opc.c")
+
+  # ---------- Build PXD file ---------- #
+  get_target_property(S2OPC_COMMON_INCLUDES s2opc_common INTERFACE_INCLUDE_DIRECTORIES)
+  # Manage build interface issue when built at same time with S2OPC
+  list(TRANSFORM S2OPC_COMMON_INCLUDES REPLACE "\\$<BUILD_INTERFACE:" "")
+  list(TRANSFORM S2OPC_COMMON_INCLUDES REPLACE "\\$<INSTALL_INTERFACE:" "")
+  list(TRANSFORM S2OPC_COMMON_INCLUDES REPLACE ">" "")
+  # Add -I option flag to each elemen of the list
+  list(TRANSFORM S2OPC_COMMON_INCLUDES PREPEND "-I")
+  get_target_property(S2OPC_CLIENTSERVER_INCLUDES s2opc_clientserver INTERFACE_INCLUDE_DIRECTORIES)
+  # Manage build interface issue when built at same with S2OPC
+  list(TRANSFORM S2OPC_CLIENTSERVER_INCLUDES REPLACE "\\$<BUILD_INTERFACE:" "")
+  list(TRANSFORM S2OPC_CLIENTSERVER_INCLUDES REPLACE "\\$<INSTALL_INTERFACE:" "")
+  list(TRANSFORM S2OPC_CLIENTSERVER_INCLUDES REPLACE ">" "")
+  # Add -I option flag to each elemen of the list
+  list(TRANSFORM S2OPC_CLIENTSERVER_INCLUDES PREPEND "-I")
+
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_PXD}
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/s2opc_includes_pys2opc.h
+                     COMMAND "${PYTHON_EXECUTABLE}" generate_pxd_autopxd.py
+                      -DSKIP_S2OPC_DEFINITIONS=1
+                      -DS2OPC_AUTOPXD=1
+                      -I${CMAKE_CURRENT_SOURCE_DIR}
+                      ${S2OPC_COMMON_INCLUDES}
+                      ${S2OPC_CLIENTSERVER_INCLUDES}
+                      s2opc_includes_pys2opc.h ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_PXD}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/s2opc_non_auto.pxd ${CMAKE_CURRENT_BINARY_DIR}
+# Uncomment the following line for development / debug purpose
+#                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_PXD} ${CMAKE_CURRENT_SOURCE_DIR}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                     COMMENT "Generation of PyS2OPC PXD file: ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_PXD}"
+                     )
+
+  # Provoke rebuild of PXD in all cases since dependency on all S2OPC headers is not managed by command
+  add_custom_target(pys2opc_pxd ALL
+                    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_PXD}
+                    )
+
+  # ---------- Build C file ---------- #
+
+  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_C}
+                     DEPENDS pys2opc_pxd ${PYS2OPC_PYX}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${PYS2OPC_PYX} ${CMAKE_CURRENT_BINARY_DIR}
+                     COMMAND cython -3 ${PYS2OPC_PYX} -o ${PYS2OPC_C}
+# Uncomment the following line for development / debug purpose (CAUTION: formating project when this file is present in sources might cause OOM)
+#                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_C} ${CMAKE_CURRENT_SOURCE_DIR}
+                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                     COMMENT "Generation of PyS2OPC C file from PXD/PYX files: ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_C}"
+                    )
+
+
+  # ---------- Build library ---------- #
+
+  add_library(pys2opc SHARED ${CMAKE_CURRENT_BINARY_DIR}/${PYS2OPC_C})
+  set_target_properties(pys2opc PROPERTIES PREFIX "")
+  set(PYS2OPC_LINK_LIBRARIES s2opc_clientserver)
+  if(WIN32)
+    list(APPEND PYS2OPC_LINK_LIBRARIES ${PYTHON_LIBRARY})
+    set_target_properties(
+      pys2opc
+      PROPERTIES
+      SUFFIX ".pyd"
+      )
   endif()
-  # No Warning on PUBSUB_ONLY, as this file is not loaded in this case...
+  target_link_libraries(pys2opc PUBLIC ${PYS2OPC_LINK_LIBRARIES})
+  target_compile_definitions(pys2opc PRIVATE "SKIP_S2OPC_DEFINITIONS")
+  target_include_directories(pys2opc PRIVATE ${PYTHON_INCLUDE_DIRS} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
   set(PYS2OPC_BUILD_PATH "${CMAKE_BINARY_DIR}/pys2opc")
   file(MAKE_DIRECTORY ${PYS2OPC_BUILD_PATH}) # Note: create build directory to use it as working dir
   file(MAKE_DIRECTORY ${PYS2OPC_BUILD_PATH}/pys2opc)
   set(PYS2OPC_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/__init__.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/connection.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/request.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/responses.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/s2opc.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/server_callbacks.py"
-                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/types.py"
+                      "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc.pyx"
                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc/version.json"
                       )
   set(PYS2OPC_BUILDERS "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
                        "${CMAKE_CURRENT_SOURCE_DIR}/README.md"
                        "${CMAKE_CURRENT_SOURCE_DIR}/NOTICE"
-                       "${CMAKE_CURRENT_SOURCE_DIR}/pys2opc_build.py"
                        "${CMAKE_CURRENT_SOURCE_DIR}/setup.py"
                        )
-  set(PYS2OPC_FILES ${PYS2OPC_SOURCES} ${PYS2OPC_BUILDERS})
-  set(PYS2OPC_INCLUDE "${PYS2OPC_BUILD_PATH}/s2opc_expanded.h")
   set(PYS2OPC_WHEEL_PATH "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${PYS2OPC_WHEEL_NAME}")
   set(PYS2OPC_TEST_INSTALL_PATH "${CMAKE_BINARY_DIR}/pys2opc_install")
 
-  # Produce the expanded header
-  s2opc_expand_header(${CMAKE_CURRENT_SOURCE_DIR}/s2opc_headers.h
-                      "s2opc_clientserver"
-                      ${PYS2OPC_INCLUDE}
-                      )
-
   add_custom_command(OUTPUT ${PYS2OPC_WHEEL_PATH}
-                     DEPENDS ${PYS2OPC_INCLUDE}
-                             ${PYS2OPC_FILES}
+                     DEPENDS pys2opc
                      # Note: sources copied to build dir to avoid relative path issues in pys2opc_build.py
                      COMMAND ${CMAKE_COMMAND} -E copy ${PYS2OPC_BUILDERS} ${PYS2OPC_BUILD_PATH}
+                     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pys2opc> ${PYS2OPC_BUILD_PATH}/pys2opc
                      COMMAND ${CMAKE_COMMAND} -E copy ${PYS2OPC_SOURCES} ${PYS2OPC_BUILD_PATH}/pys2opc
                      COMMAND ${PYTHON_EXECUTABLE} -m build --outdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} --wheel --no-isolation
                      WORKING_DIRECTORY ${PYS2OPC_BUILD_PATH}
@@ -89,27 +155,27 @@ if(WITH_PYS2OPC)
   # TODO: there should be a single target per dependency to avoid concurrent and parallel builds for them
   # This will be the case if the output files are re-used in another target.
   # (see add_custom_command and add_custom_target, or the target make-light-address-space)
-  add_custom_target(pys2opc ALL
+  add_custom_target(pys2opc_wheel ALL
                     DEPENDS ${PYS2OPC_WHEEL_PATH}
                     )
-  add_dependencies(pys2opc s2opc_clientserver)
 
   # Installation target
   # This is both required to test the installation of the wheel AND to be able to run the other tests AND to generate the doc...
   add_custom_command(OUTPUT ${PYS2OPC_TEST_INSTALL_PATH}/pys2opc
-                     DEPENDS ${PYS2OPC_WHEEL_PATH}
+                     DEPENDS pys2opc_wheel
                      COMMAND ${PYTHON_EXECUTABLE} -m pip install -t ${PYS2OPC_TEST_INSTALL_PATH} --no-deps --no-index ${PYS2OPC_WHEEL_PATH}
                      COMMENT "Install (temporarly) PyS2OPC to ${PYS2OPC_TEST_INSTALL_PATH}"
                      )
   add_custom_target(pys2opc_install ALL
                     DEPENDS ${PYS2OPC_TEST_INSTALL_PATH}/pys2opc
                     )
-  add_dependencies(pys2opc_install pys2opc)
+  add_dependencies(pys2opc_install pys2opc_wheel)
 
   add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/apidoc/html
-                     DEPENDS ${PYS2OPC_WHEEL_PATH}
-                     COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}"
-                             ${PYTHON_EXECUTABLE} -m pdoc --html pys2opc -fo ${CMAKE_BINARY_DIR}/apidoc/html
+                     DEPENDS pys2opc_wheel
+                     # Note: ignore the UserWarning lines generated by pdoc: "Couldn't read PEP-224 variable docstrings from <Class [...]: could not find class definition"
+                     COMMAND ${CMAKE_COMMAND} -E env "PYTHONPATH=${PYS2OPC_TEST_INSTALL_PATH}" "PYTHONWARNINGS=\"ignore::UserWarning\""
+                             ${PYTHON_EXECUTABLE} -m pdoc --config show_source_code=False --html pys2opc -fo ${CMAKE_BINARY_DIR}/apidoc/html
                      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                      )
   add_custom_target(pys2opc_doc

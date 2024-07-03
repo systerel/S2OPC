@@ -38,6 +38,7 @@
   gcc also works but loses parameter names in function prototypes, that is why the g++ and 'extern "C"' are used.
 */
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /*
@@ -107,6 +108,7 @@ typedef enum
 } SOPC_UserPolicyId;
 
 void SOPC_Sleep(unsigned int milliseconds);
+
 #endif
 
 /* C String type */
@@ -294,7 +296,7 @@ typedef struct
 {
     SOPC_LibSub_LogCbk* host_log_callback;
     SOPC_LibSub_DisconnectCbk* disconnect_callback;
-    struct
+    struct ToolkitLogger
     {
         SOPC_Log_Level level;
         const char* log_path;

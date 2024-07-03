@@ -28,10 +28,12 @@ This is mostly illustrative, as the nodes do not change in value.
 
 
 import time
+import os
 
-from pys2opc import PyS2OPC_Client as PyS2OPC, BaseClientConnectionHandler
-from _connection_configuration import configuration_parameters_security
+# overload the default client method to get key password and username with environment variable
+import utils 
 
+from pys2opc import PyS2OPC_Client, BaseClientConnectionHandler
 
 class PrintSubs(BaseClientConnectionHandler):
     """
@@ -51,15 +53,15 @@ NODES = ['ns=1;s=Int32_007',
 
 
 if __name__ == '__main__':
-    with PyS2OPC.initialize():
+    with PyS2OPC_Client.initialize():
         # Subscription parameters are defined in configuration_parameters_no_subscription
-        config = PyS2OPC.add_configuration_secured(**configuration_parameters_security)
-        PyS2OPC.mark_configured()
-        with PyS2OPC.connect(config, PrintSubs) as connection:
+        configs = PyS2OPC_Client.load_client_configuration_from_file(os.path.join('S2OPC_Client_Wrapper_Config.xml'))
+        with PyS2OPC_Client.connect(configs["write"], PrintSubs) as connection:
             # Add multiple nodes to the subscription.
             # The subscription always notifies of the first value.
-            connection.add_nodes_to_subscription(NODES)
+            result = connection.add_nodes_to_subscription(NODES)
+            assert all(result), 'Subscription failed for some NODES={} results={}'.format(NODES, result)
             # We wait for notifications up to 5 seconds.
             time.sleep(5.)
+            connection.close_subscription()
             print('Closing the connection.')
-

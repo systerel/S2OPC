@@ -67,7 +67,7 @@ bool SOPC_IsGoodStatus(SOPC_StatusCode status);
 /**
  * \brief Enumerated for all possible OPC UA attribute ids
  */
-typedef enum
+typedef enum _SOPC_AttributeId
 {
     SOPC_AttributeId_Invalid = 0,
     SOPC_AttributeId_NodeId = 1,
@@ -104,7 +104,7 @@ typedef enum
  */
 SOPC_StatusCode SOPC_StatusCode_ToTcpErrorCode(SOPC_StatusCode status);
 
-typedef enum SOPC_BuiltinId
+typedef enum _SOPC_BuiltinId
 {
     SOPC_Null_Id = 0,
     SOPC_Boolean_Id = 1,
@@ -1040,15 +1040,15 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CreateObject(SOPC_ExtensionObject* extObj
 /**
  * \brief Generic comparison function type for values contained in a variant
  *
- * \param customContext  The custom context provided to the custom comparison function
- * \param builtInTypeId  The value type of \p left and \p right comparison operands
- * \param left           The left operand for which type is defined by \p builtInTypeId
- * \param right          The right operand for which type is defined by \p builtInTypeId
- * \param[out]           The comparison result set when status returned is ::SOPC_STATUS_OK.
- *                       When result is set it is expected to be:
- *                       - (-1) if left < right
- *                       - (0) if left == right
- *                       - (+1) if left > right
+ * \param customContext    The custom context provided to the custom comparison function
+ * \param builtInTypeId    The value type of \p left and \p right comparison operands
+ * \param left             The left operand for which type is defined by \p builtInTypeId
+ * \param right            The right operand for which type is defined by \p builtInTypeId
+ * \param[out] compResult  The comparison result set when status returned is ::SOPC_STATUS_OK.
+ *                         When result is set it is expected to be:
+ *                         - (-1) if left < right
+ *                         - (0) if left == right
+ *                         - (+1) if left > right
  *
  * \return               SOPC_STATUS_OK if the comparison succeeded,
  *                       SOPC_STATUS_UNSUPPORTED if the type is not supported.
