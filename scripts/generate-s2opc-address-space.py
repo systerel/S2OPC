@@ -266,7 +266,7 @@ class NodeId(object):
 
         if data == None:
             raise ParseError('Invalid NodeId: ' + nodeid)
-        
+
         return NodeId(ns, ty, data)
 
 
@@ -406,7 +406,7 @@ class DataTypeDefinitionField(object):
 
     def __init__(self, name):
         self.name = name
-        
+
 class EnumField(DataTypeDefinitionField):
     __slots__ = 'value'
 
@@ -445,7 +445,7 @@ class StructureField(DataTypeDefinitionField):
         self.maxstringlength = 0
         if maxstringlength is not None:
             self.maxstringlength = int(maxstringlength)
-        
+
         self.allowsubtypes = False
         if allowsubtypes is not None:
             self.allowsubtypes = bool(allowsubtypes)
@@ -458,7 +458,7 @@ class DataTypeDefinition(ExtensionObject):
         self.default_encoding_id = None
         self.base_data_type_id = None
         self.fields = []
-    
+
     def add_field(self, field : DataTypeDefinitionField):
         assert (isinstance(field, StructureField) or isinstance(field, EnumField))
         if self.is_structure is None:
@@ -494,7 +494,7 @@ class DataTypeDefinition(ExtensionObject):
             self.extobj_typeid = NodeId.parse('i=123') # use binary encoding of datatype EnumDefinition
             self.extobj_objtype = '&OpcUa_EnumDefinition_EncodeableType'
 
-            
+
 def expect_element(source, name=None):
     ev, n = next(source)
 
@@ -688,14 +688,14 @@ def parse_argument_body(n):
 
 def parse_enum_value_type_body(n):
     enum = n.find(UA_VALUE_ENUM_TAG)
-    
+
     if enum is None:
         raise ParseError('EnumValueType extension object without EnumValueType tag')
 
     value = enum.find(UA_VALUE_VALUE_TAG)
     displayName = enum.find(UA_VALUE_DISPLAY_NAME_TAG)
-    descriptions = enum.find(UA_VALUE_DESCRIPTION_TAG)      
-    
+    descriptions = enum.find(UA_VALUE_DESCRIPTION_TAG)
+
     if value is None:
         raise ParseError('EnumValueType extension object without Value')
 
@@ -703,7 +703,7 @@ def parse_enum_value_type_body(n):
         raise ParseError('EnumValueType extension object without DisplayName')
     else:
         displayName = parse_localized_text(displayName)
-  
+
     if descriptions is not None:
         descriptions = parse_localized_text(descriptions)
 
@@ -714,7 +714,7 @@ def parse_engineering_unit_info_body(n):
 
     if eu is None:
         raise ParseError('EUInformation extension object without EUInformation tag')
-    
+
     namespaceuri = eu.find(UA_VALUE_NS_URI_TAG)
     unit_id = eu.find(UA_VALUE_UNIT_ID_TAG)
 
@@ -723,15 +723,15 @@ def parse_engineering_unit_info_body(n):
 
     if namespaceuri is None:
         raise ParseError('EUInformation extension object without NamespaceUri')
-    
+
     if unit_id is None:
         raise ParseError('EUInformation extension object without UnitId')
-    
-    if displayName is None:        
+
+    if displayName is None:
         raise ParseError('EUInformation extension object without DisplayName')
     else:
         displayName = parse_localized_text(displayName)
-  
+
     if description is not None:
         description = parse_localized_text(description)
 
@@ -742,28 +742,28 @@ def parse_range_body(n):
 
     if vRange is None:
         raise ParseError('Range extension object without Range tag')
-    
+
     low = vRange.find(UA_VALUE_LOW_TAG)
     high = vRange.find(UA_VALUE_HIGH_TAG)
 
     if low is None:
         raise ParseError('Range without Low tag')
-    
+
     if high is None:
         raise ParseError('Range without High tag')
-     
+
     return Range(low.text, high.text)
 
 def parse_qualified_name(n):
 
     namespace_index = n.find(UA_VALUE_NAMESPACE_INDEX_TAG)
     name = n.find(UA_VALUE_NAME_TAG)
-    
+
     if namespace_index is None:
         raise ParseError('QualifiedName without NamespaceIndex')
     if name is None:
         raise ParseError('QualifiedName without Value')
-  
+
     return QName(int(namespace_index.text), name.text)
 
 EXTENSION_OBJECT_PARSERS_DICT = {
@@ -993,7 +993,7 @@ def generate_nodeid_pointer(val):
 def generate_localized_text(text):
     if text is None:
         return '{%s, %s}' % (generate_string(None), generate_string(None))
-    
+
     if text.locale is not None:
         # remove linebreaks and whitespaces (should not exist in locale)
         text.locale = text.locale.replace('\n', '').replace('\r', '').replace(' ','')
@@ -1037,7 +1037,7 @@ def generate_extension_object(ext_obj, gen, is_array=False):
 
 # Specific extension object content generators
 
-def generate_argument_ext_obj(obj):    
+def generate_argument_ext_obj(obj):
     array_dimensions =('(uint32_t[]){%s}' % ','.join(obj.arraydimensions)
                        if obj.arraydimensions not in (None, []) else 'NULL')
     return ('''
@@ -1065,7 +1065,7 @@ def generate_enum_value_type_ext_obj(obj):
                (OpcUa_EnumValueType[])
                {{%s,
                  %d,
-                 %s,                 
+                 %s,
                  %s}}
             ''' %
             (obj.extobj_objtype,
@@ -1081,7 +1081,7 @@ def generate_engineering_unit_ext_obj(obj):
                {{%s,
                  %s,
                  %d,
-                 %s,                 
+                 %s,
                  %s}}
             ''' %
             (obj.extobj_objtype,
@@ -1154,7 +1154,7 @@ def generate_definition_fields(obj):
     else:
         gen_type = 'OpcUa_EnumField'
         gen_func = gen_definition_enum_field
-    
+
     c_array = '(%s[]){%s}' % (gen_type, ','.join(map(gen_func, obj.fields))) if obj.fields not in (None, []) else 'NULL'
     return c_array
 
@@ -1378,20 +1378,20 @@ def collect_dt_definition(aliases, dt_node, dt_xml_node):
     if definition_node is not None:
         # Union are not managed for now => skip
         is_union = parse_boolean_value(definition_node.get('IsUnion', 'false'))
-        
-    
+
+
     if definition_node is None or is_union:
         return None
 
     definition = DataTypeDefinition()
-    
+
     for field_node in definition_node:
         if field_node.tag != UA_FIELD_TAG:
             raise ParseError('Unexpected child tag %s instead of Field tag in Definition of DataType node %s' % (field_node.tag, dt_xml_node.attrib['NodeId']))
         name = field_node.get('Name', None)
         if name is None:
              raise ParseError('Name attribute missing in Field tag of Definition of DataType node %s' % (dt_xml_node.attrib['NodeId']))
-        
+
         value = field_node.get('Value', None)
         if definition.is_structure is None:
             if value is not None:
@@ -1400,11 +1400,11 @@ def collect_dt_definition(aliases, dt_node, dt_xml_node):
                 is_struct = True
         else:
             is_struct = definition.is_structure
-             
+
         if is_struct and value is not None:
             raise ParseError('Value attribute unexpected in structure definition of DataType node %s.'
                              ' If it is an enum definition the Value attribute is expected in first field.' % (dt_xml_node.attrib['NodeId']))
-        
+
         datatype = field_node.get('DataType', None)
         valuerank = field_node.get('ValueRank', None)
         arraydimensions = field_node.get('ArrayDimensions', None)
@@ -1419,17 +1419,17 @@ def collect_dt_definition(aliases, dt_node, dt_xml_node):
         if isoptional is not None:
             # Optional fields are not managed for now => skip
             return None
-        
+
         if is_struct:
             field = StructureField(name, aliases.get(datatype, datatype), valuerank, arraydimensions, maxstringlength, allowsubtypes)
         else:
             field = EnumField(name, value)
         definition.add_field(field)
-    
+
     if len(definition.fields) == 0:
         definition = None
 
-    return definition    
+    return definition
 
 def parse_uanode(no_dt_definition, xml_node, source, aliases):
     parse_element(source, xml_node.tag)
@@ -1586,7 +1586,7 @@ def generate_item_data_type(is_const_addspace, nodes, ua_node):
     if dt_definition is None:
         return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type')
     else:
-        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type',                              
+        return generate_item(is_const_addspace, ua_node, 'DataType', 'data_type',
                              DataTypeDefinition = dt_definition)
 
 
@@ -1663,7 +1663,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
             skip_element(source, n.tag)
 
         n.clear()
-    
+
     for ua_node in node_id_to_node.values():
         gen_func = GEN_ITEM_FUNCS.get(ua_node.tag, None)
         if is_const_addspace and ua_node.tag == UA_VARIABLE_TAG:
@@ -1677,7 +1677,7 @@ def generate_address_space(is_const_addspace, no_dt_definition, source, out):
                                     AccessLevel=str(access_level)))
             # Set Variant value in variable Variants array
             variables.append(generate_value_variant(ua_node.value))
-            n_items += 1    
+            n_items += 1
         elif gen_func:
             out.write(gen_func(is_const_addspace, node_id_to_node, ua_node))
             n_items += 1
