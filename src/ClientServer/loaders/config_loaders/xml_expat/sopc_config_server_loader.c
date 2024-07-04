@@ -165,6 +165,36 @@ static bool end_server_config(struct parse_context_t* ctx)
     return true;
 }
 
+static bool end_app_certs(struct parse_context_t* ctx)
+{
+    bool res = true;
+    if (NULL == ctx->serverCertificate)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no server certificate defined for the server");
+        res = false;
+    }
+    if (NULL == ctx->serverKey)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no server key defined for the server");
+        res = false;
+    }
+    if (NULL == ctx->serverPki)
+    {
+        LOG_XML_ERROR(ctx->helper_ctx.parser, "no PKI store defined for the server");
+        res = false;
+    }
+    if (!res)
+    {
+        SOPC_Free(ctx->serverCertificate);
+        SOPC_Free(ctx->serverKey);
+        SOPC_Free(ctx->serverPki);
+        ctx->serverCertificate = NULL;
+        ctx->serverKey = NULL;
+        ctx->serverPki = NULL;
+    }
+    return res;
+}
+
 static bool end_namespaces(struct parse_context_t* ctx)
 {
     if (0 == SOPC_Array_Size(ctx->namespaces))
@@ -888,6 +918,11 @@ static void end_element_handler(void* user_data, const XML_Char* name)
         ctx->state = PARSE_APPLICATION_CERT;
         break;
     case PARSE_APPLICATION_CERT:
+        if (!end_app_certs(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, 0);
+            return;
+        }
         ctx->state = PARSE_SRVCONFIG;
         break;
     case PARSE_APPLICATION_NAME:
