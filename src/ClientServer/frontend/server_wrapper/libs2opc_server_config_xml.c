@@ -114,7 +114,8 @@ static bool SOPC_HelperInternal_LoadServerConfigFromFile(const char* filename)
         return false;
     }
     SOPC_S2OPC_Config* pConfig = SOPC_CommonHelper_GetConfiguration();
-    bool res = SOPC_ConfigServer_Parse(fd, &pConfig->serverConfig);
+    SOPC_Server_Config* serverConfig = &pConfig->serverConfig;
+    bool res = SOPC_ConfigServer_Parse(fd, serverConfig);
     fclose(fd);
 
     if (!res)
@@ -124,9 +125,15 @@ static bool SOPC_HelperInternal_LoadServerConfigFromFile(const char* filename)
         return false;
     }
 
-    res = SOPC_HelperInternal_CreatePKIfromPaths();
+    if (NULL != serverConfig->serverCertPath || NULL != serverConfig->serverKeyPath ||
+        NULL != serverConfig->serverPkiPath)
+    {
+        res = SOPC_HelperInternal_CreatePKIfromPaths();
 
-    res &= SOPC_HelperInternal_LoadCertsFromPaths();
+        res &= SOPC_HelperInternal_LoadCertsFromPaths();
+    }
+    // else: all fields are NULL which should mean ApplicationCertificates tag is absent.
+    //       consistency with security needs is checked in SOPC_ServerConfigHelper_CheckConfig
 
     return res;
 }
