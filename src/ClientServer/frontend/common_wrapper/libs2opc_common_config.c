@@ -74,6 +74,9 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         return;
     }
 
+    SOPC_ComEvent_Fct* clientComEventCb = NULL;
+    SOPC_ComEvent_Fct* serverComEventCb = NULL;
+
     SOPC_Mutex_Lock(&sopc_helper_config.callbacksMutex);
     switch (event)
     {
@@ -88,7 +91,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     case SE_SND_REQUEST_FAILED:
         if (NULL != sopc_helper_config.clientComEventCb)
         {
-            sopc_helper_config.clientComEventCb(event, IdOrStatus, param, helperContext);
+            clientComEventCb = sopc_helper_config.clientComEventCb;
         }
         else
         {
@@ -101,7 +104,7 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
     case SE_LOCAL_SERVICE_RESPONSE:
         if (NULL != sopc_helper_config.serverComEventCb)
         {
-            sopc_helper_config.serverComEventCb(event, IdOrStatus, param, helperContext);
+            serverComEventCb = sopc_helper_config.serverComEventCb;
         }
         else
         {
@@ -113,6 +116,15 @@ void SOPC_Helper_ComEventCb(SOPC_App_Com_Event event, uint32_t IdOrStatus, void*
         SOPC_ASSERT(false && "Unexpected event");
     }
     SOPC_Mutex_Unlock(&sopc_helper_config.callbacksMutex);
+
+    if (NULL != clientComEventCb)
+    {
+        clientComEventCb(event, IdOrStatus, param, helperContext);
+    }
+    else if (NULL != serverComEventCb)
+    {
+        serverComEventCb(event, IdOrStatus, param, helperContext);
+    }
 }
 
 SOPC_ReturnStatus SOPC_CommonHelper_Initialize(SOPC_Log_Configuration* optLogConfig)
