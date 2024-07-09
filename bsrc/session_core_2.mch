@@ -96,10 +96,10 @@ OPERATIONS
         :(a_channel = {p_session} <<| a_channel$0 &
           a_channel_nb_sessions : t_channel --> NAT &
             /* No channel was associated: no change */
-            (a_channel$0 (p_session) = c_channel_indet =>
+            (p_session /: dom(a_channel$0) =>
                 a_channel_nb_sessions = a_channel_nb_sessions$0) &
             /* Channel was associated: decrement channel sessions counter */
-            (a_channel$0 (p_session) /= c_channel_indet =>
+            (p_session : dom(a_channel$0) =>
                 {a_channel$0 (p_session)} <<| a_channel_nb_sessions = {a_channel$0 (p_session)} <<| a_channel_nb_sessions$0 &
                 a_channel_nb_sessions (a_channel$0 (p_session)) = a_channel_nb_sessions$0 (a_channel$0 (p_session)) - 1)
         )
