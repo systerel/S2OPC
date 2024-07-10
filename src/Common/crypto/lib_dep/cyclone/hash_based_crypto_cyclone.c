@@ -54,7 +54,7 @@ SOPC_ReturnStatus HashBasedCrypto_DeriveSecret_PBKDF2_HMAC_SHA256(const SOPC_Exp
     error_t errLib = pbkdf2(&sha256HashAlgo, pSecret, (size_t) lenSecret, pSalt, (size_t) lenSalt, iteration_count,
                             pOutput, (size_t) lenOutput);
 
-    if (errLib)
+    if (0 != errLib)
     {
         memset(pOutput, 0, lenOutput);
         SOPC_Free(pOutput);

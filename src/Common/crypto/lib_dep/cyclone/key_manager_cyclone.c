@@ -86,7 +86,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     {
         errLib = pemImportRsaPublicKey((const char_t*) buffer, (size_t) lenBuf, &key->pubKey);
 
-        if (errLib) // The buffer is probably in DER format...
+        if (0 != errLib) // The buffer is probably in DER format...
         {
             // We will then directly parse it.
             // Corresponds to the case "PUBLIC KEY" when calling the function pemImportRsaPublicKey.
@@ -95,7 +95,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             errLib = x509ParseSubjectPublicKeyInfo(buffer, lenBuf, &lenParsed, &publicKeyInfo);
 
             // If no error, continue...
-            if (!errLib)
+            if (0 == errLib)
             {
                 errLib = x509ImportRsaPublicKey(&publicKeyInfo, &key->pubKey);
             }
@@ -105,7 +105,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     {
         errLib = pemImportRsaPrivateKey((const char_t*) buffer, (size_t) lenBuf, NULL, &key->privKey);
 
-        if (errLib) // The buffer is probably in DER format...
+        if (0 != errLib) // The buffer is probably in DER format...
         {
             // We will then directly parse it.
             // Corresponds to the case "RSA PRIVATE KEY" when calling the function pemImportRsaPrivateKey.
@@ -113,7 +113,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
             errLib = pkcs8ParseRsaPrivateKey(buffer, lenBuf, &privateKeyInfo.rsaPrivateKey);
 
             // If no error, continue...
-            if (!errLib)
+            if (0 == errLib)
             {
                 privateKeyInfo.oid = RSA_ENCRYPTION_OID;
                 privateKeyInfo.oidLen = sizeof(RSA_ENCRYPTION_OID);
@@ -125,13 +125,13 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
         }
 
         /* If no error, fill the public part */
-        if (!errLib)
+        if (0 == errLib)
         {
             errLib = rsaGeneratePublicKey(&key->privKey, &key->pubKey);
         }
     }
 
-    if (errLib)
+    if (0 != errLib)
     {
         SOPC_KeyManager_AsymmetricKey_Free(key);
         return SOPC_STATUS_NOK;
@@ -187,10 +187,14 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
         error_t errLib =
             pemDecryptPrivateKey((const char_t*) pBuffer, length, password, buffer_decrypted, &lenBuffer_decrypted);
 
-        if (!errLib)
+        if (0 == errLib)
         {
             status = SOPC_KeyManager_AsymmetricKey_CreateFromBuffer((uint8_t*) buffer_decrypted,
                                                                     (uint32_t) lenBuffer_decrypted, false, ppKey);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
         }
 
         SOPC_Free(buffer_decrypted);
@@ -293,7 +297,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         char_t* bufferPEM = SOPC_Malloc((2 * lenDest) * sizeof(char_t));
         size_t writtenPEM;
         errLib = pemExportRsaPublicKey(&pKey->pubKey, bufferPEM, &writtenPEM);
-        if (!errLib)
+        if (0 == errLib)
         {
             errLib = pemDecodeFile(bufferPEM, writtenPEM, "PUBLIC KEY", buffer, &lengthWritten, NULL, NULL);
         }
@@ -305,7 +309,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_ToDER(const SOPC_AsymmetricKey* 
         errLib = x509ExportRsaPrivateKey(&pKey->privKey, buffer, &lengthWritten);
     }
 
-    if (!errLib)
+    if (0 == errLib)
     {
         if (lengthWritten > 0 && (uint32_t) lengthWritten <= lenDest)
         {
@@ -418,7 +422,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
     {
         // Create the certificate from its attached buffer because Cyclone cert will point on it
         errLib = x509ParseCertificate(pCertNew->raw->data, (size_t) lenDER, &pCertNew->crt);
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON,
@@ -431,7 +435,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_CreateOrAddFromDER(const uint8_t* 
         /* Allocate and fill the public key of the cert */
         rsaInitPublicKey(&pCertNew->pubKey);
         errLib = x509ImportRsaPublicKey(&pCertNew->crt.tbsCert.subjectPublicKeyInfo, &pCertNew->pubKey);
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -676,7 +680,7 @@ SOPC_ReturnStatus SOPC_KeyManager_Certificate_GetThumbprint(const SOPC_CryptoPro
     if (SOPC_STATUS_OK == status)
     {
         errLib = hash->compute(pDER, (size_t) lenDER, pDest);
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -841,7 +845,7 @@ static char* get_raw_sha1(SOPC_Buffer* raw)
 
     error_t errLib = sha1Compute(raw->data, raw->length, pDest);
 
-    if (errLib)
+    if (0 != errLib)
     {
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "Cannot compute thumbprint of certificate, err -0x%X", errLib);
         return NULL;
@@ -1434,7 +1438,7 @@ SOPC_ReturnStatus SOPC_KeyManager_CRL_CreateOrAddFromDER(const uint8_t* bufferDE
     {
         // Create the crl from the attached buffer because Cyclone crl will point on it
         errLib = x509ParseCrl(pCRLNew->raw->data, (size_t) lenDER, &pCRLNew->crl);
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
             SOPC_Logger_TraceError(

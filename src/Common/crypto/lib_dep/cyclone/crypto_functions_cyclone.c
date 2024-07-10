@@ -249,7 +249,7 @@ static inline SOPC_ReturnStatus HMAC_hashtype_sign(const SOPC_CryptoProvider* pP
     {
         /* Do the HMAC */
         error_t errLib = hmacCompute(pHash, pKey, lenKey, pInput, lenInput, pOutput);
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -457,7 +457,7 @@ static inline SOPC_ReturnStatus PSHA(HmacContext* context,
 
     /* A(0) is seed, A(1) = HMAC_SHA256(secret, A(0)) */
     error_t errLib = hmacInit(context, pHash, pSecret, lenSecret);
-    if (errLib)
+    if (0 != errLib)
     {
         return SOPC_STATUS_NOK;
     }
@@ -469,7 +469,7 @@ static inline SOPC_ReturnStatus PSHA(HmacContext* context,
     {
         // P_SHA256(i) = HMAC_SHA256(secret, A(i+1)+seed)
         errLib = hmacInit(context, pHash, pSecret, lenSecret);
-        if (errLib)
+        if (0 != errLib)
         {
             return SOPC_STATUS_NOK;
         }
@@ -483,7 +483,7 @@ static inline SOPC_ReturnStatus PSHA(HmacContext* context,
 
             // A(i+2) = HMAC_SHA256(secret, A(i+1))
             errLib = hmacInit(context, pHash, pSecret, lenSecret);
-            if (errLib)
+            if (0 != errLib)
             {
                 return SOPC_STATUS_NOK;
             }
@@ -559,7 +559,7 @@ SOPC_ReturnStatus AsymEncrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
         errLib = rsaesOaepEncrypt(&CyclonePrng, pProvider->pCryptolibContext, &pKey->pubKey, pHash, NULL, pInput,
                                   (size_t) lenToCiph, pOutput, &lenWritten);
 
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
             break;
@@ -607,7 +607,7 @@ SOPC_ReturnStatus AsymDecrypt_RSA_OAEP(const SOPC_CryptoProvider* pProvider,
         errLib = rsaesOaepDecrypt(&pKey->privKey, pHash, NULL, pInput, (size_t) lenMsgCiph, pOutput,
                                   (size_t) lenMsgPlain, &lenDeciphed);
 
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
             break;
@@ -704,7 +704,7 @@ static inline SOPC_ReturnStatus NewMsgDigestBuffer(const uint8_t* pInput,
 
     /* Compute the MD */
     error_t errLib = pHash->compute(pInput, (size_t) lenInput, pHashRes);
-    if (errLib)
+    if (0 != errLib)
     {
         return SOPC_STATUS_NOK;
     }
@@ -784,7 +784,7 @@ SOPC_ReturnStatus AsymSign_RSASSA(const SOPC_CryptoProvider* pProvider,
             errLib = rsassaPkcs1v15Sign(&pKey->privKey, pHash, hash, pSignature, &signatureLen);
         }
 
-        if (errLib) // signature is as long as the key
+        if (0 != errLib) // signature is as long as the key
         {
             status = SOPC_STATUS_NOK;
         }
@@ -844,7 +844,7 @@ SOPC_ReturnStatus AsymVerify_RSASSA(const SOPC_CryptoProvider* pProvider,
             errLib = rsassaPkcs1v15Verify(&pKey->pubKey, pHash, hash, pSignature, (size_t) keyLength);
         }
 
-        if (errLib)
+        if (0 != errLib)
         {
             status = SOPC_STATUS_NOK;
         }
@@ -1005,7 +1005,7 @@ SOPC_ReturnStatus CryptoProvider_CTR_Crypt_AES256(const SOPC_CryptoProvider* pPr
 
     AesContext aes = {0};
     error_t errLib = aesInit(&aes, pExpKey, 32);
-    if (errLib)
+    if (0 != errLib)
     {
         status = SOPC_STATUS_NOK;
     }
