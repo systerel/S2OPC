@@ -6,11 +6,29 @@
 - Embedded: multiplatform (Linux, Windows, FreeRTOS, Zephyr), optimized footprint, real-time capable,
 - Industrial support by Systerel: support, training, specific integration and developments, certification support.
 
-For more information about support pricing, please contact us at `s2opc@systerel.fr`.
+Its demo server is certified by the OPC Foundation (see OPC UA Certification).
+
+See https://www.s2opc.com for more details.
 
 Please follow us on LinkedIn (https://www.linkedin.com/showcase/safe-secure-opc/).
 
-Its demo server is certified by the OPC Foundation (see OPC UA Certification).
+### Commercial support
+
+For S2OPC commercial support, please contact us at `s2opc@systerel.fr`.
+
+### Call for users feedback
+
+As part of our commitment to providing the best possible experience, we would love to hear your thoughts on how S2OPC has been working for you. Your feedback is crucial in helping us understand what we are doing well and where we can improve.
+
+We would be grateful if you could take a few moments to share your experience with us by sending an email at `s2opc@systerel.fr`.
+You are interested in particular by the following topics:
+- The way you have discovered the project
+- In which area do you use S2OPC (IoT, Industry, Railway, ...) ?
+- Which features do you find usefull and which one do you miss ?
+- How likely are you to recommend S2OPC to others ? (one a scale from 0 to 10) ?
+- How does this product compare with its competitors ?
+
+Please feel free to add any additional comments or suggestions you may have. 
 
 ### S2OPC technical overview
 
@@ -314,10 +332,6 @@ licensed under the Apache License Version 2.0, as can be found in `LICENSE`.
 The mbedtls library is also distributed under the Apache 2.0 license.
 OPC UA Stack code generated with the OPC foundation code generator
 tool (UA-ModelCompiler) is distributed under the OPC Foundation MIT License 1.00.
-
-## Commercial support
-
-For S2OPC commercial support, see https://www.s2opc.com.
 
 ## History
 
