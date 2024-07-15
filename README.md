@@ -1,12 +1,12 @@
 ## S2OPC OPC UA Toolkit
 
-- Safe: IEC61508 and EN50128 integration ready,
-- Secure: CSPN certification, IEC62443 targeted,
+- Safe: IEC 61508 and EN 50128 integration ready,
+- Secure: CSPN certification, IEC 62443 targeted,
 - Open-source: Apache 2.0 (non contaminating, no copy-left, no paid version),
 - Embedded: multiplatform (Linux, Windows, FreeRTOS, Zephyr), optimized footprint, real-time capable,
 - Industrial support by Systerel: support, training, specific integration and developments, certification support.
 
-Its demo server is certified by the OPC Foundation (see OPC UA Certification).
+Its demo server is certified by the [OPC Foundation](https://opcfoundation.org/products/view/safe-and-secure-opc/) (see OPC UA Certification).
 
 See https://www.s2opc.com for more details.
 
@@ -23,10 +23,10 @@ As part of our commitment to providing the best possible experience, we would lo
 We would be grateful if you could take a few moments to share your experience with us by sending an email at `s2opc@systerel.fr`.
 You are interested in particular by the following topics:
 - The way you have discovered the project
-- In which area do you use S2OPC (IoT, Industry, Railway, ...) ?
-- Which features do you find usefull and which one do you miss ?
-- How likely are you to recommend S2OPC to others ? (one a scale from 0 to 10) ?
-- How does this product compare with its competitors ?
+- In which area do you use S2OPC (IoT, Industry, Railway, ...)?
+- Which features do you find useful and which one do you miss?
+- How likely are you to recommend S2OPC to others (one a scale from 0 to 10)?
+- How does this product compare with its competitors?
 
 Please feel free to add any additional comments or suggestions you may have. 
 
@@ -45,8 +45,8 @@ of real-time and safety-critical systems (see https://www.systerel.fr/).
 
 ## CSPN certification
 
-S2OPC has been awarded a CSPN certification by ANSSI (see https://cyber.gouv.fr/produits-certifies/s2opc-version-131).
-This certification is equivalent to a BSZ certification by BSI thanks to a mutual recognition agreement (see https://cyber.gouv.fr/sites/default/files/document/bsz_cspn_mutual_recognition_agreement_v1.0_0.pdf).
+S2OPC has been awarded a First Level Security Certification (CSPN) certification by French Cybersecurity Agency (ANSSI) (see https://cyber.gouv.fr/produits-certifies/s2opc-version-131).
+This certification is equivalent to a BSZ certification by the German Federal Office for Information Security (BSI) thanks to a mutual recognition agreement (see https://cyber.gouv.fr/sites/default/files/document/bsz_cspn_mutual_recognition_agreement_v1.0_0.pdf).
 
 ## OPC UA Certification
 
@@ -177,7 +177,7 @@ The S2OPC PubSub implementation properties are the following:
 - variable management only, not events,
 - no additional verification on sequence numbers,
 - the encoding of the dataset is always of type variant (see §6.2.3.2),
-- keyframecount is set to 0 (no delta message are sent),
+- keyframecount is set to 0 (no delta messages are sent),
 - no calculation of deadband (see §6.2.2.6),
 - a single level of priority for WriterGroup (see §6.5.2.4),
 - sampling of data at the time of publication instead of sampling (same for subscriptions see §6.3.1),
@@ -188,10 +188,10 @@ Note: references point to the standard OPC UA Part 14 (1.04).
 ## S2OPC Development
 
 - systematic peer review using GitLab Merge Request mechanism,
-- formal modeling of OPC-UA services using [B method](https://en.wikipedia.org/wiki/B-Method),
+- formal modeling of OPC UA services using [B method](https://en.wikipedia.org/wiki/B-Method),
 - static analysis using [Frama C](http://frama-c.com/) from CEA and [TIS analyser](https://taas.trust-in-soft.com/) from Trust-In-Soft,
 - static analysis using [Coverity](https://scan.coverity.com/),
-- use of GCC sanitizers to detect undefined behaviours, race conditions, memory leaks and errors,
+- use of GCC sanitizers to detect undefined behaviors, race conditions, memory leaks and errors,
 - compilation using several compilers (GCC, CLang, mingGw, MSVC, ...) with conservative compilation flags,
 - all development and testing environment are bundled into [Docker](https://www.docker.com/) images
 - continuous integration with a test bench containing:
@@ -286,7 +286,7 @@ etc.)
 
 The generated project file S2OPC*.sln can then be imported in Visual Studio environment.
 
-For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation) .
+For more information, or to compile the master branch on its latest commit, please refer to the [wiki](https://gitlab.com/systerel/S2OPC/wikis/compilation).
 
 ## Hints to build S2OPC on other platforms or without CMake
 
@@ -295,7 +295,7 @@ If CMake is not available or you want to use another tool for compilation you wi
 Here are a few hints on how to manage to build without CMake:
 - S2OPC libraries sources files (*.c and *.h) are all in src/ sub-directories
 - Only one of the dependent platform directory shall be kept for the build : src/Common/helpers_platform_dep/<platform> (linux, windows, etc.)
-- src/Common/configuration/sopc_common_build_info.h provides build-specific informations that must be filled in by build procedure:
+- src/Common/configuration/sopc_common_build_info.h provides build-specific information that must be filled in by build procedure:
   - When using CMake, the sopc_common_build_info.c is automatically generated with relevant content.
   - When using any other toolchain, the template provided in file sopc_common_build_info.c_ may be used.
     In that case the template should be copied into a valid .c file to be taken into account (depends on toolchain configuration).
@@ -339,10 +339,10 @@ The S2OPC OPC UA Client / server Toolkit is the result of the Research and Devel
 Systematic and Minalogic centers of innovation supported the project as part of the French FUI CFP.
 
 INGOPCS goals:
-- Develop an open-source and secure implementation of the OPC-UA standard (IEC 62541),
+- Develop an open-source and secure implementation of the OPC UA standard (IEC 62541),
 - Verify the implementation with specialized tools (applying formal methods),
-- Demonstrate conformance to OPC-UA interoperability requirements,
-- Demonstrate compliance of the OPC-UA standard with the security requirements of sensitive Industrial Control Systems.
+- Demonstrate conformance to OPC UA interoperability requirements,
+- Demonstrate compliance of the OPC UA standard with the security requirements of sensitive Industrial Control Systems.
 
 INGOPCS initial consortium:
 - Systerel (leader)
