@@ -391,7 +391,7 @@ static inline SOPC_ReturnStatus PSHA_outer(const mbedtls_md_info_t* pmd_info,
 
     // Effectively does the PSHA with the correctly prepared context
     status = PSHA(&md_ctx, pmd_info, bufA, lenBufA, pSecret, lenSecret, pSeed, lenSeed, pOutput, lenOutput);
-
+    
     // Free the context
     mbedtls_md_free(&md_ctx);
 

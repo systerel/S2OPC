@@ -90,7 +90,16 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
-    int res = -1;
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
+    int res = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, NULL, 0);
+    SOPC_ASSERT(0 == res);
+
+    res = -1;
 
     // MbedTLS fix: mbedtls_pk_parse_key needs a NULL terminated buffer to parse
     // PEM keys.
@@ -101,22 +110,27 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromBuffer(const uint8_t* 
         if (null_terminated_buffer == NULL)
         {
             SOPC_Free(key);
+            mbedtls_entropy_free(&entropy);
+            mbedtls_ctr_drbg_free(&ctr_drbg);
             return SOPC_STATUS_OUT_OF_MEMORY;
         }
 
         memcpy(null_terminated_buffer, buffer, lenBuf);
         res = is_public ? mbedtls_pk_parse_public_key(&key->pk, null_terminated_buffer, 1 + lenBuf)
-                        : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0);
+                        : MBEDTLS_PK_PARSE_KEY(&key->pk, null_terminated_buffer, 1 + lenBuf, NULL, 0,
+                                               mbedtls_ctr_drbg_random, &ctr_drbg);
         SOPC_Free(null_terminated_buffer);
     }
 
-    if (res != 0)
+    if (0 != res)
     {
         res = is_public ? mbedtls_pk_parse_public_key(&key->pk, buffer, lenBuf)
-                        : MBEDTLS_PK_PARSE_KEY(&key->pk, buffer, lenBuf, NULL, 0);
+                        : MBEDTLS_PK_PARSE_KEY(&key->pk, buffer, lenBuf, NULL, 0, mbedtls_ctr_drbg_random, &ctr_drbg);
     }
 
-    if (res != 0)
+    mbedtls_entropy_free(&entropy);
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    if (0 != res)
     {
         SOPC_Free(key);
         return SOPC_STATUS_NOK;
@@ -137,6 +151,7 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                char* password,
                                                                uint32_t lenPassword)
 {
+
     if (NULL == szPath || NULL == ppKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
 
@@ -145,7 +160,15 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
         return SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != password && (0 == lenPassword || '\0' != password[lenPassword]))
         return SOPC_STATUS_INVALID_PARAMETERS;
+
 #if defined(MBEDTLS_FS_IO)
+
+    mbedtls_entropy_context entropy;
+    mbedtls_ctr_drbg_context ctr_drbg;
+
+    mbedtls_entropy_init(&entropy);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
     SOPC_AsymmetricKey* key = NULL;
 
     key = SOPC_Malloc(sizeof(SOPC_AsymmetricKey));
@@ -154,11 +177,20 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
     key->isBorrowedFromCert = false;
     mbedtls_pk_init(&key->pk);
 
-    if (mbedtls_pk_parse_keyfile(&key->pk, szPath, password) != 0)
+    int res = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy, NULL, 0);
+    SOPC_ASSERT(0 == res);
+
+    res = mbedtls_pk_parse_keyfile(&key->pk, szPath, password, mbedtls_ctr_drbg_random, &ctr_drbg);
+    if (0 != res)
     {
         SOPC_Free(key);
+        mbedtls_entropy_free(&entropy);
+        mbedtls_ctr_drbg_free(&ctr_drbg);
         return SOPC_STATUS_NOK;
     }
+
+    mbedtls_entropy_free(&entropy);
+    mbedtls_ctr_drbg_free(&ctr_drbg);
 
     *ppKey = key;
 

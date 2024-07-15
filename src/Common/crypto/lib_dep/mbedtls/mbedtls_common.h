@@ -51,7 +51,8 @@
     mbedtls_rsa_rsassa_pss_sign(ctx, f_rng, p_rng, MBEDTLS_RSA_PRIVATE, md_alg, hashlen, hash, sig)
 #define MBEDTLS_RSA_RSASSA_PSS_VERIFY(ctx, md_alg, hashlen, hash, sig) \
     mbedtls_rsa_rsassa_pss_verify(ctx, NULL, NULL, MBEDTLS_RSA_PUBLIC, md_alg, hashlen, hash, sig)
-#define MBEDTLS_PK_PARSE_KEY mbedtls_pk_parse_key
+#define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng) \
+    mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen)
 #define MBEDTLS_RSA_SET_PADDING(prsa, padding, hash_id) mbedtls_rsa_set_padding(prsa, padding, (int) hash_id)
 #define MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, oid, oid_len, val, val_len) \
     mbedtls_x509write_csr_set_extension(ctx, oid, oid_len, val, val_len)
@@ -69,14 +70,9 @@
 #define MBEDTLS_X509WRITE_CSR_SET_EXTENSION(ctx, oid, oid_len, val, val_len) \
     mbedtls_x509write_csr_set_extension(ctx, oid, oid_len, 0, val, val_len)
 
-// Note: f_rng is set to NULL. mbedtls_pk_parse_key documentation states that it must not be NULL.
-// However, this rng parameters are only used in scope of Elliptic curves.
-#define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen) \
-    mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen, NULL, NULL)
-#ifdef MBEDTLS_ECP_C
-// TODO : f_rng cannot be NULL in case of use of Elliptic curves
-#error "Cannot use elliptic curves with MBEDTLS V3. MBEDTLS_PK_PARSE_KEY must be modified to receive f_rng"
-#endif
+
+#define MBEDTLS_PK_PARSE_KEY(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng) \
+    mbedtls_pk_parse_key(ctx, key, keylen, pwd, pwdlen, f_rng, p_rng)
 
 // These defines shall be set before including any other MBEDTLS headers
 #ifndef MBEDTLS_ALLOW_PRIVATE_ACCESS
