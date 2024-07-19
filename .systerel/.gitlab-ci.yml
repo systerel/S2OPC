@@ -184,11 +184,11 @@ hil-tests:
 
 .build-linux: &build_linux
   stage: build
-  image: docker.aix.systerel.fr/c838/build@sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d # digest of build:1.44
+  image: docker.aix.systerel.fr/c838/build@sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e # digest of build:1.45
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR || exit 1'
   variables: &build_linux_variables
-    DOCKER_DIGEST: 'sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d'
+    DOCKER_DIGEST: 'sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -251,7 +251,7 @@ build-linux64-NoASan-NoPyS2OPC:
 
 build-win64: &build_win64
   stage: build-others
-  image: docker.aix.systerel.fr/c838/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # digest of mingw_build:1.14
+  image: docker.aix.systerel.fr/c838/mingw_build@sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf # digest of mingw_build:1.15
   needs: []
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
@@ -259,7 +259,7 @@ build-win64: &build_win64
     - *build_command_line
   variables: &build_win64_variables
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_DIGEST: 'sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773'
+    DOCKER_DIGEST: 'sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
     WARNINGS_AS_ERRORS: 0 # Some format warnings remain on MinGW
@@ -288,14 +288,14 @@ build-win32:
 
 build-rpi:
   stage: build-others
-  image: docker.aix.systerel.fr/c838/rpi-build@sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4 # digest of rpi-build:1.7
+  image: docker.aix.systerel.fr/c838/rpi-build@sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63 # digest of rpi-build:1.8
   needs: []
   script:
     - '. /usr/local/cross_venv/bin/activate'
     - *build_command_line
   variables:
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_DIGEST: 'sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4'
+    DOCKER_DIGEST: 'sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63'
     BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     # Note: building of PyS2OPC C generated file fails due to "conditional branch out of range" if not compiled with O0.
@@ -362,7 +362,7 @@ build-freertos:
 build-pikeos:
   <<: *pikeos_job
   stage: build-others
-  image: docker.aix.systerel.fr/c838/pikeos@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
+  image: docker.aix.systerel.fr/c838/pikeos@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # pikeos:1.2.1
   needs: []
   script:
     - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
@@ -378,7 +378,7 @@ build-pikeos:
 
 build-fuzz:
   stage: build
-  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
+  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:b02f7125092b23d2b2adec3fe2a4c68257470ba1978e55a9f1a1930a6dea4d94 #3.1 digest
   needs: []
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
@@ -443,7 +443,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: docker.aix.systerel.fr/c838/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # digest of check:1.20
+  image: docker.aix.systerel.fr/c838/check@sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720 # digest of check:1.21
   needs: []
   script:
     - ./.check-code.sh
@@ -466,7 +466,7 @@ test-check:
     - './.format.sh'
     - './.verify-no-git-changes.sh'
   variables:
-      DOCKER_DIGEST: 'sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8'
+      DOCKER_DIGEST: 'sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
@@ -643,7 +643,7 @@ scan_repository:
 test-pikeos:
   <<: *pikeos_job
   stage: test-others
-  image: docker.aix.systerel.fr/c838/pikeos:1.1@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
+  image: docker.aix.systerel.fr/c838/pikeos:1.2.1@sha256:3d5dcbab75b0c98a8d27d1cfa239bfa43b5b87bc1bbaca2a7c8a5bfe2adc5aeb # pikeos:1.2.1
   needs : [build-pikeos]
   script:
     - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh

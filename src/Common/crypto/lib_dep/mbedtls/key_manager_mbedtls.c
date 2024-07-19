@@ -151,7 +151,6 @@ SOPC_ReturnStatus SOPC_KeyManager_AsymmetricKey_CreateFromFile(const char* szPat
                                                                char* password,
                                                                uint32_t lenPassword)
 {
-
     if (NULL == szPath || NULL == ppKey)
         return SOPC_STATUS_INVALID_PARAMETERS;
 

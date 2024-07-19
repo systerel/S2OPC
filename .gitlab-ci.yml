@@ -159,7 +159,7 @@ proof_obligations:
 
 check_commit_signature:
   stage: gen
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d # digest of build:1.44
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e # digest of build:1.45
   needs: []
   script:
     - ./.check_signed_commit.sh
@@ -183,12 +183,12 @@ check_commit_validity:
 
 .build-linux: &build_linux
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/build@sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d # digest of build:1.44
+  image: registry.gitlab.com/systerel/s2opc/build@sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e # digest of build:1.45
   script:
     - &build_command_line './build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
   variables: &build_linux_variables
     CMAKE_INSTALL_PREFIX: '../install_linux64'
-    DOCKER_DIGEST: 'sha256:3c1b82290e986ffb1124463a7822c4387a3d9503887ad96238460480d8920a0d'
+    DOCKER_DIGEST: 'sha256:9ae17c9abdb644bcafe99ce1d0fbac0e1c4c256e17265a5bfd0b0e3d7315322e'
     BUILD_DIR: build
   artifacts:
     name: 'bin-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
@@ -280,7 +280,7 @@ build-linux64-NoASan-NoPyS2OPC:
 
 build-win64: &build_win64
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # digest of mingw_build:1.14
+  image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf # digest of mingw_build:1.15
   needs: []
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
@@ -289,7 +289,7 @@ build-win64: &build_win64
   variables: &build_win64_variables
     CMAKE_INSTALL_PREFIX: '../install_win64'
     CMAKE_TOOLCHAIN_FILE: 'toolchain-mingw32-w64_x86_64.cmake'
-    DOCKER_DIGEST: 'sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773'
+    DOCKER_DIGEST: 'sha256:d158e52c51d2f97d4bd13bcc93ebbe5793025c0032dd7e6116bdf9293fc790bf'
     BUILD_DIR: build_toolchain
     S2OPC_CLIENTSERVER_ONLY: 1 # PubSub is not compatible with windows platform
     WARNINGS_AS_ERRORS: 0 # Some format warnings remain on MinGW
@@ -321,7 +321,7 @@ build-win32:
 
 build-rpi:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4 # digest of rpi-build:1.7
+  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63 # digest of rpi-build:1.8
   needs: []
   script:
     - '. /usr/local/cross_venv/bin/activate'
@@ -329,7 +329,8 @@ build-rpi:
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_DIGEST: 'sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4'
+    DOCKER_DIGEST: 'sha256:0c5e40993e575bb829cee97e17a4965258fdccd4eef6ee81fca1fc732f417a63'
+    BUILD_SHARED_LIBS: 'true'
     BUILD_DIR: build_toolchain
     # Note: building of PyS2OPC C generated file fails due to "conditional branch out of range" if not compiled with O0.
     # In order to have S2OPC built with optimisations, it is also possible to build PyS2OPC alone in a second step.
@@ -353,7 +354,7 @@ build-rpi:
 # Used by coverity, also starts the analysis
 build-linux64-coverity:
   stage: build
-  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:a830bfdc9ea465e26607a5e2d9585139f1f65fbfd2681a139469c5ea0d341b6f # digest of coverity:1.10
+  image: registry.gitlab.com/systerel/s2opc/coverity@sha256:8831613acee4b581a879de636a6e089a3b51f5b0dabe83012479f86048a72766 # digest of coverity:1.11
   needs: []
   script: |-
     mkdir build
@@ -474,7 +475,7 @@ test-build-from-export:
 # Test check belongs to the test part, however it does not depend on linux build.
 test-check:
   <<: *test_linux
-  image: registry.gitlab.com/systerel/s2opc/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # digest of check:1.20
+  image: registry.gitlab.com/systerel/s2opc/check@sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720 # digest of check:1.21
   needs: []
   script:
     - ./.check-code.sh
@@ -497,7 +498,7 @@ test-check:
     - './.format.sh'
     - './.verify-no-git-changes.sh'
   variables:
-      DOCKER_DIGEST: 'sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8'
+      DOCKER_DIGEST: 'sha256:3c2ff85faf45af287da51ccb0a9689329e59b1d100be87d5143a47f97fd65720'
   artifacts:
     name: 'test-check-results-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:

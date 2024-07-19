@@ -21,15 +21,35 @@
 MBEDTLS_LIB_DIR = ${MBEDTLS_PRJ_DIR}/library
 
 # MbedTLS C source files
-MBEDTLS_OBJS_CRYPTO= aes \
+MBEDTLS_OBJS_CRYPTO= \
+		 psa_crypto \
+	     psa_crypto_aead \
+	     psa_crypto_cipher \
+	     psa_crypto_client \
+	     psa_crypto_driver_wrappers_no_static \
+	     psa_crypto_ecp \
+	     psa_crypto_ffdh \
+	     psa_crypto_hash \
+	     psa_crypto_mac \
+	     psa_crypto_pake \
+	     psa_crypto_rsa \
+	     psa_crypto_se \
+	     psa_crypto_slot_management \
+	     psa_crypto_storage \
+	     psa_its_file \
+	     psa_util \
+	     aes \
 	     aesni \
-	     arc4 \
+	     aesce \
 	     aria \
 	     asn1parse \
 	     asn1write \
 	     base64 \
 	     bignum \
-	     blowfish \
+	     bignum_core \
+	     bignum_mod \
+	     bignum_mod_raw \
+	     block_cipher \
 	     camellia \
 	     ccm \
 	     chacha20 \
@@ -46,25 +66,23 @@ MBEDTLS_OBJS_CRYPTO= aes \
 	     ecjpake \
 	     ecp \
 	     ecp_curves \
+	     ecp_curves_new \
 	     entropy \
 	     entropy_poll \
 	     error \
 	     gcm \
-	     havege \
 	     hkdf \
 	     hmac_drbg \
+	     lmots \
+	     lms \
 	     md \
-	     md2 \
-	     md4 \
 	     md5 \
 	     memory_buffer_alloc \
-	     mps_reader \
-	     mps_trace \
 	     nist_kw \
 	     oid \
-	     padlock \
 	     pem \
 	     pk \
+	     pk_ecc \
 	     pk_wrap \
 	     pkcs12 \
 	     pkcs5 \
@@ -73,52 +91,48 @@ MBEDTLS_OBJS_CRYPTO= aes \
 	     platform \
 	     platform_util \
 	     poly1305 \
-	     psa_crypto \
-	     psa_crypto_aead \
-	     psa_crypto_cipher \
-	     psa_crypto_client \
-	     psa_crypto_driver_wrappers \
-	     psa_crypto_ecp \
-	     psa_crypto_hash \
-	     psa_crypto_mac \
-	     psa_crypto_rsa \
-	     psa_crypto_se \
-	     psa_crypto_slot_management \
-	     psa_crypto_storage \
-	     psa_its_file \
 	     ripemd160 \
 	     rsa \
-	     rsa_internal \
+	     rsa_alt_helpers \
 	     sha1 \
 	     sha256 \
 	     sha512 \
+	     sha3 \
 	     threading \
 	     timing \
 	     version \
 	     version_features \
-	     xtea
 
-MBEDTLS_OBJS_X509= certs \
-	   pkcs11 \
+MBEDTLS_OBJS_X509= \
 	   x509 \
 	   x509_create \
 	   x509_crl \
 	   x509_crt \
 	   x509_csr \
+	   x509write \
 	   x509write_crt \
-	   x509write_csr
+	   x509write_csr \
+	   pkcs7 \
 
-MBEDTLS_OBJS_TLS=debug \
+MBEDTLS_OBJS_TLS= \
+	  debug \
+	  mps_reader \
+	  mps_trace \
 	  net_sockets \
 	  ssl_cache \
 	  ssl_ciphersuites \
-	  ssl_cli \
+	  ssl_client \
 	  ssl_cookie \
+	  ssl_debug_helpers_generated \
 	  ssl_msg \
-	  ssl_srv \
 	  ssl_ticket \
 	  ssl_tls \
-	  ssl_tls13_keys
+	  ssl_tls12_client \
+	  ssl_tls12_server \
+	  ssl_tls13_keys \
+	  ssl_tls13_client \
+	  ssl_tls13_server \
+	  ssl_tls13_generic \
 
 MBEDTLS_MODLIST += $(addprefix ${MBEDTLS_LIB_DIR}/,${MBEDTLS_OBJS_CRYPTO}) \
 		$(addprefix ${MBEDTLS_LIB_DIR}/,${MBEDTLS_OBJS_X509}) \
