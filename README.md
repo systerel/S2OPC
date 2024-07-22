@@ -18,10 +18,10 @@ For S2OPC commercial support, please contact us at `s2opc@systerel.fr`.
 
 ### Call for users feedback
 
-As part of our commitment to providing the best possible experience, we would love to hear your thoughts on how S2OPC has been working for you. Your feedback is crucial in helping us understand what we are doing well and where we can improve.
+As part of our commitment to provide the best possible experience, we would love to hear your thoughts on how S2OPC has been working for you. Your feedback is crucial in helping us understand what we are doing well and where we can improve.
 
 We would be grateful if you could take a few moments to share your experience with us by sending an email at `s2opc@systerel.fr`.
-You are interested in particular by the following topics:
+We are interested in particular by the following topics:
 - The way you have discovered the project
 - In which area do you use S2OPC (IoT, Industry, Railway, ...)?
 - Which features do you find useful and which one do you miss?
