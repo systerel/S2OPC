@@ -681,6 +681,51 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
 }
 #endif
 
+SOPC_StatusCode SOPC_Method_Func_AddRole(const SOPC_CallContext* callContextPtr,
+                                         const SOPC_NodeId* objectId,
+                                         uint32_t nbInputArgs,
+                                         const SOPC_Variant* inputArgs,
+                                         uint32_t* nbOutputArgs,
+                                         SOPC_Variant** outputArgs,
+                                         void* param)
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbInputArgs);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != inputArgs);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    return OpcUa_BadNotSupported;
+}
+
+SOPC_StatusCode SOPC_Method_Func_RemoveRole(const SOPC_CallContext* callContextPtr,
+                                            const SOPC_NodeId* objectId,
+                                            uint32_t nbInputArgs,
+                                            const SOPC_Variant* inputArgs,
+                                            uint32_t* nbOutputArgs,
+                                            SOPC_Variant** outputArgs,
+                                            void* param)
+
+{
+    SOPC_UNUSED_ARG(param);
+    SOPC_UNUSED_ARG(nbInputArgs);
+
+    SOPC_ASSERT(NULL != callContextPtr);
+    SOPC_ASSERT(NULL != objectId);
+    SOPC_ASSERT(NULL != inputArgs);
+    SOPC_ASSERT(NULL != nbOutputArgs);
+    SOPC_ASSERT(NULL != outputArgs);
+    *nbOutputArgs = 0;
+    *outputArgs = NULL;
+
+    return OpcUa_BadNotSupported;
+}
+
 SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
 {
     char* sNodeId;
@@ -797,6 +842,40 @@ SOPC_ReturnStatus SOPC_DemoServerConfig_AddMethods(SOPC_MethodCallManager* mcm)
         }
     }
 #endif
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "i=16301";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_AddRole;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        sNodeId = "i=16304";
+        methodId = SOPC_NodeId_FromCString(sNodeId, (int32_t) strlen(sNodeId));
+        if (NULL != methodId)
+        {
+            methodFunc = &SOPC_Method_Func_RemoveRole;
+            status = SOPC_MethodCallManager_AddMethod(mcm, methodId, methodFunc, NULL, NULL);
+            SOPC_NodeId_Clear(methodId);
+            SOPC_Free(methodId);
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
 
     return status;
 }

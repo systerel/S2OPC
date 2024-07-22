@@ -82,6 +82,24 @@ SOPC_StatusCode SOPC_Method_Func_GenEvent(const SOPC_CallContext* callContextPtr
                                           SOPC_Variant** outputArgs,
                                           void* param);
 
+/* \brief Add a role to the server */
+SOPC_StatusCode SOPC_Method_Func_AddRole(const SOPC_CallContext* callContextPtr,
+                                         const SOPC_NodeId* objectId,
+                                         uint32_t nbInputArgs,
+                                         const SOPC_Variant* inputArgs,
+                                         uint32_t* nbOutputArgs,
+                                         SOPC_Variant** outputArgs,
+                                         void* param);
+
+/* \brief Remove a role from the server */
+SOPC_StatusCode SOPC_Method_Func_RemoveRole(const SOPC_CallContext* callContextPtr,
+                                            const SOPC_NodeId* objectId,
+                                            uint32_t nbInputArgs,
+                                            const SOPC_Variant* inputArgs,
+                                            uint32_t* nbOutputArgs,
+                                            SOPC_Variant** outputArgs,
+                                            void* param);
+
 /*---------------------------------------------------------------------------
  *                    Demo Methods registration in Method Call Manager
  *---------------------------------------------------------------------------*/
