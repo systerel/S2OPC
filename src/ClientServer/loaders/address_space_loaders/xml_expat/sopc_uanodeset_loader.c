@@ -53,6 +53,8 @@ typedef enum
     PARSE_NODE_DESCRIPTION,          // ... in its Description
     PARSE_NODE_REFERENCES,           // ... in its References
     PARSE_NODE_REFERENCE,            // ... in its References/Reference
+    PARSE_NODE_ROLE_PERMISSIONS,     // ... in its RolePermissions
+    PARSE_NODE_ROLE_PERMISSION,      // ... in its RolePermissions/RolePermission
     PARSE_NODE_VALUE,                // In the Value tag of a UAVariable/UAVariableType tag
     PARSE_NODE_VALUE_SCALAR,         // ... for a scalar type
     PARSE_NODE_VALUE_SCALAR_COMPLEX, //     ... which is a complex value (sub-tags to manage)
@@ -110,6 +112,9 @@ struct parse_context_t
 
     // References management (lifetime: 1 node)
     SOPC_Array* references;
+
+    // RolePermissions management
+    SOPC_Array* rolepermissions;
 
     // Current node parsing
     SOPC_AddressSpace_Node node;
@@ -285,6 +290,16 @@ static parse_complex_value_tag_t complex_value_ext_obj_range_tags[] = {
      false, NULL, NULL, NULL},
     END_COMPLEX_VALUE_TAG};
 
+static parse_complex_value_tag_t complex_value_ext_obj_role_permission_type_tags[] = {
+    {"RoleId", false, (parse_complex_value_tag_t[]) COMPLEX_VALUE_NODE_ID_TAGS, false, NULL, NULL, NULL},
+    {"Permissions", false, NULL, false, NULL, NULL, NULL},
+    END_COMPLEX_VALUE_TAG};
+
+static parse_complex_value_tag_t complex_value_ext_obj_identity_mapping_rule_type_tags[] = {
+    {"CriteriaType", false, NULL, false, NULL, NULL, NULL},
+    {"Criteria", false, NULL, false, NULL, NULL, NULL}, // string
+    END_COMPLEX_VALUE_TAG};
+
 /*
  * Returns the extension object body tags expected for given TypeId nodeId as output parameter if available.
  * In case of success the EncodeableType pointer is returned and shall be used to create the extension object.
@@ -316,6 +331,16 @@ static const void* ext_obj_body_from_its_type_id(uint32_t nid_in_NS0, parse_comp
     case OpcUaId_Range_Encoding_DefaultXml:
         encType = &OpcUa_Range_EncodeableType;
         *body_tags = complex_value_ext_obj_range_tags;
+        break;
+    case OpcUaId_RolePermissionType:
+    case OpcUaId_RolePermissionType_Encoding_DefaultXml:
+        encType = &OpcUa_RolePermissionType_EncodeableType;
+        *body_tags = complex_value_ext_obj_role_permission_type_tags;
+        break;
+    case OpcUaId_IdentityMappingRuleType:
+    case OpcUaId_IdentityMappingRuleType_Encoding_DefaultXml:
+        encType = &OpcUa_IdentityMappingRuleType_EncodeableType;
+        *body_tags = complex_value_ext_obj_identity_mapping_rule_type_tags;
         break;
     default:
         encType = NULL;
@@ -743,6 +768,48 @@ static bool start_node_reference(struct parse_context_t* ctx, const XML_Char** a
     SOPC_ASSERT(append);
 
     ctx->state = PARSE_NODE_REFERENCE;
+
+    return true;
+}
+
+static bool start_node_role_permission(struct parse_context_t* ctx, const XML_Char** attrs)
+{
+    OpcUa_RolePermissionType permission;
+    OpcUa_RolePermissionType_Initialize(&permission);
+
+    for (size_t i = 0; NULL != attrs[i]; ++i)
+    {
+        const char* attr = attrs[i];
+
+        if (strcmp("Permissions", attr) == 0)
+        {
+            // Parse the permission
+            const char* val = attrs[++i];
+            if (!SOPC_strtouint(val, strlen(val), 32, &permission.Permissions))
+            {
+                LOG_XML_ERRORF(ctx->helper_ctx.parser, "Invalid permission: '%s", val);
+                return false;
+            }
+            // The RoleId is parsed in finalize_rolepermission
+        }
+    }
+
+    if (ctx->rolepermissions == NULL)
+    {
+        ctx->rolepermissions = SOPC_Array_Create(sizeof(OpcUa_RolePermissionType), 1, OpcUa_RolePermissionType_Clear);
+
+        if (ctx->rolepermissions == NULL)
+        {
+            OpcUa_RolePermissionType_Clear(&permission);
+            LOG_MEMORY_ALLOCATION_FAILURE;
+            return false;
+        }
+    }
+
+    bool append = SOPC_Array_Append(ctx->rolepermissions, permission);
+    SOPC_ASSERT(append);
+
+    ctx->state = PARSE_NODE_ROLE_PERMISSION;
 
     return true;
 }
@@ -1367,6 +1434,10 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         {
             ctx->state = PARSE_NODE_REFERENCES;
         }
+        else if (strcmp(NS(UA_NODESET_NS, "RolePermissions"), name) == 0)
+        {
+            ctx->state = PARSE_NODE_ROLE_PERMISSIONS;
+        }
         else if (current_element_has_value(ctx) && strcmp(NS(UA_NODESET_NS, "Value"), name) == 0)
         {
             ctx->state = PARSE_NODE_VALUE;
@@ -1388,6 +1459,20 @@ static void start_element_handler(void* user_data, const XML_Char* name, const X
         if (strcmp(NS(UA_NODESET_NS, "Reference"), name) == 0)
         {
             if (!start_node_reference(ctx, attrs))
+            {
+                XML_StopParser(helperCtx->parser, 0);
+                return;
+            }
+        }
+        else
+        {
+            SOPC_HelperExpat_PushSkipTag(&ctx->helper_ctx, name);
+        }
+        break;
+    case PARSE_NODE_ROLE_PERMISSIONS:
+        if (strcmp(NS(UA_NODESET_NS, "RolePermission"), name) == 0)
+        {
+            if (!start_node_role_permission(ctx, attrs))
             {
                 XML_StopParser(helperCtx->parser, 0);
                 return;
@@ -1594,6 +1679,31 @@ static bool finalize_reference(struct parse_context_t* ctx)
     SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
 
     SOPC_ReturnStatus status = SOPC_NodeId_Copy(&ref->TargetId.NodeId, target_id);
+    SOPC_NodeId_Clear(target_id);
+    SOPC_Free(target_id);
+
+    return status == SOPC_STATUS_OK;
+}
+
+static bool finalize_rolepermission(struct parse_context_t* ctx)
+{
+    // Parse RoleId
+    size_t n_rolepermissions = SOPC_Array_Size(ctx->rolepermissions);
+    SOPC_ASSERT(n_rolepermissions > 0);
+
+    OpcUa_RolePermissionType* rolepermission = SOPC_Array_Get_Ptr(ctx->rolepermissions, n_rolepermissions - 1);
+    const char* text = SOPC_HelperExpat_CharDataStripped(&ctx->helper_ctx);
+    SOPC_NodeId* target_id = SOPC_NodeId_FromCString(text, (int32_t) strlen(text));
+
+    if (target_id == NULL)
+    {
+        LOG_XML_ERRORF(ctx->helper_ctx.parser, "Cannot parse target '%s' into a NodeId.", text);
+        return false;
+    }
+
+    SOPC_HelperExpat_CharDataReset(&ctx->helper_ctx);
+
+    SOPC_ReturnStatus status = SOPC_NodeId_Copy(&rolepermission->RoleId, target_id);
     SOPC_NodeId_Clear(target_id);
     SOPC_Free(target_id);
 
@@ -1884,6 +1994,80 @@ static bool set_variant_value_guid(SOPC_Guid** guid, parse_complex_value_tag_arr
     {
         LOGF("Invalid Guid: '%s'", stringGuid);
         return false;
+    }
+
+    return true;
+}
+
+static bool set_variant_value_extobj_role_permission_type(OpcUa_RolePermissionType* rolePermissions,
+                                                          parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    // Parse
+    parse_complex_value_tag_t* roleIdTagCtx = NULL;
+    bool roleId_tag_ok = complex_value_tag_from_tag_name_no_namespace("RoleId", bodyChildsTagContext, &roleIdTagCtx);
+    SOPC_ASSERT(roleId_tag_ok);
+
+    parse_complex_value_tag_t* permissionsTagCtx = NULL;
+    bool permissions_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Permissions", bodyChildsTagContext, &permissionsTagCtx);
+    SOPC_ASSERT(permissions_tag_ok);
+
+    // Fill the rolePermissions object with the parsed elements
+    bool result = SOPC_strtouint(permissionsTagCtx->single_value, (size_t) strlen(permissionsTagCtx->single_value), 32,
+                                 &rolePermissions->Permissions);
+
+    if (result)
+    {
+        SOPC_NodeId* nodeId = NULL;
+        result = set_variant_value_nodeid(&nodeId, roleIdTagCtx->childs);
+
+        if (result)
+        {
+            rolePermissions->RoleId = *nodeId;
+            SOPC_Free(nodeId);
+        }
+    }
+
+    if (!result)
+    {
+        OpcUa_RolePermissionType_Clear(rolePermissions);
+    }
+
+    return true;
+}
+
+static bool set_variant_value_extobj_identity_mapping_rule_type(OpcUa_IdentityMappingRuleType* identityMappingRule,
+                                                                parse_complex_value_tag_array_t bodyChildsTagContext)
+{
+    // Parse
+    parse_complex_value_tag_t* criteriaTypeTagCtx = NULL;
+    bool criteriaType_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("CriteriaType", bodyChildsTagContext, &criteriaTypeTagCtx);
+    SOPC_ASSERT(criteriaType_tag_ok);
+
+    parse_complex_value_tag_t* criteriaTagCtx = NULL;
+    bool criteria_tag_ok =
+        complex_value_tag_from_tag_name_no_namespace("Criteria", bodyChildsTagContext, &criteriaTagCtx);
+    SOPC_ASSERT(criteria_tag_ok);
+
+    // Fill the OpcUa_IdentityMappingRuleType object with the parsed elements
+    bool result = SOPC_strtoint(criteriaTypeTagCtx->single_value, (size_t) strlen(criteriaTypeTagCtx->single_value), 32,
+                                &identityMappingRule->CriteriaType);
+
+    if (result)
+    {
+        // Fill the string identityMappingRule.Criteria with the parsed Criteria.
+        SOPC_ReturnStatus status =
+            SOPC_String_CopyFromCString(&identityMappingRule->Criteria, (const char*) criteriaTagCtx->single_value);
+        if (status != SOPC_STATUS_OK)
+        {
+            result = false;
+        }
+    }
+
+    if (!result)
+    {
+        OpcUa_IdentityMappingRuleType_Clear(identityMappingRule);
     }
 
     return true;
@@ -2247,6 +2431,13 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
     case OpcUaId_Range:
         result = set_variant_value_extobj_range((OpcUa_Range*) object, bodyTagCtx->childs);
         break;
+    case OpcUaId_RolePermissionType:
+        result = set_variant_value_extobj_role_permission_type((OpcUa_RolePermissionType*) object, bodyTagCtx->childs);
+        break;
+    case OpcUaId_IdentityMappingRuleType:
+        result = set_variant_value_extobj_identity_mapping_rule_type((OpcUa_IdentityMappingRuleType*) object,
+                                                                     bodyTagCtx->childs);
+        break;
     default:
         SOPC_ASSERT(false);
     }
@@ -2566,6 +2757,17 @@ static bool finalize_node(struct parse_context_t* ctx)
         ctx->references = NULL;
     }
 
+    if (ctx->rolepermissions != NULL)
+    {
+        size_t n_rolepermissions = SOPC_Array_Size(ctx->rolepermissions);
+        SOPC_ASSERT(n_rolepermissions <= INT32_MAX);
+
+        // Complete the node that will be added to the address space in the parsing context
+        *SOPC_AddressSpace_Get_NoOfRolePermissions(ctx->space, &ctx->node) = (int32_t) n_rolepermissions;
+        *SOPC_AddressSpace_Get_RolePermissions(ctx->space, &ctx->node) = SOPC_Array_Into_Raw(ctx->rolepermissions);
+        ctx->rolepermissions = NULL;
+    }
+
     SOPC_AddressSpace_Node* node = SOPC_Calloc(1, sizeof(SOPC_AddressSpace_Node));
 
     if (node == NULL)
@@ -2759,6 +2961,9 @@ static void end_element_handler(void* user_data, const XML_Char* name)
     case PARSE_NODE_REFERENCES:
         ctx->state = PARSE_NODE;
         break;
+    case PARSE_NODE_ROLE_PERMISSIONS:
+        ctx->state = PARSE_NODE;
+        break;
     case PARSE_NODE_VALUE_SCALAR:
         SOPC_ASSERT(ctx->current_value_type != SOPC_Null_Id);
 
@@ -2872,6 +3077,15 @@ static void end_element_handler(void* user_data, const XML_Char* name)
 
         ctx->state = PARSE_NODE_REFERENCES;
         break;
+    case PARSE_NODE_ROLE_PERMISSION:
+        if (!finalize_rolepermission(ctx))
+        {
+            XML_StopParser(ctx->helper_ctx.parser, false);
+            return;
+        }
+
+        ctx->state = PARSE_NODE_ROLE_PERMISSIONS;
+        break;
     case PARSE_NODE_DEFINITION:
         if (!finalize_node_definition(ctx))
         {
@@ -2903,6 +3117,7 @@ static void char_data_handler(void* user_data, const XML_Char* s, int len)
     case PARSE_NODE_DESCRIPTION:
     case PARSE_ALIAS:
     case PARSE_NODE_REFERENCE:
+    case PARSE_NODE_ROLE_PERMISSION:
     case PARSE_NODE_VALUE_SCALAR:
     case PARSE_NODE_VALUE_SCALAR_COMPLEX:
         if (!SOPC_HelperExpat_CharDataAppend(&ctx->helper_ctx, s, (size_t) len))

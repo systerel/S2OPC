@@ -266,6 +266,8 @@ ELEMENT_ATTRIBUTE_GETTER(SOPC_LocalizedText, DisplayName)
 ELEMENT_ATTRIBUTE_GETTER(SOPC_LocalizedText, Description)
 ELEMENT_ATTRIBUTE_GETTER(int32_t, NoOfReferences)
 ELEMENT_ATTRIBUTE_GETTER(OpcUa_ReferenceNode*, References)
+ELEMENT_ATTRIBUTE_GETTER(int32_t, NoOfRolePermissions)
+ELEMENT_ATTRIBUTE_GETTER(OpcUa_RolePermissionType*, RolePermissions)
 ELEMENT_ATTRIBUTE_GETTER(uint32_t, WriteMask)
 ELEMENT_ATTRIBUTE_GETTER(uint32_t, UserWriteMask)
 

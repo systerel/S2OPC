@@ -171,6 +171,9 @@ uint32_t* SOPC_AddressSpace_Get_WriteMask(SOPC_AddressSpace* space, SOPC_Address
 uint32_t* SOPC_AddressSpace_Get_UserWriteMask(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 int32_t* SOPC_AddressSpace_Get_NoOfReferences(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 OpcUa_ReferenceNode** SOPC_AddressSpace_Get_References(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+int32_t* SOPC_AddressSpace_Get_NoOfRolePermissions(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
+OpcUa_RolePermissionType** SOPC_AddressSpace_Get_RolePermissions(SOPC_AddressSpace* space,
+                                                                 SOPC_AddressSpace_Node* node);
 /* Variable and VariableType common attributes */
 SOPC_Variant* SOPC_AddressSpace_Get_Value(SOPC_AddressSpace* space, SOPC_AddressSpace_Node* node);
 

@@ -46,6 +46,8 @@ UA_DESCRIPTION_TAG = UA_NODESET_NS + 'Description'
 UA_DISPLAY_NAME_TAG = UA_NODESET_NS + 'DisplayName'
 UA_REFERENCES_TAG = UA_NODESET_NS + 'References'
 UA_REFERENCE_TAG = UA_NODESET_NS + 'Reference'
+UA_ROLEPERMISSIONS_TAG = UA_NODESET_NS + 'RolePermissions'
+UA_ROLEPERMISSION_TAG = UA_NODESET_NS + 'RolePermission'
 UA_VALUE_TAG = UA_NODESET_NS + 'Value'
 UA_DEFINITION_TAG = UA_NODESET_NS + 'Definition'
 UA_FIELD_TAG = UA_NODESET_NS + 'Field'
@@ -106,6 +108,12 @@ UA_VALUE_NAMESPACE_INDEX_TAG = UA_TYPES_NS + 'NamespaceIndex'
 UA_VALUE_RANGE_TAG = UA_TYPES_NS + 'Range'
 UA_VALUE_LOW_TAG = UA_TYPES_NS + 'Low'
 UA_VALUE_HIGH_TAG = UA_TYPES_NS + 'High'
+# RolePermissionType structure tags
+UA_VALUE_ROLEID_TAG = UA_TYPES_NS + 'RoleId'
+UA_VALUE_PERMISSIONS_TAG = UA_TYPES_NS + 'Permissions'
+# IdentityMappingRuleType structure tags
+UA_VALUE_CRITERIA_TYPE_TAG = UA_TYPES_NS + 'CriteriaType'
+UA_VALUE_CRITERIA_TAG = UA_TYPES_NS + 'Criteria'
 
 VALUE_TYPE_BOOL = 0
 VALUE_TYPE_BYTE = 1
@@ -131,6 +139,8 @@ VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE = 20
 VALUE_TYPE_ENGINEERING_UNIT_INFO = 21
 VALUE_TYPE_QUALIFIED_NAME = 22
 VALUE_TYPE_RANGE = 23
+VALUE_TYPE_ROLEPERMISSION = 24
+VALUE_TYPE_IDENTITY_MAPPING_RULE_TYPE = 25
 
 UNSUPPORTED_POINTER_VARIANT_TYPES = {VALUE_TYPE_DATETIME}
 
@@ -321,17 +331,18 @@ class VariableValue(object):
 
 
 class Node(object):
-    __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references',\
+    __slots__ = 'tag', 'nodeid', 'browse_name', 'description', 'display_name', 'references', 'role_permissions',\
                 'idonly', 'value', 'data_type', 'value_rank', 'accesslevel', 'executable', 'is_abstract', 'definition',\
                 'event_notifier'
 
-    def __init__(self, tag, nodeid, browse_name, description, display_name, references):
+    def __init__(self, tag, nodeid, browse_name, description, display_name, references, role_permissions):
         self.tag = tag
         self.nodeid = nodeid
         self.browse_name = browse_name
         self.description = description
         self.display_name = display_name
         self.references = references
+        self.role_permissions = role_permissions
         self.idonly = False
         self.value = None # For Variable node class only (next fields included)
         self.data_type = None
@@ -350,6 +361,13 @@ class Reference(object):
         self.ty = ty
         self.target = target
         self.is_forward = is_forward
+
+class RolePermission(object):
+    __slots__ = 'permissions', 'roleid'
+
+    def __init__(self, permissions, roleid):
+        self.roleid = roleid
+        self.permissions = permissions
 
 # Extension objects (non-built in Structure) classes:
 
@@ -401,6 +419,24 @@ class Range(ExtensionObject):
         self.extobj_objtype = '&OpcUa_Range_EncodeableType'
         self.low = low
         self.high = high
+
+class ValueRolePermissionType(ExtensionObject):
+    __slots__ = 'roleid', 'permissions'
+
+    def __init__(self, roleid, permissions):
+        self.extobj_typeid = NodeId.parse('i=128') # use binary encoding of datatype
+        self.extobj_objtype = '&OpcUa_RolePermissionType_EncodeableType'
+        self.roleid = roleid
+        self.permissions = permissions
+
+class ValueIdentityMappingRuleType(ExtensionObject):
+    __slots__ = 'criteria', 'criteria_type'
+
+    def __init__(self, criteria, criteria_type):
+        self.extobj_typeid = NodeId.parse('i=15736') # use binary encoding of datatype
+        self.extobj_objtype = '&OpcUa_IdentityMappingRuleType_EncodeableType'
+        self.criteria = criteria
+        self.criteria_type = criteria_type
 
 class DataTypeDefinitionField(object):
     __slots__ = 'name'
@@ -589,6 +625,24 @@ def collect_node_references(node, aliases):
 
     return refs
 
+def parse_role_permissions(node):
+    rolepermissions = []
+    
+    rolepermissions_node = node.find(UA_ROLEPERMISSIONS_TAG)
+
+    if rolepermissions_node is None:
+        return rolepermissions
+
+    for n in rolepermissions_node.findall(UA_ROLEPERMISSION_TAG):
+        try:
+            permissions = n.attrib['Permissions']
+        except KeyError:
+            raise ParseError('Missing Permissions on RolePermission element for node ' + node.get('NodeId'))
+
+        rolepermissions.append(RolePermission(permissions, NodeId.parse(n.text)))
+
+    return rolepermissions
+
 
 def parse_boolean_value(text : str) -> bool:
     return text.strip() == 'true'
@@ -755,6 +809,34 @@ def parse_range_body(n):
 
     return Range(low.text, high.text)
 
+def parse_role_permission_type_body(n):
+    roleid = n.find(UA_VALUE_ROLEID_TAG)
+    permissions = n.find(UA_VALUE_PERMISSIONS_TAG)
+
+    if roleid is None:
+        raise ParseError('RolePermission without RoleId tag')
+    
+    if permissions is None:
+        raise ParseError('RolePermission without Permissions tag')
+    
+    roleid_nodeid = parse_node_id(roleid)
+    if roleid_nodeid is None:
+        raise ParseError('RolePermission extension object with invalid RoleId nodeId %s' % roleid_nodeid)
+    
+    return ValueRolePermissionType(roleid_nodeid, permissions.text)
+
+def parse_identity_mapping_rule_type_body(n):
+    criteria = n.find(UA_VALUE_CRITERIA_TAG)
+    criteria_type = n.find(UA_VALUE_CRITERIA_TYPE_TAG)
+
+    if criteria is None:
+        raise ParseError('Identity without Criteria tag')
+    
+    if criteria_type is None:
+        raise ParseError('Identity without CriteriaType tag')
+    
+    return ValueIdentityMappingRuleType(criteria.text, criteria_type.text)
+    
 def parse_qualified_name(n):
 
     namespace_index = n.find(UA_VALUE_NAMESPACE_INDEX_TAG)
@@ -781,6 +863,16 @@ EXTENSION_OBJECT_PARSERS_DICT = {
     # Range datatype and XML encoding ids
     884: (parse_range_body, VALUE_TYPE_RANGE),
     885: (parse_range_body, VALUE_TYPE_RANGE),
+
+    # RolePermission XML encoding nodeId
+    16126: (parse_role_permission_type_body, VALUE_TYPE_ROLEPERMISSION),
+    # RolePermission datatype nodeId
+    96: (parse_role_permission_type_body, VALUE_TYPE_ROLEPERMISSION),
+
+    # IdentityMappingRuleType XML encoding nodeId
+    15728: (parse_identity_mapping_rule_type_body, VALUE_TYPE_IDENTITY_MAPPING_RULE_TYPE),
+    # IdentityMappingRuleType datatype nodeId
+    15634: (parse_identity_mapping_rule_type_body, VALUE_TYPE_IDENTITY_MAPPING_RULE_TYPE),
 
     # EnumValueType datataype nodeId
     7616 : (parse_enum_value_type_body, VALUE_TYPE_EXTENSIONOBJECT_ENUMVALUETYPE),
@@ -1109,6 +1201,32 @@ def generate_range_ext_obj(obj):
             )
            )
 
+def generate_rolepermissions_ext_obj(obj):
+    return ('''
+               (OpcUa_RolePermissionType[])
+               {{%s,
+                 %s,
+                 %s}}
+            ''' %
+            (obj.extobj_objtype,
+             generate_nodeid(obj.roleid),
+             obj.permissions
+            )
+           )
+
+def generate_identity_mapping_rule_type_ext_obj(obj):
+    return ('''
+               (OpcUa_IdentityMappingRuleType[])
+               {{%s,
+                 %s,
+                 %s}}
+            ''' %
+            (obj.extobj_objtype,
+             obj.criteria_type,
+             generate_string(obj.criteria)
+            )
+           )
+
 def gen_definition_enum_field(field):
     return ('''
             {%s,
@@ -1366,6 +1484,18 @@ def generate_value_variant(val):
                                              gen=generate_range_ext_obj, is_array=val.is_array)
         return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
                                 val.val, val.is_array, extension_object_generator)
+    elif val.ty == VALUE_TYPE_ROLEPERMISSION:
+        # Partial evaluation of generate_extension_object to make it compatible with generate_variant
+        extension_object_generator = partial(generate_extension_object,
+                                             gen=generate_rolepermissions_ext_obj, is_array=val.is_array)
+        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
+                                val.val, val.is_array, extension_object_generator)
+    elif val.ty == VALUE_TYPE_IDENTITY_MAPPING_RULE_TYPE:
+        # Partial evaluation of generate_extension_object to make it compatible with generate_variant
+        extension_object_generator = partial(generate_extension_object,
+                                             gen=generate_identity_mapping_rule_type_ext_obj, is_array=val.is_array)
+        return generate_variant('SOPC_ExtensionObject_Id', 'SOPC_ExtensionObject' , 'ExtObject',
+                                val.val, val.is_array, extension_object_generator)
     elif val.ty == VALUE_TYPE_DATETIME:
         return generate_variant('SOPC_DateTime_Id', 'SOPC_DateTime', 'Date', val.val, val.is_array, generate_datetime_str)
     elif val.ty in UNSUPPORTED_POINTER_VARIANT_TYPES:
@@ -1442,6 +1572,7 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
     description = localized_text_of_child(xml_node, UA_DESCRIPTION_TAG)
     display_name = localized_text_of_child(xml_node, UA_DISPLAY_NAME_TAG)
     references = collect_node_references(xml_node, aliases)
+    role_permissions = parse_role_permissions(xml_node)
 
     node = Node(
         xml_node.tag,
@@ -1449,7 +1580,8 @@ def parse_uanode(no_dt_definition, xml_node, source, aliases):
         browse_name,
         description,
         display_name,
-        references
+        references,
+        role_permissions
     )
 
     if (xml_node.tag == UA_VARIABLE_TAG) or (xml_node.tag == UA_VARIABLE_TYPE_TAG):
@@ -1505,6 +1637,15 @@ def generate_reference(ref):
         generate_string(None)
     )
 
+def generate_role_permission(role_permission):
+    return '''                {
+                    &OpcUa_RolePermissionType_EncodeableType,
+                    %s,
+                    %d,
+                }''' % (
+        generate_nodeid(role_permission.roleid),
+        int(role_permission.permissions)
+    )
 
 def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='OpcUa_UncertainInitialValue', **kwargs):
     extra = ''
@@ -1518,7 +1659,12 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
                       ',\n'.join(references) +
                       '\n            }') if references else 'NULL'
 
-    return '''    {
+    role_permissions = list(map(generate_role_permission, ua_node.role_permissions))
+    role_permissions_str = ('(' + references_qualifier + 'OpcUa_RolePermissionType[]) {\n' +
+                      ',\n'.join(role_permissions) +
+                      '\n            }') if role_permissions else 'NULL'
+    
+    begin_decl = '''    {
         OpcUa_NodeClass_%s,
         %s,
         {0, 0},
@@ -1530,9 +1676,7 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
             .DisplayName = %s,
             .Description = %s,
             .NoOfReferences = %d,
-            .References = %s,%s
-        }}
-    },\n''' % (
+            .References = %s,''' % (
         ty,
         value_status,
         variant_field,
@@ -1543,9 +1687,23 @@ def generate_item(is_const_addspace, ua_node, ty, variant_field, value_status='O
         generate_localized_text(ua_node.display_name),
         generate_localized_text(ua_node.description),
         len(ua_node.references),
-        references_str,
-        extra
-    )
+        references_str
+        )
+    
+    role_permissions_final = ""
+    if 'NULL' != role_permissions_str:
+        role_permissions_final = '''
+            .NoOfRolePermissions = %d,
+            .RolePermissions = %s,''' % (
+            len(ua_node.role_permissions),
+            role_permissions_str
+        )
+
+    end_decl = '''%s
+        }}\n    },\n''' % (
+        extra)
+
+    return begin_decl + role_permissions_final + end_decl
 
 def number_coalesce(n, default):
     return n if n is not None else default
