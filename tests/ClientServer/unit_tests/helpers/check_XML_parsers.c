@@ -202,6 +202,26 @@ static void addspace_for_each_equal(const uintptr_t key, const uintptr_t value, 
         ck_assert_int_eq(0, compare);
     }
 
+    /* Check RolePermissions */
+    // Compare the NoOfRolePermissions attribute
+    ck_assert_int_eq(*SOPC_AddressSpace_Get_NoOfRolePermissions(leftSpace, left),
+                     *SOPC_AddressSpace_Get_NoOfRolePermissions(rightSpace, right));
+
+    // Compare the RolePermissions attribute
+    OpcUa_RolePermissionType* left_rolepermissions = *SOPC_AddressSpace_Get_RolePermissions(leftSpace, left);
+    OpcUa_RolePermissionType* right_rolepermissions = *SOPC_AddressSpace_Get_RolePermissions(rightSpace, right);
+    if (left_rolepermissions != NULL)
+    {
+        status = SOPC_EncodeableObject_Compare(&OpcUa_RolePermissionType_EncodeableType, left_rolepermissions,
+                                               right_rolepermissions, &compare);
+        ck_assert_int_eq(SOPC_STATUS_OK, status);
+        ck_assert_int_eq(0, compare);
+    }
+    else
+    {
+        ck_assert_ptr_null(right_rolepermissions);
+    }
+
     /* Check specific attributes */
     switch (left->node_class)
     {
