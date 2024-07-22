@@ -278,6 +278,8 @@
     <DisplayName>Structure</DisplayName>
     <References>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=24</Reference>
+      <Reference ReferenceType="HasSubtype">i=15528</Reference>
+      <Reference ReferenceType="HasSubtype">i=15634</Reference>
       <Reference ReferenceType="HasSubtype">i=96</Reference>
       <Reference ReferenceType="HasSubtype">i=296</Reference>
       <Reference ReferenceType="HasSubtype">i=7594</Reference>
@@ -402,6 +404,8 @@
       <Reference ReferenceType="HasSubtype">i=2034</Reference>
       <Reference ReferenceType="HasSubtype">i=11616</Reference>
       <Reference ReferenceType="HasSubtype">i=11645</Reference>
+      <Reference ReferenceType="HasSubtype">i=15607</Reference>
+      <Reference ReferenceType="HasSubtype">i=15620</Reference>
     </References>
   </UAObjectType>
   <UAObjectType NodeId="i=61" BrowseName="FolderType">
@@ -675,6 +679,7 @@
       <Reference ReferenceType="HasProperty">i=15963</Reference>
       <Reference ReferenceType="HasProperty">i=15964</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+      <Reference ReferenceType="HasProperty">i=16134</Reference>
     </References>
   </UAObject>
   <UAVariable NodeId="i=15958" BrowseName="NamespaceUri" ParentNodeId="i=15957" DataType="String">
@@ -1339,6 +1344,7 @@
       <Reference ReferenceType="HasComponent">i=11551</Reference>
       <Reference ReferenceType="HasComponent">i=2019</Reference>
       <Reference ReferenceType="HasComponent">i=2754</Reference>
+      <Reference ReferenceType="HasComponent">i=16295</Reference>
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
@@ -1431,6 +1437,13 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=61</Reference>
       <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=16295" BrowseName="RoleSet" ParentNodeId="i=2013">
+    <DisplayName>RoleSet</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=15607</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
     </References>
   </UAObject>
   <UAObjectType NodeId="i=2020" BrowseName="ServerDiagnosticsType">
@@ -2046,6 +2059,7 @@
       <Reference ReferenceType="HasComponent">i=2996</Reference>
       <Reference ReferenceType="HasComponent">i=2997</Reference>
       <Reference ReferenceType="HasTypeDefinition">i=2013</Reference>
+      <Reference ReferenceType="HasComponent">i=15606</Reference>
     </References>
   </UAObject>
   <UAVariable NodeId="i=2269" BrowseName="ServerProfileArray" ParentNodeId="i=2268" DataType="String" ValueRank="1" ArrayDimensions="0">
@@ -2216,8 +2230,420 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=11645</Reference>
       <Reference ReferenceType="HasComponent">i=15957</Reference>
+      <Reference ReferenceType="HasComponent">ns=1;i=15957</Reference>
+      <Reference ReferenceType="HasComponent">ns=2;i=15957</Reference>
     </References>
   </UAObject>
+  <UADataType NodeId="i=15528" BrowseName="EndpointType">
+    <DisplayName>EndpointType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+      <Reference ReferenceType="HasEncoding">i=15671</Reference>
+      <Reference ReferenceType="HasEncoding">i=15949</Reference>
+      <Reference ReferenceType="HasEncoding">i=16150</Reference>
+    </References>
+    <Definition Name="EndpointType">
+      <Field Name="EndpointUrl" DataType="i=12" />
+      <Field Name="SecurityMode" DataType="i=302" />
+      <Field Name="SecurityPolicyUri" DataType="i=12" />
+      <Field Name="TransportProfileUri" DataType="i=12" />
+    </Definition>
+  </UADataType>
+  <UAObjectType NodeId="i=15607" BrowseName="RoleSetType">
+    <DisplayName>RoleSetType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasComponent">i=15608</Reference>
+      <Reference ReferenceType="HasComponent">i=15997</Reference>
+      <Reference ReferenceType="HasComponent">i=16000</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAObject NodeId="i=15608" BrowseName="&lt;RoleName&gt;" SymbolicName="RoleName_Placeholder" ParentNodeId="i=15607">
+    <DisplayName>&lt;RoleName&gt;</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16162</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+      <Reference ReferenceType="HasModellingRule">i=11508</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=16162" BrowseName="Identities" ParentNodeId="i=15608" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+  </UAVariable>
+  <UAMethod NodeId="i=15997" BrowseName="AddRole" ParentNodeId="i=15607">
+    <DisplayName>AddRole</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=15998</Reference>
+      <Reference ReferenceType="HasProperty">i=15999</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=15998" BrowseName="InputArguments" ParentNodeId="i=15997" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>RoleName</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>NamespaceUri</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="i=15999" BrowseName="OutputArguments" ParentNodeId="i=15997" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>OutputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>RoleNodeId</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=17</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=16000" BrowseName="RemoveRole" ParentNodeId="i=15607">
+    <DisplayName>RemoveRole</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16001</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=16001" BrowseName="InputArguments" ParentNodeId="i=16000" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>RoleNodeId</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=17</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAObjectType NodeId="i=15620" BrowseName="RoleType">
+    <DisplayName>RoleType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16173</Reference>
+      <Reference ReferenceType="HasProperty">i=16174</Reference>
+      <Reference ReferenceType="HasProperty">i=15410</Reference>
+      <Reference ReferenceType="HasProperty">i=16175</Reference>
+      <Reference ReferenceType="HasProperty">i=15411</Reference>
+      <Reference ReferenceType="HasComponent">i=15624</Reference>
+      <Reference ReferenceType="HasComponent">i=15626</Reference>
+      <Reference ReferenceType="HasComponent">i=16176</Reference>
+      <Reference ReferenceType="HasComponent">i=16178</Reference>
+      <Reference ReferenceType="HasComponent">i=16180</Reference>
+      <Reference ReferenceType="HasComponent">i=16182</Reference>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
+    </References>
+  </UAObjectType>
+  <UAVariable NodeId="i=16173" BrowseName="Identities" ParentNodeId="i=15620" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=16174" BrowseName="Applications" ParentNodeId="i=15620" DataType="String" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Applications</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=15410" BrowseName="ApplicationsExclude" ParentNodeId="i=15620" DataType="Boolean">
+    <DisplayName>ApplicationsExclude</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=16175" BrowseName="Endpoints" ParentNodeId="i=15620" DataType="i=15528" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Endpoints</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAVariable>
+  <UAVariable NodeId="i=15411" BrowseName="EndpointsExclude" ParentNodeId="i=15620" DataType="Boolean">
+    <DisplayName>EndpointsExclude</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAVariable>
+  <UAMethod NodeId="i=15624" BrowseName="AddIdentity" ParentNodeId="i=15620">
+    <DisplayName>AddIdentity</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=15625</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=15625" BrowseName="InputArguments" ParentNodeId="i=15624" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Rule</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=15634</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=15626" BrowseName="RemoveIdentity" ParentNodeId="i=15620">
+    <DisplayName>RemoveIdentity</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=15627</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=15627" BrowseName="InputArguments" ParentNodeId="i=15626" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Rule</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=15634</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=16176" BrowseName="AddApplication" ParentNodeId="i=15620">
+    <DisplayName>AddApplication</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16177</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=16177" BrowseName="InputArguments" ParentNodeId="i=16176" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>ApplicationUri</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=16178" BrowseName="RemoveApplication" ParentNodeId="i=15620">
+    <DisplayName>RemoveApplication</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16179</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=16179" BrowseName="InputArguments" ParentNodeId="i=16178" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>ApplicationUri</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=12</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=16180" BrowseName="AddEndpoint" ParentNodeId="i=15620">
+    <DisplayName>AddEndpoint</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16181</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=16181" BrowseName="InputArguments" ParentNodeId="i=16180" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Endpoint</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=15528</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAMethod NodeId="i=16182" BrowseName="RemoveEndpoint" ParentNodeId="i=15620">
+    <DisplayName>RemoveEndpoint</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16183</Reference>
+      <Reference ReferenceType="HasModellingRule">i=80</Reference>
+    </References>
+  </UAMethod>
+  <UAVariable NodeId="i=16183" BrowseName="InputArguments" ParentNodeId="i=16182" DataType="i=296" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>InputArguments</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+      <Reference ReferenceType="HasModellingRule">i=78</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=297</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:Argument>
+              <uax:Name>Endpoint</uax:Name>
+              <uax:DataType>
+                <uax:Identifier>i=15528</uax:Identifier>
+              </uax:DataType>
+              <uax:ValueRank>-1</uax:ValueRank>
+              <uax:ArrayDimensions />
+            </uax:Argument>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UADataType NodeId="i=15634" BrowseName="IdentityMappingRuleType">
+    <DisplayName>IdentityMappingRuleType</DisplayName>
+    <References>
+      <Reference ReferenceType="HasSubtype" IsForward="false">i=22</Reference>
+      <Reference ReferenceType="HasEncoding">i=15736</Reference>
+      <Reference ReferenceType="HasEncoding">i=15728</Reference>
+      <Reference ReferenceType="HasEncoding">i=15042</Reference>
+    </References>
+    <Definition Name="IdentityMappingRuleType">
+      <Field Name="CriteriaType" DataType="i=15632" />
+      <Field Name="Criteria" DataType="i=12" />
+    </Definition>
+  </UADataType>
   <UAObject NodeId="i=17708" BrowseName="InterfaceTypes">
     <DisplayName>InterfaceTypes</DisplayName>
     <References>
@@ -2673,6 +3099,18 @@
       <Field Name="Description" DataType="i=21" />
     </Definition>
   </UADataType>
+  <UAObject NodeId="i=15671" BrowseName="Default Binary" SymbolicName="DefaultBinary">
+    <DisplayName>Default Binary</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15736" BrowseName="Default Binary" SymbolicName="DefaultBinary">
+    <DisplayName>Default Binary</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
   <UAObject NodeId="i=128" BrowseName="Default Binary" SymbolicName="DefaultBinary">
     <DisplayName>Default Binary</DisplayName>
     <References>
@@ -2723,6 +3161,18 @@
   </UAObject>
   <UAObject NodeId="i=889" BrowseName="Default Binary" SymbolicName="DefaultBinary">
     <DisplayName>Default Binary</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15949" BrowseName="Default XML" SymbolicName="DefaultXml">
+    <DisplayName>Default XML</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15728" BrowseName="Default XML" SymbolicName="DefaultXml">
+    <DisplayName>Default XML</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
     </References>
@@ -2781,6 +3231,18 @@
       <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
     </References>
   </UAObject>
+  <UAObject NodeId="i=16150" BrowseName="Default JSON" SymbolicName="DefaultJson">
+    <DisplayName>Default JSON</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15042" BrowseName="Default JSON" SymbolicName="DefaultJson">
+    <DisplayName>Default JSON</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
+    </References>
+  </UAObject>
   <UAObject NodeId="i=15062" BrowseName="Default JSON" SymbolicName="DefaultJson">
     <DisplayName>Default JSON</DisplayName>
     <References>
@@ -2835,6 +3297,141 @@
       <Reference ReferenceType="HasTypeDefinition">i=76</Reference>
     </References>
   </UAObject>
+  <UAObject NodeId="i=15606" BrowseName="RoleSet">
+    <DisplayName>RoleSet</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=15607</Reference>
+      <Reference ReferenceType="HasComponent">i=15668</Reference>
+      <Reference ReferenceType="HasComponent">i=15680</Reference>
+      <Reference ReferenceType="HasComponent">i=15716</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15668" BrowseName="Observer">
+    <DisplayName>Observer</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16214</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15680" BrowseName="Operator">
+    <DisplayName>Operator</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16225</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+    </References>
+  </UAObject>
+  <UAObject NodeId="i=15716" BrowseName="ConfigureAdmin">
+    <DisplayName>ConfigureAdmin</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">i=16269</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=15620</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>DefaultRolePermissions</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15668</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>32</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15680</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>32</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15716</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>4128</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="i=16214" BrowseName="Identities" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=15728</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:CriteriaType>5</uax:CriteriaType>
+            <uax:Criteria>NULL</uax:Criteria>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=15728</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:CriteriaType>6</uax:CriteriaType>
+            <uax:Criteria>NULL</uax:Criteria>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="i=16225" BrowseName="Identities" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ExtensionObject>
+        <uax:TypeId>
+          <uax:Identifier>i=15728</uax:Identifier>
+        </uax:TypeId>
+        <uax:Body>
+          <uax:CriteriaType>6</uax:CriteriaType>
+          <uax:Criteria>NULL</uax:Criteria>
+        </uax:Body>
+      </uax:ExtensionObject>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="i=16269" BrowseName="Identities" ParentNodeId="i=15716" DataType="i=15634" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>Identities</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ExtensionObject>
+        <uax:TypeId>
+          <uax:Identifier>i=15728</uax:Identifier>
+        </uax:TypeId>
+        <uax:Body>
+          <uax:CriteriaType>1</uax:CriteriaType>
+          <uax:Criteria>me</uax:Criteria>
+        </uax:Body>
+      </uax:ExtensionObject>
+    </Value>
+  </UAVariable>
   <UAObject BrowseName="1:VariablesFolderBn" NodeId="ns=1;i=1000" ParentNodeId="i=85">
     <DisplayName>VariablesFolderDn</DisplayName>
     <Description>VariablesFolderDescObj1d2</Description>
@@ -2896,6 +3493,10 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
+    <RolePermissions>
+      <RolePermission Permissions="32">i=15668</RolePermission>
+      <RolePermission Permissions="96">i=15716</RolePermission>
+    </RolePermissions>
     <Value>
       <uax:Int64>-1000</uax:Int64>
     </Value>
@@ -3355,6 +3956,72 @@
       <Reference ReferenceType="Organizes">ns=1;s=Objects.15361.TRACKs</Reference>
     </References>
   </UAObject>
+  <UAObject NodeId="ns=1;i=15957" BrowseName="1:https://www.systerel.fr/S2OPC/demo/data/origin">
+    <DisplayName>https://www.systerel.fr/S2OPC/demo/data/origin</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=1;i=15958</Reference>
+      <Reference ReferenceType="HasProperty">i=15959</Reference>
+      <Reference ReferenceType="HasProperty">i=15960</Reference>
+      <Reference ReferenceType="HasProperty">i=15961</Reference>
+      <Reference ReferenceType="HasProperty">i=15962</Reference>
+      <Reference ReferenceType="HasProperty">i=15963</Reference>
+      <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="ns=1;i=15958" BrowseName="NamespaceUri" DataType="String">
+    <DisplayName>NamespaceUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin</uax:String>
+    </Value>
+  </UAVariable>
+  <UAVariable NodeId="ns=1;i=16134" BrowseName="DefaultRolePermissions" DataType="i=96" ValueRank="1" ArrayDimensions="0">
+    <DisplayName>DefaultRolePermissions</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:ListOfExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15668</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>32</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15680</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>4192</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+        <uax:ExtensionObject>
+          <uax:TypeId>
+            <uax:Identifier>i=16126</uax:Identifier>
+          </uax:TypeId>
+          <uax:Body>
+            <uax:RoleId>
+              <uax:Identifier>i=15716</uax:Identifier>
+            </uax:RoleId>
+            <uax:Permissions>32</uax:Permissions>
+          </uax:Body>
+        </uax:ExtensionObject>
+      </uax:ListOfExtensionObject>
+    </Value>
+  </UAVariable>
   <UAMethod NodeId="ns=1;s=AddVariableMethod" BrowseName="AddVariableMethod" ParentNodeId="ns=1;s=TestObject">
     <DisplayName>AddVariable</DisplayName>
     <Description>AddVariable</Description>
@@ -4730,6 +5397,29 @@
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
     </References>
+  </UAVariable>
+  <UAObject NodeId="ns=2;i=15957" BrowseName="2:https://www.systerel.fr/S2OPC/demo/data/origin2">
+    <DisplayName>https://www.systerel.fr/S2OPC/demo/data/origin2</DisplayName>
+    <References>
+      <Reference ReferenceType="HasProperty">ns=2;i=15958</Reference>
+      <Reference ReferenceType="HasProperty">i=15959</Reference>
+      <Reference ReferenceType="HasProperty">i=15960</Reference>
+      <Reference ReferenceType="HasProperty">i=15961</Reference>
+      <Reference ReferenceType="HasProperty">i=15962</Reference>
+      <Reference ReferenceType="HasProperty">i=15963</Reference>
+      <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <Reference ReferenceType="HasProperty">ns=1;i=16134</Reference>
+      <Reference ReferenceType="HasTypeDefinition">i=11616</Reference>
+    </References>
+  </UAObject>
+  <UAVariable NodeId="ns=2;i=15958" BrowseName="NamespaceUri" DataType="String">
+    <DisplayName>NamespaceUri</DisplayName>
+    <References>
+      <Reference ReferenceType="HasTypeDefinition">i=68</Reference>
+    </References>
+    <Value>
+      <uax:String>https://www.systerel.fr/S2OPC/demo/data/origin2</uax:String>
+    </Value>
   </UAVariable>
   <UAObject BrowseName="2:BLOCKs" NodeId="ns=2;s=Objects.15362.BLOCKs" ParentNodeId="ns=1;i=15361">
     <DisplayName>BLOCKs (15362)</DisplayName>

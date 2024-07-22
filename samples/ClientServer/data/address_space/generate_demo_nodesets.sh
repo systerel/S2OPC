@@ -30,22 +30,22 @@ function gen_nodeset() {
 }
 
 # Generate demo NodeSet for Micro profile + node management
-gen_nodeset s2opc_node_mgt.xml s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+gen_nodeset s2opc_node_mgt.xml s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Micro profile + file transfer
 gen_nodeset s2opc_file_transfer.xml s2opc_base_nodeset_origin.xml s2opc_base_file_transfer_origin.xml
 
 # Generate demo NodeSet for Micro profile
-gen_nodeset s2opc.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+gen_nodeset s2opc.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Micro profile + SKS
-gen_nodeset s2opc_sks.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+gen_nodeset s2opc_sks.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_base_sks_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Micro profile + PUSH
-gen_nodeset s2opc_push.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+gen_nodeset s2opc_push.xml --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_base_push_server_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet for Nano profile
-gen_nodeset s2opc_nano.xml --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
+gen_nodeset s2opc_nano.xml --remove-max-monitored-items --remove-methods --remove-max-node-management s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_demo_data_origin.xml s2opc_demo_data_perfs.xml
 
 # Generate demo NodeSet with limited base info data
-gen_nodeset s2opc_no_base_info.xml --remove-subtree "i=92" "i=93" --remove-unused --remove-backward-refs --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_data_origin.xml
+gen_nodeset s2opc_no_base_info.xml --remove-subtree "i=92" "i=93" --remove-unused --remove-backward-refs --remove-methods s2opc_base_nodeset_origin.xml s2opc_demo_role_permissions_origin.xml s2opc_demo_data_origin.xml

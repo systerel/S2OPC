@@ -834,6 +834,7 @@
       <Reference ReferenceType="HasProperty">i=15962</Reference>
       <Reference ReferenceType="HasProperty">i=15963</Reference>
       <Reference ReferenceType="HasProperty">i=15964</Reference>
+      <!-- Roles-related nodes. Defined in "s2opc_demo_role_permissions_origin.xml" -->
       <!--
       <Reference ReferenceType="HasProperty">i=16134</Reference>
       <Reference ReferenceType="HasProperty">i=16135</Reference>
@@ -953,7 +954,7 @@
       <String xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd" />
     </Value>
   </UAVariable>
-  <!-- Optional nodes: not supported -->
+  <!-- Optional nodes if RolePermissions mechanism used: added by a separate file e.g. "s2opc_demo_role_permissions_origin.xml" -->
   <!--
   <UAVariable NodeId="i=16134" BrowseName="DefaultRolePermissions" ParentNodeId="i=15957" DataType="i=96" ValueRank="1" ArrayDimensions="0">
     <DisplayName>DefaultRolePermissions</DisplayName>
@@ -7652,7 +7653,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">i=2268</Reference>
     </References>
   </UAObject>
-  <!-- Optional nodes : not supported -->
+  <!-- Optional nodes if RolePermissions mechanism used: added by a separate file e.g. "s2opc_demo_role_permissions_origin.xml" -->
   <!--
   <UAObject NodeId="i=15606" BrowseName="RoleSet" ParentNodeId="i=2268">
     <DisplayName>RoleSet</DisplayName>
