@@ -483,7 +483,7 @@ test-check:
     - './scripts/gen-sopc-types.py ./schemas/Opc.Ua.Types.bsd'
     - './scripts/generate-embedded-base-type-info.py ./schemas/Opc.Ua.NodeSet2.xml src/Common/opcua_types/sopc_embedded_nodeset2.h'
     # Check test types are up to date
-    - './scripts/gen-sopc-types.py --types_prefix S2OPC --ns_index 1 ./tests/ClientServer/data/customTypes.bsd --h_types_path ./tests/ClientServer/unit_tests/helpers/custom_types.h --c_types_path ./tests/ClientServer/unit_tests/helpers/custom_types.c --h_enum_types_path ./tests/ClientServer/unit_tests/helpers/custom_enum_types.h'
+    - './scripts/gen-sopc-types.py --types_prefix Custom --ns_index 1 ./tests/ClientServer/data/customTypes.bsd --files_path ./tests/ClientServer/unit_tests/helpers/'
     - './.format.sh'
     # Check that generated files are up to date
     - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'

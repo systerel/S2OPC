@@ -17,15 +17,15 @@
  * under the License.
  */
 
-#ifndef SOPC_S2OPC_Identifiers_H_
-#define SOPC_S2OPC_Identifiers_H_ 1
+#ifndef SOPC_Custom_Identifiers_H_
+#define SOPC_Custom_Identifiers_H_ 1
 
-#define OpcUaId_S2OPC_CustomDataType 10020
-#define OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary 10021
-#define OpcUaId_S2OPC_CustomDataType_Encoding_DefaultXml 10022
+#define OpcUaId_Custom_CustomDataType 10020
+#define OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary 10021
+#define OpcUaId_Custom_CustomDataType_Encoding_DefaultXml 10022
 
-#define OpcUaId_S2OPC_CustomDataType2 20020
-#define OpcUaId_S2OPC_CustomDataType2_Encoding_DefaultBinary 20021
-#define OpcUaId_S2OPC_CustomDataType2_Encoding_DefaultXml 20022
+#define OpcUaId_Custom_CustomDataType2 20020
+#define OpcUaId_Custom_CustomDataType2_Encoding_DefaultBinary 20021
+#define OpcUaId_Custom_CustomDataType2_Encoding_DefaultXml 20022
 
 #endif

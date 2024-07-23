@@ -32,14 +32,45 @@ H_FILE_PATH = 'src/Common/opcua_types/sopc_types.h'
 H_ENUM_FILE_PATH = 'src/Common/opcua_types/sopc_enum_types.h'
 C_FILE_PATH = 'src/Common/opcua_types/sopc_types.c'
 
+# Namespaces are very hard to handle in XPath and the ET API does not help much
+# {*} notations for namespace in XPath searches only appear in Py3.8
+# Moreover, the original namespaces are not parsed by default
+# (inspired from http://effbot.org/zone/element-namespaces.htm)
+def parse_xmlns(source):
+    # Note: the parser does not iterate over real prefixes of the ns...
+    ns_map = {}
+    for event, elem in ET.iterparse(source, ('start-ns',)):
+        if event == "start-ns":
+            prefix, uri = elem
+            if prefix not in ns_map:
+                ns_map[prefix] = uri
+    
+    return ns_map
+
+# When non-NS0 types are generated, use the type prefix to normalize type files names
+# Note: it is necessary to be able to reference this NS types into others if needed (see --imported_ns_prefixes)
+def configure_custom_files_path_from_prefix(ns):
+    lower_case_prefix = ns.types_prefix.lower()
+    global H_FILE_PATH
+    global C_FILE_PATH
+    global H_ENUM_FILE_PATH
+    H_FILE_PATH = ns.files_path + lower_case_prefix + '_types.h'
+    C_FILE_PATH = ns.files_path + lower_case_prefix + '_types.c'
+    H_ENUM_FILE_PATH = ns.files_path + lower_case_prefix + '_enum_types.h'
+
 def main():
     """Main program"""
     ns = parse_args()
-    if ns.types_prefix is None and (ns.ns_URI is not None or ns.ns_index != 0):
+    if ns.types_prefix is None and ns.ns_index != 0:
         raise ValueError("--types_prefix shall be set when namespace is not NS0")
-    schema = BinarySchema(ns.bsd, ns.types_prefix)
-    gen_header_file(ns.h_types_path, ns.h_enum_types_path, schema)
-    gen_implem_file(ns.ns_URI, ns.ns_index, ns.h_types_path, ns.c_types_path, schema)
+    elif ns.types_prefix is not None:
+        configure_custom_files_path_from_prefix(ns)
+    schema = BinarySchema(ns.bsd, ns.types_prefix, ns.ns_index, ns.imported_ns_prefixes)
+    gen_header_file(H_FILE_PATH, H_ENUM_FILE_PATH, schema)
+    ns_URI = None
+    if ns.types_prefix is not None and ns.ns_index == 0:
+        print("Warning: using NS URI field for EncodeableType instances since no NS index is defined for non-NS0: %s" % schema.targetNS)
+    gen_implem_file(ns_URI, ns.ns_index, H_FILE_PATH, C_FILE_PATH, schema)
 
 def parse_args():
     """
@@ -50,36 +81,28 @@ def parse_args():
     parser.add_argument('--types_prefix',
                         metavar='prefix type name',
                         required=False,
-                        help='Prefix used to generate global variables (only for custom types in non-NS0 namespace)')
+                        help='Prefix used to generate global variables (only for non-NS0 namespace types) and types files with prefix in lower case: <prefix>_types.h/c and <prefix>_enum_types.c')
     parser.add_argument('--ns_index',
                         metavar='OPC UA namespace index',
                         type=int,
                         default=0,
                         required=False,
                         help='Local namespace index for the OPC UA types (if index unknown, set namespace URI). Default is NS0.')
-    parser.add_argument('--ns_URI',
-                        metavar='OPC UA namespace URI',
-                        required=False,
-                        help='Namespace URI for the OPC UA types (namespace index is ignored if set)')
     parser.add_argument('bsd',
                         metavar='file.bsd',
                         help='OPC UA type description')
-    parser.add_argument('--h_types_path',
-                        default=H_FILE_PATH,
-                        metavar='types.h',
+    parser.add_argument('--files_path',
+                        default='',
+                        metavar='path',
                         required=False,
-                        help='Output OPC UA type C header')
-    parser.add_argument('--c_types_path',
-                        default=C_FILE_PATH,
-                        metavar='types.c',
-                        required=False,
-                        help='Output OPC UA type C file')
-    parser.add_argument('--h_enum_types_path',
-                        default=H_ENUM_FILE_PATH,
-                        metavar='enum_types.h',
-                        required=False,
-                        help='Output OPC UA enum type C header')
-
+                        help='(optional) directory path for non-NS0 types files generation')
+    parser.add_argument('--imported_ns_prefixes', default=[], nargs='+', dest='imported_ns_prefixes',
+                        help='''
+                        When other namespace types are imported 
+                        (except for "http://opcfoundation.org/UA" and "http://opcfoundation.org/BinarySchema/")
+                        the value used for --types_prefix used to generate those namespace types shall be provided 
+                        to be able to reference those imported types.
+                        ''')
     return parser.parse_args()
 
 def gen_header_file(h_types_path, h_enum_types_path, schema):
@@ -92,6 +115,9 @@ def gen_header_file(h_types_path, h_enum_types_path, schema):
             out_enum.write(H_ENUM_FILE_START)
         else:
             out.write(H_FILE_CUSTOM_START.format(enum_h_file=os.path.basename(h_enum_types_path), prefix=schema.types_prefix))
+            # add includes for possible use of imported types in the current NS types
+            for imported_include in schema.imported_includes:
+                out.write(H_FILE_CUSTOM_INCLUDE.format(included_h_file=imported_include))
             out_enum.write(H_ENUM_FILE_CUSTOM_START.format(prefix=schema.types_prefix))
         schema.gen_header_types(out, out_enum)
         if schema.is_ns0_types():
@@ -152,7 +178,6 @@ class BinarySchema:
       'opc': "http://opcfoundation.org/BinarySchema/",
       'xsi': "http://www.w3.org/2001/XMLSchema-instance",
       'ua': "http://opcfoundation.org/UA/",
-      'tns': "http://opcfoundation.org/UA/",
     }
     """BSD namespace shortcuts"""
 
@@ -178,6 +203,7 @@ class BinarySchema:
             'opc:Float': 'float',
             'opc:Double': 'double',
             'opc:String': 'SOPC_String',
+            'opc:CharArray': 'SOPC_String',
             'opc:DateTime': 'SOPC_DateTime',
             'opc:Guid': 'SOPC_Guid',
             'opc:ByteString': 'SOPC_ByteString',
@@ -193,11 +219,64 @@ class BinarySchema:
             'ua:DiagnosticInfo': 'SOPC_DiagnosticInfo',
     }
 
-    def __init__(self, filename, types_prefix):
+    BUILTIN_CONVERT_TYPE_BARENAME = {
+            'CharArray' : 'String'
+    }
+    
+    # Compute self.xmlns_indexes which provide computed NS index for each imported XML NS, and prefixes of imported NS
+    # Note: current types NS index <N> is considered as maximum NS index, X dependencies are computed to be <N-X>, <N-X+1>, etc. in the order of Import tags except for NS0.
+    def check_and_compute_ns_indexes(self, types_ns_index, imported_ns_prefixes):
+        # Check default NS are the expected ones
+        for ns in self.OPC_NS:
+            if self.xmlns[ns] != self.OPC_NS[ns]:
+                raise Exception("Unexpected value for XML NS %s: found %s expecting %s" % (ns, self.xmlns[ns], self.OPC_NS[ns]))
+
+        # If target NS is NS0: no NS import to deal with, ignore specific treatment
+        if self.targetNS != self.OPC_NS['ua']:
+            # Compute reverse xmlns: URI => XML NS alias
+            xmlns_rev = dict()
+            for ns in self.xmlns:
+                nsURI = self.xmlns[ns]
+                if nsURI in xmlns_rev and types_ns_index != 0:
+                    raise Exception("Several XML NS aliases for same URI %s: %s and %s" % (nsURI, self.xmlns[ns], xmlns_rev[nsURI]))
+                xmlns_rev[nsURI] = ns
+            # Compute the NS index for NS dependencies if existing: considering incremental values with {types_ns_index} as maximum value
+            nsImportNodes = self.tree.findall('opc:Import', self.xmlns)
+            # Compute NS URI imported eliminating the well-known NS0 and ~built-in-NS
+            nsImported = [nsImport.get('Namespace') for nsImport in nsImportNodes
+                          if xmlns_rev[nsImport.get('Namespace')] not in self.OPC_NS]
+            nbNsImported = len(nsImported)
+            if nbNsImported != len(imported_ns_prefixes):
+                raise Exception("Incoherent number of imported namespaces %d and provided NS types prefixes %d" % (nbNsImported, len(imported_ns_prefixes))) 
+            if types_ns_index - nbNsImported <= 0:
+                raise Exception("Number of imported NS %d greater than current types NS %d" % (nbNsImported, types_ns_index)) 
+            # Compute starting NS index to used based on max types_ns_index
+            nsImportedIndex = types_ns_index - nbNsImported
+            nsImportedCounter = 0
+            # Populate self.xmlns_indexes, self.xmln_types_prefixes and self.imported_ns_prefixes
+            for nsURI in nsImported:
+                ns = xmlns_rev[nsURI]
+                self.xmlns_indexes[ns] = nsImportedIndex
+                self.xmlns_types_prefixes[ns] = imported_ns_prefixes[nsImportedCounter] + '_'
+                self.imported_includes.append(imported_ns_prefixes[nsImportedCounter].lower() + '_types.h')
+                nsImportedIndex = nsImportedIndex + 1
+                nsImportedCounter = nsImportedCounter + 1
+            # NS 0 has no prefix in type name
+            self.xmlns_indexes['ua'] = 0
+            self.xmlns_types_prefixes['ua'] = ''
+            self.imported_includes.insert(0, 'sopc_types.h')
+
+    def __init__(self, filename, types_prefix, types_ns_index, imported_ns_prefixes):
         self.tree = ET.parse(filename)
         root = self.tree.getroot()
         if root.tag != self.ROOT_TAG:
             fatal("Invalid root element in bsd file: %s" % root.tag)
+        self.targetNS = root.get('TargetNamespace') # the target NS of types
+        self.xmlns = parse_xmlns(filename)
+        self.xmlns_indexes = dict() # NS indexes for the imported OPC UA NS
+        self.xmlns_types_prefixes = dict() # the types prefixes for the imported OPC UA NS when generated
+        self.imported_includes = [] # the includes necessary for the imported OPC UA NS types
+        self.check_and_compute_ns_indexes(types_ns_index, imported_ns_prefixes)
         self.bsd2c = OrderedDict(self.BUILTIN_TYPES)
         self.enums = dict()
         self.fields = dict()
@@ -233,14 +312,15 @@ class BinarySchema:
         Generates the declaration of typename in the header file.
         """
         typename = self.normalize_typename(typename)
+        barename = typename.split(':')[1]
         if typename in self.bsd2c:
             return
-
-        barename = typename.split(':')[1]
         node = self._get_node(barename)
         barename = self.types_prefix + barename
 
         if node.tag == self.STRUC_TAG:
+            if node.get('BaseType') == 'ua:Union':
+                fatal("Unsupported BaseType %s for type %s" % (node.get('BaseType'), node.get('Name')))
             ctype = self._gen_struct_decl(out, out_enum, node, barename)
             self.known_writer.encodeable_types.append((typename, barename))
         elif node.tag == self.ENUM_TAG:
@@ -253,8 +333,8 @@ class BinarySchema:
         self.bsd2c[typename] = ctype
 
     def gen_header_types(self, out, out_enum):
-        types = (self.tree.findall('opc:EnumeratedType', self.OPC_NS) +
-                 self.tree.findall('opc:StructuredType', self.OPC_NS))
+        types = (self.tree.findall('opc:EnumeratedType', self.xmlns) +
+                 self.tree.findall('opc:StructuredType', self.xmlns))
         for typ in types:
             name = typ.get('Name')
             if name in PREDEFINED_TYPES:
@@ -306,12 +386,21 @@ class BinarySchema:
         if fields:
             out.write(ENCODEABLE_TYPE_FIELD_DESC_START.format(name=barename))
         for field in fields:
+            field_ns_index = 0
             is_built_in, type_index = self.get_type_index(field.type_name)
+            # When the field type is in another NS, the NS index shall be referenced 
+            # and type index in this other NS types array is referenced by type index enum name
+            if not is_built_in and not field.is_same_ns:
+                field_barename = field.type_name.split(':')[1]
+                field_ns_index = self.xmlns_indexes[field.type_ns]
+                type_index = 'SOPC_TypeInternalIndex_' + self.xmlns_types_prefixes[field.type_ns] + field_barename
             out.write(ENCODEABLE_TYPE_FIELD_DESC.format(
                 name=barename,
                 is_built_in=c_bool_value(is_built_in),
                 is_array_length=c_bool_value(field.is_array_length),
                 is_to_encode=c_bool_value(field.is_to_encode),
+                is_same_ns=c_bool_value(is_built_in or field.is_same_ns),
+                ns_index=field_ns_index,
                 type_index=type_index,
                 field_name=field.name
             ))
@@ -339,6 +428,9 @@ class BinarySchema:
         is_built_in = typename in self.BUILTIN_TYPES
         if is_built_in:
             template = 'SOPC_{name}_Id'
+            # check if conversion needed for built in types
+            if barename in self.BUILTIN_CONVERT_TYPE_BARENAME:
+                barename = self.BUILTIN_CONVERT_TYPE_BARENAME[barename]
         elif self.is_enum(self.normalize_typename(typename)):
             # Enumerated types are unsigned integer (TypeId computed in enums dict)
             is_built_in = True
@@ -370,8 +462,8 @@ class BinarySchema:
         Returns the set of all names of types present in the schema that have
         not been translated.
         """
-        nodes = (self.tree.findall('opc:StructuredType', self.OPC_NS) +
-                 self.tree.findall('opc:EnumeratedType', self.OPC_NS))
+        nodes = (self.tree.findall('opc:StructuredType', self.xmlns) +
+                 self.tree.findall('opc:EnumeratedType', self.xmlns))
         names = (self.normalize_typename(node.get('Name')) for node in nodes)
         return set(filter(lambda n: n not in self.bsd2c, names))
 
@@ -379,10 +471,12 @@ class BinarySchema:
         """
         Generates the declarations for a structured type.
         """
-        children = node.findall('./opc:Field', self.OPC_NS)
+        children = node.findall('./opc:Field', self.xmlns)
         fields = [Field(self, child) for child in children]
         for field in fields:
-            self.gen_header_type(out, out_enum, field.type_name)
+            # Generate field type if not already done and if defined in target/current NS
+            if field.is_same_ns:
+                self.gen_header_type(out, out_enum, field.type_name)
         fields = [field for field in fields if field.name != 'RequestHeader']
         self._check_array_fields(name, fields)
 
@@ -460,7 +554,7 @@ class BinarySchema:
                 ENUM_DECL_ELEM.format(name=name,
                                       elem=child.attrib['Name'],
                                       value=child.attrib['Value'])
-                for child in node.findall('./opc:EnumeratedValue', self.OPC_NS)
+                for child in node.findall('./opc:EnumeratedValue', self.xmlns)
         ]
         # append an element that will size the enum as an int32
         elem_decls.append(ENUM_DECL_ELEM.format(name=name, elem="SizeOf", value=maxUint))
@@ -489,7 +583,15 @@ class BinarySchema:
         Returns the C type for the given UA type.
         The UA type must have been normalized.
         """
-        return self.bsd2c[typename]
+        # Check if known type
+        if typename in self.bsd2c:
+            return self.bsd2c[typename]
+        xmlNS, barename = typename.split(':')
+        # Check if the type is from an imported NS types that can be referenced
+        if xmlNS in self.xmlns_types_prefixes and self.xmlns[xmlNS] != self.targetNS:
+            return 'OpcUa_' + self.xmlns_types_prefixes[xmlNS] + barename
+        else:
+            raise Exception("Unexpected unknown type referenced %s" % typename)
 
     def is_enum(self, typename):
         """
@@ -521,6 +623,8 @@ class Field:
         self.schema = schema
         self.name = node.get('Name')
         self.type_name = node.get('TypeName')
+        self.type_ns =  self.type_name.split(':')[0]
+        self.is_same_ns = schema.xmlns[self.type_ns] == schema.targetNS
         self.length_field = node.get('LengthField')
         if not self.name:
             fatal("Missing name for field node: %s", node)
@@ -649,6 +753,11 @@ H_FILE_CUSTOM_START = """
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
 #include "{enum_h_file}"
+
+"""[1:]
+
+H_FILE_CUSTOM_INCLUDE = """
+#include "{included_h_file}"
 
 """[1:]
 
@@ -974,6 +1083,8 @@ ENCODEABLE_TYPE_FIELD_DESC = """
         {is_built_in},  // isBuiltIn
         {is_array_length}, // isArrayLength
         {is_to_encode}, // isToEncode
+        {is_same_ns}, // isSameNs
+        (uint16_t) {ns_index}, // nsIndex
         (uint32_t) {type_index}, // typeIndex
         (uint32_t) offsetof(OpcUa_{name}, {field_name}) // offset
     }},

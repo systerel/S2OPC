@@ -48,6 +48,8 @@ typedef struct
     SOPC_EncodeableType* encoder;
 } SOPC_EncodeableType_UserTypeValue;
 
+static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_EncodeableType* type, void* pValue);
+
 static uint64_t typeId_hash(const uintptr_t data)
 {
     return ((uint64_t)((const SOPC_EncodeableType_UserTypeKey*) data)->typeId) +
@@ -121,7 +123,7 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* pEncoder)
 
     if (g_UserEncodeableTypes == NULL)
     {
-        // Create dictionnary
+        // Create dictionary
         g_UserEncodeableTypes = SOPC_Dict_Create(0, typeId_hash, typeId_equal, type_free, type_free);
         if (g_UserEncodeableTypes == NULL)
         {
@@ -181,6 +183,97 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
         g_UserEncodeableTypes = NULL;
     }
     return SOPC_STATUS_OK;
+}
+
+static void SOPC_EncodeableType_RemoveAllUserTypes_ForEach(const uintptr_t key, uintptr_t value, uintptr_t user_data)
+{
+    SOPC_UNUSED_ARG(value);
+    SOPC_SLinkedList* toRemoveList = (SOPC_SLinkedList*) user_data;
+    uintptr_t res = SOPC_SLinkedList_Append(toRemoveList, 0, key);
+    SOPC_UNUSED_RESULT(res);
+}
+
+void SOPC_EncodeableType_RemoveAllUserTypes(void)
+{
+    SOPC_SLinkedList* toRemoveList = SOPC_SLinkedList_Create(0);
+    if (NULL == toRemoveList)
+    {
+        return;
+    }
+    SOPC_Dict_ForEach(g_UserEncodeableTypes, SOPC_EncodeableType_RemoveAllUserTypes_ForEach, (uintptr_t) toRemoveList);
+    SOPC_SLinkedListIterator toRemoveIt = SOPC_SLinkedList_GetIterator(toRemoveList);
+    while (SOPC_SLinkedList_HasNext(&toRemoveIt))
+    {
+        SOPC_Dict_Remove(g_UserEncodeableTypes, SOPC_SLinkedList_Next(&toRemoveIt));
+    }
+    SOPC_SLinkedList_Delete(toRemoveList);
+
+    SOPC_ASSERT(SOPC_Dict_Size(g_UserEncodeableTypes) == 0);
+    SOPC_Dict_Delete(g_UserEncodeableTypes);
+    g_UserEncodeableTypes = NULL;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
+                                                         const SOPC_EncodeableType** nsTypesArray)
+{
+    if (0 == nsTypesArrayLen || NULL == nsTypesArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus localStatus = SOPC_STATUS_OK;
+    const SOPC_EncodeableType* nsType = NULL;
+    const uint16_t nsIndex = nsTypesArray[0]->NamespaceIndex;
+    for (size_t i = 0; i < nsTypesArrayLen; i++)
+    {
+        nsType = nsTypesArray[i];
+        SOPC_ASSERT(nsIndex == nsType->NamespaceIndex);
+        localStatus = SOPC_EncodeableType_AddUserType(nsType);
+        // Keep NOK status if already NOK
+        status = (SOPC_STATUS_OK == status ? localStatus : status);
+    }
+    /* Trick to allow to be able to find the NS type array without TypeId known:
+     * use 0 to store first type if not already used TypeId, otherwise it is already ok.*/
+    nsType = SOPC_EncodeableType_GetUserType(nsIndex, 0);
+    if (NULL == nsType)
+    {
+        localStatus = insertKeyInUserTypes(nsTypesArray[0], nsIndex, 0);
+    }
+
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen,
+                                                           const SOPC_EncodeableType** nsTypesArray)
+{
+    if (0 == nsTypesArrayLen || NULL == nsTypesArray)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_OK;
+    SOPC_ReturnStatus localStatus = SOPC_STATUS_OK;
+    const SOPC_EncodeableType* nsType = NULL;
+    const uint16_t nsIndex = nsTypesArray[0]->NamespaceIndex;
+
+    for (size_t i = 0; i < nsTypesArrayLen; i++)
+    {
+        nsType = nsTypesArray[i];
+        SOPC_ASSERT(nsIndex == nsType->NamespaceIndex);
+        localStatus = SOPC_EncodeableType_RemoveUserType(nsType);
+        // Keep NOK status if already NOK
+        status = (SOPC_STATUS_OK == status ? localStatus : status);
+    }
+    /* Because of the trick in RegisterTypesArray, we have to create a key for a possibly virtual typeId 0 */
+    SOPC_EncodeableType_UserTypeKey key = {0};
+    key.nsIndex = nsIndex;
+    key.typeId = 0;
+
+    nsType = (SOPC_EncodeableType*) SOPC_Dict_GetKey(g_UserEncodeableTypes, (const uintptr_t) &key, NULL);
+    if (NULL != nsType)
+    {
+        SOPC_Dict_Remove(g_UserEncodeableTypes, (const uintptr_t) &key);
+    }
+    return status;
 }
 
 SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint16_t nsIndex, uint32_t typeId)
@@ -252,13 +345,54 @@ const char* SOPC_EncodeableType_GetName(SOPC_EncodeableType* encType)
     return result;
 }
 
+static inline bool checkEncodeableTypeDescIsValid(const SOPC_EncodeableType_FieldDescriptor* desc)
+{
+    if (desc->isBuiltIn || desc->isSameNs)
+    {
+        return true;
+    }
+    else
+    {
+        if (OPCUA_NAMESPACE_INDEX == desc->nsIndex && desc->typeIndex < SOPC_TypeInternalIndex_SIZE)
+        {
+            return true;
+        }
+        else
+        {
+            /* We are not able to check for the max size here */
+            return (NULL != SOPC_EncodeableType_GetUserType(desc->nsIndex, 0));
+        }
+    }
+    return false;
+}
+
 static SOPC_EncodeableType* getKnownEncodeableType(SOPC_EncodeableType* encType,
                                                    const SOPC_EncodeableType_FieldDescriptor* desc)
 {
     const uint32_t typeIndex = desc->typeIndex;
-    SOPC_ASSERT(typeIndex < SOPC_TypeInternalIndex_SIZE &&
-                "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
-    return encType->namespaceTypesArray[typeIndex];
+    SOPC_EncodeableType* encTypeZeroId = NULL;
+    if (desc->isSameNs)
+    {
+        SOPC_ASSERT(typeIndex < SOPC_TypeInternalIndex_SIZE &&
+                    "Field descriptor type index cannot be greater than SOPC_TypeInternalIndex_SIZE");
+        return encType->namespaceTypesArray[typeIndex];
+    }
+    else
+    {
+        if (OPCUA_NAMESPACE_INDEX == desc->nsIndex && desc->typeIndex < SOPC_TypeInternalIndex_SIZE)
+        {
+            /* Well known encodeable type array */
+            return sopc_KnownEncodeableTypes[desc->typeIndex];
+        }
+        else
+        {
+            /* Use a trick to retrieve the encodeable type array:
+             * TypeId 0 is always added to access the array of the namespace */
+            encTypeZeroId = SOPC_EncodeableType_GetUserType(desc->nsIndex, 0);
+            SOPC_ASSERT(NULL != encTypeZeroId);
+            return encTypeZeroId->namespaceTypesArray[desc->typeIndex];
+        }
+    }
 }
 
 static size_t getAllocationSize(SOPC_EncodeableType* encType, const SOPC_EncodeableType_FieldDescriptor* desc)
@@ -332,8 +466,13 @@ static SOPC_ReturnStatus SOPC_EncodeableType_PfnCopyArray(void* destValue, const
 {
     // When copying array, values in an array were only allocated before this call
     // We need at least the encodeableType field to be initialized for generic copy function to work
-    SOPC_EncodeableObject_Initialize(*(SOPC_EncodeableType* const*) srcValue, destValue);
-    return SOPC_EncodeableObject_Copy(*(SOPC_EncodeableType* const*) srcValue, destValue, srcValue);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_InternalInitialize(*(SOPC_EncodeableType* const*) srcValue, destValue);
+    if (SOPC_STATUS_OK == status)
+    {
+        status = SOPC_EncodeableObject_Copy(*(SOPC_EncodeableType* const*) srcValue, destValue, srcValue);
+    }
+    return status;
 }
 
 static SOPC_ReturnStatus SOPC_EncodeableType_PfnCopy(void* destValue, const void* srcValue)
@@ -399,7 +538,7 @@ static const void* const* retrieveConstArrayAddressPtr(const void* pValue,
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 
-void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
+static SOPC_ReturnStatus SOPC_EncodeableObject_InternalInitialize(SOPC_EncodeableType* type, void* pValue)
 {
     SOPC_ASSERT(type != NULL);
     SOPC_ASSERT(pValue != NULL);
@@ -410,6 +549,11 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
     for (int32_t i = 0; i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return SOPC_STATUS_NOT_SUPPORTED;
+        }
         void* pField = (char*) pValue + desc->offset;
         SOPC_EncodeableObject_PfnInitialize* initFunction = NULL;
 
@@ -440,6 +584,14 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
             initFunction(pField);
         }
     }
+    return SOPC_STATUS_OK;
+}
+
+void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue)
+{
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_InternalInitialize(type, pValue);
+    SOPC_UNUSED_RESULT(status);
+    return;
 }
 
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
@@ -453,6 +605,11 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
     for (int32_t i = 0; i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return;
+        }
         void* pField = (char*) pValue + desc->offset;
         SOPC_EncodeableObject_PfnClear* clearFunction = NULL;
 
@@ -494,8 +651,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Create(SOPC_EncodeableType* encTyp, void
         *encObject = SOPC_Malloc(encTyp->AllocationSize);
         if (*encObject != NULL)
         {
-            SOPC_EncodeableObject_Initialize(encTyp, *encObject);
-            status = SOPC_STATUS_OK;
+            status = SOPC_EncodeableObject_InternalInitialize(encTyp, *encObject);
         }
         else
         {
@@ -541,6 +697,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return SOPC_STATUS_NOT_SUPPORTED;
+        }
         const void* pField = (const char*) pValue + desc->offset;
 
         if (!desc->isToEncode)
@@ -600,12 +761,17 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
 
     if (SOPC_STATUS_OK == status)
     {
-        SOPC_EncodeableObject_Initialize(type, pValue);
+        status = SOPC_EncodeableObject_InternalInitialize(type, pValue);
     }
 
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return SOPC_STATUS_NOT_SUPPORTED;
+        }
         void* pField = (char*) pValue + desc->offset;
         SOPC_EncodeableObject_PfnDecode* decodeFunction = NULL;
 
@@ -669,6 +835,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return SOPC_STATUS_NOT_SUPPORTED;
+        }
         const void* pSrcField = (const char*) srcValue + desc->offset;
         void* pDestField = (char*) destValue + desc->offset;
 
@@ -740,9 +911,7 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Move(void* destObj, void* srcObj)
     SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) srcObj;
 
     memcpy(destObj, srcObj, encType->AllocationSize);
-    SOPC_EncodeableObject_Initialize(encType, srcObj);
-
-    return SOPC_STATUS_OK;
+    return SOPC_EncodeableObject_InternalInitialize(encType, srcObj);
 }
 
 SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
@@ -765,6 +934,11 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,
     for (int32_t i = 0; SOPC_STATUS_OK == status && i < type->NoOfFields; ++i)
     {
         const SOPC_EncodeableType_FieldDescriptor* desc = &type->Fields[i];
+        bool validDesc = checkEncodeableTypeDescIsValid(desc);
+        if (!validDesc)
+        {
+            return SOPC_STATUS_NOT_SUPPORTED;
+        }
         const void* pRightField = (const char*) rightValue + desc->offset;
         const void* pLeftField = (const char*) leftValue + desc->offset;
 

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "opcua_Custom_identifiers.h"
 #include "opcua_identifiers.h"
 #include "opcua_statuscodes.h"
 #include "sopc_address_space.h"
@@ -48,7 +49,6 @@
 #include "testlib_write.h"
 
 #include "custom_types.h"
-#include "opcua_S2OPC_identifiers.h"
 
 #define XML_UA_NODESET_PATH "./S2OPC_Test_NodeSet.xml"
 
@@ -161,7 +161,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
     OpcUa_VariableNode_Initialize(varNode);
     varNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421000};
     varNode->NodeClass = OpcUa_NodeClass_Variable;
-    varNode->DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType};
+    varNode->DataType = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_Custom_CustomDataType};
     varNode->ValueRank = -2; // Any
     status = SOPC_AddressSpace_Append(address_space, varNodeCustomDT);
 
@@ -171,7 +171,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         OpcUa_ObjectNode* objNode = &customDefaultBinaryNode->data.object;
         OpcUa_ObjectNode_Initialize(objNode);
         objNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1,
-                                        .Data.Numeric = OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary};
+                                        .Data.Numeric = OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary};
         objNode->NodeClass = OpcUa_NodeClass_Object;
 
         objNode->References = SOPC_Calloc(1, sizeof(OpcUa_ReferenceNode));
@@ -182,7 +182,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         refNode->ReferenceTypeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasEncoding};
         refNode->IsInverse = true;
         refNode->TargetId = (SOPC_ExpandedNodeId){
-            {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType}, {0}, 0};
+            {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_Custom_CustomDataType}, {0}, 0};
         status = SOPC_AddressSpace_Append(address_space, customDefaultBinaryNode);
     }
 
@@ -191,7 +191,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         // Add the "DataType" node that references the Structure DataType
         OpcUa_DataTypeNode* dtNode = &customDTNode->data.data_type;
         OpcUa_DataTypeNode_Initialize(dtNode);
-        dtNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType};
+        dtNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_Custom_CustomDataType};
         dtNode->NodeClass = OpcUa_NodeClass_DataType;
 
         dtNode->References = SOPC_Calloc(1, sizeof(OpcUa_ReferenceNode));
@@ -214,7 +214,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         varNode2->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = 421000 * 2};
         varNode2->NodeClass = OpcUa_NodeClass_Variable;
         varNode2->DataType =
-            (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType * 2};
+            (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_Custom_CustomDataType * 2};
         varNode2->ValueRank = -1;
         status = SOPC_AddressSpace_Append(address_space, varNodeCustomDT2);
     }
@@ -226,7 +226,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         OpcUa_ObjectNode* objNode = &custom2DefaultBinaryNode->data.object;
         OpcUa_ObjectNode_Initialize(objNode);
         objNode->NodeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 1,
-                                        .Data.Numeric = OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary * 2};
+                                        .Data.Numeric = OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary * 2};
         objNode->NodeClass = OpcUa_NodeClass_Object;
 
         objNode->References = SOPC_Calloc(1, sizeof(OpcUa_ReferenceNode));
@@ -237,7 +237,7 @@ static SOPC_ReturnStatus addNodesForCustomDataTypeTests(SOPC_AddressSpace* addre
         refNode->ReferenceTypeId = (SOPC_NodeId){SOPC_IdentifierType_Numeric, 0, .Data.Numeric = OpcUaId_HasEncoding};
         refNode->IsInverse = true;
         refNode->TargetId = (SOPC_ExpandedNodeId){
-            {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_S2OPC_CustomDataType * 2}, {0}, 0};
+            {SOPC_IdentifierType_Numeric, 1, .Data.Numeric = OpcUaId_Custom_CustomDataType * 2}, {0}, 0};
         status = SOPC_AddressSpace_Append(address_space, custom2DefaultBinaryNode);
     }
 
@@ -269,9 +269,9 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
     SOPC_ExtensionObject extObj;
     SOPC_ExtensionObject_Initialize(&extObj);
 
-    OpcUa_S2OPC_CustomDataType* instCDT = NULL;
+    OpcUa_Custom_CustomDataType* instCDT = NULL;
 
-    status = SOPC_ExtensionObject_CreateObject(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
+    status = SOPC_ExtensionObject_CreateObject(&extObj, &OpcUa_Custom_CustomDataType_EncodeableType, (void**) &instCDT);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     instCDT->fieldb = true;
@@ -311,7 +311,7 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     // Modify TypeId for custom 2 DT encoding Default Binary node
-    extObj.TypeId.NodeId.Data.Numeric = OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary * 2;
+    extObj.TypeId.NodeId.Data.Numeric = OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary * 2;
 
     // Write the extension object into the node with compatible DataType2 (expecting OK)
     status = SOPC_WriteRequest_SetWriteValue(writeRequest, 2, &varNodeCustomDT2->data.variable.NodeId,
@@ -355,7 +355,7 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
 
     // Modify TypeId for custom 2 DT encoding Default Binary node for second element in array
     dataValue.Value.Value.Array.Content.ExtObjectArr[1].TypeId.NodeId.Data.Numeric =
-        OpcUaId_S2OPC_CustomDataType_Encoding_DefaultBinary * 2;
+        OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary * 2;
 
     // Write an array with 2 elements with different DataType into the node with custom DataType (expecting NOK)
     status = SOPC_WriteRequest_SetWriteValue(writeRequest, 6, &varNodeCustomDT->data.variable.NodeId,

@@ -137,6 +137,17 @@ typedef SOPC_ReturnStatus(SOPC_EncodeableObject_PfnComp)(const void* left, const
  * The \c isToEncode field indicates whether this field shall be encoded and
  * decoded.  When false, the field is only initialized and cleared.
  *
+ * The \c isSameNs field indicates whether the referenced type is in the same
+ * namespace than the type containing the field. When false, the \c nsIndex shall
+ * be used to resolve the referenced type.
+ *
+ * The \c nsIndex field indicates the namespace index of the referenced type.
+ * In order to could be resolved, the namespace shall have been recorded by
+ * the
+ * in the
+ * It shall be a valid value of ::SOPC_TypeInternalIndex enum type.
+ * Note: fields can only be of internal defined types for user-defined types.
+ *
  * The \c typeIndex field indicates the index of type in internal types array
  * (namespaceTypesArray of encodeable type containing the field descriptor)
  * It shall be a valid value of ::SOPC_TypeInternalIndex enum type.
@@ -150,7 +161,9 @@ typedef struct SOPC_EncodeableType_FieldDescriptor
     bool isBuiltIn : 1;
     bool isArrayLength : 1;
     bool isToEncode : 1;
-    uint32_t typeIndex : 29;
+    bool isSameNs : 1;
+    uint16_t nsIndex : 7;
+    uint32_t typeIndex : 21;
     uint32_t offset;
 } SOPC_EncodeableType_FieldDescriptor;
 
@@ -184,7 +197,7 @@ typedef const struct SOPC_EncodeableType_Struct
  *              will successfully identify the registered encodeable type
  *
  * \note        All registered encoders must be freed by
- *              SOPC_EncodeableType_RemoveUserType
+ *              ::SOPC_EncodeableType_RemoveUserType or ::SOPC_EncodeableType_RemoveAllUserTypes
  *
  *  \param encoder        The encoder definition to register
  *  \return               A status code indicating the result of operation
@@ -201,6 +214,12 @@ SOPC_ReturnStatus SOPC_EncodeableType_AddUserType(SOPC_EncodeableType* encoder);
 SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encoder);
 
 /**
+ * \brief       Removes all user-defined encodeable types previously added by
+ *              ::SOPC_EncodeableType_AddUserType or ::SOPC_EncodeableType_RegisterTypesArray
+ */
+void SOPC_EncodeableType_RemoveAllUserTypes(void);
+
+/**
  *  \brief          Retrieve a user-defined encodeable type with the given type Id.
  *
  *  \param nsIndex        Namespace index of the \p typeId
@@ -208,6 +227,37 @@ SOPC_ReturnStatus SOPC_EncodeableType_RemoveUserType(SOPC_EncodeableType* encode
  *  \return               The searched encodeable type or NULL if parameters are incorrect or type is not found
  */
 SOPC_EncodeableType* SOPC_EncodeableType_GetUserType(uint16_t nsIndex, uint32_t typeId);
+
+/**
+ * \brief       Registers an encodeable types array.
+ *              Further calls to SOPC_EncodeableType_GetEncodeableType
+ *              will successfully identify the registered encodeable types.
+ *
+ * \note        All registered encodeable types arrays must be cleared by
+ *              using ::SOPC_EncodeableType_UnRegisterTypesArray or ::SOPC_EncodeableType_RemoveAllUserTypes
+ *
+ * \warning     All encodeable types in the array shall have the same namesapce index,
+ *              otherwise an assertion is triggered.
+ *
+ *
+ *  \param nsTypesArrayLen  The length of the \p nsTypesArray types array.
+ *  \param nsTypesArray     The :SOPC_EncodeableType array containing the types for the provided namespace index.
+ *
+ *  \return               A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableType_RegisterTypesArray(size_t nsTypesArrayLen,
+                                                         const SOPC_EncodeableType** nsTypesArray);
+
+/**
+ * \brief       UnRegisters an encodeable types array.
+ *
+ *  \param nsTypesArrayLen  The length of the \p nsTypesArray types array.
+ *  \param nsTypesArray     The :SOPC_EncodeableType array containing the types for the provided namespace index.
+ *
+ *  \return               A status code indicating the result of operation
+ */
+SOPC_ReturnStatus SOPC_EncodeableType_UnRegisterTypesArray(size_t nsTypesArrayLen,
+                                                           const SOPC_EncodeableType** nsTypesArray);
 
 /**
  *  \brief          Retrieve a defined encodeable type with the given type Id.
