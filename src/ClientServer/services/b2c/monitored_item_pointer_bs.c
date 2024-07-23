@@ -265,6 +265,22 @@ void monitored_item_pointer_bs__create_monitored_item_pointer(
     }
 }
 
+static void check_and_move_if_last_cached_value_shall_be_kept(SOPC_InternalMonitoredItemFilterCtx* oldFilterCtx,
+                                                              SOPC_InternalMonitoredItemFilterCtx* newFilterCtx)
+{
+    if (NULL == oldFilterCtx || NULL == newFilterCtx)
+    {
+        return;
+    }
+    if (oldFilterCtx->isDataFilter && newFilterCtx->isDataFilter &&
+        oldFilterCtx->Filter.Data.dataFilter.DeadbandType != OpcUa_DeadbandType_None &&
+        newFilterCtx->Filter.Data.dataFilter.DeadbandType != OpcUa_DeadbandType_None)
+    {
+        newFilterCtx->Filter.Data.lastCachedValueForFilter = oldFilterCtx->Filter.Data.lastCachedValueForFilter;
+        oldFilterCtx->Filter.Data.lastCachedValueForFilter = NULL;
+    }
+}
+
 void monitored_item_pointer_bs__modify_monitored_item_pointer(
     const constants__t_monitoredItemPointer_i monitored_item_pointer_bs__p_monitoredItemPointer,
     const constants__t_TimestampsToReturn_i monitored_item_pointer_bs__p_timestampToReturn,
@@ -285,6 +301,9 @@ void monitored_item_pointer_bs__modify_monitored_item_pointer(
 
     SOPC_InternalMonitoredItemFilterCtx* newFilterCtx =
         (SOPC_InternalMonitoredItemFilterCtx*) monitored_item_pointer_bs__p_filterCtx;
+
+    check_and_move_if_last_cached_value_shall_be_kept(monitItem->filterCtx, newFilterCtx);
+
     monitItem->discardOldest = monitored_item_pointer_bs__p_discardOldest;
     monitItem->queueSize = monitored_item_pointer_bs__p_queueSize;
     SOPC_InternalMonitoredFilter_Free(monitItem->filterCtx);
