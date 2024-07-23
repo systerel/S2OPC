@@ -1020,6 +1020,19 @@ SOPC_ReturnStatus SOPC_ExtensionObject_CompareAux(const void* left, const void* 
 void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj);
 void SOPC_ExtensionObject_ClearAux(void* value);
 
+/**
+ *  \brief           Create an encodeable object of the given encodeable type and set it in
+ *                   the given extension object
+ *
+ *  \param extObject Extension object in which the newly created encodeable object must be set
+ *  \param encTyp    Encodeable type of the encodeable object to instantiate and initialize
+ *  \param encObject Pointer to be set with the address of the newly created encodeable object
+ *  \return          SOPC_SOPC_STATUS_OK if creation and extension setting succeeded
+ */
+SOPC_ReturnStatus SOPC_ExtensionObject_CreateObject(SOPC_ExtensionObject* extObject,
+                                                    SOPC_EncodeableType* encTyp,
+                                                    void** encObject);
+
 /**** Variant ****/
 
 /**

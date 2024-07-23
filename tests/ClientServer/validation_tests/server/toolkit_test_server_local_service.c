@@ -27,7 +27,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
@@ -271,7 +271,7 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
 
     OpcUa_S2OPC_CustomDataType* instCDT = NULL;
 
-    status = SOPC_Encodeable_CreateExtension(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
+    status = SOPC_ExtensionObject_CreateObject(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     instCDT->fieldb = true;
@@ -408,7 +408,7 @@ static SOPC_ReturnStatus check_writeCustomDataType(const SOPC_AddressSpace* addr
 
     if (NULL != writeResp)
     {
-        SOPC_Encodeable_Delete(writeResp->encodeableType, (void**) &writeResp);
+        SOPC_EncodeableObject_Delete(writeResp->encodeableType, (void**) &writeResp);
     }
     SOPC_Buffer_Delete(buf);
 
@@ -565,7 +565,7 @@ static SOPC_ReturnStatus check_readDataTypeDefinition(const SOPC_AddressSpace* a
 
     if (NULL != readResp)
     {
-        SOPC_Encodeable_Delete(readResp->encodeableType, (void**) &readResp);
+        SOPC_EncodeableObject_Delete(readResp->encodeableType, (void**) &readResp);
     }
     return status;
 }

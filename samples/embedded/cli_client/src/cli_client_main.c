@@ -30,7 +30,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_common_build_info.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -200,7 +200,7 @@ static void client_tester(void)
             PRINT("Call to Browse service through failed with return code: 0x%08" PRIX32 "\n",
                   resp->ResponseHeader.ServiceResult);
         }
-        SOPC_Encodeable_Delete(resp->encodeableType, (void**) &resp);
+        SOPC_EncodeableObject_Delete(resp->encodeableType, (void**) &resp);
     }
     else
     {

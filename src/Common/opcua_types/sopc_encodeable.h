@@ -20,7 +20,10 @@
 /**
  *  \file sopc_encodeable.h
  *
- *  \brief Encodeable object services
+ * \deprecated This file is deprecated since version 1.6.0 and will be removed in version 1.7.0.
+ *             Please use replacement functions into sopc_encodeabletype.h and sopc_builtintypes.h instead.
+ *
+ *  \brief Deprecated and replacement is integrated into sopc_encodeabletype.h (Encodeable object services).
  */
 
 #ifndef SOPC_ENCODEABLE_H_
@@ -32,6 +35,8 @@
 #include "sopc_encodeabletype.h"
 
 /**
+ *  \deprecated      Use ::SOPC_EncodeableObject_Create instead.
+ *
  *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
  *
  *  \param encTyp    Encodeable type of the encodeable object to instantiate and initialize
@@ -41,6 +46,7 @@
 SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject);
 
 /**
+ *  \deprecated      Use ::SOPC_EncodeableObject_Delete instead.
  *  \brief           Clear and deallocate an encodeable object of the given encodeable type
  *
  *  \param encTyp    Encodeable type of the encodeable object to deallocate
@@ -50,6 +56,8 @@ SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** enc
 SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject);
 
 /**
+ *  \deprecated      Use ::SOPC_ExtensionObject_CreateObject instead.
+ *
  *  \brief           Create an encodeable object of the given encodeable type and set it in
  *                   the given extension object
  *
@@ -63,6 +71,8 @@ SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObjec
                                                   void** encObject);
 
 /**
+ *  \deprecated      Use ::SOPC_EncodeableObject_Move instead.
+ *
  *  \brief           Moves content of \p srcObj to \p destObj, i.e. copy \p srcObj structure content to \p destObj and
  *                   reset \p srcObj. Both parameters shall be EncodeableObject with same SOPC_EncodeableType.
  *

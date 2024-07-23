@@ -26,77 +26,22 @@
 
 SOPC_ReturnStatus SOPC_Encodeable_Create(SOPC_EncodeableType* encTyp, void** encObject)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (encTyp != NULL && encTyp->Initialize != NULL && encTyp->AllocationSize > 0 && encObject != NULL &&
-        NULL == *encObject)
-    {
-        *encObject = SOPC_Malloc(encTyp->AllocationSize);
-        if (*encObject != NULL)
-        {
-            encTyp->Initialize(*encObject);
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
-    }
-    return status;
+    return SOPC_EncodeableObject_Create(encTyp, encObject);
 }
 
 SOPC_ReturnStatus SOPC_Encodeable_Delete(SOPC_EncodeableType* encTyp, void** encObject)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL &&
-        encTyp == *(SOPC_EncodeableType**) *encObject)
-    {
-        encTyp->Clear(*encObject);
-        SOPC_Free(*encObject);
-        *encObject = NULL;
-        status = SOPC_STATUS_OK;
-    }
-    return status;
+    return SOPC_EncodeableObject_Delete(encTyp, encObject);
 }
 
 SOPC_ReturnStatus SOPC_Encodeable_CreateExtension(SOPC_ExtensionObject* extObject,
                                                   SOPC_EncodeableType* encTyp,
                                                   void** encObject)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (extObject != NULL && extObject->Encoding == SOPC_ExtObjBodyEncoding_None)
-    {
-        status = SOPC_Encodeable_Create(encTyp, encObject);
-        if (SOPC_STATUS_OK == status)
-        {
-            SOPC_ExpandedNodeId_Initialize(&extObject->TypeId);
-            /* extObject->TypeId.NamespaceUri is left empty, as it is the case for default OPC-UA types */
-            extObject->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
-            extObject->TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
-            extObject->TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
-            extObject->Encoding = SOPC_ExtObjBodyEncoding_Object;
-            extObject->Body.Object.ObjType = encTyp;
-            extObject->Body.Object.Value = *encObject;
-        }
-        else
-        {
-            SOPC_ReturnStatus deleteStatus = SOPC_Encodeable_Delete(encTyp, encObject);
-            SOPC_ASSERT(SOPC_STATUS_OK == deleteStatus);
-        }
-    }
-    return status;
+    return SOPC_ExtensionObject_CreateObject(extObject, encTyp, encObject);
 }
 
 SOPC_ReturnStatus SOPC_Encodeable_Move(void* destObj, void* srcObj)
 {
-    if (NULL == destObj || NULL == srcObj || destObj == srcObj ||
-        *(SOPC_EncodeableType**) destObj != *(SOPC_EncodeableType**) srcObj)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) srcObj;
-
-    memcpy(destObj, srcObj, encType->AllocationSize);
-    SOPC_EncodeableObject_Initialize(encType, srcObj);
-
-    return SOPC_STATUS_OK;
+    return SOPC_EncodeableObject_Move(destObj, srcObj);
 }

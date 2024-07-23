@@ -92,7 +92,7 @@ static void SOPC_InternalNotificationElement_Free(SOPC_InternalNotificationEleme
         OpcUa_WriteValue_Clear(notifElt->value);
         SOPC_Free(notifElt->value);
         SOPC_ReturnStatus status =
-            SOPC_Encodeable_Delete(&OpcUa_EventFieldList_EncodeableType, (void**) &notifElt->eventValues);
+            SOPC_EncodeableObject_Delete(&OpcUa_EventFieldList_EncodeableType, (void**) &notifElt->eventValues);
         SOPC_ASSERT(NULL == notifElt->eventValues || SOPC_STATUS_OK == status);
         SOPC_Free(notifElt);
     }

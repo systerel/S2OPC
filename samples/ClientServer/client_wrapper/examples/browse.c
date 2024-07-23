@@ -35,7 +35,7 @@
 #include "libs2opc_request_builder.h"
 
 #include "sopc_askpass.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -178,7 +178,7 @@ int main(int argc, char* const argv[])
     }
     if (NULL != browseResponse)
     {
-        SOPC_Encodeable_Delete(browseResponse->encodeableType, (void**) &browseResponse);
+        SOPC_EncodeableObject_Delete(browseResponse->encodeableType, (void**) &browseResponse);
     }
 
     // Close the connection

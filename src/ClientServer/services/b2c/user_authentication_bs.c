@@ -560,7 +560,7 @@ void user_authentication_bs__shallow_copy_user_token(
 
     void* token = NULL;
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_CreateExtension(user, user_authentication_bs__p_user_token->Body.Object.ObjType, &token);
+        SOPC_ExtensionObject_CreateObject(user, user_authentication_bs__p_user_token->Body.Object.ObjType, &token);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -644,7 +644,7 @@ static bool internal_user_name_token_copy(OpcUa_UserNameIdentityToken* source, S
     }
 
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+        SOPC_ExtensionObject_CreateObject(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_Copy(&token->UserName, &source->UserName);
@@ -813,7 +813,7 @@ static SOPC_ReturnStatus decrypt_user_token(const OpcUa_UserNameIdentityToken* u
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_CreateExtension(puser, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+        status = SOPC_ExtensionObject_CreateObject(puser, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     }
     // Copy user name and policy
     if (SOPC_STATUS_OK == status)
@@ -944,8 +944,8 @@ void user_authentication_bs__encrypt_user_token(
     {
         return;
     }
-    status = SOPC_Encodeable_CreateExtension(encryptedTokenExtObj, &OpcUa_UserNameIdentityToken_EncodeableType,
-                                             (void**) &encryptedToken);
+    status = SOPC_ExtensionObject_CreateObject(encryptedTokenExtObj, &OpcUa_UserNameIdentityToken_EncodeableType,
+                                               (void**) &encryptedToken);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_Copy(&encryptedToken->UserName, &userToken->UserName);
@@ -1170,7 +1170,8 @@ void user_authentication_bs__allocate_x509_token_from_user(
         return;
     }
 
-    status = SOPC_Encodeable_CreateExtension(x509_user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &x509_token);
+    status =
+        SOPC_ExtensionObject_CreateObject(x509_user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &x509_token);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_ByteString_Initialize(&x509_token->CertificateData);

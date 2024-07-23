@@ -31,7 +31,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
@@ -357,7 +357,7 @@ int main(void)
     {
         /* Create a service request message with nothing to do and send it through session (read service)*/
         OpcUa_ReadRequest* emptyReadRequest = NULL;
-        SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &emptyReadRequest);
+        SOPC_EncodeableObject_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &emptyReadRequest);
 
         SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get(&sessionActivated),
                                                      emptyReadRequest, 1);
@@ -400,7 +400,7 @@ int main(void)
     {
         /* Create a service request message with nothing to do and send it through session (read service)*/
         OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
-        SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
+        SOPC_EncodeableObject_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
 
         SOPC_ToolkitClient_AsyncSendRequestOnSession((uint32_t) SOPC_Atomic_Int_Get(&sessionActivated),
                                                      notSupportedServiceReq, 1);
@@ -445,7 +445,7 @@ int main(void)
 
         /* Create a service request message with nothing to do and send it through session (read service)*/
         OpcUa_RegisterServerRequest* notSupportedServiceReq = NULL;
-        SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
+        SOPC_EncodeableObject_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &notSupportedServiceReq);
         SOPC_EndpointConnectionCfg endpointConnectionCfg = SOPC_EndpointConnectionCfg_CreateClassic(channel_config_idx);
         status = SOPC_ToolkitClient_AsyncSendDiscoveryRequest(endpointConnectionCfg, notSupportedServiceReq, 1);
         printf(">>Test_Client_Toolkit: unsupported discovery request sending (using discovery API)\n");

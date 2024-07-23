@@ -70,11 +70,11 @@ void message_in_bs__dealloc_msg_in_header(const constants__t_msg_header_i messag
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     if ((*(SOPC_EncodeableType**) message_in_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType)
     {
-        SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_in_bs__msg_header);
+        SOPC_EncodeableObject_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_in_bs__msg_header);
     }
     else if ((*(SOPC_EncodeableType**) message_in_bs__msg_header) == &OpcUa_RequestHeader_EncodeableType)
     {
-        SOPC_Encodeable_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &message_in_bs__msg_header);
+        SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &message_in_bs__msg_header);
     }
     else
     {
@@ -87,7 +87,7 @@ void message_in_bs__dealloc_msg_in(const constants__t_msg_i message_in_bs__msg)
 {
     // Generated header, parameter not really a const. TODO: Check if message should not be a / in a global variable
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-    SOPC_Encodeable_Delete(*(SOPC_EncodeableType**) message_in_bs__msg, (void**) &message_in_bs__msg);
+    SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) message_in_bs__msg, (void**) &message_in_bs__msg);
     SOPC_GCC_DIAGNOSTIC_RESTORE
 }
 

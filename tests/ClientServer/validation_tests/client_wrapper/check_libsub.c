@@ -34,7 +34,7 @@
 #include "sopc_atomic.h"
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_log_manager.h"
 #include "sopc_macros.h"
@@ -184,10 +184,10 @@ START_TEST(test_subscription)
     OpcUa_ReadValueId* lrv = NULL;
     OpcUa_ReadRequest* read_req = NULL;
 
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &read_req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &read_req);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
-    status = SOPC_Encodeable_Create(&OpcUa_ReadValueId_EncodeableType, (void**) &lrv);
+    status = SOPC_EncodeableObject_Create(&OpcUa_ReadValueId_EncodeableType, (void**) &lrv);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_LibSub_ConfigurationId cfg_id = 0;

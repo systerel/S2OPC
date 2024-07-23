@@ -25,7 +25,7 @@
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_mem_alloc.h"
 
 #define DEFAULT_ENDPOINT_URL "opc.tcp://localhost:4841"
@@ -139,7 +139,7 @@ void ValidateGetEndpointsResponse(OpcUa_GetEndpointsResponse* pResp)
     /* Freeopcua always use 0 as SecurityLevel... */
     ck_assert(iSecLevelWithSecu >= iSecLevelNone);
 
-    SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
+    SOPC_EncodeableObject_Delete(pResp->encodeableType, (void**) &pResp);
 }
 
 START_TEST(test_registerServer)
@@ -158,7 +158,7 @@ START_TEST(test_registerServer)
     ck_assert_ptr_nonnull(secureConnConfig);
 
     OpcUa_RegisterServerRequest* pReq = NULL;
-    status = SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
+    status = SOPC_EncodeableObject_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     SOPC_LocalizedText* serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
     ck_assert_ptr_nonnull(serverName);
@@ -189,7 +189,7 @@ START_TEST(test_registerServer)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     ck_assert((pResp->ResponseHeader.ServiceResult & SOPC_GoodStatusOppositeMask) == 0);
-    SOPC_Encodeable_Delete(pResp->encodeableType, (void**) &pResp);
+    SOPC_EncodeableObject_Delete(pResp->encodeableType, (void**) &pResp);
 
     /* Close the toolkit */
     SOPC_ClientConfigHelper_Clear();

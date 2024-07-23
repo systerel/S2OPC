@@ -12,7 +12,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -607,7 +607,7 @@ SOPC_ReturnStatus Client_GetSecurityKeys(SOPC_SecureConnection_Config* config,
         }
         if (NULL != callResp)
         {
-            SOPC_Encodeable_Delete(callResp->encodeableType, (void**) &callResp);
+            SOPC_EncodeableObject_Delete(callResp->encodeableType, (void**) &callResp);
         }
     }
 

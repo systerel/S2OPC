@@ -254,6 +254,24 @@ void SOPC_EncodeableObject_Initialize(SOPC_EncodeableType* type, void* pValue);
 void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue);
 
 /**
+ *  \brief           Instantiate and initialize an encodeable object of the given encodeable type
+ *
+ *  \param encTyp    Encodeable type of the encodeable object to instantiate and initialize
+ *  \param encObject Pointer to be set with the address of the newly created encodeable object
+ *  \return          SOPC_SOPC_STATUS_OK if creation succeeded
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Create(SOPC_EncodeableType* encTyp, void** encObject);
+
+/**
+ *  \brief           Clear and deallocate an encodeable object of the given encodeable type
+ *
+ *  \param encTyp    Encodeable type of the encodeable object to deallocate
+ *  \param encObject Pointer to the address of the encodeable object to delete (set to NULL if operation succeded)
+ *  \return          SOPC_SOPC_STATUS_OK if deletion succeeded
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Delete(SOPC_EncodeableType* encTyp, void** encObject);
+
+/**
  * \brief Encode an encodeable object of the given encodeable type into a bytes buffer.
  *
  * \param type               The encodeable type of the object instance to encode.
@@ -314,6 +332,16 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Decode(SOPC_EncodeableType* type,
  * \return           SOPC_STATUS_OK in case of success, reason of failure otherwise.
  */
 SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* destValue, const void* srcValue);
+
+/**
+ *  \brief           Moves content of \p srcObj to \p destObj, i.e. copy \p srcObj structure content to \p destObj and
+ *                   reset \p srcObj. Both parameters shall be EncodeableObject with same SOPC_EncodeableType.
+ *
+ *  \param destObj   Empty and initialized encodeable object in which content of \p srcObj will be copied.
+ *  \param srcObj    Source encodeable object from which content will be copied into \p destObj and then reset.
+ *  \return          SOPC_SOPC_STATUS_OK if move operation succeeded
+ */
+SOPC_ReturnStatus SOPC_EncodeableObject_Move(void* destObj, void* srcObj);
 
 /**
  * \brief Compare 2 encodeable objects of the given encodeable type.

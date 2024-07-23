@@ -35,7 +35,7 @@
 #include "libs2opc_request_builder.h"
 
 #include "sopc_askpass.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -182,7 +182,7 @@ int main(int argc, char* const argv[])
     }
     if (NULL != readResponse)
     {
-        SOPC_Encodeable_Delete(readResponse->encodeableType, (void**) &readResponse);
+        SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
     }
 
     // Close the connection

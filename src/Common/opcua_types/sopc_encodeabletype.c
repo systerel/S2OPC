@@ -485,6 +485,40 @@ void SOPC_EncodeableObject_Clear(SOPC_EncodeableType* type, void* pValue)
     }
 }
 
+SOPC_ReturnStatus SOPC_EncodeableObject_Create(SOPC_EncodeableType* encTyp, void** encObject)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (encTyp != NULL && encTyp->Initialize != NULL && encTyp->AllocationSize > 0 && encObject != NULL &&
+        NULL == *encObject)
+    {
+        *encObject = SOPC_Malloc(encTyp->AllocationSize);
+        if (*encObject != NULL)
+        {
+            SOPC_EncodeableObject_Initialize(encTyp, *encObject);
+            status = SOPC_STATUS_OK;
+        }
+        else
+        {
+            status = SOPC_STATUS_NOK;
+        }
+    }
+    return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Delete(SOPC_EncodeableType* encTyp, void** encObject)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (encTyp != NULL && encTyp->Clear != NULL && encObject != NULL && *encObject != NULL &&
+        encTyp == *(SOPC_EncodeableType**) *encObject)
+    {
+        SOPC_EncodeableObject_Clear(encTyp, *encObject);
+        SOPC_Free(*encObject);
+        *encObject = NULL;
+        status = SOPC_STATUS_OK;
+    }
+    return status;
+}
+
 SOPC_ReturnStatus SOPC_EncodeableObject_Encode(SOPC_EncodeableType* type,
                                                const void* pValue,
                                                SOPC_Buffer* buf,
@@ -694,6 +728,21 @@ SOPC_ReturnStatus SOPC_EncodeableObject_Copy(SOPC_EncodeableType* type, void* de
     }
 
     return status;
+}
+
+SOPC_ReturnStatus SOPC_EncodeableObject_Move(void* destObj, void* srcObj)
+{
+    if (NULL == destObj || NULL == srcObj || destObj == srcObj ||
+        *(SOPC_EncodeableType**) destObj != *(SOPC_EncodeableType**) srcObj)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_EncodeableType* encType = *(SOPC_EncodeableType**) srcObj;
+
+    memcpy(destObj, srcObj, encType->AllocationSize);
+    SOPC_EncodeableObject_Initialize(encType, srcObj);
+
+    return SOPC_STATUS_OK;
 }
 
 SOPC_ReturnStatus SOPC_EncodeableObject_Compare(SOPC_EncodeableType* type,

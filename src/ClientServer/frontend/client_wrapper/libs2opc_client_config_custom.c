@@ -22,7 +22,7 @@
 #include "libs2opc_client_internal.h"
 #include "libs2opc_common_internal.h"
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -381,7 +381,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
     if (!secConnConfig->finalized && NULL == secConnConfig->scConfig.expectedEndpoints)
     {
         OpcUa_GetEndpointsResponse* respCopy = NULL;
-        status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &respCopy);
+        status = SOPC_EncodeableObject_Create(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &respCopy);
         if (SOPC_STATUS_OK == status)
         {
             status =
@@ -394,7 +394,7 @@ SOPC_ReturnStatus SOPC_SecureConnectionConfig_SetExpectedEndpointsDescription(
         else
         {
             SOPC_ReturnStatus deleteStatus =
-                SOPC_Encodeable_Delete(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &respCopy);
+                SOPC_EncodeableObject_Delete(&OpcUa_GetEndpointsResponse_EncodeableType, (void**) &respCopy);
             SOPC_UNUSED_RESULT(deleteStatus);
         }
     }

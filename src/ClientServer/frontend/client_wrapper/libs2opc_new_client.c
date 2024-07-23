@@ -24,7 +24,7 @@
 #include "libs2opc_new_client.h"
 
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -288,7 +288,7 @@ static void SOPC_ClientInternal_EventCbk(SOPC_LibSub_ConnectionId c_id,
 
             void** genResponseContext = (void**) responseContext;
 
-            status = SOPC_Encodeable_Create(pEncType, genResponseContext);
+            status = SOPC_EncodeableObject_Create(pEncType, genResponseContext);
             if (SOPC_STATUS_OK == status)
             {
                 SOPC_ASSERT(NULL != *genResponseContext);

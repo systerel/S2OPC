@@ -30,7 +30,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_crypto_profiles.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_event_handler.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_internal_app_dispatcher.h"

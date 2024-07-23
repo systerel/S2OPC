@@ -33,7 +33,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_common_constants.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -279,7 +279,7 @@ static SOPC_ReturnStatus client_send_write_test(SOPC_ClientConnection* secureCon
 
     if (NULL != writeResponse)
     {
-        SOPC_Encodeable_Delete(writeResponse->encodeableType, (void**) &writeResponse);
+        SOPC_EncodeableObject_Delete(writeResponse->encodeableType, (void**) &writeResponse);
     }
     return status;
 }
@@ -333,7 +333,7 @@ static SOPC_ReturnStatus client_send_read_req_test(SOPC_ClientConnection* secure
 
     if (NULL != readResponse)
     {
-        SOPC_Encodeable_Delete(readResponse->encodeableType, (void**) &readResponse);
+        SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
     }
 
     return status;
@@ -413,12 +413,12 @@ static SOPC_ReturnStatus client_send_add_nodes_req_test(SOPC_ClientConnection* s
             status = SOPC_STATUS_NOK;
         }
 
-        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(addNodesResp->encodeableType, (void**) &addNodesResp);
         SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
     else
     {
-        SOPC_ReturnStatus delStatus = SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
+        SOPC_ReturnStatus delStatus = SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &addNodesReq);
         SOPC_ASSERT(SOPC_STATUS_OK == delStatus);
     }
 

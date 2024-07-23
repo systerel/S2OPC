@@ -37,7 +37,7 @@
 #include "libs2opc_request_builder.h"
 
 #include "sopc_askpass.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -205,7 +205,7 @@ static SOPC_ReturnStatus ReadPreviousValue(SOPC_ClientConnection* secureConnecti
     }
     if (NULL != readResponse)
     {
-        SOPC_Encodeable_Delete(readResponse->encodeableType, (void**) &readResponse);
+        SOPC_EncodeableObject_Delete(readResponse->encodeableType, (void**) &readResponse);
     }
 
     return status;
@@ -434,7 +434,7 @@ int main(int argc, char* const argv[])
     }
     if (NULL != writeResponse)
     {
-        SOPC_Encodeable_Delete(writeResponse->encodeableType, (void**) &writeResponse);
+        SOPC_EncodeableObject_Delete(writeResponse->encodeableType, (void**) &writeResponse);
     }
 
     // Close the connection

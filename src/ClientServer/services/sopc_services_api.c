@@ -452,7 +452,7 @@ static void onServiceEvent(SOPC_EventHandler* handler,
         if (constants_statuscodes_bs__e_sc_ok != sCode)
         {
             // Error case
-            status = SOPC_Encodeable_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
+            status = SOPC_EncodeableObject_Create(&OpcUa_ServiceFault_EncodeableType, &msg);
             if (SOPC_STATUS_OK == status && NULL != msg)
             {
                 util_status_code__B_to_C(sCode, &((OpcUa_ServiceFault*) msg)->ResponseHeader.ServiceResult);

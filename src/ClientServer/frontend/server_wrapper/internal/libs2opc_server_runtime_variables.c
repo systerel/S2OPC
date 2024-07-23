@@ -25,7 +25,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -285,8 +285,8 @@ static bool set_write_value_build_info(OpcUa_WriteValue* wv, const OpcUa_BuildIn
     SOPC_ReturnStatus status;
 
     SOPC_ExtensionObject_Initialize(extObject);
-    status =
-        SOPC_Encodeable_CreateExtension(extObject, &OpcUa_BuildInfo_EncodeableType, (void**) &build_info_in_extObject);
+    status = SOPC_ExtensionObject_CreateObject(extObject, &OpcUa_BuildInfo_EncodeableType,
+                                               (void**) &build_info_in_extObject);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status = SOPC_EncodeableObject_Copy(&OpcUa_BuildInfo_EncodeableType, build_info_in_extObject, build_info);
@@ -340,8 +340,8 @@ static bool set_write_value_server_status(OpcUa_WriteValue* wv,
     SOPC_ReturnStatus status;
 
     SOPC_ExtensionObject_Initialize(extObject);
-    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_ServerStatusDataType_EncodeableType,
-                                             (void**) &server_status_in_extObject);
+    status = SOPC_ExtensionObject_CreateObject(extObject, &OpcUa_ServerStatusDataType_EncodeableType,
+                                               (void**) &server_status_in_extObject);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     status =

@@ -18,7 +18,6 @@
  */
 
 #include "sopc_builtintypes.h"
-#include "sopc_encodeable.h"
 #include "sopc_encoder.h"
 
 #include <inttypes.h>
@@ -3352,7 +3351,7 @@ SOPC_ReturnStatus SOPC_ExtensionObject_Copy(SOPC_ExtensionObject* dest, const SO
     case SOPC_ExtObjBodyEncoding_Object:
         if (NULL != src->Body.Object.ObjType && NULL != src->Body.Object.Value)
         {
-            status = SOPC_Encodeable_Create(src->Body.Object.ObjType, &dest->Body.Object.Value);
+            status = SOPC_EncodeableObject_Create(src->Body.Object.ObjType, &dest->Body.Object.Value);
             if (SOPC_STATUS_OK == status)
             {
                 status = SOPC_EncodeableObject_Copy(src->Body.Object.ObjType, dest->Body.Object.Value,
@@ -3524,6 +3523,34 @@ void SOPC_ExtensionObject_Clear(SOPC_ExtensionObject* extObj)
         }
         memset(extObj, 0, sizeof(SOPC_ExtensionObject));
     }
+}
+
+SOPC_ReturnStatus SOPC_ExtensionObject_CreateObject(SOPC_ExtensionObject* extObject,
+                                                    SOPC_EncodeableType* encTyp,
+                                                    void** encObject)
+{
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (extObject != NULL && extObject->Encoding == SOPC_ExtObjBodyEncoding_None)
+    {
+        status = SOPC_EncodeableObject_Create(encTyp, encObject);
+        if (SOPC_STATUS_OK == status)
+        {
+            SOPC_ExpandedNodeId_Initialize(&extObject->TypeId);
+            /* extObject->TypeId.NamespaceUri is left empty, as it is the case for default OPC-UA types */
+            extObject->TypeId.NodeId.IdentifierType = SOPC_IdentifierType_Numeric;
+            extObject->TypeId.NodeId.Namespace = encTyp->NamespaceIndex;
+            extObject->TypeId.NodeId.Data.Numeric = encTyp->BinaryEncodingTypeId;
+            extObject->Encoding = SOPC_ExtObjBodyEncoding_Object;
+            extObject->Body.Object.ObjType = encTyp;
+            extObject->Body.Object.Value = *encObject;
+        }
+        else
+        {
+            SOPC_ReturnStatus deleteStatus = SOPC_EncodeableObject_Delete(encTyp, encObject);
+            SOPC_ASSERT(SOPC_STATUS_OK == deleteStatus);
+        }
+    }
+    return status;
 }
 
 static void ApplyToVariantNonArrayBuiltInType(SOPC_BuiltinId builtInTypeId,

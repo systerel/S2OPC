@@ -24,7 +24,7 @@
 #include "opcua_identifiers.h"
 #include "sopc_assert.h"
 #include "sopc_common.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_enum_types.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_filesystem.h"

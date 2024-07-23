@@ -91,15 +91,15 @@ void msg_subscription_publish_bs__alloc_notification_message_items(
                 if (dataToSet)
                 {
                     // Create the notification data extension object
-                    status = SOPC_Encodeable_CreateExtension(notifData, &OpcUa_DataChangeNotification_EncodeableType,
-                                                             (void**) &dataChangeNotif);
+                    status = SOPC_ExtensionObject_CreateObject(notifData, &OpcUa_DataChangeNotification_EncodeableType,
+                                                               (void**) &dataChangeNotif);
                     dataToSet = false;
                 }
                 else if (eventToSet)
                 {
                     // Create the notification data extension object
-                    status = SOPC_Encodeable_CreateExtension(notifData, &OpcUa_EventNotificationList_EncodeableType,
-                                                             (void**) &eventNotifList);
+                    status = SOPC_ExtensionObject_CreateObject(notifData, &OpcUa_EventNotificationList_EncodeableType,
+                                                               (void**) &eventNotifList);
                     eventToSet = false;
                 }
             }

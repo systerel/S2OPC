@@ -24,7 +24,7 @@
 #include <string.h>
 
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
@@ -294,7 +294,7 @@ SOPC_ReturnStatus StateMachine_StartDiscovery(StateMachine_Machine* pSM)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &pReq);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_AttachFromCstring(&pReq->EndpointUrl, ENDPOINT_URL);
@@ -369,7 +369,7 @@ SOPC_ReturnStatus StateMachine_StartFindServers(StateMachine_Machine* pSM)
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_FindServersRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_FindServersRequest_EncodeableType, (void**) &pReq);
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_String_AttachFromCstring(&pReq->EndpointUrl, ENDPOINT_URL);
@@ -488,7 +488,7 @@ SOPC_ReturnStatus StateMachine_StartRegisterServer(StateMachine_Machine* pSM)
     {
         serverName = SOPC_Calloc(1, sizeof(SOPC_LocalizedText));
         discoveryURL = SOPC_String_Create();
-        status = SOPC_Encodeable_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_RegisterServerRequest_EncodeableType, (void**) &pReq);
     }
 
     if ((NULL == serverName) || (NULL == discoveryURL) || (SOPC_STATUS_OK != status))

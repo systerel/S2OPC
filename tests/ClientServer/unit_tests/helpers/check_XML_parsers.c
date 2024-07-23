@@ -38,7 +38,7 @@
 #endif
 
 #include "opcua_identifiers.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -727,7 +727,7 @@ static SOPC_ExtensionObject* build_user_name_token(char* username, char* passwor
 
     ck_assert_ptr_nonnull(extObject);
     SOPC_ExtensionObject_Initialize(extObject);
-    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+    status = SOPC_ExtensionObject_CreateObject(extObject, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     status = SOPC_String_AttachFromCstring(&token->UserName, username);
@@ -747,7 +747,7 @@ static SOPC_ExtensionObject* build_x509_token(char* pathCert)
 
     ck_assert_ptr_nonnull(extObject);
     SOPC_ExtensionObject_Initialize(extObject);
-    status = SOPC_Encodeable_CreateExtension(extObject, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
+    status = SOPC_ExtensionObject_CreateObject(extObject, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     SOPC_Buffer* buffer = NULL;

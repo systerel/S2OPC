@@ -31,7 +31,7 @@
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_dict.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_hash.h"
 #include "sopc_helper_encode.h"
@@ -1581,9 +1581,9 @@ static bool finalize_node_definition(struct parse_context_t* ctx)
         if (ctx->is_struct_fields)
         {
             OpcUa_StructureDefinition* structure_definition = NULL;
-            SOPC_ReturnStatus status = SOPC_Encodeable_CreateExtension(&ctx->node.data.data_type.DataTypeDefinition,
-                                                                       &OpcUa_StructureDefinition_EncodeableType,
-                                                                       (void**) &structure_definition);
+            SOPC_ReturnStatus status = SOPC_ExtensionObject_CreateObject(&ctx->node.data.data_type.DataTypeDefinition,
+                                                                         &OpcUa_StructureDefinition_EncodeableType,
+                                                                         (void**) &structure_definition);
 
             if (NULL == ctx->structure_definition_nodeIds)
             {
@@ -1619,8 +1619,8 @@ static bool finalize_node_definition(struct parse_context_t* ctx)
         {
             OpcUa_EnumDefinition* enum_definition = NULL;
             SOPC_ReturnStatus status =
-                SOPC_Encodeable_CreateExtension(&ctx->node.data.data_type.DataTypeDefinition,
-                                                &OpcUa_EnumDefinition_EncodeableType, (void**) &enum_definition);
+                SOPC_ExtensionObject_CreateObject(&ctx->node.data.data_type.DataTypeDefinition,
+                                                  &OpcUa_EnumDefinition_EncodeableType, (void**) &enum_definition);
             if (NULL == definition_fields || SOPC_STATUS_OK != status)
             {
                 SOPC_Free(definition_fields);
@@ -2188,7 +2188,7 @@ static bool set_variant_value_extensionobject(SOPC_ExtensionObject** extObj,
 
     SOPC_ExtensionObject_Initialize(newExtObj);
     void* object = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_CreateExtension(newExtObj, encType, &object);
+    SOPC_ReturnStatus status = SOPC_ExtensionObject_CreateObject(newExtObj, encType, &object);
 
     if (SOPC_STATUS_OK != status)
     {

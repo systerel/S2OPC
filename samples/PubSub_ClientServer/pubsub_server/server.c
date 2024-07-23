@@ -28,7 +28,7 @@
 #include "sopc_askpass.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -591,7 +591,7 @@ static void Server_request_change_sendAcyclicStatus(PublisherSendStatus state)
 {
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
 
@@ -833,7 +833,7 @@ static void Server_SetSubStatus(bool sync, SOPC_PubSubState state)
 
     /* Create a WriteRequest with a single WriteValue */
     OpcUa_WriteRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     OpcUa_WriteValue* wv = SOPC_Calloc(1, sizeof(OpcUa_WriteValue));
 
@@ -876,7 +876,7 @@ static void Server_SetSubStatus(bool sync, SOPC_PubSubState state)
             status = SOPC_ServerHelper_LocalServiceSync(request, (void**) &response);
             if (SOPC_STATUS_OK == status)
             {
-                status = SOPC_Encodeable_Delete(response->encodeableType, (void**) &response);
+                status = SOPC_EncodeableObject_Delete(response->encodeableType, (void**) &response);
             }
         }
         else
@@ -913,7 +913,7 @@ bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t nbValu
     /* Encapsulate the WriteValues in a WriteRequest and send it as a local service,
      * acknowledge before the toolkit answers */
     OpcUa_WriteRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (NULL == request)
     {
@@ -947,7 +947,7 @@ SOPC_DataValue* Server_GetSourceVariables(const OpcUa_ReadValueId* lrv, const in
     }
 
     OpcUa_ReadRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &request);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     SOPC_PubSheduler_GetVariableRequestContext* requestContext =
@@ -955,7 +955,7 @@ SOPC_DataValue* Server_GetSourceVariables(const OpcUa_ReadValueId* lrv, const in
 
     if (NULL == request || NULL == requestContext)
     {
-        SOPC_UNUSED_RESULT(SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &request));
+        SOPC_UNUSED_RESULT(SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &request));
         SOPC_Free(requestContext);
 
         return NULL;

@@ -25,7 +25,7 @@
 
 #include "opcua_identifiers.h"
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -154,7 +154,7 @@ OpcUa_ReadRequest* SOPC_ReadRequest_Create(size_t nbReadValues, OpcUa_Timestamps
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_ReadRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -179,7 +179,7 @@ OpcUa_ReadRequest* SOPC_ReadRequest_Create(size_t nbReadValues, OpcUa_Timestamps
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_ReadRequest_EncodeableType, (void**) &req);
     }
     return req;
 }
@@ -273,7 +273,7 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues)
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -297,7 +297,7 @@ OpcUa_WriteRequest* SOPC_WriteRequest_Create(size_t nbWriteValues)
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &req);
     }
     return req;
 }
@@ -381,7 +381,7 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_BrowseRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_BrowseRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -412,7 +412,7 @@ OpcUa_BrowseRequest* SOPC_BrowseRequest_Create(size_t nbNodesToBrowse,
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_BrowseRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_BrowseRequest_EncodeableType, (void**) &req);
     }
 
     return req;
@@ -502,7 +502,7 @@ OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationP
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_BrowseNextRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_BrowseNextRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -527,7 +527,7 @@ OpcUa_BrowseNextRequest* SOPC_BrowseNextRequest_Create(bool releaseContinuationP
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_BrowseNextRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_BrowseNextRequest_EncodeableType, (void**) &req);
     }
 
     return req;
@@ -563,7 +563,7 @@ OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Cre
     }
     OpcUa_TranslateBrowsePathsToNodeIdsRequest* req = NULL;
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_Create(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Create(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return NULL;
@@ -587,7 +587,7 @@ OpcUa_TranslateBrowsePathsToNodeIdsRequest* SOPC_TranslateBrowsePathsRequest_Cre
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_TranslateBrowsePathsToNodeIdsRequest_EncodeableType, (void**) &req);
     }
 
     return req;
@@ -725,7 +725,7 @@ OpcUa_GetEndpointsRequest* SOPC_GetEndpointsRequest_Create(const char* endpointU
 {
     OpcUa_GetEndpointsRequest* getEndpointReq = NULL;
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
+        SOPC_EncodeableObject_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_CopyFromCString(&getEndpointReq->EndpointUrl, endpointURL);
@@ -833,8 +833,8 @@ OpcUa_RegisterServer2Request* SOPC_RegisterServer2Request_CreateFromServerConfig
     if (SOPC_STATUS_OK == status)
     {
         request->NoOfDiscoveryConfiguration = 1;
-        status = SOPC_Encodeable_CreateExtension(request->DiscoveryConfiguration,
-                                                 &OpcUa_MdnsDiscoveryConfiguration_EncodeableType, (void**) &mdnsObj);
+        status = SOPC_ExtensionObject_CreateObject(request->DiscoveryConfiguration,
+                                                   &OpcUa_MdnsDiscoveryConfiguration_EncodeableType, (void**) &mdnsObj);
     }
 
     if (SOPC_STATUS_OK == status && srcDesc->NoOfDiscoveryUrls > 0)
@@ -917,7 +917,7 @@ OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes)
         return NULL;
     }
     OpcUa_AddNodesRequest* req = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return NULL;
@@ -941,7 +941,7 @@ OpcUa_AddNodesRequest* SOPC_AddNodesRequest_Create(size_t nbAddNodes)
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_AddNodesRequest_EncodeableType, (void**) &req);
     }
     return req;
 }
@@ -980,8 +980,8 @@ SOPC_ReturnStatus SOPC_AddNodeRequest_SetVariableAttributes(OpcUa_AddNodesReques
     // item is a Variable node
     item->NodeClass = OpcUa_NodeClass_Variable;
 
-    status = SOPC_Encodeable_CreateExtension(&item->NodeAttributes, &OpcUa_VariableAttributes_EncodeableType,
-                                             (void**) &varAttrs);
+    status = SOPC_ExtensionObject_CreateObject(&item->NodeAttributes, &OpcUa_VariableAttributes_EncodeableType,
+                                               (void**) &varAttrs);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1089,7 +1089,8 @@ OpcUa_CreateSubscriptionRequest* SOPC_CreateSubscriptionRequest_Create(double re
                                                                        SOPC_Byte priority)
 {
     OpcUa_CreateSubscriptionRequest* req = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return NULL;
@@ -1119,7 +1120,8 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -1138,7 +1140,7 @@ OpcUa_CreateMonitoredItemsRequest* SOPC_CreateMonitoredItemsRequest_Create(uint3
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &req);
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     return req;
@@ -1289,7 +1291,7 @@ SOPC_ExtensionObject* SOPC_MonitoredItem_DataChangeFilter(OpcUa_DataChangeTrigge
         return NULL;
     }
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_CreateExtension(filterExt, &OpcUa_DataChangeFilter_EncodeableType, (void**) &filter);
+        SOPC_ExtensionObject_CreateObject(filterExt, &OpcUa_DataChangeFilter_EncodeableType, (void**) &filter);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -1312,7 +1314,7 @@ OpcUa_EventFilter* SOPC_MonitoredItem_CreateEventFilter(size_t noOfSelectClauses
     {
         return NULL;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_EventFilter_EncodeableType, (void**) &result);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_EventFilter_EncodeableType, (void**) &result);
     if (SOPC_STATUS_OK == status)
     {
         result->SelectClauses = SOPC_Calloc(noOfSelectClauses, sizeof(*result->SelectClauses));
@@ -1347,7 +1349,7 @@ OpcUa_EventFilter* SOPC_MonitoredItem_CreateEventFilter(size_t noOfSelectClauses
     }
     if (SOPC_STATUS_OK != status)
     {
-        status = SOPC_Encodeable_Delete(&OpcUa_EventFilter_EncodeableType, (void**) &result);
+        status = SOPC_EncodeableObject_Delete(&OpcUa_EventFilter_EncodeableType, (void**) &result);
         if (SOPC_STATUS_OK != status)
         {
             SOPC_Free(result);
@@ -1374,8 +1376,8 @@ SOPC_ReturnStatus SOPC_EventFilter_SetOfTypeWhereClause(OpcUa_EventFilter* event
     if (SOPC_STATUS_OK == status)
     {
         element->NoOfFilterOperands = 1;
-        status = SOPC_Encodeable_CreateExtension(element->FilterOperands, &OpcUa_LiteralOperand_EncodeableType,
-                                                 (void**) &nodeIdOp);
+        status = SOPC_ExtensionObject_CreateObject(element->FilterOperands, &OpcUa_LiteralOperand_EncodeableType,
+                                                   (void**) &nodeIdOp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -1570,7 +1572,8 @@ OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint3
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -1589,7 +1592,7 @@ OpcUa_ModifyMonitoredItemsRequest* SOPC_ModifyMonitoredItemsRequest_Create(uint3
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_ModifyMonitoredItemsRequest_EncodeableType, (void**) &req);
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     return req;
@@ -1634,7 +1637,8 @@ OpcUa_DeleteMonitoredItemsRequest* SOPC_DeleteMonitoredItemsRequest_Create(uint3
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -1655,7 +1659,7 @@ OpcUa_DeleteMonitoredItemsRequest* SOPC_DeleteMonitoredItemsRequest_Create(uint3
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &req);
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     return req;
@@ -1681,7 +1685,7 @@ OpcUa_CallRequest* SOPC_CallRequest_Create(size_t nbMethodsToCalls)
     {
         return req;
     }
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_CallRequest_EncodeableType, (void**) &req);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_CallRequest_EncodeableType, (void**) &req);
     if (SOPC_STATUS_OK != status)
     {
         return req;
@@ -1697,7 +1701,7 @@ OpcUa_CallRequest* SOPC_CallRequest_Create(size_t nbMethodsToCalls)
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
+        SOPC_EncodeableObject_Delete(&OpcUa_CallRequest_EncodeableType, (void**) &req);
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
     return req;

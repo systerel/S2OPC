@@ -21,7 +21,6 @@
 
 #include "app_cb_call_context_internal.h"
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
@@ -127,7 +126,7 @@ static void onComEvent(SOPC_EventHandler* handler, int32_t event, uint32_t id, u
     if (NULL != encType && NULL != params)
     {
         // Message to deallocate => if not application shall deallocate !
-        SOPC_Encodeable_Delete(encType, &params);
+        SOPC_EncodeableObject_Delete(encType, &params);
     }
 }
 

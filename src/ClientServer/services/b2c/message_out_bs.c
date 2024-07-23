@@ -61,7 +61,7 @@ static void* internal_alloc_msg_header(const t_bool is_request)
         encType = &OpcUa_ResponseHeader_EncodeableType;
     }
 
-    status = SOPC_Encodeable_Create(encType, &header);
+    status = SOPC_EncodeableObject_Create(encType, &header);
     if (SOPC_STATUS_OK != status)
     {
         header = NULL;
@@ -94,7 +94,7 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
 
     if (NULL != encTyp)
     {
-        status = SOPC_Encodeable_Create(encTyp, &msg);
+        status = SOPC_EncodeableObject_Create(encTyp, &msg);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -109,7 +109,7 @@ static void util_message_out_bs__alloc_msg(const constants__t_msg_type_i message
     }
     else
     {
-        SOPC_Encodeable_Delete(encTyp, &msg);
+        SOPC_EncodeableObject_Delete(encTyp, &msg);
 
         *message_out_bs__nmsg = constants__c_msg_indet;
         *message_out_bs__nmsg_header = constants__c_msg_header_indet;
@@ -165,11 +165,11 @@ void message_out_bs__dealloc_msg_header_out(const constants__t_msg_header_i mess
     SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
     if ((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_ResponseHeader_EncodeableType)
     {
-        SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_out_bs__msg_header);
+        SOPC_EncodeableObject_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &message_out_bs__msg_header);
     }
     else if ((*(SOPC_EncodeableType**) message_out_bs__msg_header) == &OpcUa_RequestHeader_EncodeableType)
     {
-        SOPC_Encodeable_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &message_out_bs__msg_header);
+        SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &message_out_bs__msg_header);
     }
     else
     {
@@ -189,7 +189,7 @@ void message_out_bs__dealloc_msg_out(const constants__t_msg_i message_out_bs__ms
         // To could keep generated prototype
         // Generated header, parameter not really a const.
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_Encodeable_Delete(encType, (void**) &message_out_bs__msg);
+        SOPC_EncodeableObject_Delete(encType, (void**) &message_out_bs__msg);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }

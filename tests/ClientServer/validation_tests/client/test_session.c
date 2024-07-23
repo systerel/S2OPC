@@ -30,7 +30,7 @@
 #include "libs2opc_client_config_custom.h"
 #include "libs2opc_new_client.h"
 #include "libs2opc_request_builder.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"

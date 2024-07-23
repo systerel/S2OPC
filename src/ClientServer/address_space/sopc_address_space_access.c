@@ -20,7 +20,7 @@
 #include "sopc_address_space_access_internal.h"
 
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_node_mgt_helper_internal.h"
@@ -79,8 +79,8 @@ static void SOPC_InternalAddressSpaceAccess_FreeOperation(uint32_t id, uintptr_t
     switch (op->operation)
     {
     case SOPC_ADDSPACE_WRITE:
-        SOPC_Encodeable_Delete(&OpcUa_WriteValue_EncodeableType, &op->param1);
-        SOPC_Encodeable_Delete(&OpcUa_WriteValue_EncodeableType, &op->param2);
+        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, &op->param1);
+        SOPC_EncodeableObject_Delete(&OpcUa_WriteValue_EncodeableType, &op->param2);
         break;
     case SOPC_ADDSPACE_CHANGE_NODE:
         SOPC_NodeId_Clear((SOPC_NodeId*) op->param1);

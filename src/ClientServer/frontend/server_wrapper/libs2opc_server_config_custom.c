@@ -26,7 +26,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -533,7 +533,7 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetSoftwareBuildInfo(OpcUa_BuildInfo* 
     }
 
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_Create(&OpcUa_BuildInfo_EncodeableType, (void**) &sopc_server_helper_config.buildInfo);
+        SOPC_EncodeableObject_Create(&OpcUa_BuildInfo_EncodeableType, (void**) &sopc_server_helper_config.buildInfo);
 
     if (SOPC_STATUS_OK == status)
     {

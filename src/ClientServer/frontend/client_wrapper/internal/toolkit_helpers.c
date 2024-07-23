@@ -30,7 +30,7 @@
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
@@ -307,7 +307,7 @@ SOPC_ReturnStatus Helpers_NewCreateSubscriptionRequest(double fPublishIntervalMs
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_CreateSubscriptionRequest_EncodeableType, (void**) &pReq);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -336,7 +336,7 @@ SOPC_ReturnStatus Helpers_NewDeleteSubscriptionRequest(uint32_t subscriptionId, 
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_DeleteSubscriptionsRequest_EncodeableType, (void**) &pReq);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -370,7 +370,7 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
 
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+        status = SOPC_EncodeableObject_Create(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -378,8 +378,8 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
         if (bAck)
         {
             pReq->NoOfSubscriptionAcknowledgements = 1;
-            status = SOPC_Encodeable_Create(&OpcUa_SubscriptionAcknowledgement_EncodeableType,
-                                            (void**) &pReq->SubscriptionAcknowledgements);
+            status = SOPC_EncodeableObject_Create(&OpcUa_SubscriptionAcknowledgement_EncodeableType,
+                                                  (void**) &pReq->SubscriptionAcknowledgements);
             if (SOPC_STATUS_OK == status)
             {
                 pReq->SubscriptionAcknowledgements->SubscriptionId = iSubId;
@@ -403,7 +403,7 @@ SOPC_ReturnStatus Helpers_NewPublishRequest(bool bAck, uint32_t iSubId, uint32_t
         {
             SOPC_Free(pReq->SubscriptionAcknowledgements);
         }
-        SOPC_Encodeable_Delete(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
+        SOPC_EncodeableObject_Delete(&OpcUa_PublishRequest_EncodeableType, (void**) &pReq);
     }
 
     return status;
@@ -434,7 +434,7 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
     }
 
     SOPC_ReturnStatus status =
-        SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
+        SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
 
     if (SOPC_STATUS_OK == status)
     {
@@ -470,7 +470,7 @@ SOPC_ReturnStatus Helpers_NewCreateMonitoredItemsRequest(SOPC_NodeId** lpNid,
     }
     else if (NULL != pReq)
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
     }
 
     return status;

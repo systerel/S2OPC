@@ -53,7 +53,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles_lib_itf.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -659,7 +659,7 @@ static bool Server_SetTargetVariables(const OpcUa_WriteValue* lwv, const int32_t
     /* Encapsulate the WriteValues in a WriteRequest and send it as a local service,
      * acknowledge before the toolkit answers */
     OpcUa_WriteRequest* request = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &request);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (NULL == request)
     {

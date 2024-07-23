@@ -30,7 +30,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_crypto_provider.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
@@ -1296,8 +1296,8 @@ static bool SC_ClientTransitionHelper_ReceiveOPN(SOPC_SecureConnection* scConnec
         }
     }
 
-    SOPC_Encodeable_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
-    SOPC_Encodeable_Delete(&OpcUa_OpenSecureChannelResponse_EncodeableType, (void**) &opnResp);
+    SOPC_EncodeableObject_Delete(&OpcUa_ResponseHeader_EncodeableType, (void**) &respHeader);
+    SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelResponse_EncodeableType, (void**) &opnResp);
 
     return result;
 }
@@ -1944,8 +1944,8 @@ static bool SC_ServerTransition_ScInit_To_ScConnecting(SOPC_SecureConnection* sc
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTING;
     }
 
-    SOPC_Encodeable_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
-    SOPC_Encodeable_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
+    SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
     // Clear the temporary security info recorded by chunks manager
     scConnection->serverAsymmSecuInfo.clientCertificate = NULL;
     scConnection->serverAsymmSecuInfo.securityPolicyUri = NULL;
@@ -2381,8 +2381,8 @@ static bool SC_ServerTransition_ScConnected_To_ScConnectedRenew(SOPC_SecureConne
         scConnection->state = SECURE_CONNECTION_STATE_SC_CONNECTED_RENEW;
     }
 
-    SOPC_Encodeable_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
-    SOPC_Encodeable_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
+    SOPC_EncodeableObject_Delete(&OpcUa_RequestHeader_EncodeableType, (void**) &reqHeader);
+    SOPC_EncodeableObject_Delete(&OpcUa_OpenSecureChannelRequest_EncodeableType, (void**) &opnReq);
 
     return result;
 }

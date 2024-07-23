@@ -32,7 +32,7 @@
 #include "opcua_statuscodes.h"
 
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 
@@ -407,7 +407,8 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event(SOPC_Clie
     OpcUa_CreateMonitoredItemsResponse* createMonItResp = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
+        status =
+            SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -469,7 +470,8 @@ static OpcUa_CreateMonitoredItemsResponse* create_monitored_item_event_index_ran
     OpcUa_CreateMonitoredItemsResponse* createMonItResp = NULL;
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
+        status =
+            SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
     }
     if (SOPC_STATUS_OK == status)
     {
@@ -830,7 +832,7 @@ static SOPC_ReturnStatus check_monitored_items_special_cases(OpcUa_CreateMonitor
     }
     if (deleteResp)
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) &createMonItResp);
     }
     return status;
 }
@@ -883,7 +885,7 @@ static SOPC_ReturnStatus delete_monitored_items(SOPC_ClientHelper_Subscription* 
     if (deleteMonitoredItems)
     {
         status = SOPC_ClientHelperNew_Subscription_DeleteMonitoredItems(subscription, delMonItReq, &delMonItResp);
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) ppCreateMonItResp);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, (void**) ppCreateMonItResp);
 
         // Check DeleteMonitoredItems response
         if (SOPC_STATUS_OK == status)
@@ -912,7 +914,7 @@ static SOPC_ReturnStatus delete_monitored_items(SOPC_ClientHelper_Subscription* 
     }
     if (SOPC_STATUS_OK != status || !deleteMonitoredItems)
     {
-        SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &delMonItReq);
+        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &delMonItReq);
     }
     return status;
 }
@@ -989,7 +991,7 @@ static SOPC_ReturnStatus call_gen_events_method(SOPC_ClientConnection* secureCon
         {
             status = SOPC_STATUS_NOK;
         }
-        SOPC_Encodeable_Delete(callMethodResp->encodeableType, (void**) &callMethodResp);
+        SOPC_EncodeableObject_Delete(callMethodResp->encodeableType, (void**) &callMethodResp);
     }
     if (NULL != inputArgs)
     {

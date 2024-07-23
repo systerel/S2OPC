@@ -22,7 +22,7 @@
 #include "sopc_toolkit_async_api.h"
 
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_services_api.h"
@@ -197,7 +197,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Anonymous(SOPC_Endpoin
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_AnonymousIdentityToken_EncodeableType, (void**) &token);
+    status = SOPC_ExtensionObject_CreateObject(user, &OpcUa_AnonymousIdentityToken_EncodeableType, (void**) &token);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_InitializeFromCString(&token->PolicyId, policyId);
@@ -241,7 +241,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_UsernamePassword(
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
+    status = SOPC_ExtensionObject_CreateObject(user, &OpcUa_UserNameIdentityToken_EncodeableType, (void**) &token);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_String_Initialize(&token->UserName);
@@ -294,7 +294,7 @@ SOPC_ReturnStatus SOPC_ToolkitClient_AsyncActivateSession_Certificate(SOPC_Endpo
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
-    status = SOPC_Encodeable_CreateExtension(user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
+    status = SOPC_ExtensionObject_CreateObject(user, &OpcUa_X509IdentityToken_EncodeableType, (void**) &token);
 
     if (SOPC_STATUS_OK == status)
     {

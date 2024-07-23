@@ -23,7 +23,7 @@
 
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_event_manager.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -49,8 +49,8 @@ static void free_filter_ctx(SOPC_InternalMonitoredItemFilterCtx* filterCtx)
                 SOPC_NumericRange_Delete(filterCtx->Filter.Event.indexRangeSelectClauses[i]);
                 SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses[i]);
             }
-            SOPC_ReturnStatus status = SOPC_Encodeable_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
-                                                              (void**) &filterCtx->Filter.Event.eventFilter);
+            SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
+                                                                    (void**) &filterCtx->Filter.Event.eventFilter);
             SOPC_UNUSED_RESULT(status);
         }
         SOPC_Free(filterCtx->Filter.Event.indexRangeSelectClauses);
@@ -453,8 +453,8 @@ void monitored_item_event_filter_treatment_bs__delete_event_filter_result(
     if (NULL != monitored_item_event_filter_treatment_bs__p_filterResult)
     {
         SOPC_GCC_DIAGNOSTIC_IGNORE_CAST_CONST
-        SOPC_Encodeable_Delete(&OpcUa_EventFilterResult_EncodeableType,
-                               (void**) &monitored_item_event_filter_treatment_bs__p_filterResult);
+        SOPC_EncodeableObject_Delete(&OpcUa_EventFilterResult_EncodeableType,
+                                     (void**) &monitored_item_event_filter_treatment_bs__p_filterResult);
         SOPC_GCC_DIAGNOSTIC_RESTORE
     }
 }
@@ -494,8 +494,8 @@ void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(
         status = (NULL == filterCtx ? SOPC_STATUS_OUT_OF_MEMORY : SOPC_STATUS_OK);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Encodeable_Create(&OpcUa_EventFilter_EncodeableType,
-                                            (void**) &filterCtx->Filter.Event.eventFilter);
+            status = SOPC_EncodeableObject_Create(&OpcUa_EventFilter_EncodeableType,
+                                                  (void**) &filterCtx->Filter.Event.eventFilter);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -523,7 +523,7 @@ void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Encodeable_Create(&OpcUa_EventFilterResult_EncodeableType, (void**) &eventFilterResult);
+            status = SOPC_EncodeableObject_Create(&OpcUa_EventFilterResult_EncodeableType, (void**) &eventFilterResult);
         }
         if (SOPC_STATUS_OK == status)
         {
@@ -583,6 +583,6 @@ void monitored_item_event_filter_treatment_bs__init_event_filter_ctx_and_result(
     else
     {
         free_filter_ctx(filterCtx);
-        SOPC_Encodeable_Delete(&OpcUa_EventFilterResult_EncodeableType, (void**) &eventFilterResult);
+        SOPC_EncodeableObject_Delete(&OpcUa_EventFilterResult_EncodeableType, (void**) &eventFilterResult);
     }
 }

@@ -32,7 +32,7 @@
 #include "custom_types.h"
 #include "opcua_S2OPC_identifiers.h"
 #include "opcua_identifiers.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_mem_alloc.h"
@@ -80,7 +80,7 @@ static void checkEncodeableType(SOPC_EncodeableType* encType,
     ck_assert_ok(SOPC_Buffer_SetPosition(input, 0));
 
     // Initialization
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &obj);
+    SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(encType, &obj);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(obj);
 
@@ -98,7 +98,7 @@ static void checkEncodeableType(SOPC_EncodeableType* encType,
     ck_assert_mem_eq(input->data, output->data, frameSize);
 
     // Clear all objects
-    SOPC_Encodeable_Delete(encType, &obj);
+    SOPC_EncodeableObject_Delete(encType, &obj);
     SOPC_Buffer_Delete(input);
     SOPC_Buffer_Delete(output);
 }
@@ -622,7 +622,7 @@ START_TEST(test_UserEncodeableTypeNS1)
 
     OpcUa_S2OPC_CustomDataType* instCDT = NULL;
 
-    status = SOPC_Encodeable_CreateExtension(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
+    status = SOPC_ExtensionObject_CreateObject(&extObj, &OpcUa_S2OPC_CustomDataType_EncodeableType, (void**) &instCDT);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
     instCDT->fieldb = true;

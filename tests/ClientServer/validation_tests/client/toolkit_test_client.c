@@ -33,7 +33,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common.h"
 #include "sopc_crypto_profiles.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_helper_askpass.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -247,7 +247,7 @@ static void* getGetEndpoints_message(void)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     OpcUa_GetEndpointsRequest* getEndpointReq = NULL;
-    status = SOPC_Encodeable_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
+    status = SOPC_EncodeableObject_Create(&OpcUa_GetEndpointsRequest_EncodeableType, (void**) &getEndpointReq);
     if (SOPC_STATUS_OK == status)
     {
         status = SOPC_String_AttachFromCstring(&getEndpointReq->EndpointUrl, DEFAULT_ENDPOINT_URL);
@@ -600,7 +600,7 @@ static SOPC_ReturnStatus test_non_reg_issue_1428_create_MI(SOPC_ClientHelper_Sub
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &createMonItReq);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &createMonItReq);
     }
 
     OpcUa_CreateMonitoredItemsResponse_Clear(&createMonItResp);

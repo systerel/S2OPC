@@ -210,7 +210,7 @@ int main(int argc, char* const argv[])
     }
     if (NULL != getEndpointsResponse)
     {
-        SOPC_Encodeable_Delete(getEndpointsResponse->encodeableType, (void**) &getEndpointsResponse);
+        SOPC_EncodeableObject_Delete(getEndpointsResponse->encodeableType, (void**) &getEndpointsResponse);
     }
 
     /* Close the toolkit */

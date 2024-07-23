@@ -30,7 +30,7 @@
 #include "opcua_statuscodes.h"
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_hash.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
@@ -817,7 +817,7 @@ SOPC_ReturnStatus SOPC_StaMac_CreateMonitoredItem(SOPC_StaMac_Machine* pSM,
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pReq);
     }
 
     for (int i = 0; NULL != lpNid && i < nElems; ++i)
@@ -893,7 +893,8 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
     /* Prepare context to keep a copy of request */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
+        status =
+            SOPC_EncodeableObject_Create(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
     }
 
     /* Fill the unique client handle parameters an record the user context associated to the MI  */
@@ -952,7 +953,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewCreateMonitoredItems(SOPC_StaMac_Machine* pSM,
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
+        SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pAppCtx->req);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -995,7 +996,8 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
     /* Prepare context to keep a copy of request */
     if (SOPC_STATUS_OK == status)
     {
-        status = SOPC_Encodeable_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
+        status =
+            SOPC_EncodeableObject_Create(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
     }
 
     uintptr_t clientHandle = 0;
@@ -1031,7 +1033,7 @@ SOPC_ReturnStatus SOPC_StaMac_NewDeleteMonitoredItems(SOPC_StaMac_Machine* pSM,
     }
     else
     {
-        SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
+        SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &outAppCtx->req);
     }
 
     if (SOPC_STATUS_OK == status)
@@ -2140,7 +2142,7 @@ static void StaMac_ProcessMsg_CreateMonitoredItemsResponse(SOPC_StaMac_Machine* 
         *resp = *pMonItResp;
         SOPC_EncodeableObject_Initialize(&OpcUa_CreateMonitoredItemsResponse_EncodeableType, pMonItResp);
     }
-    SOPC_Encodeable_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
+    SOPC_EncodeableObject_Delete(&OpcUa_CreateMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
     pSM->state = stActivated;
 }
 
@@ -2195,7 +2197,7 @@ static void StaMac_ProcessMsg_DeleteMonitoredItemsResponse(SOPC_StaMac_Machine* 
         *resp = *pMonItResp;
         SOPC_EncodeableObject_Initialize(&OpcUa_DeleteMonitoredItemsResponse_EncodeableType, pMonItResp);
     }
-    SOPC_Encodeable_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
+    SOPC_EncodeableObject_Delete(&OpcUa_DeleteMonitoredItemsRequest_EncodeableType, (void**) &pMonItReq);
     pSM->state = stActivated;
 }
 

@@ -55,8 +55,8 @@ static void SOPC_InternalMonitoredFilter_Free(SOPC_InternalMonitoredItemFilterCt
             SOPC_Free(filterCtx->Filter.Event.indexRangeSelectClauses);
             SOPC_Free(filterCtx->Filter.Event.qnPathStrSelectClauses);
             SOPC_NodeId_Clear(&filterCtx->Filter.Event.whereClauseTypeId);
-            SOPC_ReturnStatus status = SOPC_Encodeable_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
-                                                              (void**) &filterCtx->Filter.Event.eventFilter);
+            SOPC_ReturnStatus status = SOPC_EncodeableObject_Delete(filterCtx->Filter.Event.eventFilter->encodeableType,
+                                                                    (void**) &filterCtx->Filter.Event.eventFilter);
             SOPC_UNUSED_RESULT(status);
         }
         SOPC_Free(filterCtx);

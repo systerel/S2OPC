@@ -29,7 +29,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
-#include "sopc_encodeable.h"
+#include "sopc_encodeabletype.h"
 #include "sopc_internal_app_dispatcher.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -97,14 +97,14 @@ void SOPC_ServerInternal_SyncLocalServiceCb(SOPC_EncodeableType* encType,
     else
     {
         // Move content of response into synchronous response to avoid deallocation on return by toolkit
-        SOPC_ReturnStatus status = SOPC_Encodeable_Create(encType, &sopc_server_helper_config.syncResp);
+        SOPC_ReturnStatus status = SOPC_EncodeableObject_Create(encType, &sopc_server_helper_config.syncResp);
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_Encodeable_Move(sopc_server_helper_config.syncResp, response);
+            status = SOPC_EncodeableObject_Move(sopc_server_helper_config.syncResp, response);
         }
         if (SOPC_STATUS_OK != status)
         {
-            SOPC_Encodeable_Delete(encType, &sopc_server_helper_config.syncResp);
+            SOPC_EncodeableObject_Delete(encType, &sopc_server_helper_config.syncResp);
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "Issue %d treating synchronous local service response: %s", (int) status,
                                    SOPC_EncodeableType_GetName(encType));
@@ -265,7 +265,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa
     if (NULL != writeRequest)
     {
         OpcUa_WriteRequest* writeRequestCopyCtx = NULL;
-        status = SOPC_Encodeable_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
+        status = SOPC_EncodeableObject_Create(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
 
         if (SOPC_STATUS_OK == status)
         {
@@ -281,7 +281,7 @@ static SOPC_ReturnStatus SOPC_HelperInternal_SendWriteRequestWithCopyInCtx(OpcUa
         {
             OpcUa_WriteRequest_Clear(writeRequest);
             SOPC_Free(writeRequest);
-            SOPC_Encodeable_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
+            SOPC_EncodeableObject_Delete(&OpcUa_WriteRequest_EncodeableType, (void**) &writeRequestCopyCtx);
         }
     }
 

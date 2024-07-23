@@ -57,7 +57,8 @@ bool util_event__alloc_event_field_list(uint32_t clientHandle,
     SOPC_ASSERT(NULL != ppEventFieldList);
     bool res = false;
     OpcUa_EventFieldList* eventFieldList = NULL;
-    SOPC_ReturnStatus status = SOPC_Encodeable_Create(&OpcUa_EventFieldList_EncodeableType, (void**) &eventFieldList);
+    SOPC_ReturnStatus status =
+        SOPC_EncodeableObject_Create(&OpcUa_EventFieldList_EncodeableType, (void**) &eventFieldList);
     if (SOPC_STATUS_OK == status)
     {
         eventFieldList->ClientHandle = clientHandle;
