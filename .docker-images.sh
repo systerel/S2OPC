@@ -25,7 +25,7 @@ MINGW_DIGEST=registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5cbfd3181a228
 RPI_DIGEST=registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # rpi_build:1.6
 CHECK_DIGEST=registry.gitlab.com/systerel/s2opc/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # check 1.20
 TEST_DIGEST=registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # test:2.16
-ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # zephyr_build:v3.2.0-b
+ZEPHYR_DIGEST=registry.gitlab.com/systerel/s2opc/zephyr_build:v3.6.0-b@sha256:13069418dd7b0317f93f02986b01f285f0f66956670f2fecded9850ace85d734 # zephyr_build:v3.6.0-b
 FREERTOS_DIGEST=registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1 (FreeRTOS for STM32-H723ZG only for CI purpose)
 
 # Private images
