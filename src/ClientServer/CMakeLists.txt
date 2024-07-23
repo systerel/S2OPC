@@ -98,6 +98,7 @@ list(APPEND WRAPPERS_INCLUDE_FILES
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_new_client.h"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.h"
+    "${CLIENTWRAPPER_PATH}/libs2opc_client_config_custom.h"
     "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client.h"
     "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_cmds.h"
     "${CLIENTWRAPPER_PATH}/deprecated/libs2opc_client_common.h"
