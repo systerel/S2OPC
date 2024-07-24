@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.h
 
- Date                 : 01/02/2024 09:39:26
+ Date                 : 09/07/2024 15:57:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -91,6 +91,7 @@ extern void session_core_1__INITIALISATION(void);
 #define session_core_1__getall_orphaned session_core_2__getall_orphaned
 #define session_core_1__getall_session_channel session_core_2__getall_session_channel
 #define session_core_1__getall_to_create session_core_2__getall_to_create
+#define session_core_1__is_client_session session_core_2__is_client_session
 #define session_core_1__is_same_user_server session_core_bs__is_same_user_server
 #define session_core_1__is_valid_session session_core_2__is_valid_session
 #define session_core_1__may_validate_server_certificate session_core_bs__may_validate_server_certificate

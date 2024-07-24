@@ -21,7 +21,7 @@
 
  File Name            : session_core_1.c
 
- Date                 : 22/03/2023 12:05:36
+ Date                 : 09/07/2024 15:57:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -99,6 +99,7 @@ void session_core_1__init_new_session(
       else {
          time_reference_bs__get_current_TimeReference(&session_core_1__l_current_time);
          session_core_2__add_session(*session_core_1__p_session,
+            session_core_1__is_client,
             session_core_1__l_current_time);
          session_core_bs__notify_set_session_state(*session_core_1__p_session,
             constants__e_session_closed,

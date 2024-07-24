@@ -21,7 +21,7 @@
 
  File Name            : session_core.c
 
- Date                 : 30/05/2024 08:36:01
+ Date                 : 09/07/2024 15:57:06
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -978,7 +978,6 @@ void session_core__may_close_unactivated_session(void) {
       t_bool session_core__l_auto_closed_active;
       t_bool session_core__l_has_session_to_close;
       constants__t_session_i session_core__l_session_to_close;
-      constants__t_channel_i session_core__l_channel;
       t_bool session_core__l_is_client;
       
       session_core_1__is_auto_close_session_active(&session_core__l_auto_closed_active);
@@ -986,9 +985,7 @@ void session_core__may_close_unactivated_session(void) {
          session_core_1__find_session_to_close(&session_core__l_has_session_to_close,
             &session_core__l_session_to_close);
          if (session_core__l_has_session_to_close == true) {
-            session_core_1__get_session_channel(session_core__l_session_to_close,
-               &session_core__l_channel);
-            channel_mgr__is_client_channel(session_core__l_channel,
+            session_core_1__is_client_session(session_core__l_session_to_close,
                &session_core__l_is_client);
             session_core_1__set_session_state_closed(session_core__l_session_to_close,
                constants_statuscodes_bs__e_sc_bad_session_not_activated,
@@ -1003,7 +1000,6 @@ void session_core__session_core_UNINITIALISATION(void) {
       t_bool session_core__l_continue;
       constants__t_session_i session_core__l_session;
       t_bool session_core__l_valid_session;
-      constants__t_channel_i session_core__l_channel;
       t_bool session_core__l_is_client;
       
       session_core_it__init_iter_session(&session_core__l_continue);
@@ -1014,9 +1010,7 @@ void session_core__session_core_UNINITIALISATION(void) {
             session_core_1__is_valid_session(session_core__l_session,
                &session_core__l_valid_session);
             if (session_core__l_valid_session == true) {
-               session_core_1__get_session_channel(session_core__l_session,
-                  &session_core__l_channel);
-               channel_mgr__is_client_channel(session_core__l_channel,
+               session_core_1__is_client_session(session_core__l_session,
                   &session_core__l_is_client);
                session_core_1__set_session_state_closed(session_core__l_session,
                   constants_statuscodes_bs__e_sc_ok,

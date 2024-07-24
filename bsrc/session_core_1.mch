@@ -31,6 +31,7 @@ SEES
 DEFINITIONS
     d_variables ==
     s_session,
+    s_client_session,
     a_state,
     a_channel,
     a_client_to_create,
@@ -49,6 +50,7 @@ DEFINITIONS
 
     d_typing ==
     s_session                   <: t_session                             &
+    s_client_session            <: t_session                             &
     a_state                      : t_session +-> t_sessionState          &
     a_channel                    : t_session +-> t_channel               &
     a_client_to_create           : t_session +-> t_channel_config_idx_i  &
@@ -73,6 +75,7 @@ INVARIANT
 
 INITIALISATION
     s_session                    := {} ||
+    s_client_session             := {} ||
     a_state                      := {} ||
     a_channel                    := {} ||
     a_client_to_create           := {} ||
@@ -173,6 +176,9 @@ OPERATIONS
             THEN
                 s_session := s_session \/ {l_nsession} ||
                 a_state (l_nsession) := e_session_init ||
+                IF is_client = TRUE THEN
+                    s_client_session := s_client_session \/ {p_session}
+                END ||
                 p_session := l_nsession
             END
         END
@@ -214,6 +220,15 @@ OPERATIONS
         session : t_session_i
     THEN
         ret :=  bool(session : s_session)
+    END
+    ;
+
+    ret <-- is_client_session (p_session) =
+    PRE
+        p_session : t_session_i  &
+        p_session : s_session
+    THEN
+        ret := bool(p_session : s_client_session)
     END
     ;
 

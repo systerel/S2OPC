@@ -29,6 +29,7 @@ SEES
 
 ABSTRACT_VARIABLES
     s_session,
+    s_client_session,
     a_state,
     a_session_init_time,
     a_channel,
@@ -40,6 +41,7 @@ ABSTRACT_VARIABLES
 
 INVARIANT
     s_session         <: t_session                            &
+    s_client_session  <: t_session                            &
     a_state            : t_session +-> t_sessionState         &
     a_session_init_time : t_session +-> t_timeref             &
     a_channel          : t_session +-> t_channel              &
@@ -51,6 +53,7 @@ INVARIANT
 
 INITIALISATION
     s_session          := {} ||
+    s_client_session   := {} ||
     a_state            := {} ||
     a_session_init_time := {} ||
     a_channel          := {} ||
@@ -62,15 +65,19 @@ INITIALISATION
 
 OPERATIONS
 
-    add_session(p_session, p_timeref) =
+    add_session(p_session, p_is_client, p_timeref) =
     PRE
         p_session : t_session_i &
         p_session : t_session   &
+        p_is_client : BOOL      &
         p_timeref : t_timeref_i &
         p_timeref : t_timeref
     THEN
         s_session := s_session \/ {p_session} ||
         a_state(p_session) := e_session_init ||
+        IF p_is_client = TRUE THEN
+            s_client_session := s_client_session \/ {p_session}
+        END ||
         a_session_init_time(p_session) := p_timeref
     END
     ;
@@ -82,6 +89,7 @@ OPERATIONS
     THEN
         s_session := s_session - {p_session} ||
         a_state   := {p_session} <<| a_state ||
+        s_client_session := s_client_session - {p_session} ||
         a_session_init_time := {p_session} <<| a_session_init_time
     END
     ;
@@ -129,6 +137,15 @@ OPERATIONS
         session : t_session_i
     THEN
         ret :=  bool(session : s_session)
+    END
+    ;
+
+    ret <-- is_client_session (p_session) =
+    PRE
+        p_session : t_session_i  &
+        p_session : dom(a_state)
+    THEN
+        ret := bool(p_session : s_client_session)
     END
     ;
 

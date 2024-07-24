@@ -21,7 +21,7 @@
 
  File Name            : session_core_2.c
 
- Date                 : 22/03/2023 10:04:23
+ Date                 : 24/07/2024 12:50:28
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,6 +38,7 @@
 constants__t_channel_i session_core_2__a_channel_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_channel_nb_sessions_i[constants__t_channel_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_orphaned_i[constants__t_session_i_max+1];
+t_bool session_core_2__a_client_session_i[constants__t_session_i_max+1];
 constants__t_channel_config_idx_i session_core_2__a_client_to_create_i[constants__t_session_i_max+1];
 constants__t_LocaleIds_i session_core_2__a_server_client_locales_i[constants__t_session_i_max+1];
 t_entier4 session_core_2__a_server_user_auth_attempts_i[constants__t_session_i_max+1];
@@ -54,6 +55,12 @@ void session_core_2__INITIALISATION(void) {
       t_entier4 i;
       for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
          session_core_2__s_session_i[i] = false;
+      }
+   }
+   {
+      t_entier4 i;
+      for (i = constants__t_session_i_max; 0 <= i; i = i - 1) {
+         session_core_2__a_client_session_i[i] = false;
       }
    }
    session_core_2__card_s_session_i = 0;
@@ -112,11 +119,13 @@ void session_core_2__INITIALISATION(void) {
   --------------------*/
 void session_core_2__add_session(
    const constants__t_session_i session_core_2__p_session,
+   const t_bool session_core_2__p_is_client,
    const constants__t_timeref_i session_core_2__p_timeref) {
    session_core_2__s_session_i[session_core_2__p_session] = true;
    session_core_2__card_s_session_i = session_core_2__card_s_session_i +
       1;
    session_core_2__a_state_i[session_core_2__p_session] = constants__e_session_init;
+   session_core_2__a_client_session_i[session_core_2__p_session] = session_core_2__p_is_client;
    session_core_2__a_session_init_time_i[session_core_2__p_session] = session_core_2__p_timeref;
 }
 
@@ -156,6 +165,12 @@ void session_core_2__is_valid_session(
    const constants__t_session_i session_core_2__session,
    t_bool * const session_core_2__ret) {
    *session_core_2__ret = session_core_2__s_session_i[session_core_2__session];
+}
+
+void session_core_2__is_client_session(
+   const constants__t_session_i session_core_2__p_session,
+   t_bool * const session_core_2__ret) {
+   *session_core_2__ret = session_core_2__a_client_session_i[session_core_2__p_session];
 }
 
 void session_core_2__get_session_state(

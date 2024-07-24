@@ -45,6 +45,7 @@ PROMOTES
     client_set_session_token,
     reset_session_to_create,
     is_valid_session,
+    is_client_session,
     get_session_state,
     set_session_channel,
     getall_session_channel,
@@ -179,7 +180,7 @@ OPERATIONS
             p_session := c_session_indet
         ELSE
             l_current_time <-- get_current_TimeReference;
-            add_session(p_session, l_current_time);
+            add_session(p_session, is_client, l_current_time);
             notify_set_session_state(p_session, e_session_closed, e_session_init, c_StatusCode_indet, is_client)
         END
     END

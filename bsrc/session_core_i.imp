@@ -1055,7 +1055,6 @@ OPERATIONS
         l_auto_closed_active,
         l_has_session_to_close,
         l_session_to_close,
-        l_channel,
         l_is_client
     IN
         l_auto_closed_active <-- is_auto_close_session_active;
@@ -1064,8 +1063,7 @@ OPERATIONS
             l_has_session_to_close, l_session_to_close <-- find_session_to_close;
             IF l_has_session_to_close = TRUE
             THEN
-                l_channel <-- get_session_channel (l_session_to_close);
-                l_is_client <-- is_client_channel (l_channel);
+                l_is_client <-- is_client_session (l_session_to_close);
                 set_session_state_closed (l_session_to_close, e_sc_bad_session_not_activated, l_is_client)
             END
         END
@@ -1077,7 +1075,6 @@ OPERATIONS
         l_continue,
         l_session,
         l_valid_session,
-        l_channel,
         l_is_client
     IN
         l_continue <-- init_iter_session;
@@ -1088,8 +1085,7 @@ OPERATIONS
 
                 IF l_valid_session = TRUE
                 THEN
-                    l_channel <-- get_session_channel (l_session);
-                    l_is_client <-- is_client_channel (l_channel);
+                    l_is_client <-- is_client_session (l_session);
                     set_session_state_closed (l_session, e_sc_ok, l_is_client)
                 END
             INVARIANT

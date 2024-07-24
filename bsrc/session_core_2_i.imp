@@ -32,6 +32,7 @@ SEES
 
 CONCRETE_VARIABLES
     s_session_i,
+    a_client_session_i,
     card_s_session_i,
     a_state_i,
     a_channel_i,
@@ -44,6 +45,7 @@ CONCRETE_VARIABLES
 
 INVARIANT
     s_session_i          : t_session_i --> BOOL                                      &
+    a_client_session_i   : t_session_i --> BOOL                                      &
     card_s_session_i     : NAT                                                       &
     a_state_i            : t_session_i --> t_sessionState                            &
     a_session_init_time_i : t_session_i --> t_timeref_i                              &
@@ -65,6 +67,7 @@ INVARIANT
 
 INITIALISATION
     s_session_i  := t_session_i * {FALSE};
+    a_client_session_i := t_session_i * {FALSE};
     card_s_session_i := 0;
     a_state_i    := t_session_i * {e_session_closed};
     a_session_init_time_i := t_session_i * {c_timeref_indet};
@@ -77,11 +80,12 @@ INITIALISATION
 
 OPERATIONS
 
-    add_session(p_session, p_timeref) =
+    add_session(p_session, p_is_client, p_timeref) =
     BEGIN
         s_session_i(p_session) := TRUE;
         card_s_session_i := card_s_session_i + 1;
         a_state_i  (p_session) := e_session_init;
+        a_client_session_i(p_session) := p_is_client;
         a_session_init_time_i (p_session) := p_timeref
     END
     ;
@@ -123,6 +127,12 @@ OPERATIONS
     ret <-- is_valid_session (session) =
     BEGIN
         ret := s_session_i(session)
+    END
+    ;
+
+    ret <-- is_client_session (p_session) =
+    BEGIN
+        ret := a_client_session_i(p_session)
     END
     ;
 
