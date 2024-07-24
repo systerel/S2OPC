@@ -226,8 +226,8 @@ list(APPEND S2OPC_COMPILER_FLAGS $<${IS_MINGW}: -Wno-pedantic-ms-format>)
 list(APPEND S2OPC_LINKER_FLAGS $<${IS_MINGW}:-static-libgcc>)
 
 # Add -fno-omit-frame-pointer when build type is RelWithDebInfo or Debug
-list(APPEND S2OPC_COMPILER_FLAGS $<$<STREQUAL:"${CMAKE_BUILD_TYPE}","RelWithDebInfo">:-fno-omit-frame-pointer>)
-list(APPEND S2OPC_COMPILER_FLAGS $<$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">:-fno-omit-frame-pointer>)
+list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:$<$<STREQUAL:"${CMAKE_BUILD_TYPE}","RelWithDebInfo">:-fno-omit-frame-pointer>>)
+list(APPEND S2OPC_COMPILER_FLAGS $<${IS_GNU}:$<$<STREQUAL:"${CMAKE_BUILD_TYPE}","Debug">:-fno-omit-frame-pointer>>)
 
 # TODO: avoid modifying CMAKE_CFLAGS_* variables ? create new CMAKE_CONFIGURATION_TYPES equivalent to the 2 following but without DNDEBUG ?
 # Re-enable asserts for Release and RelWithDebInfo builds
