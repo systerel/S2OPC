@@ -304,7 +304,7 @@ build-freertos:
 build-pikeos:
   <<: *pikeos_job
   stage: build-others
-  image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
+  image: docker.aix.systerel.fr/c838/pikeos:1.1@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
   script:
     - 'samples/embedded/platform_dep/pikeos/ci/build-pikeos-samples-docker.sh'
   artifacts:
@@ -393,6 +393,8 @@ test-check:
     - './.format.sh'
     # Check that generated files are up to date
     - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
+    - '${CI_PROJECT_DIR}/scripts/generate-s2opc_pubsub-static-config.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/config_pubsub.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/pubsub_config_static.c'
+    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/embedded_address_space.c --const_addspace'
     - './.format.sh'
     - './.verify-no-git-changes.sh'
     # Check generated demo nodesets are up to date
@@ -574,7 +576,7 @@ test-zephyr:
 test-pikeos:
   <<: *pikeos_job
   stage: test-others
-  image: docker.aix.systerel.fr/c838/pikeos:1.0@sha256:7c062aa0d1c5321371daeb0c720c80858d046dd9b4a829a099955128997ddb87 # pikeos:1.0
+  image: docker.aix.systerel.fr/c838/pikeos:1.1@sha256:52814500eeabfcb6596097a218634dce5dbbe19cc416cdeed473ac0fcd59fafb # pikeos:1.1
   script:
     - samples/embedded/platform_dep/pikeos/ci/test-embedded-docker.sh
   dependencies:

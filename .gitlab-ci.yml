@@ -458,6 +458,8 @@ test-check:
     - './.format.sh'
     # Check that generated files are up to date
     - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
+    - '${CI_PROJECT_DIR}/scripts/generate-s2opc_pubsub-static-config.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/config_pubsub.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/pubsub_config_static.c'
+    - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/tests/embedded/validation_test/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/tests/embedded/validation_test/embedded_address_space.c --const_addspace'
     - './.format.sh'
     - './.verify-no-git-changes.sh'
     # Check generated demo nodesets are up to date
