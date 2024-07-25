@@ -38,7 +38,7 @@ MODLIST_S2OPC_TESTS = $(MBEDTLS_MODLIST) $(MBEDTLS_MODLIST_USERCUSTOM_IMP) $(S2O
 APPLIST_S2OPC_TEST = unit_test.elf
 
 # Discard missing field initializers warnings from address space
-$(ODIR)/${S2OPC_VALIDATION_TEST_DIR}/address_space.o: ${S2OPC_VALIDATION_TEST_DIR}/address_space.c $(MAKEFILE_LIST)
+$(ODIR)/${S2OPC_VALIDATION_TEST_DIR}/embedded_address_space.o: ${S2OPC_VALIDATION_TEST_DIR}/embedded_address_space.c $(MAKEFILE_LIST)
 	@test -d "$(@D)" || mkdir -p "$(@D)"
 ifneq ($(PIKEOS_COMPILATION_DEPENDENCY),false)
 	@test -d "$(DEPDIR)/$(*D)" || mkdir -p "$(DEPDIR)/$(*D)"

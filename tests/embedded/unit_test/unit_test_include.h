@@ -20,10 +20,16 @@
 #ifndef UNIT_TEST_INCLUDE_H_
 #define UNIT_TEST_INCLUDE_H_
 
+#ifndef PRINT
 #if SOPC_PIKEOS
 #include <vm.h>
 
 #define PRINT vm_cprintf
+#else
+#include <stdio.h>
+
+#define PRINT printf
+#endif
 #endif
 
 void suite_test_alloc_memory(int* index);
