@@ -393,11 +393,13 @@ test-check:
     - './.format.sh'
     # Check that generated files are up to date
     - '${CI_PROJECT_DIR}/scripts/generate-s2opc-address-space.py ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/xml/s2opc_pubsub_embedded_nodeset.xml ${CI_PROJECT_DIR}/samples/embedded/cli_pubsub_server/src/test_address_space.c --const_addspace'
+    - './.format.sh'
     - './.verify-no-git-changes.sh'
     # Check generated demo nodesets are up to date
     - 'cd samples/ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
     - './.verify-no-git-changes.sh'
     - 'cd samples/PubSub_ClientServer/data/address_space && ./generate_demo_nodesets.sh && cd -'
+    - './.format.sh'
     - './.verify-no-git-changes.sh'
   variables:
       DOCKER_DIGEST: 'sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8'
