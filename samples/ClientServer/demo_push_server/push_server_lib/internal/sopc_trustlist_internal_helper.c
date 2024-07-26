@@ -1400,29 +1400,6 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
     return status;
 }
 
-/* Raise an event to re-evaluate the certificates. */
-SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList)
-{
-    SOPC_ASSERT(NULL != pTrustList);
-    SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    if (SOPC_TRUSTLIST_GROUP_APP == pTrustList->groupType)
-    {
-        SOPC_ToolkitServer_AsyncReEvalSecureChannels(false);
-    }
-    else if (SOPC_TRUSTLIST_GROUP_USR == pTrustList->groupType)
-    {
-        SOPC_ToolkitServer_AsyncReEvalUserCertSessions();
-    }
-    else
-    {
-        SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
-                                 "TrustList:%s:RaiseEvent: unexpected certificate group type : %d",
-                                 pTrustList->cStrObjectId, (const int) pTrustList->groupType);
-        status = SOPC_STATUS_NOK;
-    }
-    return status;
-}
-
 /* Executes user callback to indicate the end of a valid update */
 void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList)
 {

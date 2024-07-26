@@ -466,20 +466,6 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
                                    const bool bForcePush);
 
 /**
- * \brief Raise an event to re-evaluate the currently used certificates (application or user).
- *        The event depends on the certificate Group.
- *        Application group: Close secure channels for invalid certificates (SC layer).
- *        User group: Close sessions for invalid certificates (Services layer).
- *
- * \param pTrustList The TrustList context.
- *
- * \warning \p pTrustList shall be valid (!= NULL).
- *
- * \return SOPC_STATUS_OK if successful.
- */
-SOPC_ReturnStatus TrustList_RaiseEvent(const SOPC_TrustListContext* pTrustList);
-
-/**
  * \brief Executes user callback to indicate the end of a valid update.
  *        Do nothing if the callback is not configured.
  *

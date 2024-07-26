@@ -385,15 +385,6 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         }
     }
     SOPC_TrLst_Mask mask = TrustList_GetSpecifiedListsMask(pTrustList);
-    /* Raise an event to re-evaluate the certificate if trustListDataType fields are provided */
-    if (SOPC_IsGoodStatus(statusCode) && SOPC_TL_MASK_NONE != mask)
-    {
-        status = TrustList_RaiseEvent(pTrustList);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:CloseAndUpdate: event failed", cStrId);
-        }
-    }
 
     SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
     if (SOPC_IsGoodStatus(statusCode))
@@ -588,16 +579,6 @@ SOPC_StatusCode TrustList_Method_RemoveCertificate(const SOPC_CallContext* callC
         {
             SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER,
                                      "TrustList:%s:RemoveCertificate: failed to export the new TrustList", cStrId);
-        }
-    }
-    if (SOPC_IsGoodStatus(statusCode))
-    {
-        /* Raise an event to re-evaluate the certificate  */
-        status = TrustList_RaiseEvent(pTrustList);
-        if (SOPC_STATUS_OK != status)
-        {
-            SOPC_Logger_TraceWarning(SOPC_LOG_MODULE_CLIENTSERVER, "TrustList:%s:RemoveCertificate: event failed",
-                                     cStrId);
         }
     }
     /* Update address space variable */
