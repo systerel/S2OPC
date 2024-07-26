@@ -26,6 +26,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
+#include "sopc_toolkit_async_api.h"
 
 #include "config.h"
 
@@ -55,6 +56,12 @@ static bool SOPC_PrivateKeyAskPass_FromTerminal(char** outPassword)
 static bool SOPC_UserPrivateKeyAskPass_FromTerminal(char** outPassword)
 {
     return SOPC_AskPass_CustomPromptFromTerminal("User private key password:\n", outPassword);
+}
+
+static void SOPC_PKI_UpdateCallback(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitClient_AsyncReEvalSecureChannels(false);
 }
 
 Config_GetPassword_Fct* getClientKeyPassword_Fct = &SOPC_PrivateKeyAskPass_FromTerminal;
@@ -363,6 +370,11 @@ SOPC_ReturnStatus Config_LoadCertificates(OpcUa_MessageSecurityMode msgSecurityM
         if (SOPC_STATUS_OK == status)
         {
             status = SOPC_PKIProvider_CreateFromStore(PATH_PKI_STORE, &pPki);
+        }
+
+        if (SOPC_STATUS_OK == status)
+        {
+            status = SOPC_PKIProvider_SetUpdateCb(pPki, &SOPC_PKI_UpdateCallback, (uintptr_t) NULL);
         }
 
         if (SOPC_STATUS_OK == status)
