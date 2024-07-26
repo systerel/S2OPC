@@ -48,6 +48,12 @@
 #define SOPC_SecurityPolicy_Basic256Sha256_AsymLen_KeyMaxBits 4096
 #define SOPC_SecurityPolicy_Basic256Sha256_SecureChannelNonceLength 32
 
+static void update_callback(uintptr_t updateParam)
+{
+    uint32_t* p = (uint32_t*) updateParam;
+    *p = *p + 1;
+}
+
 START_TEST(invalid_create)
 {
     SOPC_PKIProvider* pPKI = NULL;
@@ -448,6 +454,7 @@ END_TEST
 
 START_TEST(functional_test_from_list)
 {
+    uint32_t updateCheck = 0;
     SOPC_PKIProvider* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CRLList* pTrustedCrl = NULL;
@@ -491,8 +498,17 @@ START_TEST(functional_test_from_list)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_CRL_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/crl/cacrl.der", &pTrustedCrlToUpdate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Update failed (callback is not defined) */
+    status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
+    ck_assert_int_eq(0, updateCheck);
+    /* Register update callback */
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    /* Update succeed */
     status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, pTrustedCertToUpdate, pTrustedCrlToUpdate, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, updateCheck);
     /* Validation is OK */
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -647,7 +663,10 @@ START_TEST(functional_test_pki_permissive)
     SOPC_PKI_Profile* pProfile = NULL;
     SOPC_CertificateList* pCertToValidate = NULL;
     uint32_t error = 0;
+    uint32_t updateCheck = 0;
     SOPC_ReturnStatus status = SOPC_PKIPermissive_Create(&pPKI);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/client_2k_cert.der", &pCertToValidate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -682,6 +701,7 @@ START_TEST(functional_test_pki_permissive)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, tCrt, NULL, NULL, NULL, true);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, updateCheck);
     /* Validation NOK (missing CRL )*/
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &error);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
@@ -696,6 +716,7 @@ END_TEST
 
 START_TEST(functional_test_verify_every_cert)
 {
+    uint32_t updateCheck = 0;
     SOPC_PKIProvider* pPKI = NULL;
     SOPC_CertificateList* pTrustedCerts = NULL;
     SOPC_CertificateList* pTrustedCertToUpdate = NULL;
@@ -710,6 +731,8 @@ START_TEST(functional_test_verify_every_cert)
     status = SOPC_PKIProvider_CreateFromList(pTrustedCerts, pTrustedCrl, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert_ptr_nonnull(pPKI);
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     uint32_t* pErrors = NULL;
     char** pThumbprints = NULL;
     uint32_t nbError = 0;
@@ -730,6 +753,7 @@ START_TEST(functional_test_verify_every_cert)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_UpdateFromList(pPKI, NULL, pTrustedCertToUpdate, pTrustedCrl, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, updateCheck);
     /* client_2k_cert is now invalid */
     status = SOPC_PKIProvider_VerifyEveryCertificate(pPKI, &profile, &pErrors, &pThumbprints, &nbError);
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
@@ -789,6 +813,7 @@ START_TEST(functional_test_remove_cert)
     bool bIsIssuer = false;
     size_t listLength = 0;
     size_t crlLength = 0;
+    uint32_t updateCheck = 0;
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./S2OPC_Demo_PKI/trusted/certs/cacert.der", &pCerts);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     status =
@@ -809,12 +834,23 @@ START_TEST(functional_test_remove_cert)
     status = SOPC_PKIProvider_CreateFromList(pCerts, pCRLs, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
+    /* Remove failed (update callback is not defined) */
+    status = SOPC_PKIProvider_RemoveCertificate(pPKI, "F4754CB40785156E074CF96F59D8378DF1FB7EF3", true, &bIsRemove,
+                                                &bIsIssuer);
+    ck_assert_int_eq(SOPC_STATUS_INVALID_STATE, status);
+    ck_assert(!bIsRemove);
+    ck_assert(!bIsIssuer);
+    ck_assert_int_eq(0, updateCheck);
+    /* Register update callback */
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     /* Test with an invalid thumbprint */
     status = SOPC_PKIProvider_RemoveCertificate(pPKI, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", true, &bIsRemove,
                                                 &bIsIssuer);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(!bIsRemove);
     ck_assert(!bIsIssuer);
+    ck_assert_int_eq(0, updateCheck);
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
                                                   &pPKI_IssuerCRLs);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -836,6 +872,7 @@ START_TEST(functional_test_remove_cert)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
     ck_assert(!bIsIssuer);
+    ck_assert_int_eq(1, updateCheck);
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
                                                   &pPKI_IssuerCRLs);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -857,6 +894,7 @@ START_TEST(functional_test_remove_cert)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
     ck_assert(bIsIssuer);
+    ck_assert_int_eq(2, updateCheck);
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
                                                   &pPKI_IssuerCRLs);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -878,6 +916,7 @@ START_TEST(functional_test_remove_cert)
     ck_assert_int_eq(SOPC_STATUS_OK, status);
     ck_assert(bIsRemove);
     ck_assert(bIsIssuer);
+    ck_assert_int_eq(3, updateCheck);
     status = SOPC_PKIProvider_WriteOrAppendToList(pPKI, &pPKI_TrustedCerts, &pPKI_TrustedCRLs, &pPKI_IssuerCerts,
                                                   &pPKI_IssuerCRLs);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

@@ -30,6 +30,12 @@
 #include "sopc_key_manager.h"
 #include "sopc_pki_stack.h"
 
+static void update_callback(uintptr_t updateParam)
+{
+    uint32_t* p = (uint32_t*) updateParam;
+    *p = *p + 1;
+}
+
 START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
 {
     SOPC_PKIProvider* pPKI = NULL;
@@ -41,6 +47,7 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
     SOPC_CRLList* cacrl = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t validation_error = 0;
+    uint32_t updateCheck = 0;
 
     // Create a profile for the PKI
     status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
@@ -61,6 +68,8 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
     // Create the PKI
     status = SOPC_PKIProvider_CreateFromList(cacert, cacrl, int_cli_cacert, int_cli_cacrl, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     // Create the certificate to validate
     status = SOPC_KeyManager_Certificate_CreateOrAddFromFile("./client_public/int_client_cert.pem", &pCertToValidate);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -73,6 +82,8 @@ START_TEST(certificate_validation_one_ca_trusted_only_in_chain)
     // Update the PKI
     status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, int_cli_cacert,
                                              int_cli_cacrl, cacert, cacrl, false);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, updateCheck);
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, pCertToValidate, pProfile, &validation_error);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
 
@@ -98,6 +109,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     SOPC_CRLList* cacrl = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t validation_error = 0;
+    uint32_t updateCheck = 0;
 
     // Create a profile for the PKI
     status = SOPC_PKIProvider_CreateProfile(SOPC_SecurityPolicy_Basic256Sha256_URI, &pProfile);
@@ -124,6 +136,8 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     // Create the PKI and validate
     status = SOPC_PKIProvider_CreateFromList(self_signed_ca_pathLen0, NULL, NULL, NULL, &pPKI);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    status = SOPC_PKIProvider_SetUpdateCb(pPKI, &update_callback, (uintptr_t) &updateCheck);
+    ck_assert_int_eq(SOPC_STATUS_OK, status);
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
     // Validation result: shall be OK.
     ck_assert_int_eq(SOPC_STATUS_OK, status);
@@ -134,6 +148,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, cacert, cacrl,
                                              self_signed_ca_pathLen0, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(1, updateCheck);
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen0, pProfile, &validation_error);
     // Validation result: shall be NOK cert untrusted
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
@@ -144,6 +159,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, self_signed_ca_pathLen1,
                                              NULL, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(2, updateCheck);
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_pathLen1, pProfile, &validation_error);
     // Validation result: shall be NOK
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
@@ -154,6 +170,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
     status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI,
                                              self_signed_ca_missingPathLen, NULL, NULL, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);
+    ck_assert_int_eq(3, updateCheck);
     status = SOPC_PKIProvider_ValidateCertificate(pPKI, self_signed_ca_missingPathLen, pProfile, &validation_error);
     // Validation result: shall be NOK
     ck_assert_int_eq(SOPC_STATUS_NOK, status);
