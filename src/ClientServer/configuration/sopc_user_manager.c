@@ -22,6 +22,7 @@
 #include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_types.h"
 #include "sopc_user_manager_internal.h"
 
@@ -48,6 +49,12 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
 
     return (authenticationManager->pFunctions->pFuncValidateUserIdentity)(authenticationManager, pUser,
                                                                           pUserAuthenticated);
+}
+
+void SOPC_UserAuthentication_PKIProviderUpdateCb(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitServer_AsyncReEvalUserCertSessions();
 }
 
 SOPC_ReturnStatus SOPC_UserAuthorization_IsAuthorizedOperation(SOPC_UserWithAuthorization* userWithAuthorization,

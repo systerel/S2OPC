@@ -1294,6 +1294,11 @@ bool SOPC_UsersConfig_Parse(FILE* fd,
         if (ctx.userCertSet)
         {
             pki_status = SOPC_PKIProvider_CreateFromStore(ctx.userPki, &pX509_UserIdentity_PKI);
+            if (SOPC_STATUS_OK == pki_status)
+            {
+                pki_status = SOPC_PKIProvider_SetUpdateCb(
+                    pX509_UserIdentity_PKI, &SOPC_UserAuthentication_PKIProviderUpdateCb, (uintptr_t) NULL);
+            }
         }
         if (NULL == *authentication || NULL == *authorization || NULL == config || SOPC_STATUS_OK != pki_status ||
             SOPC_STATUS_OK != res)

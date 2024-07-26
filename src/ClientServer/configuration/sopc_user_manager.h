@@ -184,6 +184,11 @@ SOPC_ReturnStatus SOPC_UserAuthentication_IsValidUserIdentity(SOPC_UserAuthentic
                                                               SOPC_UserAuthentication_Status* pUserAuthenticated);
 
 /**
+ * \brief Callback instance to be used on user PKI update
+ */
+void SOPC_UserAuthentication_PKIProviderUpdateCb(uintptr_t updateParam);
+
+/**
  * \brief Authorize an operation with the chosen authorization manager.
  *
  * \param userWithAuthorization  The user and authorization manager to use.
