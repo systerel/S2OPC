@@ -715,6 +715,12 @@ void SOPC_ServerInternal_KeyCertPairUpdateCb(uintptr_t updateParam)
     SOPC_ToolkitServer_AsyncReEvalSecureChannels(true);
 }
 
+void SOPC_ServerInternal_PKIProviderUpdateCb(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitServer_AsyncReEvalSecureChannels(false);
+}
+
 SOPC_ReturnStatus SOPC_HelperConfigServer_Initialize(void)
 {
     return SOPC_ServerConfigHelper_Initialize();

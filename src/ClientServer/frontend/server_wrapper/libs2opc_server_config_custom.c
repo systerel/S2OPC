@@ -31,6 +31,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 #include "sopc_toolkit_config.h"
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetNamespaces(size_t nbNamespaces, const char** namespaces)
@@ -195,8 +196,13 @@ SOPC_ReturnStatus SOPC_ServerConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    pConfig->serverConfig.pki = pki;
-    return SOPC_STATUS_OK;
+    SOPC_ReturnStatus status =
+        SOPC_PKIProvider_SetUpdateCb(pki, &SOPC_ServerInternal_PKIProviderUpdateCb, (uintptr_t) NULL);
+    if (SOPC_STATUS_OK == status)
+    {
+        pConfig->serverConfig.pki = pki;
+    }
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_ServerConfigHelper_SetKeyCertPairFromPath(const char* serverCertPath,

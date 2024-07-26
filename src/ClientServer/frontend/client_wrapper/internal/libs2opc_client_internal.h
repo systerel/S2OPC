@@ -131,4 +131,9 @@ uint32_t SOPC_ClientInternal_GetReverseEPcfgIdxNoOffset(SOPC_ReverseEndpointConf
  */
 void SOPC_ClientInternal_KeyCertPairUpdateCb(uintptr_t updateParam);
 
+/**
+ * \brief Callback instance to be used on client PKI update
+ */
+void SOPC_ClientInternal_PKIProviderUpdateCb(uintptr_t updateParam);
+
 #endif /* LIBS2OPC_CLIENT_INTERNAL_H_ */

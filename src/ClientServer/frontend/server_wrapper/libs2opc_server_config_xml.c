@@ -66,6 +66,9 @@ static bool SOPC_HelperInternal_CreatePKIfromPaths(void)
             "contains only valid file paths to X509 certificate at DER format.");
         return false;
     }
+    status =
+        SOPC_PKIProvider_SetUpdateCb(serverConfig->pki, &SOPC_ServerInternal_PKIProviderUpdateCb, (uintptr_t) NULL);
+    SOPC_ASSERT(SOPC_STATUS_OK == status);
     return true;
 }
 

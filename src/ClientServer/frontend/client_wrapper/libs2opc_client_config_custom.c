@@ -27,6 +27,7 @@
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_pki_stack.h"
 
 #include <string.h>
 
@@ -141,6 +142,8 @@ SOPC_ReturnStatus SOPC_ClientConfigHelper_SetPKIprovider(SOPC_PKIProvider* pki)
     if (NULL == pConfig->clientConfig.clientPKI)
     {
         pConfig->clientConfig.clientPKI = pki;
+        status = SOPC_PKIProvider_SetUpdateCb(pki, &SOPC_ClientInternal_PKIProviderUpdateCb, (uintptr_t) NULL);
+        SOPC_ASSERT(SOPC_STATUS_OK == status);
     }
     else
     {

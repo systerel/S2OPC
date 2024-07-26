@@ -209,4 +209,7 @@ void SOPC_ServerInternal_ClearEndpoint(SOPC_Endpoint_Config* epConfig);
 // Callback instance to be used on client application key / certificate pair update
 void SOPC_ServerInternal_KeyCertPairUpdateCb(uintptr_t updateParam);
 
+// Callback instance to be used on server PKI update
+void SOPC_ServerInternal_PKIProviderUpdateCb(uintptr_t updateParam);
+
 #endif

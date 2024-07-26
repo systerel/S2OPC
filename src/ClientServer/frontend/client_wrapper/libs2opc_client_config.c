@@ -235,6 +235,11 @@ static SOPC_ReturnStatus SOPC_ClientConfigHelper_MayFinalize_ClientConfigFromPat
             {
                 SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER, "Failed to create client config PKI from paths.");
             }
+            else
+            {
+                status = SOPC_PKIProvider_SetUpdateCb(pki, &SOPC_ClientInternal_PKIProviderUpdateCb, (uintptr_t) NULL);
+                SOPC_ASSERT(SOPC_STATUS_OK == status);
+            }
         }
         else
         {
@@ -891,4 +896,10 @@ void SOPC_ClientInternal_KeyCertPairUpdateCb(uintptr_t updateParam)
 {
     SOPC_UNUSED_ARG(updateParam);
     SOPC_ToolkitClient_AsyncReEvalSecureChannels(true);
+}
+
+void SOPC_ClientInternal_PKIProviderUpdateCb(uintptr_t updateParam)
+{
+    SOPC_UNUSED_ARG(updateParam);
+    SOPC_ToolkitClient_AsyncReEvalSecureChannels(false);
 }
