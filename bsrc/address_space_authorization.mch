@@ -18,7 +18,7 @@
  */
 
 MACHINE
-    address_space_bs
+    address_space_authorization
 
 SEES
     constants,
@@ -26,7 +26,7 @@ SEES
     data_value_pointer_bs
 
 DEFINITIONS
-    d_variables ==
+    d_adsp_variables ==
         s_Node,
 
         a_NodeId,
@@ -72,10 +72,10 @@ DEFINITIONS
 
         ParentNode,
         IsParentChildRefTypeSuitable,
-        IsTypeDefSuitable
-    ;
+        IsTypeDefSuitable,
+        ConstantAddressSpace;
 
-    d_inv ==
+    d_adsp_inv ==
     (
         /* Address Space nodes */
         s_Node <: t_Node &
@@ -159,32 +159,113 @@ DEFINITIONS
 
         ParentNode : s_Node +-> s_Node &
         IsParentChildRefTypeSuitable : t_NodeClass * t_NodeId * t_NodeId +-> BOOL & /* child class, reference type, parent */
-        IsTypeDefSuitable : t_NodeClass * t_NodeId +-> BOOL /* node class, type definition node id */
+        IsTypeDefSuitable : t_NodeClass * t_NodeId +-> BOOL & /* node class, type definition node id */
+        ConstantAddressSpace : BOOL
     );
 
-    d_init ==
-        d_inv
+    d_adsp_init ==
+        d_adsp_inv;
+
+    d_variables ==
+        s_access_read,
+        s_access_write,
+        s_executable,
+        s_AuthorizedOperations;
+
+    d_inv ==
+    (
+        s_access_read <: t_Node_i &
+        s_access_write <: t_Node_i * t_RawStatusCode * t_Timestamp &
+        s_executable <: t_Node_i &
+        s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
+        )
 
 ABSTRACT_VARIABLES
-    ConstantAddressSpace, /* In constant address space only Value attribute might be modified, no node can be added / removed */
+    local_service_treatment,
+    d_adsp_variables,
     d_variables
 
 INVARIANT
-    ConstantAddressSpace : BOOL &
+    local_service_treatment : BOOL &
+    d_adsp_inv &
     d_inv
 
 INITIALISATION
-    ConstantAddressSpace :: BOOL ||
-    /* This is where the Address Space is filled */
-    d_variables :( d_init )
+    local_service_treatment := FALSE ||
+    d_adsp_variables :( d_adsp_init) ||
+    d_variables :( d_inv)
 
 OPERATIONS
 
+    /* Operations implemented by the module */
+    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user) =
+    PRE
+        p_operation_type : t_operation_type_i &
+        p_operation_type : t_operation_type   &
+        p_node_id        : t_NodeId_i         &
+        p_node_id        : t_NodeId           &
+        p_attribute_id   : t_AttributeId_i    &
+        p_attribute_id   : t_AttributeId      &
+        p_user           : t_user_i           &
+        p_user           : t_user
+    THEN
+        p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
+    END
+    ;
+
+    bres <-- has_access_level_read(node) =
+    PRE
+        node : t_Node_i &
+        node : s_Node &
+        a_NodeClass(node) = e_ncl_Variable
+    THEN
+        bres := bool(node : s_access_read)
+    END
+    ;
+
+    bres <-- has_access_level_write(node, raw_sc, source_ts) =
+    PRE
+        node : t_Node_i &
+        node : s_Node &
+        a_NodeClass(node) = e_ncl_Variable &
+        raw_sc : t_RawStatusCode &
+        source_ts : t_Timestamp
+    THEN
+        bres := bool(node |-> raw_sc |-> source_ts : s_access_write)
+    END
+    ;
+
+    bres <-- has_access_level_executable(node) =
+    PRE
+        node : t_Node_i &
+        node : dom(a_Executable)
+    THEN
+        bres := bool(node : s_executable)
+    END
+    ;
+
+    /* Operations promoted from address_space_local */
+    p_res <-- is_local_service_treatment =
+    BEGIN
+        p_res := local_service_treatment
+    END
+    ;
+
+    set_local_service_treatment(p_val) =
+    PRE
+        p_val : BOOL
+    THEN
+        local_service_treatment := p_val ||
+        d_variables :( d_inv )
+    END
+    ;
+
+    /* Operations promoted from address_space_bs */
     /* Needs UNINIT to deallocate address space access */
     address_space_bs_UNINITIALISATION =
     BEGIN
         ConstantAddressSpace :: BOOL ||
-        d_variables :( d_init )
+        d_variables :( d_inv )
     END
     ;
 

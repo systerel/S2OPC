@@ -34,7 +34,7 @@ void user_authorization_bs__INITIALISATION(void) {}
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-void user_authorization_bs__get_user_authorization(
+void user_authorization_bs__get_user_authorization_bs(
     const constants__t_operation_type_i user_authorization_bs__p_operation_type,
     const constants__t_NodeId_i user_authorization_bs__p_node_id,
     const constants__t_AttributeId_i user_authorization_bs__p_attribute_id,

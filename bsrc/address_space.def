@@ -120,6 +120,11 @@ DEFINITIONS
          * This is the content of the TargetNode of all Variables and Objects. */
         Ref_HasTypeDefinition,
 
+        /* Node authorizations (includes local treatment) */
+        s_access_read,
+        s_access_write,
+        s_executable,
+
         /* User authorization */
         s_AuthorizedOperations
     ;
@@ -209,6 +214,11 @@ DEFINITIONS
 
         /* Local treatment */
         local_service_treatment : BOOL &
+
+        /* Node authorizations (includes local treatment) */
+        s_access_read <: t_Node_i &
+        s_access_write <: t_Node_i * t_RawStatusCode * t_Timestamp &
+        s_executable <: t_Node_i &
 
         /* User authorization */
         s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
@@ -415,33 +425,28 @@ DEFINITIONS
           (p_aid = e_aid_Value =>
            (ncl = e_ncl_Variable =>
              /* Specific treatement for Value of Variable attribute: check access rights + index range */
-             (local_service_treatment = FALSE &
-              conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = FALSE =>
+             (p_node /: s_access_read =>
                 val = c_Variant_indet &
                 sc = e_sc_bad_not_readable) &
-             (local_service_treatment = FALSE &
-              conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
+             (p_node : s_access_read &
               not(e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) =>
                 val = c_Variant_indet &
                 sc = e_sc_bad_user_access_denied) &
-             (local_service_treatment = TRUE or
-              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
-               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+             (p_node : s_access_read &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations &
                IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE =>
                  val = c_Variant_indet &
                  sc = e_sc_bad_index_range_invalid
              ) &
-             (local_service_treatment = TRUE or
-              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
-               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+             (p_node : s_access_read &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations &
                IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
                HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = FALSE  =>
                  val = c_Variant_indet &
                  sc = e_sc_bad_index_range_no_data
              ) &
-             (local_service_treatment = TRUE or
-              (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
-               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations) &
+             (p_node : s_access_read &
+               e_operation_type_read |-> p_nid |-> p_aid |-> p_user : s_AuthorizedOperations &
                IsValid_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE &
                HasRange_VariantIndex(a_Value(p_node) |-> p_index_range) = TRUE =>
                 /* FIXME: Should depend on the index range? */
@@ -948,12 +953,12 @@ DEFINITIONS
     END
     ;
 
-    p_bool <-- get_Executable(p_node) =
+    bres <-- has_access_level_executable(node) =
     PRE
-        p_node : t_Node_i &
-        p_node : dom(a_Executable)
+        node : t_Node_i &
+        node : s_Node
     THEN
-        p_bool := a_Executable(p_node)
+        bres := bool(node : s_executable)
     END
     ;
 

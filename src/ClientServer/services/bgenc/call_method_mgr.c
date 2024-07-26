@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.c
 
- Date                 : 19/06/2024 08:24:40
+ Date                 : 24/07/2024 17:29:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -177,7 +177,7 @@ void call_method_mgr__check_method_call_inputs(
             if (call_method_mgr__l_nodeClass == constants__e_ncl_Method) {
                session_mgr__get_session_user_server(call_method_mgr__p_session,
                   &call_method_mgr__l_user);
-               service_write__get_Executable(call_method_mgr__l_method,
+               service_write__has_access_level_executable(call_method_mgr__l_method,
                   &call_method_mgr__l_valid_executable);
                service_write__get_user_authorization(constants__e_operation_type_executable,
                   call_method_mgr__l_methodid,

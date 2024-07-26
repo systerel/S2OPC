@@ -60,7 +60,7 @@ PROMOTES
     is_local_service_treatment,
     set_local_service_treatment,
     get_user_authorization ,
-    get_Executable,
+    has_access_level_executable,
     get_EventNotifier,
     get_InputArguments,
     get_conv_Variant_ValueRank,

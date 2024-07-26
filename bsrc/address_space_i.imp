@@ -33,11 +33,9 @@ SEES
     node_id_pointer_bs
 
 IMPORTS
-    address_space_bs,
+    address_space_authorization,
     address_space_typing,
-    address_space_local,
-    gen_subscription_event_bs,
-    user_authorization_bs
+    gen_subscription_event_bs
 
 PROMOTES
     address_space_bs_UNINITIALISATION,
@@ -62,7 +60,7 @@ PROMOTES
     is_local_service_treatment,
     set_local_service_treatment,
     get_user_authorization,
-    get_Executable,
+    has_access_level_executable,
     get_InputArguments,
     get_conv_Variant_ValueRank,
     get_conv_Variant_Type,
@@ -103,20 +101,16 @@ DEFINITIONS
        ({FALSE |-> e_sc_bad_node_id_unknown,
          TRUE  |-> {FALSE |-> e_sc_bad_not_writable,
                     TRUE  |-> {FALSE |-> e_sc_bad_type_mismatch,
-                               TRUE |-> {FALSE |-> {FALSE |-> e_sc_bad_not_writable,
-                                                    TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
-                                                              TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
-                                                             }(bool(e_operation_type_write |-> nid |-> aid |-> user :
-                                                                    s_AuthorizedOperations))
-                                                   }(conv_AccessLevel_CurrentWrite(a_AccessLevel(a_NodeId~(nid)))),
-                                         TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
-                                        }(bool(local_service_treatment = TRUE))
-                              }(bool(d_Type_IsVariableSubtype
-                                       (DataValue_LocalDataType(dVal), DataValue_ValueRank(dVal),
-                                        a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid)))))
-                   }(bool(a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable & aid = e_aid_Value))
+                               TRUE |-> {FALSE |-> e_sc_bad_not_writable,
+                                         TRUE |-> {FALSE |-> e_sc_bad_user_access_denied,
+                                                   TRUE |-> d_VariantIndex_HasRange_Valid(dVal, idxRange, locale)
+                                                  }(bool(e_operation_type_write |-> nid |-> aid |-> user : s_AuthorizedOperations))
+                                        }(bool(a_NodeId~(nid) |-> DataValue_StatusCode(dVal) |-> DataValue_SourceTimestamp(dVal): s_access_write))
+                               }(bool(d_Type_IsVariableSubtype
+                                     (DataValue_LocalDataType(dVal), DataValue_ValueRank(dVal),
+                                      a_DataType(a_NodeId~(nid)), a_ValueRank(a_NodeId~(nid)))))
+                       }(bool(a_NodeClass(a_NodeId~(nid)) = e_ncl_Variable & aid = e_aid_Value))
         }(bool(nid : ran(a_NodeId))))
-
 
 LOCAL_OPERATIONS
     bres <-- local_is_mandatory_attribute(p_ncl, p_aid) =
@@ -183,37 +177,10 @@ LOCAL_OPERATIONS
 
                     a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
 
-                    (local_service_treatment = TRUE
-                    =>
-                        a_Value_StatusCode = a_Value_StatusCode$0
+                    a_Value_StatusCode = a_Value_StatusCode$0
                                              <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)} &
-                        a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+                    a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
                                               <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
-                    ) &
-                    (local_service_treatment = FALSE
-                    =>
-                        (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE or
-                            e_sc_ok = conv_RawStatusCode_To_StatusCode(DataValue_StatusCode(dataValue))
-                        =>
-                            a_Value_StatusCode = a_Value_StatusCode$0
-                                <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)}
-                        ) &
-                        (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE or
-                                e_sc_ok = conv_RawStatusCode_To_StatusCode(DataValue_StatusCode(dataValue)))
-                        =>
-                            a_Value_StatusCode = a_Value_StatusCode$0) &
-
-                        (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE or
-                            c_Timestamp_null = DataValue_SourceTimestamp(dataValue)
-                        =>
-                            a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
-                                <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
-                        ) &
-                        (not(conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE or
-                                c_Timestamp_null = DataValue_SourceTimestamp(dataValue))
-                        =>
-                            a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
-                    )
                 ) &
                 (not(serviceStatusCode = e_sc_ok)
                 =>
@@ -307,9 +274,8 @@ LOCAL_OPERATIONS
 
         /* For a Variable Value, the read must be authorized */
         (a_NodeClass(p_node) = e_ncl_Variable & p_aid = e_aid_Value =>
-        (local_service_treatment = TRUE or
-         (conv_AccessLevel_CurrentRead(a_AccessLevel(p_node)) = TRUE &
-          e_operation_type_read |-> a_NodeId(p_node) |-> p_aid |-> p_user : s_AuthorizedOperations)))
+        (p_node : s_access_read &
+          e_operation_type_read |-> a_NodeId(p_node) |-> p_aid |-> p_user : s_AuthorizedOperations))
     THEN
         sc,
         val,
@@ -450,9 +416,7 @@ OPERATIONS
         l_status1,
         l_prev_dataValue,
         l_node,
-        l_access_lvl,
         l_access_read,
-        l_prev_local_treatment,
         l_isvalid,
         l_local_treatment,
         l_wv,
@@ -477,8 +441,7 @@ OPERATIONS
             Justif: we do not generate data change event since we cannot return notification on non readable value.
             Moreover the access level is static and then the subscriber has already been notified on M.I. creation.
             */
-            l_access_lvl <-- get_AccessLevel(l_node);
-            l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
+            l_access_read <-- has_access_level_read(l_node);
             IF l_access_read = TRUE THEN
                 /* Read updated value after write: necessary since write value item can be partial due to indexRange
                                                    and to retrieve all LocalizedText alternatives */
@@ -512,10 +475,7 @@ OPERATIONS
     VAR
         l_isvalid,
         l_ncl,
-        l_access_lvl,
         l_access_write,
-        l_access_write_status,
-        l_access_write_timestamp,
         l_authorized_write,
         l_compatible_type,
         l_compat_with_conv,
@@ -523,13 +483,11 @@ OPERATIONS
         l_var_vr,
         l_dv_datatype_nid,
         l_dv_datatype_vr,
-        l_local_treatment,
         l_variant,
         l_source_ts,
         l_server_ts,
         l_server_ts_null,
-        l_raw_sc,
-        l_sc
+        l_raw_sc
     IN
         node := c_Node_indet;
         prev_dataValue := c_DataValue_indet;
@@ -550,48 +508,23 @@ OPERATIONS
                     /* Only null server timestamp allowed since we do not support to write it */
                     l_server_ts_null <-- is_Timestamps_Null(l_server_ts);
                     IF l_compatible_type = TRUE & l_server_ts_null = TRUE THEN
-                        l_local_treatment <-- is_local_service_treatment;
                         l_source_ts <-- get_conv_DataValue_SourceTimestamp(dataValue);
                         l_raw_sc <-- get_conv_DataValue_Status(dataValue);
-                        IF l_local_treatment = TRUE THEN
-                            /* No access authorization check for local treatment */
-                            serviceStatusCode, prev_dataValue <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv, index_range);
-                            IF serviceStatusCode = e_sc_ok THEN
-                                set_Value_StatusCode(p_user, node, l_raw_sc);
-                                set_Value_SourceTimestamp(p_user, node, l_source_ts)
-                            END
-                        ELSE
-                            l_access_lvl <-- get_AccessLevel(node);
-                            l_access_write <-- is_t_access_level_currentWrite(l_access_lvl);
-                            l_access_write_status <-- is_t_access_level_statusWrite(l_access_lvl);
-                            l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_lvl);
-                            IF l_access_write_status = FALSE THEN
-                                l_sc <-- getall_conv_RawStatusCode_To_StatusCode(l_raw_sc);
-                                /* From part 3 table 40 v1.04: 0 means only StatusCode Good is writable */
-                                l_access_write_status := bool(l_sc = e_sc_ok)
-                            END
-                            ;
-                            IF l_access_write_timestamp = FALSE THEN
-                                /* From part 3 table 40 v1.04: 0 means only null timestamps are writable */
-                                l_access_write_timestamp <-- is_Timestamps_Null(l_source_ts)
-                            END
-                            ;
-                            IF l_access_write = TRUE & l_access_write_status = TRUE & l_access_write_timestamp = TRUE THEN
-                                /* Write authorization is for set_Value, and read authorization is for get_Value_StatusCode */
-                                l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
-                                IF l_authorized_write = TRUE THEN
-                                    serviceStatusCode, prev_dataValue
-                                      <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv,  index_range);
-                                    IF serviceStatusCode = e_sc_ok THEN
-                                        set_Value_StatusCode(p_user, node, l_raw_sc);
-                                        set_Value_SourceTimestamp(p_user, node, l_source_ts)
-                                    END
-                                ELSE
-                                    serviceStatusCode := e_sc_bad_user_access_denied
+                        l_access_write <-- has_access_level_write(node, l_raw_sc, l_source_ts);
+                        IF l_access_write = TRUE THEN
+                            /* Access authorized */
+                            l_authorized_write <-- get_user_authorization(e_operation_type_write, nid, aid, p_user);
+                            IF l_authorized_write = TRUE THEN
+                                serviceStatusCode, prev_dataValue <-- set_Value(p_user, p_locales, node, l_variant, l_compat_with_conv, index_range);
+                                IF serviceStatusCode = e_sc_ok THEN
+                                    set_Value_StatusCode(p_user, node, l_raw_sc);
+                                    set_Value_SourceTimestamp(p_user, node, l_source_ts)
                                 END
                             ELSE
-                                serviceStatusCode := e_sc_bad_not_writable
+                                serviceStatusCode := e_sc_bad_user_access_denied
                             END
+                        ELSE
+                               serviceStatusCode := e_sc_bad_not_writable
                         END
                     ELSIF l_compatible_type = FALSE THEN
                         serviceStatusCode := e_sc_bad_type_mismatch
@@ -743,8 +676,6 @@ OPERATIONS
     VAR
         l_is_mandatory_attribute,
         l_ncl,
-        l_is_local_read,
-        l_access_lvl,
         l_access_read,
         l_user_auth
     IN
@@ -757,23 +688,16 @@ OPERATIONS
         l_is_mandatory_attribute <-- local_is_mandatory_attribute(l_ncl, p_aid);
         IF l_is_mandatory_attribute = TRUE THEN
             IF l_ncl = e_ncl_Variable & p_aid = e_aid_Value THEN
-                l_is_local_read <-- is_local_service_treatment;
-                IF l_is_local_read = TRUE THEN
-                    /* local read service call is always authorized */
-                    sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
-                ELSE
-                    l_access_lvl <-- get_AccessLevel(p_node);
-                    l_access_read <-- is_t_access_level_currentRead(l_access_lvl);
-                    IF l_access_read = TRUE THEN
-                        l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
-                        IF l_user_auth = TRUE THEN
-                            sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
-                        ELSE
-                            sc := e_sc_bad_user_access_denied
-                        END
+                l_access_read <-- has_access_level_read(p_node);
+                IF l_access_read = TRUE THEN
+                    l_user_auth <-- get_user_authorization(e_operation_type_read, p_nid, p_aid, p_user);
+                    IF l_user_auth = TRUE THEN
+                        sc, val, val_sc, val_ts_src, val_ts_srv <-- read_AddressSpace_Attribute_value(p_user, p_locales, p_node, p_nid, p_aid, p_index_range)
                     ELSE
-                       sc := e_sc_bad_not_readable
+                        sc := e_sc_bad_user_access_denied
                     END
+                ELSE
+                   sc := e_sc_bad_not_readable
                 END
             ELSE
                 /* If not a Variable Value, read is always authorized (no access rights) */

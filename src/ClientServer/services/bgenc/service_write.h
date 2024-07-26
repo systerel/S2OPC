@@ -21,7 +21,7 @@
 
  File Name            : service_write.h
 
- Date                 : 22/03/2024 14:58:24
+ Date                 : 24/07/2024 17:29:58
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -65,7 +65,6 @@ extern void service_write__INITIALISATION(void);
 #define service_write__get_BrowseName service_write_1__get_BrowseName
 #define service_write__get_DisplayName service_write_1__get_DisplayName
 #define service_write__get_EventNotifier service_write_1__get_EventNotifier
-#define service_write__get_Executable service_write_1__get_Executable
 #define service_write__get_InputArguments service_write_1__get_InputArguments
 #define service_write__get_NodeClass service_write_1__get_NodeClass
 #define service_write__get_Node_RefIndexEnd service_write_1__get_Node_RefIndexEnd
@@ -78,6 +77,7 @@ extern void service_write__INITIALISATION(void);
 #define service_write__get_conv_Variant_Type service_write_1__get_conv_Variant_Type
 #define service_write__get_conv_Variant_ValueRank service_write_1__get_conv_Variant_ValueRank
 #define service_write__get_user_authorization service_write_1__get_user_authorization
+#define service_write__has_access_level_executable service_write_1__has_access_level_executable
 #define service_write__is_AddressSpace_constant service_write_1__is_AddressSpace_constant
 #define service_write__is_IndexRangeDefined service_write_1__is_IndexRangeDefined
 #define service_write__is_NodeId_equal service_write_1__is_NodeId_equal

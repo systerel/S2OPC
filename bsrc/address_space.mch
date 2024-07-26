@@ -89,34 +89,18 @@ OPERATIONS
             ) &
             (p_status = e_sc_ok =>
                 a_Value = a_Value$0 <+ {a_NodeId~(nid) |-> DataValue_Variant(dataValue)} &
-
-                (local_service_treatment = TRUE
-                =>
-                    a_Value_StatusCode = a_Value_StatusCode$0
-                        <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)} &
-                    a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
-                        <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
-                ) &
-                (local_service_treatment = FALSE
-                =>
-                    (conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE
-                    =>
-                        a_Value_StatusCode = a_Value_StatusCode$0
-                            <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)}
-                    ) &
-                    (not(conv_AccessLevel_StatusWrite(a_AccessLevel(a_NodeId~(nid))) = TRUE)
-                    =>
-                        a_Value_StatusCode = a_Value_StatusCode$0) &
-
-                    (conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE
-                    =>
-                        a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
-                            <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
-                    ) &
-                    (not(conv_AccessLevel_TimestampWrite (a_AccessLevel(a_NodeId~(nid))) = TRUE)
-                    =>
-                        a_Value_SourceTimestamp = a_Value_SourceTimestamp$0)
-                )
+                (a_NodeId~(nid) |-> DataValue_StatusCode(dataValue) |-> DataValue_SourceTimestamp(dataValue) : s_access_write
+                 =>
+                     a_Value_StatusCode = a_Value_StatusCode$0
+                                             <+ {a_NodeId~(nid) |-> DataValue_StatusCode(dataValue)} &
+                     a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+                                              <+ {a_NodeId~(nid) |-> DataValue_SourceTimestamp(dataValue)}
+                 ) &
+                 (a_NodeId~(nid) |-> DataValue_StatusCode(dataValue) |-> DataValue_SourceTimestamp(dataValue) /: s_access_write
+                 =>
+                     a_Value_StatusCode = a_Value_StatusCode$0 &
+                     a_Value_SourceTimestamp = a_Value_SourceTimestamp$0
+                 )
             ) &
             (not (p_status = e_sc_ok)
             =>

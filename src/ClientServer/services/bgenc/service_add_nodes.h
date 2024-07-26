@@ -21,7 +21,7 @@
 
  File Name            : service_add_nodes.h
 
- Date                 : 22/03/2024 14:58:18
+ Date                 : 24/07/2024 17:29:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -64,7 +64,6 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__get_BrowseName service_add_nodes_1__get_BrowseName
 #define service_add_nodes__get_DisplayName service_add_nodes_1__get_DisplayName
 #define service_add_nodes__get_EventNotifier service_add_nodes_1__get_EventNotifier
-#define service_add_nodes__get_Executable service_add_nodes_1__get_Executable
 #define service_add_nodes__get_InputArguments service_add_nodes_1__get_InputArguments
 #define service_add_nodes__get_NodeClass service_add_nodes_1__get_NodeClass
 #define service_add_nodes__get_Node_RefIndexEnd service_add_nodes_1__get_Node_RefIndexEnd
@@ -77,6 +76,7 @@ extern void service_add_nodes__INITIALISATION(void);
 #define service_add_nodes__get_conv_Variant_Type service_add_nodes_1__get_conv_Variant_Type
 #define service_add_nodes__get_conv_Variant_ValueRank service_add_nodes_1__get_conv_Variant_ValueRank
 #define service_add_nodes__get_user_authorization service_add_nodes_1__get_user_authorization
+#define service_add_nodes__has_access_level_executable service_add_nodes_1__has_access_level_executable
 #define service_add_nodes__is_AddressSpace_constant service_add_nodes_1__is_AddressSpace_constant
 #define service_add_nodes__is_IndexRangeDefined service_add_nodes_1__is_IndexRangeDefined
 #define service_add_nodes__is_NodeId_equal service_add_nodes_1__is_NodeId_equal

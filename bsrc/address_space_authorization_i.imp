@@ -1,0 +1,167 @@
+/*
+ * Licensed to Systerel under one or more contributor license
+ * agreements. See the NOTICE file distributed with this work
+ * for additional information regarding copyright ownership.
+ * Systerel licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+IMPLEMENTATION
+    address_space_authorization_i
+
+REFINES
+    address_space_authorization
+
+IMPORTS
+    user_authorization_bs
+
+EXTENDS
+    address_space_bs,
+    address_space_local
+
+SEES
+    constants,
+    constants_statuscodes_bs,
+    data_value_pointer_bs
+
+DEFINITIONS
+    d_access_level_read ==
+        conv_AccessLevel_CurrentRead(a_AccessLevel(node)) = TRUE;
+
+    d_access_level_CurrentWrite ==
+        conv_AccessLevel_CurrentWrite(a_AccessLevel(node)) = TRUE;
+
+    d_access_level_StatusWrite ==
+        conv_AccessLevel_StatusWrite(a_AccessLevel(node)) = TRUE;
+
+    d_access_level_TimestampWrite ==
+        conv_AccessLevel_TimestampWrite(a_AccessLevel(node)) = TRUE;
+
+    d_access_level_executable ==
+        node |-> TRUE : a_Executable
+
+INVARIANT
+    s_access_read = { node |
+        node : t_Node_i &
+        node : s_Node   &
+        a_NodeClass(node) = e_ncl_Variable &
+        (local_service_treatment = TRUE or d_access_level_read)}
+    &
+    s_access_write =
+         { node, raw_sc, source_ts |
+        node : t_Node_i &
+        node : s_Node   &
+        a_NodeClass(node) = e_ncl_Variable &
+        raw_sc : t_RawStatusCode &
+        source_ts : t_Timestamp &
+        ((local_service_treatment = TRUE) or
+         (d_access_level_CurrentWrite &
+             (d_access_level_StatusWrite or conv_RawStatusCode_To_StatusCode(raw_sc) = e_sc_ok) &
+             (d_access_level_TimestampWrite or source_ts = c_Timestamp_null)))
+         }
+    &
+    s_executable = { node |
+        node : t_Node_i &
+        node : s_Node &
+        (local_service_treatment = TRUE or d_access_level_executable)}
+    &
+    s_AuthorizedOperations = {operation_type, node_id, attribute_id, user |
+        operation_type : t_operation_type_i &
+        operation_type : t_operation_type   &
+        node_id        : t_NodeId_i         &
+        node_id        : t_NodeId           &
+        attribute_id   : t_AttributeId_i    &
+        attribute_id   : t_AttributeId      &
+        user           : t_user_i           &
+        user           : t_user             &
+        (local_service_treatment = TRUE or
+            operation_type, node_id, attribute_id, user : s_AuthorizedOperations_bs)
+        }
+
+OPERATIONS
+
+    bres <-- has_access_level_read(node) =
+    VAR
+        l_access_level,
+        l_local_service_treatment
+    IN
+        l_local_service_treatment <-- is_local_service_treatment;
+        IF l_local_service_treatment = TRUE THEN
+            bres := TRUE
+        ELSE
+            l_access_level <-- get_AccessLevel(node);
+            bres <-- is_t_access_level_currentRead(l_access_level)
+        END
+    END
+    ;
+
+    bres <-- has_access_level_write(node, raw_sc, source_ts) =
+    VAR
+        l_access_level,
+        l_access_write,
+        l_access_write_status,
+        l_access_write_timestamp,
+        l_sc,
+        l_local_service_treatment
+    IN
+        l_local_service_treatment <-- is_local_service_treatment;
+        IF l_local_service_treatment = TRUE THEN
+            bres := TRUE
+        ELSE
+            l_access_level <-- get_AccessLevel(node);
+            l_access_write <-- is_t_access_level_currentWrite(l_access_level);
+            l_access_write_status <-- is_t_access_level_statusWrite(l_access_level);
+            l_access_write_timestamp <-- is_t_access_level_timestampWrite(l_access_level);
+            IF l_access_write_status = FALSE THEN
+                l_sc <-- getall_conv_RawStatusCode_To_StatusCode(raw_sc);
+                /* From part 3 table 40 v1.04: 0 means only StatusCode Good is writable */
+                l_access_write_status := bool(l_sc = e_sc_ok)
+            END
+            ;
+            IF l_access_write_timestamp = FALSE THEN
+                /* From part 3 table 40 v1.04: 0 means only null timestamps are writable */
+                l_access_write_timestamp <-- is_Timestamps_Null(source_ts)
+            END
+            ;
+            bres := bool(l_access_write = TRUE & l_access_write_status = TRUE & l_access_write_timestamp = TRUE)
+        END
+    END
+    ;
+
+    bres <-- has_access_level_executable(node) =
+    VAR
+        l_local_service_treatment
+    IN
+        l_local_service_treatment <-- is_local_service_treatment;
+        IF l_local_service_treatment = TRUE THEN
+            bres := TRUE
+        ELSE
+            bres <-- get_Executable(node)
+        END
+    END
+    ;
+
+    p_authorized <-- get_user_authorization(p_operation_type, p_node_id, p_attribute_id, p_user) =
+    VAR
+        l_local_service_treatment
+    IN
+        l_local_service_treatment <-- is_local_service_treatment;
+        IF l_local_service_treatment = TRUE THEN
+            p_authorized := TRUE
+        ELSE
+            p_authorized <-- get_user_authorization_bs(p_operation_type, p_node_id, p_attribute_id, p_user)
+        END
+    END
+
+END

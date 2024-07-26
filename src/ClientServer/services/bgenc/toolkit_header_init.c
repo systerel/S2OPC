@@ -21,7 +21,7 @@
 
  File Name            : toolkit_header_init.c
 
- Date                 : 10/04/2024 15:56:17
+ Date                 : 26/07/2024 08:43:24
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -36,6 +36,7 @@
    List of Components
   ---------------------*/
 #include "address_space.h"
+#include "address_space_authorization.h"
 #include "address_space_bs.h"
 #include "address_space_itf.h"
 #include "address_space_local.h"
@@ -213,9 +214,10 @@ void INITIALISATION(void) {
    user_authorization_bs__INITIALISATION();
    data_value_pointer_bs__INITIALISATION();
    address_space_bs__INITIALISATION();
+   address_space_local__INITIALISATION();
+   address_space_authorization__INITIALISATION();
    address_space_typing_bs__INITIALISATION();
    address_space_typing__INITIALISATION();
-   address_space_local__INITIALISATION();
    gen_subscription_event_bs__INITIALISATION();
    service_write_decode_bs__INITIALISATION();
    service_response_cb_bs__INITIALISATION();

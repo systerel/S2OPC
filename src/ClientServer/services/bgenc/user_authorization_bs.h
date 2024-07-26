@@ -21,7 +21,7 @@
 
  File Name            : user_authorization_bs.h
 
- Date                 : 04/08/2022 14:53:49
+ Date                 : 24/07/2024 12:21:53
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -48,7 +48,7 @@ extern void user_authorization_bs__INITIALISATION(void);
 /*--------------------
    OPERATIONS Clause
   --------------------*/
-extern void user_authorization_bs__get_user_authorization(
+extern void user_authorization_bs__get_user_authorization_bs(
    const constants__t_operation_type_i user_authorization_bs__p_operation_type,
    const constants__t_NodeId_i user_authorization_bs__p_node_id,
    const constants__t_AttributeId_i user_authorization_bs__p_attribute_id,

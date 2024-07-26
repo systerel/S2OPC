@@ -21,7 +21,7 @@
 
  File Name            : address_space_itf.h
 
- Date                 : 22/03/2024 14:58:03
+ Date                 : 24/07/2024 17:29:49
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -62,7 +62,6 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__get_BrowseName service_add_nodes__get_BrowseName
 #define address_space_itf__get_DisplayName service_add_nodes__get_DisplayName
 #define address_space_itf__get_EventNotifier service_add_nodes__get_EventNotifier
-#define address_space_itf__get_Executable service_add_nodes__get_Executable
 #define address_space_itf__get_InputArguments service_add_nodes__get_InputArguments
 #define address_space_itf__get_NodeClass service_add_nodes__get_NodeClass
 #define address_space_itf__get_Node_RefIndexEnd service_add_nodes__get_Node_RefIndexEnd
@@ -75,6 +74,7 @@ extern void address_space_itf__INITIALISATION(void);
 #define address_space_itf__get_conv_Variant_Type service_add_nodes__get_conv_Variant_Type
 #define address_space_itf__get_conv_Variant_ValueRank service_add_nodes__get_conv_Variant_ValueRank
 #define address_space_itf__get_user_authorization service_add_nodes__get_user_authorization
+#define address_space_itf__has_access_level_executable service_add_nodes__has_access_level_executable
 #define address_space_itf__is_AddressSpace_constant service_add_nodes__is_AddressSpace_constant
 #define address_space_itf__is_IndexRangeDefined service_add_nodes__is_IndexRangeDefined
 #define address_space_itf__is_NodeId_equal service_add_nodes__is_NodeId_equal

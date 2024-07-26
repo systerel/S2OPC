@@ -21,7 +21,7 @@
 
  File Name            : address_space.h
 
- Date                 : 22/03/2024 14:58:03
+ Date                 : 26/07/2024 08:42:55
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -38,11 +38,9 @@
 /*-----------------
    IMPORTS Clause
   -----------------*/
-#include "address_space_bs.h"
-#include "address_space_local.h"
+#include "address_space_authorization.h"
 #include "address_space_typing.h"
 #include "gen_subscription_event_bs.h"
-#include "user_authorization_bs.h"
 
 /*--------------
    SEES Clause
@@ -63,35 +61,35 @@ extern void address_space__INITIALISATION(void);
 /*-------------------------------
    PROMOTES and EXTENDS Clauses
   -------------------------------*/
-#define address_space__address_space_bs_UNINITIALISATION address_space_bs__address_space_bs_UNINITIALISATION
+#define address_space__address_space_bs_UNINITIALISATION address_space_authorization__address_space_bs_UNINITIALISATION
 #define address_space__check_object_has_method address_space_typing__check_object_has_method
-#define address_space__exec_callMethod address_space_bs__exec_callMethod
-#define address_space__get_BrowseName address_space_bs__get_BrowseName
-#define address_space__get_DisplayName address_space_bs__get_DisplayName
-#define address_space__get_EventNotifier address_space_bs__get_EventNotifier
-#define address_space__get_Executable address_space_bs__get_Executable
-#define address_space__get_InputArguments address_space_bs__get_InputArguments
-#define address_space__get_NodeClass address_space_bs__get_NodeClass
-#define address_space__get_Node_RefIndexEnd address_space_bs__get_Node_RefIndexEnd
-#define address_space__get_RefIndex_Reference address_space_bs__get_RefIndex_Reference
-#define address_space__get_Reference_IsForward address_space_bs__get_Reference_IsForward
-#define address_space__get_Reference_ReferenceType address_space_bs__get_Reference_ReferenceType
-#define address_space__get_Reference_TargetNode address_space_bs__get_Reference_TargetNode
-#define address_space__get_TypeDefinition address_space_bs__get_TypeDefinition
-#define address_space__get_Value_StatusCode address_space_bs__get_Value_StatusCode
-#define address_space__get_conv_Variant_Type address_space_bs__get_conv_Variant_Type
-#define address_space__get_conv_Variant_ValueRank address_space_bs__get_conv_Variant_ValueRank
-#define address_space__get_user_authorization user_authorization_bs__get_user_authorization
-#define address_space__is_AddressSpace_constant address_space_bs__is_AddressSpace_constant
-#define address_space__is_IndexRangeDefined address_space_bs__is_IndexRangeDefined
-#define address_space__is_NodeId_equal address_space_bs__is_NodeId_equal
-#define address_space__is_local_service_treatment address_space_local__is_local_service_treatment
+#define address_space__exec_callMethod address_space_authorization__exec_callMethod
+#define address_space__get_BrowseName address_space_authorization__get_BrowseName
+#define address_space__get_DisplayName address_space_authorization__get_DisplayName
+#define address_space__get_EventNotifier address_space_authorization__get_EventNotifier
+#define address_space__get_InputArguments address_space_authorization__get_InputArguments
+#define address_space__get_NodeClass address_space_authorization__get_NodeClass
+#define address_space__get_Node_RefIndexEnd address_space_authorization__get_Node_RefIndexEnd
+#define address_space__get_RefIndex_Reference address_space_authorization__get_RefIndex_Reference
+#define address_space__get_Reference_IsForward address_space_authorization__get_Reference_IsForward
+#define address_space__get_Reference_ReferenceType address_space_authorization__get_Reference_ReferenceType
+#define address_space__get_Reference_TargetNode address_space_authorization__get_Reference_TargetNode
+#define address_space__get_TypeDefinition address_space_authorization__get_TypeDefinition
+#define address_space__get_Value_StatusCode address_space_authorization__get_Value_StatusCode
+#define address_space__get_conv_Variant_Type address_space_authorization__get_conv_Variant_Type
+#define address_space__get_conv_Variant_ValueRank address_space_authorization__get_conv_Variant_ValueRank
+#define address_space__get_user_authorization address_space_authorization__get_user_authorization
+#define address_space__has_access_level_executable address_space_authorization__has_access_level_executable
+#define address_space__is_AddressSpace_constant address_space_authorization__is_AddressSpace_constant
+#define address_space__is_IndexRangeDefined address_space_authorization__is_IndexRangeDefined
+#define address_space__is_NodeId_equal address_space_authorization__is_NodeId_equal
+#define address_space__is_local_service_treatment address_space_authorization__is_local_service_treatment
 #define address_space__is_transitive_subtype address_space_typing__is_transitive_subtype
 #define address_space__is_valid_ReferenceTypeId address_space_typing__is_valid_ReferenceTypeId
-#define address_space__read_AddressSpace_clear_value address_space_bs__read_AddressSpace_clear_value
-#define address_space__read_AddressSpace_free_variant address_space_bs__read_AddressSpace_free_variant
-#define address_space__readall_AddressSpace_Node address_space_bs__readall_AddressSpace_Node
-#define address_space__set_local_service_treatment address_space_local__set_local_service_treatment
+#define address_space__read_AddressSpace_clear_value address_space_authorization__read_AddressSpace_clear_value
+#define address_space__read_AddressSpace_free_variant address_space_authorization__read_AddressSpace_free_variant
+#define address_space__readall_AddressSpace_Node address_space_authorization__readall_AddressSpace_Node
+#define address_space__set_local_service_treatment address_space_authorization__set_local_service_treatment
 
 /*--------------------------
    LOCAL_OPERATIONS Clause

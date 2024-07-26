@@ -24,16 +24,16 @@ SEES
     constants
 
 ABSTRACT_VARIABLES
-    s_AuthorizedOperations
+    s_AuthorizedOperations_bs
 
 INVARIANT
-    s_AuthorizedOperations <: t_operation_type * t_NodeId * t_AttributeId * t_user
+    s_AuthorizedOperations_bs <: t_operation_type * t_NodeId * t_AttributeId * t_user
 
 INITIALISATION
-    s_AuthorizedOperations :: {{}}
+    s_AuthorizedOperations_bs :: {{}}
 
 OPERATIONS
-    p_authorized <-- get_user_authorization (p_operation_type, p_node_id, p_attribute_id, p_user) =
+    p_authorized <-- get_user_authorization_bs(p_operation_type, p_node_id, p_attribute_id, p_user) =
     PRE
         p_operation_type : t_operation_type_i &
         p_operation_type : t_operation_type   &
@@ -44,7 +44,7 @@ OPERATIONS
         p_user           : t_user_i           &
         p_user           : t_user
     THEN
-        p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations)
+        p_authorized := bool(p_operation_type |-> p_node_id |-> p_attribute_id |-> p_user : s_AuthorizedOperations_bs)
     END
 
 END

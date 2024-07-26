@@ -21,7 +21,7 @@
 
  File Name            : call_method_mgr.h
 
- Date                 : 22/03/2024 14:58:08
+ Date                 : 24/07/2024 17:29:51
 
  C Translator Version : tradc Java V1.2 (06/02/2022)
 
@@ -71,7 +71,6 @@ extern void call_method_mgr__INITIALISATION(void);
 #define call_method_mgr__get_BrowseName service_write__get_BrowseName
 #define call_method_mgr__get_DisplayName service_write__get_DisplayName
 #define call_method_mgr__get_EventNotifier service_write__get_EventNotifier
-#define call_method_mgr__get_Executable service_write__get_Executable
 #define call_method_mgr__get_InputArguments service_write__get_InputArguments
 #define call_method_mgr__get_NodeClass service_write__get_NodeClass
 #define call_method_mgr__get_Node_RefIndexEnd service_write__get_Node_RefIndexEnd
@@ -84,6 +83,7 @@ extern void call_method_mgr__INITIALISATION(void);
 #define call_method_mgr__get_conv_Variant_Type service_write__get_conv_Variant_Type
 #define call_method_mgr__get_conv_Variant_ValueRank service_write__get_conv_Variant_ValueRank
 #define call_method_mgr__get_user_authorization service_write__get_user_authorization
+#define call_method_mgr__has_access_level_executable service_write__has_access_level_executable
 #define call_method_mgr__is_AddressSpace_constant service_write__is_AddressSpace_constant
 #define call_method_mgr__is_IndexRangeDefined service_write__is_IndexRangeDefined
 #define call_method_mgr__is_NodeId_equal service_write__is_NodeId_equal
