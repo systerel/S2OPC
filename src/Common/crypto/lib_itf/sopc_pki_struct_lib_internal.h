@@ -55,6 +55,8 @@ struct SOPC_PKIProvider
 
     SOPC_CRLList* pAllCrl;                /*!< Issuer CRLs + trusted CRLs */
     SOPC_FnValidateCert* pFnValidateCert; /*!< Pointer to validation function*/
+    SOPC_PKIProviderUpdateCb* pUpdateCb;  /*!< Pointer to update callback */
+    uintptr_t updateCbParam;              /*!< User defined parameter for the update callback */
     bool isPermissive;                    /*!< Define whatever the PKI is permissive (without security)*/
 };
 

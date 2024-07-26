@@ -1400,6 +1400,8 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     pPKI->pRejectedList = NULL;
     pPKI->directoryStorePath = NULL;
     pPKI->pFnValidateCert = &sopc_pki_validate_anything;
+    pPKI->pUpdateCb = NULL;
+    pPKI->updateCbParam = 0;
     pPKI->isPermissive = true;
     *ppPKI = pPKI;
     return SOPC_STATUS_OK;
@@ -1459,6 +1461,35 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
     mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
+    return status;
+#endif
+}
+
+SOPC_ReturnStatus SOPC_PKIProvider_SetUpdateCb(SOPC_PKIProvider* pPKI,
+                                               SOPC_PKIProviderUpdateCb* pUpdateCb,
+                                               uintptr_t updateParam)
+{
+#ifdef WITH_NO_CRYPTO
+    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(pUpdateCb);
+    SOPC_UNUSED_ARG(updateParam);
+    return SOPC_STATUS_NOT_SUPPORTED;
+#else
+    if (NULL == pPKI || NULL == pUpdateCb)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_STATE;
+    SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&pPKI->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
+    if (NULL == pPKI->pUpdateCb)
+    {
+        pPKI->pUpdateCb = pUpdateCb;
+        pPKI->updateCbParam = updateParam;
+        status = SOPC_STATUS_OK;
+    }
+    mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
+    SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     return status;
 #endif
 }
@@ -1712,6 +1743,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+    if (NULL == pPKI->pUpdateCb)
+    {
+        return SOPC_STATUS_INVALID_STATE;
+    }
 
     SOPC_PKIProvider* pTmpPKI = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
@@ -1802,6 +1837,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
         }
     }
 
+    /* Copy callback pointer and param before exchange the data */
+    if (SOPC_STATUS_OK == status)
+    {
+        pTmpPKI->pUpdateCb = pPKI->pUpdateCb;
+        pTmpPKI->updateCbParam = pPKI->updateCbParam;
+    }
+
     // Exchange the internal data between tmpPKI and PKI, clear previous data and free tmpPKI structure
     // Note: mutex is kept since PKI should already be in use
     if (SOPC_STATUS_OK == status)
@@ -1815,6 +1857,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
         sopc_pki_clear(pTmpPKI);
         SOPC_Free(pTmpPKI);
         pTmpPKI = NULL;
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        pPKI->pUpdateCb(pPKI->updateCbParam);
     }
 
     // Unlock PKI prior to possibly clearing it
@@ -1845,6 +1892,10 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
     if (NULL == pPKI || NULL == pThumbprint)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    if (NULL == pPKI->pUpdateCb)
+    {
+        return SOPC_STATUS_INVALID_STATE;
     }
 
     size_t lenThumbprint = strlen(pThumbprint);
@@ -1942,6 +1993,11 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
 
     *pIsIssuer = bIsIssuer;
     *pIsRemoved = bIsRemoved;
+
+    if (SOPC_STATUS_OK == status && bIsRemoved)
+    {
+        pPKI->pUpdateCb(pPKI->updateCbParam);
+    }
 
     mutStatus = SOPC_Mutex_Unlock(&pPKI->mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
@@ -2179,6 +2235,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
         pPKI->pRejectedList = NULL;
         pPKI->directoryStorePath = NULL;
         pPKI->pFnValidateCert = &SOPC_PKIProviderInternal_ValidateProfileAndCertificate;
+        pPKI->pUpdateCb = NULL;
+        pPKI->updateCbParam = 0;
         pPKI->isPermissive = false;
         *ppPKI = pPKI;
     }

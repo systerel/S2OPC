@@ -419,8 +419,9 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
  *                             \p pTrustedCerts , \p pTrustedCrl , \p pIssuerCerts  and \p pIssuerCrl .
  *
  * \warning \p securityPolicyUri is not used yet and could be NULL.
+ * \warning A callback shall have been defined using ::SOPC_PKIProvider_SetUpdateCb otherwise update is not authorized.
  *
- * \return SOPC_STATUS_OK when successful.
+ * \return SOPC_STATUS_OK when successful (SOPC_STATUS_INVALID_STATE in case update callback is not set).
  */
 SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
                                                   const char* securityPolicyUri,
@@ -434,6 +435,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
  *          If the Certificate is a CA Certificate then all the CRLs for that CA are removed.
  *
  * \warning This function will fail if \p pThumbprint does not match the SHA1 hex digest size.
+ * \warning A callback shall have been defined using ::SOPC_PKIProvider_SetUpdateCb otherwise update is not authorized.
  *
  * \param pPKI A valid pointer to the PKIProvider.
  * \param pThumbprint The SHA1 of the certificate formatted as an hexadecimal C string (NULL terminated)
@@ -442,7 +444,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
  * \param[out] pIsRemoved A valid pointer indicating whether the certificate has been found and deleted.
  * \param[out] pIsIssuer A valid pointer indicating whether the deleted certificate is an issuer.
  *
- * \return SOPC_STATUS_OK when successful.
+ * \return SOPC_STATUS_OK when successful (SOPC_STATUS_INVALID_STATE in case update callback is not set).
  */
 SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
                                                      const char* pThumbprint,
@@ -461,6 +463,24 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
  * \return SOPC_STATUS_OK when successful.
  */
 SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI);
+
+/**
+ * \brief Defines the callback to be called when a PKI certificates update is done with
+ * ::SOPC_PKIProvider_UpdateFromList or ::SOPC_PKIProvider_RemoveCertificate.
+ *
+ * \warning It is mandatory to define an associated behavior to allow calls to these functions.
+ * \note Callback is used to re-evaluate the currently used certificates (application/user) or to leave a TOFU state.
+ *
+ * \param pPKI A valid pointer to the PKIProvider for which an update callback will be defined
+ * \param pUpdateCb The callback to be called when an update is done
+ * \param updateParam A user defined parameter for the callback
+ *
+ * \return SOPC_STATUS_OK in case of success, SOPC_STATUS_INVALID_PARAMETERS in case of NULL parameter
+ *         and SOPC_STATUS_INVALID_STATE in case a callback is already defined.
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_SetUpdateCb(SOPC_PKIProvider* pPKI,
+                                               SOPC_PKIProviderUpdateCb* pUpdateCb,
+                                               uintptr_t updateParam);
 
 /**
  * \brief Frees allocated PKIs.

@@ -132,6 +132,13 @@ typedef enum
     SOPC_PKI_TYPE_USER        /**< Application server to validate user certificates*/
 } SOPC_PKI_Type;
 
+/**
+ * \brief Type of the callback triggered on PKI certificates update
+ *
+ * \param updateParam a user defined parameter for the callback
+ */
+typedef void SOPC_PKIProviderUpdateCb(uintptr_t updateParam);
+
 typedef struct SOPC_PKIProvider SOPC_PKIProvider;
 typedef struct SOPC_PKI_Profile SOPC_PKI_Profile;
 typedef struct SOPC_PKI_ChainProfile SOPC_PKI_ChainProfile;
