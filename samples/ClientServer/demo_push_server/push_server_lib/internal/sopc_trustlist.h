@@ -116,9 +116,9 @@ typedef struct SOPC_TrustListContext
     SOPC_TrLst_VarCfg varIds;      /*!< The structure which gather all the variable nodIds
                                         belonging to the TrustList */
     SOPC_TrLst_TimeEvent eventMgr; /*!< Structure to manage the trustlist activity timeout. */
-    SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted; /*!< Calls when a new valid update has occurred */
-    SOPC_PKIProvider* pPKI;       /*!< A valid pointer to the PKI that belongs to the TrustList */
-    SOPC_TrLst_OpeningCtx opnCtx; /*!< The current data of an open trustlist */
+    bool isTOFU;                   /*!< True when TOFU state otherwise False. */
+    SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI that belongs to the TrustList */
+    SOPC_TrLst_OpeningCtx opnCtx;  /*!< The current data of an open trustlist */
 } SOPC_TrustListContext;
 
 /**
@@ -149,11 +149,11 @@ typedef struct TrustList_NodeIds
  */
 struct SOPC_TrustList_Config
 {
-    const TrustList_NodeIds* pIds;                          /*!< Define all the nodeId of the TrustList. */
-    SOPC_TrustList_Type groupType;                          /*!< Define the certificate group type of the TrustList. */
-    SOPC_PKIProvider* pPKI;                                 /*!< A valid pointer to the PKI of the TrustList. */
-    uint32_t maxTrustListSize;                              /*!< Define the maximum size in byte for the TrustList. */
-    SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted; /*!< Calls when a new valid update has occurred */
+    const TrustList_NodeIds* pIds; /*!< Define all the nodeId of the TrustList. */
+    SOPC_TrustList_Type groupType; /*!< Define the certificate group type of the TrustList. */
+    SOPC_PKIProvider* pPKI;        /*!< A valid pointer to the PKI of the TrustList. */
+    uint32_t maxTrustListSize;     /*!< Define the maximum size in byte for the TrustList. */
+    bool isTOFU;                   /*!< True when TOFU otherwise False. */
 };
 
 /**
@@ -464,16 +464,6 @@ SOPC_StatusCode TrustList_UpdateWithWriteMethod(SOPC_TrustListContext* pTrustLis
 SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
                                    const bool bEraseExiting,
                                    const bool bForcePush);
-
-/**
- * \brief Executes user callback to indicate the end of a valid update.
- *        Do nothing if the callback is not configured.
- *
- * \param pTrustList The TrustList context.
- *
- * \warning \p pTrustList shall be valid (!= NULL).
- */
-void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList);
 
 /**
  * \brief Write the value of the TrustList Size variable.

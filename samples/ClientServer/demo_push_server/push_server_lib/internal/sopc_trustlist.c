@@ -279,7 +279,7 @@ static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrus
                                                   SOPC_TrustList_Type groupType,
                                                   SOPC_PKIProvider* pPKI,
                                                   uint32_t maxTrustListSize,
-                                                  SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted);
+                                                  bool isTOFU);
 static void trustlist_clear_context(SOPC_TrustListContext* pTrustList);
 static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList);
 static void trustlist_dict_free_context_value(uintptr_t value);
@@ -299,7 +299,7 @@ static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrus
                                                   SOPC_TrustList_Type groupType,
                                                   SOPC_PKIProvider* pPKI,
                                                   uint32_t maxTrustListSize,
-                                                  SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted)
+                                                  bool isTOFU)
 {
     if (NULL == ppTrustList || NULL == pPKI)
     {
@@ -314,7 +314,7 @@ static SOPC_ReturnStatus trustlist_create_context(SOPC_TrustListContext** ppTrus
     pTrustList->maxTrustListSize = maxTrustListSize;
     pTrustList->groupType = groupType;
     pTrustList->pPKI = pPKI;
-    pTrustList->pFnUpdateCompleted = pFnUpdateCompleted;
+    pTrustList->isTOFU = isTOFU;
 
     *ppTrustList = pTrustList;
     return SOPC_STATUS_OK;
@@ -333,7 +333,6 @@ static void trustlist_clear_context(SOPC_TrustListContext* pTrustList)
     SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pTrustedCRLs);
     SOPC_KeyManager_CRL_Free(pTrustList->opnCtx.pIssuerCRLs);
     SOPC_Looper_Delete(pTrustList->eventMgr.pLooper);
-    pTrustList->pFnUpdateCompleted = NULL;
 }
 
 static void trustlist_delete_context(SOPC_TrustListContext** ppTrustList)
@@ -445,6 +444,7 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
     pCfg->groupType = groupType;
     pCfg->pPKI = pPKI;
     pCfg->maxTrustListSize = maxTrustListSize;
+    pCfg->isTOFU = false;
 
     *ppConfig = pCfg;
     return SOPC_STATUS_OK;
@@ -454,18 +454,13 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
 SOPC_ReturnStatus SOPC_TrustList_GetTOFUConfiguration(const SOPC_TrustList_Type groupType,
                                                       SOPC_PKIProvider* pPKI,
                                                       const uint32_t maxTrustListSize,
-                                                      SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
                                                       SOPC_TrustList_Config** ppConfig)
 {
-    if (NULL == pFnUpdateCompleted) // Other parameters are check inside GetDefaultConfiguration
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
     SOPC_ReturnStatus status = SOPC_TrustList_GetDefaultConfiguration(groupType, pPKI, maxTrustListSize, ppConfig);
     if (SOPC_STATUS_OK == status)
     {
         SOPC_TrustList_Config* pCfg = *ppConfig;
-        pCfg->pFnUpdateCompleted = pFnUpdateCompleted;
+        pCfg->isTOFU = true;
     }
     return status;
 }
@@ -524,8 +519,8 @@ SOPC_ReturnStatus SOPC_TrustList_Configure(SOPC_TrustList_Config* pCfg, SOPC_Met
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     SOPC_TrustListContext* pTrustList = NULL;
-    SOPC_ReturnStatus status = trustlist_create_context(&pTrustList, pCfg->groupType, pCfg->pPKI,
-                                                        pCfg->maxTrustListSize, pCfg->pFnUpdateCompleted);
+    SOPC_ReturnStatus status =
+        trustlist_create_context(&pTrustList, pCfg->groupType, pCfg->pPKI, pCfg->maxTrustListSize, pCfg->isTOFU);
     if (SOPC_STATUS_OK != status)
     {
         return status;

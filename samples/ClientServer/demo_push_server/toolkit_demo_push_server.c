@@ -54,6 +54,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_push_server_config_itf.h"
 #include "sopc_threads.h"
+#include "sopc_toolkit_async_api.h"
 #include "sopc_user_app_itf.h"
 
 #define DEMO_PUSH_M_TO_MS 60000
@@ -133,8 +134,9 @@ static void* DemoPushSrv_StopServerThread(void* arg)
     return NULL;
 }
 
-static void DemoPushSrv_TrustList_UpdateCompleted(void)
+static void DemoPushSrv_TrustList_UpdateCompleted(uintptr_t updateParam)
 {
+    SOPC_UNUSED_ARG(updateParam);
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&gAppCtx.mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
     printf("<Demo_Push_Server: Trustlist update is completed\n");
@@ -220,9 +222,14 @@ static SOPC_ReturnStatus DemoPushSrv_ConfigureServerConfigurationNodes(void)
         }
         if (SOPC_STATUS_OK == status)
         {
-            status = SOPC_PushServerConfig_GetTOFUConfiguration(
-                serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION, SOPC_TRUSTLIST_DEFAULT_MAX_SIZE,
-                &DemoPushSrv_TrustList_UpdateCompleted, &pPushConfig);
+            status = SOPC_PKIProvider_SetUpdateCb(serverConfig->pki, &DemoPushSrv_TrustList_UpdateCompleted,
+                                                  (uintptr_t) NULL);
+        }
+        if (SOPC_STATUS_OK == status)
+        {
+            status =
+                SOPC_PushServerConfig_GetTOFUConfiguration(serverConfig->pki, SOPC_CERT_TYPE_RSA_SHA256_APPLICATION,
+                                                           SOPC_TRUSTLIST_DEFAULT_MAX_SIZE, &pPushConfig);
         }
     }
     else

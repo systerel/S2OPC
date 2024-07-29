@@ -228,10 +228,9 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetDefaultConfiguration(SOPC_PKIProvider
 SOPC_ReturnStatus SOPC_PushServerConfig_GetTOFUConfiguration(SOPC_PKIProvider* pPKIApp,
                                                              const SOPC_Certificate_Type appCertType,
                                                              const uint32_t maxTrustListSize,
-                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
                                                              SOPC_PushServerConfig_Config** ppConfig)
 {
-    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == pFnUpdateCompleted || NULL == ppConfig)
+    if (NULL == pPKIApp || 0 == maxTrustListSize || NULL == ppConfig)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -247,8 +246,7 @@ SOPC_ReturnStatus SOPC_PushServerConfig_GetTOFUConfiguration(SOPC_PKIProvider* p
     {
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
-    status = SOPC_CertificateGroup_GetTOFUConfiguration(appCertType, pPKIApp, maxTrustListSize, pFnUpdateCompleted,
-                                                        &pAppCertGroupCfg);
+    status = SOPC_CertificateGroup_GetTOFUConfiguration(appCertType, pPKIApp, maxTrustListSize, &pAppCertGroupCfg);
 
     if (SOPC_STATUS_OK == status)
     {

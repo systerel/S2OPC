@@ -355,10 +355,9 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
 SOPC_ReturnStatus SOPC_CertificateGroup_GetTOFUConfiguration(const SOPC_Certificate_Type certType,
                                                              SOPC_PKIProvider* pPKI,
                                                              const uint32_t maxTrustListSize,
-                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
                                                              SOPC_CertificateGroup_Config** ppConfig)
 {
-    if (NULL == pPKI || 0 == maxTrustListSize || NULL == pFnUpdateCompleted || NULL == ppConfig)
+    if (NULL == pPKI || 0 == maxTrustListSize || NULL == ppConfig)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
@@ -375,8 +374,7 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetTOFUConfiguration(const SOPC_Certific
     }
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_TrustList_Config* pTrustListCfg = NULL;
-    status = SOPC_TrustList_GetTOFUConfiguration(SOPC_TRUSTLIST_GROUP_APP, pPKI, maxTrustListSize, pFnUpdateCompleted,
-                                                 &pTrustListCfg);
+    status = SOPC_TrustList_GetTOFUConfiguration(SOPC_TRUSTLIST_GROUP_APP, pPKI, maxTrustListSize, &pTrustListCfg);
     if (SOPC_STATUS_OK == status)
     {
         pCfg->pIds = pNodeIds;

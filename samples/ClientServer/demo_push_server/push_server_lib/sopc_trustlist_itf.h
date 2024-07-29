@@ -49,11 +49,6 @@ typedef enum
 } SOPC_TrustList_Type;
 
 /**
- * \brief Calls when a new valid update of the TrustList has occurred.
- */
-typedef void SOPC_TrustList_UpdateCompleted_Fct(void);
-
-/**
  * \brief Structure to gather TrustList configuration data
  */
 typedef struct SOPC_TrustList_Config SOPC_TrustList_Config;
@@ -90,7 +85,6 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
  * \param groupType        Define the certificate group type of the TrustList.
  * \param pPKI             A valid pointer to the PKI of the TrustList.
  * \param maxTrustListSize Define the maximum size in byte of the TrustList.
- * \param pFnUpdateCompleted The callback when a new valid update of the TrustList has occurred.
  * \param[out] ppConfig    A newly created configuration. You should delete it with
  *                         ::SOPC_TrustList_DeleteConfiguration .
  *
@@ -99,7 +93,6 @@ SOPC_ReturnStatus SOPC_TrustList_GetDefaultConfiguration(const SOPC_TrustList_Ty
 SOPC_ReturnStatus SOPC_TrustList_GetTOFUConfiguration(const SOPC_TrustList_Type groupType,
                                                       SOPC_PKIProvider* pPKI,
                                                       const uint32_t maxTrustListSize,
-                                                      SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
                                                       SOPC_TrustList_Config** ppConfig);
 
 /**

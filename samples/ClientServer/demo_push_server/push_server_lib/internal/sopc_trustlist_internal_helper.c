@@ -676,7 +676,7 @@ SOPC_TrLst_Mask TrustList_GetSpecifiedListsMask(const SOPC_TrustListContext* pTr
 bool TrustList_isInTOFUSate(const SOPC_TrustListContext* pTrustList)
 {
     SOPC_ASSERT(NULL != pTrustList);
-    return NULL != pTrustList->pFnUpdateCompleted;
+    return pTrustList->isTOFU;
 }
 
 /* Check the TrustList handle */
@@ -1398,16 +1398,6 @@ SOPC_ReturnStatus TrustList_Export(const SOPC_TrustListContext* pTrustList,
                                  pTrustList->cStrObjectId);
     }
     return status;
-}
-
-/* Executes user callback to indicate the end of a valid update */
-void TrustList_UpdateCompleted(const SOPC_TrustListContext* pTrustList)
-{
-    SOPC_ASSERT(NULL != pTrustList);
-    if (TrustList_isInTOFUSate(pTrustList))
-    {
-        pTrustList->pFnUpdateCompleted();
-    }
 }
 
 /* Write the value of the Size variable */

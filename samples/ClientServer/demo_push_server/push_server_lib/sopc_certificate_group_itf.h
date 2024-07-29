@@ -89,7 +89,6 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
  * \param pPKI             A valid pointer to the TrustList PKI that belongs to the CertificateGroup object.
  * \param maxTrustListSize Define the maximum size in byte of the TrustList that belongs to the
  *                         CertificateGroup object.
- * \param pFnUpdateCompleted The callback when a new valid update of the TrustList has occurred.
  * \param[out] ppConfig A newly created configuration. You should delete it with
  *                      ::SOPC_CertificateGroup_DeleteConfiguration .
  *
@@ -98,7 +97,6 @@ SOPC_ReturnStatus SOPC_CertificateGroup_GetDefaultConfiguration(const SOPC_Trust
 SOPC_ReturnStatus SOPC_CertificateGroup_GetTOFUConfiguration(const SOPC_Certificate_Type certType,
                                                              SOPC_PKIProvider* pPKI,
                                                              const uint32_t maxTrustListSize,
-                                                             SOPC_TrustList_UpdateCompleted_Fct* pFnUpdateCompleted,
                                                              SOPC_CertificateGroup_Config** ppConfig);
 
 /**

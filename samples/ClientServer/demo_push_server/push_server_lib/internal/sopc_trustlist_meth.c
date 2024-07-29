@@ -392,7 +392,6 @@ SOPC_StatusCode TrustList_Method_CloseAndUpdate(const SOPC_CallContext* callCont
         if (SOPC_TL_MASK_NONE != mask)
         {
             Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
-            TrustList_UpdateCompleted(pTrustList);
         }
         /* The variant is deleted by the method call manager */
         *nbOutputArgs = 1;
@@ -492,7 +491,6 @@ SOPC_StatusCode TrustList_Method_AddCertificate(const SOPC_CallContext* callCont
     {
         SOPC_AddressSpaceAccess* pAddSpAccess = SOPC_CallContext_GetAddressSpaceAccess(callContextPtr);
         Trustlist_WriteVarLastUpdateTime(pTrustList, pAddSpAccess);
-        TrustList_UpdateCompleted(pTrustList);
     }
 
     return statusCode;
