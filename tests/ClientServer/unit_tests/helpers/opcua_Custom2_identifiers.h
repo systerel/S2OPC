@@ -17,19 +17,15 @@
  * under the License.
  */
 
-#ifndef SOPC_Custom_Identifiers_H_
-#define SOPC_Custom_Identifiers_H_ 1
+#ifndef SOPC_Custom2_Identifiers_H_
+#define SOPC_Custom2_Identifiers_H_ 1
 
-#define OpcUaId_Custom_CustomDataType 10020
-#define OpcUaId_Custom_CustomDataType_Encoding_DefaultBinary 10021
-#define OpcUaId_Custom_CustomDataType_Encoding_DefaultXml 10022
+#define OpcUaId_Custom2_Custom2DataType 100020
+#define OpcUaId_Custom2_Custom2DataType_Encoding_DefaultBinary 100021
+#define OpcUaId_Custom2_Custom2DataType_Encoding_DefaultXml 100022
 
-#define OpcUaId_Custom_CustomDataType2 20020
-#define OpcUaId_Custom_CustomDataType2_Encoding_DefaultBinary 20021
-#define OpcUaId_Custom_CustomDataType2_Encoding_DefaultXml 20022
-
-#define OpcUaId_Custom_CustomWithNS0DataType 30020
-#define OpcUaId_Custom_CustomWithNS0DataType_Encoding_DefaultBinary 30021
-#define OpcUaId_Custom_CustomWithNS0DataType_Encoding_DefaultXml 30022
+#define OpcUaId_Custom2_CustomWithNS1DataType 200020
+#define OpcUaId_Custom2_CustomWithNS1DataType_Encoding_DefaultBinary 200021
+#define OpcUaId_Custom2_CustomWithNS1DataType_Encoding_DefaultXml 200022
 
 #endif

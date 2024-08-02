@@ -20,13 +20,12 @@
 #ifndef SOPC_Custom_Types_H_
 #define SOPC_Custom_Types_H_ 1
 
+#include "custom_enum_types.h"
 #include "sopc_buffer.h"
 #include "sopc_builtintypes.h"
 #include "sopc_encodeabletype.h"
-#include "custom_enum_types.h"
 
 #include "sopc_types.h"
-
 
 #ifndef OPCUA_EXCLUDE_Custom_CustomDataType
 /*============================================================================
@@ -72,6 +71,28 @@ void OpcUa_Custom_CustomDataType2_Clear(void* pValue);
 
 #endif
 
+#ifndef OPCUA_EXCLUDE_Custom_CustomWithNS0DataType
+/*============================================================================
+ * The Custom_CustomWithNS0DataType structure.
+ *===========================================================================*/
+extern SOPC_EncodeableType OpcUa_Custom_CustomWithNS0DataType_EncodeableType;
+
+typedef struct _OpcUa_Custom_CustomWithNS0DataType
+{
+    SOPC_EncodeableType* encodeableType;
+    /* IMPORTANT NOTE: response header IN RESPONSE MSG BODY is kept only
+     *  for giving a copy of the header to application.
+     */
+    SOPC_Boolean fieldb;
+    OpcUa_KeyValuePair keyPair;
+} OpcUa_Custom_CustomWithNS0DataType;
+
+void OpcUa_Custom_CustomWithNS0DataType_Initialize(void* pValue);
+
+void OpcUa_Custom_CustomWithNS0DataType_Clear(void* pValue);
+
+#endif
+
 /*============================================================================
  * Indexes in the table of known encodeable types.
  *
@@ -84,6 +105,9 @@ typedef enum _SOPC_Custom_TypeInternalIndex
 #endif
 #ifndef OPCUA_EXCLUDE_Custom_CustomDataType2
     SOPC_TypeInternalIndex_Custom_CustomDataType2,
+#endif
+#ifndef OPCUA_EXCLUDE_Custom_CustomWithNS0DataType
+    SOPC_TypeInternalIndex_Custom_CustomWithNS0DataType,
 #endif
     SOPC_Custom_TypeInternalIndex_SIZE
 } SOPC_Custom_TypeInternalIndex;

@@ -8,4 +8,8 @@
     <opc:Field Name="fieldb" TypeName="opc:Boolean"/>
     <opc:Field Name="fieldcdt" TypeName="tns:CustomDataType"/>
   </opc:StructuredType>
+  <opc:StructuredType Name="CustomWithNS0DataType" BaseType="ua:ExtensionObject">
+    <opc:Field Name="fieldb" TypeName="opc:Boolean"/>
+    <opc:Field Name="keyPair" TypeName="ua:KeyValuePair" /> <!-- depends on NS0 types -->
+  </opc:StructuredType>
 </opc:TypeDictionary>
