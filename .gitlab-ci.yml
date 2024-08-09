@@ -434,6 +434,20 @@ build-fuzz:
     - if: "$TEST_NETWORK_FUZZ != null"
       when: always
 
+build-ml-bugs:
+  stage: build
+  image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
+  script:
+    - apt-get update -y && apt-get install -y openssl
+    - pip install multiprocess
+    - ./tests/ClientServer/scripts/ml_bugs.sh
+  artifacts:
+    name: 'bug4_packets.txt'
+    paths:
+      - "./tests/ClientServer/scripts/browse_packets.txt"
+    when: on_failure
+    expire_in: "30 days"
+
 ###
 # Test jobs
 ###
