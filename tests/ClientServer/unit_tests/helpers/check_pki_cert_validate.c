@@ -130,7 +130,7 @@ START_TEST(certificate_validation_self_signed_ca_without_crl)
 
     // 2nd validation: self_signed_ca_pathLen0 is issuer and we want to validate it
     // Update the PKI and validate
-    // There shall be at least one trusted certificate in the PKI (see the PKI function check_lists())
+    // There shall be at least one trusted certificate in the PKI (see the PKI function SOPC_PKIProvider_CheckLists())
     status = SOPC_PKIProvider_UpdateFromList(pPKI, SOPC_SecurityPolicy_Basic256Sha256_URI, cacert, cacrl,
                                              self_signed_ca_pathLen0, NULL, false);
     ck_assert_int_eq(SOPC_STATUS_OK, status);

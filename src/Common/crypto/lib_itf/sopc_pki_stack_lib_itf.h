@@ -483,6 +483,85 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
                                                      bool* pIsIssuer);
 
 /**
+ * \brief Checks if the Common Name attribute of a certificate thumbprint is specified.
+ *
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckCommonName(const SOPC_CertificateList* pToValidate);
+
+/**
+ * \brief Checks if the PKI public keys are valid.
+ *
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ *
+ * \param pConfig A valid pointer to a profile configuration.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateList* pToValidate,
+                                                       const SOPC_PKI_LeafProfile* pConfig);
+
+/**
+ * \brief Checks if the host name in the URL used
+ * to connect to the server is the same as the host name in the certificate URL.
+ *
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ *
+ * \param url A valid URL extracted from a certificate.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate, const char* url);
+
+/**
+ * \brief Checks if the Application URI is matching the URI provided with the certificate.
+ *
+ * \param pToValidate A valid pointer to the Certificate to validate.
+ *
+ * \param applicationUri A valid URI to an application URI.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckApplicationUri(const SOPC_CertificateList* pToValidate,
+                                                       const char* applicationUri);
+
+/**
+ * \brief Checks if the certificate uses are matching the required uses.
+ *
+ * \param pToValidate A valid pointer to the certificate to validate.
+ *
+ * \param pProfile A valid pointer to the expected profile of a certificate.
+ *
+ * \return SOPC_STATUS_OK when successful.
+ *
+ */
+SOPC_ReturnStatus SOPC_PKIProvider_CheckCertificateUsage(const SOPC_CertificateList* pToValidate,
+                                                         const SOPC_PKI_LeafProfile* pProfile);
+
+/**
+ * \brief Get some statistics about the certificate chain.
+ *
+ * \param pCert A valid pointer to the certificate chain.
+ *
+ * \param caCount A valid pointer to store the number of certificate authorities.
+ *
+ * \param listLength A valid pointer to store the length of the certificate chain.
+ *
+ * \param rootCount A valid pointer to store the number of self-signed certificates.
+ *
+ */
+void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
+                                   uint32_t* caCount,
+                                   uint32_t* listLength,
+                                   uint32_t* rootCount);
+
+/**
  * \brief Free a PKI provider.
  *
  * \param ppPKI The PKI.
