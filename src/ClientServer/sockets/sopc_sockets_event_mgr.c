@@ -32,6 +32,38 @@
 
 #include "p_sopc_sockets.h"
 
+static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_Socket* listener,
+                                                        SOPC_Socket* connection,
+                                                        const char* eventName)
+{
+    char* peerHost = NULL;
+    char* peerService = NULL;
+    char* selfHost = NULL;
+    char* selfService = NULL;
+    SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
+    SOPC_SocketAddress_GetNameInfo(listener->addr, &selfHost, &selfService);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s [%s]:%s from [%s]:%s with socket socketIdx=%" PRIu32,
+                          eventName, (selfHost ? selfHost : "<Unknown Address>"),
+                          (selfService ? selfService : "<Unknown port>"), (peerHost ? peerHost : "<Unknown Address>"),
+                          (peerService ? peerService : "<Unknown port>"), connection->socketIdx);
+    SOPC_Free(peerHost);
+    SOPC_Free(peerService);
+    SOPC_Free(selfHost);
+    SOPC_Free(selfService);
+}
+
+static void SOPC_SocketsInternalEventMgr_LogSocketEvent(SOPC_Socket* connection, const char* eventName)
+{
+    char* peerHost = NULL;
+    char* peerService = NULL;
+    SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
+    SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER, "%s [%s]:%s with socket socketIdx=%" PRIu32, eventName,
+                          (peerHost ? peerHost : "<Unknown Address>"), (peerService ? peerService : "<Unknown port>"),
+                          connection->socketIdx);
+    SOPC_Free(peerHost);
+    SOPC_Free(peerService);
+}
+
 static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_Socket_AddressInfo* addr)
 {
     bool result = false;
@@ -161,6 +193,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
         if (SOPC_STATUS_OK != status && freeSocket != NULL)
         {
             // Set as closed to be removed from used socket
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(freeSocket, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(freeSocket->socketIdx);
         }
 
@@ -276,6 +309,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
         {
             if (freeSocket != NULL)
             {
+                SOPC_SocketsInternalEventMgr_LogSocketEvent(freeSocket, "Closed connection on");
                 SOPC_SocketsInternalContext_CloseSocket(freeSocket->socketIdx);
             }
         }
@@ -502,6 +536,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         }
         else
         {
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
         break;
@@ -535,6 +570,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         if (socketElt->state != SOCKET_STATE_CLOSED && socketElt->state != SOCKET_STATE_LISTENING &&
             socketElt->connectionId == (uint32_t) auxParam)
         {
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
         else
@@ -555,6 +591,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         /* Check upper level request is still valid: expected socket state and upper connection id */
         if (socketElt->state == SOCKET_STATE_LISTENING && socketElt->connectionId == (uint32_t) auxParam)
         {
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
         else
@@ -603,6 +640,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
         {
             SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, eltId);
             // Definitively close the socket
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(eltId);
         }
 
@@ -610,44 +648,6 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
     default:
         SOPC_ASSERT(false);
     }
-}
-
-static void SOPC_SocketsInternalEventMgr_LogAcceptedConnection(SOPC_Socket* listener, SOPC_Socket* connection)
-{
-    char* peerHost = NULL;
-    char* peerService = NULL;
-    char* selfHost = NULL;
-    char* selfService = NULL;
-    SOPC_ReturnStatus status = SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
-    if (SOPC_STATUS_OK == status)
-    {
-        status = SOPC_SocketAddress_GetNameInfo(listener->addr, &selfHost, &selfService);
-    }
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                              "Connection accepted on [%s]:%s from [%s]:%s with socket socketIdx=%" PRIu32, selfHost,
-                              selfService, peerHost, peerService, connection->socketIdx);
-    }
-    SOPC_Free(peerHost);
-    SOPC_Free(peerService);
-    SOPC_Free(selfHost);
-    SOPC_Free(selfService);
-}
-
-static void SOPC_SocketsInternalEventMgr_LogConnection(SOPC_Socket* connection)
-{
-    char* peerHost = NULL;
-    char* peerService = NULL;
-    SOPC_ReturnStatus status = SOPC_SocketAddress_GetNameInfo(connection->addr, &peerHost, &peerService);
-    if (SOPC_STATUS_OK == status)
-    {
-        SOPC_Logger_TraceInfo(SOPC_LOG_MODULE_CLIENTSERVER,
-                              "Connection established to [%s]:%s with socket socketIdx=%" PRIu32, peerHost, peerService,
-                              connection->socketIdx);
-    }
-    SOPC_Free(peerHost);
-    SOPC_Free(peerService);
 }
 
 void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_Socket* socketElt)
@@ -685,7 +685,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             if (SOPC_STATUS_OK == status)
             {
                 acceptSock->addr = SOPC_Socket_GetPeerAddress(acceptSock->sock);
-                SOPC_SocketsInternalEventMgr_LogAcceptedConnection(socketElt, acceptSock);
+                SOPC_SocketsInternalEventMgr_LogAcceptEvent(socketElt, acceptSock, "Connection accepted on");
                 acceptSock->isServerConnection = true;
                 acceptSock->listenerSocketIdx = socketElt->socketIdx;
                 // Set initial state of new socket
@@ -702,6 +702,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             }
             else
             {
+                SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Connection refused to");
                 SOPC_SocketsInternalContext_CloseSocket(acceptSock->socketIdx);
             }
         }
@@ -714,6 +715,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         // State is connecting
         SOPC_ASSERT(socketElt->state == SOCKET_STATE_CONNECTING);
 
+        SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Connection attempt failed to");
+
         // Will do a new attempt with next possible address if possible
         result = SOPC_SocketsEventMgr_NextConnectClientAttempt(socketElt);
         if (!result)
@@ -723,6 +726,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
                               socketElt->connectionId, // endpoint description config index
                               (uintptr_t) NULL, socketIdx);
             // Definitively close the socket
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(socketIdx);
         }
 
@@ -742,7 +746,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             socketElt->curConnectAttemptAddr = NULL;
             socketElt->nextConnectAttemptAddr = NULL;
         }
-        SOPC_SocketsInternalEventMgr_LogConnection(socketElt);
+
+        SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Connected to");
 
         // Notify connection
         SOPC_Sockets_Emit(SOCKET_CONNECTION,
@@ -764,6 +769,8 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
             SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, socketIdx);
         }
 
+        SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
+
         SOPC_SocketsInternalContext_CloseSocket(socketIdx);
 
         break;
@@ -776,6 +783,7 @@ void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent eve
         if (status != SOPC_STATUS_OK)
         {
             SOPC_Sockets_Emit(SOCKET_FAILURE, socketElt->connectionId, (uintptr_t) NULL, socketIdx);
+            SOPC_SocketsInternalEventMgr_LogSocketEvent(socketElt, "Closed connection on");
             SOPC_SocketsInternalContext_CloseSocket(socketIdx);
         }
 
