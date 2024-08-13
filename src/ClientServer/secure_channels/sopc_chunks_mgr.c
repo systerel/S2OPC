@@ -615,7 +615,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         }
         else
         { // if decoded thumbprint
-            *errorStatus = OpcUa_BadTcpInternalError;
+            *errorStatus = OpcUa_BadSecurityChecksFailed;
 
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr (asym cert): receiver thumbprint decoding error (epCfgIdx=%" PRIu32
@@ -1062,7 +1062,11 @@ static bool SC_Chunks_CheckSymmetricSecurityHeader(SOPC_SecureConnection* scConn
     else
     {
         result = false;
-        *errorStatus = OpcUa_BadTcpInternalError;
+        *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ChunksMgr: token id decoding error (epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32 ")",
+                               scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -1127,7 +1131,11 @@ static bool SC_Chunks_CheckSequenceHeaderSN(SOPC_SecureConnection* scConnection,
     else
     {
         result = false;
-        *errorStatus = OpcUa_BadTcpInternalError;
+        *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ChunksMgr: sequence number decoding error (epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32 ")",
+                               scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
     }
 
     return result;
@@ -1159,7 +1167,11 @@ static bool SC_Chunks_CheckSequenceHeaderRequestId(
     if (!result)
     {
         result = false;
-        *errorStatus = OpcUa_BadTcpInternalError;
+        *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ChunksMgr: request id decoding error (epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32 ")",
+                               scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
     }
 
     // (In case of multi-chunk message) Check it is the same requestId than previous chunks
@@ -1809,7 +1821,12 @@ bool SC_Chunks_TreatTcpPayload(SOPC_SecureConnection* scConnection,
         if (SOPC_STATUS_OK != retStatus)
         {
             result = false;
-            *errorStatus = OpcUa_BadDecodingError;
+            *errorStatus = OpcUa_BadSecurityChecksFailed;
+
+            SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                                   "ChunksMgr (message header): secure channel id decoding error (epCfgIdx=%" PRIu32
+                                   " scCfgIdx=%" PRIu32 ")",
+                                   scConnection->serverEndpointConfigIdx, scConnection->secureChannelConfigIdx);
         }
     }
 
