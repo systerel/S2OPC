@@ -99,6 +99,12 @@ SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          uintptr_t params,
                                          uintptr_t auxParam);
 
+/* \brief Return the current pending number of events in queue
+ * \param handler   the event handler
+ *
+ * \return the current pending number of events in queue */
+uint32_t SOPC_EventHandler_Get_QueueSize(SOPC_EventHandler* handler);
+
 /**
  * \brief Posts an event to the front of the event handler's message queue
  *

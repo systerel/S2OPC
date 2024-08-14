@@ -90,6 +90,22 @@ SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queu
     return status;
 }
 
+uint32_t SOPC_AsyncQueue_GetSize(SOPC_AsyncQueue* queue)
+{
+    uint32_t result = 0;
+    if (NULL == queue)
+    {
+        return result;
+    }
+    SOPC_ReturnStatus status = SOPC_Mutex_Lock(&queue->queueMutex);
+    if (SOPC_STATUS_OK == status)
+    {
+        result = SOPC_SLinkedList_GetLength(queue->queueList);
+        SOPC_Mutex_Unlock(&queue->queueMutex);
+    }
+    return result;
+}
+
 static SOPC_ReturnStatus SOPC_AsyncQueue_BlockingEnqueueFirstOrLast(SOPC_AsyncQueue* queue,
                                                                     void* element,
                                                                     bool firstOut)

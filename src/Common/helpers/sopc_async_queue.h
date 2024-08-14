@@ -26,6 +26,8 @@
 #ifndef SOPC_ASYNC_QUEUE_H_
 #define SOPC_ASYNC_QUEUE_H_
 
+#include <stdint.h>
+
 #include "sopc_enums.h"
 
 typedef struct SOPC_AsyncQueue SOPC_AsyncQueue;
@@ -40,6 +42,12 @@ typedef struct SOPC_AsyncQueue SOPC_AsyncQueue;
  * SOPC_STATUS_INVALID_PARAMETERS otherwise
  */
 SOPC_ReturnStatus SOPC_AsyncQueue_Init(SOPC_AsyncQueue** queue, const char* queueName);
+
+/**
+ *  \brief          Provide the number of currently pending elements in the queue
+ *  \return         The number of currently pending elements in the queue, or 0 in case of invalid parameters.
+ */
+uint32_t SOPC_AsyncQueue_GetSize(SOPC_AsyncQueue* queue);
 
 /**
  *  \brief          Add a new element (and allocate new queue element) to the head of the given linked queue.

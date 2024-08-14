@@ -42,6 +42,7 @@
 #include <string.h>
 
 #include "libs2opc_common_config.h"
+#include "libs2opc_common_monitoring.h"
 #include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_config.h"
@@ -158,6 +159,7 @@ static int cmd_demo_date(WordList* pList);
 static int cmd_demo_read(WordList* pList);
 static int cmd_demo_cache(WordList* pList);
 static int cmd_demo_quit(WordList* pList);
+static int cmd_demo_queue(WordList* pList);
 
 /** Configuration of a command line */
 typedef struct
@@ -167,18 +169,20 @@ typedef struct
     const char* description;
 } CLI_config_t;
 
-static const CLI_config_t CLI_config[] = {{"help", cmd_demo_help, "Display help"},
-                                          {"quit", cmd_demo_quit, "Quit demo"},
-                                          {"info", cmd_demo_info, "Show demo info"},
-                                          {"dbg", cmd_demo_dbg, "Show target debug info"},
-                                          {"log", cmd_demo_log, "Set log level"},
-                                          {"read", cmd_demo_read, "Print content of  <NodeId>"},
-                                          {"date", cmd_demo_date, "Print date"},
-                                          {"write", cmd_demo_write, "Write value to server"},
-                                          {"pub", cmd_demo_pub, "Manage Publisher"},
-                                          {"sub", cmd_demo_sub, "Manage Subscriber"},
-                                          {"cache", cmd_demo_cache, "Print content of cache"},
-                                          {NULL, NULL, NULL}};
+static const CLI_config_t CLI_config[] = {
+    {"help", cmd_demo_help, "Display help"},
+    {"quit", cmd_demo_quit, "Quit demo"},
+    {"info", cmd_demo_info, "Show demo info"},
+    {"dbg", cmd_demo_dbg, "Show target debug info"},
+    {"log", cmd_demo_log, "Set log level"},
+    {"read", cmd_demo_read, "Print content of  <NodeId>"},
+    {"date", cmd_demo_date, "Print date"},
+    {"write", cmd_demo_write, "Write value to server"},
+    {"pub", cmd_demo_pub, "Manage Publisher"},
+    {"sub", cmd_demo_sub, "Manage Subscriber"},
+    {"cache", cmd_demo_cache, "Print content of cache"},
+    {"queues", cmd_demo_queue, "Show S2OPC queues status [<Prepend Nb requests>]"},
+    {NULL, NULL, NULL}};
 
 #define NB_MAX_SUB_WRITERS 10
 
@@ -1280,6 +1284,42 @@ static int cmd_demo_cache(WordList* pList)
     SOPC_UNUSED_ARG(pList);
 
     Cache_Dump();
+    return 0;
+}
+
+/***************************************************/
+static int cmd_demo_queue(WordList* pList)
+{
+    SOPC_UNUSED_ARG(pList);
+    unsigned int nbAsynchReq = 100u;
+    const char* param1Str = CLI_GetNextWord(pList);
+
+    if (NULL != param1Str && param1Str[0] != 0)
+    {
+        nbAsynchReq = (unsigned int) atoi(param1Str);
+    }
+
+    SOPC_CommonMonitoring_QueueSize res;
+
+    PRINT("Creating %u Asynch requests...\n", nbAsynchReq);
+    // To make the test relevant, force some internal requests
+    for (size_t iReq = 0; iReq < nbAsynchReq; iReq++)
+    {
+        OpcUa_ReadRequest* request = SOPC_ReadRequest_Create(2, OpcUa_TimestampsToReturn_Source);
+        SOPC_ASSERT(request != NULL);
+        SOPC_ReadRequest_SetReadValueFromStrings(request, 0, "ns=1;s=SubUInt32", SOPC_AttributeId_Value, NULL);
+        SOPC_ReadRequest_SetReadValueFromStrings(request, 1, "ns=1;s=PubUInt32", SOPC_AttributeId_Value, NULL);
+        SOPC_ServerHelper_LocalServiceAsync(request, ASYNCH_CONTEXT_PARAM);
+    }
+
+    PRINT("Pending elements in queues:\n");
+    res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_Services);
+    PRINT(" - 'Service'         : %5" PRIu32 "\n", res);
+    res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_SecuredChannels);
+    PRINT(" - 'SecuredChannels' : %5" PRIu32 "\n", res);
+    res = SOPC_CommonMonitoring_GetQueueSize(SOPC_CommonMonitoring_QueueType_Sockets);
+    PRINT(" - 'Sockets'         : %5" PRIu32 "\n", res);
+
     return 0;
 }
 

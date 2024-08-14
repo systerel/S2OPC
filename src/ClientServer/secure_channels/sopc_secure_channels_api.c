@@ -223,6 +223,19 @@ void SOPC_SecureChannels_EnqueueInternalEventAsNext(SOPC_SecureChannels_Internal
     SOPC_EventHandler_PostAsNext(secureChannelsInternalEventHandler, (int32_t) event, id, params, auxParam);
 }
 
+uint32_t SOPC_SecureChannels_Get_QueueSize(void)
+{
+    return SOPC_EventHandler_Get_QueueSize(secureChannelsEventHandler) +
+           SOPC_EventHandler_Get_QueueSize(secureChannelsInternalEventHandler);
+
+    /*
+        return SOPC_EventHandler_Get_QueueSize(secureChannelsInputEventHandler) +
+                SOPC_EventHandler_Get_QueueSize(secureChannelsInternalEventHandler) +
+                SOPC_EventHandler_Get_QueueSize(secureChannelsSocketsEventHandler) +
+                SOPC_EventHandler_Get_QueueSize(secureChannelsTimerEventHandler) +
+                SOPC_EventHandler_Get_QueueSize(secureChannelsEventHandler);*/
+}
+
 void SOPC_SecureChannels_Initialize(SOPC_SetListenerFunc* setSocketsListener)
 {
     SOPC_SecureChannelsInternalContext_Initialize(setSocketsListener);

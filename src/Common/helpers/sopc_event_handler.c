@@ -133,6 +133,11 @@ SOPC_EventHandler* SOPC_EventHandler_Create(SOPC_Looper* looper, SOPC_EventHandl
     return handler;
 }
 
+uint32_t SOPC_EventHandler_Get_QueueSize(SOPC_EventHandler* handler)
+{
+    return (NULL == handler ? 0 : SOPC_AsyncQueue_GetSize(handler->looper->queue));
+}
+
 SOPC_ReturnStatus SOPC_EventHandler_Post(SOPC_EventHandler* handler,
                                          int32_t event,
                                          uint32_t eltId,

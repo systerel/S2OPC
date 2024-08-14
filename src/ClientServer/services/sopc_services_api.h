@@ -175,6 +175,9 @@ typedef enum SOPC_Services_Event
 /* API to enqueue an event for services */
 void SOPC_Services_EnqueueEvent(SOPC_Services_Event seEvent, uint32_t id, uintptr_t params, uintptr_t auxParam);
 
+/** \brief Return the current pending number of events in Service queue */
+uint32_t SOPC_Services_Get_QueueSize(void);
+
 /**
  *  \brief Initializes the services and application event dispatcher threads
  */

@@ -77,6 +77,7 @@ endif()
 
 set(S2OPC_WRAPPERS_SRC
     "${COMMONWRAPPER_PATH}/libs2opc_common_config.c"
+    "${COMMONWRAPPER_PATH}/libs2opc_common_monitoring.c"
     "${HELPERWRAPPER_PATH}/libs2opc_request_builder.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client.c"
     "${CLIENTWRAPPER_PATH}/libs2opc_client_config.c"

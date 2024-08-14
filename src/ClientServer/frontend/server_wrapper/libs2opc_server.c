@@ -22,6 +22,7 @@
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_common_internal.h"
+#include "libs2opc_request_builder.h"
 #include "libs2opc_server.h"
 #include "libs2opc_server_internal.h"
 
