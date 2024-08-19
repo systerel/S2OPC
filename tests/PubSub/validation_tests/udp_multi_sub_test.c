@@ -26,7 +26,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_udp_sockets.h"
 
 #define MCAST_PORT "4840"

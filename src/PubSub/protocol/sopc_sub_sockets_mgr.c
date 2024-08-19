@@ -25,7 +25,7 @@
 #include "sopc_macros.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
 // Default time for socket set timeout if no timeout event is provided
 #define DEFAULT_SOCKET_SET_TIMEOUT_MS 500

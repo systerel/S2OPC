@@ -30,6 +30,7 @@
 #include "sopc_address_space_utils_internal.h"
 #include "sopc_array.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_dict.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_encoder.h"
@@ -40,7 +41,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_singly_linked_list.h"
-#include "sopc_time.h"
 
 typedef enum
 {

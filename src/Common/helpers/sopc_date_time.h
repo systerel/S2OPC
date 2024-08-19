@@ -20,8 +20,6 @@
 #ifndef SOPC_TIME_H_
 #define SOPC_TIME_H_
 
-#include "sopc_time_reference.h"
-
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stddef.h>

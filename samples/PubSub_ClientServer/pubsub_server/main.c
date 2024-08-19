@@ -24,12 +24,12 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_uri.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
-#include "sopc_time.h"
 
 #include "libs2opc_common_config.h"
 

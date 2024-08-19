@@ -17,25 +17,40 @@
  * under the License.
  */
 
-#include "p_sopc_time.h"
-#include "sopc_date_time.h"
-#include "time.h"
+/** \file sopc_askpass.c
+ *
+ * \brief A platform independent API to handle SOPC_TimeReference
+ */
 
-/* This implementation is not POSIX compliant.
- * This time functions return seconds since the Epoch plus UTC offset from building machine.
- * This function is only used to verify x509 certificate date validity. Accordingly to mbedtls 2.28.1 documentation
- * it is is not necessary to have a precise clock only the date is usefull for this verification */
-time_t time(time_t* result)
+#include "sopc_time_reference.h"
+
+SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)
 {
-    time_t t = -1;
-    SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(SOPC_Time_GetCurrentTimeUTC(), &t);
-    if (SOPC_STATUS_OK != status)
+    SOPC_TimeReference result = 0;
+
+    if (UINT64_MAX - timeRef > ms)
     {
-        t = -1;
+        result = timeRef + ms;
     }
-    if (NULL != result)
+    else
     {
-        *result = t;
+        // Set maximum representable value
+        result = UINT64_MAX;
     }
-    return t;
+
+    return result;
+}
+
+int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right)
+{
+    int8_t result = 0;
+    if (left < right)
+    {
+        result = -1;
+    }
+    else if (left > right)
+    {
+        result = 1;
+    }
+    return result;
 }

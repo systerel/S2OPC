@@ -32,6 +32,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
+#include "sopc_time_reference.h"
 
 typedef struct SOPC_EventTimer
 {

@@ -26,7 +26,6 @@
 #include "sopc_logger.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_sk_builder.h"
-#include "sopc_time.h"
 
 /*** DEFAULT IMPLEMENTATION FUNCTIONS ***/
 

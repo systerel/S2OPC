@@ -25,10 +25,10 @@
 #include "sopc_array.h"
 #include "sopc_assert.h"
 #include "sopc_common_constants.h"
+#include "sopc_date_time.h"
 #include "sopc_filesystem.h"
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
 
 static const char* traceName = "Trace";
 static char* filePath = NULL;

@@ -24,7 +24,6 @@
 
 #include "sopc_assert.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 // Sleep timeout in milliseconds
 static const uint32_t sleepTimeout = 10;

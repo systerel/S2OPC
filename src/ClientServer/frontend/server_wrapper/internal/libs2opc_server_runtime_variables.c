@@ -32,7 +32,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config_constants.h"
-#include "sopc_time.h"
 #include "sopc_types.h"
 
 static SOPC_Unix_Time parse_build_date(const char* build_date)

@@ -26,8 +26,8 @@
 
 #include "msg_read_response_bs.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
 #include "sopc_types.h"
 #include "util_b2c.h"
 

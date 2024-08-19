@@ -29,7 +29,7 @@
 #include "sopc_key_sets.h"
 #include "sopc_secret_buffer.h"
 #include "sopc_singly_linked_list.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"
 

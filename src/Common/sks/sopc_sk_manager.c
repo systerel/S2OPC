@@ -25,7 +25,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_sk_manager.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
 /*** DEFAULT IMPLEMENTATION FUNCTIONS ***/
 

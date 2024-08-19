@@ -36,7 +36,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_time.h" /* SOPC_Sleep */
 #include "string.h"
 
 #include "libs2opc_client_cmds.h"

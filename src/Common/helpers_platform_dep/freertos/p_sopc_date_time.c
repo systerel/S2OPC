@@ -19,7 +19,7 @@
 
 #include "p_sopc_common_time.h"
 #include "sopc_date_time.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
 #include "FreeRTOS.h"
 
@@ -65,7 +65,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
     }
 
     currentTimeT = (time_t) currentTimeInS;
-    status = SOPC_Time_FromTimeT(currentTimeT, &datetime);
+    status = SOPC_Time_FromUnixTime(currentTimeT, &datetime);
     if (SOPC_STATUS_OK != status)
     {
         // Time overflow...

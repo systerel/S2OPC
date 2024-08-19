@@ -67,7 +67,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_time.h"
 
 #define MAIN_STACK_SIZE ((unsigned short) 2048)
 

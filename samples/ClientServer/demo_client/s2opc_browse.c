@@ -23,8 +23,8 @@
 
 #include "sopc_builtintypes.h"
 #include "sopc_common.h"
+#include "sopc_date_time.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"

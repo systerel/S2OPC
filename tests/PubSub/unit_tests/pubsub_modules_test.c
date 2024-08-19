@@ -39,7 +39,7 @@
 #include "sopc_pub_source_variable.h"
 #include "sopc_reader_layer.h"
 #include "sopc_sub_target_variable.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_types.h"
 
 /* COMMON DATA */

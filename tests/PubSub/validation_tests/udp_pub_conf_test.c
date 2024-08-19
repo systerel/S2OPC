@@ -29,7 +29,6 @@
 #include "sopc_network_layer.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 #include "sopc_udp_sockets.h"
 
 #define MCAST_PORT "4840"

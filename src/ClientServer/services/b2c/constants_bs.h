@@ -41,7 +41,7 @@
 #include "sopc_builtintypes.h"
 #include "sopc_services_api_internal.h"
 #include "sopc_singly_linked_list.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"

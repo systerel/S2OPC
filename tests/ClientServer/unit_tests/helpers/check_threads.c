@@ -36,7 +36,7 @@
 #include "sopc_mutexes.h"
 
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
 static SOPC_Mutex gmutex;
 static SOPC_Condition gcond;

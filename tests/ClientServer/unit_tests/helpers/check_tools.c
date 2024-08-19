@@ -48,7 +48,7 @@
 #include "sopc_random.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_toolkit_config_constants.h"
 
 #define NODEID_NS 58942

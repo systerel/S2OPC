@@ -23,9 +23,9 @@
 #include <unistd.h>
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 // 10^9
 #define SOPC_SECOND_TO_NANOSECONDS 1000000000

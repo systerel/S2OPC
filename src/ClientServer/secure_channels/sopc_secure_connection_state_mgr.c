@@ -43,7 +43,6 @@
 #include "sopc_secure_channels_internal_ctx.h"
 #include "sopc_singly_linked_list.h"
 #include "sopc_sockets_api.h"
-#include "sopc_time.h"
 #include "sopc_toolkit_config_internal.h"
 
 bool SC_InitNewConnection(uint32_t* newConnectionIdx)

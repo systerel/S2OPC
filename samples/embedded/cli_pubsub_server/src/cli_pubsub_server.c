@@ -53,6 +53,7 @@
 #include "sopc_atomic.h"
 #include "sopc_common_build_info.h"
 #include "sopc_crypto_profiles_lib_itf.h"
+#include "sopc_date_time.h"
 #include "sopc_encodeabletype.h"
 #include "sopc_helper_string.h"
 #include "sopc_logger.h"
@@ -64,7 +65,7 @@
 #include "sopc_sk_manager.h"
 #include "sopc_sub_scheduler.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 
 // project includes
 #include "cache.h"

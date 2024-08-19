@@ -46,7 +46,6 @@
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pki_struct_lib_internal.h"
-#include "sopc_time.h"
 
 #include "key_manager_cyclone.h"
 

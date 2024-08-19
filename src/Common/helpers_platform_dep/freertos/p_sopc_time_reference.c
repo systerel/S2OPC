@@ -20,6 +20,7 @@
 /* s2opc includes */
 #include "p_sopc_common_time.h"
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_time_reference.h"

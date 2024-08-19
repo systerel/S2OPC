@@ -31,7 +31,7 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_constants.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_types.h"
 
 /* MQTT connection hard coded configuration */

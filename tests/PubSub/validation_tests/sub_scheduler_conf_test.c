@@ -27,7 +27,6 @@
 #include "sopc_sub_scheduler.h"
 #include "sopc_sub_target_variable.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 #include "sopc_xml_loader.h"
 
 static int32_t stop = 0;

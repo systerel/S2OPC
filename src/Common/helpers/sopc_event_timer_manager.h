@@ -30,8 +30,8 @@
 #ifndef SOPC_EVENT_TIMER_MANAGER_H_
 #define SOPC_EVENT_TIMER_MANAGER_H_
 
+#include "sopc_date_time.h"
 #include "sopc_event_handler.h"
-#include "sopc_time.h"
 
 /**
  * Maximum resolution time for the event timers evaluation

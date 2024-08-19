@@ -29,12 +29,12 @@
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
+#include "sopc_date_time.h"
 #include "sopc_event_timer_manager.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 static struct
 {

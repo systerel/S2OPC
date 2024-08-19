@@ -34,7 +34,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 #include "libs2opc_common_config.h"
 #include "libs2opc_request_builder.h"

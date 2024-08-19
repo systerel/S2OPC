@@ -43,7 +43,7 @@ typedef uint32_t SOPC_StatusCode;
 
 #include "sopc_enums.h"
 //#include "sopc_builtintypes.h"  // includes stdio
-//#include "sopc_time.h"  // includes <times.h>
+//#include "sopc_date_time.h"  // includes <times.h>
 //#include "sopc_log_manager.h"  // uses var_args
 //#include "sopc_types.h"  // includes stdio
 //#include "sopc_mem_alloc.h"  // includes stdio

@@ -25,11 +25,11 @@
 #include "p_sopc_time.h"
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_platform_time.h"
-#include "sopc_time.h"
 
 #define SECOND_TO_100NS 10000000
 #define MS_TO_NS 1000000

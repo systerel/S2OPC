@@ -26,7 +26,6 @@
 #include "sopc_date_time.h"
 #include "sopc_dict.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_time.h"
 #include "sopc_types.h"
 
 #define ELEMENT_ATTRIBUTE_INITIALIZE_CASE(val, field, extra) \

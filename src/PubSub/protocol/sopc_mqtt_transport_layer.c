@@ -17,8 +17,10 @@
  * under the License.
  */
 
-#include "sopc_mqtt_transport_layer.h"
+#include <inttypes.h>
+
 #include "sopc_macros.h"
+#include "sopc_mqtt_transport_layer.h"
 
 #ifndef USE_MQTT_PAHO
 #define USE_MQTT_PAHO 0

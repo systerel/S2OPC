@@ -40,7 +40,6 @@
 #include "sopc_assert.h"
 #include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
-#include "sopc_time.h"
 
 #include "p_sopc_zephyr_time.h"
 

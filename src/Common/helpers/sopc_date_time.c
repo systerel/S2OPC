@@ -23,10 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "sopc_time.h"
+#include "sopc_date_time.h"
 
 #include "sopc_assert.h"
-#include "sopc_date_time.h"
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
@@ -97,37 +96,6 @@ char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact)
 char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact)
 {
     return get_current_time_string(false, compact);
-}
-
-SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)
-{
-    SOPC_TimeReference result = 0;
-
-    if (UINT64_MAX - timeRef > ms)
-    {
-        result = timeRef + ms;
-    }
-    else
-    {
-        // Set maximum representable value
-        result = UINT64_MAX;
-    }
-
-    return result;
-}
-
-int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right)
-{
-    int8_t result = 0;
-    if (left < right)
-    {
-        result = -1;
-    }
-    else if (left > right)
-    {
-        result = 1;
-    }
-    return result;
 }
 
 SOPC_ReturnStatus SOPC_Time_FromUnixTime(SOPC_Unix_Time time, SOPC_DateTime* res)

@@ -42,7 +42,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_pki_stack.h"
 #include "sopc_secure_channels_api.h"
-#include "sopc_time.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_types.h"

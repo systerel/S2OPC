@@ -24,7 +24,6 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 typedef HRESULT(WINAPI* pSetThreadDescription)(HANDLE, PCWSTR);
 

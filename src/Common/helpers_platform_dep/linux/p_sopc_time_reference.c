@@ -137,7 +137,7 @@ bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != t);
     int res = clock_gettime(CLOCK_MONOTONIC, &t->tp);
-    SOPC_ASSERT(-1 != res);   // Note: cann log any error here, because Log feature uses timestamping.
+    SOPC_ASSERT(-1 != res); // Note: cannot log any error here, because Log feature uses timestamping.
     return true;
 }
 

@@ -18,7 +18,6 @@
  */
 
 #include "sopc_date_time.h"
-#include "sopc_time.h"
 
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
 {

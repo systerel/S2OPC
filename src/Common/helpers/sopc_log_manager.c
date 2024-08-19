@@ -27,10 +27,10 @@
 #include "sopc_assert.h"
 #include "sopc_circular_log_file.h"
 #include "sopc_common_constants.h"
+#include "sopc_date_time.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_time.h"
 
 // Keep 100 bytes to print log file change
 #define RESERVED_BYTES_PRINT_FILE_CHANGE 100

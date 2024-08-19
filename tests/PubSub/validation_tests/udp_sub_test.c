@@ -24,6 +24,7 @@
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
 #include "sopc_dataset_ll_layer.h"
+#include "sopc_date_time.h"
 #include "sopc_helper_endianness_cfg.h"
 #include "sopc_logger.h"
 #include "sopc_macros.h"
@@ -31,7 +32,7 @@
 #include "sopc_reader_layer.h"
 #include "sopc_sub_sockets_mgr.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
+#include "sopc_time_reference.h"
 #include "sopc_udp_sockets.h"
 
 #define MCAST_PORT "4840"

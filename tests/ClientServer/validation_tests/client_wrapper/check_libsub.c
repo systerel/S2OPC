@@ -39,7 +39,7 @@
 #include "sopc_log_manager.h"
 #include "sopc_macros.h"
 #include "sopc_threads.h"
-#include "sopc_time.h" /* SOPC_Sleep, SOPC_TimeReference */
+#include "sopc_time_reference.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_types.h"
 #include "sopc_user_app_itf.h"

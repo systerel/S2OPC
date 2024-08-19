@@ -33,7 +33,6 @@
 #include "sopc_ieee_check.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_secure_channels_api.h"
-#include "sopc_time.h"
 #include "stub_sc_sopc_sockets_api.h"
 
 SOPC_EventRecorder* servicesEvents = NULL;

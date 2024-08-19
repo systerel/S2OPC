@@ -24,7 +24,7 @@
 #include "time_reference_bs.h"
 
 #include "sopc_assert.h"
-#include "sopc_time.h"
+#include "sopc_date_time.h"
 
 /*------------------------
    INITIALISATION Clause
