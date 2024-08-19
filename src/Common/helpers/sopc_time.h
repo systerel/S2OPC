@@ -36,6 +36,16 @@
 typedef time_t SOPC_Unix_Time;
 
 /**
+ * \brief return the current time in DateTime format which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
+ *
+ * Note: since the clock is not monotonic, it should not be used to measure elapsed time
+ *
+ * \return the current time in DateTime format
+ *
+ */
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
+
+/**
  * \brief returns a C string representation of the given time in DateTime format
  * E.g.:
  * - compact == false: "2018/01/30 13:15:52.694\0"
@@ -44,6 +54,7 @@ typedef time_t SOPC_Unix_Time;
  * \param time     time value in DataTime format, which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
  * \param local    provides local time if set, UTC time otherwise
  * \param compact  provides compact version when flag is set
+ * \return         A new allocated representation of time. Must be freed by caller with \p SOPC_Free
  *
  */
 char* SOPC_Time_GetString(SOPC_DateTime time, bool local, bool compact);
@@ -71,28 +82,24 @@ char* SOPC_Time_GetStringOfCurrentLocalTime(bool compact);
 char* SOPC_Time_GetStringOfCurrentTimeUTC(bool compact);
 
 /**
- * \brief return the time reference corresponding to the given time reference incremented by the given duration in
- * milliseconds
+ * \brief Breaks down a timestamp to its structured representation in local time.
  *
- * \param timeRef the time reference to be incremented
- * \param ms      the duration in milliseconds to use for increment
+ * \param t   the timestamp.
+ * \param tm  the structured representation of the timestamp in local time.
  *
- * \return the new time reference incremented by the given duration or with the maximum value in case of overflow
- *         or NULL incase timerRef == NULL or new memory allocation failed
- *
+ * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
  */
-SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms);
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm);
 
 /**
- * \brief return the comparison of given time references
+ * \brief Breaks down a timestamp to its structured representation in UTC time.
  *
- * \param left  the left time reference operand (NULL pointer considered less than any other value)
- * \param right the right time reference operand (NULL pointer considered less than any other value)
+ * \param t   the timestamp.
+ * \param tm  the structured representation of the timestamp in UTC time.
  *
- * \return -1 if \p left < \p right operand, 0 if \p left = \p right and 1 if \p left > right
- *
+ * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
  */
-int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right);
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm);
 
 /**
  * \brief Converts a UNIX timestamp to a time expressed in 100ns slices since

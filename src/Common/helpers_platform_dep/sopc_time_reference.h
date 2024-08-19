@@ -46,11 +46,16 @@
 #include <stdint.h>
 
 /**
- * Time reference type (milliseconds)
+ * Provides a reference point in time (in milliseconds). This representation is only
+ * relevant when comparing two objects. It is mainly used to measure time intervals.
  */
 typedef uint64_t SOPC_TimeReference;
 
-/** Time reference sub-millisecond resolution */
+/** SOPC_TimeReference
+ * Provides a high resolution reference point in time. This representation is only
+ * relevant when comparing two objects. It is mainly used to measure time intervals. The granularity depends on OS
+ * specific capabilities.
+ * \note Each platform must provide the implementation of SOPC_HighRes_TimeReference and all related functions. */
 typedef struct SOPC_HighRes_TimeReference SOPC_HighRes_TimeReference;
 
 /**
@@ -62,6 +67,30 @@ typedef struct SOPC_HighRes_TimeReference SOPC_HighRes_TimeReference;
  *
  */
 SOPC_TimeReference SOPC_TimeReference_GetCurrent(void);
+
+/**
+ * \brief return the time reference corresponding to the given time reference incremented by the given duration in
+ * milliseconds
+ *
+ * \param timeRef the time reference to be incremented
+ * \param ms      the duration in milliseconds to use for increment
+ *
+ * \return the new time reference incremented by the given duration or with the maximum value in case of overflow
+ *         or NULL incase timerRef == NULL or new memory allocation failed
+ *
+ */
+SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms);
+
+/**
+ * \brief return the comparison of given time references
+ *
+ * \param left  the left time reference operand (NULL pointer considered less than any other value)
+ * \param right the right time reference operand (NULL pointer considered less than any other value)
+ *
+ * \return -1 if \p left < \p right operand, 0 if \p left = \p right and 1 if \p left > right
+ *
+ */
+int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right);
 
 /**
  * \brief Store the current time in t.

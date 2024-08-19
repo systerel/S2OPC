@@ -135,17 +135,9 @@ bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_
 
 bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
-    if (NULL == t)
-    {
-        return false;
-    }
+    SOPC_ASSERT(NULL != t);
     int res = clock_gettime(CLOCK_MONOTONIC, &t->tp);
-    if (-1 == res)
-    {
-        /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_gettime failed: %d (%s)", errno, strerror(errno));
-        return false;
-    }
+    SOPC_ASSERT(-1 != res);   // Note: cann log any error here, because Log feature uses timestamping.
     return true;
 }
 

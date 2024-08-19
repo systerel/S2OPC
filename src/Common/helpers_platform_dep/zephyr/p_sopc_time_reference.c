@@ -162,6 +162,39 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent()
 }
 
 /***************************************************/
+SOPC_TimeReference SOPC_TimeReference_AddMilliseconds(SOPC_TimeReference timeRef, uint64_t ms)
+{
+    SOPC_TimeReference result = 0;
+
+    if (UINT64_MAX - timeRef > ms)
+    {
+        result = timeRef + ms;
+    }
+    else
+    {
+        // Set maximum representable value
+        result = UINT64_MAX;
+    }
+
+    return result;
+}
+
+/***************************************************/
+int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference right)
+{
+    int8_t result = 0;
+    if (left < right)
+    {
+        result = -1;
+    }
+    else if (left > right)
+    {
+        result = 1;
+    }
+    return result;
+}
+
+/***************************************************/
 bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
     SOPC_ASSERT(NULL != t);
