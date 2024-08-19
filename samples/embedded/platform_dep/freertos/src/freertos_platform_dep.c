@@ -296,7 +296,7 @@ void SOPC_Platform_Target_Debug(const char* param)
 time_t sopc_time_alt(time_t* timer)
 {
     time_t t;
-    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(SOPC_Time_GetCurrentTimeUTC(), &t);
+    SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(SOPC_Time_GetCurrentTimeUTC(), &t);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     if (NULL != timer)
     {

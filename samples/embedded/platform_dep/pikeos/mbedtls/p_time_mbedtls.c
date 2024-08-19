@@ -28,7 +28,7 @@
 time_t time(time_t* result)
 {
     time_t t = -1;
-    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(SOPC_Time_GetCurrentTimeUTC(), &t);
+    SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(SOPC_Time_GetCurrentTimeUTC(), &t);
     if (SOPC_STATUS_OK != status)
     {
         t = -1;

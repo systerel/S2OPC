@@ -839,7 +839,7 @@ time_t getCurrentUnixTime(void)
     SOPC_DateTime dateTime = SOPC_Time_GetCurrentTimeUTC();
 
     // Convert it to the type time_t
-    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(dateTime, &res);
+    SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(dateTime, &res);
 
     if (SOPC_STATUS_OK == status)
     {

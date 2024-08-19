@@ -32,9 +32,10 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_toolkit_async_api.h"
 #include "sopc_toolkit_config_constants.h"
+#include "sopc_time.h"
 #include "sopc_types.h"
 
-static time_t parse_build_date(const char* build_date)
+static SOPC_Unix_Time parse_build_date(const char* build_date)
 {
     struct tm time;
     memset(&time, 0, sizeof(struct tm));
@@ -71,7 +72,7 @@ static time_t parse_build_date(const char* build_date)
     time.tm_year -= 1900;
     time.tm_mon--;
 
-    return mktime(&time);
+    return (SOPC_Unix_Time)(mktime(&time));
 }
 
 SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Build_Info build_info,
@@ -111,9 +112,9 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
                                            build_info.clientServerBuildInfo.buildSrcCommit);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    time_t buildDateAsTimet = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);
+    SOPC_Unix_Time buildDateAsTimet = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);
     SOPC_DateTime buildDate;
-    status = SOPC_Time_FromTimeT(buildDateAsTimet, &buildDate);
+    status = SOPC_Time_FromUnixTime(buildDateAsTimet, &buildDate);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     runtimeVariables.build_info.BuildDate = buildDate;

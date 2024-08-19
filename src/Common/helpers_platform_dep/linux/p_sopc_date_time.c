@@ -20,7 +20,7 @@
 #include "sopc_date_time.h"
 #include "sopc_time.h"
 
-int64_t SOPC_Time_GetCurrentTimeUTC(void)
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
 {
     struct timespec currentTime;
     int64_t dt = 0;
@@ -38,7 +38,7 @@ int64_t SOPC_Time_GetCurrentTimeUTC(void)
 
     int64_t ns100 = currentTime.tv_nsec / 100;
 
-    if ((SOPC_Time_FromTimeT(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
+    if ((SOPC_Time_FromUnixTime(currentTime.tv_sec, &dt) != SOPC_STATUS_OK) || (INT64_MAX - ns100 < dt))
     {
         // Time overflow...
         return INT64_MAX;
@@ -49,12 +49,12 @@ int64_t SOPC_Time_GetCurrentTimeUTC(void)
     return dt;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm)
 {
     return (localtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm)
 {
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }

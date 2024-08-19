@@ -26,10 +26,9 @@
 #ifndef SOPC_DATE_TIME_H_
 #define SOPC_DATE_TIME_H_
 
-#include <time.h>
-
 #include "sopc_builtintypes.h"
 #include "sopc_enums.h"
+#include "sopc_time.h"
 
 /**
  * \brief return the current time in DateTime format which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
@@ -49,7 +48,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void);
  *
  * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
  */
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm);
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm);
 
 /**
  * \brief Breaks down a timestamp to its structured representation in UTC time.
@@ -59,6 +58,6 @@ SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm);
  *
  * \return \ref SOPC_STATUS_OK in case of success, \ref SOPC_STATUS_NOK in case of error.
  */
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm);
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm);
 
 #endif // SOPC_DATE_TIME_H_

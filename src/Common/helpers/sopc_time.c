@@ -30,10 +30,10 @@
 #include "sopc_helper_string.h"
 #include "sopc_mem_alloc.h"
 
-static const int64_t SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
-static const int64_t SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
+static const SOPC_DateTime SOPC_SECONDS_BETWEEN_EPOCHS = 11644473600;
+static const SOPC_DateTime SOPC_SECOND_TO_100_NANOSECONDS = 10000000; // 10^7
 
-char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
+char* SOPC_Time_GetString(SOPC_DateTime time, bool local, bool compact)
 {
     static const size_t buf_size = 24;
 
@@ -43,7 +43,7 @@ char* SOPC_Time_GetString(int64_t time, bool local, bool compact)
     }
 
     time_t seconds = 0;
-    SOPC_ReturnStatus status = SOPC_Time_ToTimeT(time, &seconds);
+    SOPC_ReturnStatus status = SOPC_Time_ToUnixTime(time, &seconds);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     uint32_t milliseconds = (uint32_t)((time / 10000) % 1000);
@@ -130,7 +130,7 @@ int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference ri
     return result;
 }
 
-SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res)
+SOPC_ReturnStatus SOPC_Time_FromUnixTime(SOPC_Unix_Time time, SOPC_DateTime* res)
 {
     SOPC_ASSERT(time >= 0);
 
@@ -160,9 +160,9 @@ SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res)
     return SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dateTime, time_t* res)
+SOPC_ReturnStatus SOPC_Time_ToUnixTime(SOPC_DateTime dt, SOPC_Unix_Time* res)
 {
-    int64_t secs = dateTime / SOPC_SECOND_TO_100_NANOSECONDS;
+    int64_t secs = dt / SOPC_SECOND_TO_100_NANOSECONDS;
 
     if (secs < SOPC_SECONDS_BETWEEN_EPOCHS)
     {
@@ -176,9 +176,9 @@ SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dateTime, time_t* res)
         return SOPC_STATUS_NOK;
     }
 
-    if (secs == (int64_t)(time_t) secs)
+    if (secs == (int64_t)(SOPC_Unix_Time) secs)
     {
-        *res = (time_t) secs;
+        *res = (SOPC_Unix_Time) secs;
         return SOPC_STATUS_OK;
     }
     else

@@ -23,7 +23,7 @@
 #include "sopc_date_time.h"
 
 /***************************************************/
-int64_t SOPC_Time_GetCurrentTimeUTC(void)
+SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
 {
     int64_t result = 0;
     FILETIME fileCurrentTime;
@@ -46,13 +46,13 @@ int64_t SOPC_Time_GetCurrentTimeUTC(void)
 }
 
 /***************************************************/
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm)
 {
     return (localtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 /***************************************************/
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm)
 {
     return (gmtime_s(tm, &t) == 0) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }

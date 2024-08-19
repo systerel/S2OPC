@@ -26,7 +26,7 @@
 /* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
  * There are configTICK_RATE_HZ per second.
  */
-uint64_t P_SOPC_COMMON_TIME_get_tick(void);
+SOPC_Unix_Time P_SOPC_COMMON_TIME_get_tick(void);
 
 /* Appy an offset in second to internal reference
  */

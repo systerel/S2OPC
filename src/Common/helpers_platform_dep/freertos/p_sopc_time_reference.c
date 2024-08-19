@@ -43,7 +43,7 @@ struct SOPC_HighRes_TimeReference
 SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 {
     uint64_t currentTimeInMs = 0;
-    uint64_t wTimeInTicks = 0;
+    SOPC_Unix_Time wTimeInTicks = 0;
 
     wTimeInTicks = P_SOPC_COMMON_TIME_get_tick();
     currentTimeInMs = (wTimeInTicks * (uint64_t) 1000) / (uint64_t) configTICK_RATE_HZ;

@@ -494,7 +494,7 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC()
     uint64_t value_frac_in_100ns = now100ns % SECOND_TO_100NS;
 
     // ZEPHYR time_t is 64 bits.
-    SOPC_ReturnStatus result = SOPC_Time_FromTimeT(value_in_s, &datetime);
+    SOPC_ReturnStatus result = SOPC_Time_FromUnixTime(value_in_s, &datetime);
     if (SOPC_STATUS_OK != result)
     {
         // Time overflow...

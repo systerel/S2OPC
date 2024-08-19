@@ -154,6 +154,9 @@ typedef struct SOPC_String
 typedef SOPC_String SOPC_XmlElement;
 typedef SOPC_String SOPC_ByteString;
 
+/**
+ * \brief OPC UA timestamp format which is 100 nanoseconds from 1601/01/01 00:00:00 UTC
+ */
 typedef int64_t SOPC_DateTime;
 
 typedef struct SOPC_Guid

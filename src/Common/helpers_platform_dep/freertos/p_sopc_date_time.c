@@ -76,12 +76,12 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
     return datetime;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm)
 {
     return (localtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm)
 {
     return (gmtime_r(&t, tm) == NULL) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }

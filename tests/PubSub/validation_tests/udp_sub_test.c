@@ -182,7 +182,7 @@ static void printVariant(const SOPC_Variant* variant)
         printf("   - Variant Value %" PRIi64 "\n", variant->Value.Int64);
         break;
     case SOPC_DateTime_Id:
-        SOPC_Time_ToTimeT(variant->Value.Date, &time);
+        SOPC_Time_ToUnixTime(variant->Value.Date, &time);
         printf("   - Variant Value %s", ctime(&time));
         break;
     case SOPC_String_Id:

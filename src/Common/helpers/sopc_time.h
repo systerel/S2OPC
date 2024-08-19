@@ -27,7 +27,13 @@
 #include <stddef.h>
 #include <time.h>
 
+#include "sopc_builtintypes.h"
 #include "sopc_enums.h"
+
+/**
+ * A time reference in UNIX standard representation (number of seconds since Jan 1st, 1970)
+ */
+typedef time_t SOPC_Unix_Time;
 
 /**
  * \brief returns a C string representation of the given time in DateTime format
@@ -40,7 +46,7 @@
  * \param compact  provides compact version when flag is set
  *
  */
-char* SOPC_Time_GetString(int64_t time, bool local, bool compact);
+char* SOPC_Time_GetString(SOPC_DateTime time, bool local, bool compact);
 
 /**
  * \brief return the current local time as a C String, e.g.:
@@ -96,7 +102,7 @@ int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference ri
  * \param res   the resulting time
  * \return     \ref SOPC_STATUS_OK on success, an error code on failure
  */
-SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res);
+SOPC_ReturnStatus SOPC_Time_FromUnixTime(SOPC_Unix_Time time, SOPC_DateTime* res);
 
 /**
  * \brief Converts a time expressed in 100ns slices since 1601/01/01 00:00:00 UTC
@@ -106,7 +112,7 @@ SOPC_ReturnStatus SOPC_Time_FromTimeT(time_t time, int64_t* res);
  * \param res  the resulting time_t
  * \return     \ref SOPC_STATUS_OK on success, an error code on failure
  */
-SOPC_ReturnStatus SOPC_Time_ToTimeT(int64_t dt, time_t* res);
+SOPC_ReturnStatus SOPC_Time_ToUnixTime(SOPC_DateTime dt, SOPC_Unix_Time* res);
 
 /**
  * \brief S2OPC equivalent of standard struct tm.
