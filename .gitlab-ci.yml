@@ -320,20 +320,29 @@ build-win32:
 
 build-rpi:
   stage: build-others
-  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # digest of rpi-build:1.6
+  image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4 # digest of rpi-build:1.7
   needs: []
   script:
+    - '. /usr/local/cross_venv/bin/activate'
     - *build_command_line
   variables:
     CMAKE_INSTALL_PREFIX: '../install_rpi'
     CMAKE_TOOLCHAIN_FILE: '/toolchain-rpi.cmake'
-    DOCKER_DIGEST: 'sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a'
-    BUILD_SHARED_LIBS: 'true'
+    DOCKER_DIGEST: 'sha256:ef0e91dae560b77396e142d81fc1a9740bd7f51355a2055c3b6510faa33ea8c4'
     BUILD_DIR: build_toolchain
+    # Note: building of PyS2OPC C generated file fails due to "conditional branch out of range" if not compiled with O0.
+    # In order to have S2OPC built with optimisations, it is also possible to build PyS2OPC alone in a second step.
+    CMAKE_BUILD_TYPE: Debug
+    WITH_PYS2OPC: 1
+    # Note: it might be renamed to "...-linux_armv7l.whl" if needed for installation
+    PYS2OPC_WHEEL_NAME: 'pys2opc-1.5.1-cp39-cp39-linux_arm.whl'
   artifacts:
     name: 'bin-rpi-${CI_COMMIT_REF_SLUG}_${CI_COMMIT_SHA}_job${CI_JOB_ID}'
     paths:
       - '$BUILD_DIR/bin'
+      - '$BUILD_DIR/bin'
+      - '$BUILD_DIR/lib'
+      - '*.log'
       - 'install_rpi/'
     expire_in: '1 week'
   rules:

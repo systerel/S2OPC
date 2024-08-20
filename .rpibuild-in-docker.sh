@@ -23,5 +23,5 @@
 set -e
 
 source "$(dirname "$0")/".docker-images.sh
-
-"$(dirname "$0")/".run-in-docker.sh "$RPI_DIGEST" CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_DIGEST="$RPI_DIGEST" "$@"
+# Note: activate the Python3 cross_venv to be able to build the wheel for RPi with correct information
+"$(dirname "$0")/".run-in-docker.sh "$RPI_DIGEST" ". /usr/local/cross_venv/bin/activate && " PYS2OPC_WHEEL_NAME=pys2opc-1.5.1-cp310-cp310-linux_arm.whl CMAKE_TOOLCHAIN_FILE=/toolchain-rpi.cmake DOCKER_DIGEST="$RPI_DIGEST" "$@"
