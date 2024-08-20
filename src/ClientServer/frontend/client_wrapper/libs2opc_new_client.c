@@ -602,7 +602,6 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
         if (!SOPC_ClientHelperInternal_CheckConnectionValid(pConfig, secConnConfig) ||
             (!isSynchronous && NULL == sopc_client_helper_config.asyncRespCb))
         {
-            SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
             status = SOPC_STATUS_INVALID_STATE;
         }
 
@@ -696,7 +695,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_DiscoveryService(bool isSynch
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
     }
-    if (!requestSentToServices)
+    if (!requestSentToServices && NULL != request)
     {
         SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
     }
@@ -1107,7 +1106,7 @@ static SOPC_ReturnStatus SOPC_ClientHelperInternal_Service(bool isSynchronous,
             SOPC_ClientHelperInternal_GenReqCtx_ClearAndFree(reqCtx);
         }
     }
-    if (!requestSentToServices)
+    if (!requestSentToServices && NULL != request)
     {
         SOPC_EncodeableObject_Delete(*(SOPC_EncodeableType**) request, &request);
     }
