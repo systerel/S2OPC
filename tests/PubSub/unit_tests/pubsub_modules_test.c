@@ -398,8 +398,7 @@ START_TEST(test_tc_tools_test)
 {
     SOPC_HighRes_TimeReference* t1 = SOPC_HighRes_TimeReference_Create();
     SOPC_HighRes_TimeReference* t2 = SOPC_HighRes_TimeReference_Create();
-    bool res = SOPC_HighRes_TimeReference_Copy(t2, t1);
-    ck_assert(res);
+    SOPC_HighRes_TimeReference_Copy(t2, t1);
 
     int64_t delta_us;
 

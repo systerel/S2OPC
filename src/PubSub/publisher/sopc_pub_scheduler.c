@@ -358,8 +358,7 @@ static bool MessageCtx_Array_Init_Next(SOPC_PubScheduler_TransportCtx* ctx,
     context->messageKeepAlive = NULL; // by default NULL and set only if publisher is acyclic
     context->keepAliveTimeUs = 0;     // by default equal to 0 and set only if publisher is acyclic
     context->next_timeout = SOPC_HighRes_TimeReference_Create();
-    result = SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
-    SOPC_ASSERT(result);
+    SOPC_HighRes_TimeReference_Copy(context->next_timeout, tRef);
     context->dataSetMessageCtx =
         SOPC_Array_Create(sizeof(SOPC_DataSetMessageCtx_t), nbDataset, clear_dataSetMessageCtx_array);
     SOPC_ASSERT(NULL != context->dataSetMessageCtx);
@@ -797,16 +796,13 @@ static void* thread_start_publish(void* arg)
     SOPC_ASSERT(NULL != now);
     SOPC_ASSERT(NULL != nextTimeout);
 
-    bool ok = true;
-
     status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     while (!SOPC_Atomic_Int_Get(&pubSchedulerCtx.quit))
     {
         /* Wake-up: find which message(s) needs to be sent */
-        ok = SOPC_HighRes_TimeReference_GetTime(now);
-        SOPC_ASSERT(ok && "Failed GetTime");
+        SOPC_HighRes_TimeReference_GetTime(now);
 
         /* If a message needs to be sent, send it */
         MessageCtx* context = MessageCtxArray_FindMostExpired();
@@ -841,12 +837,10 @@ static void* thread_start_publish(void* arg)
         /* Otherwise sleep until there is a message to send */
         else
         {
-            ok = SOPC_HighRes_TimeReference_Copy(nextTimeout, context->next_timeout);
-            SOPC_ASSERT(ok && "Failed Copy");
+            SOPC_HighRes_TimeReference_Copy(nextTimeout, context->next_timeout);
             status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
-            ok = SOPC_HighRes_TimeReference_SleepUntil(nextTimeout);
-            SOPC_ASSERT(ok && "Failed NanoSleep");
+            SOPC_HighRes_TimeReference_SleepUntil(nextTimeout);
             status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
             SOPC_ASSERT(SOPC_STATUS_OK == status);
         }
@@ -1189,26 +1183,24 @@ static MessageCtx* MessageCtxArray_GetFromWriterGroupId(uint16_t wgId)
 
 bool SOPC_PubScheduler_AcyclicSend(uint16_t writerGroupId)
 {
-    bool result = false;
     if (!pubSchedulerCtx.isStarted)
     {
-        return result;
+        return false;
     }
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     MessageCtx* ctx = MessageCtxArray_GetFromWriterGroupId(writerGroupId);
     if (NULL == ctx)
     {
-        return result;
+        return false;
     }
     status = SOPC_Mutex_Lock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    result = SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
-    SOPC_ASSERT(result);
+    SOPC_HighRes_TimeReference_GetTime(ctx->next_timeout);
     SOPC_HighRes_TimeReference_AddSynchedDuration(ctx->next_timeout, ctx->keepAliveTimeUs, -1);
     MessageCtx_send_publish_message(ctx);
     status = SOPC_Mutex_Unlock(&pubSchedulerCtx.messages.acyclicMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    return result;
+    return true;
 }
 
 SOPC_ReturnStatus initialize_DataSetField_from_WriterGroup(SOPC_Dataset_LL_NetworkMessage* networkMessage,

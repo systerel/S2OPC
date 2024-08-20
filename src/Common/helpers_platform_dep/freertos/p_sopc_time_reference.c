@@ -52,11 +52,12 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
     return currentTimeInMs;
 }
 
-bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
+void SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
-    SOPC_ASSERT(NULL != t);
-    t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
-    return true;
+    if (NULL != t)
+    {
+        t->ticksMs = (uint64_t) SOPC_TimeReference_GetCurrent();
+    }
 }
 
 void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t,
@@ -103,7 +104,7 @@ bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, c
     return t->ticksMs <= t1.ticksMs;
 }
 
-bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
+void SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_ASSERT(NULL != date);
     SOPC_HighRes_TimeReference now;
@@ -125,20 +126,12 @@ bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* dat
 
         vTaskDelayUntil(&nowInternalTick, timeToWait);
     }
-    return true;
 }
 
 SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void)
 {
     SOPC_HighRes_TimeReference* ret = SOPC_Calloc(1, sizeof(SOPC_HighRes_TimeReference));
-    if (NULL != ret)
-    {
-        bool ok = SOPC_HighRes_TimeReference_GetTime(ret);
-        if (!ok)
-        {
-            SOPC_HighRes_TimeReference_Delete(&ret);
-        }
-    }
+    SOPC_HighRes_TimeReference_GetTime(ret);
 
     return ret;
 }
@@ -153,12 +146,10 @@ void SOPC_HighRes_TimeReference_Delete(SOPC_HighRes_TimeReference** t)
     *t = NULL;
 }
 
-bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
+void SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
 {
-    if (NULL == from || NULL == to)
+    if (NULL != from && NULL != to)
     {
-        return false;
+        *to = *from;
     }
-    *to = *from;
-    return true;
 }

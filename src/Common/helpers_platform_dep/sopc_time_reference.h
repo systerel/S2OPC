@@ -95,11 +95,12 @@ int8_t SOPC_TimeReference_Compare(SOPC_TimeReference left, SOPC_TimeReference ri
 /**
  * \brief Store the current time in t.
  *
- * \param t A Non-null time reference
+ * \param t A time reference object. Nothing is done if NULL is passed.
  *
- * \return false if failed.
+ * \note This function is not supposed to fail. (It is required at lowest level, including logging feature).
+ *       In case of failure, the function should use SOPC_ASSERT.
  */
-bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t);
+void SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t);
 
 /**
  * \brief Compare two \p SOPC_HighRes_TimeReference elements into microseconds.
@@ -142,12 +143,12 @@ void SOPC_HighRes_TimeReference_AddSynchedDuration(SOPC_HighRes_TimeReference* t
 bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, const SOPC_HighRes_TimeReference* now);
 
 /** \brief Precise sleep until specified date.
- * \param date The date at which the function shall return
- * \return true in case of success
+ * \param date The date at which the function shall return. Cannot be NULL.
+ * \note This function is not supposed to fail. In case of failure, it is expected to call SOPC_ASSERT.
  * \note If date is in the past, the function yields but does not wait.
  * \note The calling thread must have appropriate scheduling policy and priority for precise timing.
  */
-bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date);
+void SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date);
 
 /**
  * \brief Create a new time reference.
@@ -159,14 +160,14 @@ bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* dat
 SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void);
 
 /**
- * @brief A copy of a non-NULL SOPC_HighRes_TimeReference structure
+ * \brief A copy of a non-NULL SOPC_HighRes_TimeReference structure
  *
- * @param to Pointer to the destination
- * @param from Pointer to the source
- * @return true in case of success
- * @return false if \a from or \a to is NULL
+ * \param to Pointer to the destination. Function call ignored if NULL.
+ * \param from Pointer to the source. Function call ignored if NULL.
+ * \note This function is not supposed to fail. In case of failure, it is expected to call SOPC_ASSERT.
  */
-bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from);
+void SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from);
+
 /**
  * \brief Deletes a time reference.
  * \param t A reference returned by \a SOPC_HighRes_TimeReference_Create

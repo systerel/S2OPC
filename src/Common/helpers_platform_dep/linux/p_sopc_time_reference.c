@@ -101,14 +101,7 @@ SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
 SOPC_HighRes_TimeReference* SOPC_HighRes_TimeReference_Create(void)
 {
     SOPC_HighRes_TimeReference* ret = SOPC_Calloc(1, sizeof(SOPC_HighRes_TimeReference));
-    if (NULL != ret)
-    {
-        bool ok = SOPC_HighRes_TimeReference_GetTime(ret);
-        if (!ok)
-        {
-            SOPC_HighRes_TimeReference_Delete(&ret);
-        }
-    }
+    SOPC_HighRes_TimeReference_GetTime(ret);
 
     return ret;
 }
@@ -123,22 +116,21 @@ void SOPC_HighRes_TimeReference_Delete(SOPC_HighRes_TimeReference** t)
     *t = NULL;
 }
 
-bool SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
+void SOPC_HighRes_TimeReference_Copy(SOPC_HighRes_TimeReference* to, const SOPC_HighRes_TimeReference* from)
 {
-    if (NULL == from || NULL == to)
+    if (NULL != from && NULL != to)
     {
-        return false;
+        *to = *from;
     }
-    *to = *from;
-    return true;
 }
 
-bool SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
+void SOPC_HighRes_TimeReference_GetTime(SOPC_HighRes_TimeReference* t)
 {
-    SOPC_ASSERT(NULL != t);
-    int res = clock_gettime(CLOCK_MONOTONIC, &t->tp);
-    SOPC_ASSERT(-1 != res); // Note: cannot log any error here, because Log feature uses timestamping.
-    return true;
+    if (NULL != t)
+    {
+        int res = clock_gettime(CLOCK_MONOTONIC, &t->tp);
+        SOPC_ASSERT(-1 != res);
+    }
 }
 
 static void SOPC_HighRes_TimeReference_AddDuration(SOPC_HighRes_TimeReference* t, uint64_t duration_us)
@@ -212,11 +204,10 @@ bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, c
 {
     SOPC_ASSERT(NULL != t);
     SOPC_HighRes_TimeReference t1 = {0};
-    bool ok = true;
 
     if (NULL == now)
     {
-        ok = SOPC_HighRes_TimeReference_GetTime(&t1);
+        SOPC_HighRes_TimeReference_GetTime(&t1);
     }
     else
     {
@@ -224,7 +215,7 @@ bool SOPC_HighRes_TimeReference_IsExpired(const SOPC_HighRes_TimeReference* t, c
     }
 
     /* t <= t1 */
-    return ok && (t->tp.tv_sec < t1.tp.tv_sec || (t->tp.tv_sec == t1.tp.tv_sec && t->tp.tv_nsec <= t1.tp.tv_nsec));
+    return (t->tp.tv_sec < t1.tp.tv_sec || (t->tp.tv_sec == t1.tp.tv_sec && t->tp.tv_nsec <= t1.tp.tv_nsec));
 }
 
 int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRef, const SOPC_HighRes_TimeReference* t)
@@ -233,8 +224,7 @@ int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRe
 
     if (NULL == t)
     {
-        const bool ok = SOPC_HighRes_TimeReference_GetTime(&t1);
-        SOPC_ASSERT(ok);
+        SOPC_HighRes_TimeReference_GetTime(&t1);
     }
     else
     {
@@ -246,20 +236,22 @@ int64_t SOPC_HighRes_TimeReference_DeltaUs(const SOPC_HighRes_TimeReference* tRe
     return delta_sec * SOPC_SECONDS_TO_MICROSECONDS + delta_nsec / SOPC_MICROSECOND_TO_NANOSECONDS;
 }
 
-bool SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
+void SOPC_HighRes_TimeReference_SleepUntil(const SOPC_HighRes_TimeReference* date)
 {
     SOPC_ASSERT(NULL != date);
     static bool warned = false;
-    const int res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &date->tp, NULL);
 
-    /* TODO: handle the EINTR case more accurately */
+    int res;
+    do
+    {
+        res = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &date->tp, NULL);
+    } while (res == EINTR);
+
     if (0 != res && !warned)
     {
         /* TODO: strerror is not thread safe: is it possible to find a thread safe work-around? */
         SOPC_Logger_TraceError(SOPC_LOG_MODULE_COMMON, "clock_nanosleep failed (warn once): %d (%s)", errno,
                                strerror(errno));
-        warned = true;
+        SOPC_ASSERT(false);
     }
-
-    return 0 == res;
 }
