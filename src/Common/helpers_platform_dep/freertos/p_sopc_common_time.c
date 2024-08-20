@@ -36,6 +36,7 @@
 
 /* Number of ticks since FreeRTOS' EPOCH, which is 01/01/1970 00:00:00 UTC.
  * There are configTICK_RATE_HZ per second.
+ * Critical section is required if running on a 32 or 16 bit processor. *
  */
 static uint64_t gGlobalTimeReference = 0;
 
@@ -43,6 +44,7 @@ static uint64_t gGlobalTimeReference = 0;
 // Called from ISR
 void vApplicationTickHook(void)
 {
+    // Note : Critical section must not be used inside ISR
     gGlobalTimeReference += 1;
 
     return;
@@ -142,7 +144,10 @@ void setInitialDateToBuildTime(void)
     // Set nb ticks
     if (0 <= now)
     {
-        gGlobalTimeReference += ((uint64_t) now) * ((uint64_t) configTICK_RATE_HZ);
+        const uint64_t increment = ((uint64_t) now) * ((uint64_t) configTICK_RATE_HZ);
+        portENTER_CRITICAL();
+        gGlobalTimeReference += increment;
+        portEXIT_CRITICAL();
     }
 }
 
@@ -156,7 +161,6 @@ uint64_t P_SOPC_COMMON_TIME_get_tick(void)
         isTimeInitialized = true;
     }
     uint64_t xTicks;
-    /* Critical section required if running on a 32 or 16 bit processor. */
     portENTER_CRITICAL();
     {
         xTicks = gGlobalTimeReference;
@@ -167,6 +171,10 @@ uint64_t P_SOPC_COMMON_TIME_get_tick(void)
 
 void P_SOPC_COMMON_TIME_SetDateOffset(int64_t nbSecOffset)
 {
-    gGlobalTimeReference += ((int64_t) nbSecOffset) * configTICK_RATE_HZ;
+    /* Critical section required if running on a 32 or 16 bit processor. */
+    const uint64_t increment = ((int64_t) nbSecOffset) * configTICK_RATE_HZ;
+    portENTER_CRITICAL();
+    gGlobalTimeReference += increment;
+    portEXIT_CRITICAL();
     return;
 }

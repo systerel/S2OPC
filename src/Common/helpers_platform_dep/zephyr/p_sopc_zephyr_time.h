@@ -17,23 +17,9 @@
  * under the License.
  */
 
-/** \file
- *
- * PubSub publications require a time that has finer resolution than C99 time_t.
- * The OPC UA type *Duration* is a double representing ms delays between publications.
- * It's resolution goes finer than the nanosecond resolution.
- *
- * The SOPC_HighRes_TimeReference type should be defined to be as precise as possible to support sub-milliseconds
- * publications.
- *
- * Under Linux, the implementation should use CLOCK_MONOTONIC, as we want to send regular notifications,
- * even if the system time gets back or forth (e.g. because of ntp).
- */
-
 /**
- * \brief This file provides time related ZEPHYR-specific implementations which are not directly required by
- *          SOPC core.
- *          This file may be included by ZEPHYR applications that need these services.
+ * \brief This file provides time related ZEPHYR-specific implementations which are defined in
+ *          "sopc_time_reference.h".
  * \note The ZEPHYR PtP time correction is realized while processing specific time events (\a
  *          SOPC_Time_GetCurrentTimeUTC). Natively, in S2OPC core, this function may not be called as long as no
  *          PubSub is started. As a consequence, in the case an application waits for a PtP synchronization before
@@ -48,6 +34,8 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "sopc_time_reference.h"
 
 /**
  * \brief Possible time sources

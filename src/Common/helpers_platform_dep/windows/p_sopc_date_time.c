@@ -26,6 +26,8 @@
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
 {
     int64_t result = 0;
+    // Reminder : FILETIME Contains a 64-bit value representing the number of 100-nanosecond intervals since
+    // January 1, 1601 (UTC).
     FILETIME fileCurrentTime;
     ULARGE_INTEGER currentTime;
 

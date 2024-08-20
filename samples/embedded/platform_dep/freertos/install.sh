@@ -54,7 +54,7 @@ mkdir -p ${SRC_DIR-}/sample_inc
 # copy source files to Core/Src
 cp -ur ${S2OPC_SAMPLE-}/${FREERTOS_SAMPLE-}/src/* "${SRC_DIR-}/sample_src" || exit 10
 cp -ur ${S2OPC_SAMPLE-}/platform_dep/freertos/src/* "${SRC_DIR-}/sample_src" || exit 10
-test ${OPT_CRYPTO} = "mbedtls" && (cp -ur ${S2OPC_SAMPLE-}/platform_dep/mbedtls_config "${SRC_DIR-}" || exit 11)
+[[ ${OPT_CRYPTO} = "mbedtls" ]] && (cp -ur ${S2OPC_SAMPLE-}/platform_dep/mbedtls_config "${SRC_DIR-}" || exit 11)
 cp -ur ${S2OPC_SRC-}/Common "${SRC_DIR-}" || exit 12
 cp -ur ${S2OPC_SRC-}/PubSub "${SRC_DIR-}" || exit 13
 cp -ur ${S2OPC_SRC-}/ClientServer "${SRC_DIR-}" || exit 14

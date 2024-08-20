@@ -79,10 +79,7 @@
  * Variables
  ******************************************************************************/
 #if defined(USE_FreeRTOS_HEAP_5)
-#ifdef STM32H723xx
-#define HEAP_REGION2_SIZE (128 * 1024)
-#define HEAP_REGION2_BASE 0x20000000
-#elif defined(STM32H735xx)
+#if defined(STM32H723xx) || defined(STM32H735xx)
 #define HEAP_REGION2_SIZE (128 * 1024)
 #define HEAP_REGION2_BASE 0x20000000
 #else
@@ -102,7 +99,6 @@ HeapRegion_t board_heap5_regions[] = {{(void*) HEAP_REGION2_BASE, HEAP_REGION2_S
 /*************************************************/
 static void rng_self_test(void)
 {
-    SOPC_Shell_Printf("Mbedtls not used\n");
 #if S2OPC_CRYPTO_MBEDTLS
     unsigned char buff[32];
     size_t oLen = 0;
@@ -115,6 +111,8 @@ static void rng_self_test(void)
         SOPC_Shell_Printf("%02X ", buff[i]);
     }
     SOPC_Shell_Printf("]\n");
+#else
+    SOPC_Shell_Printf("Mbedtls not used\n");
 #endif
 }
 

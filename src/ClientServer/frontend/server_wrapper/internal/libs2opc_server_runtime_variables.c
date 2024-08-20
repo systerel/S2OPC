@@ -111,9 +111,9 @@ SOPC_Server_RuntimeVariables SOPC_RuntimeVariables_BuildDefault(SOPC_Toolkit_Bui
                                            build_info.clientServerBuildInfo.buildSrcCommit);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_Unix_Time buildDateAsTimet = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);
+    SOPC_Unix_Time buildDateAsUnixTime = parse_build_date(build_info.clientServerBuildInfo.buildBuildDate);
     SOPC_DateTime buildDate;
-    status = SOPC_Time_FromUnixTime(buildDateAsTimet, &buildDate);
+    status = SOPC_Time_FromUnixTime(buildDateAsUnixTime, &buildDate);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
     runtimeVariables.build_info.BuildDate = buildDate;

@@ -51,9 +51,14 @@
 
 #define KEY_ESC (0x1BU)
 
-#ifdef STM32H723xx
+// Select a UART for STM32 boards. To support new boards, the following lines may be adapted
+// depending on UART number for ST-LINK attached UART.
+#if defined(STM32H723xx) || defined(STM32H735xx)
 #include <stm32h7xx_hal.h>
+#define STM32_LINK_UART huart3
+#endif
 
+#ifdef STM32_LINK_UART
 void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
 {
     ETH_MACFilterConfigTypeDef macFilterConfig;
@@ -63,20 +68,6 @@ void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
     macFilterConfig.PassAllMulticast = ENABLE;
     HAL_ETH_SetMACFilterConfig(heth, &macFilterConfig);
 }
-#elif defined(STM32H735xx)
-#include <stm32h7xx_hal.h>
-
-void SOPC_ETH_MAC_Filter_Config(ETH_HandleTypeDef* heth)
-{
-    ETH_MACFilterConfigTypeDef macFilterConfig;
-
-    HAL_ETH_GetMACFilterConfig(heth, &macFilterConfig);
-    // macFilterConfig.PromiscuousMode = ENABLE;
-    macFilterConfig.PassAllMulticast = ENABLE;
-    HAL_ETH_SetMACFilterConfig(heth, &macFilterConfig);
-}
-#else
-#error
 #endif
 
 typedef enum _fun_key_status
@@ -102,17 +93,11 @@ static SOPC_Mutex printMutex;
 static uint8_t SOPC_Shell_getc(void)
 {
     uint8_t result = 0xFF;
-#ifdef STM32H723xx
+#ifdef STM32_LINK_UART
     {
-        extern UART_HandleTypeDef huart3;
+        extern UART_HandleTypeDef STM32_LINK_UART;
         const uint16_t numberOfDataReceived = 1;
-        HAL_UART_Receive(&huart3, &result, numberOfDataReceived, HAL_MAX_DELAY);
-    }
-#elif defined(STM32H735xx)
-    {
-        extern UART_HandleTypeDef huart3;
-        const uint16_t numberOfDataReceived = 1;
-        HAL_UART_Receive(&huart3, &result, numberOfDataReceived, HAL_MAX_DELAY);
+        HAL_UART_Receive(&STM32_LINK_UART, &result, numberOfDataReceived, HAL_MAX_DELAY);
     }
 #else
 #error "Unknown target, can't figure out how to communicate over Serial line"
@@ -133,31 +118,11 @@ int _gettimeofday(struct timeval* tv, void* tzvp)
  ******************************************************************************/
 static void shell_putChar(const char c);
 
-#ifdef STM32H723xx
-extern UART_HandleTypeDef huart3;
+#ifdef STM32_LINK_UART
+extern UART_HandleTypeDef STM32_LINK_UART;
 static inline void shell_putChar(const char c)
 {
-    HAL_UART_Transmit(&huart3, (const unsigned char*) &c, 1, HAL_MAX_DELAY);
-}
-
-int __io_putchar(int ch)
-{
-    shell_putChar(ch);
-
-#if IMPLICIT_LF_WITH_CR
-    if (ch == '\n')
-    {
-        shell_putChar('\r');
-    }
-#endif
-    return 1;
-}
-#elif defined(STM32H735xx)
-extern UART_HandleTypeDef huart3;
-static inline void shell_putChar(const char c)
-{
-    const uint16_t numberOfDataTransmit = 1;
-    HAL_UART_Transmit(&huart3, (const unsigned char*) &c, numberOfDataTransmit, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&STM32_LINK_UART, (const unsigned char*) &c, 1, HAL_MAX_DELAY);
 }
 
 int __io_putchar(int ch)

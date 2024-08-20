@@ -304,6 +304,11 @@ int main(int argc, char* const argv[])
     {
         save_rtt_to_csv();
     }
+
+    for (size_t idx = 0; idx < g_n_samples; ++idx)
+    {
+        SOPC_HighRes_TimeReference_Delete(&g_ts_emissions[idx]);
+    }
     SOPC_HighRes_TimeReference_Delete(&t0);
     SOPC_Free(g_ts_emissions);
     SOPC_Free(g_rtt);
@@ -334,15 +339,8 @@ static SOPC_DataValue* get_source_increment(const OpcUa_ReadValueId* nodesToRead
             size_t idx = var->Value.Uint32;
             if (idx < g_n_samples)
             {
-                if (g_ts_emissions[idx] == NULL)
-                {
-                    g_ts_emissions[idx] = SOPC_HighRes_TimeReference_Create();
-                }
-                else
-                {
-                    SOPC_HighRes_TimeReference_GetTime(g_ts_emissions[idx]);
-                    printf("Multpile sending of index %d\n", (int) idx);
-                }
+                SOPC_ASSERT(g_ts_emissions[idx] == NULL);
+                g_ts_emissions[idx] = SOPC_HighRes_TimeReference_Create();
             }
         }
     }
