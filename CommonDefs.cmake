@@ -474,6 +474,10 @@ function(s2opc_gen_build_info c_model_source_path c_file_target_path)
   set_source_files_properties(${c_file_target_path} PROPERTIES GENERATED TRUE)
 endfunction()
 
+if ((NOT S2OPC_CRYPTO_CYCLONE) AND (NOT S2OPC_CRYPTO_MBEDTLS))
+  list(APPEND S2OPC_DEFINITIONS "WITH_NO_CRYPTO")
+endif()
+
 # Function to generate a C structure address space from an XML UA nodeset file to be loaded by embedded loader
 function(s2opc_embed_address_space c_file_name xml_uanodeset_path)
 

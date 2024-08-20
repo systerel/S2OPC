@@ -34,78 +34,6 @@
 
 #include "sopc_pki_stack.h"
 
-SOPC_ReturnStatus SOPC_PKIProvider_CreateLeafProfile(const char* securityPolicyUri, SOPC_PKI_LeafProfile** ppProfile)
-{
-    SOPC_UNUSED_ARG(securityPolicyUri);
-    SOPC_UNUSED_ARG(ppProfile);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile, SOPC_PKI_Type PKIType)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(PKIType);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProfile, const char* applicationUri)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(applicationUri);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProfile, const char* url)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(url);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-void SOPC_PKIProvider_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile)
-{
-    SOPC_UNUSED_ARG(ppProfile);
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, SOPC_PKI_Profile** ppProfile)
-{
-    SOPC_UNUSED_ARG(securityPolicyUri);
-    SOPC_UNUSED_ARG(ppProfile);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(PKIType);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(applicationUri);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURL(SOPC_PKI_Profile* pProfile, const char* url)
-{
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(url);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-void SOPC_PKIProvider_DeleteProfile(SOPC_PKI_Profile** ppProfile)
-{
-    SOPC_UNUSED_ARG(ppProfile);
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** ppProfile)
-{
-    SOPC_UNUSED_ARG(ppProfile);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
 SOPC_ReturnStatus SOPC_PKIProvider_AddCertToRejectedList(SOPC_PKIProvider* pPKI, const SOPC_CertificateList* pCert)
 {
     SOPC_UNUSED_ARG(pPKI);
@@ -139,16 +67,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_VerifyEveryCertificate(SOPC_PKIProvider* pPKI
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
-                                                        const SOPC_PKI_LeafProfile* pProfile,
-                                                        uint32_t* error)
-{
-    SOPC_UNUSED_ARG(pToValidate);
-    SOPC_UNUSED_ARG(pProfile);
-    SOPC_UNUSED_ARG(error);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
 SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrustedCerts,
                                                   SOPC_CRLList* pTrustedCrl,
                                                   SOPC_CertificateList* pIssuerCerts,
@@ -163,95 +81,42 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateFromList(SOPC_CertificateList* pTrusted
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_CreateFromStore(const char* directoryStorePath, SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckHostName(const SOPC_CertificateList* pToValidate, const char* url)
 {
-    if (NULL == directoryStorePath || NULL == ppPKI)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(url);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckCertificateUsage(const SOPC_CertificateList* pToValidate,
+                                                         const SOPC_PKI_LeafProfile* pProfile)
 {
-    SOPC_UNUSED_ARG(ppPKI);
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(pProfile);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckSecurityPolicy(const SOPC_CertificateList* pToValidate,
+                                                       const SOPC_PKI_LeafProfile* pConfig)
 {
-    SOPC_UNUSED_ARG(ppPKI);
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, SOPC_PKIProvider* pPKI)
-{
-    SOPC_UNUSED_ARG(directoryStorePath);
-    SOPC_UNUSED_ARG(pPKI);
+    SOPC_UNUSED_ARG(pToValidate);
+    SOPC_UNUSED_ARG(pConfig);
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
-                                                       SOPC_CertificateList** ppTrustedCerts,
-                                                       SOPC_CRLList** ppTrustedCrl,
-                                                       SOPC_CertificateList** ppIssuerCerts,
-                                                       SOPC_CRLList** ppIssuerCrl)
+void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
+                                   uint32_t* caCount,
+                                   uint32_t* listLength,
+                                   uint32_t* rootCount)
 {
-    SOPC_UNUSED_ARG(ppTrustedCerts);
-    SOPC_UNUSED_ARG(ppTrustedCrl);
-    SOPC_UNUSED_ARG(ppIssuerCerts);
-    SOPC_UNUSED_ARG(ppIssuerCrl);
-    SOPC_UNUSED_ARG(pPKI);
-    return SOPC_STATUS_NOT_SUPPORTED;
+    SOPC_UNUSED_ARG(pCert);
+    SOPC_UNUSED_ARG(caCount);
+    SOPC_UNUSED_ARG(listLength);
+    SOPC_UNUSED_ARG(rootCount);
 }
 
-SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles)
+SOPC_ReturnStatus SOPC_PKIProvider_CheckCommonName(const SOPC_CertificateList* pToValidate)
 {
-    SOPC_UNUSED_ARG(bEraseExistingFiles);
-    SOPC_UNUSED_ARG(pPKI);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert)
-{
-    SOPC_UNUSED_ARG(ppCert);
-    SOPC_UNUSED_ARG(pPKI);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI)
-{
-    SOPC_UNUSED_ARG(pPKI);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
-                                                  const char* securityPolicyUri,
-                                                  SOPC_CertificateList* pTrustedCerts,
-                                                  SOPC_CRLList* pTrustedCrl,
-                                                  SOPC_CertificateList* pIssuerCerts,
-                                                  SOPC_CRLList* pIssuerCrl,
-                                                  const bool bIncludeExistingList)
-{
-    SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(securityPolicyUri);
-    SOPC_UNUSED_ARG(pTrustedCerts);
-    SOPC_UNUSED_ARG(pTrustedCrl);
-    SOPC_UNUSED_ARG(pIssuerCerts);
-    SOPC_UNUSED_ARG(pIssuerCrl);
-    SOPC_UNUSED_ARG(bIncludeExistingList);
-    return SOPC_STATUS_NOT_SUPPORTED;
-}
-
-SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
-                                                     const char* pThumbprint,
-                                                     const bool bIsTrusted,
-                                                     bool* pIsRemoved,
-                                                     bool* pIsIssuer)
-{
-    SOPC_UNUSED_ARG(pPKI);
-    SOPC_UNUSED_ARG(pThumbprint);
-    SOPC_UNUSED_ARG(bIsTrusted);
-    SOPC_UNUSED_ARG(pIsRemoved);
-    SOPC_UNUSED_ARG(pIsIssuer);
+    SOPC_UNUSED_ARG(pToValidate);
     return SOPC_STATUS_NOT_SUPPORTED;
 }

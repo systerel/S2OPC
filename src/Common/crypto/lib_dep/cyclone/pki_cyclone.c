@@ -1543,34 +1543,6 @@ static SOPC_ReturnStatus split_root_from_cert_list(SOPC_CertificateList** ppCert
     return status;
 }
 
-// SOPC_ReturnStatus SOPC_PKIProvider_MergeCRLs(SOPC_CRLList* pLeft, SOPC_CRLList* pRight, SOPC_CRLList** ppRes)
-// {
-//     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-//     if (NULL == ppRes)
-//     {
-//         return SOPC_STATUS_INVALID_PARAMETERS;
-//     }
-//     SOPC_CRLList* pRes = *ppRes;
-//     /* Left part */
-//     if (NULL != pLeft)
-//     {
-//         status = SOPC_KeyManager_CRL_Copy(pLeft, &pRes);
-//     }
-//     /* Right part */
-//     if (NULL != pRight && SOPC_STATUS_OK == status)
-//     {
-//         status = SOPC_KeyManager_CRL_Copy(pRight, &pRes);
-//     }
-//     /* clear if error */
-//     if (SOPC_STATUS_OK != status)
-//     {
-//         SOPC_KeyManager_CRL_Free(pRes);
-//         pRes = NULL;
-//     }
-//     *ppRes = pRes;
-//     return status;
-// }
-
 void SOPC_PKIProvider_GetListStats(SOPC_CertificateList* pCert,
                                    uint32_t* caCount,
                                    uint32_t* listLength,
