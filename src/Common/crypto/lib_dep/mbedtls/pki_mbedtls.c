@@ -245,7 +245,6 @@ static void sopc_remove_cert_from_list(mbedtls_x509_crt* pPrev,
 // PKI remove certificate from rejected list declaration
 static void sopc_pki_remove_rejected_cert(SOPC_CertificateList** ppRejectedList, const SOPC_CertificateList* pCert);
 
-
 SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURI(SOPC_PKI_Profile* pProfile, const char* applicationUri)
 {
     return SOPC_PKIProvider_LeafProfileSetURI(pProfile->leafProfile, applicationUri);
@@ -255,7 +254,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetURL(SOPC_PKI_Profile* pProfile, con
 {
     return SOPC_PKIProvider_LeafProfileSetURL(pProfile->leafProfile, url);
 }
-
 
 static SOPC_ReturnStatus cert_is_self_signed(mbedtls_x509_crt* crt, bool* pbIsSelfSign)
 {
@@ -1034,7 +1032,6 @@ static SOPC_ReturnStatus sopc_PKI_validate_profile_and_certificate(SOPC_PKIProvi
     SOPC_Free(pThumbprint);
     return status;
 }
-
 
 SOPC_ReturnStatus SOPC_PKIProvider_ValidateCertificate(SOPC_PKIProvider* pPKI,
                                                        const SOPC_CertificateList* pToValidate,

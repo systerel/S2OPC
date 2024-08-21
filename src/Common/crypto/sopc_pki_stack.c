@@ -143,7 +143,6 @@ static const Profile_Cfg g_all_profiles[] = {
      .chain = &g_chain_profile_rsa_sha1_1024},
 };
 
-#ifdef S2OPC_CRYPTO_MBEDTLS
 static const SOPC_PKI_KeyUsage_Mask g_appKU = SOPC_PKI_KU_KEY_ENCIPHERMENT | SOPC_PKI_KU_KEY_DATA_ENCIPHERMENT |
                                               SOPC_PKI_KU_DIGITAL_SIGNATURE | SOPC_PKI_KU_NON_REPUDIATION;
 static const SOPC_PKI_KeyUsage_Mask g_usrKU =
@@ -151,7 +150,6 @@ static const SOPC_PKI_KeyUsage_Mask g_usrKU =
 static const SOPC_PKI_ExtendedKeyUsage_Mask g_clientEKU = SOPC_PKI_EKU_SERVER_AUTH;
 static const SOPC_PKI_ExtendedKeyUsage_Mask g_serverEKU = SOPC_PKI_EKU_CLIENT_AUTH;
 static const SOPC_PKI_ExtendedKeyUsage_Mask g_userEKU = SOPC_PKI_EKU_NONE;
-#endif
 
 #define NB_PROFILES (sizeof(g_all_profiles) / sizeof(*g_all_profiles))
 
@@ -204,7 +202,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateLeafProfile(const char* securityPolicyU
     SOPC_UNUSED_ARG(securityPolicyUri);
     SOPC_UNUSED_ARG(ppProfile);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == ppProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -231,7 +229,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateLeafProfile(const char* securityPolicyU
 
     *ppProfile = pProfile;
     return SOPC_STATUS_OK;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProfile* pProfile, SOPC_PKI_Type PKIType)
@@ -240,7 +237,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProf
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(PKIType);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -263,7 +260,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetUsageFromType(SOPC_PKI_LeafProf
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     return SOPC_STATUS_OK;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProfile, const char* applicationUri)
@@ -272,7 +268,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProf
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(applicationUri);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pProfile || NULL == applicationUri)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -287,7 +283,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURI(SOPC_PKI_LeafProfile* pProf
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     return SOPC_STATUS_OK;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProfile, const char* url)
@@ -296,7 +291,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProf
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(url);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pProfile || NULL == url)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -311,14 +306,13 @@ SOPC_ReturnStatus SOPC_PKIProvider_LeafProfileSetURL(SOPC_PKI_LeafProfile* pProf
         return SOPC_STATUS_OUT_OF_MEMORY;
     }
     return SOPC_STATUS_OK;
-#endif
 }
 
 void SOPC_PKIProvider_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile)
 {
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(ppProfile);
-#else
+#endif
     if (NULL == ppProfile)
     {
         return;
@@ -331,7 +325,6 @@ void SOPC_PKIProvider_DeleteLeafProfile(SOPC_PKI_LeafProfile** ppProfile)
         SOPC_Free(pProfile);
         *ppProfile = NULL;
     }
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, SOPC_PKI_Profile** ppProfile)
@@ -340,7 +333,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
     SOPC_UNUSED_ARG(securityPolicyUri);
     SOPC_UNUSED_ARG(ppProfile);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == ppProfile || NULL == securityPolicyUri)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -383,7 +376,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateProfile(const char* securityPolicyUri, 
     }
     *ppProfile = pProfile;
     return SOPC_STATUS_OK;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pProfile, SOPC_PKI_Type PKIType)
@@ -392,7 +384,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pPr
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(PKIType);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pProfile)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -420,7 +412,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_ProfileSetUsageFromType(SOPC_PKI_Profile* pPr
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
     return SOPC_STATUS_OK;
-#endif
 }
 
 void SOPC_PKIProvider_DeleteProfile(SOPC_PKI_Profile** ppProfile)
@@ -448,7 +439,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** p
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(ppProfile);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     /* Minimal profile for the chain.
     The leaf profile is not used for users during the validation process but the user certificate properties
     are checked according to the security policy during the activate session */
@@ -464,7 +455,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CreateMinimalUserProfile(SOPC_PKI_Profile** p
     }
     *ppProfile = pProfile;
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateList* pToValidate,
@@ -476,7 +466,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     SOPC_UNUSED_ARG(pProfile);
     SOPC_UNUSED_ARG(error);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pToValidate || NULL == pProfile || NULL == error)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -550,7 +540,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CheckLeafCertificate(const SOPC_CertificateLi
     }
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
@@ -558,7 +547,7 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(ppPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     SOPC_PKIProvider* pPKI = NULL;
 
     if (NULL == ppPKI)
@@ -590,7 +579,6 @@ SOPC_ReturnStatus SOPC_PKIPermissive_Create(SOPC_PKIProvider** ppPKI)
     pPKI->isPermissive = true;
     *ppPKI = pPKI;
     return SOPC_STATUS_OK;
-#endif
 }
 
 void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
@@ -608,7 +596,6 @@ void SOPC_PKIProvider_Free(SOPC_PKIProvider** ppPKI)
 #endif
 }
 
-#ifdef S2OPC_CRYPTO_MBEDTLS
 #if SOPC_HAS_FILESYSTEM
 static SOPC_ReturnStatus remove_files(const char* directoryPath)
 {
@@ -646,9 +633,7 @@ SOPC_ReturnStatus remove_files(const char* directoryPath)
     return SOPC_STATUS_NOT_SUPPORTED;
 }
 #endif /* SOPC_HAS_FILESYSTEM */
-#endif
 
-#ifdef S2OPC_CRYPTO_MBEDTLS
 static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
                                                  SOPC_CertificateList* pCerts,
                                                  const char* directoryPath,
@@ -670,9 +655,7 @@ static SOPC_ReturnStatus write_cert_to_der_files(SOPC_CertificateList* pRoots,
     }
     return status;
 }
-#endif
 
-#ifdef S2OPC_CRYPTO_MBEDTLS
 static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
                                                 const char* directoryPath,
                                                 const bool bEraseExistingFiles)
@@ -689,9 +672,7 @@ static SOPC_ReturnStatus write_crl_to_der_files(SOPC_CRLList* pCrl,
     }
     return status;
 }
-#endif
 
-#ifdef S2OPC_CRYPTO_MBEDTLS
 static SOPC_ReturnStatus may_create_pki_folder(const char* pBasePath, const char* pSubPath, char** ppPath)
 {
     SOPC_FileSystem_CreationResult mkdir_res = SOPC_FileSystem_Creation_Error_UnknownIssue;
@@ -713,7 +694,6 @@ static SOPC_ReturnStatus may_create_pki_folder(const char* pBasePath, const char
     *ppPath = pPath;
     return status;
 }
-#endif
 
 SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, SOPC_PKIProvider* pPKI)
 {
@@ -721,7 +701,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
     SOPC_UNUSED_ARG(directoryStorePath);
     SOPC_UNUSED_ARG(pPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pPKI || NULL == directoryStorePath)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -754,7 +734,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_SetStorePath(const char* directoryStorePath, 
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
@@ -770,7 +749,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
     SOPC_UNUSED_ARG(ppIssuerCrl);
     SOPC_UNUSED_ARG(pPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pPKI || NULL == ppTrustedCerts || NULL == ppTrustedCrl || NULL == ppIssuerCerts || NULL == ppIssuerCrl)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -819,7 +798,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteOrAppendToList(SOPC_PKIProvider* pPKI,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bool bEraseExistingFiles)
@@ -828,7 +806,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bo
     SOPC_UNUSED_ARG(bEraseExistingFiles);
     SOPC_UNUSED_ARG(pPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -903,7 +881,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteToStore(SOPC_PKIProvider* pPKI, const bo
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC_CertificateList** ppCert)
@@ -912,7 +889,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     SOPC_UNUSED_ARG(ppCert);
     SOPC_UNUSED_ARG(pPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pPKI || NULL == ppCert)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -939,7 +916,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_CopyRejectedList(SOPC_PKIProvider* pPKI, SOPC
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pPKI)
@@ -947,7 +923,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pP
 #ifdef WITH_NO_CRYPTO
     SOPC_UNUSED_ARG(pPKI);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     if (NULL == pPKI)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -980,7 +956,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_WriteRejectedCertToStore(SOPC_PKIProvider* pP
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_CheckListLength(SOPC_PKIProvider* pPKI,
@@ -1035,7 +1010,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
     SOPC_UNUSED_ARG(pIssuerCrl);
     SOPC_UNUSED_ARG(bIncludeExistingList);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     /* Check parameters */
     if (NULL == pPKI)
     {
@@ -1152,7 +1127,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_UpdateFromList(SOPC_PKIProvider* pPKI,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertByThumbprint(SOPC_CertificateList** ppList,
@@ -1235,7 +1209,7 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
     SOPC_UNUSED_ARG(pIsRemoved);
     SOPC_UNUSED_ARG(pIsIssuer);
     return SOPC_STATUS_NOT_SUPPORTED;
-#else
+#endif
     /* Initialized the value to return */
     *pIsRemoved = false;
     *pIsIssuer = false;
@@ -1344,7 +1318,6 @@ SOPC_ReturnStatus SOPC_PKIProvider_RemoveCertificate(SOPC_PKIProvider* pPKI,
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
 
     return status;
-#endif
 }
 
 SOPC_ReturnStatus SOPC_PKIProvider_ValidateAnything(SOPC_PKIProvider* pPKI,

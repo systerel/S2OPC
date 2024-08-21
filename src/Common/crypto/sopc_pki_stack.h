@@ -202,6 +202,8 @@ SOPC_ReturnStatus SOPC_PKIProvider_MergeCertificates(SOPC_CertificateList* pLeft
 /**
  * \brief Checks the number of certificates and CRLs of a PKI.
  *
+ * \param pPKI A valid pointer to a PKI.
+ * 
  * \param pTrustedCerts A valid pointer to a trusted certificate.
  *
  * \param pTrustedCrl A valid pointer to a trusted Certificate Revocation List (CRL).
