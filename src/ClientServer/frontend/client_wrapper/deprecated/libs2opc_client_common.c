@@ -35,6 +35,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_singly_linked_list.h"
+#include "sopc_threads.h"
 #include "sopc_toolkit_config.h"
 #include "sopc_toolkit_config_constants.h"
 #include "sopc_version.h"

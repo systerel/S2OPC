@@ -33,6 +33,7 @@
 #include "sopc_pub_scheduler.h"
 #include "sopc_pubsub_conf.h"
 #include "sopc_sub_scheduler.h"
+#include "sopc_threads.h"
 #include "sopc_xml_loader.h"
 
 #include "pubsub.h"

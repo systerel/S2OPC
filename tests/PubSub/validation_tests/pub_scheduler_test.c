@@ -30,6 +30,7 @@
 #include "sopc_mem_alloc.h"
 #include "sopc_network_layer.h"
 #include "sopc_pubsub_conf.h"
+#include "sopc_threads.h"
 #include "sopc_time_reference.h"
 #include "sopc_udp_sockets.h"
 #include "sopc_xml_loader.h"

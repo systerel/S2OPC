@@ -30,6 +30,7 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_pubsub_helpers.h"
+#include "sopc_threads.h"
 
 #include "libs2opc_common_config.h"
 

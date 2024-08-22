@@ -37,6 +37,7 @@
 #include "sopc_mutexes.h"
 #include "sopc_pki_stack.h"
 #include "sopc_pub_scheduler.h"
+#include "sopc_threads.h"
 #include "xml_expat/sopc_uanodeset_loader.h"
 
 #include "libs2opc_common_config.h"
