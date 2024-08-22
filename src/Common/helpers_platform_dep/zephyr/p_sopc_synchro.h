@@ -25,9 +25,16 @@
 
 #include <zephyr/kernel.h>
 
-/*****Public synchro api*****/
+/** The zephyr actual implementation of Mutex */
+struct SOPC_Mutex_Impl
+{
+    struct k_mutex mutex;
+};
 
-typedef struct k_condvar SOPC_Condition;
-typedef struct k_mutex SOPC_Mutex;
+/** The zephyr actual implementation of Condition variables */
+struct SOPC_Condition_Impl
+{
+    struct k_condvar cond;
+};
 
 #endif /* SOPC_SYNCHRO_H */

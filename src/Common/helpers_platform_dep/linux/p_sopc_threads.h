@@ -22,8 +22,8 @@
 
 #include <pthread.h>
 
-#include "sopc_threads.h"
 #include "sopc_mutexes.h"
+#include "sopc_threads.h"
 
 /** The linux actual implementation of Mutex */
 struct SOPC_Mutex_Impl

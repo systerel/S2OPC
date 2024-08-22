@@ -121,15 +121,4 @@ SOPC_ReturnStatus P_UTILS_LIST_InitMT(tUtilsList* ptr, uint16_t wMaxRDV);
 
 void P_UTILS_LIST_DeInitMT(tUtilsList* ptr);
 
-#ifdef FOLLOW_ALLOC
-extern uint32_t cptAlloc;
-extern uint32_t cptFree;
-extern QueueHandle_t cptMutex;
-void DEBUG_incrementCpt(void);
-void DEBUG_decrementCpt(void);
-#else
-#define DEBUG_incrementCpt()
-#define DEBUG_decrementCpt()
-#endif
-
 #endif

@@ -39,7 +39,7 @@ typedef struct HANDLE_TIME_REFERENCE
 } handleTimeReference;
 
 /* Handle compilation time as reference for UTC time */
-static handleTimeReference gTimeReference = {.buildTime_s = 0, .isInit = false, .criticalSection = {}};
+static handleTimeReference gTimeReference = {.buildTime_s = 0, .isInit = false, .criticalSection = SOPC_INVALID_MUTEX};
 
 static void P_TIME_SetInitialDateToBuildTime(void);
 

@@ -22,7 +22,16 @@
 
 #include <p4.h>
 
-typedef P4_mutex_t SOPC_Mutex;
-typedef P4_cond_t SOPC_Condition;
+/** The pikeOS actual implementation of Mutex */
+struct SOPC_Mutex_Impl
+{
+    P4_mutex_t mutex;
+};
+
+/** The pikeOS actual implementation of Condition variables */
+struct SOPC_Condition_Impl
+{
+    P4_cond_t cond;
+};
 
 #endif

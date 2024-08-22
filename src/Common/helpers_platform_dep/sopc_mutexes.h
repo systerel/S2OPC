@@ -18,10 +18,12 @@
  */
 
 /**
- * \file The platform-specific implementation for all mutex-related services. Each platform implementation
+ * \file
+ *
+ * The platform-specific implementation for all mutex-related services. Each platform implementation
  *  shall provide the actual definition of:
- * - \ref SOPC_Condition for Condition Variables  (e.g. pthread_mutex_t for LINUX)
- * - \ref SOPC_Mutex for Mutexes. (e.g. pthread_cond_t for LINUX)
+ * - \ref SOPC_Condition_Impl for Condition Variables. (e.g. pthread_cond_t for LINUX)
+ * - \ref SOPC_Mutex_Impl for Mutexes. (e.g. pthread_mutex_t for LINUX)
  * - All functions defined in this header file.
  */
 
@@ -45,7 +47,7 @@ typedef SOPC_Condition_Impl* SOPC_Condition;
 
 /**
  * \brief Provides a mutex mechanism that supports recursive locking.
- * \note Each platform must provide the implementation of \ref SOPC_Mutex and all related functions
+ * \note Each platform must provide the implementation of \ref SOPC_Mutex_Impl and all related functions
  * in \ref sopc_mutexes.h */
 typedef struct SOPC_Mutex_Impl SOPC_Mutex_Impl;
 typedef SOPC_Mutex_Impl* SOPC_Mutex;
@@ -57,7 +59,8 @@ typedef SOPC_Mutex_Impl* SOPC_Mutex;
 /**
  * \brief Create a Condition variable.
  * @param cond A non-NULL pointer to a condition to be created
- * @return SOPC_STATUS_OK in case of success
+ * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set ::to SOPC_INVALID_COND
+ * (if not NULL).
  */
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond);
 
@@ -80,7 +83,8 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond);
 /**
  * \brief Create a Mutex
  * @param mut A non-NULL pointer to a Mutex to be created
- * @return SOPC_STATUS_OK in case of success
+ * @return SOPC_STATUS_OK in case of success. In case of failure, cond is set ::to SOPC_INVALID_MUTEX
+ * (if not NULL).
  */
 SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut);
 

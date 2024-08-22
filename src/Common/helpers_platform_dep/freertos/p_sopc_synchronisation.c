@@ -19,13 +19,18 @@
 
 #include <stdbool.h>
 
-#include "FreeRTOS.h" /* freeRtos includes */
+/* freeRtos includes */
+#include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
 #include "timers.h"
 
-#include "sopc_enums.h" /* s2opc includes */
+/* s2opc includes */
+#include "sopc_assert.h"
+#include "sopc_enums.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
+#include "sopc_threads.h"
 
 #include "p_sopc_synchronisation.h" /* synchronisation include */
 #include "p_sopc_utils.h"           /* private list include */
@@ -33,23 +38,15 @@
 /*****Private condition variable api*****/
 
 // Clear condition variable: release all thread waiting on it
-SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(SOPC_Condition* pConditionVariable)
+static void P_SYNCHRO_ClearConditionVariable(SOPC_Condition_Impl* pConditionVariable)
 {
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
     uint16_t wCurrentSlotId = UINT16_MAX;
     TaskHandle_t handle = NULL;
     uint32_t wClearSignal = 0;
     uint32_t wSignal = 0;
 
-    if (NULL == pConditionVariable)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-    if ((E_COND_VAR_STATUS_INITIALIZED != pConditionVariable->status) // Workspace initialized
-        || (NULL == pConditionVariable->handleLockCounter))           // Critical section token exist
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
+    SOPC_ASSERT(NULL != pConditionVariable && E_COND_VAR_STATUS_INITIALIZED == pConditionVariable->status &&
+                NULL != pConditionVariable->handleLockCounter);
 
     xSemaphoreTake(pConditionVariable->handleLockCounter, portMAX_DELAY); // Critical section
     {
@@ -81,98 +78,31 @@ SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(SOPC_Condition* pConditionVar
         P_UTILS_LIST_DeInit(&pConditionVariable->taskList);
     }
 
-    vSemaphoreDelete(pConditionVariable->handleLockCounter); // End of critical section. Destroy it on clear
-    pConditionVariable->handleLockCounter = NULL;
-    DEBUG_decrementCpt();
-    memset(pConditionVariable, 0, sizeof(SOPC_Condition)); // Raz on leave memory
-
-    return result;
+    // End of critical section. Destroy it on clear
+    vSemaphoreDelete(pConditionVariable->handleLockCounter);
 }
 
-// Initialize condition variable
-SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(SOPC_Condition* pConditionVariable, // Condition variable handle
-                                                  uint16_t wMaxWaiters)               // max parallel waiting tasks
+/** \brief  Initialize condition variable.
+ * \param condVar Condition variable handle. It is supposed to be zeroed in input.
+ * \param wMaxWaiters max parallel waiting tasks
+ */
+static void P_SYNCHRO_InitConditionVariable(SOPC_Condition_Impl* condVar, const uint16_t wMaxWaiters)
 {
-    QueueHandle_t pMutex = NULL;
+    SOPC_ASSERT(NULL != condVar && wMaxWaiters <= MAX_WAITERS);
 
-    if ((MAX_WAITERS < wMaxWaiters) || (NULL == pConditionVariable))
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    /* Check if workspace already exists */
-    if (E_COND_VAR_STATUS_NOT_INITIALIZED != pConditionVariable->status)
-    {
-        return SOPC_STATUS_INVALID_STATE;
-    }
-
-    /* Raz allocated workspace */
-    memset(pConditionVariable, 0, sizeof(SOPC_Condition));
-    pMutex = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
-
+    condVar->handleLockCounter = xQueueCreateMutex(queueQUEUE_TYPE_MUTEX);
+    condVar->status = E_COND_VAR_STATUS_INITIALIZED;
     /* Allocate list of waiters */
-    P_UTILS_LIST_Init(&pConditionVariable->taskList, wMaxWaiters);
-    if ((NULL == pMutex) || (NULL == pConditionVariable->taskList.list))
-    {
-        /* Raz leaved memory*/
-        memset(pConditionVariable, 0, sizeof(SOPC_Condition));
-        vQueueDelete(pMutex);
-        pMutex = NULL;
+    P_UTILS_LIST_Init(&condVar->taskList, wMaxWaiters);
 
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-
-    DEBUG_incrementCpt();
-    pConditionVariable->handleLockCounter = pMutex;
-    pConditionVariable->status = E_COND_VAR_STATUS_INITIALIZED;
-
-    return SOPC_STATUS_OK;
-}
-
-// Destruction of condition variable if created via CreateConditionVariable.
-void P_SYNCHRO_DestroyConditionVariable(SOPC_Condition** ppConditionVariable)
-{
-    if (NULL != ppConditionVariable && NULL != *ppConditionVariable)
-    {
-        P_SYNCHRO_ClearConditionVariable(*ppConditionVariable);
-        memset(*ppConditionVariable, 0, sizeof(SOPC_Condition));
-        SOPC_Free(*ppConditionVariable);
-        *ppConditionVariable = NULL;
-        DEBUG_decrementCpt();
-    }
-}
-
-// Creation workspace.
-SOPC_Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV)
-{
-    SOPC_Condition* pConditionVariable = NULL;
-    pConditionVariable = (SOPC_Condition*) SOPC_Malloc(sizeof(SOPC_Condition));
-    if (NULL == pConditionVariable)
-    {
-        return NULL;
-    }
-
-    DEBUG_incrementCpt();
-    // Raz handle
-    memset(pConditionVariable, 0, sizeof(SOPC_Condition));
-    SOPC_ReturnStatus status = P_SYNCHRO_InitConditionVariable(pConditionVariable, wMaxRDV);
-
-    if (SOPC_STATUS_OK != status)
-    {
-        P_SYNCHRO_ClearConditionVariable(pConditionVariable);
-        // Raz handle
-        memset(pConditionVariable, 0, sizeof(SOPC_Condition));
-        SOPC_Free(pConditionVariable);
-        pConditionVariable = NULL;
-        DEBUG_decrementCpt();
-    }
-
-    return pConditionVariable;
+    // Ensure completeness
+    SOPC_ASSERT(NULL != condVar->handleLockCounter && NULL != condVar->taskList.list);
 }
 
 // Broadcast signal to all waiting task on signal passed in parameters
-SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(SOPC_Condition* pConditionVariable, // Signal to broadcaset
-                                                    bool bSignalAll) // Signal one (false) or all (true)
+static SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(
+    SOPC_Condition_Impl* pConditionVariable, // Signal to broadcaset
+    bool bSignalAll)                         // Signal one (false) or all (true)
 {
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_STATE;
     uint16_t wCurrentSlotId = UINT16_MAX;
@@ -300,12 +230,12 @@ static inline SOPC_ReturnStatus P_SYNCHRO_WaitSignal(uint32_t* pNotificationValu
 // Unlock recursive mutex in parameters before wait a signal.
 // Mutex in parameter is optional. In this case, simple wait signal.
 // On timeout, task is removed from task to notify.
-SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
-    SOPC_Condition* pConditionVariable, // Condition variable workspace
-    QueueHandle_t* pMutex,              // Recursive mutex
-    uint32_t uwSignal,                  // Signal to wait
-    uint32_t uwClearSignal,             // Clear signal
-    uint32_t uwTimeOutMs)               // TimeOut
+static SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
+    SOPC_Condition_Impl* pConditionVariable, // Condition variable workspace
+    QueueHandle_t mutex,                     // Recursive mutex
+    uint32_t uwSignal,                       // Signal to wait
+    uint32_t uwClearSignal,                  // Clear signal
+    uint32_t uwTimeOutMs)                    // TimeOut
 {
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -377,9 +307,9 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
     }
 
     // Give mutex from parameters
-    if ((NULL != pMutex) && (NULL != (*pMutex)))
+    if (NULL != mutex)
     {
-        configASSERT(xQueueGiveMutexRecursive(*pMutex) == pdPASS);
+        configASSERT(xQueueGiveMutexRecursive(mutex) == pdPASS);
     }
     // Wait signal or timeout
     // If signal or timeout, in both case, unstack signal
@@ -417,9 +347,9 @@ SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(
     }
 
     // Take mutex in parameter if exists
-    if ((NULL != pMutex) && (NULL != (*pMutex)))
+    if (NULL != mutex)
     {
-        configASSERT(xQueueTakeMutexRecursive(*pMutex, portMAX_DELAY) == pdPASS);
+        configASSERT(xQueueTakeMutexRecursive(mutex, portMAX_DELAY) == pdPASS);
     }
     return result;
 }
@@ -430,8 +360,18 @@ SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != cond)
     {
-        memset(cond, 0, sizeof(SOPC_Condition));
-        resSOPC = P_SYNCHRO_InitConditionVariable(cond, MAX_WAITERS);
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(1, sizeof(*condI));
+
+        if (SOPC_INVALID_COND == condI)
+        {
+            resSOPC = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            P_SYNCHRO_InitConditionVariable(condI, MAX_WAITERS);
+            resSOPC = SOPC_STATUS_OK;
+        }
+        *cond = condI;
     }
     return resSOPC;
 }
@@ -442,28 +382,40 @@ SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != cond)
     {
-        resSOPC = P_SYNCHRO_ClearConditionVariable(cond);
-        memset(cond, 0, sizeof(SOPC_Condition));
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+
+        P_SYNCHRO_ClearConditionVariable(condI);
+        resSOPC = SOPC_STATUS_OK;
+        SOPC_Free(condI);
+        *cond = SOPC_INVALID_COND;
     }
     return resSOPC;
 }
 
 SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
 {
-    return P_SYNCHRO_SignalConditionVariable(cond, true);
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (cond != NULL)
+    {
+        status = P_SYNCHRO_SignalConditionVariable(*cond, true);
+    }
+    return status;
 }
 
 // Must be called between lock and unlock of Mutex used to wait on condition
 SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut, uint32_t milliSecs)
 {
     SOPC_ReturnStatus resSOPC = SOPC_STATUS_INVALID_PARAMETERS;
-    SemaphoreHandle_t* pFreeRtosMutex = mut;
 
-    if (NULL != cond && NULL != mut && NULL != (*mut))
+    if (NULL != cond && NULL != mut)
     {
-        pFreeRtosMutex = ((SemaphoreHandle_t*) mut);
-        resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(cond,                //
-                                                              pFreeRtosMutex,      //
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
+        resSOPC = P_SYNCHRO_UnlockAndWaitForConditionVariable(condI,               //
+                                                              mutI->handle,        //
                                                               APP_DEFAULT_SIGNAL,  //
                                                               APP_CLEARING_SIGNAL, //
                                                               milliSecs);          //
@@ -480,89 +432,75 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex*
 /*Create recursive mutex*/
 SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 {
-    SemaphoreHandle_t freeRtosMutex = NULL;
+    SOPC_ASSERT(NULL != mut);
+    *mut = SOPC_INVALID_MUTEX;
 
-    if (NULL == mut)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+    struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(1, sizeof(*mutI));
+    SOPC_ASSERT(NULL != mutI);
 
-    freeRtosMutex = xSemaphoreCreateRecursiveMutex();
-    if (NULL == freeRtosMutex)
-    {
-        *mut = NULL;
-        return SOPC_STATUS_OUT_OF_MEMORY;
-    }
-    else
-    {
-        *mut = (SOPC_Mutex) freeRtosMutex;
-        return SOPC_STATUS_OK;
-    }
+    mutI->handle = xSemaphoreCreateRecursiveMutex();
+    SOPC_ASSERT(NULL != mutI->handle);
+
+    *mut = mutI;
+    return SOPC_STATUS_OK;
 }
 
 /*Destroy recursive mutex*/
 SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
 {
-    SemaphoreHandle_t freeRtosMutex = NULL;
-
-    if ((NULL == mut) || (NULL == (*mut)))
+    SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
+    if (mut != NULL)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        vSemaphoreDelete(&mutI->handle);
+        SOPC_Free(mutI);
+        *mut = SOPC_INVALID_MUTEX;
+        status = SOPC_STATUS_OK;
     }
-
-    freeRtosMutex = (SemaphoreHandle_t)(*mut);
-    vSemaphoreDelete(freeRtosMutex);
-    *mut = NULL;
-
-    return SOPC_STATUS_OK;
+    return status;
 }
 
 // Lock recursive mutex
 SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
 {
-    BaseType_t resRtos = pdPASS;
-    SemaphoreHandle_t freeRtosMutex = NULL;
-
-    if ((NULL == mut) || (NULL == (*mut)))
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (mut != NULL)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
 
-    freeRtosMutex = *((SemaphoreHandle_t*) (mut));
-
-    resRtos = xQueueTakeMutexRecursive(freeRtosMutex, portMAX_DELAY);
-    if (pdPASS == resRtos)
-    {
-        return SOPC_STATUS_OK;
+        const BaseType_t resRtos = xQueueTakeMutexRecursive(mutI->handle, portMAX_DELAY);
+        if (pdPASS == resRtos)
+        {
+            result = SOPC_STATUS_OK;
+        }
+        else
+        {
+            result = SOPC_STATUS_NOK;
+        }
     }
-    else
-    {
-        return SOPC_STATUS_NOK;
-    }
+    return result;
 }
 
 // Unlock recursive mutex
 SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
 {
-    SemaphoreHandle_t freeRtosMutex = NULL;
-    BaseType_t resRtos = pdPASS;
-    SOPC_ReturnStatus result = SOPC_STATUS_OK;
-
-    if ((NULL == mut) || (NULL == (*mut)))
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (mut != NULL)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
 
-    freeRtosMutex = *((SemaphoreHandle_t*) (mut));
-    resRtos = xQueueGiveMutexRecursive(freeRtosMutex);
-    if (pdPASS == resRtos)
-    {
-        result = SOPC_STATUS_OK;
+        const BaseType_t resRtos = xQueueGiveMutexRecursive(mutI->handle);
+        if (pdPASS == resRtos)
+        {
+            result = SOPC_STATUS_OK;
+        }
+        else
+        {
+            result = SOPC_STATUS_NOK;
+        }
     }
-    else
-    {
-        result = SOPC_STATUS_NOK;
-    }
-
     return result;
 }

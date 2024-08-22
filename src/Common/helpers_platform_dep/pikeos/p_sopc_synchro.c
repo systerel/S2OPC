@@ -21,6 +21,7 @@
 
 #include "p_sopc_synchro.h"
 
+#include "sopc_assert.h"
 #include "sopc_enums.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
@@ -30,7 +31,7 @@ SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != cond)
     {
-        struct SOPC_Condition_Impl* condI = SOPC_Malloc(sizeof(*condI));
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(1, sizeof(*condI));
 
         if (SOPC_INVALID_COND == condI)
         {
@@ -65,7 +66,7 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
     SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
     return P4_E_OK == p4_cond_broadcast(&condI->cond) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
@@ -75,7 +76,7 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
     SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != mut)
     {
-        struct SOPC_Mutex_Impl* mutI = SOPC_Malloc(sizeof(*mutI));
+        struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(1, sizeof(*mutI));
 
         if (SOPC_INVALID_MUTEX == mutI)
         {
@@ -109,7 +110,7 @@ SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
     SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
     return P4_E_OK == p4_mutex_lock(&mutI->mutex, P4_TIMEOUT_INFINITE) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
@@ -121,9 +122,9 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
     SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
-    return P4_E_OK == p4_mutex_unlock(mut) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    return P4_E_OK == p4_mutex_unlock(&mutI->mutex) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut, uint32_t milliSecs)
@@ -133,8 +134,8 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
-    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
     SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
 
     P4_timeout_t timeout = milliSecs * 1000000; /* P4_timeout_t has nanosecond resolution */

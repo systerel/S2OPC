@@ -26,9 +26,15 @@
 
 #include <windows.h>
 
-typedef CRITICAL_SECTION SOPC_Mutex;
+struct SOPC_Mutex_Impl
+{
+    CRITICAL_SECTION mutex;
+};
 
-typedef CONDITION_VARIABLE SOPC_Condition;
+struct SOPC_Condition_Impl
+{
+    CONDITION_VARIABLE cond;
+};
 
 typedef void* SOPCThreadStartFct(void*);
 

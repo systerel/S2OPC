@@ -30,10 +30,20 @@ typedef HRESULT(WINAPI* pSetThreadDescription)(HANDLE, PCWSTR);
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (cond != NULL)
+    if (NULL != cond)
     {
-        InitializeConditionVariable(cond);
-        status = SOPC_STATUS_OK;
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(sizeof(*condI), 1);
+
+        if (SOPC_INVALID_COND == condI)
+        {
+            status = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            InitializeConditionVariable(&condI->cond);
+            status = SOPC_STATUS_OK;
+        }
+        *cond = condI;
     }
     return status;
 }
@@ -44,6 +54,8 @@ SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
     if (cond != NULL)
     {
         status = SOPC_STATUS_OK;
+        SOPC_Free(*cond);
+        *cond = SOPC_INVALID_COND;
     }
     return status;
 }
@@ -53,7 +65,10 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL)
     {
-        WakeAllConditionVariable(cond);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+
+        WakeAllConditionVariable(&condI->cond);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -64,8 +79,12 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        InitializeCriticalSection(mut);
+        struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(sizeof(*mutI), 1);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+
+        InitializeCriticalSection(&mutI->mutex);
         status = SOPC_STATUS_OK;
+        *mut = mutI;
     }
     return status;
 }
@@ -75,7 +94,9 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        DeleteCriticalSection(mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        DeleteCriticalSection(&mutI->mutex);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -86,7 +107,9 @@ SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        EnterCriticalSection(mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        EnterCriticalSection(&mutI->mutex);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -97,7 +120,9 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        LeaveCriticalSection(mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        LeaveCriticalSection(&mutI->mutex);
         status = SOPC_STATUS_OK;
     }
     return status;
@@ -106,9 +131,13 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
 SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex* mut)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    if (cond != NULL && mut != NULL)
+    if (NULL != cond && NULL != mut)
     {
-        BOOL res = SleepConditionVariableCS(cond, mut, INFINITE);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
+        BOOL res = SleepConditionVariableCS(&condI->cond, &mutI->mutex, INFINITE);
         if (res == 0)
         {
             // Possible to retrieve error with GetLastError (see msdn doc)
@@ -127,7 +156,11 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (cond != NULL && mut != NULL && milliSecs > 0)
     {
-        BOOL res = SleepConditionVariableCS(cond, mut, (DWORD) milliSecs);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
+        BOOL res = SleepConditionVariableCS(&condI->cond, &mutI->mutex, (DWORD) milliSecs);
         if (res == 0)
         {
             status = SOPC_STATUS_NOK;

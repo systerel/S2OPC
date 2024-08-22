@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "sopc_enums.h"
+#include "sopc_mutexes.h"
 
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -52,28 +53,16 @@ typedef enum T_CONDITION_VARIABLE_STATUS
     E_COND_VAR_STATUS_SIZEOF = INT32_MAX
 } eConditionVariableStatus;
 
-typedef struct tConditionVariable
+struct SOPC_Condition_Impl
 {
     eConditionVariableStatus status;     // Status condition variable
     SemaphoreHandle_t handleLockCounter; // Critical section token
     tUtilsList taskList;                 // List of task with signal expected, calling unlock and wait
-} SOPC_Condition;
+};
 
-SOPC_Condition* P_SYNCHRO_CreateConditionVariable(uint16_t wMaxRDV);
-void P_SYNCHRO_DestroyConditionVariable(SOPC_Condition** ppv);
-SOPC_ReturnStatus P_SYNCHRO_InitConditionVariable(SOPC_Condition* pv, uint16_t wMaxWaiters);
-SOPC_ReturnStatus P_SYNCHRO_ClearConditionVariable(SOPC_Condition* pv);
-SOPC_ReturnStatus P_SYNCHRO_SignalAllConditionVariable(SOPC_Condition* pv);
-SOPC_ReturnStatus P_SYNCHRO_SignalConditionVariable(SOPC_Condition* pConditionVariable, // Signal to broadcaset
-                                                    bool bSignalAll); // Signal one (false) or all (true)
-SOPC_ReturnStatus P_SYNCHRO_UnlockAndWaitForConditionVariable(SOPC_Condition* pv,
-                                                              QueueHandle_t* pMutex,
-                                                              uint32_t uwSignal,
-                                                              uint32_t uwClearSignal,
-                                                              uint32_t uwTimeOutMs);
-
-/*****Public s2opc condition variable and mutex api*****/
-
-typedef QueueHandle_t SOPC_Mutex;
+struct SOPC_Mutex_Impl
+{
+    QueueHandle_t handle;
+};
 
 #endif

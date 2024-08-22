@@ -32,7 +32,10 @@
 
 /* s2opc includes */
 
+#include "sopc_assert.h"
 #include "sopc_enums.h"
+#include "sopc_mem_alloc.h"
+#include "sopc_mutexes.h"
 
 /* platform dep includes */
 
@@ -58,12 +61,24 @@ static inline const SOPC_ReturnStatus P_SYNCHRO_kResultToSopcStatus(const int kR
 /***************************************************/
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
-    if (NULL == cond)
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != cond)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(1, sizeof(*condI));
 
-    return P_SYNCHRO_kResultToSopcStatus(k_condvar_init(cond));
+        if (SOPC_INVALID_COND == condI)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            result = P_SYNCHRO_kResultToSopcStatus(k_condvar_init(&condI->cond));
+            // unrecoverable issue if CONDVAR cannot be created
+            SOPC_ASSERT(result == SOPC_STATUS_OK);
+        }
+        *cond = condI;
+    }
+    return result;
 }
 
 /***************************************************/
@@ -73,7 +88,8 @@ SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    // Nothing to do.
+    SOPC_Free(*cond);
+    *cond = SOPC_INVALID_COND;
     return SOPC_STATUS_OK;
 }
 
@@ -85,19 +101,34 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    k_condvar_broadcast(cond);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+    SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+
+    k_condvar_broadcast(&condI->cond);
     return SOPC_STATUS_OK;
 }
 
 /***************************************************/
 SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 {
-    if (NULL == mut)
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != mut)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
+        struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(1, sizeof(*mutI));
 
-    return P_SYNCHRO_kResultToSopcStatus(k_mutex_init(mut));
+        if (SOPC_INVALID_MUTEX == mutI)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            result = P_SYNCHRO_kResultToSopcStatus(k_mutex_init(&mutI->mutex));
+            // unrecoverable issue if CONDVAR cannot be created
+            SOPC_ASSERT(result == SOPC_STATUS_OK);
+        }
+        *mut = mutI;
+    }
+    return result;
 }
 
 /***************************************************/
@@ -107,7 +138,8 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    // Nothing to do.
+    SOPC_Free(*mut);
+    *mut = SOPC_INVALID_MUTEX;
     return SOPC_STATUS_OK;
 }
 
@@ -118,7 +150,10 @@ SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return P_SYNCHRO_kResultToSopcStatus(k_mutex_lock(mut, K_FOREVER));
+
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+    SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+    return P_SYNCHRO_kResultToSopcStatus(k_mutex_lock(&mutI->mutex, K_FOREVER));
 }
 
 /***************************************************/
@@ -128,7 +163,10 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return P_SYNCHRO_kResultToSopcStatus(k_mutex_unlock(mut));
+
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+    SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+    return P_SYNCHRO_kResultToSopcStatus(k_mutex_unlock(&mutI->mutex));
 }
 
 /***************************************************/
@@ -138,8 +176,13 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+    SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
     const k_timeout_t kWait = K_MSEC(milliSecs);
-    return P_SYNCHRO_kResultToSopcStatus(k_condvar_wait(cond, mut, kWait));
+    return P_SYNCHRO_kResultToSopcStatus(k_condvar_wait(&condI->cond, &mutI->mutex, kWait));
 }
 
 /***************************************************/
@@ -149,5 +192,9 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex*
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return P_SYNCHRO_kResultToSopcStatus(k_condvar_wait(cond, mut, K_FOREVER));
+
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*) (*mut);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*) (*cond);
+    SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+    return P_SYNCHRO_kResultToSopcStatus(k_condvar_wait(&condI->cond, &mutI->mutex, K_FOREVER));
 }
