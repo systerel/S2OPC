@@ -20,17 +20,30 @@
 #include <p4.h>
 
 #include "p_sopc_synchro.h"
+
 #include "sopc_enums.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
-    if (NULL == cond)
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != cond)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        struct SOPC_Condition_Impl* condI = SOPC_Malloc(sizeof(*condI));
+
+        if (SOPC_INVALID_COND == condI)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            p4_cond_init(&condI->cond, 0);
+            result = SOPC_STATUS_OK;
+        }
+        *cond = condI;
     }
-    p4_cond_init(cond, 0);
-    return SOPC_STATUS_OK;
+    return result;
 }
 
 SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
@@ -39,7 +52,9 @@ SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* Nothing to do */
+
+    SOPC_Free(*cond);
+    *cond = SOPC_INVALID_COND;
     return SOPC_STATUS_OK;
 }
 
@@ -49,17 +64,31 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    return P4_E_OK == p4_cond_broadcast(cond) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+    SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+    return P4_E_OK == p4_cond_broadcast(&condI->cond) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 {
-    if (NULL == mut)
+    SOPC_ReturnStatus result = SOPC_STATUS_INVALID_PARAMETERS;
+    if (NULL != mut)
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        struct SOPC_Mutex_Impl* mutI = SOPC_Malloc(sizeof(*mutI));
+
+        if (SOPC_INVALID_MUTEX == mutI)
+        {
+            result = SOPC_STATUS_OUT_OF_MEMORY;
+        }
+        else
+        {
+            p4_mutex_init(&mutI->mutex, P4_MUTEX_RECURSIVE);
+            result = SOPC_STATUS_OK;
+        }
+        *mut = mutI;
     }
-    p4_mutex_init(mut, P4_MUTEX_RECURSIVE);
-    return SOPC_STATUS_OK;
+    return result;
 }
 
 SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
@@ -68,7 +97,8 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    /* Nothing to do */
+    SOPC_Free(*mut);
+    *mut = SOPC_INVALID_MUTEX;
     return SOPC_STATUS_OK;
 }
 
@@ -79,7 +109,9 @@ SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return P4_E_OK == p4_mutex_lock(mut, P4_TIMEOUT_INFINITE) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+    SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+    return P4_E_OK == p4_mutex_lock(&mutI->mutex, P4_TIMEOUT_INFINITE) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
 SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
@@ -89,6 +121,8 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+    SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
     return P4_E_OK == p4_mutex_unlock(mut) ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
@@ -98,8 +132,13 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
+
+    struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+    struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+    SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
     P4_timeout_t timeout = milliSecs * 1000000; /* P4_timeout_t has nanosecond resolution */
-    P4_e_t res = p4_cond_wait(cond, mut, timeout);
+    P4_e_t res = p4_cond_wait(&condI->cond, &mutI->mutex, timeout);
     if (P4_E_TIMEOUT == res)
     {
         return SOPC_STATUS_TIMEOUT;

@@ -22,9 +22,20 @@
 
 #include <pthread.h>
 
-typedef pthread_mutex_t SOPC_Mutex;
+#include "sopc_threads.h"
+#include "sopc_mutexes.h"
 
-typedef pthread_cond_t SOPC_Condition;
+/** The linux actual implementation of Mutex */
+struct SOPC_Mutex_Impl
+{
+    pthread_mutex_t mutex;
+};
+
+/** The linux actual implementation of Condition variables */
+struct SOPC_Condition_Impl
+{
+    pthread_cond_t cond;
+};
 
 typedef pthread_t SOPC_Thread;
 

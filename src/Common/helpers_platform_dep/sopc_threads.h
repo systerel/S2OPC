@@ -18,23 +18,38 @@
  */
 
 /**
- *  \file
- *
- *  \brief A platform independent API to use threads
+ * \file The platform-specific implementation for all Thread-related services. Each platform implementation
+ *  shall provide the actual definition of:
+ * - \ref SOPC_Thread for threads (e.g. pthread_t for linux)
+ * - All functions defined in this header file.
  */
 
 #ifndef SOPC_THREADS_H_
 #define SOPC_THREADS_H_
 
-/**
- * The platform-specific implementation of "p_threads.h" shall provide the actual definition of
- * - \ref SOPC_Condition for Condition Variables  (e.g. pthread_mutex_t for LINUX)
- * - \ref SOPC_Mutex for Mutexes. (e.g. pthread_cond_t for LINUX)
- * - \ref SOPC_Thread for threads (e.g. pthread_t for linux)
- */
-#include "p_sopc_threads.h"
 #include "sopc_enums.h"
+#include "sopc_mutexes.h"
 
+/*****************************************************************************
+ *   Abstract interface types
+ *****************************************************************************/
+#if 0 // TODO JCH WIP
+/**
+ * \brief Provides a threading mechanism.
+ * \note The stack size of each thread is not configurable via the S2OPC API. Therefore, in the specific
+ *       case of embedded target with limited RAM, the implementation must provide an internal mechanism to
+ *       fine tune the thread stacks dimensioning.
+ * \note Each platform must provide the implementation of \ref SOPC_Thread and all related functions
+ * in \ref sopc_thread.h */
+typedef struct SOPC_Thread_Impl SOPC_Thread_Impl;
+typedef struct SOPC_Thread_Impl* SOPC_Thread_Impl;
+#else
+#include "p_sopc_threads.h"
+#endif
+
+/*****************************************************************************
+ *   Platform-dependant functions interfaces
+ *****************************************************************************/
 /**
  *  \brief Function to create a thread
  *

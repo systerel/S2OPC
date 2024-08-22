@@ -24,6 +24,7 @@
 
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
+#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
@@ -35,18 +36,23 @@
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int retCode = 0;
-    if (cond != NULL)
+    if (NULL != cond)
     {
-        retCode = pthread_cond_init(cond, NULL);
-        if (retCode == 0)
+        int retCode = 0;
+        struct SOPC_Condition_Impl* condI = SOPC_Malloc(sizeof(*condI));
+
+        if (SOPC_INVALID_COND == condI)
         {
-            status = SOPC_STATUS_OK;
+            status = SOPC_STATUS_OUT_OF_MEMORY;
         }
         else
         {
-            status = SOPC_STATUS_NOK;
+            retCode = pthread_cond_init(&condI->cond, NULL);
+            // unrecoverable issue if CONDVAR cannot be created
+            SOPC_ASSERT(retCode == 0);
+            status = SOPC_STATUS_OK;
         }
+        *cond = condI;
     }
     return status;
 }
@@ -54,18 +60,19 @@ SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
 SOPC_ReturnStatus SOPC_Condition_Clear(SOPC_Condition* cond)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
-    int retCode = 0;
     if (cond != NULL)
     {
-        retCode = pthread_cond_destroy(cond);
-        if (retCode == 0)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+
+        int retCode = pthread_cond_destroy(&condI->cond);
+        // unrecoverable issue if CONDVAR cannot be deleted.
+        // Note that if EBUSY is returned, this imply a software design issue.
+        SOPC_ASSERT(retCode == 0);
+
+        status = SOPC_STATUS_OK;
+        SOPC_Free(*cond);
+        *cond = SOPC_INVALID_COND;
     }
     return status;
 }
@@ -76,15 +83,11 @@ SOPC_ReturnStatus SOPC_Condition_SignalAll(SOPC_Condition* cond)
     int retCode = 0;
     if (cond != NULL)
     {
-        retCode = pthread_cond_broadcast(cond);
-        if (retCode == 0)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI); // see SOPC_Condition_Init
+
+        retCode = pthread_cond_broadcast(&condI->cond);
+        status = (retCode == 0 ? SOPC_STATUS_OK : SOPC_STATUS_NOK);
     }
     return status;
 }
@@ -95,6 +98,8 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
 
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     pthread_mutexattr_t attr;
+
+    *mut = SOPC_INVALID_MUTEX;
 
     if (pthread_mutexattr_init(&attr) != 0)
     {
@@ -107,10 +112,15 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
     }
     if (SOPC_STATUS_OK == status)
     {
-        if (pthread_mutex_init(mut, &attr) != 0)
+        struct SOPC_Mutex_Impl* mutI = SOPC_Malloc(sizeof(*mutI));
+
+        if (pthread_mutex_init(&mutI->mutex, &attr) != 0)
         {
+            SOPC_Free(mutI);
+            mutI = SOPC_INVALID_MUTEX;
             status = SOPC_STATUS_NOK;
         }
+        *mut = mutI;
     }
 
     pthread_mutexattr_destroy(&attr);
@@ -124,15 +134,15 @@ SOPC_ReturnStatus SOPC_Mutex_Clear(SOPC_Mutex* mut)
     int retCode = 0;
     if (mut != NULL)
     {
-        retCode = pthread_mutex_destroy(mut);
-        if (retCode == 0)
-        {
-            status = SOPC_STATUS_OK;
-        }
-        else
-        {
-            status = SOPC_STATUS_NOK;
-        }
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        retCode = pthread_mutex_destroy(&mutI->mutex);
+        // unrecoverable issue if MUTEX cannot be deleted.
+        // Note that if EBUSY is returned, this imply a software design issue.
+        SOPC_ASSERT(retCode == 0);
+        SOPC_Free(mutI);
+        *mut = SOPC_INVALID_MUTEX;
+        status = SOPC_STATUS_OK;
     }
     return status;
 }
@@ -143,7 +153,10 @@ SOPC_ReturnStatus SOPC_Mutex_Lock(SOPC_Mutex* mut)
     int retCode = 0;
     if (mut != NULL)
     {
-        retCode = pthread_mutex_lock(mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+
+        retCode = pthread_mutex_lock(&mutI->mutex);
         if (retCode == 0)
         {
             status = SOPC_STATUS_OK;
@@ -162,7 +175,9 @@ SOPC_ReturnStatus SOPC_Mutex_Unlock(SOPC_Mutex* mut)
     int retCode = 0;
     if (mut != NULL)
     {
-        retCode = pthread_mutex_unlock(mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+        SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
+        retCode = pthread_mutex_unlock(&mutI->mutex);
         if (retCode == 0)
         {
             status = SOPC_STATUS_OK;
@@ -181,7 +196,11 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndWaitCond(SOPC_Condition* cond, SOPC_Mutex*
     int retCode = 0;
     if (NULL != cond && NULL != mut)
     {
-        retCode = pthread_cond_wait(cond, mut);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
+        retCode = pthread_cond_wait(&condI->cond, &mutI->mutex);
         if (retCode == 0)
         {
             status = SOPC_STATUS_OK;
@@ -220,7 +239,11 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
             absoluteTimeout.tv_nsec = absoluteTimeout.tv_nsec + (long) nanoseconds;
         }
 
-        retCode = pthread_cond_timedwait(cond, mut, &absoluteTimeout);
+        struct SOPC_Mutex_Impl* mutI = (SOPC_Mutex_Impl*)(*mut);
+        struct SOPC_Condition_Impl* condI = (SOPC_Condition_Impl*)(*cond);
+        SOPC_ASSERT(SOPC_INVALID_COND != condI && SOPC_INVALID_MUTEX != mutI);
+
+        retCode = pthread_cond_timedwait(&condI->cond, &mutI->mutex, &absoluteTimeout);
         if (retCode == 0)
         {
             status = SOPC_STATUS_OK;
