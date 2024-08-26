@@ -100,7 +100,7 @@ static void test_thread_exec(void)
 
     SOPC_ASSERT(wait_value(&cpt, 1));
 
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     // Degraded behavior
@@ -108,7 +108,7 @@ static void test_thread_exec(void)
     SOPC_ASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Create(&thread, NULL, &cpt, "test_exec");
     SOPC_ASSERT(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     SOPC_ASSERT(status == SOPC_STATUS_NOK);
 }
 
@@ -133,7 +133,7 @@ static void test_thread_mutex(void)
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Mutex_Unlock(&gmutex));
     SOPC_ASSERT(wait_value(&cpt, 2));
 
-    SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
+    SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(&thread));
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Mutex_Clear(&gmutex));
 
     // Degraded behavior
@@ -165,7 +165,7 @@ static void test_thread_mutex_recursive(void)
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Mutex_Unlock(&gmutex));
     SOPC_ASSERT(wait_value(&cpt, 2));
 
-    SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(thread));
+    SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Thread_Join(&thread));
     SOPC_ASSERT(SOPC_STATUS_OK == SOPC_Mutex_Clear(&gmutex));
 }
 
@@ -242,7 +242,7 @@ static void test_thread_condvar(void)
     // Signal condition has changed
     status = SOPC_Condition_SignalAll(&gcond);
     // Wait thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
     // Check condition status after thread termination
     status = SOPC_Mutex_Lock(&gmutex);
@@ -278,7 +278,7 @@ static void test_thread_condvar(void)
     // Signal condition has changed
     status = SOPC_Condition_SignalAll(&gcond);
     // Wait for thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     status = SOPC_Mutex_Lock(&gmutex);
@@ -313,7 +313,7 @@ static void test_thread_condvar(void)
     // DO NOT SIGNAL CONDITION CHANGE
 
     // Wait thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     // Check timeout on condition occured

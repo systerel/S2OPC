@@ -56,7 +56,7 @@ static int32_t initialized = 0;
 static int32_t stop = 0;
 static bool timerCreationFailed = false;
 
-static SOPC_Thread cyclicEvalThread;
+static SOPC_Thread cyclicEvalThread = SOPC_INVALID_THREAD;
 
 static bool is_initialized(void)
 {
@@ -330,7 +330,7 @@ void SOPC_EventTimer_PreClear(void)
     {
         // Stop timer cyclic evaluation thread
         SOPC_Atomic_Int_Set(&stop, 1);
-        SOPC_Thread_Join(cyclicEvalThread);
+        SOPC_Thread_Join(&cyclicEvalThread);
     }
 }
 

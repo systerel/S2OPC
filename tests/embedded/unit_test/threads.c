@@ -57,7 +57,7 @@ void suite_test_thread_mutexes(int* index)
 {
     PRINT("\nTEST %d: threads and mutexes \n", *index);
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    SOPC_Condition cond;
+    SOPC_Condition cond = SOPC_INVALID_COND;
     status = SOPC_Condition_Init(&cond);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test1 : ok\n");
@@ -66,7 +66,7 @@ void suite_test_thread_mutexes(int* index)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test2 : ok\n");
 
-    SOPC_Mutex mutex;
+    SOPC_Mutex mutex = SOPC_INVALID_MUTEX;
     status = SOPC_Mutex_Initialization(&mutex);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test3 : ok\n");
@@ -79,42 +79,42 @@ void suite_test_thread_mutexes(int* index)
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test5 : ok\n");
 
-    SOPC_Thread p1 = 0;
+    SOPC_Thread p1 = SOPC_INVALID_THREAD;
     int count = 2;
     status = SOPC_Thread_CreatePrioritized(&p1, (void*) test_thread_fct, &count, 40, "Test_Thread1");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test6 : ok\n");
 
-    status = SOPC_Thread_Join(p1);
+    status = SOPC_Thread_Join(&p1);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     PRINT("Test7 : ok\n");
 
-    SOPC_Thread p2 = 0;
-    status = SOPC_Thread_Join(p2);
+    SOPC_Thread p2 = SOPC_INVALID_THREAD;
+    status = SOPC_Thread_Join(&p2);
     SOPC_ASSERT(status != SOPC_STATUS_OK);
     PRINT("Test8 : ok\n");
 
-    SOPC_Thread p3, p4 = 0;
+    SOPC_Thread p3 = SOPC_INVALID_THREAD, p4 = SOPC_INVALID_THREAD;
     int count3 = 2;
     int count4 = 2;
     status = SOPC_Thread_CreatePrioritized(&p3, (void*) test_thread_fct, &count3, 40, "Test_Thread2");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = SOPC_Thread_CreatePrioritized(&p4, (void*) test_thread_fct, &count4, 40, "Test_Thread3");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_Thread_Join(p3);
-    SOPC_Thread_Join(p4);
+    SOPC_Thread_Join(&p3);
+    SOPC_Thread_Join(&p4);
     PRINT("Test9 : ok\n");
 
-    SOPC_Thread p5, p6;
-    SOPC_Mutex mut;
+    SOPC_Thread p5 = SOPC_INVALID_THREAD, p6 = SOPC_INVALID_THREAD;
+    SOPC_Mutex mut = SOPC_INVALID_MUTEX;
     status = SOPC_Mutex_Initialization(&mut);
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = SOPC_Thread_CreatePrioritized(&p5, (void*) test_thread_fct_mutexes, &mut, 40, "Test_Thread4");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
     status = SOPC_Thread_CreatePrioritized(&p6, (void*) test_thread_fct_mutexes, &mut, 40, "Test_Thread5");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
-    SOPC_Thread_Join(p5);
-    SOPC_Thread_Join(p6);
+    SOPC_Thread_Join(&p5);
+    SOPC_Thread_Join(&p6);
     PRINT("Test10 : ok\n");
     *index += 1;
 }

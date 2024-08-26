@@ -18,6 +18,7 @@
  */
 
 #include <stdbool.h>
+#include <stddef.h>
 
 #include "sopc_assert.h"
 #include "sopc_atomic.h"
@@ -53,7 +54,7 @@ static struct
                      .timeout.callback = NULL,
                      .timeout.pContext = NULL,
                      .timeout.period_ms = 0,
-                     .thread = 0};
+                     .thread = SOPC_INVALID_THREAD};
 
 static void* SOPC_Sub_SocketsMgr_ThreadLoop(void* nullData)
 {
@@ -207,7 +208,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     // stop the reception thread
     SOPC_Atomic_Int_Set(&receptionThread.stopFlag, true);
 
-    SOPC_Thread_Join(receptionThread.thread);
+    SOPC_Thread_Join(&receptionThread.thread);
 
     // set to null thread handle, because well joined
     receptionThread.thread = 0;

@@ -22,6 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "p_sopc_threads.h"
+
 #include "sopc_assert.h"
 #include "sopc_date_time.h"
 #include "sopc_mem_alloc.h"
@@ -39,7 +41,7 @@ SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
     if (NULL != cond)
     {
         int retCode = 0;
-        struct SOPC_Condition_Impl* condI = SOPC_Calloc(sizeof(*condI), 1);
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(1, sizeof(*condI));
 
         if (SOPC_INVALID_COND == condI)
         {
@@ -263,7 +265,7 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
     return status;
 }
 
-static inline SOPC_ReturnStatus create_thread(SOPC_Thread* thread,
+static inline SOPC_ReturnStatus create_thread(pthread_t* thread,
                                               pthread_attr_t* attr,
                                               void* (*startFct)(void*),
                                               void* startArgs,
@@ -309,7 +311,25 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    return create_thread(thread, NULL, startFct, startArgs, taskName);
+    SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
+
+    if (SOPC_INVALID_THREAD == threadImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
+    SOPC_ReturnStatus status = create_thread(&threadImpl->thread, NULL, startFct, startArgs, taskName);
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *thread = threadImpl;
+    }
+    else
+    {
+        SOPC_Free(threadImpl);
+    }
+
+    return status;
 }
 
 SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
@@ -321,6 +341,13 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
     if (NULL == thread || NULL == startFct || priority < 1 || priority > 99)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    struct SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
+
+    if (SOPC_INVALID_THREAD == threadImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
     }
 
     /* Initialize scheduling policy and priority */
@@ -361,18 +388,34 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (0 == ret)
     {
-        status = create_thread(thread, &attr, startFct, startArgs, taskName);
+        status = create_thread(&threadImpl->thread, &attr, startFct, startArgs, taskName);
+    }
+
+    if (SOPC_STATUS_OK == status)
+    {
+        *thread = threadImpl;
+    }
+    else
+    {
+        SOPC_Free(threadImpl);
     }
 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
+    if (NULL == thread)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (pthread_join(thread, NULL) == 0)
+    SOPC_Thread_Impl* threadImpl = *thread;
+    if (SOPC_INVALID_THREAD != threadImpl && pthread_join(threadImpl->thread, NULL) == 0)
     {
         status = SOPC_STATUS_OK;
+        SOPC_Free(threadImpl);
+        *thread = SOPC_INVALID_THREAD;
     }
     return status;
 }

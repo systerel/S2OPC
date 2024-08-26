@@ -31,7 +31,7 @@
 #include "sopc_assert.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
-#include "sopc_mutexes.h"
+#include "sopc_threads.h"
 
 #define SHELL_COMMAND_SIZE 256u
 #define KEY_ESC (0x1BU)

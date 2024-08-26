@@ -23,6 +23,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <pthread.h>
+
 #include "cache.h"
 #include "sopc_assert.h"
 #include "sopc_common.h"

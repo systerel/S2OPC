@@ -28,10 +28,16 @@
 #include <p4.h>
 #include <p4ext_threads.h>
 
-#include "p_sopc_synchro.h"
 #include "sopc_enums.h"
 
-typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
-typedef tThreadWks* SOPC_Thread;        // Handle workspace
+typedef void* pFct(void*);
+
+struct SOPC_Thread_Impl
+{
+    P4_thr_t thread;         /* Pikeos Thread number */
+    pFct* pStartFct;         /* External user callback */
+    void* pStartArgs;        /* External user parameter */
+    P4_barrier_t joinSignal; /* Barrier to announce that thread is finished used by join */
+};
 
 #endif // SOPC_PIKEOS_P_THREADS_H_

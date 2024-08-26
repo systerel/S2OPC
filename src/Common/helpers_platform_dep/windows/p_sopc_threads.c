@@ -25,6 +25,8 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
+#include "p_sopc_threads.h"
+
 typedef HRESULT(WINAPI* pSetThreadDescription)(HANDLE, PCWSTR);
 
 SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
@@ -32,7 +34,7 @@ SOPC_ReturnStatus SOPC_Condition_Init(SOPC_Condition* cond)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (NULL != cond)
     {
-        struct SOPC_Condition_Impl* condI = SOPC_Calloc(sizeof(*condI), 1);
+        struct SOPC_Condition_Impl* condI = SOPC_Calloc(1, sizeof(*condI));
 
         if (SOPC_INVALID_COND == condI)
         {
@@ -79,7 +81,7 @@ SOPC_ReturnStatus SOPC_Mutex_Initialization(SOPC_Mutex* mut)
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
     if (mut != NULL)
     {
-        struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(sizeof(*mutI), 1);
+        struct SOPC_Mutex_Impl* mutI = SOPC_Calloc(1, sizeof(*mutI));
         SOPC_ASSERT(SOPC_INVALID_MUTEX != mutI); // See SOPC_Mutex_Initialization
 
         InitializeCriticalSection(&mutI->mutex);
@@ -180,7 +182,7 @@ SOPC_ReturnStatus SOPC_Mutex_UnlockAndTimedWaitCond(SOPC_Condition* cond, SOPC_M
 static DWORD WINAPI SOPC_Thread_StartFct(LPVOID args)
 {
     SOPC_ASSERT(args != NULL);
-    SOPC_Thread* thread = (SOPC_Thread*) args;
+    SOPC_Thread thread = (SOPC_Thread) args;
     void* returnValue = thread->startFct(thread->args);
     SOPC_ASSERT(NULL == returnValue);
     return 0;
@@ -191,28 +193,29 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
                                      void* startArgs,
                                      const char* taskName)
 {
+    if (NULL == thread || NULL == startFct)
+    {
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+
+    SOPC_Thread_Impl* threadImpl = SOPC_Calloc(1, sizeof(*threadImpl));
+
+    if (SOPC_INVALID_THREAD == threadImpl)
+    {
+        return SOPC_STATUS_OUT_OF_MEMORY;
+    }
+
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     DWORD threadId = 0;
 
-    if (NULL == thread)
-    {
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    if (NULL == startFct)
-    {
-        thread->thread = NULL;
-        return SOPC_STATUS_INVALID_PARAMETERS;
-    }
-
-    thread->args = startArgs;
-    thread->startFct = startFct;
-    thread->thread = CreateThread(NULL, // default security attributes
-                                  0,    // use default stack size
-                                  SOPC_Thread_StartFct, thread,
-                                  0, // use default creation flags
-                                  &threadId);
-    if (NULL == thread->thread)
+    threadImpl->args = startArgs;
+    threadImpl->startFct = startFct;
+    threadImpl->thread = CreateThread(NULL, // default security attributes
+                                      0,    // use default stack size
+                                      SOPC_Thread_StartFct, threadImpl,
+                                      0, // use default creation flags
+                                      &threadId);
+    if (NULL == threadImpl->thread)
     {
         status = SOPC_STATUS_NOK;
     }
@@ -234,7 +237,7 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
 
             if (0 == ret)
             {
-                HRESULT result = funcAddress(thread->thread, wcstr);
+                HRESULT result = funcAddress(threadImpl->thread, wcstr);
                 if (SUCCEEDED(result))
                 {
                     status = SOPC_STATUS_OK;
@@ -256,19 +259,34 @@ SOPC_ReturnStatus SOPC_Thread_Create(SOPC_Thread* thread,
             status = SOPC_STATUS_OK;
         }
     }
+    if (SOPC_STATUS_OK == status)
+    {
+        *thread = threadImpl;
+    }
+    else
+    {
+        SOPC_Free(threadImpl);
+    }
 
     return status;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
-    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
-    if (thread.thread != NULL)
+    if (NULL == thread)
     {
-        DWORD retCode = WaitForSingleObject(thread.thread, INFINITE);
+        return SOPC_STATUS_INVALID_PARAMETERS;
+    }
+    SOPC_ReturnStatus status = SOPC_STATUS_NOK;
+    SOPC_Thread_Impl* threadImpl = *thread;
+    if (SOPC_INVALID_THREAD != threadImpl && threadImpl->thread != NULL)
+    {
+        DWORD retCode = WaitForSingleObject(threadImpl->thread, INFINITE);
         if (WAIT_OBJECT_0 == retCode)
         {
-            thread.thread = NULL;
+            threadImpl->thread = NULL;
+            SOPC_Free(threadImpl);
+            *thread = SOPC_INVALID_THREAD;
             status = SOPC_STATUS_OK;
         }
     }

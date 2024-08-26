@@ -2171,7 +2171,7 @@ START_TEST(test_async_queue_threads)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five));
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(&thread));
     ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&params.success));
 
     // Nominal behavior of async queue FIFO (non blocking dequeue)
@@ -2184,7 +2184,7 @@ START_TEST(test_async_queue_threads)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &three));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &four));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_AsyncQueue_BlockingEnqueue(queue, (void*) &five));
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(&thread));
     ck_assert_int_eq(1, SOPC_Atomic_Int_Get(&params.success));
 
     SOPC_AsyncQueue_Free(&queue);

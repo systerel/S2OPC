@@ -80,18 +80,20 @@ static void* test_thread_mutex_recursive_fct(void* args)
 
 START_TEST(test_thread_exec)
 {
-    SOPC_Thread thread;
+    SOPC_Thread thread = SOPC_INVALID_THREAD;
     int32_t cpt = 0;
     // Nominal behavior
     SOPC_ReturnStatus status = SOPC_Thread_Create(&thread, test_thread_exec_fct, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_OK);
+    ck_assert_ptr_ne(SOPC_INVALID_THREAD, thread);
 
     SOPC_TimeReference t0 = SOPC_TimeReference_GetCurrent();
 
     ck_assert(wait_value(&cpt, 1));
 
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_OK);
+    ck_assert_ptr_eq(SOPC_INVALID_THREAD, thread);
     SOPC_TimeReference t1 = SOPC_TimeReference_GetCurrent();
 
     // Check that t1 >= t0 + Thr_Sleep_Time_ms
@@ -102,8 +104,10 @@ START_TEST(test_thread_exec)
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
     status = SOPC_Thread_Create(&thread, NULL, &cpt, "test_exec");
     ck_assert(status == SOPC_STATUS_INVALID_PARAMETERS);
-    status = SOPC_Thread_Join(thread);
+    ck_assert_ptr_eq(SOPC_INVALID_THREAD, thread);
+    status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_NOK);
+    ck_assert_ptr_eq(SOPC_INVALID_THREAD, thread);
 }
 END_TEST
 
@@ -128,7 +132,7 @@ START_TEST(test_thread_mutex)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&gmutex));
     ck_assert(wait_value(&cpt, 2));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(&thread));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&gmutex));
 
     // Degraded behavior
@@ -162,7 +166,7 @@ START_TEST(test_thread_mutex_recursive)
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Unlock(&gmutex));
     ck_assert(wait_value(&cpt, 2));
 
-    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(thread));
+    ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Thread_Join(&thread));
     ck_assert_int_eq(SOPC_STATUS_OK, SOPC_Mutex_Clear(&gmutex));
 }
 END_TEST
@@ -240,7 +244,7 @@ START_TEST(test_thread_condvar)
     // Signal condition has changed
     status = SOPC_Condition_SignalAll(&gcond);
     // Wait thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_OK);
     // Check condition status after thread termination
     status = SOPC_Mutex_Lock(&gmutex);
@@ -276,7 +280,7 @@ START_TEST(test_thread_condvar)
     // Signal condition has changed
     status = SOPC_Condition_SignalAll(&gcond);
     // Wait for thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_OK);
 
     status = SOPC_Mutex_Lock(&gmutex);
@@ -311,7 +315,7 @@ START_TEST(test_thread_condvar)
     // DO NOT SIGNAL CONDITION CHANGE
 
     // Wait thread termination
-    status = SOPC_Thread_Join(thread);
+    status = SOPC_Thread_Join(&thread);
     ck_assert(status == SOPC_STATUS_OK);
 
     // Check timeout on condition occured

@@ -37,6 +37,10 @@ struct SOPC_Condition_Impl
     pthread_cond_t cond;
 };
 
-typedef pthread_t SOPC_Thread;
+/** The linux actual implementation of Thread variables */
+struct SOPC_Thread_Impl
+{
+    pthread_t thread;
+};
 
 #endif /* SOPC_P_THREADS_H_ */

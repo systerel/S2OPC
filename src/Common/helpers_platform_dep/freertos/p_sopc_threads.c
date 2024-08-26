@@ -32,6 +32,7 @@
 #include "sopc_enums.h"
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
+#include "sopc_threads.h"
 
 #include "p_sopc_synchronisation.h" /* synchronisation include */
 #include "p_sopc_threads.h"         /* private thread include */
@@ -52,16 +53,17 @@ typedef struct T_THREAD_ARGS
     void* ptrArgs;   // External user callback parameters
 } tThreadArgs;
 
-typedef struct T_THREAD_WKS
+struct SOPC_Thread_Impl
+
 {
     TaskHandle_t handleTask;        // Handle freeRtos task
     SemaphoreHandle_t signalJoined; // Task received a join call
     tThreadArgs args;
-} tThreadWks;
+};
 
 /*****Private global definition*****/
 static SemaphoreHandle_t gMutex; // Critical section
-static tThreadWks gThreads[MAX_THREADS];
+static SOPC_Thread_Impl gThreads[MAX_THREADS];
 
 /*****Private thread api*****/
 static void criticalSectionIn(void)
@@ -80,10 +82,10 @@ static inline void criticalSectionOut(void)
     xSemaphoreGive(gMutex);
 }
 
-static tThreadWks* getFreeThread(void)
+static SOPC_Thread_Impl* getFreeThread(void)
 {
-    tThreadWks* result = NULL;
-    tThreadWks* pThr = gThreads;
+    SOPC_Thread_Impl* result = NULL;
+    SOPC_Thread_Impl* pThr = gThreads;
     for (size_t i = 0; i < MAX_THREADS && NULL == result; i++, pThr++)
     {
         if (pThr->handleTask == NO_FREERTOS_TASK)
@@ -94,10 +96,10 @@ static tThreadWks* getFreeThread(void)
     return result;
 }
 
-static bool checkThread(const tThreadWks* pThr)
+static bool checkThread(const SOPC_Thread_Impl* pThr)
 {
     bool result = false;
-    tThreadWks* pThrLoop = &gThreads[0];
+    SOPC_Thread_Impl* pThrLoop = &gThreads[0];
     for (size_t i = 0; i < MAX_THREADS && !result; i++, pThrLoop++)
     {
         if (pThrLoop == pThr)
@@ -108,7 +110,7 @@ static bool checkThread(const tThreadWks* pThr)
     return result;
 }
 
-static inline void freeThread(tThreadWks* pThr)
+static inline void freeThread(SOPC_Thread_Impl* pThr)
 {
     SOPC_ASSERT(NULL != pThr);
     if (NULL != pThr->signalJoined)
@@ -172,9 +174,9 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
         return SOPC_STATUS_INVALID_STATE;
     }
 
-    /* Create the tThreadWks structure and assign it to (*ptrWks) */
+    /* Create the SOPC_Thread_Impl structure and assign it to (*ptrWks) */
     criticalSectionIn();
-    tThreadWks* handleWks = getFreeThread();
+    struct SOPC_Thread_Impl* handleWks = getFreeThread();
 
     if (NULL == handleWks)
     {
@@ -221,13 +223,13 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Workspace
     return result;
 }
 
-SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* pHandle)
+SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread pHandle)
 {
     if (NULL == pHandle)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    tThreadWks* pThr = *pHandle;
+    SOPC_Thread_Impl* pThr = pHandle;
     if (!checkThread(pThr))
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
@@ -275,13 +277,17 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
 }
 
 // Join then destroy a thread
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_INVALID_PARAMETERS;
 
-    if (NULL != thread)
+    if (NULL != thread && SOPC_INVALID_THREAD != *thread)
     {
-        status = P_THREAD_Join(&thread);
+        status = P_THREAD_Join(*thread);
+    }
+    if (SOPC_STATUS_OK == status)
+    {
+        *thread = SOPC_INVALID_THREAD;
     }
 
     return status;

@@ -21,11 +21,9 @@
 #define SOPC_P_THREADS_H_
 
 #include "p_sopc_synchronisation.h"
+#include "sopc_threads.h"
 
 /*****Private thread api*****/
-
-typedef struct T_THREAD_WKS tThreadWks; // Thread workspace
-typedef tThreadWks* SOPC_Thread;        // Handle workspace
 
 typedef void tPtrFct(void*);
 
@@ -35,7 +33,7 @@ SOPC_ReturnStatus P_THREAD_Init(SOPC_Thread* ptrWks, // Handle workspace
                                 int priority,
                                 const char* taskName); // Callback debug joined, called before signal thread well ended
 
-SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread* p);
+SOPC_ReturnStatus P_THREAD_Join(SOPC_Thread p);
 
 void P_THREAD_Sleep(uint32_t milliseconds);
 

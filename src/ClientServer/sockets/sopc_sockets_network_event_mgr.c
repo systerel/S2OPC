@@ -327,7 +327,7 @@ static void SOPC_SocketsNetworkEventMgr_LoopThreadStop(void)
     /* Send signal to interrupt "select" and stop */
     SOPC_Socket_Close(&receptionThread.sigClientSock);
 
-    status = SOPC_Thread_Join(receptionThread.thread);
+    status = SOPC_Thread_Join(&receptionThread.thread);
     SOPC_ASSERT(status == SOPC_STATUS_OK);
 
     /* Close all sockets created to interrupt select */

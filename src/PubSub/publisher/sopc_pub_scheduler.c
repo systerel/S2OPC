@@ -188,7 +188,8 @@ static struct
                      .messages.length = 0,
                      .messages.current = 0,
                      .messages.array = NULL,
-                     .sequenceNumber = 1};
+                     .sequenceNumber = 1,
+                     .thPublisher = SOPC_INVALID_THREAD};
 
 /* This callback implements the main loop of the publisher which fetches data to publish, encode them and send them.
  * It computes when it should wake up and sleeps until then (if not past) */
@@ -226,7 +227,7 @@ static void SOPC_PubScheduler_Context_Clear(bool isPubThreadStarted)
     // Join the thread only if it has been created
     if (isPubThreadStarted)
     {
-        SOPC_Thread_Join(pubSchedulerCtx.thPublisher);
+        SOPC_Thread_Join(&pubSchedulerCtx.thPublisher);
     }
 
     /* Destroy messages and messages array */

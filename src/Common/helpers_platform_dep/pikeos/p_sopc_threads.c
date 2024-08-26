@@ -29,21 +29,9 @@
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
 
-/* Private Thread workspace definition */
-typedef void* pFct(void*);
-
-/* A structure containing thread informations. */
-typedef struct T_THREAD_WKS
-{
-    P4_thr_t thread;         /* Pikeos Thread number */
-    pFct* pStartFct;         /* External user callback */
-    void* pStartArgs;        /* External user parameter */
-    P4_barrier_t joinSignal; /* Barrier to announce that thread is finished used by join */
-} tThreadWks;
-
 static void thread_entry_point(void* arg)
 {
-    tThreadWks* pThrWks = (tThreadWks*) arg;
+    SOPC_Thread_Impl* pThrWks = (SOPC_Thread_Impl*) arg;
     if (pThrWks->pStartFct != NULL)
     {
         pThrWks->pStartFct(pThrWks->pStartArgs);
@@ -56,7 +44,7 @@ static void thread_entry_point(void* arg)
     SOPC_ASSERT(0);
 }
 
-static inline SOPC_ReturnStatus create_thread(tThreadWks* pThreadWks, int priority, const char* taskName)
+static inline SOPC_ReturnStatus create_thread(SOPC_Thread_Impl* pThreadWks, int priority, const char* taskName)
 {
     p4ext_thr_attr_t attr;
     p4ext_thr_attr_init(&attr);
@@ -66,10 +54,10 @@ static inline SOPC_ReturnStatus create_thread(tThreadWks* pThreadWks, int priori
     return res == P4_E_OK ? SOPC_STATUS_OK : SOPC_STATUS_NOK;
 }
 
-static tThreadWks* init_thread(int priority, pFct* pStartFct, void* pStartArgs, const char* pTaskName)
+static SOPC_Thread_Impl* init_thread(int priority, pFct* pStartFct, void* pStartArgs, const char* pTaskName)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
-    tThreadWks* pThreadContext = NULL;
+    SOPC_Thread_Impl* pThreadContext = NULL;
     pThreadContext = SOPC_Malloc(sizeof(*pThreadContext));
     if (NULL == pThreadContext)
     {
@@ -77,7 +65,7 @@ static tThreadWks* init_thread(int priority, pFct* pStartFct, void* pStartArgs, 
     }
     else
     {
-        memset(pThreadContext, 0, sizeof(tThreadWks));
+        memset(pThreadContext, 0, sizeof(*pThreadContext));
 
         pThreadContext->pStartArgs = pStartArgs;
         pThreadContext->pStartFct = pStartFct;
@@ -131,7 +119,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
     return SOPC_STATUS_OK;
 }
 
-static bool join_thread(tThreadWks* pThrWks)
+static bool join_thread(SOPC_Thread_Impl* pThrWks)
 {
     SOPC_ASSERT(NULL != pThrWks);
     bool result = true;
@@ -150,35 +138,36 @@ static bool join_thread(tThreadWks* pThrWks)
     return result;
 }
 
-static SOPC_ReturnStatus destroy_thread(tThreadWks** ppThrWks)
+static SOPC_ReturnStatus destroy_thread(SOPC_Thread_Impl** ppThrWks)
 {
     if (NULL == ppThrWks || NULL == (*ppThrWks))
     {
-        return SOPC_STATUS_INVALID_PARAMETERS;
+        // note : SOPC_Thread_Join must return SOPC_STATUS_NOK
+        return SOPC_STATUS_NOK;
     }
     const bool result = join_thread(*ppThrWks);
 
     if (result)
     {
-        tThreadWks* pWks = (*ppThrWks);
+        SOPC_Thread_Impl* pWks = (*ppThrWks);
         pWks->thread = 0;
         pWks->pStartFct = NULL;
         pWks->pStartArgs = NULL;
         SOPC_Free(*ppThrWks);
-        *ppThrWks = NULL;
         return SOPC_STATUS_OK;
+        *ppThrWks = SOPC_INVALID_THREAD;
     }
     return SOPC_STATUS_NOK;
 }
 
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     if (NULL == thread)
     {
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
-    status = destroy_thread(&thread);
+    status = destroy_thread(thread);
 
     return status;
 }

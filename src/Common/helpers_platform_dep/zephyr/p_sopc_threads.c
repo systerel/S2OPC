@@ -57,6 +57,7 @@
 /* platform dep includes */
 
 #include "p_sopc_threads.h"
+
 #include "sopc_threads.h"
 
 /* Stack memory definition */
@@ -160,7 +161,7 @@ K_KERNEL_STACK_ARRAY_DEFINE(gThreadStacks, CONFIG_SOPC_MAX_USER_TASKS, CONFIG_SO
 static sopcThreadConfig gUserTasks[CONFIG_SOPC_MAX_USER_TASKS];
 
 // This is the handle returned to caller
-struct tThreadHandle
+struct SOPC_Thread_Impl
 {
     const sopcThreadConfig* pCfg;
 };
@@ -212,13 +213,13 @@ static const sopcThreadConfig* P_THREAD_GetStackCfg(const char* taskName)
 // *** Private threads workspaces tab ***
 
 // Thread initialization. Called from P_THREAD_Create
-static bool P_THREAD_Init(tThreadHandle* pHandle,
+static bool P_THREAD_Init(SOPC_Thread pHandle,
                           ptrFct* callback,
                           void* pCtx,
                           const char* taskName,
                           const sopcThreadConfig* pCfg,
                           const int priority);
-static bool P_THREAD_Join(tThreadHandle* pHandle);
+static bool P_THREAD_Join(SOPC_Thread pHandle);
 
 // Thread internal callback
 static void P_THREAD_InternalCallback(void* pContext, void* pCtx, void* pNotUsed)
@@ -240,14 +241,14 @@ static void P_THREAD_InternalCallback(void* pContext, void* pCtx, void* pNotUsed
 // *** Private threads api ***
 
 // Thread initialization
-static bool P_THREAD_Init(tThreadHandle* pHandle,
+static bool P_THREAD_Init(SOPC_Thread pHandle,
                           ptrFct* callback,
                           void* pCtx,
                           const char* taskName,
                           const sopcThreadConfig* pCfg,
                           const int priority)
 {
-    if (NULL == pHandle || NULL == callback)
+    if (SOPC_INVALID_THREAD == pHandle || NULL == callback)
     {
         return false;
     }
@@ -297,9 +298,9 @@ static bool P_THREAD_Init(tThreadHandle* pHandle,
 }
 
 // Thread creation
-tThreadHandle* P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskName, const int priority)
+SOPC_Thread P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskName, const int priority)
 {
-    tThreadHandle* pHandle = NULL;
+    SOPC_Thread_Impl* pHandle = NULL;
 
     if (NULL == callback)
     {
@@ -329,7 +330,7 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskNam
 
     k_mutex_lock(&gLock, K_FOREVER);
 
-    pHandle = SOPC_Calloc(1, sizeof(struct tThreadHandle));
+    pHandle = SOPC_Calloc(1, sizeof(*pHandle));
 
     if (NULL != pHandle)
     {
@@ -347,7 +348,7 @@ tThreadHandle* P_THREAD_Create(ptrFct* callback, void* pCtx, const char* taskNam
 }
 
 // Thread destruction. Shall be called after join successful if multi join is used.
-bool P_THREAD_Destroy(tThreadHandle** ppHandle)
+bool P_THREAD_Destroy(SOPC_Thread* ppHandle)
 {
     if (NULL == ppHandle || NULL == (*ppHandle))
     {
@@ -364,14 +365,14 @@ bool P_THREAD_Destroy(tThreadHandle** ppHandle)
         pWks->threadHandle = 0;
         pWks->priority = 255;
         SOPC_Free(*ppHandle);
-        *ppHandle = NULL;
+        *ppHandle = SOPC_INVALID_THREAD;
     }
 
     return result;
 }
 
 // Thread join
-static bool P_THREAD_Join(tThreadHandle* pHandle)
+static bool P_THREAD_Join(SOPC_Thread pHandle)
 {
     SOPC_ASSERT(gInitialized);
     // Check parameters validity
@@ -449,7 +450,7 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
 }
 
 // Join then destroy a thread
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread)
 {
     SOPC_ReturnStatus resultSOPC = SOPC_STATUS_OK;
 
@@ -458,7 +459,7 @@ SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
         return SOPC_STATUS_INVALID_PARAMETERS;
     }
 
-    if (P_THREAD_Destroy(&thread))
+    if (P_THREAD_Destroy(thread))
     {
         resultSOPC = SOPC_STATUS_OK;
     }

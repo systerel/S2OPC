@@ -18,7 +18,9 @@
  */
 
 /**
- * \file The platform-specific implementation for all Thread-related services. Each platform implementation
+ * \file
+ *
+ * The platform-specific implementation for all Thread-related services. Each platform implementation
  *  shall provide the actual definition of:
  * - \ref SOPC_Thread for threads (e.g. pthread_t for linux)
  * - All functions defined in this header file.
@@ -33,19 +35,17 @@
 /*****************************************************************************
  *   Abstract interface types
  *****************************************************************************/
-#if 0 // TODO JCH WIP
+
 /**
  * \brief Provides a threading mechanism.
  * \note The stack size of each thread is not configurable via the S2OPC API. Therefore, in the specific
  *       case of embedded target with limited RAM, the implementation must provide an internal mechanism to
  *       fine tune the thread stacks dimensioning.
- * \note Each platform must provide the implementation of \ref SOPC_Thread and all related functions
+ * \note Each platform must provide the implementation of \ref SOPC_Thread_Impl and all related functions
  * in \ref sopc_thread.h */
 typedef struct SOPC_Thread_Impl SOPC_Thread_Impl;
-typedef struct SOPC_Thread_Impl* SOPC_Thread_Impl;
-#else
-#include "p_sopc_threads.h"
-#endif
+typedef SOPC_Thread_Impl* SOPC_Thread;
+#define SOPC_INVALID_THREAD NULL
 
 /*****************************************************************************
  *   Platform-dependant functions interfaces
@@ -109,8 +109,12 @@ SOPC_ReturnStatus SOPC_Thread_CreatePrioritized(SOPC_Thread* thread,
  *
  *  \param thread   Thread to wait for, created either by ::SOPC_Thread_Create or ::SOPC_Thread_CreatePrioritized.
  *                  Each thread can and shall be joined once only when terminating.
+ *                  In case of success the pointed thread value becomes ::SOPC_INVALID_THREAD
+ *
+ * \return          SOPC_STATUS_OK if operation succeeded, SOPC_STATUS_INVALID_PARAMETERS
+ *                  or SOPC_STATUS_NOK otherwise.
  */
-SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread);
+SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread* thread);
 
 /**
  *  \brief Suspend current thread execution for (at least) a millisecond interval

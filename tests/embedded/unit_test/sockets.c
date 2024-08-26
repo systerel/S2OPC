@@ -233,7 +233,7 @@ static void cb_multicast_receiver(void)
 void suite_test_raw_sockets(int* index)
 {
     PRINT("\n TEST %d: sopc_raw_sockets.h \n", *index);
-    SOPC_Thread p0, p1 = 0;
+    SOPC_Thread p0, p1 = SOPC_INVALID_THREAD;
     const char* node = "192.168.8.3";
     const char* port = "80";
     const bool useIPv6 = false;
@@ -246,8 +246,8 @@ void suite_test_raw_sockets(int* index)
     status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_client_tcp, NULL, 60, "TCP_Client");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_Thread_Join(p0);
-    SOPC_Thread_Join(p1);
+    SOPC_Thread_Join(&p0);
+    SOPC_Thread_Join(&p1);
     PRINT("Test 1 : ok\n");
 
     SOPC_Socket_AddressInfo* addrinfo = SOPC_UDP_SocketAddress_Create(useIPv6, node, port);
@@ -266,7 +266,7 @@ void suite_test_udp_sockets(int* index)
 {
     PRINT("\n TEST %d: sopc_udp_socket.h \n", *index);
 
-    SOPC_Thread p0, p1, p2, p3 = 0;
+    SOPC_Thread p0, p1, p2, p3 = SOPC_INVALID_THREAD;
 
     SOPC_ReturnStatus status = SOPC_Thread_CreatePrioritized(&p0, (void*) cb_receiver_udp, NULL, 60, "UDP_Receiver");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
@@ -274,8 +274,8 @@ void suite_test_udp_sockets(int* index)
     status = SOPC_Thread_CreatePrioritized(&p1, (void*) cb_sender_udp, NULL, 60, "UDP_Sender");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_Thread_Join(p0);
-    SOPC_Thread_Join(p1);
+    SOPC_Thread_Join(&p0);
+    SOPC_Thread_Join(&p1);
     PRINT("Test 1 : ok\n");
 
     status = SOPC_Thread_CreatePrioritized(&p2, (void*) cb_multicast_receiver, NULL, 60, "Multicast_Receiver");
@@ -284,8 +284,8 @@ void suite_test_udp_sockets(int* index)
     status = SOPC_Thread_CreatePrioritized(&p3, (void*) cb_multicast_sender, NULL, 60, "Multicast_Sender");
     SOPC_ASSERT(SOPC_STATUS_OK == status);
 
-    SOPC_Thread_Join(p2);
-    SOPC_Thread_Join(p3);
+    SOPC_Thread_Join(&p2);
+    SOPC_Thread_Join(&p3);
     PRINT("Test 2 : ok\n");
 
     *index += 1;

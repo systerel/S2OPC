@@ -38,11 +38,12 @@ struct SOPC_Condition_Impl
 
 typedef void* SOPCThreadStartFct(void*);
 
-typedef struct SOPC_Thread
+/** The windows actual implementation of Thread variables */
+struct SOPC_Thread_Impl
 {
     HANDLE thread;
     SOPCThreadStartFct* startFct;
     void* args;
-} SOPC_Thread;
+};
 
 #endif /* SOPC_P_THREADS_H_ */

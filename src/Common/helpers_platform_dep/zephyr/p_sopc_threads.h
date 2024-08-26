@@ -25,12 +25,11 @@
 #ifndef SOPC_ZEPHYR_P_THREADS_H_
 #define SOPC_ZEPHYR_P_THREADS_H_
 
-#include "p_sopc_synchro.h"
+#include "sopc_threads.h"
 
 /*****Private threads api*****/
 
-typedef struct tThreadHandle tThreadHandle; // Thread handle
-typedef void* ptrFct(void* pCtx);           // Thread callback
+typedef void* ptrFct(void* pCtx); // Thread callback
 
 /** @brief
  *   Create an handle of a thread and initialize it.
@@ -39,17 +38,16 @@ typedef void* ptrFct(void* pCtx);           // Thread callback
  *  @param taskName A task name. Caller should ensure uniqueness of names. Possibly can be NULL.
  *  @param priority The ZEPHYR priority of the new thread.
  */
-tThreadHandle* P_THREAD_Create(ptrFct* callback,     // Callback
-                               void* pCtx,           // Context
-                               const char* taskName, // Thread name
-                               const int priority);  // Priority
+SOPC_Thread P_THREAD_Create(ptrFct* callback,     // Callback
+                            void* pCtx,           // Context
+                            const char* taskName, // Thread name
+                            const int priority);  // Priority
 
 /** @brief
  *  Join and destroy a thread
  *  @param ppHandle A pointer to a tThreadHandle* object, previously returned by P_THREAD_Create
  *  @return true in case of success. Otherwise, the thread is not guaranteed to be terminated
  */
-bool P_THREAD_Destroy(tThreadHandle** ppHandle);
+bool P_THREAD_Destroy(SOPC_Thread* ppHandle);
 
-typedef tThreadHandle* SOPC_Thread;
 #endif /* SOPC_ZEPHYR_P_THREADS_H_ */
