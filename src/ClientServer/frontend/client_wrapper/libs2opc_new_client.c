@@ -75,6 +75,7 @@ typedef struct
     bool isDiscoveryModeService; /* Set if the endpoint service API was used */
     void* responseResultCtx;     /* Context dedicated to the request type */
     SOPC_StatusCode status;      /* Service response status */
+
 } SOPC_ClientHelper_ReqCtx;
 
 static SOPC_ClientHelper_ReqCtx* SOPC_ClientHelperInternal_GenReqCtx_CreateSync(uint16_t secureConnectionIdx,
@@ -1132,7 +1133,8 @@ struct SOPC_ClientHelper_Subscription
     SOPC_ClientConnection* secureConnection;
     uint32_t subscriptionId;
     uintptr_t userParam;
-    // Note: callback shall be associated to subscription when several available
+
+    SOPC_ClientSubscriptionNotification_Fct* subNotifCb;
 };
 
 static void SOPC_StaMacNotification_Cbk(uintptr_t subscriptionAppCtx,
@@ -1146,17 +1148,18 @@ static void SOPC_StaMacNotification_Cbk(uintptr_t subscriptionAppCtx,
     {
         return;
     }
-    SOPC_ClientSubscriptionNotification_Fct* subNotifCb = NULL;
     SOPC_ReturnStatus mutStatus = SOPC_Mutex_Lock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    subNotifCb = sopc_client_helper_config.subNotifCb;
     mutStatus = SOPC_Mutex_Unlock(&sopc_client_helper_config.configMutex);
     SOPC_ASSERT(SOPC_STATUS_OK == mutStatus);
-    if (NULL != subNotifCb)
+    if (NULL != (SOPC_ClientHelper_ReqCtx*) subscriptionAppCtx)
     {
         SOPC_ClientHelper_ReqCtx* subCtx = (SOPC_ClientHelper_ReqCtx*) subscriptionAppCtx;
-        subNotifCb((SOPC_ClientHelper_Subscription*) subCtx->userCtx, status, notificationType, nbNotifElts,
-                   notification, monitoredItemCtxArray);
+        SOPC_ClientHelper_Subscription* subInst = (SOPC_ClientHelper_Subscription*) subCtx->userCtx;
+        if (NULL != subInst && NULL != subInst->subNotifCb)
+        {
+            subInst->subNotifCb(subInst, status, notificationType, nbNotifElts, notification, monitoredItemCtxArray);
+        }
     }
 }
 
@@ -1181,8 +1184,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     SOPC_ReturnStatus status = SOPC_STATUS_OK;
     SOPC_StaMac_Machine* pSM = NULL;
 
-    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx] ||
-        NULL != sopc_client_helper_config.subNotifCb)
+    if (secureConnection != sopc_client_helper_config.secureConnections[secureConnection->secureConnectionIdx])
     {
         status = SOPC_STATUS_INVALID_STATE;
     }
@@ -1192,6 +1194,11 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
     {
         status = SOPC_STATUS_OUT_OF_MEMORY;
     }
+    else
+    {
+        subInstance->subNotifCb = subNotifCb;
+    }
+
     /* Get SM and configure notification CB */
     if (SOPC_STATUS_OK == status)
     {
@@ -1251,11 +1258,7 @@ SOPC_ClientHelper_Subscription* SOPC_ClientHelperNew_CreateSubscription(
         }
     }
 
-    if (SOPC_STATUS_OK == status)
-    {
-        sopc_client_helper_config.subNotifCb = subNotifCb;
-    }
-    else
+    if (SOPC_STATUS_OK != status)
     {
         SOPC_UNUSED_RESULT(SOPC_StaMac_NewConfigureNotificationCallback(pSM, NULL));
         SOPC_Free(subInstance);

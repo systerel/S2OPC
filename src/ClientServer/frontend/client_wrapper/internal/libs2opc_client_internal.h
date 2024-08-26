@@ -56,7 +56,6 @@ typedef struct SOPC_ClientHelper_Config
                                               // : ]0 : SOPC_MAX_ENDPOINT_DESCRIPTION_CONFIGURATIONS]
 
     SOPC_ServiceAsyncResp_Fct* asyncRespCb;
-    SOPC_ClientSubscriptionNotification_Fct* subNotifCb;
 
     SOPC_GetPassword_Fct* getClientKeyPasswordCb;
 
