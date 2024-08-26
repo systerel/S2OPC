@@ -26,6 +26,7 @@
  */
 
 #include <inttypes.h>
+#include <stdbool.h>
 
 #include "../unit_test_include.h"
 #include "opcua_statuscodes.h"
@@ -34,7 +35,6 @@
 #include "sopc_atomic.h"
 #include "sopc_mutexes.h"
 #include "sopc_threads.h"
-#include "sopc_time.h"
 
 static SOPC_Mutex gmutex;
 static SOPC_Condition gcond;

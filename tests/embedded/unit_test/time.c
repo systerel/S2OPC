@@ -18,8 +18,10 @@
  */
 
 #include "sopc_assert.h"
+#include "sopc_date_time.h"
 #include "sopc_enums.h"
-#include "sopc_platform_time.h"
+#include "sopc_threads.h"
+#include "sopc_time_reference.h"
 #include "unit_test_include.h"
 
 void suite_test_time(int* index)
@@ -55,39 +57,38 @@ void suite_test_time(int* index)
     PRINT("Test 5: ok\n");
 
     /* RealTime interface */
-    SOPC_RealTime* pRealTime = SOPC_RealTime_Create(NULL);
+    SOPC_HighRes_TimeReference* pRealTime = SOPC_HighRes_TimeReference_Create();
     SOPC_ASSERT(NULL != pRealTime);
     PRINT("Test 6: ok\n");
 
-    SOPC_RealTime_Delete(&pRealTime);
+    SOPC_HighRes_TimeReference_Delete(&pRealTime);
     SOPC_ASSERT(pRealTime == NULL);
     PRINT("Test 7: ok\n");
 
-    pRealTime = SOPC_RealTime_Create(NULL);
-    bool res = SOPC_RealTime_GetTime(pRealTime);
-    SOPC_ASSERT(res);
+    pRealTime = SOPC_HighRes_TimeReference_Create();
+    SOPC_HighRes_TimeReference_GetTime(pRealTime);
     PRINT("Test 8: ok\n");
 
     uint64_t duration_us = 1000;
-    SOPC_RealTime* pRealTimeCopy = SOPC_RealTime_Create(pRealTime);
-    SOPC_RealTime_AddSynchedDuration(pRealTime, duration_us, 0);
-    SOPC_ASSERT(*pRealTimeCopy + (duration_us * 1000) == *pRealTime);
+    SOPC_HighRes_TimeReference* pRealTimeCopy = SOPC_HighRes_TimeReference_Create();
+    SOPC_HighRes_TimeReference_Copy(pRealTimeCopy, pRealTime);
+    SOPC_HighRes_TimeReference_AddSynchedDuration(pRealTime, duration_us, 0);
+    SOPC_ASSERT(SOPC_HighRes_TimeReference_DeltaUs(pRealTimeCopy, pRealTime) - (duration_us * 1000) == 0);
     PRINT("Test 9: ok\n");
 
-    SOPC_RealTime_GetTime(pRealTime);
+    SOPC_HighRes_TimeReference_GetTime(pRealTime);
     duration_us = 100000;
-    SOPC_RealTime_AddSynchedDuration(pRealTime, duration_us, 0);
-    res = SOPC_RealTime_IsExpired(pRealTime, NULL);
+    SOPC_HighRes_TimeReference_AddSynchedDuration(pRealTime, duration_us, 0);
+    bool res = SOPC_HighRes_TimeReference_IsExpired(pRealTime, NULL);
     SOPC_ASSERT(!res);
     PRINT("Test 10: ok\n");
 
-    SOPC_RealTime_GetTime(pRealTime);
+    SOPC_HighRes_TimeReference_GetTime(pRealTime);
     duration_us = 1000 * 1000;
-    SOPC_RealTime_AddSynchedDuration(pRealTime, duration_us, 0);
-    res = SOPC_RealTime_SleepUntil(pRealTime);
-    SOPC_ASSERT(res);
-    SOPC_RealTime_GetTime(pRealTimeCopy);
-    SOPC_ASSERT(*pRealTime <= *pRealTimeCopy);
+    SOPC_HighRes_TimeReference_AddSynchedDuration(pRealTime, duration_us, 0);
+    SOPC_HighRes_TimeReference_SleepUntil(pRealTime);
+    SOPC_HighRes_TimeReference_GetTime(pRealTimeCopy);
+    SOPC_ASSERT(SOPC_HighRes_TimeReference_DeltaUs(pRealTimeCopy, pRealTime) <= 0);
     PRINT("Test 11: ok\n");
 
     *index += 1;

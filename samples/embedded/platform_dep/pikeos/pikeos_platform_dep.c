@@ -32,7 +32,6 @@
 #include "sopc_macros.h"
 #include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_platform_time.h"
 
 #define SHELL_COMMAND_SIZE 256u
 #define KEY_ESC (0x1BU)

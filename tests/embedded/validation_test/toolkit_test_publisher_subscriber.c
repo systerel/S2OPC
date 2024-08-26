@@ -31,7 +31,7 @@
 #include "sopc_pubsub_conf.h"
 #include "sopc_pubsub_sks.h"
 #include "sopc_sub_scheduler.h"
-#include "sopc_time.h"
+#include "sopc_threads.h"
 
 #include "../unit_test/unit_test_include.h"
 #include "pubsub_config_static.h"

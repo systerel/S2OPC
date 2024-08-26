@@ -22,19 +22,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "p_sopc_time.h"
 #include "sopc_assert.h"
-#include "sopc_builtintypes.h"
 #include "sopc_date_time.h"
-#include "sopc_macros.h"
-#include "sopc_mem_alloc.h"
 #include "sopc_mutexes.h"
-#include "sopc_platform_time.h"
 
-#define SECOND_TO_100NS 10000000
-#define MS_TO_NS 1000000
-#define US_TO_NS 1000
-#define SECOND_TO_MS 1000
+#define SOPC_SECONDS_TO_100NANOSECONDS 10000000
+#define SOPC_MILLISECONDS_TO_NANOSECONDS 1000000
+#define SOPC_MICROSECONDS_TO_NANOSECONDS 1000
+#define SOPC_SECONDS_TO_MILLISECONDS 1000
 
 typedef struct HANDLE_TIME_REFERENCE
 {
@@ -46,9 +41,9 @@ typedef struct HANDLE_TIME_REFERENCE
 /* Handle compilation time as reference for UTC time */
 static handleTimeReference gTimeReference = {.buildTime_s = 0, .isInit = false, .criticalSection = {}};
 
-void P_TIME_SetInitialDateToBuildTime(void);
+static void P_TIME_SetInitialDateToBuildTime(void);
 
-void P_TIME_SetInitialDateToBuildTime(void)
+static void P_TIME_SetInitialDateToBuildTime(void)
 {
     SOPC_Mutex_Initialization(&gTimeReference.criticalSection);
     struct tm today = {};
@@ -135,15 +130,6 @@ void P_TIME_SetInitialDateToBuildTime(void)
     SOPC_Mutex_Unlock(&gTimeReference.criticalSection);
 }
 
-void SOPC_Sleep(unsigned int milliseconds)
-{
-    P4_e_t res = p4_sleep((P4_timeout_t) P4_MSEC(milliseconds));
-    /* P4_E_CANCEL is sometimes return in debug context. To avoid constant assertions in multithreading context
-     * check out this return parameter. But should be add back in production */
-    // SOPC_ASSERT(P4_E_OK == res);
-    SOPC_ASSERT(P4_E_BADTIMEOUT != res);
-}
-
 SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
 {
     int64_t datetime = 0;
@@ -161,13 +147,13 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
     time_t buildTime_s = gTimeReference.buildTime_s;
     SOPC_Mutex_Unlock(&gTimeReference.criticalSection);
 
-    currentTick_100ns += (buildTime_s * SECOND_TO_100NS);
+    currentTick_100ns += (buildTime_s * SOPC_SECONDS_TO_100NANOSECONDS);
 
-    currentTimeFrac100Ns = currentTick_100ns % SECOND_TO_100NS;
-    currentTimeInS = currentTick_100ns / SECOND_TO_100NS;
+    currentTimeFrac100Ns = currentTick_100ns % SOPC_SECONDS_TO_100NANOSECONDS;
+    currentTimeInS = currentTick_100ns / SOPC_SECONDS_TO_100NANOSECONDS;
 
     time_t currentTimeT = (time_t) currentTimeInS;
-    status = SOPC_Time_FromTimeT(currentTimeT, &datetime);
+    status = SOPC_Time_FromUnixTime(currentTimeT, &datetime);
     if (SOPC_STATUS_OK != status)
     {
         return INT64_MAX;
@@ -176,100 +162,14 @@ SOPC_DateTime SOPC_Time_GetCurrentTimeUTC(void)
     return datetime;
 }
 
-SOPC_TimeReference SOPC_TimeReference_GetCurrent(void)
-{
-    uint64_t timeReference = 0;
-    uint64_t currentTimeInS = 0;
-    uint64_t currentTimeFracMs = 0;
-    time_t currentTick_ms = (time_t)(p4_get_time() / MS_TO_NS); /* timeReference has for resolution millisecond */
-
-    if (!gTimeReference.isInit)
-    {
-        P_TIME_SetInitialDateToBuildTime();
-    }
-
-    SOPC_Mutex_Lock(&gTimeReference.criticalSection);
-    time_t buildTime_s = gTimeReference.buildTime_s;
-    SOPC_Mutex_Unlock(&gTimeReference.criticalSection);
-
-    currentTick_ms += (buildTime_s * SECOND_TO_MS);
-
-    currentTimeFracMs = currentTick_ms % SECOND_TO_MS;
-    currentTimeInS = currentTick_ms / SECOND_TO_MS;
-
-    timeReference = (currentTimeInS * SECOND_TO_MS) + currentTimeFracMs;
-    return (SOPC_TimeReference) timeReference;
-}
-
-SOPC_ReturnStatus SOPC_Time_Breakdown_Local(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_Local(SOPC_Unix_Time t, struct tm* tm)
 {
     return (NULL == localtime_r(&t, tm)) ? SOPC_STATUS_NOK : SOPC_STATUS_OK;
 }
 
-SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(time_t t, struct tm* tm)
+SOPC_ReturnStatus SOPC_Time_Breakdown_UTC(SOPC_Unix_Time t, struct tm* tm)
 {
     return SOPC_Time_Breakdown_Local(t, tm);
-}
-
-bool SOPC_RealTime_GetTime(SOPC_RealTime* t)
-{
-    if (t == NULL)
-    {
-        return false;
-    }
-    *t = p4_get_time();
-    return true;
-}
-
-void SOPC_RealTime_AddSynchedDuration(SOPC_RealTime* t, uint64_t duration_us, int32_t offset_us)
-{
-    SOPC_UNUSED_ARG(offset_us);
-    SOPC_ASSERT(t != NULL);
-    *t += (P4_time_t)(duration_us * US_TO_NS);
-}
-
-bool SOPC_RealTime_IsExpired(const SOPC_RealTime* t, const SOPC_RealTime* now)
-{
-    SOPC_ASSERT(t != NULL);
-    if (now == NULL)
-    {
-        P4_time_t currentTime = p4_get_time();
-        return *t < currentTime;
-    }
-    return *t < *now;
-}
-
-int64_t SOPC_RealTime_DeltaUs(const SOPC_RealTime* tRef, const SOPC_RealTime* t)
-{
-    P4_time_t t1 = 0;
-
-    if (NULL == t)
-    {
-        const bool ok = SOPC_RealTime_GetTime(&t1);
-        SOPC_ASSERT(ok);
-    }
-    else
-    {
-        t1 = *t;
-    }
-
-    return (int64_t) t1 - *tRef;
-}
-
-bool SOPC_RealTime_SleepUntil(const SOPC_RealTime* date)
-{
-    P4_time_t currentTime = p4_get_time();
-    int64_t timeToWait = (*date - currentTime);
-    if (timeToWait < 0)
-    {
-        p4_thread_yield();
-    }
-    else
-    {
-        P4_e_t res = p4_sleep((P4_timeout_t) timeToWait);
-        return (P4_E_OK == res);
-    }
-    return true;
 }
 
 size_t strftime(char* strBuffer, size_t maxSize, const char* format, const struct tm* pTime)

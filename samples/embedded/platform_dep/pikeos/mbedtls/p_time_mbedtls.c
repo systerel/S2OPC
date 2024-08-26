@@ -17,7 +17,6 @@
  * under the License.
  */
 
-#include "p_sopc_time.h"
 #include "sopc_date_time.h"
 #include "time.h"
 

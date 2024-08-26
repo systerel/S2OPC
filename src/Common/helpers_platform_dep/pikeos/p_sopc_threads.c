@@ -182,3 +182,12 @@ SOPC_ReturnStatus SOPC_Thread_Join(SOPC_Thread thread)
 
     return status;
 }
+
+void SOPC_Sleep(unsigned int milliseconds)
+{
+    P4_e_t res = p4_sleep((P4_timeout_t) P4_MSEC(milliseconds));
+    /* P4_E_CANCEL is sometimes return in debug context. To avoid constant assertions in multithreading context
+     * check out this return parameter. But should be add back in production */
+    // SOPC_ASSERT(P4_E_OK == res);
+    SOPC_ASSERT(P4_E_BADTIMEOUT != res);
+}
