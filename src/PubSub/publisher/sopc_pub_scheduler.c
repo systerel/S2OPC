@@ -306,7 +306,10 @@ static void MessageCtx_Array_Clear(void)
     pubSchedulerCtx.messages.array = NULL;
     pubSchedulerCtx.messages.current = 0;
     pubSchedulerCtx.messages.length = 0;
-    SOPC_Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
+    if (SOPC_INVALID_MUTEX != pubSchedulerCtx.messages.acyclicMutex)
+    {
+        SOPC_Mutex_Clear(&pubSchedulerCtx.messages.acyclicMutex);
+    }
 }
 
 static void clear_dataSetMessageCtx_array(void* context)
