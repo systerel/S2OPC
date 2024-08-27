@@ -160,6 +160,7 @@ proof_obligations:
 check_commit_signature:
   stage: gen
   image: registry.gitlab.com/systerel/s2opc/build@sha256:0254605b9ee11bf28e1a75dcf19bd99126db2479b397fdd7d6423d0179d24744 # digest of build:1.42
+  needs: []
   script:
     - ./.check_signed_commit.sh
   rules:
@@ -169,6 +170,7 @@ check_commit_signature:
 check_commit_validity:
   stage: doc
   image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
+  needs: []
   script:
     # Unnecessary for R-O access on public project: ${CI_JOB_TOKEN}
     - './.check_ref_commit.sh -v "${SOPC_CURRENT_MILESTONE}" "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}" "${CI_MERGE_REQUEST_IID}" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}"'
@@ -204,6 +206,7 @@ build-linux64-ASan:
     <<: [*build_linux_variables,*nominal_build_variables]
     WITH_ASAN: 1
     WITH_UBSAN: 1
+  needs: []
   rules: # 1st line repeat .build-linux + added rules to avoid ASAN build
     - if: "$WINDOWS_TEST == null && $CROSS_COMPILE == null && \
            $GEN_PROOF_OBLIGATIONS == null && $TEST_NETWORK_FUZZ == null && \
@@ -217,6 +220,7 @@ build-with_missing_libs:
   <<: *build_linux
   variables:
     <<: *build_linux_variables
+  needs: []
   script:
     - rm -fr /usr/local/lib/cmake/eclipse-paho-mqtt-c || exit $?
     - ./build.sh || exit $?
@@ -233,6 +237,7 @@ build-with_no_crypto:
   <<: *build_linux
   variables:
     <<: *build_linux_variables
+  needs: []
   script:
     - S2OPC_CRYPTO_MBEDTLS=0 ./build.sh || exit $?
   rules:
@@ -245,6 +250,7 @@ build-linux64-pys2opc-all-tests:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*all-tests_build_variables] # add pys2opc
+  needs: []
   script: # build and install shared libs, then build static libs and binaries
       - 'ENABLE_SAMPLES=0 ENABLE_TESTING=0 BUILD_SHARED_LIBS=1 ./build.sh && cd $BUILD_DIR && cmake --build . --target install || exit $?'
       - 'cd .. && ./clean.sh || exit $?'
@@ -258,6 +264,7 @@ build-linux64-static-conf:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*all-builds_build_variables] # add static conf
+  needs: []
   rules: # single case rule of ALL_BUILDS
     - if: "$ALL_BUILDS != null"
       when: on_success
@@ -266,6 +273,7 @@ build-linux64-NoASan-NoPyS2OPC:
   <<: *build_linux
   variables:
     <<: [*build_linux_variables,*nominal_build_variables]
+  needs: []
   rules: # In case of coverage analysis or when nano scope is used (TODO: PyS2OPC shall be built but tests will fail: use another server with subscription in tests)
     - if: "$WITH_COVERAGE != null"
       when: on_success
@@ -273,6 +281,7 @@ build-linux64-NoASan-NoPyS2OPC:
 build-win64: &build_win64
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/mingw_build@sha256:5cbfd3181a228b9510b402cea6ac83175ac482d348dd2673f6a4c7aeac40f773 # digest of mingw_build:1.14
+  needs: []
   script:
     # Manually disable PyS2OPC for windows cross builds. When set in "variables:", the value is overwritten.
     - 'export WITH_PYS2OPC=OFF'
@@ -313,6 +322,7 @@ build-win32:
 build-rpi:
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/rpi-build@sha256:fb91901a09c44038d1ec03f71b2412d4b2ebeb3683030cebc191b6bbf3637b4a # digest of rpi-build:1.6
+  needs: []
   script:
     - *build_command_line
   variables:
@@ -335,6 +345,7 @@ build-rpi:
 build-linux64-coverity:
   stage: build
   image: registry.gitlab.com/systerel/s2opc/coverity@sha256:a830bfdc9ea465e26607a5e2d9585139f1f65fbfd2681a139469c5ea0d341b6f # digest of coverity:1.10
+  needs: []
   script: |-
     mkdir build
     cd build
@@ -348,6 +359,7 @@ build-linux64-coverity:
 build-zephyr:
   <<: *zephyr_job
   stage: build-others
+  needs: []
   image: registry.gitlab.com/systerel/s2opc/zephyr_build:v3.2.0-b@sha256:47d17149f0b1c613cc408101440654403b0fe0bbd394fe0ee48da48b9d093fde # digest of zephyr_build :v3.2.0-b
   script:
     - 'ln -s $(pwd) /zephyrproject/s2opc'
@@ -367,6 +379,7 @@ build-zephyr:
 build-freertos:
   stage: build-others
   image: registry.gitlab.com/systerel/s2opc/freertos_build:v1.0@sha256:09addc3a3bfcd46ff5581ab21229330fb4cc506c331cf7a31b0a58a0d886de0d # freertos_build:v1.1
+  needs: []
   script:
     - 'samples/embedded/platform_dep/freertos/ci/build-freertos-samples-docker.sh'
     - 'test -f build_freertos/freertos-sopc.elf'
@@ -388,6 +401,7 @@ build-freertos:
 build-fuzz:
   stage: build
   image: com.systerel.fr:5000/c838/opcua-network-fuzzer@sha256:ed423e0733e2a5131dd57f9e8ef2160230e6838ca94308ea2289bb50ce419e28 #3.0 digest
+  needs: []
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
   script:
@@ -414,6 +428,7 @@ build-fuzz:
 test-build-from-export:
   <<: *build_linux
   stage: test
+  needs: [build-linux64-ASan]
   script:
     - 'mkdir -p ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
     - 'cd ${CI_PROJECT_DIR}/samples/ClientServer/build_samples'
@@ -448,6 +463,7 @@ test-build-from-export:
 test-check:
   <<: *test_linux
   image: registry.gitlab.com/systerel/s2opc/check@sha256:1458207c7241df9955cd3ec65fc397847fa8ac3122110c4a4b9387843ec1e5a8 # digest of check:1.20
+  needs: []
   script:
     - ./.check-code.sh
     # Check generated types are up to date
@@ -508,6 +524,7 @@ test-check:
 # Test unit for ALL_TESTS variable (add dynamic configuration)
 test-unit-all-tests:
   <<: *test_unit
+  needs: [build-linux64-pys2opc-all-tests]
   variables:
     TEST_PASSWORD_PRIVATE_KEY : password
     TEST_PASSWORD_USER : password
@@ -576,6 +593,7 @@ test-uactt:
 generate_sbom:
   stage: test
   image: com.systerel.fr:5000/c838/cyberwatch@sha256:5cedde187768011d0bc096116d453415c8b4a9f1079bd99dbc28ae2e16dabe4c #com.systerel.fr:5000/c838/cyberwatch:1.0
+  needs: []
   script:
     - python3 -m pip install conan==1.62.0
     - apt install sqlite3 -y
@@ -637,6 +655,7 @@ test-zephyr:
   <<: *zephyr_job
   stage: test-others
   image: registry.gitlab.com/systerel/s2opc/test@sha256:8fbec254f6b8c8467b780d407c6f3c2e87d87899e141b8b2c9013ba30b4f0c8d # digest of test:2.16
+  needs : [build-zephyr]
   script:
     - "./samples/embedded/platform_dep/zephyr/ci/test-embedded.sh"
   dependencies:
@@ -654,6 +673,7 @@ test-zephyr:
 windows-appveyor:
   stage: build-others
   image: cicirello/pyaction@sha256:1e61034d26988094c92b629bf1d5f2027bc0659a347f31653ae405a7b05f97ae # digest of cicirello/pyaction:v4.25.0
+  needs: []
   script:
     - 'curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" --request POST -d ''{"accountName" : "Systerel", "projectSlug": "s2opc", "branch": "''$CI_COMMIT_REF_NAME''"}'' https://ci.appveyor.com/api/builds'
   tags:
