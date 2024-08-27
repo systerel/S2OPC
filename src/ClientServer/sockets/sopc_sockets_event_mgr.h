@@ -41,6 +41,6 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                      uintptr_t params,
                                      uintptr_t auxParam);
 
-void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_Socket* socketElt);
+void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_InternalSocket* socketElt);
 
 #endif /* SOPC_SOCKETS_EVENT_MGR_H_ */

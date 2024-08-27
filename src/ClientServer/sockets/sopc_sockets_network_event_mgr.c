@@ -139,7 +139,7 @@ static bool SOPC_SocketsNetworkEventMgr_TreatSocketsEvents(Socket sigSocket)
     bool result = true;
     uint32_t idx = 0;
     int32_t nbReady = 0;
-    SOPC_Socket* uaSock = NULL;
+    SOPC_InternalSocket* uaSock = NULL;
     SOPC_SocketSet readSet, writeSet, exceptSet;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 

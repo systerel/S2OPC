@@ -40,7 +40,7 @@ typedef enum
     SOCKET_STATE_ACCEPTED /**< Server: accepted socket connection at socket level only (missing SC connection level) */
 } SOPC_Socket_State;
 
-typedef struct SOPC_Socket
+typedef struct SOPC_InternalSocket
 {
     uint32_t socketIdx;    /* Index in the socket array */
     uint32_t connectionId; /* High-level associated connection id
@@ -63,10 +63,10 @@ typedef struct SOPC_Socket
     uint32_t listenerSocketIdx;
     // socket address
     SOPC_Socket_Address* addr;
-} SOPC_Socket;
+} SOPC_InternalSocket;
 
 /** @brief Array containing all sockets that can be used */
-extern SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
+extern SOPC_InternalSocket socketsArray[SOPC_MAX_SOCKETS];
 
 extern SOPC_EventHandler* socketsEventHandler;
 
@@ -82,7 +82,7 @@ void SOPC_SocketsInternalContext_Clear(void);
  *         In case socket is not a listnener, the write buffer queue is initialized.
  *  Note: caller must lock the mutex before calling it
  */
-SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener);
+SOPC_InternalSocket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener);
 
 /** @brief Close the socket and set it as not used anymore.
  */

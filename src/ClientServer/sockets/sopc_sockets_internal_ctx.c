@@ -28,7 +28,7 @@
 #include "sopc_sockets_event_mgr.h"
 #include "sopc_sockets_internal_ctx.h"
 
-SOPC_Socket socketsArray[SOPC_MAX_SOCKETS];
+SOPC_InternalSocket socketsArray[SOPC_MAX_SOCKETS];
 SOPC_Mutex socketsMutex;
 SOPC_Looper* socketsLooper = NULL;
 SOPC_AsyncQueue* socketsInputEventQueue = NULL;
@@ -46,7 +46,7 @@ struct Event
 void SOPC_SocketsInternalContext_Initialize(void)
 {
     uint32_t idx = 0;
-    memset(socketsArray, 0, sizeof(SOPC_Socket) * SOPC_MAX_SOCKETS);
+    memset(socketsArray, 0, sizeof(SOPC_InternalSocket) * SOPC_MAX_SOCKETS);
     for (idx = 0; idx < SOPC_MAX_SOCKETS; idx++)
     {
         socketsArray[idx].socketIdx = idx;
@@ -74,9 +74,9 @@ void SOPC_SocketsInternalContext_Clear(void)
     SOPC_AsyncQueue_Free(&socketsInputEventQueue);
 }
 
-SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
+SOPC_InternalSocket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
 {
-    SOPC_Socket* result = NULL;
+    SOPC_InternalSocket* result = NULL;
     uint32_t idx = 1; // index 0 is forbidden => reserved for invalid index
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     do
@@ -99,7 +99,7 @@ SOPC_Socket* SOPC_SocketsInternalContext_GetFreeSocket(bool isListener)
 
 void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
 {
-    SOPC_Socket* sock = NULL;
+    SOPC_InternalSocket* sock = NULL;
     void* elt = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     if (socketIdx < SOPC_MAX_SOCKETS && socketsArray[socketIdx].isUsed)
@@ -148,7 +148,7 @@ void SOPC_SocketsInternalContext_CloseSocket(uint32_t socketIdx)
          * sock->state = SOCKET_STATE_CLOSED;
          * ...
          * */
-        memset(sock, 0, sizeof(SOPC_Socket));
+        memset(sock, 0, sizeof(SOPC_InternalSocket));
 
         sock->socketIdx = socketIdx;
     }

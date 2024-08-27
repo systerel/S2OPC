@@ -32,8 +32,8 @@
 
 #include "p_sopc_sockets.h"
 
-static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_Socket* listener,
-                                                        SOPC_Socket* connection,
+static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_InternalSocket* listener,
+                                                        SOPC_InternalSocket* connection,
                                                         const char* eventName)
 {
     char* peerHost = NULL;
@@ -52,7 +52,7 @@ static void SOPC_SocketsInternalEventMgr_LogAcceptEvent(SOPC_Socket* listener,
     SOPC_Free(selfService);
 }
 
-static void SOPC_SocketsInternalEventMgr_LogSocketEvent(SOPC_Socket* connection, const char* eventName)
+static void SOPC_SocketsInternalEventMgr_LogSocketEvent(SOPC_InternalSocket* connection, const char* eventName)
 {
     char* peerHost = NULL;
     char* peerService = NULL;
@@ -64,7 +64,7 @@ static void SOPC_SocketsInternalEventMgr_LogSocketEvent(SOPC_Socket* connection,
     SOPC_Free(peerService);
 }
 
-static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_Socket_AddressInfo* addr)
+static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_InternalSocket* connectSocket, SOPC_Socket_AddressInfo* addr)
 {
     bool result = false;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
@@ -95,7 +95,7 @@ static bool SOPC_SocketsEventMgr_ConnectClient(SOPC_Socket* connectSocket, SOPC_
     return result;
 }
 
-static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSocket)
+static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_InternalSocket* connectSocket)
 {
     bool result = false;
     if (NULL != connectSocket && connectSocket->state == SOCKET_STATE_CONNECTING)
@@ -118,11 +118,11 @@ static bool SOPC_SocketsEventMgr_NextConnectClientAttempt(SOPC_Socket* connectSo
     return result;
 }
 
-static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
+static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
 {
-    SOPC_Socket* resultSocket = NULL;
+    SOPC_InternalSocket* resultSocket = NULL;
     SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
-    SOPC_Socket* freeSocket = NULL;
+    SOPC_InternalSocket* freeSocket = NULL;
     bool connectResult = false;
     char* hostname = NULL;
     char* port = NULL;
@@ -211,12 +211,12 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateClientSocket(const char* uri)
     return resultSocket;
 }
 
-static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uint8_t listenAllItfs)
+static SOPC_InternalSocket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uint8_t listenAllItfs)
 {
-    SOPC_Socket* resultSocket = NULL;
+    SOPC_InternalSocket* resultSocket = NULL;
     SOPC_Socket_AddressInfo *res = NULL, *p = NULL;
     bool attemptWithIPV6 = true;
-    SOPC_Socket* freeSocket = NULL;
+    SOPC_InternalSocket* freeSocket = NULL;
     bool listenResult = false;
     char* hostname = NULL;
     char* port = NULL;
@@ -320,7 +320,7 @@ static SOPC_Socket* SOPC_SocketsEventMgr_CreateServerSocket(const char* uri, uin
     return resultSocket;
 }
 
-static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
+static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_InternalSocket* sock,
                                                               const uint8_t* data,
                                                               uint32_t count,
                                                               uint32_t* finalSentBytes)
@@ -361,7 +361,7 @@ static SOPC_ReturnStatus SOPC_SocketsEventMgr_Socket_WriteAll(SOPC_Socket* sock,
     return status;
 }
 
-static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
+static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_InternalSocket* sock)
 {
     bool nothingToDequeue = false;
     bool writeQueueResult = true;
@@ -427,7 +427,7 @@ static bool SOPC_SocketsEventMgr_TreatWriteBuffer(SOPC_Socket* sock)
     return writeQueueResult;
 }
 
-static SOPC_ReturnStatus on_ready_read(SOPC_Socket* socket, uint32_t socket_id)
+static SOPC_ReturnStatus on_ready_read(SOPC_InternalSocket* socket, uint32_t socket_id)
 {
     if (socket->state != SOCKET_STATE_CONNECTED)
     {
@@ -492,7 +492,7 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
                                      uintptr_t auxParam)
 {
     bool result = false;
-    SOPC_Socket* socketElt = NULL;
+    SOPC_InternalSocket* socketElt = NULL;
     SOPC_Buffer* buffer = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
 
@@ -650,10 +650,10 @@ void SOPC_SocketsEventMgr_Dispatcher(SOPC_Sockets_InputEvent socketEvent,
     }
 }
 
-void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_Socket* socketElt)
+void SOPC_SocketsInternalEventMgr_Dispatcher(SOPC_Sockets_InternalInputEvent event, SOPC_InternalSocket* socketElt)
 {
     bool result = false;
-    SOPC_Socket* acceptSock = NULL;
+    SOPC_InternalSocket* acceptSock = NULL;
     SOPC_ReturnStatus status = SOPC_STATUS_NOK;
     uint32_t socketIdx = socketElt->socketIdx;
 
