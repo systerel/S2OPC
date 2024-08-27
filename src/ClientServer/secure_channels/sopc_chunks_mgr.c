@@ -566,22 +566,23 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                     {
                         curAppCertThumbprint.Length = (int32_t) thumbprintLength;
                     }
-                }
 
-                if (SOPC_STATUS_OK == status)
-                {
-                    status =
-                        SOPC_ByteString_Compare(&curAppCertThumbprint, &receiverCertThumb, &runningAppCertComparison);
-
-                    if (status != SOPC_STATUS_OK || runningAppCertComparison != 0)
+                    if (SOPC_STATUS_OK == status)
                     {
-                        status = SOPC_STATUS_NOK;
-                        *errorStatus = OpcUa_BadCertificateInvalid;
+                        status = SOPC_ByteString_Compare(&curAppCertThumbprint, &receiverCertThumb,
+                                                         &runningAppCertComparison);
 
-                        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                                               "ChunksMgr (asym cert): invalid receiver thumbprint (epCfgIdx=%" PRIu32
-                                               " scCfgIdx=%" PRIu32 ")",
-                                               epConfigIdx, scConfigIdx);
+                        if (status != SOPC_STATUS_OK || runningAppCertComparison != 0)
+                        {
+                            status = SOPC_STATUS_NOK;
+                            *errorStatus = OpcUa_BadCertificateInvalid;
+
+                            SOPC_Logger_TraceError(
+                                SOPC_LOG_MODULE_CLIENTSERVER,
+                                "ChunksMgr (asym cert): invalid receiver thumbprint (epCfgIdx=%" PRIu32
+                                " scCfgIdx=%" PRIu32 ")",
+                                epConfigIdx, scConfigIdx);
+                        }
                     }
                 }
                 else
