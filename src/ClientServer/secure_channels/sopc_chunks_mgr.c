@@ -398,6 +398,16 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
         scConfigIdx = scConnection->secureChannelConfigIdx;
     }
 
+    if (SOPC_STATUS_OK != status)
+    {
+        *errorStatus = OpcUa_BadTcpInternalError;
+
+        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
+                               "ChunksMgr (asym cert): certificate copy error (epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32
+                               ")",
+                               epConfigIdx, scConfigIdx);
+    }
+
     // Retrieve encryption and signature configuration expected if defined
     if (enforceSecuMode)
     {
@@ -469,7 +479,11 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                 SOPC_CertificateList* cert = NULL;
                 status = SOPC_KeyManager_Certificate_CreateOrAddFromDER(senderCertificate.Data,
                                                                         (uint32_t) senderCertificate.Length, &cert);
-                if (SOPC_STATUS_OK == status)
+                if (SOPC_STATUS_OK != status)
+                {
+                    *errorStatus = OpcUa_BadTcpInternalError;
+                }
+                else
                 {
                     status = SOPC_CryptoProvider_Certificate_Validate(scConnection->cryptoProvider, pkiProvider,
                                                                       PKIType, cert, errorStatus);
