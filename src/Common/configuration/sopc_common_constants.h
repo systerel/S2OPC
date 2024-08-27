@@ -30,6 +30,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "sopc_protocol_constants.h"
 
