@@ -412,6 +412,7 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
 
         if (SOPC_STATUS_OK != status)
         {
+            *errorStatus = OpcUa_BadTcpInternalError;
             SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
                                    "ChunksMgr (asym cert): sender certificate decoding error (epCfgIdx=%" PRIu32
                                    " scCfgIdx=%" PRIu32 "): status=%d",
@@ -509,16 +510,6 @@ static bool SC_Chunks_DecodeAsymSecurityHeader_Certificates(SOPC_SecureConnectio
                                    " scCfgIdx=%" PRIu32 ")",
                                    epConfigIdx, scConfigIdx);
         }
-    }
-    else
-    {
-        // status == STATUS_NOK
-        *errorStatus = OpcUa_BadTcpInternalError;
-
-        SOPC_Logger_TraceError(SOPC_LOG_MODULE_CLIENTSERVER,
-                               "ChunksMgr (asym cert): certificate copy error (epCfgIdx=%" PRIu32 " scCfgIdx=%" PRIu32
-                               ")",
-                               epConfigIdx, scConfigIdx);
     }
 
     // Receiver Certificate Thumbprint:
